@@ -12,7 +12,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void test_01() {
-        DataSet.empty().println();
+        Dataset.empty().println();
 
         Sheet.empty().println();
 
@@ -20,8 +20,8 @@ public class SheetTest extends AbstractTest {
                 new Object[][] { { 1, "a" }, { null, "b" }, { 5, "c" } });
 
         sheet.println();
-        sheet.toDataSetH().println();
-        sheet.toDataSetV().println();
+        sheet.toDatasetH().println();
+        sheet.toDatasetV().println();
 
         sheet.rows().map(it -> Pair.of(it.left(), it.right().join(","))).forEach(Fn.println());
         sheet.columns().map(it -> Pair.of(it.left(), it.right().join(","))).forEach(Fn.println());

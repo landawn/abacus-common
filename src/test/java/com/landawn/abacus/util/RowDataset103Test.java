@@ -20,9 +20,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-public class RowDataSet103Test extends TestBase {
+public class RowDataset103Test extends TestBase {
 
-    private RowDataSet dataSet;
+    private RowDataset dataset;
     private List<String> columnNames;
     private List<List<Object>> columnList;
 
@@ -35,7 +35,7 @@ public class RowDataSet103Test extends TestBase {
         columnList.add(Arrays.asList(25, 30, 35, 28)); // age column
         columnList.add(Arrays.asList("NYC", "LA", "Chicago", "Boston")); // city column
 
-        dataSet = new RowDataSet(columnNames, columnList);
+        dataset = new RowDataset(columnNames, columnList);
     }
 
     @Data
@@ -56,7 +56,7 @@ public class RowDataSet103Test extends TestBase {
         Function<String, String> columnConverter = String::toUpperCase;
         IntFunction<Map<String, Object>> rowSupplier = capacity -> new HashMap<>();
 
-        List<Map<String, Object>> result = dataSet.toList(columnFilter, columnConverter, rowSupplier);
+        List<Map<String, Object>> result = dataset.toList(columnFilter, columnConverter, rowSupplier);
 
         Assertions.assertEquals(4, result.size());
         Map<String, Object> firstRow = result.get(0);
@@ -71,7 +71,7 @@ public class RowDataSet103Test extends TestBase {
         // Test with null filter and converter
         IntFunction<List<Object>> rowSupplier = capacity -> new ArrayList<>();
 
-        List<List<Object>> result = dataSet.toList(null, null, rowSupplier);
+        List<List<Object>> result = dataset.toList(null, null, rowSupplier);
 
         Assertions.assertEquals(4, result.size());
         Assertions.assertEquals(4, result.get(0).size()); // All columns included
@@ -83,7 +83,7 @@ public class RowDataSet103Test extends TestBase {
         Predicate<String> columnFilter = col -> col.equals("name") || col.equals("age");
         IntFunction<Map<String, Object>> rowSupplier = capacity -> new HashMap<>();
 
-        List<Map<String, Object>> result = dataSet.toList(1, 3, columnFilter, null, rowSupplier);
+        List<Map<String, Object>> result = dataset.toList(1, 3, columnFilter, null, rowSupplier);
 
         Assertions.assertEquals(2, result.size()); // Rows 1 and 2 (0-based index)
         Map<String, Object> firstRow = result.get(0);
@@ -100,7 +100,7 @@ public class RowDataSet103Test extends TestBase {
         mergeColumnList.add(Arrays.asList("John", "John", "Jane", "Jane")); // name column
         mergeColumnList.add(Arrays.asList("Java", "Python", "JavaScript", "SQL")); // skill column
 
-        RowDataSet mergeDataSet = new RowDataSet(mergeColumnNames, mergeColumnList);
+        RowDataset mergeDataset = new RowDataset(mergeColumnNames, mergeColumnList);
 
         // Define a Person class with skills list for testing
         Collection<String> idPropNames = Arrays.asList("id");
@@ -108,7 +108,7 @@ public class RowDataSet103Test extends TestBase {
         Map<String, String> prefixAndFieldNameMap = new HashMap<>();
 
         // This will merge entities with the same ID
-        List<Person> mergedEntities = mergeDataSet.toMergedEntities(idPropNames, selectPropNames, prefixAndFieldNameMap, Person.class);
+        List<Person> mergedEntities = mergeDataset.toMergedEntities(idPropNames, selectPropNames, prefixAndFieldNameMap, Person.class);
 
         // Should result in 2 entities (one for each unique ID)
         Assertions.assertEquals(2, mergedEntities.size());
@@ -121,7 +121,7 @@ public class RowDataSet103Test extends TestBase {
         Map<String, String> prefixAndFieldNameMap = new HashMap<>();
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            dataSet.toMergedEntities(idPropNames, selectPropNames, prefixAndFieldNameMap, Person.class);
+            dataset.toMergedEntities(idPropNames, selectPropNames, prefixAndFieldNameMap, Person.class);
         });
     }
 
@@ -131,7 +131,7 @@ public class RowDataSet103Test extends TestBase {
         Collection<String> valueColumns = Arrays.asList("name", "age");
         IntFunction<Map<Integer, Object[]>> supplier = capacity -> new HashMap<>();
 
-        Map<Integer, Object[]> result = dataSet.toMap(0, dataSet.size(), keyColumn, valueColumns, Object[].class, supplier);
+        Map<Integer, Object[]> result = dataset.toMap(0, dataset.size(), keyColumn, valueColumns, Object[].class, supplier);
 
         Assertions.assertEquals(4, result.size());
         Object[] firstValue = result.get(1);
@@ -145,7 +145,7 @@ public class RowDataSet103Test extends TestBase {
         Collection<String> valueColumns = Arrays.asList("name", "age", "city");
         IntFunction<Map<Integer, List<Object>>> supplier = capacity -> new HashMap<>();
 
-        Map<Integer, List<Object>> result = dataSet.toMap(0, dataSet.size(), keyColumn, valueColumns, Clazz.ofList(), supplier);
+        Map<Integer, List<Object>> result = dataset.toMap(0, dataset.size(), keyColumn, valueColumns, Clazz.ofList(), supplier);
 
         Assertions.assertEquals(4, result.size());
         List<Object> firstValue = result.get(1);
@@ -161,7 +161,7 @@ public class RowDataSet103Test extends TestBase {
         Collection<String> valueColumns = Arrays.asList("name", "age", "city");
         IntFunction<Map<Integer, Map<String, Object>>> supplier = capacity -> new HashMap<>();
 
-        Map<Integer, Map<String, Object>> result = dataSet.toMap(0, dataSet.size(), keyColumn, valueColumns, Clazz.ofMap(), supplier);
+        Map<Integer, Map<String, Object>> result = dataset.toMap(0, dataset.size(), keyColumn, valueColumns, Clazz.ofMap(), supplier);
 
         Assertions.assertEquals(4, result.size());
         Map<String, Object> firstValue = result.get(1);
@@ -176,7 +176,7 @@ public class RowDataSet103Test extends TestBase {
         Collection<String> valueColumns = Arrays.asList("name", "age", "city");
         IntFunction<Map<Integer, Person>> supplier = capacity -> new HashMap<>();
 
-        Map<Integer, Person> result = dataSet.toMap(0, dataSet.size(), keyColumn, valueColumns, Person.class, supplier);
+        Map<Integer, Person> result = dataset.toMap(0, dataset.size(), keyColumn, valueColumns, Person.class, supplier);
 
         Assertions.assertEquals(4, result.size());
         Person firstPerson = result.get(1);
@@ -192,7 +192,7 @@ public class RowDataSet103Test extends TestBase {
             Collection<String> valueColumns = Arrays.asList("name", "age");
             IntFunction<Map<Integer, Object[]>> mapSupplier = capacity -> new HashMap<>();
 
-            Map<Integer, Object[]> result = dataSet.toMap(0, dataSet.size(), keyColumn, valueColumns, IntFunctions.ofObjectArray(), mapSupplier);
+            Map<Integer, Object[]> result = dataset.toMap(0, dataset.size(), keyColumn, valueColumns, IntFunctions.ofObjectArray(), mapSupplier);
 
             Assertions.assertEquals(4, result.size());
             Object[] firstValue = result.get(1);
@@ -204,7 +204,7 @@ public class RowDataSet103Test extends TestBase {
             Collection<String> valueColumns = Arrays.asList("name", "age");
             IntFunction<Map<Integer, List<Object>>> mapSupplier = capacity -> new HashMap<>();
 
-            Map<Integer, List<Object>> result = dataSet.toMap(0, dataSet.size(), keyColumn, valueColumns, IntFunctions.ofList(), mapSupplier);
+            Map<Integer, List<Object>> result = dataset.toMap(0, dataset.size(), keyColumn, valueColumns, IntFunctions.ofList(), mapSupplier);
 
             Assertions.assertEquals(4, result.size());
             List<Object> firstValue = result.get(1);
@@ -217,7 +217,7 @@ public class RowDataSet103Test extends TestBase {
             Collection<String> valueColumns = Arrays.asList("name", "age");
             IntFunction<Map<Integer, Map<String, Object>>> mapSupplier = capacity -> new HashMap<>();
 
-            Map<Integer, Map<String, Object>> result = dataSet.toMap(0, dataSet.size(), keyColumn, valueColumns, IntFunctions.ofMap(), mapSupplier);
+            Map<Integer, Map<String, Object>> result = dataset.toMap(0, dataset.size(), keyColumn, valueColumns, IntFunctions.ofMap(), mapSupplier);
 
             Assertions.assertEquals(4, result.size());
             Map<String, Object> firstValue = result.get(1);
@@ -230,7 +230,7 @@ public class RowDataSet103Test extends TestBase {
             Collection<String> valueColumns = Arrays.asList("name", "age");
             IntFunction<Map<Integer, Person>> mapSupplier = capacity -> new HashMap<>();
 
-            Map<Integer, Person> result = dataSet.toMap(0, dataSet.size(), keyColumn, valueColumns, i -> new Person(), mapSupplier);
+            Map<Integer, Person> result = dataset.toMap(0, dataset.size(), keyColumn, valueColumns, i -> new Person(), mapSupplier);
 
             Assertions.assertEquals(4, result.size());
             Person firstValue = result.get(1);
@@ -246,7 +246,7 @@ public class RowDataSet103Test extends TestBase {
             Collection<String> valueColumns = Arrays.asList("name", "age");
             IntFunction<ListMultimap<Integer, Object[]>> mapSupplier = IntFunctions.ofListMultimap();
 
-            Multimap<Integer, Object[], List<Object[]>> result = dataSet.toMultimap(0, dataSet.size(), keyColumn, valueColumns, IntFunctions.ofObjectArray(),
+            Multimap<Integer, Object[], List<Object[]>> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, IntFunctions.ofObjectArray(),
                     mapSupplier);
 
             Assertions.assertEquals(4, result.size());
@@ -259,7 +259,7 @@ public class RowDataSet103Test extends TestBase {
             Collection<String> valueColumns = Arrays.asList("name", "age");
             IntFunction<ListMultimap<Integer, List<Object>>> mapSupplier = IntFunctions.ofListMultimap();
 
-            Multimap<Integer, List<Object>, List<List<Object>>> result = dataSet.toMultimap(0, dataSet.size(), keyColumn, valueColumns, IntFunctions.ofList(),
+            Multimap<Integer, List<Object>, List<List<Object>>> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, IntFunctions.ofList(),
                     mapSupplier);
 
             Assertions.assertEquals(4, result.size());
@@ -272,7 +272,7 @@ public class RowDataSet103Test extends TestBase {
             Collection<String> valueColumns = Arrays.asList("name", "age");
             IntFunction<ListMultimap<Integer, Map<String, Object>>> mapSupplier = IntFunctions.ofListMultimap();
 
-            Multimap<Integer, Map<String, Object>, List<Map<String, Object>>> result = dataSet.toMultimap(0, dataSet.size(), keyColumn, valueColumns,
+            Multimap<Integer, Map<String, Object>, List<Map<String, Object>>> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns,
                     IntFunctions.ofMap(), mapSupplier);
 
             Assertions.assertEquals(4, result.size());
@@ -285,7 +285,7 @@ public class RowDataSet103Test extends TestBase {
             Collection<String> valueColumns = Arrays.asList("name", "age");
             IntFunction<ListMultimap<Integer, Person>> mapSupplier = IntFunctions.ofListMultimap();
 
-            Multimap<Integer, Person, List<Person>> result = dataSet.toMultimap(0, dataSet.size(), keyColumn, valueColumns, i -> new Person(), mapSupplier);
+            Multimap<Integer, Person, List<Person>> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, i -> new Person(), mapSupplier);
 
             Assertions.assertEquals(4, result.size());
             List<Person> firstValue = result.get(1);
@@ -303,13 +303,13 @@ public class RowDataSet103Test extends TestBase {
         dupColumnList.add(Arrays.asList("P1", "P2", "P3", "P4")); // product
         dupColumnList.add(Arrays.asList(10, 20, 30, 40)); // price
 
-        RowDataSet dupDataSet = new RowDataSet(dupColumnNames, dupColumnList);
+        RowDataset dupDataset = new RowDataset(dupColumnNames, dupColumnList);
 
         String keyColumn = "category";
         Collection<String> valueColumns = Arrays.asList("product", "price");
         IntFunction<ListMultimap<String, List<Object>>> supplier = capacity -> N.newLinkedListMultimap();
 
-        ListMultimap<String, List<Object>> result = dupDataSet.toMultimap(0, dupDataSet.size(), keyColumn, valueColumns, Clazz.ofList(), supplier);
+        ListMultimap<String, List<Object>> result = dupDataset.toMultimap(0, dupDataset.size(), keyColumn, valueColumns, Clazz.ofList(), supplier);
 
         Assertions.assertEquals(2, result.keySet().size());
         Assertions.assertEquals(2, result.get("A").size());
@@ -322,7 +322,7 @@ public class RowDataSet103Test extends TestBase {
         Collection<String> valueColumns = Arrays.asList("id", "name", "age");
         IntFunction<ListMultimap<String, Map<String, Object>>> supplier = capacity -> N.newLinkedListMultimap();
 
-        ListMultimap<String, Map<String, Object>> result = dataSet.toMultimap(0, dataSet.size(), keyColumn, valueColumns, Clazz.ofMap(), supplier);
+        ListMultimap<String, Map<String, Object>> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, Clazz.ofMap(), supplier);
 
         Assertions.assertEquals(4, result.keySet().size()); // Each city is unique in our test data
         Map<String, Object> nycPerson = result.get("NYC").get(0);
@@ -336,7 +336,7 @@ public class RowDataSet103Test extends TestBase {
         Collection<String> valueColumns = Arrays.asList("id", "name", "age");
         IntFunction<ListMultimap<String, Person>> supplier = capacity -> N.newLinkedListMultimap();
 
-        ListMultimap<String, Person> result = dataSet.toMultimap(0, dataSet.size(), keyColumn, valueColumns, Person.class, supplier);
+        ListMultimap<String, Person> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, Person.class, supplier);
 
         Assertions.assertEquals(4, result.keySet().size());
         Person nycPerson = result.get("NYC").get(0);
@@ -350,7 +350,7 @@ public class RowDataSet103Test extends TestBase {
         Collection<String> valueColumns = Arrays.asList("name", "age");
         IntFunction<Object[]> rowSupplier = size -> new Object[size];
 
-        ListMultimap<String, Object[]> result = dataSet.toMultimap(keyColumn, valueColumns, rowSupplier);
+        ListMultimap<String, Object[]> result = dataset.toMultimap(keyColumn, valueColumns, rowSupplier);
 
         Assertions.assertEquals(4, result.keySet().size());
         Object[] nycData = result.get("NYC").get(0);
@@ -365,7 +365,7 @@ public class RowDataSet103Test extends TestBase {
         IntFunction<Object[]> rowSupplier = size -> new Object[size];
         IntFunction<ListMultimap<String, Object[]>> supplier = capacity -> N.newLinkedListMultimap();
 
-        ListMultimap<String, Object[]> result = dataSet.toMultimap(keyColumn, valueColumns, rowSupplier, supplier);
+        ListMultimap<String, Object[]> result = dataset.toMultimap(keyColumn, valueColumns, rowSupplier, supplier);
 
         Assertions.assertEquals(4, result.keySet().size());
         Object[] nycData = result.get("NYC").get(0);
@@ -379,7 +379,7 @@ public class RowDataSet103Test extends TestBase {
         Collection<String> valueColumns = Arrays.asList("name", "age");
         IntFunction<Object[]> rowSupplier = size -> new Object[size];
 
-        ListMultimap<String, Object[]> result = dataSet.toMultimap(1, 3, keyColumn, valueColumns, rowSupplier);
+        ListMultimap<String, Object[]> result = dataset.toMultimap(1, 3, keyColumn, valueColumns, rowSupplier);
 
         Assertions.assertEquals(2, result.keySet().size()); // Only rows 1 and 2
         Assertions.assertTrue(result.containsKey("LA"));
@@ -395,13 +395,13 @@ public class RowDataSet103Test extends TestBase {
         groupColumnList.add(Arrays.asList("John", "Jane", "Bob", "Alice")); // employee
         groupColumnList.add(Arrays.asList(70000, 80000, 60000, 65000)); // salary
 
-        RowDataSet groupDataSet = new RowDataSet(groupColumnNames, groupColumnList);
+        RowDataset groupDataset = new RowDataset(groupColumnNames, groupColumnList);
 
         String keyColumn = "department";
         Collection<String> aggregateColumns = Arrays.asList("employee", "salary");
         String aggregateResultColumn = "employees";
 
-        DataSet grouped = groupDataSet.groupBy(keyColumn, null, aggregateColumns, aggregateResultColumn, List.class);
+        Dataset grouped = groupDataset.groupBy(keyColumn, null, aggregateColumns, aggregateResultColumn, List.class);
 
         Assertions.assertEquals(2, grouped.columnCount());
         Assertions.assertEquals(2, grouped.size()); // Two departments
@@ -416,7 +416,7 @@ public class RowDataSet103Test extends TestBase {
         Collection<String> aggregateColumns = Arrays.asList("name", "city");
         String aggregateResultColumn = "people";
 
-        DataSet grouped = dataSet.groupBy(keyColumn, keyExtractor, aggregateColumns, aggregateResultColumn, Map.class);
+        Dataset grouped = dataset.groupBy(keyColumn, keyExtractor, aggregateColumns, aggregateResultColumn, Map.class);
 
         Assertions.assertEquals(2, grouped.columnCount());
         Assertions.assertEquals(2, grouped.size()); // Young and Adult groups
@@ -432,9 +432,9 @@ public class RowDataSet103Test extends TestBase {
         otherColumnList.add(Arrays.asList(30, 35, 40, 45)); // age column
         otherColumnList.add(Arrays.asList("LA", "Chicago", "Miami", "Seattle")); // city column
 
-        RowDataSet otherDataSet = new RowDataSet(otherColumnNames, otherColumnList);
+        RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        DataSet intersection = dataSet.intersection(otherDataSet);
+        Dataset intersection = dataset.intersection(otherDataset);
 
         // Should contain rows with id 2 and 3
         Assertions.assertEquals(2, intersection.size());
@@ -449,9 +449,9 @@ public class RowDataSet103Test extends TestBase {
         otherColumnList.add(Arrays.asList(30, 35)); // age column
         otherColumnList.add(Arrays.asList("LA", "Chicago")); // city column
 
-        RowDataSet otherDataSet = new RowDataSet(otherColumnNames, otherColumnList);
+        RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        DataSet intersection = dataSet.intersection(otherDataSet, true);
+        Dataset intersection = dataset.intersection(otherDataset, true);
 
         Assertions.assertEquals(2, intersection.size());
     }
@@ -465,11 +465,11 @@ public class RowDataSet103Test extends TestBase {
         otherColumnList.add(Arrays.asList(30, 35, 40, 45)); // age column
         otherColumnList.add(Arrays.asList("LA", "Chicago", "Miami", "Seattle")); // city column
 
-        RowDataSet otherDataSet = new RowDataSet(otherColumnNames, otherColumnList);
+        RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         // Use only 'id' as key column
         Collection<String> keyColumns = Arrays.asList("id");
-        DataSet intersection = dataSet.intersection(otherDataSet, keyColumns);
+        Dataset intersection = dataset.intersection(otherDataset, keyColumns);
 
         // Should find 2 rows with matching ids (1 and 2)
         Assertions.assertEquals(2, intersection.size());
@@ -484,9 +484,9 @@ public class RowDataSet103Test extends TestBase {
         otherColumnList.add(Arrays.asList(30, 35, 40, 45)); // age column
         otherColumnList.add(Arrays.asList("LA", "Chicago", "Miami", "Seattle")); // city column
 
-        RowDataSet otherDataSet = new RowDataSet(otherColumnNames, otherColumnList);
+        RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        DataSet difference = dataSet.difference(otherDataSet);
+        Dataset difference = dataset.difference(otherDataset);
 
         // Should contain rows with id 1 and 4 (not in other dataset)
         Assertions.assertEquals(2, difference.size());
@@ -501,9 +501,9 @@ public class RowDataSet103Test extends TestBase {
         otherColumnList.add(Arrays.asList(35, 28)); // age column
         otherColumnList.add(Arrays.asList("Chicago", "Boston")); // city column
 
-        RowDataSet otherDataSet = new RowDataSet(otherColumnNames, otherColumnList);
+        RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        DataSet difference = dataSet.difference(otherDataSet, true);
+        Dataset difference = dataset.difference(otherDataset, true);
 
         // Should contain rows with id 1 and 2
         Assertions.assertEquals(2, difference.size());
@@ -518,11 +518,11 @@ public class RowDataSet103Test extends TestBase {
         otherColumnList.add(Arrays.asList(30, 35)); // age column
         otherColumnList.add(Arrays.asList("LA", "Chicago")); // city column
 
-        RowDataSet otherDataSet = new RowDataSet(otherColumnNames, otherColumnList);
+        RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         // Use only 'id' as key column
         Collection<String> keyColumns = Arrays.asList("id");
-        DataSet difference = dataSet.difference(otherDataSet, keyColumns);
+        Dataset difference = dataset.difference(otherDataset, keyColumns);
 
         // Should find 2 rows with ids 3 and 4 (not in other dataset)
         Assertions.assertEquals(2, difference.size());
@@ -537,9 +537,9 @@ public class RowDataSet103Test extends TestBase {
         otherColumnList.add(Arrays.asList(30, 35, 40, 45)); // age column
         otherColumnList.add(Arrays.asList("LA", "Chicago", "Miami", "Seattle")); // city column
 
-        RowDataSet otherDataSet = new RowDataSet(otherColumnNames, otherColumnList);
+        RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        DataSet symmetricDiff = dataSet.symmetricDifference(otherDataSet);
+        Dataset symmetricDiff = dataset.symmetricDifference(otherDataset);
 
         // Should contain rows with id 1, 4 (from first) and 5, 6 (from second)
         Assertions.assertEquals(4, symmetricDiff.size());
@@ -554,9 +554,9 @@ public class RowDataSet103Test extends TestBase {
         otherColumnList.add(Arrays.asList(35, 28, 40)); // age column
         otherColumnList.add(Arrays.asList("Chicago", "Boston", "Miami")); // city column
 
-        RowDataSet otherDataSet = new RowDataSet(otherColumnNames, otherColumnList);
+        RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        DataSet symmetricDiff = dataSet.symmetricDifference(otherDataSet, true);
+        Dataset symmetricDiff = dataset.symmetricDifference(otherDataset, true);
 
         // Should contain rows with id 1, 2 (from first) and 5 (from second)
         Assertions.assertEquals(3, symmetricDiff.size());
@@ -571,11 +571,11 @@ public class RowDataSet103Test extends TestBase {
         otherColumnList.add(Arrays.asList(30, 40, 45)); // age column
         otherColumnList.add(Arrays.asList("LA", "Miami", "Seattle")); // city column
 
-        RowDataSet otherDataSet = new RowDataSet(otherColumnNames, otherColumnList);
+        RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         // Use only 'id' as key column
         Collection<String> keyColumns = Arrays.asList("id");
-        DataSet symmetricDiff = dataSet.symmetricDifference(otherDataSet, keyColumns);
+        Dataset symmetricDiff = dataset.symmetricDifference(otherDataset, keyColumns);
 
         // Should contain rows with id 2, 3, 4 (from first) and 5, 6 (from second)
         Assertions.assertEquals(5, symmetricDiff.size());
@@ -590,10 +590,10 @@ public class RowDataSet103Test extends TestBase {
         otherColumnList.add(Arrays.asList(30, 40)); // age column
         otherColumnList.add(Arrays.asList("LA", "Miami")); // city column
 
-        RowDataSet otherDataSet = new RowDataSet(otherColumnNames, otherColumnList);
+        RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         Collection<String> keyColumns = Arrays.asList("id");
-        DataSet symmetricDiff = dataSet.symmetricDifference(otherDataSet, keyColumns, true);
+        Dataset symmetricDiff = dataset.symmetricDifference(otherDataset, keyColumns, true);
 
         // Should contain rows with id 1, 3, 4 (from first) and 5 (from second)
         Assertions.assertEquals(4, symmetricDiff.size());
@@ -602,11 +602,11 @@ public class RowDataSet103Test extends TestBase {
     // Edge case tests
 
     @Test
-    public void testToListWithEmptyDataSet() {
-        RowDataSet emptyDataSet = new RowDataSet(new ArrayList<>(), new ArrayList<>());
+    public void testToListWithEmptyDataset() {
+        RowDataset emptyDataset = new RowDataset(new ArrayList<>(), new ArrayList<>());
         IntFunction<List<Object>> rowSupplier = capacity -> new ArrayList<>();
 
-        List<List<Object>> result = emptyDataSet.toList(null, null, rowSupplier);
+        List<List<Object>> result = emptyDataset.toList(null, null, rowSupplier);
 
         Assertions.assertTrue(result.isEmpty());
     }
@@ -618,7 +618,7 @@ public class RowDataSet103Test extends TestBase {
         IntFunction<Map<Integer, String>> supplier = capacity -> new HashMap<>();
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            dataSet.toMap(0, dataSet.size(), keyColumn, valueColumns, String.class, supplier);
+            dataset.toMap(0, dataset.size(), keyColumn, valueColumns, String.class, supplier);
         });
     }
 
@@ -628,6 +628,6 @@ public class RowDataSet103Test extends TestBase {
         Collection<String> aggregateColumns = new ArrayList<>();
         String aggregateResultColumn = "data";
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> dataSet.groupBy(keyColumn, null, aggregateColumns, aggregateResultColumn, List.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> dataset.groupBy(keyColumn, null, aggregateColumns, aggregateResultColumn, List.class));
     }
 }

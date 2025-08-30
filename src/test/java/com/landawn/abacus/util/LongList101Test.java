@@ -40,7 +40,7 @@ public class LongList101Test extends TestBase {
     @Test
     public void testConstructorWithNegativeCapacity() {
         // Should not throw exception, will be handled internally
-        assertThrows(NegativeArraySizeException.class, () -> new LongList(-1));
+        assertThrows(IllegalArgumentException.class, () -> new LongList(-1));
     }
 
     @Test

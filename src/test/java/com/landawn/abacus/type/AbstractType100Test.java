@@ -211,9 +211,9 @@ public class AbstractType100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test isDataSet()")
-    public void testIsDataSet() {
-        assertFalse(stringType.isDataSet());
+    @DisplayName("Test isDataset()")
+    public void testIsDataset() {
+        assertFalse(stringType.isDataset());
     }
 
     @Test

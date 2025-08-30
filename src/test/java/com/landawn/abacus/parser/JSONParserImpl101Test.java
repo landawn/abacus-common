@@ -26,10 +26,10 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.RowDataSet;
+import com.landawn.abacus.util.RowDataset;
 import com.landawn.abacus.util.stream.Stream;
 
 public class JSONParserImpl101Test extends TestBase {
@@ -504,21 +504,21 @@ public class JSONParserImpl101Test extends TestBase {
     }
 
     @Test
-    public void testSpecialCases_DataSet() {
-        // Test DataSet serialization/deserialization
+    public void testSpecialCases_Dataset() {
+        // Test Dataset serialization/deserialization
         List<String> columnNames = Arrays.asList("col1", "col2");
         List<List<Object>> columns = new ArrayList<>();
         columns.add(Arrays.asList("a", "b", "c"));
         columns.add(Arrays.asList(1, 2, 3));
 
-        DataSet dataSet = new RowDataSet(columnNames, columns);
+        Dataset dataset = new RowDataset(columnNames, columns);
 
-        String serialized = parser.serialize(dataSet);
+        String serialized = parser.serialize(dataset);
         Assertions.assertNotNull(serialized);
         Assertions.assertTrue(serialized.contains("columnNames"));
         Assertions.assertTrue(serialized.contains("columns"));
 
-        DataSet deserialized = parser.deserialize(serialized, null, DataSet.class);
+        Dataset deserialized = parser.deserialize(serialized, null, Dataset.class);
         Assertions.assertNotNull(deserialized);
         Assertions.assertEquals(2, deserialized.columnNameList().size());
         Assertions.assertEquals(3, deserialized.size());

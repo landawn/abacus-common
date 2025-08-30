@@ -9,51 +9,51 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 
-public class DataSetType100Test extends TestBase {
+public class DatasetType100Test extends TestBase {
 
-    private DataSetType dataSetType;
+    private DatasetType datasetType;
 
     @BeforeEach
     public void setUp() {
-        dataSetType = (DataSetType) createType(DataSet.class.getSimpleName());
+        datasetType = (DatasetType) createType(Dataset.class.getSimpleName());
     }
 
     @Test
     public void testClazz() {
-        assertEquals(DataSet.class, dataSetType.clazz());
+        assertEquals(Dataset.class, datasetType.clazz());
     }
 
     @Test
-    public void testIsDataSet() {
-        assertTrue(dataSetType.isDataSet());
+    public void testIsDataset() {
+        assertTrue(datasetType.isDataset());
     }
 
     @Test
     public void testIsSerializable() {
-        assertFalse(dataSetType.isSerializable());
+        assertFalse(datasetType.isSerializable());
     }
 
     @Test
     public void testGetSerializationType() {
-        assertEquals(Type.SerializationType.DATA_SET, dataSetType.getSerializationType());
+        assertEquals(Type.SerializationType.DATA_SET, datasetType.getSerializationType());
     }
 
     @Test
     public void testStringOf() {
         // Test with null
-        assertNull(dataSetType.stringOf(null));
+        assertNull(datasetType.stringOf(null));
 
-        // Test with actual DataSet would require mocking Utils.jsonParser
+        // Test with actual Dataset would require mocking Utils.jsonParser
         // Since the implementation depends on external parser
     }
 
     @Test
     public void testValueOf() {
         // Test with null and empty string
-        assertNull(dataSetType.valueOf(null));
-        assertNull(dataSetType.valueOf(""));
+        assertNull(datasetType.valueOf(null));
+        assertNull(datasetType.valueOf(""));
 
         // Test with actual JSON would require mocking Utils.jsonParser
         // Since the implementation depends on external parser

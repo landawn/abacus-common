@@ -1199,7 +1199,7 @@ public class N103Test extends TestBase {
     }
 
     @Test
-    public void testFilterLargeDataSet() {
+    public void testFilterLargeDataset() {
         int[] result = N.filter(largeIntArray, i -> i % 1000 == 0);
         assertEquals(10, result.length);
         assertEquals(0, result[0]);
@@ -1614,7 +1614,7 @@ public class N103Test extends TestBase {
 
     // Performance edge case tests
     @Test
-    public void testLargeDataSetOperations() {
+    public void testLargeDatasetOperations() {
         // Filter large dataset
         int[] filtered = N.filter(largeIntArray, i -> i % 100 == 0);
         assertEquals(100, filtered.length);

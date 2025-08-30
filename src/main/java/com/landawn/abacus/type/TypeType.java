@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Strings;
  * <p>This class provides the ability to treat Type objects as first-class values that can be:</p>
  * <ul>
  *   <li>Serialized to and from strings (using the type name)</li>
- *   <li>Used as column values in DataSet operations</li>
+ *   <li>Used as column values in Dataset operations</li>
  *   <li>Stored in databases as type metadata</li>
  *   <li>Passed as parameters in dynamic type scenarios</li>
  * </ul>

@@ -126,11 +126,11 @@ public class Builder102Test extends TestBase {
     }
 
     @Test
-    public void testOfDataSet() {
-        DataSet dataSet = new RowDataSet(Arrays.asList("col1"), Arrays.asList(Arrays.asList("val1")));
-        Builder.DataSetBuilder builder = Builder.of(dataSet);
+    public void testOfDataset() {
+        Dataset dataset = new RowDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList("val1")));
+        Builder.DatasetBuilder builder = Builder.of(dataset);
         Assertions.assertNotNull(builder);
-        Assertions.assertSame(dataSet, builder.val());
+        Assertions.assertSame(dataset, builder.val());
     }
 
     @Test
@@ -696,11 +696,11 @@ public class Builder102Test extends TestBase {
         Assertions.assertTrue(multimap.get("key").contains(4));
     }
 
-    // DataSetBuilder tests would require more complex setup, showing a few examples
+    // DatasetBuilder tests would require more complex setup, showing a few examples
     @Test
-    public void testDataSetBuilderRenameColumn() {
-        DataSet ds = new RowDataSet(Arrays.asList("oldName"), Arrays.asList(Arrays.asList("value")));
-        Builder.DataSetBuilder builder = Builder.of(ds);
+    public void testDatasetBuilderRenameColumn() {
+        Dataset ds = new RowDataset(Arrays.asList("oldName"), Arrays.asList(Arrays.asList("value")));
+        Builder.DatasetBuilder builder = Builder.of(ds);
 
         builder.renameColumn("oldName", "newName");
         Assertions.assertTrue(ds.columnNameList().contains("newName"));
@@ -708,9 +708,9 @@ public class Builder102Test extends TestBase {
     }
 
     @Test
-    public void testDataSetBuilderAddColumn() {
-        DataSet ds = new RowDataSet(N.asList("col1"), N.asList(Arrays.asList("val1")));
-        Builder.DataSetBuilder builder = Builder.of(ds);
+    public void testDatasetBuilderAddColumn() {
+        Dataset ds = new RowDataset(N.asList("col1"), N.asList(Arrays.asList("val1")));
+        Builder.DatasetBuilder builder = Builder.of(ds);
 
         builder.addColumn("col2", N.asList("val2"));
         Assertions.assertEquals(2, ds.columnCount());
@@ -718,9 +718,9 @@ public class Builder102Test extends TestBase {
     }
 
     @Test
-    public void testDataSetBuilderRemoveColumn() {
-        DataSet ds = new RowDataSet(N.asList("col1", "col2"), N.asList(N.asList("val1"), N.asList("val2")));
-        Builder.DataSetBuilder builder = Builder.of(ds);
+    public void testDatasetBuilderRemoveColumn() {
+        Dataset ds = new RowDataset(N.asList("col1", "col2"), N.asList(N.asList("val1"), N.asList("val2")));
+        Builder.DatasetBuilder builder = Builder.of(ds);
 
         builder.removeColumn("col2");
         Assertions.assertEquals(1, ds.columnCount());

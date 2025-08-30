@@ -219,8 +219,8 @@ public class CSVUtil101Test extends TestBase {
         Files.writeString(file.toPath(), csv);
 
         // Offset beyond file size
-        DataSet dataSet = CSVUtil.loadCSV(file, null, 100, 10);
-        assertEquals(0, dataSet.size());
+        Dataset dataset = CSVUtil.loadCSV(file, null, 100, 10);
+        assertEquals(0, dataset.size());
     }
 
     @Test
@@ -229,9 +229,9 @@ public class CSVUtil101Test extends TestBase {
         String csv = "id,name\n1,John\n2,Jane\n";
 
         try (BufferedReader br = new BufferedReader(new StringReader(csv))) {
-            DataSet dataSet = CSVUtil.loadCSV(br);
-            assertEquals(2, dataSet.size());
-            assertEquals("John", dataSet.get(0, 1));
+            Dataset dataset = CSVUtil.loadCSV(br);
+            assertEquals(2, dataset.size());
+            assertEquals("John", dataset.get(0, 1));
         }
     }
 
@@ -289,10 +289,10 @@ public class CSVUtil101Test extends TestBase {
         Files.writeString(file.toPath(), csv);
 
         Predicate<String[]> alwaysFalse = row -> false;
-        DataSet dataSet = CSVUtil.loadCSV(file, null, 0, Long.MAX_VALUE, alwaysFalse);
+        Dataset dataset = CSVUtil.loadCSV(file, null, 0, Long.MAX_VALUE, alwaysFalse);
 
-        assertEquals(0, dataSet.size());
-        assertEquals(2, dataSet.columnCount());
+        assertEquals(0, dataset.size());
+        assertEquals(2, dataset.columnCount());
     }
 
     @Test
@@ -359,11 +359,11 @@ public class CSVUtil101Test extends TestBase {
         File file = tempDir.resolve("malformed.csv").toFile();
         Files.writeString(file.toPath(), malformedCsv);
 
-        DataSet dataSet = CSVUtil.loadCSV(file);
+        Dataset dataset = CSVUtil.loadCSV(file);
 
         // Should handle rows with different column counts
-        assertEquals(3, dataSet.columnCount());
-        assertEquals(2, dataSet.size());
+        assertEquals(3, dataset.columnCount());
+        assertEquals(2, dataset.size());
     }
 
     @Test
@@ -386,12 +386,12 @@ public class CSVUtil101Test extends TestBase {
             }
         };
 
-        DataSet dataSet = CSVUtil.loadCSV(file, List.of("name", "salary"), rowExtractor);
+        Dataset dataset = CSVUtil.loadCSV(file, List.of("name", "salary"), rowExtractor);
 
-        assertEquals(2, dataSet.columnCount());
-        assertEquals(2, dataSet.size());
-        assertEquals("John", dataSet.get(0, 0));
-        assertEquals(50000, (Integer) dataSet.get(0, 1));
+        assertEquals(2, dataset.columnCount());
+        assertEquals(2, dataset.size());
+        assertEquals("John", dataset.get(0, 0));
+        assertEquals(50000, (Integer) dataset.get(0, 1));
     }
 
     @Test
@@ -442,14 +442,14 @@ public class CSVUtil101Test extends TestBase {
         File file = tempDir.resolve("unicode.csv").toFile();
         Files.writeString(file.toPath(), unicodeCsv);
 
-        DataSet dataSet = CSVUtil.loadCSV(file);
+        Dataset dataset = CSVUtil.loadCSV(file);
 
-        assertEquals(2, dataSet.columnCount());
-        assertEquals(3, dataSet.size());
-        assertEquals("张三", dataSet.get(0, 0));
-        assertEquals("你好", dataSet.get(0, 1));
-        assertEquals("José", dataSet.get(1, 0));
-        assertEquals("Müller", dataSet.get(2, 0));
+        assertEquals(2, dataset.columnCount());
+        assertEquals(3, dataset.size());
+        assertEquals("张三", dataset.get(0, 0));
+        assertEquals("你好", dataset.get(0, 1));
+        assertEquals("José", dataset.get(1, 0));
+        assertEquals("Müller", dataset.get(2, 0));
     }
 
     @Test
@@ -464,10 +464,10 @@ public class CSVUtil101Test extends TestBase {
         File file = tempDir.resolve("long.csv").toFile();
         Files.writeString(file.toPath(), csv);
 
-        DataSet dataSet = CSVUtil.loadCSV(file);
+        Dataset dataset = CSVUtil.loadCSV(file);
 
-        assertEquals(2, dataSet.size());
-        assertEquals(10000, ((String) dataSet.get(0, 1)).length());
+        assertEquals(2, dataset.size());
+        assertEquals(10000, ((String) dataset.get(0, 1)).length());
     }
 
     // Test classes

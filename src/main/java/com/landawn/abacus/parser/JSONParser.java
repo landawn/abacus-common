@@ -244,7 +244,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      *
      * @param <T> the element type
      * @param source the JSON string containing an array
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/DataSet element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a Stream of parsed elements
      */
     <T> Stream<T> stream(String source, Type<? extends T> elementType);
@@ -256,7 +256,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param <T> the element type
      * @param source the JSON string containing an array
      * @param config the deserialization configuration
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/DataSet element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a Stream of parsed elements
      */
     <T> Stream<T> stream(String source, JSONDeserializationConfig config, Type<? extends T> elementType);
@@ -279,7 +279,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      *
      * @param <T> the element type
      * @param source the JSON file
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/DataSet element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a Stream of parsed elements
      */
     <T> Stream<T> stream(File source, Type<? extends T> elementType);
@@ -291,7 +291,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param <T> the element type
      * @param source the JSON file
      * @param config the deserialization configuration
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/DataSet element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a Stream of parsed elements
      */
     <T> Stream<T> stream(File source, JSONDeserializationConfig config, Type<? extends T> elementType);
@@ -314,7 +314,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param <T> the element type
      * @param source the input stream containing JSON
      * @param closeInputStreamWhenStreamIsClosed whether to close the input stream when the returned stream is closed
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/DataSet element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a Stream of parsed elements
      */
     <T> Stream<T> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, Type<? extends T> elementType);
@@ -328,7 +328,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param source the input stream containing JSON
      * @param config the deserialization configuration
      * @param closeInputStreamWhenStreamIsClosed whether to close the input stream when the returned stream is closed
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/DataSet element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a Stream of parsed elements
      */
     <T> Stream<T> stream(InputStream source, JSONDeserializationConfig config, boolean closeInputStreamWhenStreamIsClosed, Type<? extends T> elementType);
@@ -351,7 +351,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param <T> the element type
      * @param source the reader containing JSON
      * @param closeReaderWhenStreamIsClosed whether to close the reader when the returned stream is closed
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/DataSet element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a Stream of parsed elements
      */
     <T> Stream<T> stream(Reader source, boolean closeReaderWhenStreamIsClosed, Type<? extends T> elementType);
@@ -365,7 +365,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param source the reader containing JSON
      * @param config the deserialization configuration
      * @param closeReaderWhenStreamIsClosed whether to close the reader when the returned stream is closed
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/DataSet element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a Stream of parsed elements
      */
     <T> Stream<T> stream(Reader source, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed, Type<? extends T> elementType);

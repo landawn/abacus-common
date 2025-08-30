@@ -425,12 +425,12 @@ public class CommonUtil202Test extends TestBase {
     }
 
     @Test
-    public void testIsEmpty_DataSet() {
-        assertTrue(N.isEmpty((DataSet) null));
-        // DataSet emptyDs = mock(DataSet.class);
+    public void testIsEmpty_Dataset() {
+        assertTrue(N.isEmpty((Dataset) null));
+        // Dataset emptyDs = mock(Dataset.class);
         // when(emptyDs.isEmpty()).thenReturn(true);
         // assertTrue(N.isEmpty(emptyDs));
-        // DataSet nonEmptyDs = mock(DataSet.class);
+        // Dataset nonEmptyDs = mock(Dataset.class);
         // when(nonEmptyDs.isEmpty()).thenReturn(false);
         // assertFalse(N.isEmpty(nonEmptyDs));
     }

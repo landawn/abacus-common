@@ -29,7 +29,7 @@ import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.N;
@@ -382,37 +382,37 @@ public class JSONParserImpl100Test extends TestBase {
     }
 
     @Test
-    public void testSerializeDataSet() {
+    public void testSerializeDataset() {
         List<String> columnNames = Arrays.asList("col1", "col2");
         List<List<Object>> columnList = new ArrayList<>();
         columnList.add(Arrays.asList("a", "b", "c"));
         columnList.add(Arrays.asList(1, 2, 3));
 
-        DataSet ds = N.newDataSet(columnNames, columnList);
+        Dataset ds = N.newDataset(columnNames, columnList);
         String json = parser.serialize(ds);
 
         assertTrue(json.contains("columnNames"));
         assertTrue(json.contains("columns"));
 
-        DataSet ds2 = parser.deserialize(json, DataSet.class);
+        Dataset ds2 = parser.deserialize(json, Dataset.class);
         assertEquals(ds, ds2);
     }
 
     @Test
-    public void testSerializeDataSet_2() {
+    public void testSerializeDataset_2() {
         List<String> columnNames = Arrays.asList("col1", "col2");
         List<List<Object>> columnList = new ArrayList<>();
         columnList.add(Arrays.asList("a", "b", "c"));
         columnList.add(Arrays.asList(1, 2, 3));
 
-        DataSet ds = N.newDataSet(columnNames, columnList);
+        Dataset ds = N.newDataset(columnNames, columnList);
         ds.freeze();
         String json = parser.serialize(ds, JSC.create().writeColumnType(true).prettyFormat(true).quotePropName(true));
 
         assertTrue(json.contains("columnNames"));
         assertTrue(json.contains("columns"));
 
-        DataSet ds2 = parser.deserialize(json, DataSet.class);
+        Dataset ds2 = parser.deserialize(json, Dataset.class);
         assertEquals(ds, ds2);
     }
 

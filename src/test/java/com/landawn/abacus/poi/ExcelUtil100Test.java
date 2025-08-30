@@ -29,8 +29,8 @@ import com.landawn.abacus.poi.ExcelUtil.FreezePane;
 import com.landawn.abacus.poi.ExcelUtil.RowExtractors;
 import com.landawn.abacus.poi.ExcelUtil.RowMappers;
 import com.landawn.abacus.poi.ExcelUtil.SheetCreateOptions;
-import com.landawn.abacus.util.DataSet;
-import com.landawn.abacus.util.RowDataSet;
+import com.landawn.abacus.util.Dataset;
+import com.landawn.abacus.util.RowDataset;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -144,7 +144,7 @@ public class ExcelUtil100Test extends TestBase {
 
     @Test
     public void testLoadSheet_File() {
-        DataSet dataset = ExcelUtil.loadSheet(testExcelFile);
+        Dataset dataset = ExcelUtil.loadSheet(testExcelFile);
         
         assertNotNull(dataset);
         assertEquals(4, dataset.columnCount());
@@ -168,7 +168,7 @@ public class ExcelUtil100Test extends TestBase {
             }
         };
         
-        DataSet dataset = ExcelUtil.loadSheet(testExcelFile, 0, customExtractor);
+        Dataset dataset = ExcelUtil.loadSheet(testExcelFile, 0, customExtractor);
         
         assertNotNull(dataset);
         assertEquals(4, dataset.columnCount());
@@ -182,7 +182,7 @@ public class ExcelUtil100Test extends TestBase {
 
     @Test
     public void testLoadSheet_FileNameExtractor() {
-        DataSet dataset = ExcelUtil.loadSheet(testExcelFile, "TestSheet", RowExtractors.DEFAULT);
+        Dataset dataset = ExcelUtil.loadSheet(testExcelFile, "TestSheet", RowExtractors.DEFAULT);
         
         assertNotNull(dataset);
         assertEquals(4, dataset.columnCount());
@@ -270,7 +270,7 @@ public class ExcelUtil100Test extends TestBase {
         assertTrue(outputExcelFile.exists());
         
         // Verify written data
-        DataSet dataset = ExcelUtil.loadSheet(outputExcelFile);
+        Dataset dataset = ExcelUtil.loadSheet(outputExcelFile);
         assertEquals(3, dataset.columnCount());
         assertEquals(2, dataset.size());
         assertEquals("A1", dataset.get(0, 0));
@@ -294,7 +294,7 @@ public class ExcelUtil100Test extends TestBase {
         
         assertTrue(outputExcelFile.exists());
         
-        DataSet dataset = ExcelUtil.loadSheet(outputExcelFile);
+        Dataset dataset = ExcelUtil.loadSheet(outputExcelFile);
         assertEquals(2, dataset.columnCount());
         assertEquals(2, dataset.size());
     }
@@ -317,7 +317,7 @@ public class ExcelUtil100Test extends TestBase {
     }
 
     @Test
-    public void testWriteSheet_DataSet() {
+    public void testWriteSheet_Dataset() {
         List<String> columnNames = Arrays.asList("ID", "Name", "Score");
         List<List<Object>> columnData = Arrays.asList(
             Arrays.asList(1, 2, 3),
@@ -325,19 +325,19 @@ public class ExcelUtil100Test extends TestBase {
             Arrays.asList(90.5, 85.0, 92.3)
         );
         
-        DataSet dataset = new RowDataSet(columnNames, columnData);
+        Dataset dataset = new RowDataset(columnNames, columnData);
         
-        ExcelUtil.writeSheet("DataSetSheet", dataset, outputExcelFile);
+        ExcelUtil.writeSheet("DatasetSheet", dataset, outputExcelFile);
         
         assertTrue(outputExcelFile.exists());
         
-        DataSet loaded = ExcelUtil.loadSheet(outputExcelFile);
+        Dataset loaded = ExcelUtil.loadSheet(outputExcelFile);
         assertEquals(3, loaded.columnCount());
         assertEquals(3, loaded.size());
     }
 
     @Test
-    public void testWriteSheet_DataSetWithOptions() {
+    public void testWriteSheet_DatasetWithOptions() {
         SheetCreateOptions options = SheetCreateOptions.builder()
             .freezePane(new FreezePane(1, 1))
             .autoSizeColumn(true)
@@ -349,15 +349,15 @@ public class ExcelUtil100Test extends TestBase {
             Arrays.asList("X", "Y")
         );
         
-        DataSet dataset = new RowDataSet(columnNames, columnData);
+        Dataset dataset = new RowDataset(columnNames, columnData);
         
-        ExcelUtil.writeSheet("OptionsDataSet", dataset, options, outputExcelFile);
+        ExcelUtil.writeSheet("OptionsDataset", dataset, options, outputExcelFile);
         
         assertTrue(outputExcelFile.exists());
     }
 
     @Test
-    public void testWriteSheet_DataSetWithConsumer() {
+    public void testWriteSheet_DatasetWithConsumer() {
         Consumer<Sheet> customizer = sheet -> {
             sheet.createFreezePane(0, 1);
         };
@@ -367,7 +367,7 @@ public class ExcelUtil100Test extends TestBase {
             Arrays.asList("Value1", "Value2")
         );
         
-        DataSet dataset = new RowDataSet(columnNames, columnData);
+        Dataset dataset = new RowDataset(columnNames, columnData);
         
         ExcelUtil.writeSheet("CustomizedSheet", dataset, customizer, outputExcelFile);
         

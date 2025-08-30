@@ -1143,7 +1143,7 @@ public class Multimap100Test extends TestBase {
 
     // Large data sets
     @Test
-    public void testLargeDataSet() {
+    public void testLargeDataset() {
         // Test with a large number of entries
         int numKeys = 1000;
         int valuesPerKey = 100;

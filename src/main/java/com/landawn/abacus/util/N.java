@@ -35,6 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
@@ -188,10 +189,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Counts the occurrences of a specific boolean value in a boolean array.
+     * This method provides a convenient way to count how many times {@code true} or {@code false}
+     * appears in a boolean array without writing explicit loops.
      *
-     * @param a The boolean array to be checked for the presence of the valueToFind.
-     * @param valueToFind The boolean value to be checked for its occurrences in the array a.
-     * @return The number of occurrences of valueToFind in array a. Returns 0 if the array is {@code null} or empty.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean[] flags = {true, false, true, true, false};
+     * int trueCount = N.occurrencesOf(flags, true);   // Returns 3
+     * int falseCount = N.occurrencesOf(flags, false); // Returns 2
+     * 
+     * boolean[] empty = {};
+     * int count = N.occurrencesOf(empty, true);       // Returns 0
+     * int nullCount = N.occurrencesOf(null, true);    // Returns 0
+     * }</pre>
+     *
+     * @param a the boolean array to search in, may be null or empty
+     * @param valueToFind the boolean value to count occurrences of
+     * @return the number of times valueToFind appears in the array,
+     *         or 0 if the array is null or empty
      */
     public static int occurrencesOf(final boolean[] a, final boolean valueToFind) {
         if (isEmpty(a)) {
@@ -279,11 +294,23 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Counts the occurrences of a specific int value in a int array.
+     * Counts the occurrences of a specific int value in an int array.
+     * This method efficiently counts how many times a particular integer appears in an array.
      *
-     * @param a The int array to be checked for the presence of the valueToFind.
-     * @param valueToFind The int value to be checked for its occurrences in the array a.
-     * @return The number of occurrences of valueToFind in array a. Returns 0 if the array is {@code null} or empty.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int[] numbers = {1, 2, 3, 2, 4, 2, 5};
+     * int count = N.occurrencesOf(numbers, 2);    // Returns 3
+     * int missing = N.occurrencesOf(numbers, 10); // Returns 0
+     * 
+     * int[] scores = {100, 95, 100, 88, 100};
+     * int perfectScores = N.occurrencesOf(scores, 100); // Returns 3
+     * }</pre>
+     *
+     * @param a the int array to search in, may be null or empty
+     * @param valueToFind the int value to count occurrences of
+     * @return the number of times valueToFind appears in the array,
+     *         or 0 if the array is null or empty
      */
     public static int occurrencesOf(final int[] a, final int valueToFind) {
         if (isEmpty(a)) {
@@ -681,11 +708,29 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified array contains the specified value.
+     * Checks if the specified int array contains the specified value.
+     * This method provides a null-safe way to test for element presence in int arrays.
      *
-     * @param a The array to be checked for the presence of the value.
-     * @param valueToFind The value to be checked for its presence in the array.
-     * @return {@code true} if the array contains the specified value, {@code false} if <i>a</i> is {@code null} or empty or {@code valueToFind} is not found.
+     * <p>This method performs a linear search through the array to find the value.
+     * For large arrays, consider using sorted arrays with binary search for better performance.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int[] numbers = {1, 2, 3, 4, 5};
+     * boolean hasThree = N.contains(numbers, 3);    // Returns true
+     * boolean hasSeven = N.contains(numbers, 7);    // Returns false
+     * 
+     * int[] empty = {};
+     * boolean found = N.contains(empty, 1);         // Returns false
+     * boolean nullSafe = N.contains(null, 1);       // Returns false
+     * }</pre>
+     *
+     * @param a the int array to search in, may be null or empty
+     * @param valueToFind the int value to search for
+     * @return {@code true} if the array contains the specified value,
+     *         {@code false} if the array is null, empty, or does not contain the value
+     * @see #indexOf(int[], int)
+     * @see #containsAll(Collection, Object...)
      */
     public static boolean contains(final int[] a, final int valueToFind) {
         return indexOf(a, valueToFind) != INDEX_NOT_FOUND;
@@ -725,11 +770,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified array contains the specified value.
+     * Checks if the specified Object array contains the specified value using {@link #equals(Object, Object)} for comparison.
+     * This method is null-safe for both the array and the value being searched.
      *
-     * @param a The array to be checked for the presence of the value.
-     * @param valueToFind The value to be checked for its presence in the array.
-     * @return {@code true} if the array contains the specified value, {@code false} if <i>a</i> is {@code null} or empty or {@code valueToFind} is not found.
+     * <p>The comparison uses {@link #equals(Object, Object)}, which means:</p>
+     * <ul>
+     *   <li>Two null values are considered equal</li>
+     *   <li>A null value and a non-null value are never equal</li>
+     *   <li>Non-null values are compared using their {@code equals} method</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[] words = {"hello", "world", null, "test"};
+     * boolean hasHello = N.contains(words, "hello");     // Returns true
+     * boolean hasNull = N.contains(words, null);         // Returns true
+     * boolean hasMissing = N.contains(words, "missing"); // Returns false
+     * 
+     * Integer[] nums = {1, 2, 3};
+     * boolean hasTwo = N.contains(nums, 2);              // Returns true (autoboxing)
+     * boolean hasNull = N.contains(nums, null);          // Returns false
+     * 
+     * boolean nullSafe = N.contains(null, "any");        // Returns false
+     * }</pre>
+     *
+     * @param a the Object array to search in, may be null or empty
+     * @param valueToFind the value to search for, may be null
+     * @return {@code true} if the array contains the specified value,
+     *         {@code false} if the array is null, empty, or does not contain the value
+     * @see #indexOf(Object[], Object)
+     * @see Objects#equals(Object, Object)
      */
     public static boolean contains(final Object[] a, final Object valueToFind) {
         return indexOf(a, valueToFind) != INDEX_NOT_FOUND;
@@ -751,11 +821,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified {@code Iterable} contains the specified value.
+     * Checks if the specified Iterable contains the specified value using null-safe equality comparison.
+     * This method works with any Iterable implementation, including custom collections.
      *
-     * @param c The {@code Iterable} to be checked for the presence of the value.
-     * @param valueToFind The value to be checked for its presence in the {@code Iterable}.
-     * @return {@code true} if the array contains the specified value, {@code false} if {@code valueToFind} is not found or <i>c</i> is {@code null} or empty.
+     * <p>This method performs a linear search through the Iterable, making it suitable for small to medium collections.
+     * For large datasets where frequent lookups are needed, consider using a Set for O(1) lookups.</p>
+     *
+     * <p>The method uses {@link #equals(Object, Object)} for comparison, handling null values correctly.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("apple", "banana", null, "cherry");
+     * boolean hasApple = N.contains(words, "apple");     // Returns true
+     * boolean hasNull = N.contains(words, null);         // Returns true
+     * boolean hasGrape = N.contains(words, "grape");     // Returns false
+     * 
+     * // Works with any Iterable
+     * Set<Integer> numbers = new HashSet<>(Arrays.asList(1, 2, 3));
+     * boolean hasTwo = N.contains(numbers, 2);           // Returns true
+     * 
+     * // Custom Iterable
+     * Iterable<String> custom = () -> Arrays.asList("a", "b", "c").iterator();
+     * boolean hasB = N.contains(custom, "b");            // Returns true
+     * }</pre>
+     *
+     * @param c the Iterable to search in, may be null or empty
+     * @param valueToFind the value to search for, may be null
+     * @return {@code true} if the Iterable contains the specified value,
+     *         {@code false} if the Iterable is null, empty, or does not contain the value
+     * @see #contains(Collection, Object)
+     * @see #containsAny(Iterable, Set)
      */
     public static boolean contains(final Iterable<?> c, final Object valueToFind) {
         if (isEmptyCollection(c)) {
@@ -772,11 +867,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified Iterator contains the specified value.
+     * Checks if the specified Iterator contains the specified value, consuming the Iterator in the process.
+     * <b>Warning:</b> This method consumes the Iterator, so it will be exhausted after the call.
      *
-     * @param iter The {@code Iterator} to be checked for the presence of the value.
-     * @param valueToFind The value to be checked for its presence in the Iterator.
-     * @return {@code true} if the array contains the specified value, {@code false} if {@code valueToFind} is not found or <i>c</i> is {@code null} or empty.
+     * <p>This method is useful when you have an Iterator from a stream, database result set, or other
+     * one-time-use data source and need to check for a specific value.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Iterator<String> iterator = Arrays.asList("a", "b", "c").iterator();
+     * boolean hasB = N.contains(iterator, "b");      // Returns true, consumes iterator
+     * // iterator is now exhausted and hasNext() returns false
+     * 
+     * // Stream iterator example
+     * Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
+     * boolean hasThree = N.contains(stream.iterator(), 3); // Returns true
+     * 
+     * // Null safety
+     * Iterator<String> nullIter = null;
+     * boolean safe = N.contains(nullIter, "test");    // Returns false
+     * }</pre>
+     *
+     * <p><b>Performance Note:</b> The Iterator is consumed linearly until the value is found or exhausted.
+     * In the worst case, all elements will be processed.</p>
+     *
+     * @param iter the Iterator to search through, may be null (will be consumed)
+     * @param valueToFind the value to search for, may be null
+     * @return {@code true} if the Iterator contains the specified value,
+     *         {@code false} if the Iterator is null, empty, or does not contain the value
+     * @see #contains(Iterable, Object)
+     * @see #contains(Collection, Object)
      */
     public static boolean contains(final Iterator<?> iter, final Object valueToFind) {
         if (iter == null) {
@@ -811,11 +931,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the given {@code Collection} contains all the elements in the specified {@code valuesToFind} array.
+     * Tests whether the given Collection contains all elements from the specified array.
+     * This method provides a convenient way to check multiple values at once using varargs.
      *
-     * @param c The {@code Collection} to be checked for the presence of the elements in valuesToFind.
-     * @param valuesToFind The values to be checked for their presence in the given {@code Collection}.
-     * @return {@code true} if the given {@code Collection} contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} otherwise if any element in {@code valuesToFind} is not found in the given {@code Collection} or the given {@code Collection} is {@code null} or empty.
+     * <p>This method is equivalent to calling {@link #containsAll(Collection, Collection)}
+     * with the array converted to a List.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Set<String> colors = Set.of("red", "green", "blue", "yellow");
+     * 
+     * boolean hasRGB = N.containsAll(colors, "red", "green", "blue");     // Returns true
+     * boolean hasAll = N.containsAll(colors, "red", "purple");            // Returns false
+     * boolean empty = N.containsAll(colors);                              // Returns true (empty varargs)
+     * boolean nullSafe = N.containsAll(null, "red", "blue");             // Returns false
+     * 
+     * // Works with any Collection type
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+     * boolean hasSequence = N.containsAll(numbers, 2, 4, 5);             // Returns true
+     * }</pre>
+     *
+     * <p><b>Performance Note:</b> For frequent checks against the same set of values,
+     * consider converting the values to a Set first.</p>
+     *
+     * @param c the Collection to search in, may be null
+     * @param valuesToFind the values to check for, may be empty or null
+     * @return {@code true} if the Collection contains all specified values,
+     *         {@code true} if valuesToFind is null or empty,
+     *         {@code false} if c is null/empty (and valuesToFind is not) or any value is missing
+     * @see #containsAll(Collection, Collection)
+     * @see Collection#containsAll(Collection)
      */
     public static boolean containsAll(final Collection<?> c, final Object... valuesToFind) {
         if (isEmpty(valuesToFind)) {
@@ -829,11 +974,39 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the given {@code Iterable} contains all the elements in the specified {@code valuesToFind} Collection.
+     * Tests whether the given Iterable contains all elements from the specified Collection.
+     * This method works with any Iterable, not just Collections, making it more versatile.
      *
-     * @param c The {@code Iterable} to be checked for the presence of the elements in valuesToFind.
-     * @param valuesToFind The values to be checked for their presence in the given {@code Iterable}.
-     * @return {@code true} if the given {@code Iterable} contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} otherwise if any element in {@code valuesToFind} is not found is not found in the given {@code Iterable} or the given {@code Iterable} is {@code null} or empty.
+     * <p>This method uses an optimized algorithm that removes found elements from a Set
+     * copy of the search values, providing good performance for most use cases.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Works with any Iterable
+     * Set<String> searchFor = Set.of("apple", "banana");
+     * 
+     * List<String> fruits = Arrays.asList("apple", "banana", "cherry", "date");
+     * boolean found = N.containsAll(fruits, searchFor);              // Returns true
+     * 
+     * // Custom Iterable
+     * Iterable<String> custom = () -> Arrays.asList("a", "b", "c").iterator();
+     * boolean hasAB = N.containsAll(custom, Set.of("a", "b"));       // Returns true
+     * 
+     * // Lazy evaluation - stops early when all values found
+     * Stream<Integer> infiniteStream = Stream.iterate(1, i -> i + 1);
+     * boolean hasFirstThree = N.containsAll(infiniteStream::iterator, Set.of(1, 2, 3));
+     * }</pre>
+     *
+     * <p><b>Performance:</b> O(n + m) where n is the size of the Iterable and m is the size
+     * of valuesToFind. The method stops early once all values are found.</p>
+     *
+     * @param c the Iterable to search through, may be null or empty
+     * @param valuesToFind the Collection of values to check for, may be null or empty
+     * @return {@code true} if the Iterable contains all specified values,
+     *         {@code true} if valuesToFind is null or empty,
+     *         {@code false} if c is null/empty (and valuesToFind is not) or any value is missing
+     * @see #containsAll(Collection, Collection)
+     * @see #contains(Iterable, Object)
      */
     public static boolean containsAll(final Iterable<?> c, final Collection<?> valuesToFind) {
         if (isEmpty(valuesToFind)) {
@@ -854,11 +1027,40 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the given {@code Iterator} contains all the elements in the specified {@code valuesToFind} Collection.
+     * Tests whether the given Iterator contains all elements from the specified Collection.
+     * <b>Warning:</b> This method consumes the Iterator during the search process.
      *
-     * @param iter The {@code Iterator} to be checked for the presence of the elements in valuesToFind.
-     * @param valuesToFind The values to be checked for their presence in the given {@code Iterator}.
-     * @return {@code true} if the given {@code Iterator} contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} otherwise if any element in {@code valuesToFind} is not found in the given {@code Iterator} or the given {@code Iterator} is {@code null} or empty.
+     * <p>This method is useful when working with one-time-use data sources like streams,
+     * database result sets, or other Iterator-based APIs where you need to verify
+     * the presence of multiple values.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Stream-based search
+     * Stream<String> words = Stream.of("hello", "world", "java", "stream");
+     * Set<String> searchFor = Set.of("hello", "java");
+     * boolean found = N.containsAll(words.iterator(), searchFor);    // Returns true, consumes stream
+     * 
+     * // Database result set simulation
+     * Iterator<Integer> resultSet = Arrays.asList(1, 2, 3, 4, 5).iterator();
+     * boolean hasValues = N.containsAll(resultSet, Set.of(2, 4));    // Returns true
+     * // resultSet is now exhausted
+     * 
+     * // Early termination when all values found
+     * Iterator<Integer> large = IntStream.range(1, 1000000).iterator();
+     * boolean hasSmall = N.containsAll(large, Set.of(1, 2, 3));      // Stops early after finding all
+     * }</pre>
+     *
+     * <p><b>Performance:</b> The Iterator is consumed until all values are found or it's exhausted.
+     * Uses optimized early termination when all search values are located.</p>
+     *
+     * @param iter the Iterator to search through, may be null (will be consumed)
+     * @param valuesToFind the Collection of values to check for, may be null or empty
+     * @return {@code true} if the Iterator contains all specified values,
+     *         {@code true} if valuesToFind is null or empty,
+     *         {@code false} if iter is null or any value is missing
+     * @see #containsAll(Iterable, Collection)
+     * @see #contains(Iterator, Object)
      */
     public static boolean containsAll(final Iterator<?> iter, final Collection<?> valuesToFind) {
         if (isEmpty(valuesToFind)) {
@@ -26665,7 +26867,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26681,7 +26883,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26699,7 +26901,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
      * @param defaultIfNull the default value to return if the deserialized object is null
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string, or defaultIfNull if the deserialized object is null
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26718,7 +26920,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @return an object of type T deserialized from the JSON string, or defaultIfNull if the deserialized object is null
      * @throws IllegalArgumentException if the specified target type is {@code null}.
@@ -26738,7 +26940,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26755,7 +26957,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26771,7 +26973,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the file where the given JSON string is read to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26787,7 +26989,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the file where the given JSON string is read to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26804,7 +27006,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the file where the given JSON string is read to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26821,7 +27023,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the file where the given JSON string is read to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26837,7 +27039,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the input stream where the given JSON string is read to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26853,7 +27055,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the input stream where the given JSON string is read to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26870,7 +27072,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the input stream where the given JSON string is read to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26887,7 +27089,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the input stream where the given JSON string is read to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26903,7 +27105,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the reader where the given JSON string is read to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26919,7 +27121,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param json the reader where the given JSON string is read to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26936,7 +27138,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the reader where the given JSON string is read to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26953,7 +27155,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the reader where the given JSON string is read to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -26971,7 +27173,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param json the JSON string to be deserialized
      * @param fromIndex the index of the first character (inclusive) to be deserialized
      * @param toIndex the index of the last character (exclusive) to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
@@ -26991,7 +27193,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param json the JSON string to be deserialized
      * @param fromIndex the index of the first character (inclusive) to be deserialized
      * @param toIndex the index of the last character (exclusive) to be deserialized
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
@@ -27010,7 +27212,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param json the JSON string to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
@@ -27031,7 +27233,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the index of the first character (inclusive) to be deserialized
      * @param toIndex the index of the last character (exclusive) to be deserialized
      * @param config the JSON deserialization configuration
-     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param targetType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return an object of type T deserialized from the JSON string
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the specified target type is {@code null}.
@@ -27049,7 +27251,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the JSON array string to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27066,7 +27268,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the JSON array string to be streamed
      * @param config the JSON deserialization configuration
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27082,7 +27284,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the JSON array file to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27099,7 +27301,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the JSON array file to be streamed
      * @param config the JSON deserialization configuration
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27115,7 +27317,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the input stream where the given JSON array is read to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27132,7 +27334,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the input stream where the given JSON array is read to be streamed
      * @param closeInputStreamWhenStreamIsClosed the flag indicating whether to close the input stream when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27150,7 +27352,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param jsonArray the input stream where the given JSON array is read to be streamed
      * @param config the JSON deserialization configuration
      * @param closeInputStreamWhenStreamIsClosed the flag indicating whether to close the input stream when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27167,7 +27369,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the reader where the given JSON array is read to be streamed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27184,7 +27386,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the JSON array
      * @param jsonArray the reader where the given JSON array is read to be streamed
      * @param closeReaderWhenStreamIsClosed the flag indicating whether to close the reader when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27202,7 +27404,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param jsonArray the reader where the given JSON array is read to be streamed
      * @param config the JSON deserialization configuration
      * @param closeReaderWhenStreamIsClosed the flag indicating whether to close the reader when the stream is closed
-     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param elementType the type the given JSON array element will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return a stream of elements deserialized from the given JSON array
      * @throws IllegalArgumentException if the specified element type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27260,7 +27462,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Formats the given JSON string to its pretty-printed JSON format with indents and line breaks for easier reading.
      *
      * @param json the JSON string to be formatted
-     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return the formatted JSON string
      */
     public static String formatJson(final String json, final Class<?> transferType) {
@@ -27271,7 +27473,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Formats the given JSON string to its pretty-printed JSON format with indents and line breaks for easier reading.
      *
      * @param json the JSON string to be formatted
-     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return the formatted JSON string
      */
     public static String formatJson(final String json, final Type<?> transferType) {
@@ -27294,7 +27496,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param json the JSON string to be formatted
      * @param config the JSON serialization configuration
-     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return the formatted JSON string
      */
     public static String formatJson(final String json, final JSONSerializationConfig config, final Class<?> transferType) {
@@ -27309,7 +27511,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param json the JSON string to be formatted
      * @param config the JSON serialization configuration
-     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet} or serializable single value type, e.g., {@code String, Integer, Date}
+     * @param transferType the type the given JSON string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset} or serializable single value type, e.g., {@code String, Integer, Date}
      * @return the formatted JSON string
      */
     public static String formatJson(final String json, final JSONSerializationConfig config, final Type<?> transferType) {
@@ -27419,7 +27621,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param xml the XML string to be deserialized
-     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet}.
+     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset}.
      * @return an object of type T deserialized from the XML string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27451,7 +27653,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param xml the XML string to be deserialized
      * @param config the XML deserialization configuration
-     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet}.
+     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset}.
      * @return an object of type T deserialized from the XML string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27483,7 +27685,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param xml the file where the given XML string is read to be deserialized
-     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet}.
+     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset}.
      * @return an object of type T deserialized from the XML string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27515,7 +27717,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param xml the file where the given XML string is read to be deserialized
      * @param config the XML deserialization configuration
-     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet}.
+     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset}.
      * @return an object of type T deserialized from the XML string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27547,7 +27749,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param xml the input stream where the given XML string is read to be deserialized
-     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet}.
+     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset}.
      * @return an object of type T deserialized from the XML string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27579,7 +27781,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param xml the input stream where the given XML string is read to be deserialized
      * @param config the XML deserialization configuration
-     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet}.
+     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset}.
      * @return an object of type T deserialized from the XML string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27611,7 +27813,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be returned
      * @param xml the reader where the given XML string is read to be deserialized
-     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet}.
+     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset}.
      * @return an object of type T deserialized from the XML string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27643,7 +27845,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the object to be returned
      * @param xml the reader where the given XML string is read to be deserialized
      * @param config the XML deserialization configuration
-     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet}.
+     * @param targetType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset}.
      * @return an object of type T deserialized from the XML string
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see com.landawn.abacus.type.Type
@@ -27684,7 +27886,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Formats the given XML string to its pretty-printed XML format with indents and line breaks for easier reading.
      *
      * @param xml the XML string to be formatted
-     * @param transferType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet}.
+     * @param transferType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset}.
      * @return the formatted XML string
      */
     public static String formatXml(final String xml, final Class<?> transferType) {
@@ -27695,7 +27897,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Formats the given XML string to its pretty-printed XML format with indents and line breaks for easier reading.
      *
      * @param xml the XML string to be formatted
-     * @param transferType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet}.
+     * @param transferType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset}.
      * @return the formatted XML string
      */
     public static String formatXml(final String xml, final Type<?> transferType) {
@@ -27718,7 +27920,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param xml the XML string to be formatted
      * @param config the XML serialization configuration
-     * @param transferType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet}.
+     * @param transferType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset}.
      * @return the formatted XML string
      */
     public static String formatXml(final String xml, final XMLSerializationConfig config, final Class<?> transferType) {
@@ -27733,7 +27935,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param xml the XML string to be formatted
      * @param config the XML serialization configuration
-     * @param transferType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/DataSet}.
+     * @param transferType the type the given XML string will be deserialized to. It can be the {@code Type} of {@code Bean/Array/Collection/Map/Dataset}.
      * @return the formatted XML string
      */
     public static String formatXml(final String xml, final XMLSerializationConfig config, final Type<?> transferType) {

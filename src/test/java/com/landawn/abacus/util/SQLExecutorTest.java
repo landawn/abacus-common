@@ -56,7 +56,7 @@ public class SQLExecutorTest extends AbstractTest {
     //    //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //    //
     //    //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, accounts);
-    //    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //    //        assertEquals(accounts.length, ids.size());
     //    //        assertEquals(accounts.length, result.size());
     //    //
@@ -72,7 +72,7 @@ public class SQLExecutorTest extends AbstractTest {
     //    //    public void test_executeQuery() {
     //    //        String sql = "select * from account";
     //    //        ResultSet resultset = sqlExecutor.executeQuery(sql);
-    //    //        DataSet ds = JdbcUtil.extractData(resultset);
+    //    //        Dataset ds = JdbcUtil.extractData(resultset);
     //    //
     //    //        ds.println();
     //    //    }
@@ -110,7 +110,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        JdbcSettings jdbcSettings = JdbcSettings.create().setReturnedColumnNames(Array.of("id", "first_name"));
     //        List<Long> ids = sqlExecutor.batchInsert(MySqlDef.insertAccount, jdbcSettings, N.asList((Object) parameters));
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, ids.get(0));
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, ids.get(0));
     //        N.println(result);
     //
     //        sqlExecutor.update(MySqlDef.deleteAccountById, ids.get(0));
@@ -126,7 +126,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        JdbcSettings jdbcSettings = JdbcSettings.create().setReturnedColumnNames(Array.of("id", "first_name"));
     //        List<Long> ids = sqlExecutor.batchInsert(MySqlDef.insertAccount, jdbcSettings, N.asList((Object) parameters));
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, ids.get(0));
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, ids.get(0));
     //        N.println(result);
     //
     //        sqlExecutor.update(MySqlDef.deleteAccountById, ids.get(0));
@@ -143,7 +143,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        JdbcSettings jdbcSettings = JdbcSettings.create().setReturnedColumnNames(Array.of("id", "uuid", "create_time"));
     //        List<Long> ids = sqlExecutor.batchInsert(sql, jdbcSettings, N.asList((Object) parameters));
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, ids.get(0));
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, ids.get(0));
     //        N.println(result);
     //
     //        sqlExecutor.update(MySqlDef.deleteAccountById, ids.get(0));
@@ -186,7 +186,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //
     //        assertTrue(sqlExecutor.exists("select * from account"));
@@ -211,7 +211,7 @@ public class SQLExecutorTest extends AbstractTest {
     //
     //        long[] ids = { 1, 2, 3, 4, 5, 6, id };
     //
-    //        DataSet result = sqlExecutor.query(p.sql, StringUtil.join(ids, ", "));
+    //        Dataset result = sqlExecutor.query(p.sql, StringUtil.join(ids, ", "));
     //        result.println();
     //        result = sqlExecutor.query(p.sql, id);
     //        result.println();
@@ -254,7 +254,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "1", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //
     //        String sql = "select first_name from account where id = ?";
@@ -328,7 +328,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //
     //        sqlExecutor.execute(MySqlDef.deleteAccountById, id);
@@ -343,7 +343,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //        assertEquals(1, result.size());
     //
@@ -374,7 +374,7 @@ public class SQLExecutorTest extends AbstractTest {
     //
     //        sqlExecutor.insert(insertAccount_1, "fn", "ln", uuid, now, now);
     //
-    //        DataSet result = sqlExecutor.query(sql_1, uuid);
+    //        Dataset result = sqlExecutor.query(sql_1, uuid);
     //        N.println(result);
     //
     //        sqlExecutor.insert(insertAccount_2, "fn", "ln", uuid, now, now);
@@ -441,7 +441,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result1 = sqlExecutor.queryAll(N.asList(MySqlDef.selectAccountById, MySqlDef.selectAccountById), null, id);
+    //        Dataset result1 = sqlExecutor.queryAll(N.asList(MySqlDef.selectAccountById, MySqlDef.selectAccountById), null, id);
     //        N.println(result1);
     //        assertEquals(2, result1.size());
     //
@@ -451,7 +451,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        assertEquals(2, result1.size());
     //
     //        jdbcSettings = JdbcSettings.create().setQueryWithDataSources(N.asList("codes", "codes"));
-    //        DataSet result2 = sqlExecutor.queryAll(MySqlDef.selectAccountById, jdbcSettings, id);
+    //        Dataset result2 = sqlExecutor.queryAll(MySqlDef.selectAccountById, jdbcSettings, id);
     //        N.println(result2);
     //        assertEquals(2, result2.size());
     //
@@ -608,7 +608,7 @@ public class SQLExecutorTest extends AbstractTest {
     //
     //        sqlExecutor.insert(insertAccount_1, "fn", "ln", "#{gui}", now, now);
     //
-    //        DataSet result = sqlExecutor.query("select * from account WHERE gui = '#{gui}'");
+    //        Dataset result = sqlExecutor.query("select * from account WHERE gui = '#{gui}'");
     //        N.println(result);
     //        assertEquals("#{gui}", result.get("gui"));
     //
@@ -634,7 +634,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(ExtendDirtySqlMapper.SELECT_ACCOUNT_BY_ID, id);
+    //        Dataset result = sqlExecutor.query(ExtendDirtySqlMapper.SELECT_ACCOUNT_BY_ID, id);
     //        N.println(result);
     //
     //        sqlExecutor.execute(MySqlDef.deleteAccountById, id);
@@ -695,7 +695,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Object[] parameters = N.asArray("fn", "ln", UUID.randomUUID().toString(), now, now);
     //        List<Long> ids = sqlExecutor.batchInsert(MySqlDef.insertAccount, N.asList((Object) parameters));
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, ids.get(0));
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, ids.get(0));
     //        N.println(result);
     //
     //        sqlExecutor.update(MySqlDef.deleteAccountById, ids.get(0));
@@ -715,7 +715,7 @@ public class SQLExecutorTest extends AbstractTest {
     //
     //        List<Long> ids = sqlExecutor.batchInsert(MySqlDef.insertAccount, N.asList(array));
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, ids.get(0));
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, ids.get(0));
     //        N.println(result);
     //
     //        sqlExecutor.update(MySqlDef.deleteAllAccount);
@@ -750,7 +750,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //
     //        sqlExecutor.update(MySqlDef.deleteAccountById, id);
@@ -786,7 +786,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(conn, MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //
     //        sqlExecutor.update(MySqlDef.deleteAccountById, id);
@@ -925,7 +925,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //
     //        sqlExecutor.update(MySqlDef.updateAccountFirstNameById, "updatedFirstName1", id);
@@ -993,7 +993,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //
     //        N.println(result.getRow(Account.class, 0));
@@ -1061,7 +1061,7 @@ public class SQLExecutorTest extends AbstractTest {
     //
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
-    //        DataSet result = sqlExecutor.query(SELECT_ACCOUNT_BY_ID, account);
+    //        Dataset result = sqlExecutor.query(SELECT_ACCOUNT_BY_ID, account);
     //        N.println(result);
     //        assertEquals(0, result.size());
     //    }
@@ -1079,7 +1079,7 @@ public class SQLExecutorTest extends AbstractTest {
     //    //
     //    //        sqlExecutor.insert(INSERT_ACCOUNT, JdbcSettings.create().setGeneratedIdPropName("wrong"), account);
     //    //
-    //    //        DataSet result = sqlExecutor.query(SELECT_ACCOUNT_BY_ID, account);
+    //    //        Dataset result = sqlExecutor.query(SELECT_ACCOUNT_BY_ID, account);
     //    //        N.println(result);
     //    //        assertEquals(0, result.size());
     //    //    }
@@ -1113,7 +1113,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        //
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
-    //        DataSet result = sqlExecutor.query(SELECT_ACCOUNT_BY_ID, accountProps);
+    //        Dataset result = sqlExecutor.query(SELECT_ACCOUNT_BY_ID, accountProps);
     //        N.println(result);
     //        assertEquals(0, result.size());
     //    }
@@ -1137,7 +1137,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, N.asList(accounts));
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.length, ids.size());
     //        assertEquals(accounts.length, result.size());
     //
@@ -1178,7 +1178,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, accounts);
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.size(), ids.size());
     //        assertEquals(accounts.size(), result.size());
     //
@@ -1221,7 +1221,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, accounts);
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.size(), ids.size());
     //        assertEquals(accounts.size(), result.size());
     //
@@ -1261,7 +1261,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, accounts);
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.size(), ids.size());
     //        assertEquals(accounts.size(), result.size());
     //
@@ -1300,7 +1300,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //
     //        b = sqlExecutor.queryForBoolean(MySqlDef.selectAccountById, id).orElse(false);
@@ -1368,14 +1368,14 @@ public class SQLExecutorTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, N.asList(accounts));
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.length, ids.size());
     //        assertEquals(accounts.length, result.size());
     //
     //        // result.println();
     //
     //        // result.sortBy("gui");
-    //        Method method = ClassUtil.getDeclaredMethod(DataSet.class, "sortBy", String.class);
+    //        Method method = ClassUtil.getDeclaredMethod(Dataset.class, "sortBy", String.class);
     //        MultiLoopsStatistics perf = Profiler.run(result, method, "gui", 1, 1, 1);
     //        perf.printResult();
     //
@@ -1426,14 +1426,14 @@ public class SQLExecutorTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, N.asList(accounts));
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.length, ids.size());
     //        assertEquals(accounts.length, result.size());
     //
     //        // result.println();
     //
     //        // result.sortBy("gui");
-    //        Method method = ClassUtil.getDeclaredMethod(DataSet.class, "sortBy", Collection.class);
+    //        Method method = ClassUtil.getDeclaredMethod(Dataset.class, "sortBy", Collection.class);
     //        MultiLoopsStatistics perf = Profiler.run(result, method, N.asList(N.asList("gui", "first_name")), 1, 1, 1);
     //        perf.printResult();
     //
@@ -1484,14 +1484,14 @@ public class SQLExecutorTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, N.asList(accounts));
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.length, ids.size());
     //        assertEquals(accounts.length, result.size());
     //
     //        result.println();
     //        // result.groupBy("gui").println();
     //
-    //        Method method = ClassUtil.getDeclaredMethod(DataSet.class, "groupBy", String.class);
+    //        Method method = ClassUtil.getDeclaredMethod(Dataset.class, "groupBy", String.class);
     //        Profiler.run(result, method, "gui", 1, 1, 1).printResult();
     //
     //        Profiler.run(result, method, "gui", 1, 100, 1).printResult();
@@ -1523,13 +1523,13 @@ public class SQLExecutorTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, N.asList(accounts));
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.length, ids.size());
     //        assertEquals(accounts.length, result.size());
     //
     //        result.println();
     //
-    //        DataSet newResultSet = result.groupBy(N.asList("first_name", "last_name"));
+    //        Dataset newResultSet = result.groupBy(N.asList("first_name", "last_name"));
     //        newResultSet.println();
     //        assertEquals(2, newResultSet.columnNameList().size());
     //
@@ -1553,7 +1553,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        assertEquals(2, newResultSet.columnNameList().size());
     //        assertEquals(accounts.length, newResultSet.absolute(0).getInt(1));
     //
-    //        Method method = ClassUtil.getDeclaredMethod(DataSet.class, "groupBy", Collection.class);
+    //        Method method = ClassUtil.getDeclaredMethod(Dataset.class, "groupBy", Collection.class);
     //        Profiler.run(result, method, N.asList(N.asList("first_name", "last_name")), 1, 1, 1).printResult();
     //
     //        Profiler.run(result, method, N.asList(N.asList("first_name", "last_name")), 1, 100, 1).printResult();
@@ -1585,7 +1585,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, N.asList(accounts));
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.length, ids.size());
     //        assertEquals(accounts.length, result.size());
     //
@@ -1608,7 +1608,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
     //        String sql = "select * from account WHERE account.id in(?, ?)";
-    //        DataSet result = sqlExecutor.query(sql, id, id + 1);
+    //        Dataset result = sqlExecutor.query(sql, id, id + 1);
     //        N.println(result);
     //
     //        sqlExecutor.update(MySqlDef.deleteAllAccount);
@@ -1667,7 +1667,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        SQLTransaction tran = sqlExecutor.beginTransaction(IsolationLevel.READ_COMMITTED);
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //        assertEquals(1, result.size());
     //
@@ -1696,7 +1696,7 @@ public class SQLExecutorTest extends AbstractTest {
     //    public void testTransaction_12() {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = 0;
-    //        DataSet result = null;
+    //        Dataset result = null;
     //
     //        SQLTransaction tran = sqlExecutor.beginTransaction(IsolationLevel.READ_COMMITTED);
     //        try {
@@ -1744,7 +1744,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        SQLTransaction tran = sqlExecutor.beginTransaction(IsolationLevel.READ_COMMITTED);
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //        assertEquals(1, result.size());
     //
@@ -1777,7 +1777,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        try {
     //            long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //            DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //            Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //            N.println(result);
     //            assertEquals(1, result.size());
     //
@@ -1821,7 +1821,7 @@ public class SQLExecutorTest extends AbstractTest {
     //            Timestamp now = new Timestamp(System.currentTimeMillis());
     //            long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //            DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //            Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //            N.println(result);
     //            assertEquals(1, result.size());
     //
@@ -1842,7 +1842,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //        assertEquals(1, result.size());
     //
@@ -1860,7 +1860,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //        assertEquals(1, result.size());
     //
@@ -1884,7 +1884,7 @@ public class SQLExecutorTest extends AbstractTest {
     //            Timestamp now = new Timestamp(System.currentTimeMillis());
     //            id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //            DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //            Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //            N.println(result);
     //            assertEquals(1, result.size());
     //
@@ -1905,7 +1905,7 @@ public class SQLExecutorTest extends AbstractTest {
     //            Timestamp now = new Timestamp(System.currentTimeMillis());
     //            long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //            DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //            Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //            N.println(result);
     //            assertEquals(1, result.size());
     //        } finally {
@@ -1919,7 +1919,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //        assertEquals(1, result.size());
     //
@@ -1937,7 +1937,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //        assertEquals(1, result.size());
     //
@@ -1955,7 +1955,7 @@ public class SQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //        assertEquals(1, result.size());
     //

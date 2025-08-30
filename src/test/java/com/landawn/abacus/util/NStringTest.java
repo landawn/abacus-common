@@ -3647,7 +3647,7 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_NotNullOrEmpty() {
         {
-            final DataSet parameter = null;
+            final Dataset parameter = null;
             assertFalse(N.notEmpty(parameter));
         }
 

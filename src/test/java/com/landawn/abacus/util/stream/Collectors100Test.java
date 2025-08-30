@@ -50,7 +50,7 @@ import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.ByteSummaryStatistics;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharSummaryStatistics;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.FloatList;
 import com.landawn.abacus.util.FloatSummaryStatistics;
@@ -1549,17 +1549,17 @@ public class Collectors100Test extends TestBase {
     }
 
     @Test
-    public void testMoreCollectorsToDataSet() {
-        DataSet result = personList.stream().collect(MoreCollectors.toDataSet());
+    public void testMoreCollectorsToDataset() {
+        Dataset result = personList.stream().collect(MoreCollectors.toDataset());
 
         assertNotNull(result);
         assertEquals(personList.size(), result.size());
     }
 
     @Test
-    public void testMoreCollectorsToDataSetWithColumnNames() {
+    public void testMoreCollectorsToDatasetWithColumnNames() {
         List<String> columnNames = Arrays.asList("name", "age", "department");
-        DataSet result = personList.stream().collect(MoreCollectors.toDataSet(columnNames));
+        Dataset result = personList.stream().collect(MoreCollectors.toDataset(columnNames));
 
         assertNotNull(result);
         assertEquals(personList.size(), result.size());
@@ -1593,7 +1593,7 @@ public class Collectors100Test extends TestBase {
     }
 
     @Test
-    public void testLargeDataSet() {
+    public void testLargeDataset() {
         // Test with larger data set to ensure performance
         List<Integer> largeList = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {

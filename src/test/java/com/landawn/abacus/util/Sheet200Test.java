@@ -1685,8 +1685,8 @@ public class Sheet200Test extends TestBase {
     @DisplayName("Conversion Methods")
     public class ConversionMethods {
         @Test
-        public void testToDataSetH() {
-            DataSet ds = sheet.toDataSetH();
+        public void testToDatasetH() {
+            Dataset ds = sheet.toDatasetH();
             assertEquals(N.asList("C1", "C2", "C3"), ds.columnNameList());
             assertEquals(3, ds.size()); // Number of rows in original sheet
             assertEquals("V11", ds.absolute(0).get("C1")); // Row 0 (R1), Col "C1"
@@ -1695,19 +1695,19 @@ public class Sheet200Test extends TestBase {
         }
 
         @Test
-        public void testToDataSetH_uninitialized() {
+        public void testToDatasetH_uninitialized() {
             Sheet<String, String, String> uninit = new Sheet<>(rowKeys, colKeys);
-            DataSet ds = uninit.toDataSetH();
+            Dataset ds = uninit.toDatasetH();
             assertEquals(N.asList("C1", "C2", "C3"), ds.columnNameList());
             assertEquals(3, ds.size());
             assertNull(ds.absolute(0).get("C1"));
         }
 
         @Test
-        public void testToDataSetV() {
-            DataSet ds = sheet.toDataSetV();
+        public void testToDatasetV() {
+            Dataset ds = sheet.toDatasetV();
             assertEquals(N.asList("R1", "R2", "R3"), ds.columnNameList());
-            assertEquals(3, ds.size()); // Number of columns in original sheet (now rows in DataSet)
+            assertEquals(3, ds.size()); // Number of columns in original sheet (now rows in Dataset)
             assertEquals("V11", ds.absolute(0).get("R1")); // Original Col 0 (C1), Original Row "R1"
             assertEquals(true, ds.absolute(2).get("R2")); // Original Col 2 (C3), Original Row "R2"
             assertNull(ds.absolute(0).get("R3")); // Original Col 0 (C1), Original Row "R3"

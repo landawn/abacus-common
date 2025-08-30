@@ -34,18 +34,18 @@ public class CSVUtilTest extends AbstractTest {
         File file = new File("./src/test/resources/test_001.csv");
 
         IOUtil.write(csv, file);
-        DataSet dataSet = CSVUtil.loadCSV(file, ClassA.class);
-        dataSet.println();
+        Dataset dataset = CSVUtil.loadCSV(file, ClassA.class);
+        dataset.println();
 
         N.println(Strings.repeat("=", 80));
 
-        dataSet = CSVUtil.loadCSV(file, N.asList("name", "date"), ClassA.class);
-        dataSet.println();
+        dataset = CSVUtil.loadCSV(file, N.asList("name", "date"), ClassA.class);
+        dataset.println();
 
         N.println(Strings.repeat("=", 80));
 
-        dataSet = CSVUtil.loadCSV(file, N.asList("id", "date"), ClassA.class);
-        dataSet.println();
+        dataset = CSVUtil.loadCSV(file, N.asList("id", "date"), ClassA.class);
+        dataset.println();
 
         N.println(Strings.repeat("=", 80));
 
@@ -54,8 +54,8 @@ public class CSVUtilTest extends AbstractTest {
 
         N.println(Strings.repeat("=", 80));
 
-        dataSet = CSVUtil.stream(file, N.asList("name"), ClassA.class).toDataSet();
-        dataSet.println();
+        dataset = CSVUtil.stream(file, N.asList("name"), ClassA.class).toDataset();
+        dataset.println();
 
         IOUtil.deleteIfExists(file);
     }
@@ -67,12 +67,12 @@ public class CSVUtilTest extends AbstractTest {
         //    List<ClassA> list = new ArrayList<>();
         //    list.add(ClassA.builder().id(123).name("nameA").date(DateUtil.currentDate()).build());
         //    list.add(ClassA.builder().id(123).name("nameA").date(DateUtil.currentDate()).build());
-        //    Stream.of(list).toDataSet().toCsv(file);
+        //    Stream.of(list).toDataset().toCsv(file);
 
         // CSVUtil.setCSVLineParser(CSVUtil.CSV_LINE_PARSER_IN_JSON);
-        DataSet dataSet = CSVUtil.loadCSV(file, ClassA.class);
+        Dataset dataset = CSVUtil.loadCSV(file, ClassA.class);
 
-        dataSet.println();
+        dataset.println();
 
         CSVUtil.stream(file, ClassA.class).forEach(Fn.println());
 
@@ -110,7 +110,7 @@ public class CSVUtilTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, accounts);
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.size(), ids.size());
     //        assertEquals(accounts.size(), result.size());
     //
@@ -127,7 +127,7 @@ public class CSVUtilTest extends AbstractTest {
     //        sql = "INSERT INTO account (first_name, last_name, gui, last_update_time, create_time) VALUES ( ?,  ?,  ?, ?, ?)";
     //        JdbcUtils.importCSV(file, conn, sql, Type.ofAll(String.class, String.class, String.class, Timestamp.class, Timestamp.class));
     //
-    //        DataSet result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        result2.println();
     //        assertEquals(result.size(), result2.size());
     //
@@ -222,7 +222,7 @@ public class CSVUtilTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, accounts);
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.size(), ids.size());
     //        assertEquals(accounts.size(), result.size());
     //
@@ -241,7 +241,7 @@ public class CSVUtilTest extends AbstractTest {
     //        sql = "INSERT INTO account (first_name, last_name, gui, last_update_time, create_time) VALUES ( ?,  ?,  ?, ?, ?)";
     //        JdbcUtils.importCSV(file, conn, sql, types);
     //
-    //        DataSet result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        result2.println();
     //        assertEquals(result.size(), result2.size());
     //
@@ -297,7 +297,7 @@ public class CSVUtilTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, accounts);
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.size(), ids.size());
     //        assertEquals(accounts.size(), result.size());
     //
@@ -316,7 +316,7 @@ public class CSVUtilTest extends AbstractTest {
     //        sql = "INSERT INTO account (first_name, last_name, gui, last_update_time, create_time) VALUES ( ?,  ?,  ?, ?, ?)";
     //        JdbcUtils.importCSV(file, conn, sql, types);
     //
-    //        DataSet result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        result2.println();
     //        assertEquals(result.size(), result2.size());
     //

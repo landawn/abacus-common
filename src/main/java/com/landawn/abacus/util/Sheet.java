@@ -60,7 +60,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <C> the type of the column keys
  * @param <V> the type of the values stored in the cells
  *
- * @see com.landawn.abacus.util.DataSet
+ * @see com.landawn.abacus.util.Dataset
  */
 public final class Sheet<R, C, V> implements Cloneable {
 
@@ -3692,55 +3692,55 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Converts the Sheet into a DataSet in a horizontal manner.
-     * Each row in the Sheet becomes a row in the DataSet, with the column keys serving as the column names in the DataSet.
-     * The DataSet is ordered by rows, meaning the first row in the Sheet becomes the first row in the DataSet, and so on.
+     * Converts the Sheet into a Dataset in a horizontal manner.
+     * Each row in the Sheet becomes a row in the Dataset, with the column keys serving as the column names in the Dataset.
+     * The Dataset is ordered by rows, meaning the first row in the Sheet becomes the first row in the Dataset, and so on.
      *
-     * @return A DataSet object representing the data in the Sheet, ordered by rows.
+     * @return A Dataset object representing the data in the Sheet, ordered by rows.
      */
-    public DataSet toDataSetH() {
+    public Dataset toDatasetH() {
         final int rowLength = rowLength();
         final int columnLength = columnLength();
-        final List<String> dataSetColumnNameList = new ArrayList<>(columnLength);
+        final List<String> datasetColumnNameList = new ArrayList<>(columnLength);
 
         for (final C columnKey : _columnKeySet) {
-            dataSetColumnNameList.add(N.toString(columnKey));
+            datasetColumnNameList.add(N.toString(columnKey));
         }
 
-        final List<List<Object>> dataSetColumnList = new ArrayList<>(columnLength);
+        final List<List<Object>> datasetColumnList = new ArrayList<>(columnLength);
 
         if (_isInitialized) {
             for (final List<V> column : _columnList) {
-                dataSetColumnList.add(new ArrayList<>(column));
+                datasetColumnList.add(new ArrayList<>(column));
             }
         } else {
             for (int i = 0; i < columnLength; i++) {
                 final List<Object> column = new ArrayList<>(rowLength);
                 N.fill(column, 0, rowLength, null);
-                dataSetColumnList.add(column);
+                datasetColumnList.add(column);
             }
         }
 
-        return new RowDataSet(dataSetColumnNameList, dataSetColumnList);
+        return new RowDataset(datasetColumnNameList, datasetColumnList);
     }
 
     /**
-     * Converts the Sheet into a DataSet in a vertical manner.
-     * Each column in the Sheet becomes a row in the DataSet, with the row keys serving as the column names in the DataSet.
-     * The DataSet is ordered by columns, meaning the first column in the Sheet becomes the first row in the DataSet, and so on.
+     * Converts the Sheet into a Dataset in a vertical manner.
+     * Each column in the Sheet becomes a row in the Dataset, with the row keys serving as the column names in the Dataset.
+     * The Dataset is ordered by columns, meaning the first column in the Sheet becomes the first row in the Dataset, and so on.
      *
-     * @return A DataSet object representing the data in the Sheet, ordered by columns.
+     * @return A Dataset object representing the data in the Sheet, ordered by columns.
      */
-    public DataSet toDataSetV() {
+    public Dataset toDatasetV() {
         final int rowLength = rowLength();
         final int columnLength = columnLength();
-        final List<String> dataSetColumnNameList = new ArrayList<>(rowLength);
+        final List<String> datasetColumnNameList = new ArrayList<>(rowLength);
 
         for (final R rowKey : _rowKeySet) {
-            dataSetColumnNameList.add(N.toString(rowKey));
+            datasetColumnNameList.add(N.toString(rowKey));
         }
 
-        final List<List<Object>> dataSetColumnList = new ArrayList<>(rowLength);
+        final List<List<Object>> datasetColumnList = new ArrayList<>(rowLength);
 
         if (_isInitialized) {
             for (int i = 0; i < rowLength; i++) {
@@ -3750,17 +3750,17 @@ public final class Sheet<R, C, V> implements Cloneable {
                     column.add(_columnList.get(j).get(i));
                 }
 
-                dataSetColumnList.add(column);
+                datasetColumnList.add(column);
             }
         } else {
             for (int i = 0; i < rowLength; i++) {
                 final List<Object> column = new ArrayList<>(columnLength);
                 N.fill(column, 0, columnLength, null);
-                dataSetColumnList.add(column);
+                datasetColumnList.add(column);
             }
         }
 
-        return new RowDataSet(dataSetColumnNameList, dataSetColumnList);
+        return new RowDataset(datasetColumnNameList, datasetColumnList);
     }
 
     /**
@@ -3935,9 +3935,20 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Prints the content of the Sheet to the standard output.
      * The content is printed in a tabular format with row keys and column keys.
-     * This method is useful for quickly inspecting the content of the Sheet during debugging.
+     * <pre>{@code
+     * sheet.println(); // Print entire sheet to console
+     * 
+     *      +----+----+----+
+     *      | C1 | C2 | C3 |
+     * +----+----+----+----+
+     * | R1 | 1  | 2  | 3  |
+     * | R2 | 4  | 5  | 6  |
+     * | R3 | 7  | 8  | 9  |
+     * +----+----+----+----+
+     * }</pre>
      *
      * @throws UncheckedIOException if an I/O error occurs while printing the content of the Sheet.
+     * #@see #println(String)
      */
     public void println() throws UncheckedIOException {
         println(_rowKeySet, _columnKeySet);
@@ -3945,41 +3956,86 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Prints the content of the Sheet to the standard output.
+     * The content is printed in a tabular format with row keys and column keys.
+     *
+     * <pre>{@code
+     * sheet.println("## "); // Print entire sheet to console with prefix "## "
+     * 
+     * ##      +----+----+----+
+     * ##      | C1 | C2 | C3 |
+     * ## +----+----+----+----+
+     * ## | R1 | 1  | 2  | 3  |
+     * ## | R2 | 4  | 5  | 6  |
+     * ## | R3 | 7  | 8  | 9  |
+     * ## +----+----+----+----+
+     * }</pre>
+     *
+     * @param prefix The prefix string to be printed before each line of the Sheet content.
+     * @throws UncheckedIOException if an I/O error occurs while printing the content of the Sheet.
+     * @see #println()
+     */
+    public void println(String prefix) throws UncheckedIOException {
+        println(_rowKeySet, _columnKeySet, prefix, System.out); // NOSONAR);
+    }
+
+    /**
+     * Prints the content of the Sheet to the standard output.
      * The content is printed in a tabular format with specified row keys and column keys.
-     * This method is useful for quickly inspecting the content of the Sheet during debugging.
      *
      * @param rowKeySet The collection of row keys to be included in the output.
      * @param columnKeySet The collection of column keys to be included in the output.
      * @throws UncheckedIOException if an I/O error occurs while printing the content of the Sheet.
+     * @see #println()
+     * @see #println(String)
      */
     public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws UncheckedIOException {
-        println(rowKeySet, columnKeySet, IOUtil.newOutputStreamWriter(System.out)); // NOSONAR
+        println(rowKeySet, columnKeySet, System.out); // NOSONAR
     }
 
     /**
      * Prints the content of the Sheet to the provided Writer output.
      * The content is printed in a tabular format with row keys and column keys.
-     * This method is useful for quickly inspecting the content of the Sheet during debugging.
      *
-     * @param output The Writer to which the content of the Sheet will be printed.
+     * @param output The appendable to which the content of the Sheet will be printed.
      * @throws UncheckedIOException if an I/O error occurs while printing the content of the Sheet.
+     * @see #println()
+     * @see #println(String)
      */
-    public void println(final Writer output) throws UncheckedIOException {
+    public void println(final Appendable output) throws UncheckedIOException {
         println(_rowKeySet, _columnKeySet, output);
     }
 
     /**
      * Prints the content of the Sheet to the provided Writer output.
      * The content is printed in a tabular format with specified row keys and column keys.
-     * This method is useful for quickly inspecting the content of the Sheet during debugging.
      *
      * @param rowKeySet The collection of row keys to be included in the output.
      * @param columnKeySet The collection of column keys to be included in the output.
-     * @param output The Writer to which the content of the Sheet will be printed.
+     * @param output The appendable to which the content of the Sheet will be printed.
      * @throws IllegalArgumentException if the provided row keys or column keys are not included in this sheet.
      * @throws UncheckedIOException if an I/O error occurs while printing the content of the Sheet.
+     * @see #println()
+     * @see #println(String)
      */
-    public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Writer output)
+    public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Appendable output)
+            throws IllegalArgumentException, UncheckedIOException {
+        println(rowKeySet, columnKeySet, null, output);
+    }
+
+    /**
+     * Prints the content of the Sheet to the provided Writer output.
+     * The content is printed in a tabular format with specified row keys and column keys.
+     *
+     * @param rowKeySet The collection of row keys to be included in the output.
+     * @param columnKeySet The collection of column keys to be included in the output.
+     * @param prefix The prefix string to be printed before each line of the Sheet content.
+     * @param output The appendable to which the content of the Sheet will be printed.
+     * @throws IllegalArgumentException if the provided row keys or column keys are not included in this sheet.
+     * @throws UncheckedIOException if an I/O error occurs while printing the content of the Sheet.
+     * @see #println()
+     * @see #println(String)
+     */
+    public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final String prefix, final Appendable output)
             throws IllegalArgumentException, UncheckedIOException {
         if (N.notEmpty(rowKeySet) && !_rowKeySet.containsAll(rowKeySet)) {
             throw new IllegalArgumentException("Row keys: " + N.difference(rowKeySet, _rowKeySet) + " are not included in this sheet row keys: " + _rowKeySet);
@@ -3992,16 +4048,22 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         N.checkArgNotNull(output, cs.output);
 
-        final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
-        final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
+        final boolean isBufferedWriter = output instanceof Writer writer && IOUtil.isBufferedWriter(writer);
+        final Writer bw = isBufferedWriter ? (Writer) output : (output instanceof Writer writer ? Objectory.createBufferedWriter((writer)) : null);
+        final Appendable appendable = bw != null ? bw : output;
+        final String lineSeparator = Strings.isEmpty(prefix) ? IOUtil.LINE_SEPARATOR : (IOUtil.LINE_SEPARATOR + prefix);
 
         try {
+            if (N.notEmpty(prefix)) {
+                appendable.append(prefix);
+            }
+
             if (N.isEmpty(rowKeySet) && N.isEmpty(columnKeySet)) {
-                bw.write("+---+");
-                bw.write(IOUtil.LINE_SEPARATOR);
-                bw.write("|   |");
-                bw.write(IOUtil.LINE_SEPARATOR);
-                bw.write("+---+");
+                appendable.append("+---+");
+                appendable.append(lineSeparator);
+                appendable.append("|   |");
+                appendable.append(lineSeparator);
+                appendable.append("+---+");
             } else {
                 final int rowLen = rowKeySet.size();
                 final int columnLen = N.max(2, columnKeySet.size() + 1);
@@ -4072,93 +4134,93 @@ public final class Sheet<R, C, V> implements Cloneable {
                 final char hchDelta = 2;
                 for (int i = 0; i < columnLen; i++) {
                     if (i == 0) {
-                        bw.write(Strings.repeat(' ', maxColumnLens[i] + hchDelta + 1));
+                        appendable.append(Strings.repeat(' ', maxColumnLens[i] + hchDelta + 1));
                     } else {
-                        bw.write('+');
+                        appendable.append('+');
 
-                        bw.write(Strings.repeat(hch, maxColumnLens[i] + hchDelta));
+                        appendable.append(Strings.repeat(hch, maxColumnLens[i] + hchDelta));
                     }
                 }
 
-                bw.write('+');
-
-                bw.write(IOUtil.LINE_SEPARATOR);
+                appendable.append('+');
+                appendable.append(lineSeparator);
 
                 for (int i = 0; i < columnLen; i++) {
                     if (i == 0) {
-                        bw.write("  ");
+                        appendable.append("  ");
                     } else {
-                        bw.write(" | ");
+                        appendable.append(" | ");
                     }
 
-                    bw.write(Strings.padEnd(columnNameList.get(i), maxColumnLens[i]));
+                    appendable.append(Strings.padEnd(columnNameList.get(i), maxColumnLens[i]));
                 }
 
-                bw.write(" |");
-
-                bw.write(IOUtil.LINE_SEPARATOR);
+                appendable.append(" |");
+                appendable.append(lineSeparator);
 
                 for (int i = 0; i < columnLen; i++) {
-                    bw.write('+');
+                    appendable.append('+');
 
                     if (i == 1 && N.isEmpty(columnKeySet)) {
-                        bw.write(Strings.repeat(' ', maxColumnLens[i] + hchDelta));
+                        appendable.append(Strings.repeat(' ', maxColumnLens[i] + hchDelta));
                     } else {
-                        bw.write(Strings.repeat(hch, maxColumnLens[i] + hchDelta));
+                        appendable.append(Strings.repeat(hch, maxColumnLens[i] + hchDelta));
                     }
                 }
 
-                bw.write('+');
+                appendable.append('+');
 
                 for (int j = 0; j < rowLen; j++) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    appendable.append(lineSeparator);
 
                     for (int i = 0; i < columnLen; i++) {
                         if (i == 0) {
-                            bw.write("| ");
+                            appendable.append("| ");
                         } else {
-                            bw.write(" | ");
+                            appendable.append(" | ");
                         }
 
-                        bw.write(Strings.padEnd(strColumnList.get(i).get(j), maxColumnLens[i]));
+                        appendable.append(Strings.padEnd(strColumnList.get(i).get(j), maxColumnLens[i]));
                     }
 
-                    bw.write(" |");
+                    appendable.append(" |");
                 }
 
                 if (rowLen == 0) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    appendable.append(lineSeparator);
 
                     for (int i = 0; i < columnLen; i++) {
                         if (i == 0) {
-                            bw.write("| ");
-                            bw.write(Strings.padEnd("", maxColumnLens[i]));
+                            appendable.append("| ");
+                            appendable.append(Strings.padEnd("", maxColumnLens[i]));
                         } else {
-                            bw.write(Strings.padEnd("", maxColumnLens[i] + 3));
+                            appendable.append(Strings.padEnd("", maxColumnLens[i] + 3));
                         }
                     }
 
-                    bw.write(" |");
+                    appendable.append(" |");
                 }
 
-                bw.write(IOUtil.LINE_SEPARATOR);
+                appendable.append(lineSeparator);
 
                 for (int i = 0; i < columnLen; i++) {
-                    bw.write('+');
+                    appendable.append('+');
 
-                    bw.write(Strings.repeat(hch, maxColumnLens[i] + hchDelta));
+                    appendable.append(Strings.repeat(hch, maxColumnLens[i] + hchDelta));
                 }
 
-                bw.write('+');
+                appendable.append('+');
             }
 
-            bw.write(IOUtil.LINE_SEPARATOR);
+            appendable.append(IOUtil.LINE_SEPARATOR);
 
-            bw.flush();
+            if (bw != null) {
+                bw.flush();
+            }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            if (!isBufferedWriter) {
+            if (bw != null && !isBufferedWriter) {
                 Objectory.recycle((BufferedWriter) bw);
             }
         }
@@ -4397,7 +4459,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     private void checkFrozen() throws IllegalStateException {
         if (_isFrozen) {
-            throw new IllegalStateException("This DataSet is frozen, can't modify it.");
+            throw new IllegalStateException("This Dataset is frozen, can't modify it.");
         }
     }
 

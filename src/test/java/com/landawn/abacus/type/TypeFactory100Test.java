@@ -227,7 +227,7 @@ public class TypeFactory100Test extends TestBase {
             }
 
             @Override
-            public boolean isDataSet() {
+            public boolean isDataset() {
                 return false;
             }
 
@@ -581,7 +581,7 @@ public class TypeFactory100Test extends TestBase {
             }
 
             @Override
-            public boolean isDataSet() {
+            public boolean isDataset() {
                 return false;
             }
 

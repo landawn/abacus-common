@@ -303,9 +303,9 @@ sealed class CommonUtil permits N {
     public static final Object[] EMPTY_OBJECT_ARRAY = {};
 
     //    /**
-    //     * An empty immutable/unmodifiable {@code DataSet}.
+    //     * An empty immutable/unmodifiable {@code Dataset}.
     //     */
-    //    public static final DataSet EMPTY_DATA_SET = RowDataSet.EMPTY_DATA_SET;
+    //    public static final Dataset EMPTY_DATA_SET = RowDataset.EMPTY_DATA_SET;
 
     /**
      * An empty immutable/unmodifiable {@code Class} array.
@@ -972,15 +972,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified DataSet argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified Dataset argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
      * @param <T> the type of the argument
-     * @param arg the DataSet argument to check
+     * @param arg the Dataset argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty DataSet argument
+     * @return the {@code non-null} and non-empty Dataset argument
      * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
-    public static <T extends DataSet> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
+    public static <T extends Dataset> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNullOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -5700,12 +5700,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code DataSet} is {@code null} or empty.
+     * Checks if the specified {@code Dataset} is {@code null} or empty.
      *
-     * @param ds the DataSet to check
-     * @return {@code true} if the DataSet is {@code null} or empty, otherwise {@code false}
+     * @param ds the Dataset to check
+     * @return {@code true} if the Dataset is {@code null} or empty, otherwise {@code false}
      */
-    public static boolean isEmpty(final DataSet ds) {
+    public static boolean isEmpty(final Dataset ds) {
         return (ds == null) || (ds.isEmpty());
     }
 
@@ -5975,13 +5975,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code DataSet} is not {@code null} and not empty.
+     * Checks if the specified {@code Dataset} is not {@code null} and not empty.
      *
-     * @param dataSet the DataSet to check
-     * @return {@code true} if the DataSet is not {@code null} and not empty, otherwise {@code false}
+     * @param dataset the Dataset to check
+     * @return {@code true} if the Dataset is not {@code null} and not empty, otherwise {@code false}
      */
-    public static boolean notEmpty(final DataSet dataSet) {
-        return (dataSet != null) && (!dataSet.isEmpty());
+    public static boolean notEmpty(final Dataset dataset) {
+        return (dataset != null) && (!dataset.isEmpty());
     }
 
     /**
@@ -9651,60 +9651,60 @@ sealed class CommonUtil permits N {
     static final int MAX_HASH_LENGTH = (int) (MAX_ARRAY_SIZE / 1.25) - 1;
 
     /**
-     * Creates a new empty DataSet.
+     * Creates a new empty Dataset.
      *
-     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * This method creates a DataSet with no rows or columns.
+     * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
+     * This method creates a Dataset with no rows or columns.
      *
-     * @return A new empty DataSet.
-     * @see DataSet#empty()
+     * @return A new empty Dataset.
+     * @see Dataset#empty()
      */
-    public static DataSet newEmptyDataSet() {
-        return new RowDataSet(new ArrayList<>(), new ArrayList<>());
+    public static Dataset newEmptyDataset() {
+        return new RowDataset(new ArrayList<>(), new ArrayList<>());
     }
 
     /**
-     * Creates a new empty DataSet with the specified properties.
+     * Creates a new empty Dataset with the specified properties.
      *
-     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * This method creates a DataSet with no rows or columns, but with the specified properties.
+     * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
+     * This method creates a Dataset with no rows or columns, but with the specified properties.
      *
-     * @param properties A map representing the properties of the DataSet. The keys are property names and the values are the corresponding property values.
-     * @return A new empty DataSet with the specified properties.
-     * @see DataSet#empty()
+     * @param properties A map representing the properties of the Dataset. The keys are property names and the values are the corresponding property values.
+     * @return A new empty Dataset with the specified properties.
+     * @see Dataset#empty()
      */
-    static DataSet newEmptyDataSet(final Map<String, Object> properties) {
-        return new RowDataSet(new ArrayList<>(), new ArrayList<>(), properties);
+    static Dataset newEmptyDataset(final Map<String, Object> properties) {
+        return new RowDataset(new ArrayList<>(), new ArrayList<>(), properties);
     }
 
     /**
-     * Creates a new empty DataSet with the specified column names.
+     * Creates a new empty Dataset with the specified column names.
      *
-     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * This method creates a DataSet with no rows, but with the specified column names.
+     * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
+     * This method creates a Dataset with no rows, but with the specified column names.
      *
-     * @param columnNames A collection of strings representing the names of the columns in the DataSet.
-     * @return A new empty DataSet with the specified column names.
-     * @see DataSet#empty()
+     * @param columnNames A collection of strings representing the names of the columns in the Dataset.
+     * @return A new empty Dataset with the specified column names.
+     * @see Dataset#empty()
      */
-    public static DataSet newEmptyDataSet(final Collection<String> columnNames) {
-        return newEmptyDataSet(columnNames, null);
+    public static Dataset newEmptyDataset(final Collection<String> columnNames) {
+        return newEmptyDataset(columnNames, null);
     }
 
     /**
-     * Creates a new empty DataSet with the specified column names and properties.
+     * Creates a new empty Dataset with the specified column names and properties.
      *
-     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * This method creates a DataSet with no rows, but with the specified column names and properties.
+     * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
+     * This method creates a Dataset with no rows, but with the specified column names and properties.
      *
-     * @param columnNames A collection of strings representing the names of the columns in the DataSet.
-     * @param properties A map representing the properties of the DataSet. The keys are property names and the values are the corresponding property values.
-     * @return A new empty DataSet with the specified column names and properties.
-     * @see DataSet#empty()
+     * @param columnNames A collection of strings representing the names of the columns in the Dataset.
+     * @param properties A map representing the properties of the Dataset. The keys are property names and the values are the corresponding property values.
+     * @return A new empty Dataset with the specified column names and properties.
+     * @see Dataset#empty()
      */
-    public static DataSet newEmptyDataSet(final Collection<String> columnNames, final Map<String, Object> properties) {
+    public static Dataset newEmptyDataset(final Collection<String> columnNames, final Map<String, Object> properties) {
         if (isEmpty(columnNames)) {
-            return newEmptyDataSet(properties);
+            return newEmptyDataset(properties);
         }
 
         final List<List<Object>> columnList = new ArrayList<>(columnNames.size());
@@ -9713,46 +9713,46 @@ sealed class CommonUtil permits N {
             columnList.add(new ArrayList<>());
         }
 
-        return new RowDataSet(new ArrayList<>(columnNames), columnList, properties);
+        return new RowDataset(new ArrayList<>(columnNames), columnList, properties);
     }
 
     /**
-     * Creates a new DataSet with the specified rows.
+     * Creates a new Dataset with the specified rows.
      *
-     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * The <i>rows</i> parameter is a collection where each item represents a row in the DataSet.
+     * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
+     * The <i>rows</i> parameter is a collection where each item represents a row in the Dataset.
      *
-     * @param rows A collection of objects representing the data in the DataSet. Each object is a row which can be: Map/Bean.
-     * @return A new DataSet with the specified rows.
+     * @param rows A collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean.
+     * @return A new Dataset with the specified rows.
      * @throws IllegalArgumentException If the provided rows do not align properly.
-     * @see DataSet#rows(Collection, Object[][])
-     * @see DataSet#rows(Collection, Collection)
-     * @see DataSet#columns(Collection, Object[][])
-     * @see DataSet#columns(Collection, Collection)
+     * @see Dataset#rows(Collection, Object[][])
+     * @see Dataset#rows(Collection, Collection)
+     * @see Dataset#columns(Collection, Object[][])
+     * @see Dataset#columns(Collection, Collection)
      */
-    public static DataSet newDataSet(final Collection<?> rows) throws IllegalArgumentException {
-        return newDataSet(rows, null);
+    public static Dataset newDataset(final Collection<?> rows) throws IllegalArgumentException {
+        return newDataset(rows, null);
     }
 
     /**
-     * Creates a new DataSet with the specified rows and properties.
+     * Creates a new Dataset with the specified rows and properties.
      *
-     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * The <i>rows</i> parameter is a collection where each item represents a row in the DataSet.
-     * The <i>properties</i> parameter is a map where each entry represents a property of the DataSet.
+     * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
+     * The <i>rows</i> parameter is a collection where each item represents a row in the Dataset.
+     * The <i>properties</i> parameter is a map where each entry represents a property of the Dataset.
      *
-     * @param rows A collection of objects representing the data in the DataSet. Each object is a row which can be: Map/Bean.
-     * @param properties A map of properties for the DataSet. Each key is a property name and each value is the property value.
-     * @return A new DataSet with the specified rows and properties.
+     * @param rows A collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean.
+     * @param properties A map of properties for the Dataset. Each key is a property name and each value is the property value.
+     * @return A new Dataset with the specified rows and properties.
      * @throws IllegalArgumentException If the provided rows and properties do not align properly.
-     * @see DataSet#rows(Collection, Object[][])
-     * @see DataSet#rows(Collection, Collection)
-     * @see DataSet#columns(Collection, Object[][])
-     * @see DataSet#columns(Collection, Collection)
+     * @see Dataset#rows(Collection, Object[][])
+     * @see Dataset#rows(Collection, Collection)
+     * @see Dataset#columns(Collection, Object[][])
+     * @see Dataset#columns(Collection, Collection)
      */
-    public static DataSet newDataSet(final Collection<?> rows, final Map<String, Object> properties) throws IllegalArgumentException {
+    public static Dataset newDataset(final Collection<?> rows, final Map<String, Object> properties) throws IllegalArgumentException {
         if (isEmpty(rows)) {
-            return newEmptyDataSet(properties);
+            return newEmptyDataset(properties);
         }
 
         final Object firstElement = firstOrNullIfEmpty(rows);
@@ -9765,66 +9765,66 @@ sealed class CommonUtil permits N {
 
         if (Beans.isBeanClass(cls)) {
             final List<String> columnNames = Beans.getPropNameList(cls);
-            return newDataSet(columnNames, rows, properties);
+            return newDataset(columnNames, rows, properties);
         } else if (firstElement instanceof Map) {
             final List<String> columnNames = newArrayList(((Map<String, Object>) firstElement).keySet());
-            return newDataSet(columnNames, rows, properties);
+            return newDataset(columnNames, rows, properties);
         } else {
             throw new IllegalArgumentException("Unsupported row type: " + cls.getName());
         }
     }
 
     /**
-     * Creates a new DataSet with the specified column names and rows.
+     * Creates a new Dataset with the specified column names and rows.
      *
-     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
-     * The <i>rows</i> parameter is a collection where each item represents a row in the DataSet.
+     * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
+     * Each item in the <i>columnNames</i> collection represents a column in the Dataset.
+     * The <i>rows</i> parameter is a collection where each item represents a row in the Dataset.
      * The order of elements in each row should correspond to the order of column names.
      *
-     * @param columnNames A collection of strings representing the names of the columns in the DataSet.
-     * @param rows A collection of objects representing the data in the DataSet. Each object is a row which can be: Map/Bean/Array/List.
-     * @return A new DataSet with the specified column names and rows.
+     * @param columnNames A collection of strings representing the names of the columns in the Dataset.
+     * @param rows A collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean/Array/List.
+     * @return A new Dataset with the specified column names and rows.
      * @throws IllegalArgumentException If the length of <i>columnNames</i> is zero or not align with row list.
-     * @see DataSet#rows(Collection, Object[][])
-     * @see DataSet#rows(Collection, Collection)
-     * @see DataSet#columns(Collection, Object[][])
-     * @see DataSet#columns(Collection, Collection)
+     * @see Dataset#rows(Collection, Object[][])
+     * @see Dataset#rows(Collection, Collection)
+     * @see Dataset#columns(Collection, Object[][])
+     * @see Dataset#columns(Collection, Collection)
      */
-    public static DataSet newDataSet(final Collection<String> columnNames, final Collection<?> rows) throws IllegalArgumentException {
-        return newDataSet(columnNames, rows, null);
+    public static Dataset newDataset(final Collection<String> columnNames, final Collection<?> rows) throws IllegalArgumentException {
+        return newDataset(columnNames, rows, null);
     }
 
     /**
-     * Creates a new DataSet with the specified column names, rows, and properties.
+     * Creates a new Dataset with the specified column names, rows, and properties.
      *
-     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
-     * The <i>rows</i> parameter is a collection where each item represents a row in the DataSet.
+     * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
+     * Each item in the <i>columnNames</i> collection represents a column in the Dataset.
+     * The <i>rows</i> parameter is a collection where each item represents a row in the Dataset.
      * The order of elements in each row should correspond to the order of column names.
-     * The <i>properties</i> parameter is a map where each entry represents a property of the DataSet.
+     * The <i>properties</i> parameter is a map where each entry represents a property of the Dataset.
      *
-     * @param columnNames A collection of strings representing the names of the columns in the DataSet.
-     * @param rows A collection of objects representing the data in the DataSet. Each object is a row which can be: Map/Bean/Array/List.
-     * @param properties A map of properties for the DataSet. Each key is a property name and each value is the property value.
-     * @return A new DataSet with the specified column names, rows, and properties.
+     * @param columnNames A collection of strings representing the names of the columns in the Dataset.
+     * @param rows A collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean/Array/List.
+     * @param properties A map of properties for the Dataset. Each key is a property name and each value is the property value.
+     * @return A new Dataset with the specified column names, rows, and properties.
      * @throws IllegalArgumentException If the length of <i>columnNames</i> is zero or not align with row list.
-     * @see DataSet#rows(Collection, Object[][])
-     * @see DataSet#rows(Collection, Collection)
-     * @see DataSet#columns(Collection, Object[][])
-     * @see DataSet#columns(Collection, Collection)
+     * @see Dataset#rows(Collection, Object[][])
+     * @see Dataset#rows(Collection, Collection)
+     * @see Dataset#columns(Collection, Object[][])
+     * @see Dataset#columns(Collection, Collection)
      */
-    public static DataSet newDataSet(final Collection<String> columnNames, final Collection<?> rows, final Map<String, Object> properties)
+    public static Dataset newDataset(final Collection<String> columnNames, final Collection<?> rows, final Map<String, Object> properties)
             throws IllegalArgumentException {
         checkArgNotEmpty(columnNames, cs.columnNames);
 
         //    if (isEmpty(columnNames) && isEmpty(rows)) {
         //        // throw new IllegalArgumentException("Column name list and row list cannot be both null or empty");
-        //        return newEmptyDataSet(properties);
+        //        return newEmptyDataset(properties);
         //    }
 
         if (isEmpty(rows)) {
-            return newEmptyDataSet(columnNames, properties);
+            return newEmptyDataset(columnNames, properties);
         }
 
         // int startRowIndex = 0;
@@ -9833,7 +9833,7 @@ sealed class CommonUtil permits N {
         //        final Object firstElement = firstOrNullIfEmpty(rows);
         //
         //        if (firstElement == null) {
-        //            // return newEmptyDataSet(properties);
+        //            // return newEmptyDataset(properties);
         //            throw new IllegalArgumentException("Column name list cannot be obtained from row list because its first element is null");
         //        }
         //
@@ -9947,36 +9947,36 @@ sealed class CommonUtil permits N {
             }
         }
 
-        return new RowDataSet(columnNameList, columnList, properties);
+        return new RowDataset(columnNameList, columnList, properties);
     }
 
     /**
-     * Creates a new DataSet with the specified column names and rows.
+     * Creates a new Dataset with the specified column names and rows.
      *
-     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
-     * The <i>rowList</i> parameter is a 2D array where each subarray represents a row in the DataSet.
+     * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
+     * Each item in the <i>columnNames</i> collection represents a column in the Dataset.
+     * The <i>rowList</i> parameter is a 2D array where each subarray represents a row in the Dataset.
      * The order of elements in each row should correspond to the order of column names.
      *
-     * @param columnNames A collection of strings representing the names of the columns in the DataSet.
-     * @param rows A 2D array of objects representing the data in the DataSet. Each subarray is a row.
-     * @return A new DataSet with the specified column names and rows.
+     * @param columnNames A collection of strings representing the names of the columns in the Dataset.
+     * @param rows A 2D array of objects representing the data in the Dataset. Each subarray is a row.
+     * @return A new Dataset with the specified column names and rows.
      * @throws IllegalArgumentException If the length of <i>columnNames</i> is zero or not equal to the length of the subarrays in <i>rowList</i>.
-     * @see DataSet#rows(Collection, Object[][])
-     * @see DataSet#rows(Collection, Collection)
-     * @see DataSet#columns(Collection, Object[][])
-     * @see DataSet#columns(Collection, Collection)
+     * @see Dataset#rows(Collection, Object[][])
+     * @see Dataset#rows(Collection, Collection)
+     * @see Dataset#columns(Collection, Object[][])
+     * @see Dataset#columns(Collection, Collection)
      */
-    public static DataSet newDataSet(final Collection<String> columnNames, final Object[][] rows) throws IllegalArgumentException {
+    public static Dataset newDataset(final Collection<String> columnNames, final Object[][] rows) throws IllegalArgumentException {
         checkArgNotEmpty(columnNames, cs.columnNames);
 
         //    if (isEmpty(columnNames) && isEmpty(rowList)) {
         //        // throw new IllegalArgumentException("Column name list and row list cannot be both null or empty");
-        //        return newEmptyDataSet();
+        //        return newEmptyDataset();
         //    }
 
         if (isEmpty(rows)) {
-            return newEmptyDataSet(columnNames);
+            return newEmptyDataset(columnNames);
         }
 
         final int coumnCount = size(columnNames);
@@ -9988,19 +9988,19 @@ sealed class CommonUtil permits N {
             }
         }
 
-        return newDataSet(columnNames, asList(rows));
+        return newDataset(columnNames, asList(rows));
     }
 
     /**
-     * Creates a new DataSet from the provided Map.
-     * The DataSet will have two columns: one for keys and one for values from the Map.
+     * Creates a new Dataset from the provided Map.
+     * The Dataset will have two columns: one for keys and one for values from the Map.
      *
      * @param keyColumnName The name of the column for the keys from the Map.
      * @param valueColumnName The name of the column for the values from the Map.
-     * @param m The Map to convert into a DataSet.
-     * @return A new DataSet with two columns: one for keys and one for values from the Map.
+     * @param m The Map to convert into a Dataset.
+     * @return A new Dataset with two columns: one for keys and one for values from the Map.
      */
-    public static DataSet newDataSet(final String keyColumnName, final String valueColumnName, final Map<?, ?> m) {
+    public static Dataset newDataset(final String keyColumnName, final String valueColumnName, final Map<?, ?> m) {
         final List<Object> keyColumn = new ArrayList<>(m.size());
         final List<Object> valueColumn = new ArrayList<>(m.size());
 
@@ -10012,25 +10012,25 @@ sealed class CommonUtil permits N {
         final List<String> columnNameList = asList(keyColumnName, valueColumnName);
         final List<List<Object>> columnList = asList(keyColumn, valueColumn);
 
-        return newDataSet(columnNameList, columnList);
+        return newDataset(columnNameList, columnList);
     }
 
     /**
-     * Creates a new DataSet from the provided Map.
+     * Creates a new Dataset from the provided Map.
      *
-     * The DataSet will have as many columns as there are entries in the Map.
+     * The Dataset will have as many columns as there are entries in the Map.
      * The column names are the keys from the Map.
      * Each column corresponds to a Collection in the Map.
      * If a column has fewer rows than the maximum number of rows, the missing rows will be filled with {@code null} values.
      * Eventually all the columns will have the same number of rows.
      *
      * @param <C> The type of the Collection values in the Map.
-     * @param map The Map to convert into a DataSet. The keys of the map represent the column names and the values (which are collections) represent the data in the columns.
-     * @return A new DataSet with columns created from the Map.
+     * @param map The Map to convert into a Dataset. The keys of the map represent the column names and the values (which are collections) represent the data in the columns.
+     * @return A new Dataset with columns created from the Map.
      */
-    public static <C extends Collection<?>> DataSet newDataSet(final Map<String, C> map) {
+    public static <C extends Collection<?>> Dataset newDataset(final Map<String, C> map) {
         if (isEmpty(map)) {
-            return newEmptyDataSet();
+            return newEmptyDataset();
         }
 
         int maxColumnLen = 0;
@@ -10057,38 +10057,38 @@ sealed class CommonUtil permits N {
             columnList.add(column);
         }
 
-        return new RowDataSet(columnNameList, columnList);
+        return new RowDataset(columnNameList, columnList);
     }
 
     /**
-     * Creates a new DataSet with single column from the provided Collection.
-     * The DataSet will have one column with the provided column name.
+     * Creates a new Dataset with single column from the provided Collection.
+     * The Dataset will have one column with the provided column name.
      * The data in the column is the data from the provided Collection.
      *
-     * @param columnName The name of the column in the DataSet.
-     * @param column The Collection to convert into a DataSet column.
-     * @return A new DataSet with one column containing the data from the provided Collection.
+     * @param columnName The name of the column in the Dataset.
+     * @param column The Collection to convert into a Dataset column.
+     * @return A new Dataset with one column containing the data from the provided Collection.
      * @throws IllegalArgumentException if the provided columnName is empty.
      */
-    public static DataSet newDataSet(final String columnName, final Collection<?> column) throws IllegalArgumentException {
+    public static Dataset newDataset(final String columnName, final Collection<?> column) throws IllegalArgumentException {
         checkArgNotEmpty(columnName, cs.columnName);
 
         final List<String> columnNameList = asList(columnName);
         final List<List<Object>> columnList = new ArrayList<>(1);
         columnList.add(newArrayList(column));
 
-        return new RowDataSet(columnNameList, columnList);
+        return new RowDataset(columnNameList, columnList);
     }
 
     /**
-     * Merges two given DataSets into a single DataSet.
+     * Merges two given Datasets into a single Dataset.
      *
-     * @param a The first DataSet to be merged.
-     * @param b The second DataSet to be merged.
-     * @return A new DataSet which is the result of merging DataSet <i>a</i> and DataSet <i>b</i>.
+     * @param a The first Dataset to be merged.
+     * @param b The second Dataset to be merged.
+     * @return A new Dataset which is the result of merging Dataset <i>a</i> and Dataset <i>b</i>.
      * @throws IllegalArgumentException if either <i>a</i> or <i>b</i> is {@code null}.
      */
-    public static DataSet merge(@NotNull final DataSet a, @NotNull final DataSet b) throws IllegalArgumentException {
+    public static Dataset merge(@NotNull final Dataset a, @NotNull final Dataset b) throws IllegalArgumentException {
         checkArgNotNull(a);
         checkArgNotNull(b);
 
@@ -10096,15 +10096,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Merges three given DataSets into a single DataSet.
+     * Merges three given Datasets into a single Dataset.
      *
-     * @param a The first DataSet to be merged.
-     * @param b The second DataSet to be merged.
-     * @param c The third DataSet to be merged.
-     * @return A new DataSet which is the result of merging DataSet <i>a</i>, <i>b</i> and <i>c</i>.
+     * @param a The first Dataset to be merged.
+     * @param b The second Dataset to be merged.
+     * @param c The third Dataset to be merged.
+     * @return A new Dataset which is the result of merging Dataset <i>a</i>, <i>b</i> and <i>c</i>.
      * @throws IllegalArgumentException if either <i>a</i>, <i>b</i> or <i>c</i> is {@code null}.
      */
-    public static DataSet merge(@NotNull final DataSet a, @NotNull final DataSet b, @NotNull final DataSet c) throws IllegalArgumentException {
+    public static Dataset merge(@NotNull final Dataset a, @NotNull final Dataset b, @NotNull final Dataset c) throws IllegalArgumentException {
         checkArgNotNull(a);
         checkArgNotNull(b);
         checkArgNotNull(c);
@@ -10113,51 +10113,51 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Merges a collection of DataSets into a single DataSet.
+     * Merges a collection of Datasets into a single Dataset.
      *
-     * @param dss The collection of DataSets to be merged.
-     * @return A new DataSet which is the result of merging all the DataSets in the provided collection.
+     * @param dss The collection of Datasets to be merged.
+     * @return A new Dataset which is the result of merging all the Datasets in the provided collection.
      * @throws IllegalArgumentException if the provided collection is {@code null} or empty.
      */
-    public static DataSet merge(final Collection<? extends DataSet> dss) throws IllegalArgumentException {
+    public static Dataset merge(final Collection<? extends Dataset> dss) throws IllegalArgumentException {
         return merge(dss, false);
     }
 
     /**
-     * Merges a collection of DataSets into a single DataSet.
+     * Merges a collection of Datasets into a single Dataset.
      *
-     * @param dss The collection of DataSets to be merged.
-     * @param requiresSameColumns A boolean flag that indicates whether the DataSets in the collection should have the same columns.
-     *                            If set to {@code true}, all DataSets in the collection must have the same columns.
-     *                            If set to {@code false}, the DataSets in the collection can have different columns.
-     * @return A new DataSet which is the result of merging all the DataSets in the provided collection.
-     * @throws IllegalArgumentException if the provided collection is {@code null} or empty or {@code requiresSameColumns} is {@code true} and the {@code DataSets} in {@code dss} don't have the same the same column names.
+     * @param dss The collection of Datasets to be merged.
+     * @param requiresSameColumns A boolean flag that indicates whether the Datasets in the collection should have the same columns.
+     *                            If set to {@code true}, all Datasets in the collection must have the same columns.
+     *                            If set to {@code false}, the Datasets in the collection can have different columns.
+     * @return A new Dataset which is the result of merging all the Datasets in the provided collection.
+     * @throws IllegalArgumentException if the provided collection is {@code null} or empty or {@code requiresSameColumns} is {@code true} and the {@code Datasets} in {@code dss} don't have the same the same column names.
      */
-    public static DataSet merge(final Collection<? extends DataSet> dss, final boolean requiresSameColumns) throws IllegalArgumentException {
-        checkArgNotEmpty(dss, cs.dataSets);
+    public static Dataset merge(final Collection<? extends Dataset> dss, final boolean requiresSameColumns) throws IllegalArgumentException {
+        checkArgNotEmpty(dss, cs.datasets);
 
         if (requiresSameColumns && size(dss) > 1) {
-            final Iterator<? extends DataSet> iter = dss.iterator();
-            final DataSet firstDataSet = iter.next();
+            final Iterator<? extends Dataset> iter = dss.iterator();
+            final Dataset firstDataset = iter.next();
 
             if (iter.hasNext()) {
-                checkIfColumnNamesAreSame(firstDataSet, iter.next());
+                checkIfColumnNamesAreSame(firstDataset, iter.next());
             }
         }
 
         if (isEmpty(dss)) {
-            return newEmptyDataSet();
+            return newEmptyDataset();
         } else if (dss.size() == 1) {
             return dss.iterator().next().copy();
         } else if (dss.size() == 2) {
-            final Iterator<? extends DataSet> iter = dss.iterator();
+            final Iterator<? extends Dataset> iter = dss.iterator();
             return iter.next().merge(iter.next());
         } else {
             final Set<String> columnNameSet = newLinkedHashSet();
             final Map<String, Object> props = new HashMap<>();
             int totalSize = 0;
 
-            for (final DataSet ds : dss) {
+            for (final Dataset ds : dss) {
                 columnNameSet.addAll(ds.columnNameList());
                 totalSize += ds.size();
 
@@ -10174,7 +10174,7 @@ sealed class CommonUtil permits N {
                 newColumnList.add(new ArrayList<>(totalSize));
             }
 
-            for (final DataSet ds : dss) {
+            for (final Dataset ds : dss) {
                 if (ds.isEmpty()) {
                     continue;
                 }
@@ -10192,14 +10192,14 @@ sealed class CommonUtil permits N {
                 }
             }
 
-            return new RowDataSet(newColumnNameList, newColumnList, props);
+            return new RowDataset(newColumnNameList, newColumnList, props);
         }
     }
 
-    private static void checkIfColumnNamesAreSame(final DataSet a, final DataSet b) {
+    private static void checkIfColumnNamesAreSame(final Dataset a, final Dataset b) {
         if (!(a.columnNameList().size() == b.columnNameList().size() && a.columnNameList().containsAll(b.columnNameList())
                 && b.columnNameList().containsAll(a.columnNameList()))) {
-            throw new IllegalArgumentException("These two DataSets don't have same column names: " + a.columnNameList() + ", " + b.columnNameList());
+            throw new IllegalArgumentException("These two Datasets don't have same column names: " + a.columnNameList() + ", " + b.columnNameList());
         }
     }
 
@@ -14355,14 +14355,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable/unmodifiable empty {@code DataSet}.
+     * Returns an immutable/unmodifiable empty {@code Dataset}.
      *
-     * @return an immutable/unmodifiable empty DataSet
-     * @see DataSet#empty()
+     * @return an immutable/unmodifiable empty Dataset
+     * @see Dataset#empty()
      */
     @Immutable
-    public static DataSet emptyDataSet() {
-        return DataSet.empty();
+    public static Dataset emptyDataset() {
+        return Dataset.empty();
     }
 
     // ================================ compare... ====================================================================

@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Builder.BooleanListBuilder;
 import com.landawn.abacus.util.Builder.ByteListBuilder;
 import com.landawn.abacus.util.Builder.CharListBuilder;
 import com.landawn.abacus.util.Builder.CollectionBuilder;
-import com.landawn.abacus.util.Builder.DataSetBuilder;
+import com.landawn.abacus.util.Builder.DatasetBuilder;
 import com.landawn.abacus.util.Builder.DoubleListBuilder;
 import com.landawn.abacus.util.Builder.FloatListBuilder;
 import com.landawn.abacus.util.Builder.IntListBuilder;
@@ -146,11 +146,11 @@ public class Builder200Test extends TestBase {
     }
 
     @Test
-    public void testOfDataSet() {
-        DataSet dataSet = new RowDataSet(Arrays.asList("col1"), N.asList(new ArrayList<>()));
-        DataSetBuilder builder = Builder.of(dataSet);
+    public void testOfDataset() {
+        Dataset dataset = new RowDataset(Arrays.asList("col1"), N.asList(new ArrayList<>()));
+        DatasetBuilder builder = Builder.of(dataset);
         assertNotNull(builder);
-        assertSame(dataSet, builder.val());
+        assertSame(dataset, builder.val());
     }
 
     @Test
@@ -351,27 +351,27 @@ public class Builder200Test extends TestBase {
     }
 
     @Test
-    public void testDataSetBuilder() {
+    public void testDatasetBuilder() {
         List<String> columnNames = new ArrayList<>(Arrays.asList("ID", "Name"));
         List<List<?>> columns = new ArrayList<>();
         columns.add(new ArrayList<>(Arrays.asList(1, 2)));
         columns.add(new ArrayList<>(Arrays.asList("John", "Jane")));
-        DataSet dataSet = DataSet.columns(columnNames, columns);
-        DataSetBuilder builder = Builder.of(dataSet);
+        Dataset dataset = Dataset.columns(columnNames, columns);
+        DatasetBuilder builder = Builder.of(dataset);
 
         builder.renameColumn("Name", "FullName");
-        assertTrue(dataSet.columnNameList().contains("FullName"));
-        assertFalse(dataSet.columnNameList().contains("Name"));
+        assertTrue(dataset.columnNameList().contains("FullName"));
+        assertFalse(dataset.columnNameList().contains("Name"));
 
         builder.addColumn("Age", Arrays.asList(30, 25));
-        assertEquals(3, dataSet.columnCount());
-        assertEquals(Arrays.asList(30, 25), dataSet.getColumn("Age"));
+        assertEquals(3, dataset.columnCount());
+        assertEquals(Arrays.asList(30, 25), dataset.getColumn("Age"));
 
         builder.removeColumn("ID");
-        assertEquals(2, dataSet.columnCount());
+        assertEquals(2, dataset.columnCount());
 
         builder.updateColumn("Age", (Integer age) -> age + 1);
-        assertEquals(Arrays.asList(31, 26), dataSet.getColumn("Age"));
+        assertEquals(Arrays.asList(31, 26), dataset.getColumn("Age"));
     }
 
     @Test

@@ -32,7 +32,7 @@ public class JSONSerializationConfig100Test extends TestBase {
         Assertions.assertTrue(config.bracketRootValue());
         Assertions.assertFalse(config.wrapRootValue());
         Assertions.assertFalse(config.writeNullToEmpty());
-        Assertions.assertFalse(config.writeDataSetByRow());
+        Assertions.assertFalse(config.writeDatasetByRow());
     }
 
     @Test
@@ -48,15 +48,15 @@ public class JSONSerializationConfig100Test extends TestBase {
     }
 
     @Test
-    public void testWriteDataSetByRow() {
-        Assertions.assertFalse(config.writeDataSetByRow());
+    public void testWriteDatasetByRow() {
+        Assertions.assertFalse(config.writeDatasetByRow());
 
-        JSONSerializationConfig result = config.writeDataSetByRow(true);
+        JSONSerializationConfig result = config.writeDatasetByRow(true);
         Assertions.assertSame(config, result);
-        Assertions.assertTrue(config.writeDataSetByRow());
+        Assertions.assertTrue(config.writeDatasetByRow());
 
-        config.writeDataSetByRow(false);
-        Assertions.assertFalse(config.writeDataSetByRow());
+        config.writeDatasetByRow(false);
+        Assertions.assertFalse(config.writeDatasetByRow());
     }
 
     @Test

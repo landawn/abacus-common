@@ -1,1 +1,1 @@
-1, Add `DataSet.pivot`.
+1, Add `Dataset.pivot`.

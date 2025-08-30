@@ -49,13 +49,13 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  * The CSVUtil class provides comprehensive utilities for handling CSV (Comma-Separated Values) data.
- * It offers methods for loading CSV data from various sources (File, Reader) into DataSet objects,
+ * It offers methods for loading CSV data from various sources (File, Reader) into Dataset objects,
  * as well as streaming CSV data into objects of specified types. The class supports custom parsing,
  * column selection, row filtering, and type conversion.
  * 
  * <p>Key features include:</p>
  * <ul>
- *   <li>Loading CSV data into DataSet objects with column selection and filtering</li>
+ *   <li>Loading CSV data into Dataset objects with column selection and filtering</li>
  *   <li>Streaming CSV data with lazy evaluation for memory efficiency</li>
  *   <li>Custom CSV parsers for headers and lines</li>
  *   <li>Type conversion support through bean classes and type mappings</li>
@@ -64,15 +64,15 @@ import com.landawn.abacus.util.stream.Stream;
  * 
  * <p>Example usage:</p>
  * <pre>{@code
- * // Load CSV file into DataSet
- * DataSet ds = CSVUtil.loadCSV(new File("data.csv"));
+ * // Load CSV file into Dataset
+ * Dataset ds = CSVUtil.loadCSV(new File("data.csv"));
  * 
  * // Stream CSV data as beans
  * Stream<Person> persons = CSVUtil.stream(new File("persons.csv"), Person.class);
  * }</pre>
  * 
  * @see com.landawn.abacus.util.CSVParser
- * @see com.landawn.abacus.util.DataSet
+ * @see com.landawn.abacus.util.Dataset
  */
 public final class CSVUtil {
     private CSVUtil() {
@@ -207,7 +207,7 @@ public final class CSVUtil {
      * <pre>{@code
      * // Use JSON format for headers in current thread
      * CSVUtil.setHeaderParser(CSVUtil.CSV_HEADER_PARSER_IN_JSON);
-     * DataSet ds = CSVUtil.loadCSV(file); // Will use JSON parser
+     * Dataset ds = CSVUtil.loadCSV(file); // Will use JSON parser
      * CSVUtil.resetHeaderParser(); // Reset to default
      * }</pre>
      *
@@ -230,7 +230,7 @@ public final class CSVUtil {
      * <pre>{@code
      * // Use splitter for simple CSV files in current thread
      * CSVUtil.setLineParser(CSVUtil.CSV_LINE_PARSER_BY_SPLITTER);
-     * DataSet ds = CSVUtil.loadCSV(file); // Will use splitter parser
+     * Dataset ds = CSVUtil.loadCSV(file); // Will use splitter parser
      * CSVUtil.resetLineParser(); // Reset to default
      * }</pre>
      *
@@ -382,42 +382,42 @@ public final class CSVUtil {
     }
 
     /**
-     * Loads CSV data from a file into a DataSet with all columns included.
+     * Loads CSV data from a file into a Dataset with all columns included.
      * The first line of the file is treated as column headers.
      * 
      * <p>Example usage:</p>
      * <pre>{@code
-     * DataSet ds = CSVUtil.loadCSV(new File("data.csv"));
+     * Dataset ds = CSVUtil.loadCSV(new File("data.csv"));
      * System.out.println("Columns: " + ds.columnNameList());
      * System.out.println("Row count: " + ds.size());
      * }</pre>
      *
      * @param source the File containing CSV data
-     * @return a DataSet containing the loaded CSV data
+     * @return a Dataset containing the loaded CSV data
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      */
-    public static DataSet loadCSV(final File source) throws UncheckedIOException {
+    public static Dataset loadCSV(final File source) throws UncheckedIOException {
         return loadCSV(source, (Collection<String>) null);
     }
 
     /**
      * Loads CSV data from a file with specified column selection.
-     * Only the specified columns will be included in the resulting DataSet.
+     * Only the specified columns will be included in the resulting Dataset.
      * 
      * <p>Example usage:</p>
      * <pre>{@code
      * List<String> columns = Arrays.asList("Name", "Age", "City");
-     * DataSet ds = CSVUtil.loadCSV(new File("data.csv"), columns);
+     * Dataset ds = CSVUtil.loadCSV(new File("data.csv"), columns);
      * // Only Name, Age, and City columns will be loaded
      * }</pre>
      *
      * @param source the File containing CSV data
      * @param selectColumnNames a Collection of column names to include, null to include all columns
-     * @return a DataSet containing the loaded CSV data with selected columns
+     * @return a Dataset containing the loaded CSV data with selected columns
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @see #loadCSV(File, Collection, long, long, Predicate)
      */
-    public static DataSet loadCSV(final File source, final Collection<String> selectColumnNames) throws UncheckedIOException {
+    public static Dataset loadCSV(final File source, final Collection<String> selectColumnNames) throws UncheckedIOException {
         return loadCSV(source, selectColumnNames, 0, Long.MAX_VALUE);
     }
 
@@ -428,19 +428,19 @@ public final class CSVUtil {
      * <p>Example usage:</p>
      * <pre>{@code
      * // Skip first 100 rows, load next 50 rows
-     * DataSet ds = CSVUtil.loadCSV(new File("large.csv"), null, 100, 50);
+     * Dataset ds = CSVUtil.loadCSV(new File("large.csv"), null, 100, 50);
      * }</pre>
      *
      * @param source the File containing CSV data
      * @param selectColumnNames columns to include, null for all columns
      * @param offset number of data rows to skip (after header)
      * @param count maximum number of rows to read
-     * @return a DataSet containing the loaded CSV data
+     * @return a Dataset containing the loaded CSV data
      * @throws IllegalArgumentException if offset or count are negative
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(File, Collection, long, long, Predicate)
      */
-    public static DataSet loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count)
+    public static Dataset loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count)
             throws UncheckedIOException {
         return loadCSV(source, selectColumnNames, offset, count, Fn.alwaysTrue());
     }
@@ -453,7 +453,7 @@ public final class CSVUtil {
      * <pre>{@code
      * // Load only adults (age > 18) from specific columns
      * Predicate<String[]> adultFilter = row -> Integer.parseInt(row[1]) > 18;
-     * DataSet ds = CSVUtil.loadCSV(
+     * Dataset ds = CSVUtil.loadCSV(
      *     new File("people.csv"), 
      *     Arrays.asList("Name", "Age"), 
      *     0, 1000, 
@@ -466,11 +466,11 @@ public final class CSVUtil {
      * @param offset number of data rows to skip (after header)
      * @param count maximum number of rows to read
      * @param rowFilter predicate to filter rows, only matching rows are included
-     * @return a DataSet containing the filtered CSV data
+     * @return a Dataset containing the filtered CSV data
      * @throws IllegalArgumentException if offset or count are negative
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public static DataSet loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
+    public static Dataset loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter) throws UncheckedIOException {
         Reader reader = null;
 
@@ -490,39 +490,39 @@ public final class CSVUtil {
      * <p>Example usage:</p>
      * <pre>{@code
      * try (Reader reader = new FileReader("data.csv")) {
-     *     DataSet ds = CSVUtil.loadCSV(reader);
+     *     Dataset ds = CSVUtil.loadCSV(reader);
      *     ds.println(); // Print the dataset
      * }
      * }</pre>
      *
      * @param source the Reader providing CSV data
-     * @return a DataSet containing the loaded CSV data
+     * @return a Dataset containing the loaded CSV data
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(Reader, Collection, long, long, Predicate)
      */
-    public static DataSet loadCSV(final Reader source) throws UncheckedIOException {
+    public static Dataset loadCSV(final Reader source) throws UncheckedIOException {
         return loadCSV(source, (Collection<String>) null);
     }
 
     /**
      * Loads CSV data from a Reader with specified column selection.
-     * Only the specified columns will be included in the resulting DataSet.
+     * Only the specified columns will be included in the resulting Dataset.
      * 
      * <p>Example usage:</p>
      * <pre>{@code
      * try (Reader reader = new StringReader("Name,Age,City\nJohn,30,NYC\nJane,25,LA")) {
-     *     DataSet ds = CSVUtil.loadCSV(reader, Arrays.asList("Name", "City"));
+     *     Dataset ds = CSVUtil.loadCSV(reader, Arrays.asList("Name", "City"));
      *     // Only Name and City columns will be loaded
      * }
      * }</pre>
      *
      * @param source the Reader providing CSV data
      * @param selectColumnNames columns to include, null for all columns
-     * @return a DataSet containing the selected columns
+     * @return a Dataset containing the selected columns
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(Reader, Collection, long, long, Predicate)
      */
-    public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames) throws UncheckedIOException {
+    public static Dataset loadCSV(final Reader source, final Collection<String> selectColumnNames) throws UncheckedIOException {
         return loadCSV(source, selectColumnNames, 0, Long.MAX_VALUE);
     }
 
@@ -534,7 +534,7 @@ public final class CSVUtil {
      * <pre>{@code
      * try (Reader reader = new FileReader("large.csv")) {
      *     // Skip first 1000 rows, load next 100 rows
-     *     DataSet ds = CSVUtil.loadCSV(reader, null, 1000, 100);
+     *     Dataset ds = CSVUtil.loadCSV(reader, null, 1000, 100);
      * }
      * }</pre>
      *
@@ -542,12 +542,12 @@ public final class CSVUtil {
      * @param selectColumnNames columns to include, null for all columns
      * @param offset number of data rows to skip (after header)
      * @param count maximum number of rows to read
-     * @return a DataSet containing the loaded CSV data
+     * @return a Dataset containing the loaded CSV data
      * @throws IllegalArgumentException if offset or count are negative
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(Reader, Collection, long, long, Predicate)
      */
-    public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count)
+    public static Dataset loadCSV(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count)
             throws UncheckedIOException {
         return loadCSV(source, selectColumnNames, offset, count, Fn.alwaysTrue());
     }
@@ -561,7 +561,7 @@ public final class CSVUtil {
      * try (Reader reader = new FileReader("sales.csv")) {
      *     // Load only high-value sales (amount > 1000)
      *     Predicate<String[]> highValueFilter = row -> Double.parseDouble(row[2]) > 1000;
-     *     DataSet ds = CSVUtil.loadCSV(
+     *     Dataset ds = CSVUtil.loadCSV(
      *         reader,
      *         Arrays.asList("Date", "Product", "Amount"),
      *         0, Long.MAX_VALUE,
@@ -575,12 +575,12 @@ public final class CSVUtil {
      * @param offset number of data rows to skip (after header)
      * @param count maximum number of rows to read
      * @param rowFilter predicate to filter rows, only matching rows are included
-     * @return a DataSet containing the filtered CSV data
+     * @return a Dataset containing the filtered CSV data
      * @throws IllegalArgumentException if offset or count are negative
      * @throws UncheckedIOException if an I/O error occurs
      */
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
-    public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
+    public static Dataset loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count); //NOSONAR
 
@@ -593,7 +593,7 @@ public final class CSVUtil {
             String line = br.readLine();
 
             if (line == null) {
-                return N.newEmptyDataSet();
+                return N.newEmptyDataset();
             }
 
             final String[] titles = headerParser.apply(line);
@@ -655,7 +655,7 @@ public final class CSVUtil {
                 count--;
             }
 
-            return new RowDataSet(columnNameList, columnList);
+            return new RowDataset(columnNameList, columnList);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -678,18 +678,18 @@ public final class CSVUtil {
      *     // getters and setters...
      * }
      * 
-     * DataSet ds = CSVUtil.loadCSV(new File("people.csv"), Person.class);
+     * Dataset ds = CSVUtil.loadCSV(new File("people.csv"), Person.class);
      * // Age will be parsed as int, birthDate as Date
      * }</pre>
      *
      * @param source the File containing CSV data
      * @param beanClassForColumnType the bean class defining column types
-     * @return a DataSet with typed columns
+     * @return a Dataset with typed columns
      * @throws IllegalArgumentException if beanClassForColumnType is null
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(File, Collection, long, long, Class)
      */
-    public static DataSet loadCSV(final File source, final Class<?> beanClassForColumnType) throws UncheckedIOException {
+    public static Dataset loadCSV(final File source, final Class<?> beanClassForColumnType) throws UncheckedIOException {
         return loadCSV(source, null, beanClassForColumnType);
     }
 
@@ -699,7 +699,7 @@ public final class CSVUtil {
      * 
      * <p>Example usage:</p>
      * <pre>{@code
-     * DataSet ds = CSVUtil.loadCSV(
+     * Dataset ds = CSVUtil.loadCSV(
      *     new File("people.csv"), 
      *     Arrays.asList("name", "age"), 
      *     Person.class
@@ -710,12 +710,12 @@ public final class CSVUtil {
      * @param source the File containing CSV data
      * @param selectColumnNames columns to include, null for all columns
      * @param beanClassForColumnType the bean class defining column types
-     * @return a DataSet with typed columns
+     * @return a Dataset with typed columns
      * @throws IllegalArgumentException if beanClassForColumnType is null
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(File, Collection, long, long, Class)
      */
-    public static DataSet loadCSV(final File source, final Collection<String> selectColumnNames, final Class<?> beanClassForColumnType)
+    public static Dataset loadCSV(final File source, final Collection<String> selectColumnNames, final Class<?> beanClassForColumnType)
             throws UncheckedIOException {
         return loadCSV(source, selectColumnNames, 0, Long.MAX_VALUE, beanClassForColumnType);
     }
@@ -727,7 +727,7 @@ public final class CSVUtil {
      * <p>Example usage:</p>
      * <pre>{@code
      * // Load page 2 of data (items 100-199) with type conversion
-     * DataSet ds = CSVUtil.loadCSV(
+     * Dataset ds = CSVUtil.loadCSV(
      *     new File("products.csv"),
      *     Arrays.asList("id", "name", "price"),
      *     100, 100,
@@ -740,12 +740,12 @@ public final class CSVUtil {
      * @param offset number of data rows to skip
      * @param count maximum number of rows to read
      * @param beanClassForColumnType the bean class defining column types
-     * @return a DataSet with typed columns
+     * @return a Dataset with typed columns
      * @throws IllegalArgumentException if offset/count are negative or beanClassForColumnType is null
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(File, Collection, long, long, Class)
      */
-    public static DataSet loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
+    public static Dataset loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Class<?> beanClassForColumnType) throws UncheckedIOException {
         return loadCSV(source, selectColumnNames, offset, count, Fn.alwaysTrue(), beanClassForColumnType);
     }
@@ -758,7 +758,7 @@ public final class CSVUtil {
      * <pre>{@code
      * // Load expensive products (price > 100) with type conversion
      * Predicate<String[]> expensiveFilter = row -> Double.parseDouble(row[2]) > 100;
-     * DataSet ds = CSVUtil.loadCSV(
+     * Dataset ds = CSVUtil.loadCSV(
      *     new File("products.csv"),
      *     Arrays.asList("id", "name", "price"),
      *     0, 1000,
@@ -773,11 +773,11 @@ public final class CSVUtil {
      * @param count maximum number of rows to read
      * @param rowFilter predicate to filter rows
      * @param beanClassForColumnType the bean class defining column types
-     * @return a DataSet with typed and filtered data
+     * @return a Dataset with typed and filtered data
      * @throws IllegalArgumentException if parameters are invalid
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public static DataSet loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
+    public static Dataset loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter, final Class<?> beanClassForColumnType) throws UncheckedIOException {
         Reader reader = null;
 
@@ -797,19 +797,19 @@ public final class CSVUtil {
      * <p>Example usage:</p>
      * <pre>{@code
      * try (Reader reader = new FileReader("data.csv")) {
-     *     DataSet ds = CSVUtil.loadCSV(reader, Person.class);
+     *     Dataset ds = CSVUtil.loadCSV(reader, Person.class);
      *     // Columns will be typed according to Person properties
      * }
      * }</pre>
      *
      * @param source the Reader providing CSV data
      * @param beanClassForColumnType the bean class defining column types
-     * @return a DataSet with typed columns
+     * @return a Dataset with typed columns
      * @throws IllegalArgumentException if beanClassForColumnType is null
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(Reader, Collection, long, long, Predicate, Class)
      */
-    public static DataSet loadCSV(final Reader source, final Class<?> beanClassForColumnType) throws UncheckedIOException {
+    public static Dataset loadCSV(final Reader source, final Class<?> beanClassForColumnType) throws UncheckedIOException {
         return loadCSV(source, null, beanClassForColumnType);
     }
 
@@ -820,7 +820,7 @@ public final class CSVUtil {
      * <p>Example usage:</p>
      * <pre>{@code
      * try (Reader reader = new StringReader(csvData)) {
-     *     DataSet ds = CSVUtil.loadCSV(
+     *     Dataset ds = CSVUtil.loadCSV(
      *         reader,
      *         Arrays.asList("name", "age"),
      *         Person.class
@@ -831,12 +831,12 @@ public final class CSVUtil {
      * @param source the Reader providing CSV data
      * @param selectColumnNames columns to include, null for all columns
      * @param beanClassForColumnType the bean class defining column types
-     * @return a DataSet with typed columns
+     * @return a Dataset with typed columns
      * @throws IllegalArgumentException if beanClassForColumnType is null
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(Reader, Collection, long, long, Predicate, Class)
      */
-    public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, final Class<?> beanClassForColumnType)
+    public static Dataset loadCSV(final Reader source, final Collection<String> selectColumnNames, final Class<?> beanClassForColumnType)
             throws UncheckedIOException {
         return loadCSV(source, selectColumnNames, 0, Long.MAX_VALUE, beanClassForColumnType);
     }
@@ -849,7 +849,7 @@ public final class CSVUtil {
      * <pre>{@code
      * try (Reader reader = new FileReader("large.csv")) {
      *     // Load rows 500-599 with type conversion
-     *     DataSet ds = CSVUtil.loadCSV(reader, null, 500, 100, Product.class);
+     *     Dataset ds = CSVUtil.loadCSV(reader, null, 500, 100, Product.class);
      * }
      * }</pre>
      *
@@ -858,12 +858,12 @@ public final class CSVUtil {
      * @param offset number of data rows to skip
      * @param count maximum number of rows to read
      * @param beanClassForColumnType the bean class defining column types
-     * @return a DataSet with typed columns
+     * @return a Dataset with typed columns
      * @throws IllegalArgumentException if parameters are invalid
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(Reader, Collection, long, long, Predicate, Class)
      */
-    public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count,
+    public static Dataset loadCSV(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Class<?> beanClassForColumnType) throws UncheckedIOException {
         return loadCSV(source, selectColumnNames, offset, count, Fn.alwaysTrue(), beanClassForColumnType);
     }
@@ -877,7 +877,7 @@ public final class CSVUtil {
      * try (Reader reader = new FileReader("employees.csv")) {
      *     // Load senior employees (age > 40) with type conversion
      *     Predicate<String[]> seniorFilter = row -> Integer.parseInt(row[2]) > 40;
-     *     DataSet ds = CSVUtil.loadCSV(
+     *     Dataset ds = CSVUtil.loadCSV(
      *         reader,
      *         Arrays.asList("id", "name", "age", "department"),
      *         0, Long.MAX_VALUE,
@@ -893,12 +893,12 @@ public final class CSVUtil {
      * @param count maximum number of rows to read
      * @param rowFilter predicate to filter rows
      * @param beanClassForColumnType the bean class defining column types
-     * @return a DataSet with typed and filtered data
+     * @return a Dataset with typed and filtered data
      * @throws IllegalArgumentException if parameters are invalid
      * @throws UncheckedIOException if an I/O error occurs
      */
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
-    public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
+    public static Dataset loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter, final Class<?> beanClassForColumnType) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
         N.checkArgNotNull(beanClassForColumnType, cs.beanClassForColumnType);
@@ -913,7 +913,7 @@ public final class CSVUtil {
             String line = br.readLine();
 
             if (line == null) {
-                return N.newEmptyDataSet();
+                return N.newEmptyDataset();
             }
 
             final String[] titles = headerParser.apply(line);
@@ -989,7 +989,7 @@ public final class CSVUtil {
                 count--;
             }
 
-            return new RowDataSet(columnNameList, columnList);
+            return new RowDataset(columnNameList, columnList);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -1011,18 +1011,18 @@ public final class CSVUtil {
      * typeMap.put("price", Type.of(Double.class));
      * typeMap.put("active", Type.of(Boolean.class));
      * 
-     * DataSet ds = CSVUtil.loadCSV(new File("products.csv"), typeMap);
+     * Dataset ds = CSVUtil.loadCSV(new File("products.csv"), typeMap);
      * }</pre>
      *
      * @param source the File containing CSV data
      * @param columnTypeMap mapping of column names to their Types
-     * @return a DataSet with explicitly typed columns
+     * @return a Dataset with explicitly typed columns
      * @throws IllegalArgumentException if columnTypeMap is null or empty
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(File, long, long, Predicate, Map)
      */
     @SuppressWarnings("rawtypes")
-    public static DataSet loadCSV(final File source, final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException {
+    public static Dataset loadCSV(final File source, final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException {
         return loadCSV(source, 0, Long.MAX_VALUE, columnTypeMap);
     }
 
@@ -1037,20 +1037,20 @@ public final class CSVUtil {
      * typeMap.put("amount", Type.of(BigDecimal.class));
      * 
      * // Load rows 1000-1999
-     * DataSet ds = CSVUtil.loadCSV(new File("transactions.csv"), 1000, 1000, typeMap);
+     * Dataset ds = CSVUtil.loadCSV(new File("transactions.csv"), 1000, 1000, typeMap);
      * }</pre>
      *
      * @param source the File containing CSV data
      * @param offset number of data rows to skip
      * @param count maximum number of rows to read
      * @param columnTypeMap mapping of column names to their Types
-     * @return a DataSet with typed columns
+     * @return a Dataset with typed columns
      * @throws IllegalArgumentException if parameters are invalid
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(File, long, long, Predicate, Map)
      */
     @SuppressWarnings("rawtypes")
-    public static DataSet loadCSV(final File source, final long offset, final long count, final Map<String, ? extends Type> columnTypeMap)
+    public static Dataset loadCSV(final File source, final long offset, final long count, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedIOException {
         return loadCSV(source, offset, count, Fn.alwaysTrue(), columnTypeMap);
     }
@@ -1068,7 +1068,7 @@ public final class CSVUtil {
      * 
      * // Load only ERROR level logs
      * Predicate<String[]> errorFilter = row -> "ERROR".equals(row[1]);
-     * DataSet ds = CSVUtil.loadCSV(
+     * Dataset ds = CSVUtil.loadCSV(
      *     new File("app.log.csv"),
      *     0, 10000,
      *     errorFilter,
@@ -1081,12 +1081,12 @@ public final class CSVUtil {
      * @param count maximum number of rows to read
      * @param rowFilter predicate to filter rows
      * @param columnTypeMap mapping of column names to their Types
-     * @return a DataSet with typed and filtered data
+     * @return a Dataset with typed and filtered data
      * @throws IllegalArgumentException if parameters are invalid
      * @throws UncheckedIOException if an I/O error occurs
      */
     @SuppressWarnings("rawtypes")
-    public static DataSet loadCSV(final File source, final long offset, final long count, final Predicate<? super String[]> rowFilter,
+    public static Dataset loadCSV(final File source, final long offset, final long count, final Predicate<? super String[]> rowFilter,
             final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException {
         Reader reader = null;
 
@@ -1110,19 +1110,19 @@ public final class CSVUtil {
      * typeMap.put("score", Type.of(Float.class));
      * 
      * try (Reader reader = new FileReader("scores.csv")) {
-     *     DataSet ds = CSVUtil.loadCSV(reader, typeMap);
+     *     Dataset ds = CSVUtil.loadCSV(reader, typeMap);
      * }
      * }</pre>
      *
      * @param source the Reader providing CSV data
      * @param columnTypeMap mapping of column names to their Types
-     * @return a DataSet with explicitly typed columns
+     * @return a Dataset with explicitly typed columns
      * @throws IllegalArgumentException if columnTypeMap is null or empty
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(Reader, long, long, Predicate, Map)
      */
     @SuppressWarnings("rawtypes")
-    public static DataSet loadCSV(final Reader source, final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException {
+    public static Dataset loadCSV(final Reader source, final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException {
         return loadCSV(source, 0, Long.MAX_VALUE, columnTypeMap);
     }
 
@@ -1138,7 +1138,7 @@ public final class CSVUtil {
      * 
      * try (Reader reader = new FileReader("events.csv")) {
      *     // Load first 1000 events
-     *     DataSet ds = CSVUtil.loadCSV(reader, 0, 1000, typeMap);
+     *     Dataset ds = CSVUtil.loadCSV(reader, 0, 1000, typeMap);
      * }
      * }</pre>
      *
@@ -1146,13 +1146,13 @@ public final class CSVUtil {
      * @param offset number of data rows to skip
      * @param count maximum number of rows to read
      * @param columnTypeMap mapping of column names to their Types
-     * @return a DataSet with typed columns
+     * @return a Dataset with typed columns
      * @throws IllegalArgumentException if parameters are invalid
      * @throws UncheckedIOException if an I/O error occurs
      * @see #loadCSV(Reader, long, long, Predicate, Map)
      */
     @SuppressWarnings("rawtypes")
-    public static DataSet loadCSV(final Reader source, final long offset, final long count, final Map<String, ? extends Type> columnTypeMap)
+    public static Dataset loadCSV(final Reader source, final long offset, final long count, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedIOException {
         return loadCSV(source, offset, count, Fn.alwaysTrue(), columnTypeMap);
     }
@@ -1172,7 +1172,7 @@ public final class CSVUtil {
      * try (Reader reader = new FileReader("orders.csv")) {
      *     // Load completed orders only
      *     Predicate<String[]> completedFilter = row -> "COMPLETED".equals(row[3]);
-     *     DataSet ds = CSVUtil.loadCSV(reader, 0, 5000, completedFilter, typeMap);
+     *     Dataset ds = CSVUtil.loadCSV(reader, 0, 5000, completedFilter, typeMap);
      * }
      * }</pre>
      *
@@ -1181,13 +1181,13 @@ public final class CSVUtil {
      * @param count maximum number of rows to read
      * @param rowFilter predicate to filter rows
      * @param columnTypeMap mapping of column names to their Types
-     * @return a DataSet with typed and filtered data
+     * @return a Dataset with typed and filtered data
      * @throws IllegalArgumentException if parameters are invalid or columnTypeMap is empty
      * @throws UncheckedIOException if an I/O error occurs
      */
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     @SuppressWarnings("rawtypes")
-    public static DataSet loadCSV(final Reader source, long offset, long count, final Predicate<? super String[]> rowFilter,
+    public static Dataset loadCSV(final Reader source, long offset, long count, final Predicate<? super String[]> rowFilter,
             final Map<String, ? extends Type> columnTypeMap) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
@@ -1204,7 +1204,7 @@ public final class CSVUtil {
             String line = br.readLine();
 
             if (line == null) {
-                return N.newEmptyDataSet();
+                return N.newEmptyDataset();
             }
 
             final String[] titles = headerParser.apply(line);
@@ -1252,7 +1252,7 @@ public final class CSVUtil {
                 count--;
             }
 
-            return new RowDataSet(columnNameList, columnList);
+            return new RowDataset(columnNameList, columnList);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -1275,15 +1275,15 @@ public final class CSVUtil {
      *         output[2] = LocalDate.parse(row.get(2)); // date as LocalDate
      *     };
      * 
-     * DataSet ds = CSVUtil.loadCSV(new File("data.csv"), extractor);
+     * Dataset ds = CSVUtil.loadCSV(new File("data.csv"), extractor);
      * }</pre>
      *
      * @param source the File containing CSV data
      * @param rowExtractor custom logic to extract and convert row data
-     * @return a DataSet with custom extracted data
+     * @return a Dataset with custom extracted data
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public static DataSet loadCSV(final File source,
+    public static Dataset loadCSV(final File source,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor) throws UncheckedIOException {
         return loadCSV(source, null, rowExtractor);
     }
@@ -1301,7 +1301,7 @@ public final class CSVUtil {
      *         output[1] = Double.parseDouble(row.get(1)) * 1.1; // Add 10%
      *     };
      * 
-     * DataSet ds = CSVUtil.loadCSV(
+     * Dataset ds = CSVUtil.loadCSV(
      *     new File("prices.csv"),
      *     Arrays.asList("product", "price"),
      *     extractor
@@ -1311,10 +1311,10 @@ public final class CSVUtil {
      * @param source the File containing CSV data
      * @param selectColumnNames columns to include, null for all columns
      * @param rowExtractor custom logic to extract and convert row data
-     * @return a DataSet with custom extracted data
+     * @return a Dataset with custom extracted data
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public static DataSet loadCSV(final File source, final Collection<String> selectColumnNames,
+    public static Dataset loadCSV(final File source, final Collection<String> selectColumnNames,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor) throws UncheckedIOException {
         return loadCSV(source, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue(), rowExtractor);
     }
@@ -1333,18 +1333,18 @@ public final class CSVUtil {
      *     };
      * 
      * // Process rows 100-199
-     * DataSet ds = CSVUtil.loadCSV(new File("large.csv"), 100, 100, extractor);
+     * Dataset ds = CSVUtil.loadCSV(new File("large.csv"), 100, 100, extractor);
      * }</pre>
      *
      * @param source the File containing CSV data
      * @param offset number of data rows to skip
      * @param count maximum number of rows to read
      * @param rowExtractor custom logic to extract and convert row data
-     * @return a DataSet with custom extracted data
+     * @return a Dataset with custom extracted data
      * @throws IllegalArgumentException if offset or count are negative
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public static DataSet loadCSV(final File source, final long offset, final long count,
+    public static Dataset loadCSV(final File source, final long offset, final long count,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor) throws UncheckedIOException {
         return loadCSV(source, null, offset, count, Fn.alwaysTrue(), rowExtractor);
     }
@@ -1359,11 +1359,11 @@ public final class CSVUtil {
      * @param rowFilter a Predicate to filter the lines
      * @param rowExtractor a TriConsumer to extract the row data to the output array.
      *      The first parameter is the column names, the second parameter is the row data, and the third parameter is the output array. 
-     * @return a DataSet containing the loaded CSV data
+     * @return a Dataset containing the loaded CSV data
      * @throws IllegalArgumentException if offset or count are negative, or if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public static DataSet loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
+    public static Dataset loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor) throws UncheckedIOException {
         Reader reader = null;
@@ -1391,7 +1391,7 @@ public final class CSVUtil {
     //     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
     //     * @throws UncheckedIOException if an I/O error occurs.
     //     */
-    //    public static DataSet loadCSV(final InputStream source, final TriConsumer<? super String[], ? super String[], Object[]> rowExtractor)
+    //    public static Dataset loadCSV(final InputStream source, final TriConsumer<? super String[], ? super String[], Object[]> rowExtractor)
     //            throws UncheckedIOException {
     //        return loadCSV(source, 0, Long.MAX_VALUE, rowExtractor);
     //    }
@@ -1412,7 +1412,7 @@ public final class CSVUtil {
     //     * @throws IllegalArgumentException if offset or count are negative, or the size of {@code columnTypeList} is not equal to the size of columns in CSV.
     //     * @throws UncheckedIOException if an I/O error occurs.
     //     */
-    //    public static DataSet loadCSV(final InputStream source, final long offset, final long count,
+    //    public static Dataset loadCSV(final InputStream source, final long offset, final long count,
     //            final TriConsumer<? super String[], ? super String[], Object[]> rowExtractor) throws UncheckedIOException {
     //        return loadCSV(source, offset, count, Fn.alwaysTrue(), rowExtractor);
     //    }
@@ -1426,11 +1426,11 @@ public final class CSVUtil {
     //     * @param rowFilter a Predicate to filter the lines
     //     * @param rowExtractor a TriConsumer to extract the row data to the output array.
     //     *      The first parameter is the column names, the second parameter is the row data, and the third parameter is the output array.
-    //     * @return a DataSet containing the loaded CSV data
+    //     * @return a Dataset containing the loaded CSV data
     //     * @throws IllegalArgumentException if offset or count are negative, or if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
     //     * @throws UncheckedIOException if an I/O error occurs
     //     */
-    //    public static DataSet loadCSV(final InputStream source, final long offset, final long count, final Predicate<? super String[]> rowFilter,
+    //    public static Dataset loadCSV(final InputStream source, final long offset, final long count, final Predicate<? super String[]> rowFilter,
     //            final TriConsumer<? super String[], ? super String[], Object[]> rowExtractor) throws UncheckedIOException {
     //        final Reader reader = IOUtil.newInputStreamReader(source); // NOSONAR
     //
@@ -1451,7 +1451,7 @@ public final class CSVUtil {
      * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      * @throws UncheckedIOException if an I/O error occurs.
      */
-    public static DataSet loadCSV(final Reader source,
+    public static Dataset loadCSV(final Reader source,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor) throws UncheckedIOException {
         return loadCSV(source, null, rowExtractor);
     }
@@ -1471,7 +1471,7 @@ public final class CSVUtil {
      * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      * @throws UncheckedIOException if an I/O error occurs.
      */
-    public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames,
+    public static Dataset loadCSV(final Reader source, final Collection<String> selectColumnNames,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor) throws UncheckedIOException {
         return loadCSV(source, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue(), rowExtractor);
     }
@@ -1492,7 +1492,7 @@ public final class CSVUtil {
      * @throws IllegalArgumentException if offset or count are negative, or the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      * @throws UncheckedIOException if an I/O error occurs.
      */
-    public static DataSet loadCSV(final Reader source, final long offset, final long count,
+    public static Dataset loadCSV(final Reader source, final long offset, final long count,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor) throws UncheckedIOException {
         return loadCSV(source, null, offset, count, Fn.alwaysTrue(), rowExtractor);
     }
@@ -1507,12 +1507,12 @@ public final class CSVUtil {
      * @param rowFilter a Predicate to filter the lines
      * @param rowExtractor a TriConsumer to extract the row data to the output array.
      *      The first parameter is the column names, the second parameter is the row data, and the third parameter is the output array. 
-     * @return a DataSet containing the loaded CSV data
+     * @return a Dataset containing the loaded CSV data
      * @throws IllegalArgumentException if offset or count are negative, or if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      * @throws UncheckedIOException if an I/O error occurs
      */
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
-    public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
+    public static Dataset loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
             throws IllegalArgumentException, UncheckedIOException {
@@ -1527,7 +1527,7 @@ public final class CSVUtil {
             String line = br.readLine();
 
             if (line == null) {
-                return N.newEmptyDataSet();
+                return N.newEmptyDataset();
             }
 
             final String[] titles = headerParser.apply(line);
@@ -1597,7 +1597,7 @@ public final class CSVUtil {
                 count--;
             }
 
-            return new RowDataSet(columnNameList, columnList);
+            return new RowDataset(columnNameList, columnList);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {

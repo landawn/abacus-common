@@ -114,58 +114,58 @@ public class CSVUtil100Test extends TestBase {
     @Test
     @DisplayName("Test loadCSV(File) method")
     public void testLoadCSVFromFile() {
-        DataSet dataSet = CSVUtil.loadCSV(testCsvFile);
+        Dataset dataset = CSVUtil.loadCSV(testCsvFile);
 
-        assertNotNull(dataSet);
-        assertEquals(4, dataSet.columnCount());
-        assertEquals(5, dataSet.size());
-        assertEquals(List.of("id", "name", "age", "active"), dataSet.columnNameList());
+        assertNotNull(dataset);
+        assertEquals(4, dataset.columnCount());
+        assertEquals(5, dataset.size());
+        assertEquals(List.of("id", "name", "age", "active"), dataset.columnNameList());
     }
 
     @Test
     @DisplayName("Test loadCSV(File, Collection<String>) method")
     public void testLoadCSVFromFileWithSelectColumns() {
         List<String> selectColumns = List.of("name", "age");
-        DataSet dataSet = CSVUtil.loadCSV(testCsvFile, selectColumns);
+        Dataset dataset = CSVUtil.loadCSV(testCsvFile, selectColumns);
 
-        assertNotNull(dataSet);
-        assertEquals(2, dataSet.columnCount());
-        assertEquals(5, dataSet.size());
-        assertEquals(selectColumns, dataSet.columnNameList());
+        assertNotNull(dataset);
+        assertEquals(2, dataset.columnCount());
+        assertEquals(5, dataset.size());
+        assertEquals(selectColumns, dataset.columnNameList());
     }
 
     @Test
     @DisplayName("Test loadCSV(File, Collection<String>, long, long) method")
     public void testLoadCSVFromFileWithOffsetAndCount() {
         List<String> selectColumns = List.of("name", "age");
-        DataSet dataSet = CSVUtil.loadCSV(testCsvFile, selectColumns, 1, 2);
+        Dataset dataset = CSVUtil.loadCSV(testCsvFile, selectColumns, 1, 2);
 
-        assertNotNull(dataSet);
-        assertEquals(2, dataSet.columnCount());
-        assertEquals(2, dataSet.size());
-        assertEquals("Jane", dataSet.get(0, 0));
-        assertEquals("Bob", dataSet.get(1, 0));
+        assertNotNull(dataset);
+        assertEquals(2, dataset.columnCount());
+        assertEquals(2, dataset.size());
+        assertEquals("Jane", dataset.get(0, 0));
+        assertEquals("Bob", dataset.get(1, 0));
     }
 
     @Test
     @DisplayName("Test loadCSV(File, Collection<String>, long, long, Predicate) method")
     public void testLoadCSVFromFileWithFilter() {
         Predicate<String[]> rowFilter = row -> "true".equals(row[3]);
-        DataSet dataSet = CSVUtil.loadCSV(testCsvFile, null, 0, Long.MAX_VALUE, rowFilter);
+        Dataset dataset = CSVUtil.loadCSV(testCsvFile, null, 0, Long.MAX_VALUE, rowFilter);
 
-        assertNotNull(dataSet);
-        assertEquals(3, dataSet.size()); // Only rows with active=true
+        assertNotNull(dataset);
+        assertEquals(3, dataset.size()); // Only rows with active=true
     }
 
     @Test
     @DisplayName("Test loadCSV(Reader) method")
     public void testLoadCSVFromReader() throws IOException {
         try (Reader reader = new StringReader(testCsvContent)) {
-            DataSet dataSet = CSVUtil.loadCSV(reader);
+            Dataset dataset = CSVUtil.loadCSV(reader);
 
-            assertNotNull(dataSet);
-            assertEquals(4, dataSet.columnCount());
-            assertEquals(5, dataSet.size());
+            assertNotNull(dataset);
+            assertEquals(4, dataset.columnCount());
+            assertEquals(5, dataset.size());
         }
     }
 
@@ -175,11 +175,11 @@ public class CSVUtil100Test extends TestBase {
         List<String> selectColumns = List.of("id", "name");
 
         try (Reader reader = new StringReader(testCsvContent)) {
-            DataSet dataSet = CSVUtil.loadCSV(reader, selectColumns);
+            Dataset dataset = CSVUtil.loadCSV(reader, selectColumns);
 
-            assertNotNull(dataSet);
-            assertEquals(2, dataSet.columnCount());
-            assertEquals(selectColumns, dataSet.columnNameList());
+            assertNotNull(dataset);
+            assertEquals(2, dataset.columnCount());
+            assertEquals(selectColumns, dataset.columnNameList());
         }
     }
 
@@ -187,12 +187,12 @@ public class CSVUtil100Test extends TestBase {
     @DisplayName("Test loadCSV(Reader, Collection<String>, long, long) method")
     public void testLoadCSVFromReaderWithOffsetAndCount() throws IOException {
         try (Reader reader = new StringReader(testCsvContent)) {
-            DataSet dataSet = CSVUtil.loadCSV(reader, null, 2, 2);
+            Dataset dataset = CSVUtil.loadCSV(reader, null, 2, 2);
 
-            assertNotNull(dataSet);
-            assertEquals(2, dataSet.size());
-            assertEquals("Bob", dataSet.get(0, 1));
-            assertEquals("Alice", dataSet.get(1, 1));
+            assertNotNull(dataset);
+            assertEquals(2, dataset.size());
+            assertEquals("Bob", dataset.get(0, 1));
+            assertEquals("Alice", dataset.get(1, 1));
         }
     }
 
@@ -202,26 +202,26 @@ public class CSVUtil100Test extends TestBase {
         Predicate<String[]> rowFilter = row -> Integer.parseInt(row[2]) > 30;
 
         try (Reader reader = new StringReader(testCsvContent)) {
-            DataSet dataSet = CSVUtil.loadCSV(reader, null, 0, Long.MAX_VALUE, rowFilter);
+            Dataset dataset = CSVUtil.loadCSV(reader, null, 0, Long.MAX_VALUE, rowFilter);
 
-            assertNotNull(dataSet);
-            assertEquals(2, dataSet.size()); // Only Bob (35) and Charlie (40)
+            assertNotNull(dataset);
+            assertEquals(2, dataset.size()); // Only Bob (35) and Charlie (40)
         }
     }
 
     @Test
     @DisplayName("Test loadCSV with beanClassForColumnType")
     public void testLoadCSVWithBeanClass() {
-        DataSet dataSet = CSVUtil.loadCSV(testCsvFile, TestBean.class);
+        Dataset dataset = CSVUtil.loadCSV(testCsvFile, TestBean.class);
 
-        assertNotNull(dataSet);
-        assertEquals(4, dataSet.columnCount());
+        assertNotNull(dataset);
+        assertEquals(4, dataset.columnCount());
 
         // Check that types are converted properly
-        assertEquals(1, (Integer) dataSet.get(0, 0)); // id as Integer
-        assertEquals("John", dataSet.get(0, 1)); // name as String
-        assertEquals(25, (Integer) dataSet.get(0, 2)); // age as Integer
-        assertEquals(true, dataSet.get(0, 3)); // active as Boolean
+        assertEquals(1, (Integer) dataset.get(0, 0)); // id as Integer
+        assertEquals("John", dataset.get(0, 1)); // name as String
+        assertEquals(25, (Integer) dataset.get(0, 2)); // age as Integer
+        assertEquals(true, dataset.get(0, 3)); // active as Boolean
     }
 
     @Test
@@ -232,15 +232,15 @@ public class CSVUtil100Test extends TestBase {
         columnTypeMap.put("age", Type.of(Integer.class));
         columnTypeMap.put("active", Type.of(Boolean.class));
 
-        DataSet dataSet = CSVUtil.loadCSV(testCsvFile, columnTypeMap);
+        Dataset dataset = CSVUtil.loadCSV(testCsvFile, columnTypeMap);
 
-        assertNotNull(dataSet);
-        assertEquals(3, dataSet.columnCount()); // Only mapped columns
+        assertNotNull(dataset);
+        assertEquals(3, dataset.columnCount()); // Only mapped columns
 
         // Check types
-        assertTrue(dataSet.get(0, 0) instanceof Integer);
-        assertTrue(dataSet.get(0, 1) instanceof Integer);
-        assertTrue(dataSet.get(0, 2) instanceof Boolean);
+        assertTrue(dataset.get(0, 0) instanceof Integer);
+        assertTrue(dataset.get(0, 1) instanceof Integer);
+        assertTrue(dataset.get(0, 2) instanceof Boolean);
     }
 
     @Test
@@ -258,16 +258,16 @@ public class CSVUtil100Test extends TestBase {
             }
         };
 
-        DataSet dataSet = CSVUtil.loadCSV(testCsvFile, rowExtractor);
+        Dataset dataset = CSVUtil.loadCSV(testCsvFile, rowExtractor);
 
-        assertNotNull(dataSet);
-        assertEquals(4, dataSet.columnCount());
+        assertNotNull(dataset);
+        assertEquals(4, dataset.columnCount());
 
         // Check types
-        assertTrue(dataSet.get(0, 0) instanceof Integer);
-        assertTrue(dataSet.get(0, 1) instanceof String);
-        assertTrue(dataSet.get(0, 2) instanceof Integer);
-        assertTrue(dataSet.get(0, 3) instanceof Boolean);
+        assertTrue(dataset.get(0, 0) instanceof Integer);
+        assertTrue(dataset.get(0, 1) instanceof String);
+        assertTrue(dataset.get(0, 2) instanceof Integer);
+        assertTrue(dataset.get(0, 3) instanceof Boolean);
     }
 
     @Test
@@ -378,15 +378,15 @@ public class CSVUtil100Test extends TestBase {
         // Test empty file
         File emptyFile = tempDir.resolve("empty.csv").toFile();
         Files.writeString(emptyFile.toPath(), "");
-        DataSet emptyDataSet = CSVUtil.loadCSV(emptyFile);
-        assertTrue(emptyDataSet.isEmpty());
+        Dataset emptyDataset = CSVUtil.loadCSV(emptyFile);
+        assertTrue(emptyDataset.isEmpty());
 
         // Test file with only headers
         File headerOnlyFile = tempDir.resolve("headerOnly.csv").toFile();
         Files.writeString(headerOnlyFile.toPath(), "col1,col2,col3\n");
-        DataSet headerOnlyDataSet = CSVUtil.loadCSV(headerOnlyFile);
-        assertEquals(3, headerOnlyDataSet.columnCount());
-        assertEquals(0, headerOnlyDataSet.size());
+        Dataset headerOnlyDataset = CSVUtil.loadCSV(headerOnlyFile);
+        assertEquals(3, headerOnlyDataset.columnCount());
+        assertEquals(0, headerOnlyDataset.size());
 
         // Test invalid column names
         assertThrows(IllegalArgumentException.class, () -> {
@@ -421,13 +421,13 @@ public class CSVUtil100Test extends TestBase {
         File specialFile = tempDir.resolve("special.csv").toFile();
         Files.writeString(specialFile.toPath(), csvWithQuotes);
 
-        DataSet dataSet = CSVUtil.loadCSV(specialFile);
+        Dataset dataset = CSVUtil.loadCSV(specialFile);
 
-        assertEquals(2, dataSet.columnCount());
-        assertEquals(2, dataSet.size());
-        assertEquals("John Doe", dataSet.get(0, 0));
-        assertEquals("Says \"Hello\" to everyone", dataSet.get(0, 1));
-        assertEquals("Jane, Smith", dataSet.get(1, 0));
+        assertEquals(2, dataset.columnCount());
+        assertEquals(2, dataset.size());
+        assertEquals("John Doe", dataset.get(0, 0));
+        assertEquals("Says \"Hello\" to everyone", dataset.get(0, 1));
+        assertEquals("Jane, Smith", dataset.get(1, 0));
     }
 
     @Test
@@ -445,11 +445,11 @@ public class CSVUtil100Test extends TestBase {
             System.arraycopy(parts, 0, output, 0, Math.min(parts.length, output.length));
         });
 
-        DataSet dataSet = CSVUtil.loadCSV(semicolonFile);
+        Dataset dataset = CSVUtil.loadCSV(semicolonFile);
 
-        assertEquals(3, dataSet.columnCount());
-        assertEquals(2, dataSet.size());
-        assertEquals("John", dataSet.get(0, 1));
+        assertEquals(3, dataset.columnCount());
+        assertEquals(2, dataset.size());
+        assertEquals("John", dataset.get(0, 1));
 
         // Reset parsers
         CSVUtil.resetHeaderParser();
@@ -462,7 +462,7 @@ public class CSVUtil100Test extends TestBase {
         N.println(IOUtil.readAllToString(testCsvFile));
 
         {
-            DataSet dataSet = CSVUtil.loadCSV(testCsvFile, TestBean.class);
+            Dataset dataset = CSVUtil.loadCSV(testCsvFile, TestBean.class);
             File jsonFile = tempDir.resolve("test.json").toFile();
             CSVUtil.csv2json(testCsvFile, jsonFile);
             assertTrue(jsonFile.exists());
@@ -470,12 +470,12 @@ public class CSVUtil100Test extends TestBase {
 
             List<TestBean> records = N.fromJson(jsonFile, Type.ofList(TestBean.class));
             assertEquals(5, records.size());
-            assertEquals(dataSet.toList(TestBean.class), records);
+            assertEquals(dataset.toList(TestBean.class), records);
 
             N.println(IOUtil.readAllToString(jsonFile));
         }
         {
-            DataSet dataSet = CSVUtil.loadCSV(testCsvFile, TestBean.class);
+            Dataset dataset = CSVUtil.loadCSV(testCsvFile, TestBean.class);
             File jsonFile = tempDir.resolve("test.json").toFile();
             CSVUtil.csv2json(testCsvFile, null, jsonFile, TestBean.class);
             assertTrue(jsonFile.exists());
@@ -483,7 +483,7 @@ public class CSVUtil100Test extends TestBase {
 
             List<TestBean> records = N.fromJson(jsonFile, Type.ofList(TestBean.class));
             assertEquals(5, records.size());
-            assertEquals(dataSet.toList(TestBean.class), records);
+            assertEquals(dataset.toList(TestBean.class), records);
 
             N.println(IOUtil.readAllToString(jsonFile));
         }

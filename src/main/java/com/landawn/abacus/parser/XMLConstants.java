@@ -654,28 +654,28 @@ public class XMLConstants {
     public static final String RESULT_NULL_ELE = "<result isNull=\"true\" />";
 
     /**
-     * Field DATA_SET (value is {@code "dataSet"})
+     * Field DATA_SET (value is {@code "dataset"})
      * XML element name for data set structures.
      */
-    public static final String DATA_SET = "dataSet";
+    public static final String DATA_SET = "dataset";
 
     /**
-     * Field DATA_SET_ELE_START (value is {@code "<dataSet>"})
+     * Field DATA_SET_ELE_START (value is {@code "<dataset>"})
      * Opening tag for data set XML elements.
      */
-    public static final String DATA_SET_ELE_START = "<dataSet>";
+    public static final String DATA_SET_ELE_START = "<dataset>";
 
     /**
-     * Field DATA_SET_ELE_END (value is {@code "</dataSet>"})
+     * Field DATA_SET_ELE_END (value is {@code "</dataset>"})
      * Closing tag for data set XML elements.
      */
-    public static final String DATA_SET_ELE_END = "</dataSet>";
+    public static final String DATA_SET_ELE_END = "</dataset>";
 
     /**
-     * Field DATA_SET_NULL_ELE (value is {@code "<dataSet isNull=\"true\" />"})
+     * Field DATA_SET_NULL_ELE (value is {@code "<dataset isNull=\"true\" />"})
      * Self-closing XML element representing a null data set.
      */
-    public static final String DATA_SET_NULL_ELE = "<dataSet isNull=\"true\" />";
+    public static final String DATA_SET_NULL_ELE = "<dataset isNull=\"true\" />";
 
     /**
      * Field ENVELOPE (value is {@code "Envelope"})

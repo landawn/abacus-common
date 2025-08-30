@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.ImmutableMap;
@@ -1216,26 +1216,26 @@ public class Stream200Test extends TestBase {
     }
 
     @Test
-    public void testToDataSetSimple() {
+    public void testToDatasetSimple() {
         // Requires T to be Map or Bean. Let's use Maps.
         Map<String, Object> row1 = N.asMap("id", 1, "name", "Alice");
         Map<String, Object> row2 = N.asMap("id", 2, "name", "Bob");
-        DataSet dataSet = Stream.of(row1, row2).toDataSet();
+        Dataset dataset = Stream.of(row1, row2).toDataset();
 
-        assertEquals(2, dataSet.size());
-        assertTrue(dataSet.columnNameList().containsAll(Arrays.asList("id", "name")));
+        assertEquals(2, dataset.size());
+        assertTrue(dataset.columnNameList().containsAll(Arrays.asList("id", "name")));
     }
 
     @Test
-    public void testToDataSetWithColumnNames() {
+    public void testToDatasetWithColumnNames() {
         List<String> columnNames = Arrays.asList("val1", "val2");
         // Assuming T can be converted to a list matching columnNames order
         List<Object> row1Data = Arrays.asList(10, "X");
         List<Object> row2Data = Arrays.asList(20, "Y");
 
-        DataSet dataSet = Stream.of(row1Data, row2Data).toDataSet(columnNames);
-        assertEquals(2, dataSet.size());
-        assertEquals(columnNames, dataSet.columnNameList());
+        Dataset dataset = Stream.of(row1Data, row2Data).toDataset(columnNames);
+        assertEquals(2, dataset.size());
+        assertEquals(columnNames, dataset.columnNameList());
     }
 
     @Test

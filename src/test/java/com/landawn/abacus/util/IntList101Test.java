@@ -45,7 +45,7 @@ public class IntList101Test extends TestBase {
     @Test
     public void testConstructorWithNegativeCapacity() {
         // Should not throw exception, will be handled internally
-        assertThrows(NegativeArraySizeException.class, () -> new IntList(-1));
+        assertThrows(IllegalArgumentException.class, () -> new IntList(-1));
     }
 
     // Additional Static Factory Tests

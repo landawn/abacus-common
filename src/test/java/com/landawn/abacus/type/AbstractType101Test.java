@@ -81,7 +81,7 @@ public class AbstractType101Test extends TestBase {
         assertFalse(testType.isBean());
         assertFalse(testType.isMapEntity());
         assertFalse(testType.isEntityId());
-        assertFalse(testType.isDataSet());
+        assertFalse(testType.isDataset());
         assertFalse(testType.isInputStream());
         assertFalse(testType.isReader());
         assertFalse(testType.isByteBuffer());

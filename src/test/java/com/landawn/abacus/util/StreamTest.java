@@ -797,7 +797,7 @@ public class StreamTest extends AbstractTest {
             final List<Object> list = N.asList(N.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()),
                     N.asMap("k1", "v21", "k2", N.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
 
-            final DataSet dataset = N.newDataSet(list);
+            final Dataset dataset = N.newDataset(list);
             dataset.println();
 
             N.println(dataset.toCsv());
@@ -831,7 +831,7 @@ public class StreamTest extends AbstractTest {
             final List<Object> list = N.asList(N.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()),
                     N.asMap("k1", "v21", "k2", N.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
 
-            final DataSet dataset = N.newDataSet(list);
+            final Dataset dataset = N.newDataset(list);
             dataset.println();
 
             N.println(dataset.toCsv());
@@ -1290,30 +1290,30 @@ public class StreamTest extends AbstractTest {
 
         N.println(c);
 
-        DataSet ds1 = N.newDataSet(N.asList("c1", "c2"), N.asList(N.asList(1, 1), N.asList(2, 2), N.asList(3, 3), N.asList(2, 2)));
-        DataSet ds2 = N.newDataSet(N.asList("c1", "c2"), N.asList(N.asList(2, 2), N.asList(3, 3), N.asList(2, 2)));
-        DataSet ds3 = ds1.intersectAll(ds2);
+        Dataset ds1 = N.newDataset(N.asList("c1", "c2"), N.asList(N.asList(1, 1), N.asList(2, 2), N.asList(3, 3), N.asList(2, 2)));
+        Dataset ds2 = N.newDataset(N.asList("c1", "c2"), N.asList(N.asList(2, 2), N.asList(3, 3), N.asList(2, 2)));
+        Dataset ds3 = ds1.intersectAll(ds2);
         ds3.println();
 
-        ds2 = N.newDataSet(N.asList("c1", "c2"), N.asList(N.asList(3, 3), N.asList(2, 2)));
+        ds2 = N.newDataset(N.asList("c1", "c2"), N.asList(N.asList(3, 3), N.asList(2, 2)));
         ds3 = ds1.intersectAll(ds2);
         ds3.println();
 
         N.println(Strings.repeat('=', 80));
 
-        ds1 = N.newDataSet(N.asList("c1", "c2"), N.asList(N.asList(1, 1), N.asList(2, 2), N.asList(3, 3), N.asList(2, 2)));
-        ds2 = N.newDataSet(N.asList("c1", "c2"), N.asList(N.asList(2, 2), N.asList(3, 3), N.asList(2, 2)));
+        ds1 = N.newDataset(N.asList("c1", "c2"), N.asList(N.asList(1, 1), N.asList(2, 2), N.asList(3, 3), N.asList(2, 2)));
+        ds2 = N.newDataset(N.asList("c1", "c2"), N.asList(N.asList(2, 2), N.asList(3, 3), N.asList(2, 2)));
         ds3 = ds1.intersection(ds2);
         ds3.println();
 
-        ds2 = N.newDataSet(N.asList("c1", "c2"), N.asList(N.asList(3, 3), N.asList(2, 2)));
+        ds2 = N.newDataset(N.asList("c1", "c2"), N.asList(N.asList(3, 3), N.asList(2, 2)));
         ds3 = ds1.intersection(ds2);
         ds3.println();
 
         N.println(Strings.repeat('=', 80));
 
-        ds1 = N.newDataSet(N.asList("c1", "c2"), N.asList(N.asList(1, 1), N.asList(2, 2), N.asList(3, 3), N.asList(2, 2)));
-        ds2 = N.newDataSet(N.asList("c1", "c2"), N.asList(N.asList(2, 2), N.asList(3, 3), N.asList(2, 2)));
+        ds1 = N.newDataset(N.asList("c1", "c2"), N.asList(N.asList(1, 1), N.asList(2, 2), N.asList(3, 3), N.asList(2, 2)));
+        ds2 = N.newDataset(N.asList("c1", "c2"), N.asList(N.asList(2, 2), N.asList(3, 3), N.asList(2, 2)));
         ds3 = ds1.intersect(ds2);
         ds3.println();
 

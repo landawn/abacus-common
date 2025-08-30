@@ -163,7 +163,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * <pre>{@code
      * DoubleIterator iter = DoubleIterator.defer(() -> {
      *     // Expensive initialization
-     *     double[] data = loadLargeDataSet();
+     *     double[] data = loadLargeDataset();
      *     return DoubleIterator.of(data);
      * });
      * }</pre>

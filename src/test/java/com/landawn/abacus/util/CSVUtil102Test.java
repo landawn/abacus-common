@@ -98,7 +98,7 @@ public class CSVUtil102Test extends TestBase {
             fw.write("Jane,25,LA\n");
         }
 
-        DataSet ds = CSVUtil.loadCSV(tempFile);
+        Dataset ds = CSVUtil.loadCSV(tempFile);
         assertEquals(3, ds.columnNameList().size());
         assertEquals(2, ds.size());
         assertEquals("John", ds.get(0, 0));
@@ -115,7 +115,7 @@ public class CSVUtil102Test extends TestBase {
         }
 
         List<String> selectedColumns = Arrays.asList("Name", "City");
-        DataSet ds = CSVUtil.loadCSV(tempFile, selectedColumns);
+        Dataset ds = CSVUtil.loadCSV(tempFile, selectedColumns);
         assertEquals(2, ds.columnNameList().size());
         assertEquals(2, ds.size());
         assertEquals("John", ds.get(0, 0));
@@ -132,7 +132,7 @@ public class CSVUtil102Test extends TestBase {
             fw.write("Alice,28,Boston\n");
         }
 
-        DataSet ds = CSVUtil.loadCSV(tempFile, null, 1, 2);
+        Dataset ds = CSVUtil.loadCSV(tempFile, null, 1, 2);
         assertEquals(3, ds.columnNameList().size());
         assertEquals(2, ds.size());
         assertEquals("Jane", ds.get(0, 0));
@@ -149,7 +149,7 @@ public class CSVUtil102Test extends TestBase {
         }
 
         Predicate<String[]> rowFilter = row -> Integer.parseInt(row[1]) > 28;
-        DataSet ds = CSVUtil.loadCSV(tempFile, null, 0, Long.MAX_VALUE, rowFilter);
+        Dataset ds = CSVUtil.loadCSV(tempFile, null, 0, Long.MAX_VALUE, rowFilter);
         assertEquals(2, ds.size());
         assertEquals("John", ds.get(0, 0));
         assertEquals("Bob", ds.get(1, 0));
@@ -160,7 +160,7 @@ public class CSVUtil102Test extends TestBase {
         String csvContent = "Name,Age,City\nJohn,30,NYC\nJane,25,LA\n";
         Reader reader = new StringReader(csvContent);
         
-        DataSet ds = CSVUtil.loadCSV(reader);
+        Dataset ds = CSVUtil.loadCSV(reader);
         assertEquals(3, ds.columnNameList().size());
         assertEquals(2, ds.size());
         assertEquals("John", ds.get(0, 0));
@@ -169,7 +169,7 @@ public class CSVUtil102Test extends TestBase {
     @Test
     public void testLoadCSVFromReaderEmpty() throws IOException {
         Reader reader = new StringReader("");
-        DataSet ds = CSVUtil.loadCSV(reader);
+        Dataset ds = CSVUtil.loadCSV(reader);
         assertTrue(ds.isEmpty());
     }
 
@@ -181,7 +181,7 @@ public class CSVUtil102Test extends TestBase {
             fw.write("Jane,\"456 Oak Ave\",25\n");
         }
 
-        DataSet ds = CSVUtil.loadCSV(tempFile);
+        Dataset ds = CSVUtil.loadCSV(tempFile);
         assertEquals("123 Main St, Apt 4", ds.get(0, 1));
         assertEquals("456 Oak Ave", ds.get(1, 1));
     }
@@ -249,7 +249,7 @@ public class CSVUtil102Test extends TestBase {
             fw.write("Jane,25,LA\n");
         }
 
-        DataSet ds = CSVUtil.loadCSV(tempFile, Person.class);
+        Dataset ds = CSVUtil.loadCSV(tempFile, Person.class);
         assertEquals(3, ds.columnNameList().size());
         assertEquals(2, ds.size());
         assertEquals("John", ds.get(0, 0));
@@ -270,7 +270,7 @@ public class CSVUtil102Test extends TestBase {
         columnTypeMap.put("age", N.typeOf(Integer.class));
         columnTypeMap.put("salary", N.typeOf(Double.class));
         
-        DataSet ds = CSVUtil.loadCSV(tempFile, columnTypeMap);
+        Dataset ds = CSVUtil.loadCSV(tempFile, columnTypeMap);
         assertEquals("John", ds.get(0, 0));
         assertEquals(30, (Integer) ds.get(0, 1));
         assertEquals(50000.50, ds.get(0, 2));
@@ -291,7 +291,7 @@ public class CSVUtil102Test extends TestBase {
                 output[2] = row.get(2).toLowerCase();
             };
         
-        DataSet ds = CSVUtil.loadCSV(tempFile, rowExtractor);
+        Dataset ds = CSVUtil.loadCSV(tempFile, rowExtractor);
         assertEquals("JOHN", ds.get(0, 0));
         assertEquals(60, (Integer) ds.get(0, 1));
         assertEquals("nyc", ds.get(0, 2));

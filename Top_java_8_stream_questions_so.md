@@ -467,18 +467,18 @@ Multiset.of(numbers).entryStream().filterByValue(occur -> occur > 1).keys().toLi
 
 * By Java 8
 ```java
-Collection<DataSet> convert(List<MultiDataPoint> multiDataPoints) {
-    Map<String, DataSet> result = new HashMap<>();
+Collection<Dataset> convert(List<MultiDataPoint> multiDataPoints) {
+    Map<String, Dataset> result = new HashMap<>();
     multiDataPoints.forEach(pt ->
         pt.keyToData.forEach((key, value) ->
             result.computeIfAbsent(
-                key, k -> new DataSet(k, new ArrayList<>()))
+                key, k -> new Dataset(k, new ArrayList<>()))
             .dataPoints.add(new DataPoint(pt.timestamp, value))));
     return result.values();
 }
 
 // Or:
-Collection<DataSet> convert(List<MultiDataPoint> multiDataPoints) {
+Collection<Dataset> convert(List<MultiDataPoint> multiDataPoints) {
     return multiDataPoints.stream()
         .flatMap(mdp -> mdp.keyToData.entrySet().stream().map(e ->
             new Object() {
@@ -488,7 +488,7 @@ Collection<DataSet> convert(List<MultiDataPoint> multiDataPoints) {
         .collect(
             collectingAndThen(
                 groupingBy(t -> t.key, mapping(t -> t.dataPoint, toList())),
-                m -> m.entrySet().stream().map(e -> new DataSet(e.getKey(), e.getValue())).collect(toList())));
+                m -> m.entrySet().stream().map(e -> new Dataset(e.getKey(), e.getValue())).collect(toList())));
 }
 ```
 
@@ -496,7 +496,7 @@ Collection<DataSet> convert(List<MultiDataPoint> multiDataPoints) {
 ```java
 Stream.of(multiDataPoints)
     .flatMap(mdp -> Stream.of(mdp.keyToData).map(e -> Pair.of(e.getKey(), new DataPoint(mdp.timestamp, e.getValue()))))
-    .groupBy(Entry::getKey, Entry::getValue).map(e -> new DataSet(e.getKey(), e.getValue())).toList();
+    .groupBy(Entry::getKey, Entry::getValue).map(e -> new Dataset(e.getKey(), e.getValue())).toList();
 ```
 
 ---

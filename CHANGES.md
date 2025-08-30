@@ -1,3 +1,7 @@
+### 6.3.8
+
+* Improves javadoc and unit tests
+
 ### 6.3.7
 
 * Improves javadoc and unit tests
@@ -268,7 +272,7 @@
 
 ### 5.3.17
 
-* Refactoring `DataSet` and `Sheet`.
+* Refactoring `Dataset` and `Sheet`.
 * Improvements and bug fixes.
 
 ### 5.3.16
@@ -762,7 +766,7 @@
 
 ### 3.6.22
 
-* Add `DataSet.pivot`, `Sheet.sortByRow/sortByColumn`.
+* Add `Dataset.pivot`, `Sheet.sortByRow/sortByColumn`.
 * Improvements and bug fix.
 
 
@@ -1623,19 +1627,19 @@
 ### 1.20.28
 
 * Add `Optional/Nullable/OptionalBoolean/OptionalInt/...OptionalDouble.mapToNonNull`.
-* Add `N.merge(DataSet...)`.
+* Add `N.merge(Dataset...)`.
 * Improvements and bug fix.
 
 
 ### 1.20.27
 
-* Remove `DataSetUtil`.
+* Remove `DatasetUtil`.
 * Improvements and bug fix.
 
 
 ### 1.20.26
 
-* Add `DataSet.toMergedEntities`.
+* Add `Dataset.toMergedEntities`.
 * Improvements and bug fix.
 
 
@@ -1947,7 +1951,7 @@
 
 ### 1.9.10
 
-* add `ExceptionalStream.toDataSet`.
+* add `ExceptionalStream.toDataset`.
 * Improvements and bug fix.
 
 
@@ -2257,20 +2261,20 @@
 
 * Add `DisposiableArray/DisposiableIntArray/.../DisposiableDoubleArray.toList/toCollection`. 
 
-* Refactoring: change `DataSet/Sheet.println(..., Writer)` to `DataSet.println(Writer, ...)`. 
+* Refactoring: change `Dataset/Sheet.println(..., Writer)` to `Dataset.println(Writer, ...)`. 
 
 * Improvements and bug fix.
 
 
 ### 1.7.0
 
-* Add `DataSet.map/flatMap`.
+* Add `Dataset.map/flatMap`.
 
 * Add `Index.ofSubArray/ofSubList/lastOfSubArray/lastOfSubList`.
 
 * Add `IntStream.ofIndices`.
 
-* Refactoring `DataSet`.
+* Refactoring `Dataset`.
 
 * Refactoring `IntStream/ByteStream/.../DoubleStream.zip`.
 
@@ -2281,9 +2285,9 @@
 
 * Add `Matrix/IntMatrix/.../f.flatOp`.
 
-* Add `N.newDataSet(Map)`.
+* Add `N.newDataset(Map)`.
 
-* Add `DataSet.toColumnMap`.
+* Add `Dataset.toColumnMap`.
 
 * Add `Array.concat`.
 
@@ -2347,9 +2351,9 @@
 
 ### 1.5.10
  
-* Improve `DataSet/Sheet.println()`.
+* Improve `Dataset/Sheet.println()`.
 
-* Add `DataSet/Sheet.println(Writer)`.
+* Add `Dataset/Sheet.println(Writer)`.
 
 * Add `Fn.notStartsWith/notEndsWith/notContains`.
 
@@ -2485,11 +2489,11 @@
  
 * Remove `Result.__()`.
 
-* Remove `copyThen(...)` from `DataSet/IntList/LongList/DoubleList/...`.
+* Remove `copyThen(...)` from `Dataset/IntList/LongList/DoubleList/...`.
 
-* Rename `DataSet.__()` to `DataSet.builder()`.
+* Rename `Dataset.__()` to `Dataset.builder()`.
 
-* Switch method name: `DataSet.split(...)` to `DataSet.splitt(...)`.
+* Switch method name: `Dataset.split(...)` to `Dataset.splitt(...)`.
 
 * Refactoring: `Fn`.
 
@@ -2561,7 +2565,7 @@
 
 ### 1.3.26
 
-* Refactoring `DataSet`.
+* Refactoring `Dataset`.
 
 * Improvements and bug fix.
 
@@ -2707,7 +2711,7 @@
 
 * Add `Primitives`.
 
-* Refactoring `DataSetBuilder`.
+* Refactoring `DatasetBuilder`.
 
 * Improvements and bug fix.
 
@@ -2875,7 +2879,7 @@
 
 ### 1.2.12
 
-* Rename `DataSet.join` to `DataSet.innerJoin`.
+* Rename `Dataset.join` to `Dataset.innerJoin`.
 
 * Rename `RowIterator.getColumnCount/getColumnLabelList` to `RowIterator.columnCount/columnLabels`.
 
@@ -2886,7 +2890,7 @@
 
 ### 1.2.11
 
-* Rename `DataSet.updateColumn(Collection...)/updateRow(int[]...)` to `updateColumnAll/updateRowAll`.
+* Rename `Dataset.updateColumn(Collection...)/updateRow(int[]...)` to `updateColumnAll/updateRowAll`.
 
 * Rename `N/Iterators.repeatEle/repeatEleToSize` to `N/Iterators.repeatEach/repeatEachToSize`.
 
@@ -2894,7 +2898,7 @@
 
 * Refactoring: change `Stream<IntPair> IntPair.stream()/...` to `IntStream IntPair.stream()/...`.
 
-* Add `DataSet.divideColumn(...BiConsumer)`.
+* Add `Dataset.divideColumn(...BiConsumer)`.
 
 * Add `Fn.not(predicate)/contains`.
 
@@ -2919,7 +2923,7 @@
 
 * Remove `XXX.forEach(..., accumulator, conditionToBreak...)`.
 
-* Refactoring: change `DataSet.join/leftJoin/RightJoin/fullJoin(...Class<? extends Collection> collClass)` to `DataSet.join/leftJoin/RightJoin/fullJoin(...IntFunction<? extends Collection> collSupplier)`.
+* Refactoring: change `Dataset.join/leftJoin/RightJoin/fullJoin(...Class<? extends Collection> collClass)` to `Dataset.join/leftJoin/RightJoin/fullJoin(...IntFunction<? extends Collection> collSupplier)`.
 
 * Stop releasing `abacus-common-all` and `abacus-common-all-jdk7`.
 
@@ -3032,7 +3036,7 @@
 
 * Add `queryForDate`.
 
-* Add `DataSet.__()`.
+* Add `Dataset.__()`.
 
 * Improvements and bug fix.
 
@@ -3112,9 +3116,9 @@
 
 ### 1.1.7
 
-* Add `DataSetUtil`.
+* Add `DatasetUtil`.
 
-* Add `DataSet.rollup/cube`.
+* Add `Dataset.rollup/cube`.
 
 * Add `Optional/Nullable<T>.or(Try.Supplier<? extends Optional<T>, E> supplier)`.
 
@@ -3122,16 +3126,16 @@
 
 * Rename `xyz0/1/2(...)` to `xyzz(...)`.
 
-* Rename `DataSet.retainAll/removeAll` to `DataSet.intersectAll/except`.
+* Rename `Dataset.retainAll/removeAll` to `Dataset.intersectAll/except`.
 
-* Remove `DataSet.sum/averageInt/Long/Double/kthLargest/count/toMultiset/toArray/split`, replaced by `DataSet.stream(...).sum/averageInt/Long/Double/kthLargest/count/toMultiset/toArray/split`.
+* Remove `Dataset.sum/averageInt/Long/Double/kthLargest/count/toMultiset/toArray/split`, replaced by `Dataset.stream(...).sum/averageInt/Long/Double/kthLargest/count/toMultiset/toArray/split`.
 
 * Improvements and bug fix.
 
 
 ### 1.1.6
 
-* Add `DataSet.groupBy(..., func)/getOrDefault(columnName)`.
+* Add `Dataset.groupBy(..., func)/getOrDefault(columnName)`.
 
 * Add `Collectors.combine(...)`.
 
@@ -3267,7 +3271,7 @@
 
 * `Clazz.of(Class<?>)` is marked to ‘Deprecated’ and will be removed in version 1.2.0 because it doesn’t work as expected.
 
-* Replace `Predicate/Consumer/Function` in `N/Seq/IntList.../EntryStream/Stream/IntStream/.../DataSet.forEach(...)` and `N/JdbcUtil/IOUtil.parse(...)` with `Try.Predicate/Consumer/Function`.
+* Replace `Predicate/Consumer/Function` in `N/Seq/IntList.../EntryStream/Stream/IntStream/.../Dataset.forEach(...)` and `N/JdbcUtil/IOUtil.parse(...)` with `Try.Predicate/Consumer/Function`.
 
 * Add `EntryStream.collect(java.util.stream.Collector)` and `EntryStream.collectAndThen(java.util.stream.Collector, Function)`.
 

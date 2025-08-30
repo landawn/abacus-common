@@ -20,6 +20,29 @@ public class ConfigurationTest extends AbstractTest {
         assertNotNull(Configuration.findFile("Configuration.java"));
     }
 
+    //    @Test
+    //    public void testReadWriteAttr() throws IOException {
+    //        final File databaseXml = new File("./config/abacus-entity-manager.xml");
+    //        Document doc = Configuration.parse(databaseXml);
+    //
+    //        Map<String, String> elementMap = XmlUtil.readElement(doc.getDocumentElement());
+    //        N.println(elementMap);
+    //
+    //        final InputStream is = new FileInputStream(databaseXml);
+    //        doc = Configuration.parse(is);
+    //        is.close();
+    //
+    //        final Configuration config = new Configuration(doc.getDocumentElement(), null) {
+    //            @Override
+    //            protected void complexElement2Attr(final Element element) {
+    //                N.println(element.getTagName());
+    //            }
+    //        };
+    //
+    //        N.println(config.toString());
+    //        assertEquals(config, config);
+    //    }
+
     @Test
     public void testGetCommonConfigPath() {
         String st = "..\\..\\abc\\abc.txt";

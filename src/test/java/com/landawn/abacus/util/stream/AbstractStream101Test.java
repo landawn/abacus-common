@@ -35,7 +35,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ByteArrayOutputStream;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.IOUtil;
@@ -689,17 +689,17 @@ public class AbstractStream101Test extends TestBase {
     }
 
     @Test
-    public void testToDataSetWithColumnNames() {
+    public void testToDatasetWithColumnNames() {
         List<Object[]> input = new ArrayList<>();
         input.add(new Object[] { "John", 25 });
         input.add(new Object[] { "Jane", 30 });
 
         Stream<Object[]> stream = createStream(input);
-        DataSet dataSet = stream.toDataSet(Arrays.asList("name", "age"));
+        Dataset dataset = stream.toDataset(Arrays.asList("name", "age"));
 
-        assertNotNull(dataSet);
-        assertEquals(2, dataSet.size());
-        assertEquals(Arrays.asList("name", "age"), dataSet.columnNameList());
+        assertNotNull(dataset);
+        assertEquals(2, dataset.size());
+        assertEquals(Arrays.asList("name", "age"), dataset.columnNameList());
     }
 
     @Test

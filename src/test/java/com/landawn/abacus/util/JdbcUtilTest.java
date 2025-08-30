@@ -106,7 +106,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        account.setId(id);
     //
     //        String sql_selectAccountById = NSC.selectFrom(Account.class).where(CF.eq("id")).sql();
-    //        DataSet rs = JdbcUtil.prepareNamedQuery(ds, sql_selectAccountById).setLong(1, id).query();
+    //        Dataset rs = JdbcUtil.prepareNamedQuery(ds, sql_selectAccountById).setLong(1, id).query();
     //        assertEquals(uuid, rs.get("gui"));
     //
     //        String gui = JdbcUtil.prepareNamedQuery(ds, sql_selectAccountById).setParameters(account).stream(Account.class).first().get().getGUI();
@@ -139,7 +139,7 @@ public class JdbcUtilTest extends AbstractTest {
     //
     //        long id = sqlExecutor.queryForLong("select id from account where gui = ?", uuid).get();
     //
-    //        DataSet rs = JdbcUtil.prepareQuery(ds, MySqlDef.selectAccountById).setLong(1, id).query();
+    //        Dataset rs = JdbcUtil.prepareQuery(ds, MySqlDef.selectAccountById).setLong(1, id).query();
     //        assertEquals(uuid, rs.get("gui"));
     //
     //        String gui = JdbcUtil.prepareQuery(ds, MySqlDef.selectAccountById).setLong(1, id).stream(Account.class).first().get().getGUI();
@@ -166,7 +166,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        stmt.setLong(1, id);
     //
     //        java.sql.ResultSet rs = stmt.executeQuery();
-    //        DataSet resultList = JdbcUtil.extractData(rs);
+    //        Dataset resultList = JdbcUtil.extractData(rs);
     //
     //        resultList.println();
     //
@@ -254,7 +254,7 @@ public class JdbcUtilTest extends AbstractTest {
     //
     //        long id = sqlExecutor.queryForLong("select id from account where gui = ?", uuid).get();
     //
-    //        DataSet rs = JdbcUtil.executeQuery(conn, MySqlDef.selectAccountById, id);
+    //        Dataset rs = JdbcUtil.executeQuery(conn, MySqlDef.selectAccountById, id);
     //        assertEquals(uuid, rs.get("gui"));
     //
     //        rs = JdbcUtil.executeQuery(conn, MySqlDef.selectAccountById, N.asList(id));
@@ -277,7 +277,7 @@ public class JdbcUtilTest extends AbstractTest {
     //
     //            long id = sqlExecutor.queryForLong("select id from account where gui = ?", uuid).get();
     //
-    //            DataSet rs = JdbcUtil.executeQuery(conn, MySqlDef.selectAccountById, id);
+    //            Dataset rs = JdbcUtil.executeQuery(conn, MySqlDef.selectAccountById, id);
     //            assertEquals(uuid, rs.get("gui"));
     //
     //            rs = JdbcUtil.executeQuery(conn, MySqlDef.selectAccountById, N.asList(id));
@@ -395,7 +395,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        String sql_insert = "insert into account_copy (id, gui, email_address, first_name, middle_name, last_name, birth_date, status, last_update_time, create_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     //        JdbcUtils.copy(sourceConn, sql_select, targetConn, sql_insert);
     //
-    //        DataSet result = sqlExecutor.query("select * from account_copy");
+    //        Dataset result = sqlExecutor.query("select * from account_copy");
     //
     //        assertEquals(accounts.length, result.size());
     //        sqlExecutor.update(MySqlDef.deleteAllAccount);
@@ -456,7 +456,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        String sql_insert = "insert into account_copy (id, gui, email_address, first_name, middle_name, last_name, birth_date, status, last_update_time, create_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     //        JdbcUtils.copy(sourceConn, sql_select, 200, 0, Long.MAX_VALUE, targetConn, sql_insert, null, 200, 0, true);
     //
-    //        DataSet result = sqlExecutor.query("select * from account_copy");
+    //        Dataset result = sqlExecutor.query("select * from account_copy");
     //
     //        assertEquals(accounts.length, result.size());
     //        sqlExecutor.update(MySqlDef.deleteAllAccount);
@@ -520,7 +520,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) sqlExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now);
     //
-    //        DataSet result = sqlExecutor.query(MySqlDef.selectAccountById, id);
+    //        Dataset result = sqlExecutor.query(MySqlDef.selectAccountById, id);
     //        N.println(result);
     //
     //        N.println(result.getRow(Account.class, 0));
@@ -569,7 +569,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        final PreparedStatement stmt = JdbcUtil.prepareStatement(conn, sql_selectAll);
     //        final ResultSet rs = stmt.executeQuery();
     //
-    //        DataSet ds = JdbcUtil.extractData(rs);
+    //        Dataset ds = JdbcUtil.extractData(rs);
     //        ds.println();
     //
     //        JdbcUtil.close(rs, stmt, conn);
@@ -577,7 +577,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        File csvFile = new File("./src/test/resources/test.csv");
     //        ds.toCsv(csvFile);
     //
-    //        DataSet ds1 = CSVUtil.loadCSV(csvFile);
+    //        Dataset ds1 = CSVUtil.loadCSV(csvFile);
     //        ds1.println();
     //
     //        assertEquals(ds.size(), ds1.size());
@@ -587,7 +587,7 @@ public class JdbcUtilTest extends AbstractTest {
     //
     //        assertEquals(0, ds1.size());
     //
-    //        DataSet ds2 = CSVUtil.loadCSV(Account.class, csvFile);
+    //        Dataset ds2 = CSVUtil.loadCSV(Account.class, csvFile);
     //        ds2.println();
     //
     //        assertEquals(ds.size(), ds2.size());
@@ -606,7 +606,7 @@ public class JdbcUtilTest extends AbstractTest {
     //            }
     //        }
     //
-    //        DataSet ds3 = CSVUtil.loadCSV(csvFile, columnTypeList);
+    //        Dataset ds3 = CSVUtil.loadCSV(csvFile, columnTypeList);
     //
     //        ds3.println();
     //
@@ -620,7 +620,7 @@ public class JdbcUtilTest extends AbstractTest {
     //            }
     //        }
     //
-    //        DataSet ds4 = CSVUtil.loadCSV(csvFile, columnTypeMap);
+    //        Dataset ds4 = CSVUtil.loadCSV(csvFile, columnTypeMap);
     //
     //        ds4.println();
     //
@@ -659,7 +659,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        // rs.next();
     //        JdbcUtil.skip(rs, 20);
     //
-    //        DataSet ds = JdbcUtil.extractData(rs);
+    //        Dataset ds = JdbcUtil.extractData(rs);
     //        ds.println();
     //
     //        N.println(ds.size());
@@ -688,7 +688,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, N.asList(accounts));
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.length, ids.size());
     //        assertEquals(accounts.length, result.size());
     //
@@ -705,7 +705,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        sql = "INSERT INTO account (first_name, last_name, gui, last_update_time, create_time) VALUES ( ?,  ?,  ?, ?, ?)";
     //        JdbcUtils.importCSV(file, conn, sql, Type.ofAll(String.class, String.class, String.class, Timestamp.class, Timestamp.class));
     //
-    //        DataSet result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        result2.println();
     //        assertEquals(result.size(), result2.size());
     //
@@ -744,7 +744,7 @@ public class JdbcUtilTest extends AbstractTest {
     //            file.delete();
     //        }
     //
-    //        DataSet copy = result.copy(N.asList("first_name", "last_name", "gui", "last_update_time", "create_time"));
+    //        Dataset copy = result.copy(N.asList("first_name", "last_name", "gui", "last_update_time", "create_time"));
     //        copy.toCsv(file, copy.columnNameList(), 0, result.size());
     //
     //        sqlExecutor.batchUpdate(DELETE_ACCOUNT_BY_ID, N.asList(accounts));
@@ -808,7 +808,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, N.asList(accounts));
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.length, ids.size());
     //        assertEquals(accounts.length, result.size());
     //
@@ -827,7 +827,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        sql = "INSERT INTO account (first_name, last_name, gui, last_update_time, create_time) VALUES ( ?,  ?,  ?, ?, ?)";
     //        JdbcUtils.importCSV(file, conn, sql, types);
     //
-    //        DataSet result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        result2.println();
     //        assertEquals(result.size(), result2.size());
     //
@@ -842,7 +842,7 @@ public class JdbcUtilTest extends AbstractTest {
     //            file.delete();
     //        }
     //
-    //        DataSet copy = result.copy(N.asList("first_name", "last_name", "gui", "last_update_time", "create_time"));
+    //        Dataset copy = result.copy(N.asList("first_name", "last_name", "gui", "last_update_time", "create_time"));
     //        copy.toCsv(file, copy.columnNameList(), 0, result.size());
     //
     //        sqlExecutor.batchUpdate(DELETE_ACCOUNT_BY_ID, N.asList(accounts));
@@ -906,7 +906,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        List<Long> ids = sqlExecutor.batchInsert(INSERT_ACCOUNT, N.asList(accounts));
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        assertEquals(accounts.length, ids.size());
     //        assertEquals(accounts.length, result.size());
     //
@@ -925,7 +925,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        sql = "INSERT INTO account (first_name, last_name, gui, last_update_time, create_time) VALUES ( ?,  ?,  ?, ?, ?)";
     //        JdbcUtils.importCSV(file, conn, sql, types);
     //
-    //        DataSet result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        result2.println();
     //        assertEquals(result.size(), result2.size());
     //
@@ -940,7 +940,7 @@ public class JdbcUtilTest extends AbstractTest {
     //            file.delete();
     //        }
     //
-    //        DataSet copy = result.copy(N.asList("first_name", "last_name", "gui", "last_update_time", "create_time"));
+    //        Dataset copy = result.copy(N.asList("first_name", "last_name", "gui", "last_update_time", "create_time"));
     //        copy.toCsv(file, copy.columnNameList(), 0, result.size());
     //
     //        sqlExecutor.batchUpdate(DELETE_ACCOUNT_BY_ID, N.asList(accounts));
@@ -1038,7 +1038,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        sqlExecutor.batchInsert(INSERT_ACCOUNT, N.asList(accounts));
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //        Connection conn = sqlExecutor.getConnection();
@@ -1047,7 +1047,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        N.println(sql);
     //        JdbcUtils.importData(result, conn, sql);
     //
-    //        DataSet result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //
     //        assertEquals(result, result2);
     //
@@ -1074,7 +1074,7 @@ public class JdbcUtilTest extends AbstractTest {
     //        sqlExecutor.update(DELETE_ALL_ACCOUNT);
     //
     //        sqlExecutor.batchInsert(INSERT_ACCOUNT, N.asList(accounts));
-    //        DataSet result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //        File csvFile = new File("./src/test/resources/test.csv");
     //        result.toCsv(csvFile);
     //
@@ -1096,7 +1096,7 @@ public class JdbcUtilTest extends AbstractTest {
     //            }
     //        });
     //
-    //        DataSet result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
+    //        Dataset result2 = sqlExecutor.query(SELECT_ALL_ACCOUNT);
     //
     //        assertEquals(result, result2);
     //

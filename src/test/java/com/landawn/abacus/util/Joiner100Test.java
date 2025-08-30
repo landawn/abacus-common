@@ -626,7 +626,7 @@ public class Joiner100Test extends TestBase {
     }
 
     @Test
-    public void testLargeDataSet() {
+    public void testLargeDataset() {
         Joiner joiner = Joiner.with(",");
         for (int i = 0; i < 1000; i++) {
             joiner.append(i);

@@ -1135,8 +1135,8 @@ public class CommonUtil103Test extends TestBase {
     }
 
     @Test
-    public void testNewEmptyDataSet() {
-        DataSet ds = N.newEmptyDataSet();
+    public void testNewEmptyDataset() {
+        Dataset ds = N.newEmptyDataset();
         assertNotNull(ds);
         assertTrue(ds.isEmpty());
         assertEquals(0, ds.size());
@@ -1144,9 +1144,9 @@ public class CommonUtil103Test extends TestBase {
     }
 
     @Test
-    public void testNewEmptyDataSet_WithColumnNames() {
+    public void testNewEmptyDataset_WithColumnNames() {
         List<String> columnNames = Arrays.asList("col1", "col2", "col3");
-        DataSet ds = N.newEmptyDataSet(columnNames);
+        Dataset ds = N.newEmptyDataset(columnNames);
         assertNotNull(ds);
         assertTrue(ds.isEmpty());
         assertEquals(0, ds.size());
@@ -1155,12 +1155,12 @@ public class CommonUtil103Test extends TestBase {
     }
 
     @Test
-    public void testNewEmptyDataSet_WithProperties() {
+    public void testNewEmptyDataset_WithProperties() {
         Map<String, Object> properties = new HashMap<>();
         properties.put("key", "value");
 
         List<String> columnNames = Arrays.asList("col1", "col2");
-        DataSet ds = N.newEmptyDataSet(columnNames, properties);
+        Dataset ds = N.newEmptyDataset(columnNames, properties);
         assertNotNull(ds);
         assertEquals(0, ds.size());
         assertEquals(2, ds.columnCount());
@@ -1168,7 +1168,7 @@ public class CommonUtil103Test extends TestBase {
     }
 
     @Test
-    public void testNewDataSet_FromRows() {
+    public void testNewDataset_FromRows() {
         List<Map<String, Object>> rows = new ArrayList<>();
         Map<String, Object> row1 = new HashMap<>();
         row1.put("name", "John");
@@ -1180,7 +1180,7 @@ public class CommonUtil103Test extends TestBase {
         row2.put("age", 25);
         rows.add(row2);
 
-        DataSet ds = N.newDataSet(rows);
+        Dataset ds = N.newDataset(rows);
         assertNotNull(ds);
         assertEquals(2, ds.size());
         assertEquals(2, ds.columnCount());
@@ -1189,24 +1189,24 @@ public class CommonUtil103Test extends TestBase {
     }
 
     @Test
-    public void testNewDataSet_FromRowsWithProperties() {
+    public void testNewDataset_FromRowsWithProperties() {
         List<Map<String, Object>> rows = Arrays.asList(createMap("name", "John", "age", 30));
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("source", "test");
 
-        DataSet ds = N.newDataSet(rows, properties);
+        Dataset ds = N.newDataset(rows, properties);
         assertNotNull(ds);
         assertEquals(1, ds.size());
         assertEquals("test", ds.properties().get("source"));
     }
 
     @Test
-    public void testNewDataSet_WithColumnNamesAndRows() {
+    public void testNewDataset_WithColumnNamesAndRows() {
         List<String> columnNames = Arrays.asList("name", "age");
         List<Object[]> rows = Arrays.asList(new Object[] { "John", 30 }, new Object[] { "Jane", 25 });
 
-        DataSet ds = N.newDataSet(columnNames, rows);
+        Dataset ds = N.newDataset(columnNames, rows);
         assertNotNull(ds);
         assertEquals(2, ds.size());
         assertEquals(2, ds.columnCount());
@@ -1214,23 +1214,23 @@ public class CommonUtil103Test extends TestBase {
     }
 
     @Test
-    public void testNewDataSet_WithColumnNamesAndRowArray() {
+    public void testNewDataset_WithColumnNamesAndRowArray() {
         List<String> columnNames = Arrays.asList("name", "age");
         Object[][] rows = new Object[][] { { "John", 30 }, { "Jane", 25 } };
 
-        DataSet ds = N.newDataSet(columnNames, rows);
+        Dataset ds = N.newDataset(columnNames, rows);
         assertNotNull(ds);
         assertEquals(2, ds.size());
         assertEquals(2, ds.columnCount());
     }
 
     @Test
-    public void testNewDataSet_FromKeyValueMap() {
+    public void testNewDataset_FromKeyValueMap() {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("John", 30);
         map.put("Jane", 25);
 
-        DataSet ds = N.newDataSet("Name", "Age", map);
+        Dataset ds = N.newDataset("Name", "Age", map);
         assertNotNull(ds);
         assertEquals(2, ds.size());
         assertEquals(2, ds.columnCount());
@@ -1238,12 +1238,12 @@ public class CommonUtil103Test extends TestBase {
     }
 
     @Test
-    public void testNewDataSet_FromMapOfCollections() {
+    public void testNewDataset_FromMapOfCollections() {
         Map<String, List<Object>> map = new LinkedHashMap<>();
         map.put("name", Arrays.asList("John", "Jane"));
         map.put("age", Arrays.asList(30, 25));
 
-        DataSet ds = N.newDataSet(map);
+        Dataset ds = N.newDataset(map);
         assertNotNull(ds);
         assertEquals(2, ds.size());
         assertEquals(2, ds.columnCount());
@@ -1251,9 +1251,9 @@ public class CommonUtil103Test extends TestBase {
     }
 
     @Test
-    public void testNewDataSet_SingleColumn() {
+    public void testNewDataset_SingleColumn() {
         List<String> values = Arrays.asList("A", "B", "C");
-        DataSet ds = N.newDataSet("Letter", values);
+        Dataset ds = N.newDataset("Letter", values);
         assertNotNull(ds);
         assertEquals(3, ds.size());
         assertEquals(1, ds.columnCount());
@@ -1261,12 +1261,12 @@ public class CommonUtil103Test extends TestBase {
     }
 
     @Test
-    public void testMerge_TwoDataSets() {
-        DataSet ds1 = N.newDataSet(Arrays.asList("col1"), Arrays.asList(new Object[] { "A" }, new Object[] { "B" }));
+    public void testMerge_TwoDatasets() {
+        Dataset ds1 = N.newDataset(Arrays.asList("col1"), Arrays.asList(new Object[] { "A" }, new Object[] { "B" }));
 
-        DataSet ds2 = N.newDataSet(Arrays.asList("col2"), Arrays.asList(new Object[] { 1 }, new Object[] { 2 }));
+        Dataset ds2 = N.newDataset(Arrays.asList("col2"), Arrays.asList(new Object[] { 1 }, new Object[] { 2 }));
 
-        DataSet merged = N.merge(ds1, ds2);
+        Dataset merged = N.merge(ds1, ds2);
         assertNotNull(merged);
         assertEquals(4, merged.size()); // 2 + 2 rows
         assertEquals(2, merged.columnCount()); // col1 and col2
@@ -1276,53 +1276,53 @@ public class CommonUtil103Test extends TestBase {
     }
 
     @Test
-    public void testMerge_ThreeDataSets() {
-        DataSet ds1 = N.newDataSet(Arrays.asList("col1"), Arrays.asList(new Object[] { "A" }));
-        DataSet ds2 = N.newDataSet(Arrays.asList("col2"), Arrays.asList(new Object[] { 1 }));
-        DataSet ds3 = N.newDataSet(Arrays.asList("col3"), Arrays.asList(new Object[] { true }));
+    public void testMerge_ThreeDatasets() {
+        Dataset ds1 = N.newDataset(Arrays.asList("col1"), Arrays.asList(new Object[] { "A" }));
+        Dataset ds2 = N.newDataset(Arrays.asList("col2"), Arrays.asList(new Object[] { 1 }));
+        Dataset ds3 = N.newDataset(Arrays.asList("col3"), Arrays.asList(new Object[] { true }));
 
-        DataSet merged = N.merge(ds1, ds2, ds3);
+        Dataset merged = N.merge(ds1, ds2, ds3);
         assertNotNull(merged);
         assertEquals(3, merged.size());
         assertEquals(3, merged.columnCount());
 
         assertThrows(IllegalArgumentException.class, () -> N.merge(null, ds2, ds3));
         assertThrows(IllegalArgumentException.class, () -> N.merge(ds1, null, ds3));
-        assertThrows(IllegalArgumentException.class, () -> N.merge(ds1, ds2, (DataSet) null));
+        assertThrows(IllegalArgumentException.class, () -> N.merge(ds1, ds2, (Dataset) null));
     }
 
     @Test
-    public void testMerge_CollectionOfDataSets() {
-        List<DataSet> datasets = Arrays.asList(N.newDataSet(Arrays.asList("col1"), Arrays.asList(new Object[] { "A" })),
-                N.newDataSet(Arrays.asList("col2"), Arrays.asList(new Object[] { 1 })),
-                N.newDataSet(Arrays.asList("col3"), Arrays.asList(new Object[] { true })));
+    public void testMerge_CollectionOfDatasets() {
+        List<Dataset> datasets = Arrays.asList(N.newDataset(Arrays.asList("col1"), Arrays.asList(new Object[] { "A" })),
+                N.newDataset(Arrays.asList("col2"), Arrays.asList(new Object[] { 1 })),
+                N.newDataset(Arrays.asList("col3"), Arrays.asList(new Object[] { true })));
 
-        DataSet merged = N.merge(datasets);
+        Dataset merged = N.merge(datasets);
         assertNotNull(merged);
         assertEquals(3, merged.size());
         assertEquals(3, merged.columnCount());
 
         // Test empty collection
-        assertThrows(IllegalArgumentException.class, () -> N.merge(new ArrayList<DataSet>()));
+        assertThrows(IllegalArgumentException.class, () -> N.merge(new ArrayList<Dataset>()));
 
         // Test single dataset
-        DataSet single = N.merge(Arrays.asList(datasets.get(0)));
+        Dataset single = N.merge(Arrays.asList(datasets.get(0)));
         assertNotNull(single);
         assertEquals(1, single.size());
 
-        assertThrows(IllegalArgumentException.class, () -> N.merge((Collection<DataSet>) null));
+        assertThrows(IllegalArgumentException.class, () -> N.merge((Collection<Dataset>) null));
     }
 
     @Test
     public void testMerge_WithRequiresSameColumns() {
-        DataSet ds1 = N.newDataSet(Arrays.asList("col1", "col2"), N.asSingletonList(new Object[] { "A", 1 }));
+        Dataset ds1 = N.newDataset(Arrays.asList("col1", "col2"), N.asSingletonList(new Object[] { "A", 1 }));
 
-        DataSet ds2 = N.newDataSet(Arrays.asList("col1", "col2"), N.asSingletonList(new Object[] { "B", 2 }));
+        Dataset ds2 = N.newDataset(Arrays.asList("col1", "col2"), N.asSingletonList(new Object[] { "B", 2 }));
 
-        DataSet ds3 = N.newDataSet(Arrays.asList("col1", "col3"), N.asSingletonList(new Object[] { "C", 3 }));
+        Dataset ds3 = N.newDataset(Arrays.asList("col1", "col3"), N.asSingletonList(new Object[] { "C", 3 }));
 
         // Should work with same columns
-        DataSet merged = N.merge(Arrays.asList(ds1, ds2), true);
+        Dataset merged = N.merge(Arrays.asList(ds1, ds2), true);
         assertNotNull(merged);
         assertEquals(2, merged.size());
 

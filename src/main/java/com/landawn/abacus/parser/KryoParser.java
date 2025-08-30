@@ -98,7 +98,7 @@ import com.landawn.abacus.util.BooleanList;
 import com.landawn.abacus.util.ByteArrayOutputStream;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.CharList;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.FloatList;
@@ -123,7 +123,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Range;
-import com.landawn.abacus.util.RowDataSet;
+import com.landawn.abacus.util.RowDataset;
 import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.ShortList;
@@ -941,8 +941,8 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         builtInClassesToRegister.add(HBaseColumn.class);
 
         builtInClassesToRegister.add(Type.class);
-        builtInClassesToRegister.add(DataSet.class);
-        builtInClassesToRegister.add(RowDataSet.class);
+        builtInClassesToRegister.add(Dataset.class);
+        builtInClassesToRegister.add(RowDataset.class);
         builtInClassesToRegister.add(Sheet.class);
 
         builtInClassesToRegister.add(Map.Entry.class);

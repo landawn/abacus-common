@@ -1452,20 +1452,20 @@ public class NTest extends AbstractParserTest {
     @Test
     public void test_asResultSet() {
         List<?> list = createAccountList(Account.class, 99);
-        DataSet rs = N.newDataSet(list);
+        Dataset rs = N.newDataset(list);
         rs.println();
 
         list = createAccountList(com.landawn.abacus.entity.pjo.basic.Account.class, 99);
-        rs = N.newDataSet(list);
+        rs = N.newDataset(list);
         rs.println();
 
         final List<?> list2 = createAccountPropsList(79);
 
-        rs = N.newDataSet(list2);
+        rs = N.newDataset(list2);
         rs.println();
 
         list.addAll((List) list2);
-        rs = N.newDataSet(list);
+        rs = N.newDataset(list);
         rs.println();
 
         assertEquals(178, rs.size());
@@ -1474,7 +1474,7 @@ public class NTest extends AbstractParserTest {
     @Test
     public void test_asResultSet_2() {
         final List<Account> beanList = createAccountList(Account.class, 13);
-        final DataSet rs1 = N.newDataSet(beanList);
+        final Dataset rs1 = N.newDataset(beanList);
         rs1.println();
 
         final List<Map<String, Object>> mapLsit = new ArrayList<>(beanList.size());
@@ -1482,19 +1482,19 @@ public class NTest extends AbstractParserTest {
             mapLsit.add(Beans.bean2Map(account));
         }
 
-        DataSet rs2 = N.newDataSet(rs1.columnNameList(), mapLsit);
+        Dataset rs2 = N.newDataset(rs1.columnNameList(), mapLsit);
         rs2.println();
         assertEquals(rs1, rs2);
 
-        rs2 = N.newDataSet(rs1.toList(Map.class));
+        rs2 = N.newDataset(rs1.toList(Map.class));
         rs2.println();
         // assertEquals(rs1, rs2);
 
-        final DataSet rs3 = N.newDataSet(rs1.columnNameList(), rs1.toList(Object[].class));
+        final Dataset rs3 = N.newDataset(rs1.columnNameList(), rs1.toList(Object[].class));
         rs3.println();
         // assertEquals(rs1, rs3);
 
-        final DataSet rs4 = N.newDataSet(rs1.columnNameList(), rs1.toList(List.class));
+        final Dataset rs4 = N.newDataset(rs1.columnNameList(), rs1.toList(List.class));
         rs4.println();
         //  assertEquals(rs1, rs4);
 

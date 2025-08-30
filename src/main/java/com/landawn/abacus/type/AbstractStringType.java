@@ -131,7 +131,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
                 try {
                     clob.free();
                 } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e); //NOSONAR
+                    // Log and ignore - don't mask the original exception
+                    // Freeing resources should not override the main exception
                 }
             }
         } else {

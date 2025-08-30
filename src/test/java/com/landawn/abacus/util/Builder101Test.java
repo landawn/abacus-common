@@ -21,7 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Builder.DataSetBuilder;
+import com.landawn.abacus.util.Builder.DatasetBuilder;
 import com.landawn.abacus.util.Builder.MapBuilder;
 import com.landawn.abacus.util.Builder.MultimapBuilder;
 import com.landawn.abacus.util.Builder.MultisetBuilder;
@@ -30,7 +30,7 @@ import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 public class Builder101Test extends TestBase {
 
     // Test data
-    private DataSet testDataSet;
+    private Dataset testDataset;
     private List<String> columnNames;
     private List<List<Object>> data;
 
@@ -41,14 +41,14 @@ public class Builder101Test extends TestBase {
         data.add(N.asList("John", 25, "NYC"));
         data.add(N.asList("Jane", 30, "LA"));
         data.add(N.asList("Bob", 35, "Chicago"));
-        testDataSet = new RowDataSet(columnNames, data);
+        testDataset = new RowDataset(columnNames, data);
     }
 
-    // ===== Additional DataSetBuilder Tests =====
+    // ===== Additional DatasetBuilder Tests =====
 
     @Test
-    public void testDataSetBuilderRenameColumns() {
-        DataSetBuilder builder = Builder.of(testDataSet);
+    public void testDatasetBuilderRenameColumns() {
+        DatasetBuilder builder = Builder.of(testDataset);
 
         Map<String, String> oldNewNames = new HashMap<>();
         oldNewNames.put("name", "firstName");
@@ -56,51 +56,51 @@ public class Builder101Test extends TestBase {
 
         builder.renameColumns(oldNewNames);
 
-        assertTrue(testDataSet.columnNameList().contains("firstName"));
-        assertTrue(testDataSet.columnNameList().contains("years"));
-        assertFalse(testDataSet.columnNameList().contains("name"));
-        assertFalse(testDataSet.columnNameList().contains("age"));
+        assertTrue(testDataset.columnNameList().contains("firstName"));
+        assertTrue(testDataset.columnNameList().contains("years"));
+        assertFalse(testDataset.columnNameList().contains("name"));
+        assertFalse(testDataset.columnNameList().contains("age"));
     }
 
     @Test
-    public void testDataSetBuilderRenameColumnsWithFunction() {
-        DataSetBuilder builder = Builder.of(testDataSet);
+    public void testDatasetBuilderRenameColumnsWithFunction() {
+        DatasetBuilder builder = Builder.of(testDataset);
 
         // Rename specific columns with a function
         builder.renameColumns(Arrays.asList("name", "city"), col -> col.toUpperCase());
 
-        assertTrue(testDataSet.columnNameList().contains("NAME"));
-        assertTrue(testDataSet.columnNameList().contains("CITY"));
-        assertTrue(testDataSet.columnNameList().contains("age")); // unchanged
+        assertTrue(testDataset.columnNameList().contains("NAME"));
+        assertTrue(testDataset.columnNameList().contains("CITY"));
+        assertTrue(testDataset.columnNameList().contains("age")); // unchanged
     }
 
     @Test
-    public void testDataSetBuilderRenameAllColumnsWithFunction() {
-        DataSetBuilder builder = Builder.of(testDataSet);
+    public void testDatasetBuilderRenameAllColumnsWithFunction() {
+        DatasetBuilder builder = Builder.of(testDataset);
 
         // Rename all columns
         builder.renameColumns(col -> "col_" + col);
 
-        assertTrue(testDataSet.columnNameList().contains("col_name"));
-        assertTrue(testDataSet.columnNameList().contains("col_age"));
-        assertTrue(testDataSet.columnNameList().contains("col_city"));
+        assertTrue(testDataset.columnNameList().contains("col_name"));
+        assertTrue(testDataset.columnNameList().contains("col_age"));
+        assertTrue(testDataset.columnNameList().contains("col_city"));
     }
 
     @Test
-    public void testDataSetBuilderAddColumnWithBiFunction() {
-        DataSetBuilder builder = Builder.of(testDataSet);
+    public void testDatasetBuilderAddColumnWithBiFunction() {
+        DatasetBuilder builder = Builder.of(testDataset);
 
         // Add column combining two columns
         BiFunction<Object, Object, String> combineFunc = (name, city) -> name + " from " + city;
 
         builder.addColumn("description", Tuple.of("name", "city"), combineFunc);
 
-        assertTrue(testDataSet.columnNameList().contains("description"));
+        assertTrue(testDataset.columnNameList().contains("description"));
     }
 
     @Test
-    public void testDataSetBuilderAddColumnWithMultipleColumns() {
-        DataSetBuilder builder = Builder.of(testDataSet);
+    public void testDatasetBuilderAddColumnWithMultipleColumns() {
+        DatasetBuilder builder = Builder.of(testDataset);
 
         // Add column based on multiple columns using DisposableObjArray
         Function<DisposableObjArray, String> func = arr -> {
@@ -109,48 +109,48 @@ public class Builder101Test extends TestBase {
 
         builder.addColumn("nameAge", Arrays.asList("name", "age"), func);
 
-        assertTrue(testDataSet.columnNameList().contains("nameAge"));
+        assertTrue(testDataset.columnNameList().contains("nameAge"));
     }
 
     @Test
-    public void testDataSetBuilderRemoveColumns() {
-        DataSetBuilder builder = Builder.of(testDataSet);
+    public void testDatasetBuilderRemoveColumns() {
+        DatasetBuilder builder = Builder.of(testDataset);
 
         builder.removeColumns(Arrays.asList("age", "city"));
 
-        assertEquals(1, testDataSet.columnCount());
-        assertTrue(testDataSet.columnNameList().contains("name"));
-        assertFalse(testDataSet.columnNameList().contains("age"));
-        assertFalse(testDataSet.columnNameList().contains("city"));
+        assertEquals(1, testDataset.columnCount());
+        assertTrue(testDataset.columnNameList().contains("name"));
+        assertFalse(testDataset.columnNameList().contains("age"));
+        assertFalse(testDataset.columnNameList().contains("city"));
     }
 
     @Test
-    public void testDataSetBuilderRemoveColumnsWithPredicate() {
-        DataSetBuilder builder = Builder.of(testDataSet);
+    public void testDatasetBuilderRemoveColumnsWithPredicate() {
+        DatasetBuilder builder = Builder.of(testDataset);
 
         // Remove columns that start with 'c'
         builder.removeColumns(col -> col.startsWith("c"));
 
-        assertEquals(2, testDataSet.columnCount());
-        assertFalse(testDataSet.columnNameList().contains("city"));
-        assertTrue(testDataSet.columnNameList().contains("name"));
-        assertTrue(testDataSet.columnNameList().contains("age"));
+        assertEquals(2, testDataset.columnCount());
+        assertFalse(testDataset.columnNameList().contains("city"));
+        assertTrue(testDataset.columnNameList().contains("name"));
+        assertTrue(testDataset.columnNameList().contains("age"));
     }
 
     @Test
-    public void testDataSetBuilderDivideColumn() {
+    public void testDatasetBuilderDivideColumn() {
         // Add a combined column first
-        testDataSet.addColumn("fullName", Arrays.asList("John Doe", "Jane Smith", "Bob Jones"));
+        testDataset.addColumn("fullName", Arrays.asList("John Doe", "Jane Smith", "Bob Jones"));
 
-        DataSetBuilder builder = Builder.of(testDataSet);
+        DatasetBuilder builder = Builder.of(testDataset);
 
         Function<Object, List<String>> splitFunc = fullName -> Arrays.asList(fullName.toString().split(" "));
 
         builder.divideColumn("fullName", Arrays.asList("firstName", "lastName"), splitFunc);
 
-        assertFalse(testDataSet.columnNameList().contains("fullName"));
-        assertTrue(testDataSet.columnNameList().contains("firstName"));
-        assertTrue(testDataSet.columnNameList().contains("lastName"));
+        assertFalse(testDataset.columnNameList().contains("fullName"));
+        assertTrue(testDataset.columnNameList().contains("firstName"));
+        assertTrue(testDataset.columnNameList().contains("lastName"));
     }
 
     // ===== Additional MultimapBuilder Tests =====

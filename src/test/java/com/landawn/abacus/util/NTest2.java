@@ -466,7 +466,7 @@ public class NTest2 extends AbstractParserTest {
 
     @Test
     public void test_001() {
-        final DataSet dataset = N.newDataSet(N.asList("contact.email"), N.asList(N.asList("addd")));
+        final Dataset dataset = N.newDataset(N.asList("contact.email"), N.asList(N.asList("addd")));
         dataset.println();
 
         final Account account = dataset.getRow(0, Account.class);

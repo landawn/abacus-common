@@ -232,14 +232,14 @@ public class Builder<T> {
     }
 
     /**
-     * Creates a specialized DataSetBuilder for the given DataSet.
+     * Creates a specialized DatasetBuilder for the given Dataset.
      *
-     * @param val the DataSet to wrap in a builder
-     * @return a new DataSetBuilder instance
+     * @param val the Dataset to wrap in a builder
+     * @return a new DatasetBuilder instance
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}
      */
-    public static DataSetBuilder of(final DataSet val) throws IllegalArgumentException {
-        return new DataSetBuilder(val);
+    public static DatasetBuilder of(final Dataset val) throws IllegalArgumentException {
+        return new DatasetBuilder(val);
     }
 
     @SuppressWarnings("rawtypes")
@@ -279,8 +279,8 @@ public class Builder<T> {
         creatorMap.put(ListMultimap.class, val -> Builder.of((Multimap) val));
         creatorMap.put(SetMultimap.class, val -> Builder.of((Multimap) val));
 
-        creatorMap.put(DataSet.class, val -> Builder.of((DataSet) val));
-        creatorMap.put(RowDataSet.class, val -> Builder.of((DataSet) val));
+        creatorMap.put(Dataset.class, val -> Builder.of((Dataset) val));
+        creatorMap.put(RowDataset.class, val -> Builder.of((Dataset) val));
     }
 
     /**
@@ -316,8 +316,8 @@ public class Builder<T> {
             result = of((Map) val);
         } else if (val instanceof Multimap) {
             result = of((Multimap) val);
-        } else if (val instanceof DataSet) {
-            result = of((DataSet) val);
+        } else if (val instanceof Dataset) {
+            result = of((Dataset) val);
         } else {
             result = new Builder<>(val);
         }
@@ -2127,19 +2127,19 @@ public class Builder<T> {
     }
 
     /**
-     * Builder for {@link DataSet} that provides fluent methods for data manipulation operations
+     * Builder for {@link Dataset} that provides fluent methods for data manipulation operations
      * such as renaming columns, adding/removing columns, transforming data, and combining datasets.
      * 
-     * @see DataSet
+     * @see Dataset
      */
-    public static final class DataSetBuilder extends Builder<DataSet> {
+    public static final class DatasetBuilder extends Builder<Dataset> {
 
         /**
          * Instantiates a new data set builder.
          *
-         * @param ds the DataSet instance to wrap
+         * @param ds the Dataset instance to wrap
          */
-        DataSetBuilder(final DataSet ds) {
+        DatasetBuilder(final Dataset ds) {
             super(ds);
         }
 
@@ -2148,14 +2148,14 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.renameColumn("old_name", "new_name");
+         * datasetBuilder.renameColumn("old_name", "new_name");
          * }</pre>
          *
          * @param columnName the current name of the column
          * @param newColumnName the new name for the column
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder renameColumn(final String columnName, final String newColumnName) {
+        public DatasetBuilder renameColumn(final String columnName, final String newColumnName) {
             val.renameColumn(columnName, newColumnName);
 
             return this;
@@ -2170,13 +2170,13 @@ public class Builder<T> {
          *     "old_col1", "new_col1",
          *     "old_col2", "new_col2"
          * );
-         * dataSetBuilder.renameColumns(renames);
+         * datasetBuilder.renameColumns(renames);
          * }</pre>
          *
          * @param oldNewNames a map where keys are current column names and values are new names
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder renameColumns(final Map<String, String> oldNewNames) {
+        public DatasetBuilder renameColumns(final Map<String, String> oldNewNames) {
             val.renameColumns(oldNewNames);
 
             return this;
@@ -2188,7 +2188,7 @@ public class Builder<T> {
         //         * @param func
         //         * @return
         //         */
-        //        public DataSetBuilder renameColumn(String columnName, Function<? super String, String> func) {
+        //        public DatasetBuilder renameColumn(String columnName, Function<? super String, String> func) {
         //            val.renameColumn(columnName, func);
         //
         //            return this;
@@ -2200,7 +2200,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.renameColumns(Arrays.asList("col1", "col2"), 
+         * datasetBuilder.renameColumns(Arrays.asList("col1", "col2"), 
          *                             name -> name.toUpperCase());
          * }</pre>
          *
@@ -2208,7 +2208,7 @@ public class Builder<T> {
          * @param func the function that transforms old names to new names
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder renameColumns(final Collection<String> columnNames, final Function<? super String, String> func) {
+        public DatasetBuilder renameColumns(final Collection<String> columnNames, final Function<? super String, String> func) {
             val.renameColumns(columnNames, func);
 
             return this;
@@ -2219,13 +2219,13 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.renameColumns(name -> "prefix_" + name);
+         * datasetBuilder.renameColumns(name -> "prefix_" + name);
          * }</pre>
          *
          * @param func the function that transforms old names to new names
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder renameColumns(final Function<? super String, String> func) {
+        public DatasetBuilder renameColumns(final Function<? super String, String> func) {
             val.renameColumns(func);
 
             return this;
@@ -2237,14 +2237,14 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.addColumn("age", Arrays.asList(25, 30, 35));
+         * datasetBuilder.addColumn("age", Arrays.asList(25, 30, 35));
          * }</pre>
          *
          * @param columnName the name of the new column
          * @param column the list of values for the new column
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder addColumn(final String columnName, final List<?> column) {
+        public DatasetBuilder addColumn(final String columnName, final List<?> column) {
             val.addColumn(columnName, column);
 
             return this;
@@ -2256,7 +2256,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.addColumn(1, "age", Arrays.asList(25, 30, 35));
+         * datasetBuilder.addColumn(1, "age", Arrays.asList(25, 30, 35));
          * }</pre>
          *
          * @param columnIndex the position where the column should be inserted (0-based)
@@ -2264,7 +2264,7 @@ public class Builder<T> {
          * @param column the list of values for the new column
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder addColumn(final int columnIndex, final String columnName, final List<?> column) {
+        public DatasetBuilder addColumn(final int columnIndex, final String columnName, final List<?> column) {
             val.addColumn(columnIndex, columnName, column);
 
             return this;
@@ -2276,7 +2276,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.addColumn("age_squared", "age", 
+         * datasetBuilder.addColumn("age_squared", "age", 
          *                         (Integer age) -> age * age);
          * }</pre>
          *
@@ -2285,7 +2285,7 @@ public class Builder<T> {
          * @param func the function to transform values from the source column
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder addColumn(final String newColumnName, final String fromColumnName, final Function<?, ?> func) {
+        public DatasetBuilder addColumn(final String newColumnName, final String fromColumnName, final Function<?, ?> func) {
             val.addColumn(newColumnName, fromColumnName, func);
 
             return this;
@@ -2296,7 +2296,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.addColumn(2, "age_squared", "age", 
+         * datasetBuilder.addColumn(2, "age_squared", "age", 
          *                         (Integer age) -> age * age);
          * }</pre>
          *
@@ -2306,7 +2306,7 @@ public class Builder<T> {
          * @param func the function to transform values from the source column
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder addColumn(final int columnIndex, final String newColumnName, final String fromColumnName, final Function<?, ?> func) {
+        public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final String fromColumnName, final Function<?, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnName, func);
 
             return this;
@@ -2318,7 +2318,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.addColumn("full_name", Arrays.asList("first", "last"),
+         * datasetBuilder.addColumn("full_name", Arrays.asList("first", "last"),
          *     arr -> arr.get(0) + " " + arr.get(1));
          * }</pre>
          *
@@ -2327,7 +2327,7 @@ public class Builder<T> {
          * @param func the function that combines values from source columns
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder addColumn(final String newColumnName, final Collection<String> fromColumnNames,
+        public DatasetBuilder addColumn(final String newColumnName, final Collection<String> fromColumnNames,
                 final Function<? super DisposableObjArray, ?> func) {
             val.addColumn(newColumnName, fromColumnNames, func);
 
@@ -2339,7 +2339,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.addColumn(1, "full_name", Arrays.asList("first", "last"),
+         * datasetBuilder.addColumn(1, "full_name", Arrays.asList("first", "last"),
          *     arr -> arr.get(0) + " " + arr.get(1));
          * }</pre>
          *
@@ -2349,7 +2349,7 @@ public class Builder<T> {
          * @param func the function that combines values from source columns
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder addColumn(final int columnIndex, final String newColumnName, final Collection<String> fromColumnNames,
+        public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final Collection<String> fromColumnNames,
                 final Function<? super DisposableObjArray, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
 
@@ -2361,7 +2361,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.addColumn("sum", Tuple.of("col1", "col2"),
+         * datasetBuilder.addColumn("sum", Tuple.of("col1", "col2"),
          *     (Integer a, Integer b) -> a + b);
          * }</pre>
          *
@@ -2370,7 +2370,7 @@ public class Builder<T> {
          * @param func the binary function to combine values from the two columns
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder addColumn(final String newColumnName, final Tuple2<String, String> fromColumnNames, final BiFunction<?, ?, ?> func) {
+        public DatasetBuilder addColumn(final String newColumnName, final Tuple2<String, String> fromColumnNames, final BiFunction<?, ?, ?> func) {
             val.addColumn(newColumnName, fromColumnNames, func);
 
             return this;
@@ -2381,7 +2381,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.addColumn(3, "sum", Tuple.of("col1", "col2"),
+         * datasetBuilder.addColumn(3, "sum", Tuple.of("col1", "col2"),
          *     (Integer a, Integer b) -> a + b);
          * }</pre>
          *
@@ -2391,7 +2391,7 @@ public class Builder<T> {
          * @param func the binary function to combine values from the two columns
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder addColumn(final int columnIndex, final String newColumnName, final Tuple2<String, String> fromColumnNames,
+        public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final Tuple2<String, String> fromColumnNames,
                 final BiFunction<?, ?, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
 
@@ -2403,7 +2403,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.addColumn("result", Tuple.of("a", "b", "c"),
+         * datasetBuilder.addColumn("result", Tuple.of("a", "b", "c"),
          *     (Integer a, Integer b, Integer c) -> a + b + c);
          * }</pre>
          *
@@ -2412,7 +2412,7 @@ public class Builder<T> {
          * @param func the ternary function to combine values from the three columns
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder addColumn(final String newColumnName, final Tuple3<String, String, String> fromColumnNames, final TriFunction<?, ?, ?, ?> func) {
+        public DatasetBuilder addColumn(final String newColumnName, final Tuple3<String, String, String> fromColumnNames, final TriFunction<?, ?, ?, ?> func) {
             val.addColumn(newColumnName, fromColumnNames, func);
 
             return this;
@@ -2423,7 +2423,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.addColumn(2, "result", Tuple.of("a", "b", "c"),
+         * datasetBuilder.addColumn(2, "result", Tuple.of("a", "b", "c"),
          *     (Integer a, Integer b, Integer c) -> a + b + c);
          * }</pre>
          *
@@ -2433,7 +2433,7 @@ public class Builder<T> {
          * @param func the ternary function to combine values from the three columns
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder addColumn(final int columnIndex, final String newColumnName, final Tuple3<String, String, String> fromColumnNames,
+        public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final Tuple3<String, String, String> fromColumnNames,
                 final TriFunction<?, ?, ?, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
 
@@ -2445,13 +2445,13 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.removeColumn("unnecessary_column");
+         * datasetBuilder.removeColumn("unnecessary_column");
          * }</pre>
          *
          * @param columnName the name of the column to remove
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder removeColumn(final String columnName) {
+        public DatasetBuilder removeColumn(final String columnName) {
             val.removeColumn(columnName);
 
             return this;
@@ -2462,13 +2462,13 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.removeColumns(Arrays.asList("col1", "col2", "col3"));
+         * datasetBuilder.removeColumns(Arrays.asList("col1", "col2", "col3"));
          * }</pre>
          *
          * @param columnNames the collection of column names to remove
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder removeColumns(final Collection<String> columnNames) {
+        public DatasetBuilder removeColumns(final Collection<String> columnNames) {
             val.removeColumns(columnNames);
 
             return this;
@@ -2479,13 +2479,13 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.removeColumns(name -> name.startsWith("temp_"));
+         * datasetBuilder.removeColumns(name -> name.startsWith("temp_"));
          * }</pre>
          *
          * @param filter the predicate to test column names; columns returning true are removed
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder removeColumns(final Predicate<? super String> filter) {
+        public DatasetBuilder removeColumns(final Predicate<? super String> filter) {
             val.removeColumns(filter);
 
             return this;
@@ -2498,7 +2498,7 @@ public class Builder<T> {
         //         * @deprecated replaced by {@code removeColumns}.
         //         */
         //        @Deprecated
-        //        public DataSetBuilder removeColumnsIf(Predicate<? super String> filter) {
+        //        public DatasetBuilder removeColumnsIf(Predicate<? super String> filter) {
         //            val.removeColumnsIf(filter);
         //
         //            return this;
@@ -2510,14 +2510,14 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.updateColumn("price", (Double p) -> p * 1.1);
+         * datasetBuilder.updateColumn("price", (Double p) -> p * 1.1);
          * }</pre>
          *
          * @param columnName the name of the column to update
          * @param func the function to transform each value in the column
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder updateColumn(final String columnName, final Function<?, ?> func) {
+        public DatasetBuilder updateColumn(final String columnName, final Function<?, ?> func) {
             val.updateColumn(columnName, func);
 
             return this;
@@ -2528,7 +2528,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.updateColumns(Arrays.asList("price", "cost"), 
+         * datasetBuilder.updateColumns(Arrays.asList("price", "cost"), 
          *                             (Double v) -> v * 1.1);
          * }</pre>
          *
@@ -2536,7 +2536,7 @@ public class Builder<T> {
          * @param func the function to transform values in the specified columns
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder updateColumns(final Collection<String> columnNames, final Function<?, ?> func) {
+        public DatasetBuilder updateColumns(final Collection<String> columnNames, final Function<?, ?> func) {
             val.updateColumns(columnNames, func);
 
             return this;
@@ -2548,14 +2548,14 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.convertColumn("age", Integer.class);
+         * datasetBuilder.convertColumn("age", Integer.class);
          * }</pre>
          *
          * @param columnName the name of the column to convert
          * @param targetType the target class type for the column values
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder convertColumn(final String columnName, final Class<?> targetType) {
+        public DatasetBuilder convertColumn(final String columnName, final Class<?> targetType) {
             val.convertColumn(columnName, targetType);
 
             return this;
@@ -2570,13 +2570,13 @@ public class Builder<T> {
          *     "age", Integer.class,
          *     "salary", Double.class
          * );
-         * dataSetBuilder.convertColumns(conversions);
+         * datasetBuilder.convertColumns(conversions);
          * }</pre>
          *
          * @param columnTargetTypes a map of column names to their target types
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder convertColumns(final Map<String, Class<?>> columnTargetTypes) {
+        public DatasetBuilder convertColumns(final Map<String, Class<?>> columnTargetTypes) {
             val.convertColumns(columnTargetTypes);
 
             return this;
@@ -2588,7 +2588,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.combineColumns(Arrays.asList("year", "month", "day"), 
+         * datasetBuilder.combineColumns(Arrays.asList("year", "month", "day"), 
          *                              "date", LocalDate.class);
          * }</pre>
          *
@@ -2597,7 +2597,7 @@ public class Builder<T> {
          * @param newColumnClass the class type of the new column
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder combineColumns(final Collection<String> columnNames, final String newColumnName, final Class<?> newColumnClass) {
+        public DatasetBuilder combineColumns(final Collection<String> columnNames, final String newColumnName, final Class<?> newColumnClass) {
             val.combineColumns(columnNames, newColumnName, newColumnClass);
 
             return this;
@@ -2608,7 +2608,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.combineColumns(Arrays.asList("first", "last"), "fullName",
+         * datasetBuilder.combineColumns(Arrays.asList("first", "last"), "fullName",
          *     arr -> arr.get(0) + " " + arr.get(1));
          * }</pre>
          *
@@ -2617,7 +2617,7 @@ public class Builder<T> {
          * @param combineFunc the function that combines values from the source columns
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder combineColumns(final Collection<String> columnNames, final String newColumnName,
+        public DatasetBuilder combineColumns(final Collection<String> columnNames, final String newColumnName,
                 final Function<? super DisposableObjArray, ?> combineFunc) {
             val.combineColumns(columnNames, newColumnName, combineFunc);
 
@@ -2629,7 +2629,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.combineColumns(Tuple.of("width", "height"), "area",
+         * datasetBuilder.combineColumns(Tuple.of("width", "height"), "area",
          *     (Integer w, Integer h) -> w * h);
          * }</pre>
          *
@@ -2638,7 +2638,7 @@ public class Builder<T> {
          * @param combineFunc the binary function to combine values from the two columns
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder combineColumns(final Tuple2<String, String> columnNames, final String newColumnName, final BiFunction<?, ?, ?> combineFunc) {
+        public DatasetBuilder combineColumns(final Tuple2<String, String> columnNames, final String newColumnName, final BiFunction<?, ?, ?> combineFunc) {
             val.combineColumns(columnNames, newColumnName, combineFunc);
 
             return this;
@@ -2649,7 +2649,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.combineColumns(Tuple.of("red", "green", "blue"), "rgb",
+         * datasetBuilder.combineColumns(Tuple.of("red", "green", "blue"), "rgb",
          *     (Integer r, Integer g, Integer b) -> String.format("#%02X%02X%02X", r, g, b));
          * }</pre>
          *
@@ -2658,7 +2658,7 @@ public class Builder<T> {
          * @param combineFunc the ternary function to combine values from the three columns
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder combineColumns(final Tuple3<String, String, String> columnNames, final String newColumnName,
+        public DatasetBuilder combineColumns(final Tuple3<String, String, String> columnNames, final String newColumnName,
                 final TriFunction<?, ?, ?, ?> combineFunc) {
             val.combineColumns(columnNames, newColumnName, combineFunc);
 
@@ -2670,7 +2670,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.combineColumns(name -> name.startsWith("score_"), 
+         * datasetBuilder.combineColumns(name -> name.startsWith("score_"), 
          *                              "total_score", Integer.class);
          * }</pre>
          *
@@ -2679,7 +2679,7 @@ public class Builder<T> {
          * @param newColumnClass the class type of the new column
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder combineColumns(final Predicate<? super String> columnNameFilter, final String newColumnName, final Class<?> newColumnClass) {
+        public DatasetBuilder combineColumns(final Predicate<? super String> columnNameFilter, final String newColumnName, final Class<?> newColumnClass) {
             val.combineColumns(columnNameFilter, newColumnName, newColumnClass);
 
             return this;
@@ -2690,7 +2690,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.combineColumns(name -> name.startsWith("score_"), "total",
+         * datasetBuilder.combineColumns(name -> name.startsWith("score_"), "total",
          *     arr -> Arrays.stream(arr.toArray()).mapToInt(v -> (Integer)v).sum());
          * }</pre>
          *
@@ -2699,7 +2699,7 @@ public class Builder<T> {
          * @param combineFunc the function that combines values from the selected columns
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder combineColumns(final Predicate<? super String> columnNameFilter, final String newColumnName,
+        public DatasetBuilder combineColumns(final Predicate<? super String> columnNameFilter, final String newColumnName,
                 final Function<? super DisposableObjArray, ?> combineFunc) {
             val.combineColumns(columnNameFilter, newColumnName, combineFunc);
 
@@ -2712,7 +2712,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.divideColumn("full_name", Arrays.asList("first", "last"),
+         * datasetBuilder.divideColumn("full_name", Arrays.asList("first", "last"),
          *     (String name) -> Arrays.asList(name.split(" ")));
          * }</pre>
          *
@@ -2721,7 +2721,7 @@ public class Builder<T> {
          * @param divideFunc the function that splits a value into multiple values
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder divideColumn(final String columnName, final Collection<String> newColumnNames, final Function<?, ? extends List<?>> divideFunc) {
+        public DatasetBuilder divideColumn(final String columnName, final Collection<String> newColumnNames, final Function<?, ? extends List<?>> divideFunc) {
             val.divideColumn(columnName, newColumnNames, divideFunc);
 
             return this;
@@ -2733,7 +2733,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.divideColumn("coordinates", Arrays.asList("x", "y", "z"),
+         * datasetBuilder.divideColumn("coordinates", Arrays.asList("x", "y", "z"),
          *     (String coords, Object[] output) -> {
          *         String[] parts = coords.split(",");
          *         output[0] = Double.parseDouble(parts[0]);
@@ -2747,7 +2747,7 @@ public class Builder<T> {
          * @param output the consumer that populates the output array with divided values
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder divideColumn(final String columnName, final Collection<String> newColumnNames, final BiConsumer<?, Object[]> output) {
+        public DatasetBuilder divideColumn(final String columnName, final Collection<String> newColumnNames, final BiConsumer<?, Object[]> output) {
             val.divideColumn(columnName, newColumnNames, output);
 
             return this;
@@ -2758,7 +2758,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.divideColumn("key_value", Tuple.of("key", "value"),
+         * datasetBuilder.divideColumn("key_value", Tuple.of("key", "value"),
          *     (String kv, Pair<Object, Object> output) -> {
          *         String[] parts = kv.split(":");
          *         output.setLeft(parts[0]);
@@ -2771,7 +2771,7 @@ public class Builder<T> {
          * @param output the consumer that populates the output pair
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder divideColumn(final String columnName, final Tuple2<String, String> newColumnNames,
+        public DatasetBuilder divideColumn(final String columnName, final Tuple2<String, String> newColumnNames,
                 final BiConsumer<?, Pair<Object, Object>> output) {
             val.divideColumn(columnName, newColumnNames, output);
 
@@ -2783,7 +2783,7 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.divideColumn("rgb", Tuple.of("red", "green", "blue"),
+         * datasetBuilder.divideColumn("rgb", Tuple.of("red", "green", "blue"),
          *     (String color, Triple<Object, Object, Object> output) -> {
          *         // Parse RGB values and populate triple
          *         output.setLeft(red);
@@ -2797,7 +2797,7 @@ public class Builder<T> {
          * @param output the consumer that populates the output triple
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder divideColumn(final String columnName, final Tuple3<String, String, String> newColumnNames,
+        public DatasetBuilder divideColumn(final String columnName, final Tuple3<String, String, String> newColumnNames,
                 final BiConsumer<?, Triple<Object, Object, Object>> output) {
             val.divideColumn(columnName, newColumnNames, output);
 
@@ -2810,13 +2810,13 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.updateAll(value -> value == null ? "" : value);
+         * datasetBuilder.updateAll(value -> value == null ? "" : value);
          * }</pre>
          *
          * @param func the function to transform all values in the dataset
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder updateAll(final Function<?, ?> func) {
+        public DatasetBuilder updateAll(final Function<?, ?> func) {
             val.updateAll(func);
 
             return this;
@@ -2827,54 +2827,54 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * dataSetBuilder.replaceIf(value -> value == null || "".equals(value), "N/A");
+         * datasetBuilder.replaceIf(value -> value == null || "".equals(value), "N/A");
          * }</pre>
          *
          * @param predicate the condition to test each value
          * @param newValue the replacement value for matching elements
          * @return this builder instance for method chaining
          */
-        public DataSetBuilder replaceIf(final Predicate<?> predicate, final Object newValue) {
+        public DatasetBuilder replaceIf(final Predicate<?> predicate, final Object newValue) {
             val.replaceIf(predicate, newValue);
 
             return this;
         }
 
         /**
-         * Prepends the rows from another DataSet to the beginning of this DataSet.
-         * The columns of both DataSets must be identical.
+         * Prepends the rows from another Dataset to the beginning of this Dataset.
+         * The columns of both Datasets must be identical.
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * DataSet header = // ... dataset with header rows
-         * dataSetBuilder.prepend(header);
+         * Dataset header = // ... dataset with header rows
+         * datasetBuilder.prepend(header);
          * }</pre>
          *
-         * @param other the DataSet whose rows should be added at the beginning
+         * @param other the Dataset whose rows should be added at the beginning
          * @return this builder instance for method chaining
-         * @see DataSet#prepend(DataSet)
+         * @see Dataset#prepend(Dataset)
          */
-        public DataSetBuilder prepend(final DataSet other) {
+        public DatasetBuilder prepend(final Dataset other) {
             val.prepend(other);
 
             return this;
         }
 
         /**
-         * Appends the rows from another DataSet to the end of this DataSet.
-         * The columns of both DataSets must be identical.
+         * Appends the rows from another Dataset to the end of this Dataset.
+         * The columns of both Datasets must be identical.
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * DataSet moreData = // ... dataset with additional rows
-         * dataSetBuilder.append(moreData);
+         * Dataset moreData = // ... dataset with additional rows
+         * datasetBuilder.append(moreData);
          * }</pre>
          *
-         * @param other the DataSet whose rows should be added at the end
+         * @param other the Dataset whose rows should be added at the end
          * @return this builder instance for method chaining
-         * @see DataSet#append(DataSet)
+         * @see Dataset#append(Dataset)
          */
-        public DataSetBuilder append(final DataSet other) {
+        public DatasetBuilder append(final Dataset other) {
             val.append(other);
 
             return this;
@@ -2885,7 +2885,7 @@ public class Builder<T> {
         //     * @param columnName
         //     * @return
         //     */
-        //    public DataSetBuilder sortBy(final String columnName) {
+        //    public DatasetBuilder sortBy(final String columnName) {
         //        val.sortBy(columnName);
         //
         //        return this;
@@ -2898,7 +2898,7 @@ public class Builder<T> {
         //     * @param cmp
         //     * @return
         //     */
-        //    public DataSetBuilder sortBy(final String columnName, final Comparator<?> cmp) {
+        //    public DatasetBuilder sortBy(final String columnName, final Comparator<?> cmp) {
         //        val.sortBy(columnName, cmp);
         //
         //        return this;
@@ -2909,7 +2909,7 @@ public class Builder<T> {
         //     * @param columnNames
         //     * @return
         //     */
-        //    public DataSetBuilder sortBy(final Collection<String> columnNames) {
+        //    public DatasetBuilder sortBy(final Collection<String> columnNames) {
         //        val.sortBy(columnNames);
         //
         //        return this;
@@ -2921,7 +2921,7 @@ public class Builder<T> {
         //     * @param cmp
         //     * @return
         //     */
-        //    public DataSetBuilder sortBy(final Collection<String> columnNames, final Comparator<? super Object[]> cmp) {
+        //    public DatasetBuilder sortBy(final Collection<String> columnNames, final Comparator<? super Object[]> cmp) {
         //        val.sortBy(columnNames, cmp);
         //
         //        return this;
@@ -2934,7 +2934,7 @@ public class Builder<T> {
         //     * @return
         //     */
         //    @SuppressWarnings("rawtypes")
-        //    public DataSetBuilder sortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
+        //    public DatasetBuilder sortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
         //        val.sortBy(columnNames, keyExtractor);
         //
         //        return this;
@@ -2946,7 +2946,7 @@ public class Builder<T> {
         //     * @param columnName
         //     * @return
         //     */
-        //    public DataSetBuilder parallelSortBy(final String columnName) {
+        //    public DatasetBuilder parallelSortBy(final String columnName) {
         //        val.parallelSortBy(columnName);
         //
         //        return this;
@@ -2960,7 +2960,7 @@ public class Builder<T> {
         //     * @param cmp
         //     * @return
         //     */
-        //    public DataSetBuilder parallelSortBy(final String columnName, final Comparator<?> cmp) {
+        //    public DatasetBuilder parallelSortBy(final String columnName, final Comparator<?> cmp) {
         //        val.parallelSortBy(columnName, cmp);
         //
         //        return this;
@@ -2972,7 +2972,7 @@ public class Builder<T> {
         //     * @param columnNames
         //     * @return
         //     */
-        //    public DataSetBuilder parallelSortBy(final Collection<String> columnNames) {
+        //    public DatasetBuilder parallelSortBy(final Collection<String> columnNames) {
         //        val.parallelSortBy(columnNames);
         //
         //        return this;
@@ -2985,7 +2985,7 @@ public class Builder<T> {
         //     * @param cmp
         //     * @return
         //     */
-        //    public DataSetBuilder parallelSortBy(final Collection<String> columnNames, final Comparator<? super Object[]> cmp) {
+        //    public DatasetBuilder parallelSortBy(final Collection<String> columnNames, final Comparator<? super Object[]> cmp) {
         //        val.parallelSortBy(columnNames, cmp);
         //
         //        return this;
@@ -2999,7 +2999,7 @@ public class Builder<T> {
         //     * @return
         //     */
         //    @SuppressWarnings("rawtypes")
-        //    public DataSetBuilder parallelSortBy(final Collection<String> columnNames,
+        //    public DatasetBuilder parallelSortBy(final Collection<String> columnNames,
         //            final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
         //        val.parallelSortBy(columnNames, keyExtractor);
         //

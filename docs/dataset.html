@@ -43,54 +43,54 @@
 
 		<div id="page">
 
-			<h1>DataSet</h1>
+			<h1>Dataset</h1>
 			<p>
-				<a href="./DataSet_view.html">DataSet</a> supports distinct/merge/sort/groupBy/join/union/unionAll/except/intersect/paginate/filter/count/toJOSN/toXML/toCVS/... 
-				With the methods in <a href="./api-docs/com/landawn/abacus/util/N.html">N</a> and lambda in Java 8, DataSet enlarges the ability to data analyze with simple/concise APIs. An instance of DataSet can be obtained by executing a SQL query (with <a href="./api-docs/com/landawn/abacus/util/JdbcUtil.html">JdbcUtil</a>/<a href="./api-docs/com/landawn/abacus/util/SQLExecutor.html">SQLExecutor</a>), or loading from CSV by <a href="./api-docs/com/landawn/abacus/util/CSVUtil.html">CSVUtil</a>, or parsing JSON by JSONParser, or from a map or a list of entity/map/array with the method <i>asDataSet</i> in class <a href="./api-docs/com/landawn/abacus/util/N.html">N</a>.  
+				<a href="./Dataset_view.html">Dataset</a> supports distinct/merge/sort/groupBy/join/union/unionAll/except/intersect/paginate/filter/count/toJOSN/toXML/toCVS/... 
+				With the methods in <a href="./api-docs/com/landawn/abacus/util/N.html">N</a> and lambda in Java 8, Dataset enlarges the ability to data analyze with simple/concise APIs. An instance of Dataset can be obtained by executing a SQL query (with <a href="./api-docs/com/landawn/abacus/util/JdbcUtil.html">JdbcUtil</a>/<a href="./api-docs/com/landawn/abacus/util/SQLExecutor.html">SQLExecutor</a>), or loading from CSV by <a href="./api-docs/com/landawn/abacus/util/CSVUtil.html">CSVUtil</a>, or parsing JSON by JSONParser, or from a map or a list of entity/map/array with the method <i>asDataset</i> in class <a href="./api-docs/com/landawn/abacus/util/N.html">N</a>.  
 			</p>
 <!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #AA22FF">@Test</span>
-<span style="color: #008000; font-weight: bold">public</span> <span style="color: #B00040">void</span> <span style="color: #0000FF">test_DataSet</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+<span style="color: #008000; font-weight: bold">public</span> <span style="color: #B00040">void</span> <span style="color: #0000FF">test_Dataset</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
     Timestamp now <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">new</span> Timestamp<span style="color: #666666">(</span>System<span style="color: #666666">.</span><span style="color: #7D9029">currentTimeMillis</span><span style="color: #666666">());</span>
     Object<span style="color: #666666">[]</span> parameters1 <span style="color: #666666">=</span> asArray<span style="color: #666666">(</span><span style="color: #BA2121">&quot;fn&quot;</span><span style="color: #666666">,</span> <span style="color: #BA2121">&quot;ln&quot;</span><span style="color: #666666">,</span> UUID<span style="color: #666666">.</span><span style="color: #7D9029">randomUUID</span><span style="color: #666666">().</span><span style="color: #7D9029">toString</span><span style="color: #666666">(),</span> now<span style="color: #666666">,</span> now<span style="color: #666666">);</span>
     Object<span style="color: #666666">[]</span> parameters2 <span style="color: #666666">=</span> asArray<span style="color: #666666">(</span><span style="color: #BA2121">&quot;fn&quot;</span><span style="color: #666666">,</span> <span style="color: #BA2121">&quot;ln&quot;</span><span style="color: #666666">,</span> UUID<span style="color: #666666">.</span><span style="color: #7D9029">randomUUID</span><span style="color: #666666">().</span><span style="color: #7D9029">toString</span><span style="color: #666666">(),</span> now<span style="color: #666666">,</span> now<span style="color: #666666">);</span>
     sqlExecutor<span style="color: #666666">.</span><span style="color: #7D9029">batchInsert</span><span style="color: #666666">(</span>INSERT_ACCOUNT<span style="color: #666666">,</span> <span style="color: #008000; font-weight: bold">new</span> Object<span style="color: #666666">[]</span> <span style="color: #666666">{</span> parameters1<span style="color: #666666">,</span> parameters2 <span style="color: #666666">});</span>
 
     String sql <span style="color: #666666">=</span> NE<span style="color: #666666">.</span><span style="color: #7D9029">select</span><span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">class</span><span style="color: #666666">,</span> asSet<span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">DEVICES</span><span style="color: #666666">)).</span><span style="color: #7D9029">from</span><span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">_</span><span style="color: #666666">).</span><span style="color: #7D9029">sql</span><span style="color: #666666">();</span>
-    DataSet dataSet <span style="color: #666666">=</span> sqlExecutor<span style="color: #666666">.</span><span style="color: #7D9029">query</span><span style="color: #666666">(</span>sql<span style="color: #666666">);</span>
-    dataSet<span style="color: #666666">.</span><span style="color: #7D9029">println</span><span style="color: #666666">();</span>
+    Dataset dataset <span style="color: #666666">=</span> sqlExecutor<span style="color: #666666">.</span><span style="color: #7D9029">query</span><span style="color: #666666">(</span>sql<span style="color: #666666">);</span>
+    dataset<span style="color: #666666">.</span><span style="color: #7D9029">println</span><span style="color: #666666">();</span>
 
-    String json <span style="color: #666666">=</span> dataSet<span style="color: #666666">.</span><span style="color: #7D9029">toJSON</span><span style="color: #666666">();</span>
+    String json <span style="color: #666666">=</span> dataset<span style="color: #666666">.</span><span style="color: #7D9029">toJSON</span><span style="color: #666666">();</span>
     println<span style="color: #666666">(</span>json<span style="color: #666666">);</span>
 
-    String xml <span style="color: #666666">=</span> dataSet<span style="color: #666666">.</span><span style="color: #7D9029">toXML</span><span style="color: #666666">();</span>
+    String xml <span style="color: #666666">=</span> dataset<span style="color: #666666">.</span><span style="color: #7D9029">toXML</span><span style="color: #666666">();</span>
     println<span style="color: #666666">(</span>xml<span style="color: #666666">);</span>
 
-    String csv <span style="color: #666666">=</span> dataSet<span style="color: #666666">.</span><span style="color: #7D9029">toCSV</span><span style="color: #666666">();</span>
+    String csv <span style="color: #666666">=</span> dataset<span style="color: #666666">.</span><span style="color: #7D9029">toCSV</span><span style="color: #666666">();</span>
     println<span style="color: #666666">(</span>csv<span style="color: #666666">);</span>
 
-    PaginatedDataSet paginatedResult <span style="color: #666666">=</span> dataSet<span style="color: #666666">.</span><span style="color: #7D9029">paginate</span><span style="color: #666666">(25);</span>
+    PaginatedDataset paginatedResult <span style="color: #666666">=</span> dataset<span style="color: #666666">.</span><span style="color: #7D9029">paginate</span><span style="color: #666666">(25);</span>
     println<span style="color: #666666">(</span>paginatedResult<span style="color: #666666">.</span><span style="color: #7D9029">firstPage</span><span style="color: #666666">());</span>
 
     <span style="color: #408080; font-style: italic">// create account list from data set</span>
-    List<span style="color: #666666">&lt;</span>Account<span style="color: #666666">&gt;</span> accounts <span style="color: #666666">=</span> dataSet<span style="color: #666666">.</span><span style="color: #7D9029">toList</span><span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">class</span><span style="color: #666666">);</span>
+    List<span style="color: #666666">&lt;</span>Account<span style="color: #666666">&gt;</span> accounts <span style="color: #666666">=</span> dataset<span style="color: #666666">.</span><span style="color: #7D9029">toList</span><span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">class</span><span style="color: #666666">);</span>
 
     <span style="color: #408080; font-style: italic">// convert account list to data set</span>
-    DataSet dataSet2 <span style="color: #666666">=</span> asDataSet<span style="color: #666666">(</span>dataSet<span style="color: #666666">.</span><span style="color: #7D9029">columnNameList</span><span style="color: #666666">(),</span> accounts<span style="color: #666666">);</span>    
-    dataSet2<span style="color: #666666">.</span><span style="color: #7D9029">println</span><span style="color: #666666">();</span>
+    Dataset dataset2 <span style="color: #666666">=</span> asDataset<span style="color: #666666">(</span>dataset<span style="color: #666666">.</span><span style="color: #7D9029">columnNameList</span><span style="color: #666666">(),</span> accounts<span style="color: #666666">);</span>    
+    dataset2<span style="color: #666666">.</span><span style="color: #7D9029">println</span><span style="color: #666666">();</span>
     
-    dataSet2<span style="color: #666666">.</span><span style="color: #7D9029">sortBy</span><span style="color: #666666">(</span>asList<span style="color: #666666">(</span><span style="color: #BA2121">&quot;firstName&quot;</span><span style="color: #666666">,</span> <span style="color: #BA2121">&quot;lastName&quot;</span><span style="color: #666666">));</span>
+    dataset2<span style="color: #666666">.</span><span style="color: #7D9029">sortBy</span><span style="color: #666666">(</span>asList<span style="color: #666666">(</span><span style="color: #BA2121">&quot;firstName&quot;</span><span style="color: #666666">,</span> <span style="color: #BA2121">&quot;lastName&quot;</span><span style="color: #666666">));</span>
 
-    DataSet dataSet3 <span style="color: #666666">=</span> dataSet2<span style="color: #666666">.</span><span style="color: #7D9029">groupBy</span><span style="color: #666666">(</span><span style="color: #BA2121">&quot;firstName&quot;</span><span style="color: #666666">);</span>
-    println<span style="color: #666666">(</span>dataSet3<span style="color: #666666">);</span>
+    Dataset dataset3 <span style="color: #666666">=</span> dataset2<span style="color: #666666">.</span><span style="color: #7D9029">groupBy</span><span style="color: #666666">(</span><span style="color: #BA2121">&quot;firstName&quot;</span><span style="color: #666666">);</span>
+    println<span style="color: #666666">(</span>dataset3<span style="color: #666666">);</span>
 
-    DataSet dataSet4 <span style="color: #666666">=</span> dataSet2<span style="color: #666666">.</span><span style="color: #7D9029">filter</span><span style="color: #666666">(</span><span style="color: #BA2121">&quot;firstName&quot;</span><span style="color: #666666">,</span> <span style="color: #666666">(</span>String a<span style="color: #666666">)</span> <span style="color: #666666">-&gt;</span> a<span style="color: #666666">.</span><span style="color: #7D9029">startsWith</span><span style="color: #666666">(</span><span style="color: #BA2121">&quot;ab&quot;</span><span style="color: #666666">));</span>
-    println<span style="color: #666666">(</span>dataSet4<span style="color: #666666">);</span>
+    Dataset dataset4 <span style="color: #666666">=</span> dataset2<span style="color: #666666">.</span><span style="color: #7D9029">filter</span><span style="color: #666666">(</span><span style="color: #BA2121">&quot;firstName&quot;</span><span style="color: #666666">,</span> <span style="color: #666666">(</span>String a<span style="color: #666666">)</span> <span style="color: #666666">-&gt;</span> a<span style="color: #666666">.</span><span style="color: #7D9029">startsWith</span><span style="color: #666666">(</span><span style="color: #BA2121">&quot;ab&quot;</span><span style="color: #666666">));</span>
+    println<span style="color: #666666">(</span>dataset4<span style="color: #666666">);</span>
 
-    <span style="color: #B00040">int</span> count <span style="color: #666666">=</span> dataSet2<span style="color: #666666">.</span><span style="color: #7D9029">count</span><span style="color: #666666">(</span><span style="color: #BA2121">&quot;firstName&quot;</span><span style="color: #666666">,</span> <span style="color: #666666">(</span>String a<span style="color: #666666">)</span> <span style="color: #666666">-&gt;</span> a<span style="color: #666666">.</span><span style="color: #7D9029">startsWith</span><span style="color: #666666">(</span><span style="color: #BA2121">&quot;ab&quot;</span><span style="color: #666666">));</span>
+    <span style="color: #B00040">int</span> count <span style="color: #666666">=</span> dataset2<span style="color: #666666">.</span><span style="color: #7D9029">count</span><span style="color: #666666">(</span><span style="color: #BA2121">&quot;firstName&quot;</span><span style="color: #666666">,</span> <span style="color: #666666">(</span>String a<span style="color: #666666">)</span> <span style="color: #666666">-&gt;</span> a<span style="color: #666666">.</span><span style="color: #7D9029">startsWith</span><span style="color: #666666">(</span><span style="color: #BA2121">&quot;ab&quot;</span><span style="color: #666666">));</span>
     println<span style="color: #666666">(</span>count<span style="color: #666666">);</span>
 
-    DataSet dataSet5 <span style="color: #666666">=</span> dataSet2<span style="color: #666666">.</span><span style="color: #7D9029">intersect</span><span style="color: #666666">(</span>dataSet4<span style="color: #666666">);</span>
-    println<span style="color: #666666">(</span>dataSet5<span style="color: #666666">);</span>
+    Dataset dataset5 <span style="color: #666666">=</span> dataset2<span style="color: #666666">.</span><span style="color: #7D9029">intersect</span><span style="color: #666666">(</span>dataset4<span style="color: #666666">);</span>
+    println<span style="color: #666666">(</span>dataset5<span style="color: #666666">);</span>
 <span style="color: #666666">}</span>
 </pre></div>
 

@@ -773,11 +773,11 @@ public interface Type<T> {
     }
 
     /**
-     * Checks if this type represents a DataSet.
+     * Checks if this type represents a Dataset.
      *
-     * @return {@code true} if this is a DataSet type
+     * @return {@code true} if this is a Dataset type
      */
-    default boolean isDataSet() {
+    default boolean isDataset() {
         return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
     }
 
@@ -1149,7 +1149,7 @@ public interface Type<T> {
         MAP_ENTITY,
         /** EntityId types */
         ENTITY_ID,
-        /** DataSet types */
+        /** Dataset types */
         DATA_SET,
         /** Sheet types */
         SHEET,

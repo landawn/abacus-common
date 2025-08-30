@@ -2441,24 +2441,24 @@ public class Seq200Test extends TestBase {
     }
 
     @Test
-    public void test_toDataSet() throws Exception {
+    public void test_toDataset() throws Exception {
         List<Map<String, Object>> data = Arrays.asList(N.asMap("id", 1, "name", "Alice"), N.asMap("id", 2, "name", "Bob"));
-        DataSet dataSet = Seq.of(data).toDataSet();
-        assertEquals(2, dataSet.size());
-        assertTrue(dataSet.columnNameList().containsAll(Arrays.asList("id", "name")));
-        assertEquals((Integer) 1, dataSet.absolute(0).get("id"));
-        assertEquals("Bob", dataSet.absolute(1).get("name"));
+        Dataset dataset = Seq.of(data).toDataset();
+        assertEquals(2, dataset.size());
+        assertTrue(dataset.columnNameList().containsAll(Arrays.asList("id", "name")));
+        assertEquals((Integer) 1, dataset.absolute(0).get("id"));
+        assertEquals("Bob", dataset.absolute(1).get("name"));
     }
 
     @Test
-    public void test_toDataSet_withColumnNames() throws Exception {
+    public void test_toDataset_withColumnNames() throws Exception {
         List<List<Object>> data = Arrays.asList(Arrays.asList(1, "Alice"), Arrays.asList(2, "Bob"));
         List<String> columnNames = Arrays.asList("UserID", "UserName");
-        DataSet dataSet = Seq.of(data).toDataSet(columnNames);
-        assertEquals(2, dataSet.size());
-        assertEquals(columnNames, dataSet.columnNameList());
-        assertEquals((Integer) 1, dataSet.absolute(0).get("UserID"));
-        assertEquals("Bob", dataSet.absolute(1).get("UserName"));
+        Dataset dataset = Seq.of(data).toDataset(columnNames);
+        assertEquals(2, dataset.size());
+        assertEquals(columnNames, dataset.columnNameList());
+        assertEquals((Integer) 1, dataset.absolute(0).get("UserID"));
+        assertEquals("Bob", dataset.absolute(1).get("UserName"));
     }
 
     //endregion

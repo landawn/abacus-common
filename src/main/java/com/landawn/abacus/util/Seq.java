@@ -11631,7 +11631,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Converts the elements in this sequence into a DataSet.
+     * Converts the elements in this sequence into a Dataset.
      * The first row will be used as column names if its type is array or list,
      * or column names will be obtained from the first row if its type is bean or map.
      * This method is useful for converting sequences of structured data into a tabular format.
@@ -11640,24 +11640,24 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>Example:</p>
      * <pre>{@code
-     * // Convert sequence of Person objects to DataSet
-     * DataSet dataSet = seq.toDataSet();
-     * // The DataSet will have columns for each property of Person
+     * // Convert sequence of Person objects to Dataset
+     * Dataset dataset = seq.toDataset();
+     * // The Dataset will have columns for each property of Person
      * }</pre>
      *
-     * @return a DataSet containing the elements from this sequence
+     * @return a Dataset containing the elements from this sequence
      * @throws IllegalStateException if the sequence is already closed
      * @throws E if an exception occurs during the conversion
-     * @see N#newDataSet(Collection)
+     * @see N#newDataset(Collection)
      */
     @Beta
     @TerminalOp
-    public DataSet toDataSet() throws IllegalStateException, E {
-        return N.newDataSet(toList());
+    public Dataset toDataset() throws IllegalStateException, E {
+        return N.newDataset(toList());
     }
 
     /**
-     * Converts the elements in this sequence into a DataSet with the specified column names.
+     * Converts the elements in this sequence into a Dataset with the specified column names.
      * If the specified {@code columnNames} is null or empty, the first row will be used as column names
      * if its type is array or list, or column names will be obtained from the first row if its type
      * is bean or map.
@@ -11666,20 +11666,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>Example:</p>
      * <pre>{@code
-     * // Create DataSet with specific column names
+     * // Create Dataset with specific column names
      * List<String> columns = Arrays.asList("Name", "Age", "Department");
-     * DataSet dataSet = seq.toDataSet(columns);
+     * Dataset dataset = seq.toDataset(columns);
      * }</pre>
      *
-     * @param columnNames the list of column names to be used for the DataSet. Can be null or empty.
-     * @return a DataSet containing the elements from this sequence with the specified column names
+     * @param columnNames the list of column names to be used for the Dataset. Can be null or empty.
+     * @return a Dataset containing the elements from this sequence with the specified column names
      * @throws IllegalStateException if the sequence is already closed
      * @throws E if an exception occurs during the conversion
-     * @see N#newDataSet(Collection, Collection)
+     * @see N#newDataset(Collection, Collection)
      */
     @TerminalOp
-    public DataSet toDataSet(final List<String> columnNames) throws IllegalStateException, E {
-        return N.newDataSet(columnNames, toList());
+    public Dataset toDataset(final List<String> columnNames) throws IllegalStateException, E {
+        return N.newDataset(columnNames, toList());
     }
 
     /**

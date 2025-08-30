@@ -2954,7 +2954,7 @@ public class EntryStream103Test extends TestBase {
     }
 
     @Test
-    public void testLargeDataSetPerformance() {
+    public void testLargeDatasetPerformance() {
         // Create a large dataset
         Map<Integer, String> largeMap = new HashMap<>();
         for (int i = 0; i < 10000; i++) {

@@ -153,10 +153,10 @@ public class XMLConstants100Test extends TestBase {
         assertEquals("<result isNull=\"true\" />", XMLConstants.RESULT_NULL_ELE);
         
         // Test data set constants
-        assertEquals("dataSet", XMLConstants.DATA_SET);
-        assertEquals("<dataSet>", XMLConstants.DATA_SET_ELE_START);
-        assertEquals("</dataSet>", XMLConstants.DATA_SET_ELE_END);
-        assertEquals("<dataSet isNull=\"true\" />", XMLConstants.DATA_SET_NULL_ELE);
+        assertEquals("dataset", XMLConstants.DATA_SET);
+        assertEquals("<dataset>", XMLConstants.DATA_SET_ELE_START);
+        assertEquals("</dataset>", XMLConstants.DATA_SET_ELE_END);
+        assertEquals("<dataset isNull=\"true\" />", XMLConstants.DATA_SET_NULL_ELE);
         
         // Test SOAP envelope constants
         assertEquals("Envelope", XMLConstants.ENVELOPE);

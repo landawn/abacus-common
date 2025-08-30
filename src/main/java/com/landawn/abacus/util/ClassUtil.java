@@ -378,8 +378,8 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(ImmutableMap.class.getCanonicalName(), ImmutableMap.class);
 
         BUILT_IN_TYPE.put(Type.class.getCanonicalName(), Type.class);
-        BUILT_IN_TYPE.put(DataSet.class.getCanonicalName(), DataSet.class);
-        BUILT_IN_TYPE.put(RowDataSet.class.getCanonicalName(), RowDataSet.class);
+        BUILT_IN_TYPE.put(Dataset.class.getCanonicalName(), Dataset.class);
+        BUILT_IN_TYPE.put(RowDataset.class.getCanonicalName(), RowDataset.class);
         BUILT_IN_TYPE.put(Sheet.class.getCanonicalName(), Sheet.class);
 
         BUILT_IN_TYPE.put(Map.Entry.class.getCanonicalName(), Map.Entry.class);

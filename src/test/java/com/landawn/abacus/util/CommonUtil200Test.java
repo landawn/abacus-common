@@ -407,19 +407,19 @@ public class CommonUtil200Test extends TestBase {
         }
 
         @Test
-        public void checkArgNotEmpty_dataSet_valid() {
+        public void checkArgNotEmpty_dataset_valid() {
             List<String> columnNames = Arrays.asList("col1");
             List<List<?>> rows = new ArrayList<>();
             rows.add(Arrays.asList("val1"));
-            DataSet dataSet = N.newDataSet(columnNames, rows); // Assuming a concrete implementation
-            assertSame(dataSet, N.checkArgNotEmpty(dataSet, "dataSet"));
+            Dataset dataset = N.newDataset(columnNames, rows); // Assuming a concrete implementation
+            assertSame(dataset, N.checkArgNotEmpty(dataset, "dataset"));
         }
 
         @Test
-        public void checkArgNotEmpty_dataSet_invalid() {
-            assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty((DataSet) null, "dataSet"));
-            DataSet emptyDs = N.emptyDataSet(); // Empty rows
-            assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty(emptyDs, "dataSet"));
+        public void checkArgNotEmpty_dataset_invalid() {
+            assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty((Dataset) null, "dataset"));
+            Dataset emptyDs = N.emptyDataset(); // Empty rows
+            assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty(emptyDs, "dataset"));
         }
 
         @Test

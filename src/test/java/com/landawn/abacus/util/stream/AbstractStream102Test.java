@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.guava.Files;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Indexed;
@@ -1294,7 +1294,7 @@ public class AbstractStream102Test extends TestBase {
     }
 
     @Test
-    public void testToDataSet() {
+    public void testToDataset() {
         Map<String, Integer> map1 = new HashMap<>();
         map1.put("id", 1);
         map1.put("value", 100);
@@ -1304,15 +1304,15 @@ public class AbstractStream102Test extends TestBase {
         map2.put("value", 200);
 
         Stream<Map<String, Integer>> mapStream = createStream(map1, map2);
-        DataSet result = mapStream.toDataSet();
+        Dataset result = mapStream.toDataset();
         assertNotNull(result);
         assertEquals(2, result.size());
     }
 
     @Test
-    public void testToDataSetWithColumnNames() {
+    public void testToDatasetWithColumnNames() {
         stream = createStream(1, 2, 3);
-        DataSet result = stream.toDataSet(Arrays.asList("value"));
+        Dataset result = stream.toDataset(Arrays.asList("value"));
         assertNotNull(result);
         assertEquals(3, result.size());
     }

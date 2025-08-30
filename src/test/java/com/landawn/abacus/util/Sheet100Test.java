@@ -89,8 +89,8 @@ public class Sheet100Test extends TestBase {
     public void testRows() {
         {
             Object[][] data = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
-            Sheet<String, String, Integer> dataSheet = Sheet.rows(rowKeys, columnKeys, data);
-            assertEquals(5, dataSheet.get("R2", "C2"));
+            Sheet<String, String, Integer> sheetLocal = Sheet.rows(rowKeys, columnKeys, data);
+            assertEquals(5, sheetLocal.get("R2", "C2"));
         }
         {
 
@@ -114,8 +114,8 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testRowsWithCollection() {
         List<List<Integer>> rows = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6), Arrays.asList(7, 8, 9));
-        Sheet<String, String, Integer> dataSheet = Sheet.rows(rowKeys, columnKeys, rows);
-        assertEquals(5, dataSheet.get("R2", "C2"));
+        Sheet<String, String, Integer> sheetLocal = Sheet.rows(rowKeys, columnKeys, rows);
+        assertEquals(5, sheetLocal.get("R2", "C2"));
     }
 
     @Test
@@ -123,8 +123,8 @@ public class Sheet100Test extends TestBase {
 
         {
             Object[][] columns = { { 1, 4, 7 }, { 2, 5, 8 }, { 3, 6, 9 } };
-            Sheet<String, String, Integer> dataSheet = Sheet.columns(rowKeys, columnKeys, columns);
-            assertEquals(5, dataSheet.get("R2", "C2"));
+            Sheet<String, String, Integer> sheetLocal = Sheet.columns(rowKeys, columnKeys, columns);
+            assertEquals(5, sheetLocal.get("R2", "C2"));
         }
         {
 
@@ -148,8 +148,8 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testColumnsWithCollection() {
         List<List<Integer>> columns = Arrays.asList(Arrays.asList(1, 4, 7), Arrays.asList(2, 5, 8), Arrays.asList(3, 6, 9));
-        Sheet<String, String, Integer> dataSheet = Sheet.columns(rowKeys, columnKeys, columns);
-        assertEquals(5, dataSheet.get("R2", "C2"));
+        Sheet<String, String, Integer> sheetLocal = Sheet.columns(rowKeys, columnKeys, columns);
+        assertEquals(5, sheetLocal.get("R2", "C2"));
     }
 
     // Get and Put tests
@@ -1086,15 +1086,15 @@ public class Sheet100Test extends TestBase {
         assertEquals(Integer.valueOf(2), columns.get(0).get(1));
     }
 
-    // DataSet conversion tests
+    // Dataset conversion tests
     @Test
-    public void testToDataSetH() {
+    public void testToDatasetH() {
         sheet.put("R1", "C1", 1);
         sheet.put("R1", "C2", 2);
         sheet.put("R2", "C1", 3);
         sheet.put("R2", "C2", 4);
 
-        DataSet ds = sheet.toDataSetH();
+        Dataset ds = sheet.toDatasetH();
 
         assertEquals(3, ds.columnCount());
         assertEquals(3, ds.size());
@@ -1104,13 +1104,13 @@ public class Sheet100Test extends TestBase {
     }
 
     @Test
-    public void testToDataSetV() {
+    public void testToDatasetV() {
         sheet.put("R1", "C1", 1);
         sheet.put("R1", "C2", 2);
         sheet.put("R2", "C1", 3);
         sheet.put("R2", "C2", 4);
 
-        DataSet ds = sheet.toDataSetV();
+        Dataset ds = sheet.toDatasetV();
 
         assertEquals(3, ds.columnCount());
         assertEquals(3, ds.size());
@@ -1244,6 +1244,40 @@ public class Sheet100Test extends TestBase {
         assertTrue(output.contains("R1"));
         assertTrue(output.contains("C1"));
         assertTrue(output.contains("1"));
+    }
+
+    @Test
+    public void testPrintln_01() {
+        {
+            N.println(Strings.repeat("=", 120));
+            Sheet.empty().println();
+            N.println(Strings.repeat("=", 120));
+
+            N.println(Strings.repeat("=", 120));
+            Sheet.empty().println("# ");
+            N.println(Strings.repeat("=", 120));
+
+            N.println(Strings.repeat("=", 120));
+            Sheet.empty().println("// ");
+            N.println(Strings.repeat("=", 120));
+        }
+
+        Object[][] data = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+        Sheet<String, String, Integer> sheet = Sheet.rows(rowKeys, columnKeys, data);
+
+        {
+            N.println(Strings.repeat("=", 120));
+            sheet.println();
+            N.println(Strings.repeat("=", 120));
+
+            N.println(Strings.repeat("=", 120));
+            sheet.println("     * ");
+            N.println(Strings.repeat("=", 120));
+
+            N.println(Strings.repeat("=", 120));
+            sheet.println("// ");
+            N.println(Strings.repeat("=", 120));
+        }
     }
 
     @Test
@@ -1851,4 +1885,5 @@ public class Sheet100Test extends TestBase {
         assertEquals(4, transposed.columnLength());
         assertEquals(sheet.get("R1", "C1"), transposed.get("C1", "R1"));
     }
+
 }

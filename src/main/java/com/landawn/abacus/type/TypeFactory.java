@@ -44,7 +44,7 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JSONParser;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.EntityId;
 import com.landawn.abacus.util.HBaseColumn;
 import com.landawn.abacus.util.ImmutableList;
@@ -167,7 +167,7 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.ClobType.class);
             classes.add(com.landawn.abacus.type.CollectionType.class);
             classes.add(com.landawn.abacus.type.CurrencyType.class);
-            classes.add(com.landawn.abacus.type.DataSetType.class);
+            classes.add(com.landawn.abacus.type.DatasetType.class);
             classes.add(com.landawn.abacus.type.SheetType.class);
             classes.add(com.landawn.abacus.type.DoubleArrayType.class);
             classes.add(com.landawn.abacus.type.DoubleType.class);
@@ -665,8 +665,8 @@ public final class TypeFactory {
                     }
                 } else if (EntityId.class.isAssignableFrom(cls)) {
                     type = getType(EntityIdType.ENTITY_ID);
-                } else if (DataSet.class.isAssignableFrom(cls)) {
-                    type = getType(DataSetType.DATA_SET);
+                } else if (Dataset.class.isAssignableFrom(cls)) {
+                    type = getType(DatasetType.DATA_SET);
                 } else if (Sheet.class.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 3) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(

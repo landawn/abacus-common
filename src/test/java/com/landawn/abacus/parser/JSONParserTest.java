@@ -73,7 +73,7 @@ import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.ByteArrayOutputStream;
 import com.landawn.abacus.util.Clazz;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.EntityId;
@@ -2245,11 +2245,11 @@ public class JSONParserTest extends AbstractJSONParserTest {
 
         jsonParser.readString(str, Map.class);
 
-        final DataSet dataSet = N.newDataSet(N.asList(account));
-        str = jsonParser.serialize(dataSet, jsc);
+        final Dataset dataset = N.newDataset(N.asList(account));
+        str = jsonParser.serialize(dataset, jsc);
         N.println(str);
 
-        jsonParser.readString(str, DataSet.class);
+        jsonParser.readString(str, Dataset.class);
     }
 
     @Test
@@ -2294,11 +2294,11 @@ public class JSONParserTest extends AbstractJSONParserTest {
 
         jsonParser.readString(str, Map.class);
 
-        final DataSet dataSet = N.newDataSet(N.asList(account));
-        str = jsonParser.serialize(dataSet, jsc);
+        final Dataset dataset = N.newDataset(N.asList(account));
+        str = jsonParser.serialize(dataset, jsc);
         N.println(str);
 
-        jsonParser.readString(str, DataSet.class);
+        jsonParser.readString(str, Dataset.class);
     }
 
     @Test
@@ -2343,11 +2343,11 @@ public class JSONParserTest extends AbstractJSONParserTest {
 
         jsonParser.readString(str, Map.class);
 
-        final DataSet dataSet = N.newDataSet(N.asList(account));
-        str = jsonParser.serialize(dataSet, jsc);
+        final Dataset dataset = N.newDataset(N.asList(account));
+        str = jsonParser.serialize(dataset, jsc);
         N.println(str);
 
-        jsonParser.readString(str, DataSet.class);
+        jsonParser.readString(str, Dataset.class);
     }
 
     @Test
@@ -2418,19 +2418,19 @@ public class JSONParserTest extends AbstractJSONParserTest {
         assertEquals(entityId, entityId3);
     }
 
-    void execute(final DataSet rs) {
+    void execute(final Dataset rs) {
         final String json = jsonParser.serialize(rs);
-        final DataSet rs2 = jsonParser.deserialize(json, DataSet.class);
+        final Dataset rs2 = jsonParser.deserialize(json, Dataset.class);
         assertEquals(rs.size(), rs2.size());
     }
 
     //    @Test
     //    public void testSerialize_resultSet_3() {
     //        addAccount(Account.class, 99);
-    //        DataSet rs = em.query(Account.__, null, null);
+    //        Dataset rs = em.query(Account.__, null, null);
     //
     //        for (int i = 0; i < 1; i++) {
-    //            Method method = ClassUtil.getDeclaredMethod(this.getClass(), "execute", DataSet.class);
+    //            Method method = ClassUtil.getDeclaredMethod(this.getClass(), "execute", Dataset.class);
     //            Profiler.run(this, method, rs, 1, 1000, 1).printResult();
     //        }
     //

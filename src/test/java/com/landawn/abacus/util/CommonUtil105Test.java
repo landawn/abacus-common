@@ -98,8 +98,8 @@ public class CommonUtil105Test extends TestBase {
     }
 
     @Test
-    public void testEmptyDataSet() {
-        DataSet ds = N.emptyDataSet();
+    public void testEmptyDataset() {
+        Dataset ds = N.emptyDataset();
         assertNotNull(ds);
         assertTrue(ds.isEmpty());
     }

@@ -932,22 +932,22 @@ public class Seq104Test extends TestBase {
     }
 
     @Test
-    public void testToDataSet() throws Exception {
+    public void testToDataset() throws Exception {
         // Test with objects
         Seq<Map<String, Object>, Exception> seq = Seq.of(N.asMap("name", "John", "age", 25), N.asMap("name", "Jane", "age", 30));
-        DataSet dataSet = seq.toDataSet();
-        assertNotNull(dataSet);
-        assertEquals(2, dataSet.size());
+        Dataset dataset = seq.toDataset();
+        assertNotNull(dataset);
+        assertEquals(2, dataset.size());
     }
 
     @Test
-    public void testToDataSetWithColumnNames() {
+    public void testToDatasetWithColumnNames() {
         // Test with specified column names
         List<String> columns = Arrays.asList("Name", "Age");
         Seq<List<Object>, RuntimeException> seq = Seq.of(Arrays.asList("John", 25), Arrays.asList("Jane", 30));
-        DataSet dataSet = seq.toDataSet(columns);
-        assertNotNull(dataSet);
-        assertEquals(2, dataSet.size());
+        Dataset dataset = seq.toDataset(columns);
+        assertNotNull(dataset);
+        assertEquals(2, dataset.size());
     }
 
     @Test

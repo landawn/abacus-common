@@ -42,7 +42,7 @@ public class DoubleList101Test extends TestBase {
     @Test
     public void testConstructorWithNegativeCapacity() {
         // Should not throw exception, will be handled internally
-        assertThrows(NegativeArraySizeException.class, () -> new DoubleList(-1));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleList(-1));
     }
 
     @Test

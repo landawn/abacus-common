@@ -88,7 +88,7 @@ public class ParallelIteratorStream100Test extends TestBase {
     }
 
     @Test
-    public void testFilterWithLargeDataSet() {
+    public void testFilterWithLargeDataset() {
         List<Integer> largeData = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
             largeData.add(i);

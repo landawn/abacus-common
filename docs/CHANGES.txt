@@ -53,11 +53,11 @@
 
 2, Refactoring: Holder, Pair and Triple.
 
-3, Refactoring: DataSet.
+3, Refactoring: Dataset.
 
 4, Refactoring: Change Optional to OptionalNullable for most of operations in Stream/Collectors.
 
-5, Add stream(...) to PaginatedDataSet.
+5, Add stream(...) to PaginatedDataset.
 
 6, Add com.landawn.abacus.util.Builder.
 
@@ -113,7 +113,7 @@
 
 1, Add sumInt/sumLong/sumDouble/averageInt/averageLong/averageDouble/summarizeInt/summarizeLong/summarizeDouble to Stream.
 
-2, Remove distribution from DataSet
+2, Remove distribution from Dataset
 
 3, bug fix and improvements.
 
@@ -174,10 +174,10 @@
    Stream APIs will the only interfaces to provide these advanced features: map/flatmap/reduce/groupBy.
    We may add it back to N/ObjectList/IntList/... later if it's really useful/necessary.
 
-6, Refactoring toXXX(Class,...) to toXXX(...,Supplier) in DataSet/N/ObjectList/IntList/DoubleList/.../Collectors/.
+6, Refactoring toXXX(Class,...) to toXXX(...,Supplier) in Dataset/N/ObjectList/IntList/DoubleList/.../Collectors/.
    It's more friendly and beautiful by 'Supplier' for JDK 8 with Lambdas. 
 
-7, add boolean forEach2(Function<? super T, Boolean> action) to Stream/ObjectList/N/DataSet/Multiset/MultiMap/...
+7, add boolean forEach2(Function<? super T, Boolean> action) to Stream/ObjectList/N/Dataset/Multiset/MultiMap/...
    Below code can be simplified to: return stream.forEach2(e -> action(e));   
 	   for (E e : c) {
 	   		if (action) {
@@ -218,7 +218,7 @@
 
 6, Add iterate(...) to Stream.
 
-7, rename DataSet.sum(...)/average(...) to sumDouble(...)/averageDouble(...). Add sumInt(...)/sumLong(...)/averageInt(...)/averageLong(...)
+7, rename Dataset.sum(...)/average(...) to sumDouble(...)/averageDouble(...). Add sumInt(...)/sumLong(...)/averageInt(...)/averageLong(...)
 
 8, Add sumInt(...)/sumLong(...)/sumDouble(...)/averageInt(...)/averageLong(...)/averageDouble(...) to ObjectList.
 
@@ -353,7 +353,7 @@ BE CAREFUL that methods fall to parse(XXX, final long lineOffset, final long cou
 1, Add below methods to SQLiteExecutor:
 	public long insert(Object entity, int conflictAlgorithm)
 	 ...
-	public DataSet query(String table, Map<String, Class> selectColumnNameTypeMap, Condition whereClause, String groupBy, String having, String orderBy,int offset, int count)
+	public Dataset query(String table, Map<String, Class> selectColumnNameTypeMap, Condition whereClause, String groupBy, String having, String orderBy,int offset, int count)
 
 2, Refactoring the parse methods in JdbcUtil.java and IOUtil.java.
 

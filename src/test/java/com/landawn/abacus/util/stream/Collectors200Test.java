@@ -26,14 +26,13 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 
 public class Collectors200Test extends TestBase {
@@ -215,11 +214,11 @@ public class Collectors200Test extends TestBase {
 
     @Test
     public void test_averaging() {
-        assertEquals(OptionalDouble.of(2.0), Stream.of(1, 2, 3).collect(Collectors.averagingInt(i -> i)));
-        assertEquals(OptionalDouble.of(2.0), Stream.of(1L, 2L, 3L).collect(Collectors.averagingLong(i -> i)));
-        assertEquals(OptionalDouble.of(2.0), Stream.of(1.0, 2.0, 3.0).collect(Collectors.averagingDouble(i -> i)));
-        assertEquals(Optional.of(new BigDecimal("2")), Stream.of("1", "2", "3").collect(Collectors.averagingBigInteger(BigInteger::new)));
-        assertEquals(Optional.of(new BigDecimal("2.2")), Stream.of("1.1", "2.2", "3.3").collect(Collectors.averagingBigDecimal(BigDecimal::new)));
+        assertEquals(2.0, Stream.of(1, 2, 3).collect(Collectors.averagingInt(i -> i)));
+        assertEquals(2.0, Stream.of(1L, 2L, 3L).collect(Collectors.averagingLong(i -> i)));
+        assertEquals(2.0, Stream.of(1.0, 2.0, 3.0).collect(Collectors.averagingDouble(i -> i)));
+        assertEquals(new BigDecimal("2"), Stream.of("1", "2", "3").collect(Collectors.averagingBigInteger(BigInteger::new)));
+        assertEquals(new BigDecimal("2.2"), Stream.of("1.1", "2.2", "3.3").collect(Collectors.averagingBigDecimal(BigDecimal::new)));
 
         assertThrows(NoSuchElementException.class, () -> Stream.<Integer> empty().collect(Collectors.averagingIntOrElseThrow(i -> i)));
     }
@@ -351,20 +350,20 @@ public class Collectors200Test extends TestBase {
         }
 
         @Test
-        public void test_toDataSet() {
+        public void test_toDataset() {
             List<Map<String, Object>> data = new ArrayList<>();
             data.add(N.asMap("id", 1, "name", "John"));
             data.add(N.asMap("id", 2, "name", "Jane"));
 
-            DataSet dataSet = data.stream().collect(MoreCollectors.toDataSet());
-            assertEquals(2, dataSet.size());
-            assertEquals(2, dataSet.columnNameList().size());
-            assertTrue(dataSet.columnNameList().contains("id"));
-            assertTrue(dataSet.columnNameList().contains("name"));
+            Dataset dataset = data.stream().collect(MoreCollectors.toDataset());
+            assertEquals(2, dataset.size());
+            assertEquals(2, dataset.columnNameList().size());
+            assertTrue(dataset.columnNameList().contains("id"));
+            assertTrue(dataset.columnNameList().contains("name"));
 
-            DataSet dataSetWithNames = data.stream().collect(MoreCollectors.toDataSet(Arrays.asList("ID", "NAME")));
-            assertEquals(2, dataSetWithNames.size());
-            assertEquals(Arrays.asList("ID", "NAME"), dataSetWithNames.columnNameList());
+            Dataset datasetWithNames = data.stream().collect(MoreCollectors.toDataset(Arrays.asList("ID", "NAME")));
+            assertEquals(2, datasetWithNames.size());
+            assertEquals(Arrays.asList("ID", "NAME"), datasetWithNames.columnNameList());
         }
     }
 }

@@ -36,9 +36,9 @@ import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.TriPredicate;
 
-public class RowDataSet101Test extends TestBase {
+public class RowDataset101Test extends TestBase {
 
-    private DataSet dataSet;
+    private Dataset dataset;
     private List<String> columnNames;
     private List<List<Object>> columnValues;
 
@@ -52,17 +52,17 @@ public class RowDataSet101Test extends TestBase {
         columnValues.add(N.asList(25, 30, 35, 28, 32));
         columnValues.add(N.asList("NYC", "LA", "NYC", "LA", "Chicago"));
 
-        dataSet = new RowDataSet(columnNames, columnValues);
+        dataset = new RowDataset(columnNames, columnValues);
     }
 
     // XML Export Tests
 
     @Test
     public void testToXml() {
-        String xml = dataSet.toXml();
+        String xml = dataset.toXml();
         assertNotNull(xml);
-        assertTrue(xml.contains("<dataSet>"));
-        assertTrue(xml.contains("</dataSet>"));
+        assertTrue(xml.contains("<dataset>"));
+        assertTrue(xml.contains("</dataset>"));
         assertTrue(xml.contains("<row>"));
         assertTrue(xml.contains("<id>"));
         assertTrue(xml.contains("<name>"));
@@ -70,7 +70,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testToXmlWithCustomRowElementName() {
-        String xml = dataSet.toXml("record");
+        String xml = dataset.toXml("record");
         assertNotNull(xml);
         assertTrue(xml.contains("<record>"));
         assertTrue(xml.contains("</record>"));
@@ -78,7 +78,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testToXmlWithRowRange() {
-        String xml = dataSet.toXml(1, 3);
+        String xml = dataset.toXml(1, 3);
         assertNotNull(xml);
         assertTrue(xml.contains("Jane"));
         assertTrue(xml.contains("Bob"));
@@ -88,7 +88,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testToXmlWithRowRangeAndCustomElementName() {
-        String xml = dataSet.toXml(1, 3, "person");
+        String xml = dataset.toXml(1, 3, "person");
         assertNotNull(xml);
         assertTrue(xml.contains("<person>"));
         assertTrue(xml.contains("Jane"));
@@ -98,7 +98,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testToXmlWithRowRangeAndColumnNames() {
         Collection<String> columns = N.asList("name", "age");
-        String xml = dataSet.toXml(1, 3, columns);
+        String xml = dataset.toXml(1, 3, columns);
         assertNotNull(xml);
         assertTrue(xml.contains("Jane"));
         assertTrue(xml.contains("30"));
@@ -109,7 +109,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testToXmlWithAllParameters() {
         Collection<String> columns = N.asList("name", "age");
-        String xml = dataSet.toXml(1, 3, columns, "employee");
+        String xml = dataset.toXml(1, 3, columns, "employee");
         assertNotNull(xml);
         assertTrue(xml.contains("<employee>"));
         assertTrue(xml.contains("Jane"));
@@ -119,18 +119,18 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testToXmlToFile(@TempDir Path tempDir) throws IOException {
         File outputFile = tempDir.resolve("test.xml").toFile();
-        dataSet.toXml(outputFile);
+        dataset.toXml(outputFile);
         assertTrue(outputFile.exists());
 
         String content = IOUtil.readAllToString(outputFile);
-        assertTrue(content.contains("<dataSet>"));
+        assertTrue(content.contains("<dataset>"));
         assertTrue(content.contains("John"));
     }
 
     @Test
     public void testToXmlToFileWithCustomElementName(@TempDir Path tempDir) throws IOException {
         File outputFile = tempDir.resolve("test2.xml").toFile();
-        dataSet.toXml("item", outputFile);
+        dataset.toXml("item", outputFile);
         assertTrue(outputFile.exists());
 
         String content = IOUtil.readAllToString(outputFile);
@@ -140,7 +140,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testToXmlToFileWithRowRange(@TempDir Path tempDir) throws IOException {
         File outputFile = tempDir.resolve("test3.xml").toFile();
-        dataSet.toXml(1, 3, outputFile);
+        dataset.toXml(1, 3, outputFile);
         assertTrue(outputFile.exists());
 
         String content = IOUtil.readAllToString(outputFile);
@@ -152,7 +152,7 @@ public class RowDataSet101Test extends TestBase {
     public void testToXmlToFileWithAllParams(@TempDir Path tempDir) throws IOException {
         File outputFile = tempDir.resolve("test4.xml").toFile();
         Collection<String> columns = N.asList("name", "age");
-        dataSet.toXml(0, 2, columns, "record", outputFile);
+        dataset.toXml(0, 2, columns, "record", outputFile);
         assertTrue(outputFile.exists());
 
         String content = IOUtil.readAllToString(outputFile);
@@ -164,17 +164,17 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testToXmlToOutputStream() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        dataSet.toXml(baos);
+        dataset.toXml(baos);
 
         String xml = baos.toString();
-        assertTrue(xml.contains("<dataSet>"));
+        assertTrue(xml.contains("<dataset>"));
         assertTrue(xml.contains("John"));
     }
 
     @Test
     public void testToXmlToOutputStreamWithElementName() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        dataSet.toXml("data", baos);
+        dataset.toXml("data", baos);
 
         String xml = baos.toString();
         assertTrue(xml.contains("<data>"));
@@ -183,7 +183,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testToXmlToOutputStreamWithRowRange() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        dataSet.toXml(1, 3, baos);
+        dataset.toXml(1, 3, baos);
 
         String xml = baos.toString();
         assertTrue(xml.contains("Jane"));
@@ -194,7 +194,7 @@ public class RowDataSet101Test extends TestBase {
     public void testToXmlToOutputStreamWithAllParams() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Collection<String> columns = N.asList("name");
-        dataSet.toXml(0, 2, columns, "person", baos);
+        dataset.toXml(0, 2, columns, "person", baos);
 
         String xml = baos.toString();
         assertTrue(xml.contains("<person>"));
@@ -205,17 +205,17 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testToXmlToWriter() throws IOException {
         StringWriter writer = new StringWriter();
-        dataSet.toXml(writer);
+        dataset.toXml(writer);
 
         String xml = writer.toString();
-        assertTrue(xml.contains("<dataSet>"));
+        assertTrue(xml.contains("<dataset>"));
         assertTrue(xml.contains("John"));
     }
 
     @Test
     public void testToXmlToWriterWithElementName() throws IOException {
         StringWriter writer = new StringWriter();
-        dataSet.toXml("entry", writer);
+        dataset.toXml("entry", writer);
 
         String xml = writer.toString();
         assertTrue(xml.contains("<entry>"));
@@ -224,7 +224,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testToXmlToWriterWithRowRange() throws IOException {
         StringWriter writer = new StringWriter();
-        dataSet.toXml(2, 4, writer);
+        dataset.toXml(2, 4, writer);
 
         String xml = writer.toString();
         assertTrue(xml.contains("Bob"));
@@ -236,7 +236,7 @@ public class RowDataSet101Test extends TestBase {
     public void testToXmlToWriterWithAllParams() throws IOException {
         StringWriter writer = new StringWriter();
         Collection<String> columns = N.asList("id", "name");
-        dataSet.toXml(0, 2, columns, "user", writer);
+        dataset.toXml(0, 2, columns, "user", writer);
 
         String xml = writer.toString();
         assertTrue(xml.contains("<user>"));
@@ -249,7 +249,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testToCsv() {
-        String csv = dataSet.toCsv();
+        String csv = dataset.toCsv();
         assertNotNull(csv);
         assertTrue(csv.contains("\"id\",\"name\",\"age\",\"city\""));
         assertTrue(csv.contains("1,\"John\",25,\"NYC\""));
@@ -258,7 +258,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testToCsvWithRowRangeAndColumns() {
         Collection<String> columns = N.asList("name", "age");
-        String csv = dataSet.toCsv(1, 3, columns);
+        String csv = dataset.toCsv(1, 3, columns);
         assertNotNull(csv);
         assertTrue(csv.contains("\"name\",\"age\""));
         assertTrue(csv.contains("\"Jane\",30"));
@@ -269,7 +269,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testToCsvToFile(@TempDir Path tempDir) throws IOException {
         File outputFile = tempDir.resolve("test.csv").toFile();
-        dataSet.toCsv(outputFile);
+        dataset.toCsv(outputFile);
         assertTrue(outputFile.exists());
 
         String content = IOUtil.readAllToString(outputFile);
@@ -281,7 +281,7 @@ public class RowDataSet101Test extends TestBase {
     public void testToCsvToFileWithParams(@TempDir Path tempDir) throws IOException {
         File outputFile = tempDir.resolve("test2.csv").toFile();
         Collection<String> columns = N.asList("name", "city");
-        dataSet.toCsv(1, 3, columns, outputFile);
+        dataset.toCsv(1, 3, columns, outputFile);
         assertTrue(outputFile.exists());
 
         String content = IOUtil.readAllToString(outputFile);
@@ -293,7 +293,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testToCsvToOutputStream() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        dataSet.toCsv(baos);
+        dataset.toCsv(baos);
 
         String csv = baos.toString();
         assertTrue(csv.contains("\"id\",\"name\",\"age\",\"city\""));
@@ -304,7 +304,7 @@ public class RowDataSet101Test extends TestBase {
     public void testToCsvToOutputStreamWithParams() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Collection<String> columns = N.asList("id", "name");
-        dataSet.toCsv(0, 2, columns, baos);
+        dataset.toCsv(0, 2, columns, baos);
 
         String csv = baos.toString();
         assertTrue(csv.contains("\"id\",\"name\""));
@@ -315,7 +315,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testToCsvToWriter() throws IOException {
         StringWriter writer = new StringWriter();
-        dataSet.toCsv(writer);
+        dataset.toCsv(writer);
 
         String csv = writer.toString();
         assertTrue(csv.contains("\"id\",\"name\",\"age\",\"city\""));
@@ -326,7 +326,7 @@ public class RowDataSet101Test extends TestBase {
     public void testToCsvToWriterWithParams() throws IOException {
         StringWriter writer = new StringWriter();
         Collection<String> columns = N.asList("name");
-        dataSet.toCsv(2, 4, columns, writer);
+        dataset.toCsv(2, 4, columns, writer);
 
         String csv = writer.toString();
         assertTrue(csv.contains("name"));
@@ -340,7 +340,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testGroupByWithSingleKeyAndCollector() {
         Collector<Object, ?, List<Object>> listCollector = Collectors.toList();
-        DataSet grouped = dataSet.groupBy("city", "name", "names", listCollector);
+        Dataset grouped = dataset.groupBy("city", "name", "names", listCollector);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size()); // NYC, LA, Chicago
@@ -350,7 +350,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testGroupByWithSingleKeyAndRowType() {
-        DataSet grouped = dataSet.groupBy("city", N.asList("name", "age"), "people", Object[].class);
+        Dataset grouped = dataset.groupBy("city", N.asList("name", "age"), "people", Object[].class);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -361,7 +361,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testGroupByWithSingleKeyAndArrayCollector() {
         Collector<Object[], ?, List<Object[]>> collector = Collectors.toList();
-        DataSet grouped = dataSet.groupBy("city", N.asList("name", "age"), "data", collector);
+        Dataset grouped = dataset.groupBy("city", N.asList("name", "age"), "data", collector);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -373,7 +373,7 @@ public class RowDataSet101Test extends TestBase {
     public void testGroupByWithSingleKeyAndRowMapper() {
         Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0) + "-" + arr.get(1);
         Collector<String, ?, List<String>> collector = Collectors.toList();
-        DataSet grouped = dataSet.groupBy("city", N.asList("name", "age"), "info", rowMapper, collector);
+        Dataset grouped = dataset.groupBy("city", N.asList("name", "age"), "info", rowMapper, collector);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -385,7 +385,7 @@ public class RowDataSet101Test extends TestBase {
     public void testGroupByWithKeyExtractor() {
         Function<Object, String> keyExtractor = obj -> obj.toString().toUpperCase();
         Collector<Object, ?, List<Object>> collector = Collectors.toList();
-        DataSet grouped = dataSet.groupBy("city", keyExtractor, "name", "names", collector);
+        Dataset grouped = dataset.groupBy("city", keyExtractor, "name", "names", collector);
 
         assertNotNull(grouped);
         assertTrue(grouped.containsColumn("city"));
@@ -394,7 +394,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testGroupByWithMultipleKeys() {
-        DataSet grouped = dataSet.groupBy(N.asList("city"));
+        Dataset grouped = dataset.groupBy(N.asList("city"));
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -404,7 +404,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testGroupByWithMultipleKeysAndCollector() {
         Collector<Object, ?, Long> countCollector = Collectors.counting();
-        DataSet grouped = dataSet.groupBy(N.asList("city"), "name", "count", countCollector);
+        Dataset grouped = dataset.groupBy(N.asList("city"), "name", "count", countCollector);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -419,8 +419,8 @@ public class RowDataSet101Test extends TestBase {
         columnValues.add(N.asList(1, 2, 3, 4));
         columnValues.add(N.asList("A", "B", "A", "B"));
 
-        RowDataSet ds = new RowDataSet(columnNames, columnValues);
-        DataSet grouped = ds.groupBy(N.asList("name"), N.asList("id"), "ids", List.class);
+        RowDataset ds = new RowDataset(columnNames, columnValues);
+        Dataset grouped = ds.groupBy(N.asList("name"), N.asList("id"), "ids", List.class);
 
         assertNotNull(grouped);
         assertEquals(2, grouped.size());
@@ -431,7 +431,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testGroupByWithMultipleKeysAndArrayCollector() {
         Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        DataSet grouped = dataSet.groupBy(N.asList("city"), N.asList("name", "age"), "count", countCollector);
+        Dataset grouped = dataset.groupBy(N.asList("city"), N.asList("name", "age"), "count", countCollector);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -443,7 +443,7 @@ public class RowDataSet101Test extends TestBase {
     public void testGroupByWithMultipleKeysAndRowMapper() {
         Function<DisposableObjArray, Integer> rowMapper = arr -> (Integer) arr.get(0);
         Collector<Integer, ?, Integer> sumCollector = Collectors.summingInt(Integer::intValue);
-        DataSet grouped = dataSet.groupBy(N.asList("city"), N.asList("age"), "totalAge", rowMapper, sumCollector);
+        Dataset grouped = dataset.groupBy(N.asList("city"), N.asList("age"), "totalAge", rowMapper, sumCollector);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -454,7 +454,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testGroupByWithMultipleKeysAndKeyExtractor() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        DataSet grouped = dataSet.groupBy(N.asList("city"), keyExtractor);
+        Dataset grouped = dataset.groupBy(N.asList("city"), keyExtractor);
 
         assertNotNull(grouped);
         assertTrue(grouped.containsColumn("city"));
@@ -464,7 +464,7 @@ public class RowDataSet101Test extends TestBase {
     public void testGroupByWithMultipleKeysKeyExtractorAndCollector() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Collector<Object, ?, Long> countCollector = Collectors.counting();
-        DataSet grouped = dataSet.groupBy(N.asList("city"), keyExtractor, "name", "count", countCollector);
+        Dataset grouped = dataset.groupBy(N.asList("city"), keyExtractor, "name", "count", countCollector);
 
         assertNotNull(grouped);
         assertTrue(grouped.containsColumn("city"));
@@ -474,8 +474,8 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testGroupByWithMultipleKeysKeyExtractorAndRowType() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        DataSet grouped = dataSet.groupBy(N.asList("city"), keyExtractor, N.asList("name"), "names", List.class);
-        dataSet.println();
+        Dataset grouped = dataset.groupBy(N.asList("city"), keyExtractor, N.asList("name"), "names", List.class);
+        dataset.println();
 
         grouped.println();
 
@@ -488,7 +488,7 @@ public class RowDataSet101Test extends TestBase {
     public void testGroupByWithMultipleKeysKeyExtractorAndArrayCollector() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        DataSet grouped = dataSet.groupBy(N.asList("city"), keyExtractor, N.asList("name"), "count", countCollector);
+        Dataset grouped = dataset.groupBy(N.asList("city"), keyExtractor, N.asList("name"), "count", countCollector);
 
         grouped.println();
 
@@ -503,7 +503,7 @@ public class RowDataSet101Test extends TestBase {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0).toString();
         Collector<String, ?, List<String>> collector = Collectors.toList();
-        DataSet grouped = dataSet.groupBy(N.asList("city"), keyExtractor, N.asList("name"), "names", rowMapper, collector);
+        Dataset grouped = dataset.groupBy(N.asList("city"), keyExtractor, N.asList("name"), "names", rowMapper, collector);
 
         assertNotNull(grouped);
         assertTrue(grouped.containsColumn("city"));
@@ -521,7 +521,7 @@ public class RowDataSet101Test extends TestBase {
         columnValues.add(N.asList("X", "Y", "X", "Y"));
         columnValues.add(N.asList(1, 2, 3, 4));
 
-        RowDataSet ds = new RowDataSet(columnNames, columnValues);
+        RowDataset ds = new RowDataset(columnNames, columnValues);
         Collector<Object, ?, Integer> sumCollector = Collectors.summingInt(o -> (Integer) o);
 
         Sheet<String, String, Integer> pivot = ds.pivot("row", "value", "col", sumCollector);
@@ -540,7 +540,7 @@ public class RowDataSet101Test extends TestBase {
         columnValues.add(N.asList(1, 2, 3, 4));
         columnValues.add(N.asList(5, 6, 7, 8));
 
-        RowDataSet ds = new RowDataSet(columnNames, columnValues);
+        RowDataset ds = new RowDataset(columnNames, columnValues);
         Collector<Object[], ?, String> joiningCollector = Collectors.mapping(arr -> arr[0] + "-" + arr[1], Collectors.joining(","));
 
         Sheet<String, String, String> pivot = ds.pivot("row", N.asList("val1", "val2"), "col", joiningCollector);
@@ -559,7 +559,7 @@ public class RowDataSet101Test extends TestBase {
         columnValues.add(N.asList(1, 2, 3, 4));
         columnValues.add(N.asList(5, 6, 7, 8));
 
-        RowDataSet ds = new RowDataSet(columnNames, columnValues);
+        RowDataset ds = new RowDataset(columnNames, columnValues);
         Function<DisposableObjArray, Integer> rowMapper = arr -> (Integer) arr.get(0) + (Integer) arr.get(1);
         Collector<Integer, ?, Integer> sumCollector = Collectors.summingInt(Integer::intValue);
 
@@ -574,7 +574,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testRollup() {
-        List<DataSet> rollups = dataSet.rollup(N.asList("city", "name")).toList();
+        List<Dataset> rollups = dataset.rollup(N.asList("city", "name")).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -584,22 +584,22 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testRollupWithCollector() {
         Collector<Object, ?, Long> countCollector = Collectors.counting();
-        List<DataSet> rollups = dataSet.rollup(N.asList("city"), "name", "count", countCollector).toList();
+        List<Dataset> rollups = dataset.rollup(N.asList("city"), "name", "count", countCollector).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
-        for (DataSet ds : rollups) {
+        for (Dataset ds : rollups) {
             assertTrue(ds.containsColumn("count"));
         }
     }
 
     @Test
     public void testRollupWithRowType() {
-        List<DataSet> rollups = dataSet.rollup(N.asList("city"), N.asList("name"), "names", List.class).toList();
+        List<Dataset> rollups = dataset.rollup(N.asList("city"), N.asList("name"), "names", List.class).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
-        for (DataSet ds : rollups) {
+        for (Dataset ds : rollups) {
             if (ds.columnCount() > 1) {
                 assertTrue(ds.containsColumn("names"));
             }
@@ -609,11 +609,11 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testRollupWithArrayCollector() {
         Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        List<DataSet> rollups = dataSet.rollup(N.asList("city"), N.asList("name", "age"), "count", countCollector).toList();
+        List<Dataset> rollups = dataset.rollup(N.asList("city"), N.asList("name", "age"), "count", countCollector).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
-        for (DataSet ds : rollups) {
+        for (Dataset ds : rollups) {
             if (ds.columnCount() > 1) {
                 assertTrue(ds.containsColumn("count"));
             }
@@ -624,11 +624,11 @@ public class RowDataSet101Test extends TestBase {
     public void testRollupWithRowMapper() {
         Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0).toString();
         Collector<String, ?, List<String>> collector = Collectors.toList();
-        List<DataSet> rollups = dataSet.rollup(N.asList("city"), N.asList("name"), "names", rowMapper, collector).toList();
+        List<Dataset> rollups = dataset.rollup(N.asList("city"), N.asList("name"), "names", rowMapper, collector).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
-        for (DataSet ds : rollups) {
+        for (Dataset ds : rollups) {
             if (ds.columnCount() > 1) {
                 assertTrue(ds.containsColumn("names"));
             }
@@ -638,7 +638,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testRollupWithKeyExtractor() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        List<DataSet> rollups = dataSet.rollup(N.asList("city"), keyExtractor).toList();
+        List<Dataset> rollups = dataset.rollup(N.asList("city"), keyExtractor).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -648,7 +648,7 @@ public class RowDataSet101Test extends TestBase {
     public void testRollupWithKeyExtractorAndCollector() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Collector<Object, ?, Long> countCollector = Collectors.counting();
-        List<DataSet> rollups = dataSet.rollup(N.asList("city"), keyExtractor, "name", "count", countCollector).toList();
+        List<Dataset> rollups = dataset.rollup(N.asList("city"), keyExtractor, "name", "count", countCollector).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -657,7 +657,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testRollupWithKeyExtractorAndRowType() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        List<DataSet> rollups = dataSet.rollup(N.asList("city"), keyExtractor, N.asList("name"), "names", List.class).toList();
+        List<Dataset> rollups = dataset.rollup(N.asList("city"), keyExtractor, N.asList("name"), "names", List.class).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -667,7 +667,7 @@ public class RowDataSet101Test extends TestBase {
     public void testRollupWithKeyExtractorAndArrayCollector() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        List<DataSet> rollups = dataSet.rollup(N.asList("city"), keyExtractor, N.asList("name"), "count", countCollector).toList();
+        List<Dataset> rollups = dataset.rollup(N.asList("city"), keyExtractor, N.asList("name"), "count", countCollector).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -678,7 +678,7 @@ public class RowDataSet101Test extends TestBase {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0).toString();
         Collector<String, ?, List<String>> collector = Collectors.toList();
-        List<DataSet> rollups = dataSet.rollup(N.asList("city"), keyExtractor, N.asList("name"), "names", rowMapper, collector).toList();
+        List<Dataset> rollups = dataset.rollup(N.asList("city"), keyExtractor, N.asList("name"), "names", rowMapper, collector).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -688,7 +688,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testCube() {
-        List<DataSet> cubes = dataSet.cube(N.asList("city", "name")).toList();
+        List<Dataset> cubes = dataset.cube(N.asList("city", "name")).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -698,7 +698,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testCubeWithCollector() {
         Collector<Object, ?, Long> countCollector = Collectors.counting();
-        List<DataSet> cubes = dataSet.cube(N.asList("city"), "name", "count", countCollector).toList();
+        List<Dataset> cubes = dataset.cube(N.asList("city"), "name", "count", countCollector).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -706,7 +706,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testCubeWithRowType() {
-        List<DataSet> cubes = dataSet.cube(N.asList("city"), N.asList("name"), "names", List.class).toList();
+        List<Dataset> cubes = dataset.cube(N.asList("city"), N.asList("name"), "names", List.class).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -715,7 +715,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testCubeWithArrayCollector() {
         Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        List<DataSet> cubes = dataSet.cube(N.asList("city"), N.asList("name"), "count", countCollector).toList();
+        List<Dataset> cubes = dataset.cube(N.asList("city"), N.asList("name"), "count", countCollector).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -725,7 +725,7 @@ public class RowDataSet101Test extends TestBase {
     public void testCubeWithRowMapper() {
         Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0).toString();
         Collector<String, ?, List<String>> collector = Collectors.toList();
-        List<DataSet> cubes = dataSet.cube(N.asList("city"), N.asList("name"), "names", rowMapper, collector).toList();
+        List<Dataset> cubes = dataset.cube(N.asList("city"), N.asList("name"), "names", rowMapper, collector).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -734,7 +734,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testCubeWithKeyExtractor() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        List<DataSet> cubes = dataSet.cube(N.asList("city"), keyExtractor).toList();
+        List<Dataset> cubes = dataset.cube(N.asList("city"), keyExtractor).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -744,7 +744,7 @@ public class RowDataSet101Test extends TestBase {
     public void testCubeWithKeyExtractorAndCollector() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Collector<Object, ?, Long> countCollector = Collectors.counting();
-        List<DataSet> cubes = dataSet.cube(N.asList("city"), keyExtractor, "name", "count", countCollector).toList();
+        List<Dataset> cubes = dataset.cube(N.asList("city"), keyExtractor, "name", "count", countCollector).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -753,31 +753,31 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testCubeWithKeyExtractorAndRowType() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.join(", ");
-        List<DataSet> cubes = dataSet.cube(N.asList("city"), keyExtractor, N.asList("name"), "names", List.class).toList();
-        dataSet.println();
+        List<Dataset> cubes = dataset.cube(N.asList("city"), keyExtractor, N.asList("name"), "names", List.class).toList();
+        dataset.println();
 
-        cubes.forEach(DataSet::println);
+        cubes.forEach(Dataset::println);
 
         assertNotNull(cubes);
         assertEquals(1, cubes.size());
 
         N.println(Strings.repeat("=", 80));
 
-        cubes = dataSet.cube(N.asList("city", "age"), keyExtractor, N.asList("name"), "names", List.class).toList();
+        cubes = dataset.cube(N.asList("city", "age"), keyExtractor, N.asList("name"), "names", List.class).toList();
 
-        cubes.forEach(DataSet::println);
+        cubes.forEach(Dataset::println);
 
         assertNotNull(cubes);
         assertEquals(3, cubes.size());
 
-        dataSet.groupBy(N.asList("city", "age"), keyExtractor, N.asList("name"), "names", List.class).println();
+        dataset.groupBy(N.asList("city", "age"), keyExtractor, N.asList("name"), "names", List.class).println();
     }
 
     @Test
     public void testCubeWithKeyExtractorAndArrayCollector() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        List<DataSet> cubes = dataSet.cube(N.asList("city"), keyExtractor, N.asList("name"), "count", countCollector).toList();
+        List<Dataset> cubes = dataset.cube(N.asList("city"), keyExtractor, N.asList("name"), "count", countCollector).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -788,7 +788,7 @@ public class RowDataSet101Test extends TestBase {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0).toString();
         Collector<String, ?, List<String>> collector = Collectors.toList();
-        List<DataSet> cubes = dataSet.cube(N.asList("city"), keyExtractor, N.asList("name"), "names", rowMapper, collector).toList();
+        List<Dataset> cubes = dataset.cube(N.asList("city"), keyExtractor, N.asList("name"), "names", rowMapper, collector).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -798,7 +798,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testSortBy() {
-        DataSet copy = dataSet.copy();
+        Dataset copy = dataset.copy();
         copy.sortBy("age");
 
         List<Object> ages = copy.getColumn("age");
@@ -809,7 +809,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testSortByWithComparator() {
-        DataSet copy = dataSet.copy();
+        Dataset copy = dataset.copy();
         copy.sortBy("age", Comparator.reverseOrder());
 
         List<Object> ages = copy.getColumn("age");
@@ -820,7 +820,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testSortByMultipleColumns() {
-        DataSet copy = dataSet.copy();
+        Dataset copy = dataset.copy();
         copy.sortBy(N.asList("city", "age"));
 
         // Verify sorting
@@ -838,7 +838,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testSortByMultipleColumnsWithComparator() {
-        DataSet copy = dataSet.copy();
+        Dataset copy = dataset.copy();
         Comparator<Object[]> comp = (a, b) -> {
             int result = ((String) a[0]).compareTo((String) b[0]);
             if (result == 0) {
@@ -850,22 +850,22 @@ public class RowDataSet101Test extends TestBase {
 
         // Verify custom sorting
         assertNotNull(copy);
-        assertEquals(dataSet.size(), copy.size());
+        assertEquals(dataset.size(), copy.size());
     }
 
     @Test
     public void testSortByWithKeyExtractor() {
-        DataSet copy = dataSet.copy();
+        Dataset copy = dataset.copy();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0) + "-" + arr.get(1);
         copy.sortBy(N.asList("name", "age"), keyExtractor);
 
         assertNotNull(copy);
-        assertEquals(dataSet.size(), copy.size());
+        assertEquals(dataset.size(), copy.size());
     }
 
     @Test
     public void testParallelSortBy() {
-        DataSet copy = dataSet.copy();
+        Dataset copy = dataset.copy();
         copy.parallelSortBy("age");
 
         List<Object> ages = copy.getColumn("age");
@@ -876,7 +876,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testParallelSortByWithComparator() {
-        DataSet copy = dataSet.copy();
+        Dataset copy = dataset.copy();
         copy.parallelSortBy("name", String.CASE_INSENSITIVE_ORDER);
 
         List<Object> names = copy.getColumn("name");
@@ -887,26 +887,26 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testParallelSortByMultipleColumns() {
-        DataSet copy = dataSet.copy();
+        Dataset copy = dataset.copy();
         copy.parallelSortBy(N.asList("city", "name"));
 
         assertNotNull(copy);
-        assertEquals(dataSet.size(), copy.size());
+        assertEquals(dataset.size(), copy.size());
     }
 
     @Test
     public void testParallelSortByMultipleColumnsWithComparator() {
-        DataSet copy = dataSet.copy();
+        Dataset copy = dataset.copy();
         Comparator<Object[]> comp = Comparator.comparing((Object[] a) -> (String) a[0]).thenComparing(a -> (String) a[1]);
         copy.parallelSortBy(N.asList("city", "name"), comp);
 
         assertNotNull(copy);
-        assertEquals(dataSet.size(), copy.size());
+        assertEquals(dataset.size(), copy.size());
     }
 
     @Test
     public void testParallelSortByWithKeyExtractor() {
-        DataSet copy = dataSet.copy();
+        Dataset copy = dataset.copy();
         Function<DisposableObjArray, Integer> keyExtractor = arr -> (Integer) arr.get(0);
         copy.parallelSortBy(N.asList("age"), keyExtractor);
 
@@ -920,7 +920,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testTopBy() {
-        DataSet top = dataSet.topBy("age", 3);
+        Dataset top = dataset.topBy("age", 3);
 
         assertNotNull(top);
         assertEquals(3, top.size());
@@ -928,7 +928,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testTopByWithComparator() {
-        DataSet top = dataSet.topBy("age", 2, Comparator.reverseOrder());
+        Dataset top = dataset.topBy("age", 2, Comparator.reverseOrder());
 
         assertNotNull(top);
         assertEquals(2, top.size());
@@ -941,7 +941,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testTopByMultipleColumns() {
-        DataSet top = dataSet.topBy(N.asList("city", "age"), 3);
+        Dataset top = dataset.topBy(N.asList("city", "age"), 3);
 
         assertNotNull(top);
         assertEquals(3, top.size());
@@ -950,7 +950,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testTopByMultipleColumnsWithComparator() {
         Comparator<Object[]> comp = (a, b) -> ((String) a[0]).compareTo((String) b[0]);
-        DataSet top = dataSet.topBy(N.asList("city"), 2, comp);
+        Dataset top = dataset.topBy(N.asList("city"), 2, comp);
 
         assertNotNull(top);
         assertEquals(2, top.size());
@@ -959,7 +959,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testTopByWithKeyExtractor() {
         Function<DisposableObjArray, Integer> keyExtractor = arr -> (Integer) arr.get(0);
-        DataSet top = dataSet.topBy(N.asList("age"), 3, keyExtractor);
+        Dataset top = dataset.topBy(N.asList("age"), 3, keyExtractor);
 
         assertNotNull(top);
         assertEquals(3, top.size());
@@ -975,8 +975,8 @@ public class RowDataSet101Test extends TestBase {
         columnValues.add(N.asList("A", "A", "B", "B", "A"));
         columnValues.add(N.asList(1, 1, 2, 2, 1));
 
-        RowDataSet ds = new RowDataSet(columnNames, columnValues);
-        DataSet distinct = ds.distinct();
+        RowDataset ds = new RowDataset(columnNames, columnValues);
+        Dataset distinct = ds.distinct();
 
         assertNotNull(distinct);
         assertEquals(2, distinct.size()); // Only unique rows
@@ -984,7 +984,7 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testDistinctBy() {
-        DataSet distinct = dataSet.distinctBy("city");
+        Dataset distinct = dataset.distinctBy("city");
 
         assertNotNull(distinct);
         assertEquals(3, distinct.size()); // NYC, LA, Chicago
@@ -993,10 +993,10 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testDistinctByWithKeyExtractor() {
         Function<Object, String> keyExtractor = obj -> obj.toString().substring(0, 1);
-        DataSet distinct = dataSet.distinctBy("name", keyExtractor);
+        Dataset distinct = dataset.distinctBy("name", keyExtractor);
 
         assertNotNull(distinct);
-        assertTrue(distinct.size() <= dataSet.size());
+        assertTrue(distinct.size() <= dataset.size());
     }
 
     @Test
@@ -1008,8 +1008,8 @@ public class RowDataSet101Test extends TestBase {
         columnValues.add(N.asList(1, 2, 1, 1, 1));
         columnValues.add(N.asList("X", "Y", "Z", "W", "V"));
 
-        RowDataSet ds = new RowDataSet(columnNames, columnValues);
-        DataSet distinct = ds.distinctBy(N.asList("col1", "col2"));
+        RowDataset ds = new RowDataset(columnNames, columnValues);
+        Dataset distinct = ds.distinctBy(N.asList("col1", "col2"));
 
         assertNotNull(distinct);
         assertEquals(3, distinct.size()); // (A,1), (A,2), (B,1)
@@ -1018,10 +1018,10 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testDistinctByMultipleColumnsWithKeyExtractor() {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        DataSet distinct = dataSet.distinctBy(N.asList("city", "age"), keyExtractor);
+        Dataset distinct = dataset.distinctBy(N.asList("city", "age"), keyExtractor);
 
         assertNotNull(distinct);
-        assertTrue(distinct.size() <= dataSet.size());
+        assertTrue(distinct.size() <= dataset.size());
     }
 
     // Filter Tests
@@ -1029,7 +1029,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterWithPredicate() {
         Predicate<DisposableObjArray> filter = arr -> ((Integer) arr.get(2)) > 30;
-        DataSet filtered = dataSet.filter(filter);
+        Dataset filtered = dataset.filter(filter);
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size()); // Bob (35) and Tom (32)
@@ -1038,7 +1038,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterWithPredicateAndMax() {
         Predicate<DisposableObjArray> filter = arr -> ((Integer) arr.get(2)) > 25;
-        DataSet filtered = dataSet.filter(filter, 2);
+        Dataset filtered = dataset.filter(filter, 2);
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size());
@@ -1047,7 +1047,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterWithRowRange() {
         Predicate<DisposableObjArray> filter = arr -> true; // accept all
-        DataSet filtered = dataSet.filter(1, 4, filter);
+        Dataset filtered = dataset.filter(1, 4, filter);
 
         assertNotNull(filtered);
         assertEquals(3, filtered.size());
@@ -1056,7 +1056,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterWithRowRangeAndMax() {
         Predicate<DisposableObjArray> filter = arr -> true;
-        DataSet filtered = dataSet.filter(0, 5, filter, 3);
+        Dataset filtered = dataset.filter(0, 5, filter, 3);
 
         assertNotNull(filtered);
         assertEquals(3, filtered.size());
@@ -1065,7 +1065,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByColumn() {
         Predicate<Object> filter = age -> ((Integer) age) >= 30;
-        DataSet filtered = dataSet.filter("age", filter);
+        Dataset filtered = dataset.filter("age", filter);
 
         assertNotNull(filtered);
         assertEquals(3, filtered.size());
@@ -1074,7 +1074,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByColumnWithMax() {
         Predicate<Object> filter = name -> ((String) name).startsWith("J");
-        DataSet filtered = dataSet.filter("name", filter, 1);
+        Dataset filtered = dataset.filter("name", filter, 1);
 
         assertNotNull(filtered);
         assertEquals(1, filtered.size());
@@ -1083,7 +1083,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByColumnWithRowRange() {
         Predicate<Object> filter = city -> "NYC".equals(city);
-        DataSet filtered = dataSet.filter(0, 5, "city", filter);
+        Dataset filtered = dataset.filter(0, 5, "city", filter);
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size());
@@ -1092,7 +1092,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByColumnWithRowRangeAndMax() {
         Predicate<Object> filter = city -> city != null;
-        DataSet filtered = dataSet.filter(1, 4, "city", filter, 2);
+        Dataset filtered = dataset.filter(1, 4, "city", filter, 2);
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size());
@@ -1101,7 +1101,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByMultipleColumns() {
         Predicate<DisposableObjArray> filter = arr -> "NYC".equals(arr.get(0)) && ((Integer) arr.get(1)) > 30;
-        DataSet filtered = dataSet.filter(N.asList("city", "age"), filter);
+        Dataset filtered = dataset.filter(N.asList("city", "age"), filter);
 
         assertNotNull(filtered);
         assertEquals(1, filtered.size()); // Only Bob
@@ -1110,7 +1110,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByMultipleColumnsWithMax() {
         Predicate<DisposableObjArray> filter = arr -> arr.get(0) != null;
-        DataSet filtered = dataSet.filter(N.asList("name", "city"), filter, 3);
+        Dataset filtered = dataset.filter(N.asList("name", "city"), filter, 3);
 
         assertNotNull(filtered);
         assertEquals(3, filtered.size());
@@ -1119,7 +1119,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByMultipleColumnsWithRowRange() {
         Predicate<DisposableObjArray> filter = arr -> true;
-        DataSet filtered = dataSet.filter(1, 3, N.asList("name", "age"), filter);
+        Dataset filtered = dataset.filter(1, 3, N.asList("name", "age"), filter);
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size());
@@ -1128,7 +1128,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByMultipleColumnsWithRowRangeAndMax() {
         Predicate<DisposableObjArray> filter = arr -> true;
-        DataSet filtered = dataSet.filter(0, 5, N.asList("id", "name"), filter, 4);
+        Dataset filtered = dataset.filter(0, 5, N.asList("id", "name"), filter, 4);
 
         assertNotNull(filtered);
         assertEquals(4, filtered.size());
@@ -1137,7 +1137,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByTuple2() {
         BiPredicate<Object, Object> filter = (name, age) -> ((Integer) age) > 30;
-        DataSet filtered = dataSet.filter(Tuple.of("name", "age"), filter);
+        Dataset filtered = dataset.filter(Tuple.of("name", "age"), filter);
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size());
@@ -1146,7 +1146,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByTuple2WithMax() {
         BiPredicate<Object, Object> filter = (id, name) -> ((Integer) id) <= 3;
-        DataSet filtered = dataSet.filter(Tuple.of("id", "name"), filter, 2);
+        Dataset filtered = dataset.filter(Tuple.of("id", "name"), filter, 2);
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size());
@@ -1155,7 +1155,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByTuple2WithRowRange() {
         BiPredicate<Object, Object> filter = (name, city) -> "LA".equals(city);
-        DataSet filtered = dataSet.filter(1, 5, Tuple.of("name", "city"), filter);
+        Dataset filtered = dataset.filter(1, 5, Tuple.of("name", "city"), filter);
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size());
@@ -1164,7 +1164,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByTuple2WithRowRangeAndMax() {
         BiPredicate<Object, Object> filter = (id, age) -> true;
-        DataSet filtered = dataSet.filter(0, 5, Tuple.of("id", "age"), filter, 3);
+        Dataset filtered = dataset.filter(0, 5, Tuple.of("id", "age"), filter, 3);
 
         assertNotNull(filtered);
         assertEquals(3, filtered.size());
@@ -1173,7 +1173,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByTuple3() {
         TriPredicate<Object, Object, Object> filter = (id, name, age) -> ((Integer) age) < 30;
-        DataSet filtered = dataSet.filter(Tuple.of("id", "name", "age"), filter);
+        Dataset filtered = dataset.filter(Tuple.of("id", "name", "age"), filter);
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size());
@@ -1182,7 +1182,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByTuple3WithMax() {
         TriPredicate<Object, Object, Object> filter = (name, age, city) -> true;
-        DataSet filtered = dataSet.filter(Tuple.of("name", "age", "city"), filter, 2);
+        Dataset filtered = dataset.filter(Tuple.of("name", "age", "city"), filter, 2);
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size());
@@ -1191,7 +1191,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByTuple3WithRowRange() {
         TriPredicate<Object, Object, Object> filter = (id, name, age) -> ((Integer) id) > 2;
-        DataSet filtered = dataSet.filter(1, 5, Tuple.of("id", "name", "age"), filter);
+        Dataset filtered = dataset.filter(1, 5, Tuple.of("id", "name", "age"), filter);
         filtered.println();
 
         assertNotNull(filtered);
@@ -1201,7 +1201,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFilterByTuple3WithRowRangeAndMax() {
         TriPredicate<Object, Object, Object> filter = (id, age, city) -> true;
-        DataSet filtered = dataSet.filter(0, 4, Tuple.of("id", "age", "city"), filter, 3);
+        Dataset filtered = dataset.filter(0, 4, Tuple.of("id", "age", "city"), filter, 3);
 
         assertNotNull(filtered);
         assertEquals(3, filtered.size());
@@ -1212,7 +1212,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testMapSingleColumn() {
         Function<Object, String> mapper = name -> ((String) name).toUpperCase();
-        DataSet mapped = dataSet.map("name", "NAME", "id", mapper);
+        Dataset mapped = dataset.map("name", "NAME", "id", mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
@@ -1224,7 +1224,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testMapSingleColumnWithMultipleCopying() {
         Function<Object, Integer> mapper = age -> ((Integer) age) * 2;
-        DataSet mapped = dataSet.map("age", "doubleAge", N.asList("id", "name"), mapper);
+        Dataset mapped = dataset.map("age", "doubleAge", N.asList("id", "name"), mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
@@ -1237,7 +1237,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testMapTuple2() {
         BiFunction<Object, Object, String> mapper = (name, age) -> name + ":" + age;
-        DataSet mapped = dataSet.map(Tuple.of("name", "age"), "info", N.asList("id"), mapper);
+        Dataset mapped = dataset.map(Tuple.of("name", "age"), "info", N.asList("id"), mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
@@ -1249,7 +1249,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testMapTuple3() {
         TriFunction<Object, Object, Object, String> mapper = (id, name, age) -> id + "-" + name + "-" + age;
-        DataSet mapped = dataSet.map(Tuple.of("id", "name", "age"), "combined", N.asList("city"), mapper);
+        Dataset mapped = dataset.map(Tuple.of("id", "name", "age"), "combined", N.asList("city"), mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
@@ -1261,7 +1261,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testMapMultipleColumns() {
         Function<DisposableObjArray, String> mapper = arr -> arr.get(0) + ":" + arr.get(1);
-        DataSet mapped = dataSet.map(N.asList("name", "city"), "location", N.asList("id"), mapper);
+        Dataset mapped = dataset.map(N.asList("name", "city"), "location", N.asList("id"), mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
@@ -1275,7 +1275,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFlatMapSingleColumn() {
         Function<Object, Collection<String>> mapper = name -> N.asList(((String) name).toLowerCase(), ((String) name).toUpperCase());
-        DataSet flatMapped = dataSet.flatMap("name", "variations", "id", mapper);
+        Dataset flatMapped = dataset.flatMap("name", "variations", "id", mapper);
 
         assertNotNull(flatMapped);
         assertEquals(10, flatMapped.size()); // 5 * 2
@@ -1286,7 +1286,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFlatMapSingleColumnWithMultipleCopying() {
         Function<Object, Collection<Integer>> mapper = age -> N.asList((Integer) age, (Integer) age + 10);
-        DataSet flatMapped = dataSet.flatMap("age", "ages", N.asList("id", "name"), mapper);
+        Dataset flatMapped = dataset.flatMap("age", "ages", N.asList("id", "name"), mapper);
 
         assertNotNull(flatMapped);
         assertEquals(10, flatMapped.size());
@@ -1298,7 +1298,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFlatMapTuple2() {
         BiFunction<Object, Object, Collection<String>> mapper = (name, age) -> N.asList(name + "-young", name + "-old");
-        DataSet flatMapped = dataSet.flatMap(Tuple.of("name", "age"), "status", N.asList("id"), mapper);
+        Dataset flatMapped = dataset.flatMap(Tuple.of("name", "age"), "status", N.asList("id"), mapper);
 
         assertNotNull(flatMapped);
         assertEquals(10, flatMapped.size());
@@ -1309,7 +1309,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFlatMapTuple3() {
         TriFunction<Object, Object, Object, Collection<String>> mapper = (id, name, age) -> N.asList("ID" + id, "NAME" + name, "AGE" + age);
-        DataSet flatMapped = dataSet.flatMap(Tuple.of("id", "name", "age"), "tags", N.asList("city"), mapper);
+        Dataset flatMapped = dataset.flatMap(Tuple.of("id", "name", "age"), "tags", N.asList("city"), mapper);
 
         assertNotNull(flatMapped);
         assertEquals(15, flatMapped.size()); // 5 * 3
@@ -1320,7 +1320,7 @@ public class RowDataSet101Test extends TestBase {
     @Test
     public void testFlatMapMultipleColumns() {
         Function<DisposableObjArray, Collection<String>> mapper = arr -> N.asList(arr.get(0).toString(), arr.get(1).toString());
-        DataSet flatMapped = dataSet.flatMap(N.asList("name", "city"), "values", N.asList("id"), mapper);
+        Dataset flatMapped = dataset.flatMap(N.asList("name", "city"), "values", N.asList("id"), mapper);
 
         assertNotNull(flatMapped);
         assertEquals(10, flatMapped.size());
@@ -1332,20 +1332,20 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testCopy() {
-        DataSet copy = dataSet.copy();
+        Dataset copy = dataset.copy();
 
         assertNotNull(copy);
-        assertEquals(dataSet.size(), copy.size());
-        assertEquals(dataSet.columnCount(), copy.columnCount());
-        assertNotSame(dataSet, copy);
+        assertEquals(dataset.size(), copy.size());
+        assertEquals(dataset.columnCount(), copy.columnCount());
+        assertNotSame(dataset, copy);
     }
 
     @Test
     public void testCopyWithColumns() {
-        DataSet copy = dataSet.copy(N.asList("id", "name"));
+        Dataset copy = dataset.copy(N.asList("id", "name"));
 
         assertNotNull(copy);
-        assertEquals(dataSet.size(), copy.size());
+        assertEquals(dataset.size(), copy.size());
         assertEquals(2, copy.columnCount());
         assertTrue(copy.containsColumn("id"));
         assertTrue(copy.containsColumn("name"));
@@ -1354,16 +1354,16 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testCopyWithRowRange() {
-        DataSet copy = dataSet.copy(1, 4);
+        Dataset copy = dataset.copy(1, 4);
 
         assertNotNull(copy);
         assertEquals(3, copy.size());
-        assertEquals(dataSet.columnCount(), copy.columnCount());
+        assertEquals(dataset.columnCount(), copy.columnCount());
     }
 
     @Test
     public void testCopyWithRowRangeAndColumns() {
-        DataSet copy = dataSet.copy(1, 3, N.asList("name", "age"));
+        Dataset copy = dataset.copy(1, 3, N.asList("name", "age"));
 
         assertNotNull(copy);
         assertEquals(2, copy.size());
@@ -1374,21 +1374,21 @@ public class RowDataSet101Test extends TestBase {
 
     @Test
     public void testClone() {
-        DataSet cloned = dataSet.clone();
+        Dataset cloned = dataset.clone();
 
         assertNotNull(cloned);
-        assertEquals(dataSet.size(), cloned.size());
-        assertEquals(dataSet.columnCount(), cloned.columnCount());
-        assertNotSame(dataSet, cloned);
+        assertEquals(dataset.size(), cloned.size());
+        assertEquals(dataset.columnCount(), cloned.columnCount());
+        assertNotSame(dataset, cloned);
     }
 
     @Test
     public void testCloneWithFreeze() {
-        DataSet cloned = dataSet.clone(true);
+        Dataset cloned = dataset.clone(true);
 
         assertNotNull(cloned);
-        assertEquals(dataSet.size(), cloned.size());
-        assertEquals(dataSet.columnCount(), cloned.columnCount());
+        assertEquals(dataset.size(), cloned.size());
+        assertEquals(dataset.columnCount(), cloned.columnCount());
         assertTrue(cloned.isFrozen());
     }
 
@@ -1402,9 +1402,9 @@ public class RowDataSet101Test extends TestBase {
         rightValues.add(N.asList("NYC", "LA", "Chicago"));
         rightValues.add(N.asList("USA", "USA", "USA"));
 
-        RowDataSet right = new RowDataSet(rightColumns, rightValues);
+        RowDataset right = new RowDataset(rightColumns, rightValues);
 
-        DataSet joined = dataSet.innerJoin(right, "city", "city");
+        Dataset joined = dataset.innerJoin(right, "city", "city");
 
         joined.println();
 
@@ -1422,13 +1422,13 @@ public class RowDataSet101Test extends TestBase {
         rightValues.add(N.asList(25, 30, 35));
         rightValues.add(N.asList(50000, 60000, 70000));
 
-        RowDataSet right = new RowDataSet(rightColumns, rightValues);
+        RowDataset right = new RowDataset(rightColumns, rightValues);
 
         Map<String, String> onColumns = new HashMap<>();
         onColumns.put("city", "city");
         onColumns.put("age", "age");
 
-        DataSet joined = dataSet.innerJoin(right, onColumns);
+        Dataset joined = dataset.innerJoin(right, onColumns);
 
         assertNotNull(joined);
         assertTrue(joined.containsColumn("salary"));
@@ -1442,12 +1442,12 @@ public class RowDataSet101Test extends TestBase {
         rightValues.add(N.asList("NYC", "LA", "Chicago"));
         rightValues.add(N.asList("Big Apple", "City of Angels", "Windy City"));
 
-        RowDataSet right = new RowDataSet(rightColumns, rightValues);
+        RowDataset right = new RowDataset(rightColumns, rightValues);
 
         Map<String, String> onColumns = new HashMap<>();
         onColumns.put("city", "city");
 
-        DataSet joined = dataSet.innerJoin(right, onColumns, "cityInfo", Object[].class);
+        Dataset joined = dataset.innerJoin(right, onColumns, "cityInfo", Object[].class);
 
         assertNotNull(joined);
         assertTrue(joined.containsColumn("cityInfo"));
@@ -1460,13 +1460,13 @@ public class RowDataSet101Test extends TestBase {
         rightValues.add(N.asList("NYC", "NYC", "LA"));
         rightValues.add(N.asList("tag1", "tag2", "tag3"));
 
-        RowDataSet right = new RowDataSet(rightColumns, rightValues);
+        RowDataset right = new RowDataset(rightColumns, rightValues);
 
         Map<String, String> onColumns = new HashMap<>();
         onColumns.put("city", "city");
 
         IntFunction<List<Object>> collSupplier = size -> new ArrayList<>(size);
-        DataSet joined = dataSet.innerJoin(right, onColumns, "tags", Object[].class, collSupplier);
+        Dataset joined = dataset.innerJoin(right, onColumns, "tags", Object[].class, collSupplier);
 
         assertNotNull(joined);
         assertTrue(joined.containsColumn("tags"));
@@ -1480,9 +1480,9 @@ public class RowDataSet101Test extends TestBase {
         rightValues.add(N.asList("NYC", "LA"));
         rightValues.add(N.asList("USA", "USA"));
 
-        RowDataSet right = new RowDataSet(rightColumns, rightValues);
+        RowDataset right = new RowDataset(rightColumns, rightValues);
 
-        DataSet joined = dataSet.leftJoin(right, "city", "city");
+        Dataset joined = dataset.leftJoin(right, "city", "city");
 
         assertNotNull(joined);
         assertEquals(5, joined.size()); // All left rows preserved
@@ -1497,13 +1497,13 @@ public class RowDataSet101Test extends TestBase {
         rightValues.add(N.asList(25, 30));
         rightValues.add(N.asList(1000, 2000));
 
-        RowDataSet right = new RowDataSet(rightColumns, rightValues);
+        RowDataset right = new RowDataset(rightColumns, rightValues);
 
         Map<String, String> onColumns = new HashMap<>();
         onColumns.put("city", "city");
         onColumns.put("age", "age");
 
-        DataSet joined = dataSet.leftJoin(right, onColumns);
+        Dataset joined = dataset.leftJoin(right, onColumns);
 
         assertNotNull(joined);
         assertEquals(5, joined.size()); // All left rows preserved
@@ -1516,12 +1516,12 @@ public class RowDataSet101Test extends TestBase {
         rightValues.add(N.asList("NYC", "LA"));
         rightValues.add(N.asList(8000000, 4000000));
 
-        RowDataSet right = new RowDataSet(rightColumns, rightValues);
+        RowDataset right = new RowDataset(rightColumns, rightValues);
 
         Map<String, String> onColumns = new HashMap<>();
         onColumns.put("city", "city");
 
-        DataSet joined = dataSet.leftJoin(right, onColumns, "cityData", Object[].class);
+        Dataset joined = dataset.leftJoin(right, onColumns, "cityData", Object[].class);
 
         assertNotNull(joined);
         assertEquals(5, joined.size());
@@ -1535,13 +1535,13 @@ public class RowDataSet101Test extends TestBase {
         rightValues.add(N.asList("NYC", "NYC", "LA"));
         rightValues.add(N.asList("feature1", "feature2", "feature3"));
 
-        RowDataSet right = new RowDataSet(rightColumns, rightValues);
+        RowDataset right = new RowDataset(rightColumns, rightValues);
 
         Map<String, String> onColumns = new HashMap<>();
         onColumns.put("city", "city");
 
         IntFunction<Set<Object>> collSupplier = size -> new HashSet<>(size);
-        DataSet joined = dataSet.leftJoin(right, onColumns, "features", Object[].class, collSupplier);
+        Dataset joined = dataset.leftJoin(right, onColumns, "features", Object[].class, collSupplier);
 
         assertNotNull(joined);
         assertEquals(5, joined.size());
@@ -1551,41 +1551,41 @@ public class RowDataSet101Test extends TestBase {
     // Edge Cases and Error Tests
 
     @Test
-    public void testEmptyDataSetOperations() {
-        RowDataSet emptyDataSet = new RowDataSet(N.asList("col1", "col2"), N.asList(new ArrayList<>(), new ArrayList<>()));
+    public void testEmptyDatasetOperations() {
+        RowDataset emptyDataset = new RowDataset(N.asList("col1", "col2"), N.asList(new ArrayList<>(), new ArrayList<>()));
 
         // Test XML export
-        String xml = emptyDataSet.toXml();
+        String xml = emptyDataset.toXml();
         assertNotNull(xml);
-        assertTrue(xml.contains("<dataSet>"));
-        assertTrue(xml.contains("</dataSet>"));
+        assertTrue(xml.contains("<dataset>"));
+        assertTrue(xml.contains("</dataset>"));
 
         // Test CSV export
-        String csv = emptyDataSet.toCsv();
+        String csv = emptyDataset.toCsv();
         assertNotNull(csv);
         assertTrue(csv.contains("\"col1\",\"col2\""));
 
         // Test groupBy
-        DataSet grouped = emptyDataSet.groupBy("col1", "col2", "result", Collectors.toList());
+        Dataset grouped = emptyDataset.groupBy("col1", "col2", "result", Collectors.toList());
         assertNotNull(grouped);
         assertEquals(0, grouped.size());
 
         // Test filter
-        DataSet filtered = emptyDataSet.filter(arr -> true);
+        Dataset filtered = emptyDataset.filter(arr -> true);
         assertNotNull(filtered);
         assertEquals(0, filtered.size());
 
         // Test distinct
-        DataSet distinct = emptyDataSet.distinct();
+        Dataset distinct = emptyDataset.distinct();
         assertNotNull(distinct);
         assertEquals(0, distinct.size());
 
         // Test sort
-        emptyDataSet.sortBy("col1");
-        assertEquals(0, emptyDataSet.size());
+        emptyDataset.sortBy("col1");
+        assertEquals(0, emptyDataset.size());
 
         // Test copy
-        DataSet copy = emptyDataSet.copy();
+        Dataset copy = emptyDataset.copy();
         assertNotNull(copy);
         assertEquals(0, copy.size());
     }
@@ -1598,7 +1598,7 @@ public class RowDataSet101Test extends TestBase {
         columnValues.add(N.asList("A", null, "B"));
         columnValues.add(N.asList(1, 2, null));
 
-        RowDataSet ds = new RowDataSet(columnNames, columnValues);
+        RowDataset ds = new RowDataset(columnNames, columnValues);
 
         // Test XML with nulls
         String xml = ds.toXml();
@@ -1610,11 +1610,11 @@ public class RowDataSet101Test extends TestBase {
         assertNotNull(csv);
 
         // Test filter with nulls
-        DataSet filtered = ds.filter("col1", obj -> obj != null);
+        Dataset filtered = ds.filter("col1", obj -> obj != null);
         assertEquals(2, filtered.size());
 
         // Test groupBy with nulls
-        DataSet grouped = ds.groupBy("col1", "col2", "values", Collectors.toList());
+        Dataset grouped = ds.groupBy("col1", "col2", "values", Collectors.toList());
         assertNotNull(grouped);
 
         // Test sort with nulls
@@ -1623,7 +1623,7 @@ public class RowDataSet101Test extends TestBase {
     }
 
     @Test
-    public void testLargeDataSetOperations() {
+    public void testLargeDatasetOperations() {
         // Create a larger dataset for performance-related tests
         int size = 1000;
         List<String> columnNames = N.asList("id", "value", "category");
@@ -1643,7 +1643,7 @@ public class RowDataSet101Test extends TestBase {
         columnValues.add(values);
         columnValues.add(categories);
 
-        RowDataSet largeDs = new RowDataSet(columnNames, columnValues);
+        RowDataset largeDs = new RowDataset(columnNames, columnValues);
 
         // Test parallel sort
         largeDs.parallelSortBy("value");
@@ -1653,11 +1653,11 @@ public class RowDataSet101Test extends TestBase {
         }
 
         // Test groupBy on large dataset
-        DataSet grouped = largeDs.groupBy("category", "value", "sum", Collectors.summingInt(o -> (Integer) o));
+        Dataset grouped = largeDs.groupBy("category", "value", "sum", Collectors.summingInt(o -> (Integer) o));
         assertEquals(10, grouped.size());
 
         // Test topBy on large dataset
-        DataSet top = largeDs.topBy("value", 10);
+        Dataset top = largeDs.topBy("value", 10);
         assertEquals(10, top.size());
     }
 
@@ -1667,7 +1667,7 @@ public class RowDataSet101Test extends TestBase {
         Map<String, String> onColumns = new HashMap<>();
         onColumns.put("city", "city");
 
-        DataSet selfJoined = dataSet.innerJoin(dataSet, onColumns);
+        Dataset selfJoined = dataset.innerJoin(dataset, onColumns);
         assertNotNull(selfJoined);
         assertTrue(selfJoined.size() > 0);
 
@@ -1677,12 +1677,12 @@ public class RowDataSet101Test extends TestBase {
         rightValues.add(N.asList("Paris", "London"));
         rightValues.add(N.asList("data1", "data2"));
 
-        RowDataSet noMatchRight = new RowDataSet(rightColumns, rightValues);
-        DataSet noMatchJoined = dataSet.innerJoin(noMatchRight, "city", "city");
+        RowDataset noMatchRight = new RowDataset(rightColumns, rightValues);
+        Dataset noMatchJoined = dataset.innerJoin(noMatchRight, "city", "city");
         assertEquals(0, noMatchJoined.size());
 
         // Left join should preserve all left rows
-        DataSet leftJoinNoMatch = dataSet.leftJoin(noMatchRight, "city", "city");
+        Dataset leftJoinNoMatch = dataset.leftJoin(noMatchRight, "city", "city");
         assertEquals(5, leftJoinNoMatch.size());
     }
 
@@ -1690,23 +1690,23 @@ public class RowDataSet101Test extends TestBase {
     public void testColumnNameValidation() {
         // Test operations with invalid column names
         assertThrows(IllegalArgumentException.class, () -> {
-            dataSet.sortBy("nonexistent");
+            dataset.sortBy("nonexistent");
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            dataSet.filter("nonexistent", obj -> true);
+            dataset.filter("nonexistent", obj -> true);
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            dataSet.groupBy("nonexistent", "name", "result", Collectors.toList());
+            dataset.groupBy("nonexistent", "name", "result", Collectors.toList());
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            dataSet.distinctBy("nonexistent");
+            dataset.distinctBy("nonexistent");
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            dataSet.map("nonexistent", "new", "id", obj -> obj);
+            dataset.map("nonexistent", "new", "id", obj -> obj);
         });
     }
 
@@ -1714,23 +1714,23 @@ public class RowDataSet101Test extends TestBase {
     public void testRowIndexValidation() {
         // Test operations with invalid row indices
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            dataSet.toXml(-1, 3);
+            dataset.toXml(-1, 3);
         });
 
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            dataSet.toXml(2, 10);
+            dataset.toXml(2, 10);
         });
 
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            dataSet.toCsv(5, 3, N.asList("name"));
+            dataset.toCsv(5, 3, N.asList("name"));
         });
 
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            dataSet.filter(-1, 5, arr -> true);
+            dataset.filter(-1, 5, arr -> true);
         });
 
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            dataSet.copy(0, 10);
+            dataset.copy(0, 10);
         });
     }
 
@@ -1742,7 +1742,7 @@ public class RowDataSet101Test extends TestBase {
         columnValues.add(N.asList("Hello, World", "Test\"Quote", "Line\nBreak", "<tag>"));
         columnValues.add(N.asList(1, 2, 3, 4));
 
-        RowDataSet specialDs = new RowDataSet(columnNames, columnValues);
+        RowDataset specialDs = new RowDataset(columnNames, columnValues);
 
         // XML should escape special characters
         String xml = specialDs.toXml();
@@ -1760,20 +1760,20 @@ public class RowDataSet101Test extends TestBase {
         // Test groupBy with different aggregation types
 
         // Count
-        DataSet countGrouped = dataSet.groupBy("city", "name", "count", Collectors.counting());
+        Dataset countGrouped = dataset.groupBy("city", "name", "count", Collectors.counting());
         assertNotNull(countGrouped);
 
         // List collection
-        DataSet listGrouped = dataSet.groupBy("city", "age", "ages", Collectors.toList());
+        Dataset listGrouped = dataset.groupBy("city", "age", "ages", Collectors.toList());
         assertNotNull(listGrouped);
 
         // Average
-        DataSet avgGrouped = dataSet.groupBy("city", "age", "avgAge", Collectors.averagingInt(o -> (Integer) o));
+        Dataset avgGrouped = dataset.groupBy("city", "age", "avgAge", Collectors.averagingInt(o -> (Integer) o));
         assertNotNull(avgGrouped);
 
         // Custom collector
         Collector<Object, ?, String> joiningCollector = Collectors.mapping(Object::toString, Collectors.joining(","));
-        DataSet joinedGrouped = dataSet.groupBy("city", "name", "names", joiningCollector);
+        Dataset joinedGrouped = dataset.groupBy("city", "name", "names", joiningCollector);
         assertNotNull(joinedGrouped);
         assertTrue(joinedGrouped.containsColumn("names"));
     }
@@ -1787,7 +1787,7 @@ public class RowDataSet101Test extends TestBase {
             return age > 25 && age < 35 && ("NYC".equals(city) || "LA".equals(city));
         };
 
-        DataSet filtered = dataSet.filter(complexPredicate);
+        Dataset filtered = dataset.filter(complexPredicate);
         assertNotNull(filtered);
         assertTrue(filtered.size() > 0);
 
@@ -1798,7 +1798,7 @@ public class RowDataSet101Test extends TestBase {
             return name.length() > 3 && age > 30;
         };
 
-        DataSet subsetFiltered = dataSet.filter(N.asList("name", "age"), subsetPredicate);
+        Dataset subsetFiltered = dataset.filter(N.asList("name", "age"), subsetPredicate);
         assertNotNull(subsetFiltered);
     }
 
@@ -1806,12 +1806,12 @@ public class RowDataSet101Test extends TestBase {
     public void testMapWithDifferentDataTypes() {
         // Test type conversions
         Function<Object, String> toStringMapper = obj -> "ID:" + obj;
-        DataSet stringMapped = dataSet.map("id", "stringId", N.asList("name"), toStringMapper);
+        Dataset stringMapped = dataset.map("id", "stringId", N.asList("name"), toStringMapper);
         assertEquals("ID:1", stringMapped.absolute(0).get("stringId"));
 
         // Test calculations
         Function<Object, Double> doubleMapper = obj -> ((Integer) obj) * 1.5;
-        DataSet doubleMapped = dataSet.map("age", "adjustedAge", N.asList("name"), doubleMapper);
+        Dataset doubleMapped = dataset.map("age", "adjustedAge", N.asList("name"), doubleMapper);
         assertEquals(37.5, doubleMapped.absolute(0).get("adjustedAge"));
 
         // Test object creation
@@ -1821,7 +1821,7 @@ public class RowDataSet101Test extends TestBase {
             map.put("age", arr.get(1));
             return map;
         };
-        DataSet objectMapped = dataSet.map(N.asList("name", "age"), "info", N.asList("id"), mapMapper);
+        Dataset objectMapped = dataset.map(N.asList("name", "age"), "info", N.asList("id"), mapMapper);
         assertNotNull(objectMapped.absolute(0).get("info"));
         assertTrue(objectMapped.absolute(0).get("info") instanceof Map);
     }
@@ -1830,7 +1830,7 @@ public class RowDataSet101Test extends TestBase {
     public void testFlatMapEdgeCases() {
         // Test empty collection returned
         Function<Object, Collection<String>> emptyMapper = obj -> Collections.emptyList();
-        DataSet emptyFlatMapped = dataSet.flatMap("name", "empty", N.asList("id"), emptyMapper);
+        Dataset emptyFlatMapped = dataset.flatMap("name", "empty", N.asList("id"), emptyMapper);
         assertEquals(0, emptyFlatMapped.size());
 
         // Test variable size collections
@@ -1842,23 +1842,23 @@ public class RowDataSet101Test extends TestBase {
             }
             return result;
         };
-        DataSet variableFlatMapped = dataSet.flatMap("id", "values", N.asList("name"), variableMapper);
+        Dataset variableFlatMapped = dataset.flatMap("id", "values", N.asList("name"), variableMapper);
         assertNotNull(variableFlatMapped);
 
         // Test with null collection
         Function<Object, Collection<String>> nullSafeMapper = obj -> obj == null ? Collections.emptyList() : N.asList(obj.toString());
-        DataSet nullSafeFlatMapped = dataSet.flatMap("name", "safe", N.asList("id"), nullSafeMapper);
+        Dataset nullSafeFlatMapped = dataset.flatMap("name", "safe", N.asList("id"), nullSafeMapper);
         assertEquals(5, nullSafeFlatMapped.size());
     }
 
     @Test
     public void testTopByEdgeCases() {
         // Test n greater than size
-        DataSet allTop = dataSet.topBy("age", 10);
+        Dataset allTop = dataset.topBy("age", 10);
         assertEquals(5, allTop.size());
 
         // Test n = 1
-        DataSet singleTop = dataSet.topBy("age", 1);
+        Dataset singleTop = dataset.topBy("age", 1);
         assertEquals(1, singleTop.size());
 
         // Test with ties
@@ -1867,8 +1867,8 @@ public class RowDataSet101Test extends TestBase {
         columnValues.add(N.asList(1, 2, 3, 4, 5));
         columnValues.add(N.asList(10, 10, 20, 20, 30));
 
-        RowDataSet tieDs = new RowDataSet(columnNames, columnValues);
-        DataSet topWithTies = tieDs.topBy("value", 3);
+        RowDataset tieDs = new RowDataset(columnNames, columnValues);
+        Dataset topWithTies = tieDs.topBy("value", 3);
         assertEquals(3, topWithTies.size());
     }
 
@@ -1881,23 +1881,23 @@ public class RowDataSet101Test extends TestBase {
         columnValues.add(N.asList("X", "X", "Y", "Y", "Z"));
         columnValues.add(N.asList(true, false, true, true, false));
 
-        RowDataSet complexDs = new RowDataSet(columnNames, columnValues);
+        RowDataset complexDs = new RowDataset(columnNames, columnValues);
 
         // Distinct by single column
-        DataSet distinctA = complexDs.distinctBy("a");
+        Dataset distinctA = complexDs.distinctBy("a");
         assertEquals(3, distinctA.size());
 
         // Distinct by multiple columns
-        DataSet distinctAB = complexDs.distinctBy(N.asList("a", "b"));
+        Dataset distinctAB = complexDs.distinctBy(N.asList("a", "b"));
         assertEquals(3, distinctAB.size());
 
         // Distinct by all columns
-        DataSet distinctAll = complexDs.distinct();
+        Dataset distinctAll = complexDs.distinct();
         assertEquals(4, distinctAll.size()); // One duplicate row (2, Y, true)
 
         // Distinct with key extractor
         Function<DisposableObjArray, String> compositeKeyExtractor = arr -> arr.get(0) + "-" + arr.get(1);
-        DataSet distinctComposite = complexDs.distinctBy(N.asList("a", "b"), compositeKeyExtractor);
+        Dataset distinctComposite = complexDs.distinctBy(N.asList("a", "b"), compositeKeyExtractor);
         assertEquals(3, distinctComposite.size());
     }
 
@@ -1906,12 +1906,12 @@ public class RowDataSet101Test extends TestBase {
         // Test with empty column selection
         Collection<String> emptyColumns = Collections.emptyList();
 
-        String xml = dataSet.toXml(0, 2, emptyColumns);
+        String xml = dataset.toXml(0, 2, emptyColumns);
         assertNotNull(xml);
-        assertTrue(xml.contains("<dataSet>"));
-        assertTrue(xml.contains("</dataSet>"));
+        assertTrue(xml.contains("<dataset>"));
+        assertTrue(xml.contains("</dataset>"));
 
-        String csv = dataSet.toCsv(0, 2, emptyColumns);
+        String csv = dataset.toCsv(0, 2, emptyColumns);
         assertNotNull(csv);
         assertEquals("", csv.trim());
     }
@@ -1927,11 +1927,11 @@ public class RowDataSet101Test extends TestBase {
 
         List<String> columnNames = N.asList("value");
         List<List<Object>> columnValues = N.asList(values);
-        RowDataSet largeDs = new RowDataSet(columnNames, columnValues);
+        RowDataset largeDs = new RowDataset(columnNames, columnValues);
 
         // Compare parallel vs sequential sort
-        DataSet seqCopy = largeDs.copy();
-        DataSet parCopy = largeDs.copy();
+        Dataset seqCopy = largeDs.copy();
+        Dataset parCopy = largeDs.copy();
 
         seqCopy.sortBy("value", Comparator.reverseOrder());
         parCopy.parallelSortBy("value", Comparator.reverseOrder());

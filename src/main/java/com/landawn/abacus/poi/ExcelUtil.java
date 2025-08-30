@@ -42,12 +42,12 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.BufferedCSVWriter;
 import com.landawn.abacus.util.CSVUtil;
 import com.landawn.abacus.util.Charsets;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
-import com.landawn.abacus.util.RowDataSet;
+import com.landawn.abacus.util.RowDataset;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.function.TriConsumer;
@@ -65,10 +65,10 @@ import lombok.Data;
  * 
  * <p>Example usage:</p>
  * <pre>{@code
- * // Read Excel file into DataSet
- * DataSet data = ExcelUtil.loadSheet(new File("data.xlsx"));
+ * // Read Excel file into Dataset
+ * Dataset data = ExcelUtil.loadSheet(new File("data.xlsx"));
  * 
- * // Write DataSet to Excel
+ * // Write Dataset to Excel
  * ExcelUtil.writeSheet("Sheet1", data, new File("output.xlsx"));
  * }</pre>
  * 
@@ -119,26 +119,26 @@ public final class ExcelUtil {
     }
 
     /**
-     * Loads the first sheet from the specified Excel file into a DataSet.
+     * Loads the first sheet from the specified Excel file into a Dataset.
      * Uses the first row as column headers and the default row extractor for data extraction.
      * 
      * <p>Example usage:</p>
      * <pre>{@code
-     * DataSet dataset = ExcelUtil.loadSheet(new File("sales_data.xlsx"));
+     * Dataset dataset = ExcelUtil.loadSheet(new File("sales_data.xlsx"));
      * // Access data by column name
      * List<String> productNames = dataset.getColumn("Product");
      * }</pre>
      *
      * @param excelFile the Excel file to read
-     * @return a DataSet containing the sheet data with the first row as column names
+     * @return a Dataset containing the sheet data with the first row as column names
      * @throws UncheckedException if an I/O error occurs while reading the file
      */
-    public static DataSet loadSheet(final File excelFile) {
+    public static Dataset loadSheet(final File excelFile) {
         return loadSheet(excelFile, 0, RowExtractors.DEFAULT);
     }
 
     /**
-     * Loads the specified sheet from the Excel file into a DataSet using a custom row extractor.
+     * Loads the specified sheet from the Excel file into a Dataset using a custom row extractor.
      * The first row is treated as column headers, and subsequent rows are processed by the extractor.
      * 
      * <p>Example usage:</p>
@@ -149,17 +149,17 @@ public final class ExcelUtil {
      *         output[i] = cell == null ? null : cell.getStringCellValue();
      *     }
      * };
-     * DataSet dataset = ExcelUtil.loadSheet(new File("data.xlsx"), 0, customExtractor);
+     * Dataset dataset = ExcelUtil.loadSheet(new File("data.xlsx"), 0, customExtractor);
      * }</pre>
      *
      * @param excelFile the Excel file to read
      * @param sheetIndex the index of the sheet to read, starting from 0
      * @param rowExtractor custom function to extract row data. Parameters are: column headers array, 
      *                     current row, and output array to populate with extracted values
-     * @return a DataSet containing the extracted sheet data
+     * @return a Dataset containing the extracted sheet data
      * @throws UncheckedException if an I/O error occurs while reading the file
      */
-    public static DataSet loadSheet(final File excelFile, final int sheetIndex,
+    public static Dataset loadSheet(final File excelFile, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
         try (InputStream is = new FileInputStream(excelFile); //
                 Workbook workbook = new XSSFWorkbook(is)) {
@@ -171,12 +171,12 @@ public final class ExcelUtil {
     }
 
     /**
-     * Loads the sheet with the specified name from the Excel file into a DataSet.
+     * Loads the sheet with the specified name from the Excel file into a Dataset.
      * Uses a custom row extractor to process each row after the header row.
      * 
      * <p>Example usage:</p>
      * <pre>{@code
-     * DataSet dataset = ExcelUtil.loadSheet(
+     * Dataset dataset = ExcelUtil.loadSheet(
      *     new File("workbook.xlsx"), 
      *     "Sales2024", 
      *     RowExtractors.DEFAULT
@@ -187,10 +187,10 @@ public final class ExcelUtil {
      * @param sheetName the name of the sheet to read
      * @param rowExtractor custom function to extract row data. Parameters are: column headers array,
      *                     current row, and output array to populate with extracted values
-     * @return a DataSet containing the extracted sheet data
+     * @return a Dataset containing the extracted sheet data
      * @throws UncheckedException if an I/O error occurs or if the sheet name is not found
      */
-    public static DataSet loadSheet(final File excelFile, final String sheetName,
+    public static Dataset loadSheet(final File excelFile, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
         try (InputStream is = new FileInputStream(excelFile); //
                 Workbook workbook = new XSSFWorkbook(is)) {
@@ -203,11 +203,11 @@ public final class ExcelUtil {
 
     }
 
-    private static DataSet loadSheet(final Sheet sheet, final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
+    private static Dataset loadSheet(final Sheet sheet, final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
         final Iterator<Row> rowIter = sheet.rowIterator();
 
         if (!rowIter.hasNext()) {
-            return DataSet.empty();
+            return Dataset.empty();
         }
 
         final Row headerRow = rowIter.next();
@@ -236,7 +236,7 @@ public final class ExcelUtil {
 
         final List<String> columnNameList = new ArrayList<>(List.of(headers));
 
-        return new RowDataSet(columnNameList, columnList);
+        return new RowDataset(columnNameList, columnList);
     }
 
     /**
@@ -543,27 +543,27 @@ public final class ExcelUtil {
     }
 
     /**
-     * Writes a DataSet to a new Excel file with the specified sheet name.
-     * Uses the DataSet's column names as headers and writes all rows.
+     * Writes a Dataset to a new Excel file with the specified sheet name.
+     * Uses the Dataset's column names as headers and writes all rows.
      * 
      * <p>Example usage:</p>
      * <pre>{@code
-     * DataSet dataset = DataSet.fromCSV(new File("data.csv"));
+     * Dataset dataset = Dataset.fromCSV(new File("data.csv"));
      * ExcelUtil.writeSheet("ImportedData", dataset, new File("output.xlsx"));
      * }</pre>
      * 
      * @param sheetName the name of the sheet to create
-     * @param dataset the DataSet containing the data to write
+     * @param dataset the Dataset containing the data to write
      * @param outputExcelFile the file to write the Excel data to
      * @throws UncheckedException if an I/O error occurs while writing the file
      */
-    public static void writeSheet(final String sheetName, final DataSet dataset, final File outputExcelFile) {
+    public static void writeSheet(final String sheetName, final Dataset dataset, final File outputExcelFile) {
         writeSheet(sheetName, dataset, (SheetCreateOptions) null, outputExcelFile);
     }
 
     /**
-     * Writes a DataSet to a new Excel file with additional formatting options.
-     * Combines the convenience of DataSet with flexible sheet formatting capabilities.
+     * Writes a Dataset to a new Excel file with additional formatting options.
+     * Combines the convenience of Dataset with flexible sheet formatting capabilities.
      * 
      * <p>Example usage:</p>
      * <pre>{@code
@@ -576,12 +576,12 @@ public final class ExcelUtil {
      * }</pre>
      * 
      * @param sheetName the name of the sheet to create
-     * @param dataset the DataSet containing the data to write
+     * @param dataset the Dataset containing the data to write
      * @param sheetCreateOptions configuration options for sheet formatting (can be null)
      * @param outputExcelFile the file to write the Excel data to
      * @throws UncheckedException if an I/O error occurs while writing the file
      */
-    public static void writeSheet(final String sheetName, final DataSet dataset, final SheetCreateOptions sheetCreateOptions, final File outputExcelFile) {
+    public static void writeSheet(final String sheetName, final Dataset dataset, final SheetCreateOptions sheetCreateOptions, final File outputExcelFile) {
         final int columnColumn = dataset.columnCount();
 
         final Consumer<Sheet> sheetSetter = createSheetSetter(sheetCreateOptions, columnColumn);
@@ -590,7 +590,7 @@ public final class ExcelUtil {
     }
 
     /**
-     * Writes a DataSet to a new Excel file with custom sheet formatting.
+     * Writes a Dataset to a new Excel file with custom sheet formatting.
      * Provides direct access to the Sheet object for advanced formatting needs.
      * 
      * <p>Example usage:</p>
@@ -605,12 +605,12 @@ public final class ExcelUtil {
      * }</pre>
      * 
      * @param sheetName the name of the sheet to create
-     * @param dataset the DataSet containing the data to write
+     * @param dataset the Dataset containing the data to write
      * @param sheetSetter a consumer to apply custom formatting to the sheet (can be null)
      * @param outputExcelFile the file to write the Excel data to
      * @throws UncheckedException if an I/O error occurs while writing the file
      */
-    public static void writeSheet(final String sheetName, final DataSet dataset, final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) {
+    public static void writeSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet(sheetName);
 
@@ -964,17 +964,17 @@ public final class ExcelUtil {
 
     /**
      * Collection of row extractors for use with loadSheet methods.
-     * Extractors process rows and populate output arrays for DataSet creation.
+     * Extractors process rows and populate output arrays for Dataset creation.
      * 
      * <p>Example usage:</p>
      * <pre>{@code
      * // Use default extractor
-     * DataSet ds = ExcelUtil.loadSheet(file, 0, RowExtractors.DEFAULT);
+     * Dataset ds = ExcelUtil.loadSheet(file, 0, RowExtractors.DEFAULT);
      * 
      * // Create custom extractor for specific processing
      * TriConsumer<String[], Row, Object[]> customExtractor = 
      *     RowExtractors.create(cell -> cell.getStringCellValue().toUpperCase());
-     * DataSet ds = ExcelUtil.loadSheet(file, 0, customExtractor);
+     * Dataset ds = ExcelUtil.loadSheet(file, 0, customExtractor);
      * }</pre>
      */
     public static final class RowExtractors {
@@ -1001,7 +1001,7 @@ public final class ExcelUtil {
          *         cell == null ? "" : CELL2STRING.apply(cell)
          *     );
          * 
-         * DataSet ds = ExcelUtil.loadSheet(file, "Sheet1", stringExtractor);
+         * Dataset ds = ExcelUtil.loadSheet(file, "Sheet1", stringExtractor);
          * }</pre>
          * 
          * @param cellMapper function to convert each cell to the desired output type

@@ -438,13 +438,13 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents a DataSet.
+     * Checks if this type represents a Dataset.
      * Default implementation returns {@code false}.
      *
-     * @return {@code true} if this is a DataSet type, {@code false} otherwise
+     * @return {@code true} if this is a Dataset type, {@code false} otherwise
      */
     @Override
-    public boolean isDataSet() {
+    public boolean isDataset() {
         return false;
     }
 

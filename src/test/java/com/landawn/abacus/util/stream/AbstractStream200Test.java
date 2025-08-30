@@ -956,19 +956,19 @@ public class AbstractStream200Test extends TestBase {
     }
 
     @Test
-    public void test_toDataSet() {
+    public void test_toDataset() {
         List<Map<String, Object>> data = List.of(Map.of("id", 1, "name", "A"), Map.of("id", 2, "name", "B"));
-        com.landawn.abacus.util.DataSet dataSet = Stream.of(data).toDataSet();
-        assertEquals(2, dataSet.size());
-        assertTrue(dataSet.columnNameList().containsAll(List.of("id", "name")));
+        com.landawn.abacus.util.Dataset dataset = Stream.of(data).toDataset();
+        assertEquals(2, dataset.size());
+        assertTrue(dataset.columnNameList().containsAll(List.of("id", "name")));
     }
 
     @Test
-    public void test_toDataSet_withColumnNames() {
+    public void test_toDataset_withColumnNames() {
         List<List<Object>> data = List.of(List.of(1, "A"), List.of(2, "B"));
-        com.landawn.abacus.util.DataSet dataSet = Stream.of(data).toDataSet(List.of("id", "name"));
-        assertEquals(2, dataSet.size());
-        assertEquals(List.of("id", "name"), dataSet.columnNameList());
+        com.landawn.abacus.util.Dataset dataset = Stream.of(data).toDataset(List.of("id", "name"));
+        assertEquals(2, dataset.size());
+        assertEquals(List.of("id", "name"), dataset.columnNameList());
     }
 
     @Test

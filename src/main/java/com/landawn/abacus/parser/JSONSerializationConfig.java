@@ -42,7 +42,7 @@ import com.landawn.abacus.util.N;
  *   <li>bracketRootValue: true - Root values are bracketed by default</li>
  *   <li>wrapRootValue: false - Root values are not wrapped with type name by default</li>
  *   <li>writeNullToEmpty: false - Null values remain null by default</li>
- *   <li>writeDataSetByRow: false - DataSets are written by columns by default</li>
+ *   <li>writeDatasetByRow: false - Datasets are written by columns by default</li>
  * </ul>
  * 
  * @author HaiYang Li
@@ -61,9 +61,9 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     protected static final boolean defaultWrapRootValue = false;
 
     private boolean writeNullToEmpty = false;
-    private boolean writeDataSetByRow = false;
+    private boolean writeDatasetByRow = false;
     private boolean writeRowColumnKeyType = false; // for Sheet;
-    private boolean writeColumnType = false; // for DataSet and Sheet
+    private boolean writeColumnType = false; // for Dataset and Sheet
 
     private boolean quotePropName = defaultQuotePropName;
 
@@ -83,7 +83,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      *   <li>bracketRootValue: true</li>
      *   <li>wrapRootValue: false</li>
      *   <li>writeNullToEmpty: false</li>
-     *   <li>writeDataSetByRow: false</li>
+     *   <li>writeDatasetByRow: false</li>
      * </ul>
      * 
      * <p>Usage example:</p>
@@ -141,42 +141,42 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * Checks if DataSet should be written row by row.
-     * When enabled, DataSet will be serialized as an array of row objects.
-     * When disabled (default), DataSet will be serialized with column-based structure.
+     * Checks if Dataset should be written row by row.
+     * When enabled, Dataset will be serialized as an array of row objects.
+     * When disabled (default), Dataset will be serialized with column-based structure.
      * 
      * <p>Usage example:</p>
      * <pre>{@code
-     * config.writeDataSetByRow(true);
-     * // DataSet will be serialized as: [{"col1": val1, "col2": val2}, ...]
+     * config.writeDatasetByRow(true);
+     * // Dataset will be serialized as: [{"col1": val1, "col2": val2}, ...]
      * }</pre>
      * 
-     * @return {@code true} if DataSet is written by rows, {@code false} if by columns
+     * @return {@code true} if Dataset is written by rows, {@code false} if by columns
      */
-    public boolean writeDataSetByRow() {
-        return writeDataSetByRow;
+    public boolean writeDatasetByRow() {
+        return writeDatasetByRow;
     }
 
     /**
-     * Sets whether DataSet should be serialized row by row.
-     * When enabled, DataSet will be serialized as an array of row objects where each object
-     * represents a row with column names as keys. When disabled (default), DataSet will be 
+     * Sets whether Dataset should be serialized row by row.
+     * When enabled, Dataset will be serialized as an array of row objects where each object
+     * represents a row with column names as keys. When disabled (default), Dataset will be 
      * serialized with a column-based structure.
      * 
      * <p>Usage example:</p>
      * <pre>{@code
      * JSONSerializationConfig config = new JSONSerializationConfig()
-     *     .writeDataSetByRow(true);
+     *     .writeDatasetByRow(true);
      * 
      * // Row-based output: [{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}]
      * // Column-based output: {"id": [1, 2], "name": ["John", "Jane"]}
      * }</pre>
      *
-     * @param writeDataSetByRow {@code true} to write by rows, {@code false} to write by columns
+     * @param writeDatasetByRow {@code true} to write by rows, {@code false} to write by columns
      * @return this instance for method chaining
      */
-    public JSONSerializationConfig writeDataSetByRow(final boolean writeDataSetByRow) {
-        this.writeDataSetByRow = writeDataSetByRow;
+    public JSONSerializationConfig writeDatasetByRow(final boolean writeDatasetByRow) {
+        this.writeDatasetByRow = writeDatasetByRow;
 
         return this;
     }
@@ -215,7 +215,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * Checks if column type information should be written for DataSet and Sheet objects.
+     * Checks if column type information should be written for Dataset and Sheet objects.
      * When enabled, the type of each column will be included in the serialized output.
      * 
      * <p>Usage example:</p>
@@ -231,7 +231,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * Sets whether to include column type information when serializing DataSet and Sheet objects.
+     * Sets whether to include column type information when serializing Dataset and Sheet objects.
      * When enabled, the type of each column will be included in the serialized output, which
      * helps preserve type information for proper deserialization.
      * 
@@ -507,7 +507,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         h = 31 * h + N.hashCode(writeNullNumberAsZero);
         h = 31 * h + N.hashCode(writeNullBooleanAsFalse);
         h = 31 * h + N.hashCode(writeNullToEmpty);
-        h = 31 * h + N.hashCode(writeDataSetByRow);
+        h = 31 * h + N.hashCode(writeDatasetByRow);
         h = 31 * h + N.hashCode(writeRowColumnKeyType);
         h = 31 * h + N.hashCode(writeColumnType);
         h = 31 * h + N.hashCode(writeBigDecimalAsPlain());
@@ -544,7 +544,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
                     && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse) && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain())
                     && N.equals(failOnEmptyBean(), other.failOnEmptyBean()) && N.equals(supportCircularReference(), other.supportCircularReference())
                     && N.equals(getIndentation(), other.getIndentation()) && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy())
-                    && N.equals(writeNullToEmpty, other.writeNullToEmpty) && N.equals(writeDataSetByRow, other.writeDataSetByRow)
+                    && N.equals(writeNullToEmpty, other.writeNullToEmpty) && N.equals(writeDatasetByRow, other.writeDatasetByRow)
                     && N.equals(writeRowColumnKeyType, other.writeRowColumnKeyType) && N.equals(writeColumnType, other.writeColumnType)
                     && N.equals(quotePropName, other.quotePropName) && N.equals(quoteMapKey, other.quoteMapKey)
                     && N.equals(bracketRootValue, other.bracketRootValue) && N.equals(wrapRootValue, other.wrapRootValue);
@@ -565,8 +565,8 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
                 + N.toString(getStringQuotation()) + ", dateTimeFormat=" + N.toString(getDateTimeFormat()) + ", exclusion=" + N.toString(getExclusion())
                 + ", skipTransientField=" + N.toString(skipTransientField()) + ", prettyFormat=" + N.toString(prettyFormat()) + ", writeNullStringAsEmpty="
                 + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero=" + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse="
-                + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty=" + N.toString(writeNullToEmpty) + ", writeDataSetByRow="
-                + N.toString(writeDataSetByRow) + ", writeRowColumnKeyType=" + N.toString(writeRowColumnKeyType) + ", writeColumnType="
+                + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty=" + N.toString(writeNullToEmpty) + ", writeDatasetByRow="
+                + N.toString(writeDatasetByRow) + ", writeRowColumnKeyType=" + N.toString(writeRowColumnKeyType) + ", writeColumnType="
                 + N.toString(writeColumnType) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + N.toString(failOnEmptyBean())
                 + ", failOnEmptyBean=" + N.toString(failOnEmptyBean()) + ", supportCircularReference=" + N.toString(supportCircularReference())
                 + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", quotePropName="

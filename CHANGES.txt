@@ -20,7 +20,7 @@
 
 ﻿========Changes in 1.0.9 =========================================================================
 
-1*, Remove DataSet.__
+1*, Remove Dataset.__
 
 2, Improve Clazz.
 
@@ -97,7 +97,7 @@
 
 6*, Move SQLExecutor.Mapper.asyncGet/Find/Query/... to SQLExecutor.AsyncMapper.get/find/query/....
 
-7, Add DataSet.apply/accept.
+7, Add Dataset.apply/accept.
 
 8, Add allMinOccurrences/allMaxOccurrences to Multiset/LongMultiset.
 
@@ -290,9 +290,9 @@
 ========Changes in 0.9.76=========================================================================
 
 1*, Refactoring: change the order of parameters from : 
-		DataSet.addColumn(String fromColumnName, String newColumnName, Function<?, ?> func) 
+		Dataset.addColumn(String fromColumnName, String newColumnName, Function<?, ?> func) 
 	To:
-		DataSet.addColumn(String newColumnName, String fromColumnName, Function<?, ?> func)
+		Dataset.addColumn(String newColumnName, String fromColumnName, Function<?, ?> func)
 
 2, Add partitionBy/partitionByToEntry to Stream	 
 
@@ -328,7 +328,7 @@
 
 ========Changes in 0.9.74=========================================================================
 
-1*, Rename DataSet.getProperties() to DataSet.properties().
+1*, Rename Dataset.getProperties() to Dataset.properties().
 
 2, Add slidingMap to Stream
 
@@ -349,7 +349,7 @@
 
 1, Add split(U identity, BiFunction<? super T, ? super U, Boolean> predicate, Consumer<? super U> identityUpdate) to Seq
 
-2, Add replaceIf to Matrix/IntMatrix/.../DataSet/Sheet.
+2, Add replaceIf to Matrix/IntMatrix/.../Dataset/Sheet.
 
 3*, Rename Matrix.n to rows, Matrix.m to cols.
 
@@ -357,7 +357,7 @@
 
 5, Add StreamEx, a simple wrapper for Lightweight-Stream-API.
 
-6*, Refatoring: forEach(...BiPredicate<? super T, ? super R> conditionToBreak) to forEach(...BiPredicate<? super R, ? super T> conditionToBreak) in N/Seq/Stream/DataSet/Multiset/Multimap.
+6*, Refatoring: forEach(...BiPredicate<? super T, ? super R> conditionToBreak) to forEach(...BiPredicate<? super R, ? super T> conditionToBreak) in N/Seq/Stream/Dataset/Multiset/Multimap.
 
 7*, Rename distinct(...Function<? super T, ?> keyExtractor) to distinctBy(...Function<? super T, ?> keyExtractor).
 
@@ -393,7 +393,7 @@
 
 7*, Move N.repeat(Collection<T> c, int n) from Seq.
 
-8*, Rename DataSet.convertColumn(String columnName, Function<?, ?> func) to updateColumn.
+8*, Rename Dataset.convertColumn(String columnName, Function<?, ?> func) to updateColumn.
           
 9, Improvements and bug fix.
 
@@ -708,7 +708,7 @@
 
 10*, Remove ONE_SECOND/.../ONE_KB/... from N.
 
-11*, Rename updateColumn to convertColumn in DataSet.
+11*, Rename updateColumn to convertColumn in Dataset.
 
 12, Improvements and bug fix.
 
@@ -744,7 +744,7 @@
 
 ========Changes in 0.9.52=========================================================================
 
-1*, Reverse the condition to break the for loop in forEach : forEach(seed, accumulator, conditionToContinue) to forEach(seed, accumulator, conditionToBreak) in DataSet/Stream/N/ExList/Seq/Multiset/LongMultiset/Multimap.
+1*, Reverse the condition to break the for loop in forEach : forEach(seed, accumulator, conditionToContinue) to forEach(seed, accumulator, conditionToBreak) in Dataset/Stream/N/ExList/Seq/Multiset/LongMultiset/Multimap.
 
 2, Remove type parameter from SQLBuilder and CQLBuilder.
 
@@ -774,11 +774,11 @@
 
 1*, Remove flatMap3 from ExList/Seq.
 
-2*, Remove convertColumn from DataSet, replaced with updateColumn/updateRow/updateAll.
+2*, Remove convertColumn from Dataset, replaced with updateColumn/updateRow/updateAll.
 
 3*, Remove differenceOf from N, replaced with indexOfDifference
 
-4, Add divideColumn/updateColumn/updateRow/updateAll/swapColumn/swapRow/moveColumn/moveRow to DataSet.
+4, Add divideColumn/updateColumn/updateRow/updateAll/swapColumn/swapRow/moveColumn/moveRow to Dataset.
 
 5, Add renameRow/renameColumn/updateRow/updateColumn/updateAll/copy(rowKeySet, columnKeySet)/addRow(rowIndex,...)/addColumn(columnIndex,...)/moveRow/moveColumn/swapRow/swapColumn/merge/freeze/frozen/clone to Sheet.
 
@@ -840,11 +840,11 @@
 
 1, Import BigIntegerMath from Google Guava to Math2 and re-organize the API.
 
-2, Add clone to DataSet.
+2, Add clone to Dataset.
 
-3, Refactoring DataSet.groupBy: switch the positions of parameters 'resultColumnName' and 'collectorColumnName(s)'.
+3, Refactoring Dataset.groupBy: switch the positions of parameters 'resultColumnName' and 'collectorColumnName(s)'.
 
-4, Refactoring DataSet.forEach: 
+4, Refactoring Dataset.forEach: 
 		Change: "forEach(..., BiFunction<R, ? super Object[], R> accumulator...)" 
 		to: "forEach(..., BiFunction<? super Object[], R, R> accumulator...)" 
    to keep consistent the forEach method in other APIs 
@@ -898,9 +898,9 @@
 
 3, Refactoring RemoteExecutor.java
 
-4, Add removeAll/retainAll/toSheet to DataSet.
+4, Add removeAll/retainAll/toSheet to Dataset.
 
-5, Add addColumn(String fromColumnName, String newColumnName, Function<?, ?> mapper)/... to DataSet
+5, Add addColumn(String fromColumnName, String newColumnName, Function<?, ?> mapper)/... to Dataset
 
 6, rename multiplyBy/divideBy to dividedBy/multipliedBy in Fraction.
 
@@ -946,7 +946,7 @@
 
 ========Changes in 0.9.41=========================================================================
 
-1, Add stream/transpose/toDataSet/toMatrix to Sheet.
+1, Add stream/transpose/toDataset/toMatrix to Sheet.
 
 2, Remove iterate/iterateAll from SQLExecutor and Stream.of(resultSet, startIndex, endIndex) from Stream.
 
@@ -1045,7 +1045,7 @@
 
 3, switch the flatMapXXX2 and flatMapXXX3 in Stream.
 
-4, inverse the condition of for-loop continuation to keep consistent with other method: takeWhile/dropWhile/filter/... in Stream/N/ExList/DataSet... 
+4, inverse the condition of for-loop continuation to keep consistent with other method: takeWhile/dropWhile/filter/... in Stream/N/ExList/Dataset... 
 
 6, Improvements and bug fix.
 
@@ -1100,7 +1100,7 @@
 
 17. Add Hash function, copied from Google Guava under Apache License 2.0.
 
-18, Rename DataSet.XXX_SUPPLIER and N.XXX_SUPPLIER to XXX_FACTORY.
+18, Rename Dataset.XXX_SUPPLIER and N.XXX_SUPPLIER to XXX_FACTORY.
 
 19, Rename ArrayWrapper to Wrapper and improve it to support all types.
 
@@ -1111,7 +1111,7 @@
 
 1, Add Fast.java, a simple wrapper for FastJson, the fastest json parser in the world.
 
-2, Add combineColumn(Predicate<String> columnNameFilter ...) to DataSet.
+2, Add combineColumn(Predicate<String> columnNameFilter ...) to Dataset.
 
 3, Add permutation and orderedPermutation to Stream, the implementation is copied from Google Guava.
 
@@ -1126,9 +1126,9 @@
 
 ========Changes in 0.9.31=========================================================================
 
-1, Add method __(...) to DataSet for Builder.
+1, Add method __(...) to Dataset for Builder.
 
-2, Add combineColumn(Collection<String> columnNames, String newColumnName, Function<? super Object[], ?> combineFunc) and moveColumn to DataSet.
+2, Add combineColumn(Collection<String> columnNames, String newColumnName, Function<? super Object[], ?> combineFunc) and moveColumn to Dataset.
 
 3, Refactoring Difference.
 
@@ -1170,7 +1170,7 @@
 
 ========Changes in 0.9.28=========================================================================
 
-1, Refactoring groupBy/toMap/toMultimap/distinct methods in DataSet
+1, Refactoring groupBy/toMap/toMultimap/distinct methods in Dataset
 
 2, copy StringEscapeUtil/DigestUtil from Apache commons Lang and Codec under Apache License, Version 2.0
 
@@ -1182,7 +1182,7 @@
 
 2, Add replaceAll(...) to ExList/IntList...
 
-3, Refactoring groupBy/toMap/toMultimap/distinct methods in DataSet
+3, Refactoring groupBy/toMap/toMultimap/distinct methods in Dataset
 
 4, Refactoring distinct(...) methods in ExList/Stream
 
@@ -1273,11 +1273,11 @@
 
 2, Refactoring: Holder, Pair and Triple.
 
-3, Refactoring: DataSet.
+3, Refactoring: Dataset.
 
 4, Refactoring: Change Optional to OptionalNullable for most of operations in Stream/Collectors.
 
-5, Add stream(...) to PaginatedDataSet.
+5, Add stream(...) to PaginatedDataset.
 
 6, Add com.landawn.abacus.util.Builder.
 
@@ -1333,7 +1333,7 @@
 
 1, Add sumInt/sumLong/sumDouble/averageInt/averageLong/averageDouble/summarizeInt/summarizeLong/summarizeDouble to Stream.
 
-2, Remove distribution from DataSet
+2, Remove distribution from Dataset
 
 3, bug fix and improvements.
 
@@ -1394,10 +1394,10 @@
    Stream APIs will the only interfaces to provide these advanced features: map/flatmap/reduce/groupBy.
    We may add it back to N/ExList/IntList/... later if it's really useful/necessary.
 
-6, Refactoring toXXX(Class,...) to toXXX(...,Supplier) in DataSet/N/ExList/IntList/DoubleList/.../Collectors/.
+6, Refactoring toXXX(Class,...) to toXXX(...,Supplier) in Dataset/N/ExList/IntList/DoubleList/.../Collectors/.
    It's more friendly and beautiful by 'Supplier' for JDK 8 with Lambdas. 
 
-7, add boolean forEach2(Function<? super T, Boolean> action) to Stream/ExList/N/DataSet/Multiset/MultiMap/...
+7, add boolean forEach2(Function<? super T, Boolean> action) to Stream/ExList/N/Dataset/Multiset/MultiMap/...
    Below code can be simplified to: return stream.forEach2(e -> action(e));   
 	   for (E e : c) {
 	   		if (action) {
@@ -1438,7 +1438,7 @@
 
 6, Add iterate(...) to Stream.
 
-7, rename DataSet.sum(...)/average(...) to sumDouble(...)/averageDouble(...). Add sumInt(...)/sumLong(...)/averageInt(...)/averageLong(...)
+7, rename Dataset.sum(...)/average(...) to sumDouble(...)/averageDouble(...). Add sumInt(...)/sumLong(...)/averageInt(...)/averageLong(...)
 
 8, Add sumInt(...)/sumLong(...)/sumDouble(...)/averageInt(...)/averageLong(...)/averageDouble(...) to ExList.
 
@@ -1573,7 +1573,7 @@ BE CAREFUL that methods fall to parse(XXX, final long lineOffset, final long cou
 1, Add below methods to SQLiteExecutor:
 	public long insert(Object entity, int conflictAlgorithm)
 	 ...
-	public DataSet query(String table, Map<String, Class> selectColumnNameTypeMap, Condition whereClause, String groupBy, String having, String orderBy,int offset, int count)
+	public Dataset query(String table, Map<String, Class> selectColumnNameTypeMap, Condition whereClause, String groupBy, String having, String orderBy,int offset, int count)
 
 2, Refactoring the parse methods in JdbcUtil.java and IOUtil.java.
 

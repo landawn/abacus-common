@@ -41,7 +41,7 @@ public class FloatList101Test extends TestBase {
     @Test
     public void testConstructorWithNegativeCapacity() {
         // Should not throw exception, will be handled internally
-        assertThrows(NegativeArraySizeException.class, () -> new FloatList(-1));
+        assertThrows(IllegalArgumentException.class, () -> new FloatList(-1));
     }
 
     @Test

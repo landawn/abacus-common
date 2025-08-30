@@ -64,7 +64,7 @@ import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharSummaryStatistics;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Comparators;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.FloatList;
 import com.landawn.abacus.util.FloatSummaryStatistics;
@@ -8675,7 +8675,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * <p>Example:
          * <pre>{@code
          * // Calculate large totals without overflow risk
-         * Tuple2<Long, Long> largeTotals = largeDataSet.stream()
+         * Tuple2<Long, Long> largeTotals = largeDataset.stream()
          *     .collect(MoreCollectors.summingIntToLong(
          *         Data::getCount,
          *         Data::getValue
@@ -10083,60 +10083,60 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         * Returns a {@code Collector} that accumulates the input elements into a new {@code DataSet}.
+         * Returns a {@code Collector} that accumulates the input elements into a new {@code Dataset}.
          * 
          * <p>This collector is useful when you need to convert a stream of elements into a
-         * {@code DataSet} structure. The collector creates a {@code DataSet} with auto-generated
+         * {@code Dataset} structure. The collector creates a {@code Dataset} with auto-generated
          * column names based on the properties of the elements.</p>
          * 
          * <p>The returned collector accumulates elements into a list and then creates a
-         * {@code DataSet} from that list. The column names are automatically determined
+         * {@code Dataset} from that list. The column names are automatically determined
          * based on the structure of the elements.</p>
          * 
          * <p>Example:
          * <pre>{@code
-         * // Convert stream of objects to DataSet
-         * DataSet dataSet = persons.stream()
-         *     .collect(MoreCollectors.toDataSet());
+         * // Convert stream of objects to Dataset
+         * Dataset dataset = persons.stream()
+         *     .collect(MoreCollectors.toDataset());
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @return a {@code Collector} which collects all input elements into a {@code DataSet}
+         * @return a {@code Collector} which collects all input elements into a {@code Dataset}
          */
-        public static <T> Collector<T, ?, DataSet> toDataSet() {
-            return toDataSet(null);
+        public static <T> Collector<T, ?, Dataset> toDataset() {
+            return toDataset(null);
         }
 
         /**
-         * Returns a {@code Collector} that accumulates the input elements into a new {@code DataSet}
+         * Returns a {@code Collector} that accumulates the input elements into a new {@code Dataset}
          * with specified column names.
          * 
          * <p>This collector is useful when you need to convert a stream of elements into a
-         * {@code DataSet} structure with custom column names. The collector creates a
-         * {@code DataSet} using the provided column names for the resulting data structure.</p>
+         * {@code Dataset} structure with custom column names. The collector creates a
+         * {@code Dataset} using the provided column names for the resulting data structure.</p>
          * 
          * <p>The returned collector accumulates elements into a list and then creates a
-         * {@code DataSet} from that list using the specified column names. If column names
+         * {@code Dataset} from that list using the specified column names. If column names
          * are not provided (null), they will be auto-generated based on the element structure.</p>
          * 
          * <p>Example:
          * <pre>{@code
-         * // Convert stream to DataSet with custom column names
+         * // Convert stream to Dataset with custom column names
          * List<String> columnNames = Arrays.asList("ID", "Name", "Age", "Department");
-         * DataSet dataSet = employees.stream()
-         *     .collect(MoreCollectors.toDataSet(columnNames));
+         * Dataset dataset = employees.stream()
+         *     .collect(MoreCollectors.toDataset(columnNames));
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param columnNames the names of columns for the resulting {@code DataSet}, or null for auto-generated names
-         * @return a {@code Collector} which collects all input elements into a {@code DataSet}
+         * @param columnNames the names of columns for the resulting {@code Dataset}, or null for auto-generated names
+         * @return a {@code Collector} which collects all input elements into a {@code Dataset}
          *         with the specified column names
          */
-        public static <T> Collector<T, ?, DataSet> toDataSet(final List<String> columnNames) {
+        public static <T> Collector<T, ?, Dataset> toDataset(final List<String> columnNames) {
             @SuppressWarnings("rawtypes")
             final Collector<T, List<T>, List<T>> collector = (Collector) Collectors.toList();
 
-            final Function<List<T>, DataSet> finisher = it -> N.notEmpty(columnNames) ? N.newDataSet(columnNames, it) : N.newDataSet(it);
+            final Function<List<T>, Dataset> finisher = it -> N.notEmpty(columnNames) ? N.newDataset(columnNames, it) : N.newDataset(it);
 
             return create(collector.supplier(), collector.accumulator(), collector.combiner(), finisher, Collectors.CH_NOID);
         }

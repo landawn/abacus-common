@@ -59,7 +59,7 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BufferedJSONWriter;
 import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.DataSet;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.EntityId;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IdentityHashSet;
@@ -71,7 +71,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Pair;
-import com.landawn.abacus.util.RowDataSet;
+import com.landawn.abacus.util.RowDataset;
 import com.landawn.abacus.util.Seid;
 import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.Strings;
@@ -111,20 +111,20 @@ final class JSONParserImpl extends AbstractJSONParser {
     private static final String ROW_KEY_TYPE = "rowKeyType";
     private static final String COLUMN_KEY_TYPE = "columnKeyType";
 
-    private static final Map<String, Integer> dataSetSheetPropOrder = new HashMap<>();
+    private static final Map<String, Integer> datasetSheetPropOrder = new HashMap<>();
 
     static {
-        dataSetSheetPropOrder.put(ENTITY_NAME, 1);
-        dataSetSheetPropOrder.put(ENTITY_TYPE, 2);
-        dataSetSheetPropOrder.put(COLUMN_NAMES, 3);
-        dataSetSheetPropOrder.put(COLUMN_TYPES, 4);
-        dataSetSheetPropOrder.put(PROPERTIES, 5);
-        dataSetSheetPropOrder.put(IS_FROZEN, 6);
-        dataSetSheetPropOrder.put(COLUMNS, 7);
-        dataSetSheetPropOrder.put(ROW_KEY_SET, 8);
-        dataSetSheetPropOrder.put(COLUMN_KEY_SET, 9);
-        dataSetSheetPropOrder.put(ROW_KEY_TYPE, 10);
-        dataSetSheetPropOrder.put(COLUMN_KEY_TYPE, 11);
+        datasetSheetPropOrder.put(ENTITY_NAME, 1);
+        datasetSheetPropOrder.put(ENTITY_TYPE, 2);
+        datasetSheetPropOrder.put(COLUMN_NAMES, 3);
+        datasetSheetPropOrder.put(COLUMN_TYPES, 4);
+        datasetSheetPropOrder.put(PROPERTIES, 5);
+        datasetSheetPropOrder.put(IS_FROZEN, 6);
+        datasetSheetPropOrder.put(COLUMNS, 7);
+        datasetSheetPropOrder.put(ROW_KEY_SET, 8);
+        datasetSheetPropOrder.put(COLUMN_KEY_SET, 9);
+        datasetSheetPropOrder.put(ROW_KEY_TYPE, 10);
+        datasetSheetPropOrder.put(COLUMN_KEY_TYPE, 11);
     }
 
     private static final JSONDeserializationConfig jdcForStringElement = JDC.create().setElementType(String.class);
@@ -303,7 +303,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 return readCollection(jr, config, null, null, true, targetClass, c);
 
             case DATA_SET:
-                return readDataSet(jr, UNDEFINED, config, true, targetClass);
+                return readDataset(jr, UNDEFINED, config, true, targetClass);
 
             case SHEET:
                 return readSheet(jr, UNDEFINED, config, true, targetClass);
@@ -561,7 +561,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 break;
 
             case DATA_SET:
-                writeDataSet((DataSet) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
+                writeDataset((Dataset) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
 
                 break;
 
@@ -1263,13 +1263,13 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings({ "unused" })
-    protected void writeDataSet(final DataSet ds, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
+    protected void writeDataset(final Dataset ds, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw) throws IOException {
         //    if (hasCircularReference(ds, serializedObjects, config, bw)) {
         //        return;
         //    }
 
-        if (config.writeDataSetByRow()) {
+        if (config.writeDatasetByRow()) {
             writeCollection(ds.toList(LinkedHashMap.class), config, isFirstCall, indentation, serializedObjects, type, bw);
             return;
         }
@@ -2036,7 +2036,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 return readMapEntity(jr, config, isFirstCall, targetClass);
 
             case DATA_SET:
-                return readDataSet(jr, lastToken, config, isFirstCall, targetClass);
+                return readDataset(jr, lastToken, config, isFirstCall, targetClass);
 
             case SHEET:
                 return readSheet(jr, lastToken, config, isFirstCall, targetClass);
@@ -3047,7 +3047,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings("unused")
-    protected <T> T readDataSet(final JSONReader jr, final int lastToken, final JSONDeserializationConfig config, final boolean isFirstCall,
+    protected <T> T readDataset(final JSONReader jr, final int lastToken, final JSONDeserializationConfig config, final boolean isFirstCall,
             final Class<? extends T> targetClass) throws IOException {
 
         final int firstToken = isFirstCall ? jr.nextToken() : lastToken;
@@ -3060,7 +3060,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             return null;
         }
 
-        DataSet rs = null;
+        Dataset rs = null;
 
         if (firstToken == START_BRACKET) {
             final Map<String, List<Object>> result = new LinkedHashMap<>();
@@ -3102,7 +3102,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 } else {
                                     value = readValue(jr, readNullToEmpty, valueType);
 
-                                    addDataSetColumnValue(key, value, valueCount, result);
+                                    addDatasetColumnValue(key, value, valueCount, result);
                                 }
                             }
 
@@ -3134,7 +3134,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                     } else {
                                         value = readValue(jr, readNullToEmpty, valueType);
 
-                                        addDataSetColumnValue(key, value, valueCount, result);
+                                        addDatasetColumnValue(key, value, valueCount, result);
                                     }
                                 }
                             }
@@ -3150,7 +3150,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 } else {
                                     value = readBracedValue(jr, config, valueType);
 
-                                    addDataSetColumnValue(key, value, valueCount, result);
+                                    addDatasetColumnValue(key, value, valueCount, result);
                                 }
                             }
 
@@ -3165,7 +3165,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 } else {
                                     value = readBracketedValue(jr, config, config.getPropHandler(key), valueType);
 
-                                    addDataSetColumnValue(key, value, valueCount, result);
+                                    addDatasetColumnValue(key, value, valueCount, result);
                                 }
                             }
 
@@ -3181,7 +3181,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                     } else {
                                         value = readValue(jr, readNullToEmpty, valueType);
 
-                                        addDataSetColumnValue(key, value, valueCount, result);
+                                        addDatasetColumnValue(key, value, valueCount, result);
                                     }
                                 }
                             }
@@ -3224,7 +3224,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 throw new ParseException(token, getErrorMsg(jr, token));
             }
 
-            rs = new RowDataSet(new ArrayList<>(result.keySet()), new ArrayList<>(result.values()));
+            rs = new RowDataset(new ArrayList<>(result.keySet()), new ArrayList<>(result.values()));
 
             return (T) rs;
         } else {
@@ -3252,7 +3252,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         if (isKey) {
                             columnName = jr.getText();
                         } else {
-                            final Integer order = dataSetSheetPropOrder.get(columnName);
+                            final Integer order = datasetSheetPropOrder.get(columnName);
 
                             if (order == null) {
                                 throw new ParseException(token, getErrorMsg(jr, token));
@@ -3305,7 +3305,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                             isKey = true;
 
                             if (jr.hasText()) {
-                                final Integer order = dataSetSheetPropOrder.get(columnName);
+                                final Integer order = datasetSheetPropOrder.get(columnName);
 
                                 if (order == null) {
                                     throw new ParseException(token, getErrorMsg(jr, token));
@@ -3340,7 +3340,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         break;
 
                     case START_BRACKET:
-                        final Integer order = dataSetSheetPropOrder.get(columnName);
+                        final Integer order = datasetSheetPropOrder.get(columnName);
 
                         if (order == null) {
                             throw new ParseException(token, getErrorMsg(jr, token));
@@ -3475,8 +3475,8 @@ final class JSONParserImpl extends AbstractJSONParser {
                             columnList = new ArrayList<>();
                         }
 
-                        // rs = new RowDataSet(beanName, beanClass, columnNameList, columnList, properties);
-                        rs = new RowDataSet(columnNameList, columnList, properties);
+                        // rs = new RowDataset(beanName, beanClass, columnNameList, columnList, properties);
+                        rs = new RowDataset(columnNameList, columnList, properties);
 
                         if (isFrozen) {
                             rs.freeze();
@@ -3492,8 +3492,8 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     @SuppressWarnings("unused")
-    private void addDataSetColumnValue(final String key, final Object value, final int valueCount, final Map<String, List<Object>> output) {
-        // Value should not be ignored for DataSet column.
+    private void addDatasetColumnValue(final String key, final Object value, final int valueCount, final Map<String, List<Object>> output) {
+        // Value should not be ignored for Dataset column.
         // if (!ignoreNullOrEmpty || (!isNullOrEmptyValue(keyType, key) && !isNullOrEmptyValue(valueType, value))) {
         List<Object> values = output.get(key);
 
@@ -3561,7 +3561,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                     if (isKey) {
                         columnName = jr.getText();
                     } else {
-                        final Integer order = dataSetSheetPropOrder.get(columnName);
+                        final Integer order = datasetSheetPropOrder.get(columnName);
 
                         if (order == null) {
                             throw new ParseException(token, getErrorMsg(jr, token));
@@ -3603,7 +3603,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         isKey = true;
 
                         if (jr.hasText()) {
-                            final Integer order = dataSetSheetPropOrder.get(columnName);
+                            final Integer order = datasetSheetPropOrder.get(columnName);
 
                             if (order == null) {
                                 throw new ParseException(token, getErrorMsg(jr, token));
@@ -3627,7 +3627,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                     break;
 
                 case START_BRACKET:
-                    final Integer order = dataSetSheetPropOrder.get(columnName);
+                    final Integer order = datasetSheetPropOrder.get(columnName);
 
                     if (order == null) {
                         throw new ParseException(token, getErrorMsg(jr, token));
@@ -3798,8 +3798,8 @@ final class JSONParserImpl extends AbstractJSONParser {
             return readArray(jr, config, type, false, type.clazz(), null);
         } else if (type.isCollection()) {
             return readCollection(jr, config, type, propHandler, false, type.clazz(), null);
-        } else if (type.isDataSet()) {
-            return readDataSet(jr, START_BRACKET, config, false, DataSet.class);
+        } else if (type.isDataset()) {
+            return readDataset(jr, START_BRACKET, config, false, Dataset.class);
         } else {
             final List<?> list = readCollection(jr, config, type, propHandler, false, List.class, null);
             final BiFunction<List<?>, Type<?>, Object> converter = list2PairTripleConverterMap.get(type.clazz());
@@ -3819,8 +3819,8 @@ final class JSONParserImpl extends AbstractJSONParser {
             return readBean(jr, config, false, type.clazz(), type);
         } else if (type.isMap()) {
             return readMap(jr, config, type, false, type.clazz(), null);
-        } else if (type.isDataSet()) {
-            return readDataSet(jr, START_BRACE, config, false, DataSet.class);
+        } else if (type.isDataset()) {
+            return readDataset(jr, START_BRACE, config, false, Dataset.class);
         } else if (type.isMapEntity()) {
             return readMapEntity(jr, config, false, MapEntity.class);
         } else if (type.isEntityId()) {
@@ -4063,7 +4063,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             default:
                 if (!(elementType.isBean() || elementType.isMap() || elementType.isCollection() || elementType.isArray())) {
                     throw new IllegalArgumentException(
-                            "Only Bean/Map/Collection/Object Array/DataSet element types are supported by stream methods at present");
+                            "Only Bean/Map/Collection/Object Array/Dataset element types are supported by stream methods at present");
                 }
         }
     }

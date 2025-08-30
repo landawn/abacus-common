@@ -465,7 +465,7 @@ public class EntryStream102Test extends TestBase {
     }
 
     @Test
-    public void testLargeDataSetOperations() {
+    public void testLargeDatasetOperations() {
         // Test with larger data set to ensure correctness
         Map<Integer, Integer> largeMap = new LinkedHashMap<>();
         for (int i = 0; i < 10000; i++) {

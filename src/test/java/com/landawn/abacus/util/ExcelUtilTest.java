@@ -52,17 +52,17 @@ public class ExcelUtilTest extends AbstractTest {
 
     @Test
     public void test_loadSheet() {
-        final DataSet dataSet = N.newDataSet(N.asList("column1", "column2"), N.asList(N.asList("ab", "cd"), N.asList("ef", "gh")));
-        dataSet.println();
+        final Dataset dataset = N.newDataset(N.asList("column1", "column2"), N.asList(N.asList("ab", "cd"), N.asList("ef", "gh")));
+        dataset.println();
 
         File outputExcelFile = new File("./src/test/resources/test_excel_02.xlsx");
-        ExcelUtil.writeSheet("sheet_001", dataSet, outputExcelFile);
+        ExcelUtil.writeSheet("sheet_001", dataset, outputExcelFile);
 
-        DataSet dataSet2 = ExcelUtil.loadSheet(outputExcelFile);
+        Dataset dataset2 = ExcelUtil.loadSheet(outputExcelFile);
 
-        dataSet2.println();
+        dataset2.println();
 
-        assertEquals(dataSet, dataSet2);
+        assertEquals(dataset, dataset2);
 
         IOUtil.deleteQuietly(outputExcelFile);
     }

@@ -38,7 +38,7 @@ public class AsyncSQLExecutorTest extends AbstractTest {
     //
     //        sqlExecutor.insert(insertAccount_1, "fn", "ln", uuid, now, now);
     //
-    //        DataSet result = sqlExecutor.query(sql_1, uuid);
+    //        Dataset result = sqlExecutor.query(sql_1, uuid);
     //        N.println(result);
     //
     //        sqlExecutor.insert(insertAccount_2, "fn", "ln", uuid, now, now);
@@ -75,7 +75,7 @@ public class AsyncSQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) asyncSQLExecutor.insert(MySqlDef.insertAccount, "1", "ln", UUID.randomUUID().toString(), now, now).get();
     //
-    //        DataSet result = asyncSQLExecutor.query(MySqlDef.selectAccountById, id).get();
+    //        Dataset result = asyncSQLExecutor.query(MySqlDef.selectAccountById, id).get();
     //        N.println(result);
     //
     //        result = asyncSQLExecutor.query(MySqlDef.selectAccountById, id).get();
@@ -108,7 +108,7 @@ public class AsyncSQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) asyncSQLExecutor.insert(MySqlDef.insertAccount, "1", "ln", UUID.randomUUID().toString(), now, now).get();
     //
-    //        DataSet result = asyncSQLExecutor.query(MySqlDef.selectAccountById, id).get();
+    //        Dataset result = asyncSQLExecutor.query(MySqlDef.selectAccountById, id).get();
     //        N.println(result);
     //
     //        String sql = "select first_name from account where id = ?";
@@ -164,7 +164,7 @@ public class AsyncSQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) asyncSQLExecutor.insert(conn, MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now).get();
     //
-    //        DataSet result = asyncSQLExecutor.query(MySqlDef.selectAccountById, id).get();
+    //        Dataset result = asyncSQLExecutor.query(MySqlDef.selectAccountById, id).get();
     //        N.println(result);
     //
     //        asyncSQLExecutor.update(MySqlDef.deleteAccountById, id).get();
@@ -348,7 +348,7 @@ public class AsyncSQLExecutorTest extends AbstractTest {
     //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //        long id = (Long) asyncSQLExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now).get();
     //
-    //        DataSet result = asyncSQLExecutor.query(MySqlDef.selectAccountById, id).get();
+    //        Dataset result = asyncSQLExecutor.query(MySqlDef.selectAccountById, id).get();
     //        N.println(result);
     //
     //        asyncSQLExecutor.update(MySqlDef.updateAccountFirstNameById, "updatedFirstName1", id).get();
@@ -396,7 +396,7 @@ public class AsyncSQLExecutorTest extends AbstractTest {
     //    //        Timestamp now = new Timestamp(System.currentTimeMillis());
     //    //        long id = (Long) asyncSQLExecutor.insert(MySqlDef.insertAccount, "fn", "ln", UUID.randomUUID().toString(), now, now).get();
     //    //
-    //    //        DataSet result = asyncSQLExecutor.query(MySqlDef.selectAccountById, id).get();
+    //    //        Dataset result = asyncSQLExecutor.query(MySqlDef.selectAccountById, id).get();
     //    //        N.println(result);
     //    //        assertEquals(1, result.size());
     //    //
@@ -413,21 +413,21 @@ public class AsyncSQLExecutorTest extends AbstractTest {
     //        Future<Long> f = asyncSQLExecutor.insert(INSERT_ACCOUNT, account);
     //        long id = f.get();
     //
-    //        DataSet dataSet = asyncSQLExecutor.query(SELECT_ACCOUNT_BY_ID, account.getId()).get();
-    //        N.println(dataSet);
-    //        assertEquals(1, dataSet.size());
+    //        Dataset dataset = asyncSQLExecutor.query(SELECT_ACCOUNT_BY_ID, account.getId()).get();
+    //        N.println(dataset);
+    //        assertEquals(1, dataset.size());
     //
     //        account.setFirstName("updatedFirtName");
     //
     //        int result = asyncSQLExecutor.update(UPDATE_ACCOUNT_FIRST_NAME_BY_ID, account).get();
-    //        N.println(dataSet);
+    //        N.println(dataset);
     //        assertEquals(1, result);
     //
     //        result = asyncSQLExecutor.update(DELETE_ACCOUNT_BY_ID, id).get();
-    //        N.println(dataSet);
+    //        N.println(dataset);
     //        assertEquals(1, result);
-    //        dataSet = asyncSQLExecutor.query(SELECT_ACCOUNT_BY_ID, id).get();
-    //        assertEquals(0, dataSet.size());
+    //        dataset = asyncSQLExecutor.query(SELECT_ACCOUNT_BY_ID, id).get();
+    //        assertEquals(0, dataset.size());
     //    }
     //
     //    public void testBatchCRUDWithListParamter() throws InterruptedException, ExecutionException {
@@ -442,20 +442,20 @@ public class AsyncSQLExecutorTest extends AbstractTest {
     //        List<Long> ids = f.get();
     //        assertEquals(count, ids.size());
     //
-    //        DataSet dataSet = asyncSQLExecutor.query(SELECT_ALL_ACCOUNT).get();
-    //        N.println(dataSet);
-    //        assertEquals(count, dataSet.size());
+    //        Dataset dataset = asyncSQLExecutor.query(SELECT_ALL_ACCOUNT).get();
+    //        N.println(dataset);
+    //        assertEquals(count, dataset.size());
     //
     //        int result = asyncSQLExecutor.batchUpdate(UPDATE_ACCOUNT_FIRST_NAME_BY_ID, accounts).get();
-    //        N.println(dataSet);
+    //        N.println(dataset);
     //        assertEquals(count, result);
     //
     //        result = asyncSQLExecutor.batchUpdate(DELETE_ACCOUNT_BY_ID, accounts).get();
-    //        N.println(dataSet);
+    //        N.println(dataset);
     //
-    //        dataSet = asyncSQLExecutor.query(SELECT_ALL_ACCOUNT).get();
-    //        N.println(dataSet);
-    //        assertEquals(0, dataSet.size());
+    //        dataset = asyncSQLExecutor.query(SELECT_ALL_ACCOUNT).get();
+    //        N.println(dataset);
+    //        assertEquals(0, dataset.size());
     //    }
     //
     //    public void testBatchCRUDWithArrayParameters() throws InterruptedException, ExecutionException {
@@ -470,20 +470,20 @@ public class AsyncSQLExecutorTest extends AbstractTest {
     //        List<Long> ids = f.get();
     //        assertEquals(count, ids.size());
     //
-    //        DataSet dataSet = asyncSQLExecutor.query(SELECT_ALL_ACCOUNT).get();
-    //        N.println(dataSet);
-    //        assertEquals(count, dataSet.size());
+    //        Dataset dataset = asyncSQLExecutor.query(SELECT_ALL_ACCOUNT).get();
+    //        N.println(dataset);
+    //        assertEquals(count, dataset.size());
     //
     //        int result = asyncSQLExecutor.batchUpdate(UPDATE_ACCOUNT_FIRST_NAME_BY_ID, N.asList(accounts)).get();
-    //        N.println(dataSet);
+    //        N.println(dataset);
     //        assertEquals(count, result);
     //
     //        result = asyncSQLExecutor.batchUpdate(DELETE_ACCOUNT_BY_ID, N.asList(accounts)).get();
-    //        N.println(dataSet);
+    //        N.println(dataset);
     //
-    //        dataSet = asyncSQLExecutor.query(SELECT_ALL_ACCOUNT).get();
-    //        N.println(dataSet);
-    //        assertEquals(0, dataSet.size());
+    //        dataset = asyncSQLExecutor.query(SELECT_ALL_ACCOUNT).get();
+    //        N.println(dataset);
+    //        assertEquals(0, dataset.size());
     //    }
     //
     //    @Test
@@ -497,7 +497,7 @@ public class AsyncSQLExecutorTest extends AbstractTest {
     //
     //        List<Long> ids = (List) asyncSQLExecutor.batchInsert(MySqlDef.insertAccount, N.asList(array)).get();
     //
-    //        DataSet result = asyncSQLExecutor.query(MySqlDef.selectAccountById, ids.get(0)).get();
+    //        Dataset result = asyncSQLExecutor.query(MySqlDef.selectAccountById, ids.get(0)).get();
     //        N.println(result);
     //
     //        asyncSQLExecutor.update(MySqlDef.deleteAllAccount).get();

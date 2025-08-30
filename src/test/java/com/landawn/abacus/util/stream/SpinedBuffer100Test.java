@@ -414,7 +414,7 @@ public class SpinedBuffer100Test extends TestBase {
     }
 
     @Test
-    public void testLargeDataSet() {
+    public void testLargeDataset() {
         SpinedBuffer<Integer> buffer = new SpinedBuffer<>(1);
 
         // Add a large number of elements

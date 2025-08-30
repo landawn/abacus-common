@@ -27,7 +27,7 @@ public class RecordTest {
 
         assertEquals(recordA, record2);
 
-        DataSet ds = N.newDataSet(N.asList(recordA, record2));
+        Dataset ds = N.newDataset(N.asList(recordA, record2));
         ds.println();
 
         ds.toList(RecordB.class).forEach(Fn.println());
@@ -51,7 +51,7 @@ public class RecordTest {
 
         assertEquals(recordA, record2);
 
-        DataSet ds = N.newDataSet(N.asList(recordA, record2));
+        Dataset ds = N.newDataset(N.asList(recordA, record2));
         ds.println();
 
         ds.toList(RecordA.class).forEach(Fn.println());
