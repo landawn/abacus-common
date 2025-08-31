@@ -1552,17 +1552,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Calculates and returns the median value of all elements in this list.
+     * Returns the median value of all elements in this list.
      * 
      * <p>The median is the middle value when the elements are sorted in ascending order. For lists with
      * an odd number of elements, this is the exact middle element. For lists with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
-     * 
-     * <p>This method creates a temporary sorted copy of the list's elements to find the median, so it
-     * does not modify the original list order. The time complexity is O(n log n) due to sorting.</p>
-     * 
-     * <p>Note: For byte values, the median is always a whole number since we're dealing with discrete
-     * values and this implementation doesn't average the two middle values for even-sized lists.</p>
      *
      * @return an OptionalByte containing the median value if the list is non-empty, or an empty OptionalByte if the list is empty
      */
@@ -1571,15 +1565,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Calculates and returns the median value of elements within the specified range of this list.
+     * Returns the median value of elements within the specified range of this list.
      * 
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
-     * 
-     * <p>This method creates a temporary sorted copy of the specified range to find the median,
-     * leaving the original list unchanged. The time complexity is O(k log k) where k is the size
-     * of the range (toIndex - fromIndex).</p>
      *
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for

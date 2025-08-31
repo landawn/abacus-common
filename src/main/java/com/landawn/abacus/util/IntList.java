@@ -1565,32 +1565,29 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Calculates and returns the median value of all elements in this list.
-     * The median is the middle value when the elements are sorted in ascending order.
-     * If the list has an even number of elements, returns the lower of the two middle values.
+     * Returns the median value of all elements in this list.
      * 
-     * <p>This method creates a copy of the underlying array for sorting, so the original
-     * list order is preserved.</p>
+     * <p>The median is the middle value when the elements are sorted in ascending order. For lists with
+     * an odd number of elements, this is the exact middle element. For lists with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
-     * @return an OptionalInt containing the median value, or an empty OptionalInt if the list is empty
+     * @return an OptionalInt containing the median value if the list is non-empty, or an empty OptionalInt if the list is empty
      */
     public OptionalInt median() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.median(elementData, 0, size));
     }
 
     /**
-     * Calculates and returns the median value of elements in the specified range of this list.
-     * The median is the middle value when the elements in the range are sorted in ascending order.
-     * If the range has an even number of elements, returns the lower of the two middle values.
+     * Returns the median value of elements within the specified range of this list.
      * 
-     * <p>This method creates a copy of the specified range for sorting, so the original
-     * list order is preserved.</p>
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
-     * @param fromIndex the starting index (inclusive) of the range to calculate median from
-     * @param toIndex the ending index (exclusive) of the range to calculate median from
-     * @return an OptionalInt containing the median value of the specified range, 
-     *         or an empty OptionalInt if the range is empty (fromIndex == toIndex)
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
+     * @return an OptionalInt containing the median value if the range is non-empty, or an empty OptionalInt if the range is empty
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
      */
     public OptionalInt median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);

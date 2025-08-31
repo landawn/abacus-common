@@ -1447,11 +1447,14 @@ public final class Iterables {
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified array based on their natural ordering.
-     * The result is wrapped in a {@code Nullable}. If the array is {@code null} or empty, it returns an empty {@code Nullable}.
+     * Returns the median value of all elements in the specified array.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
+     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
-     * @param <T> the type of the elements in the array, which must be a subtype of Comparable
-     * @param a the array of elements to evaluate
+     * @param <T> the type of elements in the input array
+     * @param a the array of values to find the median of
      * @return a {@code Nullable} containing the median value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#median(Comparable...)
      * @see Median#of(Comparable[])
@@ -1462,12 +1465,15 @@ public final class Iterables {
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified array, according to the provided comparator.
-     * The result is wrapped in a {@code Nullable}. If the array is {@code null} or empty, it returns an empty {@code Nullable}.
+     * Returns the median value of all elements in the specified array.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
+     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
-     * @param <T> the type of the elements in the array, which must be a subtype of Comparable
-     * @param a the array of elements to evaluate
-     * @param cmp the comparator to determine the order of the elements
+     * @param <T> the type of elements in the input array
+     * @param a the array of values to find the median of
+     * @param cmp the comparator to determine the order of the values
      * @return a {@code Nullable} containing the median value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#median(Object[], Comparator)
      * @see Median#of(Comparable[])
@@ -1478,11 +1484,14 @@ public final class Iterables {
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified collection based on their natural ordering.
-     * The result is wrapped in a {@code Nullable}. If the collection is {@code null} or empty, it returns an empty {@code Nullable}.
+     * Returns the median value of all elements in the specified collection.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For collection with
+     * an odd number of elements, this is the exact middle element. For collection with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
-     * @param <T> the type of the elements in the collection, which must be a subtype of Comparable
-     * @param c the collection of elements to evaluate
+     * @param <T> the type of elements in the input collection
+     * @param c the collection of values to find the median of
      * @return a {@code Nullable} containing the median value if the collection is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#median(Collection)
      * @see Median#of(Collection)
@@ -1493,12 +1502,15 @@ public final class Iterables {
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified collection, according to the provided comparator.
-     * The result is wrapped in a {@code Nullable}. If the collection is {@code null} or empty, it returns an empty {@code Nullable}.
+     * Returns the median value of all elements in the specified collection.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For collection with
+     * an odd number of elements, this is the exact middle element. For collection with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
-     * @param <T> the type of the elements in the collection, which must be a subtype of Comparable
-     * @param c the collection of elements to evaluate
-     * @param cmp the comparator to determine the order of the elements
+     * @param <T> the type of elements in the input collection
+     * @param c the collection of values to find the median of
+     * @param cmp the comparator to determine the order of the values
      * @return a {@code Nullable} containing the median value if the collection is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#median(Collection, Comparator)
      * @see Median#of(Collection)

@@ -1511,24 +1511,29 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Returns the median element in this list.
-     * If the list has an even number of elements, returns the lower median.
+     * Returns the median value of all elements in this list.
      * 
-     * @return an OptionalChar containing the median element, or an empty OptionalChar if this list is empty
+     * <p>The median is the middle value when the elements are sorted in ascending order. For lists with
+     * an odd number of elements, this is the exact middle element. For lists with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
+     *
+     * @return an OptionalChar containing the median value if the list is non-empty, or an empty OptionalChar if the list is empty
      */
     public OptionalChar median() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.median(elementData, 0, size));
     }
 
     /**
-     * Returns the median element in the specified range of this list.
-     * If the range has an even number of elements, returns the lower median.
+     * Returns the median value of elements within the specified range of this list.
      * 
-     * @param fromIndex the index of the first element (inclusive) to be included in the calculation
-     * @param toIndex the index of the last element (exclusive) to be included in the calculation
-     * @return an OptionalChar containing the median element in the specified range,
-     *         or an empty OptionalChar if the range is empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
+     *
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
+     * @return an OptionalChar containing the median value if the range is non-empty, or an empty OptionalChar if the range is empty
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
      */
     public OptionalChar median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);

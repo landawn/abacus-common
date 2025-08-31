@@ -35,9 +35,9 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Objects;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.RandomAccess;
@@ -17144,7 +17144,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value in the specified array.
+     * Returns the median value of all elements in the specified array.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
+     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
      * @param a the array of values to find the median of
      * @return the median in the specified array
@@ -17159,11 +17163,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range in the specified array
+     * Returns the median value of elements within the specified range of the specified array.
+     * 
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
-     * @param a the array of values to find the median of
-     * @param fromIndex The start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return the median within the specified range in the input array
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
@@ -17191,7 +17198,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value in the specified array.
+     * Returns the median value of all elements in the specified array.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
+     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
      * @param a the array of values to find the median of
      * @return the median in the specified array
@@ -17206,11 +17217,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range in the specified array
+     * Returns the median value of elements within the specified range of the specified array.
+     * 
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
-     * @param a the array of values to find the median of
-     * @param fromIndex The start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return the median within the specified range in the input array
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
@@ -17238,7 +17252,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value in the specified array.
+     * Returns the median value of all elements in the specified array.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
+     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
      * @param a the array of values to find the median of
      * @return the median in the specified array
@@ -17253,11 +17271,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range in the specified array
+     * Returns the median value of elements within the specified range of the specified array.
+     * 
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
-     * @param a the array of values to find the median of
-     * @param fromIndex The start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return the median within the specified range in the input array
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
@@ -17285,8 +17306,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value in the specified array.
-     *
+     * Returns the median value of all elements in the specified array.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
+     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
+     * 
      * <pre>
      * <code>
      * N.media([1]) => 1
@@ -17311,11 +17336,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range in the specified array
+     * Returns the median value of elements within the specified range of the specified array.
+     * 
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
-     * @param a the array of values to find the median of
-     * @param fromIndex The start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return the median within the specified range in the input array
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
@@ -17343,7 +17371,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value in the specified array.
+     * Returns the median value of all elements in the specified array.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
+     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
      * @param a the array of values to find the median of
      * @return the median in the specified array
@@ -17358,11 +17390,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range in the specified array
+     * Returns the median value of elements within the specified range of the specified array.
+     * 
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
-     * @param a the array of values to find the median of
-     * @param fromIndex The start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return the median within the specified range in the input array
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
@@ -17390,7 +17425,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value in the specified array.
+     * Returns the median value of all elements in the specified array.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
+     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
      * @param a the array of values to find the median of
      * @return the median in the specified array
@@ -17405,11 +17444,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range in the specified array
+     * Returns the median value of elements within the specified range of the specified array.
+     * 
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
-     * @param a the array of values to find the median of
-     * @param fromIndex The start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return the median within the specified range in the input array
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
@@ -17437,7 +17479,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value in the specified array.
+     * Returns the median value of all elements in the specified array.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
+     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
      * @param a the array of values to find the median of
      * @return the median in the specified array
@@ -17452,11 +17498,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range in the specified array
+     * Returns the median value of elements within the specified range of the specified array.
+     * 
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
-     * @param a the array of values to find the median of
-     * @param fromIndex The start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return the median within the specified range in the input array
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
@@ -17484,8 +17533,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value in the specified array.
+     * Returns the median value of all elements in the specified array.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
+     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
+     * @param <T> the type of elements in the input array
      * @param a the array of values to find the median of
      * @return the median in the specified array
      * @throws IllegalArgumentException if the array is {@code null} or empty
@@ -17499,11 +17553,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range in the specified array
+     * Returns the median value of elements within the specified range of the specified array.
+     * 
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
-     * @param a the array of values to find the median of
-     * @param fromIndex The start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * @param <T> the type of elements in the input array
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return the median within the specified range in the input array
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
@@ -17520,7 +17578,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest element in the specified array according to the provided comparator.
+     * Returns the median value of all elements in the specified array.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
+     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
      * @param <T> the type of elements in the input array
      * @param a the array of values to find the median of
@@ -17541,12 +17603,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest element within the specified range in the input array according to the provided comparator.
+     * Returns the median value of elements within the specified range of the specified array.
+     * 
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
      * @param <T> the type of elements in the input array
-     * @param a the array of values to find the median of
-     * @param fromIndex The start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @param cmp the comparator to determine the order of the values
      * @return the median within the specified range in the input array
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
@@ -17573,7 +17638,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest element in the specified collection according to the provided comparator.
+     * Returns the median value of all elements in the specified collection.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For collection with
+     * an odd number of elements, this is the exact middle element. For collection with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
      * @param <T> the type of elements in the input collection
      * @param c the collection of values to find the median of
@@ -17592,13 +17661,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest element within the specified range in the input collection according to the provided comparator.
+     * Returns the median value of elements within the specified range of the specified collection.
+     * 
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
      * @param <T> the type of elements in the input collection
-     * @param c the collection of values to find the median of
-     * @param fromIndex The start index (inclusive) of the range to consider in the collection
-     * @param toIndex the end index (exclusive) of the range to consider in the collection
-     * @return the median within the specified range in the input collection
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
+     * @return the median within the specified range in the input array
      * @throws IllegalArgumentException if the specified collection or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the collection bounds
      * @see #median(int[])
@@ -17613,7 +17685,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest element in the specified collection according to the provided comparator.
+     * Returns the median value of all elements in the specified collection.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For collection with
+     * an odd number of elements, this is the exact middle element. For collection with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
      * @param <T> the type of elements in the input collection
      * @param c the collection of values to find the median of
@@ -17634,14 +17710,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the {@code (sizeOfRange / 2 + 1)} largest element within the specified range in the input collection according to the provided comparator.
+     * Returns the median value of elements within the specified range of the specified collection.
+     * 
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
      * @param <T> the type of elements in the input collection
-     * @param c the collection of values to find the median of
-     * @param fromIndex The start index (inclusive) of the range to consider in the collection
-     * @param toIndex the end index (exclusive) of the range to consider in the collection
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @param cmp the comparator to determine the order of the values
-     * @return the median within the specified range in the input collection
+     * @return the median within the specified range in the input array
      * @throws IllegalArgumentException if the specified collection or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the collection bounds
      * @see #median(int[])

@@ -1490,27 +1490,29 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * Returns the median value of elements in this list wrapped in an OptionalDouble.
-     * If the list is empty, returns an empty OptionalDouble.
-     * For even-sized lists, returns the average of the two middle elements.
-     * The calculation creates a temporary sorted copy of the list without modifying the original.
+     * Returns the median value of all elements in this list.
+     * 
+     * <p>The median is the middle value when the elements are sorted in ascending order. For lists with
+     * an odd number of elements, this is the exact middle element. For lists with an even number of
+     * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
-     * @return an OptionalDouble containing the median value, or empty if the list is empty
+     * @return an OptionalDouble containing the median value if the list is non-empty, or an empty OptionalDouble if the list is empty
      */
     public OptionalDouble median() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.median(elementData, 0, size));
     }
 
     /**
-     * Returns the median value of elements in the specified range of this list wrapped in an OptionalDouble.
-     * If the range is empty (fromIndex == toIndex), returns an empty OptionalDouble.
-     * For even-sized ranges, returns the average of the two middle elements.
-     * The calculation creates a temporary sorted copy of the range without modifying the original list.
+     * Returns the median value of elements within the specified range of this list.
+     * 
+     * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     * For ranges with an odd number of elements, this returns the exact middle element when sorted.
+     * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
-     * @param fromIndex the starting index of the range (inclusive)
-     * @param toIndex the ending index of the range (exclusive)
-     * @return an OptionalDouble containing the median value of the range, or empty if the range is empty
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @param fromIndex the starting index (inclusive) of the range to calculate median for
+     * @param toIndex the ending index (exclusive) of the range to calculate median for
+     * @return an OptionalDouble containing the median value if the range is non-empty, or an empty OptionalDouble if the range is empty
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
      */
     public OptionalDouble median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);

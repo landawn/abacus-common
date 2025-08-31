@@ -9333,8 +9333,10 @@ public final class RowDataset implements Dataset, Cloneable {
             sb.append("{columnNames=");
             sb.append(_columnNameList);
 
-            sb.append(", properties=");
-            sb.append(_properties);
+            if (N.notEmpty(_properties)) {
+                sb.append(", properties=");
+                sb.append(_properties);
+            }
 
             sb.append(", isFrozen=");
             sb.append(_isFrozen);
