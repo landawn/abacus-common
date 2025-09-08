@@ -872,7 +872,7 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is null or empty
-     * @see #of(Object[], int, int)
+     * @see #of(Comparable[], int, int)
      * @see #of(Object[], Comparator)
      */
     public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final T[] a) throws IllegalArgumentException {
@@ -914,7 +914,7 @@ public final class Median {
      * @throws IllegalArgumentException if the specified array is null or the range is empty
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
-     * @see #of(Object[])
+     * @see #of(Comparable[])
      * @see #of(Object[], int, int, Comparator)
      */
     public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final T[] a, final int fromIndex, final int toIndex) {
@@ -940,7 +940,7 @@ public final class Median {
      * <pre>
      * String[] words = {"apple", "pie", "banana"};
      * Pair&lt;String, Optional&lt;String&gt;&gt; median = Median.of(words, Comparator.comparing(String::length));
-     * String medianWord = median.left; // "pie" (middle length)
+     * String medianWord = median.left; // "apple" (middle length)
      * </pre>
      *
      * @param <T> the type of elements in the array
@@ -951,7 +951,7 @@ public final class Median {
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is null or empty
      * @see #of(Object[], int, int, Comparator)
-     * @see #of(Object[])
+     * @see #of(Comparable[])
      */
     public static <T> Pair<T, Optional<T>> of(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
@@ -998,7 +998,7 @@ public final class Median {
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Object[], Comparator)
-     * @see #of(Object[], int, int)
+     * @see #of(Comparable[], int, int)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Pair<T, Optional<T>> of(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IndexOutOfBoundsException {

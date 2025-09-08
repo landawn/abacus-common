@@ -412,7 +412,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testMerge() {
-        Dataset result = ds1.merge(ds2);
+        Dataset result = N.merge(ds1, ds2);
 
         assertNotNull(result);
         assertEquals(ds1.size() + ds2.size(), result.size());
@@ -431,33 +431,25 @@ public class RowDataset102Test extends TestBase {
     @Test
     public void testMergeWithColumnNames() {
         Collection<String> columnNames = N.asList("id", "city");
-        Dataset result = ds1.merge(ds2, columnNames);
+        Dataset result = ds1.copy();
+        result.merge(ds2, columnNames);
 
         assertNotNull(result);
         assertEquals(ds1.size() + ds2.size(), result.size());
     }
 
-    @Test
-    public void testMergeWithRowRange() {
-        Dataset result = ds1.merge(ds2, 0, 2);
-
-        assertNotNull(result);
-        assertEquals(ds1.size() + 2, result.size());
-    }
-
-    @Test
-    public void testMergeWithRowRangeAndColumns() {
-        Collection<String> columnNames = N.asList("id", "city");
-        Dataset result = ds1.merge(ds2, 1, 2, columnNames);
-
-        assertNotNull(result);
-        assertEquals(ds1.size() + 1, result.size());
-    }
+    //    @Test
+    //    public void testMergeWithRowRange() {
+    //        Dataset result = ds1.merge(ds2, 0, 2);
+    //
+    //        assertNotNull(result);
+    //        assertEquals(ds1.size() + 2, result.size());
+    //    }
 
     @Test
     public void testMergeMultipleDatasets() {
-        Collection<Dataset> others = N.asList(ds2, emptyDs);
-        Dataset result = ds1.merge(others);
+        Collection<Dataset> ds = N.asList(ds1, ds2, emptyDs);
+        Dataset result = N.merge(ds);
 
         assertNotNull(result);
         assertEquals(ds1.size() + ds2.size() + emptyDs.size(), result.size());

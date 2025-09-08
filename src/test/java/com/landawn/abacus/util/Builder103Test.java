@@ -377,43 +377,43 @@ public class Builder103Test extends TestBase {
         Assertions.assertEquals("John: $55000.0", dataset.getColumn("total_comp").get(0));
     }
 
-    @Test
-    public void testCombineColumnsWithPredicateAndClass() {
-        // Test combining columns matching predicate
-        builder.addColumn("score1", Arrays.asList(85, 90, 88));
-        builder.addColumn("score2", Arrays.asList(92, 87, 95));
+    //    @Test
+    //    public void testCombineColumnsWithPredicateAndClass() {
+    //        // Test combining columns matching predicate
+    //        builder.addColumn("score1", Arrays.asList(85, 90, 88));
+    //        builder.addColumn("score2", Arrays.asList(92, 87, 95));
+    //
+    //        Predicate<String> columnFilter = name -> name.startsWith("score");
+    //
+    //        DatasetBuilder result = builder.combineColumns(columnFilter, "total_score", a -> a.join(" + "));
+    //
+    //        Assertions.assertSame(builder, result);
+    //        Assertions.assertTrue(dataset.columnNameList().contains("total_score"));
+    //        Assertions.assertFalse(dataset.columnNameList().contains("score1"));
+    //        Assertions.assertFalse(dataset.columnNameList().contains("score2"));
+    //    }
 
-        Predicate<String> columnFilter = name -> name.startsWith("score");
-
-        DatasetBuilder result = builder.combineColumns(columnFilter, "total_score", a -> a.join(" + "));
-
-        Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("total_score"));
-        Assertions.assertFalse(dataset.columnNameList().contains("score1"));
-        Assertions.assertFalse(dataset.columnNameList().contains("score2"));
-    }
-
-    @Test
-    public void testCombineColumnsWithPredicateAndFunction() {
-        // Test combining columns matching predicate with function
-        builder.addColumn("metric1", Arrays.asList(10.5, 20.3, 15.7));
-        builder.addColumn("metric2", Arrays.asList(5.2, 8.1, 6.9));
-
-        Predicate<String> columnFilter = name -> name.startsWith("metric");
-        Function<DisposableObjArray, Double> combineFunc = arr -> {
-            double sum = 0;
-            for (int i = 0; i < arr.length(); i++) {
-                sum += (Double) arr.get(i);
-            }
-            return sum;
-        };
-
-        DatasetBuilder result = builder.combineColumns(columnFilter, "total_metric", combineFunc);
-
-        Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("total_metric"));
-        Assertions.assertEquals(15.7, dataset.getColumn("total_metric").get(0));
-    }
+    //    @Test
+    //    public void testCombineColumnsWithPredicateAndFunction() {
+    //        // Test combining columns matching predicate with function
+    //        builder.addColumn("metric1", Arrays.asList(10.5, 20.3, 15.7));
+    //        builder.addColumn("metric2", Arrays.asList(5.2, 8.1, 6.9));
+    //
+    //        Predicate<String> columnFilter = name -> name.startsWith("metric");
+    //        Function<DisposableObjArray, Double> combineFunc = arr -> {
+    //            double sum = 0;
+    //            for (int i = 0; i < arr.length(); i++) {
+    //                sum += (Double) arr.get(i);
+    //            }
+    //            return sum;
+    //        };
+    //
+    //        DatasetBuilder result = builder.combineColumns(columnFilter, "total_metric", combineFunc);
+    //
+    //        Assertions.assertSame(builder, result);
+    //        Assertions.assertTrue(dataset.columnNameList().contains("total_metric"));
+    //        Assertions.assertEquals(15.7, dataset.getColumn("total_metric").get(0));
+    //    }
 
     @Test
     public void testDivideColumnWithFunction() {

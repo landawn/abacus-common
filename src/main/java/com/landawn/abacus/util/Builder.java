@@ -2666,47 +2666,6 @@ public class Builder<T> {
         }
 
         /**
-         * Combines all columns matching a predicate into a single new column of the specified type.
-         * 
-         * <p>Example:</p>
-         * <pre>{@code
-         * datasetBuilder.combineColumns(name -> name.startsWith("score_"), 
-         *                              "total_score", Integer.class);
-         * }</pre>
-         *
-         * @param columnNameFilter the predicate to select columns to combine
-         * @param newColumnName the name of the resulting combined column
-         * @param newColumnClass the class type of the new column
-         * @return this builder instance for method chaining
-         */
-        public DatasetBuilder combineColumns(final Predicate<? super String> columnNameFilter, final String newColumnName, final Class<?> newColumnClass) {
-            val.combineColumns(columnNameFilter, newColumnName, newColumnClass);
-
-            return this;
-        }
-
-        /**
-         * Combines all columns matching a predicate into a single new column using a custom function.
-         * 
-         * <p>Example:</p>
-         * <pre>{@code
-         * datasetBuilder.combineColumns(name -> name.startsWith("score_"), "total",
-         *     arr -> Arrays.stream(arr.toArray()).mapToInt(v -> (Integer)v).sum());
-         * }</pre>
-         *
-         * @param columnNameFilter the predicate to select columns to combine
-         * @param newColumnName the name of the resulting combined column
-         * @param combineFunc the function that combines values from the selected columns
-         * @return this builder instance for method chaining
-         */
-        public DatasetBuilder combineColumns(final Predicate<? super String> columnNameFilter, final String newColumnName,
-                final Function<? super DisposableObjArray, ?> combineFunc) {
-            val.combineColumns(columnNameFilter, newColumnName, combineFunc);
-
-            return this;
-        }
-
-        /**
          * Divides a single column into multiple new columns using a function that returns a list.
          * Each value in the source column is split into multiple values for the new columns.
          * 

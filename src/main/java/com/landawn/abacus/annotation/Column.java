@@ -22,15 +22,45 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Specifies that a field should be mapped to a database column with optional column name configuration.
- * This annotation is used in ORM mapping to explicitly define the relationship between entity fields
- * and database columns.
+ * Specifies that a field represents a database column in an entity class.
+ * This annotation is used in ORM (Object-Relational Mapping) contexts to explicitly define
+ * the mapping between Java entity fields and database table columns.
  * 
- * <p>By default, the field name is used as the column name. Use the {@link #name()} attribute
- * to specify a different column name.</p>
+ * <p>By default, if this annotation is not present or if the name attribute is not specified,
+ * the field name is used as the column name. Use the {@link #name()} attribute to specify
+ * a different column name when the database column name differs from the field name.</p>
+ * 
+ * <p>This annotation is typically used in conjunction with {@link Entity} annotation on the class level
+ * to create complete ORM mappings.</p>
+ * 
+ * <p><b>Common use cases:</b></p>
+ * <ul>
+ *   <li>Mapping fields to columns with different naming conventions (e.g., camelCase to snake_case)</li>
+ *   <li>Handling reserved keywords as column names</li>
+ *   <li>Working with legacy database schemas</li>
+ *   <li>Explicitly documenting field-to-column mappings</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * {@literal @}Entity
+ * public class User {
+ *     {@literal @}Column(name = "user_id")
+ *     private Long id;
+ *     
+ *     {@literal @}Column(name = "user_name")
+ *     private String userName;
+ *     
+ *     {@literal @}Column  // Uses field name "email" as column name
+ *     private String email;
+ * }
+ * </pre>
  * 
  * @author HaiYang Li
  * @since 2018
+ * @see Entity
+ * @see Table
+ * @see Id
  */
 @Documented
 @Target(value = { FIELD })
@@ -48,9 +78,23 @@ public @interface Column {
 
     /**
      * The name of the database column this field maps to.
-     * If not specified, the field name is used as the column name.
+     * If not specified (empty string), the field name is used as the column name.
      * 
-     * @return the column name, empty string to use field name as default
+     * <p>Column names should follow the naming conventions of your database system.
+     * Common conventions include:</p>
+     * <ul>
+     *   <li>snake_case for PostgreSQL and MySQL</li>
+     *   <li>UPPER_CASE for Oracle</li>
+     *   <li>PascalCase for SQL Server</li>
+     * </ul>
+     * 
+     * <p><b>Example:</b></p>
+     * <pre>
+     * {@literal @}Column(name = "created_date")
+     * private LocalDateTime createdDate;
+     * </pre>
+     * 
+     * @return the column name, or empty string to use the field name as default
      */
     String name() default "";
 }

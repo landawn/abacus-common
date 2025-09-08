@@ -33,6 +33,45 @@ import java.lang.annotation.Target;
  *   <li>Are typically lazily evaluated</li>
  * </ul>
  * 
+ * <p><b>Characteristics of intermediate operations:</b></p>
+ * <ul>
+ *   <li><b>Lazy evaluation:</b> Operations are not executed until a terminal operation is invoked</li>
+ *   <li><b>Stateless or stateful:</b> May maintain state between elements (e.g., distinct, sorted)</li>
+ *   <li><b>Non-consuming:</b> Do not process the stream source directly</li>
+ *   <li><b>Pipeline formation:</b> Enable fluent API design through method chaining</li>
+ * </ul>
+ * 
+ * <p><b>Common intermediate operations include:</b></p>
+ * <ul>
+ *   <li>filter() - Selects elements matching a predicate</li>
+ *   <li>map() - Transforms each element</li>
+ *   <li>flatMap() - Transforms and flattens nested structures</li>
+ *   <li>distinct() - Removes duplicate elements</li>
+ *   <li>sorted() - Orders elements</li>
+ *   <li>peek() - Performs an action on each element without consuming</li>
+ *   <li>limit() - Truncates the stream</li>
+ *   <li>skip() - Discards initial elements</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * public class StreamProcessor&lt;T&gt; {
+ *     {@literal @}IntermediateOp
+ *     public StreamProcessor&lt;T&gt; filter(Predicate&lt;T&gt; predicate) {
+ *         // Returns new stream without processing elements
+ *         return new FilteredStream&lt;&gt;(this, predicate);
+ *     }
+ *     
+ *     {@literal @}IntermediateOp
+ *     public &lt;R&gt; StreamProcessor&lt;R&gt; map(Function&lt;T, R&gt; mapper) {
+ *         // Lazy transformation operation
+ *         return new MappedStream&lt;&gt;(this, mapper);
+ *     }
+ * }
+ * </pre>
+ * 
+ * @see TerminalOp
+ * @see LazyEvaluation
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.Stream</a>
  * @author HaiYang Li
  * @since 2018

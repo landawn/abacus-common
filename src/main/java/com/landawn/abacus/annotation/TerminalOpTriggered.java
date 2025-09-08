@@ -21,8 +21,65 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * When terminal operation is triggered by intermediate operation, the current stream will be closed and a new stream will be returned.
- *
+ * Marks methods where intermediate operations trigger terminal operations internally,
+ * resulting in the closure of the current stream and the creation of a new stream.
+ * This annotation is used to document stream operations that break the typical lazy evaluation pattern.
+ * 
+ * <p>In normal stream processing, intermediate operations are lazy and don't consume the stream
+ * until a terminal operation is explicitly called. However, some operations need to trigger
+ * terminal operations internally to complete their processing, which closes the current stream.</p>
+ * 
+ * <p><b>When this happens:</b></p>
+ * <ul>
+ *   <li>The original stream becomes closed and unusable</li>
+ *   <li>A new stream is returned for further processing</li>
+ *   <li>The intermediate operation consumes elements to completion</li>
+ *   <li>Subsequent operations work on the new stream</li>
+ * </ul>
+ * 
+ * <p><b>Common scenarios that trigger terminal operations:</b></p>
+ * <ul>
+ *   <li><b>Sorting operations:</b> Must collect all elements before sorting</li>
+ *   <li><b>Reverse operations:</b> Must collect all elements before reversing</li>
+ *   <li><b>Grouping operations:</b> Require full stream consumption for grouping</li>
+ *   <li><b>Statistical operations:</b> Need complete data set for calculations</li>
+ *   <li><b>Buffering operations:</b> Must collect elements before releasing them</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * public class StreamProcessor&lt;T&gt; {
+ *     {@literal @}TerminalOpTriggered
+ *     public StreamProcessor&lt;T&gt; sorted(Comparator&lt;T&gt; comparator) {
+ *         // This internally triggers terminal operation (collect)
+ *         List&lt;T&gt; sortedList = this.collect(Collectors.toList());
+ *         sortedList.sort(comparator);
+ *         // Returns new stream from sorted data
+ *         return new StreamProcessor&lt;&gt;(sortedList.stream());
+ *     }
+ * }
+ * </pre>
+ * 
+ * <p><b>Performance implications:</b></p>
+ * <ul>
+ *   <li>Higher memory usage due to intermediate data collection</li>
+ *   <li>Loss of streaming efficiency for large datasets</li>
+ *   <li>Eager evaluation instead of lazy evaluation</li>
+ *   <li>Potential for OutOfMemoryError with very large streams</li>
+ * </ul>
+ * 
+ * <p><b>Design considerations:</b></p>
+ * <ul>
+ *   <li>Document the stream closure behavior clearly</li>
+ *   <li>Consider providing alternative lazy implementations when possible</li>
+ *   <li>Be aware of the performance trade-offs</li>
+ *   <li>Test with large datasets to ensure acceptable memory usage</li>
+ * </ul>
+ * 
+ * @author HaiYang Li
+ * @since 2018
+ * @see IntermediateOp
+ * @see TerminalOp
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.Stream</a>
  */
 @Documented

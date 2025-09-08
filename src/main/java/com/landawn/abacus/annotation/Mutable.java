@@ -21,22 +21,57 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that the annotated type or method represents mutable data or operations.
- * Mutable types are those whose state can be modified after construction,
- * and mutable methods are those that may modify the state of the object.
+ * This annotation explicitly documents that state can be changed after creation,
+ * which is important for understanding thread-safety and usage patterns.
+ * 
+ * <p><b>When applied to types (classes/interfaces):</b></p>
+ * <ul>
+ *   <li>The type's instances have modifiable state</li>
+ *   <li>Fields may change after object construction</li>
+ *   <li>The type is NOT thread-safe without external synchronization</li>
+ *   <li>Instances should not be shared between threads without proper synchronization</li>
+ * </ul>
+ * 
+ * <p><b>When applied to methods:</b></p>
+ * <ul>
+ *   <li>The method modifies the object's state</li>
+ *   <li>The method has side effects</li>
+ *   <li>Calling the method may produce different results over time</li>
+ *   <li>The method is not safe to call concurrently without synchronization</li>
+ * </ul>
+ * 
+ * <p><b>Important considerations for mutable types:</b></p>
+ * <ul>
+ *   <li>Not suitable as Map keys or Set elements (unless equals/hashCode are immutable)</li>
+ *   <li>Require defensive copying when passing between untrusted code</li>
+ *   <li>Need synchronization for thread-safe access</li>
+ *   <li>May cause unexpected behavior if aliased (multiple references)</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * {@literal @}Mutable
+ * public class Counter {
+ *     private int value = 0;
+ *     
+ *     {@literal @}Mutable
+ *     public void increment() {
+ *         value++;
+ *     }
+ *     
+ *     public int getValue() {
+ *         return value;
+ *     }
+ * }
+ * </pre>
  * 
  * <p>This annotation serves as documentation and can be used by static analysis tools
  * to verify mutability contracts and detect potential issues with concurrent access
- * or state modifications.</p>
+ * or inappropriate usage patterns.</p>
  * 
- * <p>When applied to a type, it indicates that instances of this type are mutable.
- * When applied to a method, it indicates that the method may modify the object's state.</p>
- * 
- * <p>This annotation is the conceptual opposite of {@link Immutable} and can be used
- * to explicitly document mutability where it might not be obvious.</p>
- * 
- * @see Immutable
  * @author HaiYang Li
  * @since 2020
+ * @see Immutable
  */
 @Documented
 @Target({ ElementType.METHOD, ElementType.TYPE })

@@ -20,13 +20,55 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that a field should be ignored during bean difference comparison operations.
- * When this annotation is applied to a field, that field will be excluded from
- * comparison when using {@code BeanDifference.of(Object, Object)}.
+ * Indicates that a field should be excluded from bean difference comparison operations.
+ * When comparing two bean instances for differences, fields marked with this annotation
+ * will be completely ignored, allowing you to focus on meaningful business data changes.
  * 
- * <p>This is useful when certain fields should not be considered when determining
- * if two bean instances are different (e.g., timestamps, internal state fields).</p>
+ * <p><b>Common use cases for ignored fields:</b></p>
+ * <ul>
+ *   <li>Timestamps (created, modified dates) that change on every update</li>
+ *   <li>Version numbers or revision fields used for optimistic locking</li>
+ *   <li>Internal state or cache fields not relevant to business equality</li>
+ *   <li>Transient calculation results</li>
+ *   <li>System-generated metadata</li>
+ *   <li>Fields that are expected to differ but aren't meaningful differences</li>
+ * </ul>
  * 
+ * <p><b>Benefits:</b></p>
+ * <ul>
+ *   <li>Cleaner difference reports focusing on actual data changes</li>
+ *   <li>More accurate change detection for audit trails</li>
+ *   <li>Simplified testing by ignoring volatile fields</li>
+ *   <li>Better performance by skipping complex field comparisons</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * public class User {
+ *     private Long id;
+ *     private String username;
+ *     private String email;
+ *     
+ *     {@literal @}DiffIgnore
+ *     private Timestamp lastModified;  // Changes on every update
+ *     
+ *     {@literal @}DiffIgnore
+ *     private Integer version;         // Optimistic locking field
+ *     
+ *     {@literal @}DiffIgnore
+ *     private String sessionToken;     // Temporary runtime data
+ * }
+ * 
+ * // Usage:
+ * User user1 = getUserFromDatabase();
+ * User user2 = getUserAfterUpdate();
+ * 
+ * // Comparison will ignore lastModified, version, and sessionToken
+ * BeanDifference diff = BeanDifference.of(user1, user2);
+ * </pre>
+ * 
+ * @author HaiYang Li
+ * @since 2025
  * @see com.landawn.abacus.util.Difference.BeanDifference
  * @see com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)
  */

@@ -22,56 +22,97 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Specifies a join relationship between entities in ORM mapping.
- * This annotation defines how entities are related through foreign key relationships,
- * supporting one-to-one, one-to-many, and many-to-many associations.
+ * Defines join relationships between entities for ORM mapping and data loading.
+ * This annotation specifies how entities are connected through foreign key relationships,
+ * enabling automatic loading of related data in one-to-one, one-to-many, and many-to-many associations.
  * 
- * <p>The join conditions are specified as strings in the format "sourceField=targetField"
- * where sourceField is from the current entity and targetField is from the related entity.</p>
+ * <p><b>Join condition format:</b></p>
+ * <p>Each join condition is specified as "sourceField=targetField" where:</p>
+ * <ul>
+ *   <li>sourceField: Field name from the current entity</li>
+ *   <li>targetField: Field name from the related entity or join table</li>
+ *   <li>For join tables: use "TableName.fieldName" notation</li>
+ * </ul>
  * 
- * <h3>One-to-One or One-to-Many Join Example:</h3>
+ * <p><b>Relationship types supported:</b></p>
+ * <ul>
+ *   <li>One-to-One: Single related entity</li>
+ *   <li>One-to-Many: Collection of related entities</li>
+ *   <li>Many-to-Many: Collection through intermediate join table</li>
+ * </ul>
+ * 
+ * <h3>One-to-One Join Example:</h3>
  * <pre>
- * <code>
+ * {@literal @}Entity
+ * public class User {
+ *     {@literal @}Id
+ *     private Long id;
+ *     
+ *     {@literal @}JoinedBy("id=userId")
+ *     private UserProfile profile;  // Single related profile
+ * }
+ * 
+ * {@literal @}Entity
+ * public class UserProfile {
+ *     {@literal @}Id
+ *     private Long id;
+ *     private Long userId;  // Foreign key to User
+ *     private String bio;
+ * }
+ * </pre>
+ *
+ * <h3>One-to-Many Join Example:</h3>
+ * <pre>
+ * {@literal @}Entity
  * public class Account {
- *   private long id;
+ *     {@literal @}Id
+ *     private Long id;
  *
- *   @JoinedBy("id=accountId")
- *   private List&lt;Device&gt; devices;
- *
- *   //...
+ *     {@literal @}JoinedBy("id=accountId")
+ *     private List&lt;Device&gt; devices;  // Multiple related devices
  * }
  *
+ * {@literal @}Entity
  * public class Device {
- *   private long accountId;
- *   // ...
+ *     {@literal @}Id
+ *     private Long id;
+ *     private Long accountId;  // Foreign key to Account
+ *     private String deviceName;
  * }
- * </code>
  * </pre>
  *
  * <h3>Many-to-Many Join Example:</h3>
  * <pre>
- * <code>
+ * {@literal @}Entity
  * public class Employee {
- *   private long id;
+ *     {@literal @}Id
+ *     private Long id;
  *
- *   @JoinedBy({ "id=EmployeeProject.employeeId", "EmployeeProject.projectId = id" })
- *   private List&lt;Project&gt; projects;
- *
- *   //...
+ *     // Join through intermediate table EmployeeProject
+ *     {@literal @}JoinedBy({ "id=EmployeeProject.employeeId", "EmployeeProject.projectId=id" })
+ *     private List&lt;Project&gt; projects;
  * }
  *
+ * {@literal @}Entity
  * public class Project {
- *   private long id;
- *   // ...
+ *     {@literal @}Id
+ *     private Long id;
+ *     private String name;
  * }
  *
+ * {@literal @}Entity
  * public class EmployeeProject {
- *   private long employeeId;
- *   private long projectId;
- *   // ...
+ *     private Long employeeId;  // FK to Employee
+ *     private Long projectId;   // FK to Project
+ *     private Date assignedDate;
  * }
- * </code>
  * </pre>
+ * 
+ * @author HaiYang Li
+ * @since 2019
+ * @see Entity
+ * @see Column
+ * @see Id
  */
 @Documented
 @Target(value = { FIELD /*, METHOD */ })
@@ -79,12 +120,36 @@ import java.lang.annotation.Target;
 public @interface JoinedBy {
 
     /**
-     * Specifies the join conditions as an array of strings.
-     * Each string defines a join condition in the format "sourceField=targetField".
-     * For many-to-many relationships, multiple conditions can be specified to define
-     * the join through an intermediate table.
+     * Specifies the join conditions that define how entities are related.
+     * Each condition is a string in the format "sourceField=targetField".
      * 
-     * @return an array of join condition strings, empty array by default
+     * <p><b>For simple joins (one-to-one, one-to-many):</b></p>
+     * <ul>
+     *   <li>Use a single condition like "id=parentId"</li>
+     *   <li>Source field is from the current entity</li>
+     *   <li>Target field is from the related entity</li>
+     * </ul>
+     * 
+     * <p><b>For many-to-many joins:</b></p>
+     * <ul>
+     *   <li>Use multiple conditions to traverse the join table</li>
+     *   <li>First condition: current entity to join table</li>
+     *   <li>Second condition: join table to target entity</li>
+     *   <li>Use "TableName.fieldName" for join table references</li>
+     * </ul>
+     * 
+     * <p><b>Examples:</b></p>
+     * <pre>
+     * // Simple one-to-many
+     * {@literal @}JoinedBy("id=customerId")
+     * private List&lt;Order&gt; orders;
+     * 
+     * // Many-to-many with join table
+     * {@literal @}JoinedBy({"id=UserRole.userId", "UserRole.roleId=id"})
+     * private List&lt;Role&gt; roles;
+     * </pre>
+     * 
+     * @return array of join condition strings defining the relationship
      */
     String[] value() default {};
 

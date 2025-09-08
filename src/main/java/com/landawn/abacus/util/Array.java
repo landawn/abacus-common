@@ -91,9 +91,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method uses {@link java.lang.reflect.Array#getLength(Object)} to determine the length of the array.
      * The array can be an object array or a primitive array.
+     * If the array is null, this method returns 0.
      *
      * @param array The array whose length is to be determined.
-     * @return The length of the array.
+     * @return The length of the array, or 0 if the array is null.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @see java.lang.reflect.Array#getLength(Object)
      */

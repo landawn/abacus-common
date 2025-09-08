@@ -356,25 +356,25 @@ public class DatasetTest extends AbstractTest {
 
         dataset.println();
 
-        Sheet<String, String, Double> sheet = dataset.pivot("Product", "Amount", "Country", Collectors.summingDouble(Number::doubleValue));
+        Sheet<String, String, Double> sheet = dataset.pivot("Product", "Country", "Amount", Collectors.summingDouble(Number::doubleValue));
         sheet.println();
 
-        sheet = dataset.pivot("Country", "Amount", "Product", Collectors.summingDouble(Number::doubleValue));
+        sheet = dataset.pivot("Country", "Product", "Amount", Collectors.summingDouble(Number::doubleValue));
         sheet.println();
 
-        dataset.pivot("Country", N.asList("Amount", "Country"), "Product", it -> it.join("_"), Collectors.toList()).println();
-        dataset.pivot("Country", N.asList("Amount", "Country"), "Product", N::toString, Collectors.toList()).println();
-        dataset.pivot("Country", N.asList("Amount", "Country"), "Product", Collectors.mappingToList(N::toString)).println();
+        dataset.pivot("Country", "Product", N.asList("Amount", "Country"), it -> it.join("_"), Collectors.toList()).println();
+        dataset.pivot("Country", "Product", N.asList("Amount", "Country"), N::toString, Collectors.toList()).println();
+        dataset.pivot("Country", "Product", N.asList("Amount", "Country"), Collectors.mappingToList(N::toString)).println();
 
-        Sheet<String, Integer, List<String>> sheet2 = dataset.pivot("Country", N.asList("Product", "Country"), "Amount", Collectors.mappingToList(N::toString));
+        Sheet<String, Integer, List<String>> sheet2 = dataset.pivot("Country", "Amount", N.asList("Product", "Country"), Collectors.mappingToList(N::toString));
         sheet2.println();
 
         dataset.sortBy("Amount");
-        sheet2 = dataset.pivot("Country", N.asList("Product", "Country"), "Amount", Collectors.mappingToList(N::toString));
+        sheet2 = dataset.pivot("Country", "Amount", N.asList("Product", "Country"), Collectors.mappingToList(N::toString));
         sheet2.println();
 
         dataset.sortBy(N.asList("Country", "Amount"));
-        sheet2 = dataset.pivot("Country", N.asList("Product", "Country"), "Amount", Collectors.mappingToList(N::toString));
+        sheet2 = dataset.pivot("Country", "Amount", N.asList("Product", "Country"), Collectors.mappingToList(N::toString));
         sheet2.println();
 
         sheet2.sortByColumnKey();
@@ -391,7 +391,7 @@ public class DatasetTest extends AbstractTest {
 
         dataset.println();
 
-        final Sheet<String, Integer, List<String>> sheet = dataset.pivot("Country", N.asList("Product", "Country"), "Amount",
+        final Sheet<String, Integer, List<String>> sheet = dataset.pivot("Country", "Amount", N.asList("Product", "Country"),
                 Collectors.mappingToList(N::toString));
         sheet.println();
 
@@ -461,7 +461,7 @@ public class DatasetTest extends AbstractTest {
 
         final Dataset dataset = N.newDataset(N.asList("Product", "Amount", "Country"), rowList);
 
-        final Sheet<String, Integer, List<String>> sheet = dataset.pivot("Country", N.asList("Product", "Country"), "Amount",
+        final Sheet<String, Integer, List<String>> sheet = dataset.pivot("Country", "Amount", N.asList("Product", "Country"),
                 Collectors.mappingToList(N::toString));
         sheet.println();
 

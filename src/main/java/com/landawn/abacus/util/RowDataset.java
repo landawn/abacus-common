@@ -73,6 +73,7 @@ import com.landawn.abacus.util.function.IntObjConsumer;
 import com.landawn.abacus.util.function.IntObjFunction;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.TriPredicate;
+import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
@@ -85,6 +86,8 @@ public final class RowDataset implements Dataset, Cloneable {
     static {
         EMPTY_DATA_SET.freeze();
     }
+
+    static final Map<String, Object> EMPTY_PROPERTIES = N.emptyMap();
 
     static final char PROP_NAME_SEPARATOR = '.';
 
@@ -106,6 +109,8 @@ public final class RowDataset implements Dataset, Cloneable {
     static final String POSTFIX_FOR_SAME_JOINED_COLUMN_NAME = "_2";
 
     static final String CACHED_PROP_NAMES = "cachedPropNames";
+
+    private static final String COUNT = "count";
 
     private static final String ROW = "row";
 
@@ -139,7 +144,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
     // For Kryo
     protected RowDataset() {
-        _properties = N.emptyMap();
+        _properties = EMPTY_PROPERTIES;
     }
 
     public RowDataset(final List<String> columnNameList, final List<List<Object>> columnList) {
@@ -167,7 +172,7 @@ public final class RowDataset implements Dataset, Cloneable {
         _columnList = columnList;
 
         if (N.isEmpty(properties)) {
-            _properties = N.emptyMap();
+            _properties = EMPTY_PROPERTIES;
         } else {
             _properties = Maps.newOrderingMap(properties);
             _properties.putAll(properties);
@@ -1207,43 +1212,62 @@ public final class RowDataset implements Dataset, Cloneable {
     public void combineColumns(final Collection<String> columnNames, final String newColumnName, final Class<?> newColumnType) {
         checkFrozen();
 
+        final int positionToAdd = checkColumnNamesForCombination(columnNames, newColumnName);
+
         final List<Object> newColumn = toList(0, size(), columnNames, newColumnType);
 
-        removeColumns(columnNames);
+        addColumn(positionToAdd, newColumnName, newColumn);
 
-        addColumn(newColumnName, newColumn);
+        removeColumns(columnNames);
     }
 
     @Override
     public void combineColumns(final Collection<String> columnNames, final String newColumnName, final Function<? super DisposableObjArray, ?> combineFunc) {
-        addColumn(newColumnName, columnNames, combineFunc);
+        checkFrozen();
+
+        final int positionToAdd = checkColumnNamesForCombination(columnNames, newColumnName);
+
+        addColumn(positionToAdd, newColumnName, columnNames, combineFunc);
 
         removeColumns(columnNames);
     }
 
     @Override
-    public void combineColumns(final Predicate<? super String> columnNameFilter, final String newColumnName, final Class<?> newColumnType) {
-        combineColumns(filterColumnNames(_columnNameList, columnNameFilter), newColumnName, newColumnType);
-    }
-
-    @Override
-    public void combineColumns(final Predicate<? super String> columnNameFilter, final String newColumnName,
-            final Function<? super DisposableObjArray, ?> combineFunc) {
-        combineColumns(filterColumnNames(_columnNameList, columnNameFilter), newColumnName, combineFunc);
-    }
-
-    @Override
     public void combineColumns(final Tuple2<String, String> columnNames, final String newColumnName, final BiFunction<?, ?, ?> combineFunc) {
-        addColumn(newColumnName, columnNames, combineFunc);
+        checkFrozen();
 
-        removeColumns(Arrays.asList(columnNames._1, columnNames._2));
+        final List<String> columnNameList = Arrays.asList(columnNames._1, columnNames._2);
+        final int positionToAdd = checkColumnNamesForCombination(columnNameList, newColumnName);
+
+        addColumn(positionToAdd, newColumnName, columnNames, combineFunc);
+
+        removeColumns(columnNameList);
     }
 
     @Override
     public void combineColumns(final Tuple3<String, String, String> columnNames, final String newColumnName, final TriFunction<?, ?, ?, ?> combineFunc) {
-        addColumn(newColumnName, columnNames, combineFunc);
+        checkFrozen();
 
-        removeColumns(Arrays.asList(columnNames._1, columnNames._2, columnNames._3));
+        final List<String> columnNameList = Arrays.asList(columnNames._1, columnNames._2, columnNames._3);
+        final int positionToAdd = checkColumnNamesForCombination(columnNameList, newColumnName);
+
+        addColumn(positionToAdd, newColumnName, columnNames, combineFunc);
+
+        removeColumns(columnNameList);
+    }
+
+    private int checkColumnNamesForCombination(final Collection<String> columnNames, final String newColumnName) {
+        if (N.isEmpty(columnNames)) {
+            throw new IllegalArgumentException("Column names to be combined can't be null or empty.");
+        }
+
+        final int[] columnIndexes = checkColumnNames(columnNames);
+
+        if (containsColumn(newColumnName)) {
+            throw new IllegalArgumentException("The new column name: " + newColumnName + " is already included this Dataset: " + _columnNameList);
+        }
+
+        return N.min(columnIndexes);
     }
 
     @Override
@@ -1646,15 +1670,15 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
-    public void removeRows(final int... indices) {
+    public void removeRows(final int... rowIndexesToRemove) {
         checkFrozen();
 
-        for (final int rowIndex : indices) {
+        for (final int rowIndex : rowIndexesToRemove) {
             checkRowIndex(rowIndex);
         }
 
         for (final List<Object> element : _columnList) {
-            N.deleteAllByIndices(element, indices);
+            N.deleteAllByIndices(element, rowIndexesToRemove);
         }
 
         modCount++;
@@ -1689,17 +1713,17 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
-    public void updateRows(final int[] indices, final Function<?, ?> func) {
+    public void updateRows(final int[] rowIndexesToUpdate, final Function<?, ?> func) {
         checkFrozen();
 
-        for (final int rowIndex : indices) {
+        for (final int rowIndex : rowIndexesToUpdate) {
             checkRowIndex(rowIndex);
         }
 
         final Function<Object, Object> funcToUse = (Function<Object, Object>) func;
 
         for (final List<Object> column : _columnList) {
-            for (final int rowIndex : indices) {
+            for (final int rowIndex : rowIndexesToUpdate) {
                 column.set(rowIndex, funcToUse.apply(column.get(rowIndex)));
             }
         }
@@ -1729,13 +1753,12 @@ public final class RowDataset implements Dataset, Cloneable {
 
         final Predicate<Object> predicateToUse = (Predicate<Object>) predicate;
         final int size = size();
-        Object val = null;
 
         for (final List<Object> column : _columnList) {
             for (int i = 0; i < size; i++) {
-                val = column.get(i);
-
-                column.set(i, predicateToUse.test(val) ? newValue : val);
+                if (predicateToUse.test(column.get(i))) {
+                    column.set(i, newValue);
+                }
             }
         }
 
@@ -1774,9 +1797,113 @@ public final class RowDataset implements Dataset, Cloneable {
         modCount++;
     }
 
+    @Override
+    public void merge(final Dataset other) {
+        merge(other, false);
+    }
+
+    @Override
+    public void merge(final Dataset other, final boolean requiresSameColumns) {
+        checkFrozen();
+        checkIfColumnNamesAreSame(other, requiresSameColumns);
+
+        merge(other, 0, other.size(), other.columnNameList());
+    }
+
+    @Override
+    public void merge(final Dataset other, final Collection<String> selectColumnNamesFromOtherToMerge) {
+        merge(other, 0, other.size(), selectColumnNamesFromOtherToMerge);
+    }
+
+    //    @Override
+    //    public Dataset merge(final Dataset other, final int fromRowIndexFromOther, final int toRowIndexFromOther) {
+    //        return merge(other, fromRowIndexFromOther, toRowIndexFromOther, other.columnNameList());
+    //    }
+
+    @Override
+    public void merge(final Dataset other, final int fromRowIndexFromOther, final int toRowIndexFromOther,
+            final Collection<String> selectColumnNamesFromOtherToMerge) {
+        checkFrozen();
+        checkRowIndex(fromRowIndexFromOther, toRowIndexFromOther, other.size());
+
+        // final RowDataset result = (RowDataset) copy();
+
+        merge(this, other, fromRowIndexFromOther, toRowIndexFromOther, selectColumnNamesFromOtherToMerge);
+    }
+
+    private void merge(final RowDataset result, final Dataset other, final int fromRowIndexFromOther, final int toRowIndexFromOther,
+            final Collection<String> selectColumnNamesFromOtherToMerge) {
+        checkFrozen();
+        List<Object> column = null;
+
+        final int rowCountToBeAdded = toRowIndexFromOther - fromRowIndexFromOther;
+        int currentResultSize = result.size();
+
+        for (final String columnName : selectColumnNamesFromOtherToMerge) {
+            if (!result.containsColumn(columnName)) {
+                if (column == null) {
+                    column = new ArrayList<>(currentResultSize + rowCountToBeAdded);
+                    N.fill(column, 0, currentResultSize, null);
+                }
+
+                result.addColumn(columnName, column);
+            }
+        }
+
+        List<Object> nulls = null;
+
+        for (final String columnName : result._columnNameList) {
+            column = result._columnList.get(result.getColumnIndex(columnName));
+
+            if (selectColumnNamesFromOtherToMerge.contains(columnName) && other.containsColumn(columnName)) {
+                final int columnIndex = other.getColumnIndex(columnName);
+
+                if (fromRowIndexFromOther == 0 && toRowIndexFromOther == other.size()) {
+                    column.addAll(other.getColumn(columnIndex));
+                } else {
+                    column.addAll(other.getColumn(columnIndex).subList(fromRowIndexFromOther, toRowIndexFromOther));
+                }
+            } else {
+                if (nulls == null) {
+                    nulls = new ArrayList<>(rowCountToBeAdded);
+                    N.fill(nulls, 0, rowCountToBeAdded, null);
+                }
+
+                column.addAll(nulls);
+            }
+        }
+
+        result.mergeProperties(other.properties());
+
+        modCount++;
+    }
+
+    //    @Override
+    //    public Dataset merge(final Dataset a, final Dataset b) {
+    //        return N.merge(this, a, b);
+    //    }
+
+    //    @Override
+    //    public Dataset merge(final Collection<? extends Dataset> others) {
+    //        return merge(others, false);
+    //    }
+    //
+    //    @Override
+    //    public Dataset merge(final Collection<? extends Dataset> others, final boolean requiresSameColumns) {
+    //        if (N.isEmpty(others)) {
+    //            return this.copy();
+    //        }
+    //
+    //        final List<Dataset> dsList = new ArrayList<>(N.size(others) + 1);
+    //        dsList.add(this);
+    //        dsList.addAll(others);
+    //
+    //        return N.merge(dsList, requiresSameColumns);
+    //    }
+
     private void mergeProperties(final Map<String, Object> properties) {
         if (N.notEmpty(properties)) {
-            if (_properties == N.<String, Object> emptyMap()) {
+            if (_properties == EMPTY_PROPERTIES) {
                 _properties = Maps.newOrderingMap(properties);
             }
 
@@ -4578,25 +4705,41 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public Stream<Dataset> rollup(final Collection<String> keyColumnNames) {
-        return Stream.of(Iterables.rollup(keyColumnNames)).reversed().filter(Fn.notEmptyC()).map(this::groupBy);
+        return rollup(keyColumnNames, N.firstOrNullIfEmpty(keyColumnNames), COUNT, Collectors.countingToInt());
     }
 
     @Override
     public Stream<Dataset> rollup(final Collection<String> keyColumnNames, final String aggregateOnColumnName, final String aggregateResultColumnName,
             final Collector<?, ?, ?> collector) {
-        return Stream.of(Iterables.rollup(keyColumnNames))
+        return Stream.of(Iterables.rollup(keyColumnNames)) //
                 .reversed()
-                .filter(Fn.notEmptyC())
-                .map(columnNames1 -> groupBy(columnNames1, aggregateOnColumnName, aggregateResultColumnName, collector));
+                .map(columnNames -> {
+                    if (columnNames.isEmpty()) {
+                        final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+                        final Dataset ds = groupBy(firstKeyColumnName, k -> firstKeyColumnName, aggregateOnColumnName, aggregateResultColumnName, collector);
+                        ds.removeColumn(firstKeyColumnName);
+                        return ds;
+                    } else {
+                        return groupBy(columnNames, aggregateOnColumnName, aggregateResultColumnName, collector);
+                    }
+                });
     }
 
     @Override
     public Stream<Dataset> rollup(final Collection<String> keyColumnNames, final Collection<String> aggregateOnColumnNames,
             final String aggregateResultColumnName, final Class<?> rowType) {
-        return Stream.of(Iterables.rollup(keyColumnNames))
+        return Stream.of(Iterables.rollup(keyColumnNames)) //
                 .reversed()
-                .filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call(() -> groupBy(columnNames1, aggregateOnColumnNames, aggregateResultColumnName, rowType)));
+                .map(columnNames -> {
+                    if (columnNames.isEmpty()) {
+                        final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+                        final Dataset ds = groupBy(firstKeyColumnName, k -> firstKeyColumnName, aggregateOnColumnNames, aggregateResultColumnName, rowType);
+                        ds.removeColumn(firstKeyColumnName);
+                        return ds;
+                    } else {
+                        return groupBy(columnNames, aggregateOnColumnNames, aggregateResultColumnName, rowType);
+                    }
+                });
     }
 
     @Override
@@ -4609,36 +4752,58 @@ public final class RowDataset implements Dataset, Cloneable {
     public <T> Stream<Dataset> rollup(final Collection<String> keyColumnNames, final Collection<String> aggregateOnColumnNames,
             final String aggregateResultColumnName, final Function<? super DisposableObjArray, ? extends T> rowMapper,
             final Collector<? super T, ?, ?> collector) {
-        return Stream.of(Iterables.rollup(keyColumnNames))
+        return Stream.of(Iterables.rollup(keyColumnNames)) //
                 .reversed()
-                .filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call(() -> groupBy(columnNames1, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector)));
+                .map(columnNames -> {
+                    if (columnNames.isEmpty()) {
+                        final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+                        final Dataset ds = groupBy(firstKeyColumnName, k -> firstKeyColumnName, aggregateOnColumnNames, aggregateResultColumnName, rowMapper,
+                                collector);
+                        ds.removeColumn(firstKeyColumnName);
+                        return ds;
+                    } else {
+                        return groupBy(columnNames, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
+                    }
+                });
     }
 
     @Override
     public Stream<Dataset> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor) {
-        return Stream.of(Iterables.rollup(keyColumnNames))
-                .reversed()
-                .filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call(() -> groupBy(columnNames1, keyExtractor)));
+        return rollup(keyColumnNames, keyExtractor, N.firstOrNullIfEmpty(keyColumnNames), COUNT, Collectors.countingToInt());
     }
 
     @Override
     public Stream<Dataset> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final String aggregateOnColumnName, final String aggregateResultColumnName, final Collector<?, ?, ?> collector) {
-        return Stream.of(Iterables.rollup(keyColumnNames))
+        return Stream.of(Iterables.rollup(keyColumnNames)) // 
                 .reversed()
-                .filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call(() -> groupBy(columnNames1, keyExtractor, aggregateOnColumnName, aggregateResultColumnName, collector)));
+                .map(columnNames -> {
+                    if (columnNames.isEmpty()) {
+                        final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+                        final Dataset ds = groupBy(firstKeyColumnName, k -> firstKeyColumnName, aggregateOnColumnName, aggregateResultColumnName, collector);
+                        ds.removeColumn(firstKeyColumnName);
+                        return ds;
+                    } else {
+                        return groupBy(columnNames, keyExtractor, aggregateOnColumnName, aggregateResultColumnName, collector);
+                    }
+                });
     }
 
     @Override
     public Stream<Dataset> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName, final Class<?> rowType) {
-        return Stream.of(Iterables.rollup(keyColumnNames))
+        return Stream.of(Iterables.rollup(keyColumnNames)) //
                 .reversed()
-                .filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call(() -> groupBy(columnNames1, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, rowType)));
+                .map(columnNames -> {
+                    if (columnNames.isEmpty()) {
+                        final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+                        final Dataset ds = groupBy(firstKeyColumnName, k -> firstKeyColumnName, aggregateOnColumnNames, aggregateResultColumnName, rowType);
+                        ds.removeColumn(firstKeyColumnName);
+                        return ds;
+                    } else {
+                        return groupBy(columnNames, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, rowType);
+                    }
+                });
     }
 
     @Override
@@ -4651,33 +4816,56 @@ public final class RowDataset implements Dataset, Cloneable {
     public <T> Stream<Dataset> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName,
             final Function<? super DisposableObjArray, ? extends T> rowMapper, final Collector<? super T, ?, ?> collector) {
-        return Stream.of(Iterables.rollup(keyColumnNames))
+        return Stream.of(Iterables.rollup(keyColumnNames)) //
                 .reversed()
-                .filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try
-                        .call(() -> groupBy(columnNames1, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector)));
+                .map(columnNames -> {
+                    if (columnNames.isEmpty()) {
+                        final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+                        final Dataset ds = groupBy(firstKeyColumnName, k -> firstKeyColumnName, aggregateOnColumnNames, aggregateResultColumnName, rowMapper,
+                                collector);
+                        ds.removeColumn(firstKeyColumnName);
+                        return ds;
+                    } else {
+                        return groupBy(columnNames, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
+                    }
+                });
     }
 
     @Override
     public Stream<Dataset> cube(final Collection<String> keyColumnNames) {
-        //noinspection resource
-        return cubeSet(keyColumnNames).filter(Fn.notEmptyC()).map(this::groupBy);
+        return cube(keyColumnNames, N.firstOrNullIfEmpty(keyColumnNames), COUNT, Collectors.countingToInt());
     }
 
     @Override
     public Stream<Dataset> cube(final Collection<String> keyColumnNames, final String aggregateOnColumnName, final String aggregateResultColumnName,
             final Collector<?, ?, ?> collector) {
-        //noinspection resource
-        return cubeSet(keyColumnNames).filter(Fn.notEmptyC())
-                .map(columnNames1 -> groupBy(columnNames1, aggregateOnColumnName, aggregateResultColumnName, collector));
+        return cubeSet(keyColumnNames) //
+                .map(columnNames -> {
+                    if (columnNames.isEmpty()) {
+                        final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+                        final Dataset ds = groupBy(firstKeyColumnName, k -> firstKeyColumnName, aggregateOnColumnName, aggregateResultColumnName, collector);
+                        ds.removeColumn(firstKeyColumnName);
+                        return ds;
+                    } else {
+                        return groupBy(columnNames, aggregateOnColumnName, aggregateResultColumnName, collector);
+                    }
+                });
     }
 
     @Override
     public Stream<Dataset> cube(final Collection<String> keyColumnNames, final Collection<String> aggregateOnColumnNames,
             final String aggregateResultColumnName, final Class<?> rowType) {
-        //noinspection resource
-        return cubeSet(keyColumnNames).filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call(() -> groupBy(columnNames1, aggregateOnColumnNames, aggregateResultColumnName, rowType)));
+        return cubeSet(keyColumnNames) //
+                .map(columnNames -> {
+                    if (columnNames.isEmpty()) {
+                        final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+                        final Dataset ds = groupBy(firstKeyColumnName, k -> firstKeyColumnName, aggregateOnColumnNames, aggregateResultColumnName, rowType);
+                        ds.removeColumn(firstKeyColumnName);
+                        return ds;
+                    } else {
+                        return groupBy(columnNames, aggregateOnColumnNames, aggregateResultColumnName, rowType);
+                    }
+                });
     }
 
     @Override
@@ -4690,31 +4878,55 @@ public final class RowDataset implements Dataset, Cloneable {
     public <T> Stream<Dataset> cube(final Collection<String> keyColumnNames, final Collection<String> aggregateOnColumnNames,
             final String aggregateResultColumnName, final Function<? super DisposableObjArray, ? extends T> rowMapper,
             final Collector<? super T, ?, ?> collector) {
-        //noinspection resource
-        return cubeSet(keyColumnNames).filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call(() -> groupBy(columnNames1, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector)));
+        return cubeSet(keyColumnNames) //
+                .map(columnNames -> {
+                    if (columnNames.isEmpty()) {
+                        final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+                        final Dataset ds = groupBy(firstKeyColumnName, k -> firstKeyColumnName, aggregateOnColumnNames, aggregateResultColumnName, rowMapper,
+                                collector);
+                        ds.removeColumn(firstKeyColumnName);
+                        return ds;
+                    } else {
+                        return groupBy(columnNames, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
+                    }
+                });
     }
 
     @Override
     public Stream<Dataset> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor) {
-        //noinspection resource
-        return cubeSet(keyColumnNames).filter(Fn.notEmptyC()).map(columnNames1 -> Try.call(() -> groupBy(columnNames1, keyExtractor)));
+        return cube(keyColumnNames, keyExtractor, N.firstOrNullIfEmpty(keyColumnNames), COUNT, Collectors.countingToInt());
     }
 
     @Override
     public Stream<Dataset> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final String aggregateOnColumnName, final String aggregateResultColumnName, final Collector<?, ?, ?> collector) {
-        //noinspection resource
-        return cubeSet(keyColumnNames).filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call(() -> groupBy(columnNames1, keyExtractor, aggregateOnColumnName, aggregateResultColumnName, collector)));
+        return cubeSet(keyColumnNames) //
+                .map(columnNames -> {
+                    if (columnNames.isEmpty()) {
+                        final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+                        final Dataset ds = groupBy(firstKeyColumnName, k -> firstKeyColumnName, aggregateOnColumnName, aggregateResultColumnName, collector);
+                        ds.removeColumn(firstKeyColumnName);
+                        return ds;
+                    } else {
+                        return groupBy(columnNames, keyExtractor, aggregateOnColumnName, aggregateResultColumnName, collector);
+                    }
+                });
     }
 
     @Override
     public Stream<Dataset> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName, final Class<?> rowType) {
-        //noinspection resource
-        return cubeSet(keyColumnNames).filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call(() -> groupBy(columnNames1, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, rowType)));
+        return cubeSet(keyColumnNames) //
+                .map(columnNames -> {
+                    if (columnNames.isEmpty()) {
+                        final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+                        final Dataset ds = groupBy(firstKeyColumnName, k -> firstKeyColumnName, aggregateOnColumnNames, aggregateResultColumnName, rowType);
+                        ds.removeColumn(firstKeyColumnName);
+                        return ds;
+                    } else {
+                        return groupBy(columnNames, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, rowType);
+                    }
+                });
     }
 
     @Override
@@ -4727,10 +4939,18 @@ public final class RowDataset implements Dataset, Cloneable {
     public <T> Stream<Dataset> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName,
             final Function<? super DisposableObjArray, ? extends T> rowMapper, final Collector<? super T, ?, ?> collector) {
-        //noinspection resource
-        return cubeSet(keyColumnNames).filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try
-                        .call(() -> groupBy(columnNames1, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector)));
+        return cubeSet(keyColumnNames) // 
+                .map(columnNames -> {
+                    if (columnNames.isEmpty()) {
+                        final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+                        final Dataset ds = groupBy(firstKeyColumnName, k -> firstKeyColumnName, aggregateOnColumnNames, aggregateResultColumnName, rowMapper,
+                                collector);
+                        ds.removeColumn(firstKeyColumnName);
+                        return ds;
+                    } else {
+                        return groupBy(columnNames, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
+                    }
+                });
     }
 
     private static final com.landawn.abacus.util.function.Consumer<List<Set<String>>> REVERSE_ACTION = N::reverse;
@@ -4745,7 +4965,7 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
-    public <R, C, T> Sheet<R, C, T> pivot(final String keyColumnName, final String aggregateOnColumnNames, final String pivotColumnName,
+    public <R, C, T> Sheet<R, C, T> pivot(final String keyColumnName, final String pivotColumnName, final String aggregateOnColumnNames,
             final Collector<?, ?, ? extends T> collector) {
         final Dataset groupedDataset = groupBy(N.asList(keyColumnName, pivotColumnName), aggregateOnColumnNames, aggregateOnColumnNames, collector);
 
@@ -4753,7 +4973,7 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
-    public <R, C, T> Sheet<R, C, T> pivot(final String keyColumnName, final Collection<String> aggregateOnColumnNames, final String pivotColumnName,
+    public <R, C, T> Sheet<R, C, T> pivot(final String keyColumnName, final String pivotColumnName, final Collection<String> aggregateOnColumnNames,
             final Collector<? super Object[], ?, ? extends T> collector) {
         final String aggregateResultColumnName = Strings.join(aggregateOnColumnNames, "_");
 
@@ -4763,7 +4983,7 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
-    public <R, C, U, T> Sheet<R, C, T> pivot(final String keyColumnName, final Collection<String> aggregateOnColumnNames, final String pivotColumnName,
+    public <R, C, U, T> Sheet<R, C, T> pivot(final String keyColumnName, final String pivotColumnName, final Collection<String> aggregateOnColumnNames,
             final Function<? super DisposableObjArray, ? extends U> rowMapper, final Collector<? super U, ?, ? extends T> collector) {
         final String aggregateResultColumnName = Strings.join(aggregateOnColumnNames, "_");
 
@@ -6254,11 +6474,21 @@ public final class RowDataset implements Dataset, Cloneable {
     private void join(final List<List<Object>> newColumnList, final Dataset right, final boolean isLeftJoin, final Class<?> newColumnType,
             final int newColumnIndex, final int leftRowIndex, final List<Integer> rightRowIndexList) {
         if (N.notEmpty(rightRowIndexList)) {
-            for (final int rightRowIndex : rightRowIndexList) {
-                for (int i = 0, leftColumnLength = columnCount(); i < leftColumnLength; i++) {
-                    newColumnList.get(i).add(_columnList.get(i).get(leftRowIndex));
-                }
+            final int rightRowSize = rightRowIndexList.size();
+            final int leftColumnLength = columnCount();
+            List<Object> column = null;
+            Object val = null;
 
+            for (int i = 0; i < leftColumnLength; i++) {
+                column = newColumnList.get(i);
+                val = _columnList.get(i).get(leftRowIndex);
+
+                for (int j = 0; j < rightRowSize; j++) {
+                    column.add(val);
+                }
+            }
+
+            for (final int rightRowIndex : rightRowIndexList) {
                 newColumnList.get(newColumnIndex).add(right.getRow(rightRowIndex, newColumnType));
             }
         } else if (isLeftJoin) {
@@ -6353,7 +6583,7 @@ public final class RowDataset implements Dataset, Cloneable {
         }
 
         for (final String columnName : rightColumnNames) {
-            if (leftColumnNames.contains(columnName)) {
+            if (this.containsColumn(columnName)) {
                 newColumnNameList.add(columnName + POSTFIX_FOR_SAME_JOINED_COLUMN_NAME);
             } else {
                 newColumnNameList.add(columnName);
@@ -7610,9 +7840,9 @@ public final class RowDataset implements Dataset, Cloneable {
                     existedRowIndex = addedRowKeyMap.getOrDefault(hashKey, -1);
 
                     if (existedRowIndex >= 0) {
-                        for (int i = 0; i < otherColumnCount; i++) {
-                            newColumnList.get(otherNewColumnIndexes[i]).set(existedRowIndex, columnsInOther[i].get(rowIndex));
-                        }
+                        //    for (int i = 0; i < otherColumnCount; i++) {
+                        //        newColumnList.get(otherNewColumnIndexes[i]).set(existedRowIndex, columnsInOther[i].get(rowIndex));
+                        //    }
                     } else {
                         addedRowKeyMap.put(hashKey, startedRowIndex++);
 
@@ -7712,9 +7942,9 @@ public final class RowDataset implements Dataset, Cloneable {
                     existedRowIndex = addedRowKeyMap.getOrDefault(keyRowWrapper, -1);
 
                     if (existedRowIndex >= 0) {
-                        for (int i = 0; i < otherColumnCount; i++) {
-                            newColumnList.get(otherNewColumnIndexes[i]).set(existedRowIndex, columnsInOther[i].get(rowIndex));
-                        }
+                        //    for (int i = 0; i < otherColumnCount; i++) {
+                        //        newColumnList.get(otherNewColumnIndexes[i]).set(existedRowIndex, columnsInOther[i].get(rowIndex));
+                        //    }
                     } else {
                         addedRowKeyMap.put(keyRowWrapper, startedRowIndex++);
 
@@ -7758,7 +7988,10 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public Dataset unionAll(final Dataset other, final boolean requiresSameColumns) {
-        return merge(other, requiresSameColumns);
+        final Dataset result = copy();
+        result.merge(other, requiresSameColumns);
+        ((RowDataset) result)._properties = EMPTY_PROPERTIES;
+        return result;
     }
 
     //    @Override
@@ -8026,8 +8259,13 @@ public final class RowDataset implements Dataset, Cloneable {
     @Override
     public Dataset symmetricDifference(final Dataset other, final boolean requiresSameColumns) {
         final Collection<String> keyColumnNames = getKeyColumnNames(other);
+        final Dataset result = this.difference(other, keyColumnNames, requiresSameColumns);
 
-        return this.difference(other, keyColumnNames, requiresSameColumns).merge(other.difference(this, keyColumnNames, requiresSameColumns));
+        result.merge(other.difference(this, keyColumnNames, requiresSameColumns));
+
+        ((RowDataset) result)._properties = EMPTY_PROPERTIES;
+
+        return result;
     }
 
     @Override
@@ -8037,7 +8275,13 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public Dataset symmetricDifference(final Dataset other, final Collection<String> keyColumnNames, final boolean requiresSameColumns) {
-        return this.difference(other, keyColumnNames, requiresSameColumns).merge(other.difference(this, keyColumnNames, requiresSameColumns));
+        final Dataset result = this.difference(other, keyColumnNames, requiresSameColumns);
+
+        result.merge(other.difference(this, keyColumnNames, requiresSameColumns));
+
+        ((RowDataset) result)._properties = EMPTY_PROPERTIES;
+
+        return result;
     }
 
     private Dataset removeOccurrences(final Dataset other, final Collection<String> keyColumnNames, final boolean requiresSameColumns, final boolean retain) {
@@ -8148,108 +8392,12 @@ public final class RowDataset implements Dataset, Cloneable {
         return new RowDataset(newColumnNameList, newColumnList);
     }
 
-    @Override
-    public Dataset merge(final Dataset other) {
-        return merge(other, false);
-    }
-
-    @Override
-    public Dataset merge(final Dataset other, final boolean requiresSameColumns) {
-        checkIfColumnNamesAreSame(other, requiresSameColumns);
-
-        return merge(other, 0, other.size(), other.columnNameList());
-    }
-
-    @Override
-    public Dataset merge(final Dataset other, final Collection<String> columnNames) {
-        return merge(other, 0, other.size(), columnNames);
-    }
-
-    @Override
-    public Dataset merge(final Dataset other, final int fromRowIndex, final int toRowIndex) {
-        return merge(other, fromRowIndex, toRowIndex, other.columnNameList());
-    }
-
-    @Override
-    public Dataset merge(final Dataset other, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) {
-        checkRowIndex(fromRowIndex, toRowIndex, other.size());
-
-        final RowDataset result = (RowDataset) copy();
-
-        merge(result, other, fromRowIndex, toRowIndex, columnNames);
-
-        return result;
-    }
-
-    private void merge(final RowDataset result, final Dataset other, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) {
-        List<Object> column = null;
-
-        for (final String columnName : columnNames) {
-            if (!result.containsColumn(columnName)) {
-                if (column == null) {
-                    column = new ArrayList<>(size() + (toRowIndex - fromRowIndex));
-                    N.fill(column, 0, size(), null);
-                }
-
-                result.addColumn(columnName, column);
-            }
-        }
-
-        List<Object> nulls = null;
-
-        for (final String columnName : result._columnNameList) {
-            column = result._columnList.get(result.getColumnIndex(columnName));
-
-            if (other.containsColumn(columnName)) {
-                final int columnIndex = other.getColumnIndex(columnName);
-
-                if (fromRowIndex == 0 && toRowIndex == other.size()) {
-                    column.addAll(other.getColumn(columnIndex));
-                } else {
-                    column.addAll(other.getColumn(columnIndex).subList(fromRowIndex, toRowIndex));
-                }
-            } else {
-                if (nulls == null) {
-                    nulls = new ArrayList<>(toRowIndex - fromRowIndex);
-                    N.fill(nulls, 0, toRowIndex - fromRowIndex, null);
-                }
-
-                column.addAll(nulls);
-            }
-        }
-
-        result.mergeProperties(other.properties());
-    }
-
-    //    @Override
-    //    public Dataset merge(final Dataset a, final Dataset b) {
-    //        return N.merge(this, a, b);
-    //    }
-
-    @Override
-    public Dataset merge(final Collection<? extends Dataset> others) {
-        return merge(others, false);
-    }
-
-    @Override
-    public Dataset merge(final Collection<? extends Dataset> others, final boolean requiresSameColumns) {
-        if (N.isEmpty(others)) {
-            return this.copy();
-        }
-
-        final List<Dataset> dsList = new ArrayList<>(N.size(others) + 1);
-        dsList.add(this);
-        dsList.addAll(others);
-
-        return N.merge(dsList, requiresSameColumns);
-    }
-
     private List<String> getKeyColumnNames(final Dataset other) {
         final List<String> commonColumnNameList = new ArrayList<>(_columnNameList);
         commonColumnNameList.retainAll(other.columnNameList());
 
         if (N.isEmpty(commonColumnNameList)) {
-            throw new IllegalArgumentException("These two Datasets don't have common column names: " + _columnNameList + ", " + other.columnNameList());
+            throw new IllegalArgumentException("This two Datasets don't have any common column names: " + _columnNameList + ", " + other.columnNameList());
         }
 
         return commonColumnNameList;
@@ -9079,7 +9227,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public Map<String, Object> properties() {
-        if (_properties == N.<String, Object> emptyMap()) {
+        if (_properties == EMPTY_PROPERTIES) {
             return _properties;
         } else {
             return ImmutableMap.wrap(_properties);

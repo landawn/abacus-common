@@ -29,6 +29,9 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 /**
+ * <p>This class is copied from Apache Commons IO developed at The Apache Software Foundation
+ * under the Apache License 2.0.</p>
+ * 
  * General File System utilities for checking disk space.
  * 
  * <p>This class provides static utility methods for querying file system
@@ -45,9 +48,6 @@ import java.util.StringTokenizer;
  * <p><b>Note:</b> This implementation relies on command-line utilities and may not work
  * on all platforms or configurations. For modern applications, consider using
  * {@link java.nio.file.FileStore} instead.</p>
- * 
- * <p>This class is copied from Apache Commons IO developed at The Apache Software Foundation
- * under the Apache License 2.0.</p>
  * 
  * <p>Example usage:</p>
  * <pre>{@code

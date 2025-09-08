@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,7 @@ import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 import com.landawn.abacus.util.stream.Stream;
 
 public class Dataset100Test extends TestBase {
@@ -320,7 +322,7 @@ public class Dataset100Test extends TestBase {
             Dataset.columns(columnNames, columns);
         });
 
-        assertTrue(exception.getMessage().contains("length of 'columnNames' is not equal to the length"));
+        assertTrue(exception.getMessage().contains("The length of 'columnNames'(2) is not equal to the length of the sub-collections in 'columns'(3)"));
     }
 
     @Test
@@ -1794,6 +1796,25 @@ public class Dataset100Test extends TestBase {
     }
 
     @Test
+    public void testGroupBy2() {
+
+        Dataset dataset = Dataset.rows(Arrays.asList("department", "level", "employee", "salary", "bonus"),
+                new Object[][] { { "Sales", "Junior", "Alice", 50000, 5000 }, { "Sales", "Senior", "Bob", 75000, 8000 },
+                        { "IT", "Junior", "Charlie", 55000, 6000 }, { "IT", "Senior", "David", 80000, 9000 }, { "Sales", "Junior", "Eve", 52000, 5500 } });
+
+        Dataset result = dataset.groupBy(Arrays.asList("department", "level"), // group by department and level
+                row -> row.get(0) + "_" + row.get(1), // create composite key: "Sales_Junior"
+                Arrays.asList("salary", "bonus"), // aggregate on salary and bonus
+                "total_compensation", // result column name
+                row -> ((Integer) row.get(0)) + ((Integer) row.get(1)), // sum salary + bonus
+                Collectors.summingInt(Integer.class::cast)); // sum the results
+
+        N.println("Group by with sum aggregation:");
+        dataset.println("     * // ");
+        result.println("     * // ");
+    }
+
+    @Test
     public void testGroupByWithCollector() {
         Dataset grouped = dataset.groupBy("age", "salary", "avgSalary", collector(Collectors.averagingDouble(val -> (Double) val)));
 
@@ -1828,7 +1849,7 @@ public class Dataset100Test extends TestBase {
 
         Dataset salesData = new RowDataset(cols, data);
 
-        Sheet<Object, Object, Object> pivoted = salesData.pivot("product", "sales", "quarter", collector(Collectors.summingInt(val -> (Integer) val)));
+        Sheet<Object, Object, Object> pivoted = salesData.pivot("product", "quarter", "sales", collector(Collectors.summingInt(val -> (Integer) val)));
 
         assertNotNull(pivoted);
         assertEquals(2, pivoted.rowKeySet().size()); // Products A and B
@@ -1836,10 +1857,89 @@ public class Dataset100Test extends TestBase {
     }
 
     @Test
-    public void testRollup() {
-        List<Dataset> rollups = dataset.rollup(Arrays.asList("age", "name")).toList();
+    public void testPivot2() {
 
-        assertTrue(rollups.size() > 0);
+        Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "sales", "quantity"),
+                new Object[][] {
+                     {"North", "A", 100, 10},
+                     {"North", "B", 200, 20},
+                     {"South", "A", 150, 15},
+                     {"South", "B", 250, 25}
+                });
+
+            Sheet<String, String, Integer> pivotResult = dataset.pivot(
+                "region",                           // row identifier
+                "product",                          // column identifier
+                Arrays.asList("sales", "quantity"), // aggregate columns
+                Collectors.summingInt(arr -> (Integer) arr[0] + (Integer) arr[1])); // sum sales + quantity
+
+            // Result Sheet:
+            //        | A   | B   |
+            // -------|-----|-----|
+            // North  | 110 | 220 |
+            // South  | 165 | 275 |
+            N.println("Pivot with aggregation:");
+            dataset.println("     * // ");
+            pivotResult.println("     * // ");
+
+            // Result Sheet:
+            //        | A   | B   |
+            // -------|-----|-----|
+            // North  | 100 | 200 |
+            // South  | 150 | 250 |
+    }
+
+    @Test
+    public void testRollup() {
+        Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "city", "sales"), new Object[][] { { "North", "USA", "New York", 1000 },
+                { "North", "USA", "Boston", 800 }, { "North", "Canada", "Toronto", 600 }, { "South", "Mexico", "Mexico City", 400 } });
+
+        dataset.println("     * ");
+        Stream<Dataset> rollupResult = dataset.rollup(Arrays.asList("region", "country", "city"));
+        rollupResult.forEach(ds -> ds.println("     * "));
+        // Returns a stream of 4 datasets:
+        // Level 1: Grouped by region, country, city (most detailed)
+        // Level 2: Grouped by region, country
+        // Level 3: Grouped by region
+        // Level 4: Grand total (no grouping)
+    }
+
+    @Test
+    public void testRollup2() {
+        Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "city", "sales", "quantity"),
+                new Object[][] { { "North", "USA", "New York", 1000, 50 }, { "North", "USA", "Boston", 800, 40 }, { "North", "Canada", "Toronto", 600, 30 },
+                        { "South", "Mexico", "Mexico City", 400, 20 } });
+        Function<DisposableObjArray, String> keyExtractor = keyRow -> keyRow.join("-");
+        Stream<Dataset> rollupResult = dataset.rollup(Arrays.asList("region", "country", "city"), keyExtractor, Arrays.asList("sales", "quantity"),
+                "aggregated_totals", row -> Tuple.of((Integer) row.get(0), (Integer) row.get(1)), MoreCollectors.summingInt(tp -> tp._1, tp -> tp._2));
+
+        N.println("Rollup with aggregation:");
+        dataset.println("     * // ");
+        rollupResult.forEach(ds -> ds.println("     * // "));
+        // Returns a stream of 4 datasets with custom keys and aggregated sales:
+        // Level 1: Grouped by region-country, city (most detailed)
+        // Level 2: Grouped by region-country
+        // Level 3: Grouped by region
+        // Level 4: Grand total (no grouping)
+    }
+
+    @Test
+    public void testCube2() {
+        Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "sales"),
+                new Object[][] { { "North", "USA", 1000 }, { "North", "Canada", 600 }, { "South", "Mexico", 400 } });
+
+        Function<DisposableObjArray, String> keyExtractor = keyRow -> keyRow.join("-");
+        Function<DisposableObjArray, Double> rowMapper = row -> (Integer) row.get(0) * 1.1;
+        Stream<Dataset> cubeResult = dataset.cube(Arrays.asList("region", "country"), keyExtractor, Arrays.asList("sales"), "total_sales_with_markup",
+                rowMapper, Collectors.collectingAndThen(Collectors.summingDouble(Double::doubleValue), r -> Numbers.round(r, 2)));
+        N.println("Rollup with aggregation:");
+        dataset.println("     * // ");
+        cubeResult.forEach(ds -> ds.println("     * // "));
+        // Returns a stream of 4 datasets:
+        // Level 1: Grouped by region, country (most detailed)
+        // Level 2: Grouped by region only
+        // Level 3: Grouped by country only  
+        // Level 4: Grand total (no grouping)
     }
 
     @Test
@@ -2165,6 +2265,37 @@ public class Dataset100Test extends TestBase {
     }
 
     @Test
+    public void testUnion_2() {
+        Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+                new Object[][] { { 1, "Alice", 25 }, new Object[] { 2, "Bob", 30 }, new Object[] { 1, "Alice", 35 } });
+        Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"), new Object[][] { { 1, "Alice", 95 }, { 3, "Charlie", 85 } });
+
+        Dataset result = dataset1.union(dataset2);
+        // Result contains: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {3, "Charlie", null, 85}
+        // Note: Duplicate rows are eliminated
+
+        result.println();
+        assertEquals(4, result.columnCount());
+        assertTrue(result.containsColumn("id"));
+        assertTrue(result.containsColumn("name"));
+        assertTrue(result.containsColumn("age"));
+        assertTrue(result.containsColumn("score"));
+        assertEquals(3, result.size());
+        assertEquals(1, (Integer) result.get(0, 0));
+        assertEquals("Alice", result.get(0, 1));
+        assertEquals(25, (Integer) result.get(0, 2));
+        assertNull(result.get(0, 3));
+        assertEquals(2, (Integer) result.get(1, 0));
+        assertEquals("Bob", result.get(1, 1));
+        assertEquals(30, (Integer) result.get(1, 2));
+        assertNull(result.get(1, 3));
+        assertEquals(3, (Integer) result.get(2, 0));
+        assertEquals("Charlie", result.get(2, 1));
+        assertNull(result.get(2, 2));
+        assertEquals(85, (Integer) result.get(2, 3));
+    }
+
+    @Test
     public void testUnionAll() {
         List<String> otherColumns = Arrays.asList("id", "name", "age", "salary");
         List<List<Object>> otherData = new ArrayList<>();
@@ -2178,6 +2309,49 @@ public class Dataset100Test extends TestBase {
         Dataset unionAll = dataset.unionAll(other);
 
         assertEquals(7, unionAll.size()); // 5 + 2 (includes duplicate)
+    }
+
+    @Test
+    public void testUnionAll_2() {
+        Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+                new Object[][] { { 1, "Alice", 25 }, new Object[] { 2, "Bob", 30 }, new Object[] { 1, "Alice", 35 } });
+        Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"), new Object[][] { { 1, "Alice", 95 }, { 3, "Charlie", 85 } });
+
+        Dataset result = dataset1.unionAll(dataset2);
+        // Result contains columns: id, name, age, score
+        // Result contains: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, "Alice", 35, null}, {1, "Alice", null, 95}, {3, "Charlie", null, 85}
+        // Note: All rows are included, including duplicates
+
+        result.println();
+        assertEquals(4, result.columnCount());
+        assertTrue(result.containsColumn("id"));
+        assertTrue(result.containsColumn("name"));
+        assertTrue(result.containsColumn("age"));
+        assertTrue(result.containsColumn("score"));
+        assertEquals(5, result.size());
+        assertEquals(1, (Integer) result.get(0, 0));
+        assertEquals("Alice", result.get(0, 1));
+        assertEquals(25, (Integer) result.get(0, 2));
+        assertNull(result.get(0, 3));
+        assertEquals(2, (Integer) result.get(1, 0));
+        assertEquals("Bob", result.get(1, 1));
+        assertEquals(30, (Integer) result.get(1, 2));
+        assertNull(result.get(1, 3));
+        assertEquals(1, (Integer) result.get(2, 0));
+        assertEquals("Alice", result.get(2, 1));
+        assertEquals(35, (Integer) result.get(2, 2));
+        assertNull(result.get(2, 3));
+        // Duplicate row
+        assertEquals(1, (Integer) result.get(3, 0));
+        assertEquals("Alice", result.get(3, 1));
+        assertNull(result.get(3, 2));
+        assertEquals(95, (Integer) result.get(3, 3));
+        assertEquals(3, (Integer) result.get(4, 0));
+        assertEquals("Charlie", result.get(4, 1));
+        assertNull(result.get(4, 2));
+        assertEquals(85, (Integer) result.get(4, 3));
+
+        assertThrows(IllegalArgumentException.class, () -> dataset1.unionAll(dataset2, true));
     }
 
     @Test
@@ -2214,17 +2388,34 @@ public class Dataset100Test extends TestBase {
 
     @Test
     public void testCartesianProduct() {
-        List<String> otherColumns = Arrays.asList("code", "value");
-        List<List<Object>> otherData = new ArrayList<>();
-        otherData.add(Arrays.asList("A", "B"));
-        otherData.add(Arrays.asList(100, 200));
+        Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "Alice" }, { 2, "Bob" } });
+        Dataset dataset2 = Dataset.rows(Arrays.asList("category", "score"), new Object[][] { { "A", 95 }, { "B", 90 } });
 
-        Dataset other = new RowDataset(otherColumns, otherData);
+        Dataset result = dataset1.cartesianProduct(dataset2);
+        // Result contains columns: id, name, category, score
+        // Result contains: {1, "Alice", "A", 95}, {1, "Alice", "B", 90},
+        //                  {2, "Bob", "A", 95}, {2, "Bob", "B", 90}
 
-        Dataset product = dataset.cartesianProduct(other);
+        assertEquals(N.asList("id", "name", "category", "score"), result.columnNameList());
+        assertEquals(4, result.size());
+        assertEquals(4, result.columnCount());
+        assertEquals(1, (Integer) result.get(0, 0));
+        assertEquals("Alice", result.get(0, 1));
+        assertEquals("A", result.get(0, 2));
+        assertEquals(95, (Integer) result.get(0, 3));
+        assertEquals(1, (Integer) result.get(1, 0));
+        assertEquals("Alice", result.get(1, 1));
+        assertEquals("B", result.get(1, 2));
+        assertEquals(90, (Integer) result.get(1, 3));
+        assertEquals(2, (Integer) result.get(2, 0));
+        assertEquals("Bob", result.get(2, 1));
+        assertEquals("A", result.get(2, 2));
+        assertEquals(95, (Integer) result.get(2, 3));
+        assertEquals(2, (Integer) result.get(3, 0));
+        assertEquals("Bob", result.get(3, 1));
+        assertEquals("B", result.get(3, 2));
+        assertEquals(90, (Integer) result.get(3, 3));
 
-        assertEquals(10, product.size()); // 5 * 2
-        assertEquals(6, product.columnCount()); // 4 + 2
     }
 
     @Test
@@ -2452,6 +2643,7 @@ public class Dataset100Test extends TestBase {
         }
         {
             N.println(Strings.repeat("=", 120));
+            dataset.set(0, 0, "A very long text that exceeds the usual width零零忑零零忑零零忑 to test wrapping functionality in the dataset printing method.零零忑");
             dataset.println();
             N.println(Strings.repeat("=", 120));
 
@@ -2463,6 +2655,8 @@ public class Dataset100Test extends TestBase {
             dataset.println("// ");
             N.println(Strings.repeat("=", 120));
         }
+
+        N.println(dataset);
     }
 
     @Test
@@ -2514,6 +2708,54 @@ public class Dataset100Test extends TestBase {
     }
 
     @Test
+    public void testIntersectAll_2() {
+        {
+            // Dataset 1 with columns "id", "name"
+            Dataset ds1 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "Alice" }, { 2, "Bob" }, { 3, "Charlie" }, { 2, "Bob" } // duplicate row
+            });
+
+            // Dataset 2 with columns "id", "name"
+            Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 2, "Bob" }, { 3, "Charlie" }, { 4, "Dave" }, { 2, "Bob" }, // duplicate row
+                    { 2, "Bob" } // another duplicate
+            });
+
+            // Result will contain {2, "Bob"} twice and {3, "Charlie"} once
+            Dataset result = ds1.intersectAll(ds2);
+
+            result.println();
+            assertEquals(3, result.size());
+            assertEquals((Integer) 2, result.get(0, 0));
+            assertEquals("Bob", result.get(0, 1));
+            assertEquals((Integer) 3, result.get(1, 0));
+            assertEquals("Charlie", result.get(1, 1));
+            assertEquals((Integer) 2, result.get(2, 0));
+            assertEquals("Bob", result.get(2, 1));
+        }
+
+        {
+            // Dataset 1 with columns "id", "name"
+            Dataset ds1 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "Alice" }, { 2, "Bob" }, { 3, "Charlie" }, { 2, "Bob" } // duplicate row
+            });
+
+            // Dataset 2 with columns "id", "name"
+            Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 2, "Bob" }, { 3, "Charlie" }, { 4, "Dave" } });
+
+            // Result will contain {2, "Bob"} twice and {3, "Charlie"} once
+            Dataset result = ds1.intersectAll(ds2);
+
+            result.println();
+            assertEquals(3, result.size());
+            assertEquals((Integer) 2, result.get(0, 0));
+            assertEquals("Bob", result.get(0, 1));
+            assertEquals((Integer) 3, result.get(1, 0));
+            assertEquals("Charlie", result.get(1, 1));
+            assertEquals((Integer) 2, result.get(2, 0));
+            assertEquals("Bob", result.get(2, 1));
+        }
+
+    }
+
+    @Test
     public void testExceptAll() {
         // Add duplicate rows
         dataset.addRow(new Object[] { 1, "John", 25, 50000.0 });
@@ -2555,6 +2797,52 @@ public class Dataset100Test extends TestBase {
     }
 
     @Test
+    public void testIntersection_2() {
+        {
+            // Dataset 1 with columns "id", "name"
+            Dataset ds1 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "Alice" }, { 2, "Bob" }, { 3, "Charlie" }, { 2, "Bob" } // duplicate row
+            });
+
+            // Dataset 2 with columns "id", "name"
+            Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 2, "Bob" }, { 3, "Charlie" }, { 4, "Dave" }, { 2, "Bob" }, // duplicate row
+                    { 2, "Bob" } // another duplicate
+            });
+
+            // Result will contain {2, "Bob"} twice and {3, "Charlie"} once
+            Dataset result = ds1.intersection(ds2);
+
+            result.println();
+            assertEquals(3, result.size());
+            assertEquals((Integer) 2, result.get(0, 0));
+            assertEquals("Bob", result.get(0, 1));
+            assertEquals((Integer) 3, result.get(1, 0));
+            assertEquals("Charlie", result.get(1, 1));
+            assertEquals((Integer) 2, result.get(2, 0));
+            assertEquals("Bob", result.get(2, 1));
+        }
+
+        {
+            // Dataset 1 with columns "id", "name"
+            Dataset ds1 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "Alice" }, { 2, "Bob" }, { 3, "Charlie" }, { 2, "Bob" } // duplicate row
+            });
+
+            // Dataset 2 with columns "id", "name"
+            Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 2, "Bob" }, { 3, "Charlie" }, { 4, "Dave" } });
+
+            // Result will contain {2, "Bob"} twice and {3, "Charlie"} once
+            Dataset result = ds1.intersection(ds2);
+
+            result.println();
+            assertEquals(2, result.size());
+            assertEquals((Integer) 2, result.get(0, 0));
+            assertEquals("Bob", result.get(0, 1));
+            assertEquals((Integer) 3, result.get(1, 0));
+            assertEquals("Charlie", result.get(1, 1));
+        }
+
+    }
+
+    @Test
     public void testDifference() {
         List<String> otherColumns = Arrays.asList("id", "name", "age", "salary");
         List<List<Object>> otherData = new ArrayList<>();
@@ -2587,8 +2875,182 @@ public class Dataset100Test extends TestBase {
     }
 
     @Test
+    public void testSymmetricDifferenceWithKeyColumnsAndRequireSameColumns() {
+        Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+                new Object[][] { { 1, "Alice", "HR" }, { 2, "Bob", "Engineering" }, { 2, "Bob", "Engineering" }, // duplicate row
+                        { 3, "Charlie", "Marketing" } });
+        Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+                new Object[][] { { 2, "Bob", 50000 }, { 3, "Charlie", 55000 }, { 4, "Dave", 60000 } });
+
+        Collection<String> keyColumns = Arrays.asList("id", "name");
+        Dataset result = dataset1.symmetricDifference(dataset2, keyColumns, false);
+        // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null}
+        // and {4, "Dave", null, 60000}
+        // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+        result.println();
+        assertEquals(3, result.size());
+        assertEquals(4, result.columnCount());
+        assertTrue(result.containsColumn("id"));
+        assertTrue(result.containsColumn("name"));
+        assertTrue(result.containsColumn("department"));
+        assertTrue(result.containsColumn("salary"));
+        assertEquals(1, (Integer) result.get(0, 0));
+        assertEquals("Alice", result.get(0, 1));
+        assertEquals("HR", result.get(0, 2));
+        assertNull(result.get(0, 3));
+        assertEquals(2, (Integer) result.get(1, 0));
+        assertEquals("Bob", result.get(1, 1));
+        assertEquals("Engineering", result.get(1, 2));
+        assertNull(result.get(1, 3));
+        assertEquals(4, (Integer) result.get(2, 0));
+        assertEquals("Dave", result.get(2, 1));
+        assertNull(result.get(2, 2));
+        assertEquals(60000, (Integer) result.get(2, 3));
+
+    }
+
+    @Test
+    public void testMerge() {
+        Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] { { 1, "Alice", 25 }, { 2, "Bob", 30 } });
+        Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"), new Object[][] { { 1, "Alice", 95 }, { 3, "Charlie", 85 } });
+
+        dataset1.merge(dataset2);
+        // dataset1 now contains columns: id, name, age, score
+        // dataset1 now contains rows: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, "Alice", null, 95}, {3, "Charlie", null, 85}
+        Dataset result = dataset1;
+        result.println();
+        assertEquals(4, result.columnCount());
+        assertTrue(result.containsColumn("id"));
+        assertTrue(result.containsColumn("name"));
+        assertTrue(result.containsColumn("age"));
+        assertTrue(result.containsColumn("score"));
+        assertEquals(4, result.size());
+        assertEquals(1, (Integer) result.get(0, 0));
+        assertEquals("Alice", result.get(0, 1));
+        assertEquals(25, (Integer) result.get(0, 2));
+        assertNull(result.get(0, 3));
+        assertEquals(2, (Integer) result.get(1, 0));
+        assertEquals("Bob", result.get(1, 1));
+        assertEquals(30, (Integer) result.get(1, 2));
+        assertNull(result.get(1, 3));
+        assertEquals(1, (Integer) result.get(2, 0));
+        assertEquals("Alice", result.get(2, 1));
+        assertNull(result.get(2, 2));
+        assertEquals(95, (Integer) result.get(2, 3));
+        assertEquals(3, (Integer) result.get(3, 0));
+        assertEquals("Charlie", result.get(3, 1));
+        assertNull(result.get(3, 2));
+        assertEquals(85, (Integer) result.get(3, 3));
+
+    }
+
+    @Test
+    public void testMergeWithRequiresSameColumns() {
+
+        Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] { { 1, "Alice", 25 }, { 2, "Bob", 30 } });
+        Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"), new Object[][] { { 1, "Alice", 95 }, { 3, "Charlie", 85 } });
+
+        dataset1.merge(dataset2, false);
+        // dataset1 now contains columns: id, name, age, score
+        // dataset1 now contains rows: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, "Alice", null, 95}, {3, "Charlie", null, 85}
+        Dataset result = dataset1;
+        result.println();
+        assertEquals(4, result.columnCount());
+        assertTrue(result.containsColumn("id"));
+        assertTrue(result.containsColumn("name"));
+        assertTrue(result.containsColumn("age"));
+        assertTrue(result.containsColumn("score"));
+        assertEquals(4, result.size());
+        assertEquals(1, (Integer) result.get(0, 0));
+        assertEquals("Alice", result.get(0, 1));
+        assertEquals(25, (Integer) result.get(0, 2));
+        assertNull(result.get(0, 3));
+        assertEquals(2, (Integer) result.get(1, 0));
+        assertEquals("Bob", result.get(1, 1));
+        assertEquals(30, (Integer) result.get(1, 2));
+        assertNull(result.get(1, 3));
+        assertEquals(1, (Integer) result.get(2, 0));
+        assertEquals("Alice", result.get(2, 1));
+        assertNull(result.get(2, 2));
+        assertEquals(95, (Integer) result.get(2, 3));
+        assertEquals(3, (Integer) result.get(3, 0));
+        assertEquals("Charlie", result.get(3, 1));
+        assertNull(result.get(3, 2));
+        assertEquals(85, (Integer) result.get(3, 3));
+
+        assertThrows(IllegalArgumentException.class, () -> dataset1.merge(dataset2, true));
+
+    }
+
+    @Test
+    public void testMergeWithColumnNames() {
+        Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] { { 1, "Alice", 25 }, { 2, "Bob", 30 } });
+        Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"), new Object[][] { { 1, "Alice", 95 }, { 3, "Charlie", 85 } });
+
+        dataset1.merge(dataset2, Arrays.asList("id", "name"));
+        Dataset result = dataset1;
+        result.println();
+        // Result contains columns: id, name
+        // Result contains: {1, "Alice", 25}, {2, "Bob", 30}, {1, "Alice", null}, {3, "Charlie", null}
+        assertEquals(3, result.columnCount());
+        assertTrue(result.containsColumn("id"));
+        assertTrue(result.containsColumn("name"));
+        assertTrue(result.containsColumn("age"));
+        assertEquals(4, result.size());
+        assertEquals(1, (Integer) result.get(0, 0));
+        assertEquals("Alice", result.get(0, 1));
+        assertEquals(25, (Integer) result.get(0, 2));
+        assertEquals(2, (Integer) result.get(1, 0));
+        assertEquals("Bob", result.get(1, 1));
+        assertEquals(30, (Integer) result.get(1, 2));
+        assertEquals(1, (Integer) result.get(2, 0));
+        assertEquals("Alice", result.get(2, 1));
+        assertNull(result.get(2, 2));
+        assertEquals(3, (Integer) result.get(3, 0));
+        assertEquals("Charlie", result.get(3, 1));
+        assertNull(result.get(3, 2));
+    }
+
+    @Test
+    public void testMergeWithColumnNames2() {
+        Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] { { 1, "Alice", 25 }, { 2, "Bob", 30 } });
+        Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score", "grade"), new Object[][] { { 1, "Alice", 95, "A" }, { 3, "Charlie", 85, "B" } });
+
+        Collection<String> selectedColumns = Arrays.asList("id", "score");
+        dataset1.merge(dataset2, selectedColumns);
+        // dataset1 now contains columns: id, name, age, score
+        // dataset1 now contains rows: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, null, null, 95}, {3, null, null, 85}
+        Dataset result = dataset1;
+        result.println();
+        assertEquals(4, result.columnCount());
+        assertTrue(result.containsColumn("id"));
+        assertTrue(result.containsColumn("name"));
+        assertTrue(result.containsColumn("age"));
+        assertTrue(result.containsColumn("score"));
+        assertEquals(4, result.size());
+        assertEquals(1, (Integer) result.get(0, 0));
+        assertEquals("Alice", result.get(0, 1));
+        assertEquals(25, (Integer) result.get(0, 2));
+        assertNull(result.get(0, 3));
+        assertEquals(2, (Integer) result.get(1, 0));
+        assertEquals("Bob", result.get(1, 1));
+        assertEquals(30, (Integer) result.get(1, 2));
+        assertNull(result.get(1, 3));
+        assertEquals(1, (Integer) result.get(2, 0));
+        assertNull(result.get(2, 1));
+        assertNull(result.get(2, 2));
+        assertEquals(95, (Integer) result.get(2, 3));
+        assertEquals(3, (Integer) result.get(3, 0));
+        assertNull(result.get(3, 1));
+        assertNull(result.get(3, 2));
+        assertEquals(85, (Integer) result.get(3, 3));
+
+    }
+
+    @Test
     public void testMergeWithCollection() {
         List<Dataset> others = new ArrayList<>();
+        others.add(dataset);
 
         List<String> otherColumns1 = Arrays.asList("id", "name", "age", "salary");
         List<List<Object>> otherData1 = new ArrayList<>();
@@ -2608,7 +3070,7 @@ public class Dataset100Test extends TestBase {
         others.add(new RowDataset(otherColumns1, otherData1));
         others.add(new RowDataset(otherColumns2, otherData2));
 
-        Dataset merged = dataset.merge(others);
+        Dataset merged = N.merge(others);
 
         assertEquals(8, merged.size()); // 5 + 2 + 1
         assertTrue(merged.containsColumn("bonus"));

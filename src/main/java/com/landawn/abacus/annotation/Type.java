@@ -23,16 +23,44 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Specifies custom type information for fields or methods during serialization and persistence.
- * This annotation allows fine-grained control over how values are converted and handled
- * in different contexts such as JSON/XML serialization or database operations.
+ * Specifies custom type handling for fields or methods during serialization and persistence operations.
+ * This powerful annotation provides fine-grained control over how values are converted between
+ * different representations in contexts such as JSON/XML serialization, database persistence,
+ * and data transformation.
  * 
- * <p>The annotation can specify:</p>
+ * <p><b>Key capabilities:</b></p>
  * <ul>
- *   <li>A custom type name or class for value conversion</li>
- *   <li>How enum values should be represented (by name or ordinal)</li>
- *   <li>The scope where the type conversion should apply</li>
+ *   <li>Override default type conversion behavior</li>
+ *   <li>Specify custom type converters for complex transformations</li>
+ *   <li>Control enum representation (name vs ordinal)</li>
+ *   <li>Scope type handling to specific contexts (serialization, persistence, or both)</li>
  * </ul>
+ * 
+ * <p><b>Common use cases:</b></p>
+ * <ul>
+ *   <li>Custom date/time formatting for serialization</li>
+ *   <li>Encrypting/decrypting sensitive data during persistence</li>
+ *   <li>Converting between different representations (e.g., storing JSON as String in DB)</li>
+ *   <li>Handling legacy data formats</li>
+ *   <li>Custom enum mappings</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * public class User {
+ *     {@literal @}Type(name = "EncryptedString", scope = Scope.PERSISTENCE)
+ *     private String password;  // Encrypted when saved to DB
+ *     
+ *     {@literal @}Type(enumerated = EnumBy.ORDINAL)
+ *     private Status status;    // Stored as integer in DB
+ *     
+ *     {@literal @}Type(clazz = CustomDateType.class)
+ *     private Date createdDate; // Uses custom date formatting
+ * }
+ * </pre>
+ * 
+ * @author HaiYang Li
+ * @since 2016
  */
 @Documented
 @Target({ FIELD, METHOD })
@@ -50,64 +78,128 @@ public @interface Type {
 
     /**
      * Specifies the type name to use for type conversion.
-     * If not specified, the default type handling is used.
+     * This should match a registered type name in the type factory.
+     * Common built-in type names include:
+     * <ul>
+     *   <li>"String", "Integer", "Long", etc. - basic types</li>
+     *   <li>"Date", "LocalDateTime", "Instant" - temporal types</li>
+     *   <li>"BigDecimal", "BigInteger" - precise numeric types</li>
+     *   <li>Custom type names registered with TypeFactory</li>
+     * </ul>
      * 
-     * @return the type name, empty string for default
+     * @return the type name, or empty string to use default type handling
      */
     String name() default "";
 
     /**
-     * Specifies a custom Type class to use for value conversion.
-     * The specified class must extend {@link com.landawn.abacus.type.Type}.
+     * Specifies a custom Type class to handle value conversion.
+     * The specified class must extend {@link com.landawn.abacus.type.Type} and
+     * implement the necessary conversion methods.
      * 
-     * @return the custom Type class, defaults to base Type class
+     * <p>This is useful for complex custom conversions that can't be handled
+     * by the built-in types. The custom type class should:</p>
+     * <ul>
+     *   <li>Have a no-argument constructor</li>
+     *   <li>Override the necessary conversion methods</li>
+     *   <li>Be thread-safe if used in concurrent contexts</li>
+     * </ul>
+     * 
+     * @return the custom Type implementation class, or base Type.class for default handling
      */
     @SuppressWarnings("rawtypes")
     Class<? extends com.landawn.abacus.type.Type> clazz() default com.landawn.abacus.type.Type.class;
 
     /**
-     * Specifies how enum values should be represented when converted.
-     * The default is EnumBy.NAME which uses the enum constant name.
+     * Specifies how enum values should be represented during conversion.
+     * This affects both serialization and persistence operations.
      * 
-     * @return the enum representation strategy
+     * <p><b>EnumBy.NAME (default):</b></p>
+     * <ul>
+     *   <li>Uses the enum constant name as a string</li>
+     *   <li>More readable and maintainable</li>
+     *   <li>Resilient to enum reordering</li>
+     *   <li>Larger storage size</li>
+     * </ul>
+     * 
+     * <p><b>EnumBy.ORDINAL:</b></p>
+     * <ul>
+     *   <li>Uses the enum ordinal position as an integer</li>
+     *   <li>Smaller storage size</li>
+     *   <li>Fragile - breaks if enum order changes</li>
+     *   <li>Less readable in raw data</li>
+     * </ul>
+     * 
+     * @return the enum representation strategy, defaults to EnumBy.NAME
      */
     EnumBy enumerated() default EnumBy.NAME;
 
     /**
      * Specifies the scope where this type conversion should apply.
-     * The default is Scope.ALL which applies to all contexts.
+     * This allows different type handling for different contexts.
      * 
-     * @return the scope of type conversion
+     * <p><b>Scope options:</b></p>
+     * <ul>
+     *   <li>SERIALIZATION - Only for JSON/XML/etc. serialization</li>
+     *   <li>PERSISTENCE - Only for database operations</li>
+     *   <li>ALL (default) - Applies to both contexts</li>
+     * </ul>
+     * 
+     * <p><b>Example:</b> You might want to store a password encrypted in the
+     * database (PERSISTENCE) but never include it in JSON responses (SERIALIZATION).</p>
+     * 
+     * @return the scope of type conversion, defaults to Scope.ALL
      */
     Scope scope() default Scope.ALL;
 
     /**
-     * Defines how enum values should be represented during conversion.
+     * Defines strategies for representing enum values during type conversion.
+     * The choice between NAME and ORDINAL affects data portability, storage size,
+     * and resilience to code changes.
      */
     enum EnumBy {
-        /** Persist enumerated type property or field as an integer. */
+        /**
+         * Persist enumerated type property or field as an integer using its ordinal position.
+         * <p>Warning: This representation is fragile as it depends on the declaration order
+         * of enum constants. Adding, removing, or reordering enum values will break
+         * compatibility with existing persisted data.</p>
+         */
         ORDINAL,
 
-        /** Persist enumerated type property or field as a string. */
+        /**
+         * Persist enumerated type property or field as a string using its constant name.
+         * <p>This is the recommended approach as it's readable, maintainable, and resilient
+         * to enum reordering. The only concern is renaming enum constants, which would
+         * require data migration.</p>
+         */
         NAME
     }
 
     /**
-     * Defines the contexts where type conversion should be applied.
+     * Defines the operational contexts where custom type conversion should be applied.
+     * This enables different data representations for different use cases, such as
+     * human-readable formats for APIs versus efficient storage for databases.
      */
     enum Scope {
         /**
-         * Used for json/xml/... serialization/deserialization.
+         * Apply type conversion for serialization/deserialization operations.
+         * This includes JSON, XML, and other data interchange formats.
+         * Useful for controlling how data appears in API responses, configuration files,
+         * or when transferring data between systems.
          */
         SERIALIZATION,
 
         /**
-         * Used for database column value getter/setter.
+         * Apply type conversion for database persistence operations.
+         * This affects how values are stored in and retrieved from the database.
+         * Useful for custom database mappings, encryption, compression, or adapting
+         * to legacy database schemas.
          */
         PERSISTENCE,
 
         /**
-         * Used for all scenarios.
+         * Apply type conversion in all contexts (both serialization and persistence).
+         * This ensures consistent data handling across all operations.
+         * Use this when the same conversion logic should apply everywhere.
          */
         ALL
     }

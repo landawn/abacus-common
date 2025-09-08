@@ -22,22 +22,53 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that the annotated element is for internal use only and should not be used
- * by external code or client applications. Internal APIs may change without notice
- * and are not considered part of the public API contract.
+ * by external code or client applications. Elements marked as internal are part of the
+ * implementation details and not the public API contract.
  * 
- * <p>This annotation serves as documentation to discourage external usage and
- * can be used by IDEs or build tools to generate warnings when internal APIs are accessed
- * from outside the intended scope.</p>
- * 
- * <p>Elements marked with this annotation may:</p>
+ * <p><b>Important considerations:</b></p>
  * <ul>
- *   <li>Change or be removed in any release without deprecation</li>
- *   <li>Have incomplete or missing documentation</li>
- *   <li>Not follow the same stability guarantees as public APIs</li>
+ *   <li>Internal APIs may change or be removed in any release without notice</li>
+ *   <li>No deprecation period is provided for internal APIs</li>
+ *   <li>Breaking changes can occur in minor or patch releases</li>
+ *   <li>Documentation may be incomplete or focused on implementation details</li>
+ *   <li>No compatibility guarantees are provided</li>
  * </ul>
+ * 
+ * <p><b>This annotation can be applied to:</b></p>
+ * <ul>
+ *   <li>Classes and interfaces that are implementation details</li>
+ *   <li>Constructors that should not be called externally</li>
+ *   <li>Methods that are meant for framework use only</li>
+ *   <li>Fields that should not be accessed directly</li>
+ *   <li>Nested types used for internal organization</li>
+ * </ul>
+ * 
+ * <p><b>Tool support:</b></p>
+ * <p>IDEs and build tools may use this annotation to:</p>
+ * <ul>
+ *   <li>Generate warnings when internal APIs are accessed</li>
+ *   <li>Exclude internal elements from public API documentation</li>
+ *   <li>Enforce access restrictions in modular systems</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * {@literal @}Internal
+ * public class InternalHelper {
+ *     // This class should not be used by external code
+ * }
+ * 
+ * public class PublicAPI {
+ *     {@literal @}Internal
+ *     public void frameworkMethod() {
+ *         // This method is for framework use only
+ *     }
+ * }
+ * </pre>
  * 
  * @author HaiYang Li
  * @since 2015
+ * @see Beta
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

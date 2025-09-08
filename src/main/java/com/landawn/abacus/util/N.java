@@ -17131,15 +17131,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
         cmp = checkComparator(cmp);
 
         final int ab = cmp.compare(a, b);
-        final int ac = cmp.compare(a, c);
-        int bc = 0;
+        final int bc = cmp.compare(b, c);
 
-        if ((ab >= 0 && ac <= 0) || (ac >= 0 && ab <= 0)) {
-            return a;
-        } else if ((((bc = cmp.compare(b, c)) <= 0) && ab <= 0) || (bc >= 0 && ab >= 0)) {
-            return b;
+        if (ab <= 0) {
+            if (bc <= 0) {
+                return b;
+            } else if (cmp.compare(a, c) <= 0) {
+                return c;
+            } else {
+                return a;
+            }
         } else {
-            return c;
+            if (bc >= 0) {
+                return b;
+            } else if (cmp.compare(a, c) <= 0) {
+                return a;
+            } else {
+                return c;
+            }
         }
     }
 
@@ -17634,7 +17643,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final int len = toIndex - fromIndex;
 
-        return kthLargest(a, fromIndex, toIndex, len / 2 + 1, cmp);
+        final T ret = kthLargest(a, fromIndex, toIndex, len / 2 + 1, cmp);
+        final T element = a[toIndex - (len / 2 + 1)];
+
+        // fix for N.median(["ant", "bee", "tiger"], Comparator.comparing(String::length)));
+        if (element != ret && cmp.compare(element, ret) == 0) {
+            return element;
+        } else {
+            return ret;
+        }
     }
 
     /**
@@ -17742,7 +17759,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final int len = toIndex - fromIndex;
 
-        return kthLargest(c, fromIndex, toIndex, len / 2 + 1, cmp);
+        final T ret = kthLargest(c, fromIndex, toIndex, len / 2 + 1, cmp);
+        final T element = N.getElement(c, toIndex - (len / 2 + 1));
+        // fix for N.median(("ant", "bee", "tiger"), Comparator.comparing(String::length)));
+        if (element != ret && cmp.compare(element, ret) == 0) {
+            return element;
+        } else {
+            return ret;
+        }
     }
 
     /**

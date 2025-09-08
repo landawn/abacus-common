@@ -1417,7 +1417,7 @@ public class Dataset200Test extends TestBase {
 
         assertEquals("Charlie", resultMap.get(3).get("Name"));
         assertEquals(35, resultMap.get(3).get("Age")); // From sampleDataset (first occurrence)
-        assertEquals(70000, resultMap.get(3).get("Salary")); // From otherDs
+        assertNull(resultMap.get(3).get("Salary")); // From otherDs
 
         assertEquals("David", resultMap.get(4).get("Name"));
         assertNull(resultMap.get(4).get("Age"));

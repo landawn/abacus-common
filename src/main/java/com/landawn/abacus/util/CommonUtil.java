@@ -9984,7 +9984,7 @@ sealed class CommonUtil permits N {
         for (int i = 0; i < rows.length; i++) {
             if (len(rows[i]) != coumnCount) {
                 throw new IllegalArgumentException(
-                        "length of 'columnNames' is not equals to length of 'rowList[" + i + "]': " + coumnCount + " != " + len(rows[i]));
+                        "The length of column name list (" + coumnCount + ") does not match the length of rowList[" + i + "] (" + len(rows[i]) + ")");
             }
         }
 
@@ -10081,7 +10081,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Merges two given Datasets into a single Dataset.
+     * Merges two given Datasets into a new single Dataset.
      *
      * @param a The first Dataset to be merged.
      * @param b The second Dataset to be merged.
@@ -10092,11 +10092,13 @@ sealed class CommonUtil permits N {
         checkArgNotNull(a);
         checkArgNotNull(b);
 
-        return a.merge(b);
+        final Dataset ret = a.copy();
+        ret.merge(b);
+        return ret;
     }
 
     /**
-     * Merges three given Datasets into a single Dataset.
+     * Merges three given Datasets into a new single Dataset.
      *
      * @param a The first Dataset to be merged.
      * @param b The second Dataset to be merged.
@@ -10113,7 +10115,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Merges a collection of Datasets into a single Dataset.
+     * Merges a collection of Datasets into a new single Dataset.
      *
      * @param dss The collection of Datasets to be merged.
      * @return A new Dataset which is the result of merging all the Datasets in the provided collection.
@@ -10124,7 +10126,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Merges a collection of Datasets into a single Dataset.
+     * Merges a collection of Datasets into a new single Dataset.
      *
      * @param dss The collection of Datasets to be merged.
      * @param requiresSameColumns A boolean flag that indicates whether the Datasets in the collection should have the same columns.
@@ -10151,7 +10153,7 @@ sealed class CommonUtil permits N {
             return dss.iterator().next().copy();
         } else if (dss.size() == 2) {
             final Iterator<? extends Dataset> iter = dss.iterator();
-            return iter.next().merge(iter.next());
+            return merge(iter.next(), iter.next());
         } else {
             final Set<String> columnNameSet = newLinkedHashSet();
             final Map<String, Object> props = new HashMap<>();

@@ -22,7 +22,67 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The field will be excluded by add/addAll/batchAdd and update/updateAll/batchUpdate operations if the input is an entity.
+ * Marks a field as read-only for database persistence operations.
+ * Fields annotated with @ReadOnly will be excluded from INSERT and UPDATE operations
+ * when working with entity objects, ensuring they cannot be modified through standard
+ * persistence methods.
+ * 
+ * <p><b>Common use cases:</b></p>
+ * <ul>
+ *   <li>Database-generated values (timestamps, computed columns)</li>
+ *   <li>Audit fields populated by triggers or database functions</li>
+ *   <li>Derived or calculated fields that should only be read</li>
+ *   <li>System-managed metadata that shouldn't be directly modified</li>
+ *   <li>Fields populated through database views or joins</li>
+ * </ul>
+ * 
+ * <p><b>Behavior with persistence operations:</b></p>
+ * <ul>
+ *   <li>INSERT: Field is excluded from insert statements</li>
+ *   <li>UPDATE: Field is excluded from update statements</li>
+ *   <li>SELECT: Field is included normally (can be read)</li>
+ *   <li>The field can still be set programmatically in the Java object</li>
+ * </ul>
+ * 
+ * <p><b>Important notes:</b></p>
+ * <ul>
+ *   <li>Different from @Transient - read-only fields are still mapped to columns</li>
+ *   <li>The annotation only affects persistence operations, not serialization</li>
+ *   <li>Database-level constraints (like triggers) can still modify these fields</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * {@literal @}Entity
+ * public class Article {
+ *     {@literal @}Id
+ *     private Long id;
+ *     
+ *     {@literal @}Column
+ *     private String title;
+ *     
+ *     {@literal @}Column
+ *     private String content;
+ *     
+ *     {@literal @}ReadOnly
+ *     {@literal @}Column(name = "created_time")
+ *     private Timestamp createdTime;  // Set by database DEFAULT or trigger
+ *     
+ *     {@literal @}ReadOnly
+ *     {@literal @}Column(name = "last_modified")
+ *     private Timestamp lastModified;  // Set by database trigger
+ *     
+ *     {@literal @}ReadOnly
+ *     {@literal @}Column(name = "view_count")
+ *     private Integer viewCount;       // Updated by stored procedure
+ * }
+ * </pre>
+ * 
+ * @author HaiYang Li
+ * @since 2018
+ * @see Transient
+ * @see NonUpdatable
+ * @see Column
  */
 @Documented
 @Target(value = { FIELD /* METHOD, */ })

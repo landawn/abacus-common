@@ -4215,19 +4215,19 @@ public final class IOUtil {
      * Skips over and discards a specified number of bytes from the input stream.
      *
      * @param input  The InputStream from which bytes are to be skipped.
-     * @param toSkip The number of bytes to be skipped.
+     * @param bytesToSkip The number of bytes to be skipped.
      * @return The actual number of bytes skipped.
      * @throws If an I/O error occurs, including if the InputStream reaches the end before skipping all the bytes.
      */
-    public static long skip(final InputStream input, final long toSkip) throws IOException {
-        if (toSkip < 0) {
-            throw new IllegalArgumentException("Skip count must be non-negative, actual: " + toSkip);
-        } else if (toSkip == 0) {
+    public static long skip(final InputStream input, final long bytesToSkip) throws IOException {
+        if (bytesToSkip < 0) {
+            throw new IllegalArgumentException("Skip count must be non-negative, actual: " + bytesToSkip);
+        } else if (bytesToSkip == 0) {
             return 0;
         }
 
         final byte[] buf = Objectory.createByteArrayBuffer();
-        long remain = toSkip;
+        long remain = bytesToSkip;
 
         try {
             while (remain > 0) {
@@ -4241,7 +4241,7 @@ public final class IOUtil {
                 remain -= n;
             }
 
-            return toSkip - remain;
+            return bytesToSkip - remain;
         } finally {
             Objectory.recycle(buf);
         }
@@ -4251,19 +4251,19 @@ public final class IOUtil {
      * Skips over and discards a specified number of characters from the input reader.
      *
      * @param input  The Reader from which characters are to be skipped.
-     * @param toSkip The number of characters to be skipped.
+     * @param charsToSkip The number of characters to be skipped.
      * @return The actual number of characters skipped.
      * @throws If an I/O error occurs, including if the Reader reaches the end before skipping all the characters.
      */
-    public static long skip(final Reader input, final long toSkip) throws IOException {
-        if (toSkip < 0) {
-            throw new IllegalArgumentException("Skip count must be non-negative, actual: " + toSkip);
-        } else if (toSkip == 0) {
+    public static long skip(final Reader input, final long charsToSkip) throws IOException {
+        if (charsToSkip < 0) {
+            throw new IllegalArgumentException("Skip count must be non-negative, actual: " + charsToSkip);
+        } else if (charsToSkip == 0) {
             return 0;
         }
 
         final char[] buf = Objectory.createCharArrayBuffer();
-        long remain = toSkip;
+        long remain = charsToSkip;
 
         try {
             while (remain > 0) {
@@ -4277,7 +4277,7 @@ public final class IOUtil {
                 remain -= n;
             }
 
-            return toSkip - remain;
+            return charsToSkip - remain;
         } finally {
             Objectory.recycle(buf);
         }
@@ -4287,14 +4287,14 @@ public final class IOUtil {
      * Skips over and discards a specified number of bytes from the input stream.
      *
      * @param input  The input stream to be skipped.
-     * @param toSkip The number of bytes to be skipped.
+     * @param bytesToSkip The number of bytes to be skipped.
      * @throws If an I/O error occurs, including if the input stream reaches the end before skipping all the bytes.
      */
-    public static void skipFully(final InputStream input, final long toSkip) throws IOException {
-        final long skipped = skip(input, toSkip);
+    public static void skipFully(final InputStream input, final long bytesToSkip) throws IOException {
+        final long skipped = skip(input, bytesToSkip);
 
-        if (skipped != toSkip) {
-            throw new IOException("Bytes to skip: " + toSkip + " actual: " + skipped);
+        if (skipped != bytesToSkip) {
+            throw new IOException("Bytes to skip: " + bytesToSkip + ", actual: " + skipped);
         }
     }
 
@@ -4302,14 +4302,14 @@ public final class IOUtil {
      * Skips over and discards a specified number of characters from the input reader.
      *
      * @param input  The Reader from which characters are to be skipped.
-     * @param toSkip The number of characters to be skipped.
+     * @param charsToSkip The number of characters to be skipped.
      * @throws If an I/O error occurs, including if the Reader reaches the end before skipping all the characters.
      */
-    public static void skipFully(final Reader input, final long toSkip) throws IOException {
-        final long skipped = skip(input, toSkip);
+    public static void skipFully(final Reader input, final long charsToSkip) throws IOException {
+        final long skipped = skip(input, charsToSkip);
 
-        if (skipped != toSkip) {
-            throw new IOException("Chars to skip: " + toSkip + " actual: " + skipped);
+        if (skipped != charsToSkip) {
+            throw new IOException("Chars to skip: " + charsToSkip + ", actual: " + skipped);
         }
     }
 
@@ -5965,10 +5965,11 @@ public final class IOUtil {
     }
 
     /**
-     * Deletes the specified file (or directory).
+     * Deletes the specified file (or directory) by calling {@link File#delete()}.
      *
      * @param file
      * @return {@code true} if the file is deleted successfully, otherwise {@code false} if the file is {@code null} or doesn't exist, or can't be deleted.
+     * @see File#delete()
      * @see Files#delete(Path)
      * @see Files#deleteIfExists(Path)
      */
@@ -5986,6 +5987,7 @@ public final class IOUtil {
      * @param file The file or directory to be deleted.
      * @return {@code true} if the file or directory was deleted successfully, {@code false} otherwise.
      * @see File#delete()
+     * @see #deleteIfExists(File)
      */
     public static boolean deleteQuietly(final File file) {
         try {
@@ -6100,6 +6102,7 @@ public final class IOUtil {
 
     /**
      * Deletes the subfiles/directories under the specified {@code directory}. The {@code directory} itself won't be deleted.
+     * It's equivalent to {@code deleteFilesFromDirectory(directory)}.
      *
      * @param dir directory to clean
      * @return {@code false} if some of its subfiles can't be deleted.
@@ -6155,7 +6158,8 @@ public final class IOUtil {
      * @return {@code true} if a new file was created, {@code false} if the file already exists
      * @throws UncheckedIOException if an I/O error occurs during file creation
      * @see File#createNewFile()
-     * @see #createNewFileIfNotExists(File)
+     * @see #mkdirIfNotExists(File)
+     * @see #mkdirsIfNotExists(File)
      */
     public static boolean createIfNotExists(final File file) throws UncheckedIOException {
         try {
@@ -6170,6 +6174,9 @@ public final class IOUtil {
      *
      * @param dir The directory to be checked and possibly created.
      * @return {@code true} if the directory was created successfully or already exists, {@code false} otherwise.
+     * @see File#mkdir()
+     * @see #mkdirsIfNotExists(File)
+     * @see #createIfNotExists(File)
      */
     public static boolean mkdirIfNotExists(final File dir) {
         if (!(dir.exists() && dir.isDirectory())) {
@@ -6184,6 +6191,9 @@ public final class IOUtil {
      *
      * @param dir The directory to be checked and possibly created.
      * @return {@code true} if the directories were created successfully or already exist, {@code false} otherwise.
+     * @see File#mkdirs()
+     * @see #mkdirIfNotExists(File)
+     * @see #createIfNotExists(File)
      */
     @SuppressWarnings("UnusedReturnValue")
     public static boolean mkdirsIfNotExists(final File dir) {

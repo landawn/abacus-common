@@ -524,7 +524,7 @@ public class RowDataset101Test extends TestBase {
         RowDataset ds = new RowDataset(columnNames, columnValues);
         Collector<Object, ?, Integer> sumCollector = Collectors.summingInt(o -> (Integer) o);
 
-        Sheet<String, String, Integer> pivot = ds.pivot("row", "value", "col", sumCollector);
+        Sheet<String, String, Integer> pivot = ds.pivot("row", "col", "value", sumCollector);
 
         assertNotNull(pivot);
         assertEquals(2, pivot.rowKeySet().size());
@@ -543,7 +543,7 @@ public class RowDataset101Test extends TestBase {
         RowDataset ds = new RowDataset(columnNames, columnValues);
         Collector<Object[], ?, String> joiningCollector = Collectors.mapping(arr -> arr[0] + "-" + arr[1], Collectors.joining(","));
 
-        Sheet<String, String, String> pivot = ds.pivot("row", N.asList("val1", "val2"), "col", joiningCollector);
+        Sheet<String, String, String> pivot = ds.pivot("row", "col", N.asList("val1", "val2"), joiningCollector);
 
         assertNotNull(pivot);
         assertEquals(2, pivot.rowKeySet().size());
@@ -563,7 +563,7 @@ public class RowDataset101Test extends TestBase {
         Function<DisposableObjArray, Integer> rowMapper = arr -> (Integer) arr.get(0) + (Integer) arr.get(1);
         Collector<Integer, ?, Integer> sumCollector = Collectors.summingInt(Integer::intValue);
 
-        Sheet<String, String, Integer> pivot = ds.pivot("row", N.asList("val1", "val2"), "col", rowMapper, sumCollector);
+        Sheet<String, String, Integer> pivot = ds.pivot("row", "col", N.asList("val1", "val2"), rowMapper, sumCollector);
 
         assertNotNull(pivot);
         assertEquals(2, pivot.rowKeySet().size());
@@ -759,7 +759,7 @@ public class RowDataset101Test extends TestBase {
         cubes.forEach(Dataset::println);
 
         assertNotNull(cubes);
-        assertEquals(1, cubes.size());
+        assertEquals(2, cubes.size());
 
         N.println(Strings.repeat("=", 80));
 
@@ -768,7 +768,7 @@ public class RowDataset101Test extends TestBase {
         cubes.forEach(Dataset::println);
 
         assertNotNull(cubes);
-        assertEquals(3, cubes.size());
+        assertEquals(4, cubes.size());
 
         dataset.groupBy(N.asList("city", "age"), keyExtractor, N.asList("name"), "names", List.class).println();
     }

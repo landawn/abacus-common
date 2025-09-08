@@ -21,12 +21,19 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the annotated API is experimental and subject to change or removal in future versions.
+ * Indicates that the annotated API element is in beta stage and subject to change or removal in future versions.
  * This annotation serves as a warning to developers that the API is not yet stable and should be used
  * with caution in production code.
  * 
- * <p>Beta APIs may have incomplete documentation, limited testing, or may undergo significant changes
- * without notice. They are provided to allow early access and feedback from developers.</p>
+ * <p>Beta APIs are provided to allow early access and gather feedback from developers. They may have:
+ * <ul>
+ *   <li>Incomplete or evolving documentation</li>
+ *   <li>Limited testing coverage</li>
+ *   <li>Breaking changes without prior notice</li>
+ *   <li>Performance or stability issues</li>
+ *   <li>Missing features that will be added later</li>
+ * </ul>
+ * </p>
  * 
  * <p>This annotation can be applied to:</p>
  * <ul>
@@ -36,8 +43,26 @@ import java.lang.annotation.Target;
  *   <li>Other annotations</li>
  * </ul>
  * 
+ * <p><b>Usage recommendations:</b></p>
+ * <ul>
+ *   <li>Use beta APIs for experimentation and evaluation</li>
+ *   <li>Provide feedback to help improve the API</li>
+ *   <li>Be prepared to update your code when the API changes</li>
+ *   <li>Avoid using beta APIs in critical production systems</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * {@literal @}Beta
+ * public class ExperimentalFeature {
+ *     // This class may change significantly
+ * }
+ * </pre>
+ * 
  * @author HaiYang Li
  * @since 2015
+ * @see Internal
+ * @see Deprecated
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

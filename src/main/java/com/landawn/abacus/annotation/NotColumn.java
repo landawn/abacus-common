@@ -22,7 +22,59 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * To identity that the annotated field is not a DB column.
+ * Explicitly marks a field as NOT being a database column.
+ * This annotation is used to exclude fields from automatic column mapping in entities,
+ * providing an alternative to @Transient with clearer semantic meaning.
+ * 
+ * <p><b>When to use @NotColumn:</b></p>
+ * <ul>
+ *   <li>Fields that represent relationships managed separately (not foreign keys)</li>
+ *   <li>Computed or derived values not stored in the database</li>
+ *   <li>UI-specific or presentation-layer data</li>
+ *   <li>Temporary state or helper fields</li>
+ *   <li>When you want to be explicit about non-column fields for clarity</li>
+ * </ul>
+ * 
+ * <p><b>Difference from related annotations:</b></p>
+ * <ul>
+ *   <li>@NotColumn: Explicitly declares "this is not a column"</li>
+ *   <li>@Transient: More general "exclude from persistence"</li>
+ *   <li>@Column: Explicitly declares "this is a column"</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * {@literal @}Entity
+ * public class Product {
+ *     {@literal @}Id
+ *     private Long id;
+ *     
+ *     {@literal @}Column
+ *     private String name;
+ *     
+ *     {@literal @}Column
+ *     private BigDecimal basePrice;
+ *     
+ *     {@literal @}NotColumn
+ *     private BigDecimal discountedPrice;  // Calculated at runtime
+ *     
+ *     {@literal @}NotColumn
+ *     private List<Review> reviews;         // Loaded separately via JOIN
+ *     
+ *     {@literal @}NotColumn
+ *     private boolean inCart;               // UI state, not persisted
+ *     
+ *     public BigDecimal getDiscountedPrice() {
+ *         // Calculate based on current promotions
+ *         return basePrice.multiply(getCurrentDiscount());
+ *     }
+ * }
+ * </pre>
+ * 
+ * @author HaiYang Li
+ * @since 2020
+ * @see Transient
+ * @see Column
  */
 @Documented
 @Target(value = { FIELD })

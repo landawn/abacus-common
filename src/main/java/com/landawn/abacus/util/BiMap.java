@@ -779,7 +779,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     @SuppressWarnings("unchecked")
     @Override
     public boolean equals(final Object obj) {
-        return obj == this || (obj instanceof BiMap && keyMap.equals(((BiMap<K, V>) obj).keyMap));
+        return obj == this || (obj instanceof BiMap && keyMap.equals(((BiMap<?, ?>) obj).keyMap));
     }
 
     /**

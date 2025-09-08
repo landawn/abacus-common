@@ -21,18 +21,51 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Marks a class as a database entity for ORM mapping purposes.
- * This annotation indicates that the annotated class represents a database table
- * and can be used with persistence frameworks.
+ * Marks a class as a persistent entity that maps to a database table.
+ * This annotation is the primary marker for ORM (Object-Relational Mapping) frameworks
+ * to identify classes that represent database entities and should be managed by the persistence layer.
  * 
- * <p>The entity name can be specified explicitly using the {@link #name()} attribute.
- * If not specified, the class name is typically used as the entity name.</p>
+ * <p>An entity class typically represents a table in a relational database, where:
+ * <ul>
+ *   <li>Each instance of the entity corresponds to a row in the table</li>
+ *   <li>Each field (marked with {@link Column}) corresponds to a column in the table</li>
+ *   <li>The entity name (if specified) or class name determines the table name</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Entity classes should follow these best practices:</p>
+ * <ul>
+ *   <li>Have a no-argument constructor (can be private)</li>
+ *   <li>Define at least one field marked with {@link Id} as the primary key</li>
+ *   <li>Override equals() and hashCode() based on the entity's identity</li>
+ *   <li>Be serializable if they need to be passed across network boundaries</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * {@literal @}Entity(name = "users")
+ * public class User {
+ *     {@literal @}Id
+ *     private Long id;
+ *     
+ *     {@literal @}Column(name = "user_name")
+ *     private String username;
+ *     
+ *     {@literal @}Column
+ *     private String email;
+ *     
+ *     // Constructors, getters, setters, etc.
+ * }
+ * </pre>
  * 
  * <p><strong>Note:</strong> This annotation is marked as {@link Beta}, indicating it may
  * undergo changes in future versions.</p>
  * 
  * @author HaiYang Li
  * @since 2021
+ * @see Table
+ * @see Column
+ * @see Id
  */
 @Beta
 @Documented
@@ -50,10 +83,26 @@ public @interface Entity {
     String value() default "";
 
     /**
-     * The name of the entity. If not specified, the class name is used.
-     * This name is typically used to identify the entity in database operations.
+     * The name of the entity, which typically maps to the database table name.
+     * If not specified (empty string), the simple class name is used as the entity name.
      * 
-     * @return the entity name, empty string to use class name as default
+     * <p>The entity name is used in:</p>
+     * <ul>
+     *   <li>SQL generation for table references</li>
+     *   <li>JPQL/HQL queries to reference the entity</li>
+     *   <li>Cache keys and other framework internals</li>
+     * </ul>
+     * 
+     * <p><b>Example:</b></p>
+     * <pre>
+     * {@literal @}Entity(name = "app_users")  // Maps to 'app_users' table
+     * public class User { }
+     * 
+     * {@literal @}Entity  // Maps to 'Customer' table (class name)
+     * public class Customer { }
+     * </pre>
+     * 
+     * @return the entity name, or empty string to use the simple class name as default
      */
     String name() default "";
 }

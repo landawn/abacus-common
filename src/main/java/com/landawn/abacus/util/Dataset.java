@@ -67,14 +67,24 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Returns an immutable empty {@code Dataset}.
-     * This method can be used when you need an empty Dataset for initialization or comparison purposes.
-     * 
-     * <p>Example:</p>
+     * <br />
+     * This method provides a convenient way to obtain an empty Dataset instance for initialization, 
+     * comparison purposes, or as a default value. The returned Dataset contains no rows or columns 
+     * and is immutable, meaning it cannot be modified.
+     *
+     * <p><b>Example:</b></p>
      * <pre>{@code
-     * boolean isEmpty = Dataset.empty().isEmpty(); // returns true;
+     * Dataset emptyDataset = Dataset.empty();
+     * boolean isEmpty = emptyDataset.isEmpty(); // returns true
+     * int size = emptyDataset.size(); // returns 0
+     * 
+     * // Can be used as a default value or for comparison
+     * Dataset result = someCondition ? processedDataset : Dataset.empty();
      * }</pre>
      *
-     * @return an immutable empty {@code Dataset}
+     * @return an immutable empty {@code Dataset} with no columns or rows
+     * @see #isEmpty()
+     * @see #size()
      */
     static Dataset empty() {
         return RowDataset.EMPTY_DATA_SET;
@@ -155,7 +165,8 @@ public sealed interface Dataset permits RowDataset {
      */
     static Dataset columns(final Collection<String> columnNames, final Object[][] columns) throws IllegalArgumentException {
         if (N.size(columnNames) != N.len(columns)) {
-            throw new IllegalArgumentException("The length of 'columnNames' is not equal to the length of the sub-collections in 'columns'.");
+            throw new IllegalArgumentException("The length of 'columnNames'(" + N.size(columnNames)
+                    + ") is not equal to the length of the sub-collections in 'columns'(" + N.len(columns) + ").");
         }
 
         final int columnCount = N.size(columnNames);
@@ -1442,7 +1453,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnNames A collection containing the names of the columns to be removed. These should be names that exist in the Dataset.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code columnNames} is empty.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset.
      */
     void removeColumns(Collection<String> columnNames) throws IllegalStateException, IllegalArgumentException;
 
@@ -1500,7 +1511,7 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames A collection containing the names of the columns to be updated. These should be names that exist in the Dataset.
      * @param func The function to be applied to each value in the columns. It takes the current value and returns the new value.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code columnNames} is empty.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset.
      */
     void updateColumns(Collection<String> columnNames, Function<?, ?> func) throws IllegalStateException, IllegalArgumentException;
 
@@ -1533,13 +1544,10 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnTargetTypes A map where the key is the column name and the value is the Class object representing the target type to which the column values should be converted. The column names should exist in the Dataset.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code columnTargetTypes} is empty or a value cannot be cast to the target type.
-     * @throws NumberFormatException if string value of the column cannot be parsed to the target(Number) type.
-     * @throws RuntimeException if any other error occurs during the conversion.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset.
      * @see N#convert(Object, Class)
      */
-    void convertColumns(Map<String, Class<?>> columnTargetTypes)
-            throws IllegalStateException, IllegalArgumentException, NumberFormatException, RuntimeException;
+    void convertColumns(Map<String, Class<?>> columnTargetTypes) throws IllegalStateException, IllegalArgumentException;
 
     //
     //    /**
@@ -1550,116 +1558,140 @@ public sealed interface Dataset permits RowDataset {
     //    void convertColumn(Class<?>[] targetColumnTypes);
 
     /**
-     * Combines multiple columns into a new column in the Dataset.
+     * Combines multiple columns into a new column in the Dataset using a default combining strategy.
      * <br />
-     * The new column is created by combining the values of the specified columns for each row. The type of the new column is specified by the newColumnType parameter.
+     * The new column is created by merging the values of the specified columns into the new column for each row.
+     * The new column's type must be Object[], Collection, Map, or Bean class.
+     * <br />
+     * The new column is added at the position of the smallest index among the specified columns.
+     * <br />
+     * The original columns that were combined are removed from the Dataset after the new column is created.
      *
+     * <p><b>Example:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("firstName", "lastName"), data);
-     * dataset.combineColumns(Arrays.asList("firstName", "lastName"), "fullName", String.class);
+     * dataset.combineColumns(Arrays.asList("dept_id", "dept_name"), "dept", Map.class);
+     * // Creates a new "dept" column by combining "dept_id" and "dept_name" into a Map
+     * // The original "dept_id" and "dept_name" columns are removed
      * }</pre>
      *
      * @param columnNames A collection containing the names of the columns to be combined. These should be names that exist in the Dataset.
      * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the Dataset.
-     * @param newColumnType The Class object representing the type of the new column.
+     * @param newColumnType The Class object representing the type of the new column. It must be Object[], Collection, Map, or a Bean class.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code columnNames} is empty or the new column name already exists in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset, 
+     *                                  or {@code columnNames} is empty, 
+     *                                  or the new column name already exists in the Dataset,
+     *                                  or the specified column type is not Object[], Collection, Map, or a Bean class.
+     * @see #combineColumns(Collection, String, Function)
+     * @see #addColumn(String, Collection, Function)
+     * @see #addColumn(int, String, Collection, Function)
+     * @see #toList(Collection, Class)
      */
     void combineColumns(Collection<String> columnNames, String newColumnName, Class<?> newColumnType) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Combines multiple columns into a new column in the Dataset.
+     * Combines multiple columns into a new column in the Dataset using a custom combining function.
      * <br />
-     * The new column is created by applying a function to the values of the specified columns for each row. The function takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
+     * The new column is created by applying a function to the values of the specified columns for each row. 
+     * The function takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
+     * <br />
+     * The new column is added at the position of the smallest index among the specified columns.
+     * <br />
+     * The original columns that were combined are removed from the Dataset after the new column is created.
      *
+     * <p><b>Example:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("x", "y", "z"), data);
-     * dataset.combineColumns(Arrays.asList("x", "y", "z"), "coordinates", 
+     * dataset.combineColumns(Arrays.asList("x", "y", "z"), "coordinates",
      *     row -> "(" + row.get(0) + "," + row.get(1) + "," + row.get(2) + ")");
+     * // Creates a new "coordinates" column by combining x, y, z values
+     * // The original "x", "y", and "z" columns are removed
      * }</pre>
      *
      * @param columnNames A collection containing the names of the columns to be combined. These should be names that exist in the Dataset.
      * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the Dataset.
      * @param combineFunc The function to generate the values for the new column. It takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code columnNames} is empty or the new column name already exists in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset,
+     *                                  or {@code columnNames} is empty,
+     *                                  or the new column name already exists in the Dataset.
+     * @see #combineColumns(Collection, String, Class)
+     * @see #addColumn(String, Collection, Function)
      */
     void combineColumns(Collection<String> columnNames, String newColumnName, Function<? super DisposableObjArray, ?> combineFunc)
             throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Combines two columns into a new column in the Dataset.
+     * Combines two columns into a new column in the Dataset using a custom BiFunction.
      * <br />
      * The new column is created by applying a BiFunction to the values of the specified columns for each row.
      * The BiFunction takes the values of the two existing columns for a particular row and returns the value for the new column for that row.
+     * <br />
+     * The new column is added at the position of the smallest index among the specified columns.
+     * <br />
+     * The original columns that were combined are removed from the Dataset after the new column is created.
      *
+     * <p><b>Example:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("width", "height"), data);
      * dataset.combineColumns(Tuple.of("width", "height"), "area", (w, h) -> (Double) w * (Double) h);
+     * // Creates a new "area" column by multiplying width and height values
+     * // The original "width" and "height" columns are removed
      * }</pre>
      *
      * @param columnNames A Tuple2 containing the names of the two columns to be combined. These should be names that exist in the Dataset.
      * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the Dataset.
      * @param combineFunc The BiFunction to generate the values for the new column. It takes the values of the two existing columns for a particular row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or the new column name already exists in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset,
+     *                                  or the new column name already exists in the Dataset.
+     * @see #combineColumns(Collection, String, Function)
+     * @see #combineColumns(Tuple3, String, TriFunction)
+     * @see #addColumn(String, Tuple2, BiFunction)
      */
     void combineColumns(Tuple2<String, String> columnNames, String newColumnName, BiFunction<?, ?, ?> combineFunc)
             throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Combines three columns into a new column in the Dataset.
+     * Combines three columns into a new column in the Dataset using a custom TriFunction.
      * <br />
      * The new column is created by applying a TriFunction to the values of the specified columns for each row.
      * The TriFunction takes the values of the three existing columns for a particular row and returns the value for the new column for that row.
+     * <br />
+     * The new column is added at the position of the smallest index among the specified columns.
+     * <br />
+     * The original columns that were combined are removed from the Dataset after the new column is created.
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("x", "y", "z"), data);
+     * dataset.combineColumns(Tuple.of("x", "y", "z"), "coordinates", 
+     *     (x, y, z) -> "(" + x + "," + y + "," + z + ")");
+     * // Creates a new "coordinates" column by combining x, y, z values
+     * // The original "x", "y", and "z" columns are removed
+     * }</pre>
      *
      * @param columnNames A Tuple3 containing the names of the three columns to be combined. These should be names that exist in the Dataset.
      * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the Dataset.
      * @param combineFunc The TriFunction to generate the values for the new column. It takes the values of the three existing columns for a particular row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset is empty or the new column name already exists in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset,
+     *                                  or the new column name already exists in the Dataset.
+     * @see #combineColumns(Collection, String, Function)
+     * @see #combineColumns(Tuple2, String, BiFunction)
+     * @see #addColumn(String, Tuple3, TriFunction)
      */
     void combineColumns(Tuple3<String, String, String> columnNames, String newColumnName, TriFunction<?, ?, ?, ?> combineFunc)
             throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Combines multiple columns into a new column in the Dataset based on a column name filter.
-     * <br />
-     * The new column is created by combining the values of the specified columns for each row. The type of the new column is specified by the newColumnType parameter.
-     * <br />
-     * The columns to be combined are determined by the columnNameFilter. If the columnNameFilter returns {@code true} for a column name, that column is included in the combination.
-     *
-     * @param columnNameFilter A Predicate function to determine which columns should be combined. It should return {@code true} for column names that should be combined, and {@code false} for those that should be kept.
-     * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the Dataset.
-     * @param newColumnType The Class object representing the type of the new column.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if none of column name matches the specified {@code columnNameFilter} or the new column name already exists in the Dataset.
-     */
-    void combineColumns(Predicate<? super String> columnNameFilter, String newColumnName, Class<?> newColumnType)
-            throws IllegalStateException, IllegalArgumentException;
-
-    /**
-     * Combines multiple columns into a new column in the Dataset based on a column name filter.
-     * <br />
-     * The new column is created by applying a function to the values of the specified columns for each row. The function takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
-     * <br />
-     * The columns to be combined are determined by the columnNameFilter. If the columnNameFilter returns {@code true} for a column name, that column is included in the combination.
-     *
-     * @param columnNameFilter A Predicate function to determine which columns should be combined. It should return {@code true} for column names that should be combined, and {@code false} for those that should be kept.
-     * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the Dataset.
-     * @param combineFunc The function to generate the values for the new column. It takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if none of column name matches the specified {@code columnNameFilter} or the new column name already exists in the Dataset.
-     */
-    void combineColumns(Predicate<? super String> columnNameFilter, String newColumnName, Function<? super DisposableObjArray, ?> combineFunc)
-            throws IllegalStateException, IllegalArgumentException;
-
-    /**
      * Divides a column into multiple new columns in the Dataset.
      * <br />
-     * The division is performed by applying a function to each value in the specified column. The function takes the current value and returns a List of new values, each of which will be a value in one of the new columns.
+     * The division is performed by applying a function to each value in the specified column. 
+     * The function takes the current value and returns a List of new values, each of which will be a value in one of the new columns.
      * <br />
-     * The new columns are added at the end of the existing columns.
+     * The new columns are added at the position of the original column, and the original column is removed.
      *
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("fullName"), data);
@@ -1671,55 +1703,112 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnNames A collection containing the names of the new columns to be created. These should not be names that already exist in the Dataset. The size of this collection should match the size of the Lists returned by the divideFunc.
      * @param divideFunc The function to be applied to each value in the column. It takes the current value and returns a List of new values. The size of this List should match the size of the newColumnNames collection.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, any of the new column names already exist in the Dataset, or {@code newColumnNames} is empty, or the size of the Lists returned by the divideFunc does not match the size of the newColumnNames collection.
+     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, any of the new column names already exist in the Dataset, or {@code newColumnNames} is empty.
      */
     void divideColumn(String columnName, Collection<String> newColumnNames, Function<?, ? extends List<?>> divideFunc)
             throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Divides a column into multiple new columns in the Dataset.
+     * Divides a column into multiple new columns in the Dataset using a BiConsumer.
      * <br />
-     * The division is performed by applying a BiConsumer to each value in the specified column. The BiConsumer takes the current value and an Object array, and it should populate the array with the new values for the new columns.
+     * The division is performed by applying a BiConsumer to each value in the specified column. 
+     * The BiConsumer takes the current value and an Object array, and it should populate the array with the new values for the new columns.
      * <br />
-     * The new columns are added at the end of the existing columns.
+     * The new columns are added at the position of the original column, and the original column is removed.
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("coordinates"), data);
+     * dataset.divideColumn("coordinates", Arrays.asList("x", "y", "z"), 
+     *     (coord, output) -> {
+     *         String[] parts = ((String) coord).split(",");
+     *         output[0] = Double.parseDouble(parts[0]);
+     *         output[1] = Double.parseDouble(parts[1]);
+     *         output[2] = Double.parseDouble(parts[2]);
+     *     });
+     * // Divides "coordinates" column into "x", "y", "z" columns
+     * // The original "coordinates" column is removed
+     * }</pre>
      *
      * @param columnName The name of the column to be divided. It should be a name that exists in the Dataset.
-     * @param newColumnNames A collection containing the names of the new columns to be created. These should not be names that already exist in the Dataset. The size of this collection should match the size of the Object array populated by the output BiConsumer.
-     * @param output The BiConsumer to be applied to each value in the column. It takes the current value and an Object array, and it should populate the array with the new values for the new columns.
+     * @param newColumnNames A collection containing the names of the new columns to be created. These should not be names that already exist in the Dataset. The size of this collection determines the size of the Object array passed to the BiConsumer.
+     * @param output The BiConsumer to be applied to each value in the column. It takes the current value and an Object array, and it should populate the array with the new values for the new columns. The array size matches the size of {@code newColumnNames}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, any of the new column names already exist in the Dataset, or {@code newColumnNames} is empty.
+     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, 
+     *                                  or any of the new column names already exist in the Dataset, 
+     *                                  or {@code newColumnNames} is empty.
+     * @see #divideColumn(String, Collection, Function)
+     * @see #combineColumns(Collection, String, Function)
      */
     void divideColumn(String columnName, Collection<String> newColumnNames, BiConsumer<?, Object[]> output)
             throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Divides a column into two new columns in the Dataset.
+     * Divides a column into two new columns in the Dataset using a BiConsumer.
      * <br />
-     * The division is performed by applying a BiConsumer to each value in the specified column. The BiConsumer takes the current value and a Pair object, and it should populate the Pair with the new values for the new columns.
+     * The division is performed by applying a BiConsumer to each value in the specified column.
+     * The BiConsumer takes the current value and a Pair object, and it should populate the Pair with the new values for the new columns.
      * <br />
-     * The new columns are added at the end of the existing columns.
+     * The new columns are added at the position of the original column, and the original column is removed.
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("fullName"), data);
+     * dataset.divideColumn("fullName", Tuple.of("firstName", "lastName"),
+     *     (name, pair) -> {
+     *         String[] parts = ((String) name).split(" ");
+     *         pair.setLeft(parts[0]);
+     *         pair.setRight(parts[1]);
+     *     });
+     * // Divides "fullName" column into "firstName" and "lastName" columns
+     * // The original "fullName" column is removed
+     * }</pre>
      *
      * @param columnName The name of the column to be divided. It should be a name that exists in the Dataset.
      * @param newColumnNames A Tuple2 containing the names of the two new columns to be created. These should not be names that already exist in the Dataset.
      * @param output The BiConsumer to be applied to each value in the column. It takes the current value and a Pair object, and it should populate the Pair with the new values for the new columns.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, any of the new column names already exist in the Dataset.
+     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset,
+     *                                  or any of the new column names already exist in the Dataset.
+     * @see #divideColumn(String, Collection, Function)
+     * @see #divideColumn(String, Collection, BiConsumer)
+     * @see #combineColumns(Tuple2, String, BiFunction)
      */
     void divideColumn(String columnName, Tuple2<String, String> newColumnNames, BiConsumer<?, Pair<Object, Object>> output)
             throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Divides a column into three new columns in the Dataset.
+     * Divides a column into three new columns in the Dataset using a BiConsumer.
      * <br />
-     * The division is performed by applying a BiConsumer to each value in the specified column. The BiConsumer takes the current value and a Triple object, and it should populate the Triple with the new values for the new columns.
+     * The division is performed by applying a BiConsumer to each value in the specified column.
+     * The BiConsumer takes the current value and a Triple object, and it should populate the Triple with the new values for the new columns.
      * <br />
-     * The new columns are added at the end of the existing columns.
+     * The new columns are added at the position of the original column, and the original column is removed.
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("coordinates"), data);
+     * dataset.divideColumn("coordinates", Tuple.of("x", "y", "z"),
+     *     (coord, triple) -> {
+     *         String[] parts = ((String) coord).split(",");
+     *         triple.setLeft(Double.parseDouble(parts[0]));
+     *         triple.setMiddle(Double.parseDouble(parts[1]));
+     *         triple.setRight(Double.parseDouble(parts[2]));
+     *     });
+     * // Divides "coordinates" column into "x", "y", "z" columns
+     * // The original "coordinates" column is removed
+     * }</pre>
      *
      * @param columnName The name of the column to be divided. It should be a name that exists in the Dataset.
      * @param newColumnNames A Tuple3 containing the names of the three new columns to be created. These should not be names that already exist in the Dataset.
      * @param output The BiConsumer to be applied to each value in the column. It takes the current value and a Triple object, and it should populate the Triple with the new values for the new columns.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, any of the new column names already exist in the Dataset.
+     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset,
+     *                                  or any of the new column names already exist in the Dataset.
+     * @see #divideColumn(String, Collection, Function)
+     * @see #divideColumn(String, Collection, BiConsumer)
+     * @see #divideColumn(String, Tuple2, BiConsumer)
+     * @see #combineColumns(Tuple3, String, TriFunction)
      */
     void divideColumn(String columnName, Tuple3<String, String, String> newColumnNames, BiConsumer<?, Triple<Object, Object, Object>> output)
             throws IllegalStateException, IllegalArgumentException;
@@ -1807,11 +1896,11 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The rows are identified by their indices. All data in these rows are removed.
      *
-     * @param indices The indices of the rows to be removed. Each index should be a valid index within the current row range.
+     * @param rowIndexesToRemove The indices of the rows to be removed. Each index should be a valid index within the current row range.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if any of the specified indices is out of bounds.
      */
-    void removeRows(int... indices) throws IllegalStateException, IndexOutOfBoundsException;
+    void removeRows(int... rowIndexesToRemove) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
      * Removes a range of rows from the Dataset.
@@ -1847,12 +1936,12 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The update is performed by applying a function to each value in the specified rows. The function takes the current value and returns the new value.
      *
-     * @param indices An array of integers representing the indices of the rows to be updated. Each index should be a valid index within the current row range.
+     * @param rowIndexesToUpdate An array of integers representing the indices of the rows to be updated. Each index should be a valid index within the current row range.
      * @param func The function to be applied to each value in the rows. It takes the current value and returns the new value.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if any of the specified indices is out of bounds.
      */
-    void updateRows(int[] indices, Function<?, ?> func) throws IllegalStateException, IndexOutOfBoundsException;
+    void updateRows(int[] rowIndexesToUpdate, Function<?, ?> func) throws IllegalStateException, IndexOutOfBoundsException;
 
     // TODO should the method name be "replaceAll"? If change the method name to replaceAll, what about updateColumn/updateRow?
 
@@ -1882,17 +1971,32 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The operation is performed by adding all rows from the provided Dataset to the beginning of the current Dataset.
      * The structure (columns and their types) of the provided Dataset should match the structure of the current Dataset.
+     * The properties from the provided Dataset will also be merged into the current Dataset, with the properties from the provided Dataset taking precedence in case of conflicts.
      *
+     * <p><b>Example:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"), existingData);
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"), newData);
-     * dataset1.prepend(dataset2); // Adds dataset2 rows to the beginning of dataset1
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
+     *     new Object[][] {
+     *          {1, "Alice"},
+     *          {2, "Bob"}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
+     *     new Object[][] {
+     *          {3, "Charlie"},
+     *          {4, "Diana"}
+     *     });
+     *
+     * dataset1.prepend(dataset2);
+     * // dataset1 now contains: {3, "Charlie"}, {4, "Diana"}, {1, "Alice"}, {2, "Bob"}
      * }</pre>
      *
      * @param other The Dataset to be prepended to the current Dataset. It should have the same structure as the current Dataset.
      * @throws IllegalStateException if the current Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if this Dataset and the provided Dataset don't have the same column names.
+     * @throws IllegalArgumentException if this Dataset and the provided Dataset don't have the same column names or if the other Dataset is {@code null}.
+     * @see #append(Dataset)
      * @see #merge(Dataset)
+     * @see #union(Dataset)
+     * @see #unionAll(Dataset)
      */
     void prepend(Dataset other) throws IllegalStateException, IllegalArgumentException;
 
@@ -1901,19 +2005,355 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The operation is performed by adding all rows from the provided Dataset to the end of the current Dataset.
      * The structure (columns and their types) of the provided Dataset should match the structure of the current Dataset.
+     * The properties from the provided Dataset will also be merged into the current Dataset, with the properties from the provided Dataset taking precedence in case of conflicts.
      *
+     * <p><b>Example:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"), existingData);
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"), newData);
-     * dataset1.append(dataset2); // Adds dataset2 rows to the end of dataset1
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"), 
+     *     new Object[][] {
+     *          {1, "Alice"},
+     *          {2, "Bob"}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"), 
+     *     new Object[][] {
+     *          {3, "Charlie"},
+     *          {4, "Diana"}
+     *     });
+     * 
+     * dataset1.append(dataset2); 
+     * // dataset1 now contains: {1, "Alice"}, {2, "Bob"}, {3, "Charlie"}, {4, "Diana"}
      * }</pre>
      *
      * @param other The Dataset to be appended to the current Dataset. It should have the same structure as the current Dataset.
      * @throws IllegalStateException if the current Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if this Dataset and the provided Dataset don't have the same column names.
+     * @throws IllegalArgumentException if this Dataset and the provided Dataset don't have the same column names or if the other Dataset is {@code null}.
+     * @see #prepend(Dataset)
      * @see #merge(Dataset)
+     * @see #union(Dataset)
+     * @see #unionAll(Dataset)
      */
     void append(Dataset other) throws IllegalStateException, IllegalArgumentException;
+
+    /**
+     * Merges all the rows and columns from another Dataset into this Dataset.
+     * <br />
+     * If there are columns in the other Dataset that are not present in this Dataset, they will be added to this Dataset with null values for rows from this Dataset.
+     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with null values for rows from the other Dataset.
+     * Duplicated rows in the resulting Dataset will NOT be eliminated.
+     * The properties from the other Dataset will also be merged into this Dataset, with the properties from the other Dataset taking precedence in case of conflicts.
+     * <br />
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     *  dataset1.merge(dataset2);
+     * // dataset1 now contains columns: id, name, age, score
+     * // dataset1 now contains rows: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, "Alice", null, 95}, {3, "Charlie", null, 85}
+     * }</pre>
+     *
+     * @param other The Dataset to merge with this Dataset
+     * @throws IllegalStateException if this Dataset is frozen (read-only)
+     * @throws IllegalArgumentException if the other Dataset is {@code null}
+     * @see #merge(Dataset, boolean)
+     * @see #prepend(Dataset)
+     * @see #append(Dataset)
+     * @see #union(Dataset)
+     * @see #unionAll(Dataset)
+     */
+    void merge(Dataset other) throws IllegalStateException, IllegalArgumentException;
+
+    /**
+     * Merges all the rows and columns from another Dataset into this Dataset with an option to require the same columns.
+     * <br />
+     * If there are columns in the other Dataset that are not present in this Dataset, they will be added to this Dataset with null values for rows from this Dataset.
+     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with null values for rows from the other Dataset.
+     * Duplicated rows in the resulting Dataset will NOT be eliminated.
+     * The properties from the other Dataset will also be merged into this Dataset, with the properties from the other Dataset taking precedence in case of conflicts.
+     * <br />
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     *  dataset1.merge(dataset2);
+     * // dataset1 now contains columns: id, name, age, score
+     * // dataset1 now contains rows: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, "Alice", null, 95}, {3, "Charlie", null, 85}
+     * }</pre>
+     *
+     * @param other The Dataset to merge with this Dataset. Must not be {@code null}.
+     * @param requiresSameColumns A boolean value that determines whether the merge operation requires both Datasets to have the same columns. 
+     *                           If {@code true}, both Datasets must have identical column structures. If {@code false}, columns from both Datasets are combined.
+     * @throws IllegalStateException if this Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if {@code requiresSameColumns} is {@code true} and the Datasets do not have the same columns.
+     * @see #merge(Dataset)
+     * @see #prepend(Dataset)
+     * @see #append(Dataset)
+     * @see #union(Dataset, boolean)
+     * @see #unionAll(Dataset, boolean)
+     */
+    void merge(Dataset other, boolean requiresSameColumns) throws IllegalStateException, IllegalArgumentException;
+
+    /**
+     * Merges selected columns from another Dataset into this Dataset.
+     * <br />
+     * If there are selected columns in the other Dataset that are not present in this Dataset, they will be added to this Dataset with null values for rows from this Dataset.
+     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with null values for rows from the other Dataset.
+     * All rows from the other Dataset will be added to this Dataset, but only with values from the specified columns (other columns will have null values).
+     * Duplicated rows in the resulting Dataset will NOT be eliminated.
+     * The properties from the other Dataset will also be merged into this Dataset, with the properties from the other Dataset taking precedence in case of conflicts.
+     * <br />
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score", "grade"),
+     *     new Object[][] {
+     *          {1, "Alice", 95, "A"},
+     *          {3, "Charlie", 85, "B"}
+     *     });
+     *
+     * Collection&lt;String&gt; selectedColumns = Arrays.asList("id", "score");
+     * dataset1.merge(dataset2, selectedColumns);
+     * // dataset1 now contains columns: id, name, age, score
+     * // dataset1 now contains rows: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, null, null, 95}, {3, null, null, 85}
+     * }</pre>
+     *
+     * @param other The Dataset to merge selected columns from. Must not be {@code null}.
+     * @param selectColumnNamesFromOtherToMerge The collection of column names to select from the other Dataset for merging. Must not be {@code null} or empty.
+     * @throws IllegalStateException if this Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if {@code selectColumnNamesFromOtherToMerge} is {@code null} or empty, or if any of the specified column names doesn't exist in the other Dataset.
+     * @see #merge(Dataset)
+     * @see #merge(Dataset, boolean)
+     * @see #append(Dataset)
+     */
+    @Beta
+    void merge(Dataset other, Collection<String> selectColumnNamesFromOtherToMerge) throws IllegalStateException, IllegalArgumentException;
+
+    //    /**
+    //     * Merges this Dataset with another Dataset using rows from the specified range.
+    //     * <br />
+    //     * The merge operation combines all rows from this Dataset with rows from the other Dataset within the specified row range.
+    //     * If there are columns in the other Dataset that are not present in this Dataset, they will be added to the new Dataset.
+    //     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included in the new Dataset.
+    //     * Duplicated rows in the resulting Dataset will not be eliminated.
+    //     * The resulting Dataset also contains the properties from both Datasets.
+    //     * <br />
+    //     * {@code merge(Dataset, int, int)} is similar to {@code merge(other.copy(int, int)}.
+    //     *
+    //     * <p><b>Example:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", 25},
+    //     *          {2, "Bob", 30}
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", 95},
+    //     *          {2, "Bob", 90},
+    //     *          {3, "Charlie", 85}
+    //     *     });
+    //     *
+    //     * Dataset result = dataset1.merge(dataset2, 0, 2);
+    //     * // Result contains columns: id, name, age, score
+    //     * // Result contains: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, "Alice", null, 95}, {2, "Bob", null, 90}
+    //     * }</pre>
+    //     *
+    //     * @param other The Dataset to merge with this Dataset. Must not be {@code null}.
+    //     * @param fromRowIndexFromOther The starting index (inclusive) of the row range from the other Dataset to be included in the merge operation.
+    //     * @param toRowIndexFromOther The ending index (exclusive) of the row range from the other Dataset to be included in the merge operation.
+    //     * @return A new Dataset that is the result of the merge operation with all rows from this Dataset and the specified row range from the other Dataset.
+    //     * @throws IndexOutOfBoundsException if the {@code fromRowIndex} or {@code toRowIndex} is out of bounds for the other Dataset.
+    //     * @throws IllegalArgumentException if the other Dataset is {@code null}.
+    //     * @see #merge(Dataset)
+    //     * @see #merge(Dataset, boolean)
+    //     * @see #merge(Dataset, Collection)
+    //     * @see #prepend(Dataset)
+    //     * @see #append(Dataset)
+    //     * @see #union(Dataset)
+    //     * @see #unionAll(Dataset)
+    //     */
+    //    @Beta
+    //    Dataset merge(Dataset other, int fromRowIndexFromOther, int toRowIndexFromOther) throws IndexOutOfBoundsException, IllegalArgumentException;
+
+    /**
+     * Merges selected columns from a specified row range of another Dataset into this Dataset.
+     * <br />
+     * If there are selected columns in the other Dataset that are not present in this Dataset, they will be added to this Dataset with null values for rows from this Dataset.
+     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with null values for rows from the other Dataset.
+     * Only rows within the specified range from the other Dataset will be added to this Dataset, and only with values from the specified columns (other columns will have null values).
+     * The properties from the other Dataset will also be merged into this Dataset, with the properties from the other Dataset taking precedence in case of conflicts.
+     * <br />
+     *
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score", "grade"),
+     *     new Object[][] {
+     *          {1, "Alice", 95, "A"},
+     *          {2, "Bob", 90, "B"},
+     *          {3, "Charlie", 85, "C"}
+     *     });
+     *
+     * Collection&lt;String&gt; selectedColumns = Arrays.asList("id", "score");
+     * dataset1.merge(dataset2, 0, 2, selectedColumns);
+     * // dataset1 now contains columns: id, name, age, score
+     * // dataset1 now contains rows: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, null, null, 95}, {2, null, null, 90}
+     * }</pre>
+     *
+     * @param other The Dataset to merge selected columns from. Must not be {@code null}.
+     * @param fromRowIndexFromOther The starting index (inclusive) of the row range from the other Dataset to be included in the merge operation.
+     * @param toRowIndexFromOther The ending index (exclusive) of the row range from the other Dataset to be included in the merge operation.
+     * @param selectColumnNamesFromOtherToMerge The collection of column names to select from the other Dataset for merging. Must not be {@code null} or empty.
+     * @throws IllegalStateException if this Dataset is frozen (read-only).
+     * @throws IndexOutOfBoundsException if the {@code fromRowIndexFromOther} or {@code toRowIndexFromOther} is out of bounds for the other Dataset.
+     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if {@code selectColumnNamesFromOtherToMerge} is {@code null} or empty, or if any of the specified column names doesn't exist in the other Dataset.
+     * @see #merge(Dataset)
+     * @see #merge(Dataset, boolean)
+     * @see #merge(Dataset, Collection)
+     * @see #append(Dataset)
+     */
+    @Beta
+    void merge(Dataset other, int fromRowIndexFromOther, int toRowIndexFromOther, Collection<String> selectColumnNamesFromOtherToMerge)
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException;
+
+    //    /**
+    //     * Merges this Dataset with a collection of other Datasets.
+    //     * <br />
+    //     * The merge operation combines rows from all Datasets into a new Dataset.
+    //     * All columns from all Datasets will be included in the new Dataset.
+    //     * If there are columns that are not present in some Datasets, the corresponding values in the new Dataset will be {@code null}.
+    //     * Duplicated rows in the resulting Dataset will not be eliminated.
+    //     * The resulting Dataset also contains the properties from both Datasets.
+    //     * <br />
+    //     * {@link #merge(Collection)} is equivalent to calling {@link #merge(Dataset)} multiple times for each Dataset in the collection.
+    //     *
+    //     * <p><b>Example:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice"},
+    //     *          {2, "Bob"}
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "age"),
+    //     *     new Object[][] {
+    //     *          {3, 25},
+    //     *          {4, 30}
+    //     *     });
+    //     * Dataset dataset3 = Dataset.rows(Arrays.asList("name", "score"),
+    //     *     new Object[][] {
+    //     *          {"Charlie", 95},
+    //     *          {"David", 90}
+    //     *     });
+    //     *
+    //     * Dataset result = dataset1.merge(Arrays.asList(dataset2, dataset3));
+    //     * // Result contains columns: id, name, age, score
+    //     * // Result contains: {1, "Alice", null, null}, {2, "Bob", null, null}, 
+    //     * //                  {3, null, 25, null}, {4, null, 30, null},
+    //     * //                  {null, "Charlie", null, 95}, {null, "David", null, 90}
+    //     * }</pre>
+    //     *
+    //     * @param others The collection of Datasets to merge with this Dataset. May be {@code null} or empty.
+    //     * @return A new Dataset that is the result of the merge operation with all rows from this Dataset and all rows from the other Datasets, or a copy of this Dataset if the {@code others} collection is {@code null} or empty.
+    //     * @see #merge(Dataset)
+    //     * @see #merge(Dataset, boolean)
+    //     * @see #merge(Dataset, Collection)
+    //     * @see #merge(Dataset, int, int)
+    //     * @see #merge(Dataset, int, int, Collection)
+    //     * @see #prepend(Dataset)
+    //     * @see #append(Dataset)
+    //     * @see #union(Dataset)
+    //     * @see #unionAll(Dataset)
+    //     */
+    //    @Beta
+    //    Dataset merge(final Collection<? extends Dataset> others);
+    //
+    //    /**
+    //     * Merges this Dataset with a collection of other Datasets with an option to require same columns.
+    //     * <br />
+    //     * The merge operation combines rows from all Datasets into a new Dataset.
+    //     * All columns from all Datasets will be included in the new Dataset.
+    //     * If there are columns that are not present in some Datasets, the corresponding values in the new Dataset will be {@code null}.
+    //     * The rows from all Datasets will be included in the new Dataset, even if they have the same values.
+    //     * The resulting Dataset also contains the properties from all Datasets.
+    //     * <br />
+    //     * If {@code requiresSameColumns} is {@code true}, all Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+    //     * {@link #merge(Collection, boolean)} is equivalent to calling {@link #merge(Dataset, boolean)} multiple times for each Dataset in the collection.
+    //     *
+    //     * <p><b>Example:</b></p>
+    //     * <pre>{@code
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice"},
+    //     *          {2, "Bob"}
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "age"),
+    //     *     new Object[][] {
+    //     *          {3, 25},
+    //     *          {4, 30}
+    //     *     });
+    //     * Dataset dataset3 = Dataset.rows(Arrays.asList("name", "score"),
+    //     *     new Object[][] {
+    //     *          {"Charlie", 95},
+    //     *          {"David", 90}
+    //     *     });
+    //     *
+    //     * // throw IllegalArgumentException if requiresSameColumns is true
+    //     * dataset1.merge(Arrays.asList(dataset2, dataset3), true);
+    //     * 
+    //     * Dataset result = dataset1.merge(Arrays.asList(dataset2, dataset3), false);
+    //     * // Result contains columns: id, name, age, score
+    //     * // Result contains: {1, "Alice", null, null}, {2, "Bob", null, null}, 
+    //     * //                  {3, null, 25, null}, {4, null, 30, null},
+    //     * //                  {null, "Charlie", null, 95}, {null, "David", null, 90}
+    //     * }</pre>
+    //     *
+    //     * @param others The collection of Datasets to merge with this Dataset. May be {@code null} or empty.
+    //     * @param requiresSameColumns A boolean that indicates whether all Datasets should have the same columns.
+    //     * @return A new Dataset that is the result of the merge operation with all rows from this Dataset and all rows from the other Datasets, or a copy of this Dataset if the {@code others} collection is {@code null} or empty.
+    //     * @throws IllegalArgumentException if {@code requiresSameColumns} is {@code true} and the Datasets do not have the same columns.
+    //     * @see #merge(Dataset)
+    //     * @see #merge(Dataset, boolean)
+    //     * @see #merge(Dataset, Collection)
+    //     * @see #merge(Dataset, int, int)
+    //     * @see #merge(Dataset, int, int, Collection)
+    //     * @see #merge(Collection)
+    //     * @see #prepend(Dataset)
+    //     * @see #append(Dataset)
+    //     * @see #union(Dataset)
+    //     * @see #unionAll(Dataset)
+    //     */
+    //    @Beta
+    //    Dataset merge(final Collection<? extends Dataset> others, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
      * Retrieves the current row number in the Dataset.
@@ -4075,19 +4515,55 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * This method is typically used when you need to perform operations such as sum, average, count, etc., on a column's values, grouped by another column's values.
      * The resulting Dataset will have unique values of the key column, and the result of the aggregate operation on the specified column.
-     * 
-     * <p>Example:</p>
+     *
+     * <p><b>Example:</b></p>
      * <pre>{@code
-     * Dataset sales = Dataset.rows(Arrays.asList("department", "amount"), data);
-     * Dataset deptTotals = sales.groupBy("department", "amount", "total", Collectors.summingDouble(Double.class::cast));
+     * Dataset dataset = Dataset.rows(Arrays.asList("department", "employee", "salary"),
+     *     new Object[][] {
+     *          {"Sales", "Alice", 50000},
+     *          {"Sales", "Bob", 55000},
+     *          {"IT", "Charlie", 70000},
+     *          {"IT", "David", 75000},
+     *          {"Sales", "Eve", 52000}
+     *     });
+     *
+     * // +------------+----------+--------+
+     * // | department | employee | salary |
+     * // +------------+----------+--------+
+     * // | Sales      | Alice    | 50000  |
+     * // | Sales      | Bob      | 55000  |
+     * // | IT         | Charlie  | 70000  |
+     * // | IT         | David    | 75000  |
+     * // | Sales      | Eve      | 52000  |
+     * // +------------+----------+--------+
+     *
+     * Dataset result = dataset.groupBy(
+     *     "department",                           // group by department
+     *     "salary",                              // aggregate on salary column
+     *     "total_salary",                        // result column name
+     *     Collectors.summingInt(Integer.class::cast)); // sum salaries
+     *
+     * // Result Dataset:
+     * // +------------+--------------+
+     * // | department | total_salary |
+     * // +------------+--------------+
+     * // | Sales      | 157000       |
+     * // | IT         | 145000       |
+     * // +------------+--------------+
      * }</pre>
      *
-     * @param keyColumnName The name of the column to group by.
-     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
-     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
-     * @param collector The collector that defines the aggregate operation.
+     * @param keyColumnName The name of the column to group by. Must not be {@code null}.
+     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed. Must not be {@code null}.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
+     * @param collector The collector that defines the aggregate operation. Must not be {@code null}.
      * @return A new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName}, {@code aggregateOnColumnName}, {@code aggregateResultColumnName}, or {@code collector} is {@code null}.
+     * @see #groupBy(Collection)
+     * @see #groupBy(String, Collection, String, Collector)
+     * @see #rollup(Collection)
+     * @see #cube(Collection)
+     * @see #pivot(String, String, String, Collector)
+     * @see java.util.stream.Collectors
      */
     Dataset groupBy(String keyColumnName, String aggregateOnColumnName, String aggregateResultColumnName, Collector<?, ?, ?> collector)
             throws IllegalArgumentException;
@@ -4105,6 +4581,8 @@ public sealed interface Dataset permits RowDataset {
      * @param rowType The class type of the row in the resulting Dataset. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return A new Dataset with the grouped and aggregated data - list of type {@code rowType}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see #groupBy(String, String, String, Collector)
+     * @see #groupBy(String, Function, Collection, String, Function, Collector)
      */
     Dataset groupBy(String keyColumnName, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName, Class<?> rowType)
             throws IllegalArgumentException;
@@ -4121,6 +4599,8 @@ public sealed interface Dataset permits RowDataset {
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @return A new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code aggregateOnColumnNames} is empty.
+     * @see #groupBy(String, String, String, Collector)
+     * @see #groupBy(String, Function, Collection, String, Function, Collector)
      */
     Dataset groupBy(String keyColumnName, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
             Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
@@ -4140,6 +4620,8 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector that defines the aggregate operation.
      * @return A new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code aggregateOnColumnNames} is empty.
+     * @see #groupBy(String, String, String, Collector)
+     * @see #groupBy(String, Function, Collection, String, Function, Collector)
      */
     <T> Dataset groupBy(String keyColumnName, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
             Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector) throws IllegalArgumentException;
@@ -4158,6 +4640,8 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector that defines the aggregate operation.
      * @return A new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset.
+     * @see #groupBy(String, String, String, Collector)
+     * @see #groupBy(String, Function, Collection, String, Function, Collector)
      */
     Dataset groupBy(String keyColumnName, Function<?, ?> keyExtractor, String aggregateOnColumnName, String aggregateResultColumnName,
             Collector<?, ?, ?> collector) throws IllegalArgumentException;
@@ -4176,6 +4660,8 @@ public sealed interface Dataset permits RowDataset {
      * @param rowType The class type of the row in the resulting Dataset. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return A new Dataset with the grouped and aggregated data - list of type {@code rowType}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see #groupBy(String, String, String, Collector)
+     * @see #groupBy(String, Function, Collection, String, Function, Collector)
      */
     Dataset groupBy(String keyColumnName, Function<?, ?> keyExtractor, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
             Class<?> rowType) throws IllegalArgumentException;
@@ -4194,6 +4680,8 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector that defines the aggregate operation.
      * @return A new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code aggregateOnColumnNames} is empty.
+     * @see #groupBy(String, String, String, Collector)
+     * @see #groupBy(String, Function, Collection, String, Function, Collector)
      */
     Dataset groupBy(String keyColumnName, Function<?, ?> keyExtractor, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
             Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
@@ -4203,17 +4691,63 @@ public sealed interface Dataset permits RowDataset {
      * The result of the aggregation is stored in a new column.
      * <br />
      * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by another column's values.
-     * The resulting Dataset will have unique values of the key column, and the result of the aggregate operation on the specified columns.
+     * The resulting Dataset will have unique values of the key column (after transformation by the keyExtractor), and the result of the aggregate operation on the specified columns.
+     * <br />
+     * The keyExtractor function allows you to transform the key column values before grouping, enabling operations like case-insensitive grouping, date truncation, or other key transformations.
      *
-     * @param <T> The type of the elements being grouped.
-     * @param keyColumnName The name of the column to group by.
-     * @param keyExtractor A function to transform the key column values.
-     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
-     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
-     * @param rowMapper A function that transforms the aggregated rows into a specific type {@code T}.
-     * @param collector The collector that defines the aggregate operation.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("department", "employee", "salary", "bonus"),
+     *     new Object[][] {
+     *          {"sales", "Alice", 50000, 5000},
+     *          {"SALES", "Bob", 55000, 6000},
+     *          {"it", "Charlie", 70000, 7000},
+     *          {"IT", "David", 75000, 8000}
+     *     });
+     *
+     * // +------------+----------+--------+-------+
+     * // | department | employee | salary | bonus |
+     * // +------------+----------+--------+-------+
+     * // | sales      | Alice    | 50000  | 5000  |
+     * // | SALES      | Bob      | 55000  | 6000  |
+     * // | it         | Charlie  | 70000  | 7000  |
+     * // | IT         | David    | 75000  | 8000  |
+     * // +------------+----------+--------+-------+
+     * 
+     * Dataset result = dataset.groupBy(
+     *     "department",                           // group by department
+     *     String::toLowerCase,                    // normalize to lowercase
+     *     Arrays.asList("salary", "bonus"),      // aggregate on salary and bonus
+     *     "total_compensation",                   // result column name
+     *     row -> ((Integer) row.get(0)) + ((Integer) row.get(1)), // sum salary + bonus
+     *     Collectors.summingInt(Integer.class::cast)); // sum the results
+     *
+     * // Result Dataset:
+     * // +------------+--------------------+
+     * // | department | total_compensation |
+     * // +------------+--------------------+
+     * // | sales      | 116000             |
+     * // | it         | 160000             |
+     * // +------------+--------------------+
+     * }</pre>
+     *
+     * @param <T> The type of the elements being grouped after row mapping.
+     * @param keyColumnName The name of the column to group by. Must not be {@code null}.
+     * @param keyExtractor A function that transforms the key column values before grouping. Must not be {@code null}.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
+     * @param rowMapper A function that transforms the aggregated rows into a specific type {@code T}. Must not be {@code null}.
+     * @param collector The collector that defines the aggregate operation. Must not be {@code null}.
      * @return A new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code aggregateOnColumnNames} is empty.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName}, {@code keyExtractor}, {@code aggregateOnColumnNames}, {@code aggregateResultColumnName}, {@code rowMapper}, or {@code collector} is {@code null}, or if {@code aggregateOnColumnNames} is empty.
+     * @see #groupBy(Collection)
+     * @see #groupBy(String, String, String, Collector)
+     * @see #groupBy(String, Collection, String, Collector)
+     * @see #rollup(Collection)
+     * @see #cube(Collection)
+     * @see #pivot(String, String, String, Collector)
+     * @see java.util.stream.Collectors
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     <T> Dataset groupBy(String keyColumnName, Function<?, ?> keyExtractor, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
             Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector) throws IllegalArgumentException;
@@ -4222,11 +4756,55 @@ public sealed interface Dataset permits RowDataset {
      * Groups the rows in the Dataset by the specified key columns.
      * <br />
      * This method is typically used when you need to categorize data based on multiple column values.
-     * The resulting Dataset will have unique combinations of the key column values.
+     * The resulting Dataset will have unique combinations of the key column values, with duplicates removed.
+     * Each row in the result represents a distinct combination of values from the specified key columns.
      *
-     * @param keyColumnNames The names of the columns to group by.
-     * @return A new Dataset with the grouped data.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("department", "level", "employee", "salary"),
+     *     new Object[][] {
+     *          {"Sales", "Junior", "Alice", 50000},
+     *          {"Sales", "Senior", "Bob", 75000},
+     *          {"Sales", "Junior", "Charlie", 52000},
+     *          {"IT", "Senior", "David", 80000},
+     *          {"IT", "Junior", "Eve", 55000},
+     *          {"Sales", "Senior", "Frank", 78000}
+     *     });
+     *
+     * // +------------+--------+----------+--------+
+     * // | department | level  | employee | salary |
+     * // +------------+--------+----------+--------+
+     * // | Sales      | Junior | Alice    | 50000  |
+     * // | Sales      | Senior | Bob      | 75000  |
+     * // | Sales      | Junior | Charlie  | 52000  |
+     * // | IT         | Senior | David    | 80000  |
+     * // | IT         | Junior | Eve      | 55000  |
+     * // | Sales      | Senior | Frank    | 78000  |
+     * // +------------+--------+----------+--------+
+     * 
+     * Dataset result = dataset.groupBy(Arrays.asList("department", "level"));
+     *
+     * // Result Dataset:
+     * // +------------+--------+
+     * // | department | level  |
+     * // +------------+--------+
+     * // | Sales      | Junior |
+     * // | Sales      | Senior |
+     * // | IT         | Senior |
+     * // | IT         | Junior |
+     * // +------------+--------+
+     * }</pre>
+     *
+     * @param keyColumnNames The names of the columns to group by. Must not be {@code null} or empty.
+     * @return A new Dataset containing only the specified key columns with unique combinations of their values.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset, or if {@code keyColumnNames} is {@code null} or empty.
+     * @see #groupBy(String, String, String, Collector)
+     * @see #groupBy(String, Collection, String, Collector)
+     * @see #groupBy(Collection, String, String, Collector)
+     * @see #rollup(Collection)
+     * @see #cube(Collection)
+     * @see #pivot(String, String, String, Collector)
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     Dataset groupBy(Collection<String> keyColumnNames) throws IllegalArgumentException;
 
@@ -4243,6 +4821,8 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector that defines the aggregate operation.
      * @return A new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty.
+     * @see #groupBy(Collection)
+     * @see #groupBy(Collection, Function, Collection, String, Function, Collector)
      */
     Dataset groupBy(Collection<String> keyColumnNames, String aggregateOnColumnName, String aggregateResultColumnName, Collector<?, ?, ?> collector)
             throws IllegalArgumentException;
@@ -4260,6 +4840,8 @@ public sealed interface Dataset permits RowDataset {
      * @param rowType The class type of the new column that will store the result of the aggregate operation. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return A new Dataset with the grouped and aggregated data - list of type {@code rowType}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see #groupBy(Collection)
+     * @see #groupBy(Collection, Function, Collection, String, Function, Collector)
      */
     Dataset groupBy(Collection<String> keyColumnNames, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName, Class<?> rowType)
             throws IllegalArgumentException;
@@ -4277,6 +4859,8 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector that defines the aggregate operation.
      * @return A new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see #groupBy(Collection)
+     * @see #groupBy(Collection, Function, Collection, String, Function, Collector)
      */
     Dataset groupBy(Collection<String> keyColumnNames, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
             Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
@@ -4296,6 +4880,8 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector that defines the aggregate operation.
      * @return A new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see #groupBy(Collection)
+     * @see #groupBy(Collection, Function, Collection, String, Function, Collector)
      */
     <T> Dataset groupBy(Collection<String> keyColumnNames, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
             Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector) throws IllegalArgumentException;
@@ -4311,6 +4897,8 @@ public sealed interface Dataset permits RowDataset {
      * @param keyExtractor The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
      * @return A new Dataset with the grouped data.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty.
+     * @see #groupBy(Collection)
+     * @see #groupBy(Collection, Function, Collection, String, Function, Collector)
      */
     Dataset groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor) throws IllegalArgumentException;
 
@@ -4328,6 +4916,8 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector that defines the aggregate operation.
      * @return A new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty.
+     * @see #groupBy(Collection)
+     * @see #groupBy(Collection, Function, Collection, String, Function, Collector)
      */
     Dataset groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, String aggregateOnColumnName,
             String aggregateResultColumnName, Collector<?, ?, ?> collector) throws IllegalArgumentException;
@@ -4346,6 +4936,8 @@ public sealed interface Dataset permits RowDataset {
      * @param rowType The class of the row type. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return A new Dataset with the grouped and aggregated data - list of type {@code rowType}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see #groupBy(Collection)
+     * @see #groupBy(Collection, Function, Collection, String, Function, Collector)
      */
     Dataset groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, Collection<String> aggregateOnColumnNames,
             String aggregateResultColumnName, Class<?> rowType) throws IllegalArgumentException;
@@ -4364,26 +4956,78 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector that defines the aggregate operation.
      * @return A new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see #groupBy(Collection)
+     * @see #groupBy(Collection, Function, Collection, String, Function, Collector)
      */
     Dataset groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, Collection<String> aggregateOnColumnNames,
             String aggregateResultColumnName, Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
-     * Groups the rows in the Dataset by the specified key columns and applies an aggregate operation on specific columns.
+     * Groups the rows in the Dataset by the specified key columns and applies an aggregate operation on multiple columns.
      * The result of the aggregation is stored in a new column.
      * <br />
      * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by other columns' values.
-     * The resulting Dataset will have unique combinations of the key values, and the result of the aggregate operation on the specified columns.
+     * The resulting Dataset will have unique combinations of the key values (after transformation by the keyExtractor), and the result of the aggregate operation on the specified columns.
+     * <br />
+     * The keyExtractor function allows you to transform the key column values before grouping, enabling operations like creating composite keys, applying transformations, or other key processing.
      *
-     * @param <T> The type of the object that the row data will be mapped to.
-     * @param keyColumnNames The names of the columns to group by.
-     * @param keyExtractor The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
-     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
-     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
-     * @param rowMapper The function to map the row data to the desired type. It takes an array of objects (the row) and returns an object of type T.
-     * @param collector The collector that defines the aggregate operation.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("department", "level", "employee", "salary", "bonus"),
+     *     new Object[][] {
+     *          {"Sales", "Junior", "Alice", 50000, 5000},
+     *          {"Sales", "Senior", "Bob", 75000, 8000},
+     *          {"IT", "Junior", "Charlie", 55000, 6000},
+     *          {"IT", "Senior", "David", 80000, 9000},
+     *          {"Sales", "Junior", "Eve", 52000, 5500}
+     *     });
+     *
+     * // +------------+--------+----------+--------+-------+
+     * // | department | level  | employee | salary | bonus |
+     * // +------------+--------+----------+--------+-------+
+     * // | Sales      | Junior | Alice    | 50000  | 5000  |
+     * // | Sales      | Senior | Bob      | 75000  | 8000  |
+     * // | IT         | Junior | Charlie  | 55000  | 6000  |
+     * // | IT         | Senior | David    | 80000  | 9000  |
+     * // | Sales      | Junior | Eve      | 52000  | 5500  |
+     * // +------------+--------+----------+--------+-------+
+     * 
+     * Dataset result = dataset.groupBy(
+     *     Arrays.asList("department", "level"),    // group by department and level
+     *     row -> row.get(0) + "_" + row.get(1),   // create composite key: "Sales_Junior"
+     *     Arrays.asList("salary", "bonus"),       // aggregate on salary and bonus
+     *     "total_compensation",                    // result column name
+     *     row -> ((Integer) row.get(0)) + ((Integer) row.get(1)), // sum salary + bonus
+     *     Collectors.summingInt(Integer.class::cast)); // sum the results
+     *
+     * // Result Dataset:
+     * // +------------+--------+--------------------+
+     * // | department | level  | total_compensation |
+     * // +------------+--------+--------------------+
+     * // | Sales      | Junior | 112500             |
+     * // | Sales      | Senior | 83000              |
+     * // | IT         | Junior | 61000              |
+     * // | IT         | Senior | 89000              |
+     * // +------------+--------+--------------------+
+     * }</pre>
+     *
+     * @param <T> The type of the elements being grouped after row mapping.
+     * @param keyColumnNames The names of the columns to group by. Must not be {@code null} or empty.
+     * @param keyExtractor A function that transforms the key column values before grouping. Must not be {@code null}.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
+     * @param rowMapper A function that transforms the aggregated rows into a specific type {@code T}. Must not be {@code null}.
+     * @param collector The collector that defines the aggregate operation. Must not be {@code null}.
      * @return A new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset, or if {@code keyColumnNames}, {@code keyExtractor}, {@code aggregateOnColumnNames}, {@code aggregateResultColumnName}, {@code rowMapper}, or {@code collector} is {@code null}, or if {@code keyColumnNames} or {@code aggregateOnColumnNames} is empty.
+     * @see #groupBy(Collection)
+     * @see #groupBy(String, String, String, Collector)
+     * @see #groupBy(Collection, String, String, Collector)
+     * @see #groupBy(Collection, Function, String, String, Collector)
+     * @see #rollup(Collection)
+     * @see #cube(Collection)
+     * @see #pivot(String, String, String, Collector)
+     * @see java.util.stream.Collectors
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     <T> Dataset groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, Collection<String> aggregateOnColumnNames,
@@ -4396,29 +5040,153 @@ public sealed interface Dataset permits RowDataset {
      * The rollup operation is performed on the specified columns.
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the rollup operation.
+     * The rollup starts with the most detailed level (all specified columns) and progressively removes
+     * the rightmost column in each subsequent level, ending with the grand total (no grouping columns).
+     * Each level in the rollup contains grouped data with subtotals for that level of granularity.
      *
-     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @return A Stream of Datasets, each representing a level of the rollup operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "city", "sales", "quantity"),
+     *     new Object[][] {
+     *          {"North", "USA", "New York", 1000, 50},
+     *          {"North", "USA", "Boston", 800, 40},
+     *          {"North", "Canada", "Toronto", 600, 30},
+     *          {"South", "Mexico", "Mexico City", 400, 20}
+     *     });
+     *
+     * // +--------+---------+-------------+-------+----------+
+     * // | region | country | city        | sales | quantity |
+     * // +--------+---------+-------------+-------+----------+
+     * // | North  | USA     | New York    | 1000  | 50       |
+     * // | North  | USA     | Boston      | 800   | 40       |
+     * // | North  | Canada  | Toronto     | 600   | 30       |
+     * // | South  | Mexico  | Mexico City | 400   | 20       |
+     * // +--------+---------+-------------+-------+----------+
+     *
+     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(Arrays.asList("region", "country", "city"));
+     *
+     * // Returns a stream of 4 datasets:
+     * // Level 1: Grouped by region, country, city (most detailed)
+     * // +--------+---------+-------------+-------+
+     * // | region | country | city        | count |
+     * // +--------+---------+-------------+-------+
+     * // | North  | USA     | New York    | 1     |
+     * // | North  | USA     | Boston      | 1     |
+     * // | North  | Canada  | Toronto     | 1     |
+     * // | South  | Mexico  | Mexico City | 1     |
+     * // +--------+---------+-------------+-------+
+     * // Level 2: Grouped by region, country
+     * // +--------+---------+-------+
+     * // | region | country | count |
+     * // +--------+---------+-------+
+     * // | North  | USA     | 2     |
+     * // | North  | Canada  | 1     |
+     * // | South  | Mexico  | 1     |
+     * // +--------+---------+-------+
+     * // Level 3: Grouped by region
+     * // +--------+-------+
+     * // | region | count |
+     * // +--------+-------+
+     * // | North  | 3     |
+     * // | South  | 1     |
+     * // +--------+-------+
+     * // Level 4: Grand total (no grouping)
+     * // +-------+
+     * // | count |
+     * // +-------+
+     * // | 4     |
+     * // +-------+
+     * }</pre>
+     *
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
+     * @return A Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty.
+     * @see #groupBy(Collection)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
     Stream<Dataset> rollup(Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Performs a rollup operation on the Dataset and applies an aggregate operation on a specific column.
+     * Performs a rollup operation on the Dataset using the specified columns with aggregation.
      * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
-     * The rollup operation is performed on the specified columns.
+     * The rollup operation is performed on the specified columns, and an aggregation operation is applied
+     * to the specified aggregate column using the provided collector.
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the rollup operation.
-     * The result of the aggregation is stored in a new column in each of these Datasets.
+     * The rollup starts with the most detailed level (all specified columns) and progressively removes
+     * the rightmost column in each subsequent level, ending with the grand total (no grouping columns).
+     * Each level in the rollup contains grouped data with subtotals for that level of granularity.
+     * The results of the aggregation are stored in a new column in each of these Datasets.
      *
-     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
-     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
-     * @param collector The collector that defines the aggregate operation.
-     * @return A Stream of Datasets, each representing a level of the rollup operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "city", "sales", "quantity"),
+     *     new Object[][] {
+     *          {"North", "USA", "New York", 1000, 50},
+     *          {"North", "USA", "Boston", 800, 40},
+     *          {"North", "Canada", "Toronto", 600, 30},
+     *          {"South", "Mexico", "Mexico City", 400, 20}
+     *     });
+     *
+     * // +--------+---------+-------------+-------+----------+
+     * // | region | country | city        | sales | quantity |
+     * // +--------+---------+-------------+-------+----------+
+     * // | North  | USA     | New York    | 1000  | 50       |
+     * // | North  | USA     | Boston      | 800   | 40       |
+     * // | North  | Canada  | Toronto     | 600   | 30       |
+     * // | South  | Mexico  | Mexico City | 400   | 20       |
+     * // +--------+---------+-------------+-------+----------+
+     *
+     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     *     Arrays.asList("region", "country", "city"),
+     *     "sales",
+     *     "total_sales",
+     *     Collectors.summingInt(Numbers::toInt));
+     *
+     * // Returns a stream of 4 datasets:
+     * // Level 1: Grouped by region, country, city (most detailed)
+     * // +--------+---------+-------------+-------------+
+     * // | region | country | city        | total_sales |
+     * // +--------+---------+-------------+-------------+
+     * // | North  | USA     | New York    | 1000        |
+     * // | North  | USA     | Boston      | 800         |
+     * // | North  | Canada  | Toronto     | 600         |
+     * // | South  | Mexico  | Mexico City | 400         |
+     * // +--------+---------+-------------+-------------+
+     * // Level 2: Grouped by region, country
+     * // +--------+---------+-------------+
+     * // | region | country | total_sales |
+     * // +--------+---------+-------------+
+     * // | North  | USA     | 1800        |
+     * // | North  | Canada  | 600         |
+     * // | South  | Mexico  | 400         |
+     * // +--------+---------+-------------+
+     * // Level 3: Grouped by region
+     * // +--------+-------------+
+     * // | region | total_sales |
+     * // +--------+-------------+
+     * // | North  | 2400        |
+     * // | South  | 400         |
+     * // +--------+-------------+
+     * // Level 4: Grand total (no grouping)
+     * // +-------------+
+     * // | total_sales |
+     * // +-------------+
+     * // | 2800        |
+     * // +-------------+
+     * }</pre>
+     *
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed. Must not be {@code null}.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
+     * @param collector The collector defining the aggregate operation. Must not be {@code null}.
+     * @return A Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or if {@code aggregateOnColumnName}, {@code aggregateResultColumnName}, or {@code collector} is {@code null}.
+     * @see #rollup(Collection)
+     * @see #groupBy(Collection)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4426,19 +5194,85 @@ public sealed interface Dataset permits RowDataset {
             throws IllegalArgumentException;
 
     /**
-     * Performs a rollup operation on the Dataset and applies an aggregate operation on multiple columns.
+     * Performs a rollup operation on the Dataset using the specified columns with aggregation on multiple columns.
      * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
-     * The rollup operation is performed on the specified columns.
+     * The rollup operation is performed on the specified columns, and an aggregation operation is applied
+     * to the specified aggregate columns. The rows are converted to the specified row type before aggregation.
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the rollup operation.
+     * The rollup starts with the most detailed level (all specified columns) and progressively removes
+     * the rightmost column in each subsequent level, ending with the grand total (no grouping columns).
+     * Each level in the rollup contains grouped data with subtotals for that level of granularity.
      * The results of the aggregation are stored in a new column in each of these Datasets.
      *
-     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
-     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "city", "sales", "quantity"),
+     *     new Object[][] {
+     *          {"North", "USA", "New York", 1000, 50},
+     *          {"North", "USA", "Boston", 800, 40},
+     *          {"North", "Canada", "Toronto", 600, 30},
+     *          {"South", "Mexico", "Mexico City", 400, 20}
+     *     });
+     *
+     * // +--------+---------+-------------+-------+----------+
+     * // | region | country | city        | sales | quantity |
+     * // +--------+---------+-------------+-------+----------+
+     * // | North  | USA     | New York    | 1000  | 50       |
+     * // | North  | USA     | Boston      | 800   | 40       |
+     * // | North  | Canada  | Toronto     | 600   | 30       |
+     * // | South  | Mexico  | Mexico City | 400   | 20       |
+     * // +--------+---------+-------------+-------+----------+
+     *
+     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     *     Arrays.asList("region", "country", "city"),
+     *     Arrays.asList("sales", "quantity"),
+     *     "aggregated_data",
+     *     Object[].class);
+     *
+     * // Returns a stream of 4 datasets:
+     * // Level 1: Grouped by region, country, city (most detailed)
+     * // +--------+---------+-------------+-----------------+
+     * // | region | country | city        | aggregated_data |
+     * // +--------+---------+-------------+-----------------+
+     * // | North  | USA     | New York    | [[1000, 50]]    |
+     * // | North  | USA     | Boston      | [[800, 40]]     |
+     * // | North  | Canada  | Toronto     | [[600, 30]]     |
+     * // | South  | Mexico  | Mexico City | [[400, 20]]     |
+     * // +--------+---------+-------------+-----------------+
+     * // Level 2: Grouped by region, country
+     * // +--------+---------+-------------------------+
+     * // | region | country | aggregated_data         |
+     * // +--------+---------+-------------------------+
+     * // | North  | USA     | [[1000, 50], [800, 40]] |
+     * // | North  | Canada  | [[600, 30]]             |
+     * // | South  | Mexico  | [[400, 20]]             |
+     * // +--------+---------+-------------------------+
+     * // Level 3: Grouped by region
+     * // +--------+------------------------------------+
+     * // | region | aggregated_data                    |
+     * // +--------+------------------------------------+
+     * // | North  | [[1000, 50], [800, 40], [600, 30]] |
+     * // | South  | [[400, 20]]                        |
+     * // +--------+------------------------------------+
+     * // Level 4: Grand total (no grouping)
+     * // +-----------------------------------------------+
+     * // | aggregated_data                               |
+     * // +-----------------------------------------------+
+     * // | [[1000, 50], [800, 40], [600, 30], [400, 20]] |
+     * // +-----------------------------------------------+
+     * }</pre>
+     *
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
      * @param rowType The class of the row type. It must be one of the supported types - Object[], Collection, Map, or Bean class.
-     * @return A Stream of Datasets, each representing a level of the rollup operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class
+     * @return A Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code aggregateResultColumnName} or {@code rowType} is {@code null}, or if the specified {@code rowType} is not a supported type.
+     * @see #rollup(Collection)
+     * @see #rollup(Collection, String, String, Collector)
+     * @see #groupBy(Collection)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4446,20 +5280,86 @@ public sealed interface Dataset permits RowDataset {
             throws IllegalArgumentException;
 
     /**
-     * Performs a rollup operation on the Dataset and applies an aggregate operation on multiple columns.
+     * Performs a rollup operation on the Dataset using the specified columns with aggregation on multiple columns.
      * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
-     * The rollup operation is performed on the specified columns.
+     * The rollup operation is performed on the specified columns, and an aggregation operation is applied
+     * to the specified aggregate columns using the provided collector.
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the rollup operation.
+     * The rollup starts with the most detailed level (all specified columns) and progressively removes
+     * the rightmost column in each subsequent level, ending with the grand total (no grouping columns).
+     * Each level in the rollup contains grouped data with subtotals for that level of granularity.
      * The results of the aggregation are stored in a new column in each of these Datasets.
-     * The aggregation operation is defined by the provided collector.
      *
-     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
-     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
-     * @param collector The collector that defines the aggregate operation.
-     * @return A Stream of Datasets, each representing a level of the rollup operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "city", "sales", "quantity"),
+     *     new Object[][] {
+     *          {"North", "USA", "New York", 1000, 50},
+     *          {"North", "USA", "Boston", 800, 40},
+     *          {"North", "Canada", "Toronto", 600, 30},
+     *          {"South", "Mexico", "Mexico City", 400, 20}
+     *     });
+     *
+     * // +--------+---------+-------------+-------+----------+
+     * // | region | country | city        | sales | quantity |
+     * // +--------+---------+-------------+-------+----------+
+     * // | North  | USA     | New York    | 1000  | 50       |
+     * // | North  | USA     | Boston      | 800   | 40       |
+     * // | North  | Canada  | Toronto     | 600   | 30       |
+     * // | South  | Mexico  | Mexico City | 400   | 20       |
+     * // +--------+---------+-------------+-------+----------+
+     *
+     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     *     Arrays.asList("region", "country", "city"),
+     *     Arrays.asList("sales", "quantity"),
+     *     "aggregated_totals",
+     *     MoreCollectors.summingInt(a -> (Integer) a[0], a -> (Integer) a[1]));
+     *
+     * // Returns a stream of 4 datasets:
+     * // Level 1: Grouped by region, country, city (most detailed)
+     * // +--------+---------+-------------+-----------------+
+     * // | region | country | city        | aggregated_data |
+     * // +--------+---------+-------------+-----------------+
+     * // | North  | USA     | New York    | (1000, 50)      |
+     * // | North  | USA     | Boston      | (800, 40)       |
+     * // | North  | Canada  | Toronto     | (600, 30)       |
+     * // | South  | Mexico  | Mexico City | (400, 20)       |
+     * // +--------+---------+-------------+-----------------+
+     * // Level 2: Grouped by region, country
+     * // +--------+---------+-----------------+
+     * // | region | country | aggregated_data |
+     * // +--------+---------+-----------------+
+     * // | North  | USA     | (1800, 90)      |
+     * // | North  | Canada  | (600, 30)       |
+     * // | South  | Mexico  | (400, 20)       |
+     * // +--------+---------+-----------------+
+     * // Level 3: Grouped by region
+     * // +--------+-----------------+
+     * // | region | aggregated_data |
+     * // +--------+-----------------+
+     * // | North  | (2400, 120)     |
+     * // | South  | (400, 20)       |
+     * // +--------+-----------------+
+     * // Level 4: Grand total (no grouping)
+     * // +-----------------+
+     * // | aggregated_data |
+     * // +-----------------+
+     * // | (2800, 140)     |
+     * // +-----------------+
+     * }</pre>
+     *
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
+     * @param collector The collector defining the aggregate operation. Must not be {@code null}.
+     * @return A Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code aggregateResultColumnName} or {@code collector} is {@code null}.
+     * @see #rollup(Collection)
+     * @see #rollup(Collection, String, String, Collector)
+     * @see #rollup(Collection, Collection, String, Class)
+     * @see #groupBy(Collection)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4467,23 +5367,90 @@ public sealed interface Dataset permits RowDataset {
             Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
-     * Performs a rollup operation on the Dataset and applies an aggregate operation on multiple columns.
+     * Performs a rollup operation on the Dataset using the specified columns with aggregation on multiple columns using a custom row mapper.
      * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
-     * The rollup operation is performed on the specified columns.
+     * The rollup operation is performed on the specified columns, and an aggregation operation is applied
+     * to the specified aggregate columns using the provided row mapper and collector.
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the rollup operation.
+     * The rollup starts with the most detailed level (all specified columns) and progressively removes
+     * the rightmost column in each subsequent level, ending with the grand total (no grouping columns).
+     * Each level in the rollup contains grouped data with subtotals for that level of granularity.
      * The results of the aggregation are stored in a new column in each of these Datasets.
-     * The aggregation operation is defined by the provided collector.
-     * The rowMapper function is used to transform the DisposableObjArray to a custom type T.
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "city", "sales", "quantity"),
+     *     new Object[][] {
+     *          {"North", "USA", "New York", 1000, 50},
+     *          {"North", "USA", "Boston", 800, 40},
+     *          {"North", "Canada", "Toronto", 600, 30},
+     *          {"South", "Mexico", "Mexico City", 400, 20}
+     *     });
+     *
+     * // +--------+---------+-------------+-------+----------+
+     * // | region | country | city        | sales | quantity |
+     * // +--------+---------+-------------+-------+----------+
+     * // | North  | USA     | New York    | 1000  | 50       |
+     * // | North  | USA     | Boston      | 800   | 40       |
+     * // | North  | Canada  | Toronto     | 600   | 30       |
+     * // | South  | Mexico  | Mexico City | 400   | 20       |
+     * // +--------+---------+-------------+-------+----------+
+     *
+     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     *     Arrays.asList("region", "country", "city"),
+     *     Arrays.asList("sales", "quantity"),
+     *     "aggregated_totals",
+     *     row -> Tuple.of((Integer) row.get(0), (Integer) row.get(1)),
+     *     MoreCollectors.summingInt(tp -> tp._1, tp -> tp._2));
+     *
+     * // Returns a stream of 4 datasets:
+     * // Level 1: Grouped by region, country, city (most detailed)
+     * // +--------+---------+-------------+-----------------+
+     * // | region | country | city        | aggregated_data |
+     * // +--------+---------+-------------+-----------------+
+     * // | North  | USA     | New York    | (1000, 50)      |
+     * // | North  | USA     | Boston      | (800, 40)       |
+     * // | North  | Canada  | Toronto     | (600, 30)       |
+     * // | South  | Mexico  | Mexico City | (400, 20)       |
+     * // +--------+---------+-------------+-----------------+
+     * // Level 2: Grouped by region, country
+     * // +--------+---------+-----------------+
+     * // | region | country | aggregated_data |
+     * // +--------+---------+-----------------+
+     * // | North  | USA     | (1800, 90)      |
+     * // | North  | Canada  | (600, 30)       |
+     * // | South  | Mexico  | (400, 20)       |
+     * // +--------+---------+-----------------+
+     * // Level 3: Grouped by region
+     * // +--------+-----------------+
+     * // | region | aggregated_data |
+     * // +--------+-----------------+
+     * // | North  | (2400, 120)     |
+     * // | South  | (400, 20)       |
+     * // +--------+-----------------+
+     * // Level 4: Grand total (no grouping)
+     * // +-----------------+
+     * // | aggregated_data |
+     * // +-----------------+
+     * // | (2800, 140)     |
+     * // +-----------------+
+     * }</pre>
      *
      * @param <T> The type of the object that the row data will be mapped to.
-     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
-     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
-     * @param rowMapper The function to transform the DisposableObjArray to a custom type T.
-     * @param collector The collector that defines the aggregate operation.
-     * @return A Stream of Datasets, each representing a level of the rollup operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
+     * @param rowMapper The function to transform the DisposableObjArray to a custom type T. Must not be {@code null}.
+     * @param collector The collector that defines the aggregate operation. Must not be {@code null}.
+     * @return A Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code aggregateResultColumnName}, {@code rowMapper}, or {@code collector} is {@code null}.
+     * @see #rollup(Collection)
+     * @see #rollup(Collection, String, String, Collector)
+     * @see #rollup(Collection, Collection, String, Class)
+     * @see #rollup(Collection, Collection, String, Collector)
+     * @see #groupBy(Collection)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4491,39 +5458,178 @@ public sealed interface Dataset permits RowDataset {
             Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector) throws IllegalArgumentException;
 
     /**
-     * Performs a rollup operation on the Dataset using the specified columns and key mapper function.
+     * Performs a rollup operation on the Dataset using the specified columns with a custom key extractor function.
      * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
-     * The rollup operation is performed on the specified columns.
+     * The rollup operation is performed on the specified columns, and the key extractor function is used
+     * to transform the DisposableObjArray to a custom key for grouping purposes.
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the rollup operation.
-     * The keyExtractor function is used to transform the DisposableObjArray to a custom key.
+     * The rollup starts with the most detailed level (all specified columns) and progressively removes
+     * the rightmost column in each subsequent level, ending with the grand total (no grouping columns).
+     * Each level in the rollup contains grouped data with subtotals for that level of granularity.
      *
-     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param keyExtractor The function to transform the DisposableObjArray to a custom key.
-     * @return A Stream of Datasets, each representing a level of the rollup operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "city", "sales", "quantity"),
+     *     new Object[][] {
+     *          {"North", "USA", "New York", 1000, 50},
+     *          {"North", "USA", "Boston", 800, 40},
+     *          {"North", "Canada", "Toronto", 600, 30},
+     *          {"South", "Mexico", "Mexico City", 400, 20}
+     *     });
+     *
+     * // +--------+---------+-------------+-------+----------+
+     * // | region | country | city        | sales | quantity |
+     * // +--------+---------+-------------+-------+----------+
+     * // | North  | USA     | New York    | 1000  | 50       |
+     * // | North  | USA     | Boston      | 800   | 40       |
+     * // | North  | Canada  | Toronto     | 600   | 30       |
+     * // | South  | Mexico  | Mexico City | 400   | 20       |
+     * // +--------+---------+-------------+-------+----------+
+     *
+     * Function&lt;DisposableObjArray, String&gt; keyExtractor = keyRow -> keyRow.join("-");
+     *
+     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     *     Arrays.asList("region", "country", "city"),
+     *     keyExtractor);
+     *
+     * // Returns a stream of 4 datasets:
+     * // Level 1: Grouped by region, country, city (most detailed)
+     * // +--------+---------+-------------+-------+
+     * // | region | country | city        | count |
+     * // +--------+---------+-------------+-------+
+     * // | North  | USA     | New York    | 1     |
+     * // | North  | USA     | Boston      | 1     |
+     * // | North  | Canada  | Toronto     | 1     |
+     * // | South  | Mexico  | Mexico City | 1     |
+     * // +--------+---------+-------------+-------+
+     * // Level 2: Grouped by region, country
+     * // +--------+---------+-------+
+     * // | region | country | count |
+     * // +--------+---------+-------+
+     * // | North  | USA     | 2     |
+     * // | North  | Canada  | 1     |
+     * // | South  | Mexico  | 1     |
+     * // +--------+---------+-------+
+     * // Level 3: Grouped by region
+     * // +--------+-------+
+     * // | region | count |
+     * // +--------+-------+
+     * // | North  | 3     |
+     * // | South  | 1     |
+     * // +--------+-------+
+     * // Level 4: Grand total (no grouping)
+     * // +-------+
+     * // | count |
+     * // +-------+
+     * // | 4     |
+     * // +-------+
+     * }</pre>
+     *
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
+     * @param keyExtractor The function to transform the DisposableObjArray to a custom key for grouping purposes. Must not be {@code null}.
+     * @return A Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or if {@code keyExtractor} is {@code null}.
+     * @see #rollup(Collection)
+     * @see #rollup(Collection, String, String, Collector)
+     * @see #rollup(Collection, Collection, String, Class)
+     * @see #rollup(Collection, Collection, String, Collector)
+     * @see #rollup(Collection, Collection, String, Function, Collector)
+     * @see #groupBy(Collection)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
     Stream<Dataset> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor) throws IllegalArgumentException;
 
     /**
-     * Performs a rollup operation on the Dataset using the specified columns, key mapper function, and an aggregate operation.
+     * Performs a rollup operation on the Dataset using the specified columns with a key extractor function and aggregation on a single column.
      * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
-     * The rollup operation is performed on the specified columns.
+     * The rollup operation is performed on the specified columns, and the key extractor function is used
+     * to transform the DisposableObjArray to a custom key for grouping purposes.
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the rollup operation.
-     * The keyExtractor function is used to transform the DisposableObjArray to a custom key.
+     * The rollup starts with the most detailed level (all specified columns) and progressively removes
+     * the rightmost column in each subsequent level, ending with the grand total (no grouping columns).
+     * Each level in the rollup contains grouped data with subtotals for that level of granularity.
      * The results of the aggregation are stored in a new column in each of these Datasets.
-     * The aggregation operation is defined by the provided collector.
      *
-     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param keyExtractor The function to transform the DisposableObjArray to a custom key.
-     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
-     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
-     * @param collector The collector that defines the aggregate operation.
-     * @return A Stream of Datasets, each representing a level of the rollup operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "city", "sales", "quantity"),
+     *     new Object[][] {
+     *          {"North", "USA", "New York", 1000, 50},
+     *          {"North", "USA", "Boston", 800, 40},
+     *          {"North", "Canada", "Toronto", 600, 30},
+     *          {"South", "Mexico", "Mexico City", 400, 20}
+     *     });
+     *
+     * // +--------+---------+-------------+-------+----------+
+     * // | region | country | city        | sales | quantity |
+     * // +--------+---------+-------------+-------+----------+
+     * // | North  | USA     | New York    | 1000  | 50       |
+     * // | North  | USA     | Boston      | 800   | 40       |
+     * // | North  | Canada  | Toronto     | 600   | 30       |
+     * // | South  | Mexico  | Mexico City | 400   | 20       |
+     * // +--------+---------+-------------+-------+----------+
+     *
+     * Function&lt;DisposableObjArray, String&gt; keyExtractor = keyRow -> keyRow.join("-");
+     *
+     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     *     Arrays.asList("region", "country", "city"),
+     *     keyExtractor,
+     *     "sales",
+     *     "total_sales",
+     *     Collectors.summingInt(Numbers::toInt));
+     *
+     * // Returns a stream of 4 datasets:
+     * // Level 1: Grouped by region, country, city (most detailed)
+     * // +--------+---------+-------------+-------------+
+     * // | region | country | city        | total_sales |
+     * // +--------+---------+-------------+-------------+
+     * // | North  | USA     | New York    | 1000        |
+     * // | North  | USA     | Boston      | 800         |
+     * // | North  | Canada  | Toronto     | 600         |
+     * // | South  | Mexico  | Mexico City | 400         |
+     * // +--------+---------+-------------+-------------+
+     * // Level 2: Grouped by region, country
+     * // +--------+---------+-------------+
+     * // | region | country | total_sales |
+     * // +--------+---------+-------------+
+     * // | North  | USA     | 1800        |
+     * // | North  | Canada  | 600         |
+     * // | South  | Mexico  | 400         |
+     * // +--------+---------+-------------+
+     * // Level 3: Grouped by region
+     * // +--------+-------------+
+     * // | region | total_sales |
+     * // +--------+-------------+
+     * // | North  | 2400        |
+     * // | South  | 400         |
+     * // +--------+-------------+
+     * // Level 4: Grand total (no grouping)
+     * // +-------------+
+     * // | total_sales |
+     * // +-------------+
+     * // | 2800        |
+     * // +-------------+
+     * }</pre>
+     *
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
+     * @param keyExtractor The function to transform the DisposableObjArray to a custom key for grouping purposes. Must not be {@code null}.
+     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed. Must not be {@code null}.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
+     * @param collector The collector that defines the aggregate operation. Must not be {@code null}.
+     * @return A Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or if {@code keyExtractor}, {@code aggregateOnColumnName}, {@code aggregateResultColumnName}, or {@code collector} is {@code null}.
+     * @see #rollup(Collection)
+     * @see #rollup(Collection, String, String, Collector)
+     * @see #rollup(Collection, Collection, String, Class)
+     * @see #rollup(Collection, Collection, String, Collector)
+     * @see #rollup(Collection, Collection, String, Function, Collector)
+     * @see #rollup(Collection, Function)
+     * @see #groupBy(Collection)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4531,22 +5637,95 @@ public sealed interface Dataset permits RowDataset {
             String aggregateResultColumnName, Collector<?, ?, ?> collector) throws IllegalArgumentException;
 
     /**
-     * Performs a rollup operation on the Dataset using the specified columns, key mapper function, and a collection of aggregate operations.
+     * Performs a rollup operation on the Dataset using the specified columns with a key extractor function and aggregation on multiple columns.
      * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
-     * The rollup operation is performed on the specified columns.
+     * The rollup operation is performed on the specified columns, and the key extractor function is used
+     * to transform the DisposableObjArray to a custom key for grouping purposes.
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the rollup operation.
-     * The keyExtractor function is used to transform the DisposableObjArray to a custom key.
+     * The rollup starts with the most detailed level (all specified columns) and progressively removes
+     * the rightmost column in each subsequent level, ending with the grand total (no grouping columns).
+     * Each level in the rollup contains grouped data with subtotals for that level of granularity.
      * The results of the aggregation are stored in a new column in each of these Datasets.
      * The aggregation operation is defined by the provided rowType.
      *
-     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param keyExtractor The function to transform the DisposableObjArray to a custom key.
-     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
-     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
-     * @param rowType The class of the row type that defines the aggregate operation. It must be one of the supported types - Object[], Collection, Map, or Bean class.
-     * @return A Stream of Datasets, each representing a level of the rollup operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "city", "sales", "quantity"),
+     *     new Object[][] {
+     *          {"North", "USA", "New York", 1000, 50},
+     *          {"North", "USA", "Boston", 800, 40},
+     *          {"North", "Canada", "Toronto", 600, 30},
+     *          {"South", "Mexico", "Mexico City", 400, 20}
+     *     });
+     *
+     * // +--------+---------+-------------+-------+----------+
+     * // | region | country | city        | sales | quantity |
+     * // +--------+---------+-------------+-------+----------+
+     * // | North  | USA     | New York    | 1000  | 50       |
+     * // | North  | USA     | Boston      | 800   | 40       |
+     * // | North  | Canada  | Toronto     | 600   | 30       |
+     * // | South  | Mexico  | Mexico City | 400   | 20       |
+     * // +--------+---------+-------------+-------+----------+
+     *
+     * Function&lt;DisposableObjArray, String&gt; keyExtractor = keyRow -> keyRow.join("-");
+     *
+     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     *     Arrays.asList("region", "country", "city"),
+     *     keyExtractor,
+     *     Arrays.asList("sales", "quantity"),
+     *     "aggregated_data",
+     *     Object[].class);
+     *
+     * // Returns a stream of 4 datasets:
+     * // Level 1: Grouped by region, country, city (most detailed)
+     * // +--------+---------+-------------+-----------------+
+     * // | region | country | city        | aggregated_data |
+     * // +--------+---------+-------------+-----------------+
+     * // | North  | USA     | New York    | [[1000, 50]]    |
+     * // | North  | USA     | Boston      | [[800, 40]]     |
+     * // | North  | Canada  | Toronto     | [[600, 30]]     |
+     * // | South  | Mexico  | Mexico City | [[400, 20]]     |
+     * // +--------+---------+-------------+-----------------+
+     * // Level 2: Grouped by region, country
+     * // +--------+---------+-------------------------+
+     * // | region | country | aggregated_data         |
+     * // +--------+---------+-------------------------+
+     * // | North  | USA     | [[1000, 50], [800, 40]] |
+     * // | North  | Canada  | [[600, 30]]             |
+     * // | South  | Mexico  | [[400, 20]]             |
+     * // +--------+---------+-------------------------+
+     * // Level 3: Grouped by region
+     * // +--------+------------------------------------+
+     * // | region | aggregated_data                    |
+     * // +--------+------------------------------------+
+     * // | North  | [[1000, 50], [800, 40], [600, 30]] |
+     * // | South  | [[400, 20]]                        |
+     * // +--------+------------------------------------+
+     * // Level 4: Grand total (no grouping)
+     * // +-----------------------------------------------+
+     * // | aggregated_data                               |
+     * // +-----------------------------------------------+
+     * // | [[1000, 50], [800, 40], [600, 30], [400, 20]] |
+     * // +-----------------------------------------------+
+     * }</pre>
+     *
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
+     * @param keyExtractor The function to transform the DisposableObjArray to a custom key for grouping purposes. Must not be {@code null}.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
+     * @param rowType The class of the row type that defines the aggregate operation. It must be one of the supported types - Object[], Collection, Map, or Bean class. Must not be {@code null}.
+     * @return A Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code keyExtractor}, {@code aggregateResultColumnName}, or {@code rowType} is {@code null}, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see #rollup(Collection)
+     * @see #rollup(Collection, String, String, Collector)
+     * @see #rollup(Collection, Collection, String, Class)
+     * @see #rollup(Collection, Collection, String, Collector)
+     * @see #rollup(Collection, Collection, String, Function, Collector)
+     * @see #rollup(Collection, Function)
+     * @see #rollup(Collection, Function, String, String, Collector)
+     * @see #groupBy(Collection)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4554,22 +5733,96 @@ public sealed interface Dataset permits RowDataset {
             String aggregateResultColumnName, Class<?> rowType) throws IllegalArgumentException;
 
     /**
-     * Performs a rollup operation on the Dataset using the specified columns, key mapper function, and a collector for aggregate operations.
+     * Performs a rollup operation on the Dataset using the specified columns with a key extractor function and aggregation on multiple columns with a custom collector.
      * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
-     * The rollup operation is performed on the specified columns.
+     * The rollup operation is performed on the specified columns, and the key extractor function is used
+     * to transform the DisposableObjArray to a custom key for grouping purposes.
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the rollup operation.
-     * The keyExtractor function is used to transform the DisposableObjArray to a custom key.
+     * The rollup starts with the most detailed level (all specified columns) and progressively removes
+     * the rightmost column in each subsequent level, ending with the grand total (no grouping columns).
+     * Each level in the rollup contains grouped data with subtotals for that level of granularity.
      * The results of the aggregation are stored in a new column in each of these Datasets.
      * The aggregation operation is defined by the provided collector.
      *
-     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param keyExtractor The function to transform the DisposableObjArray to a custom key.
-     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
-     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
-     * @param collector The collector defining the aggregate operation.
-     * @return A Stream of Datasets, each representing a level of the rollup operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "city", "sales", "quantity"),
+     *     new Object[][] {
+     *          {"North", "USA", "New York", 1000, 50},
+     *          {"North", "USA", "Boston", 800, 40},
+     *          {"North", "Canada", "Toronto", 600, 30},
+     *          {"South", "Mexico", "Mexico City", 400, 20}
+     *     });
+     *
+     * // +--------+---------+-------------+-------+----------+
+     * // | region | country | city        | sales | quantity |
+     * // +--------+---------+-------------+-------+----------+
+     * // | North  | USA     | New York    | 1000  | 50       |
+     * // | North  | USA     | Boston      | 800   | 40       |
+     * // | North  | Canada  | Toronto     | 600   | 30       |
+     * // | South  | Mexico  | Mexico City | 400   | 20       |
+     * // +--------+---------+-------------+-------+----------+
+     *
+     * Function&lt;DisposableObjArray, String&gt; keyExtractor = keyRow -> keyRow.join("-");
+     *
+     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     *     Arrays.asList("region", "country", "city"),
+     *     keyExtractor,
+     *     Arrays.asList("sales", "quantity"),
+     *     "aggregated_data",
+     *     MoreCollectors.summingInt(a -> (Integer) a[0], a -> (Integer) a[1]));
+     *
+     * // Returns a stream of 4 datasets:
+     * // Level 1: Grouped by region, country, city (most detailed)
+     * // +--------+---------+-------------+-----------------+
+     * // | region | country | city        | aggregated_data |
+     * // +--------+---------+-------------+-----------------+
+     * // | North  | USA     | New York    | (1000, 50)      |
+     * // | North  | USA     | Boston      | (800, 40)       |
+     * // | North  | Canada  | Toronto     | (600, 30)       |
+     * // | South  | Mexico  | Mexico City | (400, 20)       |
+     * // +--------+---------+-------------+-----------------+
+     * // Level 2: Grouped by region, country
+     * // +--------+---------+-----------------+
+     * // | region | country | aggregated_data |
+     * // +--------+---------+-----------------+
+     * // | North  | USA     | (1800, 90)      |
+     * // | North  | Canada  | (600, 30)       |
+     * // | South  | Mexico  | (400, 20)       |
+     * // +--------+---------+-----------------+
+     * // Level 3: Grouped by region
+     * // +--------+-----------------+
+     * // | region | aggregated_data |
+     * // +--------+-----------------+
+     * // | North  | (2400, 120)     |
+     * // | South  | (400, 20)       |
+     * // +--------+-----------------+
+     * // Level 4: Grand total (no grouping)
+     * // +-----------------+
+     * // | aggregated_data |
+     * // +-----------------+
+     * // | (2800, 140)     |
+     * // +-----------------+
+     * }</pre>
+     *
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
+     * @param keyExtractor The function to transform the DisposableObjArray to a custom key for grouping purposes. Must not be {@code null}.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
+     * @param collector The collector that defines the aggregate operation. Must not be {@code null}.
+     * @return A Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code keyExtractor}, {@code aggregateResultColumnName}, or {@code collector} is {@code null}.
+     * @see #rollup(Collection)
+     * @see #rollup(Collection, String, String, Collector)
+     * @see #rollup(Collection, Collection, String, Class)
+     * @see #rollup(Collection, Collection, String, Collector)
+     * @see #rollup(Collection, Collection, String, Function, Collector)
+     * @see #rollup(Collection, Function)
+     * @see #rollup(Collection, Function, String, String, Collector)
+     * @see #rollup(Collection, Function, Collection, String, Class)
+     * @see #groupBy(Collection)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4577,24 +5830,92 @@ public sealed interface Dataset permits RowDataset {
             String aggregateResultColumnName, Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
-     * Performs a rollup operation on the Dataset using the specified columns, key mapper function, row mapper function, and a collector for aggregate operations.
+     * Performs a rollup operation on the Dataset using the specified columns, custom key extractor, row mapper function, and a collector for aggregate operations.
      * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
-     * The rollup operation is performed on the specified columns.
+     * The rollup operation is performed on the specified columns, and the key extractor function is used to transform
+     * the DisposableObjArray to a custom key for grouping.
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the rollup operation.
-     * The keyExtractor function is used to transform the DisposableObjArray to a custom key.
-     * The rowMapper function is used to transform the DisposableObjArray to a custom row.
+     * The rollup starts with the most detailed level (all specified columns) and progressively removes
+     * the rightmost column in each subsequent level, ending with the grand total (no grouping columns).
+     * The keyExtractor function allows for custom transformation of row data before grouping.
+     * The rowMapper function transforms the aggregate data before applying the collector.
      * The results of the aggregation are stored in a new column in each of these Datasets.
-     * The aggregation operation is defined by the provided collector.
      *
-     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param keyExtractor The function to transform the DisposableObjArray to a custom key.
-     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
-     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
-     * @param rowMapper The function to transform the DisposableObjArray to a custom row.
-     * @param collector The collector defining the aggregate operation.
-     * @return A Stream of Datasets, each representing a level of the rollup operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "city", "sales", "quantity"),
+     *     new Object[][] {
+     *          {"North", "USA", "New York", 1000, 50},
+     *          {"North", "USA", "Boston", 800, 40},
+     *          {"North", "Canada", "Toronto", 600, 30},
+     *          {"South", "Mexico", "Mexico City", 400, 20}
+     *     });
+     *
+     * // +--------+---------+-------------+-------+----------+
+     * // | region | country | city        | sales | quantity |
+     * // +--------+---------+-------------+-------+----------+
+     * // | North  | USA     | New York    | 1000  | 50       |
+     * // | North  | USA     | Boston      | 800   | 40       |
+     * // | North  | Canada  | Toronto     | 600   | 30       |
+     * // | South  | Mexico  | Mexico City | 400   | 20       |
+     * // +--------+---------+-------------+-------+----------+
+     *
+     * Function&lt;DisposableObjArray, String&gt; keyExtractor = keyRow -> keyRow.join("-");
+     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     *     Arrays.asList("region", "country", "city"),
+     *     keyExtractor,
+     *     Arrays.asList("sales", "quantity"),
+     *     "aggregated_totals",
+     *     row -> Tuple.of((Integer) row.get(0), (Integer) row.get(1)),
+     *     MoreCollectors.summingInt(tp -> tp._1, tp -> tp._2));
+     *
+     * // Returns a stream of 4 datasets:
+     * // Level 1: Grouped by region, country, city (most detailed)
+     * // +--------+---------+-------------+-----------------+
+     * // | region | country | city        | aggregated_data |
+     * // +--------+---------+-------------+-----------------+
+     * // | North  | USA     | New York    | (1000, 50)      |
+     * // | North  | USA     | Boston      | (800, 40)       |
+     * // | North  | Canada  | Toronto     | (600, 30)       |
+     * // | South  | Mexico  | Mexico City | (400, 20)       |
+     * // +--------+---------+-------------+-----------------+
+     * // Level 2: Grouped by region, country
+     * // +--------+---------+-----------------+
+     * // | region | country | aggregated_data |
+     * // +--------+---------+-----------------+
+     * // | North  | USA     | (1800, 90)      |
+     * // | North  | Canada  | (600, 30)       |
+     * // | South  | Mexico  | (400, 20)       |
+     * // +--------+---------+-----------------+
+     * // Level 3: Grouped by region
+     * // +--------+-----------------+
+     * // | region | aggregated_data |
+     * // +--------+-----------------+
+     * // | North  | (2400, 120)     |
+     * // | South  | (400, 20)       |
+     * // +--------+-----------------+
+     * // Level 4: Grand total (no grouping)
+     * // +-----------------+
+     * // | aggregated_data |
+     * // +-----------------+
+     * // | (2800, 140)     |
+     * // +-----------------+
+     * }</pre>
+     *
+     * @param <T> The type of elements produced by the row mapper function.
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
+     * @param keyExtractor The function to transform the DisposableObjArray to a custom key for grouping. Must not be {@code null}.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
+     * @param rowMapper The function to transform the DisposableObjArray to a custom row before aggregation. Must not be {@code null}.
+     * @param collector The collector defining the aggregate operation. Must not be {@code null}.
+     * @return A Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code keyExtractor}, {@code rowMapper}, {@code collector}, or {@code aggregateResultColumnName} is {@code null}.
+     * @see #rollup(Collection)
+     * @see #rollup(Collection, Function)
+     * @see #groupBy(Collection, Function)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4605,13 +5926,68 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Performs a cube operation on the Dataset using the specified columns.
      * A cube operation is a form of data summarization that aggregates data by all possible combinations of the specified columns.
-     * The cube operation is performed on the specified columns.
+     * Unlike rollup which creates hierarchical subtotals, cube creates subtotals for every possible combination of the grouping columns.
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the cube operation.
+     * The cube operation generates 2^n datasets where n is the number of key columns, representing all possible
+     * combinations of grouping columns including the grand total (no grouping columns).
      *
-     * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
-     * @return A Stream of Datasets, each representing a level of the cube operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "sales"),
+     *     new Object[][] {
+     *          {"North", "USA", 1000},
+     *          {"North", "Canada", 600},
+     *          {"South", "Mexico", 400}
+     *     });
+     *
+     * // +--------+---------+-------+
+     * // | region | country | sales |
+     * // +--------+---------+-------+
+     * // | North  | USA     | 1000  |
+     * // | North  | Canada  | 600   |
+     * // | South  | Mexico  | 400   |
+     * // +--------+---------+-------+
+     * 
+     * Stream&lt;Dataset&gt; cubeResult = dataset.cube(Arrays.asList("region", "country"));
+     * // Returns a stream of 4 datasets:
+     * // Level 1: Grouped by region, country (most detailed)
+     * // +--------+---------+-------+
+     * // | region | country | count |
+     * // +--------+---------+-------+
+     * // | North  | USA     | 1     |
+     * // | North  | Canada  | 1     |
+     * // | South  | Mexico  | 1     |
+     * // +--------+---------+-------+
+     * // Level 2: Grouped by region only
+     * // +--------+-------+
+     * // | region | count |
+     * // +--------+-------+
+     * // | North  | 2     |
+     * // | South  | 1     |
+     * // +--------+-------+
+     * // Level 3: Grouped by country only  
+     * // +---------+-------+
+     * // | country | count |
+     * // +---------+-------+
+     * // | USA     | 1     |
+     * // | Canada  | 1     |
+     * // | Mexico  | 1     |
+     * // +---------+-------+
+     * // Level 4: Grand total (no grouping)
+     * // +-------+
+     * // | count |
+     * // +-------+
+     * // | 3     |
+     * // +-------+
+     * }</pre>
+     *
+     * @param keyColumnNames The names of the columns on which the cube operation is to be performed. Must not be {@code null} or empty.
+     * @return A Stream of Datasets, each representing a level of the cube operation, covering all possible combinations of the specified columns.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty.
+     * @see #rollup(Collection)
+     * @see #cube(Collection, Function, Collection, String, Function, Collector)
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
     Stream<Dataset> cube(Collection<String> keyColumnNames) throws IllegalArgumentException;
@@ -4631,6 +6007,8 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector defining the aggregate operation.
      * @return A Stream of Datasets, each representing a level of the cube operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty.
+     * @see #cube(Collection)
+     * @see #cube(Collection, Function, Collection, String, Function, Collector)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4652,6 +6030,8 @@ public sealed interface Dataset permits RowDataset {
      * @param rowType The Class defining the type of the new column. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return A Stream of Datasets, each representing a level of the cube operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see #cube(Collection)
+     * @see #cube(Collection, Function, Collection, String, Function, Collector)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4673,6 +6053,8 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector defining the aggregate operation.
      * @return A Stream of Datasets, each representing a level of the cube operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see #cube(Collection)
+     * @see #cube(Collection, Function, Collection, String, Function, Collector)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4697,6 +6079,8 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector defining the aggregate operation.
      * @return A Stream of Datasets, each representing a level of the cube operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see #cube(Collection)
+     * @see #cube(Collection, Function, Collection, String, Function, Collector)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4715,6 +6099,8 @@ public sealed interface Dataset permits RowDataset {
      * @param keyExtractor The function to transform the DisposableObjArray to a key before the cube operation.
      * @return A Stream of Datasets, each representing a level of the cube operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty
+     * @see #cube(Collection)
+     * @see #cube(Collection, Function, Collection, String, Function, Collector)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4737,6 +6123,8 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector defining the aggregate operation.
      * @return A Stream of Datasets, each representing a level of the cube operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty.
+     * @see #cube(Collection)
+     * @see #cube(Collection, Function, Collection, String, Function, Collector)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4760,6 +6148,8 @@ public sealed interface Dataset permits RowDataset {
      * @param rowType The class of the rows in the resulting Dataset. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return A Stream of Datasets, each representing a level of the cube operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see #cube(Collection)
+     * @see #cube(Collection, Function, Collection, String, Function, Collector)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4783,6 +6173,8 @@ public sealed interface Dataset permits RowDataset {
      * @param collector The collector defining the aggregate operation.
      * @return A Stream of Datasets, each representing a level of the cube operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see #cube(Collection)
+     * @see #cube(Collection, Function, Collection, String, Function, Collector)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4790,25 +6182,87 @@ public sealed interface Dataset permits RowDataset {
             String aggregateResultColumnName, Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
-     * Performs a cube operation on the Dataset using the specified columns, a key mapper function, a row mapper function, and a collector.
+     * Performs a cube operation on the Dataset using the specified columns with a key extractor function, row mapper function, and aggregation on multiple columns with a custom collector.
      * A cube operation is a form of data summarization that aggregates data by all possible combinations of the specified columns.
-     * The cube operation is performed on the specified columns.
+     * Unlike rollup which creates hierarchical subtotals, cube creates subtotals for every possible combination of the grouping columns.
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the cube operation.
-     * The keyExtractor function is used to transform the DisposableObjArray to a key before the cube operation.
-     * The rowMapper function is used to transform the DisposableObjArray to a row after the cube operation.
-     * The results of the aggregation are stored in a new column in the Dataset.
-     * The collector defines the aggregate operation.
+     * The cube operation generates 2^n datasets where n is the number of key columns, representing all possible
+     * combinations of grouping columns including the grand total (no grouping columns).
+     * The key extractor function is used to transform the DisposableObjArray to a custom key for grouping purposes.
+     * The row mapper function is used to transform the aggregate input data before applying the collector.
+     * The results of the aggregation are stored in a new column in each of these Datasets.
+     * The aggregation operation is defined by the provided collector.
      *
-     * @param <T> The type of the object that the row data will be mapped to.
-     * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
-     * @param keyExtractor The function to transform the DisposableObjArray to a key before the cube operation.
-     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
-     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
-     * @param rowMapper The function to transform the DisposableObjArray to a row after the cube operation.
-     * @param collector The collector defining the aggregate operation.
-     * @return A Stream of Datasets, each representing a level of the cube operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "country", "sales"),
+     *     new Object[][] {
+     *          {"North", "USA", 1000},
+     *          {"North", "Canada", 600},
+     *          {"South", "Mexico", 400}
+     *     });
+     *
+     * // +--------+---------+-------+
+     * // | region | country | sales |
+     * // +--------+---------+-------+
+     * // | North  | USA     | 1000  |
+     * // | North  | Canada  | 600   |
+     * // | South  | Mexico  | 400   |
+     * // +--------+---------+-------+ 
+     *
+     * Function&lt;DisposableObjArray, String&gt; keyExtractor = keyRow -> keyRow.join("-");
+     * Function&lt;DisposableObjArray, Double&gt; rowMapper = row -> (Integer) row.get(0) * 1.1;
+     * Stream&lt;Dataset&gt; cubeResult = dataset.cube(
+     *     Arrays.asList("region", "country"),
+     *     keyExtractor,
+     *     Arrays.asList("sales"),
+     *     "total_sales_with_markup",
+     *     rowMapper,
+     *     Collectors.collectingAndThen(Collectors.summingDouble(Double::doubleValue), r -> Numbers.round(r, 2)));
+     * // Returns a stream of 4 datasets:
+     * // Level 1: Grouped by region, country (most detailed)
+     * // +--------+---------+-------------------------+
+     * // | region | country | total_sales_with_markup |
+     * // +--------+---------+-------------------------+
+     * // | North  | USA     | 1100.0                  |
+     * // | North  | Canada  | 660.0                   |
+     * // | South  | Mexico  | 440.0                   |
+     * // +--------+---------+-------------------------+
+     * // Level 2: Grouped by region only
+     * // +--------+-------------------------+
+     * // | region | total_sales_with_markup |
+     * // +--------+-------------------------+
+     * // | North  | 1760.0                  |
+     * // | South  | 440.0                   |
+     * // +--------+-------------------------+
+     * // Level 3: Grouped by country only
+     * // +---------+-------------------------+
+     * // | country | total_sales_with_markup |
+     * // +---------+-------------------------+
+     * // | USA     | 1100.0                  |
+     * // | Canada  | 660.0                   |
+     * // | Mexico  | 440.0                   |
+     * // +---------+-------------------------+
+     * // Level 4: Grand total (no grouping)
+     * // +-------------------------+
+     * // | total_sales_with_markup |
+     * // +-------------------------+
+     * // | 2200.0                  |
+     * // +-------------------------+
+     * }</pre>
+     *
+     * @param <T> The type of the object that the row data will be mapped to by the row mapper function.
+     * @param keyColumnNames The names of the columns on which the cube operation is to be performed. Must not be {@code null} or empty.
+     * @param keyExtractor The function to transform the DisposableObjArray to a custom key for grouping purposes. Must not be {@code null}.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
+     * @param rowMapper The function to transform the DisposableObjArray to a mapped object before applying the collector. Must not be {@code null}.
+     * @param collector The collector that defines the aggregate operation. Must not be {@code null}.
+     * @return A Stream of Datasets, each representing a level of the cube operation, covering all possible combinations of the specified columns.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code keyExtractor}, {@code aggregateResultColumnName}, {@code rowMapper}, or {@code collector} is {@code null}.
+     * @see #rollup(Collection, Function, Collection, String, Function, Collector)
+     * @see #cube(Collection, Function, Collection, String, Function, Collector)
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
@@ -4823,23 +6277,60 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * This method returns a Sheet, where each cell represents an aggregation result.
      * The keyColumnName is used as the row identifier in the resulting Sheet.
-     * The aggregateOnColumnNames is the column on whichDifference between groupBy and pivot_table for pandas dataframes the aggregate operation is to be performed.
+     * The aggregateOnColumnNames is the column on which the aggregate operation is to be performed.
      * The pivotColumnName is used as the column identifier in the resulting Sheet.
      * The collector defines the aggregate operation.
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "sales"),
+     *     new Object[][] {
+     *          {"North", "A", 100},
+     *          {"North", "B", 200},
+     *          {"South", "A", 150},
+     *          {"South", "B", 250}
+     *     });
+     *
+     * // +--------+---------+-------+
+     * // | region | product | sales |
+     * // +--------+---------+-------+
+     * // | North  | A       | 100   |
+     * // | North  | B       | 200   |
+     * // | South  | A       | 150   |
+     * // | South  | B       | 250   |
+     * // +--------+---------+-------+
+     *
+     * Sheet&lt;String, String, Integer&gt; pivotResult = dataset.pivot(
+     *     "region",      // row identifier
+     *     "product",     // column identifier
+     *     "sales",       // aggregate column
+     *     Collectors.summingInt(Integer::intValue));
+     *
+     * // Result Sheet:
+     * //         +-----+-----+
+     * //         | A   | B   |
+     * // +-------+-----+-----+
+     * // | North | 100 | 200 |
+     * // | South | 150 | 250 |
+     * // +-------+-----+-----+
+     * }</pre>
      *
      * @param <R> The type of the row identifier in the resulting Sheet.
      * @param <C> The type of the column identifier in the resulting Sheet.
      * @param <T> The type of the aggregation result in the resulting Sheet.
-     * @param keyColumnName The name of the column to be used as the row identifier in the resulting Sheet.
-     * @param aggregateOnColumnNames The name of the column on which the aggregate operation is to be performed.
-     * @param pivotColumnName The name of the column to be used as the column identifier in the resulting Sheet.
-     * @param collector The collector defining the aggregate operation.
+     * @param keyColumnName The name of the column to be used as the row identifier in the resulting Sheet. Must not be {@code null}.
+     * @param pivotColumnName The name of the column to be used as the column identifier in the resulting Sheet. Must not be {@code null}.
+     * @param aggregateOnColumnNames The name of the column on which the aggregate operation is to be performed. Must not be {@code null}.
+     * @param collector The collector defining the aggregate operation. Must not be {@code null}.
      * @return A Sheet representing the result of the pivot operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code aggregateOnColumnNames} is empty.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName}, {@code aggregateOnColumnNames}, {@code pivotColumnName}, or {@code collector} is {@code null}.
+     * @see #groupBy(Collection)
+     * @see #rollup(Collection)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/34702815">Difference between groupby and pivot_table for pandas dataframes</a>
      */
     @Beta
-    <R, C, T> Sheet<R, C, T> pivot(String keyColumnName, String aggregateOnColumnNames, String pivotColumnName, Collector<?, ?, ? extends T> collector)
+    <R, C, T> Sheet<R, C, T> pivot(String keyColumnName, String pivotColumnName, String aggregateOnColumnNames, Collector<?, ?, ? extends T> collector)
             throws IllegalArgumentException;
 
     /**
@@ -4853,19 +6344,57 @@ public sealed interface Dataset permits RowDataset {
      * The pivotColumnName is used as the column identifier in the resulting Sheet.
      * The collector defines the aggregate operation.
      *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "sales", "quantity"),
+     *     new Object[][] {
+     *          {"North", "A", 100, 10},
+     *          {"North", "B", 200, 20},
+     *          {"South", "A", 150, 15},
+     *          {"South", "B", 250, 25}
+     *     });
+     *
+     * // +--------+---------+-------+----------+
+     * // | region | product | sales | quantity |
+     * // +--------+---------+-------+----------+
+     * // | North  | A       | 100   | 10       |
+     * // | North  | B       | 200   | 20       |
+     * // | South  | A       | 150   | 15       |
+     * // | South  | B       | 250   | 25       |
+     * // +--------+---------+-------+----------+
+     *
+     * Sheet&lt;String, String, Integer&gt; pivotResult = dataset.pivot(
+     *     "region",                           // row identifier
+     *     "product",                          // column identifier
+     *     Arrays.asList("sales", "quantity"), // aggregate columns
+     *     Collectors.summingInt(arr -> (Integer) arr[0] + (Integer) arr[1])); // sum sales + quantity
+     *
+     * // Result Sheet:
+     * //         +-----+-----+
+     * //         | A   | B   |
+     * // +-------+-----+-----+
+     * // | North | 110 | 220 |
+     * // | South | 165 | 275 |
+     * // +-------+-----+-----+
+     * }</pre>
+     *
      * @param <R> The type of the row identifier in the resulting Sheet.
      * @param <C> The type of the column identifier in the resulting Sheet.
      * @param <T> The type of the aggregation result in the resulting Sheet.
-     * @param keyColumnName The name of the column to be used as the row identifier in the resulting Sheet.
-     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
-     * @param pivotColumnName The name of the column to be used as the column identifier in the resulting Sheet.
-     * @param collector The collector defining the aggregate operation.
+     * @param keyColumnName The name of the column to be used as the row identifier in the resulting Sheet. Must not be {@code null}.
+     * @param pivotColumnName The name of the column to be used as the column identifier in the resulting Sheet. Must not be {@code null}.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
+     * @param collector The collector defining the aggregate operation. Must not be {@code null}.
      * @return A Sheet representing the result of the pivot operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code aggregateOnColumnNames} is empty.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName}, {@code aggregateOnColumnNames}, {@code pivotColumnName}, or {@code collector} is {@code null}, or if {@code aggregateOnColumnNames} is empty.
+     * @see #pivot(String, String, String, Collector)
+     * @see #groupBy(Collection)
+     * @see #rollup(Collection)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/34702815">Difference between groupby and pivot_table for pandas dataframes</a>
      */
     @Beta
-    <R, C, T> Sheet<R, C, T> pivot(String keyColumnName, Collection<String> aggregateOnColumnNames, String pivotColumnName,
+    <R, C, T> Sheet<R, C, T> pivot(String keyColumnName, String pivotColumnName, Collection<String> aggregateOnColumnNames,
             Collector<? super Object[], ?, ? extends T> collector) throws IllegalArgumentException;
 
     /**
@@ -4880,21 +6409,61 @@ public sealed interface Dataset permits RowDataset {
      * The rowMapper is a function that transforms the row data before aggregation.
      * The collector defines the aggregate operation.
      *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "sales", "quantity"),
+     *     new Object[][] {
+     *          {"North", "A", 100, 10},
+     *          {"North", "B", 200, 20},
+     *          {"South", "A", 150, 15},
+     *          {"South", "B", 250, 25}
+     *     });
+     *
+     * // +--------+---------+-------+----------+
+     * // | region | product | sales | quantity |
+     * // +--------+---------+-------+----------+
+     * // | North  | A       | 100   | 10       |
+     * // | North  | B       | 200   | 20       |
+     * // | South  | A       | 150   | 15       |
+     * // | South  | B       | 250   | 25       |
+     * // +--------+---------+-------+----------+
+     *
+     * Function&lt;DisposableObjArray, Double&gt; rowMapper = row -> (Integer) row.get(0) * 1.1; // Apply 10% markup to sales
+     *
+     * Sheet&lt;String, String, Double&gt; pivotResult = dataset.pivot(
+     *     "region",                           // row identifier
+     *     "product",                          // column identifier
+     *     Arrays.asList("sales", "quantity"), // aggregate columns
+     *     rowMapper,                          // transform function
+     *     Collectors.collectingAndThen(Collectors.summingDouble(Double::doubleValue), r -> Numbers.round(r, 2))); // aggregation
+     * //         +-------+-------+
+     * //         | A     | B     |
+     * // +-------+-------+-------+
+     * // | North | 110.0 | 220.0 |
+     * // | South | 165.0 | 275.0 |
+     * // +-------+-------+-------+
+     * }</pre>
+     *
      * @param <R> The type of the row identifier in the resulting Sheet.
      * @param <C> The type of the column identifier in the resulting Sheet.
      * @param <U> The type of the row data after being transformed by the rowMapper.
      * @param <T> The type of the aggregation result in the resulting Sheet.
-     * @param keyColumnName The name of the column to be used as the row identifier in the resulting Sheet.
-     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
-     * @param pivotColumnName The name of the column to be used as the column identifier in the resulting Sheet.
-     * @param rowMapper The function to transform the row data before aggregation.
-     * @param collector The collector defining the aggregate operation.
+     * @param keyColumnName The name of the column to be used as the row identifier in the resulting Sheet. Must not be {@code null}.
+     * @param pivotColumnName The name of the column to be used as the column identifier in the resulting Sheet. Must not be {@code null}.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
+     * @param rowMapper The function to transform the row data before aggregation. Must not be {@code null}.
+     * @param collector The collector defining the aggregate operation. Must not be {@code null}.
      * @return A Sheet representing the result of the pivot operation.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code aggregateOnColumnNames} is empty.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName}, {@code aggregateOnColumnNames}, {@code pivotColumnName}, {@code rowMapper}, or {@code collector} is {@code null}, or if {@code aggregateOnColumnNames} is empty.
+     * @see #pivot(String, String, String, Collector)
+     * @see #pivot(String, String, Collection, Collector)
+     * @see #groupBy(Collection)
+     * @see #rollup(Collection)
+     * @see #cube(Collection)
      * @see <a href="https://stackoverflow.com/questions/34702815">Difference between groupby and pivot_table for pandas dataframes</a>
      */
     @Beta
-    <R, C, U, T> Sheet<R, C, T> pivot(String keyColumnName, Collection<String> aggregateOnColumnNames, String pivotColumnName,
+    <R, C, U, T> Sheet<R, C, T> pivot(String keyColumnName, String pivotColumnName, Collection<String> aggregateOnColumnNames,
             Function<? super DisposableObjArray, ? extends U> rowMapper, Collector<? super U, ?, ? extends T> collector) throws IllegalArgumentException;
 
     /**
@@ -5862,71 +7431,262 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Performs a union operation between this Dataset and another Dataset.
      * The union operation combines all rows from both Datasets into a new Dataset.
-     * Duplicated rows in the returned {@code Dataset} will be eliminated.
+     * Duplicated rows detected by common columns in the returned Dataset will be eliminated.
+     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
      *
-     * @param other The other Dataset to union with.
-     * @return A new Dataset that is the result of the union operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * Dataset result = dataset1.union(dataset2);
+     * // The resulting Dataset will have columns: id, name, age, score
+     * // Result contains: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {3, "Charlie", null, 85}
+     * // Note: Duplicate rows are eliminated
+     * }</pre>
+     *
+     * @param other The other Dataset to union with
+     * @return A new Dataset that is the result of the union operation with duplicates eliminated
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if the Datasets do not have the same column structure
+     * @see #unionAll(Dataset)
+     * @see #unionAll(Dataset, boolean)
+     * @see #intersect(Dataset)
+     * @see #except(Dataset)
      */
     Dataset union(Dataset other) throws IllegalArgumentException;
 
     /**
      * Performs a union operation between this Dataset and another Dataset.
      * The union operation combines all rows from both Datasets into a new Dataset.
-     * Duplicated rows in the returned {@code Dataset} will be eliminated.
+     * Duplicated rows detected by common columns in the returned Dataset will be eliminated.
+     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
      *
-     * @param other The other Dataset to union with.
-     * @param requiresSameColumns A boolean value that determines whether the union operation requires both Datasets to have the same columns.
-     * @return A new Dataset that is the result of the union operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null} or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * // Require same columns - will throw IllegalArgumentException due to different columns
+     * // Dataset result = dataset1.union(dataset2, true);
+     *
+     * // Allow different columns - combines all columns from both datasets
+     * Dataset result = dataset1.union(dataset2, false);
+     * // The resulting Dataset will have columns: id, name, age, score
+     * // Result contains: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {3, "Charlie", null, 85}
+     * // Note: Duplicate rows are eliminated
+     * }</pre>
+     *
+     * @param other The other Dataset to union with
+     * @param requiresSameColumns Whether both Datasets must have identical column structures
+     * @return A new Dataset that is the result of the union operation with duplicates eliminated
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if requiresSameColumns is {@code true} and the Datasets do not have identical column structures
+     * @see #union(Dataset)
+     * @see #unionAll(Dataset)
+     * @see #unionAll(Dataset, boolean)
+     * @see #intersect(Dataset)
+     * @see #except(Dataset)
      */
     Dataset union(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
      * Performs a union operation between this Dataset and another Dataset.
      * The union operation combines all rows from both Datasets into a new Dataset.
-     * Duplicated rows detected by {@code keyColumnNames} in the returned {@code Dataset} will be eliminated.
+     * Duplicated rows detected by the specified key columns in the returned Dataset will be eliminated.
+     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
      *
-     * @param other The other Dataset to union with.
-     * @param keyColumnNames The collection of column names to be used as keys for duplicate detection.
-     * @return A new Dataset that is the result of the union operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null} or if the keyColumnNames is {@code null} or empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     *
+     * Dataset result = dataset1.union(dataset2, keyColumns);
+     * // Result contains columns: id, name, age, score
+     * // Result contains: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {3, "Charlie", null, 85}
+     * // Note: Duplicates based on key columns (id, name) are eliminated
+     * }</pre>
+     *
+     * @param other The other Dataset to union with
+     * @param keyColumnNames The collection of column names to be used as keys for duplicate detection
+     * @return A new Dataset that is the result of the union operation with duplicates eliminated based on key columns
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if the keyColumnNames is {@code null} or empty,
+     *                                  or if any of the specified key column names do not exist in either Dataset
+     * @see #union(Dataset)
+     * @see #union(Dataset, boolean)
+     * @see #unionAll(Dataset)
+     * @see #intersect(Dataset, Collection)
+     * @see #except(Dataset, Collection)
      */
     Dataset union(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
      * Performs a union operation between this Dataset and another Dataset.
      * The union operation combines all rows from both Datasets into a new Dataset.
-     * Duplicated rows detected by {@code keyColumnNames} in the returned {@code Dataset} will be eliminated.
+     * Duplicated rows detected by the specified key columns in the returned Dataset will be eliminated.
+     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
      *
-     * @param other The other Dataset to union with.
-     * @param keyColumnNames The collection of column names to be used as keys for duplicate detection.
-     * @param requiresSameColumns A boolean value that determines whether the union operation requires both Datasets to have the same columns.
-     * @return A new Dataset that is the result of the union operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns, or if the keyColumnNames is {@code null} or empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     *
+     * // Require same columns - will throw IllegalArgumentException due to different columns
+     * // Dataset result2 = dataset1.union(dataset2, keyColumns, true);
+     *
+     * // Allow different columns with key-based duplicate elimination
+     * Dataset result = dataset1.union(dataset2, keyColumns, false);
+     * // Result contains columns: id, name, age, score
+     * // Result contains: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {3, "Charlie", null, 85}
+     * // Note: Duplicates based on key columns (id, name) are eliminated
+     * }</pre>
+     *
+     * @param other The other Dataset to union with
+     * @param keyColumnNames The collection of column names to be used as keys for duplicate detection
+     * @param requiresSameColumns Whether both Datasets must have identical column structures
+     * @return A new Dataset that is the result of the union operation with duplicates eliminated based on key columns
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if the keyColumnNames is {@code null} or empty,
+     *                                  or if requiresSameColumns is {@code true} and the Datasets do not have identical column structures,
+     *                                  or if any of the specified key column names do not exist in either Dataset
+     * @see #union(Dataset)
+     * @see #union(Dataset, boolean)
+     * @see #union(Dataset, Collection)
+     * @see #unionAll(Dataset)
+     * @see #intersect(Dataset, Collection)
+     * @see #except(Dataset, Collection)
      */
     Dataset union(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
      * Performs a union all operation between this Dataset and another Dataset.
      * The union all operation combines all rows from both Datasets into a new Dataset.
-     * Unlike the union operation, union all includes duplicate rows in the resulting Dataset.
+     * Unlike the union operation, union all includes duplicate rows detected by common columns in the resulting Dataset.
+     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
+     * <br />
      *
-     * @param other The other Dataset to union with.
-     * @return A new Dataset that is the result of the union all operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * Dataset result = dataset1.unionAll(dataset2);
+     * // Result contains columns: id, name, age, score
+     * // Result contains: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, "Alice", 35, null}, {1, "Alice", null, 95}, {3, "Charlie", null, 85}
+     * // Note: All rows are included, including duplicates
+     * }</pre>
+     *
+     * @param other The other Dataset to union with
+     * @return A new Dataset that is the result of the union all operation with all rows included
+     * @throws IllegalArgumentException if the other Dataset is {@code null}
+     * @see #union(Dataset)
+     * @see #union(Dataset, boolean)
+     * @see #union(Dataset, Collection)
+     * @see #unionAll(Dataset, boolean)
+     * @see #intersect(Dataset)
+     * @see #except(Dataset)
+     * @see #merge(Dataset)
      */
     Dataset unionAll(Dataset other) throws IllegalArgumentException;
 
     /**
-     * Performs a union all operation between this Dataset and another Dataset.
+     * Performs a union all operation between this Dataset and another Dataset with an option to require same columns.
      * The union all operation combines all rows from both Datasets into a new Dataset.
-     * Unlike the union operation, union all includes duplicate rows in the resulting Dataset.
+     * Unlike the union operation, union all includes duplicate rows detected by common columns in the resulting Dataset.
+     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
      *
-     * @param other The other Dataset to union with.
-     * @param requiresSameColumns A boolean value that determines whether the union all operation requires both Datasets to have the same columns.
-     * @return A new Dataset that is the result of the union all operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * // Require same columns - will throw IllegalArgumentException due to different columns
+     * // Dataset result2 = dataset1.unionAll(dataset2, true);
+     *
+     * // Allow different columns
+     * Dataset result = dataset1.unionAll(dataset2, false);
+     * // Result contains columns: id, name, age, score
+     * // Result contains: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, "Alice", 35, null}, {1, "Alice", null, 95}, {3, "Charlie", null, 85}
+     * // Note: All rows are included, including duplicates
+     * }</pre>
+     *
+     * @param other The other Dataset to union with
+     * @param requiresSameColumns Whether both Datasets must have identical column structures
+     * @return A new Dataset that is the result of the union all operation with all rows included
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if requiresSameColumns is {@code true} and the Datasets do not have identical column structures
+     * @see #union(Dataset)
+     * @see #union(Dataset, boolean)
+     * @see #union(Dataset, Collection)
+     * @see #unionAll(Dataset)
+     * @see #intersect(Dataset)
+     * @see #except(Dataset)
+     * @see #merge(Dataset, boolean)
      */
     Dataset unionAll(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5955,193 +7715,683 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Performs an intersection operation between this Dataset and another Dataset.
-     * The intersection operation returns a new Dataset that contains only the rows that are common to both Datasets.
-     * Duplicated rows in the returned Dataset will be eliminated.
+     * Only the rows that have same values in all common columns between the two Datasets will be included in the result.
+     * Duplicated rows detected by common columns in the returned Dataset will be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
      *
-     * @param other The other Dataset to intersect with.
-     * @return A new Dataset that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"), 
+     *     new Object[][] {
+     *          {1, "Alice"}, 
+     *          {2, "Bob"},
+     *          {1, "Alice"}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"), 
+     *     new Object[][] {
+     *          {1, "Alice"}, 
+     *          {3, "Charlie"}
+     *     });
+     * 
+     * Dataset result = dataset1.intersect(dataset2);
+     * // Result contains only: {1, "Alice"}
+     * }</pre>
+     *
+     * @param other The other Dataset to intersect with
+     * @return A new Dataset that is the result of the intersection operation
+     * @throws IllegalArgumentException if the other Dataset is {@code null}
+     * @see #union(Dataset)
+     * @see #except(Dataset)
      */
     Dataset intersect(Dataset other) throws IllegalArgumentException;
 
     /**
      * Performs an intersection operation between this Dataset and another Dataset.
-     * The intersection operation returns a new Dataset that contains only the rows that are common to both Datasets.
-     * Duplicated rows in the returned Dataset will be eliminated.
+     * Only the rows that have same values in all common columns between the two Datasets will be included in the result.
+     * Duplicated rows detected by common columns in the returned Dataset will be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
      *
-     * @param other The other Dataset to intersect with.
-     * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both Datasets to have the same columns.
-     * @return A new Dataset that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * // Require same columns - will throw IllegalArgumentException
+     * // Dataset result = dataset1.intersect(dataset2, true);
+     *
+     * // Allow different columns - works fine
+     * Dataset result = dataset1.intersect(dataset2, false);
+     * // Result contains: {1, "Alice", 25} based on matching common columns id and name
+     * }</pre>
+     *
+     * @param other The other Dataset to intersect with
+     * @param requiresSameColumns Whether both Datasets must have the same columns
+     * @return A new Dataset that is the result of the intersection operation
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if requiresSameColumns is {@code true} and the Datasets do not have the same columns
+     * @see #intersect(Dataset)
+     * @see #union(Dataset, boolean)
+     * @see #except(Dataset, boolean)
      */
     Dataset intersect(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Performs an intersection operation between this Dataset and another Dataset.
-     * The intersection operation returns a new Dataset that contains only the rows that are common to both Datasets based on the key columns.
-     * Duplicated rows in the returned Dataset will be eliminated.
+     * Performs an intersection operation between this Dataset and another Dataset using specified key columns.
+     * Only the rows that have same values in the specified key columns between the two Datasets will be included in the result.
+     * Duplicated rows detected by the specified key columns in the returned Dataset will be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
      *
-     * @param other The other Dataset to intersect with.
-     * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
-     * @return A new Dataset that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if the keyColumnNames is {@code null} or empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * Dataset result = dataset1.intersect(dataset2, Arrays.asList("id", "name"));
+     * // Result contains: {1, "Alice", 25} based on matching id and name
+     * }</pre>
+     *
+     * @param other The other Dataset to intersect with
+     * @param keyColumnNames The collection of column names to be used as keys for intersection
+     * @return A new Dataset that is the result of the intersection operation
+     * @throws IllegalArgumentException if the other Dataset is {@code null} or if keyColumnNames is {@code null} or empty
+     * @see #intersect(Dataset)
+     * @see #union(Dataset, Collection)
+     * @see #except(Dataset, Collection)
      */
     Dataset intersect(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Performs an intersection operation between this Dataset and another Dataset.
-     * The intersection operation returns a new Dataset that contains only the rows that are common to both Datasets based on the key columns.
-     * Duplicated rows in the returned Dataset will be eliminated.
+     * Performs an intersection operation between this Dataset and another Dataset using specified key columns.
+     * Only the rows that have same values in the specified key columns between the two Datasets will be included in the result.
+     * Duplicated rows detected by the specified key columns in the returned Dataset will be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
      *
-     * @param other The other Dataset to intersect with.
-     * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
-     * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both Datasets to have the same columns.
-     * @return A new Dataset that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * // Require same columns - will throw IllegalArgumentException
+     * // Dataset result = dataset1.intersect(dataset2, Arrays.asList("id", "name"), true);
+     *
+     * // Allow different columns - works fine
+     * Dataset result = dataset1.intersect(dataset2, Arrays.asList("id", "name"), false);
+     * // Result contains: {1, "Alice", 25} based on matching id and name
+     * }</pre>
+     *
+     * @param other The other Dataset to intersect with
+     * @param keyColumnNames The collection of column names to be used as keys for intersection
+     * @param requiresSameColumns Whether both Datasets must have the same columns
+     * @return A new Dataset that is the result of the intersection operation
+     * @throws IllegalArgumentException if the other Dataset is {@code null}, if keyColumnNames is {@code null} or empty, 
+     *                                  or if requiresSameColumns is {@code true} and the Datasets do not have the same columns
+     * @see #intersect(Dataset)
+     * @see #intersect(Dataset, Collection)
+     * @see #union(Dataset, Collection, boolean)
+     * @see #except(Dataset, Collection, boolean)
      */
     Dataset intersect(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
      * Performs an intersection operation between this Dataset and another Dataset.
-     * The intersection operation returns a new Dataset that contains only the rows that are common to both Datasets.
-     * Duplicated rows in the returned Dataset will not be eliminated.
+     * Only the rows that have same values in all common columns between the two Datasets will be included in the result.
+     * Duplicated rows detected by common columns in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
      *
-     * @param other The other Dataset to intersect with.
-     * @return A new Dataset that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 25}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {2, "Bob", 95},
+     *          {3, "Charlie", 85},
+     *     });
+     *
+     * Dataset result = dataset1.intersectAll(dataset2);
+     * // Result contains: {1, "Alice", 25}, {2, "Bob", 30}, {1, "Alice", 35} based on matching common columns id and name
+     * // Note: Duplicates are preserved
+     * }</pre>
+     *
+     * @param other The other Dataset to intersect with
+     * @return A new Dataset that is the result of the intersection operation with duplicates preserved
+     * @throws IllegalArgumentException if the other Dataset is {@code null}
+     * @see #intersect(Dataset)
+     * @see #unionAll(Dataset)
+     * @see #exceptAll(Dataset)
      */
     Dataset intersectAll(Dataset other) throws IllegalArgumentException;
 
     /**
      * Performs an intersection operation between this Dataset and another Dataset.
-     * The intersection operation returns a new Dataset that contains only the rows that are common to both Datasets.
-     * Duplicated rows in the returned Dataset will not be eliminated.
+     * Only the rows that have same values in all common columns between the two Datasets will be included in the result.
+     * Duplicated rows detected by common columns in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
      *
-     * @param other The other Dataset to intersect with.
-     * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both Datasets to have the same columns.
-     * @return A new Dataset that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 25}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {2, "Bob", 95},
+     *          {3, "Charlie", 85},
+     *     });
+     *
+     * // Require same columns - will throw IllegalArgumentException
+     * // Dataset result = dataset1.intersectAll(dataset2, true);
+     *
+     * // Allow different columns - works fine
+     * Dataset result = dataset1.intersectAll(dataset2, false);
+     * // Result contains: {1, "Alice", 25}, {2, "Bob", 30}, {1, "Alice", 25} based on matching common columns id and name
+     * // Note: Duplicates are preserved
+     * }</pre>
+     *
+     * @param other The other Dataset to intersect with
+     * @param requiresSameColumns Whether both Datasets must have the same columns
+     * @return A new Dataset that is the result of the intersection operation with duplicates preserved
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if requiresSameColumns is {@code true} and the Datasets do not have the same columns
+     * @see #intersectAll(Dataset)
+     * @see #intersect(Dataset, boolean)
+     * @see #unionAll(Dataset, boolean)
+     * @see #exceptAll(Dataset, boolean)
      */
     Dataset intersectAll(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Performs an intersection operation between this Dataset and another Dataset.
-     * The intersection operation returns a new Dataset that contains only the rows that are common to both Datasets based on the key columns.
-     * Duplicated rows in the returned Dataset will not be eliminated.
+     * Performs an intersection operation between this Dataset and another Dataset using specified key columns.
+     * Only the rows that have same values in the specified key columns between the two Datasets will be included in the result.
+     * Duplicated rows detected by the specified key columns in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
      *
-     * @param other The other Dataset to intersect with.
-     * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
-     * @return A new Dataset that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if the keyColumnNames is {@code null} or empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 25}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {2, "Bob", 95},
+     *          {3, "Charlie", 85},
+     *     });
+     *
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Dataset result = dataset1.intersectAll(dataset2, keyColumns);
+     * // Result contains: {1, "Alice", 25}, {2, "Bob", 30}, {1, "Alice", 25} based on matching key columns id and name
+     * // Note: Duplicates are preserved
+     * }</pre>
+     *
+     * @param other The other Dataset to intersect with
+     * @param keyColumnNames The collection of column names to be used as keys for the intersection operation
+     * @return A new Dataset that is the result of the intersection operation with duplicates preserved
+     * @throws IllegalArgumentException if the other Dataset is {@code null}, 
+     *                                  or if the keyColumnNames is {@code null} or empty,
+     *                                  or if any of the specified key column names do not exist in either Dataset
+     * @see #intersectAll(Dataset)
+     * @see #intersectAll(Dataset, boolean)
+     * @see #intersect(Dataset, Collection)
+     * @see #exceptAll(Dataset, Collection)
      */
     Dataset intersectAll(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Performs an intersection operation between this Dataset and another Dataset.
-     * The intersection operation returns a new Dataset that contains only the rows that are common to both Datasets based on the key columns.
-     * Duplicated rows in the returned Dataset will not be eliminated.
+     * Performs an intersection operation between this Dataset and another Dataset using specified key columns.
+     * Only the rows that have same values in the specified key columns between the two Datasets will be included in the result.
+     * Duplicated rows detected by the specified key columns in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
      *
-     * @param other The other Dataset to intersect with.
-     * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
-     * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both Datasets to have the same columns.
-     * @return A new Dataset that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {1, "Alice", 25}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {1, "Alice", 95},
+     *          {2, "Bob", 95},
+     *          {3, "Charlie", 85},
+     *     });
+     *
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * 
+     * // Require same columns - will throw IllegalArgumentException
+     * // Dataset result = dataset1.intersectAll(dataset2, keyColumns, true);
+     *
+     * // Allow different columns - works fine
+     * Dataset result = dataset1.intersectAll(dataset2, keyColumns, false);
+     * // Result contains: {1, "Alice", 25}, {2, "Bob", 30}, {1, "Alice", 25} based on matching key columns id and name
+     * // Note: Duplicates are preserved
+     * }</pre>
+     *
+     * @param other The other Dataset to intersect with
+     * @param keyColumnNames The collection of column names to be used as keys for the intersection operation
+     * @param requiresSameColumns Whether both Datasets must have the same columns
+     * @return A new Dataset that is the result of the intersection operation with duplicates preserved
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if the keyColumnNames is {@code null} or empty,
+     *                                  or if any of the specified key column names do not exist in either Dataset,
+     *                                  or if requiresSameColumns is {@code true} and the Datasets do not have the same columns
+     * @see #intersectAll(Dataset)
+     * @see #intersectAll(Dataset, boolean)
+     * @see #intersectAll(Dataset, Collection)
+     * @see #intersect(Dataset, Collection, boolean)
+     * @see #exceptAll(Dataset, Collection, boolean)
      */
     Dataset intersectAll(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
      * Performs a difference operation between this Dataset and another Dataset.
      * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset.
-     * Duplicated rows in the returned Dataset will be eliminated.
+     * This operation compares all common columns between the two Datasets. If the Datasets have different column structures,
+     * only the common columns will be used for the comparison.
+     * Duplicated rows detected by common columns in the returned Dataset will be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
      *
-     * @param other The other Dataset to compare with.
-     * @return A new Dataset that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {3, "Charlie", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * Dataset result = dataset1.except(dataset2);
+     * // Result contains: {1, "Alice", 25}, {2, "Bob", 30} based on matching common columns id and name
+     * // Note: Duplicates are eliminated
+     * }</pre>
+     *
+     * @param other The other Dataset to compare with
+     * @return A new Dataset that is the result of the difference operation with duplicates eliminated
+     * @throws IllegalArgumentException if the other Dataset is {@code null}
+     * @see #except(Dataset, boolean)
+     * @see #exceptAll(Dataset)
+     * @see #intersect(Dataset)
+     * @see #union(Dataset)
      */
     Dataset except(Dataset other) throws IllegalArgumentException;
 
     /**
      * Performs a difference operation between this Dataset and another Dataset.
      * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset.
-     * Duplicated rows in the returned Dataset will be eliminated.
+     * This operation compares all common columns between the two Datasets. If the Datasets have different column structures,
+     * only the common columns will be used for the comparison.
+     * Duplicated rows detected by common columns in the returned Dataset will be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
      *
-     * @param other The other Dataset to compare with.
-     * @param requiresSameColumns A boolean value that determines whether the difference operation requires both Datasets to have the same columns.
-     * @return A new Dataset that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {3, "Charlie", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * // Require same columns - will throw IllegalArgumentException
+     * // Dataset result = dataset1.except(dataset2, true);
+     *
+     * // Allow different columns - works fine
+     * Dataset result = dataset1.except(dataset2, false);
+     * // Result contains: {1, "Alice", 25}, {2, "Bob", 30} based on matching common columns id and name
+     * // Note: Duplicates are eliminated
+     * }</pre>
+     *
+     * @param other The other Dataset to compare with
+     * @param requiresSameColumns Whether both Datasets must have the same columns
+     * @return A new Dataset that is the result of the difference operation with duplicates eliminated
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if requiresSameColumns is {@code true} and the Datasets do not have the same columns
+     * @see #except(Dataset)
+     * @see #except(Dataset, Collection)
+     * @see #exceptAll(Dataset, boolean)
+     * @see #intersect(Dataset, boolean)
+     * @see #union(Dataset, boolean)
      */
     Dataset except(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Performs a difference operation between this Dataset and another Dataset.
-     * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset based on the key columns.
-     * Duplicated rows in the returned Dataset will be eliminated.
+     * Performs a difference operation between this Dataset and another Dataset based on specified key columns.
+     * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset.
+     * Duplicated rows detected by common columns in the returned Dataset will be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
      *
-     * @param other The other Dataset to compare with.
-     * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
-     * @return A new Dataset that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if the keyColumnNames is {@code null} or empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {3, "Charlie", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Dataset result = dataset1.except(dataset2, keyColumns);
+     * // Result contains: {1, "Alice", 25}, {2, "Bob", 30} based on matching key columns id and name
+     * // Note: Duplicates are eliminated
+     * }</pre>
+     *
+     * @param other The other Dataset to compare with
+     * @param keyColumnNames The collection of column names to be used as keys for the difference operation
+     * @return A new Dataset that is the result of the difference operation with duplicates eliminated
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if the keyColumnNames is {@code null} or empty,
+     *                                  or if any of the specified key column names do not exist in either Dataset
+     * @see #except(Dataset)
+     * @see #except(Dataset, boolean)
+     * @see #exceptAll(Dataset, Collection)
+     * @see #intersect(Dataset, Collection)
+     * @see #union(Dataset, Collection)
      */
     Dataset except(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Performs a difference operation between this Dataset and another Dataset.
-     * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset based on the key columns.
-     * Duplicated rows in the returned Dataset will be eliminated.
+     * Performs a difference operation between this Dataset and another Dataset based on specified key columns.
+     * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset.
+     * Duplicated rows detected by common columns in the returned Dataset will be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
      *
-     * @param other The other Dataset to compare with.
-     * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
-     * @param requiresSameColumns A boolean value that determines whether the difference operation requires both Datasets to have the same columns.
-     * @return A new Dataset that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {3, "Charlie", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * 
+     * // Require same columns - will throw IllegalArgumentException
+     * // Dataset result = dataset1.except(dataset2, keyColumns, true);
+     *
+     * // Allow different columns - works fine
+     * Dataset result = dataset1.except(dataset2, keyColumns, false);
+     * // Result contains: {1, "Alice", 25}, {2, "Bob", 30} based on matching key columns id and name
+     * // Note: Duplicates are eliminated
+     * }</pre>
+     *
+     * @param other The other Dataset to compare with
+     * @param keyColumnNames The collection of column names to be used as keys for the difference operation
+     * @param requiresSameColumns Whether both Datasets must have the same columns
+     * @return A new Dataset that is the result of the difference operation with duplicates eliminated
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if the keyColumnNames is {@code null} or empty,
+     *                                  or if any of the specified key column names do not exist in either Dataset,
+     *                                  or if requiresSameColumns is {@code true} and the Datasets do not have the same columns
+     * @see #except(Dataset)
+     * @see #except(Dataset, boolean)
+     * @see #except(Dataset, Collection)
+     * @see #exceptAll(Dataset, Collection, boolean)
+     * @see #intersect(Dataset, Collection, boolean)
+     * @see #union(Dataset, Collection, boolean)
      */
     Dataset except(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
      * Performs a difference operation between this Dataset and another Dataset.
      * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset.
-     * Duplicated rows in the returned Dataset will not be eliminated.
+     * This operation compares all common columns between the two Datasets. If the Datasets have different column structures,
+     * only the common columns will be used for the comparison.
+     * Duplicated rows detected by common columns in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
      *
-     * @param other The other Dataset to compare with.
-     * @return A new Dataset that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {3, "Charlie", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * Dataset result = dataset1.exceptAll(dataset2);
+     * // Result contains: {1, "Alice", 25}, {1, "Alice", 25}, {2, "Bob", 30}
+     * // Note: Duplicates are NOT eliminated
+     * }</pre>
+     *
+     * @param other The other Dataset to compare with
+     * @return A new Dataset that is the result of the difference operation with duplicates preserved
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if the Datasets do not have the same column structure
+     * @see #except(Dataset)
+     * @see #exceptAll(Dataset, boolean)
+     * @see #exceptAll(Dataset, Collection)
+     * @see #intersectAll(Dataset)
+     * @see #unionAll(Dataset)
      */
     Dataset exceptAll(Dataset other) throws IllegalArgumentException;
 
     /**
      * Performs a difference operation between this Dataset and another Dataset.
      * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset.
-     * Duplicated rows in the returned Dataset will not be eliminated.
+     * This operation compares all common columns between the two Datasets. If the Datasets have different column structures,
+     * only the common columns will be used for the comparison.
+     * Duplicated rows detected by common columns in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
      *
-     * @param other The other Dataset to compare with.
-     * @param requiresSameColumns A boolean value that determines whether the difference operation requires both Datasets to have the same columns.
-     * @return A new Dataset that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {3, "Charlie", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * // Require same columns - will throw IllegalArgumentException
+     * // Dataset result = dataset1.exceptAll(dataset2, true);
+     *
+     * // Allow different columns - works fine, compares common columns (id, name)
+     * Dataset result = dataset1.exceptAll(dataset2, false);
+     * // Result contains: {1, "Alice", 25}, {1, "Alice", 25}, {2, "Bob", 30}
+     * // Note: Duplicates are NOT eliminated
+     * }</pre>
+     *
+     * @param other The other Dataset to compare with
+     * @param requiresSameColumns Whether both Datasets must have the same columns
+     * @return A new Dataset that is the result of the difference operation with duplicates preserved
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if requiresSameColumns is {@code true} and the Datasets do not have the same columns
+     * @see #except(Dataset, boolean)
+     * @see #exceptAll(Dataset)
+     * @see #exceptAll(Dataset, Collection)
+     * @see #intersectAll(Dataset, boolean)
+     * @see #unionAll(Dataset, boolean)
      */
     Dataset exceptAll(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Performs a difference operation between this Dataset and another Dataset.
-     * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset based on the key columns.
-     * Duplicated rows in the returned Dataset will not be eliminated.
+     * Performs a difference operation between this Dataset and another Dataset based on specified key columns.
+     * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset.
+     * Duplicated rows detected by common columns in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
      *
-     * @param other The other Dataset to compare with.
-     * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
-     * @return A new Dataset that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if the keyColumnNames is {@code null} or empty.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {3, "Charlie", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {3, "Charlie", 35}
+     *     });
+     *
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     *
+     * Dataset result = dataset1.exceptAll(dataset2, keyColumns);
+     * // Result contains: {1, "Alice", 25}, {1, "Alice", 25}, {2, "Bob", 30} based on matching key columns id and name
+     * // Note: Duplicates are NOT eliminated
+     * }</pre>
+     *
+     * @param other The other Dataset to compare with
+     * @param keyColumnNames The collection of column names to be used as keys for the difference operation
+     * @return A new Dataset that is the result of the difference operation with duplicates preserved
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if the keyColumnNames is {@code null} or empty,
+     *                                  or if any of the specified key column names do not exist in either Dataset,
+     *                                  or if the Datasets do not have the same column structure
+     * @see #except(Dataset, Collection)
+     * @see #exceptAll(Dataset)
+     * @see #exceptAll(Dataset, boolean)
+     * @see #exceptAll(Dataset, Collection, boolean)
+     * @see #intersectAll(Dataset, Collection)
+     * @see #unionAll(Dataset)
      */
     Dataset exceptAll(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Performs a difference operation between this Dataset and another Dataset.
-     * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset based on the key columns.
-     * Duplicated rows in the returned Dataset will not be eliminated.
+     * Performs a difference operation between this Dataset and another Dataset based on specified key columns.
+     * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset.
+     * Duplicated rows detected by common columns in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
      *
-     * @param other The other Dataset to compare with.
-     * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
-     * @param requiresSameColumns A boolean value that determines whether the difference operation requires both Datasets to have the same columns.
-     * @return A new Dataset that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {
+     *          {1, "Alice", 25},
+     *          {1, "Alice", 25},
+     *          {2, "Bob", 30},
+     *          {3, "Charlie", 35}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "score"),
+     *     new Object[][] {
+     *          {3, "Charlie", 85}
+     *     });
+     *
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     *
+     * // Require same columns - will throw IllegalArgumentException due to different columns
+     * // Dataset result = dataset1.exceptAll(dataset2, keyColumns, true);
+     *
+     * // Allow different columns - works fine, compares only key columns (id, name)
+     * Dataset result = dataset1.exceptAll(dataset2, keyColumns, false);
+     * // Result contains: {1, "Alice", 25}, {1, "Alice", 25}, {2, "Bob", 30} based on matching key columns
+     * // Note: Duplicates are NOT eliminated
+     * }</pre>
+     *
+     * @param other The other Dataset to compare with
+     * @param keyColumnNames The collection of column names to be used as keys for the difference operation
+     * @param requiresSameColumns Whether both Datasets must have the same columns
+     * @return A new Dataset that is the result of the difference operation with duplicates preserved
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
+     *                                  or if the keyColumnNames is {@code null} or empty,
+     *                                  or if any of the specified key column names do not exist in either Dataset,
+     *                                  or if requiresSameColumns is {@code true} and the Datasets do not have the same columns
+     * @see #except(Dataset, Collection, boolean)
+     * @see #exceptAll(Dataset)
+     * @see #exceptAll(Dataset, boolean)
+     * @see #exceptAll(Dataset, Collection)
+     * @see #intersectAll(Dataset, Collection, boolean)
+     * @see #unionAll(Dataset, boolean)
      */
     Dataset exceptAll(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -6149,46 +8399,41 @@ public sealed interface Dataset permits RowDataset {
      * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset.
      * The intersection contains rows that exist in both Datasets based on matching column values.
      * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
-     * Duplicated rows in the returned {@code Dataset} will not be eliminated.
+     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
      *
-     * <p>Example:
-     * <pre>
-     * // Dataset 1 with columns "id", "name"
-     * Dataset ds1 = Dataset.rows(
-     *     Arrays.asList("id", "name"),
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
      *     new Object[][] {
-     *         {1, "Alice"},
-     *         {2, "Bob"},
-     *         {3, "Charlie"},
-     *         {2, "Bob"}  // duplicate row
-     *     }
-     * );
-     *
-     * // Dataset 2 with columns "id", "name"
-     * Dataset ds2 = Dataset.rows(
-     *     Arrays.asList("id", "name"),
+     *          {1, "Alice"},
+     *          {2, "Bob"},
+     *          {2, "Bob"}  // duplicate row
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
      *     new Object[][] {
-     *         {2, "Bob"},
-     *         {3, "Charlie"},
-     *         {4, "Dave"},
-     *         {2, "Bob"},  // duplicate row
-     *         {2, "Bob"}   // another duplicate
-     *     }
-     * );
+     *          {1, "Alice"},
+     *          {2, "Bob"},
+     *          {3, "Charlie"},
+     *          {2, "Bob"},  // duplicate row
+     *          {2, "Bob"}   // another duplicate
+     *     });
      *
-     * // Result will contain {2, "Bob"} twice and {3, "Charlie"} once
-     * Dataset result = ds1.intersection(ds2);
-     * </pre>
+     * Dataset result = dataset1.intersection(dataset2);
+     * // Returns contains {1, "Alice"} once and {2, "Bob"} twice (minimum of 2 and 3 occurrences)
+     * }</pre>
      *
-     *
-     * @param other the Dataset to find common rows with
-     * @return a new Dataset containing rows present in both Datasets, with duplicates handled based on minimum occurrences
-     * @throws IllegalArgumentException if the other Dataset is {@code null} or the two {@code Datasets} don't have common columns.
-     * @see #intersect(Dataset)
-     * @see #intersectAll(Dataset)
+     * @param other The Dataset to find common rows with. Must not be {@code null}.
+     * @return A new Dataset containing rows present in both Datasets, with duplicates handled based on minimum occurrences.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if the two Datasets don't have the same columns.
      * @see #intersection(Dataset, boolean)
      * @see #intersection(Dataset, Collection)
-     * @see N#intersection(int[], int[])
+     * @see #intersection(Dataset, Collection, boolean)
+     * @see #intersect(Dataset)
+     * @see #intersectAll(Dataset)
+     * @see #union(Dataset)
+     * @see #except(Dataset)
      */
     Dataset intersection(Dataset other) throws IllegalArgumentException;
 
@@ -6196,97 +8441,82 @@ public sealed interface Dataset permits RowDataset {
      * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset.
      * The intersection contains rows that exist in both Datasets based on matching column values.
      * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
-     * Duplicated rows in the returned {@code Dataset} will not be eliminated.
-     * 
-     * <p>Example:
-     * <pre>
-     * // Dataset 1 with columns "id", "name"
-     * Dataset ds1 = Dataset.rows(
-     *     Arrays.asList("id", "name"),
-     *     new Object[][] {
-     *         {1, "Alice"},
-     *         {2, "Bob"},
-     *         {3, "Charlie"}
-     *     }
-     * );
-     * 
-     * // Dataset 2 with columns "id", "name", "age"
-     * Dataset ds2 = Dataset.rows(
-     *     Arrays.asList("id", "name", "age"),
-     *     new Object[][] {
-     *         {2, "Bob", 30},
-     *         {3, "Charlie", 25},
-     *         {4, "Dave", 35}
-     *     }
-     * );
-     * 
-     * // With requiresSameColumns=true, this would throw IllegalArgumentException
-     * // With requiresSameColumns=false, result will contain common rows based on common columns
-     * Dataset result = ds1.intersection(ds2, false);
-     * // result will contain {2, "Bob"} and {3, "Charlie"} with only the columns from ds1
-     * </pre>
+     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
      *
-     * @param other the Dataset to find common rows with
-     * @param requiresSameColumns if true, both Datasets must have identical column structures;
-     *                           if false, the intersection is based on common columns only
-     * @return a new Dataset containing rows present in both Datasets, with duplicates handled based on minimum occurrences
-     * @throws IllegalArgumentException if the other Dataset is {@code null} or if {@code requiresSameColumns} is true
-     *                                  and the Datasets have different column structures
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
+     *     new Object[][] {
+     *          {1, "Alice"},
+     *          {2, "Bob"},
+     *          {2, "Bob"}  // duplicate row
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
+     *     new Object[][] {
+     *          {1, "Alice"},
+     *          {2, "Bob"},
+     *          {3, "Charlie"},
+     *          {2, "Bob"},  // duplicate row
+     *          {2, "Bob"}   // another duplicate
+     *     });
+     *
+     * Dataset result = dataset1.intersection(dataset2, true);
+     * // Returns contains {1, "Alice"} once and {2, "Bob"} twice (minimum of 2 and 3 occurrences)
+     * }</pre>
+     *
+     * @param other The Dataset to find common rows with. Must not be {@code null}.
+     * @param requiresSameColumns A boolean that indicates whether both Datasets should have the same columns.
+     * @return A new Dataset containing rows present in both Datasets, with duplicates handled based on minimum occurrences.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code requiresSameColumns} is {@code true} and the Datasets do not have the same columns, or if the two Datasets don't have common columns when {@code requiresSameColumns} is {@code false}.
      * @see #intersection(Dataset)
      * @see #intersection(Dataset, Collection)
      * @see #intersection(Dataset, Collection, boolean)
-     * @see N#intersection(int[], int[])
      * @see #intersect(Dataset)
      * @see #intersectAll(Dataset)
+     * @see #union(Dataset)
+     * @see #except(Dataset)
      */
     Dataset intersection(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset,
-     * based on matching values in the specified key columns. The intersection considers duplicates,
-     * retaining the minimum number of occurrences present in both Datasets.
-     * <p>The method compares only the specified key columns rather than entire rows.
-     * Columns from this Dataset are preserved in the result.
+     * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset.
+     * The intersection contains rows that exist in both Datasets based on the values in the specified key columns.
+     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
+     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
      *
-     * <p>Example:
-     * <pre>
-     * // Dataset 1 with columns "id", "name", "department"
-     * Dataset ds1 = Dataset.rows(
-     *     Arrays.asList("id", "name", "department"),
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
-     *         {1, "Alice", "HR"},
-     *         {2, "Bob", "Engineering"},
-     *         {3, "Charlie", "Marketing"},
-     *         {2, "Bob", "Engineering"}  // duplicate row
-     *     }
-     * );
-     *
-     * // Dataset 2 with columns "id", "name", "salary"
-     * Dataset ds2 = Dataset.rows(
-     *     Arrays.asList("id", "name", "salary"),
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {2, "Bob", "Engineering"}  // duplicate row
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
      *     new Object[][] {
-     *         {2, "Bob", 75000},
-     *         {3, "Charlie", 65000},
-     *         {4, "Dave", 70000},
-     *         {2, "Bob", 80000}  // different salary but same keys
-     *     }
-     * );
+     *          {1, "Alice", 75000},
+     *          {2, "Bob", 75000},
+     *          {3, "Charlie", 65000},
+     *          {4, "Dave", 70000},
+     *          {2, "Bob", 80000}  // different salary but same keys
+     *     });
      *
-     * // Result will contain rows matching on id and name columns
-     * Collection<String> keyColumns = Arrays.asList("id", "name");
-     * Dataset result = ds1.intersection(ds2, keyColumns);
-     * // result will contain {2, "Bob", "Engineering"} twice and {3, "Charlie", "Marketing"} once
-     * // with column structure matching ds1
-     * </pre>
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Dataset result = dataset1.intersection(dataset2, keyColumns);
+     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (minimum of 2 and 3 occurrences)
+     * // with column structure matching dataset1
+     * }</pre>
      *
-     *
-     * @param other the Dataset to find common rows with
-     * @param keyColumnNames the column names to use for matching rows between Datasets
-     * @return a new Dataset containing rows whose key column values appear in both Datasets,
-     *         with duplicates handled based on minimum occurrences
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if keyColumnNames is
-     *                                  {@code null} or empty, or if any specified key column doesn't
-     *                                  exist in either Dataset
+     * @param other The Dataset to find common rows with. Must not be {@code null}.
+     * @param keyColumnNames The column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+     * @return A new Dataset containing rows whose key column values appear in both Datasets, with duplicates handled based on minimum occurrences.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset.
      * @see #intersection(Dataset)
      * @see #intersection(Dataset, boolean)
      * @see #intersection(Dataset, Collection, boolean)
@@ -6296,55 +8526,43 @@ public sealed interface Dataset permits RowDataset {
     Dataset intersection(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset,
-     * based on matching values in the specified key columns. The intersection considers duplicates,
-     * retaining the minimum number of occurrences present in both Datasets.
+     * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset.
+     * The intersection contains rows that exist in both Datasets based on the values in the specified key columns.
+     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
+     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
      *
-     * <p>Example:
-     * <pre>
-     * // Dataset 1 with columns "id", "name", "department"
-     * Dataset ds1 = Dataset.rows(
-     *     Arrays.asList("id", "name", "department"),
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
-     *         {1, "Alice", "HR"},
-     *         {2, "Bob", "Engineering"},
-     *         {3, "Charlie", "Marketing"},
-     *         {2, "Bob", "Engineering"}  // duplicate row
-     *     }
-     * );
-     *
-     * // Dataset 2 with columns "id", "name", "salary"
-     * Dataset ds2 = Dataset.rows(
-     *     Arrays.asList("id", "name", "salary"),
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {2, "Bob", "Engineering"}  // duplicate row
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
      *     new Object[][] {
-     *         {2, "Bob", 75000},
-     *         {3, "Charlie", 65000},
-     *         {4, "Dave", 70000},
-     *         {2, "Bob", 80000}  // different salary but same keys
-     *     }
-     * );
+     *          {1, "Alice", 75000},
+     *          {2, "Bob", 75000},
+     *          {3, "Charlie", 65000},
+     *          {4, "Dave", 70000},
+     *          {2, "Bob", 80000}  // different salary but same keys
+     *     });
+     * 
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Dataset result = dataset1.intersection(dataset2, keyColumns, false);
+     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (minimum of 2 and 3 occurrences)
+     * // with column structure matching dataset1
+     * }</pre>
      *
-     * // With requiresSameColumns=false, different column structures are allowed
-     * Collection<String> keyColumns = Arrays.asList("id", "name");
-     * Dataset result = ds1.intersection(ds2, keyColumns, false);
-     * // result will contain {2, "Bob", "Engineering"} twice and {3, "Charlie", "Marketing"} once
-     * // with column structure matching ds1
-     * </pre>
-     *
-     * <p>The method compares only the specified key columns rather than entire rows.
-     * When {@code requiresSameColumns} is false, the columns from this Dataset are preserved in the result.
-     * When {@code requiresSameColumns} is true, both Datasets must have identical column structures.
-     *
-     * @param other the Dataset to find common rows with
-     * @param keyColumnNames the column names to use for matching rows between Datasets
-     * @param requiresSameColumns if true, both Datasets must have identical column structures;
-     *                           if false, the intersection is based on common columns only
-     * @return a new Dataset containing rows whose key column values appear in both Datasets,
-     *         with duplicates handled based on minimum occurrences
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if keyColumnNames is
-     *                                  {@code null} or empty, or if any specified key column doesn't
-     *                                  exist in either Dataset, or if {@code requiresSameColumns} is true
-     *                                  and the Datasets have different column structures
+     * @param other The Dataset to find common rows with. Must not be {@code null}.
+     * @param keyColumnNames The column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+     * @param requiresSameColumns A boolean that indicates whether both Datasets should have the same columns.
+     * @return A new Dataset containing rows whose key column values appear in both Datasets, with duplicates handled based on minimum occurrences.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset, or if {@code requiresSameColumns} is {@code true} and the Datasets do not have the same columns.
      * @see #intersection(Dataset)
      * @see #intersection(Dataset, boolean)
      * @see #intersection(Dataset, Collection)
@@ -6354,169 +8572,166 @@ public sealed interface Dataset permits RowDataset {
     Dataset intersection(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other},
-     * considering the number of occurrences of each row.
-     * Duplicated rows in the returned Dataset will not be eliminated.
+     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other}, considering the number of occurrences of each row.
+     * The comparison is performed on common columns only between the two Datasets.
+     * Duplicated rows in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
      *
-     * <p>Example:
-     * <pre>
-     * Dataset ds1 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {
-     *     {1, "Alice"}, {2, "Bob"}, {3, "Charlie"}, {3, "Charlie"}
-     * });
-     * Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {
-     *     {1, "Alice"}, {4, "David"}, {3, "Charlie"}
-     * });
-     * Dataset result = ds1.difference(ds2); 
-     * // result will contain: {2, "Bob"}, {3, "Charlie"}
-     * // One "Charlie" row remains because ds1 has two occurrences and ds2 has one
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {3, "Charlie", "Marketing"},
+     *          {3, "Charlie", "Marketing"}  // duplicate row
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {1, "Alice", 50000},
+     *          {4, "Dave", 60000},
+     *          {3, "Charlie", 55000}
+     *     });
      *
-     * Dataset ds3 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {
-     *     {5, "Eva"}, {6, "Frank"}
-     * });
-     * Dataset ds4 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {
-     *     {5, "Eva"}, {5, "Eva"}, {6, "Frank"}
-     * });
-     * Dataset result2 = ds3.difference(ds4);
-     * // result2 will be empty
-     * // No rows remain because ds4 has at least as many occurrences of each row as ds3
-     * </pre>
+     * Dataset result = dataset1.difference(dataset2);
+     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Marketing"} once
+     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
      *
-     * @param other the Dataset to compare against this Dataset
-     * @return a new Dataset containing the rows that are present in this Dataset but not in the specified Dataset,
-     *         considering the number of occurrences
-     * @throws IllegalArgumentException if the other Dataset is {@code null} or the two {@code Datasets} don't have common columns.
+     * @param other The Dataset to compare against this Dataset. Must not be {@code null}.
+     * @return A new Dataset containing the rows that are present in this Dataset but not in the specified Dataset, considering the number of occurrences.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if the two Datasets don't have common columns.
      * @see #difference(Dataset, boolean)
      * @see #difference(Dataset, Collection)
+     * @see #difference(Dataset, Collection, boolean)
      * @see #symmetricDifference(Dataset)
      * @see #intersection(Dataset)
-     * @see N#difference(Collection, Collection)
-     * @see N#difference(int[], int[])
      */
     Dataset difference(Dataset other) throws IllegalArgumentException;
 
     /**
-     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other},
-     * considering the number of occurrences of each row.
-     * Duplicated rows in the returned Dataset will not be eliminated.
+     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other}, considering the number of occurrences of each row.
+     * The comparison is performed on common columns only between the two Datasets.
+     * Duplicated rows in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
      *
-     * <p>Example:
-     * <pre>
-     * Dataset ds1 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {
-     *     {1, "Alice"}, {2, "Bob"}, {3, "Charlie"}, {3, "Charlie"}
-     * });
-     * Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {
-     *     {1, "Alice"}, {4, "David"}, {3, "Charlie"}
-     * });
-     * 
-     * // With requiresSameColumns = true
-     * Dataset result1 = ds1.difference(ds2, true);
-     * // result1 will contain: {2, "Bob"}, {3, "Charlie"}
-     * 
-     * // With requiresSameColumns = false
-     * Dataset ds3 = Dataset.rows(Arrays.asList("id", "address"), new Object[][] {
-     *     {1, "123 Main St"}, {3, "456 Oak Ave"}
-     * });
-     * Dataset result2 = ds1.difference(ds3, false);
-     * // result2 will contain rows from ds1 that don't match in the common columns
-     * </pre>
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {3, "Charlie", "Marketing"},
+     *          {3, "Charlie", "Marketing"}  // duplicate row
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {1, "Alice", 50000},
+     *          {4, "Dave", 60000},
+     *          {3, "Charlie", 55000}
+     *     });
      *
+     * Dataset result = dataset1.difference(dataset2, false);
+     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Marketing"} once
+     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
      *
-     * @param other the Dataset to compare against this Dataset
-     * @param requiresSameColumns whether both Datasets must have identical column names
-     * @return a new Dataset containing the rows that are present in this Dataset but not in the specified Dataset,
-     *         considering the number of occurrences
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if <i>requiresSameColumns</i> is 
-     *         {@code true} and the Datasets do not have the same columns
+     * @param other The Dataset to compare against this Dataset. Must not be {@code null}.
+     * @param requiresSameColumns A boolean that indicates whether both Datasets should have the same columns.
+     * @return A new Dataset containing the rows that are present in this Dataset but not in the specified Dataset, considering the number of occurrences.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
      * @see #difference(Dataset)
      * @see #difference(Dataset, Collection)
+     * @see #difference(Dataset, Collection, boolean)
      * @see #symmetricDifference(Dataset)
      * @see #intersection(Dataset)
-     * @see N#difference(Collection, Collection)
-     * @see N#difference(int[], int[])
      */
     Dataset difference(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other},
-     * comparing rows based only on the values in the specified key columns and considering the number of occurrences.
-     * Duplicated rows in the returned Dataset will not be eliminated.
+     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other}, considering the number of occurrences of each row.
+     * The comparison is performed on the specified key columns only between the two Datasets.
+     * Duplicated rows in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
      *
-     * <p>Example:
-     * <pre>
-     * Dataset ds1 = Dataset.rows(Arrays.asList("id", "name", "dept"), new Object[][] {
-     *     {1, "Alice", "HR"}, {2, "Bob", "IT"}, {3, "Charlie", "Finance"}, {3, "Charlie", "IT"}
-     * });
-     * Dataset ds2 = Dataset.rows(Arrays.asList("id", "name", "role"), new Object[][] {
-     *     {1, "Alice", "Manager"}, {3, "Charlie", "Analyst"}
-     * });
-     * 
-     * // Compare only by "id" column
-     * Dataset result1 = ds1.difference(ds2, Arrays.asList("id"));
-     * // result1 will contain: {2, "Bob", "IT"}, {3, "Charlie", "IT"}
-     * // One "Charlie" row remains since ds1 has two occurrences and ds2 has one with id=3
-     * 
-     * // Compare by both "id" and "name" columns
-     * Dataset result2 = ds1.difference(ds2, Arrays.asList("id", "name"));
-     * // result2 will contain: {2, "Bob", "IT"}, {3, "Charlie", "IT"}
-     * // The result is the same because both key fields match for Alice and Charlie
-     * </pre>
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {3, "Charlie", "Marketing"},
+     *          {3, "Charlie", "Finance"}  // duplicate key values
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {1, "Alice", 50000},
+     *          {3, "Charlie", 60000}
+     *     });
      *
-     * @param other the Dataset to compare against this Dataset
-     * @param keyColumnNames the column names to use for comparison
-     * @return a new Dataset containing the rows that are present in this Dataset but not in the specified Dataset,
-     *         based on the specified key columns and considering the number of occurrences
-     * @throws IllegalArgumentException if the other Dataset is {@code null} or if keyColumnNames is {@code null} or empty
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Dataset result = dataset1.difference(dataset2, keyColumns);
+     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Finance"}
+     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
+     *
+     * @param other The Dataset to compare against this Dataset. Must not be {@code null}.
+     * @param keyColumnNames The column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+     * @return A new Dataset containing the rows that are present in this Dataset but not in the specified Dataset, based on the specified key columns and considering the number of occurrences.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset.
      * @see #difference(Dataset)
      * @see #difference(Dataset, boolean)
-     * @see #symmetricDifference(Dataset, Collection)
+     * @see #difference(Dataset, Collection, boolean)
+     * @see #symmetricDifference(Dataset)
      * @see #intersection(Dataset, Collection)
-     * @see N#difference(Collection, Collection)
-     * @see N#difference(int[], int[])
      */
     Dataset difference(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other},
-     * comparing rows based only on the values in the specified key columns and considering the number of occurrences.
-     * Duplicated rows in the returned Dataset will not be eliminated.
-     * 
-     * <p>Example:
-     * <pre>
-     * Dataset ds1 = Dataset.rows(Arrays.asList("id", "name", "dept"), new Object[][] {
-     *     {1, "Alice", "HR"}, {2, "Bob", "IT"}, {3, "Charlie", "Finance"}, {3, "Charlie", "IT"}
-     * });
-     * Dataset ds2 = Dataset.rows(Arrays.asList("id", "name", "role"), new Object[][] {
-     *     {1, "Alice", "Manager"}, {3, "Charlie", "Analyst"}
-     * });
-     * 
-     * // With requiresSameColumns = true
-     * try {
-     *     Dataset result = ds1.difference(ds2, Arrays.asList("id", "name"), true);
-     *     // Will throw IllegalArgumentException as the Datasets have different columns
-     * } catch (IllegalArgumentException e) {
-     *     // Handle exception
-     * }
-     * 
-     * // With requiresSameColumns = false
-     * Dataset result = ds1.difference(ds2, Arrays.asList("id", "name"), false);
-     * // result will contain: {2, "Bob", "IT"}, {3, "Charlie", "IT"}
-     * // One "Charlie" row remains since ds1 has two occurrences and ds2 has one
-     * </pre>
+     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other}, considering the number of occurrences of each row.
+     * The comparison is performed on the specified key columns only between the two Datasets.
+     * Duplicated rows in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will have the same column structure as this Dataset.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
      *
-     * @param other the Dataset to compare against this Dataset
-     * @param keyColumnNames the column names to use for comparison
-     * @param requiresSameColumns whether both Datasets must have identical column names
-     * @return a new Dataset containing the rows that are present in this Dataset but not in the specified Dataset,
-     *         based on the specified key columns and considering the number of occurrences
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, if keyColumnNames is {@code null} or empty,
-     *         or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {3, "Charlie", "Marketing"},
+     *          {3, "Charlie", "Finance"}  // duplicate key values
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {1, "Alice", 50000},
+     *          {3, "Charlie", 60000}
+     *     });
+     *
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Dataset result = dataset1.difference(dataset2, keyColumns, false);
+     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Finance"}
+     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
+     *
+     * @param other The Dataset to compare against this Dataset. Must not be {@code null}.
+     * @param keyColumnNames The column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+     * @param requiresSameColumns A boolean that indicates whether both Datasets should have the same columns.
+     * @return A new Dataset containing the rows that are present in this Dataset but not in the specified Dataset, based on the specified key columns and considering the number of occurrences.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
      * @see #difference(Dataset)
      * @see #difference(Dataset, boolean)
      * @see #difference(Dataset, Collection)
-     * @see #symmetricDifference(Dataset, Collection)
-     * @see #intersection(Dataset, Collection)
-     * @see N#difference(Collection, Collection)
-     * @see N#difference(int[], int[])
+     * @see #symmetricDifference(Dataset)
+     * @see #intersection(Dataset, Collection, boolean)
      */
     Dataset difference(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -6525,38 +8740,40 @@ public sealed interface Dataset permits RowDataset {
      * but not in both. This is the set-theoretic symmetric difference operation.
      * For rows that appear multiple times, the symmetric difference contains occurrences that remain
      * after removing the minimum number of shared occurrences from both sources.
+     * The comparison is performed on the common columns between the two Datasets.
+     * Duplicated rows in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
+     * <br />
      *
-     * <p>The order of rows is preserved, with rows from this Dataset appearing first,
-     * followed by rows from the specified Dataset that aren't in this Dataset.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {2, "Bob", "Engineering"},  // duplicate row
+     *          {3, "Charlie", "Marketing"}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {2, "Bob", 50000},
+     *          {3, "Charlie", 55000},
+     *          {4, "Dave", 60000}
+     *     });
      *
-     * <p>Example:
-     * <pre>
-     * Dataset ds1 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {
-     *     {1, "Alice"}, {2, "Bob"}, {2, "Bob"}, {3, "Charlie"}
-     * });
-     * Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {
-     *     {2, "Bob"}, {3, "Charlie"}, {4, "David"}, {4, "David"}
-     * });
-     * Dataset result = ds1.symmetricDifference(ds2);
-     * // result will contain:
-     * // {1, "Alice"}, {2, "Bob"}, {4, "David"}, {4, "David"}
-     * // Rows explanation:
-     * // - {1, "Alice"} appears only in ds1, so it remains
-     * // - {2, "Bob"} appears twice in ds1 and once in ds2, so one occurrence remains
-     * // - {3, "Charlie"} appears once in each Dataset, so it's removed from both
-     * // - {4, "David"} appears twice in ds2 and not in ds1, so both occurrences remain
-     * </pre>
+     * Dataset result = dataset1.symmetricDifference(dataset2);
+     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
+     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
      *
-     * @param other the Dataset to find symmetric difference with this Dataset
-     * @return a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
-     *         but not in both, considering the number of occurrences
-     * @throws IllegalArgumentException if the other Dataset is {@code null} or the two {@code Datasets} don't have common columns.
+     * @param other The Dataset to find symmetric difference with this Dataset. Must not be {@code null}.
+     * @return A new Dataset containing rows that are present in either this Dataset or the specified Dataset, but not in both, considering the number of occurrences.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null} or if the two Datasets don't have the same columns.
      * @see #symmetricDifference(Dataset, boolean)
      * @see #symmetricDifference(Dataset, Collection)
+     * @see #symmetricDifference(Dataset, Collection, boolean)
      * @see #difference(Dataset)
      * @see #intersection(Dataset)
-     * @see N#symmetricDifference(Collection, Collection)
-     * @see N#symmetricDifference(int[], int[])
      */
     Dataset symmetricDifference(Dataset other) throws IllegalArgumentException;
 
@@ -6565,269 +8782,174 @@ public sealed interface Dataset permits RowDataset {
      * but not in both. This is the set-theoretic symmetric difference operation.
      * For rows that appear multiple times, the symmetric difference contains occurrences that remain
      * after removing the minimum number of shared occurrences from both sources.
+     * The comparison is performed on the common columns between the two Datasets.
+     * Duplicated rows in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
      *
-     * <p>The order of rows is preserved, with rows from this Dataset appearing first,
-     * followed by rows from the specified Dataset that aren't in this Dataset.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {2, "Bob", "Engineering"},  // duplicate row
+     *          {3, "Charlie", "Marketing"}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {2, "Bob", 50000},
+     *          {3, "Charlie", 55000},
+     *          {4, "Dave", 60000}
+     *     });
      *
-     * <p>Example:
-     * <pre>
-     * Dataset ds1 = Dataset.rows(Arrays.asList("id", "name", "dept"), new Object[][] {
-     *     {1, "Alice", "HR"}, {2, "Bob", "IT"}, {2, "Bob", "IT"}, {3, "Charlie", "Finance"}
-     * });
-     * Dataset ds2 = Dataset.rows(Arrays.asList("id", "name", "role"), new Object[][] {
-     *     {2, "Bob", "Manager"}, {3, "Charlie", "Analyst"}, {4, "David", "Developer"}
-     * });
-     * 
-     * // With requiresSameColumns = true
-     * try {
-     *     Dataset result = ds1.symmetricDifference(ds2, true);
-     *     // Will throw IllegalArgumentException as the Datasets have different columns
-     * } catch (IllegalArgumentException e) {
-     *     System.out.println("Datasets must have identical columns");
-     * }
-     * 
-     * // With requiresSameColumns = false
-     * Dataset result = ds1.symmetricDifference(ds2, false);
-     * // result will contain:
-     * // {1, "Alice", "HR"}, {2, "Bob", "IT"}, {4, "David", "Developer"}
-     * // Rows explanation:
-     * // - {1, "Alice", "HR"} appears only in ds1, so it remains
-     * // - {2, "Bob", "IT"} appears twice in ds1 and once in ds2, so one occurrence remains
-     * // - {3, "Charlie", "Finance"} and {3, "Charlie", "Analyst"} appear once in each Dataset, so they're removed
-     * // - {4, "David", "Developer"} appears only in ds2, so it remains
-     * </pre>
+     * Dataset result = dataset1.symmetricDifference(dataset2, false);
+     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
+     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
      *
-     * @param other the Dataset to find symmetric difference with this Dataset
-     * @param requiresSameColumns whether both Datasets must have identical column names
-     * @return a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
-     *         but not in both, considering the number of occurrences
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if <i>requiresSameColumns</i> 
-     *         is {@code true} and the Datasets do not have the same columns
+     * @param other The Dataset to find symmetric difference with this Dataset. Must not be {@code null}.
+     * @param requiresSameColumns A boolean that indicates whether both Datasets should have the same columns.
+     * @return A new Dataset containing rows that are present in either this Dataset or the specified Dataset, but not in both, considering the number of occurrences.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
      * @see #symmetricDifference(Dataset)
      * @see #symmetricDifference(Dataset, Collection)
-     * @see #difference(Dataset)
-     * @see #intersection(Dataset)
-     * @see N#symmetricDifference(Collection, Collection)
-     * @see N#symmetricDifference(int[], int[])
+     * @see #symmetricDifference(Dataset, Collection, boolean)
+     * @see #difference(Dataset, boolean)
+     * @see #intersection(Dataset, boolean)
      */
     Dataset symmetricDifference(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
      * Returns a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
-     * but not in both, based on the specified key columns. This is the set-theoretic symmetric difference operation.
+     * but not in both. This is the set-theoretic symmetric difference operation.
      * For rows that appear multiple times, the symmetric difference contains occurrences that remain
      * after removing the minimum number of shared occurrences from both sources.
+     * The comparison is performed on the specified key columns only between the two Datasets.
+     * Duplicated rows in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
+     * <br />
      *
-     * <p>The order of rows is preserved, with rows from this Dataset appearing first,
-     * followed by rows from the specified Dataset that aren't in this Dataset.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {2, "Bob", "Engineering"},  // duplicate row
+     *          {3, "Charlie", "Marketing"}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {2, "Bob", 50000},
+     *          {3, "Charlie", 55000},
+     *          {4, "Dave", 60000}
+     *     });
      *
-     * <p>Example:
-     * <pre>
-     * Dataset ds1 = Dataset.rows(Arrays.asList("id", "name", "dept"), new Object[][] {
-     *     {1, "Alice", "HR"}, {2, "Bob", "IT"}, {2, "Bob", "IT"}, {3, "Charlie", "Finance"}
-     * });
-     * Dataset ds2 = Dataset.rows(Arrays.asList("id", "name", "role"), new Object[][] {
-     *     {2, "Bob", "Manager"}, {3, "Charlie", "Analyst"}, {4, "David", "Developer"}
-     * });
-     * 
-     * // Using only "id" and "name" as key columns for comparison
-     * Dataset result = ds1.symmetricDifference(ds2, Arrays.asList("id", "name"));
-     * // result will contain:
-     * // {1, "Alice", "HR"}, {2, "Bob", "IT"}, {4, "David", "Developer"}
-     * // Rows explanation:
-     * // - {1, "Alice", "HR"} appears only in ds1, so it remains
-     * // - {2, "Bob", "IT"} appears twice in ds1 and once in ds2, so one occurrence remains
-     * // - {3, "Charlie", "Finance"}/{3, "Charlie", "Analyst"} appear once in each Dataset based on key columns, so they're removed
-     * // - {4, "David", "Developer"} appears only in ds2, so it remains
-     * </pre>
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Dataset result = dataset1.symmetricDifference(dataset2, keyColumns);
+     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
+     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
      *
-     * @param other the Dataset to find symmetric difference with this Dataset
-     * @param keyColumnNames the columns to use for comparison when determining differences
-     * @return a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
-     *         but not in both, considering the number of occurrences and comparing only specified key columns
-     * @throws IllegalArgumentException if the other Dataset is {@code null} or if keyColumnNames is {@code null} or empty
+     * @param other The Dataset to find symmetric difference with this Dataset. Must not be {@code null}.
+     * @param keyColumnNames The column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+     * @return A new Dataset containing rows that are present in either this Dataset or the specified Dataset, but not in both, based on the specified key columns and considering the number of occurrences.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in both Datasets.
      * @see #symmetricDifference(Dataset)
      * @see #symmetricDifference(Dataset, boolean)
+     * @see #symmetricDifference(Dataset, Collection, boolean)
      * @see #difference(Dataset, Collection)
      * @see #intersection(Dataset, Collection)
-     * @see N#symmetricDifference(Collection, Collection)
-     * @see N#symmetricDifference(int[], int[])
      */
     Dataset symmetricDifference(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
      * Returns a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
-     * but not in both, based on the specified key columns. This is the set-theoretic symmetric difference operation.
+     * but not in both. This is the set-theoretic symmetric difference operation.
      * For rows that appear multiple times, the symmetric difference contains occurrences that remain
      * after removing the minimum number of shared occurrences from both sources.
+     * The comparison is performed on the specified key columns only between the two Datasets.
+     * Duplicated rows in the returned Dataset will NOT be eliminated.
+     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
      *
-     * <p>The order of rows is preserved, with rows from this Dataset appearing first,
-     * followed by rows from the specified Dataset that aren't in this Dataset.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {2, "Bob", "Engineering"},  // duplicate row
+     *          {3, "Charlie", "Marketing"}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {2, "Bob", 50000},
+     *          {3, "Charlie", 55000},
+     *          {4, "Dave", 60000}
+     *     });
      *
-     * <p>Example:
-     * <pre>
-     * Dataset ds1 = Dataset.rows(Arrays.asList("id", "name", "dept"), new Object[][] {
-     *     {1, "Alice", "HR"}, {2, "Bob", "IT"}, {2, "Bob", "IT"}, {3, "Charlie", "Finance"}
-     * });
-     * Dataset ds2 = Dataset.rows(Arrays.asList("id", "name", "role"), new Object[][] {
-     *     {2, "Bob", "Manager"}, {3, "Charlie", "Analyst"}, {4, "David", "Developer"}
-     * });
+     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Dataset result = dataset1.symmetricDifference(dataset2, keyColumns, false);
+     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null}
+     * // and {4, "Dave", null, 60000}
+     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
      *
-     * // With requiresSameColumns = true (comparing only "id" and "name" columns)
-     * try {
-     *     Dataset result = ds1.symmetricDifference(ds2, Arrays.asList("id", "name"), true);
-     *     // Will throw IllegalArgumentException as the Datasets have different columns
-     * } catch (IllegalArgumentException e) {
-     *     System.out.println("Datasets must have identical columns");
-     * }
-     *
-     * // With requiresSameColumns = false (comparing only "id" and "name" columns)
-     * Dataset result = ds1.symmetricDifference(ds2, Arrays.asList("id", "name"), false);
-     * // result will contain:
-     * // {1, "Alice", "HR"}, {2, "Bob", "IT"}, {4, "David", "Developer"}
-     * // Rows explanation:
-     * // - {1, "Alice", "HR"} appears only in ds1, so it remains
-     * // - {2, "Bob", "IT"} appears twice in ds1 and once in ds2, so one occurrence remains
-     * // - {3, "Charlie", "Finance"}/{3, "Charlie", "Analyst"} appear once in each Dataset based on key columns, so they're removed
-     * // - {4, "David", "Developer"} appears only in ds2, so it remains
-     * </pre>
-     *
-     * @param other the Dataset to find symmetric difference with this Dataset
-     * @param keyColumnNames the columns to use for comparison when determining differences
-     * @param requiresSameColumns whether both Datasets must have identical column names
-     * @return a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
-     *         but not in both, considering the number of occurrences and comparing only specified key columns
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if keyColumnNames is {@code null} or empty,
-     *         or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns
+     * @param other The Dataset to find symmetric difference with this Dataset. Must not be {@code null}.
+     * @param keyColumnNames The column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+     * @param requiresSameColumns A boolean that indicates whether both Datasets should have the same columns.
+     * @return A new Dataset containing rows that are present in either this Dataset or the specified Dataset, but not in both, based on the specified key columns and considering the number of occurrences.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in both Datasets, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns.
      * @see #symmetricDifference(Dataset)
      * @see #symmetricDifference(Dataset, boolean)
      * @see #symmetricDifference(Dataset, Collection)
      * @see #difference(Dataset, Collection, boolean)
      * @see #intersection(Dataset, Collection, boolean)
-     * @see N#symmetricDifference(Collection, Collection)
-     * @see N#symmetricDifference(int[], int[])
      */
     Dataset symmetricDifference(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Merges this Dataset with another Dataset.
-     * The merge operation combines rows from both Datasets into a new Dataset.
-     * If there are columns in the other Dataset that are not present in this Dataset, they will be added to the new Dataset.
-     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included in the new Dataset.
-     * The rows from both Datasets will be included in the new Dataset, even if they have the same values.
-     * 
-     * <p>Example:</p>
-     * <pre>{@code
-     * Dataset current = Dataset.rows(Arrays.asList("id", "name"), currentData);
-     * Dataset new = Dataset.rows(Arrays.asList("id", "name"), newData);
-     * Dataset combined = current.merge(new); // combines all rows from both Datasets
-     * }</pre>
-     *
-     * @param other The Dataset to merge with.
-     * @return A new Dataset that is the result of the merge operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}.
-     * @see #prepend(Dataset)
-     * @see #append(Dataset)
-     */
-    Dataset merge(Dataset other) throws IllegalArgumentException;
-
-    /**
-     * Merges this Dataset with another Dataset.
-     * The merge operation combines rows from both Datasets into a new Dataset.
-     * If there are columns in the other Dataset that are not present in this Dataset, they will be added to the new Dataset.
-     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included in the new Dataset.
-     * The rows from both Datasets will be included in the new Dataset, even if they have the same values.
-     *
-     * @param other The Dataset to merge with.
-     * @param requiresSameColumns A boolean value that determines whether the merge operation requires both Datasets to have the same columns.
-     * @return A new Dataset that is the result of the merge operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns.
-     * @see #prepend(Dataset)
-     * @see #append(Dataset)
-     */
-    Dataset merge(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
-
-    /**
-     * Merges this Dataset with another Dataset using the specified columns.
-     * The merge operation combines rows from both Datasets into a new Dataset.
-     * Only the columns specified in the <i>columnNames</i> parameter will be included in the new Dataset.
-     * If there are columns in the <i>columnNames</i> that either not in this Dataset or the other Dataset, they will still be added to the new Dataset.
-     * The rows from both Datasets will be included in the new Dataset, even if they have the same values.
-     *
-     * @param other The Dataset to merge with.
-     * @param columnNames The collection of column names to be included in the merge operation.
-     * @return A new Dataset that is the result of the merge operation.
-     * @throws IllegalArgumentException if the other Dataset is {@code null} or if the <i>columnNames</i> collection is {@code null}.
-     */
-    Dataset merge(Dataset other, Collection<String> columnNames) throws IllegalArgumentException;
-
-    /**
-     * Merges this Dataset with another Dataset, starting from the specified row index and ending at the specified row index.
-     * The merge operation combines rows from both Datasets into a new Dataset.
-     * The rows from both Datasets will be included in the new Dataset, even if they have the same values.
-     *
-     * @param other The Dataset to merge with.
-     * @param fromRowIndex The starting index of the row range to be included in the merge operation.
-     * @param toRowIndex The ending index of the row range to be included in the merge operation.
-     * @return A new Dataset that is the result of the merge operation.
-     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range.
-     * @throws IllegalArgumentException if the other Dataset is {@code null}.
-     */
-    Dataset merge(Dataset other, int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException, IllegalArgumentException;
-
-    /**
-     * Merges this Dataset with another Dataset using the specified columns, starting from the specified row index and ending at the specified row index.
-     * The merge operation combines rows from both Datasets into a new Dataset.
-     * Only the columns specified in the <i>columnNames</i> parameter will be included in the new Dataset.
-     * If there are columns in the <i>columnNames</i> that either not in this Dataset or the other Dataset, they will still be added to the new Dataset.
-     * The rows from both Datasets will be included in the new Dataset, even if they have the same values.
-     *
-     * @param other The Dataset to merge with.
-     * @param fromRowIndex The starting index of the row range to be included in the merge operation.
-     * @param toRowIndex The ending index of the row range to be included in the merge operation.
-     * @param columnNames The collection of column names to be included in the merge operation.
-     * @return A new Dataset that is the result of the merge operation.
-     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range.
-     * @throws IllegalArgumentException if the other Dataset is {@code null} or if the <i>columnNames</i> collection is {@code null}.
-     */
-    Dataset merge(Dataset other, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
-
-    /**
-     * Merges this Dataset with a collection of other Datasets.
-     * The merge operation combines rows from all Datasets into a new Dataset.
-     * All columns from all Datasets will be included in the new Dataset.
-     * If there are columns that are not present in some Datasets, the corresponding values in the new Dataset will be {@code null}.
-     * The rows from all Datasets will be included in the new Dataset, even if they have the same values.
-     *
-     * @param others The collection of Datasets to merge with.
-     * @return A new Dataset that is the result of the merge operation, or a copy of this Dataset if the <i>others</i> collection is {@code null} or empty.
-     */
-    Dataset merge(final Collection<? extends Dataset> others);
-
-    /**
-     * Merges this Dataset with a collection of other Datasets.
-     * The merge operation combines rows from all Datasets into a new Dataset.
-     * All columns from all Datasets will be included in the new Dataset.
-     * If there are columns that are not present in some Datasets, the corresponding values in the new Dataset will be {@code null}.
-     * The rows from all Datasets will be included in the new Dataset, even if they have the same values.
-     * If <i>requiresSameColumns</i> is {@code true}, all Datasets must have the same columns, otherwise an IllegalArgumentException will be thrown.
-     *
-     * @param others The collection of Datasets to merge with.
-     * @param requiresSameColumns A boolean that indicates whether all Datasets should have the same columns.
-     * @return A new Dataset that is the result of the merge operation, or a copy of this Dataset if the <i>others</i> collection is {@code null} or empty.
-     * @throws IllegalArgumentException if <i>requiresSameColumns</i> is {@code true} and the Datasets do not have the same columns.
-     */
-    Dataset merge(final Collection<? extends Dataset> others, boolean requiresSameColumns) throws IllegalArgumentException;
-
-    /**
      * Performs a cartesian product operation with this Dataset and another Dataset.
+     * <br />
      * The cartesian product operation combines each row from this Dataset with each row from the other Dataset.
      * The resulting Dataset will have the combined columns of both Datasets.
-     * If there are columns that are not present in one of the Datasets, the corresponding values in the new Dataset will be {@code null}.
+     * If there are columns with the same name in both Datasets, the columns from the other Dataset will be suffixed with a unique identifier to avoid conflicts.
+     * The total number of rows in the resulting Dataset will be the product of the number of rows in both Datasets.
+     * <br />
+     * For example, if this Dataset has 3 rows and the other Dataset has 2 rows, the resulting Dataset will have 6 rows (3 × 2).
      *
-     * @param other The Dataset to perform the cartesian product with.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
+     *     new Object[][] {
+     *          {1, "Alice"},
+     *          {2, "Bob"}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("category", "score"),
+     *     new Object[][] {
+     *          {"A", 95},
+     *          {"B", 90}
+     *     });
+     *
+     * Dataset result = dataset1.cartesianProduct(dataset2);
+     * // Result contains columns: id, name, category, score
+     * // Result contains: {1, "Alice", "A", 95}, {1, "Alice", "B", 90},
+     * //                  {2, "Bob", "A", 95}, {2, "Bob", "B", 90}
+     * }</pre>
+     *
+     * @param other The Dataset to perform the cartesian product with. Must not be {@code null}.
      * @return A new Dataset that is the result of the cartesian product operation.
-     * @throws IllegalArgumentException if the <i>other</i> Dataset is {@code null}.
+     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}.
+     * @see #merge(Dataset)
+     * @see #innerJoin(Dataset, String, String)
+     * @see #leftJoin(Dataset, String, String)
+     * @see #union(Dataset)
      */
     Dataset cartesianProduct(Dataset other) throws IllegalArgumentException;
 
@@ -6976,6 +9098,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Creates a deep copy of the current Dataset by performing Serialization/Deserialization.
      * This method ensures that the returned Dataset is a completely separate copy of the original Dataset, with no shared references.
+     * The frozen status of the copy will always be same as the frozen status in the original Dataset.
      *
      * @return A new Dataset that is a deep copy of the current Dataset.
      */
@@ -7531,8 +9654,9 @@ public sealed interface Dataset permits RowDataset {
      * Dataset tempData = Dataset.rows(Arrays.asList("id", "name"), data);
      * tempData.clear(); // removes all rows
      * }</pre>
+     * @throws IllegalStateException if the Dataset is frozen and cannot be modified.
      */
-    void clear();
+    void clear() throws IllegalStateException;
 
     /**
      * Checks if the Dataset is empty.
@@ -7550,7 +9674,27 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Trims the size of the Dataset to its current size.
-     * This method can be used to minimize the memory footprint of the Dataset.
+     * <br />
+     * A frozen Dataset can be trimmed too because trimming doesn't change elements held in the Dataset.
+     * This method can be used to minimize the memory footprint of the Dataset by releasing any unused
+     * capacity in the underlying data structures.
+     * <br />
+     * This operation does not modify the content or structure of the Dataset, only optimizes its
+     * internal storage allocation. It is safe to call on both mutable and frozen Datasets.
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
+     * dataset.removeRows(100, 200); // Remove some rows
+     * dataset.trimToSize(); // Reclaim unused memory
+     *
+     * // Can also be called on frozen datasets
+     * dataset.freeze();
+     * dataset.trimToSize(); // Still valid - doesn't modify content
+     * }</pre>
+     *
+     * @see #freeze()
+     * @see #isFrozen()
      */
     void trimToSize();
 
@@ -7607,8 +9751,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * dataset.println(); // Print entire Dataset to console
-     * 
+     *
      * +----+---------+-----+---------+
      * | id | name    | age | salary  |
      * +----+---------+-----+---------+
@@ -7667,7 +9810,6 @@ public sealed interface Dataset permits RowDataset {
      *
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * dataset.println(); 
      * }</pre>
      *
      * @param fromRowIndex the starting index of the row, inclusive
@@ -7707,8 +9849,7 @@ public sealed interface Dataset permits RowDataset {
      * @see #println()
      * @see #println(String)
      */
-    void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Appendable output)
-            throws IndexOutOfBoundsException, UncheckedIOException;
+    void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Appendable output) throws IndexOutOfBoundsException, UncheckedIOException;
 
     /**
      * Prints a portion of the Dataset to the provided Writer.

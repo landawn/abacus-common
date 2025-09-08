@@ -21,18 +21,59 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the annotated element is null-safe and properly handles null values.
- * This annotation can be applied to constructors, methods, and parameters to document
- * that they have been designed to handle null inputs without throwing NullPointerException.
+ * Indicates that the annotated element gracefully handles null values without throwing exceptions.
+ * This annotation documents that the code has been specifically designed to be defensive against
+ * null inputs, providing predictable behavior even when null values are encountered.
  * 
- * <p>When applied to:</p>
+ * <p><b>When applied to methods or constructors:</b></p>
  * <ul>
- *   <li>A method or constructor: indicates it can safely handle null arguments</li>
- *   <li>A parameter: indicates that null is an acceptable value for that parameter</li>
+ *   <li>The method/constructor can accept null arguments without throwing NullPointerException</li>
+ *   <li>Null inputs are handled with sensible default behavior or early returns</li>
+ *   <li>The implementation includes proper null checks and defensive programming</li>
  * </ul>
  * 
- * <p>This annotation is for documentation and may be used by static analysis tools
- * to verify null-safety contracts.</p>
+ * <p><b>When applied to parameters:</b></p>
+ * <ul>
+ *   <li>Null is an acceptable and expected value for this parameter</li>
+ *   <li>The method logic properly handles the null case</li>
+ *   <li>No NullPointerException will occur from passing null</li>
+ * </ul>
+ * 
+ * <p><b>Common null-safe patterns:</b></p>
+ * <ul>
+ *   <li>Returning empty collections instead of null</li>
+ *   <li>Using default values when null is provided</li>
+ *   <li>Gracefully skipping operations on null inputs</li>
+ *   <li>Implementing the Null Object pattern</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * public class StringUtils {
+ *     {@literal @}NullSafe
+ *     public static String trim({@literal @}NullSafe String input) {
+ *         return input == null ? "" : input.trim();
+ *     }
+ *     
+ *     {@literal @}NullSafe
+ *     public static boolean isEmpty({@literal @}NullSafe String str) {
+ *         return str == null || str.length() == 0;
+ *     }
+ *     
+ *     {@literal @}NullSafe
+ *     public List<String> parseTokens({@literal @}NullSafe String input) {
+ *         if (input == null) {
+ *             return Collections.emptyList();
+ *         }
+ *         return Arrays.asList(input.split(","));
+ *     }
+ * }
+ * </pre>
+ * 
+ * @author HaiYang Li
+ * @since 2018
+ * @see NotNull
+ * @see MayReturnNull
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

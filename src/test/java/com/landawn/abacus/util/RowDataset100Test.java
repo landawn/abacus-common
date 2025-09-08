@@ -668,12 +668,12 @@ public class RowDataset100Test extends TestBase {
         Assertions.assertEquals("John:25", dataset.get(0, dataset.getColumnIndex("info")));
     }
 
-    @Test
-    public void testCombineColumnsWithPredicate() {
-        dataset.combineColumns(col -> col.equals("id") || col.equals("age"), "combined", Object[].class);
-        Assertions.assertEquals(3, dataset.columnCount());
-        Assertions.assertTrue(dataset.containsColumn("combined"));
-    }
+    //    @Test
+    //    public void testCombineColumnsWithPredicate() {
+    //        dataset.combineColumns(col -> col.equals("id") || col.equals("age"), "combined", Object[].class);
+    //        Assertions.assertEquals(3, dataset.columnCount());
+    //        Assertions.assertTrue(dataset.containsColumn("combined"));
+    //    }
 
     @Test
     public void testCombineColumnsWithTuple2() {

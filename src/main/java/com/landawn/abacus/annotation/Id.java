@@ -23,18 +23,55 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Marks a field or type as representing a primary key or identifier.
- * This annotation is used in ORM frameworks to identify primary key fields
- * and in other contexts where unique identification is required.
+ * Marks a field or type as representing the primary key (identifier) of an entity.
+ * This annotation is essential in ORM (Object-Relational Mapping) frameworks to identify
+ * which field(s) uniquely identify each entity instance in the database.
  * 
- * <p>When applied to a field, it indicates that the field is a primary key.
- * When applied to a type, it can specify composite primary key information.</p>
+ * <p><b>For single primary keys:</b></p>
+ * <p>When applied to a field, it indicates that the field is the primary key of the entity.
+ * The field type can be any serializable type, but common types include:</p>
+ * <ul>
+ *   <li>Numeric types: Long, Integer, BigInteger</li>
+ *   <li>String (for natural keys or UUIDs)</li>
+ *   <li>UUID</li>
+ *   <li>Custom ID types</li>
+ * </ul>
  * 
- * <p>The {@link #value()} attribute can be used to specify multiple column names
- * for composite keys or additional key configuration.</p>
+ * <p><b>For composite primary keys:</b></p>
+ * <p>When applied to a type, or when the value array contains multiple column names,
+ * it defines a composite primary key consisting of multiple fields.</p>
+ * 
+ * <p><b>Best practices:</b></p>
+ * <ul>
+ *   <li>Every entity should have exactly one @Id field or composite key definition</li>
+ *   <li>ID fields should be immutable after entity creation</li>
+ *   <li>Consider using generated IDs for better performance</li>
+ *   <li>Natural keys should be truly unique and unchanging</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>
+ * // Single primary key
+ * {@literal @}Entity
+ * public class User {
+ *     {@literal @}Id
+ *     private Long id;
+ * }
+ * 
+ * // Composite primary key
+ * {@literal @}Entity
+ * {@literal @}Id({"company_id", "employee_id"})
+ * public class Employee {
+ *     private Long companyId;
+ *     private Long employeeId;
+ * }
+ * </pre>
  * 
  * @author HaiYang Li
  * @since 2018
+ * @see Entity
+ * @see Column
+ * @see ReadOnlyId
  */
 @Documented
 @Target(value = { FIELD, /* METHOD, */ TYPE })
@@ -43,10 +80,27 @@ public @interface Id {
 
     /**
      * Specifies the column names that form the primary key.
-     * For simple primary keys, this is typically empty and the field name is used.
-     * For composite keys, this can contain multiple column names.
      * 
-     * @return an array of column names, empty array by default
+     * <p>Usage patterns:</p>
+     * <ul>
+     *   <li>Empty array (default): For single primary keys, the annotated field name is used</li>
+     *   <li>Single element array: Explicitly names the primary key column</li>
+     *   <li>Multiple elements: Defines a composite primary key with multiple columns</li>
+     * </ul>
+     * 
+     * <p><b>Examples:</b></p>
+     * <pre>
+     * {@literal @}Id  // Uses field name as column name
+     * private Long id;
+     * 
+     * {@literal @}Id({"user_id"})  // Maps to 'user_id' column
+     * private Long id;
+     * 
+     * {@literal @}Id({"dept_id", "emp_id"})  // Composite key
+     * public class Employee { }
+     * </pre>
+     * 
+     * @return an array of column names forming the primary key, empty array uses field name as default
      */
     String[] value() default {};
 }
