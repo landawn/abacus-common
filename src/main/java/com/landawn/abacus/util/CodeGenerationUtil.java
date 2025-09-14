@@ -860,7 +860,7 @@ public final class CodeGenerationUtil {
 
             IOUtil.mkdirsIfNotExists(new File(packageDir));
             final File file = new File(packageDir + IOUtil.DIR_SEPARATOR + propNameTableClassName + ".java");
-            IOUtil.createIfNotExists(file);
+            IOUtil.createFileIfNotExists(file);
 
             try {
                 IOUtil.write(ret, file);

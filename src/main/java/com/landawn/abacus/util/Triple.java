@@ -864,9 +864,7 @@ public final class Triple<L, M, R> implements Mutable {
             return true;
         }
 
-        if (obj instanceof Triple) {
-            final Triple<L, M, R> other = (Triple<L, M, R>) obj;
-
+        if (obj instanceof Triple<?, ?, ?> other) {
             return N.equals(left, other.left) && N.equals(middle, other.middle) && N.equals(right, other.right);
         }
 

@@ -1780,9 +1780,9 @@ public class IOUtil200Test extends TestBase {
     public void testCreateIfNotExists() throws IOException {
         File newFile = new File(tempDir.toFile(), "createTest.txt");
         assertFalse(newFile.exists());
-        assertTrue(IOUtil.createIfNotExists(newFile));
+        assertTrue(IOUtil.createFileIfNotExists(newFile));
         assertTrue(newFile.exists());
-        assertFalse(IOUtil.createIfNotExists(newFile)); // Already exists
+        assertFalse(IOUtil.createFileIfNotExists(newFile)); // Already exists
     }
 
     @Test

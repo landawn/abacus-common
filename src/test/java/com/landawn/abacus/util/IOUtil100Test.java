@@ -596,7 +596,7 @@ public class IOUtil100Test extends TestBase {
         File newFile = new File(tempDir, "new.txt");
         assertFalse(newFile.exists());
 
-        boolean created = IOUtil.createIfNotExists(newFile);
+        boolean created = IOUtil.createFileIfNotExists(newFile);
 
         assertTrue(created);
         assertTrue(newFile.exists());

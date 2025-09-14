@@ -2135,7 +2135,7 @@ public sealed interface Dataset permits RowDataset {
      *          {3, "Charlie", 85, "B"}
      *     });
      *
-     * Collection&lt;String&gt; selectedColumns = Arrays.asList("id", "score");
+     * Collection<String> selectedColumns = Arrays.asList("id", "score");
      * dataset1.merge(dataset2, selectedColumns);
      * // dataset1 now contains columns: id, name, age, score
      * // dataset1 now contains rows: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, null, null, 95}, {3, null, null, 85}
@@ -2223,7 +2223,7 @@ public sealed interface Dataset permits RowDataset {
      *          {3, "Charlie", 85, "C"}
      *     });
      *
-     * Collection&lt;String&gt; selectedColumns = Arrays.asList("id", "score");
+     * Collection<String> selectedColumns = Arrays.asList("id", "score");
      * dataset1.merge(dataset2, 0, 2, selectedColumns);
      * // dataset1 now contains columns: id, name, age, score
      * // dataset1 now contains rows: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, null, null, 95}, {2, null, null, 90}
@@ -5063,7 +5063,7 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | Mexico  | Mexico City | 400   | 20       |
      * // +--------+---------+-------------+-------+----------+
      *
-     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(Arrays.asList("region", "country", "city"));
+     * Stream<Dataset> rollupResult = dataset.rollup(Arrays.asList("region", "country", "city"));
      *
      * // Returns a stream of 4 datasets:
      * // Level 1: Grouped by region, country, city (most detailed)
@@ -5139,7 +5139,7 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | Mexico  | Mexico City | 400   | 20       |
      * // +--------+---------+-------------+-------+----------+
      *
-     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     * Stream<Dataset> rollupResult = dataset.rollup(
      *     Arrays.asList("region", "country", "city"),
      *     "sales",
      *     "total_sales",
@@ -5224,7 +5224,7 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | Mexico  | Mexico City | 400   | 20       |
      * // +--------+---------+-------------+-------+----------+
      *
-     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     * Stream<Dataset> rollupResult = dataset.rollup(
      *     Arrays.asList("region", "country", "city"),
      *     Arrays.asList("sales", "quantity"),
      *     "aggregated_data",
@@ -5310,7 +5310,7 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | Mexico  | Mexico City | 400   | 20       |
      * // +--------+---------+-------------+-------+----------+
      *
-     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     * Stream<Dataset> rollupResult = dataset.rollup(
      *     Arrays.asList("region", "country", "city"),
      *     Arrays.asList("sales", "quantity"),
      *     "aggregated_totals",
@@ -5397,7 +5397,7 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | Mexico  | Mexico City | 400   | 20       |
      * // +--------+---------+-------------+-------+----------+
      *
-     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     * Stream<Dataset> rollupResult = dataset.rollup(
      *     Arrays.asList("region", "country", "city"),
      *     Arrays.asList("sales", "quantity"),
      *     "aggregated_totals",
@@ -5487,9 +5487,9 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | Mexico  | Mexico City | 400   | 20       |
      * // +--------+---------+-------------+-------+----------+
      *
-     * Function&lt;DisposableObjArray, String&gt; keyExtractor = keyRow -> keyRow.join("-");
+     * Function<DisposableObjArray, String> keyExtractor = keyRow -> keyRow.join("-");
      *
-     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     * Stream<Dataset> rollupResult = dataset.rollup(
      *     Arrays.asList("region", "country", "city"),
      *     keyExtractor);
      *
@@ -5573,9 +5573,9 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | Mexico  | Mexico City | 400   | 20       |
      * // +--------+---------+-------------+-------+----------+
      *
-     * Function&lt;DisposableObjArray, String&gt; keyExtractor = keyRow -> keyRow.join("-");
+     * Function<DisposableObjArray, String> keyExtractor = keyRow -> keyRow.join("-");
      *
-     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     * Stream<Dataset> rollupResult = dataset.rollup(
      *     Arrays.asList("region", "country", "city"),
      *     keyExtractor,
      *     "sales",
@@ -5668,9 +5668,9 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | Mexico  | Mexico City | 400   | 20       |
      * // +--------+---------+-------------+-------+----------+
      *
-     * Function&lt;DisposableObjArray, String&gt; keyExtractor = keyRow -> keyRow.join("-");
+     * Function<DisposableObjArray, String> keyExtractor = keyRow -> keyRow.join("-");
      *
-     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     * Stream<Dataset> rollupResult = dataset.rollup(
      *     Arrays.asList("region", "country", "city"),
      *     keyExtractor,
      *     Arrays.asList("sales", "quantity"),
@@ -5764,9 +5764,9 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | Mexico  | Mexico City | 400   | 20       |
      * // +--------+---------+-------------+-------+----------+
      *
-     * Function&lt;DisposableObjArray, String&gt; keyExtractor = keyRow -> keyRow.join("-");
+     * Function<DisposableObjArray, String> keyExtractor = keyRow -> keyRow.join("-");
      *
-     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     * Stream<Dataset> rollupResult = dataset.rollup(
      *     Arrays.asList("region", "country", "city"),
      *     keyExtractor,
      *     Arrays.asList("sales", "quantity"),
@@ -5861,8 +5861,8 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | Mexico  | Mexico City | 400   | 20       |
      * // +--------+---------+-------------+-------+----------+
      *
-     * Function&lt;DisposableObjArray, String&gt; keyExtractor = keyRow -> keyRow.join("-");
-     * Stream&lt;Dataset&gt; rollupResult = dataset.rollup(
+     * Function<DisposableObjArray, String> keyExtractor = keyRow -> keyRow.join("-");
+     * Stream<Dataset> rollupResult = dataset.rollup(
      *     Arrays.asList("region", "country", "city"),
      *     keyExtractor,
      *     Arrays.asList("sales", "quantity"),
@@ -5949,7 +5949,7 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | Mexico  | 400   |
      * // +--------+---------+-------+
      * 
-     * Stream&lt;Dataset&gt; cubeResult = dataset.cube(Arrays.asList("region", "country"));
+     * Stream<Dataset> cubeResult = dataset.cube(Arrays.asList("region", "country"));
      * // Returns a stream of 4 datasets:
      * // Level 1: Grouped by region, country (most detailed)
      * // +--------+---------+-------+
@@ -6211,9 +6211,9 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | Mexico  | 400   |
      * // +--------+---------+-------+ 
      *
-     * Function&lt;DisposableObjArray, String&gt; keyExtractor = keyRow -> keyRow.join("-");
-     * Function&lt;DisposableObjArray, Double&gt; rowMapper = row -> (Integer) row.get(0) * 1.1;
-     * Stream&lt;Dataset&gt; cubeResult = dataset.cube(
+     * Function<DisposableObjArray, String> keyExtractor = keyRow -> keyRow.join("-");
+     * Function<DisposableObjArray, Double> rowMapper = row -> (Integer) row.get(0) * 1.1;
+     * Stream<Dataset> cubeResult = dataset.cube(
      *     Arrays.asList("region", "country"),
      *     keyExtractor,
      *     Arrays.asList("sales"),
@@ -6300,7 +6300,7 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | B       | 250   |
      * // +--------+---------+-------+
      *
-     * Sheet&lt;String, String, Integer&gt; pivotResult = dataset.pivot(
+     * Sheet<String, String, Integer> pivotResult = dataset.pivot(
      *     "region",      // row identifier
      *     "product",     // column identifier
      *     "sales",       // aggregate column
@@ -6363,7 +6363,7 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | B       | 250   | 25       |
      * // +--------+---------+-------+----------+
      *
-     * Sheet&lt;String, String, Integer&gt; pivotResult = dataset.pivot(
+     * Sheet<String, String, Integer> pivotResult = dataset.pivot(
      *     "region",                           // row identifier
      *     "product",                          // column identifier
      *     Arrays.asList("sales", "quantity"), // aggregate columns
@@ -6428,9 +6428,9 @@ public sealed interface Dataset permits RowDataset {
      * // | South  | B       | 250   | 25       |
      * // +--------+---------+-------+----------+
      *
-     * Function&lt;DisposableObjArray, Double&gt; rowMapper = row -> (Integer) row.get(0) * 1.1; // Apply 10% markup to sales
+     * Function<DisposableObjArray, Double> rowMapper = row -> (Integer) row.get(0) * 1.1; // Apply 10% markup to sales
      *
-     * Sheet&lt;String, String, Double&gt; pivotResult = dataset.pivot(
+     * Sheet<String, String, Double> pivotResult = dataset.pivot(
      *     "region",                           // row identifier
      *     "product",                          // column identifier
      *     Arrays.asList("sales", "quantity"), // aggregate columns
@@ -7531,7 +7531,7 @@ public sealed interface Dataset permits RowDataset {
      *          {3, "Charlie", 85}
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      *
      * Dataset result = dataset1.union(dataset2, keyColumns);
      * // Result contains columns: id, name, age, score
@@ -7576,7 +7576,7 @@ public sealed interface Dataset permits RowDataset {
      *          {3, "Charlie", 85}
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      *
      * // Require same columns - will throw IllegalArgumentException due to different columns
      * // Dataset result2 = dataset1.union(dataset2, keyColumns, true);
@@ -7966,7 +7966,7 @@ public sealed interface Dataset permits RowDataset {
      *          {3, "Charlie", 85},
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      * Dataset result = dataset1.intersectAll(dataset2, keyColumns);
      * // Result contains: {1, "Alice", 25}, {2, "Bob", 30}, {1, "Alice", 25} based on matching key columns id and name
      * // Note: Duplicates are preserved
@@ -8009,7 +8009,7 @@ public sealed interface Dataset permits RowDataset {
      *          {3, "Charlie", 85},
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      * 
      * // Require same columns - will throw IllegalArgumentException
      * // Dataset result = dataset1.intersectAll(dataset2, keyColumns, true);
@@ -8142,7 +8142,7 @@ public sealed interface Dataset permits RowDataset {
      *          {3, "Charlie", 85}
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      * Dataset result = dataset1.except(dataset2, keyColumns);
      * // Result contains: {1, "Alice", 25}, {2, "Bob", 30} based on matching key columns id and name
      * // Note: Duplicates are eliminated
@@ -8185,7 +8185,7 @@ public sealed interface Dataset permits RowDataset {
      *          {3, "Charlie", 85}
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      * 
      * // Require same columns - will throw IllegalArgumentException
      * // Dataset result = dataset1.except(dataset2, keyColumns, true);
@@ -8321,7 +8321,7 @@ public sealed interface Dataset permits RowDataset {
      *          {3, "Charlie", 35}
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      *
      * Dataset result = dataset1.exceptAll(dataset2, keyColumns);
      * // Result contains: {1, "Alice", 25}, {1, "Alice", 25}, {2, "Bob", 30} based on matching key columns id and name
@@ -8367,7 +8367,7 @@ public sealed interface Dataset permits RowDataset {
      *          {3, "Charlie", 85}
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      *
      * // Require same columns - will throw IllegalArgumentException due to different columns
      * // Dataset result = dataset1.exceptAll(dataset2, keyColumns, true);
@@ -8507,7 +8507,7 @@ public sealed interface Dataset permits RowDataset {
      *          {2, "Bob", 80000}  // different salary but same keys
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      * Dataset result = dataset1.intersection(dataset2, keyColumns);
      * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (minimum of 2 and 3 occurrences)
      * // with column structure matching dataset1
@@ -8552,7 +8552,7 @@ public sealed interface Dataset permits RowDataset {
      *          {2, "Bob", 80000}  // different salary but same keys
      *     });
      * 
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      * Dataset result = dataset1.intersection(dataset2, keyColumns, false);
      * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (minimum of 2 and 3 occurrences)
      * // with column structure matching dataset1
@@ -8674,7 +8674,7 @@ public sealed interface Dataset permits RowDataset {
      *          {3, "Charlie", 60000}
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      * Dataset result = dataset1.difference(dataset2, keyColumns);
      * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Finance"}
      * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
@@ -8716,7 +8716,7 @@ public sealed interface Dataset permits RowDataset {
      *          {3, "Charlie", 60000}
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      * Dataset result = dataset1.difference(dataset2, keyColumns, false);
      * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Finance"}
      * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
@@ -8848,7 +8848,7 @@ public sealed interface Dataset permits RowDataset {
      *          {4, "Dave", 60000}
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      * Dataset result = dataset1.symmetricDifference(dataset2, keyColumns);
      * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
      * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
@@ -8894,7 +8894,7 @@ public sealed interface Dataset permits RowDataset {
      *          {4, "Dave", 60000}
      *     });
      *
-     * Collection&lt;String&gt; keyColumns = Arrays.asList("id", "name");
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
      * Dataset result = dataset1.symmetricDifference(dataset2, keyColumns, false);
      * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null}
      * // and {4, "Dave", null, 60000}

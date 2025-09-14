@@ -322,7 +322,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     protected static void createNewFileIfNotExists(final File file) throws IOException {
-        if (!file.exists() && !IOUtil.createIfNotExists(file)) {
+        if (!file.exists() && !IOUtil.createFileIfNotExists(file)) {
             throw new IOException("Failed to create new file: " + file.getName());
         }
     }

@@ -4625,7 +4625,7 @@ public final class IOUtil {
      */
     public static FileOutputStream newFileOutputStream(final File file) throws UncheckedIOException {
         try {
-            createIfNotExists(file);
+            createFileIfNotExists(file);
 
             return new FileOutputStream(file);
         } catch (final FileNotFoundException e) {
@@ -4644,7 +4644,7 @@ public final class IOUtil {
      */
     public static FileOutputStream newFileOutputStream(final File file, final boolean append) throws UncheckedIOException {
         try {
-            createIfNotExists(file);
+            createFileIfNotExists(file);
 
             return new FileOutputStream(file, append);
         } catch (final FileNotFoundException e) {
@@ -5965,13 +5965,35 @@ public final class IOUtil {
     }
 
     /**
-     * Deletes the specified file (or directory) by calling {@link File#delete()}.
+     * Deletes the specified file if it exists by calling {@link File#delete()}.
+     * <p>
+     * This method attempts to delete the specified file or directory. If the file is {@code null}
+     * or does not exist, the method returns {@code false} without attempting deletion.
+     * For directories, this method only deletes empty directories - it will not delete
+     * directories that contain files or subdirectories.
+     * <p>
+     * This is a simple deletion method that only removes the file itself. For recursive
+     * deletion of directories and their contents, use {@link #deleteAllIfExists(File)} instead.
      *
-     * @param file
-     * @return {@code true} if the file is deleted successfully, otherwise {@code false} if the file is {@code null} or doesn't exist, or can't be deleted.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * File file = new File("./temp-file.txt");
+     * boolean deleted = IOUtil.deleteIfExists(file);
+     * if (deleted) {
+     *     System.out.println("File deleted successfully.");
+     * } else {
+     *     System.out.println("File does not exist or could not be deleted.");
+     * }
+     * }</pre>
+     *
+     * @param file The file or directory to delete. Can be {@code null}.
+     * @return {@code true} if the file was deleted successfully; {@code false} if the file
+     *         is {@code null}, does not exist, or could not be deleted.
      * @see File#delete()
      * @see Files#delete(Path)
      * @see Files#deleteIfExists(Path)
+     * @see #deleteAllIfExists(File)
+     * @see #deleteQuietly(File)
      */
     public static boolean deleteIfExists(final File file) {
         if ((file == null) || !file.exists()) {
@@ -5982,12 +6004,32 @@ public final class IOUtil {
     }
 
     /**
-     * Deletes the specified file or directory, if it exists, without throwing an exception.
+     * Deletes the specified file or directory quietly, suppressing any exceptions that may occur.
+     * <p>
+     * This method attempts to delete the specified file or directory by calling {@link #deleteIfExists(File)}.
+     * If any exception occurs during the deletion process, it is caught and logged, and the method
+     * returns {@code false}. This makes it safe to use in situations where you want to attempt
+     * deletion but don't want to handle exceptions explicitly.
+     * <p>
+     * Unlike {@link #deleteIfExists(File)}, this method will never throw an exception.
+     * It only deletes the file itself, not its contents if it's a directory with files.
+     * For recursive deletion, use {@link #deleteAllIfExists(File)} instead.
      *
-     * @param file The file or directory to be deleted.
-     * @return {@code true} if the file or directory was deleted successfully, {@code false} otherwise.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * File file = new File("./temp-file.txt");
+     * boolean deleted = IOUtil.deleteQuietly(file);
+     * // No exception handling needed - method handles all errors internally
+     * System.out.println("File deleted: " + deleted);
+     * }</pre>
+     *
+     * @param file The file or directory to delete. Can be {@code null}.
+     * @return {@code true} if the file was deleted successfully; {@code false} if the file
+     *         is {@code null}, does not exist, could not be deleted, or if an exception occurred.
      * @see File#delete()
+     * @see Files#deleteIfExists(Path)
      * @see #deleteIfExists(File)
+     * @see #deleteAllIfExists(File)
      */
     public static boolean deleteQuietly(final File file) {
         try {
@@ -6000,12 +6042,33 @@ public final class IOUtil {
 
     /**
      * Deletes the specified file and all its subfiles/directories recursively if it's a directory.
+     * <p>
+     * This method performs a recursive deletion operation. If the specified file is a directory,
+     * it will delete all files and subdirectories within it before deleting the directory itself.
+     * If the file is a regular file, it will simply delete the file. If the file does not exist
+     * or is {@code null}, the method returns {@code false} without performing any operations.
+     * <p>
+     * This operation is irreversible and will permanently remove all specified files and directories.
      *
-     * @param file
-     * @return {@code true} if the file is deleted successfully, otherwise {@code false} if the file is {@code null} or doesn't exist, or can't be deleted.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * File directory = new File("./temp-folder");
+     * boolean deleted = IOUtil.deleteAllIfExists(directory);
+     * if (deleted) {
+     *     System.out.println("File/directory and all contents deleted successfully.");
+     * } else {
+     *     System.out.println("File/directory does not exist or could not be deleted.");
+     * }
+     * }</pre>
+     *
+     * @param file The file or directory to delete recursively.
+     * @return {@code true} if the file/directory and all its contents were deleted successfully;
+     *         {@code false} if the file is {@code null}, does not exist, or could not be deleted.
      * @see File#delete()
      * @see Files#delete(Path)
      * @see Files#deleteIfExists(Path)
+     * @see #deleteIfExists(File)
+     * @see #deleteFilesFromDirectory(File)
      */
     public static boolean deleteAllIfExists(final File file) {
         if ((file == null) || !file.exists()) {
@@ -6038,28 +6101,76 @@ public final class IOUtil {
     }
 
     /**
-     * Deletes subfiles/directories from the specified {@code dir}. The {@code file} itself won't be deleted.
+     * Deletes all subfiles and subdirectories from the specified directory.
+     * <p>
+     * This method removes all files and directories contained within the specified directory,
+     * but leaves the directory itself intact. If the directory does not exist or is actually
+     * a file, the method returns {@code false} without performing any operations.
+     * <p>
+     * This operation is recursive - subdirectories and all their contents will be deleted.
+     * The method is equivalent to calling {@code deleteFilesFromDirectory(dir, BiPredicates.alwaysTrue())}.
      *
-     * @param dir The directory where subfiles/directories will be deleted from.
-     * @return {@code true} if the file or directory was deleted successfully, {@code false} otherwise.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * File directory = new File("./temp-folder");
+     * boolean deleted = IOUtil.deleteFilesFromDirectory(directory);
+     * if (deleted) {
+     *     System.out.println("All files and subdirectories deleted successfully.");
+     * } else {
+     *     System.out.println("Failed to delete some files or subdirectories.");
+     * }
+     * }</pre>
+     *
+     * @param dir The directory from which to delete all files and subdirectories.
+     * @return {@code true} if all files and directories were deleted successfully;
+     *         {@code false} if the directory does not exist or is actually a file, 
+     *         or some files could not be deleted or if the operation failed.
      * @see File#delete()
      * @see Files#delete(Path)
+     * @see Files#deleteIfExists(Path)
+     * @see #deleteFilesFromDirectory(File, Throwables.BiPredicate)
+     * @see #deleteAllIfExists(File)
      */
     public static boolean deleteFilesFromDirectory(final File dir) {
         return deleteFilesFromDirectory(dir, BiPredicates.alwaysTrue());
     }
 
     /**
-     * Deletes subfiles/directories from the specified {@code dir}. The {@code file} itself won't be deleted.
+     * Deletes subfiles/directories from the specified directory based on the provided filter.
+     * <p>
+     * This method removes files and subdirectories within the specified directory that match
+     * the given filter criteria. The directory itself is not deleted, only its contents.
+     * <p>
+     * The filter is a {@link Throwables.BiPredicate} that receives the parent directory and
+     * each file/subdirectory as parameters. Only files/directories for which the filter
+     * returns {@code true} will be deleted.
      *
-     * @param <E> the type of the exception that may be thrown
-     * @param dir The directory where subfiles/directories will be deleted from.
-     * @param filter The filter to be applied when deleting files or directories.
-     * @return {@code true} if the file or directory was deleted successfully, {@code false} otherwise.
-     * @throws E if an exception of type E occurs during the operation.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * File directory = new File("./temp-folder");
+     * // Delete only .txt files
+     * boolean deleted = IOUtil.deleteFilesFromDirectory(directory, 
+     *     (parentDir, file) -> file.getName().endsWith(".txt"));
+     * if (deleted) {
+     *     System.out.println("Matching files deleted successfully.");
+     * } else {
+     *     System.out.println("Failed to delete some files.");
+     * }
+     * }</pre>
+     *
+     * @param <E> The type of exception that the filter may throw.
+     * @param dir The directory from which to delete files and subdirectories.
+     * @param filter The predicate to determine which files/directories should be deleted.
+     *               Receives the parent directory and the file/directory being evaluated.
+     * @return {@code true} if all matching files and directories were deleted successfully;
+     *         {@code false} if the directory does not exist or is actually a file, 
+     *         or some files could not be deleted or if the operation failed.
+     * @throws E if the filter throws an exception during evaluation.
      * @see File#delete()
      * @see Files#delete(Path)
      * @see Files#deleteIfExists(Path)
+     * @see #deleteFilesFromDirectory(File)
+     * @see #deleteAllIfExists(File)
      */
     public static <E extends Exception> boolean deleteFilesFromDirectory(final File dir, final Throwables.BiPredicate<? super File, ? super File, E> filter)
             throws E {
@@ -6101,12 +6212,33 @@ public final class IOUtil {
     }
 
     /**
-     * Deletes the subfiles/directories under the specified {@code directory}. The {@code directory} itself won't be deleted.
-     * It's equivalent to {@code deleteFilesFromDirectory(directory)}.
+     * Cleans a directory by deleting all subfiles and subdirectories within it.
+     * <p>
+     * This method removes all files and directories contained within the specified directory,
+     * but leaves the directory itself intact. If the directory does not exist or is actually
+     * a file, the method returns {@code false} without performing any operations.
+     * <p>
+     * This operation is recursive - subdirectories and all their contents will be deleted.
+     * The method is equivalent to calling {@code deleteFilesFromDirectory(directory)}.
      *
-     * @param dir directory to clean
-     * @return {@code false} if some of its subfiles can't be deleted.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * File directory = new File("./temp-folder");
+     * boolean cleaned = IOUtil.cleanDirectory(directory);
+     * if (cleaned) {
+     *     System.out.println("Directory cleaned successfully.");
+     * } else {
+     *     System.out.println("Failed to clean some files in the directory.");
+     * }
+     * }</pre>
+     *
+     * @param dir The directory to clean.
+     * @return {@code true} if all subfiles and subdirectories were deleted successfully; 
+     *         {@code false} if the directory does not exist or is actually a file, 
+     *         or some files could not be deleted or if the operation failed.
      * @see #deleteFilesFromDirectory(File)
+     * @see #deleteAllIfExists(File)
+     * @see File#delete()
      */
     public static boolean cleanDirectory(final File dir) {
         return deleteFilesFromDirectory(dir, BiPredicates.alwaysTrue());
@@ -6116,12 +6248,15 @@ public final class IOUtil {
         if (!file.exists()) {
             try {
                 if (!file.createNewFile()) {
-                    if (file.getParentFile().mkdirs()) {
+                    // Too wide. It works with: File invalidFile = new File("/invalid/path/test.json");
+                    // if (file.getParentFile().mkdirs()) {
+                    if (file.getParentFile().mkdir()) {
                         return file.createNewFile();
                     }
                 }
             } catch (final IOException e) {
-                if (!file.exists() && file.getParentFile().mkdirs()) {
+                // if (!file.exists() && file.getParentFile().mkdirs()) {
+                if (!file.exists() && file.getParentFile().mkdir()) {
                     return file.createNewFile();
                 }
 
@@ -6146,7 +6281,7 @@ public final class IOUtil {
      * Example usage:
      * <pre>{@code
      * File configFile = new File("/path/to/config.json");
-     * boolean created = IOUtil.createIfNotExists(configFile);
+     * boolean created = IOUtil.createFileIfNotExists(configFile);
      * if (created) {
      *     System.out.println("Created new config file");
      * } else {
@@ -6155,13 +6290,13 @@ public final class IOUtil {
      * }</pre>
      *
      * @param file the File object representing the file to create
-     * @return {@code true} if a new file was created, {@code false} if the file already exists
+     * @return {@code true} if a new file was created successfully; {@code false} if the file already exists
      * @throws UncheckedIOException if an I/O error occurs during file creation
      * @see File#createNewFile()
      * @see #mkdirIfNotExists(File)
      * @see #mkdirsIfNotExists(File)
      */
-    public static boolean createIfNotExists(final File file) throws UncheckedIOException {
+    public static boolean createFileIfNotExists(final File file) throws UncheckedIOException {
         try {
             return createNewFileIfNotExists(file);
         } catch (final IOException e) {
@@ -6170,13 +6305,29 @@ public final class IOUtil {
     }
 
     /**
-     * Creates a new directory if it does not exist.
+     * Creates a directory if it does not already exist.
+     * <p>
+     * This method attempts to create the directory named by the given {@code File} object.
+     * If a directory with this name already exists, the method returns {@code false}.
+     * If the directory does not exist, it is created. This method does not create parent
+     * directories. Use {@link #mkdirsIfNotExists(File)} to create parent directories as well.
      *
-     * @param dir The directory to be checked and possibly created.
-     * @return {@code true} if the directory was created successfully or already exists, {@code false} otherwise.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * File newDir = new File("./new-directory");
+     * boolean result = IOUtil.mkdirIfNotExists(newDir);
+     * if (result) {
+     *     System.out.println("Directory exists or was created successfully.");
+     * } else {
+     *     System.out.println("Failed to create directory or a file with the same name exists.");
+     * }
+     * }</pre>
+     *
+     * @param dir The directory to create.
+     * @return {@code true} if the directory was created successfully; {@code false} if the directory already exists or creation failed.
      * @see File#mkdir()
      * @see #mkdirsIfNotExists(File)
-     * @see #createIfNotExists(File)
+     * @see #createFileIfNotExists(File)
      */
     public static boolean mkdirIfNotExists(final File dir) {
         if (!(dir.exists() && dir.isDirectory())) {
@@ -6188,12 +6339,31 @@ public final class IOUtil {
 
     /**
      * Creates new directories if they do not exist.
+     * <p>
+     * This method attempts to create the directory named by the given {@code File} object,
+     * including any necessary but nonexistent parent directories. If a directory with this 
+     * name already exists, the method returns {@code false}. If the directory does not exist,
+     * it and all necessary parent directories are created.
+     * <p>
+     * Unlike {@link #mkdirIfNotExists(File)}, this method will create parent directories
+     * as needed to ensure the full directory path exists.
      *
-     * @param dir The directory to be checked and possibly created.
-     * @return {@code true} if the directories were created successfully or already exist, {@code false} otherwise.
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * File deepDir = new File("./parent/child/grandchild");
+     * boolean created = IOUtil.mkdirsIfNotExists(deepDir);
+     * if (created) {
+     *     System.out.println("Directory hierarchy was created successfully.");
+     * } else {
+     *     System.out.println("Directory already exists or creation failed.");
+     * }
+     * }</pre>
+     *
+     * @param dir The directory to create, including any necessary parent directories.
+     * @return {@code true} if the directories were created successfully; {@code false} if the directory already exists or creation failed.
      * @see File#mkdirs()
      * @see #mkdirIfNotExists(File)
-     * @see #createIfNotExists(File)
+     * @see #createFileIfNotExists(File)
      */
     @SuppressWarnings("UnusedReturnValue")
     public static boolean mkdirsIfNotExists(final File dir) {

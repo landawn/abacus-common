@@ -989,9 +989,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
             return true;
         }
 
-        if (obj instanceof Pair) {
-            final Pair<?, ?> other = (Pair<?, ?>) obj;
-
+        if (obj instanceof Pair<?, ?> other) {
             return N.equals(left, other.left) && N.equals(right, other.right);
         }
 

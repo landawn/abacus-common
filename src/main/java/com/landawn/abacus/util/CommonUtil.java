@@ -16219,6 +16219,26 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a list containing the first <i>n</i> elements from the given array.
+     * If the array has less than <i>n</i> elements, it returns a list with all the elements in the array.
+     *
+     * @param <T> the type of elements in the array
+     * @param a the array to get the elements from
+     * @param n the number of elements to retrieve from the array
+     * @return a list containing the first <i>n</i> elements from the array
+     * @throws IllegalArgumentException if <i>n</i> is negative
+     */
+    public static <T> List<T> firstElements(final T[] a, final int n) throws IllegalArgumentException {
+        checkArgument(n >= 0, "'n' can't be negative: " + n);
+
+        if (isEmpty(a) || n == 0) {
+            return new ArrayList<>();
+        }
+
+        return N.toList(a, 0, Math.min(n, a.length));
+    }
+
+    /**
      * Returns a list containing the first <i>n</i> elements from the given Iterable.
      * If the Iterable has less than <i>n</i> elements, it returns a list with all the elements in the Iterable.
      *
@@ -16288,6 +16308,26 @@ sealed class CommonUtil permits N {
         }
 
         return result;
+    }
+
+    /**
+     * Returns a list containing the last <i>n</i> elements from the given array.
+     * If the array has less than <i>n</i> elements, it returns a list with all the elements in the array.
+     *
+     * @param <T> the type of elements in the array
+     * @param a the array to get the elements from
+     * @param n the number of elements to retrieve from the end of the array
+     * @return a list containing the last <i>n</i> elements from the array
+     * @throws IllegalArgumentException if <i>n</i> is negative
+     */
+    public static <T> List<T> lastElements(final T[] a, final int n) throws IllegalArgumentException {
+        checkArgument(n >= 0, "'n' can't be negative: " + n);
+
+        if (isEmpty(a) || n == 0) {
+            return new ArrayList<>();
+        }
+
+        return N.toList(a, Math.max(0, a.length - n), a.length);
     }
 
     /**
