@@ -110,7 +110,7 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      *     end > start;
      * 
      * ObjBiIntPredicate<String> combined = isValidRange.and(isNonEmpty);
-     * combined.test("Hello", 2, 2); // returns false (not non-empty)
+     * combined.test("Hello", 2, 2); // returns {@code false} (not non-empty)
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate

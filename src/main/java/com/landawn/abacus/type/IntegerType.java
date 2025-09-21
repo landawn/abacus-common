@@ -46,7 +46,7 @@ public final class IntegerType extends AbstractIntegerType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * For IntegerType, this always returns true as Integer is the wrapper class for the primitive int type.
+     * For IntegerType, this always returns {@code true} as Integer is the wrapper class for the primitive int type.
      *
      * @return true, indicating Integer is a primitive wrapper
      */

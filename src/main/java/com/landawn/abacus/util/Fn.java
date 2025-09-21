@@ -2447,7 +2447,7 @@ public final class Fn {
      *
      * @param <T> the type of the input to the predicate
      * @param c the collection of predicates
-     * @return a Predicate that returns true only if all predicates return true
+     * @return a Predicate that returns {@code true} only if all predicates return true
      * @throws IllegalArgumentException if the collection is null or empty
      */
     public static <T> Predicate<T> and(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
@@ -2509,7 +2509,7 @@ public final class Fn {
      * @param <T> the type of the first input to the predicate
      * @param <U> the type of the second input to the predicate
      * @param c the list of bi-predicates
-     * @return a BiPredicate that returns true only if all bi-predicates return true
+     * @return a BiPredicate that returns {@code true} only if all bi-predicates return true
      * @throws IllegalArgumentException if the list is null or empty
      */
     public static <T, U> BiPredicate<T, U> and(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
@@ -2601,7 +2601,7 @@ public final class Fn {
      *
      * @param <T> the type of the input to the predicate
      * @param c the collection of predicates
-     * @return a Predicate that returns true if any predicate returns true
+     * @return a Predicate that returns {@code true} if any predicate returns true
      * @throws IllegalArgumentException if the collection is null or empty
      */
     public static <T> Predicate<T> or(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
@@ -2663,7 +2663,7 @@ public final class Fn {
      * @param <T> the type of the first input to the predicate
      * @param <U> the type of the second input to the predicate
      * @param c the list of bi-predicates
-     * @return a BiPredicate that returns true if any bi-predicate returns true
+     * @return a BiPredicate that returns {@code true} if any bi-predicate returns true
      * @throws IllegalArgumentException if the list is null or empty
      */
     public static <T, U> BiPredicate<T, U> or(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
@@ -6263,7 +6263,7 @@ public final class Fn {
      * <p>This predicate is useful for filtering streams of Optionals to keep only those that contain values.</p>
      *
      * @param <T> the type of the value in the Optional
-     * @return a Predicate that returns true if the Optional contains a value
+     * @return a Predicate that returns {@code true} if the Optional contains a value
      * @see #isPresentJdk()
      * @see #getIfPresentOrElseNull()
      */
@@ -6282,7 +6282,7 @@ public final class Fn {
      * This is the JDK Optional version of isPresent.</p>
      *
      * @param <T> the type of the value in the Optional
-     * @return a Predicate that returns true if the Java Optional contains a value
+     * @return a Predicate that returns {@code true} if the Java Optional contains a value
      * @see #isPresent()
      * @see #getIfPresentOrElseNullJdk()
      */
@@ -6373,12 +6373,12 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful Predicate that maintains a set of seen elements and returns true only for distinct elements.
+         * Returns a stateful Predicate that maintains a set of seen elements and returns {@code true} only for distinct elements.
          * The predicate uses a HashSet internally to track previously seen elements.
          * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
          * @param <T> the type of the input to the predicate
-         * @return a stateful Predicate that returns true for first occurrence of each distinct element
+         * @return a stateful Predicate that returns {@code true} for first occurrence of each distinct element
          */
         @Beta
         @SequentialOnly
@@ -6396,12 +6396,12 @@ public final class Fn {
 
         /**
          * Returns a stateful Predicate that maintains distinct elements based on a key extracted by the mapper function.
-         * The predicate returns true only for elements whose mapped keys haven't been seen before.
+         * The predicate returns {@code true} only for elements whose mapped keys haven't been seen before.
          * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
          * @param <T> the type of the input to the predicate
          * @param mapper the function to extract the key for distinctness comparison
-         * @return a stateful Predicate that returns true for elements with distinct mapped keys
+         * @return a stateful Predicate that returns {@code true} for elements with distinct mapped keys
          */
         @Beta
         @SequentialOnly
@@ -6418,12 +6418,12 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful Predicate that maintains a concurrent set of seen elements and returns true only for distinct elements.
+         * Returns a stateful Predicate that maintains a concurrent set of seen elements and returns {@code true} only for distinct elements.
          * This predicate is thread-safe and can be used in parallel streams.
          * This method is marked as Beta and Stateful, indicating it should not be saved or cached for reuse.
          *
          * @param <T> the type of the input to the predicate
-         * @return a stateful thread-safe Predicate that returns true for first occurrence of each distinct element
+         * @return a stateful thread-safe Predicate that returns {@code true} for first occurrence of each distinct element
          */
         @Beta
         @Stateful
@@ -6445,7 +6445,7 @@ public final class Fn {
          *
          * @param <T> the type of the input to the predicate
          * @param mapper the function to extract the key for distinctness comparison
-         * @return a stateful thread-safe Predicate that returns true for elements with distinct mapped keys
+         * @return a stateful thread-safe Predicate that returns {@code true} for elements with distinct mapped keys
          */
         @Beta
         @Stateful
@@ -6462,11 +6462,11 @@ public final class Fn {
 
         /**
          * Returns a stateful Predicate that removes continuous repeat elements.
-         * The predicate returns false for elements that are equal to the immediately preceding element.
+         * The predicate returns {@code false} for elements that are equal to the immediately preceding element.
          * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
          *
          * @param <T> the type of the input to the predicate
-         * @return a stateful Predicate that returns true for elements different from their immediate predecessor
+         * @return a stateful Predicate that returns {@code true} for elements different from their immediate predecessor
          */
         @Beta
         @SequentialOnly
@@ -6527,7 +6527,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a BiPredicate that always returns true regardless of input.
+         * Returns a BiPredicate that always returns {@code true} regardless of input.
          *
          * @param <T> the type of the first argument to the predicate
          * @param <U> the type of the second argument to the predicate
@@ -6538,7 +6538,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a BiPredicate that always returns false regardless of input.
+         * Returns a BiPredicate that always returns {@code false} regardless of input.
          *
          * @param <T> the type of the first argument to the predicate
          * @param <U> the type of the second argument to the predicate
@@ -6594,7 +6594,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a TriPredicate that always returns true regardless of input.
+         * Returns a TriPredicate that always returns {@code true} regardless of input.
          *
          * @param <A> the type of the first argument to the predicate
          * @param <B> the type of the second argument to the predicate
@@ -6606,7 +6606,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a TriPredicate that always returns false regardless of input.
+         * Returns a TriPredicate that always returns {@code false} regardless of input.
          *
          * @param <A> the type of the first argument to the predicate
          * @param <B> the type of the second argument to the predicate
@@ -7932,7 +7932,7 @@ public final class Fn {
         /**
          * Returns a CharPredicate that tests if a character is zero.
          *
-         * @return a CharPredicate that returns true if the character is '\0'
+         * @return a CharPredicate that returns {@code true} if the character is '\0'
          */
         public static CharPredicate isZero() {
             return IS_ZERO;
@@ -7942,7 +7942,7 @@ public final class Fn {
          * Returns a CharPredicate that tests if a character is whitespace.
          * Uses Character.isWhitespace() for the test.
          *
-         * @return a CharPredicate that returns true if the character is whitespace
+         * @return a CharPredicate that returns {@code true} if the character is whitespace
          */
         public static CharPredicate isWhitespace() {
             return IS_WHITESPACE;
@@ -7951,7 +7951,7 @@ public final class Fn {
         /**
          * Returns a CharBiPredicate that tests if two characters are equal.
          *
-         * @return a CharBiPredicate that returns true if the two characters are equal
+         * @return a CharBiPredicate that returns {@code true} if the two characters are equal
          */
         public static CharBiPredicate equal() {
             return EQUAL;
@@ -7960,7 +7960,7 @@ public final class Fn {
         /**
          * Returns a CharBiPredicate that tests if two characters are not equal.
          *
-         * @return a CharBiPredicate that returns true if the two characters are not equal
+         * @return a CharBiPredicate that returns {@code true} if the two characters are not equal
          */
         public static CharBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -7969,7 +7969,7 @@ public final class Fn {
         /**
          * Returns a CharBiPredicate that tests if the first character is greater than the second.
          *
-         * @return a CharBiPredicate that returns true if the first character is greater than the second
+         * @return a CharBiPredicate that returns {@code true} if the first character is greater than the second
          */
         public static CharBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -7978,7 +7978,7 @@ public final class Fn {
         /**
          * Returns a CharBiPredicate that tests if the first character is greater than or equal to the second.
          *
-         * @return a CharBiPredicate that returns true if the first character is greater than or equal to the second
+         * @return a CharBiPredicate that returns {@code true} if the first character is greater than or equal to the second
          */
         public static CharBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -7987,7 +7987,7 @@ public final class Fn {
         /**
          * Returns a CharBiPredicate that tests if the first character is less than the second.
          *
-         * @return a CharBiPredicate that returns true if the first character is less than the second
+         * @return a CharBiPredicate that returns {@code true} if the first character is less than the second
          */
         public static CharBiPredicate lessThan() {
             return LESS_THAN;
@@ -7996,7 +7996,7 @@ public final class Fn {
         /**
          * Returns a CharBiPredicate that tests if the first character is less than or equal to the second.
          *
-         * @return a CharBiPredicate that returns true if the first character is less than or equal to the second
+         * @return a CharBiPredicate that returns {@code true} if the first character is less than or equal to the second
          */
         public static CharBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -8146,7 +8146,7 @@ public final class Fn {
         /**
          * Returns a BytePredicate that tests if a byte value is positive (greater than zero).
          *
-         * @return a BytePredicate that returns true if the byte is greater than 0
+         * @return a BytePredicate that returns {@code true} if the byte is greater than 0
          */
         public static BytePredicate positive() {
             return POSITIVE;
@@ -8155,7 +8155,7 @@ public final class Fn {
         /**
          * Returns a BytePredicate that tests if a byte value is not negative (greater than or equal to zero).
          *
-         * @return a BytePredicate that returns true if the byte is greater than or equal to 0
+         * @return a BytePredicate that returns {@code true} if the byte is greater than or equal to 0
          */
         public static BytePredicate notNegative() {
             return NOT_NEGATIVE;
@@ -8164,7 +8164,7 @@ public final class Fn {
         /**
          * Returns a ByteBiPredicate that tests if two byte values are equal.
          *
-         * @return a ByteBiPredicate that returns true if the two bytes are equal
+         * @return a ByteBiPredicate that returns {@code true} if the two bytes are equal
          */
         public static ByteBiPredicate equal() {
             return EQUAL;
@@ -8173,7 +8173,7 @@ public final class Fn {
         /**
          * Returns a ByteBiPredicate that tests if two byte values are not equal.
          *
-         * @return a ByteBiPredicate that returns true if the two bytes are not equal
+         * @return a ByteBiPredicate that returns {@code true} if the two bytes are not equal
          */
         public static ByteBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -8182,7 +8182,7 @@ public final class Fn {
         /**
          * Returns a ByteBiPredicate that tests if the first byte is greater than the second.
          *
-         * @return a ByteBiPredicate that returns true if the first byte is greater than the second
+         * @return a ByteBiPredicate that returns {@code true} if the first byte is greater than the second
          */
         public static ByteBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -8191,7 +8191,7 @@ public final class Fn {
         /**
          * Returns a ByteBiPredicate that tests if the first byte is greater than or equal to the second.
          *
-         * @return a ByteBiPredicate that returns true if the first byte is greater than or equal to the second
+         * @return a ByteBiPredicate that returns {@code true} if the first byte is greater than or equal to the second
          */
         public static ByteBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -8200,7 +8200,7 @@ public final class Fn {
         /**
          * Returns a ByteBiPredicate that tests if the first byte is less than the second.
          *
-         * @return a ByteBiPredicate that returns true if the first byte is less than the second
+         * @return a ByteBiPredicate that returns {@code true} if the first byte is less than the second
          */
         public static ByteBiPredicate lessThan() {
             return LESS_THAN;
@@ -8209,7 +8209,7 @@ public final class Fn {
         /**
          * Returns a ByteBiPredicate that tests if the first byte is less than or equal to the second.
          *
-         * @return a ByteBiPredicate that returns true if the first byte is less than or equal to the second
+         * @return a ByteBiPredicate that returns {@code true} if the first byte is less than or equal to the second
          */
         public static ByteBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -8385,7 +8385,7 @@ public final class Fn {
         /**
          * Returns a ShortPredicate that tests if a short value is positive (greater than zero).
          *
-         * @return a ShortPredicate that returns true if the short is greater than 0
+         * @return a ShortPredicate that returns {@code true} if the short is greater than 0
          */
         public static ShortPredicate positive() {
             return POSITIVE;
@@ -8394,7 +8394,7 @@ public final class Fn {
         /**
          * Returns a ShortPredicate that tests if a short value is not negative (greater than or equal to zero).
          *
-         * @return a ShortPredicate that returns true if the short is greater than or equal to 0
+         * @return a ShortPredicate that returns {@code true} if the short is greater than or equal to 0
          */
         public static ShortPredicate notNegative() {
             return NOT_NEGATIVE;
@@ -8403,7 +8403,7 @@ public final class Fn {
         /**
          * Returns a ShortBiPredicate that tests if two short values are equal.
          *
-         * @return a ShortBiPredicate that returns true if the two shorts are equal
+         * @return a ShortBiPredicate that returns {@code true} if the two shorts are equal
          */
         public static ShortBiPredicate equal() {
             return EQUAL;
@@ -8412,7 +8412,7 @@ public final class Fn {
         /**
          * Returns a ShortBiPredicate that tests if two short values are not equal.
          *
-         * @return a ShortBiPredicate that returns true if the two shorts are not equal
+         * @return a ShortBiPredicate that returns {@code true} if the two shorts are not equal
          */
         public static ShortBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -8421,7 +8421,7 @@ public final class Fn {
         /**
          * Returns a ShortBiPredicate that tests if the first short is greater than the second.
          *
-         * @return a ShortBiPredicate that returns true if the first short is greater than the second
+         * @return a ShortBiPredicate that returns {@code true} if the first short is greater than the second
          */
         public static ShortBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -8430,7 +8430,7 @@ public final class Fn {
         /**
          * Returns a ShortBiPredicate that tests if the first short is greater than or equal to the second.
          *
-         * @return a ShortBiPredicate that returns true if the first short is greater than or equal to the second
+         * @return a ShortBiPredicate that returns {@code true} if the first short is greater than or equal to the second
          */
         public static ShortBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -8439,7 +8439,7 @@ public final class Fn {
         /**
          * Returns a ShortBiPredicate that tests if the first short is less than the second.
          *
-         * @return a ShortBiPredicate that returns true if the first short is less than the second
+         * @return a ShortBiPredicate that returns {@code true} if the first short is less than the second
          */
         public static ShortBiPredicate lessThan() {
             return LESS_THAN;
@@ -8448,7 +8448,7 @@ public final class Fn {
         /**
          * Returns a ShortBiPredicate that tests if the first short is less than or equal to the second.
          *
-         * @return a ShortBiPredicate that returns true if the first short is less than or equal to the second
+         * @return a ShortBiPredicate that returns {@code true} if the first short is less than or equal to the second
          */
         public static ShortBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -8624,7 +8624,7 @@ public final class Fn {
         /**
          * Returns an IntPredicate that tests if an int value is positive (greater than zero).
          *
-         * @return an IntPredicate that returns true if the int is greater than 0
+         * @return an IntPredicate that returns {@code true} if the int is greater than 0
          */
         public static IntPredicate positive() {
             return POSITIVE;
@@ -8633,7 +8633,7 @@ public final class Fn {
         /**
          * Returns an IntPredicate that tests if an int value is not negative (greater than or equal to zero).
          *
-         * @return an IntPredicate that returns true if the int is greater than or equal to 0
+         * @return an IntPredicate that returns {@code true} if the int is greater than or equal to 0
          */
         public static IntPredicate notNegative() {
             return NOT_NEGATIVE;
@@ -8642,7 +8642,7 @@ public final class Fn {
         /**
          * Returns an IntBiPredicate that tests if two int values are equal.
          *
-         * @return an IntBiPredicate that returns true if the two ints are equal
+         * @return an IntBiPredicate that returns {@code true} if the two ints are equal
          */
         public static IntBiPredicate equal() {
             return EQUAL;
@@ -8651,7 +8651,7 @@ public final class Fn {
         /**
          * Returns an IntBiPredicate that tests if two int values are not equal.
          *
-         * @return an IntBiPredicate that returns true if the two ints are not equal
+         * @return an IntBiPredicate that returns {@code true} if the two ints are not equal
          */
         public static IntBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -8660,7 +8660,7 @@ public final class Fn {
         /**
          * Returns an IntBiPredicate that tests if the first int is greater than the second.
          *
-         * @return an IntBiPredicate that returns true if the first int is greater than the second
+         * @return an IntBiPredicate that returns {@code true} if the first int is greater than the second
          */
         public static IntBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -8669,7 +8669,7 @@ public final class Fn {
         /**
          * Returns an IntBiPredicate that tests if the first int is greater than or equal to the second.
          *
-         * @return an IntBiPredicate that returns true if the first int is greater than or equal to the second
+         * @return an IntBiPredicate that returns {@code true} if the first int is greater than or equal to the second
          */
         public static IntBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -8678,7 +8678,7 @@ public final class Fn {
         /**
          * Returns an IntBiPredicate that tests if the first int is less than the second.
          *
-         * @return an IntBiPredicate that returns true if the first int is less than the second
+         * @return an IntBiPredicate that returns {@code true} if the first int is less than the second
          */
         public static IntBiPredicate lessThan() {
             return LESS_THAN;
@@ -8687,7 +8687,7 @@ public final class Fn {
         /**
          * Returns an IntBiPredicate that tests if the first int is less than or equal to the second.
          *
-         * @return an IntBiPredicate that returns true if the first int is less than or equal to the second
+         * @return an IntBiPredicate that returns {@code true} if the first int is less than or equal to the second
          */
         public static IntBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -8862,7 +8862,7 @@ public final class Fn {
         /**
          * Returns a LongPredicate that tests if a long value is positive (greater than zero).
          *
-         * @return a LongPredicate that returns true if the long is greater than 0
+         * @return a LongPredicate that returns {@code true} if the long is greater than 0
          */
         public static LongPredicate positive() {
             return POSITIVE;
@@ -8871,7 +8871,7 @@ public final class Fn {
         /**
          * Returns a LongPredicate that tests if a long value is not negative (greater than or equal to zero).
          *
-         * @return a LongPredicate that returns true if the long is greater than or equal to 0
+         * @return a LongPredicate that returns {@code true} if the long is greater than or equal to 0
          */
         public static LongPredicate notNegative() {
             return NOT_NEGATIVE;
@@ -8880,7 +8880,7 @@ public final class Fn {
         /**
          * Returns a LongBiPredicate that tests if two long values are equal.
          *
-         * @return a LongBiPredicate that returns true if the two longs are equal
+         * @return a LongBiPredicate that returns {@code true} if the two longs are equal
          */
         public static LongBiPredicate equal() {
             return EQUAL;
@@ -8889,7 +8889,7 @@ public final class Fn {
         /**
          * Returns a LongBiPredicate that tests if two long values are not equal.
          *
-         * @return a LongBiPredicate that returns true if the two longs are not equal
+         * @return a LongBiPredicate that returns {@code true} if the two longs are not equal
          */
         public static LongBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -8898,7 +8898,7 @@ public final class Fn {
         /**
          * Returns a LongBiPredicate that tests if the first long is greater than the second.
          *
-         * @return a LongBiPredicate that returns true if the first long is greater than the second
+         * @return a LongBiPredicate that returns {@code true} if the first long is greater than the second
          */
         public static LongBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -8907,7 +8907,7 @@ public final class Fn {
         /**
          * Returns a LongBiPredicate that tests if the first long is greater than or equal to the second.
          *
-         * @return a LongBiPredicate that returns true if the first long is greater than or equal to the second
+         * @return a LongBiPredicate that returns {@code true} if the first long is greater than or equal to the second
          */
         public static LongBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -8916,7 +8916,7 @@ public final class Fn {
         /**
          * Returns a LongBiPredicate that tests if the first long is less than the second.
          *
-         * @return a LongBiPredicate that returns true if the first long is less than the second
+         * @return a LongBiPredicate that returns {@code true} if the first long is less than the second
          */
         public static LongBiPredicate lessThan() {
             return LESS_THAN;
@@ -8925,7 +8925,7 @@ public final class Fn {
         /**
          * Returns a LongBiPredicate that tests if the first long is less than or equal to the second.
          *
-         * @return a LongBiPredicate that returns true if the first long is less than or equal to the second
+         * @return a LongBiPredicate that returns {@code true} if the first long is less than or equal to the second
          */
         public static LongBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -9100,7 +9100,7 @@ public final class Fn {
         /**
          * Returns a FloatPredicate that tests if a float value is positive (greater than zero).
          *
-         * @return a FloatPredicate that returns true if the float is greater than 0
+         * @return a FloatPredicate that returns {@code true} if the float is greater than 0
          */
         public static FloatPredicate positive() {
             return POSITIVE;
@@ -9109,7 +9109,7 @@ public final class Fn {
         /**
          * Returns a FloatPredicate that tests if a float value is not negative (greater than or equal to zero).
          *
-         * @return a FloatPredicate that returns true if the float is greater than or equal to 0
+         * @return a FloatPredicate that returns {@code true} if the float is greater than or equal to 0
          */
         public static FloatPredicate notNegative() {
             return NOT_NEGATIVE;
@@ -9119,7 +9119,7 @@ public final class Fn {
          * Returns a FloatBiPredicate that tests if two float values are equal.
          * Uses N.equals for proper float comparison including NaN handling.
          *
-         * @return a FloatBiPredicate that returns true if the two floats are equal
+         * @return a FloatBiPredicate that returns {@code true} if the two floats are equal
          */
         public static FloatBiPredicate equal() {
             return EQUAL;
@@ -9129,7 +9129,7 @@ public final class Fn {
          * Returns a FloatBiPredicate that tests if two float values are not equal.
          * Uses N.compare for proper float comparison including NaN handling.
          *
-         * @return a FloatBiPredicate that returns true if the two floats are not equal
+         * @return a FloatBiPredicate that returns {@code true} if the two floats are not equal
          */
         public static FloatBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -9139,7 +9139,7 @@ public final class Fn {
          * Returns a FloatBiPredicate that tests if the first float is greater than the second.
          * Uses N.compare for proper float comparison including NaN handling.
          *
-         * @return a FloatBiPredicate that returns true if the first float is greater than the second
+         * @return a FloatBiPredicate that returns {@code true} if the first float is greater than the second
          */
         public static FloatBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -9149,7 +9149,7 @@ public final class Fn {
          * Returns a FloatBiPredicate that tests if the first float is greater than or equal to the second.
          * Uses N.compare for proper float comparison including NaN handling.
          *
-         * @return a FloatBiPredicate that returns true if the first float is greater than or equal to the second
+         * @return a FloatBiPredicate that returns {@code true} if the first float is greater than or equal to the second
          */
         public static FloatBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -9159,7 +9159,7 @@ public final class Fn {
          * Returns a FloatBiPredicate that tests if the first float is less than the second.
          * Uses N.compare for proper float comparison including NaN handling.
          *
-         * @return a FloatBiPredicate that returns true if the first float is less than the second
+         * @return a FloatBiPredicate that returns {@code true} if the first float is less than the second
          */
         public static FloatBiPredicate lessThan() {
             return LESS_THAN;
@@ -9169,7 +9169,7 @@ public final class Fn {
          * Returns a FloatBiPredicate that tests if the first float is less than or equal to the second.
          * Uses N.compare for proper float comparison including NaN handling.
          *
-         * @return a FloatBiPredicate that returns true if the first float is less than or equal to the second
+         * @return a FloatBiPredicate that returns {@code true} if the first float is less than or equal to the second
          */
         public static FloatBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -9344,7 +9344,7 @@ public final class Fn {
         /**
          * Returns a DoublePredicate that tests if a double value is positive (greater than zero).
          *
-         * @return a DoublePredicate that returns true if the double is greater than 0
+         * @return a DoublePredicate that returns {@code true} if the double is greater than 0
          */
         public static DoublePredicate positive() {
             return POSITIVE;
@@ -9353,7 +9353,7 @@ public final class Fn {
         /**
          * Returns a DoublePredicate that tests if a double value is not negative (greater than or equal to zero).
          *
-         * @return a DoublePredicate that returns true if the double is greater than or equal to 0
+         * @return a DoublePredicate that returns {@code true} if the double is greater than or equal to 0
          */
         public static DoublePredicate notNegative() {
             return NOT_NEGATIVE;
@@ -9363,7 +9363,7 @@ public final class Fn {
          * Returns a DoubleBiPredicate that tests if two double values are equal.
          * Uses N.equals for proper double comparison including NaN handling.
          *
-         * @return a DoubleBiPredicate that returns true if the two doubles are equal
+         * @return a DoubleBiPredicate that returns {@code true} if the two doubles are equal
          */
         public static DoubleBiPredicate equal() {
             return EQUAL;
@@ -9373,7 +9373,7 @@ public final class Fn {
          * Returns a DoubleBiPredicate that tests if two double values are not equal.
          * Uses N.compare for proper double comparison including NaN handling.
          *
-         * @return a DoubleBiPredicate that returns true if the two doubles are not equal
+         * @return a DoubleBiPredicate that returns {@code true} if the two doubles are not equal
          */
         public static DoubleBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -9383,7 +9383,7 @@ public final class Fn {
          * Returns a DoubleBiPredicate that tests if the first double is greater than the second.
          * Uses N.compare for proper double comparison including NaN handling.
          *
-         * @return a DoubleBiPredicate that returns true if the first double is greater than the second
+         * @return a DoubleBiPredicate that returns {@code true} if the first double is greater than the second
          */
         public static DoubleBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -9393,7 +9393,7 @@ public final class Fn {
          * Returns a DoubleBiPredicate that tests if the first double is greater than or equal to the second.
          * Uses N.compare for proper double comparison including NaN handling.
          *
-         * @return a DoubleBiPredicate that returns true if the first double is greater than or equal to the second
+         * @return a DoubleBiPredicate that returns {@code true} if the first double is greater than or equal to the second
          */
         public static DoubleBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -9403,7 +9403,7 @@ public final class Fn {
          * Returns a DoubleBiPredicate that tests if the first double is less than the second.
          * Uses N.compare for proper double comparison including NaN handling.
          *
-         * @return a DoubleBiPredicate that returns true if the first double is less than the second
+         * @return a DoubleBiPredicate that returns {@code true} if the first double is less than the second
          */
         public static DoubleBiPredicate lessThan() {
             return LESS_THAN;
@@ -9413,7 +9413,7 @@ public final class Fn {
          * Returns a DoubleBiPredicate that tests if the first double is less than or equal to the second.
          * Uses N.compare for proper double comparison including NaN handling.
          *
-         * @return a DoubleBiPredicate that returns true if the first double is less than or equal to the second
+         * @return a DoubleBiPredicate that returns {@code true} if the first double is less than or equal to the second
          */
         public static DoubleBiPredicate lessEqual() {
             return LESS_EQUAL;

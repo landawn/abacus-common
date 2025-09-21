@@ -44,7 +44,7 @@ public final class PrimitiveCharType extends AbstractCharacterType {
 
     /**
      * Indicates whether this type represents a primitive type.
-     * Always returns true for PrimitiveCharType.
+     * Always returns {@code true} for PrimitiveCharType.
      *
      * @return true, as this type handler is for primitive char
      */

@@ -260,7 +260,7 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Predicate that always returns true regardless of input.
+     * Returns a Throwables.Predicate that always returns {@code true} regardless of input.
      *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of exception that may be thrown
@@ -271,7 +271,7 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Predicate that always returns false regardless of input.
+     * Returns a Throwables.Predicate that always returns {@code false} regardless of input.
      *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of exception that may be thrown
@@ -636,7 +636,7 @@ public final class Fnn {
      *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of exception that may be thrown
-     * @return a Predicate that returns true if the input is null
+     * @return a Predicate that returns {@code true} if the input is null
      */
     @Beta
     public static <T, E extends Exception> Throwables.Predicate<T, E> isNull() {
@@ -645,11 +645,11 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Predicate that tests if a CharSequence is empty.
-     * The predicate returns true if the CharSequence has length 0.
+     * The predicate returns {@code true} if the CharSequence has length 0.
      *
      * @param <T> the type of CharSequence
      * @param <E> the type of exception that may be thrown
-     * @return a Predicate that returns true if the CharSequence is empty
+     * @return a Predicate that returns {@code true} if the CharSequence is empty
      */
     public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isEmpty() {
         return (Throwables.Predicate<T, E>) Fn.IS_EMPTY;
@@ -657,11 +657,11 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Predicate that tests if a CharSequence is blank.
-     * The predicate returns true if the CharSequence is empty or contains only whitespace characters.
+     * The predicate returns {@code true} if the CharSequence is empty or contains only whitespace characters.
      *
      * @param <T> the type of CharSequence
      * @param <E> the type of exception that may be thrown
-     * @return a Predicate that returns true if the CharSequence is blank
+     * @return a Predicate that returns {@code true} if the CharSequence is blank
      */
     public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isBlank() {
         return (Throwables.Predicate<T, E>) Fn.IS_BLANK;
@@ -669,12 +669,12 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Predicate that tests if an array is empty.
-     * The predicate returns true if the array is null or has length 0.
+     * The predicate returns {@code true} if the array is null or has length 0.
      * This method is marked as Beta.
      *
      * @param <T> the component type of the array
      * @param <E> the type of exception that may be thrown
-     * @return a Predicate that returns true if the array is empty
+     * @return a Predicate that returns {@code true} if the array is empty
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -684,12 +684,12 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Predicate that tests if a Collection is empty.
-     * The predicate returns true if the Collection is null or has size 0.
+     * The predicate returns {@code true} if the Collection is null or has size 0.
      * This method is marked as Beta.
      *
      * @param <T> the type of Collection
      * @param <E> the type of exception that may be thrown
-     * @return a Predicate that returns true if the Collection is empty
+     * @return a Predicate that returns {@code true} if the Collection is empty
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -699,12 +699,12 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Predicate that tests if a Map is empty.
-     * The predicate returns true if the Map is null or has size 0.
+     * The predicate returns {@code true} if the Map is null or has size 0.
      * This method is marked as Beta.
      *
      * @param <T> the type of Map
      * @param <E> the type of exception that may be thrown
-     * @return a Predicate that returns true if the Map is empty
+     * @return a Predicate that returns {@code true} if the Map is empty
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -717,7 +717,7 @@ public final class Fnn {
      * 
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
-     * @return a Predicate that returns true if the input is not null, false otherwise
+     * @return a Predicate that returns {@code true} if the input is not null, {@code false} otherwise
      * @see java.util.Objects#nonNull(Object)
      */
     @Beta
@@ -731,7 +731,7 @@ public final class Fnn {
      * 
      * @param <T> the type of the CharSequence to test
      * @param <E> the type of the exception that may be thrown
-     * @return a Predicate that returns true if the input CharSequence is not empty, false otherwise
+     * @return a Predicate that returns {@code true} if the input CharSequence is not empty, {@code false} otherwise
      * @see CharSequence#length()
      */
     public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> notEmpty() {
@@ -745,7 +745,7 @@ public final class Fnn {
      * 
      * @param <T> the type of the CharSequence to test
      * @param <E> the type of the exception that may be thrown
-     * @return a Predicate that returns true if the input CharSequence is not blank, false otherwise
+     * @return a Predicate that returns {@code true} if the input CharSequence is not blank, {@code false} otherwise
      * @see Character#isWhitespace(char)
      */
     public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> notBlank() {
@@ -758,7 +758,7 @@ public final class Fnn {
      * 
      * @param <T> the component type of the array
      * @param <E> the type of the exception that may be thrown
-     * @return a Predicate that returns true if the input array is not empty, false otherwise
+     * @return a Predicate that returns {@code true} if the input array is not empty, {@code false} otherwise
      * @see java.lang.reflect.Array#getLength(Object)
      */
     @Beta
@@ -773,7 +773,7 @@ public final class Fnn {
      * 
      * @param <T> the type of the Collection to test
      * @param <E> the type of the exception that may be thrown
-     * @return a Predicate that returns true if the input Collection is not empty, false otherwise
+     * @return a Predicate that returns {@code true} if the input Collection is not empty, {@code false} otherwise
      * @see Collection#isEmpty()
      */
     @Beta
@@ -788,7 +788,7 @@ public final class Fnn {
      * 
      * @param <T> the type of the Map to test
      * @param <E> the type of the exception that may be thrown
-     * @return a Predicate that returns true if the input Map is not empty, false otherwise
+     * @return a Predicate that returns {@code true} if the input Map is not empty, {@code false} otherwise
      * @see Map#isEmpty()
      */
     @Beta
@@ -1180,7 +1180,7 @@ public final class Fnn {
 
     /**
      * Returns a Predicate that represents the logical negation of the given predicate.
-     * When evaluated, the returned predicate returns true if the given predicate returns false, and vice versa.
+     * When evaluated, the returned predicate returns {@code true} if the given predicate returns false, and vice versa.
      * 
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
@@ -1197,7 +1197,7 @@ public final class Fnn {
 
     /**
      * Returns a BiPredicate that represents the logical negation of the given bi-predicate.
-     * When evaluated, the returned bi-predicate returns true if the given bi-predicate returns false, and vice versa.
+     * When evaluated, the returned bi-predicate returns {@code true} if the given bi-predicate returns false, and vice versa.
      * 
      * @param <T> the type of the first argument to the predicate
      * @param <U> the type of the second argument to the predicate
@@ -1216,7 +1216,7 @@ public final class Fnn {
 
     /**
      * Returns a TriPredicate that represents the logical negation of the given tri-predicate.
-     * When evaluated, the returned tri-predicate returns true if the given tri-predicate returns false, and vice versa.
+     * When evaluated, the returned tri-predicate returns {@code true} if the given tri-predicate returns false, and vice versa.
      * 
      * @param <A> the type of the first argument to the predicate
      * @param <B> the type of the second argument to the predicate
@@ -1234,7 +1234,7 @@ public final class Fnn {
     }
 
     /**
-     * Returns a stateful Predicate that returns true for at most the specified number of evaluations.
+     * Returns a stateful Predicate that returns {@code true} for at most the specified number of evaluations.
      * The predicate maintains an internal counter that decrements with each test, returning true 
      * while the counter is positive and false once it reaches zero. This predicate is thread-safe
      * and can be used in parallel streams.

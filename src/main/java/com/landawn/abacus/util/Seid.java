@@ -478,7 +478,7 @@ public class Seid implements EntityId {
      * }</pre>
      *
      * @param propName the property name to check
-     * @return true if the property exists, false otherwise
+     * @return {@code true} if the property exists, {@code false} otherwise
      */
     @Override
     public boolean containsKey(final String propName) {
@@ -555,7 +555,7 @@ public class Seid implements EntityId {
      * boolean empty = seid.isEmpty(); // Returns true
      * }</pre>
      *
-     * @return true if this Seid contains no properties, false otherwise
+     * @return {@code true} if this Seid contains no properties, {@code false} otherwise
      */
     @Override
     public boolean isEmpty() {
@@ -607,7 +607,7 @@ public class Seid implements EntityId {
      * }</pre>
      *
      * @param obj the object to compare with
-     * @return true if the objects are equal, false otherwise
+     * @return {@code true} if the objects are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {

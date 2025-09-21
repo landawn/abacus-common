@@ -338,7 +338,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      *
      * @param x the first char array
      * @param y the second char array
-     * @return true if the arrays are equal, false otherwise
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final char[] x, final char[] y) {

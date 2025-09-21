@@ -42,7 +42,7 @@ public final class PrimitiveBooleanType extends AbstractBooleanType {
 
     /**
      * Indicates whether this type represents a primitive type.
-     * Always returns true for PrimitiveBooleanType.
+     * Always returns {@code true} for PrimitiveBooleanType.
      *
      * @return true, as this type handler is for primitive boolean
      */

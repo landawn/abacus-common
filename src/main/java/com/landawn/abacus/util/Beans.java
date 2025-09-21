@@ -6024,7 +6024,7 @@ public final class Beans {
      * }</pre>
      *
      * @param bean the bean object to extract properties from
-     * @param propFilter a predicate that tests property name and value; returns true to include the property
+     * @param propFilter a predicate that tests property name and value; returns {@code true} to include the property
      * @return a stream of Map.Entry objects containing filtered property names and values
      * @throws IllegalArgumentException if bean is null
      */

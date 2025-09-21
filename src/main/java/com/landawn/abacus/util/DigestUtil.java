@@ -457,7 +457,7 @@ public class DigestUtil {
      * Tests whether the specified message digest algorithm is available in the current environment.
      *
      * @param messageDigestAlgorithm The algorithm name to test (e.g., "SHA-256", "MD5")
-     * @return true if the algorithm is available, false otherwise
+     * @return {@code true} if the algorithm is available, {@code false} otherwise
      * 
      * <p>Example:</p>
      * <pre>

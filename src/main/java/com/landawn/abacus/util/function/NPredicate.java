@@ -88,7 +88,7 @@ public interface NPredicate<T> {
      *     return true;
      * };
      * NPredicate<Integer> notAllEven = allEven.negate();
-     * notAllEven.test(2, 4, 5); // returns true (not all are even)
+     * notAllEven.test(2, 4, 5); // returns {@code true} (not all are even)
      * }</pre>
      * 
      * @return a predicate that represents the logical negation of this predicate
@@ -124,7 +124,7 @@ public interface NPredicate<T> {
      *     return sum < 100;
      * };
      * NPredicate<Integer> combined = allPositive.and(sumLessThan100);
-     * combined.test(10, 20, 30); // returns true (all positive AND sum < 100)
+     * combined.test(10, 20, 30); // returns {@code true} (all positive AND sum < 100)
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
@@ -161,7 +161,7 @@ public interface NPredicate<T> {
      *     return false;
      * };
      * NPredicate<String> anyInvalid = anyEmpty.or(anyNull);
-     * anyInvalid.test("hello", "", "world"); // returns true (one is empty)
+     * anyInvalid.test("hello", "", "world"); // returns {@code true} (one is empty)
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate

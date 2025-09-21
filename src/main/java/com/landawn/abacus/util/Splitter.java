@@ -397,7 +397,7 @@ public final class Splitter {
      * parameter is true. Empty strings can occur when there are consecutive delimiters
      * or when delimiters appear at the beginning or end of the input.
      *
-     * @param omitEmptyStrings true to omit empty strings from results, false to include them
+     * @param omitEmptyStrings true to omit empty strings from results, {@code false} to include them
      * @return this Splitter instance for method chaining
      * @deprecated replaced by {@link #omitEmptyStrings()}
      */
@@ -432,7 +432,7 @@ public final class Splitter {
      * resulting substring when the specified parameter is true. Only space
      * characters (not all whitespace) are trimmed.
      *
-     * @param trim true to trim spaces from results, false to leave them as-is
+     * @param trim true to trim spaces from results, {@code false} to leave them as-is
      * @return this Splitter instance for method chaining
      * @deprecated replaced by {@link #trimResults()}
      */
@@ -468,7 +468,7 @@ public final class Splitter {
      * removes all whitespace as defined by {@link Character#isWhitespace(char)},
      * including spaces, tabs, newlines, etc.
      *
-     * @param strip true to strip whitespace from results, false to leave them as-is
+     * @param strip true to strip whitespace from results, {@code false} to leave them as-is
      * @return this Splitter instance for method chaining
      * @see Character#isWhitespace(char)
      * @deprecated replaced by {@link #stripResults()}
@@ -994,7 +994,7 @@ public final class Splitter {
          * Configures this MapSplitter to omit entries with empty values when the
          * specified parameter is true. This applies to the entries splitting phase.
          *
-         * @param omitEmptyStrings true to omit entries with empty keys and values, false to include them
+         * @param omitEmptyStrings true to omit entries with empty keys and values, {@code false} to include them
          * @return this MapSplitter instance for method chaining
          * @deprecated replaced by {@link #omitEmptyStrings()}
          */
@@ -1021,7 +1021,7 @@ public final class Splitter {
          * Configures this MapSplitter to trim spaces from both entries and
          * key-value pairs when the specified parameter is true.
          *
-         * @param trim true to trim spaces, false to leave them as-is
+         * @param trim true to trim spaces, {@code false} to leave them as-is
          * @return this MapSplitter instance for method chaining
          * @deprecated replaced by {@link #trimResults()}
          */
@@ -1052,7 +1052,7 @@ public final class Splitter {
          * characters from both entries and key-value pairs when the specified
          * parameter is true.
          *
-         * @param strip true to strip whitespace, false to leave it as-is
+         * @param strip true to strip whitespace, {@code false} to leave it as-is
          * @return this MapSplitter instance for method chaining
          * @see Character#isWhitespace(char)
          * @deprecated replaced by {@link #stripResults()}

@@ -38,7 +38,7 @@ public final class PrimitiveLongType extends AbstractLongType {
 
     /**
      * Indicates whether this type represents a primitive type.
-     * For PrimitiveLongType, this always returns true since it represents the primitive long type.
+     * For PrimitiveLongType, this always returns {@code true} since it represents the primitive long type.
      *
      * @return true, indicating this is a primitive type
      */

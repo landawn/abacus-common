@@ -90,7 +90,7 @@ public final class FastJson {
      * }</pre>
      * 
      * @param obj the object to be converted to JSON string
-     * @param prettyFormat true to enable pretty formatting with indentation and line breaks, false for compact output
+     * @param prettyFormat true to enable pretty formatting with indentation and line breaks, {@code false} for compact output
      * @return the JSON string representation of the object with or without pretty formatting
      */
     public static String toJson(final Object obj, final boolean prettyFormat) {

@@ -122,7 +122,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     /**
      * Indicates that this is a generic type with type parameters.
      *
-     * @return true as ImmutableSet is a generic type
+     * @return {@code true} as ImmutableSet is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -133,7 +133,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * Checks whether the elements of this immutable set type are serializable.
      * The immutable set is considered serializable if its element type is serializable.
      *
-     * @return true if the underlying set type is serializable, false otherwise
+     * @return {@code true} if the underlying set type is serializable, {@code false} otherwise
      */
     @Override
     public boolean isSerializable() {
@@ -209,7 +209,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      *
      * @param typeClass the ImmutableSet class
      * @param parameterTypeName the name of the element type
-     * @param isDeclaringName true to generate a declaring name with simple class names, false for fully qualified names
+     * @param isDeclaringName true to generate a declaring name with simple class names, {@code false} for fully qualified names
      * @return the formatted type name (e.g., "ImmutableSet<String>" or "com.landawn.abacus.util.ImmutableSet<java.lang.String>")
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {

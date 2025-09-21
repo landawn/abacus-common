@@ -101,7 +101,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
     /**
      * Indicates that this is a generic type with type parameters.
      *
-     * @return true as HBaseColumn is a generic type
+     * @return {@code true} as HBaseColumn is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -150,7 +150,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      *
      * @param typeClass the HBaseColumn class (not used in current implementation but kept for consistency)
      * @param parameterTypeName the name of the value type
-     * @param isDeclaringName true to generate a declaring name with simple class names, false for fully qualified names
+     * @param isDeclaringName true to generate a declaring name with simple class names, {@code false} for fully qualified names
      * @return the formatted type name (e.g., "HBaseColumn<String>" or "com.landawn.abacus.util.HBaseColumn<java.lang.String>")
      */
     @SuppressWarnings("unused")

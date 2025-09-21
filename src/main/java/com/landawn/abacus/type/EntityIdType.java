@@ -48,7 +48,7 @@ public class EntityIdType extends AbstractType<EntityId> {
 
     /**
      * Indicates whether this type represents an EntityId.
-     * Always returns true for EntityIdType.
+     * Always returns {@code true} for EntityIdType.
      *
      * @return true, as this type handler specifically handles EntityId objects
      */

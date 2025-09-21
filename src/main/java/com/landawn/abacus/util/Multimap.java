@@ -2109,7 +2109,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * from the given collection. This is equivalent to subset testing.
      *
      * <p>An empty collection is always considered to be contained by any collection,
-     * so this method returns true for empty input collections if the key exists.</p>
+     * so this method returns {@code true} for empty input collections if the key exists.</p>
      *
      * <p>Example usage:</p>
      * <pre>{@code

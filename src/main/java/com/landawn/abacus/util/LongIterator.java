@@ -50,7 +50,7 @@ import com.landawn.abacus.util.stream.LongStream;
 public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
-     * An empty LongIterator that always returns false for hasNext() and throws
+     * An empty LongIterator that always returns {@code false} for hasNext() and throws
      * NoSuchElementException for nextLong(). This constant is useful for representing
      * an iterator over an empty collection of longs.
      */

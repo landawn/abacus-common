@@ -338,7 +338,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param serializedObjects set of already serialized objects
      * @param config the serialization configuration
      * @param bw the XML writer
-     * @return true if circular reference was found and handled, false otherwise
+     * @return {@code true} if circular reference was found and handled, {@code false} otherwise
      * @throws IOException if an I/O error occurs
      */
     protected static boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JSONXMLSerializationConfig<?> config,

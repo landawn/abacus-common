@@ -99,7 +99,7 @@ public abstract class Tuple<TP> implements Immutable {
      * boolean hasNull2 = t2.anyNull(); // Returns false
      * }</pre>
      *
-     * @return true if at least one element in this tuple is null, false if all elements are non-null
+     * @return {@code true} if at least one element in this tuple is null, {@code false} if all elements are non-null
      */
     public abstract boolean anyNull();
 
@@ -118,7 +118,7 @@ public abstract class Tuple<TP> implements Immutable {
      * boolean allNull2 = t2.allNull(); // Returns false
      * }</pre>
      *
-     * @return true if every element in this tuple is null, false if at least one element is non-null
+     * @return {@code true} if every element in this tuple is null, {@code false} if at least one element is non-null
      */
     public abstract boolean allNull();
 
@@ -126,7 +126,7 @@ public abstract class Tuple<TP> implements Immutable {
      * Checks if this tuple contains the specified value.
      * 
      * <p>The comparison is performed using object equality (via N.equals() which handles null values).
-     * The method checks each element in order and returns true as soon as a match is found.</p>
+     * The method checks each element in order and returns {@code true} as soon as a match is found.</p>
      * 
      * <p>Example:</p>
      * <pre>{@code
@@ -137,7 +137,7 @@ public abstract class Tuple<TP> implements Immutable {
      * }</pre>
      *
      * @param valueToFind the value to search for in this tuple, may be null
-     * @return true if this tuple contains an element equal to the specified value, false otherwise
+     * @return {@code true} if this tuple contains an element equal to the specified value, {@code false} otherwise
      */
     public abstract boolean contains(final Object valueToFind);
 
@@ -1016,7 +1016,7 @@ public abstract class Tuple<TP> implements Immutable {
          * if and only if the element equals the specified value (including null equality).</p>
          *
          * @param valueToFind the value to search for
-         * @return true if the element equals the specified value
+         * @return {@code true} if the element equals the specified value
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -1073,7 +1073,7 @@ public abstract class Tuple<TP> implements Immutable {
          * <p>Two Tuple1 instances are equal if they contain equal elements.</p>
          *
          * @param obj the object to compare with
-         * @return true if the specified object is a Tuple1 with an equal element
+         * @return {@code true} if the specified object is a Tuple1 with an equal element
          */
         @Override
         public boolean equals(final Object obj) {
@@ -1177,7 +1177,7 @@ public abstract class Tuple<TP> implements Immutable {
          * <p>Returns true if either element equals the specified value.</p>
          *
          * @param valueToFind the value to search for
-         * @return true if either element equals the specified value
+         * @return {@code true} if either element equals the specified value
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -1366,7 +1366,7 @@ public abstract class Tuple<TP> implements Immutable {
          * <p>Two Tuple2 instances are equal if they contain equal elements in the same positions.</p>
          *
          * @param obj the object to compare with
-         * @return true if the specified object is a Tuple2 with equal elements
+         * @return {@code true} if the specified object is a Tuple2 with equal elements
          */
         @Override
         public boolean equals(final Object obj) {
@@ -1470,7 +1470,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return true if any of the three elements is null
+         * @return {@code true} if any of the three elements is null
          */
         @Override
         public boolean anyNull() {
@@ -1480,7 +1480,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return true if all three elements are null
+         * @return {@code true} if all three elements are null
          */
         @Override
         public boolean allNull() {
@@ -1491,7 +1491,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          *
          * @param valueToFind the value to search for
-         * @return true if any element equals the specified value
+         * @return {@code true} if any element equals the specified value
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -1657,7 +1657,7 @@ public abstract class Tuple<TP> implements Immutable {
          * Two Tuple3 instances are equal if all corresponding elements are equal.
          *
          * @param obj the object to compare with
-         * @return true if the specified object is a Tuple3 with equal elements
+         * @return {@code true} if the specified object is a Tuple3 with equal elements
          */
         @Override
         public boolean equals(final Object obj) {
@@ -1764,7 +1764,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return true if any of the four elements is null
+         * @return {@code true} if any of the four elements is null
          */
         @Override
         public boolean anyNull() {
@@ -1774,7 +1774,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return true if all four elements are null
+         * @return {@code true} if all four elements are null
          */
         @Override
         public boolean allNull() {
@@ -1785,7 +1785,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          *
          * @param valueToFind the value to search for
-         * @return true if any element equals the specified value
+         * @return {@code true} if any element equals the specified value
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -1881,7 +1881,7 @@ public abstract class Tuple<TP> implements Immutable {
          * Two Tuple4 instances are equal if all corresponding elements are equal.
          *
          * @param obj the object to compare with
-         * @return true if the specified object is a Tuple4 with equal elements
+         * @return {@code true} if the specified object is a Tuple4 with equal elements
          */
         @Override
         public boolean equals(final Object obj) {
@@ -1990,7 +1990,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return true if any of the five elements is null
+         * @return {@code true} if any of the five elements is null
          */
         @Override
         public boolean anyNull() {
@@ -2000,7 +2000,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return true if all five elements are null
+         * @return {@code true} if all five elements are null
          */
         @Override
         public boolean allNull() {
@@ -2011,7 +2011,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          *
          * @param valueToFind the value to search for
-         * @return true if any element equals the specified value
+         * @return {@code true} if any element equals the specified value
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -2112,7 +2112,7 @@ public abstract class Tuple<TP> implements Immutable {
          * Two Tuple5 instances are equal if all corresponding elements are equal.
          *
          * @param obj the object to compare with
-         * @return true if the specified object is a Tuple5 with equal elements
+         * @return {@code true} if the specified object is a Tuple5 with equal elements
          */
         @Override
         public boolean equals(final Object obj) {
@@ -2227,7 +2227,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return true if any of the six elements is null
+         * @return {@code true} if any of the six elements is null
          */
         @Override
         public boolean anyNull() {
@@ -2237,7 +2237,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return true if all six elements are null
+         * @return {@code true} if all six elements are null
          */
         @Override
         public boolean allNull() {
@@ -2248,7 +2248,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          *
          * @param valueToFind the value to search for
-         * @return true if any element equals the specified value
+         * @return {@code true} if any element equals the specified value
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -2351,7 +2351,7 @@ public abstract class Tuple<TP> implements Immutable {
          * Two Tuple6 instances are equal if all corresponding elements are equal.
          *
          * @param obj the object to compare with
-         * @return true if the specified object is a Tuple6 with equal elements
+         * @return {@code true} if the specified object is a Tuple6 with equal elements
          */
         @Override
         public boolean equals(final Object obj) {
@@ -2474,7 +2474,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return true if any of the seven elements is null
+         * @return {@code true} if any of the seven elements is null
          */
         @Override
         public boolean anyNull() {
@@ -2484,7 +2484,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return true if all seven elements are null
+         * @return {@code true} if all seven elements are null
          */
         @Override
         public boolean allNull() {
@@ -2495,7 +2495,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          *
          * @param valueToFind the value to search for
-         * @return true if any element equals the specified value
+         * @return {@code true} if any element equals the specified value
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -2601,7 +2601,7 @@ public abstract class Tuple<TP> implements Immutable {
          * Two Tuple7 instances are equal if all corresponding elements are equal.
          *
          * @param obj the object to compare with
-         * @return true if the specified object is a Tuple7 with equal elements
+         * @return {@code true} if the specified object is a Tuple7 with equal elements
          */
         @Override
         public boolean equals(final Object obj) {
@@ -2730,7 +2730,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return true if any of the eight elements is null
+         * @return {@code true} if any of the eight elements is null
          */
         @Override
         public boolean anyNull() {
@@ -2740,7 +2740,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return true if all eight elements are null
+         * @return {@code true} if all eight elements are null
          */
         @Override
         public boolean allNull() {
@@ -2751,7 +2751,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          *
          * @param valueToFind the value to search for
-         * @return true if any element equals the specified value
+         * @return {@code true} if any element equals the specified value
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -2859,7 +2859,7 @@ public abstract class Tuple<TP> implements Immutable {
          * Two Tuple8 instances are equal if all corresponding elements are equal.
          *
          * @param obj the object to compare with
-         * @return true if the specified object is a Tuple8 with equal elements
+         * @return {@code true} if the specified object is a Tuple8 with equal elements
          */
         @Override
         public boolean equals(final Object obj) {
@@ -3038,7 +3038,7 @@ public abstract class Tuple<TP> implements Immutable {
          * boolean hasNull2 = t2.anyNull(); // Returns false
          * }</pre>
          *
-         * @return true if at least one element is null, false otherwise
+         * @return {@code true} if at least one element is null, {@code false} otherwise
          */
         @Override
         public boolean anyNull() {
@@ -3048,7 +3048,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Checks if all elements in this tuple are null.
          * 
-         * <p>This method returns true only when every single element (_1 through _9) is null.</p>
+         * <p>This method returns {@code true} only when every single element (_1 through _9) is null.</p>
          * 
          * <p>Example:</p>
          * <pre>{@code
@@ -3061,7 +3061,7 @@ public abstract class Tuple<TP> implements Immutable {
          * boolean allNull2 = t2.allNull(); // Returns false
          * }</pre>
          *
-         * @return true if all 9 elements are null, false otherwise
+         * @return {@code true} if all 9 elements are null, {@code false} otherwise
          */
         @Override
         public boolean allNull() {
@@ -3087,7 +3087,7 @@ public abstract class Tuple<TP> implements Immutable {
          * }</pre>
          *
          * @param valueToFind the value to search for, may be null
-         * @return true if any element equals the specified value, false otherwise
+         * @return {@code true} if any element equals the specified value, {@code false} otherwise
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -3291,7 +3291,7 @@ public abstract class Tuple<TP> implements Immutable {
          * }</pre>
          *
          * @param obj the object to compare with this tuple
-         * @return true if the specified object is a Tuple9 with all elements equal to this tuple's elements
+         * @return {@code true} if the specified object is a Tuple9 with all elements equal to this tuple's elements
          */
         @Override
         public boolean equals(final Object obj) {

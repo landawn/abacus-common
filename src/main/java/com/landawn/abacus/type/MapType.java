@@ -116,7 +116,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     /**
      * Indicates whether this is a generic type.
-     * For MapType, this always returns true since Map is parameterized with key and value types.
+     * For MapType, this always returns {@code true} since Map is parameterized with key and value types.
      *
      * @return true, indicating that Map is a generic type
      */

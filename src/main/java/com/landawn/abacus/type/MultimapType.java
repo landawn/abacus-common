@@ -127,7 +127,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
 
     /**
      * Indicates whether this is a generic type.
-     * For MultimapType, this always returns true since Multimap is parameterized with key and value types.
+     * For MultimapType, this always returns {@code true} since Multimap is parameterized with key and value types.
      *
      * @return true, indicating that Multimap is a generic type
      */

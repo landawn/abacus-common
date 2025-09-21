@@ -174,7 +174,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Sets the value to newValue if the predicate returns true for the current value.
+     * Sets the value to newValue if the predicate returns {@code true} for the current value.
      * If the predicate returns false, the value remains unchanged.
      * 
      * <p>Example:</p>
@@ -187,7 +187,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * @param <E> the type of exception that the predicate may throw
      * @param newValue the new value to set if the predicate returns true
      * @param predicate the predicate that tests the current value
-     * @return true if the value was set, false otherwise
+     * @return {@code true} if the value was set, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setIf(final double newValue, final Throwables.DoublePredicate<E> predicate) throws E {

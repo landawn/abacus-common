@@ -386,7 +386,7 @@ public final class HttpRequest {
     /**
      * Sets whether to use caches for this request.
      *
-     * @param useCaches true to use caches, false otherwise
+     * @param useCaches true to use caches, {@code false} otherwise
      * @return This HttpRequest instance for method chaining
      */
     public HttpRequest useCaches(final boolean useCaches) {

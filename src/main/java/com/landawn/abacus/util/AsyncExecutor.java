@@ -574,7 +574,7 @@ public class AsyncExecutor {
      * }
      * }</pre>
      *
-     * @return true if the executor has been terminated, false otherwise
+     * @return {@code true} if the executor has been terminated, {@code false} otherwise
      */
     public boolean isTerminated() {
         return executor == null || !(executor instanceof ExecutorService executorService) || executorService.isTerminated();

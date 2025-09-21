@@ -267,7 +267,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      *
      * @param x the first double array
      * @param y the second double array
-     * @return true if the arrays are equal, false otherwise
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final double[] x, final double[] y) {

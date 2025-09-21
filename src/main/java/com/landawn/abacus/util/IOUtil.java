@@ -8269,7 +8269,7 @@ public final class IOUtil {
      *
      * @param file1 the first file
      * @param file2 the second file
-     * @return true if the contents of the files are equal or they both don't exist, false otherwise
+     * @return {@code true} if the contents of the files are equal or they both don't exist, {@code false} otherwise
      * @throws IllegalArgumentException when an input is not a file.
      * @throws IOException If an I/O error occurs.
      */
@@ -8321,7 +8321,7 @@ public final class IOUtil {
      * @param file2       the second file
      * @param charsetName the name of the requested charset.
      *                    May be null, in which case the platform default is used
-     * @return true if the content of the files are equal or neither exists,
+     * @return {@code true} if the content of the files are equal or neither exists,
      * false otherwise
      * @throws IllegalArgumentException when an input is not a file.
      * @throws IOException in case of an I/O error.

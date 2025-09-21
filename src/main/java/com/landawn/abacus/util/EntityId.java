@@ -342,7 +342,7 @@ public interface EntityId {
      * }</pre>
      *
      * @param propName the property name to check
-     * @return true if the property exists, false otherwise
+     * @return {@code true} if the property exists, {@code false} otherwise
      */
     boolean containsKey(String propName);
 
@@ -399,7 +399,7 @@ public interface EntityId {
      * boolean empty2 = id2.isEmpty(); // Returns false
      * }</pre>
      *
-     * @return true if this EntityId contains no properties, false otherwise
+     * @return {@code true} if this EntityId contains no properties, {@code false} otherwise
      */
     default boolean isEmpty() {
         return size() == 0;

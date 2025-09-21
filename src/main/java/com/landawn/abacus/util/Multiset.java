@@ -570,7 +570,7 @@ public final class Multiset<E> implements Collection<E> {
      * @param element the element to conditionally set the count of
      * @param oldOccurrences the expected current count
      * @param newOccurrences the desired new count
-     * @return true if the count was successfully updated, false if the current count didn't match oldOccurrences
+     * @return {@code true} if the count was successfully updated, {@code false} if the current count didn't match oldOccurrences
      * @throws IllegalArgumentException if oldOccurrences or newOccurrences is negative
      */
     public boolean setCount(final E element, final int oldOccurrences, final int newOccurrences) {
@@ -612,7 +612,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param element the element to add one occurrence of
-     * @return true (as specified by {@link Collection#add})
+     * @return {@code true} (as specified by {@link Collection#add})
      * @throws IllegalArgumentException if the element already has {@link Integer#MAX_VALUE} occurrences
      */
     @Override
@@ -715,7 +715,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param c the collection containing elements to be added
-     * @return true if this multiset changed as a result of the call
+     * @return {@code true} if this multiset changed as a result of the call
      */
     @Override
     public boolean addAll(final Collection<? extends E> c) {
@@ -737,7 +737,7 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param c the collection containing elements to be added
      * @param occurrencesToAdd the number of occurrences to add for each element
-     * @return true if this multiset changed as a result of the call
+     * @return {@code true} if this multiset changed as a result of the call
      * @throws IllegalArgumentException if occurrencesToAdd is negative
      */
     @Beta
@@ -769,7 +769,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param element the element to remove one occurrence of
-     * @return true if an occurrence was found and removed
+     * @return {@code true} if an occurrence was found and removed
      */
     @Override
     public boolean remove(final Object element) {
@@ -869,7 +869,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param c the collection containing elements to be removed
-     * @return true if this multiset changed as a result of the call
+     * @return {@code true} if this multiset changed as a result of the call
      * @deprecated replaced by {@link #removeAllOccurrences(Collection)}
      */
     @Deprecated
@@ -906,7 +906,7 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param c the collection containing elements to be removed
      * @param occurrencesToRemove the number of occurrences to remove for each element
-     * @return true if this multiset changed as a result of the call
+     * @return {@code true} if this multiset changed as a result of the call
      * @throws IllegalArgumentException if occurrencesToRemove is negative
      */
     public boolean removeAll(final Collection<?> c, final int occurrencesToRemove) {
@@ -963,7 +963,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param c the collection containing elements to be removed
-     * @return true if this multiset changed as a result of the call
+     * @return {@code true} if this multiset changed as a result of the call
      */
     public boolean removeAllOccurrences(final Collection<?> c) {
         return removeAll(c);
@@ -980,8 +980,8 @@ public final class Multiset<E> implements Collection<E> {
      * // Removes all occurrences of "apple"
      * }</pre>
      *
-     * @param predicate the predicate which returns true for elements to be removed
-     * @return true if any elements were removed
+     * @param predicate the predicate which returns {@code true} for elements to be removed
+     * @return {@code true} if any elements were removed
      * @throws IllegalArgumentException if the predicate is null
      */
     public boolean removeAllOccurrencesIf(final Predicate<? super E> predicate) throws IllegalArgumentException {
@@ -1022,8 +1022,8 @@ public final class Multiset<E> implements Collection<E> {
      * // Removes all occurrences of "a" (which has count 3)
      * }</pre>
      *
-     * @param predicate the predicate which returns true for elements to be removed
-     * @return true if any elements were removed
+     * @param predicate the predicate which returns {@code true} for elements to be removed
+     * @return {@code true} if any elements were removed
      * @throws IllegalArgumentException if the predicate is null
      */
     public boolean removeAllOccurrencesIf(final ObjIntPredicate<? super E> predicate) throws IllegalArgumentException {
@@ -1260,7 +1260,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param c the collection containing elements to be retained
-     * @return true if this multiset changed as a result of the call
+     * @return {@code true} if this multiset changed as a result of the call
      */
     @Override
     public boolean retainAll(final Collection<?> c) {
@@ -1296,7 +1296,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param valueToFind the element whose presence is to be tested
-     * @return true if this multiset contains at least one occurrence of the element
+     * @return {@code true} if this multiset contains at least one occurrence of the element
      */
     @Override
     public boolean contains(final Object valueToFind) {
@@ -1320,7 +1320,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param elements the collection to be checked for containment
-     * @return true if this multiset contains all elements in the specified collection
+     * @return {@code true} if this multiset contains all elements in the specified collection
      */
     @Override
     public boolean containsAll(final Collection<?> elements) {

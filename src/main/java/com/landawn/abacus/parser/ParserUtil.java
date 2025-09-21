@@ -1409,7 +1409,7 @@ public final class ParserUtil {
          * @param propName the property name (supports nested paths)
          * @param propValue the value to set
          * @param ignoreUnmatchedProperty if true, silently ignore properties that don't exist
-         * @return true if the property was set, false if it was ignored
+         * @return {@code true} if the property was set, {@code false} if it was ignored
          * @throws IllegalArgumentException if no setter found and ignoreUnmatchedProperty is false
          */
         @SuppressWarnings("rawtypes")
@@ -1513,7 +1513,7 @@ public final class ParserUtil {
          * @param propInfoFromOtherBean property information from another bean
          * @param propValue the value to set
          * @param ignoreUnmatchedProperty if true, silently ignore properties that don't exist
-         * @return true if the property was set, false if it was ignored
+         * @return {@code true} if the property was set, {@code false} if it was ignored
          * @throws RuntimeException if no setter found and ignoreUnmatchedProperty is false
          */
         public boolean setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue, final boolean ignoreUnmatchedProperty) {
@@ -1694,7 +1694,7 @@ public final class ParserUtil {
          * }</pre>
          *
          * @param annotationClass the annotation class to check for
-         * @return true if the annotation is present, false otherwise
+         * @return {@code true} if the annotation is present, {@code false} otherwise
          */
         public boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {
             return annotations.containsKey(annotationClass);

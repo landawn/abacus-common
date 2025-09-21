@@ -94,7 +94,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     }
 
     /**
-     * Indicates whether this is a generic type. Always returns true for PairType.
+     * Indicates whether this is a generic type. Always returns {@code true} for PairType.
      *
      * @return true, as PairType is always a generic type
      */

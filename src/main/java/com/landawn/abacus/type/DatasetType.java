@@ -48,7 +48,7 @@ public class DatasetType extends AbstractType<Dataset> {
 
     /**
      * Indicates whether this type represents a Dataset.
-     * Always returns true for DatasetType.
+     * Always returns {@code true} for DatasetType.
      *
      * @return true, as this type handler specifically handles Dataset objects
      */

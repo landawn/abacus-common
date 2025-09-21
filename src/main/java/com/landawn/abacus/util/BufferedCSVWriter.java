@@ -186,7 +186,7 @@ public final class BufferedCSVWriter extends CharacterWriter {
      * }
      * }</pre>
      *
-     * @return true if using backslash escaping, false if using double-quote escaping
+     * @return {@code true} if using backslash escaping, {@code false} if using double-quote escaping
      */
     boolean isBackSlash() {
         return replacementsForChars['"'] == BACK_SLASH_CHAR_ARRAY;

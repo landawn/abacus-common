@@ -38,7 +38,7 @@ public final class PrimitiveIntType extends AbstractIntegerType {
 
     /**
      * Indicates whether this type represents a primitive type.
-     * For PrimitiveIntType, this always returns true since it represents the primitive int type.
+     * For PrimitiveIntType, this always returns {@code true} since it represents the primitive int type.
      *
      * @return true, indicating this is a primitive type
      */

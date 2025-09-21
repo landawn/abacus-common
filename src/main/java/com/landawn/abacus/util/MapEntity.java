@@ -155,7 +155,7 @@ public final class MapEntity implements Serializable {
      * user.set("age", "25");
      * 
      * Integer age = user.get("age", Integer.class); // returns 25
-     * Boolean active = user.get("active", Boolean.class); // returns false (default)
+     * Boolean active = user.get("active", Boolean.class); // returns {@code false} (default)
      * }</pre>
      * 
      * @param <T> the target type

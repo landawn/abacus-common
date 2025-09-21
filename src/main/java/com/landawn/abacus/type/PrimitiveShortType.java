@@ -44,7 +44,7 @@ public final class PrimitiveShortType extends AbstractShortType {
 
     /**
      * Indicates whether this type represents a primitive type.
-     * For PrimitiveShortType, this always returns true since it represents the primitive short type.
+     * For PrimitiveShortType, this always returns {@code true} since it represents the primitive short type.
      *
      * @return true, indicating this is a primitive type
      */

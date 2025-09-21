@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -1491,7 +1492,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Checks if the given {@code Collection} contains any elements from the specified {@code valuesToFind} Collection.
-     * This method returns true if there is at least one element that exists in both collections.
+     * This method returns {@code true} if there is at least one element that exists in both collections.
      *
      * <p>This method uses {@link #disjoint(Collection, Collection)} internally for optimal performance.
      * Performance characteristics depend on the Collection types used.</p>
@@ -13169,7 +13170,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return {@code true} if the collection has duplicates, {@code false} otherwise
      */
     public static boolean hasDuplicates(final Collection<?> c, final boolean isSorted) {
-        if (isEmpty(c) || c.size() == 1) {
+        if (isEmpty(c) || c.size() == 1 || c instanceof Set) {
             return false;
         }
 
@@ -33065,12 +33066,43 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * Pauses the execution of the current thread for the specified time in an uninterruptible manner.
+     * This method will continue to sleep for the full duration even if the thread is interrupted,
+     * re-establishing the interrupt status only after the sleep completes.
      *
-     * If a thread is interrupted during such a call, the call continues to block until the result is available or the
-     * timeout elapses, and only then re-interrupts the thread.
+     * <p><strong>Note:</strong> This implementation is derived from Google Guava under Apache License 2.0 and has been modified.</p>
      *
-     * @param timeoutInMillis
+     * <p>When a thread is interrupted during the sleep call, this method continues to block until the
+     * full timeout duration elapses, and only then re-interrupts the thread by calling
+     * {@link Thread#interrupt()} to restore the interrupted status.</p>
+     *
+     * <p>This behavior is useful when you need guaranteed sleep duration regardless of interruptions,
+     * such as rate limiting, retry delays, or time-based coordination where partial sleep would
+     * break the timing contract.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Rate limiting: ensure minimum delay between operations
+     * N.sleepUninterruptibly(1000); // Always sleeps for 1 second
+     * 
+     * // Retry with fixed delay - won't be shortened by interrupts
+     * for (int attempt = 0; attempt < maxRetries; attempt++) {
+     *     try {
+     *         return performOperation();
+     *     } catch (Exception e) {
+     *         if (attempt < maxRetries - 1) {
+     *             N.sleepUninterruptibly(retryDelayMs);
+     *         }
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param timeoutInMillis the time to sleep in milliseconds. If zero or negative, 
+     *                       the method returns immediately without sleeping
+     * @see #sleep(long)
+     * @see #sleep(long, TimeUnit)
+     * @see Thread#interrupt()
+     * @see TimeUnit#sleep(long)
      */
     public static void sleepUninterruptibly(final long timeoutInMillis) {
         if (timeoutInMillis <= 0) {
@@ -33102,14 +33134,39 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * Pauses the execution of the current thread for the specified time with the given time unit in an uninterruptible manner.
+     * This method will continue to sleep for the full duration even if the thread is interrupted,
+     * re-establishing the interrupt status only after the sleep completes.
      *
-     * If a thread is interrupted during such a call, the call continues to block until the result is available or the
-     * timeout elapses, and only then re-interrupts the thread.
+     * <p><strong>Note:</strong> This implementation is derived from Google Guava under Apache License 2.0 and has been modified.</p>
      *
-     * @param timeout
-     * @param unit
-     * @throws IllegalArgumentException if the specified {@code unit} is {@code null}.
+     * <p>When a thread is interrupted during the sleep call, this method continues to block until the
+     * full timeout duration elapses, and only then re-interrupts the thread by calling
+     * {@link Thread#interrupt()} to restore the interrupted status.</p>
+     *
+     * <p>This behavior is useful when you need guaranteed sleep duration regardless of interruptions,
+     * such as rate limiting, retry delays, or time-based coordination where partial sleep would
+     * break the timing contract.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Sleep for 5 seconds regardless of interruptions
+     * N.sleepUninterruptibly(5, TimeUnit.SECONDS);
+     * 
+     * // Micro-sleep for precise timing
+     * N.sleepUninterruptibly(500, TimeUnit.MICROSECONDS);
+     * 
+     * // Rate limiting with different time units
+     * N.sleepUninterruptibly(2, TimeUnit.MINUTES); // 2 minute delay
+     * }</pre>
+     *
+     * @param timeout the time to sleep. If zero or negative, the method returns immediately without sleeping
+     * @param unit the time unit for the timeout parameter. Must not be null
+     * @throws IllegalArgumentException if the specified {@code unit} is {@code null}
+     * @see #sleepUninterruptibly(long)
+     * @see #sleep(long, TimeUnit)
+     * @see TimeUnit
+     * @see Thread#interrupt()
      */
     public static void sleepUninterruptibly(final long timeout, @NotNull final TimeUnit unit) throws IllegalArgumentException {
         checkArgNotNull(unit, cs.unit);
@@ -33143,12 +33200,45 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Creates a lazy-initialized supplier from the provided supplier.
-     * The supplier's get() method will not be called until necessary and only be called only because the returned value will be cached.
+     * Creates a lazy-initialized supplier from the provided supplier that defers computation until first access.
+     * The supplier's {@code get()} method will only be called once, on the first invocation, and the result
+     * will be cached for all subsequent calls. This provides thread-safe lazy initialization with memoization.
      *
-     * @param <T> The type of results supplied by this supplier
-     * @param supplier The supplier to be lazily initialized
-     * @return A lazy-initialized supplier
+     * <p>This is particularly useful for expensive computations or resource initialization that should only
+     * happen if and when the value is actually needed, and should be computed only once.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Expensive computation deferred until needed
+     * Supplier<List<String>> expensiveData = N.lazyInit(() -> {
+     *     System.out.println("Computing expensive data...");
+     *     return loadDataFromDatabase(); // Only called once
+     * });
+     * 
+     * // First call triggers computation
+     * List<String> data1 = expensiveData.get(); // Prints "Computing expensive data..."
+     * 
+     * // Subsequent calls return cached result
+     * List<String> data2 = expensiveData.get(); // No computation, returns cached value
+     * 
+     * // Resource initialization
+     * Supplier<DatabaseConnection> connection = N.lazyInit(() -> {
+     *     return new DatabaseConnection(config);
+     * });
+     * }</pre>
+     *
+     * <p><strong>Thread safety:</strong> The returned supplier is thread-safe. Concurrent calls to {@code get()}
+     * will ensure that the underlying supplier is called exactly once, even in multi-threaded environments.</p>
+     *
+     * <p><strong>Performance:</strong> After the first call, subsequent calls have minimal overhead as they
+     * simply return the cached value without any synchronization.</p>
+     *
+     * @param <T> the type of results supplied by this supplier
+     * @param supplier the supplier to be lazily initialized, must not be null
+     * @return a thread-safe lazy-initialized supplier that caches the result of the first call
+     * @throws NullPointerException if the supplier is null
+     * @see LazyInitializer#of(Supplier)
+     * @see #lazyInitialize(Throwables.Supplier)
      */
     @Beta
     public static <T> com.landawn.abacus.util.function.Supplier<T> lazyInit(final Supplier<T> supplier) {
@@ -33156,12 +33246,49 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Creates a lazy-initialized supplier from the provided supplier.
-     * The supplier's get() method will not be called until necessary and only be called only because the returned value will be cached.
+     * Creates a lazy-initialized supplier from the provided exception-throwing supplier that defers computation until first access.
+     * The supplier's {@code get()} method will only be called once, on the first invocation, and the result
+     * will be cached for all subsequent calls. This provides thread-safe lazy initialization with memoization for
+     * suppliers that may throw checked exceptions.
      *
-     * @param <T> The type of results supplied by this supplier
-     * @param supplier The supplier to be lazily initialized
-     * @return A lazy-initialized supplier
+     * <p>This is particularly useful for expensive computations or resource initialization that may throw
+     * checked exceptions and should only happen if and when the value is actually needed.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Database connection with exception handling
+     * Throwables.Supplier<Connection, SQLException> lazyConnection = N.lazyInitialize(() -> {
+     *     System.out.println("Establishing database connection...");
+     *     return DriverManager.getConnection(url, user, password);
+     * });
+     * 
+     * try {
+     *     Connection conn1 = lazyConnection.get(); // May throw SQLException on first call
+     *     Connection conn2 = lazyConnection.get(); // Returns cached connection, no exception
+     * } catch (SQLException e) {
+     *     // Handle connection error
+     * }
+     * 
+     * // File reading with lazy initialization
+     * Throwables.Supplier<String, IOException> fileContent = N.lazyInitialize(() -> {
+     *     return Files.readString(Paths.get("config.txt"));
+     * });
+     * }</pre>
+     *
+     * <p><strong>Thread safety:</strong> The returned supplier is thread-safe. Concurrent calls to {@code get()}
+     * will ensure that the underlying supplier is called exactly once, even in multi-threaded environments.</p>
+     *
+     * <p><strong>Exception behavior:</strong> If the underlying supplier throws an exception on the first call,
+     * that exception will be propagated and the supplier will remain uninitialized. Subsequent calls will
+     * attempt to call the underlying supplier again.</p>
+     *
+     * @param <T> the type of results supplied by this supplier
+     * @param <E> the type of exception that may be thrown by the supplier
+     * @param supplier the exception-throwing supplier to be lazily initialized, must not be null
+     * @return a thread-safe lazy-initialized supplier that caches the result of the first successful call
+     * @throws NullPointerException if the supplier is null
+     * @see Throwables.LazyInitializer#of(Throwables.Supplier)
+     * @see #lazyInit(Supplier)
      */
     @Beta
     public static <T, E extends Exception> Throwables.Supplier<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) {
@@ -33242,11 +33369,49 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Prints the given object's string representation to the standard output stream (System.out) and returns the object.
-     * The object's string representation is obtained by calling {@code N.toString(Object)} method.
+     * This method provides intelligent formatting for different object types and is particularly useful for debugging
+     * and method chaining scenarios where you want to inspect intermediate values without breaking the chain.
      *
-     * @param <T> The type of the object to be printed.
-     * @param obj The object to be printed.
-     * @return The same object that was printed.
+     * <p><strong>Formatting behavior:</strong></p>
+     * <ul>
+     * <li><strong>Collections:</strong> Formatted as [element1, element2, element3] with comma-space separators</li>
+     * <li><strong>Object arrays:</strong> Formatted as [element1, element2, element3] with comma-space separators</li>
+     * <li><strong>Maps:</strong> Formatted as {key1=value1, key2=value2} with comma-space separators</li>
+     * <li><strong>Other objects:</strong> Uses {@code N.toString(Object)} for string representation</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Method chaining with debugging
+     * List<String> result = N.println(Arrays.asList("a", "b", "c"))  // Prints: [a, b, c]
+     *     .stream()
+     *     .map(String::toUpperCase)
+     *     .collect(toList());
+     * 
+     * // Debug intermediate values
+     * int value = N.println(calculateSomething())  // Prints the calculated value
+     *     * 2;
+     * 
+     * // Collection debugging
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("foo", 1);
+     * map.put("bar", 2);
+     * N.println(map);  // Prints: {foo=1, bar=2}
+     * 
+     * // Array debugging
+     * String[] array = {"hello", "world"};
+     * N.println(array);  // Prints: [hello, world]
+     * }</pre>
+     *
+     * <p><strong>Performance note:</strong> This method uses optimized string builders with cached buffers
+     * for formatting collections and arrays, providing good performance for debugging purposes.</p>
+     *
+     * @param <T> the type of the object to be printed
+     * @param obj the object to be printed, may be null
+     * @return the same object that was printed, enabling method chaining
+     * @see #toString(Object)
+     * @see #fprintln(String, Object...)
+     * @see System#out
      */
     @SuppressWarnings("rawtypes")
     public static <T> T println(final T obj) {
@@ -33299,12 +33464,48 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
 
     /**
-     * Prints the formatted string to the standard output using the specified format and arguments.
+     * Prints a formatted string to the standard output stream (System.out) followed by a newline.
+     * This method provides convenient formatted printing using printf-style format strings,
+     * combining the functionality of {@link String#format(String, Object...)} with automatic newline addition.
      *
-     * @param format the format string
-     * @param args the arguments referenced by the format specifiers in the format string
+     * <p>The format string uses the same syntax as {@link String#format(String, Object...)}, supporting
+     * various format specifiers such as %s (string), %d (decimal), %f (floating point), %x (hexadecimal), etc.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Simple string formatting
+     * N.fprintln("Hello, %s!", "World");  // Prints: Hello, World!
+     * 
+     * // Multiple arguments with different types
+     * N.fprintln("User %s (ID: %d) has %.2f credits", "Alice", 123, 45.67);
+     * // Prints: User Alice (ID: 123) has 45.67 credits
+     * 
+     * // Numeric formatting
+     * N.fprintln("Hexadecimal: %x, Binary: %8s", 255, Integer.toBinaryString(255));
+     * // Prints: Hexadecimal: ff, Binary: 11111111
+     * 
+     * // Date/time formatting
+     * N.fprintln("Current time: %tF %tT", new Date(), new Date());
+     * // Prints: Current time: 2023-12-25 14:30:45
+     * 
+     * // Debugging with formatted output
+     * N.fprintln("Processing item %d of %d: %s", current, total, item.getName());
+     * }</pre>
+     *
+     * <p><strong>Performance note:</strong> This method uses {@link System#out#printf(String, Object...)}
+     * internally, which is efficient for formatted output but may be slower than simple string concatenation
+     * for very frequent debugging calls.</p>
+     *
+     * @param format the format string as described in {@link java.util.Formatter}. Must not be null
+     * @param args the arguments referenced by the format specifiers in the format string.
+     *             If there are more arguments than format specifiers, the extra arguments are ignored.
+     *             The number of arguments is variable and may be zero
+     * @throws IllegalFormatException if the format string is invalid or contains illegal format specifiers
+     * @throws NullPointerException if the format string is null
      * @see String#format(String, Object...)
+     * @see System#out#printf(String, Object...)
      * @see #println(Object)
+     * @see java.util.Formatter
      */
     public static void fprintln(final String format, final Object... args) {
         System.out.printf(format, args); //NOSONAR

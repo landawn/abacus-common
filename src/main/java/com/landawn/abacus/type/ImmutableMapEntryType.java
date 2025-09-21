@@ -104,7 +104,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     /**
      * Indicates that this is a generic type with type parameters.
      *
-     * @return true as map entry types are generic types
+     * @return {@code true} as map entry types are generic types
      */
     @Override
     public boolean isGenericType() {
@@ -227,7 +227,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      *
      * @param keyTypeName the name of the key type
      * @param valueTypeName the name of the value type
-     * @param isDeclaringName true to generate a declaring name with simple type names, false for fully qualified names
+     * @param isDeclaringName true to generate a declaring name with simple type names, {@code false} for fully qualified names
      * @return the formatted type name (e.g., "Map.ImmutableEntry<String, Integer>")
      */
     protected static String getTypeName(final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {

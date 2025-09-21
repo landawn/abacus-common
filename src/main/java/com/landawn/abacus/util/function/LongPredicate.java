@@ -277,8 +277,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <pre>{@code
      * LongPredicate inRange = LongPredicate.between(10L, 20L);
      * inRange.test(15L); // returns true
-     * inRange.test(10L); // returns false (not greater than min)
-     * inRange.test(20L); // returns false (not less than max)
+     * inRange.test(10L); // returns {@code false} (not greater than min)
+     * inRange.test(20L); // returns {@code false} (not less than max)
      * }</pre>
      *
      * @param minValue the exclusive lower bound

@@ -99,7 +99,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
     /**
      * Indicates whether this is a generic type.
-     * For MapEntryType, this always returns true since Map.Entry is parameterized with key and value types.
+     * For MapEntryType, this always returns {@code true} since Map.Entry is parameterized with key and value types.
      *
      * @return true, indicating that Map.Entry is a generic type
      */

@@ -63,6 +63,8 @@ import com.landawn.abacus.util.stream.Stream;
  * 
  * <p>The Sheet can be frozen to prevent modifications, making it immutable.</p>
  * 
+ * <p><b>Note:</b> This implementation is not thread-safe. If multiple threads access a sheet concurrently, and at least one of the threads modifies the sheet, it must be synchronized externally.</p>
+ * 
  * <p>Notation: {@code R} = Row, {@code C} = Column, {@code H} = Horizontal, {@code V} = Vertical</p>
  *
  * <pre>{@code
@@ -139,15 +141,15 @@ public final class Sheet<R, C, V> implements Cloneable {
      * sheet.put("row1", "col1", 42); // Set a value
      * }</pre>
      *
-     * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} values
-     * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} values
-     * @throws IllegalArgumentException if any of the row keys or column keys are {@code null}
+     * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
+     * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
+     * @throws IllegalArgumentException if any of the row keys or column keys are {@code null} or duplicated
      */
     public Sheet(final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws IllegalArgumentException {
         N.checkArgument(!N.anyNull(rowKeySet), "Row key can't be null");
         N.checkArgument(!N.anyNull(columnKeySet), "Column key can't be null");
-        N.checkArgument(N.size(rowKeySet) == N.newLinkedHashSet(rowKeySet).size(), "Duplicate row keys are not allowed");
-        N.checkArgument(N.size(columnKeySet) == N.newLinkedHashSet(columnKeySet).size(), "Duplicate column keys are not allowed");
+        N.checkArgument(!N.hasDuplicates(rowKeySet), "Duplicate row keys are not allowed");
+        N.checkArgument(!N.hasDuplicates(columnKeySet), "Duplicate column keys are not allowed");
 
         _rowKeySet = N.newLinkedHashSet(rowKeySet);
         _columnKeySet = N.newLinkedHashSet(columnKeySet);
@@ -173,11 +175,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Integer val = sheet.get("row2", "col2"); // returns null
      * }</pre>
      *
-     * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} values
-     * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} values
+     * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
+     * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
      * @param rows the initial data as a 2D array where rows[i][j] is the value at row i, column j;
      *             must have length equal to rowKeySet size, and each inner array must have length equal to columnKeySet size
-     * @throws IllegalArgumentException if any row/column keys are {@code null}, or if array dimensions don't match the key sets
+     * @throws IllegalArgumentException if any row/column keys are {@code null} or duplicated, or if array dimensions don't match the key sets
      */
     public Sheet(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Object[][] rows) throws IllegalArgumentException {
         this(rowKeySet, columnKeySet);
@@ -260,11 +262,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <R> the type of the row keys
      * @param <C> the type of the column keys
      * @param <V> the type of the values stored in the cells
-     * @param rowKeySet the collection of row keys for the Sheet
-     * @param columnKeySet the collection of column keys for the Sheet
+     * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
+     * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
      * @param rows the data as a 2D array where each inner array represents a row
      * @return a new Sheet with the specified keys and data
-     * @throws IllegalArgumentException if any keys are {@code null} or dimensions don't match
+     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, or dimensions don't match
      */
     public static <R, C, V> Sheet<R, C, V> rows(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Object[][] rows)
             throws IllegalArgumentException {
@@ -292,11 +294,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <R> the type of the row keys
      * @param <C> the type of the column keys
      * @param <V> the type of the values stored in the cells
-     * @param rowKeySet the collection of row keys for the Sheet
-     * @param columnKeySet the collection of column keys for the Sheet
+     * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
+     * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
      * @param rows the data as a collection of collections where each inner collection represents a row
      * @return a new Sheet with the specified keys and data
-     * @throws IllegalArgumentException if any keys are {@code null} or dimensions don't match
+     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, or dimensions don't match
      */
     public static <R, C, V> Sheet<R, C, V> rows(final Collection<R> rowKeySet, final Collection<C> columnKeySet,
             final Collection<? extends Collection<? extends V>> rows) throws IllegalArgumentException {
@@ -356,11 +358,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <R> the type of the row keys
      * @param <C> the type of the column keys
      * @param <V> the type of the values stored in the cells
-     * @param rowKeySet the collection of row keys for the Sheet
-     * @param columnKeySet the collection of column keys for the Sheet
+     * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
+     * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
      * @param columns the data as a 2D array where each inner array represents a column
      * @return a new Sheet with the specified keys and data
-     * @throws IllegalArgumentException if any keys are {@code null} or dimensions don't match
+     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, or dimensions don't match
      */
     public static <R, C, V> Sheet<R, C, V> columns(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Object[][] columns)
             throws IllegalArgumentException {
@@ -411,11 +413,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <R> the type of the row keys
      * @param <C> the type of the column keys
      * @param <V> the type of the values stored in the cells
-     * @param rowKeySet the collection of row keys for the Sheet
-     * @param columnKeySet the collection of column keys for the Sheet
+     * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
+     * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
      * @param columns the data as a collection of collections where each inner collection represents a column
      * @return a new Sheet with the specified keys and data
-     * @throws IllegalArgumentException if any keys are {@code null} or dimensions don't match
+     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, or dimensions don't match
      */
     public static <R, C, V> Sheet<R, C, V> columns(final Collection<R> rowKeySet, final Collection<C> columnKeySet,
             final Collection<? extends Collection<? extends V>> columns) throws IllegalArgumentException {
@@ -563,7 +565,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IndexOutOfBoundsException if the indices are out of bounds
      * @see #isNull(Object, Object)
      */
-    public boolean isNull(final int rowIndex, final int columnIndex) throws IllegalArgumentException {
+    public boolean isNull(final int rowIndex, final int columnIndex) throws IndexOutOfBoundsException {
         checkRowIndex(rowIndex);
         checkColumnIndex(columnIndex);
 
@@ -587,10 +589,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param point the Point containing row and column indices
      * @return {@code true} if the cell contains {@code null}, {@code false} otherwise
-     * @throws IllegalArgumentException if the point's indices are out of bounds
+     * @throws IndexOutOfBoundsException if the point's indices are out of bounds
      * @see #isNull(int, int)
      */
-    public boolean isNull(final Point point) throws IllegalArgumentException {
+    public boolean isNull(final Point point) throws IndexOutOfBoundsException {
         return isNull(point.rowIndex, point.columnIndex);
     }
 
@@ -3707,7 +3709,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     //     * Checks if the Sheet has been initialized.
     //     * A Sheet is considered initialized if it has been populated with data.
     //     *
-    //     * @return true if the Sheet is initialized, false otherwise.
+    //     * @return {@code true} if the Sheet is initialized, {@code false} otherwise.
     //     */
     //    public boolean isInitialized() {
     //        return _isInitialized;

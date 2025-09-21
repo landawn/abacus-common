@@ -113,7 +113,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     /**
      * Indicates that this is a generic type with type parameters.
      *
-     * @return true as multimap types are generic types
+     * @return {@code true} as multimap types are generic types
      */
     @Override
     public boolean isGenericType() {
@@ -193,7 +193,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * @param typeClass the multimap class
      * @param keyTypeName the name of the key type
      * @param valueTypeName the name of the value type
-     * @param isDeclaringName true to generate a declaring name, false for the full name
+     * @param isDeclaringName true to generate a declaring name, {@code false} for the full name
      * @return the formatted type name (e.g., "Multimap<String, Integer>")
      */
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {

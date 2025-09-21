@@ -17516,9 +17516,9 @@ sealed class CommonUtil permits N {
      * int[] c = {1, 2, 3};
      * int[] d = {1, 2, 2, 2};
      * 
-     * haveSameElements(a, b); // returns true (same elements, different order)
-     * haveSameElements(a, c); // returns false (different lengths)
-     * haveSameElements(a, d); // returns false (different frequencies of element 2)
+     * haveSameElements(a, b); // returns {@code true} (same elements, different order)
+     * haveSameElements(a, c); // returns {@code false} (different lengths)
+     * haveSameElements(a, d); // returns {@code false} (different frequencies of element 2)
      * haveSameElements(null, null); // returns true
      * haveSameElements(new int[0], new int[0]); // returns true
      * }</pre>

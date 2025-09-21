@@ -91,7 +91,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     /**
      * Indicates that this is a generic type with type parameters.
      *
-     * @return true as Indexed is a generic type
+     * @return {@code true} as Indexed is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -193,7 +193,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * The format depends on whether a declaring name (simplified) or full name is requested.
      *
      * @param valueTypeName the name of the value type
-     * @param isDeclaringName true to generate a declaring name with simple class names, false for fully qualified names
+     * @param isDeclaringName true to generate a declaring name with simple class names, {@code false} for fully qualified names
      * @return the formatted type name (e.g., "Indexed<String>" or "com.landawn.abacus.util.Indexed<java.lang.String>")
      */
     protected static String getTypeName(final String valueTypeName, final boolean isDeclaringName) {

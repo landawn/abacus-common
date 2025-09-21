@@ -4538,7 +4538,7 @@ public class Builder<T> {
          * }
          * }</pre>
          * 
-         * @return true if all values compared are equal, false otherwise
+         * @return {@code true} if all values compared are equal, {@code false} otherwise
          */
         public boolean result() {
             return result;
@@ -4563,7 +4563,7 @@ public class Builder<T> {
          * }
          * }</pre>
          *
-         * @return true if all values compared are equal, false otherwise
+         * @return {@code true} if all values compared are equal, {@code false} otherwise
          * @see #result()
          */
         public boolean isEquals() {

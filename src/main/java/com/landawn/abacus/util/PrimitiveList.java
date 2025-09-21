@@ -350,7 +350,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>
      * IntList list1 = IntList.of(1, 2, 3, 4);
      * IntList list2 = IntList.of(3, 5, 7);
-     * boolean result = list1.containsAny(list2); // returns true (common element: 3)
+     * boolean result = list1.containsAny(list2); // returns {@code true} (common element: 3)
      * </pre></p>
      *
      * @param l the PrimitiveList to be checked for common elements with this list.
@@ -372,7 +372,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>
      * IntList list = IntList.of(1, 2, 3, 4);
      * int[] array = {3, 5, 7};
-     * boolean result = list.containsAny(array); // returns true (common element: 3)
+     * boolean result = list.containsAny(array); // returns {@code true} (common element: 3)
      * </pre></p>
      *
      * @param a the array to be checked for common elements with this list.
@@ -447,7 +447,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * 
      * IntList list3 = IntList.of(1, 2, 3);
      * IntList list4 = IntList.of(3, 4, 5);
-     * boolean result2 = list3.disjoint(list4); // returns false (common element: 3)
+     * boolean result2 = list3.disjoint(list4); // returns {@code false} (common element: 3)
      * </pre></p>
      *
      * @param l the PrimitiveList to check for disjointness with this list.
@@ -471,7 +471,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * boolean result1 = list.disjoint(array1); // returns true
      * 
      * int[] array2 = {3, 4, 5};
-     * boolean result2 = list.disjoint(array2); // returns false (common element: 3)
+     * boolean result2 = list.disjoint(array2); // returns {@code false} (common element: 3)
      * </pre></p>
      *
      * @param a the array to check for disjointness with this list.
@@ -1499,7 +1499,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * 
      * @param lenA the size of the first collection
      * @param lenB the size of the second collection
-     * @return true if a set-based algorithm would be more efficient, false otherwise
+     * @return {@code true} if a set-based algorithm would be more efficient, {@code false} otherwise
      */
     protected boolean needToSet(final int lenA, final int lenB) {
         return Math.min(lenA, lenB) > 3 && Math.max(lenA, lenB) > 9;

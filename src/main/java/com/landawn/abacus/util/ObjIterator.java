@@ -390,7 +390,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * }</pre>
      *
      * @param <T> the type of elements returned by this iterator
-     * @param hasNext a BooleanSupplier that returns true if more elements should be generated
+     * @param hasNext a BooleanSupplier that returns {@code true} if more elements should be generated
      * @param supplier a Supplier that produces the next element
      * @return an ObjIterator that generates elements conditionally
      * @throws IllegalArgumentException if hasNext or supplier is null

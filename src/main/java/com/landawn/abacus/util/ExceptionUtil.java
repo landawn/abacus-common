@@ -387,7 +387,7 @@ public final class ExceptionUtil {
      *
      * @param e the exception to check
      * @param targetExceptionType the exception type to look for
-     * @return true if the exception or any cause is of the specified type
+     * @return {@code true} if the exception or any cause is of the specified type
      */
     public static boolean hasCause(final Throwable e, final Class<? extends Throwable> targetExceptionType) {
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
@@ -421,7 +421,7 @@ public final class ExceptionUtil {
      *
      * @param e the exception to check
      * @param targetExceptionTester the predicate to test each exception in the cause chain
-     * @return true if any exception in the cause chain matches the predicate
+     * @return {@code true} if any exception in the cause chain matches the predicate
      */
     public static boolean hasCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
@@ -454,7 +454,7 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the exception to check
-     * @return true if the exception chain contains a SQL-related exception
+     * @return {@code true} if the exception chain contains a SQL-related exception
      */
     public static boolean hasSQLCause(final Throwable e) {
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
@@ -487,7 +487,7 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the exception to check
-     * @return true if the exception chain contains an IO-related exception
+     * @return {@code true} if the exception chain contains an IO-related exception
      */
     public static boolean hasIOCause(final Throwable e) {
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
@@ -521,7 +521,7 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the throwable to check
-     * @return true if the throwable is NullPointerException or IllegalArgumentException
+     * @return {@code true} if the throwable is NullPointerException or IllegalArgumentException
      */
     @Beta
     public static boolean isNullPointerOrIllegalArgumentException(final Throwable e) {

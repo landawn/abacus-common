@@ -103,7 +103,7 @@ public enum IOCase {
      * Private constructor for enum constants.
      *
      * @param name the name of the constant
-     * @param sensitive true if case-sensitive, false if case-insensitive
+     * @param sensitive true if case-sensitive, {@code false} if case-insensitive
      */
     IOCase(final String name, final boolean sensitive) {
         this.name = name;

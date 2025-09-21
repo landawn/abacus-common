@@ -114,7 +114,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
     /**
      * Indicates that this is a generic type with type parameters.
      *
-     * @return true as multiset types are generic types
+     * @return {@code true} as multiset types are generic types
      */
     @Override
     public boolean isGenericType() {
@@ -187,7 +187,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      *
      * @param typeClass the multiset class
      * @param parameterTypeName the name of the element type
-     * @param isDeclaringName true to generate a declaring name, false for the full name
+     * @param isDeclaringName true to generate a declaring name, {@code false} for the full name
      * @return the formatted type name (e.g., "Multiset<String>")
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {

@@ -53,7 +53,7 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings({ "java:S6548" })
 public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
-    /** An empty BooleanIterator instance that always returns false for hasNext() */
+    /** An empty BooleanIterator instance that always returns {@code false} for hasNext() */
     public static final BooleanIterator EMPTY = new BooleanIterator() {
         @Override
         public boolean hasNext() {

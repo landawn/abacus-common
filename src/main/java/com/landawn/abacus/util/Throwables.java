@@ -161,7 +161,7 @@ public final class Throwables {
 
     /**
      * Executes the specified callable command that may throw a checked exception and returns its result.
-     * If the command throws an exception and the predicate returns true for that exception,
+     * If the command throws an exception and the predicate returns {@code true} for that exception,
      * the result from the supplier will be returned. If the predicate returns false,
      * the exception will be wrapped in a RuntimeException and rethrown.
      *
@@ -192,7 +192,7 @@ public final class Throwables {
 
     /**
      * Executes the specified callable command that may throw a checked exception and returns its result.
-     * If the command throws an exception and the predicate returns true for that exception,
+     * If the command throws an exception and the predicate returns {@code true} for that exception,
      * the specified default value will be returned. If the predicate returns false,
      * the exception will be wrapped in a RuntimeException and rethrown.
      *
@@ -589,7 +589,7 @@ public final class Throwables {
         /**
          * Returns true if the iterator has more elements to iterate over.
          *
-         * @return true if there are more elements, false otherwise
+         * @return {@code true} if there are more elements, {@code false} otherwise
          * @throws E if an exception occurs while checking for more elements
          */
         public abstract boolean hasNext() throws E;
@@ -1133,7 +1133,7 @@ public final class Throwables {
          * Evaluates this predicate on the given argument.
          *
          * @param t the input argument
-         * @return true if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise false
          * @throws E if an exception occurs during evaluation
          */
         boolean test(T t) throws E;
@@ -1180,7 +1180,7 @@ public final class Throwables {
          *
          * @param t the first input argument
          * @param u the second input argument
-         * @return true if the input arguments match the predicate, otherwise false
+         * @return {@code true} if the input arguments match the predicate, otherwise false
          * @throws E if an exception occurs during evaluation
          */
         boolean test(T t, U u) throws E;
@@ -1220,7 +1220,7 @@ public final class Throwables {
          * @param a the first input argument
          * @param b the second input argument
          * @param c the third input argument
-         * @return true if the input arguments match the predicate, otherwise false
+         * @return {@code true} if the input arguments match the predicate, otherwise false
          * @throws E if an exception occurs during evaluation
          */
         boolean test(A a, B b, C c) throws E;
@@ -1245,7 +1245,7 @@ public final class Throwables {
          * @param b the second input argument
          * @param c the third input argument
          * @param d the fourth input argument
-         * @return true if the input arguments match the predicate, otherwise false
+         * @return {@code true} if the input arguments match the predicate, otherwise false
          * @throws E if an exception occurs during evaluation
          */
         boolean test(A a, B b, C c, D d) throws E;
@@ -1524,7 +1524,7 @@ public final class Throwables {
          * Evaluates this predicate on the given boolean argument.
          *
          * @param value the boolean input argument
-         * @return true if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise false
          * @throws E if an exception occurs during evaluation
          */
         boolean test(boolean value) throws E;
@@ -1578,7 +1578,7 @@ public final class Throwables {
          * Evaluates this predicate on the given char argument.
          *
          * @param value the char input argument
-         * @return true if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise false
          * @throws E if an exception occurs during evaluation
          */
         boolean test(char value) throws E;
@@ -1632,7 +1632,7 @@ public final class Throwables {
          * Evaluates this predicate on the given byte argument.
          *
          * @param value the byte input argument
-         * @return true if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise false
          * @throws E if an exception occurs during evaluation
          */
         boolean test(byte value) throws E;
@@ -1686,7 +1686,7 @@ public final class Throwables {
          * Evaluates this predicate on the given short argument.
          *
          * @param value the short input argument
-         * @return true if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise false
          * @throws E if an exception occurs during evaluation
          */
         boolean test(short value) throws E;
@@ -1740,7 +1740,7 @@ public final class Throwables {
          * Evaluates this predicate on the given int argument.
          *
          * @param value the int input argument
-         * @return true if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise false
          * @throws E if an exception occurs during evaluation
          */
         boolean test(int value) throws E;
@@ -1830,7 +1830,7 @@ public final class Throwables {
          * Evaluates this predicate on the given long argument.
          *
          * @param value the long input argument
-         * @return true if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise false
          * @throws E if an exception occurs during evaluation
          */
         boolean test(long value) throws E;
@@ -1920,7 +1920,7 @@ public final class Throwables {
          * Evaluates this predicate on the given float argument.
          *
          * @param value the float input argument
-         * @return true if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise false
          * @throws E if an exception occurs during evaluation
          */
         boolean test(float value) throws E;
@@ -1974,7 +1974,7 @@ public final class Throwables {
          * Evaluates this predicate on the given double argument.
          *
          * @param value the double input argument
-         * @return true if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise false
          * @throws E if an exception occurs during evaluation
          */
         boolean test(double value) throws E;

@@ -268,7 +268,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      *
      * @param x the first boolean array
      * @param y the second boolean array
-     * @return true if the arrays are equal, false otherwise
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final boolean[] x, final boolean[] y) {

@@ -133,7 +133,7 @@ public @interface Subscribe {
      * }
      * </pre>
      * 
-     * @return true to accept only exact type matches, false to accept subtypes
+     * @return {@code true} to accept only exact type matches, {@code false} to accept subtypes
      */
     boolean strictEventType() default false;
 
@@ -160,7 +160,7 @@ public @interface Subscribe {
      * }
      * </pre>
      * 
-     * @return true to receive sticky events upon registration
+     * @return {@code true} to receive sticky events upon registration
      */
     boolean sticky() default false;
 
@@ -240,7 +240,7 @@ public @interface Subscribe {
      * }
      * </pre>
      * 
-     * @return true to ignore duplicate consecutive events
+     * @return {@code true} to ignore duplicate consecutive events
      */
     boolean deduplicate() default false;
 }

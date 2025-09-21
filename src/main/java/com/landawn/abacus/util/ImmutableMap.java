@@ -621,7 +621,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * }</pre>
      * </p>
      *
-     * @return true if this map contains no key-value mappings, false otherwise
+     * @return {@code true} if this map contains no key-value mappings, {@code false} otherwise
      * @see java.util.Map#isEmpty()
      */
     @Override
@@ -631,7 +631,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     /**
      * Returns true if this map contains a mapping for the specified key.
-     * More formally, returns true if and only if this map contains a mapping for a key k
+     * More formally, returns {@code true} if and only if this map contains a mapping for a key k
      * such that (key==null ? k==null : key.equals(k)).
      * 
      * <p>Example:
@@ -644,7 +644,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * </p>
      *
      * @param key the key whose presence in this map is to be tested
-     * @return true if this map contains a mapping for the specified key
+     * @return {@code true} if this map contains a mapping for the specified key
      * @see java.util.Map#containsKey(Object)
      */
     @Override
@@ -654,7 +654,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     /**
      * Returns true if this map maps one or more keys to the specified value.
-     * More formally, returns true if and only if this map contains at least one mapping
+     * More formally, returns {@code true} if and only if this map contains at least one mapping
      * to a value v such that (value==null ? v==null : value.equals(v)).
      * This operation requires linear time in the size of the map.
      * 
@@ -667,7 +667,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * </p>
      *
      * @param value the value whose presence in this map is to be tested
-     * @return true if this map maps one or more keys to the specified value
+     * @return {@code true} if this map maps one or more keys to the specified value
      * @see java.util.Map#containsValue(Object)
      */
     @Override

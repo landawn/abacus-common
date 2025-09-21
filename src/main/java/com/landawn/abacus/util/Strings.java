@@ -373,7 +373,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
       * isValidJavaIdentifier(null);                   // returns false
       * isValidJavaIdentifier("");                     // returns false
       * isValidJavaIdentifier("   ");                  // returns false
-      * isValidJavaIdentifier("123abc");               // returns false (starts with digit)
+      * isValidJavaIdentifier("123abc");               // returns {@code false} (starts with digit)
       * }</pre>
       *
       * @param cs The CharSequence to be checked. It can be {@code null} or empty.
@@ -408,7 +408,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isKeyword("return");                           // returns true
      * 
      * // Not Java keywords
-     * isKeyword("Class");                            // returns false (case sensitive)
+     * isKeyword("Class");                            // returns {@code false} (case sensitive)
      * isKeyword("myVariable");                       // returns false
      * isKeyword(null);                               // returns false
      * isKeyword("");                                 // returns false
@@ -442,9 +442,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isValidEmailAddress("admin+tag@domain.co.uk"); // returns true
      * 
      * // Invalid email addresses
-     * isValidEmailAddress("invalid.email");          // returns false (no @ symbol)
-     * isValidEmailAddress("@example.com");           // returns false (no local part)
-     * isValidEmailAddress("user@");                  // returns false (no domain)
+     * isValidEmailAddress("invalid.email");          // returns {@code false} (no @ symbol)
+     * isValidEmailAddress("@example.com");           // returns {@code false} (no local part)
+     * isValidEmailAddress("user@");                  // returns {@code false} (no domain)
      * isValidEmailAddress(null);                     // returns false
      * isValidEmailAddress("");                       // returns false
      * }</pre>
@@ -481,7 +481,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * 
      * // Invalid URLs
      * isValidUrl("not a url");                       // returns false
-     * isValidUrl("www.example.com");                 // returns false (no protocol)
+     * isValidUrl("www.example.com");                 // returns {@code false} (no protocol)
      * isValidUrl(null);                              // returns false
      * isValidUrl("");                                // returns false
      * }</pre>
@@ -514,9 +514,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isValidHttpUrl("https://api.example.com:8443");// returns true
      * 
      * // Invalid HTTP URLs
-     * isValidHttpUrl("ftp://files.example.com");     // returns false (not HTTP)
-     * isValidHttpUrl("www.example.com");             // returns false (no protocol)
-     * isValidHttpUrl("file:///C:/doc.txt");          // returns false (not HTTP)
+     * isValidHttpUrl("ftp://files.example.com");     // returns {@code false} (not HTTP)
+     * isValidHttpUrl("www.example.com");             // returns {@code false} (no protocol)
+     * isValidHttpUrl("file:///C:/doc.txt");          // returns {@code false} (not HTTP)
      * isValidHttpUrl(null);                          // returns false
      * isValidHttpUrl("");                            // returns false
      * }</pre>
@@ -542,7 +542,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * isEmpty(null);                                 // returns true
      * isEmpty("");                                   // returns true
-     * isEmpty("   ");                                // returns false (contains spaces)
+     * isEmpty("   ");                                // returns {@code false} (contains spaces)
      * isEmpty("abc");                                // returns false
      * isEmpty(new StringBuilder());                  // returns true
      * }</pre>
@@ -601,7 +601,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Example:
      * <pre>{@code
      * isNotEmpty("abc");                             // returns true
-     * isNotEmpty("   ");                             // returns true (contains spaces)
+     * isNotEmpty("   ");                             // returns {@code true} (contains spaces)
      * isNotEmpty(new StringBuilder("test"));         // returns true
      * isNotEmpty("");                                // returns false
      * isNotEmpty(null);                              // returns false
@@ -626,7 +626,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * isNotBlank("abc");                             // returns true
      * isNotBlank("  abc  ");                         // returns true
-     * isNotBlank("   ");                             // returns false (only whitespace)
+     * isNotBlank("   ");                             // returns {@code false} (only whitespace)
      * isNotBlank("");                                // returns false
      * isNotBlank(null);                              // returns false
      * }</pre>
@@ -899,7 +899,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAnyEmpty("", "xyz");                         // returns true
      * isAnyEmpty(null, "xyz");                       // returns true
      * isAnyEmpty("abc", "xyz");                      // returns false
-     * isAnyEmpty("   ", "xyz");                      // returns false (spaces are not empty)
+     * isAnyEmpty("   ", "xyz");                      // returns {@code false} (spaces are not empty)
      * }</pre>
      *
      * @param a The first CharSequence to be checked. It can be {@code null}.
@@ -923,7 +923,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAnyEmpty("", "def", "xyz");                  // returns true
      * isAnyEmpty("abc", "def", null);                // returns true
      * isAnyEmpty("abc", "def", "xyz");               // returns false
-     * isAnyEmpty("   ", "def", "xyz");               // returns false (spaces are not empty)
+     * isAnyEmpty("   ", "def", "xyz");               // returns {@code false} (spaces are not empty)
      * }</pre>
      *
      * @param a The first CharSequence to be checked. It can be {@code null}.
@@ -7418,9 +7418,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // Non-ASCII alphabetic strings
      * isAsciiAlpha(null);                    // returns false
      * isAsciiAlpha("");                      // returns false
-     * isAsciiAlpha("abc123");                // returns false (contains digits)
-     * isAsciiAlpha("hello world");           // returns false (contains space)
-     * isAsciiAlpha("café");                  // returns false (contains non-ASCII character)
+     * isAsciiAlpha("abc123");                // returns {@code false} (contains digits)
+     * isAsciiAlpha("hello world");           // returns {@code false} (contains space)
+     * isAsciiAlpha("café");                  // returns {@code false} (contains non-ASCII character)
      * }</pre>
      *
      * @param cs The CharSequence to be checked. It can be {@code null} or empty.
@@ -7461,9 +7461,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * 
      * // Invalid strings
      * isAsciiAlphaSpace(null);               // returns false
-     * isAsciiAlphaSpace("Hello123");         // returns false (contains digits)
-     * isAsciiAlphaSpace("Hello\tWorld");     // returns false (contains tab)
-     * isAsciiAlphaSpace("café");             // returns false (contains non-ASCII character)
+     * isAsciiAlphaSpace("Hello123");         // returns {@code false} (contains digits)
+     * isAsciiAlphaSpace("Hello\tWorld");     // returns {@code false} (contains tab)
+     * isAsciiAlphaSpace("café");             // returns {@code false} (contains non-ASCII character)
      * }</pre>
      *
      * @param cs The CharSequence to be checked. It can be {@code null} or empty.
@@ -7510,9 +7510,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // Non-ASCII alphanumeric strings
      * isAsciiAlphanumeric(null);             // returns false
      * isAsciiAlphanumeric("");               // returns false
-     * isAsciiAlphanumeric("hello world");    // returns false (contains space)
-     * isAsciiAlphanumeric("user@email");     // returns false (contains special character)
-     * isAsciiAlphanumeric("café123");        // returns false (contains non-ASCII character)
+     * isAsciiAlphanumeric("hello world");    // returns {@code false} (contains space)
+     * isAsciiAlphanumeric("user@email");     // returns {@code false} (contains special character)
+     * isAsciiAlphanumeric("café123");        // returns {@code false} (contains non-ASCII character)
      * }</pre>
      *
      * @param cs The CharSequence to be checked. It can be {@code null} or empty.
@@ -7555,9 +7555,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * 
      * // Invalid strings
      * isAsciiAlphanumericSpace(null);               // returns false
-     * isAsciiAlphanumericSpace("Hello@World");      // returns false (contains special character)
-     * isAsciiAlphanumericSpace("Test\t123");        // returns false (contains tab)
-     * isAsciiAlphanumericSpace("café 2023");        // returns false (contains non-ASCII character)
+     * isAsciiAlphanumericSpace("Hello@World");      // returns {@code false} (contains special character)
+     * isAsciiAlphanumericSpace("Test\t123");        // returns {@code false} (contains tab)
+     * isAsciiAlphanumericSpace("café 2023");        // returns {@code false} (contains non-ASCII character)
      * }</pre>
      *
      * @param cs The CharSequence to be checked. It can be {@code null} or empty.
@@ -7602,10 +7602,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // Non-ASCII numeric strings
      * isAsciiNumeric(null);                  // returns false
      * isAsciiNumeric("");                    // returns false
-     * isAsciiNumeric("12.3");                // returns false (contains decimal point)
-     * isAsciiNumeric("-123");                // returns false (contains minus sign)
-     * isAsciiNumeric("12 34");               // returns false (contains space)
-     * isAsciiNumeric("12a");                 // returns false (contains letter)
+     * isAsciiNumeric("12.3");                // returns {@code false} (contains decimal point)
+     * isAsciiNumeric("-123");                // returns {@code false} (contains minus sign)
+     * isAsciiNumeric("12 34");               // returns {@code false} (contains space)
+     * isAsciiNumeric("12a");                 // returns {@code false} (contains letter)
      * }</pre>
      *
      * @param cs The CharSequence to be checked. It can be {@code null} or empty.
@@ -7646,16 +7646,16 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // Unicode letter strings
      * isAlpha("abc");                        // returns true
      * isAlpha("ABC");                        // returns true
-     * isAlpha("αβγ");                        // returns true (Greek letters)
-     * isAlpha("你好");                        // returns true (Chinese characters)
-     * isAlpha("café");                       // returns true (includes accented letter)
+     * isAlpha("αβγ");                        // returns {@code true} (Greek letters)
+     * isAlpha("你好");                        // returns {@code true} (Chinese characters)
+     * isAlpha("café");                       // returns {@code true} (includes accented letter)
      * 
      * // Non-letter strings
      * isAlpha(null);                         // returns false
      * isAlpha("");                           // returns false
-     * isAlpha("  ");                         // returns false (contains spaces)
-     * isAlpha("ab2c");                       // returns false (contains digit)
-     * isAlpha("ab-c");                       // returns false (contains hyphen)
+     * isAlpha("  ");                         // returns {@code false} (contains spaces)
+     * isAlpha("ab2c");                       // returns {@code false} (contains digit)
+     * isAlpha("ab-c");                       // returns {@code false} (contains hyphen)
      * }</pre>
      *
      * @param cs The CharSequence to check, which may be null
@@ -7693,16 +7693,16 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // Unicode letter strings with spaces
      * isAlphaSpace("Hello World");           // returns true
      * isAlphaSpace("café au lait");          // returns true
-     * isAlphaSpace("你好 世界");               // returns true (Chinese with space)
-     * isAlphaSpace("");                      // returns true (empty string)
-     * isAlphaSpace("  ");                    // returns true (only spaces)
+     * isAlphaSpace("你好 世界");               // returns {@code true} (Chinese with space)
+     * isAlphaSpace("");                      // returns {@code true} (empty string)
+     * isAlphaSpace("  ");                    // returns {@code true} (only spaces)
      * 
      * // Invalid strings
      * isAlphaSpace(null);                    // returns false
      * isAlphaSpace("ab c");                  // returns true
-     * isAlphaSpace("ab2c");                  // returns false (contains digit)
-     * isAlphaSpace("ab-c");                  // returns false (contains hyphen)
-     * isAlphaSpace("ab\tc");                 // returns false (contains tab)
+     * isAlphaSpace("ab2c");                  // returns {@code false} (contains digit)
+     * isAlphaSpace("ab-c");                  // returns {@code false} (contains hyphen)
+     * isAlphaSpace("ab\tc");                 // returns {@code false} (contains tab)
      * }</pre>
      *
      * @param cs The CharSequence to check, which may be null
@@ -7743,17 +7743,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // Unicode alphanumeric strings
      * isAlphanumeric("abc");                 // returns true
      * isAlphanumeric("abc123");              // returns true
-     * isAlphanumeric("αβγ123");              // returns true (Greek letters with digits)
-     * isAlphanumeric("你好123");              // returns true (Chinese with digits)
+     * isAlphanumeric("αβγ123");              // returns {@code true} (Greek letters with digits)
+     * isAlphanumeric("你好123");              // returns {@code true} (Chinese with digits)
      * isAlphanumeric("café2023");            // returns true
      * 
      * // Invalid strings
      * isAlphanumeric(null);                  // returns false
      * isAlphanumeric("");                    // returns false
-     * isAlphanumeric("  ");                  // returns false (contains spaces)
-     * isAlphanumeric("ab c");                // returns false (contains space)
+     * isAlphanumeric("  ");                  // returns {@code false} (contains spaces)
+     * isAlphanumeric("ab c");                // returns {@code false} (contains space)
      * isAlphanumeric("ab2c");                // returns true
-     * isAlphanumeric("ab-c");                // returns false (contains hyphen)
+     * isAlphanumeric("ab-c");                // returns {@code false} (contains hyphen)
      * }</pre>
      *
      * @param cs The CharSequence to check, which may be null
@@ -7792,15 +7792,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAlphanumericSpace("Hello World 123");       // returns true
      * isAlphanumericSpace("café au lait 2023");     // returns true
      * isAlphanumericSpace("你好 123");                // returns true
-     * isAlphanumericSpace("");                      // returns true (empty string)
-     * isAlphanumericSpace("  ");                    // returns true (only spaces)
+     * isAlphanumericSpace("");                      // returns {@code true} (empty string)
+     * isAlphanumericSpace("  ");                    // returns {@code true} (only spaces)
      * 
      * // Invalid strings
      * isAlphanumericSpace(null);                    // returns false
      * isAlphanumericSpace("ab c");                  // returns true
      * isAlphanumericSpace("ab2c");                  // returns true
-     * isAlphanumericSpace("ab-c");                  // returns false (contains hyphen)
-     * isAlphanumericSpace("ab\tc");                 // returns false (contains tab)
+     * isAlphanumericSpace("ab-c");                  // returns {@code false} (contains hyphen)
+     * isAlphanumericSpace("ab\tc");                 // returns {@code false} (contains tab)
      * }</pre>
      *
      * @param cs The CharSequence to check, which may be null
@@ -7845,19 +7845,19 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Unicode numeric strings
      * isNumeric("123");                      // returns true
-     * isNumeric("१२३");                      // returns true (Devanagari digits)
-     * isNumeric("٤٥٦");                      // returns true (Arabic-Indic digits)
+     * isNumeric("१२३");                      // returns {@code true} (Devanagari digits)
+     * isNumeric("٤٥٦");                      // returns {@code true} (Arabic-Indic digits)
      * 
      * // Invalid strings
      * isNumeric(null);                       // returns false
      * isNumeric("");                         // returns false
-     * isNumeric("  ");                       // returns false (contains spaces)
-     * isNumeric("12 3");                     // returns false (contains space)
-     * isNumeric("ab2c");                     // returns false (contains letters)
-     * isNumeric("12-3");                     // returns false (contains hyphen)
-     * isNumeric("12.3");                     // returns false (contains decimal point)
-     * isNumeric("-123");                     // returns false (contains minus sign)
-     * isNumeric("+123");                     // returns false (contains plus sign)
+     * isNumeric("  ");                       // returns {@code false} (contains spaces)
+     * isNumeric("12 3");                     // returns {@code false} (contains space)
+     * isNumeric("ab2c");                     // returns {@code false} (contains letters)
+     * isNumeric("12-3");                     // returns {@code false} (contains hyphen)
+     * isNumeric("12.3");                     // returns {@code false} (contains decimal point)
+     * isNumeric("-123");                     // returns {@code false} (contains minus sign)
+     * isNumeric("+123");                     // returns {@code false} (contains plus sign)
      * }</pre>
      *
      * @param cs The CharSequence to check, which may be null
@@ -7896,18 +7896,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Unicode numeric strings with spaces
      * isNumericSpace("123 456");             // returns true
-     * isNumericSpace("१२३ ४५६");             // returns true (Devanagari digits with space)
-     * isNumericSpace("");                    // returns true (empty string)
-     * isNumericSpace("  ");                  // returns true (only spaces)
+     * isNumericSpace("१२३ ४५६");             // returns {@code true} (Devanagari digits with space)
+     * isNumericSpace("");                    // returns {@code true} (empty string)
+     * isNumericSpace("  ");                  // returns {@code true} (only spaces)
      * isNumericSpace("\u0967\u0968\u0969"); // returns true
      * isNumericSpace("\u0967\u0968 \u0969");// returns true
      * 
      * // Invalid strings
      * isNumericSpace(null);                  // returns false
-     * isNumericSpace("ab2c");                // returns false (contains letters)
-     * isNumericSpace("12-3");                // returns false (contains hyphen)
-     * isNumericSpace("12.3");                // returns false (contains decimal point)
-     * isNumericSpace("12\t3");               // returns false (contains tab)
+     * isNumericSpace("ab2c");                // returns {@code false} (contains letters)
+     * isNumericSpace("12-3");                // returns {@code false} (contains hyphen)
+     * isNumericSpace("12.3");                // returns {@code false} (contains decimal point)
+     * isNumericSpace("12\t3");               // returns {@code false} (contains tab)
      * }</pre>
      *
      * @param cs The CharSequence to check, which may be null
@@ -7945,17 +7945,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Example:
      * <pre>{@code
      * // Whitespace strings
-     * isWhitespace("");                      // returns true (empty string)
-     * isWhitespace("  ");                    // returns true (spaces)
-     * isWhitespace("\t\n\r");                // returns true (tab, newline, carriage return)
-     * isWhitespace("  \t  ");                // returns true (mixed whitespace)
+     * isWhitespace("");                      // returns {@code true} (empty string)
+     * isWhitespace("  ");                    // returns {@code true} (spaces)
+     * isWhitespace("\t\n\r");                // returns {@code true} (tab, newline, carriage return)
+     * isWhitespace("  \t  ");                // returns {@code true} (mixed whitespace)
      * 
      * // Non-whitespace strings
      * isWhitespace(null);                    // returns false
-     * isWhitespace("abc");                   // returns false (contains letters)
-     * isWhitespace("ab2c");                  // returns false (contains letters and digit)
-     * isWhitespace("ab-c");                  // returns false (contains letters and hyphen)
-     * isWhitespace(" a ");                   // returns false (contains letter)
+     * isWhitespace("abc");                   // returns {@code false} (contains letters)
+     * isWhitespace("ab2c");                  // returns {@code false} (contains letters and digit)
+     * isWhitespace("ab-c");                  // returns {@code false} (contains letters and hyphen)
+     * isWhitespace(" a ");                   // returns {@code false} (contains letter)
      * }</pre>
      *
      * @param cs The CharSequence to check, which may be null
@@ -8029,11 +8029,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // Invalid strings
      * isAsciiDigitalNumber(null);            // returns false
      * isAsciiDigitalNumber("");              // returns false
-     * isAsciiDigitalNumber(" 0.1 ");         // returns false (contains spaces)
-     * isAsciiDigitalNumber("abc");           // returns false (contains letters)
-     * isAsciiDigitalNumber("1 a");           // returns false (contains space and letter)
-     * isAsciiDigitalNumber("1.2.3");         // returns false (multiple decimal points)
-     * isAsciiDigitalNumber("e10");           // returns false (no digits before 'e')
+     * isAsciiDigitalNumber(" 0.1 ");         // returns {@code false} (contains spaces)
+     * isAsciiDigitalNumber("abc");           // returns {@code false} (contains letters)
+     * isAsciiDigitalNumber("1 a");           // returns {@code false} (contains space and letter)
+     * isAsciiDigitalNumber("1.2.3");         // returns {@code false} (multiple decimal points)
+     * isAsciiDigitalNumber("e10");           // returns {@code false} (no digits before 'e')
      * }</pre>
      *
      * @param str The string to check, which may be null
@@ -8143,12 +8143,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // Invalid strings
      * isAsciiDigitalInteger(null);           // returns false
      * isAsciiDigitalInteger("");             // returns false
-     * isAsciiDigitalInteger(" 0.1 ");        // returns false (contains spaces and decimal)
-     * isAsciiDigitalInteger("12.34");        // returns false (contains decimal point)
-     * isAsciiDigitalInteger("abc");          // returns false (contains letters)
-     * isAsciiDigitalInteger("1 a");          // returns false (contains space and letter)
-     * isAsciiDigitalInteger("2e10");         // returns false (contains exponential notation)
-     * isAsciiDigitalInteger("+");            // returns false (only sign, no digits)
+     * isAsciiDigitalInteger(" 0.1 ");        // returns {@code false} (contains spaces and decimal)
+     * isAsciiDigitalInteger("12.34");        // returns {@code false} (contains decimal point)
+     * isAsciiDigitalInteger("abc");          // returns {@code false} (contains letters)
+     * isAsciiDigitalInteger("1 a");          // returns {@code false} (contains space and letter)
+     * isAsciiDigitalInteger("2e10");         // returns {@code false} (contains exponential notation)
+     * isAsciiDigitalInteger("+");            // returns {@code false} (only sign, no digits)
      * }</pre>
      *
      * @param str The string to check, which may be null
@@ -10087,7 +10087,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Check substring presence
      * contains("hello world", "world");              // returns true
-     * contains("hello world", "World");              // returns false (case-sensitive)
+     * contains("hello world", "World");              // returns {@code false} (case-sensitive)
      * contains("programming", "gram");               // returns true
      * contains("test", "xyz");                       // returns false
      * contains(null, "test");                        // returns false
@@ -10119,10 +10119,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Check token presence with delimiter
      * contains("apple,banana,orange", "banana", ","); // returns true
-     * contains("apple,banana,orange", "ban", ",");    // returns false (partial match)
+     * contains("apple,banana,orange", "ban", ",");    // returns {@code false} (partial match)
      * contains("one two three", "two", " ");          // returns true
      * contains("one-two-three", "two", "-");          // returns true
-     * contains("testing", "test", ",");               // returns false (no delimiter)
+     * contains("testing", "test", ",");               // returns {@code false} (no delimiter)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10183,7 +10183,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Check token presence with delimiter ignoring case
      * containsIgnoreCase("Apple,Banana,Orange", "banana", ","); // returns true
-     * containsIgnoreCase("Apple,Banana,Orange", "BAN", ",");    // returns false (partial)
+     * containsIgnoreCase("Apple,Banana,Orange", "BAN", ",");    // returns {@code false} (partial)
      * containsIgnoreCase("ONE TWO THREE", "two", " ");          // returns true
      * containsIgnoreCase("One-Two-Three", "TWO", "-");          // returns true
      * }</pre>
@@ -10215,9 +10215,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Check if all characters are present
      * containsAll("hello world", 'h', 'e', 'l');    // returns true
-     * containsAll("hello world", 'h', 'x');         // returns false ('x' not present)
+     * containsAll("hello world", 'h', 'x');         // returns {@code false} ('x' not present)
      * containsAll("test", 't', 'e', 's');           // returns true
-     * containsAll("test");                          // returns true (empty array)
+     * containsAll("test");                          // returns {@code true} (empty array)
      * containsAll(null, 'a');                       // returns false
      * containsAll("", 'a');                         // returns false
      * }</pre>
@@ -10262,7 +10262,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * containsAll("hello world", "hello", "world"); // returns true
      * containsAll("hello world", "hello", "xyz");   // returns false
      * containsAll("programming", "gram", "pro");    // returns true
-     * containsAll("test");                          // returns true (empty array)
+     * containsAll("test");                          // returns {@code true} (empty array)
      * containsAll(null, "test");                    // returns false
      * containsAll("", "test");                      // returns false
      * }</pre>
@@ -10305,7 +10305,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * containsAllIgnoreCase("Hello World", "HELLO", "world"); // returns true
      * containsAllIgnoreCase("Hello World", "HELLO", "XYZ");   // returns false
      * containsAllIgnoreCase("Programming", "GRAM", "PRO");    // returns true
-     * containsAllIgnoreCase("test");                          // returns true (empty array)
+     * containsAllIgnoreCase("test");                          // returns {@code true} (empty array)
      * containsAllIgnoreCase(null, "test");                    // returns false
      * }</pre>
      *
@@ -10343,12 +10343,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Example:
      * <pre>{@code
      * // Check if any character is present
-     * containsAny("hello", 'a', 'e', 'i');          // returns true ('e' is present)
+     * containsAny("hello", 'a', 'e', 'i');          // returns {@code true} ('e' is present)
      * containsAny("hello", 'x', 'y', 'z');          // returns false
      * containsAny("test", 't');                     // returns true
      * containsAny("", 'a');                         // returns false
      * containsAny(null, 'a');                       // returns false
-     * containsAny("test");                          // returns false (empty array)
+     * containsAny("test");                          // returns {@code false} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10376,12 +10376,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Example:
      * <pre>{@code
      * // Check if any substring is present
-     * containsAny("hello world", "xyz", "world");   // returns true ("world" is present)
+     * containsAny("hello world", "xyz", "world");   // returns {@code true} ("world" is present)
      * containsAny("hello world", "xyz", "abc");     // returns false
      * containsAny("programming", "gram", "xyz");    // returns true
      * containsAny("", "test");                      // returns false
      * containsAny(null, "test");                    // returns false
-     * containsAny("test");                          // returns false (empty array)
+     * containsAny("test");                          // returns {@code false} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10460,11 +10460,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Check if none of the characters are present
      * containsNone("hello", 'x', 'y', 'z');         // returns true
-     * containsNone("hello", 'h', 'x');              // returns false ('h' is present)
+     * containsNone("hello", 'h', 'x');              // returns {@code false} ('h' is present)
      * containsNone("test", 'a', 'b', 'c');          // returns true
      * containsNone("", 'a');                        // returns true
      * containsNone(null, 'a');                      // returns true
-     * containsNone("test");                         // returns true (empty array)
+     * containsNone("test");                         // returns {@code true} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10519,7 +10519,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Check if none of the substrings are present
      * containsNone("hello world", "xyz", "abc");    // returns true
-     * containsNone("hello world", "hello", "xyz");  // returns false ("hello" is present)
+     * containsNone("hello world", "hello", "xyz");  // returns {@code false} ("hello" is present)
      * containsNone("test", "abc", "xyz");           // returns true
      * containsNone("", "test");                     // returns true
      * containsNone(null, "test");                   // returns true
@@ -10585,10 +10585,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // Check if string contains only specified characters
      * containsOnly("aaa", 'a');                     // returns true
      * containsOnly("abc", 'a', 'b', 'c', 'd');     // returns true
-     * containsOnly("abcd", 'a', 'b', 'c');         // returns false ('d' not allowed)
+     * containsOnly("abcd", 'a', 'b', 'c');         // returns {@code false} ('d' not allowed)
      * containsOnly("", 'a');                        // returns true
      * containsOnly(null, 'a');                      // returns true
-     * containsOnly("test");                         // returns false (empty allowed set)
+     * containsOnly("test");                         // returns {@code false} (empty allowed set)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10618,9 +10618,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Example:
      * <pre>{@code
      * // Check for whitespace presence
-     * containsWhitespace("hello world");            // returns true (space)
-     * containsWhitespace("hello\tworld");           // returns true (tab)
-     * containsWhitespace("hello\nworld");           // returns true (newline)
+     * containsWhitespace("hello world");            // returns {@code true} (space)
+     * containsWhitespace("hello\tworld");           // returns {@code true} (tab)
+     * containsWhitespace("hello\nworld");           // returns {@code true} (newline)
      * containsWhitespace("helloworld");             // returns false
      * containsWhitespace("");                       // returns false
      * containsWhitespace(null);                     // returns false
@@ -10657,9 +10657,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Check if string starts with prefix
      * startsWith("hello world", "hello");           // returns true
-     * startsWith("hello world", "Hello");           // returns false (case-sensitive)
-     * startsWith("hello", "hello world");           // returns false (prefix too long)
-     * startsWith("test", "");                       // returns true (empty prefix)
+     * startsWith("hello world", "Hello");           // returns {@code false} (case-sensitive)
+     * startsWith("hello", "hello world");           // returns {@code false} (prefix too long)
+     * startsWith("test", "");                       // returns {@code true} (empty prefix)
      * startsWith(null, "test");                     // returns false
      * startsWith("test", null);                     // returns false
      * }</pre>
@@ -10687,7 +10687,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * startsWithIgnoreCase("Hello World", "hello"); // returns true
      * startsWithIgnoreCase("Hello World", "HELLO"); // returns true
      * startsWithIgnoreCase("test", "TEST");         // returns true
-     * startsWithIgnoreCase("hello", "hello world"); // returns false (prefix too long)
+     * startsWithIgnoreCase("hello", "hello world"); // returns {@code false} (prefix too long)
      * startsWithIgnoreCase(null, "test");           // returns false
      * startsWithIgnoreCase("test", null);           // returns false
      * }</pre>
@@ -10729,11 +10729,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Check if string starts with any prefix
      * startsWithAny("hello world", "hi", "hello");  // returns true
-     * startsWithAny("hello world", "Hi", "Hello");  // returns false (case-sensitive)
+     * startsWithAny("hello world", "Hi", "Hello");  // returns {@code false} (case-sensitive)
      * startsWithAny("test", "a", "b", "t");         // returns true
      * startsWithAny("test", "a", "b", "c");         // returns false
      * startsWithAny(null, "test");                  // returns false
-     * startsWithAny("test");                        // returns false (empty array)
+     * startsWithAny("test");                        // returns {@code false} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10806,9 +10806,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Check if string ends with suffix
      * endsWith("hello world", "world");             // returns true
-     * endsWith("hello world", "World");             // returns false (case-sensitive)
-     * endsWith("hello", "hello world");             // returns false (suffix too long)
-     * endsWith("test", "");                         // returns true (empty suffix)
+     * endsWith("hello world", "World");             // returns {@code false} (case-sensitive)
+     * endsWith("hello", "hello world");             // returns {@code false} (suffix too long)
+     * endsWith("test", "");                         // returns {@code true} (empty suffix)
      * endsWith(null, "test");                       // returns false
      * endsWith("test", null);                       // returns false
      * }</pre>
@@ -10836,7 +10836,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * endsWithIgnoreCase("Hello World", "world");   // returns true
      * endsWithIgnoreCase("Hello World", "WORLD");   // returns true
      * endsWithIgnoreCase("test", "TEST");           // returns true
-     * endsWithIgnoreCase("hello", "hello world");   // returns false (suffix too long)
+     * endsWithIgnoreCase("hello", "hello world");   // returns {@code false} (suffix too long)
      * endsWithIgnoreCase(null, "test");             // returns false
      * endsWithIgnoreCase("test", null);             // returns false
      * }</pre>
@@ -10862,11 +10862,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Check if string ends with any suffix
      * endsWithAny("hello.txt", ".txt", ".doc");     // returns true
-     * endsWithAny("hello.txt", ".TXT", ".DOC");     // returns false (case-sensitive)
+     * endsWithAny("hello.txt", ".TXT", ".DOC");     // returns {@code false} (case-sensitive)
      * endsWithAny("test", "st", "ing");             // returns true
      * endsWithAny("test", "ing", "ed");             // returns false
      * endsWithAny(null, "test");                    // returns false
-     * endsWithAny("test");                          // returns false (empty array)
+     * endsWithAny("test");                          // returns {@code false} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10956,7 +10956,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Compare strings for equality
      * equals("hello", "hello");                     // returns true
-     * equals("hello", "Hello");                     // returns false (case-sensitive)
+     * equals("hello", "Hello");                     // returns {@code false} (case-sensitive)
      * equals(null, null);                           // returns true
      * equals("test", null);                         // returns false
      * equals(null, "test");                         // returns false
@@ -11012,10 +11012,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Check if string equals any value
      * equalsAny("test", "test", "demo", "sample");  // returns true
-     * equalsAny("test", "Test", "TEST");            // returns false (case-sensitive)
-     * equalsAny(null, "test", null, "demo");        // returns true (null match)
+     * equalsAny("test", "Test", "TEST");            // returns {@code false} (case-sensitive)
+     * equalsAny(null, "test", null, "demo");        // returns {@code true} (null match)
      * equalsAny("test", "demo", "sample");          // returns false
-     * equalsAny("test");                            // returns false (empty array)
+     * equalsAny("test");                            // returns {@code false} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, which may be null
@@ -11050,9 +11050,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // Check if string equals any value ignoring case
      * equalsAnyIgnoreCase("test", "TEST", "demo");  // returns true
      * equalsAnyIgnoreCase("Test", "test", "TEST");  // returns true
-     * equalsAnyIgnoreCase(null, "test", null);      // returns true (null match)
+     * equalsAnyIgnoreCase(null, "test", null);      // returns {@code true} (null match)
      * equalsAnyIgnoreCase("test", "demo", "sample");// returns false
-     * equalsAnyIgnoreCase("test");                  // returns false (empty array)
+     * equalsAnyIgnoreCase("test");                  // returns {@code false} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, which may be null
@@ -19164,7 +19164,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isBase64((byte)'0');                           // returns true
      * isBase64((byte)'+');                           // returns true
      * isBase64((byte)'/');                           // returns true
-     * isBase64((byte)'=');                           // returns true (padding)
+     * isBase64((byte)'=');                           // returns {@code true} (padding)
      * 
      * // Invalid Base64 characters
      * isBase64((byte)'!');                           // returns false
@@ -19192,12 +19192,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Valid Base64 byte arrays
      * isBase64("SGVsbG8=".getBytes());               // returns true
-     * isBase64("SGVs bG8=".getBytes());              // returns true (whitespace allowed)
-     * isBase64(new byte[0]);                         // returns true (empty array)
+     * isBase64("SGVs bG8=".getBytes());              // returns {@code true} (whitespace allowed)
+     * isBase64(new byte[0]);                         // returns {@code true} (empty array)
      * 
      * // Invalid Base64 byte arrays
-     * isBase64("Hello!".getBytes());                 // returns false (contains '!')
-     * isBase64("SGVs@G8=".getBytes());               // returns false (contains '@')
+     * isBase64("Hello!".getBytes());                 // returns {@code false} (contains '!')
+     * isBase64("SGVs@G8=".getBytes());               // returns {@code false} (contains '@')
      * }</pre>
      *
      * @param arrayOctet byte array to test
@@ -19226,13 +19226,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Valid Base64 strings
      * isBase64("SGVsbG8gV29ybGQ=");                 // returns true
-     * isBase64("SGVs bG8g V29y bGQ=");              // returns true (whitespace allowed)
-     * isBase64("");                                  // returns true (empty string)
+     * isBase64("SGVs bG8g V29y bGQ=");              // returns {@code true} (whitespace allowed)
+     * isBase64("");                                  // returns {@code true} (empty string)
      * 
      * // Invalid Base64 strings
      * isBase64("Hello World!");                      // returns false
-     * isBase64("SGVs!G8=");                          // returns false (contains '!')
-     * isBase64("test@123");                          // returns false (contains '@')
+     * isBase64("SGVs!G8=");                          // returns {@code false} (contains '!')
+     * isBase64("test@123");                          // returns {@code false} (contains '@')
      * }</pre>
      *
      * @param base64 String to test

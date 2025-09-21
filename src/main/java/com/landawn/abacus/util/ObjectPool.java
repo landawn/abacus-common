@@ -288,7 +288,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * This method also verifies that the associated value is not null.
      *
      * @param key key whose presence in this map is to be tested
-     * @return true if this map contains a non-null mapping for the specified key
+     * @return {@code true} if this map contains a non-null mapping for the specified key
      */
     @Override
     public boolean containsKey(final Object key) {
@@ -309,7 +309,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * This operation requires a full scan of the map and is not optimized for performance.
      *
      * @param value value whose presence in this map is to be tested
-     * @return true if this map maps one or more keys to the specified value
+     * @return {@code true} if this map maps one or more keys to the specified value
      */
     @Override
     public boolean containsValue(final Object value) {
@@ -458,7 +458,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     /**
      * Returns true if this map contains no key-value mappings.
      *
-     * @return true if this map contains no key-value mappings
+     * @return {@code true} if this map contains no key-value mappings
      */
     @Override
     public boolean isEmpty() {
@@ -574,7 +574,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
          * the two entries represent the same mapping.
          *
          * @param obj object to be compared for equality with this map entry
-         * @return true if the specified object is equal to this map entry
+         * @return {@code true} if the specified object is equal to this map entry
          */
         @Override
         public final boolean equals(final Object obj) {

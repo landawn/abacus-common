@@ -2845,7 +2845,7 @@ public final class Numbers {
     //     * Primality test: tells if the argument is a (provable) prime or not.
     //     *
     //     * @param n number to test.
-    //     * @return true if n is prime. (All numbers &lt; 2 return false).
+    //     * @return {@code true} if n is prime. (All numbers &lt; 2 return false).
     //     */
     //    public static boolean isPrime(int n) {
     //        if (n < 2) {

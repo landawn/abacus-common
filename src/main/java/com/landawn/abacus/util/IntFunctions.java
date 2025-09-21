@@ -1118,7 +1118,7 @@ public final class IntFunctions {
      * @param <T> the type of Collection to register
      * @param targetClass the Class object representing the Collection type to register
      * @param creator the IntFunction that creates instances of the target class with specified capacity
-     * @return true if the registration was successful, false if a creator was already registered for this class
+     * @return {@code true} if the registration was successful, {@code false} if a creator was already registered for this class
      * @throws IllegalArgumentException if targetClass or creator is null, or if targetClass is a built-in class
      */
     @SuppressWarnings("rawtypes")
@@ -1146,7 +1146,7 @@ public final class IntFunctions {
      * @param <T> the type of Map to register
      * @param targetClass the Class object representing the Map type to register
      * @param creator the IntFunction that creates instances of the target class with specified capacity
-     * @return true if the registration was successful, false if a creator was already registered for this class
+     * @return {@code true} if the registration was successful, {@code false} if a creator was already registered for this class
      * @throws IllegalArgumentException if targetClass or creator is null, or if targetClass is a built-in class
      */
     @SuppressWarnings("rawtypes")

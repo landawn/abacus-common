@@ -206,7 +206,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     /**
      * Indicates whether this type is a generic type with type parameters.
      *
-     * @return true if this is a generic type, false otherwise
+     * @return {@code true} if this is a generic type, {@code false} otherwise
      */
     @Override
     public boolean isGenericType() {
@@ -226,7 +226,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     /**
      * Indicates whether this type is treated as a general object type without specific value extraction.
      *
-     * @return true if this is an object type, false otherwise
+     * @return {@code true} if this is an object type, {@code false} otherwise
      */
     @Override
     public boolean isObjectType() {
@@ -236,7 +236,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     /**
      * Indicates whether instances of this type can be serialized.
      *
-     * @return true if the type is serializable, false otherwise
+     * @return {@code true} if the type is serializable, {@code false} otherwise
      */
     @Override
     public boolean isSerializable() {

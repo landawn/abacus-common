@@ -110,7 +110,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * Indicates whether arrays of this type can be serialized.
      * Serialization capability depends on whether the element type is serializable.
      *
-     * @return true if the element type is serializable, false otherwise
+     * @return {@code true} if the element type is serializable, {@code false} otherwise
      */
     @Override
     public boolean isSerializable() {
@@ -359,7 +359,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * 
      * @param x the first array
      * @param y the second array
-     * @return true if the arrays are equal, false otherwise
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object[] x, final Object[] y) {
@@ -372,7 +372,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * 
      * @param x the first array
      * @param y the second array
-     * @return true if the arrays are deeply equal, false otherwise
+     * @return {@code true} if the arrays are deeply equal, {@code false} otherwise
      */
     @Override
     public boolean deepEquals(final Object[] x, final Object[] y) {

@@ -425,7 +425,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * in the order they appear in the specified list.
      *
      * @param c the IntList containing elements to be added to this list
-     * @return true if this list changed as a result of the call (i.e., if c was not empty)
+     * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
      */
     @Override
     public boolean addAll(final IntList c) {
@@ -452,7 +452,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param index the index at which to insert the first element from the specified list
      * @param c the IntList containing elements to be inserted into this list
-     * @return true if this list changed as a result of the call (i.e., if c was not empty)
+     * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
      * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
      */
     @Override
@@ -485,7 +485,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * in the order they appear in the array.
      *
      * @param a the array containing elements to be added to this list
-     * @return true if this list changed as a result of the call (i.e., if the array was not empty)
+     * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
      */
     @Override
     public boolean addAll(final int[] a) {
@@ -500,7 +500,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param index the index at which to insert the first element from the specified array
      * @param a the array containing elements to be inserted into this list
-     * @return true if this list changed as a result of the call (i.e., if the array was not empty)
+     * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
      * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
      */
     @Override
@@ -546,7 +546,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * element with the lowest index i such that get(i) == e.
      *
      * @param e the element to be removed from this list, if present
-     * @return true if this list contained the specified element and it was removed
+     * @return {@code true} if this list contained the specified element and it was removed
      */
     public boolean remove(final int e) {
         for (int i = 0; i < size; i++) {
@@ -566,7 +566,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * The list is compacted after removal, and remaining elements maintain their relative order.
      *
      * @param e the element to be removed from this list
-     * @return true if this list was modified (i.e., at least one occurrence was removed)
+     * @return {@code true} if this list was modified (i.e., at least one occurrence was removed)
      */
     public boolean removeAllOccurrences(final int e) {
         int w = 0;
@@ -609,7 +609,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * This method compares elements by value, removing all occurrences found in the specified list.
      *
      * @param c the IntList containing elements to be removed from this list
-     * @return true if this list was modified as a result of the call
+     * @return {@code true} if this list was modified as a result of the call
      */
     @Override
     public boolean removeAll(final IntList c) {
@@ -625,7 +625,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * This method compares elements by value, removing all occurrences found in the array.
      *
      * @param a the array containing elements to be removed from this list
-     * @return true if this list was modified as a result of the call
+     * @return {@code true} if this list was modified as a result of the call
      */
     @Override
     public boolean removeAll(final int[] a) {
@@ -641,8 +641,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * The elements are tested in order, and those for which the predicate returns true
      * are removed. The relative order of retained elements is preserved.
      *
-     * @param p the predicate which returns true for elements to be removed
-     * @return true if any elements were removed from this list
+     * @param p the predicate which returns {@code true} for elements to be removed
+     * @return {@code true} if any elements were removed from this list
      */
     public boolean removeIf(final IntPredicate p) {
         final IntList tmp = new IntList(size());
@@ -669,7 +669,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * If the list is sorted, this method uses an optimized algorithm. The relative order of
      * retained elements is preserved.
      *
-     * @return true if any duplicates were removed from this list
+     * @return {@code true} if any duplicates were removed from this list
      */
     @Override
     public boolean removeDuplicates() {
@@ -714,7 +714,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * in the specified list. Elements are compared by value.
      *
      * @param c the IntList containing elements to be retained in this list
-     * @return true if this list was modified as a result of the call
+     * @return {@code true} if this list was modified as a result of the call
      */
     @Override
     public boolean retainAll(final IntList c) {
@@ -733,7 +733,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * in the specified array. Elements are compared by value.
      *
      * @param a the array containing elements to be retained in this list
-     * @return true if this list was modified as a result of the call
+     * @return {@code true} if this list was modified as a result of the call
      */
     @Override
     public boolean retainAll(final int[] a) {
@@ -1006,9 +1006,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Replaces all elements in this list that satisfy the given predicate with the specified new value.
      *
-     * @param predicate the predicate which returns true for elements to be replaced
+     * @param predicate the predicate which returns {@code true} for elements to be replaced
      * @param newValue the value to replace matching elements with
-     * @return true if at least one element was replaced
+     * @return {@code true} if at least one element was replaced
      */
     public boolean replaceIf(final IntPredicate predicate, final int newValue) {
         boolean result = false;
@@ -1050,11 +1050,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns true if this list contains the specified element.
-     * More formally, returns true if and only if this list contains at least one
+     * More formally, returns {@code true} if and only if this list contains at least one
      * element e such that e == valueToFind.
      *
      * @param valueToFind the element whose presence in this list is to be tested
-     * @return true if this list contains the specified element
+     * @return {@code true} if this list contains the specified element
      */
     public boolean contains(final int valueToFind) {
         return indexOf(valueToFind) >= 0;
@@ -1062,11 +1062,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns true if this list contains any element that is also contained in the
-     * specified IntList. This method returns true if the two lists share at least
+     * specified IntList. This method returns {@code true} if the two lists share at least
      * one common element.
      *
      * @param c the IntList to be checked for containment in this list
-     * @return true if this list contains any element from the specified list
+     * @return {@code true} if this list contains any element from the specified list
      */
     @Override
     public boolean containsAny(final IntList c) {
@@ -1079,11 +1079,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns true if this list contains any element that is also contained in the
-     * specified array. This method returns true if this list and the array share
+     * specified array. This method returns {@code true} if this list and the array share
      * at least one common element.
      *
      * @param a the array to be checked for containment in this list
-     * @return true if this list contains any element from the specified array
+     * @return {@code true} if this list contains any element from the specified array
      */
     @Override
     public boolean containsAny(final int[] a) {
@@ -1096,11 +1096,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns true if this list contains all elements in the specified IntList.
-     * This method returns true if the specified list is a subset of this list
+     * This method returns {@code true} if the specified list is a subset of this list
      * (ignoring element order but considering duplicates).
      *
      * @param c the IntList to be checked for containment in this list
-     * @return true if this list contains all elements in the specified list
+     * @return {@code true} if this list contains all elements in the specified list
      */
     @Override
     public boolean containsAll(final IntList c) {
@@ -1131,11 +1131,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns true if this list contains all elements in the specified array.
-     * This method returns true if all elements in the array are present in this list
+     * This method returns {@code true} if all elements in the array are present in this list
      * (ignoring element order but considering duplicates).
      *
      * @param a the array to be checked for containment in this list
-     * @return true if this list contains all elements in the specified array
+     * @return {@code true} if this list contains all elements in the specified array
      */
     @Override
     public boolean containsAll(final int[] a) {
@@ -1153,7 +1153,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Two lists are disjoint if they share no common elements.
      *
      * @param c the IntList to check for disjointness with this list
-     * @return true if the two lists have no elements in common
+     * @return {@code true} if the two lists have no elements in common
      */
     @Override
     public boolean disjoint(final IntList c) {
@@ -1185,7 +1185,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * This list and the array are disjoint if they share no common elements.
      *
      * @param b the array to check for disjointness with this list
-     * @return true if this list and the array have no elements in common
+     * @return {@code true} if this list and the array have no elements in common
      */
     @Override
     public boolean disjoint(final int[] b) {
@@ -1683,7 +1683,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Checks whether this list contains any duplicate elements.
      * An element is considered a duplicate if it appears more than once in the list.
      *
-     * @return true if the list contains at least one duplicate element, false otherwise
+     * @return {@code true} if the list contains at least one duplicate element, {@code false} otherwise
      */
     @Override
     public boolean hasDuplicates() {
@@ -1694,7 +1694,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Checks whether the elements in this list are sorted in ascending order.
      * An empty list or a list with a single element is considered sorted.
      *
-     * @return true if all elements are in ascending order (allowing equal consecutive values),
+     * @return {@code true} if all elements are in ascending order (allowing equal consecutive values),
      *         false otherwise
      */
     @Override
@@ -2007,7 +2007,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Returns true if this list contains no elements.
      *
-     * @return true if this list contains no elements, false otherwise
+     * @return {@code true} if this list contains no elements, {@code false} otherwise
      */
     @Override
     public boolean isEmpty() {
@@ -2324,7 +2324,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p>Two int values are considered equal if they have the same value.</p>
      *
      * @param obj the object to be compared for equality with this list
-     * @return true if the specified object is equal to this list, false otherwise
+     * @return {@code true} if the specified object is equal to this list, {@code false} otherwise
      */
     @SuppressFBWarnings
     @Override

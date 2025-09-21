@@ -472,7 +472,7 @@ public abstract class Configuration {
      *
      * @param configFileName the name of the file or directory to find (can include relative path)
      * @param dir the directory to search in
-     * @param isDir true if searching for a directory, false for a file
+     * @param isDir true if searching for a directory, {@code false} for a file
      * @return the found file or directory, or null if not found
      * @throws RuntimeException if the target file name is empty or null
      */
@@ -816,7 +816,7 @@ public abstract class Configuration {
      * }</pre>
      *
      * @param attrName the name of the attribute to check
-     * @return true if the attribute exists, false otherwise
+     * @return {@code true} if the attribute exists, {@code false} otherwise
      */
     public boolean hasAttribute(final String attrName) {
         return attrs.containsKey(attrName);
@@ -981,7 +981,7 @@ public abstract class Configuration {
      * }</pre>
      *
      * @param obj the object to compare with
-     * @return true if the objects are equal, false otherwise
+     * @return {@code true} if the objects are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {

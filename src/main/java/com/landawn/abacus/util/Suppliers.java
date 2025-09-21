@@ -1282,7 +1282,7 @@ public final class Suppliers {
      * @param <T> the Collection type
      * @param targetClass the Class object of the Collection implementation to register
      * @param supplier the Supplier that creates instances of the target class
-     * @return true if the registration was successful, false if a supplier was already registered for this class
+     * @return {@code true} if the registration was successful, {@code false} if a supplier was already registered for this class
      * @throws IllegalArgumentException if targetClass or supplier is null, or if targetClass is a built-in class
      */
     @SuppressWarnings("rawtypes")
@@ -1314,7 +1314,7 @@ public final class Suppliers {
      * @param <T> the Map type
      * @param targetClass the Class object of the Map implementation to register
      * @param supplier the Supplier that creates instances of the target class
-     * @return true if the registration was successful, false if a supplier was already registered for this class
+     * @return {@code true} if the registration was successful, {@code false} if a supplier was already registered for this class
      * @throws IllegalArgumentException if targetClass or supplier is null, or if targetClass is a built-in class
      */
     @SuppressWarnings("rawtypes")

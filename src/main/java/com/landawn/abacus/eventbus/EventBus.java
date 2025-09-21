@@ -811,7 +811,7 @@ public class EventBus {
      * </pre>
      *
      * @param event the sticky event to remove
-     * @return true if the event was found and removed, false otherwise
+     * @return {@code true} if the event was found and removed, {@code false} otherwise
      */
     public boolean removeStickyEvent(final Object event) {
         return removeStickyEvent(event, null);
@@ -831,7 +831,7 @@ public class EventBus {
      *
      * @param event the sticky event to remove
      * @param eventId the event ID the sticky event was posted with
-     * @return true if the event was found with matching event ID and removed, false otherwise
+     * @return {@code true} if the event was found with matching event ID and removed, {@code false} otherwise
      */
     public boolean removeStickyEvent(final Object event, final String eventId) {
         synchronized (stickyEventMap) {
@@ -861,7 +861,7 @@ public class EventBus {
      * </pre>
      *
      * @param eventType the class type of sticky events to remove
-     * @return true if one or more sticky events were removed, false otherwise
+     * @return {@code true} if one or more sticky events were removed, {@code false} otherwise
      */
     public boolean removeStickyEvents(final Class<?> eventType) {
         return removeStickyEvents(null, eventType);
@@ -881,7 +881,7 @@ public class EventBus {
      *
      * @param eventId the event ID to match, or null for events without ID
      * @param eventType the class type of sticky events to remove
-     * @return true if one or more sticky events were removed, false otherwise
+     * @return {@code true} if one or more sticky events were removed, {@code false} otherwise
      */
     public boolean removeStickyEvents(final String eventId, final Class<?> eventType) {
         final List<Object> keyToRemove = new ArrayList<>();
@@ -983,7 +983,7 @@ public class EventBus {
      * Currently supports DEFAULT and THREAD_POOL_EXECUTOR modes.
      *
      * @param threadMode the thread mode to check
-     * @return true if the thread mode is supported, false otherwise
+     * @return {@code true} if the thread mode is supported, {@code false} otherwise
      */
     protected boolean isSupportedThreadMode(final ThreadMode threadMode) {
         return threadMode == null || threadMode == ThreadMode.DEFAULT || threadMode == ThreadMode.THREAD_POOL_EXECUTOR;

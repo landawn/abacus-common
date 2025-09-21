@@ -630,7 +630,7 @@ public final class JSONUtil {
      * List<Object> list = JSONUtil.unwrap(json);
      * // list.get(0) returns "text" (String)
      * // list.get(1) returns 123 (Integer)
-     * // list.get(2) returns true (Boolean)
+     * // list.get(2) returns {@code true} (Boolean)
      * // list.get(3) returns null
      * // list.get(4) returns Map with "key"="value"
      * // list.get(5) returns List [1,2,3]

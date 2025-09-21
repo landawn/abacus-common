@@ -249,7 +249,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * 
      * @param x the first short array to compare
      * @param y the second short array to compare
-     * @return true if the arrays are equal, false otherwise
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final short[] x, final short[] y) {

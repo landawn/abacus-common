@@ -299,7 +299,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * the specified list is modified during the operation.
      *
      * @param c the FloatList containing elements to be added to this list. Must not be null.
-     * @return true if this list changed as a result of the call (i.e., if c was not empty)
+     * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
      */
     @Override
     public boolean addAll(final FloatList c) {
@@ -326,7 +326,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param index the index at which to insert the first element from the specified list. Must be between 0 and size (inclusive).
      * @param c the FloatList containing elements to be inserted into this list. Must not be null.
-     * @return true if this list changed as a result of the call (i.e., if c was not empty)
+     * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
      * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
      */
     @Override
@@ -359,7 +359,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * The list will be automatically resized if necessary to accommodate the new elements.
      *
      * @param a the array containing elements to be added to this list. May be null or empty.
-     * @return true if this list changed as a result of the call (i.e., if the array was not null or empty)
+     * @return {@code true} if this list changed as a result of the call (i.e., if the array was not null or empty)
      */
     @Override
     public boolean addAll(final float[] a) {
@@ -373,7 +373,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param index the index at which to insert the first element from the specified array. Must be between 0 and size (inclusive).
      * @param a the array containing elements to be inserted into this list. May be null or empty.
-     * @return true if this list changed as a result of the call (i.e., if the array was not null or empty)
+     * @return {@code true} if this list changed as a result of the call (i.e., if the array was not null or empty)
      * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
      */
     @Override
@@ -413,7 +413,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Float.compare() to handle NaN values correctly.
      *
      * @param e the element to be removed from this list, if present
-     * @return true if this list contained the specified element and it was removed
+     * @return {@code true} if this list contained the specified element and it was removed
      */
     public boolean remove(final float e) {
         for (int i = 0; i < size; i++) {
@@ -434,7 +434,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Float.compare() to handle NaN values correctly.
      *
      * @param e the element to be removed from this list
-     * @return true if this list contained one or more occurrences of the specified element
+     * @return {@code true} if this list contained one or more occurrences of the specified element
      */
     public boolean removeAllOccurrences(final float e) {
         int w = 0;
@@ -475,7 +475,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param c the FloatList containing elements to be removed from this list. Must not be null.
-     * @return true if this list changed as a result of the call
+     * @return {@code true} if this list changed as a result of the call
      */
     @Override
     public boolean removeAll(final FloatList c) {
@@ -491,7 +491,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param a the array containing elements to be removed from this list. May be null or empty.
-     * @return true if this list changed as a result of the call
+     * @return {@code true} if this list changed as a result of the call
      */
     @Override
     public boolean removeAll(final float[] a) {
@@ -504,11 +504,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Removes all elements from this list that satisfy the given predicate. The elements are
-     * tested in order, and those for which the predicate returns true are removed. The list
+     * tested in order, and those for which the predicate returns {@code true} are removed. The list
      * is compacted after removal.
      *
-     * @param p the predicate which returns true for elements to be removed. Must not be null.
-     * @return true if any elements were removed
+     * @param p the predicate which returns {@code true} for elements to be removed. Must not be null.
+     * @return {@code true} if any elements were removed
      */
     public boolean removeIf(final FloatPredicate p) {
         final FloatList tmp = new FloatList(size());
@@ -536,7 +536,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * to run in linear time. For unsorted lists, a LinkedHashSet is used internally to track
      * unique elements while preserving order.
      *
-     * @return true if any duplicate elements were removed, false if all elements were already unique
+     * @return {@code true} if any duplicate elements were removed, {@code false} if all elements were already unique
      */
     @Override
     public boolean removeDuplicates() {
@@ -581,7 +581,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * the specified FloatList. The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param c the FloatList containing elements to be retained in this list. Must not be null.
-     * @return true if this list changed as a result of the call
+     * @return {@code true} if this list changed as a result of the call
      */
     @Override
     public boolean retainAll(final FloatList c) {
@@ -600,7 +600,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * the specified array. The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param a the array containing elements to be retained in this list. May be null or empty.
-     * @return true if this list changed as a result of the call
+     * @return {@code true} if this list changed as a result of the call
      */
     @Override
     public boolean retainAll(final float[] a) {
@@ -866,11 +866,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Replaces all elements that satisfy the given predicate with the specified new value.
-     * Elements are tested in order, and those for which the predicate returns true are replaced.
+     * Elements are tested in order, and those for which the predicate returns {@code true} are replaced.
      *
      * @param predicate the predicate to test each element. Must not be null.
      * @param newValue the value to replace matching elements with
-     * @return true if any elements were replaced, false otherwise
+     * @return {@code true} if any elements were replaced, {@code false} otherwise
      */
     public boolean replaceIf(final FloatPredicate predicate, final float newValue) {
         boolean result = false;
@@ -916,7 +916,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Float.compare() to handle NaN values correctly.
      *
      * @param valueToFind the element whose presence in this list is to be tested
-     * @return true if this list contains the specified element, false otherwise
+     * @return {@code true} if this list contains the specified element, {@code false} otherwise
      */
     public boolean contains(final float valueToFind) {
         return indexOf(valueToFind) >= 0;
@@ -927,7 +927,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param c the FloatList to be checked for containment in this list. Must not be null.
-     * @return true if this list contains any element from the specified FloatList, false if this list
+     * @return {@code true} if this list contains any element from the specified FloatList, {@code false} if this list
      *         is empty, c is empty, or no elements match
      */
     @Override
@@ -944,7 +944,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param a the array to be checked for containment in this list. May be null or empty.
-     * @return true if this list contains any element from the specified array, false if this list
+     * @return {@code true} if this list contains any element from the specified array, {@code false} if this list
      *         is empty, the array is null or empty, or no elements match
      */
     @Override
@@ -962,7 +962,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param c the FloatList to be checked for containment in this list. Must not be null.
-     * @return true if this list contains all elements from the specified FloatList (including duplicates),
+     * @return {@code true} if this list contains all elements from the specified FloatList (including duplicates),
      *         false otherwise. Returns true if c is empty.
      */
     @Override
@@ -998,7 +998,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param a the array to be checked for containment in this list. May be null or empty.
-     * @return true if this list contains all elements from the specified array (including duplicates),
+     * @return {@code true} if this list contains all elements from the specified array (including duplicates),
      *         false otherwise. Returns true if the array is null or empty.
      */
     @Override
@@ -1017,7 +1017,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Two lists are disjoint if they share no common elements.
      *
      * @param c the FloatList to be checked for disjointness with this list. Must not be null.
-     * @return true if this list has no elements in common with the specified FloatList,
+     * @return {@code true} if this list has no elements in common with the specified FloatList,
      *         false if they share at least one element. Returns true if either list is empty.
      */
     @Override
@@ -1050,7 +1050,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * This list and the array are disjoint if they share no common elements.
      *
      * @param b the array to be checked for disjointness with this list. May be null or empty.
-     * @return true if this list has no elements in common with the specified array,
+     * @return {@code true} if this list has no elements in common with the specified array,
      *         false if they share at least one element. Returns true if either this list
      *         or the array is empty or null.
      */

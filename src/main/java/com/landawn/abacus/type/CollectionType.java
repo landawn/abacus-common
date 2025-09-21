@@ -147,7 +147,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     /**
      * Checks whether this collection type represents a List or its subtype.
      *
-     * @return true if this type represents a List, false otherwise
+     * @return {@code true} if this type represents a List, {@code false} otherwise
      */
     @Override
     public boolean isList() {
@@ -157,7 +157,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     /**
      * Checks whether this collection type represents a Set or its subtype.
      *
-     * @return true if this type represents a Set, false otherwise
+     * @return {@code true} if this type represents a Set, {@code false} otherwise
      */
     @Override
     public boolean isSet() {
@@ -165,7 +165,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Always returns true as this type handler specifically handles Collection types.
+     * Always returns {@code true} as this type handler specifically handles Collection types.
      *
      * @return true
      */
@@ -177,7 +177,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     /**
      * Indicates that this is a generic type with type parameters.
      *
-     * @return true as collection types are generic types
+     * @return {@code true} as collection types are generic types
      */
     @Override
     public boolean isGenericType() {
@@ -188,7 +188,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * Checks whether the elements of this collection type are serializable.
      * The collection itself is considered serializable if its element type is serializable.
      *
-     * @return true if the element type is serializable, false otherwise
+     * @return {@code true} if the element type is serializable, {@code false} otherwise
      */
     @Override
     public boolean isSerializable() {
@@ -388,7 +388,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      *
      * @param typeClass the collection class
      * @param parameterTypeName the name of the element type
-     * @param isDeclaringName true to generate a declaring name with simple class names, false for fully qualified names
+     * @param isDeclaringName true to generate a declaring name with simple class names, {@code false} for fully qualified names
      * @return the formatted type name (e.g., "List<String>" or "java.util.List<java.lang.String>")
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {

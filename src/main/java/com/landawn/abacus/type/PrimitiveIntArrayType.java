@@ -248,7 +248,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * 
      * @param x the first int array to compare
      * @param y the second int array to compare
-     * @return true if the arrays are equal, false otherwise
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final int[] x, final int[] y) {

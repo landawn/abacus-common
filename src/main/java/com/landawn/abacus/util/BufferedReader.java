@@ -504,7 +504,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * }
      * }</pre>
      *
-     * @return true if the next read() is guaranteed not to block for input,
+     * @return {@code true} if the next read() is guaranteed not to block for input,
      *         false otherwise
      * @throws IOException if an I/O error occurs
      */

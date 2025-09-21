@@ -122,7 +122,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     /**
      * Indicates that this is a generic type with type parameters.
      *
-     * @return true as ImmutableList is a generic type
+     * @return {@code true} as ImmutableList is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -133,7 +133,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * Checks whether the elements of this immutable list type are serializable.
      * The immutable list is considered serializable if its element type is serializable.
      *
-     * @return true if the underlying list type is serializable, false otherwise
+     * @return {@code true} if the underlying list type is serializable, {@code false} otherwise
      */
     @Override
     public boolean isSerializable() {
@@ -209,7 +209,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      *
      * @param typeClass the ImmutableList class
      * @param parameterTypeName the name of the element type
-     * @param isDeclaringName true to generate a declaring name with simple class names, false for fully qualified names
+     * @param isDeclaringName true to generate a declaring name with simple class names, {@code false} for fully qualified names
      * @return the formatted type name (e.g., "ImmutableList<String>" or "com.landawn.abacus.util.ImmutableList<java.lang.String>")
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {

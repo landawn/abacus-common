@@ -338,7 +338,7 @@ public class CSVParser {
      * Returns whether this parser uses strict quotes mode.
      * In strict quotes mode, characters outside quotes are ignored.
      *
-     * @return true if strict quotes mode is enabled
+     * @return {@code true} if strict quotes mode is enabled
      */
     public boolean isStrictQuotes() {
         return strictQuotes;
@@ -348,7 +348,7 @@ public class CSVParser {
      * Returns whether this parser ignores leading whitespace.
      * When true, whitespace before a quote character is ignored.
      *
-     * @return true if leading whitespace is ignored
+     * @return {@code true} if leading whitespace is ignored
      */
     public boolean isIgnoreLeadingWhiteSpace() {
         return ignoreLeadingWhiteSpace;
@@ -358,7 +358,7 @@ public class CSVParser {
      * Returns whether this parser ignores quotation marks.
      * When true, quotes are treated as regular characters.
      *
-     * @return true if quotations are ignored
+     * @return {@code true} if quotations are ignored
      */
     public boolean isIgnoreQuotations() {
         return ignoreQuotations;

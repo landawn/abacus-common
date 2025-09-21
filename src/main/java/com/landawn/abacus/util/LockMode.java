@@ -262,7 +262,7 @@ public enum LockMode {
      * }</pre>
      *
      * @param lockMode the LockMode to check against
-     * @return true if this LockMode's operations are locked by the specified lockMode, false otherwise
+     * @return {@code true} if this LockMode's operations are locked by the specified lockMode, {@code false} otherwise
      */
     public boolean isXLockOf(final LockMode lockMode) {
         return (intValue & lockMode.intValue) > 0;

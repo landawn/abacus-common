@@ -86,7 +86,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
 
     /**
      * Indicates whether this type represents a primitive byte array.
-     * Always returns true for PrimitiveByteArrayType.
+     * Always returns {@code true} for PrimitiveByteArrayType.
      *
      * @return true, as this type handler is specifically for byte arrays
      */
@@ -403,7 +403,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      *
      * @param x the first byte array
      * @param y the second byte array
-     * @return true if the arrays are equal, false otherwise
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final byte[] x, final byte[] y) {

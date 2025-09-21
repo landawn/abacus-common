@@ -310,7 +310,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The elements are appended in the order they appear in the specified list.
      *
      * @param c the DoubleList containing elements to be added to this list
-     * @return true if this list changed as a result of the call (i.e., if c was not empty)
+     * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
      */
     @Override
     public boolean addAll(final DoubleList c) {
@@ -337,7 +337,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param index the index at which to insert the first element from the specified list
      * @param c the DoubleList containing elements to be inserted into this list
-     * @return true if this list changed as a result of the call (i.e., if c was not empty)
+     * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
      * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
      */
     @Override
@@ -370,7 +370,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The elements are appended in the order they appear in the array.
      *
      * @param a the array containing elements to be added to this list
-     * @return true if this list changed as a result of the call (i.e., if the array was not empty)
+     * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
      */
     @Override
     public boolean addAll(final double[] a) {
@@ -385,7 +385,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param index the index at which to insert the first element from the specified array
      * @param a the array containing elements to be inserted into this list
-     * @return true if this list changed as a result of the call (i.e., if the array was not empty)
+     * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
      * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
      */
     @Override
@@ -425,7 +425,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * {@code Double.compare} for accurate floating-point comparison.
      *
      * @param e the element to be removed from this list, if present
-     * @return true if this list contained the specified element and it was removed
+     * @return {@code true} if this list contained the specified element and it was removed
      */
     public boolean remove(final double e) {
         for (int i = 0; i < size; i++) {
@@ -446,7 +446,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Elements are compared using {@code Double.compare} for accurate floating-point comparison.
      *
      * @param e the element to be removed from this list
-     * @return true if at least one occurrence was removed from the list
+     * @return {@code true} if at least one occurrence was removed from the list
      */
     public boolean removeAllOccurrences(final double e) {
         int w = 0;
@@ -488,7 +488,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * rather than their positions. If an element appears multiple times, all occurrences are removed.
      *
      * @param c the DoubleList containing elements to be removed from this list
-     * @return true if this list was modified as a result of this operation
+     * @return {@code true} if this list was modified as a result of this operation
      */
     @Override
     public boolean removeAll(final DoubleList c) {
@@ -505,7 +505,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * rather than their positions. If an element appears multiple times, all occurrences are removed.
      *
      * @param a the array containing elements to be removed from this list
-     * @return true if this list was modified as a result of this operation
+     * @return {@code true} if this list was modified as a result of this operation
      */
     @Override
     public boolean removeAll(final double[] a) {
@@ -518,11 +518,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Removes all elements from this list that satisfy the given predicate.
-     * The elements are tested in order, and those for which the predicate returns true are removed.
+     * The elements are tested in order, and those for which the predicate returns {@code true} are removed.
      * The relative order of retained elements is preserved.
      *
-     * @param p the predicate which returns true for elements to be removed
-     * @return true if any elements were removed
+     * @param p the predicate which returns {@code true} for elements to be removed
+     * @return {@code true} if any elements were removed
      */
     public boolean removeIf(final DoublePredicate p) {
         final DoubleList tmp = new DoubleList(size());
@@ -549,7 +549,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The relative order of retained elements is preserved. This method is optimized to handle
      * both sorted and unsorted lists efficiently.
      *
-     * @return true if any duplicates were removed from the list
+     * @return {@code true} if any duplicates were removed from the list
      */
     @Override
     public boolean removeDuplicates() {
@@ -594,7 +594,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * This operation effectively performs a set intersection based on element values.
      *
      * @param c the DoubleList containing elements to be retained in this list
-     * @return true if this list was modified as a result of this operation
+     * @return {@code true} if this list was modified as a result of this operation
      */
     @Override
     public boolean retainAll(final DoubleList c) {
@@ -613,7 +613,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * This operation effectively performs a set intersection based on element values.
      *
      * @param a the array containing elements to be retained in this list
-     * @return true if this list was modified as a result of this operation
+     * @return {@code true} if this list was modified as a result of this operation
      */
     @Override
     public boolean retainAll(final double[] a) {
@@ -881,7 +881,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param predicate the predicate to test elements
      * @param newValue the value to replace matching elements with
-     * @return true if at least one element was replaced
+     * @return {@code true} if at least one element was replaced
      */
     public boolean replaceIf(final DoublePredicate predicate, final double newValue) {
         boolean result = false;
@@ -927,7 +927,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Elements are compared using {@code Double.compare} for accurate floating-point comparison.
      *
      * @param valueToFind the element whose presence in this list is to be tested
-     * @return true if this list contains the specified element
+     * @return {@code true} if this list contains the specified element
      */
     public boolean contains(final double valueToFind) {
         return indexOf(valueToFind) >= 0;
@@ -938,7 +938,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns true if there is at least one element that appears in both lists.
      *
      * @param c the DoubleList to check for common elements
-     * @return true if this list contains any element from the specified list
+     * @return {@code true} if this list contains any element from the specified list
      */
     @Override
     public boolean containsAny(final DoubleList c) {
@@ -954,7 +954,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns true if there is at least one element that appears in both this list and the array.
      *
      * @param a the array to check for common elements
-     * @return true if this list contains any element from the specified array
+     * @return {@code true} if this list contains any element from the specified array
      */
     @Override
     public boolean containsAny(final double[] a) {
@@ -971,7 +971,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The frequency of elements is not considered; only presence is checked.
      *
      * @param c the DoubleList to check for containment
-     * @return true if this list contains all elements from the specified list
+     * @return {@code true} if this list contains all elements from the specified list
      */
     @Override
     public boolean containsAll(final DoubleList c) {
@@ -1006,7 +1006,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The frequency of elements is not considered; only presence is checked.
      *
      * @param a the array to check for containment
-     * @return true if this list contains all elements from the specified array
+     * @return {@code true} if this list contains all elements from the specified array
      */
     @Override
     public boolean containsAll(final double[] a) {
@@ -1024,7 +1024,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns true if the two lists are disjoint (i.e., have no common elements).
      *
      * @param c the DoubleList to check for disjointness
-     * @return true if this list and the specified list have no elements in common
+     * @return {@code true} if this list and the specified list have no elements in common
      */
     @Override
     public boolean disjoint(final DoubleList c) {
@@ -1056,7 +1056,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns true if the list and array are disjoint (i.e., have no common elements).
      *
      * @param b the array to check for disjointness
-     * @return true if this list and the specified array have no elements in common
+     * @return {@code true} if this list and the specified array have no elements in common
      */
     @Override
     public boolean disjoint(final double[] b) {

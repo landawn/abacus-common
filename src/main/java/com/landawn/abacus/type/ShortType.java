@@ -35,7 +35,7 @@ public final class ShortType extends AbstractShortType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * For ShortType, this always returns true since it represents the Short wrapper class
+     * For ShortType, this always returns {@code true} since it represents the Short wrapper class
      * for the primitive short type.
      *
      * @return true, indicating this is a primitive wrapper type

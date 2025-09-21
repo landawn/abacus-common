@@ -45,7 +45,7 @@ public final class BeanType<T> extends AbstractType<T> {
 
     /**
      * Determines whether this type represents a JavaBean.
-     * Always returns true for BeanType instances.
+     * Always returns {@code true} for BeanType instances.
      *
      * @return {@code true} indicating this is a bean type
      */

@@ -165,7 +165,7 @@ public final class Timed<T> implements Immutable {
      * }</pre>
      *
      * @param obj the reference object with which to compare
-     * @return true if this object is equal to the obj argument; false otherwise
+     * @return {@code true} if this object is equal to the obj argument; false otherwise
      */
     @Override
     public boolean equals(final Object obj) {

@@ -194,7 +194,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     //     * Checks if the pool contains the specified element.
     //     *
     //     * @param e The element to be checked for presence in the pool.
-    //     * @return true if the pool contains the specified element, false otherwise.
+    //     * @return {@code true} if the pool contains the specified element, {@code false} otherwise.
     //     */
     //    boolean containsValue(E e);
 

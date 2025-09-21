@@ -399,8 +399,8 @@ public final class Triple<L, M, R> implements Mutable {
      * @param <E> the type of exception that the predicate may throw
      * @param newLeft the new value to potentially set for the left element
      * @param predicate a bi-predicate that takes the current Triple and the new left value;
-     *                  returns true if the left element should be updated
-     * @return true if the left element was updated, false otherwise
+     *                  returns {@code true} if the left element should be updated
+     * @return {@code true} if the left element was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setLeftIf(final L newLeft, final Throwables.BiPredicate<? super Triple<L, M, R>, ? super L, E> predicate) throws E {
@@ -426,8 +426,8 @@ public final class Triple<L, M, R> implements Mutable {
      * @param <E> the type of exception that the predicate may throw
      * @param newMiddle the new value to potentially set for the middle element
      * @param predicate a bi-predicate that takes the current Triple and the new middle value;
-     *                  returns true if the middle element should be updated
-     * @return true if the middle element was updated, false otherwise
+     *                  returns {@code true} if the middle element should be updated
+     * @return {@code true} if the middle element was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setMiddleIf(final M newMiddle, final Throwables.BiPredicate<? super Triple<L, M, R>, ? super M, E> predicate)
@@ -454,8 +454,8 @@ public final class Triple<L, M, R> implements Mutable {
      * @param <E> the type of exception that the predicate may throw
      * @param newRight the new value to potentially set for the right element
      * @param predicate a bi-predicate that takes the current Triple and the new right value;
-     *                  returns true if the right element should be updated
-     * @return true if the right element was updated, false otherwise
+     *                  returns {@code true} if the right element should be updated
+     * @return {@code true} if the right element was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setRightIf(final R newRight, final Throwables.BiPredicate<? super Triple<L, M, R>, ? super R, E> predicate) throws E {
@@ -485,8 +485,8 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newMiddle the new value to potentially set for the middle element
      * @param newRight the new value to potentially set for the right element
      * @param predicate a quad-predicate that takes the current Triple and the three new values;
-     *                  returns true if all elements should be updated
-     * @return true if all elements were updated, false otherwise
+     *                  returns {@code true} if all elements should be updated
+     * @return {@code true} if all elements were updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setIf(final L newLeft, final M newMiddle, final R newRight,
@@ -855,7 +855,7 @@ public final class Triple<L, M, R> implements Mutable {
      * }</pre>
      *
      * @param obj the object to compare with this Triple for equality
-     * @return true if the specified object is a Triple with equal elements,
+     * @return {@code true} if the specified object is a Triple with equal elements,
      *         false otherwise
      */
     @Override

@@ -46,7 +46,7 @@ public final class LongType extends AbstractLongType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * For LongType, this always returns true since Long is the wrapper class for the primitive long type.
+     * For LongType, this always returns {@code true} since Long is the wrapper class for the primitive long type.
      *
      * @return true, indicating that Long is a primitive wrapper
      */

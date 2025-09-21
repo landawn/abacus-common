@@ -249,7 +249,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * 
      * @param x the first long array to compare
      * @param y the second long array to compare
-     * @return true if the arrays are equal, false otherwise
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final long[] x, final long[] y) {

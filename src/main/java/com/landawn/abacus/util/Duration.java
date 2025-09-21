@@ -540,7 +540,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * </p>
      *
      * @param obj the object to check, null returns false
-     * @return true if this is equal to the other duration
+     * @return {@code true} if this is equal to the other duration
      */
     @Override
     public boolean equals(final Object obj) {

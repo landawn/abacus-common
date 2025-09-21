@@ -1152,7 +1152,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * </ul>
      * <p>
      * For multi-character inputs, delegates to {@link Boolean#valueOf(String)}, which
-     * returns true only if the string equals "true" (case-insensitive).
+     * returns {@code true} only if the string equals "true" (case-insensitive).
      *
      * @param str the string to parse, must not be null
      * @return a Boolean representing the parsed value

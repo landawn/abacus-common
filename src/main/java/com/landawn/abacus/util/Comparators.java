@@ -88,7 +88,7 @@ public final class Comparators {
      * A comparator for boolean arrays that compares elements lexicographically.
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
-     * In element comparison, false is considered less than true.
+     * In element comparison, {@code false} is considered less than true.
      * Null arrays are handled with null considered as the minimum value.
      */
     public static final Comparator<boolean[]> BOOLEAN_ARRAY_COMPARATOR = (a, b) -> {
@@ -847,7 +847,7 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a boolean value using the provided function.
-     * In the comparison, false is considered less than true.
+     * In the comparison, {@code false} is considered less than true.
      *
      * <p>Example usage:</p>
      * <pre>{@code

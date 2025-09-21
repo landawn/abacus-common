@@ -1743,7 +1743,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Checks whether this list contains any duplicate elements.
      * 
-     * <p>This method scans through all elements in the list and returns true if any element appears
+     * <p>This method scans through all elements in the list and returns {@code true} if any element appears
      * more than once. It uses an efficient algorithm that typically completes in O(n) time for byte
      * values by using a boolean array to track seen values.</p>
      * 
@@ -1775,7 +1775,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList.of(-5, 0, 3, 10).isSorted()     // returns true
      * ByteList.of(3, 1, 4, 2).isSorted()       // returns false
-     * ByteList.of(1, 1, 2, 2).isSorted()       // returns true (duplicates allowed)
+     * ByteList.of(1, 1, 2, 2).isSorted()       // returns {@code true} (duplicates allowed)
      * }</pre></p>
      *
      * @return {@code true} if the list is sorted in ascending order, {@code false} otherwise

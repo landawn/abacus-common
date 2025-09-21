@@ -376,7 +376,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param newLeft the new value to potentially set for the left element (can be null)
      * @param predicate the condition to test; receives the current pair as the first parameter
      *                  and the new left value as the second parameter
-     * @return true if the value was updated (predicate returned true), false otherwise
+     * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setLeftIf(final L newLeft, final Throwables.BiPredicate<? super Pair<L, R>, ? super L, E> predicate) throws E {
@@ -410,7 +410,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param newRight the new value to potentially set for the right element (can be null)
      * @param predicate the condition to test; receives the current pair as the first parameter
      *                  and the new right value as the second parameter
-     * @return true if the value was updated (predicate returned true), false otherwise
+     * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setRightIf(final R newRight, final Throwables.BiPredicate<? super Pair<L, R>, ? super R, E> predicate) throws E {
@@ -449,7 +449,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param predicate the condition to test; receives the current pair as the first parameter,
      *                  the new left value as the second parameter, and the new right value as
      *                  the third parameter
-     * @return true if both values were updated (predicate returned true), false otherwise
+     * @return {@code true} if both values were updated (predicate returned true), {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setIf(final L newLeft, final R newRight,
@@ -973,7 +973,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * 
      * pair1.equals(pair2); // returns true
      * pair1.equals(pair3); // returns false
-     * pair1.equals("Hello"); // returns false (different type)
+     * pair1.equals("Hello"); // returns {@code false} (different type)
      * 
      * Pair<String, Integer> pair4 = Pair.of(null, null);
      * Pair<String, Integer> pair5 = Pair.of(null, null);
@@ -981,7 +981,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param obj the object to be compared for equality with this pair
-     * @return true if the specified object is equal to this pair, false otherwise
+     * @return {@code true} if the specified object is equal to this pair, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {

@@ -267,7 +267,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      *
      * @param x the first float array
      * @param y the second float array
-     * @return true if the arrays are equal, false otherwise
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final float[] x, final float[] y) {

@@ -946,7 +946,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * Arrays containing only serializable types can be serialized as JSON for efficiency.
      * 
      * @param a the array to check
-     * @return true if the array can be serialized as JSON
+     * @return {@code true} if the array can be serialized as JSON
      */
     protected boolean isSerializableByJSON(final Object[] a) {
         if (N.typeOf(a.getClass().getComponentType()).isSerializable()) {
@@ -967,7 +967,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * Collections containing only serializable types can be serialized as JSON for efficiency.
      * 
      * @param c the collection to check
-     * @return true if the collection can be serialized as JSON
+     * @return {@code true} if the collection can be serialized as JSON
      */
     protected boolean isSerializableByJSON(final Collection<?> c) {
         for (final Object e : c) {

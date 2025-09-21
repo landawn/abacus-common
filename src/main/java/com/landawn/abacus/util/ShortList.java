@@ -339,7 +339,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * is modified during the operation.
      *
      * @param c the ShortList containing elements to be added to this list
-     * @return true if this list changed as a result of the call
+     * @return {@code true} if this list changed as a result of the call
      */
     @Override
     public boolean addAll(final ShortList c) {
@@ -366,7 +366,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param index the index at which to insert the first element from the specified list
      * @param c the ShortList containing elements to be added to this list
-     * @return true if this list changed as a result of the call
+     * @return {@code true} if this list changed as a result of the call
      * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
      */
     @Override
@@ -399,7 +399,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * in the array.
      *
      * @param a the array containing elements to be added to this list
-     * @return true if this list changed as a result of the call (returns false only if the array is empty)
+     * @return {@code true} if this list changed as a result of the call (returns {@code false} only if the array is empty)
      */
     @Override
     public boolean addAll(final short[] a) {
@@ -414,7 +414,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param index the index at which to insert the first element from the specified array
      * @param a the array containing elements to be added to this list
-     * @return true if this list changed as a result of the call (returns false only if the array is empty)
+     * @return {@code true} if this list changed as a result of the call (returns {@code false} only if the array is empty)
      * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
      */
     @Override
@@ -454,7 +454,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * with the lowest index i such that elementData[i] == e.
      *
      * @param e the element to be removed from this list, if present
-     * @return true if this list contained the specified element
+     * @return {@code true} if this list contained the specified element
      */
     public boolean remove(final short e) {
         for (int i = 0; i < size; i++) {
@@ -474,7 +474,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * so that there are no gaps between elements.
      *
      * @param e the element to be removed from this list
-     * @return true if this list was modified (i.e., at least one occurrence was removed)
+     * @return {@code true} if this list was modified (i.e., at least one occurrence was removed)
      */
     public boolean removeAllOccurrences(final short e) {
         int w = 0;
@@ -515,7 +515,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Each occurrence of an element in the specified list will remove at most one occurrence from this list.
      *
      * @param c the ShortList containing elements to be removed from this list
-     * @return true if this list changed as a result of the call
+     * @return {@code true} if this list changed as a result of the call
      */
     @Override
     public boolean removeAll(final ShortList c) {
@@ -531,7 +531,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Each occurrence of an element in the array will remove at most one occurrence from this list.
      *
      * @param a the array containing elements to be removed from this list
-     * @return true if this list changed as a result of the call
+     * @return {@code true} if this list changed as a result of the call
      */
     @Override
     public boolean removeAll(final short[] a) {
@@ -546,8 +546,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Removes all elements from this list that satisfy the given predicate. The elements are tested
      * in order from first to last, and removed elements are compacted so no gaps remain.
      *
-     * @param p the predicate which returns true for elements to be removed
-     * @return true if any elements were removed
+     * @param p the predicate which returns {@code true} for elements to be removed
+     * @return {@code true} if any elements were removed
      */
     public boolean removeIf(final ShortPredicate p) {
         final ShortList tmp = new ShortList(size());
@@ -574,7 +574,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * The relative order of unique elements is preserved. If the list is already sorted, this operation
      * is optimized to run in linear time.
      *
-     * @return true if any duplicates were removed, false if all elements were already unique
+     * @return {@code true} if any duplicates were removed, {@code false} if all elements were already unique
      */
     @Override
     public boolean removeDuplicates() {
@@ -619,7 +619,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * specified list. Each occurrence is considered independently.
      *
      * @param c the ShortList containing elements to be retained in this list
-     * @return true if this list changed as a result of the call
+     * @return {@code true} if this list changed as a result of the call
      */
     @Override
     public boolean retainAll(final ShortList c) {
@@ -638,7 +638,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * specified array. Each occurrence is considered independently.
      *
      * @param a the array containing elements to be retained in this list
-     * @return true if this list changed as a result of the call
+     * @return {@code true} if this list changed as a result of the call
      */
     @Override
     public boolean retainAll(final short[] a) {
@@ -904,7 +904,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
-     * @return true if any elements were replaced
+     * @return {@code true} if any elements were replaced
      */
     public boolean replaceIf(final ShortPredicate predicate, final short newValue) {
         boolean result = false;
@@ -946,11 +946,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns true if this list contains the specified element. More formally, returns true if and only if
+     * Returns true if this list contains the specified element. More formally, returns {@code true} if and only if
      * this list contains at least one element e such that e == valueToFind.
      *
      * @param valueToFind the element whose presence in this list is to be tested
-     * @return true if this list contains the specified element
+     * @return {@code true} if this list contains the specified element
      */
     public boolean contains(final short valueToFind) {
         return indexOf(valueToFind) >= 0;
@@ -961,7 +961,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * The operation returns as soon as any match is found.
      *
      * @param c the ShortList to be checked for containment in this list
-     * @return true if this list contains any element from the specified list
+     * @return {@code true} if this list contains any element from the specified list
      */
     @Override
     public boolean containsAny(final ShortList c) {
@@ -977,7 +977,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * The operation returns as soon as any match is found.
      *
      * @param a the array to be checked for containment in this list
-     * @return true if this list contains any element from the specified array
+     * @return {@code true} if this list contains any element from the specified array
      */
     @Override
     public boolean containsAny(final short[] a) {
@@ -994,7 +994,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * in the specified list, this list must contain at least two occurrences of that element.
      *
      * @param c the ShortList to be checked for containment in this list
-     * @return true if this list contains all elements of the specified list
+     * @return {@code true} if this list contains all elements of the specified list
      */
     @Override
     public boolean containsAll(final ShortList c) {
@@ -1029,7 +1029,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * in the specified array, this list must contain at least two occurrences of that element.
      *
      * @param a the array to be checked for containment in this list
-     * @return true if this list contains all elements of the specified array
+     * @return {@code true} if this list contains all elements of the specified array
      */
     @Override
     public boolean containsAll(final short[] a) {
@@ -1047,7 +1047,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Two lists are disjoint if they share no common elements.
      *
      * @param c the ShortList to be checked for disjointness with this list
-     * @return true if this list has no elements in common with the specified list
+     * @return {@code true} if this list has no elements in common with the specified list
      */
     @Override
     public boolean disjoint(final ShortList c) {
@@ -1079,7 +1079,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * This list and the array are disjoint if they share no common elements.
      *
      * @param b the array to be checked for disjointness with this list
-     * @return true if this list has no elements in common with the specified array
+     * @return {@code true} if this list has no elements in common with the specified array
      */
     @Override
     public boolean disjoint(final short[] b) {
@@ -1625,7 +1625,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Checks whether this list contains duplicate elements.
      *
-     * @return true if the list contains at least one duplicate element, false otherwise
+     * @return {@code true} if the list contains at least one duplicate element, {@code false} otherwise
      */
     @Override
     public boolean hasDuplicates() {
@@ -1635,7 +1635,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Checks whether the elements in this list are sorted in ascending order.
      * 
-     * @return true if the list is sorted in ascending order or is empty, false otherwise
+     * @return {@code true} if the list is sorted in ascending order or is empty, {@code false} otherwise
      */
     @Override
     public boolean isSorted() {
@@ -1928,7 +1928,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Returns true if this list contains no elements.
      *
-     * @return true if this list contains no elements, false otherwise
+     * @return {@code true} if this list contains no elements, {@code false} otherwise
      */
     @Override
     public boolean isEmpty() {
@@ -2208,7 +2208,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * are equal.</p>
      *
      * @param obj the object to compare with this list for equality
-     * @return true if the specified object is equal to this list, false otherwise
+     * @return {@code true} if the specified object is equal to this list, {@code false} otherwise
      */
     @SuppressFBWarnings
     @Override

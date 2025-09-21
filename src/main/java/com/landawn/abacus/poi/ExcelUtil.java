@@ -277,7 +277,7 @@ public final class ExcelUtil {
      * @param <T> the type of objects to map rows to
      * @param excelFile the Excel file to read
      * @param sheetIndex the index of the sheet to read, starting from 0
-     * @param skipFirstRow true to skip the first row (typically headers), false otherwise
+     * @param skipFirstRow true to skip the first row (typically headers), {@code false} otherwise
      * @param rowMapper function to convert each Row to an object of type T
      * @return a list of mapped objects, one per row
      * @throws UncheckedException if an I/O error occurs while reading the file
@@ -314,7 +314,7 @@ public final class ExcelUtil {
      * @param <T> the type of objects to map rows to
      * @param excelFile the Excel file to read
      * @param sheetName the name of the sheet to read
-     * @param skipFirstRow true to skip the first row (typically headers), false otherwise
+     * @param skipFirstRow true to skip the first row (typically headers), {@code false} otherwise
      * @param rowMapper function to convert each Row to an object of type T
      * @return a list of mapped objects, one per row
      * @throws UncheckedException if an I/O error occurs or if the sheet name is not found
@@ -359,7 +359,7 @@ public final class ExcelUtil {
      *
      * @param excelFile the Excel file to read
      * @param sheetIndex the index of the sheet to stream, starting from 0
-     * @param skipFirstRow true to skip the first row (typically headers), false otherwise
+     * @param skipFirstRow true to skip the first row (typically headers), {@code false} otherwise
      * @return a Stream of Row objects from the specified sheet
      * @throws UncheckedException if an I/O error occurs while reading the file
      */
@@ -388,7 +388,7 @@ public final class ExcelUtil {
      *
      * @param excelFile the Excel file to read
      * @param sheetName the name of the sheet to stream
-     * @param skipFirstRow true to skip the first row (typically headers), false otherwise
+     * @param skipFirstRow true to skip the first row (typically headers), {@code false} otherwise
      * @return a Stream of Row objects from the specified sheet
      * @throws UncheckedException if an I/O error occurs or if the sheet name is not found
      */

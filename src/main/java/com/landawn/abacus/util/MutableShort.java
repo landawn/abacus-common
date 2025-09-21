@@ -186,7 +186,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * @param <E> the type of exception the predicate may throw
      * @param newValue the new value to set if the condition is met
      * @param predicate the predicate to test the current value
-     * @return true if the value was updated, false otherwise
+     * @return {@code true} if the value was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setIf(final short newValue, final Throwables.ShortPredicate<E> predicate) throws E {

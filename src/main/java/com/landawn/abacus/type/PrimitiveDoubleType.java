@@ -44,7 +44,7 @@ public final class PrimitiveDoubleType extends AbstractDoubleType {
 
     /**
      * Indicates whether this type represents a primitive type.
-     * Always returns true for PrimitiveDoubleType.
+     * Always returns {@code true} for PrimitiveDoubleType.
      *
      * @return true, as this type handler is for primitive double
      */

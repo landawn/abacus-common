@@ -55,7 +55,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
 
     /**
      * Determines whether this type represents a String type.
-     * Always returns true for AbstractStringType implementations.
+     * Always returns {@code true} for AbstractStringType implementations.
      *
      * @return {@code true} indicating this is a string type
      */

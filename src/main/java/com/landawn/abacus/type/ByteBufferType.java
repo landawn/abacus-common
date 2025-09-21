@@ -54,7 +54,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
 
     /**
      * Determines whether this type represents a ByteBuffer.
-     * Always returns true for ByteBufferType instances.
+     * Always returns {@code true} for ByteBufferType instances.
      *
      * @return {@code true} indicating this is a byte buffer type
      */

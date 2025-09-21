@@ -220,7 +220,7 @@ public final class HttpSettings {
     /**
      * Gets whether to use caches.
      *
-     * @return true if caches should be used, false otherwise
+     * @return {@code true} if caches should be used, {@code false} otherwise
      */
     public boolean getUseCaches() { // NOSONAR
         return useCaches;
@@ -232,7 +232,7 @@ public final class HttpSettings {
      * 
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *
-     * @param useCaches true to use caches, false otherwise
+     * @param useCaches true to use caches, {@code false} otherwise
      * @return This HttpSettings instance for method chaining
      */
     public HttpSettings setUseCaches(final boolean useCaches) {

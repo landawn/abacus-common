@@ -100,7 +100,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
 
     /**
      * Indicates whether this is a generic type.
-     * For MultisetType, this always returns true since Multiset is parameterized with an element type.
+     * For MultisetType, this always returns {@code true} since Multiset is parameterized with an element type.
      *
      * @return true, indicating that Multiset is a generic type
      */

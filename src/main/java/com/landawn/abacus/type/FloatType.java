@@ -46,7 +46,7 @@ public final class FloatType extends AbstractFloatType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * For FloatType, this always returns true as Float is the wrapper class for the primitive float type.
+     * For FloatType, this always returns {@code true} as Float is the wrapper class for the primitive float type.
      *
      * @return true, indicating Float is a primitive wrapper
      */
