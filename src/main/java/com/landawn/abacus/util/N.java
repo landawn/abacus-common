@@ -226,10 +226,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Counts the occurrences of a specific char value in a char array.
+     * This method provides a convenient way to count how many times a particular character
+     * appears in a character array without writing explicit loops.
      *
-     * @param a The char array to be checked for the presence of the valueToFind.
-     * @param valueToFind The char value to be checked for its occurrences in the array a.
-     * @return The number of occurrences of valueToFind in array a. Returns 0 if the array is {@code null} or empty.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * char[] letters = {'a', 'b', 'c', 'a', 'b', 'a'};
+     * int aCount = N.occurrencesOf(letters, 'a');    // Returns 3
+     * int zCount = N.occurrencesOf(letters, 'z');    // Returns 0
+     * 
+     * char[] empty = {};
+     * int count = N.occurrencesOf(empty, 'x');       // Returns 0
+     * int nullCount = N.occurrencesOf(null, 'y');    // Returns 0
+     * }</pre>
+     *
+     * @param a the char array to search in, may be null or empty
+     * @param valueToFind the char value to count occurrences of
+     * @return the number of times valueToFind appears in the array,
+     *         or 0 if the array is null or empty
      */
     public static int occurrencesOf(final char[] a, final char valueToFind) {
         if (isEmpty(a)) {
@@ -249,10 +263,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Counts the occurrences of a specific byte value in a byte array.
+     * This method provides a convenient way to count how many times a particular byte value
+     * appears in a byte array without writing explicit loops.
      *
-     * @param a The byte array to be checked for the presence of the valueToFind.
-     * @param valueToFind The byte value to be checked for its occurrences in the array a.
-     * @return The number of occurrences of valueToFind in array a. Returns 0 if the array is {@code null} or empty.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * byte[] data = {1, 2, 3, 1, 2, 1};
+     * int oneCount = N.occurrencesOf(data, (byte) 1);  // Returns 3
+     * int zeroCount = N.occurrencesOf(data, (byte) 0); // Returns 0
+     * 
+     * byte[] empty = {};
+     * int count = N.occurrencesOf(empty, (byte) 5);     // Returns 0
+     * int nullCount = N.occurrencesOf(null, (byte) 1); // Returns 0
+     * }</pre>
+     *
+     * @param a the byte array to search in, may be null or empty
+     * @param valueToFind the byte value to count occurrences of
+     * @return the number of times valueToFind appears in the array,
+     *         or 0 if the array is null or empty
      */
     public static int occurrencesOf(final byte[] a, final byte valueToFind) {
         if (isEmpty(a)) {
@@ -272,10 +300,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Counts the occurrences of a specific short value in a short array.
+     * This method provides a convenient way to count how many times a particular short value
+     * appears in a short array without writing explicit loops.
      *
-     * @param a The short array to be checked for the presence of the valueToFind.
-     * @param valueToFind The short value to be checked for its occurrences in the array a.
-     * @return The number of occurrences of valueToFind in array a. Returns 0 if the array is {@code null} or empty.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * short[] values = {10, 20, 30, 10, 20, 10};
+     * int tenCount = N.occurrencesOf(values, (short) 10);  // Returns 3
+     * int zeroCount = N.occurrencesOf(values, (short) 0);  // Returns 0
+     * 
+     * short[] empty = {};
+     * int count = N.occurrencesOf(empty, (short) 5);       // Returns 0
+     * int nullCount = N.occurrencesOf(null, (short) 10);   // Returns 0
+     * }</pre>
+     *
+     * @param a the short array to search in, may be null or empty
+     * @param valueToFind the short value to count occurrences of
+     * @return the number of times valueToFind appears in the array,
+     *         or 0 if the array is null or empty
      */
     public static int occurrencesOf(final short[] a, final short valueToFind) {
         if (isEmpty(a)) {
@@ -330,10 +372,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Counts the occurrences of a specific long value in a long array.
+     * This method provides a convenient way to count how many times a particular long value
+     * appears in a long array without writing explicit loops.
      *
-     * @param a The long array to be checked for the presence of the valueToFind.
-     * @param valueToFind The long value to be checked for its occurrences in the array a.
-     * @return The number of occurrences of valueToFind in array a. Returns 0 if the array is {@code null} or empty.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * long[] ids = {1000L, 2000L, 3000L, 1000L, 2000L, 1000L};
+     * int count1000 = N.occurrencesOf(ids, 1000L);  // Returns 3
+     * int count5000 = N.occurrencesOf(ids, 5000L);  // Returns 0
+     * 
+     * long[] empty = {};
+     * int count = N.occurrencesOf(empty, 100L);      // Returns 0
+     * int nullCount = N.occurrencesOf(null, 1000L);  // Returns 0
+     * }</pre>
+     *
+     * @param a the long array to search in, may be null or empty
+     * @param valueToFind the long value to count occurrences of
+     * @return the number of times valueToFind appears in the array,
+     *         or 0 if the array is null or empty
      */
     public static int occurrencesOf(final long[] a, final long valueToFind) {
         if (isEmpty(a)) {
@@ -353,10 +409,27 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Counts the occurrences of a specific float value in a float array.
+     * This method provides a convenient way to count how many times a particular float value
+     * appears in a float array without writing explicit loops. Uses Float.compare() for
+     * proper handling of NaN and -0.0/+0.0 comparisons.
      *
-     * @param a The float array to be checked for the presence of the valueToFind.
-     * @param valueToFind The float value to be checked for its occurrences in the array a.
-     * @return The number of occurrences of valueToFind in array a. Returns 0 if the array is {@code null} or empty.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * float[] prices = {1.5f, 2.3f, 1.5f, 3.7f, 1.5f};
+     * int count15 = N.occurrencesOf(prices, 1.5f);    // Returns 3
+     * int countNaN = N.occurrencesOf(prices, Float.NaN); // Returns 0
+     * 
+     * float[] withNaN = {1.0f, Float.NaN, 2.0f, Float.NaN};
+     * int nanCount = N.occurrencesOf(withNaN, Float.NaN); // Returns 2
+     * 
+     * float[] empty = {};
+     * int count = N.occurrencesOf(empty, 1.0f);        // Returns 0
+     * }</pre>
+     *
+     * @param a the float array to search in, may be null or empty
+     * @param valueToFind the float value to count occurrences of (including NaN)
+     * @return the number of times valueToFind appears in the array,
+     *         or 0 if the array is null or empty
      */
     public static int occurrencesOf(final float[] a, final float valueToFind) {
         if (isEmpty(a)) {
@@ -376,10 +449,27 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Counts the occurrences of a specific double value in a double array.
+     * This method provides a convenient way to count how many times a particular double value
+     * appears in a double array without writing explicit loops. Uses Double.compare() for
+     * proper handling of NaN and -0.0/+0.0 comparisons.
      *
-     * @param a The double array to be checked for the presence of the valueToFind.
-     * @param valueToFind The double value to be checked for its occurrences in the array a.
-     * @return The number of occurrences of valueToFind in array a. Returns 0 if the array is {@code null} or empty.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * double[] measurements = {1.5, 2.3, 1.5, 3.7, 1.5};
+     * int count15 = N.occurrencesOf(measurements, 1.5);     // Returns 3
+     * int countNaN = N.occurrencesOf(measurements, Double.NaN); // Returns 0
+     * 
+     * double[] withNaN = {1.0, Double.NaN, 2.0, Double.NaN};
+     * int nanCount = N.occurrencesOf(withNaN, Double.NaN);   // Returns 2
+     * 
+     * double[] empty = {};
+     * int count = N.occurrencesOf(empty, 1.0);              // Returns 0
+     * }</pre>
+     *
+     * @param a the double array to search in, may be null or empty
+     * @param valueToFind the double value to count occurrences of (including NaN)
+     * @return the number of times valueToFind appears in the array,
+     *         or 0 if the array is null or empty
      */
     public static int occurrencesOf(final double[] a, final double valueToFind) {
         if (isEmpty(a)) {
@@ -399,10 +489,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Counts the occurrences of a specific Object value in an Object array.
+     * This method provides a convenient way to count how many times a particular object
+     * appears in an object array. Uses proper null-safe equality comparison.
      *
-     * @param a The Object array to be checked for the presence of the valueToFind.
-     * @param valueToFind The Object value to be checked for its occurrences in the array a.
-     * @return The number of occurrences of valueToFind in array a. Returns 0 if the array is {@code null} or empty.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[] words = {"hello", "world", "hello", "java", "hello"};
+     * int helloCount = N.occurrencesOf(words, "hello");  // Returns 3
+     * int nullCount = N.occurrencesOf(words, null);      // Returns 0
+     * 
+     * String[] withNulls = {"a", null, "b", null, "c"};
+     * int nulls = N.occurrencesOf(withNulls, null);      // Returns 2
+     * 
+     * Object[] empty = {};
+     * int count = N.occurrencesOf(empty, "test");        // Returns 0
+     * }</pre>
+     *
+     * @param a the Object array to search in, may be null or empty
+     * @param valueToFind the Object value to count occurrences of, may be null
+     * @return the number of times valueToFind appears in the array,
+     *         or 0 if the array is null or empty
      */
     public static int occurrencesOf(final Object[] a, final Object valueToFind) {
         if (isEmpty(a)) {
@@ -430,10 +536,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Counts the occurrences of a specific Object value in an {@code Iterable}.
+     * This method provides a convenient way to count how many times a particular object
+     * appears in any iterable collection (List, Set, etc.). Uses proper null-safe equality comparison.
      *
-     * @param c The {@code Iterable} to be checked for the presence of the valueToFind.
-     * @param valueToFind The Object value to be checked for its occurrences in the {@code Iterable} <i>c</i>.
-     * @return The number of occurrences of valueToFind in {@code Iterable} <i>c</i>. Returns 0 if the {@code Iterable} is {@code null}.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("hello", "world", "hello", "java");
+     * int helloCount = N.occurrencesOf(words, "hello");  // Returns 2
+     * 
+     * Set<Integer> numbers = new HashSet<>(Arrays.asList(1, 2, 3, 2, 4));
+     * int twoCount = N.occurrencesOf(numbers, 2);        // Returns 1 (Set removes duplicates)
+     * 
+     * List<String> withNulls = Arrays.asList("a", null, "b", null);
+     * int nullCount = N.occurrencesOf(withNulls, null);  // Returns 2
+     * }</pre>
+     *
+     * @param c the {@code Iterable} to search in, may be null or empty
+     * @param valueToFind the Object value to count occurrences of, may be null
+     * @return the number of times valueToFind appears in the iterable,
+     *         or 0 if the iterable is null or empty
+     * @throws ArithmeticException if the number of occurrences exceeds Integer.MAX_VALUE
      */
     public static int occurrencesOf(final Iterable<?> c, final Object valueToFind) {
         if (isEmptyCollection(c)) {
@@ -461,11 +583,27 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Counts the occurrences of a specific Object value in an {@code Iterator}.
+     * This method provides a convenient way to count how many times a particular object
+     * appears in an iterator. Uses proper null-safe equality comparison.
+     * 
+     * <p><strong>Note:</strong> This method consumes the iterator completely.</p>
      *
-     * @param iter The {@code Iterator} to be checked for the presence of the valueToFind.
-     * @param valueToFind The Object value to be checked for its occurrences in the Iterator <i>iter</i>.
-     * @return The number of occurrences of valueToFind in Iterator <i>iter</i>. Returns 0 if the Iterator is {@code null}.
-     * @throws ArithmeticException if the number of occurrences exceeds Integer.MAX_VALUE.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("hello", "world", "hello", "java");
+     * Iterator<String> iter = words.iterator();
+     * int helloCount = N.occurrencesOf(iter, "hello");  // Returns 2
+     * // iter is now exhausted
+     * 
+     * Iterator<String> nullIter = null;
+     * int count = N.occurrencesOf(nullIter, "test");    // Returns 0
+     * }</pre>
+     *
+     * @param iter the {@code Iterator} to search in, may be null
+     * @param valueToFind the Object value to count occurrences of, may be null
+     * @return the number of times valueToFind appears in the iterator,
+     *         or 0 if the iterator is null
+     * @throws ArithmeticException if the number of occurrences exceeds Integer.MAX_VALUE
      * @see Iterators#occurrencesOf(Iterator, Object)
      */
     public static int occurrencesOf(final Iterator<?> iter, final Object valueToFind) throws ArithmeticException {
@@ -474,10 +612,25 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Counts the occurrences of a specific character in a String.
+     * This method provides a convenient way to count how many times a particular character
+     * appears in a string without writing explicit loops.
      *
-     * @param str The String to be checked for the presence of the valueToFind.
-     * @param valueToFind The character to be checked for its occurrences in the String <i>str</i>.
-     * @return The number of occurrences of valueToFind in String <i>str</i>. Returns 0 if the String is {@code null} or empty.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String text = "hello world";
+     * int lCount = N.occurrencesOf(text, 'l');      // Returns 3
+     * int spaceCount = N.occurrencesOf(text, ' ');  // Returns 1
+     * int zCount = N.occurrencesOf(text, 'z');      // Returns 0
+     * 
+     * String empty = "";
+     * int count = N.occurrencesOf(empty, 'a');      // Returns 0
+     * int nullCount = N.occurrencesOf(null, 'x');   // Returns 0
+     * }</pre>
+     *
+     * @param str the String to search in, may be null or empty
+     * @param valueToFind the character to count occurrences of
+     * @return the number of times valueToFind appears in the string,
+     *         or 0 if the string is null or empty
      * @see Strings#countMatches(String, char)
      */
     public static int occurrencesOf(final String str, final char valueToFind) {
@@ -486,10 +639,27 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Counts the occurrences of a specific String value in another String.
+     * This method provides a convenient way to count how many times a particular substring
+     * appears in a string without writing explicit loops.
      *
-     * @param str The String to be checked for the presence of the valueToFind.
-     * @param valueToFind The String value to be checked for its occurrences in the String <i>str</i>.
-     * @return The number of occurrences of valueToFind in String <i>str</i>. Returns 0 if the String is {@code null} or empty.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String text = "hello hello world hello";
+     * int helloCount = N.occurrencesOf(text, "hello");  // Returns 3
+     * int worldCount = N.occurrencesOf(text, "world");  // Returns 1
+     * int javaCount = N.occurrencesOf(text, "java");    // Returns 0
+     * 
+     * String pattern = "ababab";
+     * int abCount = N.occurrencesOf(pattern, "ab");     // Returns 3
+     * 
+     * String empty = "";
+     * int count = N.occurrencesOf(empty, "test");       // Returns 0
+     * }</pre>
+     *
+     * @param str the String to search in, may be null or empty
+     * @param valueToFind the String value to count occurrences of, may be null
+     * @return the number of times valueToFind appears in the string,
+     *         or 0 if the string is null or empty
      * @see Strings#countMatches(String, String)
      */
     public static int occurrencesOf(final String str, final String valueToFind) {
@@ -499,11 +669,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns a map with the occurrences of each element in the given array.
      * The map's keys are the distinct elements in the array, and their corresponding values are the number of occurrences of each element.
-     * If the input array is {@code null} or empty, an empty map is returned.
+     * This method provides an efficient way to get frequency counts for all elements in an array.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[] words = {"apple", "banana", "apple", "cherry", "banana", "apple"};
+     * Map<String, Integer> counts = N.occurrencesMap(words);
+     * // Result: {apple=3, banana=2, cherry=1}
+     * 
+     * Integer[] numbers = {1, 2, 3, 2, 1, 2};
+     * Map<Integer, Integer> numCounts = N.occurrencesMap(numbers);
+     * // Result: {1=2, 2=3, 3=1}
+     * 
+     * String[] empty = {};
+     * Map<String, Integer> emptyCounts = N.occurrencesMap(empty); // Returns empty map
+     * }</pre>
      *
      * @param <T> the type of elements in the input array
-     * @param a the array to count occurrences from
-     * @return a Map containing the elements of the array as keys and their occurrences as values
+     * @param a the array to count occurrences from, may be null or empty
+     * @return a Map containing the elements of the array as keys and their occurrences as values,
+     *         or an empty map if the array is null or empty
      */
     public static <T> Map<T, Integer> occurrencesMap(final T[] a) {
         return occurrencesMap(a, Suppliers.ofMap());
@@ -512,12 +697,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns a map with the occurrences of each element in the given array.
      * The map's keys are the distinct elements in the array, and their corresponding values are the number of occurrences of each element.
-     * If the input array is {@code null} or empty, a map provided by the supplied map supplier is returned.
+     * This method allows you to specify the type of map to use for collecting results (e.g., TreeMap for sorted keys).
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[] words = {"c", "a", "b", "a", "c"};
+     * 
+     * // Use TreeMap for sorted keys
+     * Map<String, Integer> sorted = N.occurrencesMap(words, TreeMap::new);
+     * // Result keys in order: [a, b, c]
+     * 
+     * // Use LinkedHashMap for insertion order
+     * Map<String, Integer> ordered = N.occurrencesMap(words, LinkedHashMap::new);
+     * // Result keys in order: [c, a, b]
+     * }</pre>
      *
      * @param <T> the type of elements in the input array
-     * @param a the array to count occurrences from
+     * @param a the array to count occurrences from, may be null or empty
      * @param mapSupplier the supplier of the map to be used for collecting occurrences
-     * @return a Map containing the elements of the array as keys and their occurrences as values
+     * @return a Map containing the elements of the array as keys and their occurrences as values,
+     *         or a map from the supplier if the array is null or empty
      */
     public static <T> Map<T, Integer> occurrencesMap(final T[] a, final Supplier<Map<T, Integer>> mapSupplier) {
         if (isEmpty(a)) {
@@ -536,11 +735,23 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns a map with the occurrences of each element in the given iterable collection.
      * The map's keys are the distinct elements in the collection, and their corresponding values are the number of occurrences of each element.
-     * If the input collection is {@code null}, an empty map is returned.
+     * This method works with any iterable collection (List, Set, Queue, etc.).
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("apple", "banana", "apple", "cherry");
+     * Map<String, Integer> counts = N.occurrencesMap(words);
+     * // Result: {apple=2, banana=1, cherry=1}
+     * 
+     * Set<Integer> uniqueNumbers = new HashSet<>(Arrays.asList(1, 2, 3));
+     * Map<Integer, Integer> setCounts = N.occurrencesMap(uniqueNumbers);
+     * // Result: {1=1, 2=1, 3=1} (all counts are 1 since Set has unique elements)
+     * }</pre>
      *
      * @param <T> the type of elements in the input collection
-     * @param c the collection to count occurrences from
-     * @return a Map containing the elements of the collection as keys and their occurrences as values
+     * @param c the collection to count occurrences from, may be null
+     * @return a Map containing the elements of the collection as keys and their occurrences as values,
+     *         or an empty map if the collection is null or empty
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterable<? extends T> c) {
         return occurrencesMap(c, Suppliers.ofMap());
@@ -549,12 +760,25 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns a map with the occurrences of each element in the given iterable collection.
      * The map's keys are the distinct elements in the collection, and their corresponding values are the number of occurrences of each element.
-     * If the input collection is {@code null}, a map provided by the supplied map supplier is returned.
+     * This method allows you to specify the type of map to use for collecting results.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("c", "a", "b", "a", "c");
+     * 
+     * // Use TreeMap for sorted keys
+     * Map<String, Integer> sorted = N.occurrencesMap(words, TreeMap::new);
+     * // Result keys in order: [a, b, c]
+     * 
+     * // Use LinkedHashMap to preserve encounter order
+     * Map<String, Integer> ordered = N.occurrencesMap(words, LinkedHashMap::new);
+     * }</pre>
      *
      * @param <T> the type of elements in the input collection
-     * @param c the collection to count occurrences from
+     * @param c the collection to count occurrences from, may be null
      * @param mapSupplier the supplier of the map to be used for collecting occurrences
-     * @return a Map containing the elements of the collection as keys and their occurrences as values
+     * @return a Map containing the elements of the collection as keys and their occurrences as values,
+     *         or a map from the supplier if the collection is null or empty
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterable<? extends T> c, final Supplier<Map<T, Integer>> mapSupplier) {
         if (isEmptyCollection(c)) {
@@ -579,11 +803,25 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns a map with the occurrences of each element in the given iterator.
      * The map's keys are the distinct elements in the iterator, and their corresponding values are the number of occurrences of each element.
-     * If the input iterator is {@code null} or empty, an empty map is returned.
+     * 
+     * <p><strong>Note:</strong> This method consumes the iterator completely.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("apple", "banana", "apple", "cherry");
+     * Iterator<String> iter = words.iterator();
+     * Map<String, Integer> counts = N.occurrencesMap(iter);
+     * // Result: {apple=2, banana=1, cherry=1}
+     * // iter is now exhausted
+     * 
+     * Iterator<String> nullIter = null;
+     * Map<String, Integer> empty = N.occurrencesMap(nullIter); // Returns empty map
+     * }</pre>
      *
      * @param <T> the type of elements in the input iterator
-     * @param iter the iterator to count occurrences from
-     * @return a Map containing the elements of the iterator as keys and their occurrences as values
+     * @param iter the iterator to count occurrences from, may be null
+     * @return a Map containing the elements of the iterator as keys and their occurrences as values,
+     *         or an empty map if the iterator is null
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterator<? extends T> iter) {
         return occurrencesMap(iter, Suppliers.ofMap());
@@ -592,12 +830,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns a map with the occurrences of each element in the given iterator.
      * The map's keys are the distinct elements in the iterator, and their corresponding values are the number of occurrences of each element.
-     * If the input iterator is {@code null} or empty, a map provided by the supplied map supplier is returned.
+     * This method allows you to specify the type of map to use for collecting results.
+     * 
+     * <p><strong>Note:</strong> This method consumes the iterator completely.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("c", "a", "b", "a", "c");
+     * Iterator<String> iter = words.iterator();
+     * 
+     * // Use TreeMap for sorted keys
+     * Map<String, Integer> sorted = N.occurrencesMap(iter, TreeMap::new);
+     * // Result keys in order: [a, b, c]
+     * }</pre>
      *
      * @param <T> the type of elements in the input iterator
-     * @param iter the iterator to count occurrences from
+     * @param iter the iterator to count occurrences from, may be null
      * @param mapSupplier the supplier of the map to be used for collecting occurrences
-     * @return a Map containing the elements of the iterator as keys and their occurrences as values
+     * @return a Map containing the elements of the iterator as keys and their occurrences as values,
+     *         or a map from the supplier if the iterator is null
+     * @throws ArithmeticException if any occurrence count exceeds Integer.MAX_VALUE
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterator<? extends T> iter, final Supplier<Map<T, Integer>> mapSupplier) {
         if (iter == null) {
@@ -664,44 +916,100 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
 
     /**
-     * Checks if the specified array contains the specified value.
+     * Checks if the specified boolean array contains the specified value.
+     * This method provides a null-safe way to test for element presence in boolean arrays.
      *
-     * @param a The array to be checked for the presence of the value.
-     * @param valueToFind The value to be checked for its presence in the array.
-     * @return {@code true} if the array contains the specified value, {@code false} if <i>a</i> is {@code null} or empty or {@code valueToFind} is not found.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean[] flags = {true, false, true};
+     * boolean hasTrue = N.contains(flags, true);    // Returns true
+     * boolean hasFalse = N.contains(flags, false);  // Returns true
+     * 
+     * boolean[] empty = {};
+     * boolean found = N.contains(empty, true);      // Returns false
+     * boolean nullSafe = N.contains(null, false);   // Returns false
+     * }</pre>
+     *
+     * @param a the boolean array to search in, may be null or empty
+     * @param valueToFind the boolean value to search for
+     * @return {@code true} if the array contains the specified value,
+     *         {@code false} if the array is null, empty, or does not contain the value
+     * @see #indexOf(boolean[], boolean)
      */
     public static boolean contains(final boolean[] a, final boolean valueToFind) {
         return indexOf(a, valueToFind) != INDEX_NOT_FOUND;
     }
 
     /**
-     * Checks if the specified array contains the specified value.
+     * Checks if the specified char array contains the specified value.
+     * This method provides a null-safe way to test for element presence in char arrays.
      *
-     * @param a The array to be checked for the presence of the value.
-     * @param valueToFind The value to be checked for its presence in the array.
-     * @return {@code true} if the array contains the specified value, {@code false} if <i>a</i> is {@code null} or empty or {@code valueToFind} is not found.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * char[] letters = {'a', 'b', 'c', 'd'};
+     * boolean hasC = N.contains(letters, 'c');      // Returns true
+     * boolean hasZ = N.contains(letters, 'z');      // Returns false
+     * 
+     * char[] empty = {};
+     * boolean found = N.contains(empty, 'x');       // Returns false
+     * boolean nullSafe = N.contains(null, 'y');     // Returns false
+     * }</pre>
+     *
+     * @param a the char array to search in, may be null or empty
+     * @param valueToFind the char value to search for
+     * @return {@code true} if the array contains the specified value,
+     *         {@code false} if the array is null, empty, or does not contain the value
+     * @see #indexOf(char[], char)
      */
     public static boolean contains(final char[] a, final char valueToFind) {
         return indexOf(a, valueToFind) != INDEX_NOT_FOUND;
     }
 
     /**
-     * Checks if the specified array contains the specified value.
+     * Checks if the specified byte array contains the specified value.
+     * This method provides a null-safe way to test for element presence in byte arrays.
      *
-     * @param a The array to be checked for the presence of the value.
-     * @param valueToFind The value to be checked for its presence in the array.
-     * @return {@code true} if the array contains the specified value, {@code false} if <i>a</i> is {@code null} or empty or {@code valueToFind} is not found.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * byte[] data = {1, 2, 3, 4, 5};
+     * boolean hasThree = N.contains(data, (byte) 3);  // Returns true
+     * boolean hasTen = N.contains(data, (byte) 10);   // Returns false
+     * 
+     * byte[] empty = {};
+     * boolean found = N.contains(empty, (byte) 1);    // Returns false
+     * boolean nullSafe = N.contains(null, (byte) 2);  // Returns false
+     * }</pre>
+     *
+     * @param a the byte array to search in, may be null or empty
+     * @param valueToFind the byte value to search for
+     * @return {@code true} if the array contains the specified value,
+     *         {@code false} if the array is null, empty, or does not contain the value
+     * @see #indexOf(byte[], byte)
      */
     public static boolean contains(final byte[] a, final byte valueToFind) {
         return indexOf(a, valueToFind) != INDEX_NOT_FOUND;
     }
 
     /**
-     * Checks if the specified array contains the specified value.
+     * Checks if the specified short array contains the specified value.
+     * This method provides a null-safe way to test for element presence in short arrays.
      *
-     * @param a The array to be checked for the presence of the value.
-     * @param valueToFind The value to be checked for its presence in the array.
-     * @return {@code true} if the array contains the specified value, {@code false} if <i>a</i> is {@code null} or empty or {@code valueToFind} is not found.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * short[] values = {10, 20, 30, 40, 50};
+     * boolean hasThirty = N.contains(values, (short) 30);  // Returns true
+     * boolean hasHundred = N.contains(values, (short) 100); // Returns false
+     * 
+     * short[] empty = {};
+     * boolean found = N.contains(empty, (short) 10);       // Returns false
+     * boolean nullSafe = N.contains(null, (short) 20);     // Returns false
+     * }</pre>
+     *
+     * @param a the short array to search in, may be null or empty
+     * @param valueToFind the short value to search for
+     * @return {@code true} if the array contains the specified value,
+     *         {@code false} if the array is null, empty, or does not contain the value
+     * @see #indexOf(short[], short)
      */
     public static boolean contains(final short[] a, final short valueToFind) {
         return indexOf(a, valueToFind) != INDEX_NOT_FOUND;
@@ -737,33 +1045,81 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified array contains the specified value.
+     * Checks if the specified long array contains the specified value.
+     * This method provides a null-safe way to test for element presence in long arrays.
      *
-     * @param a The array to be checked for the presence of the value.
-     * @param valueToFind The value to be checked for its presence in the array.
-     * @return {@code true} if the array contains the specified value, {@code false} if <i>a</i> is {@code null} or empty or {@code valueToFind} is not found.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * long[] ids = {1000L, 2000L, 3000L, 4000L};
+     * boolean hasThousand = N.contains(ids, 1000L);    // Returns true
+     * boolean hasFive = N.contains(ids, 5000L);        // Returns false
+     * 
+     * long[] empty = {};
+     * boolean found = N.contains(empty, 100L);         // Returns false
+     * boolean nullSafe = N.contains(null, 200L);       // Returns false
+     * }</pre>
+     *
+     * @param a the long array to search in, may be null or empty
+     * @param valueToFind the long value to search for
+     * @return {@code true} if the array contains the specified value,
+     *         {@code false} if the array is null, empty, or does not contain the value
+     * @see #indexOf(long[], long)
      */
     public static boolean contains(final long[] a, final long valueToFind) {
         return indexOf(a, valueToFind) != INDEX_NOT_FOUND;
     }
 
     /**
-     * Checks if the specified array contains the specified value.
+     * Checks if the specified float array contains the specified value.
+     * This method provides a null-safe way to test for element presence in float arrays.
+     * Uses Float.compare() for proper handling of NaN and -0.0/+0.0 comparisons.
      *
-     * @param a The array to be checked for the presence of the value.
-     * @param valueToFind The value to be checked for its presence in the array.
-     * @return {@code true} if the array contains the specified value, {@code false} if <i>a</i> is {@code null} or empty or {@code valueToFind} is not found.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * float[] values = {1.5f, 2.3f, 3.7f, 4.1f};
+     * boolean hasOneAndHalf = N.contains(values, 1.5f);     // Returns true
+     * boolean hasNaN = N.contains(values, Float.NaN);       // Returns false
+     * 
+     * float[] withNaN = {1.0f, Float.NaN, 2.0f};
+     * boolean foundNaN = N.contains(withNaN, Float.NaN);    // Returns true
+     * 
+     * float[] empty = {};
+     * boolean found = N.contains(empty, 1.0f);             // Returns false
+     * }</pre>
+     *
+     * @param a the float array to search in, may be null or empty
+     * @param valueToFind the float value to search for (including NaN)
+     * @return {@code true} if the array contains the specified value,
+     *         {@code false} if the array is null, empty, or does not contain the value
+     * @see #indexOf(float[], float)
      */
     public static boolean contains(final float[] a, final float valueToFind) {
         return indexOf(a, valueToFind) != INDEX_NOT_FOUND;
     }
 
     /**
-     * Checks if the specified array contains the specified value.
+     * Checks if the specified double array contains the specified value.
+     * This method provides a null-safe way to test for element presence in double arrays.
+     * Uses Double.compare() for proper handling of NaN and -0.0/+0.0 comparisons.
      *
-     * @param a The array to be checked for the presence of the value.
-     * @param valueToFind The value to be checked for its presence in the array.
-     * @return {@code true} if the array contains the specified value, {@code false} if <i>a</i> is {@code null} or empty or {@code valueToFind} is not found.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * double[] values = {1.5, 2.3, 3.7, 4.1};
+     * boolean hasOneAndHalf = N.contains(values, 1.5);      // Returns true
+     * boolean hasNaN = N.contains(values, Double.NaN);      // Returns false
+     * 
+     * double[] withNaN = {1.0, Double.NaN, 2.0};
+     * boolean foundNaN = N.contains(withNaN, Double.NaN);   // Returns true
+     * 
+     * double[] empty = {};
+     * boolean found = N.contains(empty, 1.0);              // Returns false
+     * }</pre>
+     *
+     * @param a the double array to search in, may be null or empty
+     * @param valueToFind the double value to search for (including NaN)
+     * @return {@code true} if the array contains the specified value,
+     *         {@code false} if the array is null, empty, or does not contain the value
+     * @see #indexOf(double[], double)
      */
     public static boolean contains(final double[] a, final double valueToFind) {
         return indexOf(a, valueToFind) != INDEX_NOT_FOUND;
@@ -807,10 +1163,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Checks if the specified Collection contains the specified value.
+     * This method leverages the Collection's built-in contains() method for optimal performance
+     * and delegates null handling to the specific Collection implementation.
      *
-     * @param c The Collection to be checked for the presence of the Collection.
-     * @param valueToFind The value to be checked for its presence in the array.
-     * @return {@code true} if the array contains the specified value, {@code false} if {@code valueToFind} is not found or <i>c</i> is {@code null} or empty.
+     * <p>Performance characteristics depend on the Collection type:</p>
+     * <ul>
+     *   <li>HashSet, HashMap.keySet(): O(1) average case</li>
+     *   <li>TreeSet, TreeMap.keySet(): O(log n)</li>
+     *   <li>ArrayList, LinkedList: O(n)</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("apple", "banana", "cherry");
+     * boolean hasApple = N.contains(words, "apple");     // Returns true
+     * boolean hasGrape = N.contains(words, "grape");     // Returns false
+     * 
+     * Set<Integer> numbers = new HashSet<>(Arrays.asList(1, 2, 3));
+     * boolean hasTwo = N.contains(numbers, 2);           // Returns true (O(1))
+     * 
+     * // Null safety
+     * Collection<String> nullCollection = null;
+     * boolean safe = N.contains(nullCollection, "test"); // Returns false
+     * }</pre>
+     *
+     * @param c the Collection to search in, may be null or empty
+     * @param valueToFind the value to search for, may be null (depending on Collection implementation)
+     * @return {@code true} if the Collection contains the specified value,
+     *         {@code false} if the Collection is null, empty, or does not contain the value
+     * @see Collection#contains(Object)
+     * @see #contains(Iterable, Object)
      */
     public static boolean contains(final Collection<?> c, final Object valueToFind) {
         if (isEmpty(c)) {
@@ -914,10 +1296,37 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Checks if the given {@code Collection} contains all the elements in the specified {@code valuesToFind} Collection.
+     * This method leverages the Collection's built-in containsAll() method for optimal performance.
      *
-     * @param c The {@code Collection} to be checked for the presence of the elements in valuesToFind.
-     * @param valuesToFind The values to be checked for their presence in the given {@code Collection}.
-     * @return {@code true} if the given {@code Collection} contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} otherwise if any element in {@code valuesToFind} is not found in the given {@code Collection} or the given {@code Collection} is {@code null} or empty.
+     * <p>Performance characteristics depend on both Collection types. For best performance,
+     * use Set-based collections when possible:</p>
+     * <ul>
+     *   <li>HashSet.containsAll(HashSet): O(m) where m is the size of valuesToFind</li>
+     *   <li>ArrayList.containsAll(Collection): O(n * m) where n is list size, m is valuesToFind size</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Set<String> colors = Set.of("red", "green", "blue", "yellow");
+     * List<String> primary = Arrays.asList("red", "blue", "yellow");
+     * boolean hasPrimary = N.containsAll(colors, primary);        // Returns true
+     * 
+     * List<String> missing = Arrays.asList("red", "purple");
+     * boolean hasAll = N.containsAll(colors, missing);            // Returns false
+     * 
+     * // Edge cases
+     * boolean emptySearch = N.containsAll(colors, Collections.emptyList()); // Returns true
+     * boolean nullSearch = N.containsAll(colors, null);                     // Returns true
+     * boolean nullCollection = N.containsAll(null, primary);                // Returns false
+     * }</pre>
+     *
+     * @param c the {@code Collection} to search in, may be null
+     * @param valuesToFind the values to check for, may be null or empty
+     * @return {@code true} if the Collection contains all specified values,
+     *         {@code true} if valuesToFind is null or empty,
+     *         {@code false} if c is null/empty (and valuesToFind is not) or any value is missing
+     * @see Collection#containsAll(Collection)
+     * @see #containsAll(Collection, Object...)
      */
     public static boolean containsAll(final Collection<?> c, final Collection<?> valuesToFind) {
         if (isEmpty(valuesToFind)) {
@@ -1082,10 +1491,31 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Checks if the given {@code Collection} contains any elements from the specified {@code valuesToFind} Collection.
+     * This method returns true if there is at least one element that exists in both collections.
      *
-     * @param c The {@code Collection} to be checked for the presence of any elements in valuesToFind.
-     * @param valuesToFind The values to be checked for their presence in the given {@code Collection}.
-     * @return {@code true} if the given {@code Collection} contains any elements in {@code valuesToFind}, {@code false} otherwise if doesn't or if the given {@code Collection} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty.
+     * <p>This method uses {@link #disjoint(Collection, Collection)} internally for optimal performance.
+     * Performance characteristics depend on the Collection types used.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Set<String> colors = Set.of("red", "green", "blue");
+     * List<String> warm = Arrays.asList("red", "orange", "yellow");
+     * boolean hasWarm = N.containsAny(colors, warm);              // Returns true ("red")
+     * 
+     * List<String> cool = Arrays.asList("purple", "cyan");
+     * boolean hasCool = N.containsAny(colors, cool);              // Returns false
+     * 
+     * // Edge cases
+     * boolean emptyCheck = N.containsAny(colors, Collections.emptyList()); // Returns false
+     * boolean nullCheck = N.containsAny(null, warm);                       // Returns false
+     * }</pre>
+     *
+     * @param c the {@code Collection} to search in, may be null or empty
+     * @param valuesToFind the values to check for, may be null or empty
+     * @return {@code true} if the Collection contains any of the specified values,
+     *         {@code false} if either collection is null/empty or no common elements exist
+     * @see #disjoint(Collection, Collection)
+     * @see #containsAll(Collection, Collection)
      */
     public static boolean containsAny(final Collection<?> c, final Collection<?> valuesToFind) {
         if (isEmpty(c) || isEmpty(valuesToFind)) {
@@ -1097,10 +1527,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Checks if the given {@code Collection} contains any elements from the specified {@code valuesToFind} array.
+     * This method provides a convenient varargs interface for checking multiple values.
      *
-     * @param c The {@code Collection} to be checked for the presence of any elements in valuesToFind.
-     * @param valuesToFind The values to be checked for their presence in the {given {@code Collection}.
-     * @return {@code true} if the given {@code Collection} contains any elements in {@code valuesToFind}, {@code false} otherwise if doesn't or if the given {@code Collection} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Set<String> colors = Set.of("red", "green", "blue");
+     * boolean hasWarm = N.containsAny(colors, "red", "orange", "yellow"); // Returns true
+     * boolean hasCool = N.containsAny(colors, "purple", "cyan");           // Returns false
+     * boolean empty = N.containsAny(colors);                              // Returns false (no args)
+     * 
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+     * boolean hasEven = N.containsAny(numbers, 2, 6, 8);                  // Returns true (2)
+     * boolean hasNone = N.containsAny(numbers, 10, 11, 12);               // Returns false
+     * }</pre>
+     *
+     * @param c the {@code Collection} to search in, may be null or empty
+     * @param valuesToFind the values to check for, may be empty or contain null elements
+     * @return {@code true} if the Collection contains any of the specified values,
+     *         {@code false} if the collection is null/empty, no values provided, or no matches found
+     * @see #containsAny(Collection, Collection)
+     * @see #contains(Collection, Object)
      */
     public static boolean containsAny(final Collection<?> c, final Object... valuesToFind) {
         if (isEmpty(c) || isEmpty(valuesToFind)) {
@@ -1112,10 +1558,31 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Checks if the given {@code Iterable} contains any elements from the specified {@code valuesToFind} Set.
+     * This method works with any Iterable and uses the Set's O(1) contains() method for optimal performance.
      *
-     * @param c The {@code Iterable} to be checked for the presence of any elements in valuesToFind.
-     * @param valuesToFind The values to be checked for their presence in the given {@code Iterable}.
-     * @return {@code true} if the given {@code Iterable} contains any elements in {@code valuesToFind}, {@code false} otherwise if doesn't or if the given {@code Iterable} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty.
+     * <p>Performance: O(n) where n is the size of the Iterable, with O(1) lookup time per element.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<String> fruits = Arrays.asList("apple", "banana", "cherry", "date");
+     * Set<String> citrus = Set.of("orange", "lemon", "lime");
+     * boolean hasCitrus = N.containsAny(fruits, citrus);          // Returns false
+     * 
+     * Set<String> common = Set.of("apple", "grape");
+     * boolean hasCommon = N.containsAny(fruits, common);          // Returns true ("apple")
+     * 
+     * // Works with any Iterable
+     * Iterable<Integer> range = () -> IntStream.range(1, 6).iterator();
+     * Set<Integer> evens = Set.of(2, 4, 6, 8);
+     * boolean hasEvens = N.containsAny(range, evens);             // Returns true (2, 4)
+     * }</pre>
+     *
+     * @param c the {@code Iterable} to search through, may be null or empty
+     * @param valuesToFind the Set of values to check for, may be null or empty
+     * @return {@code true} if the Iterable contains any of the specified values,
+     *         {@code false} if either parameter is null/empty or no common elements exist
+     * @see #containsAny(Collection, Collection)
+     * @see Set#contains(Object)
      */
     public static boolean containsAny(final Iterable<?> c, final Set<?> valuesToFind) {
         if (isEmptyCollection(c) || isEmpty(valuesToFind)) {
@@ -1133,10 +1600,35 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Checks if the given {@code Iterator} contains any elements from the specified {@code valuesToFind} Set.
+     * <b>Warning:</b> This method consumes the Iterator during the search process.
      *
-     * @param iter The {@code Iterator} to be checked for the presence of any elements in valuesToFind.
-     * @param valuesToFind The values to be checked for their presence in the given {@code Iterator}.
-     * @return {@code true} if the given {@code Iterator} contains any elements in {@code valuesToFind}, {@code false} otherwise if doesn't or if the given {@code Iterator} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty.
+     * <p>This method is useful when working with stream iterators, database cursors, or other
+     * one-time-use data sources where you need to check for any matching values.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Stream iterator example
+     * Stream<String> words = Stream.of("hello", "world", "java", "stream");
+     * Set<String> keywords = Set.of("java", "python", "c++");
+     * boolean hasKeyword = N.containsAny(words.iterator(), keywords); // Returns true ("java")
+     * 
+     * // Database result set simulation
+     * Iterator<Integer> results = Arrays.asList(1, 2, 3, 4, 5).iterator();
+     * Set<Integer> targets = Set.of(3, 7, 9);
+     * boolean found = N.containsAny(results, targets);                // Returns true (3)
+     * // results iterator is now exhausted
+     * 
+     * // Null safety
+     * Iterator<String> nullIter = null;
+     * boolean safe = N.containsAny(nullIter, Set.of("test"));        // Returns false
+     * }</pre>
+     *
+     * @param iter the {@code Iterator} to search through, may be null (will be consumed)
+     * @param valuesToFind the Set of values to check for, may be null or empty
+     * @return {@code true} if the Iterator contains any of the specified values,
+     *         {@code false} if the Iterator is null, valuesToFind is null/empty, or no matches found
+     * @see #containsAny(Iterable, Set)
+     * @see Set#contains(Object)
      */
     public static boolean containsAny(final Iterator<?> iter, final Set<?> valuesToFind) {
         if (iter == null || isEmpty(valuesToFind)) {
@@ -1154,10 +1646,32 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Checks if the given {@code Collection} doesn't contain any elements from the specified {@code valuesToFind} Collection.
+     * This is the logical negation of {@link #containsAny(Collection, Collection)}.
      *
-     * @param c The {@code Collection} to be checked for the presence of any elements in valuesToFind.
-     * @param valuesToFind The values to be checked for their presence in the given {@code Collection}.
-     * @return {@code true} if the given {@code Collection} doesn't contain any elements in {@code valuesToFind} or if the given {@code Collection} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty, {@code false} otherwise
+     * <p>This method is useful for exclusion checks and validation scenarios where you want to ensure
+     * no unwanted elements are present.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Set<String> allowedColors = Set.of("red", "green", "blue");
+     * List<String> userColors = Arrays.asList("red", "yellow");
+     * List<String> invalidColors = Arrays.asList("yellow");
+     * 
+     * boolean noInvalid = N.containsNone(allowedColors, invalidColors); // Returns true
+     * boolean hasInvalid = N.containsNone(userColors, invalidColors);    // Returns false ("yellow")
+     * 
+     * // Edge cases
+     * boolean emptyCheck = N.containsNone(allowedColors, Collections.emptyList()); // Returns true
+     * boolean nullCheck = N.containsNone(null, invalidColors);                     // Returns true
+     * }</pre>
+     *
+     * @param c the {@code Collection} to check, may be null or empty
+     * @param valuesToFind the values to check for absence, may be null or empty
+     * @return {@code true} if the Collection contains none of the specified values,
+     *         {@code true} if either collection is null or empty,
+     *         {@code false} if any value from valuesToFind is found in c
+     * @see #containsAny(Collection, Collection)
+     * @see #disjoint(Collection, Collection)
      */
     public static boolean containsNone(final Collection<?> c, final Collection<?> valuesToFind) {
         if (isEmpty(c) || isEmpty(valuesToFind)) {
@@ -1169,10 +1683,28 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Checks if the specified given {@code Collection} doesn't contain any elements from the specified {@code valuesToFind} array.
+     * This method provides a convenient varargs interface for exclusion checks.
      *
-     * @param c The {@code Collection} to be checked for the presence of any elements in valuesToFind.
-     * @param valuesToFind The values to be checked for their presence in the given {@code Collection}.
-     * @return {@code true} if the given {@code Collection} doesn't contain any elements in {@code valuesToFind} or if the given {@code Collection} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty, {@code false} otherwise
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Set<String> userInput = Set.of("safe", "clean", "valid");
+     * boolean isClean = N.containsNone(userInput, "script", "eval", "exec"); // Returns true
+     * 
+     * List<String> mixed = Arrays.asList("good", "bad", "neutral");
+     * boolean hasNoBad = N.containsNone(mixed, "bad", "evil");               // Returns false ("bad")
+     * 
+     * // Edge cases
+     * boolean emptyCheck = N.containsNone(userInput);                        // Returns true (no args)
+     * boolean nullCheck = N.containsNone(null, "test");                      // Returns true
+     * }</pre>
+     *
+     * @param c the {@code Collection} to check, may be null or empty
+     * @param valuesToFind the values to check for absence, may be empty or contain null elements
+     * @return {@code true} if the Collection contains none of the specified values,
+     *         {@code true} if either parameter is null/empty,
+     *         {@code false} if any value from valuesToFind is found in c
+     * @see #containsNone(Collection, Collection)
+     * @see #containsAny(Collection, Object...)
      */
     public static boolean containsNone(final Collection<?> c, final Object... valuesToFind) {
         if (isEmpty(c) || isEmpty(valuesToFind)) {
@@ -1184,10 +1716,30 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Checks if the given {@code Iterable} doesn't contain any elements from the specified {@code valuesToFind} Set.
+     * This method works with any Iterable and leverages Set's O(1) contains() for optimal performance.
      *
-     * @param c The {@code Iterable} to be checked for the presence of any elements in valuesToFind.
-     * @param valuesToFind The values to be checked for their presence in given {@code Iterable}.
-     * @return {@code true} if the given {@code Iterable} doesn't contain any elements in {@code valuesToFind} or if the given {@code Iterable} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty, {@code false} otherwise
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<String> document = Arrays.asList("the", "quick", "brown", "fox");
+     * Set<String> stopWords = Set.of("and", "or", "but", "if");
+     * boolean hasNoStopWords = N.containsNone(document, stopWords);      // Returns true
+     * 
+     * Set<String> commonWords = Set.of("the", "and", "or");
+     * boolean isClean = N.containsNone(document, commonWords);           // Returns false ("the")
+     * 
+     * // Works with any Iterable
+     * Iterable<Integer> range = () -> IntStream.range(1, 6).iterator();
+     * Set<Integer> negatives = Set.of(-1, -2, -3);
+     * boolean noNegatives = N.containsNone(range, negatives);            // Returns true
+     * }</pre>
+     *
+     * @param c the {@code Iterable} to check, may be null or empty
+     * @param valuesToFind the Set of values to check for absence, may be null or empty
+     * @return {@code true} if the Iterable contains none of the specified values,
+     *         {@code true} if either parameter is null/empty,
+     *         {@code false} if any value from valuesToFind is found in c
+     * @see #containsNone(Collection, Collection)
+     * @see #containsAny(Iterable, Set)
      */
     public static boolean containsNone(final Iterable<?> c, final Set<?> valuesToFind) {
         if (isEmptyCollection(c) || isEmpty(valuesToFind)) {
@@ -1199,10 +1751,32 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Checks if the given {@code Iterator} doesn't contain any elements from the specified {@code valuesToFind} Set.
+     * <b>Warning:</b> This method consumes the Iterator during the check.
      *
-     * @param iter The {@code Iterator} to be checked for the presence of any elements in valuesToFind.
-     * @param valuesToFind The values to be checked for their presence in the given {@code Iterator}.
-     * @return {@code true} if the given {@code Iterator} doesn't contain any elements in {@code valuesToFind} or if the given {@code Iterator} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty, {@code false} otherwise
+     * <p>This method is useful for validation of stream data, database results, or other
+     * one-time-use data sources where you need to ensure no forbidden values are present.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Stream validation
+     * Stream<String> userInput = Stream.of("hello", "world", "test");
+     * Set<String> forbidden = Set.of("admin", "root", "system");
+     * boolean isSafe = N.containsNone(userInput.iterator(), forbidden);  // Returns true, consumes stream
+     * 
+     * // Database result validation
+     * Iterator<Integer> results = Arrays.asList(1, 2, 3, 4, 5).iterator();
+     * Set<Integer> invalid = Set.of(0, -1, -2);
+     * boolean isValid = N.containsNone(results, invalid);                // Returns true
+     * // results iterator is now exhausted
+     * }</pre>
+     *
+     * @param iter the {@code Iterator} to check, may be null (will be consumed)
+     * @param valuesToFind the Set of values to check for absence, may be null or empty
+     * @return {@code true} if the Iterator contains none of the specified values,
+     *         {@code true} if either parameter is null/empty,
+     *         {@code false} if any value from valuesToFind is found
+     * @see #containsNone(Iterable, Set)
+     * @see #containsAny(Iterator, Set)
      */
     public static boolean containsNone(final Iterator<?> iter, final Set<?> valuesToFind) {
         if (iter == null || isEmpty(valuesToFind)) {

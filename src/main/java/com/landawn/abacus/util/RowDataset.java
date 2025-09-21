@@ -1698,6 +1698,135 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
+    public void removeDuplicateRowsBy(final String keyColumnName) throws IllegalStateException, IllegalArgumentException {
+        removeDuplicateRowsBy(keyColumnName, Fn.identity());
+    }
+
+    @Override
+    public void removeDuplicateRowsBy(final String keyColumnName, final Function<?, ?> keyExtractor) throws IllegalStateException, IllegalArgumentException {
+        checkFrozen();
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
+        final int columnIndex = checkColumnName(keyColumnName);
+        final int size = size();
+
+        if (size <= 1) {
+            return;
+        }
+
+        final int columnCount = columnCount();
+        final List<List<Object>> newColumnList = new ArrayList<>(columnCount);
+
+        for (int i = 0; i < columnCount; i++) {
+            newColumnList.add(new ArrayList<>());
+        }
+
+        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
+        final Function<Object, ?> keyExtractorToUse = (Function<Object, ?>) keyExtractor;
+        final Set<Object> rowSet = N.newHashSet();
+        Object key = null;
+        Object value = null;
+
+        for (int rowIndex = 0; rowIndex < size; rowIndex++) {
+            value = _columnList.get(columnIndex).get(rowIndex);
+            key = hashKey(isNullOrIdentityKeyExtractor ? value : keyExtractorToUse.apply(value));
+
+            if (rowSet.add(key)) {
+                for (int i = 0; i < columnCount; i++) {
+                    newColumnList.get(i).add(_columnList.get(i).get(rowIndex));
+                }
+            }
+        }
+
+        for (int i = 0; i < columnCount; i++) {
+            _columnList.get(i).clear();
+            _columnList.get(i).addAll(newColumnList.get(i));
+        }
+
+        modCount++;
+    }
+
+    @Override
+    public void removeDuplicateRowsBy(final Collection<String> keyColumnNames) throws IllegalStateException, IllegalArgumentException {
+        removeDuplicateRowsBy(keyColumnNames, Fn.identity());
+    }
+
+    @Override
+    public void removeDuplicateRowsBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ?> keyExtractor)
+            throws IllegalStateException, IllegalArgumentException {
+        checkFrozen();
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
+        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
+
+        if (columnNames.size() == 1 && isNullOrIdentityKeyExtractor) {
+            removeDuplicateRowsBy(columnNames.iterator().next());
+
+            return;
+        }
+
+        final int size = size();
+        final int[] columnIndexes = checkColumnNames(columnNames);
+
+        if (size <= 1) {
+            return;
+        }
+
+        final int columnCount = columnCount();
+        final List<List<Object>> newColumnList = new ArrayList<>(columnCount);
+
+        for (int i = 0; i < columnCount; i++) {
+            newColumnList.add(new ArrayList<>());
+        }
+
+        final Set<Object> rowSet = N.newHashSet();
+        Object[] row = Objectory.createObjectArray(columnCount);
+        Wrapper<Object[]> rowWrapper = isNullOrIdentityKeyExtractor ? Wrapper.of(row) : null;
+        final DisposableObjArray disposableArray = isNullOrIdentityKeyExtractor ? null : DisposableObjArray.wrap(row);
+        Object key = null;
+
+        for (int rowIndex = 0; rowIndex < size; rowIndex++) {
+            for (int i = 0, len = columnIndexes.length; i < len; i++) {
+                row[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
+            }
+
+            key = isNullOrIdentityKeyExtractor ? rowWrapper : hashKey(keyExtractor.apply(disposableArray));
+
+            if (rowSet.add(key)) {
+                for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+                    newColumnList.get(columnIndex).add(_columnList.get(columnIndex).get(rowIndex));
+                }
+
+                if (isNullOrIdentityKeyExtractor) {
+                    row = Objectory.createObjectArray(columnCount);
+                    rowWrapper = Wrapper.of(row);
+                }
+            }
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        if (isNullOrIdentityKeyExtractor) {
+            @SuppressWarnings("rawtypes")
+            final Set<Wrapper<Object[]>> tmp = (Set) rowSet;
+
+            for (final Wrapper<Object[]> rw : tmp) {
+                Objectory.recycle(rw.value());
+            }
+        }
+
+        for (int i = 0; i < columnCount; i++) {
+            _columnList.get(i).clear();
+            _columnList.get(i).addAll(newColumnList.get(i));
+        }
+
+        modCount++;
+    }
+
+    @Override
     public void updateRow(final int rowIndex, final Function<?, ?> func) {
         checkFrozen();
 
@@ -3970,7 +4099,7 @@ public final class RowDataset implements Dataset, Cloneable {
     @Override
     public Dataset groupBy(final String keyColumnName, final String aggregateOnColumnName, final String aggregateResultColumnName,
             final Collector<?, ?, ?> collector) {
-        return groupBy(keyColumnName, NULL_FUNC_INDICATOR_1, aggregateOnColumnName, aggregateResultColumnName, collector);
+        return groupBy(keyColumnName, Fn.identity(), aggregateOnColumnName, aggregateResultColumnName, collector);
     }
 
     @Override
@@ -4016,7 +4145,7 @@ public final class RowDataset implements Dataset, Cloneable {
     @Override
     public <T> Dataset groupBy(final String keyColumnName, final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName,
             final Function<? super DisposableObjArray, ? extends T> rowMapper, final Collector<? super T, ?, ?> collector) {
-        return groupBy(keyColumnName, NULL_FUNC_INDICATOR_1, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
+        return groupBy(keyColumnName, Fn.identity(), aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
     }
 
     private Dataset groupBy(final String keyColumnName, final Function<?, ?> keyExtractor) {
@@ -4081,6 +4210,7 @@ public final class RowDataset implements Dataset, Cloneable {
             return new RowDataset(newColumnNameList, newColumnList);
         }
 
+        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
         final Function<Object, ?> keyExtractorToUse = (Function<Object, ?>) (keyExtractor == null ? Fn.identity() : keyExtractor);
         final List<Object> keyColumn = newColumnList.get(0);
         final List<Object> aggResultColumn = newColumnList.get(1);
@@ -4097,7 +4227,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = groupByColumn.get(rowIndex);
-            key = hashKey(keyExtractorToUse.apply(value));
+            key = hashKey(isNullOrIdentityKeyExtractor ? value : keyExtractorToUse.apply(value));
 
             collectorRowIndex = keyRowIndexMap.get(key);
 
@@ -4152,8 +4282,6 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     private static final Function<? super DisposableObjArray, Object[]> CLONE = DisposableObjArray::copy;
-    private static final Function<?, ?> NULL_FUNC_INDICATOR_1 = null;
-    private static final Function<? super DisposableObjArray, ?> NULL_FUNC_INDICATOR_2 = null;
 
     @Override
     public Dataset groupBy(final String keyColumnName, final Function<?, ?> keyExtractor, final Collection<String> aggregateOnColumnNames,
@@ -4192,6 +4320,7 @@ public final class RowDataset implements Dataset, Cloneable {
             return new RowDataset(newColumnNameList, newColumnList);
         }
 
+        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
         final Function<Object, ?> keyExtractorToUse = (Function<Object, ?>) (keyExtractor == null ? Fn.identity() : keyExtractor);
         final List<Object> keyColumn = newColumnList.get(0);
         final List<Object> aggResultColumn = newColumnList.get(1);
@@ -4209,7 +4338,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = groupByColumn.get(rowIndex);
-            key = hashKey(keyExtractorToUse.apply(value));
+            key = hashKey(isNullOrIdentityKeyExtractor ? value : keyExtractorToUse.apply(value));
 
             collectorRowIndex = keyRowIndexMap.get(key);
 
@@ -4236,13 +4365,13 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public Dataset groupBy(final Collection<String> keyColumnNames) {
-        return groupBy(keyColumnNames, NULL_FUNC_INDICATOR_2);
+        return groupBy(keyColumnNames, Fn.identity());
     }
 
     @Override
     public Dataset groupBy(final Collection<String> keyColumnNames, final String aggregateOnColumnName, final String aggregateResultColumnName,
             final Collector<?, ?, ?> collector) {
-        return groupBy(keyColumnNames, NULL_FUNC_INDICATOR_2, aggregateOnColumnName, aggregateResultColumnName, collector);
+        return groupBy(keyColumnNames, Fn.identity(), aggregateOnColumnName, aggregateResultColumnName, collector);
     }
 
     @Override
@@ -4328,7 +4457,7 @@ public final class RowDataset implements Dataset, Cloneable {
     @Override
     public <T> Dataset groupBy(final Collection<String> keyColumnNames, final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName,
             final Function<? super DisposableObjArray, ? extends T> rowMapper, final Collector<? super T, ?, ?> collector) {
-        return groupBy(keyColumnNames, NULL_FUNC_INDICATOR_2, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
+        return groupBy(keyColumnNames, Fn.identity(), aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
     }
 
     @Override
@@ -5356,6 +5485,8 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public Dataset distinctBy(final String columnName, final Function<?, ?> keyExtractor) {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         final int columnIndex = checkColumnName(columnName);
 
         final int size = size();
@@ -5371,6 +5502,7 @@ public final class RowDataset implements Dataset, Cloneable {
             return new RowDataset(newColumnNameList, newColumnList, _properties);
         }
 
+        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
         final Function<Object, ?> keyExtractorToUse = (Function<Object, ?>) keyExtractor;
         final Set<Object> rowSet = N.newHashSet();
         Object key = null;
@@ -5378,7 +5510,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = _columnList.get(columnIndex).get(rowIndex);
-            key = hashKey(keyExtractorToUse == null ? value : keyExtractorToUse.apply(value));
+            key = hashKey(isNullOrIdentityKeyExtractor ? value : keyExtractorToUse.apply(value));
 
             if (rowSet.add(key)) {
                 for (int i = 0; i < columnCount; i++) {
@@ -5392,11 +5524,13 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public Dataset distinctBy(final Collection<String> columnNames) {
-        return distinctBy(columnNames, NULL_FUNC_INDICATOR_2);
+        return distinctBy(columnNames, Fn.identity());
     }
 
     @Override
     public Dataset distinctBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ?> keyExtractor) {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
 
         if (columnNames.size() == 1 && isNullOrIdentityKeyExtractor) {

@@ -1886,4 +1886,12 @@ public class Sheet100Test extends TestBase {
         assertEquals(sheet.get("R1", "C1"), transposed.get("C1", "R1"));
     }
 
+    @Test
+    public void test_forEachNonNullH() {
+        Sheet<String, String, Integer> sheet = Sheet.rows(List.of("row1", "row2"), List.of("col1", "col2"), new Integer[][] { { 1, null }, { 3, 4 } });
+
+        sheet.forEachNonNullH((r, c, v) -> System.out.println(r + "," + c + "=" + v));
+        // Prints: row1,col1=1  row2,col1=3  row2,col2=4 (skips null)
+    }
+
 }

@@ -330,9 +330,15 @@ public final class IOUtil {
 
     /**
      * Retrieves the host name of the local machine.
-     * If the host name cannot be determined, it returns {@code UNKNOWN_HOST_NAME}.
+     * If the host name cannot be determined, it returns "UNKNOWN_HOST_NAME".
      *
-     * @return The host name of the local machine. If the host name cannot be determined, it returns {@code UNKNOWN_HOST_NAME}.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * String hostName = IOUtil.getHostName();
+     * System.out.println("Current host name: " + hostName);
+     * </code></pre>
+     *
+     * @return The host name of the local machine, or "UNKNOWN_HOST_NAME" if it cannot be determined.
      */
     public static String getHostName() {
         String ret = hostName;
@@ -370,16 +376,21 @@ public final class IOUtil {
     }
 
     /**
-     * Returns the disk size of the volume which holds the working directory.
-     * <p>
-     * Identical to:
-     * <pre>
-     * freeSpaceKb(new File(".").getAbsolutePath())
-     * </pre>
+     * Returns the free disk space on the volume where the current working directory resides, in kilobytes (KB).
+     * This is equivalent to calling {@code freeDiskSpaceKb(new File(".").getAbsolutePath())}.
      *
-     * @return
-     * @throws UncheckedIOException  if an error occurs when finding the free space
-     * @throws IllegalStateException if an error occurred in initialization
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try {
+     *     long freeSpace = IOUtil.freeDiskSpaceKb();
+     *     System.out.println("Free disk space: " + freeSpace + " KB");
+     * } catch (UncheckedIOException e) {
+     *     System.err.println("Failed to get free disk space: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @return The amount of free disk space in kilobytes.
+     * @throws UncheckedIOException if an I/O error occurs while retrieving the free space information.
      */
     public static long freeDiskSpaceKb() throws UncheckedIOException {
         try {
@@ -390,17 +401,23 @@ public final class IOUtil {
     }
 
     /**
-     * Returns the disk size of the volume which holds the working directory.
-     * <p>
-     * Identical to:
-     * <pre>
-     * freeSpaceKb(new File(".").getAbsolutePath())
-     * </pre>
+     * Returns the free disk space on the volume where the current working directory resides, in kilobytes (KB).
+     * This is equivalent to calling {@code freeDiskSpaceKb(new File(".").getAbsolutePath(), timeout)}.
+     * The command to retrieve the disk space will be aborted if it exceeds the specified timeout.
      *
-     * @param timeout The timeout amount in milliseconds or no timeout if the value is zero or less
-     * @return The amount of free disk space available in kilobytes
-     * @throws UncheckedIOException  if an error occurs when finding the free space
-     * @throws IllegalStateException if an error occurred in initialization
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try {
+     *     long freeSpace = IOUtil.freeDiskSpaceKb(5000); // 5-second timeout
+     *     System.out.println("Free disk space: " + freeSpace + " KB");
+     * } catch (UncheckedIOException e) {
+     *     System.err.println("Failed to get free disk space within the specified timeout: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param timeout The maximum time in milliseconds to wait for the command to complete. A value of zero or less means no timeout.
+     * @return The amount of free disk space in kilobytes.
+     * @throws UncheckedIOException if an I/O error occurs or the command times out.
      */
     public static long freeDiskSpaceKb(final long timeout) throws UncheckedIOException {
         try {
@@ -413,27 +430,34 @@ public final class IOUtil {
     //-----------------------------------------------------------------------
 
     /**
-     * Returns the free space on a drive or volume in kilobytes by invoking
-     * the command line.
-     * <pre>
-     * FileSystemUtils.freeSpaceKb("C:");       // Windows
-     * FileSystemUtils.freeSpaceKb("/volume");  // *nix
-     * </pre>
-     * The free space is calculated via the command line.
-     * It uses 'dir /-c' on Windows, 'df -kP' on AIX/HP-UX and 'df -k' on other Unix.
-     * <p>
-     * In order to work, you must be running Windows, or have an implementation of
-     * Unix df that supports GNU format when passed -k (or -kP). If you are going
-     * to rely on this code, please check that it works on your OS by running
-     * some simple tests to compare the command line with the output from this class.
-     * If your operating system isn't supported, please raise a JIRA call detailing
-     * the exact result from df -k and as much other detail as possible, thanks.
+     * Returns the free disk space on the specified path in kilobytes (KB).
+     * The free space is determined by invoking a command-line utility appropriate for the operating system.
+     * <ul>
+     *     <li>On Windows, it uses {@code dir /-c}.</li>
+     *     <li>On AIX/HP-UX, it uses {@code df -kP}.</li>
+     *     <li>On other Unix-based systems, it uses {@code df -k}.</li>
+     * </ul>
+     * Note: The accuracy of this method depends on the availability and output format of the underlying system commands.
      *
-     * @param path the path to get free space for, not {@code null}, not empty on Unix
-     * @return The amount of free disk space available in kilobytes for the specified path
-     * @throws UncheckedIOException     if an error occurs when finding the free space
-     * @throws IllegalArgumentException if the path is invalid
-     * @throws IllegalStateException    if an error occurred in initialization
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try {
+     *     // For Windows
+     *     long freeSpace = IOUtil.freeDiskSpaceKb("C:\\");
+     *     System.out.println("Free space on C: " + freeSpace + " KB");
+     * 
+     *     // For Unix-like systems
+     *     long freeSpaceUnix = IOUtil.freeDiskSpaceKb("/home");
+     *     System.out.println("Free space on /home: " + freeSpaceUnix + " KB");
+     * } catch (UncheckedIOException e) {
+     *     System.err.println("Failed to get free disk space for the specified path: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param path The path to a file or directory on the volume to check. It must not be {@code null}. On Unix, it should not be an empty string.
+     * @return The amount of free disk space in kilobytes.
+     * @throws UncheckedIOException if an I/O error occurs while retrieving the free space information.
+     * @throws IllegalArgumentException if the path is invalid.
      */
     public static long freeDiskSpaceKb(final String path) throws UncheckedIOException {
         try {
@@ -444,29 +468,31 @@ public final class IOUtil {
     }
 
     /**
-     * Returns the free space on a drive or volume in kilobytes by invoking
-     * the command line.
-     * <pre>
-     * FileSystemUtils.freeSpaceKb("C:");       // Windows
-     * FileSystemUtils.freeSpaceKb("/volume");  // *nix
-     * </pre>
-     * The free space is calculated via the command line.
-     * It uses 'dir /-c' on Windows, 'df -kP' on AIX/HP-UX and 'df -k' on other Unix.
-     * <p>
-     * In order to work, you must be running Windows, or have an implementation of
-     * Unix df that supports GNU format when passed -k (or -kP). If you are going
-     * to rely on this code, please check that it works on your OS by running
-     * some simple tests to compare the command line with the output from this class.
-     * If your operating system isn't supported, please raise a JIRA call detailing
-     * the exact result from df -k and as much other detail as possible, thanks.
+     * Returns the free disk space on the specified path in kilobytes (KB), with a timeout for the operation.
+     * The free space is determined by invoking a command-line utility appropriate for the operating system, and the command will be aborted if it exceeds the specified timeout.
+     * <ul>
+     *     <li>On Windows, it uses {@code dir /-c}.</li>
+     *     <li>On AIX/HP-UX, it uses {@code df -kP}.</li>
+     *     <li>On other Unix-based systems, it uses {@code df -k}.</li>
+     * </ul>
+     * Note: The accuracy of this method depends on the availability and output format of the underlying system commands.
      *
-     * @param path    the path to get free space for, not {@code null}, not empty on Unix
-     * @param timeout The timeout amount in milliseconds or no timeout if the value
-     *                is zero or less
-     * @return The amount of free disk space available in kilobytes for the specified path
-     * @throws UncheckedIOException     if an error occurs when finding the free space
-     * @throws IllegalArgumentException if the path is invalid
-     * @throws IllegalStateException    if an error occurred in initialization
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try {
+     *     // For Windows, with a 5-second timeout
+     *     long freeSpace = IOUtil.freeDiskSpaceKb("C:\\", 5000);
+     *     System.out.println("Free space on C: " + freeSpace + " KB");
+     * } catch (UncheckedIOException e) {
+     *     System.err.println("Failed to get free disk space for the specified path within the timeout: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param path The path to a file or directory on the volume to check. It must not be {@code null}. On Unix, it should not be an empty string.
+     * @param timeout The maximum time in milliseconds to wait for the command to complete. A value of zero or less means no timeout.
+     * @return The amount of free disk space in kilobytes.
+     * @throws UncheckedIOException if an I/O error occurs or the command times out.
+     * @throws IllegalArgumentException if the path is invalid.
      */
     public static long freeDiskSpaceKb(final String path, final long timeout) throws UncheckedIOException {
         try {
@@ -481,21 +507,33 @@ public final class IOUtil {
     }
 
     /**
-     * Converts an array of characters into an array of bytes using the default charset.
+     * Converts a character array to a byte array using the default character set of the platform.
      *
-     * @param chars The array of characters to be converted, not {@code null}.
-     * @return The resulting byte array.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * char[] chars = new char[]{'H', 'e', 'l', 'l', 'o'};
+     * byte[] bytes = IOUtil.chars2Bytes(chars);
+     * </code></pre>
+     *
+     * @param chars The character array to convert. May be {@code null} or empty.
+     * @return The resulting byte array, or an empty byte array if the input is {@code null} or empty.
      */
     public static byte[] chars2Bytes(final char[] chars) {
         return chars2Bytes(chars, DEFAULT_CHARSET);
     }
 
     /**
-     * Converts an array of characters into an array of bytes using the provided charset.
+     * Converts a character array to a byte array using the specified character set.
      *
-     * @param chars   The array of characters to be converted, not {@code null}.
-     * @param charset The charset to be used to open the specified source for reading.
-     * @return The resulting byte array.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * char[] chars = new char[]{'H', 'e', 'l', 'l', 'o'};
+     * byte[] bytes = IOUtil.chars2Bytes(chars, StandardCharsets.UTF_8);
+     * </code></pre>
+     *
+     * @param chars The character array to convert. May be {@code null} or empty.
+     * @param charset The character set to use for encoding. If {@code null}, the platform's default charset is used.
+     * @return The resulting byte array, or an empty byte array if the input is {@code null} or empty.
      */
     public static byte[] chars2Bytes(final char[] chars, final Charset charset) {
         if (N.isEmpty(chars)) {
@@ -506,13 +544,21 @@ public final class IOUtil {
     }
 
     /**
-     * Converts an array of characters into an array of bytes using the provided charset.
+     * Converts a sub-array of a character array to a byte array using the specified character set.
      *
-     * @param chars     The array of characters to be converted, not {@code null}.
-     * @param offset    The index of the first character in the array to convert.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * char[] chars = new char[]{'H', 'e', 'l', 'l', 'o'};
+     * // Convert the sub-array {'e', 'l', 'l'}
+     * byte[] bytes = IOUtil.chars2Bytes(chars, 1, 3, StandardCharsets.UTF_8);
+     * </code></pre>
+     *
+     * @param chars The source character array.
+     * @param offset The starting position in the character array (0-based).
      * @param charCount The number of characters to convert.
-     * @param charset   The charset to be used to open the specified source for reading.
-     * @return The resulting byte array.
+     * @param charset The character set to use for encoding. If {@code null}, the platform's default charset is used.
+     * @return The resulting byte array, or an empty byte array if {@code charCount} is zero.
+     * @throws IndexOutOfBoundsException if {@code offset} or {@code charCount} is out of bounds.
      */
     public static byte[] chars2Bytes(final char[] chars, final int offset, final int charCount, Charset charset) {
         N.checkArgNotNegative(offset, cs.offset);
@@ -532,21 +578,33 @@ public final class IOUtil {
     }
 
     /**
-     * Converts an array of bytes into an array of characters using the default charset.
+     * Converts a byte array to a character array using the default character set of the platform.
      *
-     * @param bytes The array of bytes to be converted, not {@code null}.
-     * @return The resulting character array.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * byte[] bytes = new byte[]{72, 101, 108, 108, 111}; // "Hello"
+     * char[] chars = IOUtil.bytes2Chars(bytes);
+     * </code></pre>
+     *
+     * @param bytes The byte array to convert. May be {@code null} or empty.
+     * @return The resulting character array, or an empty character array if the input is {@code null} or empty.
      */
     public static char[] bytes2Chars(final byte[] bytes) {
         return bytes2Chars(bytes, DEFAULT_CHARSET);
     }
 
     /**
-     * Converts an array of bytes into an array of characters using the provided charset.
+     * Converts a byte array to a character array using the specified character set.
      *
-     * @param bytes   The array of bytes to be converted, not {@code null}.
-     * @param charset The charset to be used to open the specified source for reading.
-     * @return The resulting character array.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * byte[] bytes = new byte[]{72, 101, 108, 108, 111}; // "Hello" in UTF-8
+     * char[] chars = IOUtil.bytes2Chars(bytes, StandardCharsets.UTF_8);
+     * </code></pre>
+     *
+     * @param bytes The byte array to convert. May be {@code null} or empty.
+     * @param charset The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return The resulting character array, or an empty character array if the input is {@code null} or empty.
      */
     public static char[] bytes2Chars(final byte[] bytes, final Charset charset) {
         if (N.isEmpty(bytes)) {
@@ -557,13 +615,21 @@ public final class IOUtil {
     }
 
     /**
-     * Converts an array of bytes into an array of characters using the provided charset.
+     * Converts a sub-array of a byte array to a character array using the specified character set.
      *
-     * @param bytes     The array of bytes to be converted, not {@code null}.
-     * @param offset    The index of the first byte in the array to convert.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * byte[] bytes = new byte[]{72, 101, 108, 108, 111}; // "Hello" in UTF-8
+     * // Convert the sub-array {101, 108, 108}
+     * char[] chars = IOUtil.bytes2Chars(bytes, 1, 3, StandardCharsets.UTF_8);
+     * </code></pre>
+     *
+     * @param bytes The source byte array.
+     * @param offset The starting position in the byte array (0-based).
      * @param byteCount The number of bytes to convert.
-     * @param charset   The charset to be used to open the specified source for reading.
-     * @return The resulting character array.
+     * @param charset The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return The resulting character array, or an empty character array if {@code byteCount} is zero.
+     * @throws IndexOutOfBoundsException if {@code offset} or {@code byteCount} is out of bounds.
      */
     public static char[] bytes2Chars(final byte[] bytes, final int offset, final int byteCount, Charset charset) {
         N.checkArgNotNegative(offset, cs.offset);
@@ -583,24 +649,39 @@ public final class IOUtil {
     }
 
     /**
-     * Converts a string into an InputStream using the default charset.
+     * Converts a {@code String} to an {@code InputStream} using the platform's default character set.
      *
-     * @param str The string to be converted, not {@code null}.
-     * @return The resulting InputStream.
-     * @see #string2InputStream(String, Charset)
-     * @see String#getBytes()
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * String str = "Hello, World!";
+     * try (InputStream inputStream = IOUtil.string2InputStream(str)) {
+     *     // Use the inputStream
+     * }
+     * </code></pre>
+     *
+     * @param str The string to convert. Must not be {@code null}.
+     * @return An {@code InputStream} for the given string.
+     * @throws IllegalArgumentException if the input string is {@code null}.
      */
     public static InputStream string2InputStream(final String str) {
         return string2InputStream(str, DEFAULT_CHARSET);
     }
 
     /**
-     * Converts a string into an InputStream using the provided charset.
+     * Converts a {@code String} to an {@code InputStream} using the specified character set.
      *
-     * @param str     The string to be converted, not {@code null}.
-     * @param charset The charset to be used to open the specified source for reading.
-     * @return The resulting InputStream.
-     * @see String#getBytes(Charset)
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * String str = "Hello, World!";
+     * try (InputStream inputStream = IOUtil.string2InputStream(str, StandardCharsets.UTF_8)) {
+     *     // Use the inputStream
+     * }
+     * </code></pre>
+     *
+     * @param str The string to convert. Must not be {@code null}.
+     * @param charset The character set to use for encoding. If {@code null}, the platform's default charset is used.
+     * @return An {@code InputStream} for the given string.
+     * @throws IllegalArgumentException if the input string is {@code null}.
      */
     public static InputStream string2InputStream(final String str, Charset charset) {
         if (str == null) {
@@ -613,10 +694,19 @@ public final class IOUtil {
     }
 
     /**
-     * Converts a string into a Reader.
+     * Converts a {@code String} into a {@code Reader}.
+     * If the input string is {@code null}, an empty reader is returned.
      *
-     * @param str The string to be converted.
-     * @return The resulting Reader.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * String str = "Hello, World!";
+     * try (Reader reader = IOUtil.string2Reader(str)) {
+     *     // Use the reader
+     * }
+     * </code></pre>
+     *
+     * @param str The string to convert. May be {@code null}.
+     * @return A {@code Reader} for the given string.
      * @see StringReader
      */
     public static Reader string2Reader(final String str) {
@@ -624,11 +714,21 @@ public final class IOUtil {
     }
 
     /**
-     * Converts a StringBuilder into a Writer.
+     * Wraps a {@code StringBuilder} in a {@code Writer}.
+     * Any characters written to the writer will be appended to the string builder.
      *
-     * @param sb The StringBuilder to be converted, not {@code null}.
-     * @return The resulting Writer.
-     * @throws IllegalArgumentException if the input StringBuilder is {@code null}.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * StringBuilder sb = new StringBuilder();
+     * try (Writer writer = IOUtil.stringBuilder2Writer(sb)) {
+     *     writer.write("Hello");
+     * }
+     * // sb.toString() will be "Hello"
+     * </code></pre>
+     *
+     * @param sb The {@code StringBuilder} to wrap. Must not be {@code null}.
+     * @return A {@code Writer} that appends to the specified string builder.
+     * @throws IllegalArgumentException if the input {@code StringBuilder} is {@code null}.
      */
     public static Writer stringBuilder2Writer(final StringBuilder sb) throws IllegalArgumentException {
         if (sb == null) {
@@ -640,16 +740,25 @@ public final class IOUtil {
 
     /**
      * Reads all bytes from a file into a byte array.
-     * <br />
-     * Comparing with {@code readbytes(File)}, this method throws {@code UncheckedIOException} instead of {@code IOException}.
+     * This method handles regular files, gzipped files (ending with .gz), and zip files (ending with .zip).
+     * For zip files, it reads the first entry.
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream} with size closed to {@code Integer.MAX_VALUE}
+     * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * @param source The file to read bytes from, not {@code null}.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("data.bin");
+     * try {
+     *     byte[] fileBytes = IOUtil.readAllBytes(file);
+     *     // Process the bytes
+     * } catch (UncheckedIOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
      * @return A byte array containing all bytes from the file.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
+     * @throws OutOfMemoryError if the file is too large to be read into a byte array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static byte[] readAllBytes(final File source) throws UncheckedIOException {
@@ -669,17 +778,24 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all bytes from an InputStream into a byte array.
-     * <br />
-     * Comparing with {@code readbytes(InputStream)}, this method throws {@code UncheckedIOException} instead of {@code IOException}.
+     * Reads all remaining bytes from an {@code InputStream} into a byte array.
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input stream is not closed by this method.
      *
-     * @param source
-     * @return A byte array containing all bytes from the file.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("data.bin")) {
+     *     byte[] allBytes = IOUtil.readAllBytes(inputStream);
+     *     // Process the bytes
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from.
+     * @return A byte array containing all bytes read from the stream.
+     * @throws OutOfMemoryError if the stream is too large to be read into a byte array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static byte[] readAllBytes(final InputStream source) throws UncheckedIOException {
@@ -692,17 +808,26 @@ public final class IOUtil {
 
     /**
      * Reads all bytes from a file into a byte array.
-     * <br />
-     * Comparing with {@code readAllBytes(File)}, this method throws {@code IOException} instead of {@code UncheckedIOException}.
+     * This method is similar to {@link #readAllBytes(File)} but throws a checked {@code IOException}.
+     * It handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * @param source The file to read bytes from, not {@code null}.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("data.bin");
+     * try {
+     *     byte[] fileBytes = IOUtil.readBytes(file);
+     *     // Process the bytes
+     * } catch (IOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
      * @return A byte array containing all bytes from the file.
-     * @throws OutOfMemoryError if an array of the required size cannot be allocated
-     * @throws IOException      if an I/O error occurs. the unchecked IO exception
+     * @throws OutOfMemoryError if the file is too large to be read into a byte array.
+     * @throws IOException if an I/O error occurs.
      * @see #readAllBytes(File)
      */
     @Beta
@@ -721,14 +846,26 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of bytes from a file into a byte array.
-     * The reading starts from the specified offset in bytes in the file.
+     * Reads up to a specified number of bytes from a file into a byte array, starting from a given offset.
      *
-     * @param source The file to read bytes from, not {@code null}.
-     * @param offset The starting position in bytes in the file, from where to start reading.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("data.bin");
+     * try {
+     *     // Read 1024 bytes, starting from the 100th byte
+     *     byte[] partialBytes = IOUtil.readBytes(file, 100, 1024);
+     *     // Process the partial bytes
+     * } catch (IOException e) {
+     *     System.err.println("Error reading partial file content: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param offset The starting position in the file, in bytes, from where to begin reading.
      * @param maxLen The maximum number of bytes to read.
-     * @return A byte array containing the read bytes from the file.
+     * @return A byte array containing the bytes read from the file. The length of the array will be at most {@code maxLen}.
      * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static byte[] readBytes(final File source, final long offset, final int maxLen) throws IOException {
         final Holder<ZipFile> outputZipFile = new Holder<>();
@@ -745,18 +882,26 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all bytes from an InputStream into a byte array.
-     * <br />
-     * Comparing with {@code readAllBytes(InputStream)}, this method throws {@code IOException} instead of {@code UncheckedIOException}.
+     * Reads all remaining bytes from an {@code InputStream} into a byte array.
+     * This method is similar to {@link #readAllBytes(InputStream)} but throws a checked {@code IOException}.
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input stream is not closed by this method.
      *
-     * @param source
-     * @return A byte array containing all bytes from the file.
-     * @throws OutOfMemoryError if an array of the required size cannot be allocated
-     * @throws IOException      if an I/O error occurs.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("data.bin")) {
+     *     byte[] allBytes = IOUtil.readBytes(inputStream);
+     *     // Process the bytes
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from.
+     * @return A byte array containing all bytes read from the stream.
+     * @throws OutOfMemoryError if the stream is too large to be read into a byte array.
+     * @throws IOException if an I/O error occurs.
      * @see #readAllBytes(InputStream)
      */
     @Beta
@@ -765,14 +910,26 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of bytes from an InputStream into a byte array.
-     * The reading starts from the specified offset in bytes in the InputStream.
+     * Reads up to a specified number of bytes from an {@code InputStream} into a byte array, starting from a given offset.
+     * This method will skip the specified number of bytes from the stream before starting to read.
      *
-     * @param source The InputStream to read bytes from, not {@code null}.
-     * @param offset The starting position in bytes in the InputStream, from where to start reading.
-     * @param maxLen The maximum number of bytes to read.
-     * @return A byte array containing the read bytes from the InputStream.
-     * @throws IOException if an I/O error occurs.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("data.bin")) {
+     *     // Skip the first 100 bytes and read the next 1024 bytes
+     *     byte[] partialBytes = IOUtil.readBytes(inputStream, 100, 1024);
+     *     // Process the partial bytes
+     * } catch (IOException e) {
+     *     System.err.println("Error reading partial stream content: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from. Must not be {@code null}.
+     * @param offset The number of bytes to skip from the beginning of the stream.
+     * @param maxLen The maximum number of bytes to read after the offset.
+     * @return A byte array containing the bytes read from the stream. The length of the array will be at most {@code maxLen}.
+     * @throws IOException if an I/O error occurs during reading or skipping.
+     * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static byte[] readBytes(final InputStream source, final long offset, final int maxLen) throws IOException {
         return readBytes(source, offset, (long) maxLen);
@@ -821,17 +978,25 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all characters from a file into a character array using the default charset.
-     * <br />
-     * Comparing with {@code readChars(File)}, this method throws {@code UncheckedIOException} instead of {@code IOException}.
+     * Reads all characters from a file into a character array using the platform's default character set.
+     * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * @param source The file to read characters from, not {@code null}.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     char[] fileChars = IOUtil.readAllChars(file);
+     *     // Process the characters
+     * } catch (UncheckedIOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
      * @return A character array containing all characters from the file.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
+     * @throws OutOfMemoryError if the file is too large to be read into a character array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static char[] readAllChars(final File source) throws UncheckedIOException {
@@ -839,18 +1004,26 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all characters from a file into a character array using the provided charset.
-     * <br />
-     * Comparing with {@code readChars(File, Charset)}, this method throws {@code UncheckedIOException} instead of {@code IOException}.
+     * Reads all characters from a file into a character array using the specified character set.
+     * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * @param source   The file to read characters from, not {@code null}.
-     * @param encoding The charset to be used for conversion, not {@code null}.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     char[] fileChars = IOUtil.readAllChars(file, StandardCharsets.UTF_8);
+     *     // Process the characters
+     * } catch (UncheckedIOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
      * @return A character array containing all characters from the file.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
+     * @throws OutOfMemoryError if the file is too large to be read into a character array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static char[] readAllChars(final File source, final Charset encoding) throws UncheckedIOException {
@@ -870,17 +1043,24 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all characters from an InputStream into a character array using the default charset.
-     * <br />
-     * Comparing with {@code readChars(InputStream)}, this method throws {@code UncheckedIOException} instead of {@code IOException}.
+     * Reads all remaining characters from an {@code InputStream} into a character array using the platform's default character set.
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input stream is not closed by this method.
      *
-     * @param source The InputStream to read characters from, not {@code null}.
-     * @return A character array containing all characters from the InputStream.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     char[] allChars = IOUtil.readAllChars(inputStream);
+     *     // Process the characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from.
+     * @return A character array containing all characters read from the stream.
+     * @throws OutOfMemoryError if the stream is too large to be read into a character array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static char[] readAllChars(final InputStream source) throws UncheckedIOException {
@@ -888,18 +1068,25 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all characters from an InputStream into a character array using the provided charset.
-     * <br />
-     * Comparing with {@code readChars(InputStream, Charset)}, this method throws {@code UncheckedIOException} instead of {@code IOException}.
+     * Reads all remaining characters from an {@code InputStream} into a character array using the specified character set.
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input stream is not closed by this method.
      *
-     * @param source   The InputStream to read characters from, not {@code null}.
-     * @param encoding The charset to be used for conversion, not {@code null}.
-     * @return A character array containing all characters from the InputStream.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     char[] allChars = IOUtil.readAllChars(inputStream, StandardCharsets.UTF_8);
+     *     // Process the characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return A character array containing all characters read from the stream.
+     * @throws OutOfMemoryError if the stream is too large to be read into a character array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static char[] readAllChars(final InputStream source, final Charset encoding) throws UncheckedIOException {
@@ -913,17 +1100,24 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all characters from a Reader into a character array.
-     * <br />
-     * Comparing with {@code readChars(Reader)}, this method throws {@code UncheckedIOException} instead of {@code IOException}.
+     * Reads all remaining characters from a {@code Reader} into a character array.
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for readers with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input reader is not closed by this method.
      *
-     * @param source The Reader to read characters from, not {@code null}.
-     * @return A character array containing all characters from the Reader.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (Reader reader = new FileReader("text_file.txt")) {
+     *     char[] allChars = IOUtil.readAllChars(reader);
+     *     // Process the characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from reader: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code Reader} to read from.
+     * @return A character array containing all characters read from the reader.
+     * @throws OutOfMemoryError if the reader's content is too large to be read into a character array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static char[] readAllChars(final Reader source) throws UncheckedIOException {
@@ -935,18 +1129,26 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all characters from a file into a character array using the default charset.
-     * <br />
-     * Comparing with {@code readAllChars(File)}, this method throws {@code IOException} instead of {@code UncheckedIOException}.
+     * Reads all characters from a file into a character array using the platform's default character set.
+     * This method is similar to {@link #readAllChars(File)} but throws a checked {@code IOException}.
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * @param source The file to read characters from, not {@code null}.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     char[] fileChars = IOUtil.readChars(file);
+     *     // Process the characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
      * @return A character array containing all characters from the file.
-     * @throws OutOfMemoryError if an array of the required size cannot be allocated
-     * @throws IOException      if an I/O error occurs.
+     * @throws OutOfMemoryError if the file is too large to be read into a character array.
+     * @throws IOException if an I/O error occurs.
      * @see #readAllChars(File)
      */
     @Beta
@@ -955,19 +1157,27 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all characters from a file into a character array using the provided charset.
-     * <br />
-     * Comparing with {@code readAllChars(File, Charset)}, this method throws {@code IOException} instead of {@code UncheckedIOException}.
+     * Reads all characters from a file into a character array using the specified character set.
+     * This method is similar to {@link #readAllChars(File, Charset)} but throws a checked {@code IOException}.
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * @param source   The file to read characters from, not {@code null}.
-     * @param encoding The charset to be used for conversion, not {@code null}.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     char[] fileChars = IOUtil.readChars(file, StandardCharsets.UTF_8);
+     *     // Process the characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
      * @return A character array containing all characters from the file.
-     * @throws OutOfMemoryError if an array of the required size cannot be allocated
-     * @throws IOException      if an I/O error occurs.
+     * @throws OutOfMemoryError if the file is too large to be read into a character array.
+     * @throws IOException if an I/O error occurs.
      * @see #readAllChars(File, Charset)
      */
     @Beta
@@ -976,29 +1186,53 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of characters from a file into a character array using the default charset.
-     * The reading starts from the specified offset in characters in the file.
+     * Reads up to a specified number of characters from a file into a character array, starting from a given character offset, using the platform's default charset.
      *
-     * @param source The file to read characters from, not {@code null}.
-     * @param offset The starting position in characters in the file, from where to start reading.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     // Read 1024 characters, starting from the 100th character
+     *     char[] partialChars = IOUtil.readChars(file, 100, 1024);
+     *     // Process the partial characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading partial file content: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param offset The starting position in characters in the file, from where to begin reading.
      * @param maxLen The maximum number of characters to read.
-     * @return A character array containing the read characters from the file.
+     * @return A character array containing the characters read from the file. The length of the array will be at most {@code maxLen}.
      * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static char[] readChars(final File source, final long offset, final int maxLen) throws IOException {
         return readChars(source, DEFAULT_CHARSET, offset, maxLen);
     }
 
     /**
-     * Reads a specified number of characters from a file into a character array using the provided charset.
-     * The reading starts from the specified offset in characters in the file.
+     * Reads up to a specified number of characters from a file into a character array, starting from a given character offset, using the specified character set.
      *
-     * @param source   The file to read characters from, not {@code null}.
-     * @param encoding The charset to be used for conversion, not {@code null}.
-     * @param offset   The starting position in characters in the file, from where to start reading.
-     * @param maxLen   The maximum number of characters to read.
-     * @return A character array containing the read characters from the file.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     // Read 1024 characters, starting from the 100th character, using UTF-8 encoding
+     *     char[] partialChars = IOUtil.readChars(file, StandardCharsets.UTF_8, 100, 1024);
+     *     // Process the partial characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading partial file content: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param offset The starting position in characters in the file, from where to begin reading.
+     * @param maxLen The maximum number of characters to read.
+     * @return A character array containing the characters read from the file. The length of the array will be at most {@code maxLen}.
      * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static char[] readChars(final File source, final Charset encoding, final long offset, final int maxLen) throws IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -1018,18 +1252,26 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all characters from an InputStream into a character array using the default charset.
-     * <br />
-     * Comparing with {@code readAllChars(InputStream)}, this method throws {@code IOException} instead of {@code UncheckedIOException}.
+     * Reads all remaining characters from an {@code InputStream} into a character array using the platform's default character set.
+     * This method is similar to {@link #readAllChars(InputStream)} but throws a checked {@code IOException}.
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input stream is not closed by this method.
      *
-     * @param source The InputStream to read characters from, not {@code null}.
-     * @return A character array containing all characters from the InputStream.
-     * @throws OutOfMemoryError if an array of the required size cannot be allocated
-     * @throws IOException      if an I/O error occurs.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     char[] allChars = IOUtil.readChars(inputStream);
+     *     // Process the characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from.
+     * @return A character array containing all characters read from the stream.
+     * @throws OutOfMemoryError if the stream is too large to be read into a character array.
+     * @throws IOException if an I/O error occurs.
      * @see #readAllChars(InputStream)
      */
     @Beta
@@ -1038,19 +1280,27 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all characters from an InputStream into a character array using the provided charset.
-     * <br />
-     * Comparing with {@code readAllChars(InputStream, Charset)}, this method throws {@code IOException} instead of {@code UncheckedIOException}.
+     * Reads all remaining characters from an {@code InputStream} into a character array using the specified character set.
+     * This method is similar to {@link #readAllChars(InputStream, Charset)} but throws a checked {@code IOException}.
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input stream is not closed by this method.
      *
-     * @param source   The InputStream to read characters from, not {@code null}.
-     * @param encoding The charset to be used for conversion, not {@code null}.
-     * @return A character array containing all characters from the InputStream.
-     * @throws OutOfMemoryError if an array of the required size cannot be allocated
-     * @throws IOException      if an I/O error occurs.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     char[] allChars = IOUtil.readChars(inputStream, StandardCharsets.UTF_8);
+     *     // Process the characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return A character array containing all characters read from the stream.
+     * @throws OutOfMemoryError if the stream is too large to be read into a character array.
+     * @throws IOException if an I/O error occurs.
      * @see #readAllChars(InputStream, Charset)
      */
     @Beta
@@ -1059,29 +1309,53 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of characters from an InputStream into a character array using the default charset.
-     * The reading starts from the specified offset in characters in the InputStream.
+     * Reads up to a specified number of characters from an {@code InputStream} into a character array, starting from a given character offset, using the platform's default charset.
+     * This method will skip the specified number of bytes from the stream before starting to read.
      *
-     * @param source The InputStream to read characters from, not {@code null}.
-     * @param offset The starting position in characters in the InputStream, from where to start reading.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     // Skip the first 100 characters and read the next 1024 characters
+     *     char[] partialChars = IOUtil.readChars(inputStream, 100, 1024);
+     *     // Process the partial characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading partial stream content: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from. Must not be {@code null}.
+     * @param offset The starting position in characters in the stream, from where to begin reading.
      * @param maxLen The maximum number of characters to read.
-     * @return A character array containing the read characters from the InputStream.
-     * @throws IOException if an I/O error occurs.
+     * @return A character array containing the characters read from the stream. The length of the array will be at most {@code maxLen}.
+     * @throws IOException if an I/O error occurs during reading or skipping.
+     * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static char[] readChars(final InputStream source, final long offset, final int maxLen) throws IOException {
         return readChars(source, DEFAULT_CHARSET, offset, maxLen);
     }
 
     /**
-     * Reads a specified number of characters from an InputStream into a character array using the provided charset.
-     * The reading starts from the specified offset in characters in the InputStream.
+     * Reads up to a specified number of characters from an {@code InputStream} into a character array, starting from a given character offset, using the specified character set.
+     * This method will skip the specified number of bytes from the stream before starting to read.
      *
-     * @param source   The InputStream to read characters from, not {@code null}.
-     * @param encoding The charset to be used for conversion, not {@code null}.
-     * @param offset   The starting position in characters in the InputStream, from where to start reading.
-     * @param maxLen   The maximum number of characters to read.
-     * @return A character array containing the read characters from the InputStream.
-     * @throws IOException if an I/O error occurs.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     // Skip the first 100 characters and read the next 1024 characters using UTF-8
+     *     char[] partialChars = IOUtil.readChars(inputStream, StandardCharsets.UTF_8, 100, 1024);
+     *     // Process the partial characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading partial stream content: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param offset The starting position in characters in the stream, from where to begin reading.
+     * @param maxLen The maximum number of characters to read.
+     * @return A character array containing the characters read from the stream. The length of the array will be at most {@code maxLen}.
+     * @throws IOException if an I/O error occurs during reading or skipping.
+     * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static char[] readChars(final InputStream source, final Charset encoding, final long offset, final int maxLen) throws IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -1097,18 +1371,26 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all characters from a Reader into a character array using the default charset.
-     * <br />
-     * Comparing with {@code readAllChars(Reader)}, this method throws {@code IOException} instead of {@code UncheckedIOException}.
+     * Reads all remaining characters from a {@code Reader} into a character array.
+     * This method is similar to {@link #readAllChars(Reader)} but throws a checked {@code IOException}.
      * <p>
-     * <br />
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: This method should not be used for readers with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input reader is not closed by this method.
      *
-     * @param source The Reader to read characters from, not {@code null}.
-     * @return A character array containing all characters from the Reader.
-     * @throws OutOfMemoryError if an array of the required size cannot be allocated
-     * @throws IOException      if an I/O error occurs.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (Reader reader = new FileReader("text_file.txt")) {
+     *     char[] allChars = IOUtil.readChars(reader);
+     *     // Process the characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from reader: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code Reader} to read from.
+     * @return A character array containing all characters read from the reader.
+     * @throws OutOfMemoryError if the reader's content is too large to be read into a character array.
+     * @throws IOException if an I/O error occurs.
      * @see #readAllChars(Reader)
      */
     @Beta
@@ -1117,14 +1399,26 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of characters from a Reader into a character array.
-     * The reading starts from the specified offset in characters in the Reader.
+     * Reads up to a specified number of characters from a {@code Reader} into a character array, starting from a given character offset.
+     * This method will skip the specified number of characters from the reader before starting to read.
      *
-     * @param source The Reader to read characters from, not {@code null}.
-     * @param offset The starting position in characters in the Reader, from where to start reading.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (Reader reader = new FileReader("text_file.txt")) {
+     *     // Skip the first 100 characters and read the next 1024 characters
+     *     char[] partialChars = IOUtil.readChars(reader, 100, 1024);
+     *     // Process the partial characters
+     * } catch (IOException e) {
+     *     System.err.println("Error reading partial reader content: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code Reader} to read from. Must not be {@code null}.
+     * @param offset The starting position in characters in the reader, from where to begin reading.
      * @param maxLen The maximum number of characters to read.
-     * @return A character array containing the read characters from the Reader.
-     * @throws IOException if an I/O error occurs.
+     * @return A character array containing the characters read from the reader. The length of the array will be at most {@code maxLen}.
+     * @throws IOException if an I/O error occurs during reading or skipping.
+     * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static char[] readChars(final Reader source, final long offset, final int maxLen) throws IOException {
         return readChars(source, offset, (long) maxLen);
@@ -1172,13 +1466,25 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all content from a file into a String using the default charset.
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Reads the entire content of a file into a {@code String} using the platform's default character set.
+     * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
+     * <p>
+     * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * @param source The file to read content from, not {@code null}.
-     * @return A String containing all content from the file.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     String content = IOUtil.readAllToString(file);
+     *     System.out.println(content);
+     * } catch (UncheckedIOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @return A {@code String} containing the entire content of the file.
+     * @throws OutOfMemoryError if the file is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static String readAllToString(final File source) throws UncheckedIOException {
@@ -1186,14 +1492,26 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all content from a file into a String using the provided charset.
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Reads the entire content of a file into a {@code String} using the specified character set.
+     * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
+     * <p>
+     * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * @param source   The file to read content from, not {@code null}.
-     * @param encoding The charset to be used to open the specified file for reading.
-     * @return A String containing all content from the file.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     String content = IOUtil.readAllToString(file, StandardCharsets.UTF_8);
+     *     System.out.println(content);
+     * } catch (UncheckedIOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return A {@code String} containing the entire content of the file.
+     * @throws OutOfMemoryError if the file is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static String readAllToString(final File source, final Charset encoding) throws UncheckedIOException {
@@ -1213,13 +1531,24 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all content from an InputStream into a String using the default charset.
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Reads all remaining characters from an {@code InputStream} into a {@code String} using the platform's default character set.
+     * <p>
+     * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input stream is not closed by this method.
      *
-     * @param source The InputStream to read content from, not {@code null}.
-     * @return A String containing all content from the InputStream.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     String content = IOUtil.readAllToString(inputStream);
+     *     System.out.println(content);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from.
+     * @return A {@code String} containing all content read from the stream.
+     * @throws OutOfMemoryError if the stream is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static String readAllToString(final InputStream source) throws UncheckedIOException {
@@ -1227,14 +1556,25 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all content from an InputStream into a String using the provided charset.
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Reads all remaining characters from an {@code InputStream} into a {@code String} using the specified character set.
+     * <p>
+     * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input stream is not closed by this method.
      *
-     * @param source   The InputStream to read content from, not {@code null}.
-     * @param encoding The charset to be used to open the specified InputStream for reading.
-     * @return A String containing all content from the InputStream.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     String content = IOUtil.readAllToString(inputStream, StandardCharsets.UTF_8);
+     *     System.out.println(content);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return A {@code String} containing all content read from the stream.
+     * @throws OutOfMemoryError if the stream is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static String readAllToString(final InputStream source, final Charset encoding) throws UncheckedIOException {
@@ -1253,13 +1593,24 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all content from a Reader into a String.
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Reads all remaining characters from a {@code Reader} into a {@code String}.
+     * <p>
+     * Note: This method should not be used for readers with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input reader is not closed by this method.
      *
-     * @param source The Reader to read content from, not {@code null}.
-     * @return A String containing all content from the Reader.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (Reader reader = new FileReader("text_file.txt")) {
+     *     String content = IOUtil.readAllToString(reader);
+     *     System.out.println(content);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from reader: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code Reader} to read from.
+     * @return A {@code String} containing all content read from the reader.
+     * @throws OutOfMemoryError if the reader's content is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static String readAllToString(final Reader source) throws UncheckedIOException {
@@ -1269,29 +1620,53 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of characters from a file into a String using the default charset.
-     * The reading starts from the specified offset in characters in the file.
+     * Reads up to a specified number of characters from a file into a {@code String}, starting from a given character offset, using the platform's default charset.
      *
-     * @param source The file to read characters from, not {@code null}.
-     * @param offset The starting position in characters in the file, from where to start reading.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     // Read 1024 characters, starting from the 100th character
+     *     String partialContent = IOUtil.readToString(file, 100, 1024);
+     *     System.out.println(partialContent);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading partial file content: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param offset The starting position in characters in the file, from where to begin reading.
      * @param maxLen The maximum number of characters to read.
-     * @return A String containing the read characters from the file.
+     * @return A {@code String} containing the characters read from the file.
      * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static String readToString(final File source, final long offset, final int maxLen) throws IOException {
         return readToString(source, DEFAULT_CHARSET, offset, maxLen);
     }
 
     /**
-     * Reads a specified number of characters from a file into a String using the provided charset.
-     * The reading starts from the specified offset in characters in the file.
+     * Reads up to a specified number of characters from a file into a {@code String}, starting from a given character offset, using the specified character set.
      *
-     * @param source   The file to read characters from, not {@code null}.
-     * @param encoding The charset to be used to open the specified file for reading.
-     * @param offset   The starting position in characters in the file, from where to start reading.
-     * @param maxLen   The maximum number of characters to read.
-     * @return A String containing the read characters from the file.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     // Read 1024 characters, starting from the 100th character, using UTF-8 encoding
+     *     String partialContent = IOUtil.readToString(file, StandardCharsets.UTF_8, 100, 1024);
+     *     System.out.println(partialContent);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading partial file content: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param offset The starting position in characters in the file, from where to begin reading.
+     * @param maxLen The maximum number of characters to read.
+     * @return A {@code String} containing the characters read from the file.
      * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static String readToString(final File source, final Charset encoding, final long offset, final int maxLen) throws IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -1311,29 +1686,53 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of characters from an InputStream into a String using the default charset.
-     * The reading starts from the specified offset in characters in the InputStream.
+     * Reads up to a specified number of characters from an {@code InputStream} into a {@code String}, starting from a given character offset, using the platform's default charset.
+     * This method will skip the specified number of bytes from the stream before starting to read.
      *
-     * @param source The InputStream to read characters from, not {@code null}.
-     * @param offset The starting position in characters in the InputStream, from where to start reading.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     // Skip the first 100 characters and read the next 1024 characters
+     *     String partialContent = IOUtil.readToString(inputStream, 100, 1024);
+     *     System.out.println(partialContent);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading partial stream content: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from. Must not be {@code null}.
+     * @param offset The starting position in characters in the stream, from where to begin reading.
      * @param maxLen The maximum number of characters to read.
-     * @return A String containing the read characters from the InputStream.
-     * @throws IOException if an I/O error occurs.
+     * @return A {@code String} containing the characters read from the stream.
+     * @throws IOException if an I/O error occurs during reading or skipping.
+     * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static String readToString(final InputStream source, final long offset, final int maxLen) throws IOException {
         return readToString(source, DEFAULT_CHARSET, offset, maxLen);
     }
 
     /**
-     * Reads a specified number of characters from an InputStream, starting from a specified offset in characters, and converts them into a String.
-     * The characters are decoded using the provided Charset.
+     * Reads up to a specified number of characters from an {@code InputStream} into a {@code String}, starting from a given character offset, using the specified character set.
+     * This method will skip the specified number of bytes from the stream before starting to read.
      *
-     * @param source   The InputStream to read from.
-     * @param encoding The charset to be used to open the specified InputStream for reading.
-     * @param offset   The position in characters in the InputStream to start reading from.
-     * @param maxLen   The maximum number of characters to read from the InputStream.
-     * @return A String containing the characters read from the InputStream.
-     * @throws IOException if an I/O error occurs.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     // Skip the first 100 characters and read the next 1024 characters using UTF-8
+     *     String partialContent = IOUtil.readToString(inputStream, StandardCharsets.UTF_8, 100, 1024);
+     *     System.out.println(partialContent);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading partial stream content: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param offset The starting position in characters in the stream, from where to begin reading.
+     * @param maxLen The maximum number of characters to read.
+     * @return A {@code String} containing the characters read from the stream.
+     * @throws IOException if an I/O error occurs during reading or skipping.
+     * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static String readToString(final InputStream source, final Charset encoding, final long offset, final int maxLen) throws IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -1349,14 +1748,26 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of characters from a Reader into a String.
-     * The reading starts from the specified offset in characters in the Reader.
+     * Reads up to a specified number of characters from a {@code Reader} into a {@code String}, starting from a given character offset.
+     * This method will skip the specified number of characters from the reader before starting to read.
      *
-     * @param source The Reader to read characters from, not {@code null}.
-     * @param offset The starting position in characters in the Reader, from where to start reading.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (Reader reader = new FileReader("text_file.txt")) {
+     *     // Skip the first 100 characters and read the next 1024 characters
+     *     String partialContent = IOUtil.readToString(reader, 100, 1024);
+     *     System.out.println(partialContent);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading partial reader content: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code Reader} to read from. Must not be {@code null}.
+     * @param offset The starting position in characters in the reader, from where to begin reading.
      * @param maxLen The maximum number of characters to read.
-     * @return A String containing the read characters from the Reader.
-     * @throws IOException if an I/O error occurs.
+     * @return A {@code String} containing the characters read from the reader.
+     * @throws IOException if an I/O error occurs during reading or skipping.
+     * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static String readToString(final Reader source, final long offset, final int maxLen) throws IOException {
         final char[] chs = readChars(source, offset, maxLen);
@@ -1365,29 +1776,53 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all lines from a file and returns them as a List of Strings using the default charset.
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with line size closed to {@code Integer.MAX_VALUE}.
+     * Reads all lines from a file into a list of strings, using the platform's default charset.
+     * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
+     * <p>
+     * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * @param source The InputStream to read from.
-     * @return A List of Strings, each string being a line from the InputStream.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
-     * @throws UncheckedIOException If an I/O error occurs.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     List&lt;String&gt; lines = IOUtil.readAllLines(file);
+     *     lines.forEach(System.out::println);
+     * } catch (UncheckedIOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @return A list of strings, each representing a line in the file.
+     * @throws OutOfMemoryError if the file is too large to be read into memory.
+     * @throws UncheckedIOException if an I/O error occurs.
      */
     public static List<String> readAllLines(final File source) throws UncheckedIOException {
         return readAllLines(source, DEFAULT_CHARSET);
     }
 
     /**
-     * Reads all lines from a file and returns them as a List of Strings using the provided charset.
-     * <br />
-     * Note: This method should not be used to read a {@code File} with line size close to {@code Integer.MAX_VALUE}.
+     * Reads all lines from a file into a list of strings, using the specified character set.
+     * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
+     * <p>
+     * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * @param source   The file to read lines from, not {@code null}.
-     * @param encoding The charset to be used for conversion, not {@code null}.
-     * @return A List of Strings, each string being a line from the file.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
-     * @throws UncheckedIOException If an I/O error occurs.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     List&lt;String&gt; lines = IOUtil.readAllLines(file, StandardCharsets.UTF_8);
+     *     lines.forEach(System.out::println);
+     * } catch (UncheckedIOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return A list of strings, each representing a line in the file.
+     * @throws OutOfMemoryError if the file is too large to be read into memory.
+     * @throws UncheckedIOException if an I/O error occurs.
      */
     public static List<String> readAllLines(final File source, final Charset encoding) throws UncheckedIOException {
         final Holder<ZipFile> outputZipFile = new Holder<>();
@@ -1406,29 +1841,51 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all lines from an InputStream and returns them as a List of Strings using the default charset.
-     * <br />
-     * Note: This method should not be used to read an {@code InputStream} with line size close to {@code Integer.MAX_VALUE}.
+     * Reads all lines from an {@code InputStream} into a list of strings, using the platform's default character set.
+     * <p>
+     * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input stream is not closed by this method.
      *
-     * @param source The InputStream to read lines from, not {@code null}.
-     * @return A List of Strings, each string being a line from the InputStream.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
-     * @throws UncheckedIOException If an I/O error occurs.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     List&lt;String&gt; lines = IOUtil.readAllLines(inputStream);
+     *     lines.forEach(System.out::println);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from.
+     * @return A list of strings, each representing a line from the stream.
+     * @throws OutOfMemoryError if the stream is too large to be read into memory.
+     * @throws UncheckedIOException if an I/O error occurs.
      */
     public static List<String> readAllLines(final InputStream source) throws UncheckedIOException {
         return readAllLines(source, DEFAULT_CHARSET);
     }
 
     /**
-     * Reads all lines from an InputStream and returns them as a List of Strings using the provided charset.
-     * <br />
-     * Note: This method should not be used to read an {@code InputStream} with line size close to {@code Integer.MAX_VALUE}.
+     * Reads all lines from an {@code InputStream} into a list of strings, using the specified character set.
+     * <p>
+     * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input stream is not closed by this method.
      *
-     * @param source   The InputStream to read lines from, not {@code null}.
-     * @param encoding The charset to be used for conversion, not {@code null}.
-     * @return A List of Strings, each string being a line from the InputStream.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
-     * @throws UncheckedIOException If an I/O error occurs.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     List&lt;String&gt; lines = IOUtil.readAllLines(inputStream, StandardCharsets.UTF_8);
+     *     lines.forEach(System.out::println);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return A list of strings, each representing a line from the stream.
+     * @throws OutOfMemoryError if the stream is too large to be read into memory.
+     * @throws UncheckedIOException if an I/O error occurs.
      */
     public static List<String> readAllLines(final InputStream source, final Charset encoding) throws UncheckedIOException {
 
@@ -1442,14 +1899,25 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all lines from a Reader and returns them as a List of Strings.
-     * <br />
-     * Note: This method should not be used to read a {@code Reader} with line size close to {@code Integer.MAX_VALUE}.
+     * Reads all lines from a {@code Reader} into a list of strings.
+     * <p>
+     * Note: This method should not be used for readers with content size close to {@code Integer.MAX_VALUE} due to memory constraints.
+     * The input reader is not closed by this method.
      *
-     * @param source The Reader to read lines from, not {@code null}.
-     * @return A List of Strings, each string being a line from the Reader.
-     * @throws OutOfMemoryError     if an array of the required size cannot be allocated
-     * @throws UncheckedIOException If an I/O error occurs.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (Reader reader = new FileReader("text_file.txt")) {
+     *     List&lt;String&gt; lines = IOUtil.readAllLines(reader);
+     *     lines.forEach(System.out::println);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from reader: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code Reader} to read from.
+     * @return A list of strings, each representing a line from the reader.
+     * @throws OutOfMemoryError if the reader's content is too large to be read into memory.
+     * @throws UncheckedIOException if an I/O error occurs.
      */
     public static List<String> readAllLines(final Reader source) throws UncheckedIOException {
         final List<String> res = new ArrayList<>();
@@ -1550,29 +2018,53 @@ public final class IOUtil {
     //    }
 
     /**
-     * Reads a specified number of lines from a file using the default charset and returns them as a List of Strings.
-     * The lines to read are determined by the provided offset (0-based) and count.
+     * Reads a specified number of lines from a file into a list of strings, starting from a given line offset, using the platform's default charset.
      *
-     * @param source The file to read lines from, not {@code null}.
-     * @param offset The starting position in lines in the file, from where to start reading.
-     * @param count  The number of lines to read from the file.
-     * @return A List of Strings, each string being a line from the file.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     // Read 10 lines, starting from the 5th line
+     *     List&lt;String&gt; lines = IOUtil.readLines(file, 4, 10);
+     *     lines.forEach(System.out::println);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading lines from file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param offset The 0-based index of the first line to read.
+     * @param count The number of lines to read.
+     * @return A list of strings, each representing a line from the specified range in the file.
      * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
     public static List<String> readLines(final File source, final int offset, final int count) throws IOException {
         return readLines(source, DEFAULT_CHARSET, offset, count);
     }
 
     /**
-     * Reads a specified number of lines from a file using the provided charset and returns them as a List of Strings.
-     * The lines to read are determined by the provided offset (0-based) and count.
+     * Reads a specified number of lines from a file into a list of strings, starting from a given line offset, using the specified character set.
      *
-     * @param source   The file to read lines from, not {@code null}.
-     * @param encoding The charset to be used to open the specified file for reading.
-     * @param offset   The starting position in lines in the file, from where to start reading.
-     * @param count    The number of lines to read from the file.
-     * @return A List of Strings, each string being a line from the file.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     // Read 10 lines, starting from the 5th line, using UTF-8 encoding
+     *     List&lt;String&gt; lines = IOUtil.readLines(file, StandardCharsets.UTF_8, 4, 10);
+     *     lines.forEach(System.out::println);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading lines from file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param offset The 0-based index of the first line to read.
+     * @param count The number of lines to read.
+     * @return A list of strings, each representing a line from the specified range in the file.
      * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
     public static List<String> readLines(final File source, final Charset encoding, final int offset, final int count) throws IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -1592,29 +2084,53 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of lines from an InputStream using the default charset and returns them as a List of Strings.
-     * The lines to read are determined by the provided offset (0-based) and count.
+     * Reads a specified number of lines from an {@code InputStream} into a list of strings, starting from a given line offset, using the platform's default charset.
+     * The input stream is not closed by this method.
      *
-     * @param source The InputStream to read lines from, not {@code null}.
-     * @param offset The starting position in lines in the InputStream, from where to start reading.
-     * @param count  The number of lines to read from the InputStream.
-     * @return A List of Strings, each string being a line from the InputStream.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     // Read 10 lines, starting from the 5th line
+     *     List&lt;String&gt; lines = IOUtil.readLines(inputStream, 4, 10);
+     *     lines.forEach(System.out::println);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading lines from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from. Must not be {@code null}.
+     * @param offset The 0-based index of the first line to read.
+     * @param count The number of lines to read.
+     * @return A list of strings, each representing a line from the specified range in the stream.
      * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
     public static List<String> readLines(final InputStream source, final int offset, final int count) throws IOException {
         return readLines(source, DEFAULT_CHARSET, offset, count);
     }
 
     /**
-     * Reads a specified number of lines from an InputStream using the provided charset and returns them as a List of Strings.
-     * The lines to read are determined by the provided offset (0-based) and count.
+     * Reads a specified number of lines from an {@code InputStream} into a list of strings, starting from a given line offset, using the specified character set.
+     * The input stream is not closed by this method.
      *
-     * @param source   The InputStream to read lines from, not {@code null}.
-     * @param encoding The charset to be used to open the specified InputStream for reading
-     * @param offset   The starting position in lines in the InputStream, from where to start reading.
-     * @param count    The number of lines to read from the InputStream.
-     * @return A List of Strings, each string being a line from the InputStream.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     // Read 10 lines, starting from the 5th line, using UTF-8 encoding
+     *     List&lt;String&gt; lines = IOUtil.readLines(inputStream, StandardCharsets.UTF_8, 4, 10);
+     *     lines.forEach(System.out::println);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading lines from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param offset The 0-based index of the first line to read.
+     * @param count The number of lines to read.
+     * @return A list of strings, each representing a line from the specified range in the stream.
      * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
     public static List<String> readLines(final InputStream source, final Charset encoding, final int offset, final int count) throws IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -1624,14 +2140,26 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of lines from a Reader and returns them as a List of Strings.
-     * The lines to read are determined by the provided offset (0-based) and count.
+     * Reads a specified number of lines from a {@code Reader} into a list of strings, starting from a given line offset.
+     * The input reader is not closed by this method.
      *
-     * @param source The Reader to read lines from, not {@code null}.
-     * @param offset The starting position in lines in the Reader, from where to start reading.
-     * @param count  The number of lines to read from the Reader.
-     * @return A List of Strings, each string being a line from the Reader.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (Reader reader = new FileReader("text_file.txt")) {
+     *     // Read 10 lines, starting from the 5th line
+     *     List&lt;String&gt; lines = IOUtil.readLines(reader, 4, 10);
+     *     lines.forEach(System.out::println);
+     * } catch (IOException e) {
+     *     System.err.println("Error reading lines from reader: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code Reader} to read from. Must not be {@code null}.
+     * @param offset The 0-based index of the first line to read.
+     * @param count The number of lines to read.
+     * @return A list of strings, each representing a line from the specified range in the reader.
      * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static List<String> readLines(final Reader source, int offset, int count) throws IOException {
@@ -1663,10 +2191,23 @@ public final class IOUtil {
     }
 
     /**
-     * Reads the first line from a file using the default charset and returns it as a String.
+     * Reads the first line from a file using the platform's default charset.
      *
-     * @param source The file to read the first line from, not {@code null}.
-     * @return A String containing the first line from the file, or {@code null} if the file is empty.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     String firstLine = IOUtil.readFirstLine(file);
+     *     if (firstLine != null) {
+     *         System.out.println("First line: " + firstLine);
+     *     }
+     * } catch (IOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @return The first line of the file, or {@code null} if the file is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readFirstLine(final File source) throws IOException {
@@ -1674,11 +2215,24 @@ public final class IOUtil {
     }
 
     /**
-     * Reads the first line from a file using the provided charset and returns it as a String.
+     * Reads the first line from a file using the specified character set.
      *
-     * @param source   The file to read the first line from, not {@code null}.
-     * @param encoding The charset to be used the open the specified file for reading.
-     * @return A String containing the first line from the file, or {@code null} if the file is empty.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     String firstLine = IOUtil.readFirstLine(file, StandardCharsets.UTF_8);
+     *     if (firstLine != null) {
+     *         System.out.println("First line: " + firstLine);
+     *     }
+     * } catch (IOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return The first line of the file, or {@code null} if the file is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readFirstLine(final File source, final Charset encoding) throws IOException {
@@ -1696,10 +2250,23 @@ public final class IOUtil {
     }
 
     /**
-     * Reads the first line from an InputStream using the default charset and returns it as a String.
+     * Reads the first line from an {@code InputStream} using the platform's default character set.
+     * The input stream is not closed by this method.
      *
-     * @param source The InputStream to read the first line from, not {@code null}.
-     * @return A String containing the first line from the InputStream, or {@code null} if the InputStream is empty.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     String firstLine = IOUtil.readFirstLine(inputStream);
+     *     if (firstLine != null) {
+     *         System.out.println("First line: " + firstLine);
+     *     }
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from. Must not be {@code null}.
+     * @return The first line from the stream, or {@code null} if the stream is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readFirstLine(final InputStream source) throws IOException {
@@ -1707,11 +2274,24 @@ public final class IOUtil {
     }
 
     /**
-     * Reads the first line from an InputStream using the provided charset and returns it as a String.
+     * Reads the first line from an {@code InputStream} using the specified character set.
+     * The input stream is not closed by this method.
      *
-     * @param source   The InputStream to read the first line from, not {@code null}.
-     * @param encoding The charset to be used the open the specified InputStream for reading.
-     * @return A String containing the first line from the InputStream, or {@code null} if the InputStream is empty.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     String firstLine = IOUtil.readFirstLine(inputStream, StandardCharsets.UTF_8);
+     *     if (firstLine != null) {
+     *         System.out.println("First line: " + firstLine);
+     *     }
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return The first line from the stream, or {@code null} if the stream is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readFirstLine(final InputStream source, final Charset encoding) throws IOException {
@@ -1719,10 +2299,23 @@ public final class IOUtil {
     }
 
     /**
-     * Reads the first line from a Reader and returns it as a String.
+     * Reads the first line from a {@code Reader}.
+     * The input reader is not closed by this method.
      *
-     * @param source The Reader to read the first line from, not {@code null}.
-     * @return A String containing the first line from the Reader, or {@code null} if the Reader is empty.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (Reader reader = new FileReader("text_file.txt")) {
+     *     String firstLine = IOUtil.readFirstLine(reader);
+     *     if (firstLine != null) {
+     *         System.out.println("First line: " + firstLine);
+     *     }
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from reader: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code Reader} to read from. Must not be {@code null}.
+     * @return The first line from the reader, or {@code null} if the reader is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readFirstLine(final Reader source) throws IOException {
@@ -1730,10 +2323,23 @@ public final class IOUtil {
     }
 
     /**
-     * Reads the last line from a file using the default charset and returns it as a String.
+     * Reads the last line from a file using the platform's default charset.
      *
-     * @param source The file to read the last line from, not {@code null}.
-     * @return A String containing the last line from the file, or {@code null} if the file is empty.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     String lastLine = IOUtil.readLastLine(file);
+     *     if (lastLine != null) {
+     *         System.out.println("Last line: " + lastLine);
+     *     }
+     * } catch (IOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @return The last line of the file, or {@code null} if the file is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readLastLine(final File source) throws IOException {
@@ -1741,11 +2347,24 @@ public final class IOUtil {
     }
 
     /**
-     * Reads the last line from a file using the provided charset and returns it as a String.
+     * Reads the last line from a file using the specified character set.
      *
-     * @param source   The file to read the last line from, not {@code null}.
-     * @param encoding The charset to be used the open the specified file for reading.
-     * @return A String containing the last line from the file, or {@code null} if the file is empty.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * File file = new File("text_file.txt");
+     * try {
+     *     String lastLine = IOUtil.readLastLine(file, StandardCharsets.UTF_8);
+     *     if (lastLine != null) {
+     *         System.out.println("Last line: " + lastLine);
+     *     }
+     * } catch (IOException e) {
+     *     System.err.println("Error reading file: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The file to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return The last line of the file, or {@code null} if the file is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readLastLine(final File source, final Charset encoding) throws IOException {
@@ -1763,10 +2382,23 @@ public final class IOUtil {
     }
 
     /**
-     * Reads the last line from an InputStream using the default charset and returns it as a String.
+     * Reads the last line from an {@code InputStream} using the platform's default character set.
+     * The input stream is not closed by this method.
      *
-     * @param source The InputStream to read the last line from, not {@code null}.
-     * @return A String containing the last line from the InputStream, or {@code null} if the InputStream is empty.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     String lastLine = IOUtil.readLastLine(inputStream);
+     *     if (lastLine != null) {
+     *         System.out.println("Last line: " + lastLine);
+     *     }
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from. Must not be {@code null}.
+     * @return The last line from the stream, or {@code null} if the stream is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readLastLine(final InputStream source) throws IOException {
@@ -1774,11 +2406,24 @@ public final class IOUtil {
     }
 
     /**
-     * Reads the last line from an InputStream using the provided charset and returns it as a String.
+     * Reads the last line from an {@code InputStream} using the specified character set.
+     * The input stream is not closed by this method.
      *
-     * @param source   The InputStream to read the last line from, not {@code null}.
-     * @param encoding The charset to be used the open the specified InputStream for reading.
-     * @return A String containing the last line from the InputStream, or {@code null} if the InputStream is empty.
+     * <p><b>Usage Example:</b></p>
+     * <pre><code>
+     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
+     *     String lastLine = IOUtil.readLastLine(inputStream, StandardCharsets.UTF_8);
+     *     if (lastLine != null) {
+     *         System.out.println("Last line: " + lastLine);
+     *     }
+     * } catch (IOException e) {
+     *     System.err.println("Error reading from stream: " + e.getMessage());
+     * }
+     * </code></pre>
+     *
+     * @param source The {@code InputStream} to read from. Must not be {@code null}.
+     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return The last line from the stream, or {@code null} if the stream is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readLastLine(final InputStream source, final Charset encoding) throws IOException {
