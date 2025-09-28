@@ -72,8 +72,8 @@ public class Dataset100Test extends TestBase {
         properties.put("version", 1);
 
         RowDataset dsWithProps = new RowDataset(columnNames, columnList, properties);
-        assertEquals("test", dsWithProps.properties().get("source"));
-        assertEquals(1, dsWithProps.properties().get("version"));
+        assertEquals("test", dsWithProps.getProperties().get("source"));
+        assertEquals(1, dsWithProps.getProperties().get("version"));
     }
 
     @Test
@@ -1030,7 +1030,7 @@ public class Dataset100Test extends TestBase {
 
     @Test
     public void testUpdateColumns() {
-        dataset.updateColumns(Arrays.asList("age", "salary"), val -> val instanceof Integer ? (int) val * 2 : (double) val * 2);
+        dataset.updateColumns(Arrays.asList("age", "salary"), (c, v) -> v instanceof Integer ? (int) v * 2 : (double) v * 2);
 
         assertEquals((Double) 50.0, dataset.get(0, 2)); // age doubled
         assertEquals((Double) 100000.0, dataset.get(0, 3)); // salary doubled
@@ -1436,6 +1436,63 @@ public class Dataset100Test extends TestBase {
     }
 
     @Test
+    public void testRemoveDuplicateRowsBy() {
+        Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "department"),
+                new Object[][] { { 1, "John", "IT" }, { 2, "Jane", "HR" }, { 3, "John", "Finance" }, // Duplicate name
+                        { 4, "Bob", "IT" } });
+        dataset.removeDuplicateRowsBy("name");
+        // Result: Only rows with id=1, id=2, and id=4 remain
+        // The row with id=3 is removed because "John" already exists
+        assertEquals(3, dataset.size());
+        assertEquals((Integer) 1, dataset.get(0, 0));
+        assertEquals((Integer) 2, dataset.get(1, 0));
+        assertEquals((Integer) 4, dataset.get(2, 0));
+    }
+
+    @Test
+    public void testRemoveDuplicateRowsBy2() {
+        Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "department"),
+                new Object[][] { { 1, "John Doe", "IT" }, { 2, "Jane Smith", "HR" }, { 3, "Johnathan Doe", "Finance" }, // Duplicate based on last name
+                        { 4, "Bob Brown", "IT" } });
+        dataset.removeDuplicateRowsBy("name", name -> ((String) name).split(" ")[1]); // Use last name as key
+        // Result: Only rows with id=1, id=2, and id=4 remain
+        // The row with id=3 is removed because "Doe" already exists
+        assertEquals(3, dataset.size());
+        assertEquals((Integer) 1, dataset.get(0, 0));
+        assertEquals((Integer) 2, dataset.get(1, 0));
+        assertEquals((Integer) 4, dataset.get(2, 0));
+    }
+
+    @Test
+    public void testRemoveDuplicateRows3() {
+        Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "department"),
+                new Object[][] { { 1, "John", "IT" }, { 2, "Jane", "HR" }, { 3, "John", "IT" }, // Duplicate name and department
+                        { 4, "Bob", "IT" } });
+        dataset.removeDuplicateRowsBy(Arrays.asList("name", "department"));
+        // Result: Only rows with id=1, id=2, and id=4 remain
+        // The row with id=3 is removed because ("John", "IT") already exists
+        assertEquals(3, dataset.size());
+        assertEquals((Integer) 1, dataset.get(0, 0));
+        assertEquals((Integer) 2, dataset.get(1, 0));
+        assertEquals((Integer) 4, dataset.get(2, 0));
+
+    }
+
+    @Test
+    public void testRemoveDuplicateRowsBy4() {
+        Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "department"),
+                new Object[][] { { 1, "John Doe", "IT" }, { 2, "Jane Smith", "HR" }, { 3, "Johnathan Doe", "IT" }, // Duplicate based on last name and department
+                        { 4, "Bob Brown", "IT" } });
+        dataset.removeDuplicateRowsBy(Arrays.asList("name", "department"), row -> ((String) row.get(0)).split(" ")[1] + "|" + row.get(1)); // Use last name and department as key
+        // Result: Only rows with id=1, id=2, and id=4 remain
+        // The row with id=3 is removed because ("Doe", "IT") already exists
+        assertEquals(3, dataset.size());
+        assertEquals((Integer) 1, dataset.get(0, 0));
+        assertEquals((Integer) 2, dataset.get(1, 0));
+        assertEquals((Integer) 4, dataset.get(2, 0));
+    }
+
+    @Test
     public void testUpdateRow() {
         dataset.updateRow(0, val -> val instanceof Number ? 999 : "UPDATED");
 
@@ -1447,7 +1504,7 @@ public class Dataset100Test extends TestBase {
 
     @Test
     public void testUpdateRows() {
-        dataset.updateRows(new int[] { 0, 2 }, val -> val instanceof String ? "UPDATED" : val);
+        dataset.updateRows(new int[] { 0, 2 }, (i, v) -> v instanceof String ? "UPDATED" : v);
 
         assertEquals("UPDATED", dataset.get(0, 1));
         assertEquals("UPDATED", dataset.get(2, 1));
@@ -1465,12 +1522,35 @@ public class Dataset100Test extends TestBase {
     }
 
     @Test
+    public void testUpdateAllWithIntBiObjFunction() {
+        dataset.println();
+
+        dataset.updateAll((i, c, v) -> v instanceof String ? "Name" + i : v);
+
+        dataset.println();
+
+        for (int i = 0; i < dataset.size(); i++) {
+            assertEquals("Name" + i, dataset.get(i, 1)); // name column
+        }
+    }
+
+
+    @Test
     public void testReplaceIf() {
         dataset.replaceIf(val -> val instanceof Integer && (int) val > 30, 999);
 
         assertEquals((Integer) 25, dataset.get(0, 2)); // age 25, not replaced
         assertEquals((Integer) 30, dataset.get(1, 2)); // age 30, not replaced
         assertEquals((Integer) 999, dataset.get(2, 2)); // age 35, replaced
+    }
+
+    @Test
+    public void testReplaceIfWithIntBiObjPredicate() {
+        dataset.println();
+        assertEquals("Bob", dataset.get(2, 1));
+        dataset.replaceIf((i, c, v) -> "name".equals(c) && "Bob".equals(v), "Robert");
+        dataset.println();
+        assertEquals("Robert", dataset.get(2, 1));
     }
 
     @Test
@@ -1767,8 +1847,17 @@ public class Dataset100Test extends TestBase {
     public void testToCsv() {
         String csv = dataset.toCsv();
         assertNotNull(csv);
+        N.println(csv);
         assertTrue(csv.contains("\"id\",\"name\",\"age\",\"salary\""));
         assertTrue(csv.contains("1,\"John\",25,50000.0"));
+    }
+
+    @Test
+    public void testToCsv_2() {
+        Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "Alice" }, { 2, "Bob\"s" } });
+        String csv = dataset.toCsv();
+        N.println(csv);
+
     }
 
     @Test
@@ -1860,33 +1949,27 @@ public class Dataset100Test extends TestBase {
     public void testPivot2() {
 
         Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "sales", "quantity"),
-                new Object[][] {
-                     {"North", "A", 100, 10},
-                     {"North", "B", 200, 20},
-                     {"South", "A", 150, 15},
-                     {"South", "B", 250, 25}
-                });
+                new Object[][] { { "North", "A", 100, 10 }, { "North", "B", 200, 20 }, { "South", "A", 150, 15 }, { "South", "B", 250, 25 } });
 
-            Sheet<String, String, Integer> pivotResult = dataset.pivot(
-                "region",                           // row identifier
-                "product",                          // column identifier
+        Sheet<String, String, Integer> pivotResult = dataset.pivot("region", // row identifier
+                "product", // column identifier
                 Arrays.asList("sales", "quantity"), // aggregate columns
                 Collectors.summingInt(arr -> (Integer) arr[0] + (Integer) arr[1])); // sum sales + quantity
 
-            // Result Sheet:
-            //        | A   | B   |
-            // -------|-----|-----|
-            // North  | 110 | 220 |
-            // South  | 165 | 275 |
-            N.println("Pivot with aggregation:");
-            dataset.println("     * // ");
-            pivotResult.println("     * // ");
+        // Result Sheet:
+        //        | A   | B   |
+        // -------|-----|-----|
+        // North  | 110 | 220 |
+        // South  | 165 | 275 |
+        N.println("Pivot with aggregation:");
+        dataset.println("     * // ");
+        pivotResult.println("     * // ");
 
-            // Result Sheet:
-            //        | A   | B   |
-            // -------|-----|-----|
-            // North  | 100 | 200 |
-            // South  | 150 | 250 |
+        // Result Sheet:
+        //        | A   | B   |
+        // -------|-----|-----|
+        // North  | 100 | 200 |
+        // South  | 150 | 250 |
     }
 
     @Test
@@ -2585,20 +2668,20 @@ public class Dataset100Test extends TestBase {
 
     @Test
     public void testProperties() {
-        assertTrue(dataset.properties().isEmpty());
+        assertTrue(dataset.getProperties().isEmpty());
 
         Map<String, Object> props = new HashMap<>();
         props.put("key", "value");
         Dataset dsWithProps = new RowDataset(columnNames, columnList, props);
 
-        assertEquals("value", dsWithProps.properties().get("key"));
+        assertEquals("value", dsWithProps.getProperties().get("key"));
     }
 
-    @Test
-    public void testColumnNames() {
-        List<String> names = dataset.columnNames().toList();
-        assertEquals(Arrays.asList("id", "name", "age", "salary"), names);
-    }
+    //    @Test
+    //    public void testColumnNames() {
+    //        List<String> names = dataset.columnNames().toList();
+    //        assertEquals(Arrays.asList("id", "name", "age", "salary"), names);
+    //    }
 
     @Test
     public void testColumns() {
@@ -3687,7 +3770,7 @@ public class Dataset100Test extends TestBase {
         datasetWithProps.moveRows(0, 2, 3);
         datasetWithProps.moveColumns(Arrays.asList("name"), 0);
 
-        assertEquals("value", datasetWithProps.properties().get("test"));
+        assertEquals("value", datasetWithProps.getProperties().get("test"));
         assertEquals(5, datasetWithProps.size());
         assertEquals(4, datasetWithProps.columnCount());
     }

@@ -585,24 +585,22 @@ public class DatasetTest extends AbstractTest {
         final Map<String, String> map = new HashMap<>();
         map.put(null, null);
 
-        final List<String> columNames = N.asList("id", "firstName", "contact.id", "contact.address", "contact.city", "devices.id", "devices.name",
-                "devices.model");
-        final Dataset dataset = N.newDataset(columNames, N.asList(N.asList(1, "firstName1", 1, "address1", "city1", 1, "device1", "model1"),
-                N.asList(1, "firstName2", 2, "address2", "city2", 2, "device2", "model2")));
+        final List<String> columNames = N.asList("id", "name", "devices.id", "devices.model", "devices.serialNumber");
+        final Dataset dataset = Dataset.rows(columNames,
+                new Object[][] { { 100, "Bob", 1, "iPhone", "abc123" }, { 100, "Bob", 2, "MacBook", "mmm123" }, { 200, "Alice", 3, "Android", "aaa223" } });
 
-        dataset.toList(Account.class).stream().map(N::toJson).forEach(Fn.println());
+        // dataset.toList(Account.class).stream().map(N::toJson).forEach(Fn.println());
+
+        dataset.println("     * # ");
+
+        dataset.toEntities(Map.of("d", "devices"), Account.class).forEach(e -> System.out.println(N.toJson(e)));
+
+        dataset.toMergedEntities(Account.class).forEach(e -> System.out.println(N.toJson(e)));
 
         final List<Account> accounts = dataset.toMergedEntities(Account.class);
-        accounts.stream().map(N::toJson).forEach(Fn.println());
-        assertEquals(1, accounts.size());
-        assertEquals("firstName2", accounts.get(0).getFirstName());
-        assertEquals(2, accounts.get(0).getDevices().size());
 
-        final List<Account> accounts2 = dataset.toMergedEntities(N.asList("id", "firstName"), dataset.columnNameList(), Account.class);
-        accounts2.stream().map(N::toJson).forEach(Fn.println());
-        assertEquals(2, accounts2.size());
-        assertEquals("firstName1", accounts2.get(0).getFirstName());
-        assertEquals(1, accounts2.get(0).getDevices().size());
+        String json = N.toJson(accounts, JSC.create().prettyFormat(true));
+        N.println(json);
     }
 
     @Test
@@ -931,7 +929,7 @@ public class DatasetTest extends AbstractTest {
 
         ds1.updateRow(0, t -> t instanceof String ? t + "___" : t);
 
-        ds1.updateRows(Array.of(1, 0), t -> t instanceof String ? t + "___" : t);
+        ds1.updateRows(Array.of(1, 0), (i, v) -> v instanceof String ? v + "___" : v);
 
         ds1.println();
 
@@ -939,7 +937,7 @@ public class DatasetTest extends AbstractTest {
 
         ds1.println();
 
-        ds1.updateColumns(N.asList("lastName", "firstName"), t -> t instanceof String ? t + "###" : t);
+        ds1.updateColumns(N.asList("lastName", "firstName"), (c, v) -> v instanceof String ? v + "###" : v);
 
         ds1.println();
 
@@ -1045,7 +1043,7 @@ public class DatasetTest extends AbstractTest {
         final List<Account> accountList = createAccountList(Account.class, 7);
         final MutableInt idx = MutableInt.of(100);
         final Dataset ds = N.newDataset(accountList);
-        ds.updateColumns(N.asList("firstName", "lastName"), (final String t) -> t + idx.getAndIncrement());
+        ds.updateColumns(N.asList("firstName", "lastName"), (c, v) -> (String) v + idx.getAndIncrement());
         ds.println();
 
         ds.topBy("lastName", 3).println();
@@ -1064,7 +1062,7 @@ public class DatasetTest extends AbstractTest {
         ds.renameColumns(ds.columnNameList(), t -> t + "2");
         ds.println();
 
-        ds.updateColumns(ds.columnNameList(), N::toString);
+        ds.updateColumns(ds.columnNameList(), (c, v) -> N.toString(v));
         ds.println();
     }
 

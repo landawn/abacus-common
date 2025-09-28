@@ -151,9 +151,7 @@ public interface Paginated<T> extends Iterable<T> {
     Optional<T> lastPage();
 
     /**
-     * Retrieves the page at the specified page number.
-     * The page numbering scheme (0-based or 1-based) is implementation-specific and should
-     * be documented by the implementing class.
+     * Retrieves the page at the specified page number (0-based index).
      * 
      * <p>This method throws an exception if the requested page number is out of bounds.
      * Use {@link #totalPages()} to check the valid range before calling this method, or
@@ -178,7 +176,7 @@ public interface Paginated<T> extends Iterable<T> {
      * }
      * }</pre>
      *
-     * @param pageNum the page number to retrieve (0-based or 1-based depending on implementation)
+     * @param pageNum the page number to retrieve (0-based index)
      * @return the data contained in the specified page
      * @throws IllegalArgumentException if pageNum is negative or exceeds the total number of pages
      * @throws IndexOutOfBoundsException if the page number is out of valid range (alternative to IllegalArgumentException)

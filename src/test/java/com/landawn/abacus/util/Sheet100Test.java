@@ -109,6 +109,18 @@ public class Sheet100Test extends TestBase {
             assertEquals(Integer.valueOf(2), firstRow.get(1));
 
         }
+
+        {
+            Sheet<String, String, Integer> sheet = Sheet.rows(List.of("row1", "row2"), List.of("col1", "col2"), new Integer[][] { { 1, 2 }, { 3, 4 } });
+
+            // Map each row to its sum
+            List<Pair<String, String>> result = sheet.rows((rowIndex, row) -> row.join("-")).toList();
+            assertEquals(2, result.size());
+            assertEquals("row1", result.get(0).left());
+            assertEquals("1-2", result.get(0).right());
+            assertEquals("row2", result.get(1).left());
+            assertEquals("3-4", result.get(1).right());
+        }
     }
 
     @Test
@@ -1407,7 +1419,7 @@ public class Sheet100Test extends TestBase {
         sheet.put("R2", "C2", 22);
         sheet.put("R2", "C3", 23);
 
-        List<Cell<String, String, Integer>> cells = sheet.cellsH(1).toList();
+        List<Cell<String, String, Integer>> cells = sheet.cellsH(1, 2).toList();
         assertEquals(3, cells.size());
         assertEquals("R2", cells.get(0).rowKey());
         assertEquals(Integer.valueOf(21), cells.get(0).value());
@@ -1419,7 +1431,7 @@ public class Sheet100Test extends TestBase {
         sheet.put("R2", "C2", 22);
         sheet.put("R3", "C2", 32);
 
-        List<Cell<String, String, Integer>> cells = sheet.cellsV(1).toList();
+        List<Cell<String, String, Integer>> cells = sheet.cellsV(1, 2).toList();
         assertEquals(3, cells.size());
         assertEquals("C2", cells.get(0).columnKey());
         assertEquals(Integer.valueOf(12), cells.get(0).value());
@@ -1427,7 +1439,7 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testPointsHWithSingleRow() {
-        List<Point> points = sheet.pointsH(1).toList();
+        List<Point> points = sheet.pointsH(1, 2).toList();
         assertEquals(3, points.size());
         assertEquals(Point.of(1, 0), points.get(0));
         assertEquals(Point.of(1, 1), points.get(1));
@@ -1436,7 +1448,7 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testPointsVWithSingleColumn() {
-        List<Point> points = sheet.pointsV(1).toList();
+        List<Point> points = sheet.pointsV(1, 2).toList();
         assertEquals(3, points.size());
         assertEquals(Point.of(0, 1), points.get(0));
         assertEquals(Point.of(1, 1), points.get(1));
@@ -1449,7 +1461,7 @@ public class Sheet100Test extends TestBase {
         sheet.put("R2", "C2", 22);
         sheet.put("R2", "C3", 23);
 
-        List<Integer> values = sheet.streamH(1).toList();
+        List<Integer> values = sheet.streamH(1, 2).toList();
         assertEquals(3, values.size());
         assertEquals(Integer.valueOf(21), values.get(0));
         assertEquals(Integer.valueOf(22), values.get(1));
@@ -1462,7 +1474,7 @@ public class Sheet100Test extends TestBase {
         sheet.put("R2", "C2", 22);
         sheet.put("R3", "C2", 32);
 
-        List<Integer> values = sheet.streamV(1).toList();
+        List<Integer> values = sheet.streamV(1, 2).toList();
         assertEquals(3, values.size());
         assertEquals(Integer.valueOf(12), values.get(0));
         assertEquals(Integer.valueOf(22), values.get(1));
@@ -1887,11 +1899,19 @@ public class Sheet100Test extends TestBase {
     }
 
     @Test
-    public void test_forEachNonNullH() {
-        Sheet<String, String, Integer> sheet = Sheet.rows(List.of("row1", "row2"), List.of("col1", "col2"), new Integer[][] { { 1, null }, { 3, 4 } });
+    public void test_tmp() {
+        Sheet<String, String, Integer> sheet1 = Sheet.rows(List.of("row1", "row2"), List.of("col1", "col2"), new Integer[][] { { 1, 2 }, { 3, 4 } });
 
-        sheet.forEachNonNullH((r, c, v) -> System.out.println(r + "," + c + "=" + v));
-        // Prints: row1,col1=1  row2,col1=3  row2,col2=4 (skips null)
+        sheet1.println("     * # ");
+
+        Sheet<String, String, Integer> sheet2 = Sheet.rows(List.of("row2", "row3"), List.of("col2", "col3"), new Integer[][] { { 10, 20 }, { 30, 40 } });
+
+        sheet2.println("     * # ");
+        // Add values where both exist, use non-null value otherwise
+        Sheet<String, String, String> merged = sheet1.merge(sheet2, (a, b) -> a + "#" + b);
+
+        merged.println("     * # ");
+
     }
 
 }

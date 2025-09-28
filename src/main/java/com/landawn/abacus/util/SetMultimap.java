@@ -600,6 +600,28 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Filters the SetMultimap based on the provided key-value pair filter.
+     *
+     * This method creates a new SetMultimap and adds all key-value pairs from the current SetMultimap that satisfy the provided key-value pair filter.
+     * The new SetMultimap has the same structural and hash characteristics as the current one.
+     *
+     * @param filter The predicate to be applied to each key-value pair in the SetMultimap. If the predicate returns {@code true}, the key-value pair is included in the new SetMultimap.
+     * @return A new SetMultimap containing all the key-value pairs of the current SetMultimap that satisfy the provided key-value pair filter.
+     */
+    @Override
+    public SetMultimap<K, E> filter(final BiPredicate<? super K, ? super Set<E>> filter) {
+        final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
+
+        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
+            if (filter.test(entry.getKey(), entry.getValue())) {
+                result.backingMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Filters the SetMultimap based on the provided key filter.
      *
      * This method creates a new SetMultimap and adds all key-value pairs from the current SetMultimap that satisfy the provided key filter.
@@ -636,28 +658,6 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
         for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getValue())) {
-                result.backingMap.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Filters the SetMultimap based on the provided key-value pair filter.
-     *
-     * This method creates a new SetMultimap and adds all key-value pairs from the current SetMultimap that satisfy the provided key-value pair filter.
-     * The new SetMultimap has the same structural and hash characteristics as the current one.
-     *
-     * @param filter The predicate to be applied to each key-value pair in the SetMultimap. If the predicate returns {@code true}, the key-value pair is included in the new SetMultimap.
-     * @return A new SetMultimap containing all the key-value pairs of the current SetMultimap that satisfy the provided key-value pair filter.
-     */
-    @Override
-    public SetMultimap<K, E> filter(final BiPredicate<? super K, ? super Set<E>> filter) {
-        final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
-
-        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
-            if (filter.test(entry.getKey(), entry.getValue())) {
                 result.backingMap.put(entry.getKey(), entry.getValue());
             }
         }

@@ -2142,6 +2142,54 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
+     * Creates a new Multimap containing only entries where both the key and value collection
+     * satisfy the given bi-predicate. This provides the most flexible filtering option.
+     *
+     * <p>The bi-predicate receives both the key and its entire value collection,
+     * allowing complex filtering logic based on the relationship between keys and their values.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("scores_2023", Arrays.asList(85, 92, 78));
+     * multimap.putMany("scores_2022", Arrays.asList(90, 88));
+     * multimap.putMany("temp_data", Arrays.asList(1, 2, 3, 4, 5));
+     * 
+     * // Filter recent years with good average scores
+     * Multimap<String, Integer, ?> goodRecentScores = multimap.filter(
+     *     (key, values) -> key.contains("2023") && 
+     *                      values.stream().mapToInt(Integer::intValue).average().orElse(0) > 80);
+     * 
+     * // Filter by key length and collection size relationship
+     * Multimap<String, Integer, ?> balanced = multimap.filter(
+     *     (key, values) -> key.length() > values.size());
+     * 
+     * // Complex business logic
+     * Multimap<String, Integer, ?> filtered = multimap.filter(
+     *     (key, values) -> !key.startsWith("temp_") && 
+     *                      !values.isEmpty() && 
+     *                      values.stream().allMatch(v -> v > 0));
+     * }</pre>
+     *
+     * @param filter the bi-predicate to test each key-value collection pair
+     * @return a new Multimap containing only entries that satisfy the bi-predicate
+     * @throws NullPointerException if filter is null
+     * @see #filterByKey(Predicate)
+     * @see #filterByValue(Predicate)
+     */
+    public Multimap<K, E, V> filter(final BiPredicate<? super K, ? super V> filter) {
+        final Multimap<K, E, V> result = new Multimap<>(mapSupplier, valueSupplier);
+    
+        for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
+            if (filter.test(entry.getKey(), entry.getValue())) {
+                result.backingMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+    
+        return result;
+    }
+
+    /**
      * Creates a new Multimap containing only entries where the key satisfies the given predicate.
      * This is a non-destructive filtering operation that preserves the original Multimap.
      *
@@ -2221,54 +2269,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (filter.test(entry.getValue())) {
-                result.backingMap.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Creates a new Multimap containing only entries where both the key and value collection
-     * satisfy the given bi-predicate. This provides the most flexible filtering option.
-     *
-     * <p>The bi-predicate receives both the key and its entire value collection,
-     * allowing complex filtering logic based on the relationship between keys and their values.</p>
-     *
-     * <p>Example usage:</p>
-     * <pre>{@code
-     * ListMultimap<String, Integer> multimap = N.newListMultimap();
-     * multimap.putMany("scores_2023", Arrays.asList(85, 92, 78));
-     * multimap.putMany("scores_2022", Arrays.asList(90, 88));
-     * multimap.putMany("temp_data", Arrays.asList(1, 2, 3, 4, 5));
-     * 
-     * // Filter recent years with good average scores
-     * Multimap<String, Integer, ?> goodRecentScores = multimap.filter(
-     *     (key, values) -> key.contains("2023") && 
-     *                      values.stream().mapToInt(Integer::intValue).average().orElse(0) > 80);
-     * 
-     * // Filter by key length and collection size relationship
-     * Multimap<String, Integer, ?> balanced = multimap.filter(
-     *     (key, values) -> key.length() > values.size());
-     * 
-     * // Complex business logic
-     * Multimap<String, Integer, ?> filtered = multimap.filter(
-     *     (key, values) -> !key.startsWith("temp_") && 
-     *                      !values.isEmpty() && 
-     *                      values.stream().allMatch(v -> v > 0));
-     * }</pre>
-     *
-     * @param filter the bi-predicate to test each key-value collection pair
-     * @return a new Multimap containing only entries that satisfy the bi-predicate
-     * @throws NullPointerException if filter is null
-     * @see #filterByKey(Predicate)
-     * @see #filterByValue(Predicate)
-     */
-    public Multimap<K, E, V> filter(final BiPredicate<? super K, ? super V> filter) {
-        final Multimap<K, E, V> result = new Multimap<>(mapSupplier, valueSupplier);
-
-        for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
-            if (filter.test(entry.getKey(), entry.getValue())) {
                 result.backingMap.put(entry.getKey(), entry.getValue());
             }
         }
@@ -2824,19 +2824,20 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * Therefore, the total count of values is the sum of the sizes of all value collections.
      *
      * @return The total count of all the elements in all value collections in the Multimap.
+     * @throws ArithmeticException if the total count of values overflows an int
      */
-    public int totalCountOfValues() {
+    public int totalCountOfValues() throws ArithmeticException {
         if (backingMap.isEmpty()) {
             return 0;
         }
 
-        int count = 0;
+        long count = 0;
 
         for (final V v : backingMap.values()) {
             count += v.size();
         }
 
-        return count;
+        return Numbers.toIntExact(count);
     }
 
     /**

@@ -1359,7 +1359,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
         }
 
-        if (N.notEmpty(ds.properties())) {
+        if (N.notEmpty(ds.getProperties())) {
             {
                 if (isPrettyFormat) {
                     bw.write(IOUtil.LINE_SEPARATOR);
@@ -1382,7 +1382,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
             bw.write(COLON_SPACE_CHAR_ARRAY);
 
-            write(ds.properties(), config, false, nextIndentation, serializedObjects, bw);
+            write(ds.getProperties(), config, false, nextIndentation, serializedObjects, bw);
 
             if (isPrettyFormat) {
                 bw.write(_COMMA);

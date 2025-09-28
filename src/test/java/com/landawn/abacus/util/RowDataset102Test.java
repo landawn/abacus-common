@@ -764,16 +764,16 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testProperties() {
-        Map<String, Object> props = ds1.properties();
+        Map<String, Object> props = ds1.getProperties();
         assertNotNull(props);
     }
 
-    @Test
-    public void testColumnNames() {
-        List<String> columnNames = ds1.columnNames().toList();
-        assertEquals(3, columnNames.size());
-        assertEquals(N.asList("id", "name", "age"), columnNames);
-    }
+    //    @Test
+    //    public void testColumnNames() {
+    //        List<String> columnNames = ds1.columnNames().toList();
+    //        assertEquals(3, columnNames.size());
+    //        assertEquals(N.asList("id", "name", "age"), columnNames);
+    //    }
 
     @Test
     public void testColumns() {

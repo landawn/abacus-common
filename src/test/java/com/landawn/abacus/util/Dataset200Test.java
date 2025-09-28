@@ -81,7 +81,7 @@ public class Dataset200Test extends TestBase {
         Map<String, Object> props = new HashMap<>();
         props.put("key1", "value1");
         RowDataset ds = new RowDataset(columnNames, columnValues, props);
-        assertEquals("value1", ds.properties().get("key1"));
+        assertEquals("value1", ds.getProperties().get("key1"));
     }
 
     @Test
@@ -535,7 +535,7 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void updateColumns_collection() {
-        sampleDataset.updateColumns(Arrays.asList("ID", "Age"), val -> ((Number) val).intValue() + 100);
+        sampleDataset.updateColumns(Arrays.asList("ID", "Age"), (c, v) -> ((Number) v).intValue() + 100);
         assertEquals(Arrays.asList(101, 102, 103), sampleDataset.getColumn("ID"));
         assertEquals(Arrays.asList(130, 124, 135), sampleDataset.getColumn("Age"));
     }
@@ -1287,20 +1287,20 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void properties_access() {
-        assertTrue(sampleDataset.properties().isEmpty());
+        assertTrue(sampleDataset.getProperties().isEmpty());
         Map<String, Object> props = new HashMap<>();
         props.put("version", 1.2);
         RowDataset dsWithProps = new RowDataset(columnNames, columnValues, props);
-        assertEquals(1.2, (Double) dsWithProps.properties().get("version"), 0.001);
+        assertEquals(1.2, (Double) dsWithProps.getProperties().get("version"), 0.001);
         // Test immutability of returned properties map
-        assertThrows(UnsupportedOperationException.class, () -> dsWithProps.properties().put("newKey", "newVal"));
+        assertThrows(UnsupportedOperationException.class, () -> dsWithProps.getProperties().put("newKey", "newVal"));
     }
 
-    @Test
-    public void columnNames_stream() {
-        List<String> streamedNames = sampleDataset.columnNames().toList();
-        assertEquals(columnNames, streamedNames);
-    }
+    //    @Test
+    //    public void columnNames_stream() {
+    //        List<String> streamedNames = sampleDataset.columnNames().toList();
+    //        assertEquals(columnNames, streamedNames);
+    //    }
 
     @Test
     public void columns_streamOfImmutableLists() {

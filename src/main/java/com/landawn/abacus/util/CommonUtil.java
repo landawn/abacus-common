@@ -9922,6 +9922,11 @@ sealed class CommonUtil permits N {
                     }
                 }
             } else if (type.isArray()) {
+                if (Array.getLength(row) != columnCount) {
+                    throw new IllegalArgumentException(
+                            "The length of row array (" + Array.getLength(row) + ") does not match the length of column name list (" + columnCount + ")");
+                }
+
                 if (type.isPrimitiveArray()) {
                     for (int i = 0; i < columnCount; i++) {
                         columnList.get(i).add(Array.get(row, i));
@@ -9934,7 +9939,13 @@ sealed class CommonUtil permits N {
                     }
                 }
             } else if (type.isCollection()) {
-                final Iterator<Object> it = ((Collection<Object>) row).iterator();
+                final Collection<Object> c = (Collection<Object>) row;
+                if (c.size() != columnCount) {
+                    throw new IllegalArgumentException(
+                            "The size of row collection (" + c.size() + ") does not match the length of column name list (" + columnCount + ")");
+                }
+
+                final Iterator<Object> it = c.iterator();
 
                 for (int i = 0; i < columnCount; i++) {
                     columnList.get(i).add(it.next());
@@ -10012,7 +10023,7 @@ sealed class CommonUtil permits N {
         final List<String> columnNameList = asList(keyColumnName, valueColumnName);
         final List<List<Object>> columnList = asList(keyColumn, valueColumn);
 
-        return newDataset(columnNameList, columnList);
+        return new RowDataset(columnNameList, columnList);
     }
 
     /**
@@ -10163,8 +10174,8 @@ sealed class CommonUtil permits N {
                 columnNameSet.addAll(ds.columnNameList());
                 totalSize += ds.size();
 
-                if (notEmpty(ds.properties())) {
-                    props.putAll(ds.properties());
+                if (notEmpty(ds.getProperties())) {
+                    props.putAll(ds.getProperties());
                 }
             }
 

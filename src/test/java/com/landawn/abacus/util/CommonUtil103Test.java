@@ -1164,7 +1164,7 @@ public class CommonUtil103Test extends TestBase {
         assertNotNull(ds);
         assertEquals(0, ds.size());
         assertEquals(2, ds.columnCount());
-        assertEquals("value", ds.properties().get("key"));
+        assertEquals("value", ds.getProperties().get("key"));
     }
 
     @Test
@@ -1198,7 +1198,7 @@ public class CommonUtil103Test extends TestBase {
         Dataset ds = N.newDataset(rows, properties);
         assertNotNull(ds);
         assertEquals(1, ds.size());
-        assertEquals("test", ds.properties().get("source"));
+        assertEquals("test", ds.getProperties().get("source"));
     }
 
     @Test

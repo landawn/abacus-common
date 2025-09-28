@@ -626,6 +626,28 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     }
 
     /**
+     * Filters the ListMultimap based on the provided key-value pair filter.
+     *
+     * This method creates a new ListMultimap and adds all key-value pairs from the current ListMultimap that satisfy the provided key-value pair filter.
+     * The new ListMultimap has the same structural and hash characteristics as the current one.
+     *
+     * @param filter The predicate to be applied to each key-value pair in the ListMultimap. If the predicate returns {@code true}, the key-value pair is included in the new ListMultimap.
+     * @return A new ListMultimap containing all the key-value pairs of the current ListMultimap that satisfy the provided key-value pair filter.
+     */
+    @Override
+    public ListMultimap<K, E> filter(final BiPredicate<? super K, ? super List<E>> filter) {
+        final ListMultimap<K, E> result = new ListMultimap<>(mapSupplier, valueSupplier);
+
+        for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
+            if (filter.test(entry.getKey(), entry.getValue())) {
+                result.backingMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Filters the ListMultimap based on the provided key filter.
      *
      * This method creates a new ListMultimap and adds all key-value pairs from the current ListMultimap that satisfy the provided key filter.
@@ -662,28 +684,6 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
         for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getValue())) {
-                result.backingMap.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Filters the ListMultimap based on the provided key-value pair filter.
-     *
-     * This method creates a new ListMultimap and adds all key-value pairs from the current ListMultimap that satisfy the provided key-value pair filter.
-     * The new ListMultimap has the same structural and hash characteristics as the current one.
-     *
-     * @param filter The predicate to be applied to each key-value pair in the ListMultimap. If the predicate returns {@code true}, the key-value pair is included in the new ListMultimap.
-     * @return A new ListMultimap containing all the key-value pairs of the current ListMultimap that satisfy the provided key-value pair filter.
-     */
-    @Override
-    public ListMultimap<K, E> filter(final BiPredicate<? super K, ? super List<E>> filter) {
-        final ListMultimap<K, E> result = new ListMultimap<>(mapSupplier, valueSupplier);
-
-        for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
-            if (filter.test(entry.getKey(), entry.getValue())) {
                 result.backingMap.put(entry.getKey(), entry.getValue());
             }
         }

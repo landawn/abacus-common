@@ -69,6 +69,8 @@ import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.function.IntBiObjFunction;
+import com.landawn.abacus.util.function.IntBiObjPredicate;
 import com.landawn.abacus.util.function.IntObjConsumer;
 import com.landawn.abacus.util.function.IntObjFunction;
 import com.landawn.abacus.util.function.TriFunction;
@@ -171,12 +173,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
         _columnList = columnList;
 
-        if (N.isEmpty(properties)) {
-            _properties = EMPTY_PROPERTIES;
-        } else {
-            _properties = Maps.newOrderingMap(properties);
-            _properties.putAll(properties);
-        }
+        _properties = copyProperties(properties);
     }
 
     //    @Override
@@ -1173,7 +1170,7 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
-    public void updateColumns(final Collection<String> columnNames, final Function<?, ?> func) {
+    public void updateColumns(final Collection<String> columnNames, final BiFunction<String, ?, ?> func) {
         checkFrozen();
 
         if (N.isEmpty(columnNames)) {
@@ -1182,13 +1179,13 @@ public final class RowDataset implements Dataset, Cloneable {
 
         checkColumnNames(columnNames);
 
-        final Function<Object, Object> funcToUse = (Function<Object, Object>) func;
+        final BiFunction<String, Object, Object> funcToUse = (BiFunction<String, Object, Object>) func;
 
         for (final String columnName : columnNames) {
             final List<Object> column = _columnList.get(checkColumnName(columnName));
 
             for (int i = 0, len = size(); i < len; i++) {
-                column.set(i, funcToUse.apply(column.get(i)));
+                column.set(i, funcToUse.apply(columnName, column.get(i)));
             }
         }
 
@@ -1431,6 +1428,32 @@ public final class RowDataset implements Dataset, Cloneable {
         modCount++;
     }
 
+    //    @Override
+    //    public Stream<String> columnNames() {
+    //        return Stream.of(_columnNameList);
+    //    }
+
+    @Override
+    public Stream<ImmutableList<Object>> columns() {
+        //noinspection resource
+        return IntStream.range(0, columnCount()).mapToObj(this::getColumn);
+    }
+
+    @Override
+    public Map<String, ImmutableList<Object>> columnMap() {
+        final Map<String, ImmutableList<Object>> result = new LinkedHashMap<>(_columnNameList.size());
+
+        for (final String columnName : _columnNameList) {
+            result.put(columnName, getColumn(columnName));
+        }
+
+        return result;
+    }
+
+    //    @Override
+    //    public DatasetBuilder builder() {
+    //        return Builder.of(this);
+    //    }
     @Override
     public void addRow(final Object row) {
         addRow(size(), row);
@@ -1842,18 +1865,18 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
-    public void updateRows(final int[] rowIndexesToUpdate, final Function<?, ?> func) {
+    public void updateRows(final int[] rowIndexesToUpdate, final IntObjFunction<?, ?> func) {
         checkFrozen();
 
         for (final int rowIndex : rowIndexesToUpdate) {
             checkRowIndex(rowIndex);
         }
 
-        final Function<Object, Object> funcToUse = (Function<Object, Object>) func;
+        final IntObjFunction<Object, Object> funcToUse = (IntObjFunction<Object, Object>) func;
 
         for (final List<Object> column : _columnList) {
             for (final int rowIndex : rowIndexesToUpdate) {
-                column.set(rowIndex, funcToUse.apply(column.get(rowIndex)));
+                column.set(rowIndex, funcToUse.apply(rowIndex, column.get(rowIndex)));
             }
         }
 
@@ -1870,6 +1893,26 @@ public final class RowDataset implements Dataset, Cloneable {
         for (final List<Object> column : _columnList) {
             for (int i = 0; i < size; i++) {
                 column.set(i, funcToUse.apply(column.get(i)));
+            }
+        }
+
+        modCount++;
+    }
+
+    @Override
+    public void updateAll(final IntBiObjFunction<String, ?, ?> func) {
+        checkFrozen();
+
+        final IntBiObjFunction<String, Object, Object> funcToUse = (IntBiObjFunction<String, Object, Object>) func;
+        final int columnCount = columnCount();
+        final int size = size();
+
+        for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+            final String columnName = _columnNameList.get(columnIndex);
+            final List<Object> column = _columnList.get(columnIndex);
+
+            for (int rowIndex = 0; rowIndex < size; rowIndex++) {
+                column.set(rowIndex, funcToUse.apply(rowIndex, columnName, column.get(rowIndex)));
             }
         }
 
@@ -1895,6 +1938,28 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
+    public void replaceIf(final IntBiObjPredicate<String, ?> predicate, final Object newValue) {
+        checkFrozen();
+
+        final IntBiObjPredicate<String, Object> predicateToUse = (IntBiObjPredicate<String, Object>) predicate;
+        final int columnCount = columnCount();
+        final int size = size();
+
+        for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+            final String columnName = _columnNameList.get(columnIndex);
+            final List<Object> column = _columnList.get(columnIndex);
+
+            for (int rowIndex = 0; rowIndex < size; rowIndex++) {
+                if (predicateToUse.test(rowIndex, columnName, column.get(rowIndex))) {
+                    column.set(rowIndex, newValue);
+                }
+            }
+        }
+
+        modCount++;
+    }
+
+    @Override
     public void prepend(final Dataset other) {
         checkFrozen();
         checkIfColumnNamesAreSame(other, true);
@@ -1905,7 +1970,7 @@ public final class RowDataset implements Dataset, Cloneable {
             _columnList.get(columnIndexesForOther[i]).addAll(0, other.getColumn(i));
         }
 
-        mergeProperties(other.properties());
+        mergeProperties(other.getProperties());
 
         modCount++;
     }
@@ -1921,7 +1986,7 @@ public final class RowDataset implements Dataset, Cloneable {
             _columnList.get(columnIndexesForOther[i]).addAll(other.getColumn(i));
         }
 
-        mergeProperties(other.properties());
+        mergeProperties(other.getProperties());
 
         modCount++;
     }
@@ -2002,7 +2067,7 @@ public final class RowDataset implements Dataset, Cloneable {
             }
         }
 
-        result.mergeProperties(other.properties());
+        result.mergeProperties(other.getProperties());
 
         modCount++;
     }
@@ -2723,6 +2788,11 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
+    public <T> List<T> toMergedEntities(final Map<String, String> prefixAndFieldNameMap, final Class<? extends T> rowType) throws IllegalArgumentException {
+        return toMergedEntities(ParserUtil.getBeanInfo(rowType).idPropNameList, _columnNameList, prefixAndFieldNameMap, rowType);
+    }
+
+    @Override
     public <T> List<T> toMergedEntities(final String idPropName, final Class<? extends T> rowType) {
         return toMergedEntities(idPropName, _columnNameList, rowType);
     }
@@ -2733,8 +2803,19 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
+    public <T> List<T> toMergedEntities(final String idPropName, final Map<String, String> prefixAndFieldNameMap, final Class<? extends T> rowType) {
+        return toMergedEntities(N.asList(idPropName), _columnNameList, prefixAndFieldNameMap, rowType);
+    }
+
+    @Override
     public <T> List<T> toMergedEntities(final Collection<String> idPropNames, final Collection<String> selectPropNames, final Class<? extends T> rowType) {
         return toMergedEntities(idPropNames, selectPropNames, null, rowType);
+    }
+
+    @Override
+    public <T> List<T> toMergedEntities(final Collection<String> idPropNames, final Map<String, String> prefixAndFieldNameMap,
+            final Class<? extends T> rowType) {
+        return toMergedEntities(idPropNames, _columnNameList, prefixAndFieldNameMap, rowType);
     }
 
     @Override
@@ -6293,7 +6374,7 @@ public final class RowDataset implements Dataset, Cloneable {
             }
         }
 
-        return new RowDataset(newColumnNameList, newColumnList, copyProperties ? _properties : null);
+        return new RowDataset(newColumnNameList, newColumnList, copyProperties ? copyProperties(_properties) : null);
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
@@ -9349,8 +9430,8 @@ public final class RowDataset implements Dataset, Cloneable {
     public void clear() {
         checkFrozen();
 
-        for (final List<Object> objects : _columnList) {
-            objects.clear();
+        for (final List<Object> column : _columnList) {
+            column.clear();
         }
 
         // columnList.clear();
@@ -9360,11 +9441,28 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
-    public Map<String, Object> properties() {
+    public Map<String, Object> getProperties() {
         if (_properties == EMPTY_PROPERTIES) {
             return _properties;
         } else {
             return ImmutableMap.wrap(_properties);
+        }
+    }
+
+    @Override
+    public void setProperties(final Map<String, ?> properties) {
+        checkFrozen();
+
+        this._properties = copyProperties(properties);
+    }
+
+    private static Map<String, Object> copyProperties(final Map<String, ?> properties) {
+        if (N.isEmpty(properties)) {
+            return EMPTY_PROPERTIES;
+        } else {
+            Map<String, Object> result = Maps.newOrderingMap(properties);
+            result.putAll(properties);
+            return result;
         }
     }
 
@@ -9389,33 +9487,6 @@ public final class RowDataset implements Dataset, Cloneable {
     //        }
     //
     //        return (T) _properties.remove(propName);
-    //    }
-
-    @Override
-    public Stream<String> columnNames() {
-        return Stream.of(_columnNameList);
-    }
-
-    @Override
-    public Stream<ImmutableList<Object>> columns() {
-        //noinspection resource
-        return IntStream.range(0, columnCount()).mapToObj(this::getColumn);
-    }
-
-    @Override
-    public Map<String, ImmutableList<Object>> columnMap() {
-        final Map<String, ImmutableList<Object>> result = new LinkedHashMap<>(_columnNameList.size());
-
-        for (final String columnName : _columnNameList) {
-            result.put(columnName, getColumn(columnName));
-        }
-
-        return result;
-    }
-
-    //    @Override
-    //    public DatasetBuilder builder() {
-    //        return Builder.of(this);
     //    }
 
     @Override

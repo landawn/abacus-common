@@ -647,7 +647,7 @@ public class RowDataset100Test extends TestBase {
 
     @Test
     public void testUpdateColumns() {
-        dataset.updateColumns(Arrays.asList("id", "age"), (Function<Integer, Integer>) val -> (Integer) val * 10);
+        dataset.updateColumns(Arrays.asList("id", "age"), (c, v) -> (Integer) v * 10);
         Assertions.assertEquals(10, (Integer) dataset.get(0, 0));
         Assertions.assertEquals(250, (Integer) dataset.get(0, 2));
     }
@@ -824,7 +824,7 @@ public class RowDataset100Test extends TestBase {
 
     @Test
     public void testUpdateRows() {
-        dataset.updateRows(new int[] { 0, 2 }, (Function<Object, Object>) val -> val instanceof Integer ? (Integer) val * 2 : val);
+        dataset.updateRows(new int[] { 0, 2 }, (i, v) -> v instanceof Integer ? (Integer) v * 2 : v);
         Assertions.assertEquals(2, (Integer) dataset.get(0, 0));
         Assertions.assertEquals(50, (Integer) dataset.get(0, 2));
         Assertions.assertEquals(2, (Integer) dataset.get(1, 0)); // Unchanged

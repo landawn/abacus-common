@@ -283,7 +283,7 @@ public class Builder103Test extends TestBase {
     public void testUpdateColumns() {
         // Test updating values in multiple columns
         Collection<String> columnsToUpdate = Arrays.asList("age", "salary");
-        Function<Number, Number> func = num -> {
+        BiFunction<String, Number, Number> func = (c, num) -> {
             if (num instanceof Integer) {
                 return ((Integer) num) * 2;
             } else if (num instanceof Double) {

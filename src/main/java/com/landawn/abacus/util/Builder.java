@@ -40,6 +40,8 @@ import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.function.IntBiObjFunction;
+import com.landawn.abacus.util.function.IntBiObjPredicate;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -2529,14 +2531,14 @@ public class Builder<T> {
          * <p>Example:</p>
          * <pre>{@code
          * datasetBuilder.updateColumns(Arrays.asList("price", "cost"), 
-         *                             (Double v) -> v * 1.1);
+         *                             (String c, Double v) -> v * 1.1);
          * }</pre>
          *
          * @param columnNames the names of columns to update
          * @param func the function to transform values in the specified columns
          * @return this builder instance for method chaining
          */
-        public DatasetBuilder updateColumns(final Collection<String> columnNames, final Function<?, ?> func) {
+        public DatasetBuilder updateColumns(final Collection<String> columnNames, final BiFunction<String, ?, ?> func) {
             val.updateColumns(columnNames, func);
 
             return this;
@@ -2782,6 +2784,31 @@ public class Builder<T> {
         }
 
         /**
+        * Updates all the values in the Dataset.
+        * <br />
+        * The update is performed by applying a function to each value in the Dataset. The function takes the row index, column name, and current value, and returns the new value.
+         * 
+         * <p>Example:</p>
+         * <pre>{@code
+         * datasetBuilder.updateAll((rowIndex, colName, value) -> {
+         *     if ("status".equals(colName) && value == null) {
+         *         return "inactive";
+         *     }
+         *     return value;
+         * });
+         * }</pre>
+         *
+         * @param func The function to be applied to each value in the Dataset. It takes the row index, column name, and current value, and returns the new value.
+         * @return this builder instance for method chaining
+         * @see Dataset#updateAll(IntBiObjFunction)
+         */
+        public DatasetBuilder updateAll(final IntBiObjFunction<String, ?, ?> func) {
+            val.updateAll(func);
+
+            return this;
+        }
+
+        /**
          * Replaces all values in the dataset that match a predicate with a new value.
          * 
          * <p>Example:</p>
@@ -2794,6 +2821,28 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          */
         public DatasetBuilder replaceIf(final Predicate<?> predicate, final Object newValue) {
+            val.replaceIf(predicate, newValue);
+
+            return this;
+        }
+
+
+        /**
+         * Replaces values in the Dataset that satisfy a specified condition with a new value.
+         * <br />
+         * The predicate takes the row index, column name, and each value in the Dataset as input, and returns a boolean indicating whether the value should be replaced.
+         *
+         * <p>Example:</p>
+         * <pre>{@code
+         *  datasetBuilder.replaceIf((rowIndex, colName, value) -> "status".equals(colName) && "inactive".equals(value), "N/A");
+         * }</pre>
+         *
+         * @param predicate The predicate to test each value in the sheet. It takes the row index, column name, and a value from the Dataset as input, and returns a boolean indicating whether the value should be replaced.
+         * @param newValue The new value to replace the values that satisfy the condition.
+         * @return this builder instance for method chaining
+         * @see Dataset#replaceIf(IntBiObjPredicate, Object)
+         */
+        public DatasetBuilder replaceIf(final IntBiObjPredicate<String, ?> predicate, final Object newValue) {
             val.replaceIf(predicate, newValue);
 
             return this;
