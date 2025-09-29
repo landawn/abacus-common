@@ -8,9 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1229,56 +1226,4 @@ public class Seq104Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2).joinTo(null));
     }
 
-    @Test
-    public void testSaveEach() throws IOException {
-        // Test saving to file
-        File output = new File(tempDir.toFile(), "test_output.txt");
-        Seq<Integer, RuntimeException> seq = Seq.of(1, 2, 3, 4, 5);
-
-        // Continue processing after saving
-        long count = seq.saveEach(output).filter(n -> n > 2).count();
-
-        assertEquals(3, count);
-
-        // Verify file contents
-        List<String> lines = Files.readAllLines(output.toPath());
-        assertEquals(Arrays.asList("1", "2", "3", "4", "5"), lines);
-    }
-
-    @Test
-    public void testSaveEachWithFunction() throws IOException {
-        // Test saving with custom formatting
-        File output = new File(tempDir.toFile(), "test_output_formatted.txt");
-        Seq<String, RuntimeException> seq = Seq.of("apple", "banana", "cherry");
-
-        // Save with uppercase transformation
-        seq.saveEach(e -> e.toUpperCase(), output).forEach(System.out::println);
-
-        // Verify file contents
-        List<String> lines = Files.readAllLines(output.toPath());
-        assertEquals(Arrays.asList("APPLE", "BANANA", "CHERRY"), lines);
-    }
-
-    @Test
-    public void testSaveEachLargeSequence() throws IOException {
-        // Test with large sequence to trigger flushing
-        File output = new File(tempDir.toFile(), "test_output_large.txt");
-        int size = 10000;
-        Seq<Integer, RuntimeException> seq = Seq.range(0, size);
-
-        long sum = seq.saveEach(output).sumLong(Integer::longValue);
-
-        assertEquals((long) size * (size - 1) / 2, sum);
-
-        // Verify file was written
-        assertTrue(output.exists());
-        assertTrue(output.length() > 0);
-    }
-
-    @Test
-    public void testSaveEachWithNullFile() {
-        // Test saving with null file
-        Seq<Integer, RuntimeException> seq = Seq.of(1, 2, 3);
-        assertThrows(IllegalArgumentException.class, () -> seq.saveEach(null));
-    }
 }

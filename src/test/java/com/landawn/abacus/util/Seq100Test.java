@@ -7,26 +7,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -46,8 +37,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import javax.sql.DataSource;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -1512,182 +1501,182 @@ public class Seq100Test extends TestBase {
         assertEquals(Arrays.asList("a1true", "b99false", "x99true"), result);
     }
 
-    @Test
-    public void testSaveEachToFile() throws Exception {
-        File output = Files.createTempFile(tempFolder, "test", ".txt").toFile();
-
-        List<String> data = Arrays.asList("line1", "line2", "line3");
-        List<String> result = Seq.of(data).saveEach(output).toList();
-
-        assertEquals(data, result);
-        assertEquals(Arrays.asList("line1", "line2", "line3"), Files.readAllLines(output.toPath()));
-    }
-
-    @Test
-    public void testSaveEachToFileWithMapper() throws Exception {
-        File output = Files.createTempFile(tempFolder, "test", ".txt").toFile();
-
-        List<Integer> data = Arrays.asList(1, 2, 3);
-        List<Integer> result = Seq.of(data).saveEach(n -> "Number: " + n, output).toList();
-
-        assertEquals(data, result);
-        assertEquals(Arrays.asList("Number: 1", "Number: 2", "Number: 3"), Files.readAllLines(output.toPath()));
-    }
-
-    @Test
-    public void testSaveEachToOutputStream() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        List<String> data = Arrays.asList("line1", "line2");
-        List<String> result = Seq.of(data).saveEach(s -> s, baos).toList();
-
-        assertEquals(data, result);
-        String content = baos.toString();
-        assertTrue(content.contains("line1"));
-        assertTrue(content.contains("line2"));
-    }
-
-    @Test
-    public void testSaveEachToWriter() throws Exception {
-        StringWriter writer = new StringWriter();
-
-        List<String> data = Arrays.asList("line1", "line2");
-        List<String> result = Seq.of(data).saveEach(s -> s, writer).toList();
-
-        assertEquals(data, result);
-        String content = writer.toString();
-        assertTrue(content.contains("line1"));
-        assertTrue(content.contains("line2"));
-    }
-
-    @Test
-    public void testSaveEachWithBiConsumerToFile() throws Exception {
-        File output = Files.createTempFile(tempFolder, "test", ".txt").toFile();
-
-        List<Integer> data = Arrays.asList(1, 2, 3);
-        List<Integer> result = Seq.of(data).saveEach((n, w) -> w.write("Num: " + n), output).toList();
-
-        assertEquals(data, result);
-        List<String> lines = Files.readAllLines(output.toPath());
-        assertEquals(Arrays.asList("Num: 1", "Num: 2", "Num: 3"), lines);
-    }
-
-    @Test
-    public void testSaveEachWithBiConsumerToWriter() throws Exception {
-        StringWriter writer = new StringWriter();
-
-        List<Integer> data = Arrays.asList(1, 2, 3);
-        List<Integer> result = Seq.of(data).saveEach((n, w) -> w.write("Num: " + n), writer).toList();
-
-        assertEquals(data, result);
-        String content = writer.toString();
-        assertTrue(content.contains("Num: 1"));
-        assertTrue(content.contains("Num: 2"));
-        assertTrue(content.contains("Num: 3"));
-    }
-
-    @Test
-    public void testSaveEachToPreparedStatement() throws Exception {
-        PreparedStatement stmt = mock(PreparedStatement.class);
-
-        List<Integer> data = Arrays.asList(1, 2, 3);
-        List<Integer> result = Seq.of(data).saveEach(stmt, (n, ps) -> {
-            ps.setInt(1, n);
-            ps.setString(2, "Value" + n);
-        }).toList();
-
-        assertEquals(data, result);
-        verify(stmt, times(3)).setInt(anyInt(), anyInt());
-        verify(stmt, times(3)).setString(anyInt(), anyString());
-        verify(stmt, times(3)).execute();
-    }
-
-    @Test
-    public void testSaveEachToPreparedStatementBatch() throws Exception {
-        PreparedStatement stmt = mock(PreparedStatement.class);
-        when(stmt.executeBatch()).thenReturn(new int[] { 1, 1 });
-
-        List<Integer> data = Arrays.asList(1, 2, 3, 4, 5);
-        List<Integer> result = Seq.of(data).saveEach(stmt, 2, 0, (n, ps) -> {
-            ps.setInt(1, n);
-        }).toList();
-
-        assertEquals(data, result);
-        verify(stmt, times(5)).setInt(anyInt(), anyInt());
-        verify(stmt, times(5)).addBatch();
-        verify(stmt, times(3)).executeBatch(); // 2 + 2 + 1
-    }
-
     //    @Test
-    //    public void testSaveEachToConnection() throws Exception {
-    //        Connection conn = mock(Connection.class);
-    //        PreparedStatement stmt = mock(PreparedStatement.class);
-    //        when(conn.prepareStatement(anyString())).thenReturn(stmt);
+    //    public void testSaveEachToFile() throws Exception {
+    //        File output = Files.createTempFile(tempFolder, "test", ".txt").toFile();
+    //
+    //        List<String> data = Arrays.asList("line1", "line2", "line3");
+    //        List<String> result = Seq.of(data).saveEach(output).toList();
+    //
+    //        assertEquals(data, result);
+    //        assertEquals(Arrays.asList("line1", "line2", "line3"), Files.readAllLines(output.toPath()));
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToFileWithMapper() throws Exception {
+    //        File output = Files.createTempFile(tempFolder, "test", ".txt").toFile();
     //
     //        List<Integer> data = Arrays.asList(1, 2, 3);
-    //        List<Integer> result = Seq.of(data).saveEach(conn, "INSERT INTO test VALUES (?)", (n, ps) -> {
+    //        List<Integer> result = Seq.of(data).saveEach(n -> "Number: " + n, output).toList();
+    //
+    //        assertEquals(data, result);
+    //        assertEquals(Arrays.asList("Number: 1", "Number: 2", "Number: 3"), Files.readAllLines(output.toPath()));
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToOutputStream() throws Exception {
+    //        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    //
+    //        List<String> data = Arrays.asList("line1", "line2");
+    //        List<String> result = Seq.of(data).saveEach(s -> s, baos).toList();
+    //
+    //        assertEquals(data, result);
+    //        String content = baos.toString();
+    //        assertTrue(content.contains("line1"));
+    //        assertTrue(content.contains("line2"));
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToWriter() throws Exception {
+    //        StringWriter writer = new StringWriter();
+    //
+    //        List<String> data = Arrays.asList("line1", "line2");
+    //        List<String> result = Seq.of(data).saveEach(s -> s, writer).toList();
+    //
+    //        assertEquals(data, result);
+    //        String content = writer.toString();
+    //        assertTrue(content.contains("line1"));
+    //        assertTrue(content.contains("line2"));
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachWithBiConsumerToFile() throws Exception {
+    //        File output = Files.createTempFile(tempFolder, "test", ".txt").toFile();
+    //
+    //        List<Integer> data = Arrays.asList(1, 2, 3);
+    //        List<Integer> result = Seq.of(data).saveEach((n, w) -> w.write("Num: " + n), output).toList();
+    //
+    //        assertEquals(data, result);
+    //        List<String> lines = Files.readAllLines(output.toPath());
+    //        assertEquals(Arrays.asList("Num: 1", "Num: 2", "Num: 3"), lines);
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachWithBiConsumerToWriter() throws Exception {
+    //        StringWriter writer = new StringWriter();
+    //
+    //        List<Integer> data = Arrays.asList(1, 2, 3);
+    //        List<Integer> result = Seq.of(data).saveEach((n, w) -> w.write("Num: " + n), writer).toList();
+    //
+    //        assertEquals(data, result);
+    //        String content = writer.toString();
+    //        assertTrue(content.contains("Num: 1"));
+    //        assertTrue(content.contains("Num: 2"));
+    //        assertTrue(content.contains("Num: 3"));
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToPreparedStatement() throws Exception {
+    //        PreparedStatement stmt = mock(PreparedStatement.class);
+    //
+    //        List<Integer> data = Arrays.asList(1, 2, 3);
+    //        List<Integer> result = Seq.of(data).saveEach(stmt, (n, ps) -> {
+    //            ps.setInt(1, n);
+    //            ps.setString(2, "Value" + n);
+    //        }).toList();
+    //
+    //        assertEquals(data, result);
+    //        verify(stmt, times(3)).setInt(anyInt(), anyInt());
+    //        verify(stmt, times(3)).setString(anyInt(), anyString());
+    //        verify(stmt, times(3)).execute();
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToPreparedStatementBatch() throws Exception {
+    //        PreparedStatement stmt = mock(PreparedStatement.class);
+    //        when(stmt.executeBatch()).thenReturn(new int[] { 1, 1 });
+    //
+    //        List<Integer> data = Arrays.asList(1, 2, 3, 4, 5);
+    //        List<Integer> result = Seq.of(data).saveEach(stmt, 2, 0, (n, ps) -> {
     //            ps.setInt(1, n);
     //        }).toList();
     //
     //        assertEquals(data, result);
-    //        verify(conn).prepareStatement("INSERT INTO test VALUES (?)");
-    //        verify(stmt, times(3)).setInt(1, anyInt());
+    //        verify(stmt, times(5)).setInt(anyInt(), anyInt());
+    //        verify(stmt, times(5)).addBatch();
+    //        verify(stmt, times(3)).executeBatch(); // 2 + 2 + 1
+    //    }
+    //
+    //    //    @Test
+    //    //    public void testSaveEachToConnection() throws Exception {
+    //    //        Connection conn = mock(Connection.class);
+    //    //        PreparedStatement stmt = mock(PreparedStatement.class);
+    //    //        when(conn.prepareStatement(anyString())).thenReturn(stmt);
+    //    //
+    //    //        List<Integer> data = Arrays.asList(1, 2, 3);
+    //    //        List<Integer> result = Seq.of(data).saveEach(conn, "INSERT INTO test VALUES (?)", (n, ps) -> {
+    //    //            ps.setInt(1, n);
+    //    //        }).toList();
+    //    //
+    //    //        assertEquals(data, result);
+    //    //        verify(conn).prepareStatement("INSERT INTO test VALUES (?)");
+    //    //        verify(stmt, times(3)).setInt(1, anyInt());
+    //    //        verify(stmt, times(3)).execute();
+    //    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToConnectionBatch() throws Exception {
+    //        Connection conn = mock(Connection.class);
+    //        PreparedStatement stmt = mock(PreparedStatement.class);
+    //        when(conn.prepareStatement(anyString())).thenReturn(stmt);
+    //        when(stmt.executeBatch()).thenReturn(new int[] { 1, 1 });
+    //
+    //        List<Integer> data = Arrays.asList(1, 2, 3);
+    //        List<Integer> result = Seq.of(data).saveEach(conn, "INSERT INTO test VALUES (?)", 2, 0, (n, ps) -> {
+    //            ps.setInt(1, n);
+    //        }).toList();
+    //
+    //        assertEquals(data, result);
+    //        verify(stmt, times(3)).addBatch();
+    //        verify(stmt, times(2)).executeBatch(); // 2 + 1
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToDataSource() throws Exception {
+    //        DataSource ds = mock(DataSource.class);
+    //        Connection conn = mock(Connection.class);
+    //        PreparedStatement stmt = mock(PreparedStatement.class);
+    //        when(ds.getConnection()).thenReturn(conn);
+    //        when(conn.prepareStatement(anyString())).thenReturn(stmt);
+    //
+    //        List<Integer> data = Arrays.asList(1, 2, 3);
+    //        List<Integer> result = Seq.of(data).saveEach(ds, "INSERT INTO test VALUES (?)", (n, ps) -> {
+    //            ps.setInt(1, n);
+    //        }).toList();
+    //
+    //        assertEquals(data, result);
+    //        verify(ds).getConnection();
     //        verify(stmt, times(3)).execute();
     //    }
-
-    @Test
-    public void testSaveEachToConnectionBatch() throws Exception {
-        Connection conn = mock(Connection.class);
-        PreparedStatement stmt = mock(PreparedStatement.class);
-        when(conn.prepareStatement(anyString())).thenReturn(stmt);
-        when(stmt.executeBatch()).thenReturn(new int[] { 1, 1 });
-
-        List<Integer> data = Arrays.asList(1, 2, 3);
-        List<Integer> result = Seq.of(data).saveEach(conn, "INSERT INTO test VALUES (?)", 2, 0, (n, ps) -> {
-            ps.setInt(1, n);
-        }).toList();
-
-        assertEquals(data, result);
-        verify(stmt, times(3)).addBatch();
-        verify(stmt, times(2)).executeBatch(); // 2 + 1
-    }
-
-    @Test
-    public void testSaveEachToDataSource() throws Exception {
-        DataSource ds = mock(DataSource.class);
-        Connection conn = mock(Connection.class);
-        PreparedStatement stmt = mock(PreparedStatement.class);
-        when(ds.getConnection()).thenReturn(conn);
-        when(conn.prepareStatement(anyString())).thenReturn(stmt);
-
-        List<Integer> data = Arrays.asList(1, 2, 3);
-        List<Integer> result = Seq.of(data).saveEach(ds, "INSERT INTO test VALUES (?)", (n, ps) -> {
-            ps.setInt(1, n);
-        }).toList();
-
-        assertEquals(data, result);
-        verify(ds).getConnection();
-        verify(stmt, times(3)).execute();
-    }
-
-    @Test
-    public void testSaveEachToDataSourceBatch() throws Exception {
-        DataSource ds = mock(DataSource.class);
-        Connection conn = mock(Connection.class);
-        PreparedStatement stmt = mock(PreparedStatement.class);
-        when(ds.getConnection()).thenReturn(conn);
-        when(conn.prepareStatement(anyString())).thenReturn(stmt);
-        when(stmt.executeBatch()).thenReturn(new int[] { 1, 1 });
-
-        List<Integer> data = Arrays.asList(1, 2, 3);
-        List<Integer> result = Seq.of(data).saveEach(ds, "INSERT INTO test VALUES (?)", 2, 0, (n, ps) -> {
-            ps.setInt(1, n);
-        }).toList();
-
-        assertEquals(data, result);
-        verify(stmt, times(3)).addBatch();
-        verify(stmt, times(2)).executeBatch();
-    }
+    //
+    //    @Test
+    //    public void testSaveEachToDataSourceBatch() throws Exception {
+    //        DataSource ds = mock(DataSource.class);
+    //        Connection conn = mock(Connection.class);
+    //        PreparedStatement stmt = mock(PreparedStatement.class);
+    //        when(ds.getConnection()).thenReturn(conn);
+    //        when(conn.prepareStatement(anyString())).thenReturn(stmt);
+    //        when(stmt.executeBatch()).thenReturn(new int[] { 1, 1 });
+    //
+    //        List<Integer> data = Arrays.asList(1, 2, 3);
+    //        List<Integer> result = Seq.of(data).saveEach(ds, "INSERT INTO test VALUES (?)", 2, 0, (n, ps) -> {
+    //            ps.setInt(1, n);
+    //        }).toList();
+    //
+    //        assertEquals(data, result);
+    //        verify(stmt, times(3)).addBatch();
+    //        verify(stmt, times(2)).executeBatch();
+    //    }
 
     @Test
     public void testTransform() throws Exception {
@@ -2112,470 +2101,470 @@ public class Seq100Test extends TestBase {
 
     // Tests for saveEach methods
 
-    @Test
-    public void testSaveEachToFile2() throws IOException {
-        Path tempFile = Files.createTempFile("test", ".txt");
-
-        try {
-            Seq<String, RuntimeException> seq = Seq.of("line1", "line2", "line3");
-            Seq<String, RuntimeException> result = seq.saveEach(tempFile.toFile());
-
-            // Verify the sequence is returned for chaining
-            assertNotNull(result);
-
-            // Consume the sequence to trigger the save operation
-            List<String> consumed = result.toList();
-            assertEquals(Arrays.asList("line1", "line2", "line3"), consumed);
-
-            // Verify file content
-            List<String> fileContent = Files.readAllLines(tempFile);
-            assertEquals(Arrays.asList("line1", "line2", "line3"), fileContent);
-
-        } finally {
-            Files.deleteIfExists(tempFile);
-        }
-    }
-
-    @Test
-    public void testSaveEachToFileWithMapper2() throws IOException {
-        Path tempFile = Files.createTempFile("test", ".txt");
-
-        try {
-            Seq<Integer, RuntimeException> seq = Seq.of(1, 2, 3);
-            Seq<Integer, RuntimeException> result = seq.saveEach(i -> "Number: " + i, tempFile.toFile());
-
-            assertNotNull(result);
-            List<Integer> consumed = result.toList();
-            assertEquals(Arrays.asList(1, 2, 3), consumed);
-
-            List<String> fileContent = Files.readAllLines(tempFile);
-            assertEquals(Arrays.asList("Number: 1", "Number: 2", "Number: 3"), fileContent);
-
-        } finally {
-            Files.deleteIfExists(tempFile);
-        }
-    }
-
-    @Test
-    public void testSaveEachToOutputStream2() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        Seq<String, RuntimeException> seq = Seq.of("test1", "test2");
-        Seq<String, RuntimeException> result = seq.saveEach(s -> s.toUpperCase(), baos);
-
-        assertNotNull(result);
-        List<String> consumed = result.toList();
-        assertEquals(Arrays.asList("test1", "test2"), consumed);
-
-        String output = baos.toString();
-        assertTrue(output.contains("TEST1"));
-        assertTrue(output.contains("TEST2"));
-    }
-
-    @Test
-    public void testSaveEachToWriter2() throws IOException {
-        StringWriter writer = new StringWriter();
-
-        Seq<String, RuntimeException> seq = Seq.of("hello", "world");
-        Seq<String, RuntimeException> result = seq.saveEach(s -> s + "!", writer);
-
-        assertNotNull(result);
-        List<String> consumed = result.toList();
-        assertEquals(Arrays.asList("hello", "world"), consumed);
-
-        String output = writer.toString();
-        assertTrue(output.contains("hello!"));
-        assertTrue(output.contains("world!"));
-    }
-
-    @Test
-    public void testSaveEachWithBiConsumerToFile2() throws IOException {
-        Path tempFile = Files.createTempFile("test", ".txt");
-
-        try {
-            Seq<String, RuntimeException> seq = Seq.of("data1", "data2");
-            Throwables.BiConsumer<String, Writer, IOException> writeFunc = (item, w) -> w.write("[" + item + "]");
-
-            Seq<String, RuntimeException> result = seq.saveEach(writeFunc, tempFile.toFile());
-
-            assertNotNull(result);
-            result.toList(); // Consume to trigger save
-
-            String content = Files.readString(tempFile);
-            assertTrue(content.contains("[data1]"));
-            assertTrue(content.contains("[data2]"));
-
-        } finally {
-            Files.deleteIfExists(tempFile);
-        }
-    }
-
-    @Test
-    public void testSaveEachWithBiConsumerToWriter2() throws IOException {
-        StringWriter writer = new StringWriter();
-
-        Seq<Integer, RuntimeException> seq = Seq.of(10, 20, 30);
-        Throwables.BiConsumer<Integer, Writer, IOException> writeFunc = (item, w) -> w.write("Value=" + item);
-
-        Seq<Integer, RuntimeException> result = seq.saveEach(writeFunc, writer);
-
-        assertNotNull(result);
-        result.toList(); // Consume to trigger save
-
-        String output = writer.toString();
-        assertTrue(output.contains("Value=10"));
-        assertTrue(output.contains("Value=20"));
-        assertTrue(output.contains("Value=30"));
-    }
-
-    @Test
-    public void testSaveEachToPreparedStatement2() throws SQLException {
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-
-        Seq<String, RuntimeException> seq = Seq.of("value1", "value2");
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
-
-        Seq<String, RuntimeException> result = seq.saveEach(mockStmt, stmtSetter);
-
-        assertNotNull(result);
-        result.toList(); // Consume to trigger save
-
-        verify(mockStmt, times(2)).execute();
-        verify(mockStmt).setString(1, "value1");
-        verify(mockStmt).setString(1, "value2");
-    }
-
-    @Test
-    public void testSaveEachToPreparedStatementWithBatch() throws SQLException {
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-
-        Seq<String, RuntimeException> seq = Seq.of("v1", "v2", "v3");
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
-
-        Seq<String, RuntimeException> result = seq.saveEach(mockStmt, 2, 0, stmtSetter);
-
-        assertNotNull(result);
-        result.toList(); // Consume to trigger save
-
-        verify(mockStmt, times(3)).addBatch();
-        verify(mockStmt, times(2)).executeBatch(); // 2 items per batch, so 2 batch executions
-    }
-
-    @Test
-    public void testSaveEachToConnection2() throws SQLException {
-        Connection mockConn = mock(Connection.class);
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
-
-        Seq<String, RuntimeException> seq = Seq.of("test");
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
-
-        Seq<String, RuntimeException> result = seq.saveEach(mockConn, "INSERT INTO test VALUES (?)", stmtSetter);
-
-        assertNotNull(result);
-        result.toList(); // Consume to trigger save
-
-        verify(mockConn).prepareStatement("INSERT INTO test VALUES (?)");
-        verify(mockStmt).execute();
-    }
-
-    @Test
-    public void testSaveEachToDataSource2() throws SQLException {
-        DataSource mockDs = mock(DataSource.class);
-        Connection mockConn = mock(Connection.class);
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-
-        when(mockDs.getConnection()).thenReturn(mockConn);
-        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
-
-        Seq<String, RuntimeException> seq = Seq.of("test");
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
-
-        Seq<String, RuntimeException> result = seq.saveEach(mockDs, "INSERT INTO test VALUES (?)", stmtSetter);
-
-        assertNotNull(result);
-        result.toList(); // Consume to trigger save
-
-        verify(mockDs).getConnection();
-        verify(mockConn).prepareStatement("INSERT INTO test VALUES (?)");
-        verify(mockStmt).execute();
-    }
-
-    // Tests for persist methods
-
-    @Test
-    public void testPersistToFile() throws Exception {
-        Path tempFile = Files.createTempFile("persist", ".txt");
-
-        try {
-            Seq<String, RuntimeException> seq = Seq.of("line1", "line2", "line3");
-            long count = seq.persist(tempFile.toFile());
-
-            assertEquals(3, count);
-
-            List<String> content = Files.readAllLines(tempFile);
-            assertEquals(Arrays.asList("line1", "line2", "line3"), content);
-
-        } finally {
-            Files.deleteIfExists(tempFile);
-        }
-    }
-
-    @Test
-    public void testPersistToFileWithHeaderAndTail() throws Exception {
-        Path tempFile = Files.createTempFile("persist", ".txt");
-
-        try {
-            Seq<String, RuntimeException> seq = Seq.of("data1", "data2");
-            long count = seq.persist("HEADER", "TAIL", tempFile.toFile());
-
-            assertEquals(2, count);
-
-            List<String> content = Files.readAllLines(tempFile);
-            assertEquals(Arrays.asList("HEADER", "data1", "data2", "TAIL"), content);
-
-        } finally {
-            Files.deleteIfExists(tempFile);
-        }
-    }
-
-    @Test
-    public void testPersistWithMapper() throws Exception {
-        Path tempFile = Files.createTempFile("persist", ".txt");
-
-        try {
-            Seq<Integer, RuntimeException> seq = Seq.of(1, 2, 3);
-            long count = seq.persist(i -> "NUM:" + i, tempFile.toFile());
-
-            assertEquals(3, count);
-
-            List<String> content = Files.readAllLines(tempFile);
-            assertEquals(Arrays.asList("NUM:1", "NUM:2", "NUM:3"), content);
-
-        } finally {
-            Files.deleteIfExists(tempFile);
-        }
-    }
-
-    @Test
-    public void testPersistToOutputStream() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        Seq<String, RuntimeException> seq = Seq.of("test1", "test2");
-        long count = seq.persist(s -> s.toUpperCase(), baos);
-
-        assertEquals(2, count);
-
-        String output = baos.toString();
-        assertTrue(output.contains("TEST1"));
-        assertTrue(output.contains("TEST2"));
-    }
-
-    @Test
-    public void testPersistToWriter() throws Exception {
-        StringWriter writer = new StringWriter();
-
-        Seq<String, RuntimeException> seq = Seq.of("hello", "world");
-        long count = seq.persist(s -> s + "!", writer);
-
-        assertEquals(2, count);
-
-        String output = writer.toString();
-        assertTrue(output.contains("hello!"));
-        assertTrue(output.contains("world!"));
-    }
-
-    @Test
-    public void testPersistWithBiConsumer() throws Exception {
-        StringWriter writer = new StringWriter();
-
-        Seq<String, RuntimeException> seq = Seq.of("data1", "data2");
-        Throwables.BiConsumer<String, Writer, IOException> writeFunc = (item, w) -> w.write("[" + item + "]");
-
-        long count = seq.persist(writeFunc, writer);
-
-        assertEquals(2, count);
-
-        String output = writer.toString();
-        assertTrue(output.contains("[data1]"));
-        assertTrue(output.contains("[data2]"));
-    }
-
-    @Test
-    public void testPersistToPreparedStatement() throws Exception {
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-
-        Seq<String, RuntimeException> seq = Seq.of("value1", "value2");
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
-
-        long count = seq.persist(mockStmt, 1, 0, stmtSetter);
-
-        assertEquals(2, count);
-        verify(mockStmt, times(2)).execute();
-    }
-
-    @Test
-    public void testPersistToConnection() throws Exception {
-        Connection mockConn = mock(Connection.class);
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
-
-        Seq<String, RuntimeException> seq = Seq.of("test");
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
-
-        long count = seq.persist(mockConn, "INSERT INTO test VALUES (?)", 1, 0, stmtSetter);
-
-        assertEquals(1, count);
-        verify(mockConn).prepareStatement("INSERT INTO test VALUES (?)");
-        verify(mockStmt).execute();
-    }
-
-    @Test
-    public void testPersistToDataSource() throws Exception {
-        DataSource mockDs = mock(DataSource.class);
-        Connection mockConn = mock(Connection.class);
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-
-        when(mockDs.getConnection()).thenReturn(mockConn);
-        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
-
-        Seq<String, RuntimeException> seq = Seq.of("test");
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
-
-        long count = seq.persist(mockDs, "INSERT INTO test VALUES (?)", 1, 0, stmtSetter);
-
-        assertEquals(1, count);
-        verify(mockDs).getConnection();
-        verify(mockStmt).execute();
-    }
-
-    // Tests for persistToCSV methods
-
-    @Test
-    public void testPersistToCSVFile() throws Exception {
-        Path tempFile = Files.createTempFile("test", ".csv");
-
-        try {
-            Seq<Map<String, Object>, RuntimeException> seq = Seq.of(Map.of("name", "John", "age", 30), Map.of("name", "Jane", "age", 25));
-
-            long count = seq.persistToCSV(tempFile.toFile());
-
-            assertEquals(2, count);
-
-            List<String> content = Files.readAllLines(tempFile);
-            assertTrue(content.size() >= 2); // Header + data rows
-
-        } finally {
-            Files.deleteIfExists(tempFile);
-        }
-    }
-
-    @Test
-    public void testPersistToCSVWithHeaders() throws Exception {
-        Path tempFile = Files.createTempFile("test", ".csv");
-
-        try {
-            List<String> headers = Arrays.asList("name", "age");
-            Seq<Map<String, Object>, RuntimeException> seq = Seq.of(Map.of("name", "John", "age", 30), Map.of("name", "Jane", "age", 25));
-
-            long count = seq.persistToCSV(headers, tempFile.toFile());
-
-            assertEquals(2, count);
-
-            List<String> content = Files.readAllLines(tempFile);
-            assertTrue(content.size() >= 3); // Header + data rows
-            assertTrue(content.get(0).contains("name"));
-            assertTrue(content.get(0).contains("age"));
-
-        } finally {
-            Files.deleteIfExists(tempFile);
-        }
-    }
-
-    @Test
-    public void testPersistToCSVOutputStream() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        Seq<Map<String, Object>, Exception> seq = Seq.just(Map.of("id", 1, "value", "test"));
-
-        long count = seq.persistToCSV(baos);
-
-        assertEquals(1, count);
-
-        String output = baos.toString();
-        assertTrue(output.length() > 0);
-    }
-
-    @Test
-    public void testPersistToCSVWriter() throws Exception {
-        StringWriter writer = new StringWriter();
-
-        List<String> headers = Arrays.asList("col1", "col2");
-        Seq<List<String>, RuntimeException> seq = Seq.of(Arrays.asList("val1", "val2"), Arrays.asList("val3", "val4"));
-
-        long count = seq.persistToCSV(headers, writer);
-
-        assertEquals(2, count);
-
-        String output = writer.toString();
-        assertTrue(output.contains("col1"));
-        assertTrue(output.contains("val1"));
-    }
-
-    // Tests for persistToJSON methods
-
-    @Test
-    public void testPersistToJSONFile() throws Exception {
-        Path tempFile = Files.createTempFile("test", ".json");
-
-        try {
-            Seq<Map<String, Object>, RuntimeException> seq = Seq.of(Map.of("name", "John", "age", 30), Map.of("name", "Jane", "age", 25));
-
-            long count = seq.persistToJSON(tempFile.toFile());
-
-            assertEquals(2, count);
-
-            String content = Files.readString(tempFile);
-            assertTrue(content.startsWith("["));
-            assertTrue(content.endsWith("]"));
-
-        } finally {
-            Files.deleteIfExists(tempFile);
-        }
-    }
-
-    @Test
-    public void testPersistToJSONOutputStream() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        Seq<String, RuntimeException> seq = Seq.of("test1", "test2");
-
-        long count = seq.persistToJSON(baos);
-
-        assertEquals(2, count);
-
-        String output = baos.toString();
-        assertTrue(output.contains("["));
-        assertTrue(output.contains("]"));
-    }
-
-    @Test
-    public void testPersistToJSONWriter() throws Exception {
-        StringWriter writer = new StringWriter();
-
-        Seq<Integer, RuntimeException> seq = Seq.of(1, 2, 3);
-
-        long count = seq.persistToJSON(writer);
-
-        assertEquals(3, count);
-
-        String output = writer.toString();
-        assertTrue(output.contains("["));
-        assertTrue(output.contains("]"));
-        assertTrue(output.contains("1"));
-        assertTrue(output.contains("2"));
-        assertTrue(output.contains("3"));
-    }
+    //    @Test
+    //    public void testSaveEachToFile2() throws IOException {
+    //        Path tempFile = Files.createTempFile("test", ".txt");
+    //
+    //        try {
+    //            Seq<String, RuntimeException> seq = Seq.of("line1", "line2", "line3");
+    //            Seq<String, RuntimeException> result = seq.saveEach(tempFile.toFile());
+    //
+    //            // Verify the sequence is returned for chaining
+    //            assertNotNull(result);
+    //
+    //            // Consume the sequence to trigger the save operation
+    //            List<String> consumed = result.toList();
+    //            assertEquals(Arrays.asList("line1", "line2", "line3"), consumed);
+    //
+    //            // Verify file content
+    //            List<String> fileContent = Files.readAllLines(tempFile);
+    //            assertEquals(Arrays.asList("line1", "line2", "line3"), fileContent);
+    //
+    //        } finally {
+    //            Files.deleteIfExists(tempFile);
+    //        }
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToFileWithMapper2() throws IOException {
+    //        Path tempFile = Files.createTempFile("test", ".txt");
+    //
+    //        try {
+    //            Seq<Integer, RuntimeException> seq = Seq.of(1, 2, 3);
+    //            Seq<Integer, RuntimeException> result = seq.saveEach(i -> "Number: " + i, tempFile.toFile());
+    //
+    //            assertNotNull(result);
+    //            List<Integer> consumed = result.toList();
+    //            assertEquals(Arrays.asList(1, 2, 3), consumed);
+    //
+    //            List<String> fileContent = Files.readAllLines(tempFile);
+    //            assertEquals(Arrays.asList("Number: 1", "Number: 2", "Number: 3"), fileContent);
+    //
+    //        } finally {
+    //            Files.deleteIfExists(tempFile);
+    //        }
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToOutputStream2() throws IOException {
+    //        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("test1", "test2");
+    //        Seq<String, RuntimeException> result = seq.saveEach(s -> s.toUpperCase(), baos);
+    //
+    //        assertNotNull(result);
+    //        List<String> consumed = result.toList();
+    //        assertEquals(Arrays.asList("test1", "test2"), consumed);
+    //
+    //        String output = baos.toString();
+    //        assertTrue(output.contains("TEST1"));
+    //        assertTrue(output.contains("TEST2"));
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToWriter2() throws IOException {
+    //        StringWriter writer = new StringWriter();
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("hello", "world");
+    //        Seq<String, RuntimeException> result = seq.saveEach(s -> s + "!", writer);
+    //
+    //        assertNotNull(result);
+    //        List<String> consumed = result.toList();
+    //        assertEquals(Arrays.asList("hello", "world"), consumed);
+    //
+    //        String output = writer.toString();
+    //        assertTrue(output.contains("hello!"));
+    //        assertTrue(output.contains("world!"));
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachWithBiConsumerToFile2() throws IOException {
+    //        Path tempFile = Files.createTempFile("test", ".txt");
+    //
+    //        try {
+    //            Seq<String, RuntimeException> seq = Seq.of("data1", "data2");
+    //            Throwables.BiConsumer<String, Writer, IOException> writeFunc = (item, w) -> w.write("[" + item + "]");
+    //
+    //            Seq<String, RuntimeException> result = seq.saveEach(writeFunc, tempFile.toFile());
+    //
+    //            assertNotNull(result);
+    //            result.toList(); // Consume to trigger save
+    //
+    //            String content = Files.readString(tempFile);
+    //            assertTrue(content.contains("[data1]"));
+    //            assertTrue(content.contains("[data2]"));
+    //
+    //        } finally {
+    //            Files.deleteIfExists(tempFile);
+    //        }
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachWithBiConsumerToWriter2() throws IOException {
+    //        StringWriter writer = new StringWriter();
+    //
+    //        Seq<Integer, RuntimeException> seq = Seq.of(10, 20, 30);
+    //        Throwables.BiConsumer<Integer, Writer, IOException> writeFunc = (item, w) -> w.write("Value=" + item);
+    //
+    //        Seq<Integer, RuntimeException> result = seq.saveEach(writeFunc, writer);
+    //
+    //        assertNotNull(result);
+    //        result.toList(); // Consume to trigger save
+    //
+    //        String output = writer.toString();
+    //        assertTrue(output.contains("Value=10"));
+    //        assertTrue(output.contains("Value=20"));
+    //        assertTrue(output.contains("Value=30"));
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToPreparedStatement2() throws SQLException {
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("value1", "value2");
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
+    //
+    //        Seq<String, RuntimeException> result = seq.saveEach(mockStmt, stmtSetter);
+    //
+    //        assertNotNull(result);
+    //        result.toList(); // Consume to trigger save
+    //
+    //        verify(mockStmt, times(2)).execute();
+    //        verify(mockStmt).setString(1, "value1");
+    //        verify(mockStmt).setString(1, "value2");
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToPreparedStatementWithBatch() throws SQLException {
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("v1", "v2", "v3");
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
+    //
+    //        Seq<String, RuntimeException> result = seq.saveEach(mockStmt, 2, 0, stmtSetter);
+    //
+    //        assertNotNull(result);
+    //        result.toList(); // Consume to trigger save
+    //
+    //        verify(mockStmt, times(3)).addBatch();
+    //        verify(mockStmt, times(2)).executeBatch(); // 2 items per batch, so 2 batch executions
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToConnection2() throws SQLException {
+    //        Connection mockConn = mock(Connection.class);
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("test");
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
+    //
+    //        Seq<String, RuntimeException> result = seq.saveEach(mockConn, "INSERT INTO test VALUES (?)", stmtSetter);
+    //
+    //        assertNotNull(result);
+    //        result.toList(); // Consume to trigger save
+    //
+    //        verify(mockConn).prepareStatement("INSERT INTO test VALUES (?)");
+    //        verify(mockStmt).execute();
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachToDataSource2() throws SQLException {
+    //        DataSource mockDs = mock(DataSource.class);
+    //        Connection mockConn = mock(Connection.class);
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //
+    //        when(mockDs.getConnection()).thenReturn(mockConn);
+    //        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("test");
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
+    //
+    //        Seq<String, RuntimeException> result = seq.saveEach(mockDs, "INSERT INTO test VALUES (?)", stmtSetter);
+    //
+    //        assertNotNull(result);
+    //        result.toList(); // Consume to trigger save
+    //
+    //        verify(mockDs).getConnection();
+    //        verify(mockConn).prepareStatement("INSERT INTO test VALUES (?)");
+    //        verify(mockStmt).execute();
+    //    }
+    //
+    //    // Tests for persist methods
+    //
+    //    @Test
+    //    public void testPersistToFile() throws Exception {
+    //        Path tempFile = Files.createTempFile("persist", ".txt");
+    //
+    //        try {
+    //            Seq<String, RuntimeException> seq = Seq.of("line1", "line2", "line3");
+    //            long count = seq.persist(tempFile.toFile());
+    //
+    //            assertEquals(3, count);
+    //
+    //            List<String> content = Files.readAllLines(tempFile);
+    //            assertEquals(Arrays.asList("line1", "line2", "line3"), content);
+    //
+    //        } finally {
+    //            Files.deleteIfExists(tempFile);
+    //        }
+    //    }
+    //
+    //    @Test
+    //    public void testPersistToFileWithHeaderAndTail() throws Exception {
+    //        Path tempFile = Files.createTempFile("persist", ".txt");
+    //
+    //        try {
+    //            Seq<String, RuntimeException> seq = Seq.of("data1", "data2");
+    //            long count = seq.persist("HEADER", "TAIL", tempFile.toFile());
+    //
+    //            assertEquals(2, count);
+    //
+    //            List<String> content = Files.readAllLines(tempFile);
+    //            assertEquals(Arrays.asList("HEADER", "data1", "data2", "TAIL"), content);
+    //
+    //        } finally {
+    //            Files.deleteIfExists(tempFile);
+    //        }
+    //    }
+    //
+    //    @Test
+    //    public void testPersistWithMapper() throws Exception {
+    //        Path tempFile = Files.createTempFile("persist", ".txt");
+    //
+    //        try {
+    //            Seq<Integer, RuntimeException> seq = Seq.of(1, 2, 3);
+    //            long count = seq.persist(i -> "NUM:" + i, tempFile.toFile());
+    //
+    //            assertEquals(3, count);
+    //
+    //            List<String> content = Files.readAllLines(tempFile);
+    //            assertEquals(Arrays.asList("NUM:1", "NUM:2", "NUM:3"), content);
+    //
+    //        } finally {
+    //            Files.deleteIfExists(tempFile);
+    //        }
+    //    }
+    //
+    //    @Test
+    //    public void testPersistToOutputStream() throws Exception {
+    //        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("test1", "test2");
+    //        long count = seq.persist(s -> s.toUpperCase(), baos);
+    //
+    //        assertEquals(2, count);
+    //
+    //        String output = baos.toString();
+    //        assertTrue(output.contains("TEST1"));
+    //        assertTrue(output.contains("TEST2"));
+    //    }
+    //
+    //    @Test
+    //    public void testPersistToWriter() throws Exception {
+    //        StringWriter writer = new StringWriter();
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("hello", "world");
+    //        long count = seq.persist(s -> s + "!", writer);
+    //
+    //        assertEquals(2, count);
+    //
+    //        String output = writer.toString();
+    //        assertTrue(output.contains("hello!"));
+    //        assertTrue(output.contains("world!"));
+    //    }
+    //
+    //    @Test
+    //    public void testPersistWithBiConsumer() throws Exception {
+    //        StringWriter writer = new StringWriter();
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("data1", "data2");
+    //        Throwables.BiConsumer<String, Writer, IOException> writeFunc = (item, w) -> w.write("[" + item + "]");
+    //
+    //        long count = seq.persist(writeFunc, writer);
+    //
+    //        assertEquals(2, count);
+    //
+    //        String output = writer.toString();
+    //        assertTrue(output.contains("[data1]"));
+    //        assertTrue(output.contains("[data2]"));
+    //    }
+    //
+    //    @Test
+    //    public void testPersistToPreparedStatement() throws Exception {
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("value1", "value2");
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
+    //
+    //        long count = seq.persist(mockStmt, 1, 0, stmtSetter);
+    //
+    //        assertEquals(2, count);
+    //        verify(mockStmt, times(2)).execute();
+    //    }
+    //
+    //    @Test
+    //    public void testPersistToConnection() throws Exception {
+    //        Connection mockConn = mock(Connection.class);
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("test");
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
+    //
+    //        long count = seq.persist(mockConn, "INSERT INTO test VALUES (?)", 1, 0, stmtSetter);
+    //
+    //        assertEquals(1, count);
+    //        verify(mockConn).prepareStatement("INSERT INTO test VALUES (?)");
+    //        verify(mockStmt).execute();
+    //    }
+    //
+    //    @Test
+    //    public void testPersistToDataSource() throws Exception {
+    //        DataSource mockDs = mock(DataSource.class);
+    //        Connection mockConn = mock(Connection.class);
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //
+    //        when(mockDs.getConnection()).thenReturn(mockConn);
+    //        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("test");
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> stmtSetter = (item, stmt) -> stmt.setString(1, item);
+    //
+    //        long count = seq.persist(mockDs, "INSERT INTO test VALUES (?)", 1, 0, stmtSetter);
+    //
+    //        assertEquals(1, count);
+    //        verify(mockDs).getConnection();
+    //        verify(mockStmt).execute();
+    //    }
+    //
+    //    // Tests for persistToCSV methods
+    //
+    //    @Test
+    //    public void testPersistToCSVFile() throws Exception {
+    //        Path tempFile = Files.createTempFile("test", ".csv");
+    //
+    //        try {
+    //            Seq<Map<String, Object>, RuntimeException> seq = Seq.of(Map.of("name", "John", "age", 30), Map.of("name", "Jane", "age", 25));
+    //
+    //            long count = seq.persistToCSV(tempFile.toFile());
+    //
+    //            assertEquals(2, count);
+    //
+    //            List<String> content = Files.readAllLines(tempFile);
+    //            assertTrue(content.size() >= 2); // Header + data rows
+    //
+    //        } finally {
+    //            Files.deleteIfExists(tempFile);
+    //        }
+    //    }
+    //
+    //    @Test
+    //    public void testPersistToCSVWithHeaders() throws Exception {
+    //        Path tempFile = Files.createTempFile("test", ".csv");
+    //
+    //        try {
+    //            List<String> headers = Arrays.asList("name", "age");
+    //            Seq<Map<String, Object>, RuntimeException> seq = Seq.of(Map.of("name", "John", "age", 30), Map.of("name", "Jane", "age", 25));
+    //
+    //            long count = seq.persistToCSV(headers, tempFile.toFile());
+    //
+    //            assertEquals(2, count);
+    //
+    //            List<String> content = Files.readAllLines(tempFile);
+    //            assertTrue(content.size() >= 3); // Header + data rows
+    //            assertTrue(content.get(0).contains("name"));
+    //            assertTrue(content.get(0).contains("age"));
+    //
+    //        } finally {
+    //            Files.deleteIfExists(tempFile);
+    //        }
+    //    }
+    //
+    //    @Test
+    //    public void testPersistToCSVOutputStream() throws Exception {
+    //        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    //
+    //        Seq<Map<String, Object>, Exception> seq = Seq.just(Map.of("id", 1, "value", "test"));
+    //
+    //        long count = seq.persistToCSV(baos);
+    //
+    //        assertEquals(1, count);
+    //
+    //        String output = baos.toString();
+    //        assertTrue(output.length() > 0);
+    //    }
+    //
+    //    @Test
+    //    public void testPersistToCSVWriter() throws Exception {
+    //        StringWriter writer = new StringWriter();
+    //
+    //        List<String> headers = Arrays.asList("col1", "col2");
+    //        Seq<List<String>, RuntimeException> seq = Seq.of(Arrays.asList("val1", "val2"), Arrays.asList("val3", "val4"));
+    //
+    //        long count = seq.persistToCSV(headers, writer);
+    //
+    //        assertEquals(2, count);
+    //
+    //        String output = writer.toString();
+    //        assertTrue(output.contains("col1"));
+    //        assertTrue(output.contains("val1"));
+    //    }
+    //
+    //    // Tests for persistToJSON methods
+    //
+    //    @Test
+    //    public void testPersistToJSONFile() throws Exception {
+    //        Path tempFile = Files.createTempFile("test", ".json");
+    //
+    //        try {
+    //            Seq<Map<String, Object>, RuntimeException> seq = Seq.of(Map.of("name", "John", "age", 30), Map.of("name", "Jane", "age", 25));
+    //
+    //            long count = seq.persistToJSON(tempFile.toFile());
+    //
+    //            assertEquals(2, count);
+    //
+    //            String content = Files.readString(tempFile);
+    //            assertTrue(content.startsWith("["));
+    //            assertTrue(content.endsWith("]"));
+    //
+    //        } finally {
+    //            Files.deleteIfExists(tempFile);
+    //        }
+    //    }
+    //
+    //    @Test
+    //    public void testPersistToJSONOutputStream() throws Exception {
+    //        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    //
+    //        Seq<String, RuntimeException> seq = Seq.of("test1", "test2");
+    //
+    //        long count = seq.persistToJSON(baos);
+    //
+    //        assertEquals(2, count);
+    //
+    //        String output = baos.toString();
+    //        assertTrue(output.contains("["));
+    //        assertTrue(output.contains("]"));
+    //    }
+    //
+    //    @Test
+    //    public void testPersistToJSONWriter() throws Exception {
+    //        StringWriter writer = new StringWriter();
+    //
+    //        Seq<Integer, RuntimeException> seq = Seq.of(1, 2, 3);
+    //
+    //        long count = seq.persistToJSON(writer);
+    //
+    //        assertEquals(3, count);
+    //
+    //        String output = writer.toString();
+    //        assertTrue(output.contains("["));
+    //        assertTrue(output.contains("]"));
+    //        assertTrue(output.contains("1"));
+    //        assertTrue(output.contains("2"));
+    //        assertTrue(output.contains("3"));
+    //    }
 
     // Tests for println method
 
@@ -2809,20 +2798,6 @@ public class Seq100Test extends TestBase {
     }
 
     @Test
-    public void testSaveEachWithNullFile() {
-        Seq<String, RuntimeException> seq = Seq.of("test");
-
-        assertThrows(IllegalArgumentException.class, () -> seq.saveEach((File) null).count());
-    }
-
-    @Test
-    public void testPersistWithNullFile() {
-        Seq<String, RuntimeException> seq = Seq.of("test");
-
-        assertThrows(IllegalArgumentException.class, () -> seq.persist((File) null));
-    }
-
-    @Test
     public void testTransformWithNullFunction() {
         Seq<String, RuntimeException> seq = Seq.of("test");
 
@@ -2865,52 +2840,66 @@ public class Seq100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> seq.sps(-1, stream -> stream));
     }
 
-    // Performance and edge case tests
 
-    @Test
-    public void testPersistLargeDataset() throws Exception {
-        Path tempFile = Files.createTempFile("large", ".txt");
-
-        try {
-            // Create a large sequence
-            Seq<Integer, RuntimeException> seq = Seq.range(0, 10000);
-
-            long count = seq.persist(Object::toString, tempFile.toFile());
-
-            assertEquals(10000, count);
-
-            long fileLineCount = Files.lines(tempFile).count();
-            assertEquals(10000, fileLineCount);
-
-        } finally {
-            Files.deleteIfExists(tempFile);
-        }
-    }
-
-    @Test
-    public void testSaveEachWithFlushingBehavior() throws Exception {
-        Path tempFile = Files.createTempFile("flush", ".txt");
-
-        try {
-            // Create sequence larger than flush batch size
-            List<String> largeData = new ArrayList<>();
-            for (int i = 0; i < 500; i++) {
-                largeData.add("line" + i);
-            }
-
-            Seq<String, RuntimeException> seq = Seq.of(largeData);
-            Seq<String, RuntimeException> result = seq.saveEach(tempFile.toFile());
-
-            List<String> consumed = result.toList();
-            assertEquals(500, consumed.size());
-
-            List<String> fileContent = Files.readAllLines(tempFile);
-            assertEquals(500, fileContent.size());
-
-        } finally {
-            Files.deleteIfExists(tempFile);
-        }
-    }
+    //    @Test
+    //    public void testSaveEachWithNullFile() {
+    //        Seq<String, RuntimeException> seq = Seq.of("test");
+    //
+    //        assertThrows(IllegalArgumentException.class, () -> seq.saveEach((File) null).count());
+    //    }
+    //
+    //    @Test
+    //    public void testPersistWithNullFile() {
+    //        Seq<String, RuntimeException> seq = Seq.of("test");
+    //
+    //        assertThrows(IllegalArgumentException.class, () -> seq.persist((File) null));
+    //    }
+    //    // Performance and edge case tests
+    //
+    //    @Test
+    //    public void testPersistLargeDataset() throws Exception {
+    //        Path tempFile = Files.createTempFile("large", ".txt");
+    //
+    //        try {
+    //            // Create a large sequence
+    //            Seq<Integer, RuntimeException> seq = Seq.range(0, 10000);
+    //
+    //            long count = seq.persist(Object::toString, tempFile.toFile());
+    //
+    //            assertEquals(10000, count);
+    //
+    //            long fileLineCount = Files.lines(tempFile).count();
+    //            assertEquals(10000, fileLineCount);
+    //
+    //        } finally {
+    //            Files.deleteIfExists(tempFile);
+    //        }
+    //    }
+    //
+    //    @Test
+    //    public void testSaveEachWithFlushingBehavior() throws Exception {
+    //        Path tempFile = Files.createTempFile("flush", ".txt");
+    //
+    //        try {
+    //            // Create sequence larger than flush batch size
+    //            List<String> largeData = new ArrayList<>();
+    //            for (int i = 0; i < 500; i++) {
+    //                largeData.add("line" + i);
+    //            }
+    //
+    //            Seq<String, RuntimeException> seq = Seq.of(largeData);
+    //            Seq<String, RuntimeException> result = seq.saveEach(tempFile.toFile());
+    //
+    //            List<String> consumed = result.toList();
+    //            assertEquals(500, consumed.size());
+    //
+    //            List<String> fileContent = Files.readAllLines(tempFile);
+    //            assertEquals(500, fileContent.size());
+    //
+    //        } finally {
+    //            Files.deleteIfExists(tempFile);
+    //        }
+    //    }
 
     @Test
     public void testConcurrentCloseHandling() throws Exception {

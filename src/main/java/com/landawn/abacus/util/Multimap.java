@@ -259,7 +259,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param e the value to be associated with the specified key
      * @return {@code true} if the value was successfully added to the collection,
      *         {@code false} if the collection does not permit duplicates and already contains the value
-     * @throws NullPointerException if the key is null (depending on the backing map implementation)
      * @see #putIfAbsent(Object, Object)
      * @see #putMany(Object, Collection)
      */
@@ -404,7 +403,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param c the collection of values to be associated with the specified key
      * @return {@code true} if any values were added to the Multimap,
      *         {@code false} if the collection was empty or no values were added
-     * @throws NullPointerException if the collection is null
      * @see #put(Object, Object)
      * @see #putManyIfKeyAbsent(Object, Collection)
      * @see Collection#addAll(Collection)
@@ -784,7 +782,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param predicate the predicate that determines which keys to process
      * @return {@code true} if at least one value was removed from any collection,
      *         {@code false} if no values were removed (either no keys matched or value not found)
-     * @throws NullPointerException if the predicate is null
      * @see #removeOne(Object, Object)
      * @see #removeManyIf(Collection, Predicate)
      */
@@ -879,7 +876,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param predicate the predicate that determines which keys to process
      * @return {@code true} if any values were removed from any collection,
      *         {@code false} if no changes were made (no keys matched, values not found, or values collection empty)
-     * @throws NullPointerException if the predicate is null
      * @see #removeMany(Object, Collection)
      * @see #removeAllIf(Predicate)
      */
@@ -984,7 +980,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param predicate the predicate that determines which entries to remove
      * @return {@code true} if any entries were removed from the Multimap,
      *         {@code false} if no entries matched the predicate
-     * @throws NullPointerException if the predicate is null
      * @see #removeAll(Object)
      * @see #filter(BiPredicate)
      */
@@ -1040,7 +1035,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @param predicate the bi-predicate that accepts a key and its value collection
      * @return {@code true} if any entries were removed, {@code false} if no entries matched
-     * @throws NullPointerException if the predicate is null
      * @see #removeAllIf(Predicate)
      * @see #filter(BiPredicate)
      */
@@ -1355,7 +1349,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @return {@code true} if at least one replacement was made,
      *         {@code false} if no keys matched or old value was not found
      * @throws IllegalStateException if the new value cannot be added to any collection
-     * @throws NullPointerException if the predicate is null
      * @see #replaceOne(Object, Object, Object)
      * @see #replaceAllWithOneIf(Predicate, Object)
      */
@@ -1952,7 +1945,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param multimapSupplier factory function that creates the target Multimap type,
      *                         receives the size of this Multimap as a hint
      * @return a new inverted Multimap with keys and values swapped
-     * @throws NullPointerException if multimapSupplier is null
      * @see #copy()
      */
     public <VV extends Collection<K>, M extends Multimap<E, K, VV>> M inverse(final IntFunction<? extends M> multimapSupplier) {
@@ -2173,7 +2165,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @param filter the bi-predicate to test each key-value collection pair
      * @return a new Multimap containing only entries that satisfy the bi-predicate
-     * @throws NullPointerException if filter is null
      * @see #filterByKey(Predicate)
      * @see #filterByValue(Predicate)
      */
@@ -2214,7 +2205,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @param filter the predicate to test each key
      * @return a new Multimap containing only entries whose keys satisfy the predicate
-     * @throws NullPointerException if filter is null
      * @see #filterByValue(Predicate)
      * @see #filter(BiPredicate)
      */
@@ -2260,7 +2250,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @param filter the predicate to test each value collection
      * @return a new Multimap containing only entries whose value collections satisfy the predicate
-     * @throws NullPointerException if filter is null
      * @see #filterByKey(Predicate)
      * @see #filter(BiPredicate)
      */

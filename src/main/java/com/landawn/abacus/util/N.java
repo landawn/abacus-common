@@ -6463,7 +6463,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @Deprecated
     public static void updateAllUsingReplaceAllInstead() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("Fake method. Please use 'replaceAll'");
+        throw new UnsupportedOperationException("Dummy method. Please use 'replaceAll'");
     }
 
     /**
@@ -6475,7 +6475,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @Deprecated
     public static void updateIfUsingReplaceIfInstead() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("Fake method. Please use 'replaceIf'");
+        throw new UnsupportedOperationException("Dummy method. Please use 'replaceIf'");
     }
 
     /**
@@ -33236,7 +33236,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of results supplied by this supplier
      * @param supplier the supplier to be lazily initialized, must not be null
      * @return a thread-safe lazy-initialized supplier that caches the result of the first call
-     * @throws NullPointerException if the supplier is null
      * @see LazyInitializer#of(Supplier)
      * @see #lazyInitialize(Throwables.Supplier)
      */
@@ -33286,7 +33285,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that may be thrown by the supplier
      * @param supplier the exception-throwing supplier to be lazily initialized, must not be null
      * @return a thread-safe lazy-initialized supplier that caches the result of the first successful call
-     * @throws NullPointerException if the supplier is null
      * @see Throwables.LazyInitializer#of(Throwables.Supplier)
      * @see #lazyInit(Supplier)
      */
@@ -33501,7 +33499,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *             If there are more arguments than format specifiers, the extra arguments are ignored.
      *             The number of arguments is variable and may be zero
      * @throws IllegalFormatException if the format string is invalid or contains illegal format specifiers
-     * @throws NullPointerException if the format string is null
      * @see String#format(String, Object...)
      * @see System#out#printf(String, Object...)
      * @see #println(Object)

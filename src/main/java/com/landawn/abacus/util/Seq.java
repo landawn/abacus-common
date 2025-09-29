@@ -15,19 +15,13 @@
 package com.landawn.abacus.util;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Serial;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.security.SecureRandom;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,12 +68,8 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.annotation.TerminalOpTriggered;
 import com.landawn.abacus.exception.TooManyElementsException;
-import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.BeanInfo;
-import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -131,7 +121,7 @@ import com.landawn.abacus.util.stream.Stream;
 public final class Seq<T, E extends Exception> implements AutoCloseable, Immutable {
     private static final Logger logger = LoggerFactory.getLogger(Seq.class);
 
-    private static final int BATCH_SIZE_FOR_FLUSH = 1000;
+    // private static final int BATCH_SIZE_FOR_FLUSH = 1000;
 
     private static final Throwables.Function<OptionalInt, Integer, RuntimeException> GET_AS_INT = OptionalInt::get;
 
@@ -12344,7 +12334,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre></p>
      *
      * @param joiner the Joiner to append the elements to
-     * @return the Joiner containing the joined elements
+     * @return the provided Joiner after appending all elements
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the joiner is null
      * @throws E if an exception occurs during iteration of the sequence
@@ -12366,2102 +12356,2102 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }
     }
 
-    /**
-     * Writes each element of this sequence as a separate line to the specified file.
-     * Each element is converted to a string using {@code N.stringOf(Object)} and written as a separate line.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is an intermediate operation and will not close the sequence. The actual writing
-     * occurs when a terminal operation is invoked on the returned sequence.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * // Save numbers to file and continue processing
-     * long count = Seq.of(1, 2, 3, 4, 5)
-     *     .saveEach(new File("numbers.txt"))
-     *     .filter(n -> n > 2)
-     *     .count();
-     * // File contains: 1, 2, 3, 4, 5 (each on new line)
-     * // count = 3
-     * }</pre></p>
-     *
-     * @param output the file to write each element to
-     * @return this sequence for method chaining
-     * @throws IllegalStateException if the sequence is already closed
-     * @see #persist(File)
-     * @see N#stringOf(Object)
-     * @see #onEach(Throwables.Consumer)
-     */
-    @Beta
-    @IntermediateOp
-    public Seq<T, E> saveEach(final File output) throws IllegalStateException {
-        return saveEach(N::stringOf, output);
-    }
-
-    /**
-     * Writes each element of this sequence as a separate line to the specified file using the provided function
-     * to convert elements to strings. Each converted string is written as a separate line.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is an intermediate operation and will not close the sequence. The actual writing
-     * occurs when a terminal operation is invoked on the returned sequence.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * // Save with custom formatting
-     * Seq.of("apple", "banana", "cherry")
-     *     .saveEach(str -> str.toUpperCase(), new File("fruits.txt"))
-     *     .forEach(System.out::println);
-     * // File contains: APPLE, BANANA, CHERRY (each on new line)
-     * }</pre></p>
-     *
-     * @param toLine the function to convert each element to a string
-     * @param output the file to write each element to
-     * @return this sequence for method chaining
-     * @throws IllegalStateException if the sequence is already closed
-     * @see #persist(Throwables.Function, File)
-     * @see N#stringOf(Object)
-     * @see #onEach(Throwables.Consumer)
-     */
-    @Beta
-    @IntermediateOp
-    public Seq<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final File output) throws IllegalStateException {
-        assertNotClosed();
-        checkArgNotNull(output, cs.outputFile);
-
-        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
-            private final Throwables.Iterator<T, E> iter = iteratorEx();
-            private Writer writer = null;
-            private BufferedWriter bw = null;
-            private boolean initialized = false;
-            long cnt = 0;
-
-            public boolean hasNext() throws E {
-                return iter.hasNext();
-            }
-
-            public T next() throws E {
-                final T next = iter.next();
-
-                if (!initialized) {
-                    init();
-                }
-
-                try {
-                    bw.write(toLine.apply(next));
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                    cnt++;
-
-                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
-                        bw.flush();
-                    }
-                } catch (final IOException e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
-                }
-
-                return next;
-            }
-
-            @Override
-            protected void closeResource() {
-                if (writer != null) {
-                    try {
-                        if (bw != null) {
-                            try {
-                                bw.flush();
-                            } catch (final IOException e) {
-                                throw new UncheckedIOException(e);
-                            } finally {
-                                Objectory.recycle(bw);
-                            }
-                        }
-                    } finally {
-                        IOUtil.close(writer);
-                    }
-                }
-            }
-
-            private void init() {
-                initialized = true;
-
-                writer = IOUtil.newFileWriter(output);
-                bw = Objectory.createBufferedWriter(writer);
-            }
-        };
-
-        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
-    }
-
-    /**
-     * Writes each element of this sequence as a separate line to the specified output stream using the provided function
-     * to convert elements to strings. Each converted string is written as a separate line.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is an intermediate operation and will not close the sequence. The actual writing
-     * occurs when a terminal operation is invoked on the returned sequence.</p>
-     * 
-     * <p>Note: The output stream is not closed by this operation.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * // Save to System.out
-     * Seq.of("line1", "line2", "line3")
-     *     .saveEach(String::toUpperCase, System.out)
-     *     .count();
-     * // Prints: LINE1, LINE2, LINE3 (each on new line)
-     * }</pre></p>
-     *
-     * @param toLine the function to convert each element to a string
-     * @param output the output stream to write each element to
-     * @return this sequence for method chaining
-     * @throws IllegalStateException if the sequence is already closed
-     * @see #persist(Throwables.Function, OutputStream)
-     * @see N#stringOf(Object)
-     * @see #onEach(Throwables.Consumer)
-     */
-    @Beta
-    @IntermediateOp
-    public Seq<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final OutputStream output) throws IllegalStateException {
-        assertNotClosed();
-        checkArgNotNull(output, cs.outputStream);
-
-        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
-            private final Throwables.Iterator<T, E> iter = iteratorEx();
-            private BufferedWriter bw = null;
-            private boolean initialized = false;
-            long cnt = 0;
-
-            public boolean hasNext() throws E {
-                return iter.hasNext();
-            }
-
-            public T next() throws E {
-                final T next = iter.next();
-
-                if (!initialized) {
-                    init();
-                }
-
-                try {
-                    bw.write(toLine.apply(next));
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                    cnt++;
-
-                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
-                        bw.flush();
-                    }
-                } catch (final IOException e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
-                }
-
-                return next;
-            }
-
-            @Override
-            protected void closeResource() {
-                if (bw != null) {
-                    try {
-                        bw.flush();
-                    } catch (final IOException e) {
-                        throw new UncheckedIOException(e);
-                    } finally {
-                        Objectory.recycle(bw);
-                    }
-                }
-            }
-
-            private void init() {
-                initialized = true;
-
-                bw = Objectory.createBufferedWriter(output);
-            }
-        };
-
-        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
-    }
-
-    /**
-     * Writes each element of this sequence as a separate line to the specified writer using the provided function
-     * to convert elements to strings. Each converted string is written as a separate line.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is an intermediate operation and will not close the sequence. The actual writing
-     * occurs when a terminal operation is invoked on the returned sequence.</p>
-     * 
-     * <p>Note: The writer is not closed by this operation.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * StringWriter sw = new StringWriter();
-     * List<String> processed = Seq.of("a", "b", "c")
-     *     .saveEach(str -> "Item: " + str, sw)
-     *     .map(String::toUpperCase)
-     *     .toList();
-     * // sw contains: "Item: a\nItem: b\nItem: c\n"
-     * // processed = [A, B, C]
-     * }</pre></p>
-     *
-     * @param toLine the function to convert each element to a string
-     * @param output the writer to write each element to
-     * @return this sequence for method chaining
-     * @throws IllegalStateException if the sequence is already closed
-     * @see #persist(Throwables.Function, Writer)
-     * @see N#stringOf(Object)
-     * @see #onEach(Throwables.Consumer)
-     */
-    @Beta
-    @IntermediateOp
-    public Seq<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final Writer output) throws IllegalStateException {
-        assertNotClosed();
-        checkArgNotNull(output, cs.outputWriter);
-
-        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
-            private final Throwables.Iterator<T, E> iter = iteratorEx();
-            private Writer bw = null;
-            private boolean isBufferedWriter = false;
-            private boolean initialized = false;
-            long cnt = 0;
-
-            public boolean hasNext() throws E {
-                return iter.hasNext();
-            }
-
-            public T next() throws E {
-                final T next = iter.next();
-
-                if (!initialized) {
-                    init();
-                }
-
-                try {
-                    bw.write(toLine.apply(next));
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                    cnt++;
-
-                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
-                        bw.flush();
-                    }
-                } catch (final IOException e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
-                }
-
-                return next;
-            }
-
-            @Override
-            protected void closeResource() {
-                if (!isBufferedWriter && (bw != null)) {
-                    try {
-                        bw.flush();
-                    } catch (final IOException e) {
-                        throw new UncheckedIOException(e);
-                    } finally {
-                        Objectory.recycle((BufferedWriter) bw);
-                    }
-                }
-            }
-
-            private void init() {
-                initialized = true;
-
-                isBufferedWriter = IOUtil.isBufferedWriter(output);
-                bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
-            }
-        };
-
-        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
-    }
-
-    /**
-     * Writes each element of this sequence as a separate line to the specified file using the provided function
-     * to write each element. The write function receives both the element and a Writer,
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is an intermediate operation and will not close the sequence. The actual writing
-     * occurs when a terminal operation is invoked on the returned sequence.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * // Write with custom formatting
-     * Seq.of("apple", "banana", "cherry")
-     *     .saveEach((fruit, writer) -> {
-     *         writer.write("Fruit: ");
-     *         writer.write(fruit.toUpperCase());
-     *     }, new File("fruits.txt"))
-     *     .count();
-     * // File contains custom formatted lines
-     * }</pre></p>
-     *
-     * @param write the function to write each element as a separate line to the file. The line separator is automatically added after each write.
-     * @param output the file to write each element to
-     * @return this sequence for method chaining
-     * @throws IllegalStateException if the sequence is already closed
-     * @see #persist(Throwables.BiConsumer, File)
-     * @see N#stringOf(Object)
-     * @see #onEach(Throwables.Consumer)
-     */
-    @Beta
-    @IntermediateOp
-    public Seq<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> write, final File output) throws IllegalStateException {
-        assertNotClosed();
-        checkArgNotNull(output, cs.outputFile);
-
-        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
-            private final Throwables.Iterator<T, E> iter = iteratorEx();
-            private Writer writer = null;
-            private BufferedWriter bw = null;
-            private boolean initialized = false;
-            long cnt = 0;
-
-            public boolean hasNext() throws E {
-                return iter.hasNext();
-            }
-
-            public T next() throws E {
-                final T next = iter.next();
-
-                if (!initialized) {
-                    init();
-                }
-
-                try {
-                    write.accept(next, bw);
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                    cnt++;
-
-                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
-                        bw.flush();
-                    }
-                } catch (final IOException e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
-                }
-
-                return next;
-            }
-
-            @Override
-            protected void closeResource() {
-                if (writer != null) {
-                    try {
-                        if (bw != null) {
-                            try {
-                                bw.flush();
-                            } catch (final IOException e) {
-                                throw new UncheckedIOException(e);
-                            } finally {
-                                Objectory.recycle(bw);
-                            }
-                        }
-                    } finally {
-                        IOUtil.close(writer);
-                    }
-                }
-            }
-
-            private void init() {
-                initialized = true;
-
-                writer = IOUtil.newFileWriter(output);
-                bw = Objectory.createBufferedWriter(writer);
-            }
-        };
-
-        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
-    }
-
-    /**
-     * Writes each element of this sequence as a separate line to the specified writer using the provided function
-     * to write each element. The write function receives both the element and the Writer,
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is an intermediate operation and will not close the sequence. The actual writing
-     * occurs when a terminal operation is invoked on the returned sequence.</p>
-     * 
-     * <p>Note: The writer is not closed by this operation.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * StringWriter sw = new StringWriter();
-     * Seq.of(1, 2, 3)
-     *     .saveEach((num, writer) -> {
-     *         writer.write("Number: ");
-     *         writer.write(String.valueOf(num * 10));
-     *     }, sw)
-     *     .sum();
-     * // sw contains: "Number: 10\nNumber: 20\nNumber: 30\n"
-     * }</pre></p>
-     *
-     * @param write the function to write each element as a separate line to the writer. The line separator is automatically added after each write.
-     * @param output the writer to write each element to
-     * @return this sequence for method chaining
-     * @throws IllegalStateException if the sequence is already closed
-     * @see #persist(Throwables.BiConsumer, Writer)
-     * @see N#stringOf(Object)
-     * @see #onEach(Throwables.Consumer)
-     */
-    @Beta
-    @IntermediateOp
-    public Seq<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> write, final Writer output) throws IllegalStateException {
-        assertNotClosed();
-        checkArgNotNull(output, cs.outputWriter);
-
-        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
-            private final Throwables.Iterator<T, E> iter = iteratorEx();
-            private Writer bw = null;
-            private boolean isBufferedWriter = false;
-            private boolean initialized = false;
-            long cnt = 0;
-
-            public boolean hasNext() throws E {
-                return iter.hasNext();
-            }
-
-            public T next() throws E {
-                final T next = iter.next();
-
-                if (!initialized) {
-                    init();
-                }
-
-                try {
-                    write.accept(next, bw);
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                    cnt++;
-
-                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
-                        bw.flush();
-                    }
-                } catch (final IOException e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
-                }
-
-                return next;
-            }
-
-            @Override
-            protected void closeResource() {
-                if (!isBufferedWriter && (bw != null)) {
-                    try {
-                        bw.flush();
-                    } catch (final IOException e) {
-                        throw new UncheckedIOException(e);
-                    } finally {
-                        Objectory.recycle((BufferedWriter) bw);
-                    }
-                }
-            }
-
-            private void init() {
-                initialized = true;
-
-                isBufferedWriter = IOUtil.isBufferedWriter(output);
-                bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
-            }
-        };
-
-        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
-    }
-
-    /**
-     * Saves each element of this sequence to the database using the provided PreparedStatement
-     * and statement setter. Each element is individually executed as the sequence is consumed.
-     * 
-     * <p>This is an intermediate operation and will not close the sequence. The actual database
-     * operations occur when a terminal operation is invoked on the returned sequence.</p>
-     * 
-     * <p>Note: {@code UncheckedSQLException} may be thrown in the terminal operation if an SQL error occurs.
-     * The PreparedStatement is not closed by this operation.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (name, age) VALUES (?, ?)");
-     * long count = Seq.of(new User("Alice", 25), new User("Bob", 30))
-     *     .saveEach(stmt, (user, ps) -> {
-     *         ps.setString(1, user.getName());
-     *         ps.setInt(2, user.getAge());
-     *     })
-     *     .count();
-     * // Inserts 2 rows and returns 2
-     * }</pre></p>
-     *
-     * @param stmt the prepared statement used to save each element
-     * @param stmtSetter the function to set parameters on the prepared statement for each element
-     * @return this sequence for method chaining
-     * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the prepared statement is null
-     * @see #persist(PreparedStatement, int, long, Throwables.BiConsumer)
-     * @see #onEach(Throwables.Consumer)
-     */
-    @Beta
-    @IntermediateOp
-    public Seq<T, E> saveEach(final PreparedStatement stmt, final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
-            throws IllegalStateException, IllegalArgumentException {
-        return saveEach(stmt, 0, 0, stmtSetter);
-    }
-
-    /**
-     * Saves each element of this sequence to the database using the provided PreparedStatement
-     * and statement setter, with support for batch processing. Elements are collected into batches
-     * of the specified size and executed together for improved performance.
-     * 
-     * <p>This is an intermediate operation and will not close the sequence. The actual database
-     * operations occur when a terminal operation is invoked on the returned sequence.</p>
-     * 
-     * <p>Note: {@code UncheckedSQLException} may be thrown in the terminal operation if an SQL error occurs.
-     * The PreparedStatement is not closed by this operation.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO products (name, price) VALUES (?, ?)");
-     * List<Product> saved = Seq.of(products)
-     *     .saveEach(stmt, 100, 1000, (product, ps) -> {
-     *         ps.setString(1, product.getName());
-     *         ps.setDouble(2, product.getPrice());
-     *     })
-     *     .toList();
-     * // Inserts products in batches of 100, with 1 second pause between batches
-     * }</pre></p>
-     *
-     * @param stmt the prepared statement used to save each element
-     * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used
-     * @param batchIntervalInMillis the pause interval in milliseconds between batch executions
-     * @param stmtSetter the function to set parameters on the prepared statement for each element
-     * @return this sequence for method chaining
-     * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the prepared statement is null, or batchSize/batchIntervalInMillis is negative
-     * @see #persist(PreparedStatement, int, long, Throwables.BiConsumer)
-     * @see #onEach(Throwables.Consumer)
-     */
-    @Beta
-    @IntermediateOp
-    public Seq<T, E> saveEach(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
-        assertNotClosed();
-        checkArgNotNull(stmt, cs.PreparedStatement);
-        checkArgNotNegative(batchSize, cs.batchSize);
-        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
-
-        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
-            private final Throwables.Iterator<T, E> iter = iteratorEx();
-            private final boolean isBatchUsed = batchSize > 1;
-            long cnt = 0;
-
-            public boolean hasNext() throws E {
-                return iter.hasNext();
-            }
-
-            public T next() throws E {
-                final T next = iter.next();
-
-                try {
-                    stmtSetter.accept(next, stmt);
-
-                    if (isBatchUsed) {
-                        cnt++;
-                        stmt.addBatch();
-
-                        if (cnt % batchSize == 0) {
-                            DataSourceUtil.executeBatch(stmt);
-
-                            if (batchIntervalInMillis > 0) {
-                                N.sleepUninterruptibly(batchIntervalInMillis);
-                            }
-                        }
-                    } else {
-                        stmt.execute();
-                    }
-                } catch (final SQLException e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
-                }
-
-                return next;
-            }
-
-            @Override
-            protected void closeResource() {
-                if (isBatchUsed && (cnt % batchSize) > 0) {
-                    try {
-                        DataSourceUtil.executeBatch(stmt);
-                    } catch (final SQLException e) {
-                        throw ExceptionUtil.toRuntimeException(e, true);
-                    }
-                }
-            }
-        };
-
-        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
-    }
-
-    /**
-     * Saves each element of this sequence to the database using the provided connection and
-     * SQL insert statement. A PreparedStatement is created from the connection and SQL,
-     * and each element is executed individually as the sequence is consumed.
-     * 
-     * <p>This is an intermediate operation and will not close the sequence. The actual database
-     * operations occur when a terminal operation is invoked on the returned sequence.</p>
-     * 
-     * <p>Note: {@code UncheckedSQLException} may be thrown in the terminal operation if an SQL error occurs.
-     * The created PreparedStatement is automatically closed when the sequence completes.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * String sql = "INSERT INTO employees (name, department) VALUES (?, ?)";
-     * Seq.of(employees)
-     *     .saveEach(connection, sql, (emp, ps) -> {
-     *         ps.setString(1, emp.getName());
-     *         ps.setString(2, emp.getDepartment());
-     *     })
-     *     .forEach(emp -> System.out.println("Saved: " + emp));
-     * }</pre></p>
-     *
-     * @param conn the database connection to use
-     * @param insertSQL the SQL insert statement to prepare
-     * @param stmtSetter the function to set parameters on the prepared statement for each element
-     * @return this sequence for method chaining
-     * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the connection or insert SQL is null
-     * @see #persist(Connection, String, int, long, Throwables.BiConsumer)
-     * @see #onEach(Throwables.Consumer)
-     */
-    @Beta
-    @IntermediateOp
-    public Seq<T, E> saveEach(final Connection conn, final String insertSQL,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
-        return saveEach(conn, insertSQL, 0, 0, stmtSetter);
-    }
-
-    /**
-     * Saves each element of this sequence to the database using the provided connection,
-     * SQL insert statement, and batch processing parameters. A PreparedStatement is created
-     * from the connection and SQL, and elements are executed in batches for improved performance.
-     * 
-     * <p>This is an intermediate operation and will not close the sequence. The actual database
-     * operations occur when a terminal operation is invoked on the returned sequence.</p>
-     * 
-     * <p>Note: {@code UncheckedSQLException} may be thrown in the terminal operation if an SQL error occurs.
-     * The created PreparedStatement is automatically closed when the sequence completes.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * String sql = "INSERT INTO orders (customer_id, amount, date) VALUES (?, ?, ?)";
-     * Seq.of(orders)
-     *     .saveEach(connection, sql, 500, 2000, (order, ps) -> {
-     *         ps.setLong(1, order.getCustomerId());
-     *         ps.setBigDecimal(2, order.getAmount());
-     *         ps.setDate(3, order.getDate());
-     *     })
-     *     .count();
-     * // Inserts orders in batches of 500, with 2 second pause between batches
-     * }</pre></p>
-     *
-     * @param conn the database connection to use
-     * @param insertSQL the SQL insert statement to prepare
-     * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used
-     * @param batchIntervalInMillis the pause interval in milliseconds between batch executions
-     * @param stmtSetter the function to set parameters on the prepared statement for each element
-     * @return this sequence for method chaining
-     * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if connection/insert SQL is null, or batchSize/batchIntervalInMillis is negative
-     * @see #persist(Connection, String, int, long, Throwables.BiConsumer)
-     * @see #onEach(Throwables.Consumer)
-     */
-    @Beta
-    @IntermediateOp
-    public Seq<T, E> saveEach(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
-        assertNotClosed();
-        checkArgNotNull(conn, cs.Connection);
-        checkArgNotNull(insertSQL, cs.insertSQL);
-        checkArgNotNegative(batchSize, cs.batchSize);
-        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
-
-        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
-            private final Throwables.Iterator<T, E> iter = iteratorEx();
-            private PreparedStatement stmt = null;
-            private boolean initialized = false;
-            private final boolean isBatchUsed = batchSize > 1;
-            long cnt = 0;
-
-            public boolean hasNext() throws E {
-                return iter.hasNext();
-            }
-
-            public T next() throws E {
-                final T next = iter.next();
-
-                if (!initialized) {
-                    init();
-                }
-
-                try {
-                    stmtSetter.accept(next, stmt);
-
-                    if (isBatchUsed) {
-                        cnt++;
-                        stmt.addBatch();
-
-                        if (cnt % batchSize == 0) {
-                            DataSourceUtil.executeBatch(stmt);
-
-                            if (batchIntervalInMillis > 0) {
-                                N.sleepUninterruptibly(batchIntervalInMillis);
-                            }
-                        }
-                    } else {
-                        stmt.execute();
-                    }
-                } catch (final SQLException e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
-                }
-
-                return next;
-            }
-
-            @Override
-            protected void closeResource() {
-                if (stmt != null) {
-                    try {
-                        if (isBatchUsed && (cnt % batchSize) > 0) {
-                            DataSourceUtil.executeBatch(stmt);
-                        }
-                    } catch (final SQLException e) {
-                        throw ExceptionUtil.toRuntimeException(e, true);
-                    } finally {
-                        DataSourceUtil.closeQuietly(stmt);
-                    }
-                }
-            }
-
-            private void init() {
-                initialized = true;
-
-                try {
-                    stmt = conn.prepareStatement(insertSQL);
-                } catch (final SQLException e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
-                }
-            }
-        };
-
-        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
-    }
-
-    /**
-     * Saves each element of this sequence to the database using the provided DataSource and
-     * SQL insert statement. A connection is obtained from the DataSource, a PreparedStatement
-     * is created, and each element is executed individually as the sequence is consumed.
-     * 
-     * <p>This is an intermediate operation and will not close the sequence. The actual database
-     * operations occur when a terminal operation is invoked on the returned sequence.</p>
-     * 
-     * <p>Note: {@code UncheckedSQLException} may be thrown in the terminal operation if an SQL error occurs.
-     * The connection and PreparedStatement are automatically managed and closed when the sequence completes.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * String sql = "INSERT INTO logs (message, level, timestamp) VALUES (?, ?, ?)";
-     * Seq.of(logEntries)
-     *     .saveEach(dataSource, sql, (log, ps) -> {
-     *         ps.setString(1, log.getMessage());
-     *         ps.setString(2, log.getLevel());
-     *         ps.setTimestamp(3, log.getTimestamp());
-     *     })
-     *     .forEach(log -> System.out.println("Logged: " + log));
-     * }</pre></p>
-     *
-     * @param ds the data source to obtain connections from
-     * @param insertSQL the SQL insert statement to prepare
-     * @param stmtSetter the function to set parameters on the prepared statement for each element
-     * @return this sequence for method chaining
-     * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the DataSource or insert SQL is null
-     * @see #persist(javax.sql.DataSource, String, int, long, Throwables.BiConsumer)
-     * @see #onEach(Throwables.Consumer)
-     */
-    @Beta
-    @IntermediateOp
-    public Seq<T, E> saveEach(final javax.sql.DataSource ds, final String insertSQL,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
-        return saveEach(ds, insertSQL, 0, 0, stmtSetter);
-    }
-
-    /**
-     * Saves each element of this sequence to the database using the provided DataSource,
-     * SQL insert statement, and batch processing parameters. A connection is obtained from
-     * the DataSource, and elements are executed in batches for improved performance.
-     * 
-     * <p>This is an intermediate operation and will not close the sequence. The actual database
-     * operations occur when a terminal operation is invoked on the returned sequence.</p>
-     * 
-     * <p>Note: {@code UncheckedSQLException} may be thrown in the terminal operation if an SQL error occurs.
-     * The connection and PreparedStatement are automatically managed and closed when the sequence completes.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * String sql = "INSERT INTO transactions (account_id, amount, type) VALUES (?, ?, ?)";
-     * long processed = Seq.of(transactions)
-     *     .saveEach(dataSource, sql, 1000, 5000, (tx, ps) -> {
-     *         ps.setLong(1, tx.getAccountId());
-     *         ps.setBigDecimal(2, tx.getAmount());
-     *         ps.setString(3, tx.getType());
-     *     })
-     *     .count();
-     * // Inserts transactions in batches of 1000, with 5 second pause between batches
-     * }</pre></p>
-     *
-     * @param ds the data source to obtain connections from
-     * @param insertSQL the SQL insert statement to prepare
-     * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used
-     * @param batchIntervalInMillis the pause interval in milliseconds between batch executions
-     * @param stmtSetter the function to set parameters on the prepared statement for each element
-     * @return this sequence for method chaining
-     * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if DataSource/insert SQL is null, or batchSize/batchIntervalInMillis is negative
-     * @see #persist(javax.sql.DataSource, String, int, long, Throwables.BiConsumer)
-     * @see #onEach(Throwables.Consumer)
-     */
-    @Beta
-    @IntermediateOp
-    public Seq<T, E> saveEach(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
-        assertNotClosed();
-        checkArgNotNull(ds, cs.DataSource);
-        checkArgNotNull(insertSQL, cs.insertSQL);
-        checkArgNotNegative(batchSize, cs.batchSize);
-        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
-
-        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
-            private final Throwables.Iterator<T, E> iter = iteratorEx();
-            private Connection conn = null;
-            private PreparedStatement stmt = null;
-            private boolean initialized = false;
-            private final boolean isBatchUsed = batchSize > 1;
-            long cnt = 0;
-
-            public boolean hasNext() throws E {
-                return iter.hasNext();
-            }
-
-            public T next() throws E {
-                final T next = iter.next();
-
-                if (!initialized) {
-                    init();
-                }
-
-                try {
-                    stmtSetter.accept(next, stmt);
-
-                    if (isBatchUsed) {
-                        cnt++;
-                        stmt.addBatch();
-
-                        if (cnt % batchSize == 0) {
-                            DataSourceUtil.executeBatch(stmt);
-
-                            if (batchIntervalInMillis > 0) {
-                                N.sleepUninterruptibly(batchIntervalInMillis);
-                            }
-                        }
-                    } else {
-                        stmt.execute();
-                    }
-                } catch (final SQLException e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
-                }
-
-                return next;
-            }
-
-            @Override
-            protected void closeResource() {
-                try {
-                    if (stmt != null) {
-                        try {
-                            if (isBatchUsed && (cnt % batchSize) > 0) {
-                                DataSourceUtil.executeBatch(stmt);
-                            }
-                        } catch (final SQLException e) {
-                            throw ExceptionUtil.toRuntimeException(e, true);
-                        } finally {
-                            DataSourceUtil.closeQuietly(stmt);
-                        }
-                    }
-                } finally {
-                    DataSourceUtil.releaseConnection(conn, ds);
-                }
-            }
-
-            private void init() {
-                initialized = true;
-
-                try {
-                    conn = ds.getConnection();
-                    stmt = conn.prepareStatement(insertSQL);
-                } catch (final SQLException e) {
-                    try {
-                        if (stmt != null) {
-                            DataSourceUtil.closeQuietly(stmt);
-                        }
-                    } finally {
-                        DataSourceUtil.releaseConnection(conn, ds);
-                    }
-
-                    throw ExceptionUtil.toRuntimeException(e, true);
-                }
-            }
-        };
-
-        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
-    }
-
-    /**
-     * Saves each element of this sequence as a separate line to the specified file.
-     * Each element is converted to a string using {@code N.stringOf(Object)} and written as a separate line.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is a terminal operation and will close the sequence after execution.</p>
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * long count = Seq.of("apple", "banana", "cherry")
-     *     .persist(new File("fruits.txt"));
-     * // Creates file with 3 lines, returns 3
-     * }</pre></p>
-     *
-     * @param output the file to write the sequence to
-     * @return the number of elements written
-     * @throws IllegalStateException if the sequence is already closed
-     * @throws IOException if an I/O error occurs
-     * @throws E if an exception occurs during iteration of the sequence
-     * @see N#stringOf(Object)
-     */
-    @TerminalOp
-    public long persist(final File output) throws IllegalStateException, IOException, E {
-        return persist(N::stringOf, output);
-    }
-
-    /**
-     * Saves each element of this sequence as a separate line to the specified file with a header and tail line.
-     * Each element is converted to a string using {@code N.stringOf(Object)} and written to a new line in the file.
-     * The header line is written first, followed by all elements, and finally the tail line.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is a terminal operation and will close the sequence after execution.</p>
-     *
-     * @param headerLine the header line to be written at the beginning of the file. Can be {@code null} if no header is needed
-     * @param tailLine the tail line to be written at the end of the file. Can be {@code null} if no tail is needed
-     * @param output the target file where the sequence elements will be written. The file will be created if it doesn't exist,
-     *               or overwritten if it does exist
-     * @return the total number of elements that were persisted to the file (excluding header and tail lines)
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the file
-     * @throws E if an exception occurs during element processing
-     * @see N#stringOf(Object)
-     */
-    @TerminalOp
-    public long persist(final String headerLine, final String tailLine, final File output) throws IllegalStateException, IOException, E {
-        return persist(headerLine, tailLine, N::stringOf, output);
-    }
-
-    /**
-     * Saves each element of this sequence as a separate line to the specified file using a custom string conversion function.
-     * Each element is converted to a string using the provided {@code toLine} function and written to a new line in the file.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is a terminal operation and will close the sequence after execution.</p>
-     *
-     * @param toLine the function that converts each element to a string representation for writing to the file.
-     *               The function may throw exception type E
-     * @param output the target file where the sequence elements will be written. The file will be created if it doesn't exist,
-     *               or overwritten if it does exist
-     * @return the total number of elements that were persisted to the file
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the file
-     * @throws E if an exception occurs during element processing or string conversion
-     * @see N#stringOf(Object)
-     */
-    @TerminalOp
-    public long persist(final Throwables.Function<? super T, String, E> toLine, final File output) throws IllegalStateException, IOException, E {
-        return persist(null, null, toLine, output);
-    }
-
-    /**
-     * Saves each element of this sequence as a separate line to the specified file with a header and tail line using a custom string conversion function.
-     * Each element is converted to a string using the provided {@code toLine} function and written to a new line in the file.
-     * The header line is written first, followed by all elements, and finally the tail line.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is a terminal operation and will close the sequence after execution.</p>
-     *
-     * @param header the header line to be written at the beginning of the file. Can be {@code null} if no header is needed
-     * @param tail the tail line to be written at the end of the file. Can be {@code null} if no tail is needed
-     * @param toLine the function that converts each element to a string representation for writing to the file.
-     *               The function may throw exception type E
-     * @param output the target file where the sequence elements will be written. The file will be created if it doesn't exist,
-     *               or overwritten if it does exist. Must not be {@code null}
-     * @return the total number of elements that were persisted to the file (excluding header and tail lines)
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the file
-     * @throws E if an exception occurs during element processing or string conversion
-     * @see N#stringOf(Object)
-     */
-    @TerminalOp
-    public long persist(final String header, final String tail, final Throwables.Function<? super T, String, E> toLine, final File output)
-            throws IllegalStateException, IOException, E {
-        assertNotClosed();
-        checkArgNotNull(output, cs.outputFile);
-
-        final Writer writer = IOUtil.newFileWriter(output);
-
-        try {
-            return persist(header, tail, toLine, writer);
-        } finally {
-            IOUtil.close(writer);
-        }
-    }
-
-    /**
-     * Saves each element of this sequence as a separate line to the specified output stream using a custom string conversion function.
-     * Each element is converted to a string using the provided {@code toLine} function and written to a new line in the stream.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is a terminal operation and will close the sequence after execution.</p>
-     * 
-     * <p>Note: The output stream is not closed by this operation.</p>
-     *
-     * @param toLine the function that converts each element to a string representation for writing to the stream.
-     *               The function may throw exception type E
-     * @param output the target output stream where the sequence elements will be written. Must not be {@code null}
-     * @return the total number of elements that were persisted to the stream
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the stream
-     * @throws E if an exception occurs during element processing or string conversion
-     * @see N#stringOf(Object)
-     */
-    @TerminalOp
-    public long persist(final Throwables.Function<? super T, String, E> toLine, final OutputStream output) throws IllegalStateException, IOException, E {
-        assertNotClosed();
-        checkArgNotNull(output, cs.outputStream);
-
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
-
-        try {
-            return persist(toLine, bw);
-        } finally {
-            Objectory.recycle(bw);
-        }
-    }
-
-    /**
-     * Saves each element of this sequence as a separate line to the specified output stream with a header and tail line using a custom string conversion function.
-     * Each element is converted to a string using the provided {@code toLine} function and written to a new line in the stream.
-     * The header line is written first, followed by all elements, and finally the tail line.
-     * The output stream is wrapped in a BufferedWriter for better performance.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is a terminal operation and will close the sequence after execution.</p>
-     * 
-     * <p>Note: The output stream is not closed by this operation.</p>
-     *
-     * @param header the header line to be written at the beginning of the stream. Can be {@code null} if no header is needed
-     * @param tail the tail line to be written at the end of the stream. Can be {@code null} if no tail is needed
-     * @param toLine the function that converts each element to a string representation for writing to the stream.
-     *               The function may throw exception type E
-     * @param output the target output stream where the sequence elements will be written. Must not be {@code null}
-     * @return the total number of elements that were persisted to the stream (excluding header and tail lines)
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the stream
-     * @throws E if an exception occurs during element processing or string conversion
-     * @see N#stringOf(Object)
-     */
-    @TerminalOp
-    public long persist(final String header, final String tail, final Throwables.Function<? super T, String, E> toLine, final OutputStream output)
-            throws IllegalStateException, IOException, E {
-        assertNotClosed();
-        checkArgNotNull(output, cs.outputStream);
-
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
-
-        try {
-            return persist(header, tail, toLine, bw);
-        } finally {
-            Objectory.recycle(bw);
-        }
-    }
-
-    /**
-     * Saves each element of this sequence as a separate line to the specified writer using a custom string conversion function.
-     * Each element is converted to a string using the provided {@code toLine} function and written to a new line in the writer.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is a terminal operation and will close the sequence after execution.</p>
-     * 
-     * <p>Note: The writer is not closed by this operation.</p>
-     *
-     * @param toLine the function that converts each element to a string representation for writing to the writer.
-     *               The function may throw exception type E
-     * @param output the target writer where the sequence elements will be written. Must not be {@code null}
-     * @return the total number of elements that were persisted to the writer
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the writer
-     * @throws E if an exception occurs during element processing or string conversion
-     * @see N#stringOf(Object)
-     */
-    @TerminalOp
-    public long persist(final Throwables.Function<? super T, String, E> toLine, final Writer output) throws IllegalStateException, IOException, E {
-        assertNotClosed();
-
-        return persist(null, null, toLine, output);
-    }
-
-    /**
-     * Saves each element of this sequence as a separate line to the specified writer with a header and tail line using a custom string conversion function.
-     * Each element is converted to a string using the provided {@code toLine} function and written to a new line in the writer.
-     * The header line is written first, followed by all elements, and finally the tail line.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is a terminal operation and will close the sequence after execution.</p>
-     * 
-     * <p>Note: The writer is not closed by this operation.</p>
-     *
-     * @param header the header line to be written at the beginning. Can be {@code null} if no header is needed
-     * @param tail the tail line to be written at the end. Can be {@code null} if no tail is needed
-     * @param toLine the function that converts each element to a string representation for writing.
-     *               The function may throw exception type E
-     * @param output the target writer where the sequence elements will be written. Must not be {@code null}
-     * @return the total number of elements that were persisted (excluding header and tail lines)
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing
-     * @throws E if an exception occurs during element processing or string conversion
-     * @see N#stringOf(Object)
-     */
-    @TerminalOp
-    public long persist(final String header, final String tail, final Throwables.Function<? super T, String, E> toLine, final Writer output)
-            throws IllegalStateException, IOException, E {
-        assertNotClosed();
-        checkArgNotNull(output, cs.outputWriter);
-
-        try {
-            final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
-            final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
-            long cnt = 0;
-
-            try {
-                @SuppressWarnings("resource")
-                final Throwables.Iterator<T, E> iter = iteratorEx();
-
-                if (header != null) {
-                    bw.write(header);
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                }
-
-                while (iter.hasNext()) {
-                    bw.write(toLine.apply(iter.next()));
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                    cnt++;
-
-                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
-                        bw.flush();
-                    }
-                }
-
-                if (tail != null) {
-                    bw.write(tail);
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                }
-            } finally {
-                try {
-                    bw.flush();
-                } finally {
-                    if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
-                    }
-                }
-            }
-
-            return cnt;
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     * Saves each element of this sequence as a separate line to the specified file using a custom writer consumer.
-     * Each element is processed by the provided {@code write} consumer which writes directly to the writer.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is a terminal operation and will close the sequence after execution.</p>
-     *
-     * @param write the function to write each element as a separate line to the file. The line separator is automatically added after each write.
-     * @param output the target file where the sequence elements will be written. The file will be created if it doesn't exist,
-     *               or overwritten if it does exist
-     * @return the total number of elements that were processed and written to the file
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the file
-     * @throws E if an exception occurs during element processing
-     */
-    @TerminalOp
-    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> write, final File output) throws IllegalStateException, IOException, E {
-        assertNotClosed();
-
-        return persist(null, null, write, output);
-    }
-
-    /**
-     * Saves each element of this sequence as a separate line to the specified file with a header and tail line using a custom writer consumer.
-     * Each element is processed by the provided {@code write} consumer which writes directly to the writer.
-     * The header line is written first, followed by all elements (each followed by a line separator), and finally the tail line.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is a terminal operation and will close the sequence after execution.</p>
-     *
-     * @param header the header line to be written at the beginning of the file. Can be {@code null} if no header is needed
-     * @param tail the tail line to be written at the end of the file. Can be {@code null} if no tail is needed
-     * @param write the function to write each element as a separate line to the file. The line separator is automatically added after each write.
-     *                  A line separator is automatically added after each element
-     * @param output the target file where the sequence elements will be written. The file will be created if it doesn't exist,
-     *               or overwritten if it does exist. Must not be {@code null}
-     * @return the total number of elements that were processed and written to the file (excluding header and tail lines)
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the file
-     * @throws E if an exception occurs during element processing
-     */
-    @TerminalOp
-    public long persist(final String header, final String tail, final Throwables.BiConsumer<? super T, Writer, IOException> write, final File output)
-            throws IOException, E {
-        assertNotClosed();
-        checkArgNotNull(output, cs.outputFile);
-
-        final Writer writer = IOUtil.newFileWriter(output);
-
-        try {
-            return persist(header, tail, write, writer);
-        } finally {
-            IOUtil.close(writer);
-        }
-    }
-
-    /**
-     * Saves each element of this sequence as a separate line to the specified writer using a custom writer consumer.
-     * Each element is processed by the provided {@code write} consumer which writes directly to the writer
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is a terminal operation and will close the sequence after execution.</p>
-     * 
-     * <p>Note: The writer is not closed by this operation.</p>
-     *
-     * @param write the function to write each element as a separate line to the writer. The line separator is automatically added after each write.
-     * @param output the target writer where the sequence elements will be written. Must not be {@code null}
-     * @return the total number of elements that were processed and written to the writer
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the writer
-     * @throws E if an exception occurs during element processing
-     */
-    @TerminalOp
-    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> write, final Writer output) throws IllegalStateException, IOException, E {
-        assertNotClosed();
-
-        return persist(null, null, write, output);
-    }
-
-    /**
-     * Saves each element of this sequence as a separate line to the specified writer with a header and tail line using a custom writer consumer.
-     * Each element is processed by the provided {@code write} consumer which writes directly to the writer.
-     * The header line is written first, followed by all elements (each followed by a line separator), and finally the tail line.
-     * The line separator is automatically added after each write.
-     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
-     * 
-     * <p>This is a terminal operation and will close the sequence after execution.</p>
-     * 
-     * <p>Note: The writer is not closed by this operation.</p>
-     *
-     * @param header the header line to be written at the beginning. Can be {@code null} if no header is needed
-     * @param tail the tail line to be written at the end. Can be {@code null} if no tail is needed
-     * @param write the function to write each element as a separate line to the writer. The line separator is automatically added after each write.
-     *                  A line separator is automatically added after each element
-     * @param output the target writer where the sequence elements will be written. Must not be {@code null}
-     * @return the total number of elements that were processed and written (excluding header and tail lines)
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing
-     * @throws E if an exception occurs during element processing
-     */
-    @TerminalOp
-    public long persist(final String header, final String tail, final Throwables.BiConsumer<? super T, Writer, IOException> write, final Writer output)
-            throws IOException, E {
-        assertNotClosed();
-        checkArgNotNull(output, cs.outputWriter);
-
-        try {
-            final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
-            final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
-            long cnt = 0;
-
-            try {
-                @SuppressWarnings("resource")
-                final Throwables.Iterator<T, E> iter = iteratorEx();
-
-                if (header != null) {
-                    bw.write(header);
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                }
-
-                while (iter.hasNext()) {
-                    write.accept(iter.next(), bw);
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                    cnt++;
-
-                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
-                        bw.flush();
-                    }
-                }
-
-                if (tail != null) {
-                    bw.write(tail);
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                }
-            } finally {
-                try {
-                    bw.flush();
-                } finally {
-                    if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
-                    }
-                }
-            }
-
-            return cnt;
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     * Persists the elements of this sequence to a database using the specified prepared statement and statement setter.
-     * Each element is bound to the prepared statement using the provided {@code stmtSetter} consumer.
-     * If batch size is greater than 1, batch updates are used for better performance.
-     * The prepared statement is NOT closed by this method.
-     * The sequence is automatically closed after this operation completes.
-     *
-     * <br />
-     * This is a terminal operation and will close the sequence.
-     *
-     * @param stmt the prepared statement to use for persisting elements. Must not be {@code null}
-     * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used
-     * @param batchIntervalInMillis the pause interval in milliseconds between each batch execution. 
-     *                              Use 0 for no pause. Must not be negative
-     * @param stmtSetter the consumer that binds each element to the prepared statement.
-     *                   The consumer receives the element and the prepared statement as parameters and may throw SQLException
-     * @return the total number of elements that were persisted to the database
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IllegalArgumentException if the prepared statement is {@code null}, or batchSize or batchIntervalInMillis is negative
-     * @throws SQLException if a database access error occurs
-     * @throws E if an exception occurs during element processing
-     */
-    @TerminalOp
-    public long persist(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
-            throws IllegalStateException, IllegalArgumentException, SQLException, E {
-        assertNotClosed();
-        checkArgNotNull(stmt, cs.PreparedStatement);
-        checkArgNotNegative(batchSize, cs.batchSize);
-        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
-
-        try {
-            @SuppressWarnings("resource")
-            final Throwables.Iterator<T, E> iter = iteratorEx();
-            final boolean isBatchUsed = batchSize > 1;
-            long cnt = 0;
-
-            while (iter.hasNext()) {
-                stmtSetter.accept(iter.next(), stmt);
-                cnt++;
-
-                if (isBatchUsed) {
-                    stmt.addBatch();
-
-                    if (cnt % batchSize == 0) {
-                        DataSourceUtil.executeBatch(stmt);
-
-                        if (batchIntervalInMillis > 0) {
-                            N.sleepUninterruptibly(batchIntervalInMillis);
-                        }
-                    }
-                } else {
-                    stmt.execute();
-                }
-            }
-
-            if (isBatchUsed && cnt % batchSize > 0) {
-                DataSourceUtil.executeBatch(stmt);
-            }
-
-            return cnt;
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     * Persists the elements of this sequence to a database using the specified connection and insert SQL.
-     * A prepared statement is created from the insert SQL and each element is bound to it using the provided {@code stmtSetter} consumer.
-     * If batch size is greater than 1, batch updates are used for better performance.
-     * The prepared statement is automatically closed after this method completes.
-     * The sequence is automatically closed after this operation completes.
-     *
-     * <br />
-     * This is a terminal operation and will close the sequence.
-     *
-     * @param conn the database connection to use. Must not be {@code null}
-     * @param insertSQL the SQL insert statement to prepare. Must not be {@code null}
-     * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used
-     * @param batchIntervalInMillis the pause interval in milliseconds between each batch execution. 
-     *                              Use 0 for no pause. Must not be negative
-     * @param stmtSetter the consumer that binds each element to the prepared statement.
-     *                   The consumer receives the element and the prepared statement as parameters and may throw SQLException
-     * @return the total number of elements that were persisted to the database
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IllegalArgumentException if the connection or insert SQL is {@code null}, or batchSize or batchIntervalInMillis is negative
-     * @throws SQLException if a database access error occurs
-     * @throws E if an exception occurs during element processing
-     */
-    @TerminalOp
-    public long persist(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
-            throws IllegalStateException, IllegalArgumentException, SQLException, E {
-        assertNotClosed();
-        checkArgNotNull(conn, cs.Connection);
-        checkArgNotNull(insertSQL, cs.insertSQL);
-        checkArgNotNegative(batchSize, cs.batchSize);
-        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
-
-        PreparedStatement stmt = null;
-
-        try {
-            stmt = conn.prepareStatement(insertSQL);
-
-            return persist(stmt, batchSize, batchIntervalInMillis, stmtSetter);
-        } finally {
-            DataSourceUtil.closeQuietly(stmt);
-        }
-    }
-
-    /**
-     * Persists the elements of this sequence to a database using the specified data source and insert SQL.
-     * A connection is obtained from the data source, a prepared statement is created from the insert SQL,
-     * and each element is bound to it using the provided {@code stmtSetter} consumer.
-     * If batch size is greater than 1, batch updates are used for better performance.
-     * The connection and prepared statement are automatically closed after this method completes.
-     * The sequence is automatically closed after this operation completes.
-     *
-     * <br />
-     * This is a terminal operation and will close the sequence.
-     *
-     * @param ds the data source to obtain a connection from. Must not be {@code null}
-     * @param insertSQL the SQL insert statement to prepare. Must not be {@code null}
-     * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used
-     * @param batchIntervalInMillis the pause interval in milliseconds between each batch execution. 
-     *                              Use 0 for no pause. Must not be negative
-     * @param stmtSetter the consumer that binds each element to the prepared statement.
-     *                   The consumer receives the element and the prepared statement as parameters and may throw SQLException
-     * @return the total number of elements that were persisted to the database
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IllegalArgumentException if the data source or insert SQL is {@code null}, or batchSize or batchIntervalInMillis is negative
-     * @throws SQLException if a database access error occurs
-     * @throws E if an exception occurs during element processing
-     */
-    @TerminalOp
-    public long persist(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
-            throws IllegalStateException, IllegalArgumentException, SQLException, E {
-        assertNotClosed();
-        checkArgNotNull(ds, cs.DataSource);
-        checkArgNotNull(insertSQL, cs.insertSQL);
-        checkArgNotNegative(batchSize, cs.batchSize);
-        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
-
-        Connection conn = null;
-        PreparedStatement stmt = null;
-
-        try {
-            conn = ds.getConnection();
-            stmt = conn.prepareStatement(insertSQL);
-
-            return persist(stmt, batchSize, batchIntervalInMillis, stmtSetter);
-        } finally {
-            try {
-                DataSourceUtil.closeQuietly(stmt);
-            } finally {
-                DataSourceUtil.releaseConnection(conn, ds);
-            }
-        }
-    }
-
-    /**
-     * Persists the elements of this sequence to the specified file in CSV format.
-     * The first element is used to determine the CSV structure:
-     * - If the element is an array or List, the first row is used as field names
-     * - If the element is a bean or Map, column names are obtained from the bean properties or map keys
-     * Each element is written as a CSV row with values properly escaped and quoted as needed.
-     * The sequence is automatically closed after this operation completes.
-     *
-     * <br />
-     * This is a terminal operation and will close the sequence.
-     *
-     * @param output the target file where the CSV data will be written. The file will be created if it doesn't exist,
-     *               or overwritten if it does exist
-     * @return the total number of data rows that were written to the file (excluding the header row if present)
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the file
-     * @throws E if an exception occurs during element processing
-     * @see CSVUtil#setHeaderParser(Function)
-     * @see CSVUtil#setLineParser(BiConsumer)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    @Beta
-    @TerminalOp
-    public long persistToCSV(final File output) throws IllegalStateException, IOException, E {
-        final Writer writer = IOUtil.newFileWriter(output);
-
-        try {
-            return persistToCSV(writer);
-        } finally {
-            IOUtil.close(writer);
-        }
-    }
-
-    /**
-     * Persists the elements of this sequence to the specified file in CSV format with custom headers.
-     * The provided headers are used as the first row of the CSV file.
-     * Each element must be compatible with the CSV structure (array, List, Map, or bean).
-     * Each element is written as a CSV row with values properly escaped and quoted as needed.
-     * The sequence is automatically closed after this operation completes.
-     *
-     * <br />
-     * This is a terminal operation and will close the sequence.
-     *
-     * @param csvHeaders the collection of header names to use for the CSV columns. Must not be empty
-     * @param output the target file where the CSV data will be written. The file will be created if it doesn't exist,
-     *               or overwritten if it does exist
-     * @return the total number of data rows that were written to the file (excluding the header row)
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the file
-     * @throws E if an exception occurs during element processing
-     * @see CSVUtil#setHeaderParser(Function)
-     * @see CSVUtil#setLineParser(BiConsumer)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    @TerminalOp
-    public long persistToCSV(final Collection<String> csvHeaders, final File output) throws IllegalStateException, IOException, E {
-        final Writer writer = IOUtil.newFileWriter(output);
-
-        try {
-            return persistToCSV(csvHeaders, writer);
-        } finally {
-            IOUtil.close(writer);
-        }
-    }
-
-    /**
-     * Persists the elements of this sequence to the specified output stream in CSV format.
-     * The first element is used to determine the CSV structure:
-     * - If the element is an array or List, the first row is used as field names
-     * - If the element is a bean or Map, column names are obtained from the bean properties or map keys
-     * Each element is written as a CSV row with values properly escaped and quoted as needed.
-     * The output stream is wrapped in a BufferedWriter for better performance.
-     * The sequence is automatically closed after this operation completes.
-     *
-     * <br />
-     * This is a terminal operation and will close the sequence.
-     *
-     * @param output the target output stream where the CSV data will be written
-     * @return the total number of data rows that were written to the stream (excluding the header row if present)
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the stream
-     * @throws E if an exception occurs during element processing
-     * @see CSVUtil#setHeaderParser(Function)
-     * @see CSVUtil#setLineParser(BiConsumer)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    @Beta
-    @TerminalOp
-    public long persistToCSV(final OutputStream output) throws IllegalStateException, IOException, E {
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
-
-        try {
-            return persistToCSV(bw);
-        } finally {
-            IOUtil.close(bw);
-        }
-    }
-
-    /**
-     * Persists the elements of this sequence to the specified output stream in CSV format with custom headers.
-     * The provided headers are used as the first row of the CSV file.
-     * Each element must be compatible with the CSV structure (array, List, Map, or bean).
-     * Each element is written as a CSV row with values properly escaped and quoted as needed.
-     * The output stream is wrapped in a BufferedWriter for better performance.
-     * The sequence is automatically closed after this operation completes.
-     *
-     * <br />
-     * This is a terminal operation and will close the sequence.
-     *
-     * @param csvHeaders the collection of header names to use for the CSV columns. Must not be empty
-     * @param output the target output stream where the CSV data will be written
-     * @return the total number of data rows that were written to the stream (excluding the header row)
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the stream
-     * @throws E if an exception occurs during element processing
-     * @see CSVUtil#setHeaderParser(Function)
-     * @see CSVUtil#setLineParser(BiConsumer)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    @TerminalOp
-    public long persistToCSV(final Collection<String> csvHeaders, final OutputStream output) throws IllegalStateException, IOException, E {
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
-
-        try {
-            return persistToCSV(csvHeaders, bw);
-        } finally {
-            IOUtil.close(bw);
-        }
-    }
-
-    /**
-     * Persists the elements of this sequence to the specified writer in CSV format.
-     * The first element is used to determine the CSV structure:
-     * - If the element is an array or List, the first row is used as field names
-     * - If the element is a bean or Map, column names are obtained from the bean properties or map keys
-     * Each element is written as a CSV row with values properly escaped and quoted as needed.
-     * The writer is flushed periodically for better performance with large sequences.
-     * The sequence is automatically closed after this operation completes.
-     *
-     * <br />
-     * This is a terminal operation and will close the sequence.
-     *
-     * @param output the target writer where the CSV data will be written
-     * @return the total number of data rows that were written (excluding the header row if present)
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing
-     * @throws E if an exception occurs during element processing
-     * @see CSVUtil#setHeaderParser(Function)
-     * @see CSVUtil#setLineParser(BiConsumer)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    @Beta
-    @TerminalOp
-    public long persistToCSV(final Writer output) throws IllegalStateException, IOException, E {
-        return persistToCSV(null, output, true);
-    }
-
-    /**
-     * Persists the elements of this sequence to the specified writer in CSV format with custom headers.
-     * The provided headers are used as the first row of the CSV file.
-     * Each element must be compatible with the CSV structure (array, List, Map, or bean).
-     * For beans, values are extracted based on the property names matching the headers.
-     * For Maps, values are retrieved using the headers as keys.
-     * For arrays and Lists, values are taken in order corresponding to the header positions.
-     * Each element is written as a CSV row with values properly escaped and quoted as needed.
-     * The writer is flushed periodically for better performance with large sequences.
-     * The sequence is automatically closed after this operation completes.
-     *
-     * <br />
-     * This is a terminal operation and will close the sequence.
-     *
-     * @param csvHeaders the collection of header names to use for the CSV columns. Must not be empty
-     * @param output the target writer where the CSV data will be written
-     * @return the total number of data rows that were written (excluding the header row)
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IllegalArgumentException if csvHeaders is empty
-     * @throws IOException if an I/O error occurs while writing
-     * @throws E if an exception occurs during element processing
-     * @see CSVUtil#setHeaderParser(Function)
-     * @see CSVUtil#setLineParser(BiConsumer)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
-     */
-    @TerminalOp
-    public long persistToCSV(final Collection<String> csvHeaders, final Writer output) throws IllegalStateException, IllegalArgumentException, IOException, E {
-        return persistToCSV(csvHeaders, output, false);
-    }
-
-    private long persistToCSV(final Collection<String> csvHeaders, final Writer output, final boolean canCsvHeadersBeEmpty)
-            throws IllegalStateException, IllegalArgumentException, IOException, E {
-        assertNotClosed();
-
-        if (!canCsvHeadersBeEmpty) {
-            checkArgNotEmpty(csvHeaders, cs.csvHeaders);
-        }
-
-        try {
-            final List<Object> headers = N.newArrayList(csvHeaders);
-            final boolean isBufferedWriter = output instanceof BufferedCSVWriter;
-            final BufferedCSVWriter bw = isBufferedWriter ? (BufferedCSVWriter) output : Objectory.createBufferedCSVWriter(output);
-
-            final char separator = WD._COMMA;
-            long cnt = 0;
-            T next = null;
-            Class<?> cls = null;
-
-            try {
-                @SuppressWarnings("resource")
-                final Throwables.Iterator<T, E> iter = iteratorEx();
-
-                if (iter.hasNext()) {
-                    cnt++;
-                    next = iter.next();
-                    cls = next.getClass();
-
-                    if (Beans.isBeanClass(cls)) {
-                        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
-
-                        if (N.isEmpty(headers)) {
-                            headers.addAll(beanInfo.propNameList);
-                        }
-
-                        final int headSize = headers.size();
-                        final PropInfo[] propInfos = new PropInfo[headSize];
-                        PropInfo propInfo = null;
-
-                        for (int i = 0; i < headSize; i++) {
-                            propInfos[i] = beanInfo.getPropInfo(headers.get(i).toString());
-                        }
-
-                        for (int i = 0; i < headSize; i++) {
-                            if (i > 0) {
-                                bw.write(separator);
-                            }
-
-                            CSVUtil.writeField(bw, null, headers.get(i));
-                        }
-
-                        bw.write(IOUtil.LINE_SEPARATOR);
-
-                        for (int i = 0; i < headSize; i++) {
-                            propInfo = propInfos[i];
-
-                            if (i > 0) {
-                                bw.write(separator);
-                            }
-
-                            CSVUtil.writeField(bw, propInfo.jsonXmlType, propInfo.getPropValue(next));
-                        }
-
-                        while (iter.hasNext()) {
-                            next = iter.next();
-                            bw.write(IOUtil.LINE_SEPARATOR);
-
-                            for (int i = 0; i < headSize; i++) {
-                                propInfo = propInfos[i];
-
-                                if (i > 0) {
-                                    bw.write(separator);
-                                }
-
-                                CSVUtil.writeField(bw, propInfo.jsonXmlType, propInfo.getPropValue(next));
-                            }
-
-                            if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
-                                bw.flush();
-                            }
-                        }
-                    } else if (next instanceof Map) {
-                        Map<Object, Object> row = (Map<Object, Object>) next;
-
-                        if (N.isEmpty(headers)) {
-                            headers.addAll(row.keySet());
-                        }
-
-                        final int headSize = headers.size();
-
-                        for (int i = 0; i < headSize; i++) {
-                            if (i > 0) {
-                                bw.write(separator);
-                            }
-
-                            CSVUtil.writeField(bw, null, headers.get(i));
-                        }
-
-                        bw.write(IOUtil.LINE_SEPARATOR);
-
-                        for (int i = 0; i < headSize; i++) {
-                            if (i > 0) {
-                                bw.write(separator);
-                            }
-
-                            CSVUtil.writeField(bw, null, row.get(headers.get(i)));
-                        }
-
-                        while (iter.hasNext()) {
-                            row = (Map<Object, Object>) iter.next();
-
-                            bw.write(IOUtil.LINE_SEPARATOR);
-
-                            for (int i = 0; i < headSize; i++) {
-                                if (i > 0) {
-                                    bw.write(separator);
-                                }
-
-                                CSVUtil.writeField(bw, null, row.get(headers.get(i)));
-                            }
-
-                            if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
-                                bw.flush();
-                            }
-                        }
-                    } else if (N.notEmpty(headers) && next instanceof Collection) {
-                        final int headSize = headers.size();
-                        Collection<Object> row = (Collection<Object>) next;
-
-                        for (int i = 0; i < headSize; i++) {
-                            if (i > 0) {
-                                bw.write(separator);
-                            }
-
-                            CSVUtil.writeField(bw, null, headers.get(i));
-                        }
-
-                        bw.write(IOUtil.LINE_SEPARATOR);
-
-                        Iterator<Object> rowIter = row.iterator();
-
-                        for (int i = 0; i < headSize; i++) {
-                            if (i > 0) {
-                                bw.write(separator);
-                            }
-
-                            CSVUtil.writeField(bw, null, rowIter.next());
-                        }
-
-                        while (iter.hasNext()) {
-                            row = (Collection<Object>) iter.next();
-                            rowIter = row.iterator();
-
-                            bw.write(IOUtil.LINE_SEPARATOR);
-
-                            for (int i = 0; i < headSize; i++) {
-                                if (i > 0) {
-                                    bw.write(separator);
-                                }
-
-                                CSVUtil.writeField(bw, null, rowIter.next());
-                            }
-
-                            if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
-                                bw.flush();
-                            }
-                        }
-                    } else if (N.notEmpty(headers) && next instanceof Object[] row) {
-                        final int headSize = headers.size();
-                        for (int i = 0; i < headSize; i++) {
-                            if (i > 0) {
-                                bw.write(separator);
-                            }
-
-                            CSVUtil.writeField(bw, null, headers.get(i));
-                        }
-
-                        bw.write(IOUtil.LINE_SEPARATOR);
-
-                        for (int i = 0; i < headSize; i++) {
-                            if (i > 0) {
-                                bw.write(separator);
-                            }
-
-                            CSVUtil.writeField(bw, null, row[i]);
-                        }
-
-                        while (iter.hasNext()) {
-                            row = (Object[]) iter.next();
-
-                            bw.write(IOUtil.LINE_SEPARATOR);
-
-                            for (int i = 0; i < headSize; i++) {
-                                if (i > 0) {
-                                    bw.write(separator);
-                                }
-
-                                CSVUtil.writeField(bw, null, row[i]);
-                            }
-
-                            if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
-                                bw.flush();
-                            }
-                        }
-                    } else {
-                        throw new RuntimeException(cls + " is no supported for CSV format. Only bean/Map are supported");
-                    }
-                } else if (N.notEmpty(headers)) {
-                    final int headSize = headers.size();
-
-                    for (int i = 0; i < headSize; i++) {
-                        if (i > 0) {
-                            bw.write(separator);
-                        }
-
-                        CSVUtil.writeField(bw, null, headers.get(i));
-                    }
-                }
-            } finally {
-                try {
-                    bw.flush();
-                } finally {
-                    if (!isBufferedWriter) {
-                        Objectory.recycle(bw);
-                    }
-                }
-            }
-
-            return cnt;
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     * Persists the elements of this sequence to the specified file in JSON format.
-     * The elements are written as a JSON array, with each element converted to its JSON representation.
-     * The output format includes line separators between elements for readability.
-     * The sequence is automatically closed after this operation completes.
-     *
-     * <br />
-     * This is a terminal operation and will close the sequence.
-     *
-     * @param output the target file where the JSON data will be written. The file will be created if it doesn't exist,
-     *               or overwritten if it does exist
-     * @return the total number of elements that were written to the file
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the file
-     * @throws E if an exception occurs during element processing
-     */
-    @TerminalOp
-    public long persistToJSON(final File output) throws IllegalStateException, IOException, E {
-        final Writer writer = IOUtil.newFileWriter(output);
-
-        try {
-            return persistToJSON(writer);
-        } finally {
-            IOUtil.close(writer);
-        }
-    }
-
-    /**
-     * Persists the elements of this sequence to the specified output stream in JSON format.
-     * The elements are written as a JSON array, with each element converted to its JSON representation.
-     * The output format includes line separators between elements for readability.
-     * The output stream is wrapped in a BufferedWriter for better performance.
-     * The sequence is automatically closed after this operation completes.
-     *
-     * <br />
-     * This is a terminal operation and will close the sequence.
-     *
-     * @param output the target output stream where the JSON data will be written
-     * @return the total number of elements that were written to the stream
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing to the stream
-     * @throws E if an exception occurs during element processing
-     */
-    @TerminalOp
-    public long persistToJSON(final OutputStream output) throws IllegalStateException, IOException, E {
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
-
-        try {
-            return persistToJSON(bw);
-        } finally {
-            IOUtil.close(bw);
-        }
-    }
-
-    /**
-     * Persists the elements of this sequence to the specified writer in JSON format.
-     * The elements are written as a JSON array, with each element converted to its JSON representation.
-     * The output format includes line separators between elements for readability.
-     * If the writer is not already a BufferedJSONWriter, it will be wrapped in one for better performance.
-     * The writer is flushed periodically (every BATCH_SIZE_FOR_FLUSH elements) for better performance with large sequences.
-     * The sequence is automatically closed after this operation completes.
-     *
-     * <br />
-     * This is a terminal operation and will close the sequence.
-     *
-     * @param output the target writer where the JSON data will be written
-     * @return the total number of elements that were written
-     * @throws IllegalStateException if the sequence has already been closed
-     * @throws IOException if an I/O error occurs while writing
-     * @throws E if an exception occurs during element processing
-     */
-    @TerminalOp
-    public long persistToJSON(final Writer output) throws IllegalStateException, IOException, E {
-        assertNotClosed();
-
-        try {
-            final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
-            final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output); // NOSONAR
-
-            long cnt = 0;
-
-            try {
-                @SuppressWarnings("resource")
-                final Throwables.Iterator<T, E> iter = iteratorEx();
-                bw.write("[");
-
-                while (iter.hasNext()) {
-                    if (cnt > 0) {
-                        bw.write(WD._COMMA);
-                    }
-
-                    bw.write(IOUtil.LINE_SEPARATOR);
-                    N.toJson(iter.next(), bw);
-
-                    if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
-                        bw.flush();
-                    }
-                }
-
-                bw.write(IOUtil.LINE_SEPARATOR);
-                bw.write("]");
-            } finally {
-                try {
-                    bw.flush();
-                } finally {
-                    if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
-                    }
-                }
-            }
-
-            return cnt;
-        } finally {
-            close();
-        }
-    }
+    //    /**
+    //     * Writes each element of this sequence as a separate line to the specified file.
+    //     * Each element is converted to a string using {@code N.stringOf(Object)} and written as a separate line.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is an intermediate operation and will not close the sequence. The actual writing
+    //     * occurs when a terminal operation is invoked on the returned sequence.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * // Save numbers to file and continue processing
+    //     * long count = Seq.of(1, 2, 3, 4, 5)
+    //     *     .saveEach(new File("numbers.txt"))
+    //     *     .filter(n -> n > 2)
+    //     *     .count();
+    //     * // File contains: 1, 2, 3, 4, 5 (each on new line)
+    //     * // count = 3
+    //     * }</pre></p>
+    //     *
+    //     * @param output the file to write each element to
+    //     * @return this sequence for method chaining
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @see #persist(File)
+    //     * @see N#stringOf(Object)
+    //     * @see #onEach(Throwables.Consumer)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> saveEach(final File output) throws IllegalStateException {
+    //        return saveEach(N::stringOf, output);
+    //    }
+    //
+    //    /**
+    //     * Writes each element of this sequence as a separate line to the specified file using the provided function
+    //     * to convert elements to strings. Each converted string is written as a separate line.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is an intermediate operation and will not close the sequence. The actual writing
+    //     * occurs when a terminal operation is invoked on the returned sequence.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * // Save with custom formatting
+    //     * Seq.of("apple", "banana", "cherry")
+    //     *     .saveEach(str -> str.toUpperCase(), new File("fruits.txt"))
+    //     *     .forEach(System.out::println);
+    //     * // File contains: APPLE, BANANA, CHERRY (each on new line)
+    //     * }</pre></p>
+    //     *
+    //     * @param toLine the function to convert each element to a string
+    //     * @param output the file to write each element to
+    //     * @return this sequence for method chaining
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @see #persist(Throwables.Function, File)
+    //     * @see N#stringOf(Object)
+    //     * @see #onEach(Throwables.Consumer)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final File output) throws IllegalStateException {
+    //        assertNotClosed();
+    //        checkArgNotNull(output, cs.outputFile);
+    //
+    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private Writer writer = null;
+    //            private BufferedWriter bw = null;
+    //            private boolean initialized = false;
+    //            long cnt = 0;
+    //
+    //            public boolean hasNext() throws E {
+    //                return iter.hasNext();
+    //            }
+    //
+    //            public T next() throws E {
+    //                final T next = iter.next();
+    //
+    //                if (!initialized) {
+    //                    init();
+    //                }
+    //
+    //                try {
+    //                    bw.write(toLine.apply(next));
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //                    cnt++;
+    //
+    //                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+    //                        bw.flush();
+    //                    }
+    //                } catch (final IOException e) {
+    //                    throw ExceptionUtil.toRuntimeException(e, true);
+    //                }
+    //
+    //                return next;
+    //            }
+    //
+    //            @Override
+    //            protected void closeResource() {
+    //                if (writer != null) {
+    //                    try {
+    //                        if (bw != null) {
+    //                            try {
+    //                                bw.flush();
+    //                            } catch (final IOException e) {
+    //                                throw new UncheckedIOException(e);
+    //                            } finally {
+    //                                Objectory.recycle(bw);
+    //                            }
+    //                        }
+    //                    } finally {
+    //                        IOUtil.close(writer);
+    //                    }
+    //                }
+    //            }
+    //
+    //            private void init() {
+    //                initialized = true;
+    //
+    //                writer = IOUtil.newFileWriter(output);
+    //                bw = Objectory.createBufferedWriter(writer);
+    //            }
+    //        };
+    //
+    //        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
+    //    }
+    //
+    //    /**
+    //     * Writes each element of this sequence as a separate line to the specified output stream using the provided function
+    //     * to convert elements to strings. Each converted string is written as a separate line.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is an intermediate operation and will not close the sequence. The actual writing
+    //     * occurs when a terminal operation is invoked on the returned sequence.</p>
+    //     * 
+    //     * <p>Note: The output stream is not closed by this operation.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * // Save to System.out
+    //     * Seq.of("line1", "line2", "line3")
+    //     *     .saveEach(String::toUpperCase, System.out)
+    //     *     .count();
+    //     * // Prints: LINE1, LINE2, LINE3 (each on new line)
+    //     * }</pre></p>
+    //     *
+    //     * @param toLine the function to convert each element to a string
+    //     * @param output the output stream to write each element to
+    //     * @return this sequence for method chaining
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @see #persist(Throwables.Function, OutputStream)
+    //     * @see N#stringOf(Object)
+    //     * @see #onEach(Throwables.Consumer)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final OutputStream output) throws IllegalStateException {
+    //        assertNotClosed();
+    //        checkArgNotNull(output, cs.outputStream);
+    //
+    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private BufferedWriter bw = null;
+    //            private boolean initialized = false;
+    //            long cnt = 0;
+    //
+    //            public boolean hasNext() throws E {
+    //                return iter.hasNext();
+    //            }
+    //
+    //            public T next() throws E {
+    //                final T next = iter.next();
+    //
+    //                if (!initialized) {
+    //                    init();
+    //                }
+    //
+    //                try {
+    //                    bw.write(toLine.apply(next));
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //                    cnt++;
+    //
+    //                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+    //                        bw.flush();
+    //                    }
+    //                } catch (final IOException e) {
+    //                    throw ExceptionUtil.toRuntimeException(e, true);
+    //                }
+    //
+    //                return next;
+    //            }
+    //
+    //            @Override
+    //            protected void closeResource() {
+    //                if (bw != null) {
+    //                    try {
+    //                        bw.flush();
+    //                    } catch (final IOException e) {
+    //                        throw new UncheckedIOException(e);
+    //                    } finally {
+    //                        Objectory.recycle(bw);
+    //                    }
+    //                }
+    //            }
+    //
+    //            private void init() {
+    //                initialized = true;
+    //
+    //                bw = Objectory.createBufferedWriter(output);
+    //            }
+    //        };
+    //
+    //        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
+    //    }
+    //
+    //    /**
+    //     * Writes each element of this sequence as a separate line to the specified writer using the provided function
+    //     * to convert elements to strings. Each converted string is written as a separate line.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is an intermediate operation and will not close the sequence. The actual writing
+    //     * occurs when a terminal operation is invoked on the returned sequence.</p>
+    //     * 
+    //     * <p>Note: The writer is not closed by this operation.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * StringWriter sw = new StringWriter();
+    //     * List<String> processed = Seq.of("a", "b", "c")
+    //     *     .saveEach(str -> "Item: " + str, sw)
+    //     *     .map(String::toUpperCase)
+    //     *     .toList();
+    //     * // sw contains: "Item: a\nItem: b\nItem: c\n"
+    //     * // processed = [A, B, C]
+    //     * }</pre></p>
+    //     *
+    //     * @param toLine the function to convert each element to a string
+    //     * @param output the writer to write each element to
+    //     * @return this sequence for method chaining
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @see #persist(Throwables.Function, Writer)
+    //     * @see N#stringOf(Object)
+    //     * @see #onEach(Throwables.Consumer)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final Writer output) throws IllegalStateException {
+    //        assertNotClosed();
+    //        checkArgNotNull(output, cs.outputWriter);
+    //
+    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private Writer bw = null;
+    //            private boolean isBufferedWriter = false;
+    //            private boolean initialized = false;
+    //            long cnt = 0;
+    //
+    //            public boolean hasNext() throws E {
+    //                return iter.hasNext();
+    //            }
+    //
+    //            public T next() throws E {
+    //                final T next = iter.next();
+    //
+    //                if (!initialized) {
+    //                    init();
+    //                }
+    //
+    //                try {
+    //                    bw.write(toLine.apply(next));
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //                    cnt++;
+    //
+    //                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+    //                        bw.flush();
+    //                    }
+    //                } catch (final IOException e) {
+    //                    throw ExceptionUtil.toRuntimeException(e, true);
+    //                }
+    //
+    //                return next;
+    //            }
+    //
+    //            @Override
+    //            protected void closeResource() {
+    //                if (!isBufferedWriter && (bw != null)) {
+    //                    try {
+    //                        bw.flush();
+    //                    } catch (final IOException e) {
+    //                        throw new UncheckedIOException(e);
+    //                    } finally {
+    //                        Objectory.recycle((BufferedWriter) bw);
+    //                    }
+    //                }
+    //            }
+    //
+    //            private void init() {
+    //                initialized = true;
+    //
+    //                isBufferedWriter = IOUtil.isBufferedWriter(output);
+    //                bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
+    //            }
+    //        };
+    //
+    //        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
+    //    }
+    //
+    //    /**
+    //     * Writes each element of this sequence as a separate line to the specified file using the provided function
+    //     * to write each element. The write function receives both the element and a Writer,
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is an intermediate operation and will not close the sequence. The actual writing
+    //     * occurs when a terminal operation is invoked on the returned sequence.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * // Write with custom formatting
+    //     * Seq.of("apple", "banana", "cherry")
+    //     *     .saveEach((fruit, writer) -> {
+    //     *         writer.write("Fruit: ");
+    //     *         writer.write(fruit.toUpperCase());
+    //     *     }, new File("fruits.txt"))
+    //     *     .count();
+    //     * // File contains custom formatted lines
+    //     * }</pre></p>
+    //     *
+    //     * @param write the function to write each element as a separate line to the file. The line separator is automatically added after each write.
+    //     * @param output the file to write each element to
+    //     * @return this sequence for method chaining
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @see #persist(Throwables.BiConsumer, File)
+    //     * @see N#stringOf(Object)
+    //     * @see #onEach(Throwables.Consumer)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> write, final File output) throws IllegalStateException {
+    //        assertNotClosed();
+    //        checkArgNotNull(output, cs.outputFile);
+    //
+    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private Writer writer = null;
+    //            private BufferedWriter bw = null;
+    //            private boolean initialized = false;
+    //            long cnt = 0;
+    //
+    //            public boolean hasNext() throws E {
+    //                return iter.hasNext();
+    //            }
+    //
+    //            public T next() throws E {
+    //                final T next = iter.next();
+    //
+    //                if (!initialized) {
+    //                    init();
+    //                }
+    //
+    //                try {
+    //                    write.accept(next, bw);
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //                    cnt++;
+    //
+    //                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+    //                        bw.flush();
+    //                    }
+    //                } catch (final IOException e) {
+    //                    throw ExceptionUtil.toRuntimeException(e, true);
+    //                }
+    //
+    //                return next;
+    //            }
+    //
+    //            @Override
+    //            protected void closeResource() {
+    //                if (writer != null) {
+    //                    try {
+    //                        if (bw != null) {
+    //                            try {
+    //                                bw.flush();
+    //                            } catch (final IOException e) {
+    //                                throw new UncheckedIOException(e);
+    //                            } finally {
+    //                                Objectory.recycle(bw);
+    //                            }
+    //                        }
+    //                    } finally {
+    //                        IOUtil.close(writer);
+    //                    }
+    //                }
+    //            }
+    //
+    //            private void init() {
+    //                initialized = true;
+    //
+    //                writer = IOUtil.newFileWriter(output);
+    //                bw = Objectory.createBufferedWriter(writer);
+    //            }
+    //        };
+    //
+    //        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
+    //    }
+    //
+    //    /**
+    //     * Writes each element of this sequence as a separate line to the specified writer using the provided function
+    //     * to write each element. The write function receives both the element and the Writer,
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is an intermediate operation and will not close the sequence. The actual writing
+    //     * occurs when a terminal operation is invoked on the returned sequence.</p>
+    //     * 
+    //     * <p>Note: The writer is not closed by this operation.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * StringWriter sw = new StringWriter();
+    //     * Seq.of(1, 2, 3)
+    //     *     .saveEach((num, writer) -> {
+    //     *         writer.write("Number: ");
+    //     *         writer.write(String.valueOf(num * 10));
+    //     *     }, sw)
+    //     *     .sum();
+    //     * // sw contains: "Number: 10\nNumber: 20\nNumber: 30\n"
+    //     * }</pre></p>
+    //     *
+    //     * @param write the function to write each element as a separate line to the writer. The line separator is automatically added after each write.
+    //     * @param output the writer to write each element to
+    //     * @return this sequence for method chaining
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @see #persist(Throwables.BiConsumer, Writer)
+    //     * @see N#stringOf(Object)
+    //     * @see #onEach(Throwables.Consumer)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> write, final Writer output) throws IllegalStateException {
+    //        assertNotClosed();
+    //        checkArgNotNull(output, cs.outputWriter);
+    //
+    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private Writer bw = null;
+    //            private boolean isBufferedWriter = false;
+    //            private boolean initialized = false;
+    //            long cnt = 0;
+    //
+    //            public boolean hasNext() throws E {
+    //                return iter.hasNext();
+    //            }
+    //
+    //            public T next() throws E {
+    //                final T next = iter.next();
+    //
+    //                if (!initialized) {
+    //                    init();
+    //                }
+    //
+    //                try {
+    //                    write.accept(next, bw);
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //                    cnt++;
+    //
+    //                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+    //                        bw.flush();
+    //                    }
+    //                } catch (final IOException e) {
+    //                    throw ExceptionUtil.toRuntimeException(e, true);
+    //                }
+    //
+    //                return next;
+    //            }
+    //
+    //            @Override
+    //            protected void closeResource() {
+    //                if (!isBufferedWriter && (bw != null)) {
+    //                    try {
+    //                        bw.flush();
+    //                    } catch (final IOException e) {
+    //                        throw new UncheckedIOException(e);
+    //                    } finally {
+    //                        Objectory.recycle((BufferedWriter) bw);
+    //                    }
+    //                }
+    //            }
+    //
+    //            private void init() {
+    //                initialized = true;
+    //
+    //                isBufferedWriter = IOUtil.isBufferedWriter(output);
+    //                bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
+    //            }
+    //        };
+    //
+    //        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence to the database using the provided PreparedStatement
+    //     * and statement setter. Each element is individually executed as the sequence is consumed.
+    //     * 
+    //     * <p>This is an intermediate operation and will not close the sequence. The actual database
+    //     * operations occur when a terminal operation is invoked on the returned sequence.</p>
+    //     * 
+    //     * <p>Note: {@code UncheckedSQLException} may be thrown in the terminal operation if an SQL error occurs.
+    //     * The PreparedStatement is not closed by this operation.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (name, age) VALUES (?, ?)");
+    //     * long count = Seq.of(new User("Alice", 25), new User("Bob", 30))
+    //     *     .saveEach(stmt, (user, ps) -> {
+    //     *         ps.setString(1, user.getName());
+    //     *         ps.setInt(2, user.getAge());
+    //     *     })
+    //     *     .count();
+    //     * // Inserts 2 rows and returns 2
+    //     * }</pre></p>
+    //     *
+    //     * @param stmt the prepared statement used to save each element
+    //     * @param stmtSetter the function to set parameters on the prepared statement for each element
+    //     * @return this sequence for method chaining
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @throws IllegalArgumentException if the prepared statement is null
+    //     * @see #persist(PreparedStatement, int, long, Throwables.BiConsumer)
+    //     * @see #onEach(Throwables.Consumer)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> saveEach(final PreparedStatement stmt, final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
+    //            throws IllegalStateException, IllegalArgumentException {
+    //        return saveEach(stmt, 0, 0, stmtSetter);
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence to the database using the provided PreparedStatement
+    //     * and statement setter, with support for batch processing. Elements are collected into batches
+    //     * of the specified size and executed together for improved performance.
+    //     * 
+    //     * <p>This is an intermediate operation and will not close the sequence. The actual database
+    //     * operations occur when a terminal operation is invoked on the returned sequence.</p>
+    //     * 
+    //     * <p>Note: {@code UncheckedSQLException} may be thrown in the terminal operation if an SQL error occurs.
+    //     * The PreparedStatement is not closed by this operation.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO products (name, price) VALUES (?, ?)");
+    //     * List<Product> saved = Seq.of(products)
+    //     *     .saveEach(stmt, 100, 1000, (product, ps) -> {
+    //     *         ps.setString(1, product.getName());
+    //     *         ps.setDouble(2, product.getPrice());
+    //     *     })
+    //     *     .toList();
+    //     * // Inserts products in batches of 100, with 1 second pause between batches
+    //     * }</pre></p>
+    //     *
+    //     * @param stmt the prepared statement used to save each element
+    //     * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used
+    //     * @param batchIntervalInMillis the pause interval in milliseconds between batch executions
+    //     * @param stmtSetter the function to set parameters on the prepared statement for each element
+    //     * @return this sequence for method chaining
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @throws IllegalArgumentException if the prepared statement is null, or batchSize/batchIntervalInMillis is negative
+    //     * @see #persist(PreparedStatement, int, long, Throwables.BiConsumer)
+    //     * @see #onEach(Throwables.Consumer)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> saveEach(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
+    //            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
+    //        assertNotClosed();
+    //        checkArgNotNull(stmt, cs.PreparedStatement);
+    //        checkArgNotNegative(batchSize, cs.batchSize);
+    //        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
+    //
+    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private final boolean isBatchUsed = batchSize > 1;
+    //            long cnt = 0;
+    //
+    //            public boolean hasNext() throws E {
+    //                return iter.hasNext();
+    //            }
+    //
+    //            public T next() throws E {
+    //                final T next = iter.next();
+    //
+    //                try {
+    //                    stmtSetter.accept(next, stmt);
+    //
+    //                    if (isBatchUsed) {
+    //                        cnt++;
+    //                        stmt.addBatch();
+    //
+    //                        if (cnt % batchSize == 0) {
+    //                            DataSourceUtil.executeBatch(stmt);
+    //
+    //                            if (batchIntervalInMillis > 0) {
+    //                                N.sleepUninterruptibly(batchIntervalInMillis);
+    //                            }
+    //                        }
+    //                    } else {
+    //                        stmt.execute();
+    //                    }
+    //                } catch (final SQLException e) {
+    //                    throw ExceptionUtil.toRuntimeException(e, true);
+    //                }
+    //
+    //                return next;
+    //            }
+    //
+    //            @Override
+    //            protected void closeResource() {
+    //                if (isBatchUsed && (cnt % batchSize) > 0) {
+    //                    try {
+    //                        DataSourceUtil.executeBatch(stmt);
+    //                    } catch (final SQLException e) {
+    //                        throw ExceptionUtil.toRuntimeException(e, true);
+    //                    }
+    //                }
+    //            }
+    //        };
+    //
+    //        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence to the database using the provided connection and
+    //     * SQL insert statement. A PreparedStatement is created from the connection and SQL,
+    //     * and each element is executed individually as the sequence is consumed.
+    //     * 
+    //     * <p>This is an intermediate operation and will not close the sequence. The actual database
+    //     * operations occur when a terminal operation is invoked on the returned sequence.</p>
+    //     * 
+    //     * <p>Note: {@code UncheckedSQLException} may be thrown in the terminal operation if an SQL error occurs.
+    //     * The created PreparedStatement is automatically closed when the sequence completes.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * String sql = "INSERT INTO employees (name, department) VALUES (?, ?)";
+    //     * Seq.of(employees)
+    //     *     .saveEach(connection, sql, (emp, ps) -> {
+    //     *         ps.setString(1, emp.getName());
+    //     *         ps.setString(2, emp.getDepartment());
+    //     *     })
+    //     *     .forEach(emp -> System.out.println("Saved: " + emp));
+    //     * }</pre></p>
+    //     *
+    //     * @param conn the database connection to use
+    //     * @param insertSQL the SQL insert statement to prepare
+    //     * @param stmtSetter the function to set parameters on the prepared statement for each element
+    //     * @return this sequence for method chaining
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @throws IllegalArgumentException if the connection or insert SQL is null
+    //     * @see #persist(Connection, String, int, long, Throwables.BiConsumer)
+    //     * @see #onEach(Throwables.Consumer)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> saveEach(final Connection conn, final String insertSQL,
+    //            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
+    //        return saveEach(conn, insertSQL, 0, 0, stmtSetter);
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence to the database using the provided connection,
+    //     * SQL insert statement, and batch processing parameters. A PreparedStatement is created
+    //     * from the connection and SQL, and elements are executed in batches for improved performance.
+    //     * 
+    //     * <p>This is an intermediate operation and will not close the sequence. The actual database
+    //     * operations occur when a terminal operation is invoked on the returned sequence.</p>
+    //     * 
+    //     * <p>Note: {@code UncheckedSQLException} may be thrown in the terminal operation if an SQL error occurs.
+    //     * The created PreparedStatement is automatically closed when the sequence completes.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * String sql = "INSERT INTO orders (customer_id, amount, date) VALUES (?, ?, ?)";
+    //     * Seq.of(orders)
+    //     *     .saveEach(connection, sql, 500, 2000, (order, ps) -> {
+    //     *         ps.setLong(1, order.getCustomerId());
+    //     *         ps.setBigDecimal(2, order.getAmount());
+    //     *         ps.setDate(3, order.getDate());
+    //     *     })
+    //     *     .count();
+    //     * // Inserts orders in batches of 500, with 2 second pause between batches
+    //     * }</pre></p>
+    //     *
+    //     * @param conn the database connection to use
+    //     * @param insertSQL the SQL insert statement to prepare
+    //     * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used
+    //     * @param batchIntervalInMillis the pause interval in milliseconds between batch executions
+    //     * @param stmtSetter the function to set parameters on the prepared statement for each element
+    //     * @return this sequence for method chaining
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @throws IllegalArgumentException if connection/insert SQL is null, or batchSize/batchIntervalInMillis is negative
+    //     * @see #persist(Connection, String, int, long, Throwables.BiConsumer)
+    //     * @see #onEach(Throwables.Consumer)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> saveEach(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+    //            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
+    //        assertNotClosed();
+    //        checkArgNotNull(conn, cs.Connection);
+    //        checkArgNotNull(insertSQL, cs.insertSQL);
+    //        checkArgNotNegative(batchSize, cs.batchSize);
+    //        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
+    //
+    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private PreparedStatement stmt = null;
+    //            private boolean initialized = false;
+    //            private final boolean isBatchUsed = batchSize > 1;
+    //            long cnt = 0;
+    //
+    //            public boolean hasNext() throws E {
+    //                return iter.hasNext();
+    //            }
+    //
+    //            public T next() throws E {
+    //                final T next = iter.next();
+    //
+    //                if (!initialized) {
+    //                    init();
+    //                }
+    //
+    //                try {
+    //                    stmtSetter.accept(next, stmt);
+    //
+    //                    if (isBatchUsed) {
+    //                        cnt++;
+    //                        stmt.addBatch();
+    //
+    //                        if (cnt % batchSize == 0) {
+    //                            DataSourceUtil.executeBatch(stmt);
+    //
+    //                            if (batchIntervalInMillis > 0) {
+    //                                N.sleepUninterruptibly(batchIntervalInMillis);
+    //                            }
+    //                        }
+    //                    } else {
+    //                        stmt.execute();
+    //                    }
+    //                } catch (final SQLException e) {
+    //                    throw ExceptionUtil.toRuntimeException(e, true);
+    //                }
+    //
+    //                return next;
+    //            }
+    //
+    //            @Override
+    //            protected void closeResource() {
+    //                if (stmt != null) {
+    //                    try {
+    //                        if (isBatchUsed && (cnt % batchSize) > 0) {
+    //                            DataSourceUtil.executeBatch(stmt);
+    //                        }
+    //                    } catch (final SQLException e) {
+    //                        throw ExceptionUtil.toRuntimeException(e, true);
+    //                    } finally {
+    //                        DataSourceUtil.closeQuietly(stmt);
+    //                    }
+    //                }
+    //            }
+    //
+    //            private void init() {
+    //                initialized = true;
+    //
+    //                try {
+    //                    stmt = conn.prepareStatement(insertSQL);
+    //                } catch (final SQLException e) {
+    //                    throw ExceptionUtil.toRuntimeException(e, true);
+    //                }
+    //            }
+    //        };
+    //
+    //        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence to the database using the provided DataSource and
+    //     * SQL insert statement. A connection is obtained from the DataSource, a PreparedStatement
+    //     * is created, and each element is executed individually as the sequence is consumed.
+    //     * 
+    //     * <p>This is an intermediate operation and will not close the sequence. The actual database
+    //     * operations occur when a terminal operation is invoked on the returned sequence.</p>
+    //     * 
+    //     * <p>Note: {@code UncheckedSQLException} may be thrown in the terminal operation if an SQL error occurs.
+    //     * The connection and PreparedStatement are automatically managed and closed when the sequence completes.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * String sql = "INSERT INTO logs (message, level, timestamp) VALUES (?, ?, ?)";
+    //     * Seq.of(logEntries)
+    //     *     .saveEach(dataSource, sql, (log, ps) -> {
+    //     *         ps.setString(1, log.getMessage());
+    //     *         ps.setString(2, log.getLevel());
+    //     *         ps.setTimestamp(3, log.getTimestamp());
+    //     *     })
+    //     *     .forEach(log -> System.out.println("Logged: " + log));
+    //     * }</pre></p>
+    //     *
+    //     * @param ds the data source to obtain connections from
+    //     * @param insertSQL the SQL insert statement to prepare
+    //     * @param stmtSetter the function to set parameters on the prepared statement for each element
+    //     * @return this sequence for method chaining
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @throws IllegalArgumentException if the DataSource or insert SQL is null
+    //     * @see #persist(javax.sql.DataSource, String, int, long, Throwables.BiConsumer)
+    //     * @see #onEach(Throwables.Consumer)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> saveEach(final javax.sql.DataSource ds, final String insertSQL,
+    //            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
+    //        return saveEach(ds, insertSQL, 0, 0, stmtSetter);
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence to the database using the provided DataSource,
+    //     * SQL insert statement, and batch processing parameters. A connection is obtained from
+    //     * the DataSource, and elements are executed in batches for improved performance.
+    //     * 
+    //     * <p>This is an intermediate operation and will not close the sequence. The actual database
+    //     * operations occur when a terminal operation is invoked on the returned sequence.</p>
+    //     * 
+    //     * <p>Note: {@code UncheckedSQLException} may be thrown in the terminal operation if an SQL error occurs.
+    //     * The connection and PreparedStatement are automatically managed and closed when the sequence completes.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * String sql = "INSERT INTO transactions (account_id, amount, type) VALUES (?, ?, ?)";
+    //     * long processed = Seq.of(transactions)
+    //     *     .saveEach(dataSource, sql, 1000, 5000, (tx, ps) -> {
+    //     *         ps.setLong(1, tx.getAccountId());
+    //     *         ps.setBigDecimal(2, tx.getAmount());
+    //     *         ps.setString(3, tx.getType());
+    //     *     })
+    //     *     .count();
+    //     * // Inserts transactions in batches of 1000, with 5 second pause between batches
+    //     * }</pre></p>
+    //     *
+    //     * @param ds the data source to obtain connections from
+    //     * @param insertSQL the SQL insert statement to prepare
+    //     * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used
+    //     * @param batchIntervalInMillis the pause interval in milliseconds between batch executions
+    //     * @param stmtSetter the function to set parameters on the prepared statement for each element
+    //     * @return this sequence for method chaining
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @throws IllegalArgumentException if DataSource/insert SQL is null, or batchSize/batchIntervalInMillis is negative
+    //     * @see #persist(javax.sql.DataSource, String, int, long, Throwables.BiConsumer)
+    //     * @see #onEach(Throwables.Consumer)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<T, E> saveEach(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+    //            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
+    //        assertNotClosed();
+    //        checkArgNotNull(ds, cs.DataSource);
+    //        checkArgNotNull(insertSQL, cs.insertSQL);
+    //        checkArgNotNegative(batchSize, cs.batchSize);
+    //        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
+    //
+    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            private Connection conn = null;
+    //            private PreparedStatement stmt = null;
+    //            private boolean initialized = false;
+    //            private final boolean isBatchUsed = batchSize > 1;
+    //            long cnt = 0;
+    //
+    //            public boolean hasNext() throws E {
+    //                return iter.hasNext();
+    //            }
+    //
+    //            public T next() throws E {
+    //                final T next = iter.next();
+    //
+    //                if (!initialized) {
+    //                    init();
+    //                }
+    //
+    //                try {
+    //                    stmtSetter.accept(next, stmt);
+    //
+    //                    if (isBatchUsed) {
+    //                        cnt++;
+    //                        stmt.addBatch();
+    //
+    //                        if (cnt % batchSize == 0) {
+    //                            DataSourceUtil.executeBatch(stmt);
+    //
+    //                            if (batchIntervalInMillis > 0) {
+    //                                N.sleepUninterruptibly(batchIntervalInMillis);
+    //                            }
+    //                        }
+    //                    } else {
+    //                        stmt.execute();
+    //                    }
+    //                } catch (final SQLException e) {
+    //                    throw ExceptionUtil.toRuntimeException(e, true);
+    //                }
+    //
+    //                return next;
+    //            }
+    //
+    //            @Override
+    //            protected void closeResource() {
+    //                try {
+    //                    if (stmt != null) {
+    //                        try {
+    //                            if (isBatchUsed && (cnt % batchSize) > 0) {
+    //                                DataSourceUtil.executeBatch(stmt);
+    //                            }
+    //                        } catch (final SQLException e) {
+    //                            throw ExceptionUtil.toRuntimeException(e, true);
+    //                        } finally {
+    //                            DataSourceUtil.closeQuietly(stmt);
+    //                        }
+    //                    }
+    //                } finally {
+    //                    DataSourceUtil.releaseConnection(conn, ds);
+    //                }
+    //            }
+    //
+    //            private void init() {
+    //                initialized = true;
+    //
+    //                try {
+    //                    conn = ds.getConnection();
+    //                    stmt = conn.prepareStatement(insertSQL);
+    //                } catch (final SQLException e) {
+    //                    try {
+    //                        if (stmt != null) {
+    //                            DataSourceUtil.closeQuietly(stmt);
+    //                        }
+    //                    } finally {
+    //                        DataSourceUtil.releaseConnection(conn, ds);
+    //                    }
+    //
+    //                    throw ExceptionUtil.toRuntimeException(e, true);
+    //                }
+    //            }
+    //        };
+    //
+    //        return create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence as a separate line to the specified file.
+    //     * Each element is converted to a string using {@code N.stringOf(Object)} and written as a separate line.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is a terminal operation and will close the sequence after execution.</p>
+    //     * 
+    //     * <p>Example:
+    //     * <pre>{@code
+    //     * long count = Seq.of("apple", "banana", "cherry")
+    //     *     .persist(new File("fruits.txt"));
+    //     * // Creates file with 3 lines, returns 3
+    //     * }</pre></p>
+    //     *
+    //     * @param output the file to write the sequence to
+    //     * @return the number of elements written
+    //     * @throws IllegalStateException if the sequence is already closed
+    //     * @throws IOException if an I/O error occurs
+    //     * @throws E if an exception occurs during iteration of the sequence
+    //     * @see N#stringOf(Object)
+    //     */
+    //    @TerminalOp
+    //    public long persist(final File output) throws IllegalStateException, IOException, E {
+    //        return persist(N::stringOf, output);
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence as a separate line to the specified file with a header and tail line.
+    //     * Each element is converted to a string using {@code N.stringOf(Object)} and written to a new line in the file.
+    //     * The header line is written first, followed by all elements, and finally the tail line.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is a terminal operation and will close the sequence after execution.</p>
+    //     *
+    //     * @param headerLine the header line to be written at the beginning of the file. Can be {@code null} if no header is needed
+    //     * @param tailLine the tail line to be written at the end of the file. Can be {@code null} if no tail is needed
+    //     * @param output the target file where the sequence elements will be written. The file will be created if it doesn't exist,
+    //     *               or overwritten if it does exist
+    //     * @return the total number of elements that were persisted to the file (excluding header and tail lines)
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the file
+    //     * @throws E if an exception occurs during element processing
+    //     * @see N#stringOf(Object)
+    //     */
+    //    @TerminalOp
+    //    public long persist(final String headerLine, final String tailLine, final File output) throws IllegalStateException, IOException, E {
+    //        return persist(headerLine, tailLine, N::stringOf, output);
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence as a separate line to the specified file using a custom string conversion function.
+    //     * Each element is converted to a string using the provided {@code toLine} function and written to a new line in the file.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is a terminal operation and will close the sequence after execution.</p>
+    //     *
+    //     * @param toLine the function that converts each element to a string representation for writing to the file.
+    //     *               The function may throw exception type E
+    //     * @param output the target file where the sequence elements will be written. The file will be created if it doesn't exist,
+    //     *               or overwritten if it does exist
+    //     * @return the total number of elements that were persisted to the file
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the file
+    //     * @throws E if an exception occurs during element processing or string conversion
+    //     * @see N#stringOf(Object)
+    //     */
+    //    @TerminalOp
+    //    public long persist(final Throwables.Function<? super T, String, E> toLine, final File output) throws IllegalStateException, IOException, E {
+    //        return persist(null, null, toLine, output);
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence as a separate line to the specified file with a header and tail line using a custom string conversion function.
+    //     * Each element is converted to a string using the provided {@code toLine} function and written to a new line in the file.
+    //     * The header line is written first, followed by all elements, and finally the tail line.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is a terminal operation and will close the sequence after execution.</p>
+    //     *
+    //     * @param header the header line to be written at the beginning of the file. Can be {@code null} if no header is needed
+    //     * @param tail the tail line to be written at the end of the file. Can be {@code null} if no tail is needed
+    //     * @param toLine the function that converts each element to a string representation for writing to the file.
+    //     *               The function may throw exception type E
+    //     * @param output the target file where the sequence elements will be written. The file will be created if it doesn't exist,
+    //     *               or overwritten if it does exist. Must not be {@code null}
+    //     * @return the total number of elements that were persisted to the file (excluding header and tail lines)
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the file
+    //     * @throws E if an exception occurs during element processing or string conversion
+    //     * @see N#stringOf(Object)
+    //     */
+    //    @TerminalOp
+    //    public long persist(final String header, final String tail, final Throwables.Function<? super T, String, E> toLine, final File output)
+    //            throws IllegalStateException, IOException, E {
+    //        assertNotClosed();
+    //        checkArgNotNull(output, cs.outputFile);
+    //
+    //        final Writer writer = IOUtil.newFileWriter(output);
+    //
+    //        try {
+    //            return persist(header, tail, toLine, writer);
+    //        } finally {
+    //            IOUtil.close(writer);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence as a separate line to the specified output stream using a custom string conversion function.
+    //     * Each element is converted to a string using the provided {@code toLine} function and written to a new line in the stream.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is a terminal operation and will close the sequence after execution.</p>
+    //     * 
+    //     * <p>Note: The output stream is not closed by this operation.</p>
+    //     *
+    //     * @param toLine the function that converts each element to a string representation for writing to the stream.
+    //     *               The function may throw exception type E
+    //     * @param output the target output stream where the sequence elements will be written. Must not be {@code null}
+    //     * @return the total number of elements that were persisted to the stream
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the stream
+    //     * @throws E if an exception occurs during element processing or string conversion
+    //     * @see N#stringOf(Object)
+    //     */
+    //    @TerminalOp
+    //    public long persist(final Throwables.Function<? super T, String, E> toLine, final OutputStream output) throws IllegalStateException, IOException, E {
+    //        assertNotClosed();
+    //        checkArgNotNull(output, cs.outputStream);
+    //
+    //        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+    //
+    //        try {
+    //            return persist(toLine, bw);
+    //        } finally {
+    //            Objectory.recycle(bw);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence as a separate line to the specified output stream with a header and tail line using a custom string conversion function.
+    //     * Each element is converted to a string using the provided {@code toLine} function and written to a new line in the stream.
+    //     * The header line is written first, followed by all elements, and finally the tail line.
+    //     * The output stream is wrapped in a BufferedWriter for better performance.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is a terminal operation and will close the sequence after execution.</p>
+    //     * 
+    //     * <p>Note: The output stream is not closed by this operation.</p>
+    //     *
+    //     * @param header the header line to be written at the beginning of the stream. Can be {@code null} if no header is needed
+    //     * @param tail the tail line to be written at the end of the stream. Can be {@code null} if no tail is needed
+    //     * @param toLine the function that converts each element to a string representation for writing to the stream.
+    //     *               The function may throw exception type E
+    //     * @param output the target output stream where the sequence elements will be written. Must not be {@code null}
+    //     * @return the total number of elements that were persisted to the stream (excluding header and tail lines)
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the stream
+    //     * @throws E if an exception occurs during element processing or string conversion
+    //     * @see N#stringOf(Object)
+    //     */
+    //    @TerminalOp
+    //    public long persist(final String header, final String tail, final Throwables.Function<? super T, String, E> toLine, final OutputStream output)
+    //            throws IllegalStateException, IOException, E {
+    //        assertNotClosed();
+    //        checkArgNotNull(output, cs.outputStream);
+    //
+    //        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+    //
+    //        try {
+    //            return persist(header, tail, toLine, bw);
+    //        } finally {
+    //            Objectory.recycle(bw);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence as a separate line to the specified writer using a custom string conversion function.
+    //     * Each element is converted to a string using the provided {@code toLine} function and written to a new line in the writer.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is a terminal operation and will close the sequence after execution.</p>
+    //     * 
+    //     * <p>Note: The writer is not closed by this operation.</p>
+    //     *
+    //     * @param toLine the function that converts each element to a string representation for writing to the writer.
+    //     *               The function may throw exception type E
+    //     * @param output the target writer where the sequence elements will be written. Must not be {@code null}
+    //     * @return the total number of elements that were persisted to the writer
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the writer
+    //     * @throws E if an exception occurs during element processing or string conversion
+    //     * @see N#stringOf(Object)
+    //     */
+    //    @TerminalOp
+    //    public long persist(final Throwables.Function<? super T, String, E> toLine, final Writer output) throws IllegalStateException, IOException, E {
+    //        assertNotClosed();
+    //
+    //        return persist(null, null, toLine, output);
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence as a separate line to the specified writer with a header and tail line using a custom string conversion function.
+    //     * Each element is converted to a string using the provided {@code toLine} function and written to a new line in the writer.
+    //     * The header line is written first, followed by all elements, and finally the tail line.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is a terminal operation and will close the sequence after execution.</p>
+    //     * 
+    //     * <p>Note: The writer is not closed by this operation.</p>
+    //     *
+    //     * @param header the header line to be written at the beginning. Can be {@code null} if no header is needed
+    //     * @param tail the tail line to be written at the end. Can be {@code null} if no tail is needed
+    //     * @param toLine the function that converts each element to a string representation for writing.
+    //     *               The function may throw exception type E
+    //     * @param output the target writer where the sequence elements will be written. Must not be {@code null}
+    //     * @return the total number of elements that were persisted (excluding header and tail lines)
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing
+    //     * @throws E if an exception occurs during element processing or string conversion
+    //     * @see N#stringOf(Object)
+    //     */
+    //    @TerminalOp
+    //    public long persist(final String header, final String tail, final Throwables.Function<? super T, String, E> toLine, final Writer output)
+    //            throws IllegalStateException, IOException, E {
+    //        assertNotClosed();
+    //        checkArgNotNull(output, cs.outputWriter);
+    //
+    //        try {
+    //            final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
+    //            final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
+    //            long cnt = 0;
+    //
+    //            try {
+    //                @SuppressWarnings("resource")
+    //                final Throwables.Iterator<T, E> iter = iteratorEx();
+    //
+    //                if (header != null) {
+    //                    bw.write(header);
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //                }
+    //
+    //                while (iter.hasNext()) {
+    //                    bw.write(toLine.apply(iter.next()));
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //                    cnt++;
+    //
+    //                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+    //                        bw.flush();
+    //                    }
+    //                }
+    //
+    //                if (tail != null) {
+    //                    bw.write(tail);
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //                }
+    //            } finally {
+    //                try {
+    //                    bw.flush();
+    //                } finally {
+    //                    if (!isBufferedWriter) {
+    //                        Objectory.recycle((BufferedWriter) bw);
+    //                    }
+    //                }
+    //            }
+    //
+    //            return cnt;
+    //        } finally {
+    //            close();
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence as a separate line to the specified file using a custom writer consumer.
+    //     * Each element is processed by the provided {@code write} consumer which writes directly to the writer.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is a terminal operation and will close the sequence after execution.</p>
+    //     *
+    //     * @param write the function to write each element as a separate line to the file. The line separator is automatically added after each write.
+    //     * @param output the target file where the sequence elements will be written. The file will be created if it doesn't exist,
+    //     *               or overwritten if it does exist
+    //     * @return the total number of elements that were processed and written to the file
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the file
+    //     * @throws E if an exception occurs during element processing
+    //     */
+    //    @TerminalOp
+    //    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> write, final File output) throws IllegalStateException, IOException, E {
+    //        assertNotClosed();
+    //
+    //        return persist(null, null, write, output);
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence as a separate line to the specified file with a header and tail line using a custom writer consumer.
+    //     * Each element is processed by the provided {@code write} consumer which writes directly to the writer.
+    //     * The header line is written first, followed by all elements (each followed by a line separator), and finally the tail line.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is a terminal operation and will close the sequence after execution.</p>
+    //     *
+    //     * @param header the header line to be written at the beginning of the file. Can be {@code null} if no header is needed
+    //     * @param tail the tail line to be written at the end of the file. Can be {@code null} if no tail is needed
+    //     * @param write the function to write each element as a separate line to the file. The line separator is automatically added after each write.
+    //     *                  A line separator is automatically added after each element
+    //     * @param output the target file where the sequence elements will be written. The file will be created if it doesn't exist,
+    //     *               or overwritten if it does exist. Must not be {@code null}
+    //     * @return the total number of elements that were processed and written to the file (excluding header and tail lines)
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the file
+    //     * @throws E if an exception occurs during element processing
+    //     */
+    //    @TerminalOp
+    //    public long persist(final String header, final String tail, final Throwables.BiConsumer<? super T, Writer, IOException> write, final File output)
+    //            throws IOException, E {
+    //        assertNotClosed();
+    //        checkArgNotNull(output, cs.outputFile);
+    //
+    //        final Writer writer = IOUtil.newFileWriter(output);
+    //
+    //        try {
+    //            return persist(header, tail, write, writer);
+    //        } finally {
+    //            IOUtil.close(writer);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence as a separate line to the specified writer using a custom writer consumer.
+    //     * Each element is processed by the provided {@code write} consumer which writes directly to the writer
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is a terminal operation and will close the sequence after execution.</p>
+    //     * 
+    //     * <p>Note: The writer is not closed by this operation.</p>
+    //     *
+    //     * @param write the function to write each element as a separate line to the writer. The line separator is automatically added after each write.
+    //     * @param output the target writer where the sequence elements will be written. Must not be {@code null}
+    //     * @return the total number of elements that were processed and written to the writer
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the writer
+    //     * @throws E if an exception occurs during element processing
+    //     */
+    //    @TerminalOp
+    //    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> write, final Writer output) throws IllegalStateException, IOException, E {
+    //        assertNotClosed();
+    //
+    //        return persist(null, null, write, output);
+    //    }
+    //
+    //    /**
+    //     * Saves each element of this sequence as a separate line to the specified writer with a header and tail line using a custom writer consumer.
+    //     * Each element is processed by the provided {@code write} consumer which writes directly to the writer.
+    //     * The header line is written first, followed by all elements (each followed by a line separator), and finally the tail line.
+    //     * The line separator is automatically added after each write.
+    //     * The sequence is written progressively as elements are consumed, with periodic flushing for large sequences.
+    //     * 
+    //     * <p>This is a terminal operation and will close the sequence after execution.</p>
+    //     * 
+    //     * <p>Note: The writer is not closed by this operation.</p>
+    //     *
+    //     * @param header the header line to be written at the beginning. Can be {@code null} if no header is needed
+    //     * @param tail the tail line to be written at the end. Can be {@code null} if no tail is needed
+    //     * @param write the function to write each element as a separate line to the writer. The line separator is automatically added after each write.
+    //     *                  A line separator is automatically added after each element
+    //     * @param output the target writer where the sequence elements will be written. Must not be {@code null}
+    //     * @return the total number of elements that were processed and written (excluding header and tail lines)
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing
+    //     * @throws E if an exception occurs during element processing
+    //     */
+    //    @TerminalOp
+    //    public long persist(final String header, final String tail, final Throwables.BiConsumer<? super T, Writer, IOException> write, final Writer output)
+    //            throws IOException, E {
+    //        assertNotClosed();
+    //        checkArgNotNull(output, cs.outputWriter);
+    //
+    //        try {
+    //            final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
+    //            final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
+    //            long cnt = 0;
+    //
+    //            try {
+    //                @SuppressWarnings("resource")
+    //                final Throwables.Iterator<T, E> iter = iteratorEx();
+    //
+    //                if (header != null) {
+    //                    bw.write(header);
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //                }
+    //
+    //                while (iter.hasNext()) {
+    //                    write.accept(iter.next(), bw);
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //                    cnt++;
+    //
+    //                    if (cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+    //                        bw.flush();
+    //                    }
+    //                }
+    //
+    //                if (tail != null) {
+    //                    bw.write(tail);
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //                }
+    //            } finally {
+    //                try {
+    //                    bw.flush();
+    //                } finally {
+    //                    if (!isBufferedWriter) {
+    //                        Objectory.recycle((BufferedWriter) bw);
+    //                    }
+    //                }
+    //            }
+    //
+    //            return cnt;
+    //        } finally {
+    //            close();
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Persists the elements of this sequence to a database using the specified prepared statement and statement setter.
+    //     * Each element is bound to the prepared statement using the provided {@code stmtSetter} consumer.
+    //     * If batch size is greater than 1, batch updates are used for better performance.
+    //     * The prepared statement is NOT closed by this method.
+    //     * The sequence is automatically closed after this operation completes.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @param stmt the prepared statement to use for persisting elements. Must not be {@code null}
+    //     * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used
+    //     * @param batchIntervalInMillis the pause interval in milliseconds between each batch execution. 
+    //     *                              Use 0 for no pause. Must not be negative
+    //     * @param stmtSetter the consumer that binds each element to the prepared statement.
+    //     *                   The consumer receives the element and the prepared statement as parameters and may throw SQLException
+    //     * @return the total number of elements that were persisted to the database
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IllegalArgumentException if the prepared statement is {@code null}, or batchSize or batchIntervalInMillis is negative
+    //     * @throws SQLException if a database access error occurs
+    //     * @throws E if an exception occurs during element processing
+    //     */
+    //    @TerminalOp
+    //    public long persist(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
+    //            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
+    //            throws IllegalStateException, IllegalArgumentException, SQLException, E {
+    //        assertNotClosed();
+    //        checkArgNotNull(stmt, cs.PreparedStatement);
+    //        checkArgNotNegative(batchSize, cs.batchSize);
+    //        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
+    //
+    //        try {
+    //            @SuppressWarnings("resource")
+    //            final Throwables.Iterator<T, E> iter = iteratorEx();
+    //            final boolean isBatchUsed = batchSize > 1;
+    //            long cnt = 0;
+    //
+    //            while (iter.hasNext()) {
+    //                stmtSetter.accept(iter.next(), stmt);
+    //                cnt++;
+    //
+    //                if (isBatchUsed) {
+    //                    stmt.addBatch();
+    //
+    //                    if (cnt % batchSize == 0) {
+    //                        DataSourceUtil.executeBatch(stmt);
+    //
+    //                        if (batchIntervalInMillis > 0) {
+    //                            N.sleepUninterruptibly(batchIntervalInMillis);
+    //                        }
+    //                    }
+    //                } else {
+    //                    stmt.execute();
+    //                }
+    //            }
+    //
+    //            if (isBatchUsed && cnt % batchSize > 0) {
+    //                DataSourceUtil.executeBatch(stmt);
+    //            }
+    //
+    //            return cnt;
+    //        } finally {
+    //            close();
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Persists the elements of this sequence to a database using the specified connection and insert SQL.
+    //     * A prepared statement is created from the insert SQL and each element is bound to it using the provided {@code stmtSetter} consumer.
+    //     * If batch size is greater than 1, batch updates are used for better performance.
+    //     * The prepared statement is automatically closed after this method completes.
+    //     * The sequence is automatically closed after this operation completes.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @param conn the database connection to use. Must not be {@code null}
+    //     * @param insertSQL the SQL insert statement to prepare. Must not be {@code null}
+    //     * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used
+    //     * @param batchIntervalInMillis the pause interval in milliseconds between each batch execution. 
+    //     *                              Use 0 for no pause. Must not be negative
+    //     * @param stmtSetter the consumer that binds each element to the prepared statement.
+    //     *                   The consumer receives the element and the prepared statement as parameters and may throw SQLException
+    //     * @return the total number of elements that were persisted to the database
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IllegalArgumentException if the connection or insert SQL is {@code null}, or batchSize or batchIntervalInMillis is negative
+    //     * @throws SQLException if a database access error occurs
+    //     * @throws E if an exception occurs during element processing
+    //     */
+    //    @TerminalOp
+    //    public long persist(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+    //            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
+    //            throws IllegalStateException, IllegalArgumentException, SQLException, E {
+    //        assertNotClosed();
+    //        checkArgNotNull(conn, cs.Connection);
+    //        checkArgNotNull(insertSQL, cs.insertSQL);
+    //        checkArgNotNegative(batchSize, cs.batchSize);
+    //        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
+    //
+    //        PreparedStatement stmt = null;
+    //
+    //        try {
+    //            stmt = conn.prepareStatement(insertSQL);
+    //
+    //            return persist(stmt, batchSize, batchIntervalInMillis, stmtSetter);
+    //        } finally {
+    //            DataSourceUtil.closeQuietly(stmt);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Persists the elements of this sequence to a database using the specified data source and insert SQL.
+    //     * A connection is obtained from the data source, a prepared statement is created from the insert SQL,
+    //     * and each element is bound to it using the provided {@code stmtSetter} consumer.
+    //     * If batch size is greater than 1, batch updates are used for better performance.
+    //     * The connection and prepared statement are automatically closed after this method completes.
+    //     * The sequence is automatically closed after this operation completes.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @param ds the data source to obtain a connection from. Must not be {@code null}
+    //     * @param insertSQL the SQL insert statement to prepare. Must not be {@code null}
+    //     * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used
+    //     * @param batchIntervalInMillis the pause interval in milliseconds between each batch execution. 
+    //     *                              Use 0 for no pause. Must not be negative
+    //     * @param stmtSetter the consumer that binds each element to the prepared statement.
+    //     *                   The consumer receives the element and the prepared statement as parameters and may throw SQLException
+    //     * @return the total number of elements that were persisted to the database
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IllegalArgumentException if the data source or insert SQL is {@code null}, or batchSize or batchIntervalInMillis is negative
+    //     * @throws SQLException if a database access error occurs
+    //     * @throws E if an exception occurs during element processing
+    //     */
+    //    @TerminalOp
+    //    public long persist(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+    //            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
+    //            throws IllegalStateException, IllegalArgumentException, SQLException, E {
+    //        assertNotClosed();
+    //        checkArgNotNull(ds, cs.DataSource);
+    //        checkArgNotNull(insertSQL, cs.insertSQL);
+    //        checkArgNotNegative(batchSize, cs.batchSize);
+    //        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
+    //
+    //        Connection conn = null;
+    //        PreparedStatement stmt = null;
+    //
+    //        try {
+    //            conn = ds.getConnection();
+    //            stmt = conn.prepareStatement(insertSQL);
+    //
+    //            return persist(stmt, batchSize, batchIntervalInMillis, stmtSetter);
+    //        } finally {
+    //            try {
+    //                DataSourceUtil.closeQuietly(stmt);
+    //            } finally {
+    //                DataSourceUtil.releaseConnection(conn, ds);
+    //            }
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Persists the elements of this sequence to the specified file in CSV format.
+    //     * The first element is used to determine the CSV structure:
+    //     * - If the element is an array or List, the first row is used as field names
+    //     * - If the element is a bean or Map, column names are obtained from the bean properties or map keys
+    //     * Each element is written as a CSV row with values properly escaped and quoted as needed.
+    //     * The sequence is automatically closed after this operation completes.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @param output the target file where the CSV data will be written. The file will be created if it doesn't exist,
+    //     *               or overwritten if it does exist
+    //     * @return the total number of data rows that were written to the file (excluding the header row if present)
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the file
+    //     * @throws E if an exception occurs during element processing
+    //     * @see CSVUtil#setHeaderParser(Function)
+    //     * @see CSVUtil#setLineParser(BiConsumer)
+    //     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+    //     * @see CSVUtil#resetEscapeCharForWrite()
+    //     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+    //     */
+    //    @Beta
+    //    @TerminalOp
+    //    public long persistToCSV(final File output) throws IllegalStateException, IOException, E {
+    //        final Writer writer = IOUtil.newFileWriter(output);
+    //
+    //        try {
+    //            return persistToCSV(writer);
+    //        } finally {
+    //            IOUtil.close(writer);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Persists the elements of this sequence to the specified file in CSV format with custom headers.
+    //     * The provided headers are used as the first row of the CSV file.
+    //     * Each element must be compatible with the CSV structure (array, List, Map, or bean).
+    //     * Each element is written as a CSV row with values properly escaped and quoted as needed.
+    //     * The sequence is automatically closed after this operation completes.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @param csvHeaders the collection of header names to use for the CSV columns. Must not be empty
+    //     * @param output the target file where the CSV data will be written. The file will be created if it doesn't exist,
+    //     *               or overwritten if it does exist
+    //     * @return the total number of data rows that were written to the file (excluding the header row)
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the file
+    //     * @throws E if an exception occurs during element processing
+    //     * @see CSVUtil#setHeaderParser(Function)
+    //     * @see CSVUtil#setLineParser(BiConsumer)
+    //     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+    //     * @see CSVUtil#resetEscapeCharForWrite()
+    //     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+    //     */
+    //    @TerminalOp
+    //    public long persistToCSV(final Collection<String> csvHeaders, final File output) throws IllegalStateException, IOException, E {
+    //        final Writer writer = IOUtil.newFileWriter(output);
+    //
+    //        try {
+    //            return persistToCSV(csvHeaders, writer);
+    //        } finally {
+    //            IOUtil.close(writer);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Persists the elements of this sequence to the specified output stream in CSV format.
+    //     * The first element is used to determine the CSV structure:
+    //     * - If the element is an array or List, the first row is used as field names
+    //     * - If the element is a bean or Map, column names are obtained from the bean properties or map keys
+    //     * Each element is written as a CSV row with values properly escaped and quoted as needed.
+    //     * The output stream is wrapped in a BufferedWriter for better performance.
+    //     * The sequence is automatically closed after this operation completes.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @param output the target output stream where the CSV data will be written
+    //     * @return the total number of data rows that were written to the stream (excluding the header row if present)
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the stream
+    //     * @throws E if an exception occurs during element processing
+    //     * @see CSVUtil#setHeaderParser(Function)
+    //     * @see CSVUtil#setLineParser(BiConsumer)
+    //     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+    //     * @see CSVUtil#resetEscapeCharForWrite()
+    //     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+    //     */
+    //    @Beta
+    //    @TerminalOp
+    //    public long persistToCSV(final OutputStream output) throws IllegalStateException, IOException, E {
+    //        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+    //
+    //        try {
+    //            return persistToCSV(bw);
+    //        } finally {
+    //            IOUtil.close(bw);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Persists the elements of this sequence to the specified output stream in CSV format with custom headers.
+    //     * The provided headers are used as the first row of the CSV file.
+    //     * Each element must be compatible with the CSV structure (array, List, Map, or bean).
+    //     * Each element is written as a CSV row with values properly escaped and quoted as needed.
+    //     * The output stream is wrapped in a BufferedWriter for better performance.
+    //     * The sequence is automatically closed after this operation completes.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @param csvHeaders the collection of header names to use for the CSV columns. Must not be empty
+    //     * @param output the target output stream where the CSV data will be written
+    //     * @return the total number of data rows that were written to the stream (excluding the header row)
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the stream
+    //     * @throws E if an exception occurs during element processing
+    //     * @see CSVUtil#setHeaderParser(Function)
+    //     * @see CSVUtil#setLineParser(BiConsumer)
+    //     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+    //     * @see CSVUtil#resetEscapeCharForWrite()
+    //     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+    //     */
+    //    @TerminalOp
+    //    public long persistToCSV(final Collection<String> csvHeaders, final OutputStream output) throws IllegalStateException, IOException, E {
+    //        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+    //
+    //        try {
+    //            return persistToCSV(csvHeaders, bw);
+    //        } finally {
+    //            IOUtil.close(bw);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Persists the elements of this sequence to the specified writer in CSV format.
+    //     * The first element is used to determine the CSV structure:
+    //     * - If the element is an array or List, the first row is used as field names
+    //     * - If the element is a bean or Map, column names are obtained from the bean properties or map keys
+    //     * Each element is written as a CSV row with values properly escaped and quoted as needed.
+    //     * The writer is flushed periodically for better performance with large sequences.
+    //     * The sequence is automatically closed after this operation completes.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @param output the target writer where the CSV data will be written
+    //     * @return the total number of data rows that were written (excluding the header row if present)
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing
+    //     * @throws E if an exception occurs during element processing
+    //     * @see CSVUtil#setHeaderParser(Function)
+    //     * @see CSVUtil#setLineParser(BiConsumer)
+    //     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+    //     * @see CSVUtil#resetEscapeCharForWrite()
+    //     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+    //     */
+    //    @Beta
+    //    @TerminalOp
+    //    public long persistToCSV(final Writer output) throws IllegalStateException, IOException, E {
+    //        return persistToCSV(null, output, true);
+    //    }
+    //
+    //    /**
+    //     * Persists the elements of this sequence to the specified writer in CSV format with custom headers.
+    //     * The provided headers are used as the first row of the CSV file.
+    //     * Each element must be compatible with the CSV structure (array, List, Map, or bean).
+    //     * For beans, values are extracted based on the property names matching the headers.
+    //     * For Maps, values are retrieved using the headers as keys.
+    //     * For arrays and Lists, values are taken in order corresponding to the header positions.
+    //     * Each element is written as a CSV row with values properly escaped and quoted as needed.
+    //     * The writer is flushed periodically for better performance with large sequences.
+    //     * The sequence is automatically closed after this operation completes.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @param csvHeaders the collection of header names to use for the CSV columns. Must not be empty
+    //     * @param output the target writer where the CSV data will be written
+    //     * @return the total number of data rows that were written (excluding the header row)
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IllegalArgumentException if csvHeaders is empty
+    //     * @throws IOException if an I/O error occurs while writing
+    //     * @throws E if an exception occurs during element processing
+    //     * @see CSVUtil#setHeaderParser(Function)
+    //     * @see CSVUtil#setLineParser(BiConsumer)
+    //     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
+    //     * @see CSVUtil#resetEscapeCharForWrite()
+    //     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+    //     */
+    //    @TerminalOp
+    //    public long persistToCSV(final Collection<String> csvHeaders, final Writer output) throws IllegalStateException, IllegalArgumentException, IOException, E {
+    //        return persistToCSV(csvHeaders, output, false);
+    //    }
+    //
+    //    private long persistToCSV(final Collection<String> csvHeaders, final Writer output, final boolean canCsvHeadersBeEmpty)
+    //            throws IllegalStateException, IllegalArgumentException, IOException, E {
+    //        assertNotClosed();
+    //
+    //        if (!canCsvHeadersBeEmpty) {
+    //            checkArgNotEmpty(csvHeaders, cs.csvHeaders);
+    //        }
+    //
+    //        try {
+    //            final List<Object> headers = N.newArrayList(csvHeaders);
+    //            final boolean isBufferedWriter = output instanceof BufferedCSVWriter;
+    //            final BufferedCSVWriter bw = isBufferedWriter ? (BufferedCSVWriter) output : Objectory.createBufferedCSVWriter(output);
+    //
+    //            final char separator = WD._COMMA;
+    //            long cnt = 0;
+    //            T next = null;
+    //            Class<?> cls = null;
+    //
+    //            try {
+    //                @SuppressWarnings("resource")
+    //                final Throwables.Iterator<T, E> iter = iteratorEx();
+    //
+    //                if (iter.hasNext()) {
+    //                    cnt++;
+    //                    next = iter.next();
+    //                    cls = next.getClass();
+    //
+    //                    if (Beans.isBeanClass(cls)) {
+    //                        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
+    //
+    //                        if (N.isEmpty(headers)) {
+    //                            headers.addAll(beanInfo.propNameList);
+    //                        }
+    //
+    //                        final int headSize = headers.size();
+    //                        final PropInfo[] propInfos = new PropInfo[headSize];
+    //                        PropInfo propInfo = null;
+    //
+    //                        for (int i = 0; i < headSize; i++) {
+    //                            propInfos[i] = beanInfo.getPropInfo(headers.get(i).toString());
+    //                        }
+    //
+    //                        for (int i = 0; i < headSize; i++) {
+    //                            if (i > 0) {
+    //                                bw.write(separator);
+    //                            }
+    //
+    //                            CSVUtil.writeField(bw, null, headers.get(i));
+    //                        }
+    //
+    //                        bw.write(IOUtil.LINE_SEPARATOR);
+    //
+    //                        for (int i = 0; i < headSize; i++) {
+    //                            propInfo = propInfos[i];
+    //
+    //                            if (i > 0) {
+    //                                bw.write(separator);
+    //                            }
+    //
+    //                            CSVUtil.writeField(bw, propInfo.jsonXmlType, propInfo.getPropValue(next));
+    //                        }
+    //
+    //                        while (iter.hasNext()) {
+    //                            next = iter.next();
+    //                            bw.write(IOUtil.LINE_SEPARATOR);
+    //
+    //                            for (int i = 0; i < headSize; i++) {
+    //                                propInfo = propInfos[i];
+    //
+    //                                if (i > 0) {
+    //                                    bw.write(separator);
+    //                                }
+    //
+    //                                CSVUtil.writeField(bw, propInfo.jsonXmlType, propInfo.getPropValue(next));
+    //                            }
+    //
+    //                            if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+    //                                bw.flush();
+    //                            }
+    //                        }
+    //                    } else if (next instanceof Map) {
+    //                        Map<Object, Object> row = (Map<Object, Object>) next;
+    //
+    //                        if (N.isEmpty(headers)) {
+    //                            headers.addAll(row.keySet());
+    //                        }
+    //
+    //                        final int headSize = headers.size();
+    //
+    //                        for (int i = 0; i < headSize; i++) {
+    //                            if (i > 0) {
+    //                                bw.write(separator);
+    //                            }
+    //
+    //                            CSVUtil.writeField(bw, null, headers.get(i));
+    //                        }
+    //
+    //                        bw.write(IOUtil.LINE_SEPARATOR);
+    //
+    //                        for (int i = 0; i < headSize; i++) {
+    //                            if (i > 0) {
+    //                                bw.write(separator);
+    //                            }
+    //
+    //                            CSVUtil.writeField(bw, null, row.get(headers.get(i)));
+    //                        }
+    //
+    //                        while (iter.hasNext()) {
+    //                            row = (Map<Object, Object>) iter.next();
+    //
+    //                            bw.write(IOUtil.LINE_SEPARATOR);
+    //
+    //                            for (int i = 0; i < headSize; i++) {
+    //                                if (i > 0) {
+    //                                    bw.write(separator);
+    //                                }
+    //
+    //                                CSVUtil.writeField(bw, null, row.get(headers.get(i)));
+    //                            }
+    //
+    //                            if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+    //                                bw.flush();
+    //                            }
+    //                        }
+    //                    } else if (N.notEmpty(headers) && next instanceof Collection) {
+    //                        final int headSize = headers.size();
+    //                        Collection<Object> row = (Collection<Object>) next;
+    //
+    //                        for (int i = 0; i < headSize; i++) {
+    //                            if (i > 0) {
+    //                                bw.write(separator);
+    //                            }
+    //
+    //                            CSVUtil.writeField(bw, null, headers.get(i));
+    //                        }
+    //
+    //                        bw.write(IOUtil.LINE_SEPARATOR);
+    //
+    //                        Iterator<Object> rowIter = row.iterator();
+    //
+    //                        for (int i = 0; i < headSize; i++) {
+    //                            if (i > 0) {
+    //                                bw.write(separator);
+    //                            }
+    //
+    //                            CSVUtil.writeField(bw, null, rowIter.next());
+    //                        }
+    //
+    //                        while (iter.hasNext()) {
+    //                            row = (Collection<Object>) iter.next();
+    //                            rowIter = row.iterator();
+    //
+    //                            bw.write(IOUtil.LINE_SEPARATOR);
+    //
+    //                            for (int i = 0; i < headSize; i++) {
+    //                                if (i > 0) {
+    //                                    bw.write(separator);
+    //                                }
+    //
+    //                                CSVUtil.writeField(bw, null, rowIter.next());
+    //                            }
+    //
+    //                            if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+    //                                bw.flush();
+    //                            }
+    //                        }
+    //                    } else if (N.notEmpty(headers) && next instanceof Object[] row) {
+    //                        final int headSize = headers.size();
+    //                        for (int i = 0; i < headSize; i++) {
+    //                            if (i > 0) {
+    //                                bw.write(separator);
+    //                            }
+    //
+    //                            CSVUtil.writeField(bw, null, headers.get(i));
+    //                        }
+    //
+    //                        bw.write(IOUtil.LINE_SEPARATOR);
+    //
+    //                        for (int i = 0; i < headSize; i++) {
+    //                            if (i > 0) {
+    //                                bw.write(separator);
+    //                            }
+    //
+    //                            CSVUtil.writeField(bw, null, row[i]);
+    //                        }
+    //
+    //                        while (iter.hasNext()) {
+    //                            row = (Object[]) iter.next();
+    //
+    //                            bw.write(IOUtil.LINE_SEPARATOR);
+    //
+    //                            for (int i = 0; i < headSize; i++) {
+    //                                if (i > 0) {
+    //                                    bw.write(separator);
+    //                                }
+    //
+    //                                CSVUtil.writeField(bw, null, row[i]);
+    //                            }
+    //
+    //                            if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+    //                                bw.flush();
+    //                            }
+    //                        }
+    //                    } else {
+    //                        throw new RuntimeException(cls + " is no supported for CSV format. Only bean/Map are supported");
+    //                    }
+    //                } else if (N.notEmpty(headers)) {
+    //                    final int headSize = headers.size();
+    //
+    //                    for (int i = 0; i < headSize; i++) {
+    //                        if (i > 0) {
+    //                            bw.write(separator);
+    //                        }
+    //
+    //                        CSVUtil.writeField(bw, null, headers.get(i));
+    //                    }
+    //                }
+    //            } finally {
+    //                try {
+    //                    bw.flush();
+    //                } finally {
+    //                    if (!isBufferedWriter) {
+    //                        Objectory.recycle(bw);
+    //                    }
+    //                }
+    //            }
+    //
+    //            return cnt;
+    //        } finally {
+    //            close();
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Persists the elements of this sequence to the specified file in JSON format.
+    //     * The elements are written as a JSON array, with each element converted to its JSON representation.
+    //     * The output format includes line separators between elements for readability.
+    //     * The sequence is automatically closed after this operation completes.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @param output the target file where the JSON data will be written. The file will be created if it doesn't exist,
+    //     *               or overwritten if it does exist
+    //     * @return the total number of elements that were written to the file
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the file
+    //     * @throws E if an exception occurs during element processing
+    //     */
+    //    @TerminalOp
+    //    public long persistToJSON(final File output) throws IllegalStateException, IOException, E {
+    //        final Writer writer = IOUtil.newFileWriter(output);
+    //
+    //        try {
+    //            return persistToJSON(writer);
+    //        } finally {
+    //            IOUtil.close(writer);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Persists the elements of this sequence to the specified output stream in JSON format.
+    //     * The elements are written as a JSON array, with each element converted to its JSON representation.
+    //     * The output format includes line separators between elements for readability.
+    //     * The output stream is wrapped in a BufferedWriter for better performance.
+    //     * The sequence is automatically closed after this operation completes.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @param output the target output stream where the JSON data will be written
+    //     * @return the total number of elements that were written to the stream
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing to the stream
+    //     * @throws E if an exception occurs during element processing
+    //     */
+    //    @TerminalOp
+    //    public long persistToJSON(final OutputStream output) throws IllegalStateException, IOException, E {
+    //        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+    //
+    //        try {
+    //            return persistToJSON(bw);
+    //        } finally {
+    //            IOUtil.close(bw);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Persists the elements of this sequence to the specified writer in JSON format.
+    //     * The elements are written as a JSON array, with each element converted to its JSON representation.
+    //     * The output format includes line separators between elements for readability.
+    //     * If the writer is not already a BufferedJSONWriter, it will be wrapped in one for better performance.
+    //     * The writer is flushed periodically (every BATCH_SIZE_FOR_FLUSH elements) for better performance with large sequences.
+    //     * The sequence is automatically closed after this operation completes.
+    //     *
+    //     * <br />
+    //     * This is a terminal operation and will close the sequence.
+    //     *
+    //     * @param output the target writer where the JSON data will be written
+    //     * @return the total number of elements that were written
+    //     * @throws IllegalStateException if the sequence has already been closed
+    //     * @throws IOException if an I/O error occurs while writing
+    //     * @throws E if an exception occurs during element processing
+    //     */
+    //    @TerminalOp
+    //    public long persistToJSON(final Writer output) throws IllegalStateException, IOException, E {
+    //        assertNotClosed();
+    //
+    //        try {
+    //            final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
+    //            final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output); // NOSONAR
+    //
+    //            long cnt = 0;
+    //
+    //            try {
+    //                @SuppressWarnings("resource")
+    //                final Throwables.Iterator<T, E> iter = iteratorEx();
+    //                bw.write("[");
+    //
+    //                while (iter.hasNext()) {
+    //                    if (cnt > 0) {
+    //                        bw.write(WD._COMMA);
+    //                    }
+    //
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //                    N.toJson(iter.next(), bw);
+    //
+    //                    if (++cnt % BATCH_SIZE_FOR_FLUSH == 0) {
+    //                        bw.flush();
+    //                    }
+    //                }
+    //
+    //                bw.write(IOUtil.LINE_SEPARATOR);
+    //                bw.write("]");
+    //            } finally {
+    //                try {
+    //                    bw.flush();
+    //                } finally {
+    //                    if (!isBufferedWriter) {
+    //                        Objectory.recycle((BufferedWriter) bw);
+    //                    }
+    //                }
+    //            }
+    //
+    //            return cnt;
+    //        } finally {
+    //            close();
+    //        }
+    //    }
 
     /**
      * Prints all elements of this sequence to the standard output (System.out).
@@ -14718,6 +14708,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws IllegalArgumentException if {@code maxThreadNum} is not positive (less than or equal to 0)
      * @see #sps(Function)
+     * @see #sps(int, Executor, Function)
      * @see #transform(Function)
      * @see #transformB(Function)
      * @see #transformB(Function, boolean)
@@ -14730,6 +14721,61 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         checkArgPositive(maxThreadNum, cs.maxThreadNum);
 
         return create(ops.apply(this.stream().parallel(maxThreadNum)), true);
+    }
+
+    /**
+     * Temporarily switches the sequence to a parallel stream with a specified maximum number of threads
+     * and custom executor for the operation defined by {@code ops}, and then switches it back to a sequence.
+     * This method provides fine-grained control over both the parallelism level and the execution context
+     * for specific operations.
+     *
+     * <p>The {@code maxThreadNum} parameter controls the maximum number of threads that can be used
+     * for parallel processing, while the {@code executor} parameter allows you to specify a custom
+     * thread pool or execution strategy. This combination is useful when you need precise control
+     * over resource allocation, thread naming, priority, or other execution characteristics.</p>
+     *
+     * <p>The provided function receives a parallel stream created from this sequence's current state
+     * with the specified thread limit and executor, performs operations on it, and returns a new stream.
+     * The resulting stream is then converted back to a Seq for continued sequential processing.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Process with custom thread pool and thread limit
+     * ExecutorService customExecutor = Executors.newFixedThreadPool(4);
+     * Seq<Result, Exception> result = seq
+     *     .sps(4, customExecutor, s -> s.map(complexComputation)
+     *                                   .filter(Objects::nonNull));
+     * }</pre>
+     *
+     * @param <R> the type of the elements in the resulting sequence
+     * @param maxThreadNum the maximum number of threads to use for parallel processing. Must be
+     *                     a positive integer greater than 0
+     * @param executor the custom executor to use for parallel processing. Must not be {@code null}.
+     *                 This can be any implementation of {@link Executor}, including thread pools,
+     *                 custom schedulers, or specialized execution contexts
+     * @param ops the function defining the operations to be performed on the parallel stream.
+     *            This function takes the current sequence converted to a parallel stream with
+     *            the specified thread limit and executor, and returns a stream with elements of type R
+     * @return a sequence containing the elements resulting from applying the operations defined
+     *         by {@code ops} with the specified parallelism level and executor
+     * @throws IllegalStateException if the sequence has already been operated upon or closed
+     * @throws IllegalArgumentException if {@code maxThreadNum} is not positive (less than or equal to 0)
+     * @throws NullPointerException if {@code executor} or {@code ops} is {@code null}
+     * @see #sps(Function)
+     * @see #sps(int, Function)
+     * @see #transform(Function)
+     * @see #transformB(Function)
+     * @see #transformB(Function, boolean)
+     * @see Stream#parallel(int, Executor)
+     */
+    @Beta
+    @IntermediateOp
+    public <R> Seq<R, E> sps(final int maxThreadNum, final Executor executor, final Function<? super Stream<T>, ? extends Stream<? extends R>> ops)
+            throws IllegalStateException {
+        assertNotClosed();
+        checkArgPositive(maxThreadNum, cs.maxThreadNum);
+
+        return create(ops.apply(this.stream().parallel(maxThreadNum, executor)), true);
     }
 
     /**
@@ -15498,15 +15544,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }
     }
 
-    private void checkArgNotEmpty(final Collection<?> c, final String errorMessage) {
-        if (c == null || c.size() == 0) {
-            try {
-                N.checkArgNotEmpty(c, errorMessage);
-            } finally {
-                close();
-            }
-        }
-    }
+    //    private void checkArgNotEmpty(final Collection<?> c, final String errorMessage) {
+    //        if (c == null || c.size() == 0) {
+    //            try {
+    //                N.checkArgNotEmpty(c, errorMessage);
+    //            } finally {
+    //                close();
+    //            }
+    //        }
+    //    }
 
     private void checkArgument(final boolean b, final String errorMessage) {
         if (!b) {

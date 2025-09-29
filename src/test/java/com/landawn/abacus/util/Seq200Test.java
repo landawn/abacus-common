@@ -8,13 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,13 +18,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1909,179 +1901,179 @@ public class Seq200Test extends TestBase {
         assertEquals("<1-2-3>", joiner.toString());
     }
 
-    // Persist/Save methods require file IO, using @TempDir
-    @Test
-    public void test_saveEach_toFile_defaultToString() throws IOException, Exception {
-        File outFile = tempDir.resolve("saveEachDefault.txt").toFile();
-        Seq<Integer, Exception> seq = Seq.of(1, 2, 3).saveEach(outFile);
-        // saveEach is intermediate, consume it
-        drainWithException(seq); // This executes the saveEach logic
-
-        List<String> lines = Files.readAllLines(outFile.toPath());
-        assertEquals(Arrays.asList("1", "2", "3"), lines);
-    }
-
-    @Test
-    public void test_saveEach_toFile_customToLine() throws IOException, Exception {
-        File outFile = tempDir.resolve("saveEachCustom.txt").toFile();
-        Seq<Integer, Exception> seq = Seq.of(1, 2, 3).saveEach(i -> "val:" + i, outFile);
-        drainWithException(seq);
-
-        List<String> lines = Files.readAllLines(outFile.toPath());
-        assertEquals(Arrays.asList("val:1", "val:2", "val:3"), lines);
-    }
-
-    @Test
-    public void test_saveEach_toOutputStream() throws IOException, Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        Seq<Integer, Exception> seq = Seq.of(1, 2).saveEach(i -> "num:" + i, baos);
-        drainWithException(seq); // Consume to trigger save
-
-        String expected = "num:1" + IOUtil.LINE_SEPARATOR + "num:2" + IOUtil.LINE_SEPARATOR;
-        assertEquals(expected, baos.toString(StandardCharsets.UTF_8));
-    }
-
-    @Test
-    public void test_saveEach_toWriter() throws IOException, Exception {
-        StringWriter sw = new StringWriter();
-        Seq<Integer, Exception> seq = Seq.of(1, 2).saveEach(i -> "item:" + i, sw);
-        drainWithException(seq); // Consume to trigger save
-
-        String expected = "item:1" + IOUtil.LINE_SEPARATOR + "item:2" + IOUtil.LINE_SEPARATOR;
-        assertEquals(expected, sw.toString());
-    }
-
-    @Test
-    public void test_saveEach_toFile_biConsumer() throws IOException, Exception {
-        File outFile = tempDir.resolve("saveEachBiConsumer.txt").toFile();
-        Seq<Integer, Exception> seq = Seq.of(1, 2).saveEach((i, writer) -> writer.write("Num-" + i), outFile);
-        drainWithException(seq);
-
-        List<String> lines = Files.readAllLines(outFile.toPath());
-        assertEquals(Arrays.asList("Num-1", "Num-2"), lines);
-    }
-
-    @Test
-    public void test_saveEach_toWriter_biConsumer() throws IOException, Exception {
-        StringWriter sw = new StringWriter();
-        Seq<Integer, Exception> seq = Seq.of(1, 2).saveEach((i, writer) -> writer.write("Item-" + i), sw);
-        drainWithException(seq);
-
-        String expected = "Item-1" + IOUtil.LINE_SEPARATOR + "Item-2" + IOUtil.LINE_SEPARATOR;
-        assertEquals(expected, sw.toString());
-    }
-
-    @Test
-    public void test_persist_toFile_defaultToString() throws IOException, Exception {
-        File outFile = tempDir.resolve("persistDefault.txt").toFile();
-        long count = Seq.of(1, 2, 3).persist(outFile);
-
-        assertEquals(3, count);
-        List<String> lines = Files.readAllLines(outFile.toPath());
-        assertEquals(Arrays.asList("1", "2", "3"), lines);
-    }
-
-    @Test
-    public void test_persist_toFile_headerTail() throws IOException, Exception {
-        File outFile = tempDir.resolve("persistHeaderTail.txt").toFile();
-        long count = Seq.of(1, 2).persist("Header", "Tail", outFile);
-
-        assertEquals(2, count);
-        List<String> lines = Files.readAllLines(outFile.toPath());
-        assertEquals(Arrays.asList("Header", "1", "2", "Tail"), lines);
-    }
-
-    @Test
-    public void test_persist_toFile_customToLine() throws IOException, Exception {
-        File outFile = tempDir.resolve("persistCustom.txt").toFile();
-        long count = Seq.of(1, 2).persist(i -> "val:" + i, outFile);
-
-        assertEquals(2, count);
-        List<String> lines = Files.readAllLines(outFile.toPath());
-        assertEquals(Arrays.asList("val:1", "val:2"), lines);
-    }
-
-    @Test
-    public void test_persist_toFile_headerTail_customToLine() throws IOException, Exception {
-        File outFile = tempDir.resolve("persistHeaderTailCustom.txt").toFile();
-        long count = Seq.of(1, 2).persist("H", "T", i -> "v:" + i, outFile);
-
-        assertEquals(2, count);
-        List<String> lines = Files.readAllLines(outFile.toPath());
-        assertEquals(Arrays.asList("H", "v:1", "v:2", "T"), lines);
-    }
-
-    @Test
-    public void test_persist_toOutputStream() throws IOException, Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        long count = Seq.of(1, 2).persist(i -> "num:" + i, baos);
-        assertEquals(2, count);
-        String expected = "num:1" + IOUtil.LINE_SEPARATOR + "num:2" + IOUtil.LINE_SEPARATOR;
-        assertEquals(expected, baos.toString(StandardCharsets.UTF_8));
-    }
-
-    @Test
-    public void test_persist_toOutputStream_headerTail() throws IOException, Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        long count = Seq.of(1, 2).persist("START", "END", i -> "num:" + i, baos);
-        assertEquals(2, count);
-        String expected = "START" + IOUtil.LINE_SEPARATOR + "num:1" + IOUtil.LINE_SEPARATOR + "num:2" + IOUtil.LINE_SEPARATOR + "END" + IOUtil.LINE_SEPARATOR;
-        assertEquals(expected, baos.toString(StandardCharsets.UTF_8));
-    }
-
-    @Test
-    public void test_persist_toWriter() throws IOException, Exception {
-        StringWriter sw = new StringWriter();
-        long count = Seq.of(1, 2).persist(i -> "item:" + i, sw);
-        assertEquals(2, count);
-        String expected = "item:1" + IOUtil.LINE_SEPARATOR + "item:2" + IOUtil.LINE_SEPARATOR;
-        assertEquals(expected, sw.toString());
-    }
-
-    @Test
-    public void test_persist_toWriter_headerTail() throws IOException, Exception {
-        StringWriter sw = new StringWriter();
-        long count = Seq.of(1, 2).persist("S", "E", i -> "item:" + i, sw);
-        assertEquals(2, count);
-        String expected = "S" + IOUtil.LINE_SEPARATOR + "item:1" + IOUtil.LINE_SEPARATOR + "item:2" + IOUtil.LINE_SEPARATOR + "E" + IOUtil.LINE_SEPARATOR;
-        assertEquals(expected, sw.toString());
-    }
-
-    @Test
-    public void test_persist_toFile_biConsumer() throws IOException, Exception {
-        File outFile = tempDir.resolve("persistBiConsumer.txt").toFile();
-        long count = Seq.of(1, 2).persist((i, writer) -> writer.write("Num-" + i), outFile);
-        assertEquals(2, count);
-        List<String> lines = Files.readAllLines(outFile.toPath());
-        assertEquals(Arrays.asList("Num-1", "Num-2"), lines);
-    }
-
-    @Test
-    public void test_persist_toFile_headerTail_biConsumer() throws IOException, Exception {
-        File outFile = tempDir.resolve("persistHTBiConsumer.txt").toFile();
-        long count = Seq.of(1, 2).persist("H", "T", (i, writer) -> writer.write("Num-" + i), outFile);
-        assertEquals(2, count);
-        List<String> lines = Files.readAllLines(outFile.toPath());
-        assertEquals(Arrays.asList("H", "Num-1", "Num-2", "T"), lines);
-    }
-
-    @Test
-    public void test_persist_toWriter_biConsumer() throws IOException, Exception {
-        StringWriter sw = new StringWriter();
-        long count = Seq.of(1, 2).persist((i, writer) -> writer.write("Item-" + i), sw);
-        assertEquals(2, count);
-        String expected = "Item-1" + IOUtil.LINE_SEPARATOR + "Item-2" + IOUtil.LINE_SEPARATOR;
-        assertEquals(expected, sw.toString());
-    }
-
-    @Test
-    public void test_persist_toWriter_headerTail_biConsumer() throws IOException, Exception {
-        StringWriter sw = new StringWriter();
-        long count = Seq.of(1, 2).persist("S", "E", (i, writer) -> writer.write("Item-" + i), sw);
-        assertEquals(2, count);
-        String expected = "S" + IOUtil.LINE_SEPARATOR + "Item-1" + IOUtil.LINE_SEPARATOR + "Item-2" + IOUtil.LINE_SEPARATOR + "E" + IOUtil.LINE_SEPARATOR;
-        assertEquals(expected, sw.toString());
-    }
+    //    // Persist/Save methods require file IO, using @TempDir
+    //    @Test
+    //    public void test_saveEach_toFile_defaultToString() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("saveEachDefault.txt").toFile();
+    //        Seq<Integer, Exception> seq = Seq.of(1, 2, 3).saveEach(outFile);
+    //        // saveEach is intermediate, consume it
+    //        drainWithException(seq); // This executes the saveEach logic
+    //
+    //        List<String> lines = Files.readAllLines(outFile.toPath());
+    //        assertEquals(Arrays.asList("1", "2", "3"), lines);
+    //    }
+    //
+    //    @Test
+    //    public void test_saveEach_toFile_customToLine() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("saveEachCustom.txt").toFile();
+    //        Seq<Integer, Exception> seq = Seq.of(1, 2, 3).saveEach(i -> "val:" + i, outFile);
+    //        drainWithException(seq);
+    //
+    //        List<String> lines = Files.readAllLines(outFile.toPath());
+    //        assertEquals(Arrays.asList("val:1", "val:2", "val:3"), lines);
+    //    }
+    //
+    //    @Test
+    //    public void test_saveEach_toOutputStream() throws IOException, Exception {
+    //        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    //        Seq<Integer, Exception> seq = Seq.of(1, 2).saveEach(i -> "num:" + i, baos);
+    //        drainWithException(seq); // Consume to trigger save
+    //
+    //        String expected = "num:1" + IOUtil.LINE_SEPARATOR + "num:2" + IOUtil.LINE_SEPARATOR;
+    //        assertEquals(expected, baos.toString(StandardCharsets.UTF_8));
+    //    }
+    //
+    //    @Test
+    //    public void test_saveEach_toWriter() throws IOException, Exception {
+    //        StringWriter sw = new StringWriter();
+    //        Seq<Integer, Exception> seq = Seq.of(1, 2).saveEach(i -> "item:" + i, sw);
+    //        drainWithException(seq); // Consume to trigger save
+    //
+    //        String expected = "item:1" + IOUtil.LINE_SEPARATOR + "item:2" + IOUtil.LINE_SEPARATOR;
+    //        assertEquals(expected, sw.toString());
+    //    }
+    //
+    //    @Test
+    //    public void test_saveEach_toFile_biConsumer() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("saveEachBiConsumer.txt").toFile();
+    //        Seq<Integer, Exception> seq = Seq.of(1, 2).saveEach((i, writer) -> writer.write("Num-" + i), outFile);
+    //        drainWithException(seq);
+    //
+    //        List<String> lines = Files.readAllLines(outFile.toPath());
+    //        assertEquals(Arrays.asList("Num-1", "Num-2"), lines);
+    //    }
+    //
+    //    @Test
+    //    public void test_saveEach_toWriter_biConsumer() throws IOException, Exception {
+    //        StringWriter sw = new StringWriter();
+    //        Seq<Integer, Exception> seq = Seq.of(1, 2).saveEach((i, writer) -> writer.write("Item-" + i), sw);
+    //        drainWithException(seq);
+    //
+    //        String expected = "Item-1" + IOUtil.LINE_SEPARATOR + "Item-2" + IOUtil.LINE_SEPARATOR;
+    //        assertEquals(expected, sw.toString());
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_toFile_defaultToString() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("persistDefault.txt").toFile();
+    //        long count = Seq.of(1, 2, 3).persist(outFile);
+    //
+    //        assertEquals(3, count);
+    //        List<String> lines = Files.readAllLines(outFile.toPath());
+    //        assertEquals(Arrays.asList("1", "2", "3"), lines);
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_toFile_headerTail() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("persistHeaderTail.txt").toFile();
+    //        long count = Seq.of(1, 2).persist("Header", "Tail", outFile);
+    //
+    //        assertEquals(2, count);
+    //        List<String> lines = Files.readAllLines(outFile.toPath());
+    //        assertEquals(Arrays.asList("Header", "1", "2", "Tail"), lines);
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_toFile_customToLine() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("persistCustom.txt").toFile();
+    //        long count = Seq.of(1, 2).persist(i -> "val:" + i, outFile);
+    //
+    //        assertEquals(2, count);
+    //        List<String> lines = Files.readAllLines(outFile.toPath());
+    //        assertEquals(Arrays.asList("val:1", "val:2"), lines);
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_toFile_headerTail_customToLine() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("persistHeaderTailCustom.txt").toFile();
+    //        long count = Seq.of(1, 2).persist("H", "T", i -> "v:" + i, outFile);
+    //
+    //        assertEquals(2, count);
+    //        List<String> lines = Files.readAllLines(outFile.toPath());
+    //        assertEquals(Arrays.asList("H", "v:1", "v:2", "T"), lines);
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_toOutputStream() throws IOException, Exception {
+    //        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    //        long count = Seq.of(1, 2).persist(i -> "num:" + i, baos);
+    //        assertEquals(2, count);
+    //        String expected = "num:1" + IOUtil.LINE_SEPARATOR + "num:2" + IOUtil.LINE_SEPARATOR;
+    //        assertEquals(expected, baos.toString(StandardCharsets.UTF_8));
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_toOutputStream_headerTail() throws IOException, Exception {
+    //        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    //        long count = Seq.of(1, 2).persist("START", "END", i -> "num:" + i, baos);
+    //        assertEquals(2, count);
+    //        String expected = "START" + IOUtil.LINE_SEPARATOR + "num:1" + IOUtil.LINE_SEPARATOR + "num:2" + IOUtil.LINE_SEPARATOR + "END" + IOUtil.LINE_SEPARATOR;
+    //        assertEquals(expected, baos.toString(StandardCharsets.UTF_8));
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_toWriter() throws IOException, Exception {
+    //        StringWriter sw = new StringWriter();
+    //        long count = Seq.of(1, 2).persist(i -> "item:" + i, sw);
+    //        assertEquals(2, count);
+    //        String expected = "item:1" + IOUtil.LINE_SEPARATOR + "item:2" + IOUtil.LINE_SEPARATOR;
+    //        assertEquals(expected, sw.toString());
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_toWriter_headerTail() throws IOException, Exception {
+    //        StringWriter sw = new StringWriter();
+    //        long count = Seq.of(1, 2).persist("S", "E", i -> "item:" + i, sw);
+    //        assertEquals(2, count);
+    //        String expected = "S" + IOUtil.LINE_SEPARATOR + "item:1" + IOUtil.LINE_SEPARATOR + "item:2" + IOUtil.LINE_SEPARATOR + "E" + IOUtil.LINE_SEPARATOR;
+    //        assertEquals(expected, sw.toString());
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_toFile_biConsumer() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("persistBiConsumer.txt").toFile();
+    //        long count = Seq.of(1, 2).persist((i, writer) -> writer.write("Num-" + i), outFile);
+    //        assertEquals(2, count);
+    //        List<String> lines = Files.readAllLines(outFile.toPath());
+    //        assertEquals(Arrays.asList("Num-1", "Num-2"), lines);
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_toFile_headerTail_biConsumer() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("persistHTBiConsumer.txt").toFile();
+    //        long count = Seq.of(1, 2).persist("H", "T", (i, writer) -> writer.write("Num-" + i), outFile);
+    //        assertEquals(2, count);
+    //        List<String> lines = Files.readAllLines(outFile.toPath());
+    //        assertEquals(Arrays.asList("H", "Num-1", "Num-2", "T"), lines);
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_toWriter_biConsumer() throws IOException, Exception {
+    //        StringWriter sw = new StringWriter();
+    //        long count = Seq.of(1, 2).persist((i, writer) -> writer.write("Item-" + i), sw);
+    //        assertEquals(2, count);
+    //        String expected = "Item-1" + IOUtil.LINE_SEPARATOR + "Item-2" + IOUtil.LINE_SEPARATOR;
+    //        assertEquals(expected, sw.toString());
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_toWriter_headerTail_biConsumer() throws IOException, Exception {
+    //        StringWriter sw = new StringWriter();
+    //        long count = Seq.of(1, 2).persist("S", "E", (i, writer) -> writer.write("Item-" + i), sw);
+    //        assertEquals(2, count);
+    //        String expected = "S" + IOUtil.LINE_SEPARATOR + "Item-1" + IOUtil.LINE_SEPARATOR + "Item-2" + IOUtil.LINE_SEPARATOR + "E" + IOUtil.LINE_SEPARATOR;
+    //        assertEquals(expected, sw.toString());
+    //    }
 
     @Test
     public void test_println() throws Exception {
@@ -2593,197 +2585,197 @@ public class Seq200Test extends TestBase {
 
     //region Save/Persist with Mocks and TempDir
 
-    @Test
-    public void test_saveEach_preparedStatement() throws SQLException, Exception {
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-
-        Seq<String, Exception> seq = Seq.of("a", "b").saveEach(mockStmt, setter);
-        drainWithException(seq); // Consume to trigger execution
-
-        verify(mockStmt, times(1)).setString(1, "a");
-        verify(mockStmt, times(1)).setString(1, "b");
-        verify(mockStmt, times(2)).execute(); // Default is no batching
-    }
-
-    @Test
-    public void test_saveEach_preparedStatement_withBatching() throws SQLException, Exception {
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-
-        Seq<String, Exception> seq = Seq.of("a", "b", "c").saveEach(mockStmt, 2, 0, setter);
-        drainWithException(seq);
-
-        verify(mockStmt, times(3)).addBatch();
-        verify(mockStmt, times(2)).executeBatch(); // Once for the first 2, once for the remaining 1.
-    }
-
-    @Test
-    public void test_persist_preparedStatement() throws SQLException, Exception {
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-
-        long count = Seq.of("a", "b", "c").persist(mockStmt, 2, 0, setter);
-        assertEquals(3, count);
-
-        verify(mockStmt, times(3)).addBatch();
-        verify(mockStmt, times(2)).executeBatch();
-    }
-
-    @Test
-    public void test_persistToCSV_defaultHeaders() throws IOException, Exception {
-        File outFile = tempDir.resolve("data.csv").toFile();
-        List<Map<String, Object>> data = Arrays.asList(N.asLinkedHashMap("name", "Alice", "age", 30), // LinkedHashMap to preserve key order for header
-                N.asLinkedHashMap("name", "Bob", "age", 24));
-
-        long count = Seq.of(data).persistToCSV(outFile);
-        assertEquals(2, count);
-
-        List<String> csvLines = Files.readAllLines(outFile.toPath());
-        assertEquals(3, csvLines.size()); // Header + 2 data lines
-        assertEquals("\"name\",\"age\"", csvLines.get(0)); // Default header from first map's keys
-        assertEquals("\"Alice\",30", csvLines.get(1));
-        assertEquals("\"Bob\",24", csvLines.get(2));
-    }
-
-    @Test
-    public void test_persistToCSV_withHeaders() throws IOException, Exception {
-        File outFile = tempDir.resolve("dataWithHeaders.csv").toFile();
-        List<Map<String, Object>> data = Arrays.asList(N.asMap("name", "Alice", "age", 30, "city", "NY"), N.asMap("name", "Bob", "age", 24, "city", "LA"));
-        List<String> headers = Arrays.asList("name", "city"); // Select specific headers
-
-        long count = Seq.of(data).persistToCSV(headers, outFile);
-        assertEquals(2, count);
-
-        List<String> csvLines = Files.readAllLines(outFile.toPath());
-        assertEquals(3, csvLines.size());
-        assertEquals("\"name\",\"city\"", csvLines.get(0));
-        assertEquals("\"Alice\",\"NY\"", csvLines.get(1));
-        assertEquals("\"Bob\",\"LA\"", csvLines.get(2));
-    }
-
-    @Test
-    public void test_persistToJSON() throws IOException, Exception {
-        File outFile = tempDir.resolve("data.json").toFile();
-        List<Map<String, Object>> data = Arrays.asList(N.asMap("name", "Alice", "age", 30), N.asMap("name", "Bob", "age", 24));
-        long count = Seq.of(data).persistToJSON(outFile);
-        assertEquals(2, count); // Number of top-level objects in the array
-
-        String jsonContent = Files.readString(outFile.toPath());
-        // Basic check, actual JSON parsing would be more robust
-        assertTrue(jsonContent.startsWith("["));
-        assertTrue(jsonContent.endsWith("]")); // Seq adds a final line separator
-        assertTrue(jsonContent.contains("\"name\": \"Alice\""));
-        assertTrue(jsonContent.contains("\"name\": \"Bob\""));
-    }
-
-    //endregion
-
-    //region Async Method Tests
-    @Test
-    public void test_asyncRun() throws Exception {
-        AtomicBoolean executed = new AtomicBoolean(false);
-        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-        ContinuableFuture<Void> future = seq.asyncRun(s -> {
-            s.forEach(e -> {
-            }); // consume the seq
-            executed.set(true);
-        });
-        future.get(1, TimeUnit.SECONDS); // Wait for completion
-        assertTrue(executed.get());
-    }
-
-    @Test
-    public void test_asyncCall() throws Exception {
-        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-        ContinuableFuture<Long> future = seq.asyncCall(s -> s.count());
-        assertEquals(3L, future.get(1, TimeUnit.SECONDS).longValue());
-    }
-
-    //endregion  
-
-    //region Save/Persist with Connection/DataSource Mocking
-
-    @Test
-    public void test_saveEach_connection_sql_setter() throws SQLException, Exception {
-        Connection mockConn = mock(Connection.class);
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
-
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-        String sql = "INSERT INTO foo(bar) VALUES (?)";
-
-        Seq<String, Exception> seq = Seq.of("x", "y").saveEach(mockConn, sql, setter);
-        drainWithException(seq);
-
-        verify(mockConn, times(1)).prepareStatement(sql);
-        verify(mockStmt, times(1)).setString(1, "x");
-        verify(mockStmt, times(1)).setString(1, "y");
-        verify(mockStmt, times(2)).execute();
-        verify(mockStmt, times(1)).close(); // Underlying iterator for saveEach should close the PreparedStatement
-    }
-
-    @Test
-    public void test_saveEach_dataSource_sql_batch_setter() throws SQLException, Exception {
-        javax.sql.DataSource mockDS = mock(javax.sql.DataSource.class);
-        Connection mockConn = mock(Connection.class);
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-        when(mockDS.getConnection()).thenReturn(mockConn);
-        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
-
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-        String sql = "INSERT INTO foo(bar) VALUES (?)";
-
-        Seq<String, Exception> seq = Seq.of("x", "y", "z").saveEach(mockDS, sql, 2, 0, setter);
-        drainWithException(seq);
-
-        verify(mockDS, times(1)).getConnection();
-        verify(mockConn, times(1)).prepareStatement(sql);
-        verify(mockStmt, times(3)).addBatch();
-        verify(mockStmt, times(2)).executeBatch(); // once for x,y; once for z
-        verify(mockStmt, times(1)).close();
-        verify(mockConn, times(1)).close(); // Assuming DataSourceUtil.releaseConnection closes it
-    }
-
-    @Test
-    public void test_persist_connection_sql_batch_setter() throws SQLException, Exception {
-        Connection mockConn = mock(Connection.class);
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
-
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-        String sql = "INSERT INTO foo(bar) VALUES (?)";
-
-        long count = Seq.of("x", "y", "z").persist(mockConn, sql, 2, 0, setter);
-        assertEquals(3, count);
-
-        verify(mockConn, times(1)).prepareStatement(sql);
-        verify(mockStmt, times(3)).addBatch();
-        verify(mockStmt, times(2)).executeBatch();
-        verify(mockStmt, times(1)).close(); // Persist directly closes resources it creates.
-    }
-
-    @Test
-    public void test_persist_dataSource_sql_batch_setter() throws SQLException, Exception {
-        javax.sql.DataSource mockDS = mock(javax.sql.DataSource.class);
-        Connection mockConn = mock(Connection.class);
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-        when(mockDS.getConnection()).thenReturn(mockConn);
-        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
-
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-        String sql = "INSERT INTO foo(bar) VALUES (?)";
-
-        long count = Seq.of("x", "y", "z", "w").persist(mockDS, sql, 2, 0, setter);
-        assertEquals(4, count);
-
-        verify(mockDS, times(1)).getConnection();
-        verify(mockConn, times(1)).prepareStatement(sql);
-        verify(mockStmt, times(4)).addBatch();
-        verify(mockStmt, times(2)).executeBatch(); // for x,y and z,w
-        verify(mockStmt, times(1)).close();
-        verify(mockConn, times(1)).close(); // Assuming DataSourceUtil.releaseConnection closes it
-    }
+    //    @Test
+    //    public void test_saveEach_preparedStatement() throws SQLException, Exception {
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
+    //
+    //        Seq<String, Exception> seq = Seq.of("a", "b").saveEach(mockStmt, setter);
+    //        drainWithException(seq); // Consume to trigger execution
+    //
+    //        verify(mockStmt, times(1)).setString(1, "a");
+    //        verify(mockStmt, times(1)).setString(1, "b");
+    //        verify(mockStmt, times(2)).execute(); // Default is no batching
+    //    }
+    //
+    //    @Test
+    //    public void test_saveEach_preparedStatement_withBatching() throws SQLException, Exception {
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
+    //
+    //        Seq<String, Exception> seq = Seq.of("a", "b", "c").saveEach(mockStmt, 2, 0, setter);
+    //        drainWithException(seq);
+    //
+    //        verify(mockStmt, times(3)).addBatch();
+    //        verify(mockStmt, times(2)).executeBatch(); // Once for the first 2, once for the remaining 1.
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_preparedStatement() throws SQLException, Exception {
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
+    //
+    //        long count = Seq.of("a", "b", "c").persist(mockStmt, 2, 0, setter);
+    //        assertEquals(3, count);
+    //
+    //        verify(mockStmt, times(3)).addBatch();
+    //        verify(mockStmt, times(2)).executeBatch();
+    //    }
+    //
+    //    @Test
+    //    public void test_persistToCSV_defaultHeaders() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("data.csv").toFile();
+    //        List<Map<String, Object>> data = Arrays.asList(N.asLinkedHashMap("name", "Alice", "age", 30), // LinkedHashMap to preserve key order for header
+    //                N.asLinkedHashMap("name", "Bob", "age", 24));
+    //
+    //        long count = Seq.of(data).persistToCSV(outFile);
+    //        assertEquals(2, count);
+    //
+    //        List<String> csvLines = Files.readAllLines(outFile.toPath());
+    //        assertEquals(3, csvLines.size()); // Header + 2 data lines
+    //        assertEquals("\"name\",\"age\"", csvLines.get(0)); // Default header from first map's keys
+    //        assertEquals("\"Alice\",30", csvLines.get(1));
+    //        assertEquals("\"Bob\",24", csvLines.get(2));
+    //    }
+    //
+    //    @Test
+    //    public void test_persistToCSV_withHeaders() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("dataWithHeaders.csv").toFile();
+    //        List<Map<String, Object>> data = Arrays.asList(N.asMap("name", "Alice", "age", 30, "city", "NY"), N.asMap("name", "Bob", "age", 24, "city", "LA"));
+    //        List<String> headers = Arrays.asList("name", "city"); // Select specific headers
+    //
+    //        long count = Seq.of(data).persistToCSV(headers, outFile);
+    //        assertEquals(2, count);
+    //
+    //        List<String> csvLines = Files.readAllLines(outFile.toPath());
+    //        assertEquals(3, csvLines.size());
+    //        assertEquals("\"name\",\"city\"", csvLines.get(0));
+    //        assertEquals("\"Alice\",\"NY\"", csvLines.get(1));
+    //        assertEquals("\"Bob\",\"LA\"", csvLines.get(2));
+    //    }
+    //
+    //    @Test
+    //    public void test_persistToJSON() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("data.json").toFile();
+    //        List<Map<String, Object>> data = Arrays.asList(N.asMap("name", "Alice", "age", 30), N.asMap("name", "Bob", "age", 24));
+    //        long count = Seq.of(data).persistToJSON(outFile);
+    //        assertEquals(2, count); // Number of top-level objects in the array
+    //
+    //        String jsonContent = Files.readString(outFile.toPath());
+    //        // Basic check, actual JSON parsing would be more robust
+    //        assertTrue(jsonContent.startsWith("["));
+    //        assertTrue(jsonContent.endsWith("]")); // Seq adds a final line separator
+    //        assertTrue(jsonContent.contains("\"name\": \"Alice\""));
+    //        assertTrue(jsonContent.contains("\"name\": \"Bob\""));
+    //    }
+    //
+    //    //endregion
+    //
+    //    //region Async Method Tests
+    //    @Test
+    //    public void test_asyncRun() throws Exception {
+    //        AtomicBoolean executed = new AtomicBoolean(false);
+    //        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
+    //        ContinuableFuture<Void> future = seq.asyncRun(s -> {
+    //            s.forEach(e -> {
+    //            }); // consume the seq
+    //            executed.set(true);
+    //        });
+    //        future.get(1, TimeUnit.SECONDS); // Wait for completion
+    //        assertTrue(executed.get());
+    //    }
+    //
+    //    @Test
+    //    public void test_asyncCall() throws Exception {
+    //        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
+    //        ContinuableFuture<Long> future = seq.asyncCall(s -> s.count());
+    //        assertEquals(3L, future.get(1, TimeUnit.SECONDS).longValue());
+    //    }
+    //
+    //    //endregion  
+    //
+    //    //region Save/Persist with Connection/DataSource Mocking
+    //
+    //    @Test
+    //    public void test_saveEach_connection_sql_setter() throws SQLException, Exception {
+    //        Connection mockConn = mock(Connection.class);
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+    //
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
+    //        String sql = "INSERT INTO foo(bar) VALUES (?)";
+    //
+    //        Seq<String, Exception> seq = Seq.of("x", "y").saveEach(mockConn, sql, setter);
+    //        drainWithException(seq);
+    //
+    //        verify(mockConn, times(1)).prepareStatement(sql);
+    //        verify(mockStmt, times(1)).setString(1, "x");
+    //        verify(mockStmt, times(1)).setString(1, "y");
+    //        verify(mockStmt, times(2)).execute();
+    //        verify(mockStmt, times(1)).close(); // Underlying iterator for saveEach should close the PreparedStatement
+    //    }
+    //
+    //    @Test
+    //    public void test_saveEach_dataSource_sql_batch_setter() throws SQLException, Exception {
+    //        javax.sql.DataSource mockDS = mock(javax.sql.DataSource.class);
+    //        Connection mockConn = mock(Connection.class);
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //        when(mockDS.getConnection()).thenReturn(mockConn);
+    //        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+    //
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
+    //        String sql = "INSERT INTO foo(bar) VALUES (?)";
+    //
+    //        Seq<String, Exception> seq = Seq.of("x", "y", "z").saveEach(mockDS, sql, 2, 0, setter);
+    //        drainWithException(seq);
+    //
+    //        verify(mockDS, times(1)).getConnection();
+    //        verify(mockConn, times(1)).prepareStatement(sql);
+    //        verify(mockStmt, times(3)).addBatch();
+    //        verify(mockStmt, times(2)).executeBatch(); // once for x,y; once for z
+    //        verify(mockStmt, times(1)).close();
+    //        verify(mockConn, times(1)).close(); // Assuming DataSourceUtil.releaseConnection closes it
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_connection_sql_batch_setter() throws SQLException, Exception {
+    //        Connection mockConn = mock(Connection.class);
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+    //
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
+    //        String sql = "INSERT INTO foo(bar) VALUES (?)";
+    //
+    //        long count = Seq.of("x", "y", "z").persist(mockConn, sql, 2, 0, setter);
+    //        assertEquals(3, count);
+    //
+    //        verify(mockConn, times(1)).prepareStatement(sql);
+    //        verify(mockStmt, times(3)).addBatch();
+    //        verify(mockStmt, times(2)).executeBatch();
+    //        verify(mockStmt, times(1)).close(); // Persist directly closes resources it creates.
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_dataSource_sql_batch_setter() throws SQLException, Exception {
+    //        javax.sql.DataSource mockDS = mock(javax.sql.DataSource.class);
+    //        Connection mockConn = mock(Connection.class);
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //        when(mockDS.getConnection()).thenReturn(mockConn);
+    //        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+    //
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
+    //        String sql = "INSERT INTO foo(bar) VALUES (?)";
+    //
+    //        long count = Seq.of("x", "y", "z", "w").persist(mockDS, sql, 2, 0, setter);
+    //        assertEquals(4, count);
+    //
+    //        verify(mockDS, times(1)).getConnection();
+    //        verify(mockConn, times(1)).prepareStatement(sql);
+    //        verify(mockStmt, times(4)).addBatch();
+    //        verify(mockStmt, times(2)).executeBatch(); // for x,y and z,w
+    //        verify(mockStmt, times(1)).close();
+    //        verify(mockConn, times(1)).close(); // Assuming DataSourceUtil.releaseConnection closes it
+    //    }
 
     //[Previous imports and SeqTest class definition would be here]
     //[Including Exception and @TempDir setup]
@@ -3085,100 +3077,100 @@ public class Seq200Test extends TestBase {
 
     //endregion
 
-    //region JDBC related saveEach/persist with empty Seq
-    @Test
-    public void test_saveEach_preparedStatement_emptySeq() throws SQLException, Exception {
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-
-        Seq<String, Exception> seq = Seq.<String, Exception> empty().saveEach(mockStmt, setter);
-        drainWithException(seq); // Consume to trigger execution
-
-        verify(mockStmt, never()).setString(anyInt(), anyString());
-        verify(mockStmt, never()).execute();
-        verify(mockStmt, never()).addBatch();
-        verify(mockStmt, never()).executeBatch();
-        // The internal iterator's closeResource will be called, but PreparedStatement is not closed by saveEach itself.
-    }
-
-    @Test
-    public void test_persist_preparedStatement_emptySeq() throws SQLException, Exception {
-        PreparedStatement mockStmt = mock(PreparedStatement.class);
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-
-        long count = Seq.<String, Exception> empty().persist(mockStmt, 2, 0, setter);
-        assertEquals(0, count);
-
-        verify(mockStmt, never()).setString(anyInt(), anyString());
-        verify(mockStmt, never()).execute();
-        verify(mockStmt, never()).addBatch();
-        verify(mockStmt, never()).executeBatch();
-    }
-
-    @Test
-    public void test_saveEach_connection_emptySeq() throws SQLException, Exception {
-        Connection mockConn = mock(Connection.class);
-        // No PreparedStatement should be created if seq is empty
-        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-        String sql = "INSERT INTO foo(bar) VALUES (?)";
-
-        Seq<String, Exception> seq = Seq.<String, Exception> empty().saveEach(mockConn, sql, setter);
-        drainWithException(seq);
-
-        verify(mockConn, never()).prepareStatement(anyString());
-    }
-
+    //    //region JDBC related saveEach/persist with empty Seq
     //    @Test
-    //    public void test_persist_dataSource_emptySeq() throws SQLException, Exception {
-    //        javax.sql.DataSource mockDS = mock(javax.sql.DataSource.class);
-    //        // No Connection or PreparedStatement should be obtained/created if seq is empty
+    //    public void test_saveEach_preparedStatement_emptySeq() throws SQLException, Exception {
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
+    //
+    //        Seq<String, Exception> seq = Seq.<String, Exception> empty().saveEach(mockStmt, setter);
+    //        drainWithException(seq); // Consume to trigger execution
+    //
+    //        verify(mockStmt, never()).setString(anyInt(), anyString());
+    //        verify(mockStmt, never()).execute();
+    //        verify(mockStmt, never()).addBatch();
+    //        verify(mockStmt, never()).executeBatch();
+    //        // The internal iterator's closeResource will be called, but PreparedStatement is not closed by saveEach itself.
+    //    }
+    //
+    //    @Test
+    //    public void test_persist_preparedStatement_emptySeq() throws SQLException, Exception {
+    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
+    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
+    //
+    //        long count = Seq.<String, Exception> empty().persist(mockStmt, 2, 0, setter);
+    //        assertEquals(0, count);
+    //
+    //        verify(mockStmt, never()).setString(anyInt(), anyString());
+    //        verify(mockStmt, never()).execute();
+    //        verify(mockStmt, never()).addBatch();
+    //        verify(mockStmt, never()).executeBatch();
+    //    }
+    //
+    //    @Test
+    //    public void test_saveEach_connection_emptySeq() throws SQLException, Exception {
+    //        Connection mockConn = mock(Connection.class);
+    //        // No PreparedStatement should be created if seq is empty
     //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
     //        String sql = "INSERT INTO foo(bar) VALUES (?)";
     //
-    //        long count = Seq.<String, Exception> empty().persist(mockDS, sql, 2, 0, setter);
+    //        Seq<String, Exception> seq = Seq.<String, Exception> empty().saveEach(mockConn, sql, setter);
+    //        drainWithException(seq);
+    //
+    //        verify(mockConn, never()).prepareStatement(anyString());
+    //    }
+    //
+    //    //    @Test
+    //    //    public void test_persist_dataSource_emptySeq() throws SQLException, Exception {
+    //    //        javax.sql.DataSource mockDS = mock(javax.sql.DataSource.class);
+    //    //        // No Connection or PreparedStatement should be obtained/created if seq is empty
+    //    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
+    //    //        String sql = "INSERT INTO foo(bar) VALUES (?)";
+    //    //
+    //    //        long count = Seq.<String, Exception> empty().persist(mockDS, sql, 2, 0, setter);
+    //    //        assertEquals(0, count);
+    //    //
+    //    //        verify(mockDS, never()).getConnection();
+    //    //    }
+    //
+    //    //endregion
+    //
+    //    //region Specific I/O method scenarios
+    //
+    //    @Test
+    //    public void test_persistToCSV_emptySeq() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("empty.csv").toFile();
+    //        List<String> headers = Arrays.asList("h1", "h2");
+    //
+    //        long count = Seq.<Map<String, Object>, Exception> empty().persistToCSV(headers, outFile);
     //        assertEquals(0, count);
     //
-    //        verify(mockDS, never()).getConnection();
+    //        List<String> csvLines = Files.readAllLines(outFile.toPath());
+    //        // Only header should be written if headers are provided and sequence is empty.
+    //        // The current implementation writes header only if there's at least one row to infer columns from,
+    //        // or if headers are explicitly passed. If headers passed and seq empty, it should write header.
+    //        assertEquals(1, csvLines.size(), "Should write header even for empty data if headers provided");
+    //        assertEquals("\"h1\",\"h2\"", csvLines.get(0));
+    //
+    //        // Without explicit headers and empty sequence (e.g. Seq.<Map<String,Object>>empty().persistToCSV(outFile))
+    //        // The method doesn't know what headers to write.
+    //        File outFileNoHeader = tempDir.resolve("emptyNoHeader.csv").toFile();
+    //        count = Seq.<Map<String, Object>, Exception> empty().persistToCSV(outFileNoHeader);
+    //        assertEquals(0, count);
+    //        csvLines = Files.readAllLines(outFileNoHeader.toPath());
+    //        assertTrue(csvLines.isEmpty(), "Should be empty if no headers and no data");
     //    }
-
-    //endregion
-
-    //region Specific I/O method scenarios
-
-    @Test
-    public void test_persistToCSV_emptySeq() throws IOException, Exception {
-        File outFile = tempDir.resolve("empty.csv").toFile();
-        List<String> headers = Arrays.asList("h1", "h2");
-
-        long count = Seq.<Map<String, Object>, Exception> empty().persistToCSV(headers, outFile);
-        assertEquals(0, count);
-
-        List<String> csvLines = Files.readAllLines(outFile.toPath());
-        // Only header should be written if headers are provided and sequence is empty.
-        // The current implementation writes header only if there's at least one row to infer columns from,
-        // or if headers are explicitly passed. If headers passed and seq empty, it should write header.
-        assertEquals(1, csvLines.size(), "Should write header even for empty data if headers provided");
-        assertEquals("\"h1\",\"h2\"", csvLines.get(0));
-
-        // Without explicit headers and empty sequence (e.g. Seq.<Map<String,Object>>empty().persistToCSV(outFile))
-        // The method doesn't know what headers to write.
-        File outFileNoHeader = tempDir.resolve("emptyNoHeader.csv").toFile();
-        count = Seq.<Map<String, Object>, Exception> empty().persistToCSV(outFileNoHeader);
-        assertEquals(0, count);
-        csvLines = Files.readAllLines(outFileNoHeader.toPath());
-        assertTrue(csvLines.isEmpty(), "Should be empty if no headers and no data");
-    }
-
-    @Test
-    public void test_persistToJSON_emptySeq() throws IOException, Exception {
-        File outFile = tempDir.resolve("empty.json").toFile();
-        long count = Seq.<Map<String, Object>, Exception> empty().persistToJSON(outFile);
-        assertEquals(0, count);
-
-        String jsonContent = Files.readString(outFile.toPath());
-        // Expects "[]" with line separators
-        assertEquals("[" + IOUtil.LINE_SEPARATOR + "]", jsonContent.trim());
-    }
+    //
+    //    @Test
+    //    public void test_persistToJSON_emptySeq() throws IOException, Exception {
+    //        File outFile = tempDir.resolve("empty.json").toFile();
+    //        long count = Seq.<Map<String, Object>, Exception> empty().persistToJSON(outFile);
+    //        assertEquals(0, count);
+    //
+    //        String jsonContent = Files.readString(outFile.toPath());
+    //        // Expects "[]" with line separators
+    //        assertEquals("[" + IOUtil.LINE_SEPARATOR + "]", jsonContent.trim());
+    //    }
 
     // [Previous imports and SeqTest class definition would be here]
     // [Including Exception and @TempDir setup]
