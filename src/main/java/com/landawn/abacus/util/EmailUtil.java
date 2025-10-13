@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -263,13 +264,7 @@ public final class EmailUtil {
                     final DataSource source = new FileDataSource(fileName);
                     messageBodyPart.setDataHandler(new DataHandler(source));
 
-                    int index = fileName.lastIndexOf("\\");
-
-                    if (index < 0) {
-                        index = fileName.lastIndexOf("/");
-                    }
-
-                    messageBodyPart.setFileName((index >= 0) ? fileName.substring(index + 1) : fileName);
+                    messageBodyPart.setFileName(new File(fileName).getName());
                     multipart.addBodyPart(messageBodyPart);
                 }
             }

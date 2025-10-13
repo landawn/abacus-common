@@ -7,11 +7,13 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.DoubleList;
 
+@Tag("new-test")
 public class DoubleIteratorEx100Test extends TestBase {
 
     @Test
@@ -21,7 +23,7 @@ public class DoubleIteratorEx100Test extends TestBase {
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextDouble());
         Assertions.assertEquals(0, iter.count());
         Assertions.assertArrayEquals(new double[0], iter.toArray());
-        iter.close(); // Should not throw
+        iter.close();
     }
 
     @Test
@@ -143,14 +145,11 @@ public class DoubleIteratorEx100Test extends TestBase {
         ObjIteratorEx<Double> objIter = ObjIteratorEx.of(1.0, 2.0, 3.0);
         DoubleIteratorEx iter = DoubleIteratorEx.from(objIter);
         
-        // Test advance
         iter.advance(1);
         Assertions.assertEquals(2.0, iter.nextDouble());
         
-        // Test count
         Assertions.assertEquals(1, iter.count());
         
-        // Test close
         iter.close();
     }
 
@@ -165,7 +164,6 @@ public class DoubleIteratorEx100Test extends TestBase {
         iter.advance(1);
         Assertions.assertEquals(5.0, iter.nextDouble());
         
-        // Advance beyond end
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
@@ -182,7 +180,6 @@ public class DoubleIteratorEx100Test extends TestBase {
     @Test
     public void testAdvanceNegative() {
         DoubleIteratorEx iter = DoubleIteratorEx.of(1.0, 2.0, 3.0);
-        // Assertions.assertThrows(IllegalArgumentException.class, () -> iter.advance(-1));
         iter.advance(-1);
     }
 
@@ -244,6 +241,6 @@ public class DoubleIteratorEx100Test extends TestBase {
     @Test
     public void testClose() {
         DoubleIteratorEx iter = DoubleIteratorEx.of(1.0, 2.0, 3.0);
-        iter.close(); // Should not throw
+        iter.close();
     }
 }

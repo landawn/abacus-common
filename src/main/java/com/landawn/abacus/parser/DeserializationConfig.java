@@ -46,7 +46,6 @@ import com.landawn.abacus.util.N;
  * </ul>
  *
  * @param <C> the concrete configuration type for method chaining
- * @author HaiYang Li
  * @since 0.8
  * @see JSONDeserializationConfig
  * @see XMLDeserializationConfig

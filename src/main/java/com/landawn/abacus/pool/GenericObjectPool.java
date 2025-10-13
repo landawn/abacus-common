@@ -334,7 +334,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 vacate();
             }
 
-            while (true) {
+            int maxSpins = 10000;
+            while (maxSpins-- > 0) {
                 if (pool.size() < capacity) {
                     if (memoryMeasure != null && memoryMeasure.sizeOf(e) > maxMemorySize - totalDataSize.get()) {
                         // ignore.
@@ -359,6 +360,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
                 nanos = notFull.awaitNanos(nanos);
             }
+
+            return false; // Safety timeout after max spins
         } finally {
             lock.unlock();
         }

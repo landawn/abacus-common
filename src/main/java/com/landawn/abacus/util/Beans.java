@@ -1310,12 +1310,13 @@ public final class Beans {
             unmodifiableGetMethodMap.keySet(); // initialize? //NOSONAR
             beanDeclaredPropGetMethodPool.put(cls, unmodifiableGetMethodMap);
 
-            if (beanPropGetMethodPool.get(cls) == null) {
+            Map<String, Method> existingGetMethodMap = beanPropGetMethodPool.get(cls);
+            if (existingGetMethodMap == null) {
                 final Map<String, Method> tmp = new ObjectPool<>(N.max(64, propGetMethodMap.size()));
                 tmp.putAll(propGetMethodMap);
                 beanPropGetMethodPool.put(cls, tmp);
             } else {
-                beanPropGetMethodPool.get(cls).putAll(propGetMethodMap);
+                existingGetMethodMap.putAll(propGetMethodMap);
             }
 
             // for Double-Checked Locking is Broke to initialize it before put it into map.
@@ -1324,12 +1325,13 @@ public final class Beans {
             unmodifiableSetMethodMap.keySet(); // initialize? //NOSONAR
             beanDeclaredPropSetMethodPool.put(cls, unmodifiableSetMethodMap);
 
-            if (beanPropSetMethodPool.get(cls) == null) {
+            Map<String, Method> existingSetMethodMap = beanPropSetMethodPool.get(cls);
+            if (existingSetMethodMap == null) {
                 final Map<String, Method> tmp = new ObjectPool<>(N.max(64, propSetMethodMap.size()));
                 tmp.putAll(propSetMethodMap);
                 beanPropSetMethodPool.put(cls, tmp);
             } else {
-                beanPropSetMethodPool.get(cls).putAll(propSetMethodMap);
+                existingSetMethodMap.putAll(propSetMethodMap);
             }
 
             final List<String> propNameList = new ArrayList<>(propFieldMap.keySet());
@@ -1353,16 +1355,16 @@ public final class Beans {
                         propName = getPropNameByMethod(method);
                         builderPropSetMethodMap.put(propName, method);
                     }
-
-                    final ImmutableMap<String, Method> unmodifiableBuilderPropSetMethodMap = ImmutableMap.wrap(builderPropSetMethodMap);
-                    //noinspection ResultOfMethodCallIgnored
-                    unmodifiableBuilderPropSetMethodMap.keySet(); // initialize? //NOSONAR
-                    beanDeclaredPropSetMethodPool.put(builderClass, unmodifiableBuilderPropSetMethodMap);
-
-                    final Map<String, Method> tmp = new ObjectPool<>(N.max(64, builderPropSetMethodMap.size()));
-                    tmp.putAll(builderPropSetMethodMap);
-                    beanPropSetMethodPool.put(builderClass, tmp);
                 }
+
+                final ImmutableMap<String, Method> unmodifiableBuilderPropSetMethodMap = ImmutableMap.wrap(builderPropSetMethodMap);
+                //noinspection ResultOfMethodCallIgnored
+                unmodifiableBuilderPropSetMethodMap.keySet(); // initialize? //NOSONAR
+                beanDeclaredPropSetMethodPool.put(builderClass, unmodifiableBuilderPropSetMethodMap);
+
+                final Map<String, Method> tmp = new ObjectPool<>(N.max(64, builderPropSetMethodMap.size()));
+                tmp.putAll(builderPropSetMethodMap);
+                beanPropSetMethodPool.put(builderClass, tmp);
             }
         }
     }
@@ -1829,7 +1831,7 @@ public final class Beans {
         final int len = inlinePropGetMethodQueue.size();
         Object propBean = bean;
 
-        for (Method method : inlinePropGetMethodQueue) {
+        for (final Method method : inlinePropGetMethodQueue) {
             propBean = getPropValue(propBean, method);
 
             if (propBean == null) {
@@ -2113,14 +2115,18 @@ public final class Beans {
      * String formal3 = Beans.formalizePropName("class");        // Returns "clazz"
      * }</pre>
      *
-     * @param propName the property name to be formalized
+     * @param str the property name to be formalized
      * @return the formalized property name
      */
-    public static String formalizePropName(final String propName) {
-        String newPropName = formalizedPropNamePool.get(propName);
+    public static String formalizePropName(final String str) {
+        if (Strings.isEmpty(str)) {
+            return str;
+        }
+
+        String newPropName = formalizedPropNamePool.get(str);
 
         if (newPropName == null) {
-            newPropName = Beans.toCamelCase(propName);
+            newPropName = Beans.toCamelCase(str);
 
             for (final Map.Entry<String, String> entry : keyWordMapper.entrySet()) { //NOSONAR
                 if (entry.getKey().equalsIgnoreCase(newPropName)) {
@@ -2130,7 +2136,7 @@ public final class Beans {
                 }
             }
 
-            formalizedPropNamePool.put(propName, newPropName);
+            formalizedPropNamePool.put(str, newPropName);
         }
 
         return newPropName;
@@ -2146,16 +2152,20 @@ public final class Beans {
      * String camel3 = Beans.toCamelCase("address-line-1");  // Returns "addressLine1"
      * }</pre>
      *
-     * @param propName the property name to be converted
+     * @param str the property name to be converted
      * @return the camel case version of the property name
      */
-    public static String toCamelCase(final String propName) {
-        String newPropName = camelCasePropNamePool.get(propName);
+    public static String toCamelCase(final String str) {
+        if (Strings.isEmpty(str)) {
+            return str;
+        }
+
+        String newPropName = camelCasePropNamePool.get(str);
 
         if (newPropName == null) {
-            newPropName = Strings.toCamelCase(propName);
+            newPropName = Strings.toCamelCase(str);
             newPropName = NameUtil.getCachedName(newPropName);
-            camelCasePropNamePool.put(propName, newPropName);
+            camelCasePropNamePool.put(str, newPropName);
         }
 
         return newPropName;
@@ -2748,6 +2758,10 @@ public final class Beans {
      */
     public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
             final IntFunction<? extends M> mapSupplier) {
+        if (bean == null) {
+            return mapSupplier.apply(0);
+        }
+
         final M output = mapSupplier.apply(N.isEmpty(selectPropNames) ? getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
         bean2Map(bean, selectPropNames, keyNamingPolicy, output);
@@ -2842,6 +2856,10 @@ public final class Beans {
      */
     public static <M extends Map<String, Object>> void bean2Map(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
             final M output) {
+        if (bean == null) {
+            return;
+        }
+
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
         final Class<?> beanClass = bean.getClass();
@@ -3147,6 +3165,10 @@ public final class Beans {
      */
     public static <M extends Map<String, Object>> void bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             NamingPolicy keyNamingPolicy, final M output) {
+        if (bean == null) {
+            return;
+        }
+
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
         final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
@@ -3341,6 +3363,10 @@ public final class Beans {
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
+        if (bean == null) {
+            return mapSupplier.apply(0);
+        }
+
         final M output = mapSupplier.apply(N.isEmpty(selectPropNames) ? getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
         deepBean2Map(bean, selectPropNames, keyNamingPolicy, output);
@@ -3451,6 +3477,10 @@ public final class Beans {
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
+        if (bean == null) {
+            return;
+        }
+
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
@@ -3721,6 +3751,10 @@ public final class Beans {
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
+        if (bean == null) {
+            return;
+        }
+
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
@@ -3896,6 +3930,10 @@ public final class Beans {
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
+        if (bean == null) {
+            return mapSupplier.apply(0);
+        }
+
         final M output = mapSupplier.apply(N.isEmpty(selectPropNames) ? getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
         bean2FlatMap(bean, selectPropNames, keyNamingPolicy, output);
@@ -3983,6 +4021,10 @@ public final class Beans {
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
             final M output) {
+        if (bean == null) {
+            return;
+        }
+
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
         final Class<?> beanClass = bean.getClass();
@@ -4265,6 +4307,10 @@ public final class Beans {
 
     private static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy, final String parentPropName, final M output) {
+        if (bean == null) {
+            return;
+        }
+
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
@@ -4837,19 +4883,6 @@ public final class Beans {
         return (T) result;
     }
 
-    //    /**
-    //     * Checks if is bean.
-    //     *
-    //     * @param cls
-    //     * @return true, if is bean
-    //     * @see ClassUtil#isBeanClass(Class)
-    //     * @deprecated replaced by {@code Beans.isBeanClass(Class)}
-    //     */
-    //    @Deprecated
-    //    public static boolean isBeanClass(final Class<?> cls) {
-    //        return Beans.isBeanClass(cls);
-    //    }
-
     private static final BinaryOperator<?> DEFAULT_MERGE_FUNC = (a, b) -> a == null ? b : a;
 
     /**
@@ -5258,12 +5291,13 @@ public final class Beans {
      *
      * @param <T> the type of the target bean
      * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @param propFilter predicate to determine which properties should be merged
-     * @param propNameConverter function to convert property names from source to target format
-     * @param mergeFunc binary operator to determine the merged value for each property
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}
+     * @param propFilter predicate to determine which properties should be merged; must not be {@code null}
+     * @param propNameConverter function to convert property names from source to target format; must not be {@code null}
+     * @param mergeFunc binary operator to determine the merged value for each property; must not be {@code null}
      * @return the same target bean instance with filtered, converted, and merged properties
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}
+     * @throws NullPointerException if {@code propFilter}, {@code propNameConverter}, or {@code mergeFunc} is {@code null}
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5445,6 +5479,10 @@ public final class Beans {
 
             for (final String propName : selectPropNames) {
                 propInfo = srcBeanInfo.getPropInfo(propName);
+
+                if (propInfo == null) {
+                    throw new IllegalArgumentException("No property found by name: " + propName + " in source bean class: " + sourceBean.getClass());
+                }
 
                 if (isIdentityPropNameConverter) {
                     targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
@@ -5819,15 +5857,20 @@ public final class Beans {
 
         for (final String propName : propNamesToFill) {
             propInfo = beanInfo.getPropInfo(propName);
+
+            if (propInfo == null) {
+                throw new IllegalArgumentException("Property: " + propName + " is not found in bean class: " + beanInfo.clazz);
+            }
+
             parameterClass = propInfo.clazz;
             type = propInfo.jsonXmlType;
 
             if (String.class.equals(parameterClass)) {
                 propValue = Strings.uuid().substring(0, 16);
             } else if (boolean.class.equals(parameterClass) || Boolean.class.equals(parameterClass)) {
-                propValue = N.RAND.nextInt() % 2 != 0;
+                propValue = N.RAND.nextBoolean();
             } else if (char.class.equals(parameterClass) || Character.class.equals(parameterClass)) {
-                propValue = (char) ('a' + N.RAND.nextInt() % 26);
+                propValue = (char) ('a' + N.RAND.nextInt(26));
             } else if (int.class.equals(parameterClass) || Integer.class.equals(parameterClass)) {
                 propValue = N.RAND.nextInt();
             } else if (long.class.equals(parameterClass) || Long.class.equals(parameterClass)) {

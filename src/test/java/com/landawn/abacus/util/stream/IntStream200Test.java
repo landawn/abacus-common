@@ -6,15 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.IntList;
 
-
-/**
- * Unit tests for {@link IntStream}.
- * This is a sample and not an exhaustive test suite.
- */
+@Tag("new-test")
 public class IntStream200Test extends TestBase {
 
     @Test

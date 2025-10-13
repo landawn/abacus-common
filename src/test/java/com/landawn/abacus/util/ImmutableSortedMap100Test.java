@@ -10,9 +10,11 @@ import java.util.TreeMap;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class ImmutableSortedMap100Test extends TestBase {
 
     @Test
@@ -146,7 +148,6 @@ public class ImmutableSortedMap100Test extends TestBase {
         ImmutableSortedMap<String, Integer> wrapped = ImmutableSortedMap.wrap(mutable);
         Assertions.assertEquals(2, wrapped.size());
 
-        // Changes are reflected
         mutable.put("c", 3);
         Assertions.assertEquals(3, wrapped.size());
         Assertions.assertTrue(wrapped.containsKey("c"));

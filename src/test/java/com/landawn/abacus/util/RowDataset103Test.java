@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
@@ -20,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Tag("new-test")
 public class RowDataset103Test extends TestBase {
 
     private RowDataset dataset;
@@ -30,10 +32,10 @@ public class RowDataset103Test extends TestBase {
     public void setUp() {
         columnNames = Arrays.asList("id", "name", "age", "city");
         columnList = new ArrayList<>();
-        columnList.add(Arrays.asList(1, 2, 3, 4)); // id column
-        columnList.add(Arrays.asList("John", "Jane", "Bob", "Alice")); // name column
-        columnList.add(Arrays.asList(25, 30, 35, 28)); // age column
-        columnList.add(Arrays.asList("NYC", "LA", "Chicago", "Boston")); // city column
+        columnList.add(Arrays.asList(1, 2, 3, 4));
+        columnList.add(Arrays.asList("John", "Jane", "Bob", "Alice"));
+        columnList.add(Arrays.asList(25, 30, 35, 28));
+        columnList.add(Arrays.asList("NYC", "LA", "Chicago", "Boston"));
 
         dataset = new RowDataset(columnNames, columnList);
     }
@@ -51,7 +53,6 @@ public class RowDataset103Test extends TestBase {
 
     @Test
     public void testToListWithColumnFilterAndConverter() {
-        // Test with column filter - only select name and age columns
         Predicate<String> columnFilter = col -> col.equals("name") || col.equals("age");
         Function<String, String> columnConverter = String::toUpperCase;
         IntFunction<Map<String, Object>> rowSupplier = capacity -> new HashMap<>();
@@ -68,24 +69,22 @@ public class RowDataset103Test extends TestBase {
 
     @Test
     public void testToListWithColumnFilterAndConverterNullValues() {
-        // Test with null filter and converter
         IntFunction<List<Object>> rowSupplier = capacity -> new ArrayList<>();
 
         List<List<Object>> result = dataset.toList(null, null, rowSupplier);
 
         Assertions.assertEquals(4, result.size());
-        Assertions.assertEquals(4, result.get(0).size()); // All columns included
+        Assertions.assertEquals(4, result.get(0).size());
     }
 
     @Test
     public void testToListWithRowIndexRange() {
-        // Test with specific row range
         Predicate<String> columnFilter = col -> col.equals("name") || col.equals("age");
         IntFunction<Map<String, Object>> rowSupplier = capacity -> new HashMap<>();
 
         List<Map<String, Object>> result = dataset.toList(1, 3, columnFilter, null, rowSupplier);
 
-        Assertions.assertEquals(2, result.size()); // Rows 1 and 2 (0-based index)
+        Assertions.assertEquals(2, result.size());
         Map<String, Object> firstRow = result.get(0);
         Assertions.assertEquals("Jane", firstRow.get("name"));
         Assertions.assertEquals(30, firstRow.get("age"));
@@ -93,24 +92,20 @@ public class RowDataset103Test extends TestBase {
 
     @Test
     public void testToMergedEntities() {
-        // Create a dataset with duplicate IDs to test merging
         List<String> mergeColumnNames = Arrays.asList("id", "name", "skill");
         List<List<Object>> mergeColumnList = new ArrayList<>();
-        mergeColumnList.add(Arrays.asList(1, 1, 2, 2)); // id column with duplicates
-        mergeColumnList.add(Arrays.asList("John", "John", "Jane", "Jane")); // name column
-        mergeColumnList.add(Arrays.asList("Java", "Python", "JavaScript", "SQL")); // skill column
+        mergeColumnList.add(Arrays.asList(1, 1, 2, 2));
+        mergeColumnList.add(Arrays.asList("John", "John", "Jane", "Jane"));
+        mergeColumnList.add(Arrays.asList("Java", "Python", "JavaScript", "SQL"));
 
         RowDataset mergeDataset = new RowDataset(mergeColumnNames, mergeColumnList);
 
-        // Define a Person class with skills list for testing
         Collection<String> idPropNames = Arrays.asList("id");
         Collection<String> selectPropNames = Arrays.asList("id", "name", "skill");
         Map<String, String> prefixAndFieldNameMap = new HashMap<>();
 
-        // This will merge entities with the same ID
         List<Person> mergedEntities = mergeDataset.toMergedEntities(idPropNames, selectPropNames, prefixAndFieldNameMap, Person.class);
 
-        // Should result in 2 entities (one for each unique ID)
         Assertions.assertEquals(2, mergedEntities.size());
     }
 
@@ -296,12 +291,11 @@ public class RowDataset103Test extends TestBase {
 
     @Test
     public void testToMultimapWithCollectionRowType() {
-        // Create dataset with duplicate keys for multimap testing
         List<String> dupColumnNames = Arrays.asList("category", "product", "price");
         List<List<Object>> dupColumnList = new ArrayList<>();
-        dupColumnList.add(Arrays.asList("A", "A", "B", "B")); // category with duplicates
-        dupColumnList.add(Arrays.asList("P1", "P2", "P3", "P4")); // product
-        dupColumnList.add(Arrays.asList(10, 20, 30, 40)); // price
+        dupColumnList.add(Arrays.asList("A", "A", "B", "B"));
+        dupColumnList.add(Arrays.asList("P1", "P2", "P3", "P4"));
+        dupColumnList.add(Arrays.asList(10, 20, 30, 40));
 
         RowDataset dupDataset = new RowDataset(dupColumnNames, dupColumnList);
 
@@ -324,7 +318,7 @@ public class RowDataset103Test extends TestBase {
 
         ListMultimap<String, Map<String, Object>> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, Clazz.ofMap(), supplier);
 
-        Assertions.assertEquals(4, result.keySet().size()); // Each city is unique in our test data
+        Assertions.assertEquals(4, result.keySet().size());
         Map<String, Object> nycPerson = result.get("NYC").get(0);
         Assertions.assertEquals(1, nycPerson.get("id"));
         Assertions.assertEquals("John", nycPerson.get("name"));
@@ -381,19 +375,18 @@ public class RowDataset103Test extends TestBase {
 
         ListMultimap<String, Object[]> result = dataset.toMultimap(1, 3, keyColumn, valueColumns, rowSupplier);
 
-        Assertions.assertEquals(2, result.keySet().size()); // Only rows 1 and 2
+        Assertions.assertEquals(2, result.keySet().size());
         Assertions.assertTrue(result.containsKey("LA"));
         Assertions.assertTrue(result.containsKey("Chicago"));
     }
 
     @Test
     public void testGroupBy() {
-        // Create dataset with groupable data
         List<String> groupColumnNames = Arrays.asList("department", "employee", "salary");
         List<List<Object>> groupColumnList = new ArrayList<>();
-        groupColumnList.add(Arrays.asList("IT", "IT", "HR", "HR")); // department
-        groupColumnList.add(Arrays.asList("John", "Jane", "Bob", "Alice")); // employee
-        groupColumnList.add(Arrays.asList(70000, 80000, 60000, 65000)); // salary
+        groupColumnList.add(Arrays.asList("IT", "IT", "HR", "HR"));
+        groupColumnList.add(Arrays.asList("John", "Jane", "Bob", "Alice"));
+        groupColumnList.add(Arrays.asList(70000, 80000, 60000, 65000));
 
         RowDataset groupDataset = new RowDataset(groupColumnNames, groupColumnList);
 
@@ -404,7 +397,7 @@ public class RowDataset103Test extends TestBase {
         Dataset grouped = groupDataset.groupBy(keyColumn, null, aggregateColumns, aggregateResultColumn, List.class);
 
         Assertions.assertEquals(2, grouped.columnCount());
-        Assertions.assertEquals(2, grouped.size()); // Two departments
+        Assertions.assertEquals(2, grouped.size());
         Assertions.assertTrue(grouped.containsColumn("department"));
         Assertions.assertTrue(grouped.containsColumn("employees"));
     }
@@ -419,24 +412,22 @@ public class RowDataset103Test extends TestBase {
         Dataset grouped = dataset.groupBy(keyColumn, keyExtractor, aggregateColumns, aggregateResultColumn, Map.class);
 
         Assertions.assertEquals(2, grouped.columnCount());
-        Assertions.assertEquals(2, grouped.size()); // Young and Adult groups
+        Assertions.assertEquals(2, grouped.size());
     }
 
     @Test
     public void testIntersection() {
-        // Create another dataset with some overlapping data
         List<String> otherColumnNames = Arrays.asList("id", "name", "age", "city");
         List<List<Object>> otherColumnList = new ArrayList<>();
-        otherColumnList.add(Arrays.asList(2, 3, 5, 6)); // id column
-        otherColumnList.add(Arrays.asList("Jane", "Bob", "Eve", "Frank")); // name column
-        otherColumnList.add(Arrays.asList(30, 35, 40, 45)); // age column
-        otherColumnList.add(Arrays.asList("LA", "Chicago", "Miami", "Seattle")); // city column
+        otherColumnList.add(Arrays.asList(2, 3, 5, 6));
+        otherColumnList.add(Arrays.asList("Jane", "Bob", "Eve", "Frank"));
+        otherColumnList.add(Arrays.asList(30, 35, 40, 45));
+        otherColumnList.add(Arrays.asList("LA", "Chicago", "Miami", "Seattle"));
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         Dataset intersection = dataset.intersection(otherDataset);
 
-        // Should contain rows with id 2 and 3
         Assertions.assertEquals(2, intersection.size());
     }
 
@@ -444,10 +435,10 @@ public class RowDataset103Test extends TestBase {
     public void testIntersectionWithRequireSameColumns() {
         List<String> otherColumnNames = Arrays.asList("id", "name", "age", "city");
         List<List<Object>> otherColumnList = new ArrayList<>();
-        otherColumnList.add(Arrays.asList(2, 3)); // id column
-        otherColumnList.add(Arrays.asList("Jane", "Bob")); // name column
-        otherColumnList.add(Arrays.asList(30, 35)); // age column
-        otherColumnList.add(Arrays.asList("LA", "Chicago")); // city column
+        otherColumnList.add(Arrays.asList(2, 3));
+        otherColumnList.add(Arrays.asList("Jane", "Bob"));
+        otherColumnList.add(Arrays.asList(30, 35));
+        otherColumnList.add(Arrays.asList("LA", "Chicago"));
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
@@ -460,18 +451,16 @@ public class RowDataset103Test extends TestBase {
     public void testIntersectionWithKeyColumns() {
         List<String> otherColumnNames = Arrays.asList("id", "name", "age", "city");
         List<List<Object>> otherColumnList = new ArrayList<>();
-        otherColumnList.add(Arrays.asList(1, 2, 5, 6)); // id column
-        otherColumnList.add(Arrays.asList("Different", "Different", "Eve", "Frank")); // different names
-        otherColumnList.add(Arrays.asList(30, 35, 40, 45)); // age column
-        otherColumnList.add(Arrays.asList("LA", "Chicago", "Miami", "Seattle")); // city column
+        otherColumnList.add(Arrays.asList(1, 2, 5, 6));
+        otherColumnList.add(Arrays.asList("Different", "Different", "Eve", "Frank"));
+        otherColumnList.add(Arrays.asList(30, 35, 40, 45));
+        otherColumnList.add(Arrays.asList("LA", "Chicago", "Miami", "Seattle"));
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        // Use only 'id' as key column
         Collection<String> keyColumns = Arrays.asList("id");
         Dataset intersection = dataset.intersection(otherDataset, keyColumns);
 
-        // Should find 2 rows with matching ids (1 and 2)
         Assertions.assertEquals(2, intersection.size());
     }
 
@@ -479,16 +468,15 @@ public class RowDataset103Test extends TestBase {
     public void testDifference() {
         List<String> otherColumnNames = Arrays.asList("id", "name", "age", "city");
         List<List<Object>> otherColumnList = new ArrayList<>();
-        otherColumnList.add(Arrays.asList(2, 3, 5, 6)); // id column
-        otherColumnList.add(Arrays.asList("Jane", "Bob", "Eve", "Frank")); // name column
-        otherColumnList.add(Arrays.asList(30, 35, 40, 45)); // age column
-        otherColumnList.add(Arrays.asList("LA", "Chicago", "Miami", "Seattle")); // city column
+        otherColumnList.add(Arrays.asList(2, 3, 5, 6));
+        otherColumnList.add(Arrays.asList("Jane", "Bob", "Eve", "Frank"));
+        otherColumnList.add(Arrays.asList(30, 35, 40, 45));
+        otherColumnList.add(Arrays.asList("LA", "Chicago", "Miami", "Seattle"));
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         Dataset difference = dataset.difference(otherDataset);
 
-        // Should contain rows with id 1 and 4 (not in other dataset)
         Assertions.assertEquals(2, difference.size());
     }
 
@@ -496,16 +484,15 @@ public class RowDataset103Test extends TestBase {
     public void testDifferenceWithRequireSameColumns() {
         List<String> otherColumnNames = Arrays.asList("id", "name", "age", "city");
         List<List<Object>> otherColumnList = new ArrayList<>();
-        otherColumnList.add(Arrays.asList(3, 4)); // id column
-        otherColumnList.add(Arrays.asList("Bob", "Alice")); // name column
-        otherColumnList.add(Arrays.asList(35, 28)); // age column
-        otherColumnList.add(Arrays.asList("Chicago", "Boston")); // city column
+        otherColumnList.add(Arrays.asList(3, 4));
+        otherColumnList.add(Arrays.asList("Bob", "Alice"));
+        otherColumnList.add(Arrays.asList(35, 28));
+        otherColumnList.add(Arrays.asList("Chicago", "Boston"));
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         Dataset difference = dataset.difference(otherDataset, true);
 
-        // Should contain rows with id 1 and 2
         Assertions.assertEquals(2, difference.size());
     }
 
@@ -513,18 +500,16 @@ public class RowDataset103Test extends TestBase {
     public void testDifferenceWithKeyColumns() {
         List<String> otherColumnNames = Arrays.asList("id", "name", "age", "city");
         List<List<Object>> otherColumnList = new ArrayList<>();
-        otherColumnList.add(Arrays.asList(1, 2)); // id column
-        otherColumnList.add(Arrays.asList("Different", "Different")); // different names
-        otherColumnList.add(Arrays.asList(30, 35)); // age column
-        otherColumnList.add(Arrays.asList("LA", "Chicago")); // city column
+        otherColumnList.add(Arrays.asList(1, 2));
+        otherColumnList.add(Arrays.asList("Different", "Different"));
+        otherColumnList.add(Arrays.asList(30, 35));
+        otherColumnList.add(Arrays.asList("LA", "Chicago"));
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        // Use only 'id' as key column
         Collection<String> keyColumns = Arrays.asList("id");
         Dataset difference = dataset.difference(otherDataset, keyColumns);
 
-        // Should find 2 rows with ids 3 and 4 (not in other dataset)
         Assertions.assertEquals(2, difference.size());
     }
 
@@ -532,16 +517,15 @@ public class RowDataset103Test extends TestBase {
     public void testSymmetricDifference() {
         List<String> otherColumnNames = Arrays.asList("id", "name", "age", "city");
         List<List<Object>> otherColumnList = new ArrayList<>();
-        otherColumnList.add(Arrays.asList(2, 3, 5, 6)); // id column
-        otherColumnList.add(Arrays.asList("Jane", "Bob", "Eve", "Frank")); // name column
-        otherColumnList.add(Arrays.asList(30, 35, 40, 45)); // age column
-        otherColumnList.add(Arrays.asList("LA", "Chicago", "Miami", "Seattle")); // city column
+        otherColumnList.add(Arrays.asList(2, 3, 5, 6));
+        otherColumnList.add(Arrays.asList("Jane", "Bob", "Eve", "Frank"));
+        otherColumnList.add(Arrays.asList(30, 35, 40, 45));
+        otherColumnList.add(Arrays.asList("LA", "Chicago", "Miami", "Seattle"));
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         Dataset symmetricDiff = dataset.symmetricDifference(otherDataset);
 
-        // Should contain rows with id 1, 4 (from first) and 5, 6 (from second)
         Assertions.assertEquals(4, symmetricDiff.size());
     }
 
@@ -549,16 +533,15 @@ public class RowDataset103Test extends TestBase {
     public void testSymmetricDifferenceWithRequireSameColumns() {
         List<String> otherColumnNames = Arrays.asList("id", "name", "age", "city");
         List<List<Object>> otherColumnList = new ArrayList<>();
-        otherColumnList.add(Arrays.asList(3, 4, 5)); // id column
-        otherColumnList.add(Arrays.asList("Bob", "Alice", "Eve")); // name column
-        otherColumnList.add(Arrays.asList(35, 28, 40)); // age column
-        otherColumnList.add(Arrays.asList("Chicago", "Boston", "Miami")); // city column
+        otherColumnList.add(Arrays.asList(3, 4, 5));
+        otherColumnList.add(Arrays.asList("Bob", "Alice", "Eve"));
+        otherColumnList.add(Arrays.asList(35, 28, 40));
+        otherColumnList.add(Arrays.asList("Chicago", "Boston", "Miami"));
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         Dataset symmetricDiff = dataset.symmetricDifference(otherDataset, true);
 
-        // Should contain rows with id 1, 2 (from first) and 5 (from second)
         Assertions.assertEquals(3, symmetricDiff.size());
     }
 
@@ -566,18 +549,16 @@ public class RowDataset103Test extends TestBase {
     public void testSymmetricDifferenceWithKeyColumns() {
         List<String> otherColumnNames = Arrays.asList("id", "name", "age", "city");
         List<List<Object>> otherColumnList = new ArrayList<>();
-        otherColumnList.add(Arrays.asList(1, 5, 6)); // id column
-        otherColumnList.add(Arrays.asList("Different", "Eve", "Frank")); // name column
-        otherColumnList.add(Arrays.asList(30, 40, 45)); // age column
-        otherColumnList.add(Arrays.asList("LA", "Miami", "Seattle")); // city column
+        otherColumnList.add(Arrays.asList(1, 5, 6));
+        otherColumnList.add(Arrays.asList("Different", "Eve", "Frank"));
+        otherColumnList.add(Arrays.asList(30, 40, 45));
+        otherColumnList.add(Arrays.asList("LA", "Miami", "Seattle"));
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        // Use only 'id' as key column
         Collection<String> keyColumns = Arrays.asList("id");
         Dataset symmetricDiff = dataset.symmetricDifference(otherDataset, keyColumns);
 
-        // Should contain rows with id 2, 3, 4 (from first) and 5, 6 (from second)
         Assertions.assertEquals(5, symmetricDiff.size());
     }
 
@@ -585,21 +566,18 @@ public class RowDataset103Test extends TestBase {
     public void testSymmetricDifferenceWithKeyColumnsAndRequireSameColumns() {
         List<String> otherColumnNames = Arrays.asList("id", "name", "age", "city");
         List<List<Object>> otherColumnList = new ArrayList<>();
-        otherColumnList.add(Arrays.asList(2, 5)); // id column
-        otherColumnList.add(Arrays.asList("Jane", "Eve")); // name column
-        otherColumnList.add(Arrays.asList(30, 40)); // age column
-        otherColumnList.add(Arrays.asList("LA", "Miami")); // city column
+        otherColumnList.add(Arrays.asList(2, 5));
+        otherColumnList.add(Arrays.asList("Jane", "Eve"));
+        otherColumnList.add(Arrays.asList(30, 40));
+        otherColumnList.add(Arrays.asList("LA", "Miami"));
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         Collection<String> keyColumns = Arrays.asList("id");
         Dataset symmetricDiff = dataset.symmetricDifference(otherDataset, keyColumns, true);
 
-        // Should contain rows with id 1, 3, 4 (from first) and 5 (from second)
         Assertions.assertEquals(4, symmetricDiff.size());
     }
-
-    // Edge case tests
 
     @Test
     public void testToListWithEmptyDataset() {

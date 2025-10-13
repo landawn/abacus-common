@@ -8,11 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 
+@Tag("new-test")
 public class JSONReader100Test extends TestBase {
 
     private JSONReader reader;
@@ -44,7 +46,7 @@ public class JSONReader100Test extends TestBase {
         assertEquals("age", reader.getText());
 
         assertEquals(JSONReader.COLON, reader.nextToken());
-        assertEquals(JSONReader.END_BRACE, reader.nextToken()); // number token
+        assertEquals(JSONReader.END_BRACE, reader.nextToken());
         assertEquals("30", reader.getText());
 
         assertEquals(JSONReader.EOF, reader.nextToken());
@@ -74,19 +76,19 @@ public class JSONReader100Test extends TestBase {
         String json = "{\"key\":\"value\"}";
         reader = JSONStringReader.parse(json, cbuf);
 
-        reader.nextToken(); // {
+        reader.nextToken();
         assertFalse(reader.hasText());
 
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
         assertTrue(reader.hasText());
         assertEquals("key", reader.getText());
 
-        reader.nextToken(); // :
+        reader.nextToken();
         assertFalse(reader.hasText());
 
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
         assertTrue(reader.hasText());
         assertEquals("value", reader.getText());
     }
@@ -96,14 +98,14 @@ public class JSONReader100Test extends TestBase {
         String json = "{\"message\":\"Hello World\"}";
         reader = JSONStringReader.parse(json, cbuf);
 
-        reader.nextToken(); // {
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("message", reader.getText());
 
-        reader.nextToken(); // :
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("Hello World", reader.getText());
     }
 
@@ -112,8 +114,8 @@ public class JSONReader100Test extends TestBase {
         String json = "\"test string\"";
         reader = JSONStringReader.parse(json, cbuf);
 
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
 
         Type<String> stringType = N.typeOf(String.class);
         String value = reader.readValue(stringType);
@@ -161,14 +163,14 @@ public class JSONReader100Test extends TestBase {
         String json = "{\"key\":\"value\\nwith\\nnewlines\"}";
         reader = JSONStringReader.parse(json, cbuf);
 
-        reader.nextToken(); // {
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("key", reader.getText());
 
-        reader.nextToken(); // :
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("value\nwith\nnewlines", reader.getText());
     }
 
@@ -198,19 +200,19 @@ public class JSONReader100Test extends TestBase {
         reader = JSONStringReader.parse(json, cbuf);
 
         assertEquals(JSONReader.START_BRACE, reader.nextToken());
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("outer", reader.getText());
 
         assertEquals(JSONReader.COLON, reader.nextToken());
         assertEquals(JSONReader.START_BRACE, reader.nextToken());
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("inner", reader.getText());
 
         assertEquals(JSONReader.COLON, reader.nextToken());
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("value", reader.getText());
 
         assertEquals(JSONReader.END_BRACE, reader.nextToken());
@@ -224,18 +226,18 @@ public class JSONReader100Test extends TestBase {
 
         assertEquals(JSONReader.START_BRACKET, reader.nextToken());
         assertEquals(JSONReader.START_BRACE, reader.nextToken());
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("id", reader.getText());
         assertEquals(JSONReader.COLON, reader.nextToken());
-        assertEquals(JSONReader.END_BRACE, reader.nextToken()); // 1
+        assertEquals(JSONReader.END_BRACE, reader.nextToken());
         assertEquals("1", reader.getText());
 
         assertEquals(JSONReader.COMMA, reader.nextToken());
 
         assertEquals(JSONReader.START_BRACE, reader.nextToken());
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("id", reader.getText());
         assertEquals(JSONReader.COLON, reader.nextToken());
         assertEquals(JSONReader.END_BRACE, reader.nextToken());

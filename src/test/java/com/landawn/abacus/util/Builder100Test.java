@@ -25,6 +25,7 @@ import java.util.function.ToIntFunction;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Builder.BooleanListBuilder;
@@ -43,9 +44,9 @@ import com.landawn.abacus.util.Builder.MultisetBuilder;
 import com.landawn.abacus.util.Builder.ShortListBuilder;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("new-test")
 public class Builder100Test extends TestBase {
 
-    // Test data
     private List<String> testList;
     private Map<String, Integer> testMap;
     private Set<String> testSet;
@@ -58,8 +59,6 @@ public class Builder100Test extends TestBase {
         testMap.put("two", 2);
         testSet = new HashSet<>(Arrays.asList("x", "y", "z"));
     }
-
-    // ===== Builder<T> Tests =====
 
     @Test
     public void testBuilderOf() {
@@ -130,8 +129,6 @@ public class Builder100Test extends TestBase {
         assertEquals(1, stream.count());
     }
 
-    // ===== BooleanListBuilder Tests =====
-
     @Test
     public void testBooleanListBuilder() {
         BooleanList boolList = new BooleanList();
@@ -180,8 +177,6 @@ public class Builder100Test extends TestBase {
         assertTrue(list.get(1));
     }
 
-    // ===== CharListBuilder Tests =====
-
     @Test
     public void testCharListBuilder() {
         CharList charList = new CharList();
@@ -197,8 +192,6 @@ public class Builder100Test extends TestBase {
         assertEquals('b', charList.get(2));
     }
 
-    // ===== ByteListBuilder Tests =====
-
     @Test
     public void testByteListBuilder() {
         ByteList byteList = new ByteList();
@@ -211,8 +204,6 @@ public class Builder100Test extends TestBase {
         assertEquals(1, byteList.size());
         assertEquals((byte) 20, byteList.get(0));
     }
-
-    // ===== ShortListBuilder Tests =====
 
     @Test
     public void testShortListBuilder() {
@@ -229,8 +220,6 @@ public class Builder100Test extends TestBase {
         assertEquals((short) 200, shortList.get(2));
     }
 
-    // ===== IntListBuilder Tests =====
-
     @Test
     public void testIntListBuilder() {
         IntList intList = new IntList();
@@ -244,8 +233,6 @@ public class Builder100Test extends TestBase {
         assertEquals(25, intList.get(0));
         assertEquals(30, intList.get(1));
     }
-
-    // ===== LongListBuilder Tests =====
 
     @Test
     public void testLongListBuilder() {
@@ -262,8 +249,6 @@ public class Builder100Test extends TestBase {
         assertEquals(400L, longList.get(2));
     }
 
-    // ===== FloatListBuilder Tests =====
-
     @Test
     public void testFloatListBuilder() {
         FloatList floatList = new FloatList();
@@ -279,8 +264,6 @@ public class Builder100Test extends TestBase {
         assertEquals(3.5f, floatList.get(2), 0.001f);
     }
 
-    // ===== DoubleListBuilder Tests =====
-
     @Test
     public void testDoubleListBuilder() {
         DoubleList doubleList = new DoubleList();
@@ -294,8 +277,6 @@ public class Builder100Test extends TestBase {
         assertEquals(2.5, doubleList.get(0), 0.001);
         assertEquals(3.5, doubleList.get(1), 0.001);
     }
-
-    // ===== ListBuilder Tests =====
 
     @Test
     public void testListBuilder() {
@@ -314,8 +295,6 @@ public class Builder100Test extends TestBase {
 
         assertEquals(Arrays.asList("a", "x", "y", "b", "c"), testList);
     }
-
-    // ===== CollectionBuilder Tests =====
 
     @Test
     public void testCollectionBuilder() {
@@ -338,8 +317,6 @@ public class Builder100Test extends TestBase {
         assertFalse(testSet.contains("y"));
     }
 
-    // ===== MultisetBuilder Tests =====
-
     @Test
     public void testMultisetBuilder() {
         Multiset<String> multiset = new Multiset<>();
@@ -353,8 +330,6 @@ public class Builder100Test extends TestBase {
         assertEquals(0, multiset.count("b"));
         assertEquals(2, multiset.count("c"));
     }
-
-    // ===== MapBuilder Tests =====
 
     @Test
     public void testMapBuilder() {
@@ -373,16 +348,12 @@ public class Builder100Test extends TestBase {
     public void testMapBuilderPutIfAbsent() {
         MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(testMap);
 
-        builder.putIfAbsent("one", 10) // Should not replace
-                .putIfAbsent("three", 3) // Should add
-                .putIfAbsent("four", () -> 4); // Should add via supplier
+        builder.putIfAbsent("one", 10).putIfAbsent("three", 3).putIfAbsent("four", () -> 4);
 
         assertEquals(Integer.valueOf(1), testMap.get("one"));
         assertEquals(Integer.valueOf(3), testMap.get("three"));
         assertEquals(Integer.valueOf(4), testMap.get("four"));
     }
-
-    // ===== MultimapBuilder Tests =====
 
     @Test
     public void testMultimapBuilder() {
@@ -397,8 +368,6 @@ public class Builder100Test extends TestBase {
         assertEquals(Arrays.asList("value3"), multimap.get("key2"));
         assertEquals(Arrays.asList("v1", "v2"), multimap.get("key3"));
     }
-
-    // ===== ComparisonBuilder Tests =====
 
     @Test
     public void testComparisonBuilder() {
@@ -417,10 +386,7 @@ public class Builder100Test extends TestBase {
 
         assertEquals(-1, result);
 
-        // First comparison is not equal, so it determines the result
-        result = Builder.compare("b", "a")
-                .compare(5, 10) // This won't be evaluated
-                .result();
+        result = Builder.compare("b", "a").compare(5, 10).result();
 
         assertEquals(1, result);
     }
@@ -449,8 +415,6 @@ public class Builder100Test extends TestBase {
         assertEquals(0, Builder.compareNullBigger(null, null).result());
     }
 
-    // ===== EquivalenceBuilder Tests =====
-
     @Test
     public void testEquivalenceBuilder() {
         assertTrue(Builder.equals("a", "a").result());
@@ -466,10 +430,7 @@ public class Builder100Test extends TestBase {
 
         assertTrue(result);
 
-        result = Builder.equals("a", "a")
-                .equals(5, 10) // This makes it false
-                .equals(true, true) // This won't change the result
-                .result();
+        result = Builder.equals("a", "a").equals(5, 10).equals(true, true).result();
 
         assertFalse(result);
     }
@@ -494,8 +455,6 @@ public class Builder100Test extends TestBase {
         assertFalse(Builder.equals("Hello", "World", caseInsensitive).result());
     }
 
-    // ===== HashCodeBuilder Tests =====
-
     @Test
     public void testHashCodeBuilder() {
         int hash1 = Builder.hash("test").result();
@@ -515,10 +474,7 @@ public class Builder100Test extends TestBase {
 
         assertEquals(hash1, hash2);
 
-        int hash3 = Builder.hash("a")
-                .hash(5)
-                .hash(false) // Different value
-                .result();
+        int hash3 = Builder.hash("a").hash(5).hash(false).result();
 
         assertNotEquals(hash1, hash3);
     }
@@ -538,52 +494,41 @@ public class Builder100Test extends TestBase {
         int hash1 = Builder.hash("test", lengthHash).result();
         int hash2 = Builder.hash("same", lengthHash).result();
 
-        assertEquals(hash1, hash2); // Both strings have length 4
+        assertEquals(hash1, hash2);
     }
-
-    // ===== Factory method tests for specific collection types =====
 
     @Test
     public void testBuilderOfSpecificTypes() {
-        // Test with ArrayList
         ArrayList<String> arrayList = new ArrayList<>(Arrays.asList("a", "b"));
         Builder<List<String>> arrayListBuilder = Builder.of(arrayList);
         assertTrue(arrayListBuilder instanceof ListBuilder);
 
-        // Test with LinkedList
         LinkedList<String> linkedList = new LinkedList<>(Arrays.asList("x", "y"));
         Builder<List<String>> linkedListBuilder = Builder.of(linkedList);
         assertTrue(linkedListBuilder instanceof ListBuilder);
 
-        // Test with HashSet
         HashSet<String> hashSet = new HashSet<>(Arrays.asList("p", "q"));
         Builder<Collection<String>> hashSetBuilder = Builder.of(hashSet);
         assertTrue(hashSetBuilder instanceof CollectionBuilder);
 
-        // Test with TreeMap
         TreeMap<String, Integer> treeMap = new TreeMap<>();
         treeMap.put("one", 1);
         Builder<Map<String, Integer>> treeMapBuilder = Builder.of(treeMap);
         assertTrue(treeMapBuilder instanceof MapBuilder);
     }
 
-    // ===== Edge cases and error conditions =====
-
     @Test
     public void testEmptyCollections() {
-        // Empty list
         List<String> emptyList = new ArrayList<>();
         ListBuilder<String, List<String>> listBuilder = Builder.of(emptyList);
         listBuilder.add("first");
         assertEquals(1, emptyList.size());
 
-        // Empty map
         Map<String, Integer> emptyMap = new HashMap<>();
         MapBuilder<String, Integer, Map<String, Integer>> mapBuilder = Builder.of(emptyMap);
         mapBuilder.put("key", 1);
         assertEquals(1, emptyMap.size());
 
-        // Empty multiset
         Multiset<String> emptyMultiset = new Multiset<>();
         MultisetBuilder<String> multisetBuilder = Builder.of(emptyMultiset);
         multisetBuilder.add("item", 3);
@@ -592,7 +537,6 @@ public class Builder100Test extends TestBase {
 
     @Test
     public void testBuilderReuse() {
-        // Test that builder can be used multiple times
         List<String> list = new ArrayList<>(Arrays.asList("a", "b"));
         ListBuilder<String, List<String>> builder = Builder.of(list);
 

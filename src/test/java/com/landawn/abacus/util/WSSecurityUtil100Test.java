@@ -4,9 +4,11 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class WSSecurityUtil100Test extends TestBase {
 
     @Test
@@ -17,7 +19,6 @@ public class WSSecurityUtil100Test extends TestBase {
         Assertions.assertNotNull(nonce);
         Assertions.assertEquals(length, nonce.length);
 
-        // Test that different calls produce different nonces
         byte[] nonce2 = WSSecurityUtil.generateNonce(length);
         Assertions.assertFalse(java.util.Arrays.equals(nonce, nonce2));
     }
@@ -30,9 +31,8 @@ public class WSSecurityUtil100Test extends TestBase {
         byte[] digest = WSSecurityUtil.generateDigest(inputBytes);
 
         Assertions.assertNotNull(digest);
-        Assertions.assertEquals(20, digest.length); // SHA-1 produces 20 bytes
+        Assertions.assertEquals(20, digest.length);
 
-        // Test consistency
         byte[] digest2 = WSSecurityUtil.generateDigest(inputBytes);
         Assertions.assertArrayEquals(digest, digest2);
     }
@@ -48,7 +48,6 @@ public class WSSecurityUtil100Test extends TestBase {
         Assertions.assertNotNull(digest);
         Assertions.assertFalse(digest.isEmpty());
 
-        // Test consistency
         String digest2 = WSSecurityUtil.doPasswordDigest(nonce, created, password);
         Assertions.assertEquals(digest, digest2);
     }
@@ -64,7 +63,6 @@ public class WSSecurityUtil100Test extends TestBase {
         Assertions.assertNotNull(digest);
         Assertions.assertFalse(digest.isEmpty());
 
-        // Test consistency
         String digest2 = WSSecurityUtil.doPasswordDigest(nonce, created, password);
         Assertions.assertEquals(digest, digest2);
     }

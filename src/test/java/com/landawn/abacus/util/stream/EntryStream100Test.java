@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.BiIterator;
@@ -33,7 +34,7 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.Supplier;
 
-
+@Tag("new-test")
 public class EntryStream100Test extends TestBase {
 
     private Map<String, Integer> testMap;
@@ -62,19 +63,15 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testOf() {
-        // Test of with map
         EntryStream<String, Integer> stream = EntryStream.of(testMap);
         assertEquals(5, stream.count());
 
-        // Test of with key-value pairs
         EntryStream<String, Integer> stream2 = EntryStream.of("a", 1, "b", 2, "c", 3);
         assertEquals(3, stream2.count());
 
-        // Test empty
         EntryStream<String, Integer> emptyStream = EntryStream.empty();
         assertEquals(0, emptyStream.count());
 
-        // Test ofNullable
         Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 100);
         assertEquals(1, EntryStream.ofNullable(entry).count());
         assertEquals(0, EntryStream.ofNullable(null).count());
@@ -103,35 +100,31 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testFilter() {
-        // Test filter by predicate
         List<Entry<String, Integer>> filtered = EntryStream.of(testMap).filter(e -> e.getValue() > 2).toList();
         assertEquals(3, filtered.size());
 
-        // Test filter by BiPredicate
         List<Entry<String, Integer>> biFiltered = EntryStream.of(testMap).filter((k, v) -> k.length() > 3 && v > 2).toList();
-        assertEquals(3, biFiltered.size()); // "three" and "four"
+        assertEquals(3, biFiltered.size());
     }
 
     @Test
     public void testFilterByKey() {
         List<Entry<String, Integer>> filtered = EntryStream.of(testMap).filterByKey(k -> k.startsWith("t")).toList();
-        assertEquals(2, filtered.size()); // "two" and "three"
+        assertEquals(2, filtered.size());
     }
 
     @Test
     public void testFilterByValue() {
         List<Entry<String, Integer>> filtered = EntryStream.of(testMap).filterByValue(v -> v % 2 == 0).toList();
-        assertEquals(2, filtered.size()); // 2 and 4
+        assertEquals(2, filtered.size());
     }
 
     @Test
     public void testMap() {
-        // Test map to different entry type
         Map<String, String> mapped = EntryStream.of(testMap).map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue().toString())).toMap();
         assertEquals("1", mapped.get("one"));
         assertEquals("2", mapped.get("two"));
 
-        // Test map with key and value mappers
         Map<String, Double> mapped2 = EntryStream.of(testMap).map(e -> e.getKey().toUpperCase(), e -> e.getValue() * 2.0).toMap();
         assertEquals(2.0, mapped2.get("ONE"));
         assertEquals(4.0, mapped2.get("TWO"));
@@ -153,7 +146,6 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testFlatMap() {
-        // Test flatMap
         List<Entry<String, Integer>> flattened = EntryStream.of(multiValueMap).flatmap((k, v) -> {
             Map<String, Integer> map = new HashMap<>();
             for (Integer i : v) {
@@ -162,14 +154,14 @@ public class EntryStream100Test extends TestBase {
             return map;
         }).toList();
 
-        assertEquals(9, flattened.size()); // Total values in all lists
+        assertEquals(9, flattened.size());
     }
 
     @Test
     public void testFlatMapKey() {
-        Map<String, Integer> result = EntryStream.of(testMap).flatMapKey(k -> Stream.of(k, k.toUpperCase())).toMap((v1, v2) -> v1); // merge function for duplicate keys
+        Map<String, Integer> result = EntryStream.of(testMap).flatMapKey(k -> Stream.of(k, k.toUpperCase())).toMap((v1, v2) -> v1);
 
-        assertEquals(10, result.size()); // Each original key generates 2 keys
+        assertEquals(10, result.size());
         assertEquals(1, result.get("one"));
         assertEquals(1, result.get("ONE"));
     }
@@ -178,22 +170,20 @@ public class EntryStream100Test extends TestBase {
     public void testFlatMapValue() {
         List<Entry<String, Integer>> result = EntryStream.of("a", 2, "b", 3).flatMapValue(v -> Stream.range(1, v + 1)).toList();
 
-        assertEquals(5, result.size()); // 2 values for "a", 3 values for "b"
+        assertEquals(5, result.size());
     }
 
     @Test
     public void testGroupBy() {
-        // Test simple groupBy
         Map<String, List<Integer>> grouped = EntryStream.of("a", 1, "b", 2, "a", 3, "b", 4, "a", 5).groupBy().toMap();
 
         assertEquals(Arrays.asList(1, 3, 5), grouped.get("a"));
         assertEquals(Arrays.asList(2, 4), grouped.get("b"));
 
-        // Test groupBy with merge function
         Map<String, Integer> summed = EntryStream.of("a", 1, "b", 2, "a", 3, "b", 4, "a", 5).groupBy(Integer::sum).toMap();
 
-        assertEquals(9, summed.get("a")); // 1 + 3 + 5
-        assertEquals(6, summed.get("b")); // 2 + 4
+        assertEquals(9, summed.get("a"));
+        assertEquals(6, summed.get("b"));
     }
 
     @Test
@@ -218,7 +208,6 @@ public class EntryStream100Test extends TestBase {
 
         assertEquals(3, distinct.size());
 
-        // Verify first occurrence is kept
         java.util.Optional<Entry<String, Integer>> aEntry = distinct.stream().filter(e -> "a".equals(e.getKey())).findFirst();
         assertTrue(aEntry.isPresent());
         assertEquals(1, aEntry.get().getValue());
@@ -272,15 +261,13 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testToMap() {
-        // Test basic toMap
         Map<String, Integer> map = EntryStream.of("a", 1, "b", 2, "c", 3).toMap();
         assertEquals(3, map.size());
         assertEquals(1, map.get("a"));
 
-        // Test toMap with merge function
         Map<String, Integer> merged = EntryStream.of("a", 1, "b", 2, "a", 3).toMap(Integer::sum);
 
-        assertEquals(4, merged.get("a")); // 1 + 3
+        assertEquals(4, merged.get("a"));
         assertEquals(2, merged.get("b"));
     }
 
@@ -294,20 +281,17 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testJoin() {
-        // Test join with delimiter
         String joined = EntryStream.of("a", 1, "b", 2, "c", 3).join(", ");
         assertTrue(joined.contains("a=1"));
         assertTrue(joined.contains("b=2"));
         assertTrue(joined.contains("c=3"));
 
-        // Test join with custom key-value delimiter
         String customJoined = EntryStream.of("x", 10, "y", 20).join("; ", "->", "[", "]");
         assertEquals("[x->10; y->20]", customJoined);
     }
 
     @Test
     public void testMinMax() {
-        // Test min/max by key
         Optional<Entry<String, Integer>> minByKey = EntryStream.of(testMap).minByKey(Comparator.naturalOrder());
         assertTrue(minByKey.isPresent());
         assertEquals("five", minByKey.get().getKey());
@@ -316,7 +300,6 @@ public class EntryStream100Test extends TestBase {
         assertTrue(maxByKey.isPresent());
         assertEquals("two", maxByKey.get().getKey());
 
-        // Test min/max by value
         Optional<Entry<String, Integer>> minByValue = EntryStream.of(testMap).minByValue(Comparator.naturalOrder());
         assertTrue(minByValue.isPresent());
         assertEquals(1, minByValue.get().getValue());
@@ -328,17 +311,14 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testAnyAllNoneMatch() {
-        // Test anyMatch
         assertTrue(EntryStream.of(testMap).anyMatch(e -> e.getValue() > 4));
         assertTrue(EntryStream.of(testMap).anyMatch((k, v) -> k.equals("three") && v == 3));
         assertFalse(EntryStream.of(testMap).anyMatch(e -> e.getValue() > 10));
 
-        // Test allMatch
         assertTrue(EntryStream.of(testMap).allMatch(e -> e.getValue() > 0));
         assertTrue(EntryStream.of(testMap).allMatch((k, v) -> k.length() >= 3));
         assertFalse(EntryStream.of(testMap).allMatch(e -> e.getValue() > 3));
 
-        // Test noneMatch
         assertTrue(EntryStream.of(testMap).noneMatch(e -> e.getValue() > 10));
         assertTrue(EntryStream.of(testMap).noneMatch((k, v) -> k.isEmpty()));
         assertFalse(EntryStream.of(testMap).noneMatch(e -> e.getValue() == 3));
@@ -346,17 +326,14 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testFindFirstAnyLast() {
-        // Test findFirst
         Optional<Entry<String, Integer>> first = EntryStream.of(testMap).findFirst(e -> e.getValue() > 3);
         assertTrue(first.isPresent());
         assertEquals("four", first.get().getKey());
 
-        // Test findAny
         Optional<Entry<String, Integer>> any = EntryStream.of(testMap).findAny((k, v) -> v % 2 == 0);
         assertTrue(any.isPresent());
         assertTrue(any.get().getValue() % 2 == 0);
 
-        // Test findLast
         Optional<Entry<String, Integer>> last = EntryStream.of(testMap).findLast(e -> e.getValue() < 4);
         assertTrue(last.isPresent());
         assertEquals("three", last.get().getKey());
@@ -364,12 +341,10 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testAppendPrepend() {
-        // Test append
         List<Entry<String, Integer>> appended = EntryStream.of("a", 1).append(EntryStream.of("b", 2, "c", 3)).toList();
         assertEquals(3, appended.size());
         assertEquals("c", appended.get(2).getKey());
 
-        // Test prepend
         List<Entry<String, Integer>> prepended = EntryStream.of("c", 3).prepend(EntryStream.of("a", 1, "b", 2)).toList();
         assertEquals(3, prepended.size());
         assertEquals("a", prepended.get(0).getKey());
@@ -400,23 +375,20 @@ public class EntryStream100Test extends TestBase {
         assertEquals(2, zipped.get("b"));
         assertEquals(3, zipped.get("c"));
 
-        // Test zip with different lengths
         String[] moreKeys = { "x", "y", "z", "w" };
         Integer[] fewerValues = { 10, 20 };
 
         Map<String, Integer> partial = EntryStream.zip(moreKeys, fewerValues).toMap();
-        assertEquals(2, partial.size()); // Only 2 pairs created
+        assertEquals(2, partial.size());
     }
 
     @Test
     public void testCollect() {
-        // Test collect with collector
         Map<Boolean, List<Entry<String, Integer>>> partitioned = EntryStream.of(testMap).collect(Collectors.partitioningBy(e -> e.getValue() % 2 == 0));
 
-        assertEquals(2, partitioned.get(true).size()); // even values
-        assertEquals(3, partitioned.get(false).size()); // odd values
+        assertEquals(2, partitioned.get(true).size());
+        assertEquals(3, partitioned.get(false).size());
 
-        // Test custom collect
         StringBuilder sb = EntryStream.of("a", 1, "b", 2)
                 .collect(StringBuilder::new, (acc, e) -> acc.append(e.getKey()).append(":").append(e.getValue()).append(" "), StringBuilder::append);
 
@@ -439,7 +411,6 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testSelectByKeyValue() {
-        // Test selectByKey
         EntryStream<Integer, String> selected = EntryStream.<Object, String> of(1, "one", "two", "2", 3, "three").selectByKey(Integer.class);
 
         Map<Integer, String> result = selected.toMap();
@@ -447,7 +418,6 @@ public class EntryStream100Test extends TestBase {
         assertEquals("one", result.get(1));
         assertEquals("three", result.get(3));
 
-        // Test selectByValue
         EntryStream<String, Integer> selectedByValue = EntryStream.<String, Object> of("a", 1, "b", "two", "c", 3).selectByValue(Integer.class);
 
         assertEquals(2, selectedByValue.count());
@@ -455,14 +425,12 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testTakeWhileDropWhile() {
-        // Test takeWhile
         List<Entry<String, Integer>> taken = EntryStream.of("a", 1, "b", 2, "c", 3, "d", 1, "e", 2).takeWhile(e -> e.getValue() <= 2).toList();
 
         assertEquals(2, taken.size());
         assertEquals("a", taken.get(0).getKey());
         assertEquals("b", taken.get(1).getKey());
 
-        // Test dropWhile
         List<Entry<String, Integer>> dropped = EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4).dropWhile((k, v) -> v < 3).toList();
 
         assertEquals(2, dropped.size());
@@ -471,7 +439,6 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testMapPartial() {
-        // Test mapPartial
         List<Entry<String, Integer>> mapped = EntryStream.of(testMap)
                 .mapPartial(e -> e.getValue() > 2 ? Optional.of(new AbstractMap.SimpleEntry<>(e.getKey().toUpperCase(), e.getValue() * 10)) : Optional.empty())
                 .toList();
@@ -482,7 +449,6 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testMapKeyValuePartial() {
-        // Test mapKeyPartial
         Map<String, Integer> mappedKeys = EntryStream.of(testMap).mapKeyPartial(k -> k.length() > 3 ? Optional.of(k.toUpperCase()) : Optional.empty()).toMap();
 
         assertEquals(3, mappedKeys.size());
@@ -490,7 +456,6 @@ public class EntryStream100Test extends TestBase {
         assertTrue(mappedKeys.containsKey("FOUR"));
         assertTrue(mappedKeys.containsKey("FIVE"));
 
-        // Test mapValuePartial
         Map<String, Integer> mappedValues = EntryStream.of(testMap).mapValuePartial(v -> v % 2 == 0 ? Optional.of(v * 100) : Optional.empty()).toMap();
 
         assertEquals(2, mappedValues.size());
@@ -526,31 +491,26 @@ public class EntryStream100Test extends TestBase {
         List<Entry<String, Integer>> list2 = Arrays.asList(new AbstractMap.SimpleEntry<>("b", 2), new AbstractMap.SimpleEntry<>("c", 3),
                 new AbstractMap.SimpleEntry<>("d", 4));
 
-        // Test intersection
         List<Entry<String, Integer>> intersection = EntryStream.of(list1).intersection(list2).toList();
         assertEquals(2, intersection.size());
 
-        // Test difference
         List<Entry<String, Integer>> difference = EntryStream.of(list1).difference(list2).toList();
         assertEquals(1, difference.size());
         assertEquals("a", difference.get(0).getKey());
 
-        // Test symmetric difference
         List<Entry<String, Integer>> symDiff = EntryStream.of(list1).symmetricDifference(list2).toList();
         assertEquals(2, symDiff.size());
     }
 
     @Test
     public void testReduce() {
-        // Test reduce with identity
         Entry<String, Integer> identity = new AbstractMap.SimpleEntry<>("", 0);
         Entry<String, Integer> result = EntryStream.of(testMap)
                 .reduce(identity, (acc, e) -> new AbstractMap.SimpleEntry<>(acc.getKey() + e.getKey(), acc.getValue() + e.getValue()));
 
         assertEquals("onetwothreefourfive", result.getKey());
-        assertEquals(15, result.getValue()); // 1+2+3+4+5
+        assertEquals(15, result.getValue());
 
-        // Test reduce without identity
         Optional<Entry<String, Integer>> reduced = EntryStream.of("a", 1, "b", 2, "c", 3)
                 .reduce((e1, e2) -> new AbstractMap.SimpleEntry<>(e1.getKey() + e2.getKey(), e1.getValue() + e2.getValue()));
 
@@ -580,17 +540,14 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testOnlyOne() {
-        // Test with single element
         Optional<Entry<String, Integer>> single = EntryStream.of("a", 1).onlyOne();
         assertTrue(single.isPresent());
         assertEquals("a", single.get().getKey());
 
-        // Test with multiple elements - should throw
         assertThrows(Exception.class, () -> {
             EntryStream.of(testMap).onlyOne();
         });
 
-        // Test with empty stream
         Optional<Entry<String, Integer>> empty = EntryStream.<String, Integer> empty().onlyOne();
         assertFalse(empty.isPresent());
     }
@@ -613,7 +570,7 @@ public class EntryStream100Test extends TestBase {
     @Test
     public void testToSet() {
         Set<Entry<String, Integer>> set = EntryStream.of("a", 1, "b", 2, "a", 1).toSet();
-        assertEquals(2, set.size()); // Duplicate entry removed
+        assertEquals(2, set.size());
     }
 
     @Test
@@ -639,11 +596,9 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testShuffled() {
-        // Just verify it doesn't throw and returns same size
         List<Entry<String, Integer>> shuffled = EntryStream.of(testMap).shuffled().toList();
 
         assertEquals(5, shuffled.size());
-        // Verify all elements are present (order may be different)
         Set<String> keys = shuffled.stream().map(Entry::getKey).collect(Collectors.toSet());
         assertTrue(keys.containsAll(testMap.keySet()));
     }
@@ -694,7 +649,6 @@ public class EntryStream100Test extends TestBase {
         assertEquals(3, immutableMap.size());
         assertEquals(1, immutableMap.get("a"));
 
-        // Verify it's immutable
         assertThrows(UnsupportedOperationException.class, () -> {
             immutableMap.put("d", 4);
         });
@@ -702,7 +656,6 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testParallel() {
-        // Basic parallel test - just verify it works
         long count = EntryStream.of(testMap).parallel().filter(e -> e.getValue() > 2).count();
 
         assertEquals(3, count);
@@ -710,7 +663,6 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testTransformB() {
-        // Test transform operation
         List<String> transformed = EntryStream.of(testMap)
                 .entries()
                 .transformB(stream -> stream.filter(e -> e.getValue() > 2).map(e -> e.getKey().toUpperCase()))
@@ -724,10 +676,8 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        // Test nMatch - at least 2, at most 4 entries with value > 2
         assertTrue(EntryStream.of(testMap).nMatch(2, 4, e -> e.getValue() > 2));
 
-        // Test with BiPredicate
         assertTrue(EntryStream.of(testMap).nMatch(1, 3, (k, v) -> k.length() == 3 && v > 0));
     }
 
@@ -739,7 +689,7 @@ public class EntryStream100Test extends TestBase {
             }
         }).toList();
 
-        assertEquals(5, result.size()); // 2 entries for "a", 3 for "b"
+        assertEquals(5, result.size());
     }
 
     @Test
@@ -772,11 +722,11 @@ public class EntryStream100Test extends TestBase {
         };
 
         EntryStream<String, Integer> deferred = EntryStream.defer(supplier);
-        assertEquals(0, creationCount.get()); // Not created yet
+        assertEquals(0, creationCount.get());
 
         long count = deferred.count();
         assertEquals(2, count);
-        assertEquals(1, creationCount.get()); // Created when consumed
+        assertEquals(1, creationCount.get());
     }
 
     @Test
@@ -868,12 +818,10 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testAppendIfEmpty() {
-        // Test with non-empty stream
         List<Entry<String, Integer>> nonEmpty = EntryStream.of("a", 1).appendIfEmpty(Fn.s(() -> EntryStream.of("b", 2))).toList();
         assertEquals(1, nonEmpty.size());
         assertEquals("a", nonEmpty.get(0).getKey());
 
-        // Test with empty stream
         List<Entry<String, Integer>> empty = EntryStream.<String, Integer> empty().appendIfEmpty(Fn.s(() -> EntryStream.of("b", 2))).toList();
         assertEquals(1, empty.size());
         assertEquals("b", empty.get(0).getKey());
@@ -883,22 +831,18 @@ public class EntryStream100Test extends TestBase {
     public void testIfEmpty() {
         AtomicInteger counter = new AtomicInteger(0);
 
-        // Non-empty stream - action should not run
         EntryStream.of("a", 1).ifEmpty(() -> counter.incrementAndGet()).count();
         assertEquals(0, counter.get());
 
-        // Empty stream - action should run
         EntryStream.<String, Integer> empty().ifEmpty(() -> counter.incrementAndGet()).count();
         assertEquals(1, counter.get());
     }
 
     @Test
     public void testToMapThenApplyAccept() {
-        // Test toMapThenApply
         int sum = EntryStream.of("a", 1, "b", 2, "c", 3).toMapThenApply(map -> map.values().stream().mapToInt(Integer::intValue).sum());
         assertEquals(6, sum);
 
-        // Test toMapThenAccept
         AtomicInteger result = new AtomicInteger(0);
         EntryStream.of("a", 1, "b", 2, "c", 3).toMapThenAccept(map -> result.set(map.size()));
         assertEquals(3, result.get());
@@ -906,27 +850,23 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testGroupToThenApplyAccept() {
-        // Test groupToThenApply
         int totalGroups = EntryStream.of("a", 1, "b", 2, "a", 3).groupToThenApply(Map::size);
         assertEquals(2, totalGroups);
 
-        // Test groupToThenAccept
         AtomicInteger maxGroupSize = new AtomicInteger(0);
         EntryStream.of("a", 1, "b", 2, "a", 3, "a", 4).groupToThenAccept(map -> {
             map.values().forEach(list -> maxGroupSize.set(Math.max(maxGroupSize.get(), list.size())));
         });
-        assertEquals(3, maxGroupSize.get()); // "a" has 3 values
+        assertEquals(3, maxGroupSize.get());
     }
 
     @Test
     public void testCollectThenApplyAccept() {
-        // Test collectThenApply
         String result = EntryStream.of("a", 1, "b", 2)
                 .collectThenApply(Collectors.toMap(Entry::getKey, Entry::getValue), map -> map.keySet().stream().collect(Collectors.joining(",")));
         assertTrue(result.contains("a"));
         assertTrue(result.contains("b"));
 
-        // Test collectThenAccept
         AtomicReference<Map<String, Integer>> mapRef = new AtomicReference<>();
         EntryStream.of("a", 1, "b", 2).collectThenAccept(Collectors.toMap(Entry::getKey, Entry::getValue), mapRef::set);
         assertEquals(2, mapRef.get().size());
@@ -934,12 +874,10 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testApplyIfNotEmpty() {
-        // Test with non-empty stream
         Optional<Integer> sum = EntryStream.of("a", 1, "b", 2, "c", 3).applyIfNotEmpty(stream -> stream.values().mapToInt(Integer::intValue).sum());
         assertTrue(sum.isPresent());
         assertEquals(6, sum.get());
 
-        // Test with empty stream
         Optional<Integer> emptyResult = EntryStream.<String, Integer> empty().applyIfNotEmpty(stream -> stream.values().mapToInt(Integer::intValue).sum());
         assertFalse(emptyResult.isPresent());
     }
@@ -948,11 +886,9 @@ public class EntryStream100Test extends TestBase {
     public void testAcceptIfNotEmpty() {
         AtomicInteger counter = new AtomicInteger(0);
 
-        // Test with non-empty stream
         EntryStream.of("a", 1, "b", 2).acceptIfNotEmpty(stream -> counter.addAndGet((int) stream.count()));
         assertEquals(2, counter.get());
 
-        // Test with empty stream - orElse should execute
         counter.set(0);
         EntryStream.<String, Integer> empty().acceptIfNotEmpty(stream -> counter.incrementAndGet()).orElse(() -> counter.set(100));
         assertEquals(100, counter.get());

@@ -17,6 +17,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -35,7 +36,7 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalFloat;
 
-
+@Tag("new-test")
 public class AbstractFloatStream100Test extends TestBase {
 
     private FloatStream stream;
@@ -43,7 +44,6 @@ public class AbstractFloatStream100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Initialize with default values for most tests
         stream = createFloatStream(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f });
         stream2 = createFloatStream(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f });
     }
@@ -76,7 +76,7 @@ public class AbstractFloatStream100Test extends TestBase {
         long endTime = System.currentTimeMillis();
 
         assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f }, result);
-        assertTrue(endTime - startTime >= 40); // At least 4 delays (between elements)
+        assertTrue(endTime - startTime >= 40);
     }
 
     @Test
@@ -270,7 +270,6 @@ public class AbstractFloatStream100Test extends TestBase {
         FloatStream result = stream.shuffled(rnd);
         float[] arr = result.toArray();
         assertEquals(5, arr.length);
-        // Check all elements are present
         Arrays.sort(arr);
         assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f }, arr);
     }

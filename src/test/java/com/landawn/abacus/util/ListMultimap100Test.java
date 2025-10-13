@@ -15,29 +15,27 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class ListMultimap100Test extends TestBase {
 
     @Test
     public void testConstructors() {
-        // Test default constructor
         ListMultimap<String, Integer> multimap1 = new ListMultimap<>();
         Assertions.assertNotNull(multimap1);
         Assertions.assertTrue(multimap1.isEmpty());
-        
-        // Test constructor with initial capacity
+
         ListMultimap<String, Integer> multimap2 = new ListMultimap<>(10);
         Assertions.assertNotNull(multimap2);
         Assertions.assertTrue(multimap2.isEmpty());
-        
-        // Test constructor with map and list types
+
         ListMultimap<String, Integer> multimap3 = new ListMultimap<>(LinkedHashMap.class, LinkedList.class);
         Assertions.assertNotNull(multimap3);
         Assertions.assertTrue(multimap3.isEmpty());
-        
-        // Test constructor with suppliers
+
         ListMultimap<String, Integer> multimap4 = new ListMultimap<>(TreeMap::new, ArrayList::new);
         Assertions.assertNotNull(multimap4);
         Assertions.assertTrue(multimap4.isEmpty());
@@ -45,53 +43,48 @@ public class ListMultimap100Test extends TestBase {
 
     @Test
     public void testOf() {
-        // Test single element
         ListMultimap<String, Integer> map1 = ListMultimap.of("a", 1);
         Assertions.assertEquals(1, map1.size());
         Assertions.assertTrue(map1.get("a").contains(1));
-        
-        // Test multiple elements
+
         ListMultimap<String, Integer> map2 = ListMultimap.of("a", 1, "b", 2);
         Assertions.assertEquals(2, map2.size());
         Assertions.assertTrue(map2.get("a").contains(1));
         Assertions.assertTrue(map2.get("b").contains(2));
-        
+
         ListMultimap<String, Integer> map3 = ListMultimap.of("a", 1, "b", 2, "c", 3);
         Assertions.assertEquals(3, map3.size());
-        
+
         ListMultimap<String, Integer> map4 = ListMultimap.of("a", 1, "b", 2, "c", 3, "d", 4);
         Assertions.assertEquals(4, map4.size());
-        
+
         ListMultimap<String, Integer> map5 = ListMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
         Assertions.assertEquals(5, map5.size());
-        
+
         ListMultimap<String, Integer> map6 = ListMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6);
         Assertions.assertEquals(6, map6.size());
-        
+
         ListMultimap<String, Integer> map7 = ListMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7);
         Assertions.assertEquals(7, map7.size());
     }
 
     @Test
     public void testCreate() {
-        // Test create from Map
         Map<String, Integer> sourceMap = new HashMap<>();
         sourceMap.put("a", 1);
         sourceMap.put("b", 2);
-        
+
         ListMultimap<String, Integer> multimap = ListMultimap.create(sourceMap);
         Assertions.assertEquals(2, multimap.size());
         Assertions.assertEquals(Arrays.asList(1), multimap.get("a"));
         Assertions.assertEquals(Arrays.asList(2), multimap.get("b"));
-        
-        // Test create from Collection with key extractor
+
         List<String> strings = Arrays.asList("a", "bb", "ccc", "dd");
         ListMultimap<Integer, String> lengthMap = ListMultimap.create(strings, String::length);
         Assertions.assertEquals(Arrays.asList("a"), lengthMap.get(1));
         Assertions.assertEquals(Arrays.asList("bb", "dd"), lengthMap.get(2));
         Assertions.assertEquals(Arrays.asList("ccc"), lengthMap.get(3));
-        
-        // Test create from Collection with key and value extractors
+
         ListMultimap<Integer, String> upperMap = ListMultimap.create(strings, String::length, String::toUpperCase);
         Assertions.assertEquals(Arrays.asList("A"), upperMap.get(1));
         Assertions.assertEquals(Arrays.asList("BB", "DD"), upperMap.get(2));
@@ -100,42 +93,38 @@ public class ListMultimap100Test extends TestBase {
 
     @Test
     public void testConcat() {
-        // Test concat two maps
         Map<String, Integer> map1 = new HashMap<>();
         map1.put("a", 1);
         map1.put("b", 2);
-        
+
         Map<String, Integer> map2 = new HashMap<>();
         map2.put("b", 3);
         map2.put("c", 4);
-        
+
         ListMultimap<String, Integer> result = ListMultimap.concat(map1, map2);
         Assertions.assertEquals(Arrays.asList(1), result.get("a"));
         Assertions.assertEquals(Arrays.asList(2, 3), result.get("b"));
         Assertions.assertEquals(Arrays.asList(4), result.get("c"));
-        
-        // Test concat with nulls
+
         ListMultimap<String, Integer> nullResult1 = ListMultimap.concat(null, map1);
         Assertions.assertEquals(1, nullResult1.get("a").size());
-        
+
         ListMultimap<String, Integer> nullResult2 = ListMultimap.concat(map1, null);
         Assertions.assertEquals(1, nullResult2.get("a").size());
-        
+
         ListMultimap<String, Integer> nullResult3 = ListMultimap.concat(null, null);
         Assertions.assertTrue(nullResult3.isEmpty());
-        
-        // Test concat three maps
+
         Map<String, Integer> map3 = new HashMap<>();
         map3.put("c", 5);
         map3.put("d", 6);
-        
+
         ListMultimap<String, Integer> result3 = ListMultimap.concat(map1, map2, map3);
         Assertions.assertEquals(Arrays.asList(1), result3.get("a"));
         Assertions.assertEquals(Arrays.asList(2, 3), result3.get("b"));
         Assertions.assertEquals(Arrays.asList(4, 5), result3.get("c"));
         Assertions.assertEquals(Arrays.asList(6), result3.get("d"));
-        
-        // Test concat collection
+
         List<Map<String, Integer>> maps = Arrays.asList(map1, map2, map3);
         ListMultimap<String, Integer> resultCollection = ListMultimap.concat(maps);
         Assertions.assertEquals(Arrays.asList(1), resultCollection.get("a"));
@@ -146,21 +135,18 @@ public class ListMultimap100Test extends TestBase {
 
     @Test
     public void testWrap() {
-        // Test wrap existing map
         Map<String, List<Integer>> existingMap = new HashMap<>();
         existingMap.put("a", new ArrayList<>(Arrays.asList(1, 2, 3)));
         existingMap.put("b", new ArrayList<>(Arrays.asList(4, 5)));
-        
+
         ListMultimap<String, Integer> wrapped = ListMultimap.wrap(existingMap);
         Assertions.assertEquals(2, wrapped.size());
         Assertions.assertEquals(Arrays.asList(1, 2, 3), wrapped.get("a"));
         Assertions.assertEquals(Arrays.asList(4, 5), wrapped.get("b"));
-        
-        // Verify changes are reflected
+
         wrapped.put("a", 6);
         Assertions.assertEquals(Arrays.asList(1, 2, 3, 6), existingMap.get("a"));
-        
-        // Test wrap with supplier
+
         ListMultimap<String, Integer> wrappedWithSupplier = ListMultimap.wrap(existingMap, LinkedList::new);
         Assertions.assertEquals(2, wrappedWithSupplier.size());
     }
@@ -171,7 +157,7 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("a", 1);
         multimap.put("a", 2);
         multimap.put("a", 3);
-        
+
         Assertions.assertEquals(Integer.valueOf(1), multimap.getFirst("a"));
         Assertions.assertNull(multimap.getFirst("b"));
     }
@@ -181,7 +167,7 @@ public class ListMultimap100Test extends TestBase {
         ListMultimap<String, Integer> multimap = new ListMultimap<>();
         multimap.put("a", 1);
         multimap.put("a", 2);
-        
+
         Assertions.assertEquals(Integer.valueOf(1), multimap.getFirstOrDefault("a", 99));
         Assertions.assertEquals(Integer.valueOf(99), multimap.getFirstOrDefault("b", 99));
     }
@@ -193,7 +179,7 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("a", 2);
         multimap.put("b", 2);
         multimap.put("b", 3);
-        
+
         ListMultimap<Integer, String> inverse = multimap.inverse();
         Assertions.assertEquals(Arrays.asList("a"), inverse.get(1));
         Assertions.assertEquals(Arrays.asList("a", "b"), inverse.get(2));
@@ -206,13 +192,12 @@ public class ListMultimap100Test extends TestBase {
         original.put("a", 1);
         original.put("a", 2);
         original.put("b", 3);
-        
+
         ListMultimap<String, Integer> copy = original.copy();
         Assertions.assertEquals(original.size(), copy.size());
         Assertions.assertEquals(original.get("a"), copy.get("a"));
         Assertions.assertEquals(original.get("b"), copy.get("b"));
-        
-        // Verify it's a deep copy
+
         copy.put("a", 4);
         Assertions.assertEquals(2, original.get("a").size());
         Assertions.assertEquals(3, copy.get("a").size());
@@ -225,10 +210,10 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("banana", 2);
         multimap.put("apricot", 3);
         multimap.put("berry", 4);
-        
+
         Predicate<String> startsWithA = k -> k.startsWith("a");
         ListMultimap<String, Integer> filtered = multimap.filterByKey(startsWithA);
-        
+
         Assertions.assertEquals(2, filtered.size());
         Assertions.assertTrue(filtered.containsKey("apple"));
         Assertions.assertTrue(filtered.containsKey("apricot"));
@@ -244,10 +229,10 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("b", 3);
         multimap.put("c", 4);
         multimap.put("c", 5);
-        
+
         Predicate<List<Integer>> hasMultipleValues = list -> list.size() > 1;
         ListMultimap<String, Integer> filtered = multimap.filterByValue(hasMultipleValues);
-        
+
         Assertions.assertEquals(2, filtered.size());
         Assertions.assertTrue(filtered.containsKey("a"));
         Assertions.assertTrue(filtered.containsKey("c"));
@@ -261,10 +246,10 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("a", 2);
         multimap.put("b", 10);
         multimap.put("c", 20);
-        
+
         BiPredicate<String, List<Integer>> filter = (k, v) -> k.equals("a") || v.stream().anyMatch(i -> i >= 10);
         ListMultimap<String, Integer> filtered = multimap.filter(filter);
-        
+
         Assertions.assertEquals(3, filtered.size());
         Assertions.assertTrue(filtered.containsKey("a"));
         Assertions.assertTrue(filtered.containsKey("b"));
@@ -277,7 +262,7 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("a", 1);
         multimap.put("a", 2);
         multimap.put("b", 3);
-        
+
         ImmutableMap<String, ImmutableList<Integer>> immutableMap = multimap.toImmutableMap();
         Assertions.assertEquals(2, immutableMap.size());
         Assertions.assertEquals(ImmutableList.of(1, 2), immutableMap.get("a"));
@@ -290,7 +275,7 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("a", 1);
         multimap.put("a", 2);
         multimap.put("b", 3);
-        
+
         ImmutableMap<String, ImmutableList<Integer>> immutableMap = multimap.toImmutableMap(LinkedHashMap::new);
         Assertions.assertEquals(2, immutableMap.size());
         Assertions.assertEquals(ImmutableList.of(1, 2), immutableMap.get("a"));
@@ -300,17 +285,14 @@ public class ListMultimap100Test extends TestBase {
     @Test
     public void testPutAndGet() {
         ListMultimap<String, Integer> multimap = new ListMultimap<>();
-        
-        // Test single put
+
         multimap.put("a", 1);
         Assertions.assertEquals(Arrays.asList(1), multimap.get("a"));
-        
-        // Test multiple puts for same key
+
         multimap.put("a", 2);
         multimap.put("a", 3);
         Assertions.assertEquals(Arrays.asList(1, 2, 3), multimap.get("a"));
-        
-        // Test get for non-existent key returns empty list
+
         List<Integer> empty = multimap.get("non-existent");
         Assertions.assertNull(empty);
     }
@@ -318,17 +300,15 @@ public class ListMultimap100Test extends TestBase {
     @Test
     public void testPutAll() {
         ListMultimap<String, Integer> multimap = new ListMultimap<>();
-        
-        // Test putAll with collection
+
         multimap.putMany("a", Arrays.asList(1, 2, 3));
         Assertions.assertEquals(Arrays.asList(1, 2, 3), multimap.get("a"));
-        
-        // Test putAll with another multimap
+
         ListMultimap<String, Integer> other = new ListMultimap<>();
         other.put("b", 4);
         other.put("b", 5);
         other.put("c", 6);
-        
+
         multimap.putMany(other);
         Assertions.assertEquals(Arrays.asList(4, 5), multimap.get("b"));
         Assertions.assertEquals(Arrays.asList(6), multimap.get("c"));
@@ -339,20 +319,17 @@ public class ListMultimap100Test extends TestBase {
         ListMultimap<String, Integer> multimap = new ListMultimap<>();
         multimap.put("a", 1);
         multimap.put("a", 2);
-        multimap.put("a", 1); // Duplicate
+        multimap.put("a", 1);
         multimap.put("b", 3);
-        
-        // Test remove specific value
+
         boolean removed = multimap.removeOne("a", 1);
         Assertions.assertTrue(removed);
-        Assertions.assertEquals(Arrays.asList(2, 1), multimap.get("a")); // Only first occurrence removed
-        
-        // Test remove all for key
+        Assertions.assertEquals(Arrays.asList(2, 1), multimap.get("a"));
+
         List<Integer> removedList = multimap.removeAll("a");
         Assertions.assertEquals(Arrays.asList(2, 1), removedList);
         Assertions.assertNull(multimap.get("a"));
-        
-        // Test remove non-existent
+
         Assertions.assertFalse(multimap.removeOne("non-existent", 99));
     }
 
@@ -362,19 +339,16 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("a", 1);
         multimap.put("a", 2);
         multimap.put("b", 3);
-        
-        // Test containsKey
+
         Assertions.assertTrue(multimap.containsKey("a"));
         Assertions.assertTrue(multimap.containsKey("b"));
         Assertions.assertFalse(multimap.containsKey("c"));
-        
-        // Test containsValue
+
         Assertions.assertTrue(multimap.containsValue(1));
         Assertions.assertTrue(multimap.containsValue(2));
         Assertions.assertTrue(multimap.containsValue(3));
         Assertions.assertFalse(multimap.containsValue(4));
-        
-        // Test contains key-value pair
+
         Assertions.assertTrue(multimap.contains("a", 1));
         Assertions.assertTrue(multimap.contains("a", 2));
         Assertions.assertFalse(multimap.contains("a", 3));
@@ -386,18 +360,17 @@ public class ListMultimap100Test extends TestBase {
         ListMultimap<String, Integer> multimap = new ListMultimap<>();
         Assertions.assertEquals(0, multimap.size());
         Assertions.assertTrue(multimap.isEmpty());
-        
+
         multimap.put("a", 1);
         Assertions.assertEquals(1, multimap.size());
         Assertions.assertFalse(multimap.isEmpty());
-        
+
         multimap.put("a", 2);
-        Assertions.assertEquals(1, multimap.size()); // Still one key
-        
+        Assertions.assertEquals(1, multimap.size());
+
         multimap.put("b", 3);
-        Assertions.assertEquals(2, multimap.size()); // Two keys
-        
-        // Test totalCountOfValues
+        Assertions.assertEquals(2, multimap.size());
+
         Assertions.assertEquals(3, multimap.totalCountOfValues());
     }
 
@@ -406,7 +379,7 @@ public class ListMultimap100Test extends TestBase {
         ListMultimap<String, Integer> multimap = new ListMultimap<>();
         multimap.put("a", 1);
         multimap.put("b", 2);
-        
+
         multimap.clear();
         Assertions.assertTrue(multimap.isEmpty());
         Assertions.assertEquals(0, multimap.size());
@@ -419,7 +392,7 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("a", 1);
         multimap.put("b", 2);
         multimap.put("a", 3);
-        
+
         Set<String> keys = multimap.keySet();
         Assertions.assertEquals(2, keys.size());
         Assertions.assertTrue(keys.contains("a"));
@@ -432,16 +405,17 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("a", 1);
         multimap.put("a", 2);
         multimap.put("b", 3);
-        
+
         Collection<List<Integer>> values = multimap.values();
         Assertions.assertEquals(2, values.size());
-        
-        // Verify values
+
         boolean hasA = false;
         boolean hasB = false;
         for (List<Integer> list : values) {
-            if (list.equals(Arrays.asList(1, 2))) hasA = true;
-            if (list.equals(Arrays.asList(3))) hasB = true;
+            if (list.equals(Arrays.asList(1, 2)))
+                hasA = true;
+            if (list.equals(Arrays.asList(3)))
+                hasB = true;
         }
         Assertions.assertTrue(hasA);
         Assertions.assertTrue(hasB);
@@ -453,10 +427,10 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("a", 1);
         multimap.put("a", 2);
         multimap.put("b", 3);
-        
+
         Set<Map.Entry<String, List<Integer>>> entries = multimap.entrySet();
         Assertions.assertEquals(2, entries.size());
-        
+
         for (Map.Entry<String, List<Integer>> entry : entries) {
             if (entry.getKey().equals("a")) {
                 Assertions.assertEquals(Arrays.asList(1, 2), entry.getValue());
@@ -469,12 +443,11 @@ public class ListMultimap100Test extends TestBase {
     @Test
     public void testDuplicateValues() {
         ListMultimap<String, Integer> multimap = new ListMultimap<>();
-        
-        // Lists allow duplicates
+
         multimap.put("a", 1);
         multimap.put("a", 1);
         multimap.put("a", 1);
-        
+
         List<Integer> values = multimap.get("a");
         Assertions.assertEquals(3, values.size());
         Assertions.assertEquals(Arrays.asList(1, 1, 1), values);
@@ -483,12 +456,11 @@ public class ListMultimap100Test extends TestBase {
     @Test
     public void testOrderPreservation() {
         ListMultimap<String, Integer> multimap = new ListMultimap<>();
-        
-        // Test insertion order is preserved
+
         for (int i = 0; i < 10; i++) {
             multimap.put("a", i);
         }
-        
+
         List<Integer> values = multimap.get("a");
         for (int i = 0; i < 10; i++) {
             Assertions.assertEquals(i, values.get(i));
@@ -497,21 +469,18 @@ public class ListMultimap100Test extends TestBase {
 
     @Test
     public void testWithDifferentBackingTypes() {
-        // Test with TreeMap backing
         ListMultimap<String, Integer> treeMultimap = new ListMultimap<>(TreeMap.class, ArrayList.class);
         treeMultimap.put("c", 1);
         treeMultimap.put("a", 2);
         treeMultimap.put("b", 3);
-        
-        // Keys should be sorted
+
         List<String> keys = new ArrayList<>(treeMultimap.keySet());
         Assertions.assertEquals(Arrays.asList("a", "b", "c"), keys);
-        
-        // Test with LinkedList values
+
         ListMultimap<String, Integer> linkedMultimap = new ListMultimap<>(HashMap.class, LinkedList.class);
         linkedMultimap.put("a", 1);
         linkedMultimap.put("a", 2);
-        
+
         List<Integer> values = linkedMultimap.get("a");
         Assertions.assertTrue(values instanceof LinkedList);
         Assertions.assertEquals(Arrays.asList(1, 2), values);
@@ -523,16 +492,16 @@ public class ListMultimap100Test extends TestBase {
         map1.put("a", 1);
         map1.put("a", 2);
         map1.put("b", 3);
-        
+
         ListMultimap<String, Integer> map2 = new ListMultimap<>();
         map2.put("a", 1);
         map2.put("a", 2);
         map2.put("b", 3);
-        
+
         ListMultimap<String, Integer> map3 = new ListMultimap<>();
         map3.put("a", 1);
         map3.put("b", 3);
-        
+
         Assertions.assertEquals(map1, map2);
         Assertions.assertNotEquals(map1, map3);
         Assertions.assertEquals(map1.hashCode(), map2.hashCode());
@@ -544,7 +513,7 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("a", 1);
         multimap.put("a", 2);
         multimap.put("b", 3);
-        
+
         String str = multimap.toString();
         Assertions.assertNotNull(str);
         Assertions.assertTrue(str.contains("a"));

@@ -118,11 +118,11 @@ public final class Maps {
         final Iterator<? extends K> keyIter = keys.iterator();
         final Iterator<? extends V> valueIter = values.iterator();
 
-        final int minLen = N.min(keys instanceof Collection ? ((Collection<K>) keys).size() : 0,
-                values instanceof Collection ? ((Collection<V>) values).size() : 0);
-        final Map<K, V> result = N.newHashMap(minLen);
+        final int minLen = N.min(keys instanceof Collection ? ((Collection<K>) keys).size() : Integer.MAX_VALUE,
+                values instanceof Collection ? ((Collection<V>) values).size() : Integer.MAX_VALUE);
+        final Map<K, V> result = N.newHashMap(minLen == Integer.MAX_VALUE ? 0 : minLen);
 
-        for (int i = 0; i < minLen; i++) {
+        while (keyIter.hasNext() && valueIter.hasNext()) {
             result.put(keyIter.next(), valueIter.next());
         }
 
@@ -361,11 +361,12 @@ public final class Maps {
         final Iterator<? extends K> keyIter = keys.iterator();
         final Iterator<? extends V> valueIter = values.iterator();
 
-        final int minLen = N.min(keys instanceof Collection ? ((Collection<K>) keys).size() : 0,
-                values instanceof Collection ? ((Collection<V>) values).size() : 0);
+        final int keysSize = keys instanceof Collection ? ((Collection<K>) keys).size() : 0;
+        final int valuesSize = values instanceof Collection ? ((Collection<V>) values).size() : 0;
+        final int minLen = N.min(keysSize, valuesSize);
         final M result = mapSupplier.apply(minLen);
 
-        for (int i = 0; i < minLen; i++) {
+        while (keyIter.hasNext() && valueIter.hasNext()) {
             result.put(keyIter.next(), valueIter.next());
         }
 
@@ -404,11 +405,12 @@ public final class Maps {
         final Iterator<? extends K> keyIter = keys.iterator();
         final Iterator<? extends V> valueIter = values.iterator();
 
-        final int minLen = N.min(keys instanceof Collection ? ((Collection<K>) keys).size() : 0,
-                values instanceof Collection ? ((Collection<V>) values).size() : 0);
+        final int keysSize = keys instanceof Collection ? ((Collection<K>) keys).size() : 0;
+        final int valuesSize = values instanceof Collection ? ((Collection<V>) values).size() : 0;
+        final int minLen = N.min(keysSize, valuesSize);
         final M result = mapSupplier.apply(minLen);
 
-        for (int i = 0; i < minLen; i++) {
+        while (keyIter.hasNext() && valueIter.hasNext()) {
             result.merge(keyIter.next(), valueIter.next(), mergeFunction);
         }
 
@@ -2492,6 +2494,9 @@ public final class Maps {
      * @return {@code true} if the map contains the specified entry, {@code false} otherwise
      */
     public static boolean contains(final Map<?, ?> map, final Map.Entry<?, ?> entry) {
+        if (entry == null) {
+            return false;
+        }
         return contains(map, entry.getKey(), entry.getValue());
     }
 
@@ -2589,7 +2594,7 @@ public final class Maps {
         for (final Map.Entry<K, V> entry : map.entrySet()) {
             val = map2.get(entry.getKey());
 
-            if ((val != null && N.equals(val, entry.getValue())) || (val == null && entry.getValue() == null && map.containsKey(entry.getKey()))) {
+            if ((val != null && N.equals(val, entry.getValue())) || (val == null && entry.getValue() == null && map2.containsKey(entry.getKey()))) {
                 result.put(entry.getKey(), entry.getValue());
             }
         }
@@ -3952,460 +3957,6 @@ public final class Maps {
     //        }
     //
     //        return (T) recordInfo.creator().apply(args);
-    //    }
-
-    //    public static class MapGetter<K, V> {
-    //
-    //        private final Map<K, V> map;
-    //        private final boolean defaultForPrimitiveOrBoxedType;
-    //
-    //        MapGetter(final Map<K, V> map, final boolean defaultForPrimitiveOrBoxedType) {
-    //            this.map = map;
-    //            this.defaultForPrimitiveOrBoxedType = defaultForPrimitiveOrBoxedType;
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param <K>
-    //         * @param <V>
-    //         * @param map
-    //         * @return
-    //         */
-    //        public static <K, V> MapGetter<K, V> of(final Map<K, V> map) {
-    //            return of(map, false);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param <K>
-    //         * @param <V>
-    //         * @param map
-    //         * @param defaultForPrimitiveOrBoxedType
-    //         * @return
-    //         */
-    //        public static <K, V> MapGetter<K, V> of(final Map<K, V> map, final boolean defaultForPrimitiveOrBoxedType) {
-    //            return new MapGetter<>(map, defaultForPrimitiveOrBoxedType);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public Boolean getBoolean(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null && defaultForPrimitiveOrBoxedType) {
-    //                return Boolean.FALSE;
-    //            } else if (value instanceof Boolean) {
-    //                return (Boolean) value;
-    //            }
-    //
-    //            return Strings.parseBoolean(N.toString(value));
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public Character getChar(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null && defaultForPrimitiveOrBoxedType) {
-    //                return 0;
-    //            } else if (value instanceof Character) {
-    //                return (Character) value;
-    //            }
-    //
-    //            return Strings.parseChar(N.toString(value));
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public Byte getByte(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null && defaultForPrimitiveOrBoxedType) {
-    //                return 0;
-    //            } else if (value instanceof Byte) {
-    //                return (Byte) value;
-    //            }
-    //
-    //            return Numbers.toByte(value);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public Short getShort(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null && defaultForPrimitiveOrBoxedType) {
-    //                return 0;
-    //            } else if (value instanceof Short) {
-    //                return (Short) value;
-    //            }
-    //
-    //            return Numbers.toShort(value);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public Integer getInt(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null && defaultForPrimitiveOrBoxedType) {
-    //                return 0;
-    //            } else if (value instanceof Integer) {
-    //                return (Integer) value;
-    //            }
-    //
-    //            return Numbers.toInt(value);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public Long getLong(final K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null && defaultForPrimitiveOrBoxedType) {
-    //                return 0L;
-    //            } else if (value instanceof Long) {
-    //                return (Long) value;
-    //            }
-    //
-    //            return Numbers.toLong(value);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public Float getFloat(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null && defaultForPrimitiveOrBoxedType) {
-    //                return 0F;
-    //            } else if (value instanceof Float) {
-    //                return (Float) value;
-    //            }
-    //
-    //            return Numbers.toFloat(value);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public Double getDouble(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null && defaultForPrimitiveOrBoxedType) {
-    //                return 0d;
-    //            } else if (value instanceof Double) {
-    //                return (Double) value;
-    //            }
-    //
-    //            return Numbers.toDouble(value);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public BigInteger getBigInteger(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null || value instanceof BigInteger) {
-    //                return (BigInteger) value;
-    //            }
-    //
-    //            return N.convert(value, BigInteger.class);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public BigDecimal getBigDecimal(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null || value instanceof BigDecimal) {
-    //                return (BigDecimal) value;
-    //            }
-    //
-    //            return N.convert(value, BigDecimal.class);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public String getString(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null || value instanceof String) {
-    //                return (String) value;
-    //            }
-    //
-    //            return N.stringOf(value);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public Calendar getCalendar(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null || value instanceof Calendar) {
-    //                return (Calendar) value;
-    //            }
-    //
-    //            return N.convert(value, Calendar.class);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public Date getJUDate(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null || value instanceof Date) {
-    //                return (Date) value;
-    //            }
-    //
-    //            return N.convert(value, Date.class);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public java.sql.Date getDate(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null || value instanceof java.sql.Date) {
-    //                return (java.sql.Date) value;
-    //            }
-    //
-    //            return N.convert(value, java.sql.Date.class);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public java.sql.Time getTime(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null || value instanceof java.sql.Time) {
-    //                return (java.sql.Time) value;
-    //            }
-    //
-    //            return N.convert(value, java.sql.Time.class);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public java.sql.Timestamp getTimestamp(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null || value instanceof java.sql.Timestamp) {
-    //                return (java.sql.Timestamp) value;
-    //            }
-    //
-    //            return N.convert(value, java.sql.Timestamp.class);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public LocalDate getLocalDate(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null || value instanceof LocalDate) {
-    //                return (LocalDate) value;
-    //            }
-    //
-    //            return N.convert(value, LocalDate.class);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public LocalTime getLocalTime(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null || value instanceof LocalTime) {
-    //                return (LocalTime) value;
-    //            }
-    //
-    //            return N.convert(value, LocalTime.class);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public LocalDateTime getLocalDateTime(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null || value instanceof LocalDateTime) {
-    //                return (LocalDateTime) value;
-    //            }
-    //
-    //            return N.convert(value, LocalDateTime.class);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public ZonedDateTime getZonedDateTime(K key) {
-    //            Object value = map.get(key);
-    //
-    //            if (value == null || value instanceof ZonedDateTime) {
-    //                return (ZonedDateTime) value;
-    //            }
-    //
-    //            return N.convert(value, ZonedDateTime.class);
-    //        }
-    //
-    //        /**
-    //         *
-    //         *
-    //         * @param key
-    //         * @return
-    //         */
-    //        public V getObject(K key) {
-    //            return map.get(key);
-    //        }
-    //
-    //        /**
-    //         * Returns {@code null} if no value found by the specified {@code key}, or the value is {@code null}.
-    //         *
-    //         *
-    //         * @param <T>
-    //         * @param key
-    //         * @param targetType
-    //         * @return
-    //         */
-    //        public <T> T get(final Object key, final Class<? extends T> targetType) {
-    //            final V val = map.get(key);
-    //
-    //            if (val == null) {
-    //                return (T) (defaultForPrimitiveOrBoxedType && ClassUtil.isPrimitiveWrapper(targetType) ? N.defaultValueOf(ClassUtil.unwrap(targetType))
-    //                        : N.defaultValueOf(targetType));
-    //            }
-    //
-    //            if (targetType.isAssignableFrom(val.getClass())) {
-    //                return (T) val;
-    //            }
-    //
-    //            return N.convert(val, targetType);
-    //        }
-    //
-    //        /**
-    //         * Returns {@code null} if no value found by the specified {@code key}, or the value is {@code null}.
-    //         *
-    //         *
-    //         * @param <T>
-    //         * @param key
-    //         * @param targetType
-    //         * @return
-    //         */
-    //        public <T> T get(final Object key, final Type<? extends T> targetType) {
-    //            final V val = map.get(key);
-    //
-    //            if (val == null) {
-    //                return (T) (defaultForPrimitiveOrBoxedType && targetType.isPrimitiveWrapper() ? N.defaultValueOf(ClassUtil.unwrap(targetType.clazz()))
-    //                        : targetType.defaultValue());
-    //            }
-    //
-    //            if (targetType.clazz().isAssignableFrom(val.getClass())) {
-    //                return (T) val;
-    //            }
-    //
-    //            return N.convert(val, targetType);
-    //        }
-    //
-    //        /**
-    //         *
-    //         * @param <T>
-    //         * @param key
-    //         * @param defaultForNull
-    //         * @return
-    //         * @throws IllegalArgumentException
-    //         */
-    //        public <T> T get(final Object key, final T defaultForNull) throws IllegalArgumentException {
-    //            N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
-    //
-    //            final V val = map.get(key);
-    //
-    //            if (val == null) {
-    //                return defaultForNull;
-    //            }
-    //
-    //            if (defaultForNull.getClass().isAssignableFrom(val.getClass())) {
-    //                return (T) val;
-    //            }
-    //
-    //            return (T) N.convert(val, defaultForNull.getClass());
-    //        }
     //    }
 
     /**

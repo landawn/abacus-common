@@ -17,11 +17,13 @@ import java.sql.Types;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class AbstractIntegerType100Test extends TestBase {
 
     private Type<Number> integerType;
@@ -148,15 +150,12 @@ public class AbstractIntegerType100Test extends TestBase {
 
     @Test
     public void testWriteCharacter() throws IOException {
-        // Test null value
         integerType.writeCharacter(writer, null, null);
         verify(writer).write(any(char[].class));
 
-        // Test with value
         integerType.writeCharacter(writer, 123, null);
         verify(writer).writeInt(123);
 
-        // Test with writeNullNumberAsZero config
         when(config.writeNullNumberAsZero()).thenReturn(true);
         integerType.writeCharacter(writer, null, config);
         verify(writer).writeInt(0);

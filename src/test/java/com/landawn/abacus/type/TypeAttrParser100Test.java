@@ -2,10 +2,12 @@ package com.landawn.abacus.type;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.TypeAttrParser;
 
+@Tag("new-test")
 public class TypeAttrParser100Test extends TestBase {
 
     @Test
@@ -128,7 +130,6 @@ public class TypeAttrParser100Test extends TestBase {
 
     @Test
     public void testComplexRealWorldExample() {
-        // Test a complex real-world scenario
         TypeAttrParser parser = TypeAttrParser.parse("ConcurrentHashMap<String, List<Map<Integer, String>>>(32, 0.85f, 16)");
 
         Assertions.assertEquals("ConcurrentHashMap", parser.getClassName());
@@ -169,15 +170,11 @@ public class TypeAttrParser100Test extends TestBase {
         String[] params1 = parser.getParameters();
         String[] params2 = parser.getParameters();
 
-        // Should return the same content
         Assertions.assertArrayEquals(typeParams1, typeParams2);
         Assertions.assertArrayEquals(params1, params2);
 
-        // unfortunately, Java arrays are mutable, so we can't guarantee immutability
-        // Modifying returned array shouldn't affect internal state
         if (typeParams1.length > 0) {
             typeParams1[0] = "Modified";
-            // Assertions.assertNotEquals("Modified", parser.getTypeParameters()[0]);
             Assertions.assertEquals("Modified", parser.getTypeParameters()[0]);
         }
     }

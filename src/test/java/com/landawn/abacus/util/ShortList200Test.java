@@ -14,42 +14,38 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalShort;
 
+@Tag("new-test")
 public class ShortList200Test extends TestBase {
 
     @Test
     @DisplayName("Test constructors and static factories")
     public void testConstructorsAndFactories() {
-        // Default constructor
         ShortList list1 = new ShortList();
         assertTrue(list1.isEmpty());
 
-        // Constructor with capacity
         ShortList list2 = new ShortList(20);
         assertTrue(list2.isEmpty());
         assertEquals(20, list2.array().length);
 
-        // Constructor wrapping an array
         short[] data = { 1, 2, 3 };
         ShortList list3 = new ShortList(data);
         assertEquals(3, list3.size());
-        data[0] = 5; // Should reflect change
+        data[0] = 5;
         assertEquals((short) 5, list3.get(0));
 
-        // 'of' factory
         ShortList list4 = ShortList.of((short) 1, (short) 2);
         assertArrayEquals(new short[] { 1, 2 }, list4.toArray());
 
-        // 'copyOf' factory
         short[] original = { 10, 20 };
         ShortList list5 = ShortList.copyOf(original);
-        original[0] = 15; // Should not reflect change
+        original[0] = 15;
         assertEquals((short) 10, list5.get(0));
 
-        // 'copyOfRange' factory
         ShortList list6 = ShortList.copyOf(new short[] { 1, 2, 3, 4, 5 }, 1, 4);
         assertArrayEquals(new short[] { 2, 3, 4 }, list6.toArray());
     }
@@ -93,13 +89,13 @@ public class ShortList200Test extends TestBase {
     public void testRemoveMethods() {
         ShortList list = ShortList.of((short) 1, (short) 2, (short) 3, (short) 2, (short) 4);
 
-        assertTrue(list.remove((short) 2)); // remove first '2'
+        assertTrue(list.remove((short) 2));
         assertArrayEquals(new short[] { 1, 3, 2, 4 }, list.toArray());
 
         assertTrue(list.removeAll(ShortList.of((short) 1, (short) 4)));
         assertArrayEquals(new short[] { 3, 2 }, list.toArray());
 
-        list.addAll(ShortList.of((short) 5, (short) 6)); // now [3, 2, 5, 6]
+        list.addAll(ShortList.of((short) 5, (short) 6));
         assertTrue(list.retainAll(new short[] { 2, 6, 7 }));
         assertArrayEquals(new short[] { 2, 6 }, list.toArray());
 
@@ -139,7 +135,7 @@ public class ShortList200Test extends TestBase {
     @DisplayName("Test moveRange and replaceRange methods")
     public void testMoveAndReplaceRange() {
         ShortList list = ShortList.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
-        list.moveRange(1, 3, 3); // move {2,3} to the end -> [1, 4, 5, 2, 3]
+        list.moveRange(1, 3, 3);
         assertArrayEquals(new short[] { 1, 4, 5, 2, 3 }, list.toArray());
 
         list.replaceRange(0, 2, ShortList.of((short) 9, (short) 8, (short) 7));
@@ -168,9 +164,9 @@ public class ShortList200Test extends TestBase {
     @DisplayName("Test statistical methods with ranges")
     public void testStatsWithRange() {
         ShortList list = ShortList.of((short) 9, (short) 2, (short) 7, (short) 5, (short) 2);
-        assertEquals(OptionalShort.of((short) 2), list.min(1, 4)); // min of {2, 7, 5}
-        assertEquals(OptionalShort.of((short) 7), list.max(1, 4)); // max of {2, 7, 5}
-        assertEquals(OptionalShort.of((short) 5), list.median(1, 4)); // median of {2, 7, 5}
+        assertEquals(OptionalShort.of((short) 2), list.min(1, 4));
+        assertEquals(OptionalShort.of((short) 7), list.max(1, 4));
+        assertEquals(OptionalShort.of((short) 5), list.median(1, 4));
         assertEquals(2, list.occurrencesOf((short) 2));
     }
 
@@ -198,7 +194,7 @@ public class ShortList200Test extends TestBase {
     @DisplayName("Test in-place modifications: reverse(range), rotate, swap, fill")
     public void testModifications() {
         ShortList list = ShortList.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
-        list.reverse(1, 4); // reverse {2,3,4} -> {4,3,2}
+        list.reverse(1, 4);
         assertArrayEquals(new short[] { 1, 4, 3, 2, 5 }, list.toArray());
         list.rotate(-1);
         assertArrayEquals(new short[] { 4, 3, 2, 5, 1 }, list.toArray());
@@ -239,7 +235,7 @@ public class ShortList200Test extends TestBase {
         IntList intList = list.toIntList();
         assertArrayEquals(new int[] { 10, 20, 30 }, intList.toArray());
 
-        assertEquals(50, list.stream(1, 3).sum()); // sum of {20, 30}
+        assertEquals(50, list.stream(1, 3).sum());
     }
 
     @Test
@@ -294,7 +290,7 @@ public class ShortList200Test extends TestBase {
         listWithCap.trimToSize();
         assertEquals(3, listWithCap.array().length);
 
-        ShortList copy = listWithCap.copy(0, 3, 2); // copy with step
+        ShortList copy = listWithCap.copy(0, 3, 2);
         assertArrayEquals(new short[] { 1, 3 }, copy.toArray());
 
         List<ShortList> chunks = listWithCap.split(2);

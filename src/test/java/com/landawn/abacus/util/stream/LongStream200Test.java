@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -34,7 +35,7 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.function.LongBiPredicate;
 
-
+@Tag("new-test")
 public class LongStream200Test extends TestBase {
 
     @Nested
@@ -410,11 +411,11 @@ public class LongStream200Test extends TestBase {
         public void testSps() {
             LongList collected = new LongList();
             long sum = LongStream.range(0, 100).sps(s -> s.peek(e -> {
-                synchronized (collected) { // Ensure thread-safe collection
+                synchronized (collected) {
                     collected.add(e);
                 }
-            }).map(i -> i * 2)) // parallel
-                    .filter(i -> i > 50) // sequential
+            }).map(i -> i * 2))
+                    .filter(i -> i > 50)
                     .sum();
 
             assertEquals(100, collected.size());
@@ -434,7 +435,6 @@ public class LongStream200Test extends TestBase {
             try (LongStream stream = LongStream.of(1, 2, 3).onClose(counter::incrementAndGet)) {
                 stream.count();
             }
-            // A terminal operation will close the stream.
             assertEquals(1, counter.get());
         }
 
@@ -444,7 +444,6 @@ public class LongStream200Test extends TestBase {
             LongStream stream = LongStream.of(1, 2, 3).onClose(counter::incrementAndGet);
             stream.close();
             assertEquals(1, counter.get());
-            // Close is idempotent
             stream.close();
             assertEquals(1, counter.get());
         }
@@ -527,7 +526,6 @@ public class LongStream200Test extends TestBase {
 
         @Test
         public void testCollapse() {
-            // Collapse consecutive equal numbers
             LongBiPredicate isSame = (a, b) -> a == b;
             long[] array = { 1, 1, 2, 3, 3, 3, 1, 4 };
             long[][] expected = { { 1, 1 }, { 2 }, { 3, 3, 3 }, { 1 }, { 4 } };
@@ -542,10 +540,9 @@ public class LongStream200Test extends TestBase {
 
         @Test
         public void testCollapseWithMerge() {
-            // Collapse consecutive equal numbers by summing them
             LongBiPredicate isSame = (a, b) -> a == b;
             long[] array = { 1, 1, 2, 3, 3, 3, 1, 4 };
-            long[] expected = { 2, 2, 9, 1, 4 }; // 1+1, 2, 3+3+3, 1, 4
+            long[] expected = { 2, 2, 9, 1, 4 };
 
             long[] result = LongStream.of(array).collapse(isSame, Long::sum).toArray();
 
@@ -554,7 +551,7 @@ public class LongStream200Test extends TestBase {
 
         @Test
         public void testSymmetricDifference() {
-            Collection<Long> other = Arrays.asList(3L, 4L, 5L, 5L); // {3, 4, 5, 5}
+            Collection<Long> other = Arrays.asList(3L, 4L, 5L, 5L);
             long[] result = LongStream.of(1, 2, 3, 3).symmetricDifference(other).sorted().toArray();
             assertArrayEquals(new long[] { 1, 2, 3, 4, 5, 5 }, result);
         }
@@ -655,7 +652,7 @@ public class LongStream200Test extends TestBase {
             assertEquals(15, stats.getSum());
 
             Map<Percentage, Long> percentiles = result.right().get();
-            assertEquals(3, percentiles.get(Percentage._50)); // Median
+            assertEquals(3, percentiles.get(Percentage._50));
             assertEquals(5, percentiles.get(Percentage._99));
         }
 
@@ -722,25 +719,22 @@ public class LongStream200Test extends TestBase {
         public void testAcceptIfNotEmpty() {
             AtomicInteger counter = new AtomicInteger(0);
 
-            // Test non-empty stream
             LongStream.of(1, 2, 3).acceptIfNotEmpty(s -> counter.incrementAndGet());
             assertEquals(1, counter.get());
 
-            // Test empty stream
             final AtomicBoolean elseExecuted = new AtomicBoolean(false);
             LongStream.empty().acceptIfNotEmpty(s -> counter.incrementAndGet()).orElse(() -> elseExecuted.set(true));
-            assertEquals(1, counter.get()); // Should not have incremented
+            assertEquals(1, counter.get());
             assertTrue(elseExecuted.get());
         }
 
         @Test
         public void testPsp() {
-            // Parallel -> Sequential -> Parallel
             long[] result = LongStream.range(1, 100)
                     .parallel()
-                    .psp(s -> s.filter(i -> i > 10).limit(5)) // The filter and limit run sequentially
-                    .map(i -> i * 10) // This map runs in parallel again
-                    .sorted() // Ensure order
+                    .psp(s -> s.filter(i -> i > 10).limit(5))
+                    .map(i -> i * 10)
+                    .sorted()
                     .toArray();
 
             assertArrayEquals(new long[] { 110, 120, 130, 140, 150 }, result);

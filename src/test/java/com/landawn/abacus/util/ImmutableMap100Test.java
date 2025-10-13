@@ -10,9 +10,11 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class ImmutableMap100Test extends TestBase {
 
     @Test
@@ -90,10 +92,7 @@ public class ImmutableMap100Test extends TestBase {
 
     @Test
     public void testOf_TenEntries() {
-        ImmutableMap<String, Integer> map = ImmutableMap.of(
-            "a", 1, "b", 2, "c", 3, "d", 4, "e", 5,
-            "f", 6, "g", 7, "h", 8, "i", 9, "j", 10
-        );
+        ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7, "h", 8, "i", 9, "j", 10);
         Assertions.assertEquals(10, map.size());
         Assertions.assertEquals(10, map.get("j"));
     }
@@ -103,11 +102,10 @@ public class ImmutableMap100Test extends TestBase {
         Map<String, Integer> mutable = new HashMap<>();
         mutable.put("one", 1);
         mutable.put("two", 2);
-        
+
         ImmutableMap<String, Integer> immutable = ImmutableMap.copyOf(mutable);
         Assertions.assertEquals(2, immutable.size());
-        
-        // Verify defensive copy
+
         mutable.put("three", 3);
         Assertions.assertEquals(2, immutable.size());
         Assertions.assertNull(immutable.get("three"));
@@ -138,7 +136,7 @@ public class ImmutableMap100Test extends TestBase {
         linked.put("first", 1);
         linked.put("second", 2);
         linked.put("third", 3);
-        
+
         ImmutableMap<String, Integer> map = ImmutableMap.copyOf(linked);
         Iterator<String> keys = map.keySet().iterator();
         Assertions.assertEquals("first", keys.next());
@@ -150,11 +148,10 @@ public class ImmutableMap100Test extends TestBase {
     public void testWrap() {
         Map<String, Integer> mutable = new HashMap<>();
         mutable.put("initial", 1);
-        
+
         ImmutableMap<String, Integer> wrapped = ImmutableMap.wrap(mutable);
         Assertions.assertEquals(1, wrapped.size());
-        
-        // Changes are reflected
+
         mutable.put("added", 2);
         Assertions.assertEquals(2, wrapped.size());
         Assertions.assertEquals(2, wrapped.get("added"));
@@ -176,7 +173,7 @@ public class ImmutableMap100Test extends TestBase {
     @Test
     public void testGetOrDefault() {
         ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-        
+
         Assertions.assertEquals(1, map.getOrDefault("a", 0));
         Assertions.assertEquals(2, map.getOrDefault("b", 0));
         Assertions.assertEquals(99, map.getOrDefault("c", 99));
@@ -188,7 +185,7 @@ public class ImmutableMap100Test extends TestBase {
         Map<String, Integer> mapWithNull = new HashMap<>();
         mapWithNull.put("key", null);
         ImmutableMap<String, Integer> map = ImmutableMap.copyOf(mapWithNull);
-        
+
         Assertions.assertNull(map.getOrDefault("key", 42));
         Assertions.assertEquals(42, map.getOrDefault("missing", 42));
     }
@@ -276,7 +273,7 @@ public class ImmutableMap100Test extends TestBase {
     @Test
     public void testContainsKey() {
         ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-        
+
         Assertions.assertTrue(map.containsKey("a"));
         Assertions.assertTrue(map.containsKey("b"));
         Assertions.assertFalse(map.containsKey("c"));
@@ -286,7 +283,7 @@ public class ImmutableMap100Test extends TestBase {
     @Test
     public void testContainsValue() {
         ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 1);
-        
+
         Assertions.assertTrue(map.containsValue(1));
         Assertions.assertTrue(map.containsValue(2));
         Assertions.assertFalse(map.containsValue(3));
@@ -296,7 +293,7 @@ public class ImmutableMap100Test extends TestBase {
     @Test
     public void testGet() {
         ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-        
+
         Assertions.assertEquals(1, map.get("a"));
         Assertions.assertEquals(2, map.get("b"));
         Assertions.assertNull(map.get("c"));
@@ -307,13 +304,12 @@ public class ImmutableMap100Test extends TestBase {
     public void testKeySet() {
         ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 3);
         Set<String> keys = map.keySet();
-        
+
         Assertions.assertEquals(3, keys.size());
         Assertions.assertTrue(keys.contains("a"));
         Assertions.assertTrue(keys.contains("b"));
         Assertions.assertTrue(keys.contains("c"));
-        
-        // KeySet should be unmodifiable
+
         Assertions.assertThrows(UnsupportedOperationException.class, () -> keys.add("d"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> keys.remove("a"));
     }
@@ -322,12 +318,11 @@ public class ImmutableMap100Test extends TestBase {
     public void testValues() {
         ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 1);
         Collection<Integer> values = map.values();
-        
+
         Assertions.assertEquals(3, values.size());
         Assertions.assertTrue(values.contains(1));
         Assertions.assertTrue(values.contains(2));
-        
-        // Values should be unmodifiable
+
         Assertions.assertThrows(UnsupportedOperationException.class, () -> values.add(3));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> values.remove(1));
     }
@@ -336,10 +331,9 @@ public class ImmutableMap100Test extends TestBase {
     public void testEntrySet() {
         ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
         Set<Map.Entry<String, Integer>> entries = map.entrySet();
-        
+
         Assertions.assertEquals(2, entries.size());
-        
-        // Verify entries
+
         boolean foundA = false, foundB = false;
         for (Map.Entry<String, Integer> entry : entries) {
             if ("a".equals(entry.getKey()) && 1 == entry.getValue()) {
@@ -350,8 +344,7 @@ public class ImmutableMap100Test extends TestBase {
         }
         Assertions.assertTrue(foundA);
         Assertions.assertTrue(foundB);
-        
-        // EntrySet should be unmodifiable
+
         Map.Entry<String, Integer> newEntry = new AbstractMap.SimpleEntry<>("c", 3);
         Assertions.assertThrows(UnsupportedOperationException.class, () -> entries.add(newEntry));
     }
@@ -365,12 +358,8 @@ public class ImmutableMap100Test extends TestBase {
 
     @Test
     public void testBuilder() {
-        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer>builder()
-                .put("one", 1)
-                .put("two", 2)
-                .putAll(N.asMap("three", 3, "four", 4))
-                .build();
-        
+        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder().put("one", 1).put("two", 2).putAll(N.asMap("three", 3, "four", 4)).build();
+
         Assertions.assertEquals(4, map.size());
         Assertions.assertEquals(1, map.get("one"));
         Assertions.assertEquals(4, map.get("four"));
@@ -378,23 +367,16 @@ public class ImmutableMap100Test extends TestBase {
 
     @Test
     public void testBuilder_EmptyPutAll() {
-        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer>builder()
-                .put("a", 1)
-                .putAll(null)
-                .putAll(new HashMap<>())
-                .build();
-        
+        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder().put("a", 1).putAll(null).putAll(new HashMap<>()).build();
+
         Assertions.assertEquals(1, map.size());
     }
 
     @Test
     public void testBuilder_WithBackingMap() {
         Map<String, Integer> backing = new LinkedHashMap<>();
-        ImmutableMap<String, Integer> map = ImmutableMap.builder(backing)
-                .put("a", 1)
-                .put("b", 2)
-                .build();
-        
+        ImmutableMap<String, Integer> map = ImmutableMap.builder(backing).put("a", 1).put("b", 2).build();
+
         Assertions.assertEquals(2, map.size());
         Assertions.assertEquals(2, backing.size());
     }
@@ -410,9 +392,9 @@ public class ImmutableMap100Test extends TestBase {
         mapWithNulls.put(null, "nullKey");
         mapWithNulls.put("nullValue", null);
         mapWithNulls.put("normal", "value");
-        
+
         ImmutableMap<String, String> map = ImmutableMap.copyOf(mapWithNulls);
-        
+
         Assertions.assertEquals(3, map.size());
         Assertions.assertEquals("nullKey", map.get(null));
         Assertions.assertNull(map.get("nullValue"));

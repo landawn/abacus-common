@@ -171,13 +171,14 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @param iteratorSupplier a Supplier that provides the DoubleIterator when needed
      * @return a lazily initialized DoubleIterator
      * @throws IllegalArgumentException if iteratorSupplier is null
+     * @throws IllegalStateException if the supplier returns null when invoked
      */
     public static DoubleIterator defer(final Supplier<? extends DoubleIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new DoubleIterator() {
             private DoubleIterator iter = null;
-            private boolean isInitialized = false;
+            private volatile boolean isInitialized = false;
 
             @Override
             public boolean hasNext() {
@@ -197,10 +198,13 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
                 return iter.nextDouble();
             }
 
-            private void init() {
+            private synchronized void init() {
                 if (!isInitialized) {
                     isInitialized = true;
                     iter = iteratorSupplier.get();
+                    if (iter == null) {
+                        throw new IllegalStateException("Iterator supplier returned null");
+                    }
                 }
             }
         };
@@ -223,7 +227,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @throws IllegalArgumentException if supplier is null
      */
     public static DoubleIterator generate(final DoubleSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new DoubleIterator() {
             @Override
@@ -260,9 +264,16 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         N.checkArgNotNull(supplier);
 
         return new DoubleIterator() {
+            private boolean hasNextCached = false;
+            private boolean hasNextValue = false;
+
             @Override
             public boolean hasNext() {
-                return hasNext.getAsBoolean();
+                if (!hasNextCached) {
+                    hasNextValue = hasNext.getAsBoolean();
+                    hasNextCached = true;
+                }
+                return hasNextValue;
             }
 
             @Override
@@ -271,6 +282,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                hasNextCached = false;
                 return supplier.getAsDouble();
             }
         };
@@ -314,7 +326,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     public DoubleIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
-        if (n <= 0) {
+        if (n == 0) {
             return this;
         }
 
@@ -417,32 +429,32 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         final DoubleIterator iter = this;
 
         return new DoubleIterator() {
-            private boolean hasNext = false;
+            private boolean hasNextValue = false;
             private double next = 0;
 
             @Override
             public boolean hasNext() {
-                if (!hasNext) {
+                if (!hasNextValue) {
                     while (iter.hasNext()) {
                         next = iter.nextDouble();
 
                         if (predicate.test(next)) {
-                            hasNext = true;
+                            hasNextValue = true;
                             break;
                         }
                     }
                 }
 
-                return hasNext;
+                return hasNextValue;
             }
 
             @Override
             public double nextDouble() {
-                if (!hasNext && !hasNext()) {
+                if (!hasNextValue && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                hasNext = false;
+                hasNextValue = false;
 
                 return next;
             }
@@ -647,19 +659,24 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * <p>Example:</p>
      * <pre>{@code
      * DoubleIterator.of(10.5, 20.5, 30.5)
-     *     .foreachIndexed((index, value) -> 
+     *     .foreachIndexed((index, value) ->
      *         System.out.println("Position " + index + ": " + value)
      *     );
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element with its index 
+     * @param action the action to perform on each element with its index
+     * @throws IllegalArgumentException if action is null
+     * @throws IllegalStateException if the iterator has more than Integer.MAX_VALUE elements
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntDoubleConsumer<E> action) throws IllegalArgumentException, E {
         int idx = 0;
 
         while (hasNext()) {
+            if (idx < 0) {
+                throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
+            }
             action.accept(idx++, nextDouble());
         }
     }

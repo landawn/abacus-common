@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.google.common.base.Strings;
 import com.landawn.abacus.TestBase;
@@ -38,14 +39,13 @@ import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.Supplier;
 
+@Tag("new-test")
 public class CharStream100Test extends TestBase {
 
     private CharStream emptyStream;
     private CharStream singleElementStream;
     private CharStream multiElementStream;
 
-    // This method will be used to initialize CharStream instances for tests.
-    // For ArrayCharStream, we directly instantiate it.
     protected CharStream createCharStream(char... array) {
         return CharStream.of(array);
     }
@@ -107,7 +107,6 @@ public class CharStream100Test extends TestBase {
 
     @AfterEach
     public void tearDown() {
-        // Close streams if needed
         if (emptyStream != null)
             emptyStream.close();
         if (singleElementStream != null)
@@ -116,7 +115,6 @@ public class CharStream100Test extends TestBase {
             multiElementStream.close();
     }
 
-    // Test factory methods
     @Test
     public void testEmpty() {
         CharStream stream = CharStream.empty();
@@ -216,7 +214,6 @@ public class CharStream100Test extends TestBase {
         assertThat(stream.toArray()).containsExactly('a', 'b', 'c');
     }
 
-    // Test range methods
     @Test
     public void testRange() {
         CharStream stream = CharStream.range('a', 'e');
@@ -241,14 +238,12 @@ public class CharStream100Test extends TestBase {
         assertThat(stream.toArray()).containsExactly('a', 'd', 'g');
     }
 
-    // Test repeat method
     @Test
     public void testRepeat() {
         CharStream stream = CharStream.repeat('x', 3);
         assertThat(stream.toArray()).containsExactly('x', 'x', 'x');
     }
 
-    // Test random methods
     @Test
     public void testRandom() {
         CharStream stream = CharStream.random().limit(10);
@@ -277,7 +272,6 @@ public class CharStream100Test extends TestBase {
         }
     }
 
-    // Test iterate methods
     @Test
     public void testIterateWithHasNextAndNext() {
         AtomicInteger counter = new AtomicInteger(0);
@@ -297,7 +291,6 @@ public class CharStream100Test extends TestBase {
         assertThat(stream.toArray()).containsExactly('a', 'b', 'c');
     }
 
-    // Test generate method
     @Test
     public void testGenerate() {
         AtomicInteger counter = new AtomicInteger(0);
@@ -305,7 +298,6 @@ public class CharStream100Test extends TestBase {
         assertThat(stream.toArray()).containsExactly('a', 'b', 'c');
     }
 
-    // Test concat methods
     @Test
     public void testConcatArrays() {
         char[] a1 = { 'a', 'b' };
@@ -337,7 +329,6 @@ public class CharStream100Test extends TestBase {
         assertThat(stream.toArray()).containsExactly('a', 'b', 'c', 'd');
     }
 
-    // Test flatten methods
     @Test
     public void testFlatten2DArray() {
         char[][] array = { { 'a', 'b' }, { 'c', 'd' } };
@@ -359,7 +350,6 @@ public class CharStream100Test extends TestBase {
         assertThat(stream.toArray()).containsExactly('a', 'b', 'c', 'd');
     }
 
-    // Test zip methods
     @Test
     public void testZipArrays() {
         char[] a = { 'a', 'b', 'c' };
@@ -384,7 +374,6 @@ public class CharStream100Test extends TestBase {
         assertThat(stream.toArray()).containsExactly('x', 'y', 'z');
     }
 
-    // Test merge methods
     @Test
     public void testMergeArrays() {
         char[] a = { 'a', 'c', 'e' };
@@ -393,7 +382,6 @@ public class CharStream100Test extends TestBase {
         assertThat(stream.toArray()).containsExactly('a', 'b', 'c', 'd', 'e', 'f');
     }
 
-    // Test intermediate operations
     @Test
     public void testMap() {
         CharStream stream = createCharStream('a', 'b', 'c').map(c -> Character.toUpperCase(c));
@@ -462,7 +450,6 @@ public class CharStream100Test extends TestBase {
         assertThat(peeked).containsExactly('a', 'b', 'c');
     }
 
-    // Test terminal operations
     @Test
     public void testToArray() {
         char[] array = createCharStream('a', 'b', 'c').toArray();
@@ -592,7 +579,6 @@ public class CharStream100Test extends TestBase {
         assertThat(result).isEqualTo("[a, b, c]");
     }
 
-    // Test advanced operations
     @Test
     public void testTakeWhile() {
         CharStream stream = createCharStream('a', 'b', 'c', 'd').takeWhile(c -> c < 'c');
@@ -707,7 +693,6 @@ public class CharStream100Test extends TestBase {
         assertThat(createCharStream('a').appendIfEmpty('x').toArray()).containsExactly('a');
     }
 
-    // Test parallel operations
     @Test
     public void testParallel() {
         CharStream stream = createCharStream('a', 'b', 'c', 'd', 'e').parallel();
@@ -721,7 +706,6 @@ public class CharStream100Test extends TestBase {
         assertThat(stream.isParallel()).isFalse();
     }
 
-    // Test error handling 
     @Test
     public void testInvalidRange() {
         CharStream.range('z', 'a').toList().isEmpty();
@@ -737,7 +721,6 @@ public class CharStream100Test extends TestBase {
         assertThrows(NoSuchElementException.class, () -> CharStream.empty().iterator().nextChar());
     }
 
-    // Test close operations
     @Test
     public void testClose() {
         AtomicInteger closeCount = new AtomicInteger(0);
@@ -755,7 +738,6 @@ public class CharStream100Test extends TestBase {
         assertThat(closeCount.get()).isEqualTo(1);
     }
 
-    // Test special cases
     @Test
     public void testEmptyStreamOperations() {
         assertThat(CharStream.empty().min()).isEqualTo(OptionalChar.empty());
@@ -768,7 +750,7 @@ public class CharStream100Test extends TestBase {
     @Test
     public void testStreamReuseException() {
         CharStream stream = createCharStream('a', 'b', 'c');
-        stream.count(); // Terminal operation
+        stream.count();
 
         assertThrows(IllegalStateException.class, () -> stream.count());
     }
@@ -805,7 +787,7 @@ public class CharStream100Test extends TestBase {
         Optional<Map<Percentage, Character>> percentiles = createCharStream('a', 'b', 'c', 'd', 'e').percentiles();
         assertThat(percentiles.isPresent()).isTrue();
         Map<Percentage, Character> map = percentiles.get();
-        assertThat(map.get(Percentage._50)).isEqualTo('c'); // median
+        assertThat(map.get(Percentage._50)).isEqualTo('c');
     }
 
     @Test

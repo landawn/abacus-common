@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -74,6 +75,7 @@ import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.TriPredicate;
 
+@Tag("new-test")
 public class Fn107Test extends TestBase {
 
     @Nested
@@ -207,13 +209,9 @@ public class Fn107Test extends TestBase {
         public void testAlternate() {
             CharBiFunction<MergeResult> func = Fn.FC.alternate();
 
-            // First call should return TAKE_FIRST
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply('a', 'b'));
-            // Second call should return TAKE_SECOND
             Assertions.assertEquals(MergeResult.TAKE_SECOND, func.apply('c', 'd'));
-            // Third call should return TAKE_FIRST again
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply('e', 'f'));
-            // Fourth call should return TAKE_SECOND
             Assertions.assertEquals(MergeResult.TAKE_SECOND, func.apply('g', 'h'));
         }
 
@@ -224,7 +222,7 @@ public class Fn107Test extends TestBase {
             Assertions.assertEquals('a', minOp.applyAsChar('b', 'a'));
             Assertions.assertEquals('a', minOp.applyAsChar('a', 'a'));
             Assertions.assertEquals('\0', minOp.applyAsChar('\0', 'a'));
-            Assertions.assertEquals('A', minOp.applyAsChar('A', 'a')); // 'A' < 'a' in ASCII
+            Assertions.assertEquals('A', minOp.applyAsChar('A', 'a'));
         }
 
         @Test
@@ -234,7 +232,7 @@ public class Fn107Test extends TestBase {
             Assertions.assertEquals('b', maxOp.applyAsChar('b', 'a'));
             Assertions.assertEquals('a', maxOp.applyAsChar('a', 'a'));
             Assertions.assertEquals('a', maxOp.applyAsChar('\0', 'a'));
-            Assertions.assertEquals('a', maxOp.applyAsChar('A', 'a')); // 'a' > 'A' in ASCII
+            Assertions.assertEquals('a', maxOp.applyAsChar('A', 'a'));
         }
     }
 
@@ -387,11 +385,8 @@ public class Fn107Test extends TestBase {
         public void testAlternate() {
             ByteBiFunction<MergeResult> func = Fn.FB.alternate();
 
-            // First call should return TAKE_FIRST
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply((byte) 1, (byte) 2));
-            // Second call should return TAKE_SECOND
             Assertions.assertEquals(MergeResult.TAKE_SECOND, func.apply((byte) 3, (byte) 4));
-            // Third call should return TAKE_FIRST again
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply((byte) 5, (byte) 6));
         }
 
@@ -563,11 +558,8 @@ public class Fn107Test extends TestBase {
         public void testAlternate() {
             ShortBiFunction<MergeResult> func = Fn.FS.alternate();
 
-            // First call should return TAKE_FIRST
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply((short) 10, (short) 20));
-            // Second call should return TAKE_SECOND
             Assertions.assertEquals(MergeResult.TAKE_SECOND, func.apply((short) 30, (short) 40));
-            // Third call should return TAKE_FIRST again
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply((short) 50, (short) 60));
         }
 
@@ -739,11 +731,8 @@ public class Fn107Test extends TestBase {
         public void testAlternate() {
             IntBiFunction<MergeResult> func = Fn.FI.alternate();
 
-            // First call should return TAKE_FIRST
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply(100, 200));
-            // Second call should return TAKE_SECOND
             Assertions.assertEquals(MergeResult.TAKE_SECOND, func.apply(300, 400));
-            // Third call should return TAKE_FIRST again
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply(500, 600));
         }
 
@@ -755,7 +744,6 @@ public class Fn107Test extends TestBase {
             Assertions.assertEquals(500, minOp.applyAsInt(500, 500));
             Assertions.assertEquals(-1000, minOp.applyAsInt(-1000, 500));
 
-            // Test that it uses Math.min
             Assertions.assertEquals(Integer.MIN_VALUE, minOp.applyAsInt(Integer.MIN_VALUE, Integer.MAX_VALUE));
         }
 
@@ -767,7 +755,6 @@ public class Fn107Test extends TestBase {
             Assertions.assertEquals(500, maxOp.applyAsInt(500, 500));
             Assertions.assertEquals(500, maxOp.applyAsInt(-1000, 500));
 
-            // Test that it uses Math.max
             Assertions.assertEquals(Integer.MAX_VALUE, maxOp.applyAsInt(Integer.MIN_VALUE, Integer.MAX_VALUE));
         }
     }
@@ -921,11 +908,8 @@ public class Fn107Test extends TestBase {
         public void testAlternate() {
             LongBiFunction<MergeResult> func = Fn.FL.alternate();
 
-            // First call should return TAKE_FIRST
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply(1000L, 2000L));
-            // Second call should return TAKE_SECOND
             Assertions.assertEquals(MergeResult.TAKE_SECOND, func.apply(3000L, 4000L));
-            // Third call should return TAKE_FIRST again
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply(5000L, 6000L));
         }
 
@@ -937,7 +921,6 @@ public class Fn107Test extends TestBase {
             Assertions.assertEquals(500000L, minOp.applyAsLong(500000L, 500000L));
             Assertions.assertEquals(-1000000L, minOp.applyAsLong(-1000000L, 500000L));
 
-            // Test that it uses Math.min
             Assertions.assertEquals(Long.MIN_VALUE, minOp.applyAsLong(Long.MIN_VALUE, Long.MAX_VALUE));
         }
 
@@ -949,7 +932,6 @@ public class Fn107Test extends TestBase {
             Assertions.assertEquals(500000L, maxOp.applyAsLong(500000L, 500000L));
             Assertions.assertEquals(500000L, maxOp.applyAsLong(-1000000L, 500000L));
 
-            // Test that it uses Math.max
             Assertions.assertEquals(Long.MAX_VALUE, maxOp.applyAsLong(Long.MIN_VALUE, Long.MAX_VALUE));
         }
     }
@@ -986,7 +968,7 @@ public class Fn107Test extends TestBase {
             Assertions.assertTrue(predicate.test(1.5f, 1.5f));
             Assertions.assertTrue(predicate.test(-10.25f, -10.25f));
             Assertions.assertTrue(predicate.test(0.0f, 0.0f));
-            Assertions.assertTrue(predicate.test(Float.NaN, Float.NaN)); // N.equals handles NaN
+            Assertions.assertTrue(predicate.test(Float.NaN, Float.NaN));
             Assertions.assertFalse(predicate.test(1.5f, 1.50001f));
             Assertions.assertFalse(predicate.test(-1.0f, 1.0f));
         }
@@ -998,7 +980,7 @@ public class Fn107Test extends TestBase {
             Assertions.assertTrue(predicate.test(-1.0f, 1.0f));
             Assertions.assertFalse(predicate.test(1.5f, 1.5f));
             Assertions.assertFalse(predicate.test(0.0f, 0.0f));
-            Assertions.assertFalse(predicate.test(Float.NaN, Float.NaN)); // N.compare handles NaN
+            Assertions.assertFalse(predicate.test(Float.NaN, Float.NaN));
         }
 
         @Test
@@ -1008,7 +990,7 @@ public class Fn107Test extends TestBase {
             Assertions.assertTrue(predicate.test(0.0f, -1.0f));
             Assertions.assertFalse(predicate.test(5.5f, 5.5f));
             Assertions.assertFalse(predicate.test(5.5f, 10.5f));
-            Assertions.assertTrue(predicate.test(Float.NaN, 1.0f)); // NaN comparisons
+            Assertions.assertTrue(predicate.test(Float.NaN, 1.0f));
             Assertions.assertFalse(predicate.test(1.0f, Float.NaN));
         }
 
@@ -1111,11 +1093,8 @@ public class Fn107Test extends TestBase {
         public void testAlternate() {
             FloatBiFunction<MergeResult> func = Fn.FF.alternate();
 
-            // First call should return TAKE_FIRST
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply(1.0f, 2.0f));
-            // Second call should return TAKE_SECOND
             Assertions.assertEquals(MergeResult.TAKE_SECOND, func.apply(3.0f, 4.0f));
-            // Third call should return TAKE_FIRST again
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply(5.0f, 6.0f));
         }
 
@@ -1127,7 +1106,6 @@ public class Fn107Test extends TestBase {
             Assertions.assertEquals(5.5f, minOp.applyAsFloat(5.5f, 5.5f), 0.0001f);
             Assertions.assertEquals(-10.5f, minOp.applyAsFloat(-10.5f, 5.5f), 0.0001f);
 
-            // Test that it uses Math.min
             Assertions.assertEquals(-Float.MAX_VALUE, minOp.applyAsFloat(-Float.MAX_VALUE, Float.MAX_VALUE), 0.0001f);
             Assertions.assertTrue(Float.isNaN(minOp.applyAsFloat(Float.NaN, 1.0f)));
         }
@@ -1140,7 +1118,6 @@ public class Fn107Test extends TestBase {
             Assertions.assertEquals(5.5f, maxOp.applyAsFloat(5.5f, 5.5f), 0.0001f);
             Assertions.assertEquals(5.5f, maxOp.applyAsFloat(-10.5f, 5.5f), 0.0001f);
 
-            // Test that it uses Math.max
             Assertions.assertEquals(Float.MAX_VALUE, maxOp.applyAsFloat(-Float.MAX_VALUE, Float.MAX_VALUE), 0.0001f);
             Assertions.assertTrue(Float.isNaN(maxOp.applyAsFloat(Float.NaN, 1.0f)));
         }
@@ -1178,7 +1155,7 @@ public class Fn107Test extends TestBase {
             Assertions.assertTrue(predicate.test(1.5, 1.5));
             Assertions.assertTrue(predicate.test(-10.25, -10.25));
             Assertions.assertTrue(predicate.test(0.0, 0.0));
-            Assertions.assertTrue(predicate.test(Double.NaN, Double.NaN)); // N.equals handles NaN
+            Assertions.assertTrue(predicate.test(Double.NaN, Double.NaN));
             Assertions.assertFalse(predicate.test(1.5, 1.50001));
             Assertions.assertFalse(predicate.test(-1.0, 1.0));
         }
@@ -1190,7 +1167,7 @@ public class Fn107Test extends TestBase {
             Assertions.assertTrue(predicate.test(-1.0, 1.0));
             Assertions.assertFalse(predicate.test(1.5, 1.5));
             Assertions.assertFalse(predicate.test(0.0, 0.0));
-            Assertions.assertFalse(predicate.test(Double.NaN, Double.NaN)); // N.compare handles NaN
+            Assertions.assertFalse(predicate.test(Double.NaN, Double.NaN));
         }
 
         @Test
@@ -1200,7 +1177,7 @@ public class Fn107Test extends TestBase {
             Assertions.assertTrue(predicate.test(0.0, -1.0));
             Assertions.assertFalse(predicate.test(5.5, 5.5));
             Assertions.assertFalse(predicate.test(5.5, 10.5));
-            Assertions.assertTrue(predicate.test(Double.NaN, 1.0)); // NaN comparisons
+            Assertions.assertTrue(predicate.test(Double.NaN, 1.0));
             Assertions.assertFalse(predicate.test(1.0, Double.NaN));
         }
 
@@ -1303,11 +1280,8 @@ public class Fn107Test extends TestBase {
         public void testAlternate() {
             DoubleBiFunction<MergeResult> func = Fn.FD.alternate();
 
-            // First call should return TAKE_FIRST
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply(1.0, 2.0));
-            // Second call should return TAKE_SECOND
             Assertions.assertEquals(MergeResult.TAKE_SECOND, func.apply(3.0, 4.0));
-            // Third call should return TAKE_FIRST again
             Assertions.assertEquals(MergeResult.TAKE_FIRST, func.apply(5.0, 6.0));
         }
 
@@ -1319,7 +1293,6 @@ public class Fn107Test extends TestBase {
             Assertions.assertEquals(5.5, minOp.applyAsDouble(5.5, 5.5), 0.0001);
             Assertions.assertEquals(-10.5, minOp.applyAsDouble(-10.5, 5.5), 0.0001);
 
-            // Test that it uses Math.min
             Assertions.assertEquals(-Double.MAX_VALUE, minOp.applyAsDouble(-Double.MAX_VALUE, Double.MAX_VALUE), 0.0001);
             Assertions.assertTrue(Double.isNaN(minOp.applyAsDouble(Double.NaN, 1.0)));
         }
@@ -1332,7 +1305,6 @@ public class Fn107Test extends TestBase {
             Assertions.assertEquals(5.5, maxOp.applyAsDouble(5.5, 5.5), 0.0001);
             Assertions.assertEquals(5.5, maxOp.applyAsDouble(-10.5, 5.5), 0.0001);
 
-            // Test that it uses Math.max
             Assertions.assertEquals(Double.MAX_VALUE, maxOp.applyAsDouble(-Double.MAX_VALUE, Double.MAX_VALUE), 0.0001);
             Assertions.assertTrue(Double.isNaN(maxOp.applyAsDouble(Double.NaN, 1.0)));
         }
@@ -1351,14 +1323,12 @@ public class Fn107Test extends TestBase {
 
             Throwables.Supplier<String, RuntimeException> memoized = Fnn.memoize(supplier);
 
-            // First call should invoke the supplier
             Assertions.assertEquals("result", memoized.get());
             Assertions.assertEquals(1, counter.get());
 
-            // Subsequent calls should return cached value
             Assertions.assertEquals("result", memoized.get());
             Assertions.assertEquals("result", memoized.get());
-            Assertions.assertEquals(1, counter.get()); // Counter should not increase
+            Assertions.assertEquals(1, counter.get());
         }
 
         @Test
@@ -1371,22 +1341,17 @@ public class Fn107Test extends TestBase {
 
             Throwables.Supplier<String, RuntimeException> memoized = Fnn.memoizeWithExpiration(supplier, 100, TimeUnit.MILLISECONDS);
 
-            // First call
             Assertions.assertEquals("result1", memoized.get());
             Assertions.assertEquals(1, counter.get());
 
-            // Call within expiration time should return cached value
             Assertions.assertEquals("result1", memoized.get());
             Assertions.assertEquals(1, counter.get());
 
-            // Wait for expiration
             Thread.sleep(150);
 
-            // Call after expiration should invoke supplier again
             Assertions.assertEquals("result2", memoized.get());
             Assertions.assertEquals(2, counter.get());
 
-            // Test invalid arguments
             Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.memoizeWithExpiration(supplier, -1, TimeUnit.SECONDS));
             Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.memoizeWithExpiration(null, 1, TimeUnit.SECONDS));
         }
@@ -1401,17 +1366,14 @@ public class Fn107Test extends TestBase {
 
             Throwables.Function<Integer, String, RuntimeException> memoized = Fnn.memoize(func);
 
-            // First calls with different inputs
             Assertions.assertEquals("result1", memoized.apply(1));
             Assertions.assertEquals("result2", memoized.apply(2));
             Assertions.assertEquals(2, counter.get());
 
-            // Subsequent calls with same inputs should return cached values
             Assertions.assertEquals("result1", memoized.apply(1));
             Assertions.assertEquals("result2", memoized.apply(2));
-            Assertions.assertEquals(2, counter.get()); // Counter should not increase
+            Assertions.assertEquals(2, counter.get());
 
-            // Test with null input
             Assertions.assertEquals("resultnull", memoized.apply(null));
             Assertions.assertEquals(3, counter.get());
             Assertions.assertEquals("resultnull", memoized.apply(null));
@@ -1525,14 +1487,12 @@ public class Fn107Test extends TestBase {
         @Test
         public void testEmptyAction() {
             Throwables.Runnable<Exception> emptyAction = Fnn.emptyAction();
-            // Should not throw any exception
             Assertions.assertDoesNotThrow(() -> emptyAction.run());
         }
 
         @Test
         public void testDoNothing() {
             Throwables.Consumer<String, RuntimeException> doNothing = Fnn.doNothing();
-            // Should not throw any exception
             Assertions.assertDoesNotThrow(() -> doNothing.accept("test"));
             Assertions.assertDoesNotThrow(() -> doNothing.accept(null));
         }
@@ -1571,7 +1531,7 @@ public class Fn107Test extends TestBase {
             long start = System.currentTimeMillis();
             sleeper.accept("test");
             long duration = System.currentTimeMillis() - start;
-            Assertions.assertTrue(duration >= 40); // Allow some tolerance
+            Assertions.assertTrue(duration >= 40);
         }
 
         @Test
@@ -1580,21 +1540,20 @@ public class Fn107Test extends TestBase {
             long start = System.currentTimeMillis();
             sleeper.accept("test");
             long duration = System.currentTimeMillis() - start;
-            Assertions.assertTrue(duration >= 40); // Allow some tolerance
+            Assertions.assertTrue(duration >= 40);
         }
 
         @Test
         public void testRateLimiterWithPermitsPerSecond() throws Exception {
-            Throwables.Consumer<String, RuntimeException> rateLimited = Fnn.rateLimiter(10.0); // 10 permits per second
+            Throwables.Consumer<String, RuntimeException> rateLimited = Fnn.rateLimiter(10.0);
             long start = System.currentTimeMillis();
 
-            // Execute 3 times - should take at least 200ms (3 * 100ms = 300ms minus first immediate execution)
             for (int i = 0; i < 3; i++) {
                 rateLimited.accept("test");
             }
 
             long duration = System.currentTimeMillis() - start;
-            Assertions.assertTrue(duration >= 180); // Allow some tolerance
+            Assertions.assertTrue(duration >= 180);
         }
 
         @Test
@@ -1606,7 +1565,6 @@ public class Fn107Test extends TestBase {
             closer.accept(closeable);
             Assertions.assertTrue(closed[0]);
 
-            // Test with null
             Assertions.assertDoesNotThrow(() -> closer.accept(null));
         }
 
@@ -1619,7 +1577,6 @@ public class Fn107Test extends TestBase {
             closer.accept(closeable);
             Assertions.assertTrue(closed[0]);
 
-            // Test with throwing closeable - should not throw
             AutoCloseable throwingCloseable = () -> {
                 throw new IOException("Close failed");
             };
@@ -1629,14 +1586,12 @@ public class Fn107Test extends TestBase {
         @Test
         public void testPrintln() {
             Throwables.Consumer<String, RuntimeException> printer = Fnn.println();
-            // Just test that it doesn't throw
             Assertions.assertDoesNotThrow(() -> printer.accept("test"));
         }
 
         @Test
         public void testPrintlnWithSeparator() {
             Throwables.BiConsumer<String, Integer, RuntimeException> printer = Fnn.println(" - ");
-            // Just test that it doesn't throw
             Assertions.assertDoesNotThrow(() -> printer.accept("test", 123));
         }
 
@@ -2260,7 +2215,6 @@ public class Fn107Test extends TestBase {
             Throwables.BiConsumer<String, java.util.function.Consumer<Character>, RuntimeException> result = Fnn.mc(mapper);
             Assertions.assertSame(mapper, result);
 
-            // Test functionality
             java.util.List<Character> chars = new java.util.ArrayList<>();
             result.accept("test", chars::add);
             Assertions.assertEquals(java.util.Arrays.asList('t', 'e', 's', 't'), chars);
@@ -2651,7 +2605,6 @@ public class Fn107Test extends TestBase {
             Throwables.Function<String, Integer, RuntimeException> func = String::length;
             Throwables.Consumer<String, RuntimeException> consumer = Fnn.f2c(func);
 
-            // Should not throw even though function returns a value
             Assertions.assertDoesNotThrow(() -> consumer.accept("test"));
 
             Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.f2c((Throwables.Function<String, Integer, RuntimeException>) null));
@@ -2662,7 +2615,6 @@ public class Fn107Test extends TestBase {
             Throwables.BiFunction<String, Integer, String, RuntimeException> biFunc = (s, i) -> s + i;
             Throwables.BiConsumer<String, Integer, RuntimeException> biConsumer = Fnn.f2c(biFunc);
 
-            // Should not throw even though function returns a value
             Assertions.assertDoesNotThrow(() -> biConsumer.accept("test", 123));
 
             Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.f2c((Throwables.BiFunction<String, Integer, String, RuntimeException>) null));
@@ -2673,7 +2625,6 @@ public class Fn107Test extends TestBase {
             Throwables.TriFunction<String, Integer, Boolean, String, RuntimeException> triFunc = (s, i, b) -> s + i + b;
             Throwables.TriConsumer<String, Integer, Boolean, RuntimeException> triConsumer = Fnn.f2c(triFunc);
 
-            // Should not throw even though function returns a value
             Assertions.assertDoesNotThrow(() -> triConsumer.accept("test", 123, true));
 
             Assertions.assertThrows(IllegalArgumentException.class,
@@ -2726,7 +2677,6 @@ public class Fn107Test extends TestBase {
             Throwables.Callable<String, RuntimeException> callable = () -> "result";
             Throwables.Runnable<RuntimeException> runnable = Fnn.c2r(callable);
 
-            // Should not throw even though callable returns a value
             Assertions.assertDoesNotThrow(() -> runnable.run());
 
             Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.c2r(null));
@@ -2770,7 +2720,6 @@ public class Fn107Test extends TestBase {
             javaRunnable.run();
             Assertions.assertTrue(executed[0]);
 
-            // Test exception conversion
             Throwables.Runnable<Exception> throwingRunnable = () -> {
                 throw new IOException("Test exception");
             };

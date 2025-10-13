@@ -1,16 +1,17 @@
 package com.landawn.abacus.util;
 
-
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalBoolean;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("new-test")
 public class BooleanIterator100Test extends TestBase {
 
     @Test

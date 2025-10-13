@@ -19,6 +19,7 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Builder.DatasetBuilder;
@@ -27,9 +28,9 @@ import com.landawn.abacus.util.Builder.MultimapBuilder;
 import com.landawn.abacus.util.Builder.MultisetBuilder;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 
+@Tag("new-test")
 public class Builder101Test extends TestBase {
 
-    // Test data
     private Dataset testDataset;
     private List<String> columnNames;
     private List<List<Object>> data;
@@ -43,8 +44,6 @@ public class Builder101Test extends TestBase {
         data.add(N.asList("Bob", 35, "Chicago"));
         testDataset = new RowDataset(columnNames, data);
     }
-
-    // ===== Additional DatasetBuilder Tests =====
 
     @Test
     public void testDatasetBuilderRenameColumns() {
@@ -66,19 +65,17 @@ public class Builder101Test extends TestBase {
     public void testDatasetBuilderRenameColumnsWithFunction() {
         DatasetBuilder builder = Builder.of(testDataset);
 
-        // Rename specific columns with a function
         builder.renameColumns(Arrays.asList("name", "city"), col -> col.toUpperCase());
 
         assertTrue(testDataset.columnNameList().contains("NAME"));
         assertTrue(testDataset.columnNameList().contains("CITY"));
-        assertTrue(testDataset.columnNameList().contains("age")); // unchanged
+        assertTrue(testDataset.columnNameList().contains("age"));
     }
 
     @Test
     public void testDatasetBuilderRenameAllColumnsWithFunction() {
         DatasetBuilder builder = Builder.of(testDataset);
 
-        // Rename all columns
         builder.renameColumns(col -> "col_" + col);
 
         assertTrue(testDataset.columnNameList().contains("col_name"));
@@ -90,7 +87,6 @@ public class Builder101Test extends TestBase {
     public void testDatasetBuilderAddColumnWithBiFunction() {
         DatasetBuilder builder = Builder.of(testDataset);
 
-        // Add column combining two columns
         BiFunction<Object, Object, String> combineFunc = (name, city) -> name + " from " + city;
 
         builder.addColumn("description", Tuple.of("name", "city"), combineFunc);
@@ -102,7 +98,6 @@ public class Builder101Test extends TestBase {
     public void testDatasetBuilderAddColumnWithMultipleColumns() {
         DatasetBuilder builder = Builder.of(testDataset);
 
-        // Add column based on multiple columns using DisposableObjArray
         Function<DisposableObjArray, String> func = arr -> {
             return arr.get(0) + ":" + arr.get(1);
         };
@@ -128,7 +123,6 @@ public class Builder101Test extends TestBase {
     public void testDatasetBuilderRemoveColumnsWithPredicate() {
         DatasetBuilder builder = Builder.of(testDataset);
 
-        // Remove columns that start with 'c'
         builder.removeColumns(col -> col.startsWith("c"));
 
         assertEquals(2, testDataset.columnCount());
@@ -139,7 +133,6 @@ public class Builder101Test extends TestBase {
 
     @Test
     public void testDatasetBuilderDivideColumn() {
-        // Add a combined column first
         testDataset.addColumn("fullName", Arrays.asList("John Doe", "Jane Smith", "Bob Jones"));
 
         DatasetBuilder builder = Builder.of(testDataset);
@@ -153,14 +146,11 @@ public class Builder101Test extends TestBase {
         assertTrue(testDataset.columnNameList().contains("lastName"));
     }
 
-    // ===== Additional MultimapBuilder Tests =====
-
     @Test
     public void testMultimapBuilderPutMany() {
         Multimap<String, Integer, List<Integer>> multimap = N.newListMultimap();
         MultimapBuilder<String, Integer, List<Integer>, Multimap<String, Integer, List<Integer>>> builder = Builder.of(multimap);
 
-        // Test putMany with Map
         Map<String, Collection<Integer>> mapToAdd = new HashMap<>();
         mapToAdd.put("key1", Arrays.asList(1, 2, 3));
         mapToAdd.put("key2", Arrays.asList(4, 5));
@@ -199,35 +189,26 @@ public class Builder101Test extends TestBase {
 
         MultimapBuilder<String, Integer, List<Integer>, Multimap<String, Integer, List<Integer>>> builder = Builder.of(multimap);
 
-        // Test removeOne with map
         Map<String, Integer> toRemoveOne = new HashMap<>();
         toRemoveOne.put("key1", 2);
         builder.removeOne(toRemoveOne);
 
         assertEquals(Arrays.asList(1, 3), multimap.get("key1"));
 
-        // Test removeMany with collection
         builder.removeMany("key1", Arrays.asList(1, 3));
         assertNull(multimap.get("key1"));
 
-        // Test removeAll
         builder.removeAll("key2");
         assertNull(multimap.get("key2"));
 
-        // Test removeMany with map
         Map<String, Collection<Integer>> toRemoveMany = new HashMap<>();
         toRemoveMany.put("key3", Arrays.asList(5));
         builder.removeMany(toRemoveMany);
         assertNull(multimap.get("key3"));
     }
 
-    // ===== Additional primitive list builder tests =====
-
-    // ===== ComparisonBuilder with custom comparator =====
-
     @Test
     public void testComparisonBuilderWithCustomComparator() {
-        // Case-insensitive string comparator
         Comparator<String> caseInsensitive = String.CASE_INSENSITIVE_ORDER;
 
         int result = Builder.compare("Hello", "hello", caseInsensitive).result();
@@ -237,24 +218,17 @@ public class Builder101Test extends TestBase {
         assertTrue(result < 0);
     }
 
-    // ===== X<T> Builder (Beta) =====
-
     @Test
     public void testXBuilder() {
-        // Test the X builder wrapper (if accessible)
         String value = "test";
         Builder<String> builder = Builder.of(value);
 
-        // X is package-private, so we can only test through public API
         assertTrue(builder instanceof Builder);
         assertEquals(value, builder.val());
     }
 
-    // ===== Testing edge cases for various builders =====
-
     @Test
     public void testBuilderChainingComplex() {
-        // Complex chaining test
         List<String> list = new ArrayList<>();
 
         Builder.of(list).add("first").addAll(Arrays.asList("second", "third")).add(1, "inserted").remove("third").accept(l -> l.add("fourth")).apply(l -> {
@@ -270,13 +244,11 @@ public class Builder101Test extends TestBase {
         Multiset<String> multiset = N.newMultiset();
         MultisetBuilder<String> builder = Builder.of(multiset);
 
-        // Test removing more occurrences than exist
-        builder.add("item", 3).remove("item", 5); // Remove more than exists
+        builder.add("item", 3).remove("item", 5);
 
         assertEquals(0, multiset.count("item"));
 
-        // Test setCount
-        builder.setCount("item2", 10).setCount("item2", 5); // Override count
+        builder.setCount("item2", 10).setCount("item2", 5);
 
         assertEquals(5, multiset.count("item2"));
     }
@@ -288,11 +260,9 @@ public class Builder101Test extends TestBase {
 
         MapBuilder<String, String, Map<String, String>> builder = Builder.of(map);
 
-        // Test putIfAbsent with null value in map
         builder.putIfAbsent("null-value", "replacement");
         assertEquals("replacement", map.get("null-value"));
 
-        // Test putIfAbsent with supplier when value is null
         map.put("null-value2", null);
         builder.putIfAbsent("null-value2", () -> "generated");
         assertEquals("generated", map.get("null-value2"));
@@ -300,7 +270,6 @@ public class Builder101Test extends TestBase {
 
     @Test
     public void testHashCodeBuilderConsistency() {
-        // Test that hash code is consistent
         Object[] values = { "test", 123, true, 45.6, 'x' };
 
         int hash1 = Builder.hash(values[0]).hash(values[1]).hash((boolean) values[2]).hash((double) values[3]).hash((char) values[4]).result();
@@ -312,7 +281,6 @@ public class Builder101Test extends TestBase {
 
     @Test
     public void testEquivalenceBuilderShortCircuit() {
-        // Test that equivalence builder short-circuits on first false
         boolean[] evaluated = { false, false, false };
 
         BiPredicate<String, String> tracker1 = (a, b) -> {
@@ -335,6 +303,6 @@ public class Builder101Test extends TestBase {
         assertFalse(result);
         assertTrue(evaluated[0]);
         assertTrue(evaluated[1]);
-        assertFalse(evaluated[2]); // Should not be evaluated due to short-circuit
+        assertFalse(evaluated[2]);
     }
 }

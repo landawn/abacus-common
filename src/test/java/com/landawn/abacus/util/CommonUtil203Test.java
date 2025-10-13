@@ -35,16 +35,13 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-// Assuming N.java and its dependencies (com.landawn.abacus.*, etc.) are in the classpath.
-// Specifically, constants like Strings.NULL, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, etc.,
-// and helper methods like N.typeOf(), N.CLASS_TYPE_ENUM, N.checkArgNotEmpty(), etc.,
-// are assumed to be available and function as expected.
+@Tag("new-test")
 public class CommonUtil203Test extends TestBase {
 
-    // Assuming Strings.EMPTY is defined elsewhere, typically as ""
     private static final String EMPTY_STR = "";
 
     @Nested
@@ -66,7 +63,6 @@ public class CommonUtil203Test extends TestBase {
 
             List<?> emptyList = N.nullToEmpty((List<?>) null);
             assertTrue(emptyList.isEmpty());
-            // Check for immutability if N.emptyList() guarantees it
             assertThrows(UnsupportedOperationException.class, () -> emptyList.add(null));
         }
 
@@ -240,7 +236,6 @@ public class CommonUtil203Test extends TestBase {
             assertArrayEquals(N.EMPTY_STRING_ARRAY, N.nullToEmpty((String[]) null));
             String[] arr = { "a", "b" };
             assertSame(arr, N.nullToEmpty(arr));
-            // Note: This method does NOT change nulls inside the array to empty strings.
             String[] arrWithNull = { "a", null };
             String[] resultArrWithNull = N.nullToEmpty(arrWithNull);
             assertSame(arrWithNull, resultArrWithNull);
@@ -252,13 +247,13 @@ public class CommonUtil203Test extends TestBase {
             assertArrayEquals(N.EMPTY_STRING_ARRAY, N.nullToEmptyForEach(null));
             String[] arr = { "a", "b" };
             String[] result = N.nullToEmptyForEach(arr);
-            assertSame(arr, result); // Modifies in place
+            assertSame(arr, result);
             assertArrayEquals(new String[] { "a", "b" }, result);
 
             String[] arrWithNulls = { "a", null, "c", null };
             String[] expected = { "a", EMPTY_STR, "c", EMPTY_STR };
             result = N.nullToEmptyForEach(arrWithNulls);
-            assertSame(arrWithNulls, result); // Modifies in place
+            assertSame(arrWithNulls, result);
             assertArrayEquals(expected, result);
 
             String[] allNulls = { null, null };
@@ -269,7 +264,7 @@ public class CommonUtil203Test extends TestBase {
 
             String[] emptyArr = N.EMPTY_STRING_ARRAY;
             result = N.nullToEmptyForEach(emptyArr);
-            assertSame(emptyArr, result); // Should return the same empty array instance
+            assertSame(emptyArr, result);
             assertArrayEquals(N.EMPTY_STRING_ARRAY, result);
         }
 
@@ -318,7 +313,6 @@ public class CommonUtil203Test extends TestBase {
         @Test
         @SuppressWarnings("unchecked")
         public void testNullToEmpty_GenericArray() {
-            // Integer[]
             Integer[] intArr = { 1, 2 };
             assertSame(intArr, N.nullToEmpty(intArr, Integer[].class));
             Integer[] nullIntArr = null;
@@ -327,7 +321,6 @@ public class CommonUtil203Test extends TestBase {
             assertEquals(0, emptyIntArrResult.length);
             assertEquals(Integer.class, emptyIntArrResult.getClass().getComponentType());
 
-            // String[]
             String[] strArr = { "a", "b" };
             assertSame(strArr, N.nullToEmpty(strArr, String[].class));
             String[] nullStrArr = null;
@@ -337,7 +330,6 @@ public class CommonUtil203Test extends TestBase {
             assertArrayEquals(new String[0], emptyStrArrResult);
             assertEquals(String.class, emptyStrArrResult.getClass().getComponentType());
 
-            // Custom Object[]
             MyClass[] myObjArr = { new MyClass(), new MyClass() };
             assertSame(myObjArr, N.nullToEmpty(myObjArr, MyClass[].class));
             MyClass[] nullMyObjArr = null;
@@ -351,20 +343,13 @@ public class CommonUtil203Test extends TestBase {
         static class MyClass {
         }
 
-        // Tests for ImmutableXxx types. These assume that com.landawn.abacus.util.ImmutableX classes
-        // have static empty() methods that N calls, or N provides similar empty immutable instances.
-        // For simplicity, these tests will check against standard empty collections for emptiness.
-
         @Test
         public void testNullToEmpty_ImmutableCollection() {
-            // Assuming com.landawn.abacus.util.ImmutableList.empty() is what N.nullToEmpty would return for null
-            // For the purpose of this test, we'll check the general contract.
             com.landawn.abacus.util.ImmutableList<String> nonNullList = com.landawn.abacus.util.ImmutableList.of("a");
             assertSame(nonNullList, N.nullToEmpty(nonNullList));
 
             com.landawn.abacus.util.ImmutableCollection<?> emptyCol = N.nullToEmpty((com.landawn.abacus.util.ImmutableCollection<?>) null);
             assertTrue(emptyCol.isEmpty());
-            // Further checks depend on the behavior of ImmutableList.empty()
         }
 
         @Test
@@ -490,7 +475,6 @@ public class CommonUtil203Test extends TestBase {
     @Nested
     @DisplayName("defaultIfEmpty/Blank Methods")
     public class DefaultIfEmptyBlankTests {
-        //These rely on N.isEmpty, N.isBlank, N.checkArgNotEmpty, N.checkArgNotBlank
 
         @Test
         public void testDefaultIfEmpty_CharSequence_withDefaultArg() {
@@ -593,23 +577,19 @@ public class CommonUtil203Test extends TestBase {
     @Nested
     @DisplayName("defaultValueOf Method")
     public class DefaultValueOfTests {
-        // This test's correctness heavily depends on the implementation of
-        // com.landawn.abacus.util.Type.defaultValue() which is not provided.
-        // The following are common expectations for default values.
         @Test
         public void testDefaultValueOf() {
-            // Assuming Type.defaultValue() behaves as follows:
-            assertEquals(false, (boolean) N.defaultValueOf(boolean.class)); // or Boolean.class for primitive default
-            assertEquals(0, (char) N.defaultValueOf(char.class)); // or Character.class
-            assertEquals(0, (byte) N.defaultValueOf(byte.class)); // or Byte.class
-            assertEquals(0, (short) N.defaultValueOf(short.class)); // or Short.class
-            assertEquals(0, (int) N.defaultValueOf(int.class)); // or Integer.class
-            assertEquals(0L, (long) N.defaultValueOf(long.class)); // or Long.class
-            assertEquals(0.0f, (float) N.defaultValueOf(float.class), 0.0f); // or Float.class
-            assertEquals(0.0, (double) N.defaultValueOf(double.class), 0.0); // or Double.class
+            assertEquals(false, (boolean) N.defaultValueOf(boolean.class));
+            assertEquals(0, (char) N.defaultValueOf(char.class));
+            assertEquals(0, (byte) N.defaultValueOf(byte.class));
+            assertEquals(0, (short) N.defaultValueOf(short.class));
+            assertEquals(0, (int) N.defaultValueOf(int.class));
+            assertEquals(0L, (long) N.defaultValueOf(long.class));
+            assertEquals(0.0f, (float) N.defaultValueOf(float.class), 0.0f);
+            assertEquals(0.0, (double) N.defaultValueOf(double.class), 0.0);
 
             assertEquals(null, N.defaultValueOf(Boolean.class));
-            assertEquals(null, N.defaultValueOf(Character.class)); // Or specific char default
+            assertEquals(null, N.defaultValueOf(Character.class));
             assertEquals(null, N.defaultValueOf(Byte.class));
             assertEquals(null, N.defaultValueOf(Short.class));
             assertEquals(null, N.defaultValueOf(Integer.class));
@@ -621,7 +601,7 @@ public class CommonUtil203Test extends TestBase {
             assertNull(N.defaultValueOf(Object.class));
             assertNull(N.defaultValueOf(List.class));
 
-            assertThrows(IllegalArgumentException.class, () -> N.defaultValueOf(null)); // Assuming typeOf(null) throws NPE
+            assertThrows(IllegalArgumentException.class, () -> N.defaultValueOf(null));
         }
     }
 }

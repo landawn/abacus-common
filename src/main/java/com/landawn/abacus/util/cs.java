@@ -214,6 +214,7 @@ public final class cs { // NOSONAR
     public static final String numOfParts = "numOfParts";
     public static final String offset = "offset";
     public static final String onComplete = "onComplete";
+    public static final String operator = "operator";
     public static final String other = "other";
     public static final String otherIfErrorOccurred = "otherIfErrorOccurred";
     public static final String output = "output";
@@ -257,6 +258,7 @@ public final class cs { // NOSONAR
     public static final String source = "source";
     public static final String srcClass = "srcClass";
     public static final String startInclusive = "startInclusive";
+    public static final String startIndex = "startIndex";
     public static final String startTime = "startTime";
     public static final String step = "step";
     public static final String subColl = "subColl";
@@ -341,6 +343,10 @@ public final class cs { // NOSONAR
     public static final String componentType = "componentType";
     public static final String capacity = "capacity";
     public static final String propFilter = "propFilter";
+
+    public static final String encoding = "encoding";
+
+    public static final String inputStream = "inputStream";
 
     private cs() {
         // Utility class for constant string values.

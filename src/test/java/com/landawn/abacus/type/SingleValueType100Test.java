@@ -17,11 +17,13 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class SingleValueType100Test extends TestBase {
 
     private TestSingleValueType singleValueType;
@@ -86,17 +88,14 @@ public class SingleValueType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with value
         TestValue value = new TestValue("test");
         assertEquals("test", singleValueType.stringOf(value));
 
-        // Test with null
         assertNull(singleValueType.stringOf(null));
     }
 
     @Test
     public void testValueOf() {
-        // Basic implementation returns the string itself
         assertEquals(new TestValue("test"), singleValueType.valueOf("test"));
     }
 
@@ -159,14 +158,11 @@ public class SingleValueType100Test extends TestBase {
         CharacterWriter writer = createCharacterWriter();
         JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
 
-        // Test with value
         TestValue value = new TestValue("test");
         singleValueType.writeCharacter(writer, value, config);
 
-        // Test with null
         singleValueType.writeCharacter(writer, null, config);
 
-        // Test with quotation
         when(config.getStringQuotation()).thenReturn('"');
         singleValueType.writeCharacter(writer, value, config);
     }

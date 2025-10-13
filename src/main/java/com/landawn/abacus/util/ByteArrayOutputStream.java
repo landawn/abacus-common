@@ -341,7 +341,7 @@ public final class ByteArrayOutputStream extends OutputStream {
     }
 
     private void ensureCapacity(final int minCapacity) {
-        if (minCapacity > N.MAX_ARRAY_SIZE || minCapacity < 0) {
+        if (minCapacity < 0 || minCapacity > N.MAX_ARRAY_SIZE) {
             throw new OutOfMemoryError();
         }
 

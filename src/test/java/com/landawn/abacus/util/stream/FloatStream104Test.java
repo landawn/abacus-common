@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Duration;
@@ -21,6 +22,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.RateLimiter;
 import com.landawn.abacus.util.u.OptionalFloat;
 
+@Tag("new-test")
 public class FloatStream104Test extends TestBase {
 
     @Test
@@ -372,12 +374,10 @@ public class FloatStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterShuffled() {
-        // Since shuffled is random, we can only test the count and that all elements are present
         assertEquals(5, FloatStream.of(1, 2, 3, 4, 5).shuffled().count());
         assertEquals(4, FloatStream.of(1, 2, 3, 4, 5).shuffled().skip(1).count());
         float[] shuffled = FloatStream.of(1, 2, 3, 4, 5).shuffled().toArray();
         assertEquals(5, shuffled.length);
-        // Check all elements are present
         Arrays.sort(shuffled);
         assertArrayEquals(new float[] { 1, 2, 3, 4, 5 }, shuffled, 0.001f);
 
@@ -1026,7 +1026,6 @@ public class FloatStream104Test extends TestBase {
         assertEquals(9, FloatStream.random().limit(10).skip(1).count());
         float[] randomArray = FloatStream.random().limit(10).toArray();
         assertEquals(10, randomArray.length);
-        // Check all values are between 0 (inclusive) and 1 (exclusive)
         for (float f : randomArray) {
             assertTrue(f >= 0.0f && f < 1.0f);
         }
@@ -1886,8 +1885,6 @@ public class FloatStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterPsp() {
-        // psp stands for "parallel-sequential-parallel"
-        // This method temporarily switches to sequential for a specific operation
         assertEquals(5, FloatStream.of(1, 2, 3, 4, 5).parallel().psp(s -> s.sorted()).count());
         assertEquals(4, FloatStream.of(1, 2, 3, 4, 5).parallel().psp(s -> s.sorted()).skip(1).count());
         assertArrayEquals(new float[] { 1, 2, 3, 4, 5 }, FloatStream.of(5, 3, 1, 4, 2).parallel().psp(s -> s.sorted()).toArray(), 0.001f);
@@ -1904,7 +1901,6 @@ public class FloatStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterRateLimited() {
-        // rateLimited method delays elements - for testing, we'll just verify the stream is returned correctly
         assertEquals(5, FloatStream.of(1, 2, 3, 4, 5).rateLimited(1000.0).count());
         assertEquals(4, FloatStream.of(1, 2, 3, 4, 5).rateLimited(1000.0).skip(1).count());
         assertArrayEquals(new float[] { 1, 2, 3, 4, 5 }, FloatStream.of(1, 2, 3, 4, 5).rateLimited(1000.0).toArray(), 0.001f);
@@ -1949,7 +1945,7 @@ public class FloatStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterDelay() {
-        Duration duration = Duration.ofMillis(0); // 0 delay to make tests run fast
+        Duration duration = Duration.ofMillis(0);
         assertEquals(5, FloatStream.of(1, 2, 3, 4, 5).delay(duration).count());
         assertEquals(4, FloatStream.of(1, 2, 3, 4, 5).delay(duration).skip(1).count());
         assertArrayEquals(new float[] { 1, 2, 3, 4, 5 }, FloatStream.of(1, 2, 3, 4, 5).delay(duration).toArray(), 0.001f);
@@ -1966,7 +1962,7 @@ public class FloatStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterDelayJavaTime() {
-        java.time.Duration duration = java.time.Duration.ofMillis(0); // 0 delay to make tests run fast
+        java.time.Duration duration = java.time.Duration.ofMillis(0);
         assertEquals(5, FloatStream.of(1, 2, 3, 4, 5).delay(duration).count());
         assertEquals(4, FloatStream.of(1, 2, 3, 4, 5).delay(duration).skip(1).count());
         assertArrayEquals(new float[] { 1, 2, 3, 4, 5 }, FloatStream.of(1, 2, 3, 4, 5).delay(duration).toArray(), 0.001f);
@@ -2128,7 +2124,6 @@ public class FloatStream104Test extends TestBase {
         assertEquals(N.asList(1f, 2f, 3f, 4f, 5f), FloatStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> FloatStream.of(6, 7, 8)).toList());
         assertEquals(N.asList(2f, 3f, 4f, 5f), FloatStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> FloatStream.of(6, 7, 8)).skip(1).toList());
 
-        // Test with empty stream
         assertEquals(3, FloatStream.empty().appendIfEmpty(() -> FloatStream.of(6, 7, 8)).count());
         assertEquals(2, FloatStream.empty().appendIfEmpty(() -> FloatStream.of(6, 7, 8)).skip(1).count());
         assertArrayEquals(new float[] { 6, 7, 8 }, FloatStream.empty().appendIfEmpty(() -> FloatStream.of(6, 7, 8)).toArray(), 0.001f);

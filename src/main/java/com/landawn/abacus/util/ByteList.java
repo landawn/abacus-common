@@ -275,15 +275,18 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Returns the underlying byte array backing this list without creating a copy.
      * This method provides direct access to the internal array for performance-critical operations.
-     * 
+     *
      * <p><b>Warning:</b> The returned array is the actual internal storage of this list.
      * Modifications to the returned array will directly affect this list's contents.
      * The array may be larger than the list size; only indices from 0 to size()-1 contain valid elements.
-     * 
+     *
      * <p>This method is marked as {@code @Beta} and should be used with caution.
      *
      * @return the internal byte array backing this list
-     * @deprecated should call {@code toArray()}
+     * @deprecated This method is deprecated because it exposes internal state and can lead to bugs.
+     *             Use {@link #toArray()} instead to get a safe copy of the list elements.
+     *             If you need the internal array for performance reasons and understand the risks,
+     *             consider using a custom implementation or wrapping this list appropriately.
      */
     @Beta
     @Deprecated
@@ -304,19 +307,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         rangeCheck(index);
 
         return elementData[index];
-    }
-
-    /**
-     * Checks if the specified index is within the valid range of the list.
-     * This is an internal method used for bounds checking.
-     *
-     * @param index the index to check
-     * @throws IndexOutOfBoundsException if index >= size
-     */
-    private void rangeCheck(final int index) {
-        if (index >= size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
-        }
     }
 
     /**
@@ -604,11 +594,21 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Removes all elements from this list that satisfy the given predicate.
-     * Elements are tested in order, and those for which the predicate returns {@code true}
-     * are removed. The order of the remaining elements is preserved.
+     * Elements are tested in order from first to last, and those for which the predicate
+     * returns {@code true} are removed. The order of the remaining elements is preserved.
      *
-     * @param p the predicate which returns {@code true} for elements to be removed
-     * @return {@code true} if any elements were removed
+     * <p>This is a functional programming approach to element removal, allowing complex
+     * removal logic to be expressed concisely using lambda expressions or method references.
+     *
+     * <pre>
+     * ByteList list = ByteList.of((byte)1, (byte)-2, (byte)3, (byte)-4, (byte)5);
+     * list.removeIf(b -> b < 0);  // Removes negative values
+     * // list now contains: [1, 3, 5]
+     * </pre>
+     *
+     * @param p the predicate which returns {@code true} for elements to be removed. Must not be null.
+     * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
+     *
      */
     public boolean removeIf(final BytePredicate p) {
         final ByteList tmp = new ByteList(size());
@@ -775,8 +775,18 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * The indices array specifies which elements to remove. Duplicate indices are ignored.
      * The implementation handles the removal efficiently by processing indices in sorted order.
      *
+     * <p>This method is useful for batch removal operations when you have multiple
+     * indices to remove. It's more efficient than removing elements one by one.
+     *
+     * <pre>
+     * ByteList list = ByteList.of((byte)10, (byte)20, (byte)30, (byte)40, (byte)50);
+     * list.deleteAllByIndices(1, 3);  // Remove elements at positions 1 and 3
+     * // list now contains: [10, 30, 50]
+     * </pre>
+     *
      * @param indices the indices of elements to remove. Can be null or empty.
      *                Invalid indices (negative or >= size) are ignored.
+     *
      */
     @Override
     public void deleteAllByIndices(final int... indices) {
@@ -792,7 +802,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             N.fill(elementData, tmp.length, size, (byte) 0);
         }
 
-        size -= elementData.length - tmp.length;
+        size = size - (elementData.length - tmp.length);
     }
 
     /**
@@ -827,27 +837,36 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Moves a range of elements within this list to a new position.
-     * The elements in the range [fromIndex, toIndex) are moved so that the element
-     * originally at fromIndex will be at newPositionStartIndexAfterMove after the operation.
-     * No elements are added or removed; the list size remains unchanged.
-     *
-     * <p>Example:
-     * <pre>
+     * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
+     * so that the element originally at fromIndex will be at newPositionAfterMove.
+     * Other elements are shifted as necessary to accommodate the move.
+     * 
+     * <p>Examples:</p>
+     * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
-     * list.moveRange(1, 3, 3); // Moves elements at indices 1,2 to start at index 3
+     * // size = 5
+     *
+     * // Move elements at indices 1,2 to start at index 2
+     * list.moveRange(1, 3, 2);
      * // Result: [1, 4, 2, 3, 5]
-     * </pre>
+     *
+     * // Move range to end
+     * list = ByteList.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
+     * int rangeLen = 3 - 1; // = 2
+     * list.moveRange(1, 3, list.size() - rangeLen); // newPos = 5 - 2 = 3
+     * // Result: [1, 4, 5, 2, 3]
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionStartIndexAfterMove the index where the first element of the range 
-     *        should be positioned after the move. Must be in range [0, size - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if any index is out of bounds or if 
-     *         newPositionStartIndexAfterMove would cause elements to be moved outside the list
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and size() - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndexAfterMove);
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
     /**
@@ -964,7 +983,17 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Replaces each element of this list with the result of applying the specified operator to that element.
      * The operator is applied to each element in order from index 0 to size-1.
      *
+     * <p>This method provides a functional way to transform all elements in place, useful for
+     * operations like scaling, negation, or mathematical transformations.
+     *
+     * <pre>
+     * ByteList list = ByteList.of((byte)1, (byte)2, (byte)3);
+     * list.replaceAll(b -> (byte)(b * 2));  // Double each value
+     * // list now contains: [2, 4, 6]
+     * </pre>
+     *
      * @param operator the operator to apply to each element. Must not be null.
+     *
      */
     public void replaceAll(final ByteUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
@@ -975,11 +1004,21 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Replaces all elements that satisfy the given predicate with the specified new value.
      * Elements are tested with the predicate in order from index 0 to size-1,
-     * and those for which the predicate returns {@code true} are replaced.
+     * and those for which the predicate returns {@code true} are replaced with {@code newValue}.
+     *
+     * <p>This method provides a convenient way to conditionally replace values without
+     * manually iterating through the list.
+     *
+     * <pre>
+     * ByteList list = ByteList.of((byte)1, (byte)-2, (byte)3, (byte)-4, (byte)5);
+     * list.replaceIf(b -> b < 0, (byte)0);  // Replace negative values with 0
+     * // list now contains: [1, 0, 3, 0, 5]
+     * </pre>
      *
      * @param predicate the predicate to test each element. Must not be null.
      * @param newValue the value to replace matching elements with
-     * @return {@code true} if at least one element was replaced
+     * @return {@code true} if at least one element was replaced; {@code false} if no elements matched
+     *
      */
     public boolean replaceIf(final BytePredicate predicate, final byte newValue) {
         boolean result = false;
@@ -1399,8 +1438,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Returns the number of times the specified value appears in this list.
      * This method counts all occurrences of the value throughout the entire list.
      *
+     * <pre>
+     * ByteList list = ByteList.of((byte)1, (byte)2, (byte)1, (byte)3, (byte)1);
+     * int count = list.occurrencesOf((byte)1);  // Returns 3
+     * </pre>
+     *
      * @param valueToFind the value to count occurrences of
-     * @return the number of times the specified value appears in this list
+     * @return the number of times the specified value appears in this list; 0 if the value is not found
+     *
      */
     public int occurrencesOf(final byte valueToFind) {
         if (size == 0) {
@@ -1464,7 +1509,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *         or -1 if the value is not found
      */
     public int lastIndexOf(final byte valueToFind) {
-        return lastIndexOf(valueToFind, size);
+        return lastIndexOf(valueToFind, size - 1);
     }
 
     /**
@@ -1874,7 +1919,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return the index of the search key if found; otherwise, {@code (-(insertion point) - 1)}
      */
     public int binarySearch(final byte valueToFind) {
-        return N.binarySearch(elementData, valueToFind);
+        return N.binarySearch(elementData, 0, size(), valueToFind);
     }
 
     /**
@@ -2555,7 +2600,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param e the byte value to add at the end
      */
     public void addLast(final byte e) {
-        add(size, e);
+        add(e);
     }
 
     /**
@@ -2592,70 +2637,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         return delete(size - 1);
     }
-
-    //    /**
-    //     * Returns a new ByteList with the elements in reverse order.
-    //     *
-    //     * @return A new ByteList with all elements of the current list in reverse order.
-    //     */
-    //    public ByteList reversed() {
-    //        final byte[] a = N.copyOfRange(elementData, 0, size);
-    //
-    //        N.reverse(a);
-    //
-    //        return new ByteList(a);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param <E>
-    //     * @param func
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <R, E extends Exception> R apply(final Throwables.Function<? super ByteList, ? extends R, E> func) throws E {
-    //        return func.apply(this);
-    //    }
-    //
-    //    /**
-    //     * Apply if not empty.
-    //     *
-    //     * @param <R>
-    //     * @param <E>
-    //     * @param func
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super ByteList, ? extends R, E> func) throws E {
-    //        return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <E extends Exception> void accept(final Throwables.Consumer<? super ByteList, E> action) throws E {
-    //        action.accept(this);
-    //    }
-    //
-    //    /**
-    //     * Accept if not empty.
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super ByteList, E> action) throws E {
-    //        return If.is(size > 0).then(this, action);
-    //    }
 
     /**
      * Returns a hash code value for this list.
@@ -2724,7 +2705,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     private void ensureCapacity(final int minCapacity) {
-        if (minCapacity > MAX_ARRAY_SIZE || minCapacity < 0) {
+        if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
             throw new OutOfMemoryError();
         }
 

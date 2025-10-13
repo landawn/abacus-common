@@ -9,7 +9,7 @@ import org.junit.platform.suite.api.Suite;
 
 @Suite
 @SelectPackages({ "com.landawn.abacus" })
-@IncludeTags({ "new-test", "old-test" })
+@IncludeTags({ "2025", "new-test", "old-test" })
 @ExcludeTags({ "slow-test" }) // But exclude any that also have "slow-test" tag
 public class AbacusCommonUnitSuite {
 }

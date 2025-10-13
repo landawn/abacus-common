@@ -2,9 +2,11 @@ package com.landawn.abacus.exception;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class UncheckedException100Test extends TestBase {
 
     @Test

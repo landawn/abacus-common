@@ -13,10 +13,12 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class BytesType100Test extends TestBase {
 
     private BytesType type;
@@ -53,7 +55,6 @@ public class BytesType100Test extends TestBase {
         byte[] bytes = new byte[] { 1, 2, 3 };
         String result = type.stringOf(bytes);
         Assertions.assertNotNull(result);
-        // Base64 encoding of [1, 2, 3]
         assertEquals("AQID", result);
     }
 
@@ -62,7 +63,6 @@ public class BytesType100Test extends TestBase {
         byte[] bytes = new byte[] { (byte) 0, (byte) 127, (byte) -128, (byte) -1 };
         String result = type.stringOf(bytes);
         Assertions.assertNotNull(result);
-        // Verify it's a valid Base64 string
         Assertions.assertTrue(result.matches("^[A-Za-z0-9+/]*={0,2}$"));
     }
 
@@ -81,7 +81,7 @@ public class BytesType100Test extends TestBase {
 
     @Test
     public void testValueOf_ValidBase64() {
-        String base64 = "AQID"; // Base64 encoding of [1, 2, 3]
+        String base64 = "AQID";
         byte[] result = type.valueOf(base64);
 
         Assertions.assertNotNull(result);
@@ -192,7 +192,6 @@ public class BytesType100Test extends TestBase {
 
     @Test
     public void testSpecialCases() {
-        // Test with bytes that might cause issues in Base64
         byte[] special = new byte[] { 0, 1, 2, 3, 61, 62, 63, 64, 65 };
 
         String base64 = type.stringOf(special);

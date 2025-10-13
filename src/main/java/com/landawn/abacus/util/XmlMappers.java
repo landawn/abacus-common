@@ -1105,24 +1105,14 @@ public final class XmlMappers {
         return defaultDeserializationConfigForCopy.without(deserializationFeatureNotEnabledByDefault);
     }
 
-    //    /**
-    //     *
-    //     * @param setter first parameter is the copy of default {@code SerializationConfig}
-    //     * @return
-    //     */
-    //    public static SerializationConfig createSerializationConfig(final Function<? super SerializationConfig, ? extends SerializationConfig> setter) {
-    //        return setter.apply(createSerializationConfig());
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param setter first parameter is the copy of default {@code DeserializationConfig}
-    //     * @return
-    //     */
-    //    public static DeserializationConfig createDeserializationConfig(final Function<? super DeserializationConfig, ? extends DeserializationConfig> setter) {
-    //        return setter.apply(createDeserializationConfig());
-    //    }
-
+    /**
+     * Retrieves an XmlMapper from the pool configured with the specified serialization configuration.
+     * If the pool is empty, a new XmlMapper is created. This method is used internally for object pooling
+     * to improve performance by reusing mapper instances.
+     *
+     * @param config the serialization configuration to apply, or {@code null} to use the default mapper
+     * @return an XmlMapper configured with the specified serialization config
+     */
     static XmlMapper getXmlMapper(final SerializationConfig config) {
         if (config == null) {
             return defaultXmlMapper;
@@ -1145,6 +1135,14 @@ public final class XmlMappers {
         return mapper;
     }
 
+    /**
+     * Retrieves an XmlMapper from the pool configured with the specified deserialization configuration.
+     * If the pool is empty, a new XmlMapper is created. This method is used internally for object pooling
+     * to improve performance by reusing mapper instances.
+     *
+     * @param config the deserialization configuration to apply, or {@code null} to use the default mapper
+     * @return an XmlMapper configured with the specified deserialization config
+     */
     static XmlMapper getXmlMapper(final DeserializationConfig config) {
         if (config == null) {
             return defaultXmlMapper;
@@ -1167,6 +1165,13 @@ public final class XmlMappers {
         return mapper;
     }
 
+    /**
+     * Returns an XmlMapper to the pool for reuse after resetting it to default configuration.
+     * This method resets both serialization and deserialization configs to their defaults
+     * before returning the mapper to the pool. If the pool is full, the mapper is discarded.
+     *
+     * @param mapper the XmlMapper to return to the pool, or {@code null} (which is ignored)
+     */
     static void recycle(final XmlMapper mapper) {
         if (mapper == null) {
             return;
@@ -1562,15 +1567,15 @@ public final class XmlMappers {
             }
         }
 
-        /**         
-         * Deserializes an XML string into an object of the specified generic type with custom deserialization features
+        /**
+         * Deserializes XML from a file into an object of the specified generic type
          * using the wrapped XmlMapper.
          *
          * @param <T> the type of the object to return
-         * @param xml the XML string to deserialize
-         * @param targetType the type reference describing the target type
+         * @param xml the XML file to read from
+         * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
          * @return the deserialized object
-         * @throws RuntimeException if deserialization fails
+         * @throws RuntimeException if deserialization fails or file cannot be read
          * @see com.fasterxml.jackson.core.type.TypeReference
          */
         public <T> T fromXml(final File xml, final TypeReference<? extends T> targetType) {
@@ -1582,14 +1587,14 @@ public final class XmlMappers {
         }
 
         /**
-         * Deserializes XML from a file into an object of the specified generic type
-         * using the wrapped XmlMapper.
+         * Deserializes XML from an input stream into an object of the specified generic type
+         * using the wrapped XmlMapper. The stream is not closed by this method.
          *
          * @param <T> the type of the object to return
          * @param xml the InputStream containing XML data
          * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
          * @return the deserialized object
-         * @throws RuntimeException if deserialization fails or file cannot be read
+         * @throws RuntimeException if deserialization fails
          * @see com.fasterxml.jackson.core.type.TypeReference
          */
         public <T> T fromXml(final InputStream xml, final TypeReference<? extends T> targetType) {

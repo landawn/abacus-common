@@ -19,9 +19,11 @@ import java.util.function.LongPredicate;
 import java.util.function.LongUnaryOperator;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class LongList200Test extends TestBase {
 
     @Test
@@ -36,7 +38,6 @@ public class LongList200Test extends TestBase {
         LongList list = new LongList(10);
         assertEquals(0, list.size());
         assertTrue(list.isEmpty());
-        // Internal capacity check - though not guaranteed, it's a good verification
         assertTrue(list.array().length >= 10 || list.array().length == 0);
     }
 
@@ -46,7 +47,6 @@ public class LongList200Test extends TestBase {
         LongList list = new LongList(a);
         assertEquals(3, list.size());
         assertArrayEquals(a, list.toArray());
-        // The internal array is the same instance
         assertSame(a, list.array());
     }
 
@@ -85,7 +85,6 @@ public class LongList200Test extends TestBase {
         LongList list = LongList.copyOf(a);
         assertEquals(3, list.size());
         assertArrayEquals(a, list.toArray());
-        // Ensure it's a copy
         a[0] = 99L;
         assertEquals(1L, list.get(0));
     }
@@ -226,7 +225,7 @@ public class LongList200Test extends TestBase {
         LongList list = LongList.of(1L, 2L, 2L, 3L, 1L, 4L, 4L);
         assertTrue(list.removeDuplicates());
         assertArrayEquals(new long[] { 1L, 2L, 3L, 4L }, list.toArray());
-        assertFalse(list.removeDuplicates()); // Already unique
+        assertFalse(list.removeDuplicates());
     }
 
     @Test
@@ -251,7 +250,7 @@ public class LongList200Test extends TestBase {
         LongList list = LongList.of(0L, 1L, 2L, 3L, 4L, 5L);
         list.deleteAllByIndices(1, 3, 5);
         assertArrayEquals(new long[] { 0L, 2L, 4L }, list.toArray());
-        list.deleteAllByIndices(); // Should do nothing
+        list.deleteAllByIndices();
         assertArrayEquals(new long[] { 0L, 2L, 4L }, list.toArray());
     }
 
@@ -260,7 +259,7 @@ public class LongList200Test extends TestBase {
         LongList list = LongList.of(0L, 1L, 2L, 3L, 4L, 5L);
         list.deleteRange(1, 4);
         assertArrayEquals(new long[] { 0L, 4L, 5L }, list.toArray());
-        list.deleteRange(2, 2); // Should do nothing
+        list.deleteRange(2, 2);
         assertArrayEquals(new long[] { 0L, 4L, 5L }, list.toArray());
     }
 
@@ -431,7 +430,7 @@ public class LongList200Test extends TestBase {
     public void testBinarySearch() {
         LongList list = LongList.of(11L, 22L, 33L, 44L, 55L);
         assertEquals(2, list.binarySearch(33L));
-        assertTrue(list.binarySearch(30L) < 0); // Not found
+        assertTrue(list.binarySearch(30L) < 0);
     }
 
     @Test
@@ -502,7 +501,7 @@ public class LongList200Test extends TestBase {
 
         long[] toArray = list.toArray();
         assertArrayEquals(a, toArray);
-        assertNotSame(a, toArray); // Should be a copy
+        assertNotSame(a, toArray);
     }
 
     @Test

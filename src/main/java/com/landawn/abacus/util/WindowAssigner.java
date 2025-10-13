@@ -31,7 +31,6 @@ package com.landawn.abacus.util;
  * 
  * <p>This is an internal class used by the Stream API's windowing operations.</p>
  *
- * @author Haiyang Li
  * @since 5.3.0
  */
 public abstract class WindowAssigner {

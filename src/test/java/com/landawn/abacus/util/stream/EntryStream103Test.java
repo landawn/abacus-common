@@ -1,10 +1,10 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -54,6 +55,7 @@ import com.landawn.abacus.util.RateLimiter;
 import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 
+@Tag("new-test")
 public class EntryStream103Test extends TestBase {
 
     private Map<String, Integer> testMap;
@@ -1042,11 +1044,7 @@ public class EntryStream103Test extends TestBase {
         map.put("b", 2);
 
         EntryStream<String, Integer> stream = EntryStream.of(map);
-        List<Map.Entry<String, Integer>> sorted = stream.sorted().toList();
-        assertEquals(3, sorted.size());
-        assertEquals("a", sorted.get(0).getKey());
-        assertEquals("b", sorted.get(1).getKey());
-        assertEquals("c", sorted.get(2).getKey());
+        assertThrows(UnsupportedOperationException.class, () -> stream.sorted().toList());
     }
 
     @Test
@@ -1162,11 +1160,7 @@ public class EntryStream103Test extends TestBase {
         map.put("c", 3);
 
         EntryStream<String, Integer> stream = EntryStream.of(map);
-        List<Map.Entry<String, Integer>> sorted = stream.reverseSorted().toList();
-        assertEquals(3, sorted.size());
-        assertEquals("c", sorted.get(0).getKey());
-        assertEquals("b", sorted.get(1).getKey());
-        assertEquals("a", sorted.get(2).getKey());
+        assertThrows(UnsupportedOperationException.class, () -> stream.reverseSorted().toList());
     }
 
     @Test
@@ -1313,7 +1307,6 @@ public class EntryStream103Test extends TestBase {
         EntryStream<String, Integer> stream = EntryStream.of(map);
         List<Map.Entry<String, Integer>> shuffled = stream.shuffled().toList();
         assertEquals(10, shuffled.size());
-        // Should contain all entries
         for (int i = 0; i < 10; i++) {
             final int val = i;
             assertTrue(shuffled.stream().anyMatch(e -> e.getValue() == val));
@@ -1478,13 +1471,11 @@ public class EntryStream103Test extends TestBase {
         Map<String, Integer> defaults = new LinkedHashMap<>();
         defaults.put("default", 0);
 
-        // Empty stream
         EntryStream<String, Integer> emptyStream = EntryStream.empty();
         List<Map.Entry<String, Integer>> result1 = emptyStream.appendIfEmpty(defaults).toList();
         assertEquals(1, result1.size());
         assertEquals("default", result1.get(0).getKey());
 
-        // Non-empty stream
         EntryStream<String, Integer> nonEmptyStream = EntryStream.of("a", 1);
         List<Map.Entry<String, Integer>> result2 = nonEmptyStream.appendIfEmpty(defaults).toList();
         assertEquals(1, result2.size());
@@ -1495,13 +1486,11 @@ public class EntryStream103Test extends TestBase {
     public void testAppendIfEmptySupplier() {
         Supplier<EntryStream<String, Integer>> defaultSupplier = () -> EntryStream.of("default", 0);
 
-        // Empty stream
         EntryStream<String, Integer> emptyStream = EntryStream.empty();
         List<Map.Entry<String, Integer>> result1 = emptyStream.appendIfEmpty(defaultSupplier).toList();
         assertEquals(1, result1.size());
         assertEquals("default", result1.get(0).getKey());
 
-        // Non-empty stream
         EntryStream<String, Integer> nonEmptyStream = EntryStream.of("a", 1);
         List<Map.Entry<String, Integer>> result2 = nonEmptyStream.appendIfEmpty(defaultSupplier).toList();
         assertEquals(1, result2.size());
@@ -1512,15 +1501,13 @@ public class EntryStream103Test extends TestBase {
     public void testIfEmpty() {
         AtomicInteger counter = new AtomicInteger(0);
 
-        // Empty stream
         EntryStream<String, Integer> emptyStream = EntryStream.empty();
         emptyStream.ifEmpty(() -> counter.incrementAndGet()).toList();
         assertEquals(1, counter.get());
 
-        // Non-empty stream
         EntryStream<String, Integer> nonEmptyStream = EntryStream.of(testMap);
         nonEmptyStream.ifEmpty(() -> counter.incrementAndGet()).toList();
-        assertEquals(1, counter.get()); // Should not increment
+        assertEquals(1, counter.get());
     }
 
     @Test
@@ -1589,7 +1576,7 @@ public class EntryStream103Test extends TestBase {
 
     @Test
     public void testRateLimited() {
-        RateLimiter rateLimiter = RateLimiter.create(10.0); // 10 permits per second
+        RateLimiter rateLimiter = RateLimiter.create(10.0);
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("a", 1);
         map.put("b", 2);
@@ -1611,7 +1598,7 @@ public class EntryStream103Test extends TestBase {
         long duration = System.currentTimeMillis() - start;
 
         assertEquals(2, result.size());
-        assertTrue(duration >= 10); // At least 10ms delay
+        assertTrue(duration >= 10);
     }
 
     @Test
@@ -2504,8 +2491,6 @@ public class EntryStream103Test extends TestBase {
         assertTrue(closed.get());
     }
 
-    // Static factory methods tests
-
     @Test
     public void testEmpty() {
         EntryStream<String, Integer> empty = EntryStream.empty();
@@ -2858,12 +2843,9 @@ public class EntryStream103Test extends TestBase {
         assertEquals(30, result.get(1).getValue());
     }
 
-    // Edge cases and error conditions
-
     @Test
     public void testEmptyStreamOperations() {
 
-        // Test various operations on empty stream
         assertEquals(0, EntryStream.empty().count());
         assertFalse(EntryStream.empty().first().isPresent());
         assertFalse(EntryStream.empty().last().isPresent());
@@ -2897,7 +2879,6 @@ public class EntryStream103Test extends TestBase {
 
         EntryStream<String, Integer> parallel = EntryStream.of(largeMap).parallel();
 
-        // Test that parallel operations work correctly
         long count = parallel.filter((k, v) -> v % 2 == 0).count();
         assertEquals(500, count);
 
@@ -2909,9 +2890,8 @@ public class EntryStream103Test extends TestBase {
     @Test
     public void testStreamReuse() {
         EntryStream<String, Integer> stream = EntryStream.of(testMap);
-        stream.toList(); // Consume the stream
+        stream.toList();
 
-        // Attempting to use the stream again should throw exception
         assertThrows(Exception.class, () -> stream.toMap());
     }
 
@@ -2943,11 +2923,9 @@ public class EntryStream103Test extends TestBase {
         List<Map.Entry<String, Integer>> entries = Arrays.asList(new AbstractMap.SimpleEntry<>("a", 1), new AbstractMap.SimpleEntry<>("a", 2),
                 new AbstractMap.SimpleEntry<>("a", 3));
 
-        // Test that duplicate keys throw exception without merge function
         EntryStream<String, Integer> stream = EntryStream.of(entries);
         assertThrows(IllegalStateException.class, () -> stream.toMap());
 
-        // Test merge function handling
         EntryStream<String, Integer> stream2 = EntryStream.of(entries);
         Map<String, Integer> merged = stream2.toMap(Integer::sum);
         assertEquals(6, merged.get("a"));
@@ -2955,13 +2933,11 @@ public class EntryStream103Test extends TestBase {
 
     @Test
     public void testLargeDatasetPerformance() {
-        // Create a large dataset
         Map<Integer, String> largeMap = new HashMap<>();
         for (int i = 0; i < 10000; i++) {
             largeMap.put(i, "value" + i);
         }
 
-        // Test performance of various operations
         long start = System.currentTimeMillis();
 
         Map<String, List<Integer>> grouped = EntryStream.of(largeMap)
@@ -2971,16 +2947,14 @@ public class EntryStream103Test extends TestBase {
 
         long duration = System.currentTimeMillis() - start;
 
-        // Verify results
         assertEquals(10, grouped.size());
-        assertTrue(duration < 1000); // Should complete in reasonable time
+        assertTrue(duration < 1000);
     }
 
     @Test
     public void testCustomCollectors() {
         EntryStream<String, Integer> stream = EntryStream.of(testMap);
 
-        // Test with custom collector
         String result = stream
                 .collect(Collector.of(StringBuilder::new, (sb, entry) -> sb.append(entry.getKey()).append(":").append(entry.getValue()).append(";"),
                         (sb1, sb2) -> sb1.append(sb2), StringBuilder::toString));
@@ -2992,14 +2966,11 @@ public class EntryStream103Test extends TestBase {
 
     @Test
     public void testMapperFunctions() {
-        // Test various mapper edge cases
         EntryStream<String, Integer> stream = EntryStream.of(testMap);
 
-        // Test identity mapping
         Map<String, Integer> identity = stream.map(e -> e).toMap();
         assertEquals(testMap, identity);
 
-        // Test null-producing mappers
         EntryStream<String, Integer> stream2 = EntryStream.of("a", 1);
         Map<String, Integer> nullMapped = stream2.mapKey(k -> (String) null).toMap();
         assertEquals(1, nullMapped.get(null));
@@ -3009,14 +2980,11 @@ public class EntryStream103Test extends TestBase {
     public void testPredicateEdgeCases() {
         EntryStream<String, Integer> stream = EntryStream.of(testMap);
 
-        // Always true predicate
         assertEquals(3, stream.filter(e -> true).count());
 
-        // Always false predicate
         EntryStream<String, Integer> stream2 = EntryStream.of(testMap);
         assertEquals(0, stream2.filter(e -> false).count());
 
-        // Null-safe predicates
         Map<String, Integer> mapWithNull = new HashMap<>();
         mapWithNull.put("a", null);
         EntryStream<String, Integer> stream3 = EntryStream.of(mapWithNull);
@@ -3030,29 +2998,23 @@ public class EntryStream103Test extends TestBase {
         map.put("b", 1);
         map.put("c", 1);
 
-        // Test stable sort with equal values
         EntryStream<String, Integer> stream = EntryStream.of(map);
         List<Map.Entry<String, Integer>> sorted = stream.sortedByValue(Comparator.naturalOrder()).toList();
 
         assertEquals(3, sorted.size());
-        // All values are equal, so order should be preserved
     }
 
     @Test
     public void testBoundaryConditions() {
-        // Test with single element
         EntryStream<String, Integer> single = EntryStream.of("a", 1);
         assertEquals(1, single.count());
 
-        // Test with very large values
         EntryStream<String, Long> large = EntryStream.of("max", Long.MAX_VALUE);
         assertEquals(Long.MAX_VALUE, large.first().get().getValue());
 
-        // Test with negative indices
         EntryStream<String, Integer> stream = EntryStream.of(testMap);
         assertThrows(IllegalArgumentException.class, () -> stream.skip(-1));
 
-        // Test with zero limits
         EntryStream<String, Integer> stream2 = EntryStream.of(testMap);
         assertEquals(0, stream2.limit(0).count());
     }
@@ -3067,7 +3029,6 @@ public class EntryStream103Test extends TestBase {
         List<Thread> threads = new ArrayList<>();
         List<Map<String, Integer>> results = Collections.synchronizedList(new ArrayList<>());
 
-        // Create multiple threads that process the same stream source
         for (int i = 0; i < 10; i++) {
             Thread thread = new Thread(() -> {
                 Map<String, Integer> result = EntryStream.of(concurrentMap).filter((k, v) -> v % 2 == 0).toMap();
@@ -3077,12 +3038,10 @@ public class EntryStream103Test extends TestBase {
             thread.start();
         }
 
-        // Wait for all threads to complete
         for (Thread thread : threads) {
             thread.join();
         }
 
-        // Verify all threads got the same result
         assertEquals(10, results.size());
         for (Map<String, Integer> result : results) {
             assertEquals(50, result.size());
@@ -3091,10 +3050,8 @@ public class EntryStream103Test extends TestBase {
 
     @Test
     public void testMemoryEfficiency() {
-        // Test that streams don't unnecessarily store all elements
         AtomicInteger counter = new AtomicInteger(0);
 
-        // Create a large stream but only take first few elements
         Map<Integer, Integer> largeMap = new HashMap<>();
         for (int i = 0; i < 1000000; i++) {
             largeMap.put(i, i);
@@ -3103,8 +3060,7 @@ public class EntryStream103Test extends TestBase {
         List<Map.Entry<Integer, Integer>> firstTen = EntryStream.of(largeMap).peek(e -> counter.incrementAndGet()).limit(10).toList();
 
         assertEquals(10, firstTen.size());
-        // Due to lazy evaluation, only necessary elements should be processed
-        assertTrue(counter.get() <= 1000); // Much less than 1,000,000
+        assertTrue(counter.get() <= 1000);
     }
 
     @Test
@@ -3113,7 +3069,6 @@ public class EntryStream103Test extends TestBase {
         map.put("a", 1);
         map.put("b", 2);
 
-        // Test that exceptions in mappers are properly propagated
         EntryStream<String, Integer> stream = EntryStream.of(map);
         assertThrows(RuntimeException.class, () -> stream.map(e -> {
             if (e.getKey().equals("b")) {
@@ -3127,14 +3082,12 @@ public class EntryStream103Test extends TestBase {
     public void testResourceManagement() {
         AtomicBoolean resourceClosed = new AtomicBoolean(false);
 
-        // Test that close handlers are called even when exception occurs
         try {
             EntryStream.of(testMap).onClose(() -> resourceClosed.set(true)).map(e -> {
                 throw new RuntimeException("Force exception");
             }).toList();
             fail("Should have thrown exception");
         } catch (RuntimeException e) {
-            // Expected
         }
 
         assertTrue(resourceClosed.get());

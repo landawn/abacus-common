@@ -11,11 +11,13 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class FloatType100Test extends TestBase {
 
     private FloatType floatType;
@@ -41,7 +43,6 @@ public class FloatType100Test extends TestBase {
 
     @Test
     public void testGetByColumnIndex() throws SQLException {
-        // Test with Float object
         Float expectedFloat = 3.14f;
         when(resultSet.getObject(1)).thenReturn(expectedFloat);
 
@@ -49,11 +50,9 @@ public class FloatType100Test extends TestBase {
         assertEquals(expectedFloat, result);
         verify(resultSet).getObject(1);
 
-        // Test with null
         when(resultSet.getObject(2)).thenReturn(null);
         assertNull(floatType.get(resultSet, 2));
 
-        // Test with other Number type
         when(resultSet.getObject(3)).thenReturn(42);
         result = floatType.get(resultSet, 3);
         assertEquals(42.0f, result);
@@ -61,7 +60,6 @@ public class FloatType100Test extends TestBase {
 
     @Test
     public void testGetByColumnLabel() throws SQLException {
-        // Test with Float object
         Float expectedFloat = 3.14f;
         when(resultSet.getObject("floatColumn")).thenReturn(expectedFloat);
 
@@ -69,11 +67,9 @@ public class FloatType100Test extends TestBase {
         assertEquals(expectedFloat, result);
         verify(resultSet).getObject("floatColumn");
 
-        // Test with null
         when(resultSet.getObject("nullColumn")).thenReturn(null);
         assertNull(floatType.get(resultSet, "nullColumn"));
 
-        // Test with other Number type
         when(resultSet.getObject("intColumn")).thenReturn(42);
         result = floatType.get(resultSet, "intColumn");
         assertEquals(42.0f, result);

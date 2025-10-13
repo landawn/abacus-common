@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -71,6 +72,7 @@ import com.landawn.abacus.util.function.ShortBiFunction;
 import com.landawn.abacus.util.function.ShortNFunction;
 import com.landawn.abacus.util.function.ShortTriFunction;
 
+@Tag("new-test")
 public class Stream101Test extends TestBase {
 
     @Mock
@@ -92,7 +94,6 @@ public class Stream101Test extends TestBase {
 
     @AfterEach
     public void tearDown() {
-        // Clean up resources if needed
     }
 
     protected Stream<Boolean> createStream(final boolean... data) {
@@ -184,17 +185,16 @@ public class Stream101Test extends TestBase {
     }
 
     protected <T> Stream<T> createStream(final Optional<T> op) {
-        return op == null || op.isEmpty() ? Stream.empty() : Stream.of(op.get()); //NOSONAR
+        return op == null || op.isEmpty() ? Stream.empty() : Stream.of(op.get());
     }
 
     protected <T> Stream<T> createStream(final java.util.Optional<T> op) {
-        return op == null || op.isEmpty() ? Stream.empty() : Stream.of(op.get()); //NOSONAR
+        return op == null || op.isEmpty() ? Stream.empty() : Stream.of(op.get());
     }
 
     protected <T> Stream<T> createStream(final Enumeration<? extends T> enumeration) {
         return Stream.of(enumeration);
     }
-    // Tests for zip methods with char arrays and functions
 
     @Test
     public void testZipCharArraysWithBiFunction() {
@@ -308,8 +308,6 @@ public class Stream101Test extends TestBase {
         assertEquals("by2", result.get(1));
         assertEquals("cz3", result.get(2));
     }
-
-    // Tests for zip with valueForNone parameters for char
 
     @Test
     public void testZipCharArraysWithValueForNone() {
@@ -426,8 +424,6 @@ public class Stream101Test extends TestBase {
         assertEquals("-+3", result.get(2));
     }
 
-    // Tests for zip methods with byte arrays and functions
-
     @Test
     public void testZipByteArraysWithBiFunction() {
         byte[] a = { 1, 2, 3 };
@@ -541,8 +537,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Integer.valueOf(15), result.get(1));
         assertEquals(Integer.valueOf(18), result.get(2));
     }
-
-    // Tests for zip with valueForNone parameters for byte
 
     @Test
     public void testZipByteArraysWithValueForNone() {
@@ -659,8 +653,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Integer.valueOf(39), result.get(2));
     }
 
-    // Tests for zip methods with short arrays and functions
-
     @Test
     public void testZipShortArraysWithBiFunction() {
         short[] a = { 1, 2, 3 };
@@ -774,8 +766,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Integer.valueOf(15), result.get(1));
         assertEquals(Integer.valueOf(18), result.get(2));
     }
-
-    // Tests for zip with valueForNone parameters for short
 
     @Test
     public void testZipShortArraysWithValueForNone() {
@@ -893,8 +883,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Integer.valueOf(39), result.get(2));
     }
 
-    // Tests for zip methods with int arrays and functions
-
     @Test
     public void testZipIntArraysWithBiFunction() {
         int[] a = { 1, 2, 3 };
@@ -1007,8 +995,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Integer.valueOf(15), result.get(1));
         assertEquals(Integer.valueOf(18), result.get(2));
     }
-
-    // Tests for zip with valueForNone parameters for int
 
     @Test
     public void testZipIntArraysWithValueForNone() {
@@ -1125,8 +1111,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Integer.valueOf(39), result.get(2));
     }
 
-    // Tests for zip methods with long arrays and functions
-
     @Test
     public void testZipLongArraysWithBiFunction() {
         long[] a = { 1L, 2L, 3L };
@@ -1239,8 +1223,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Long.valueOf(15L), result.get(1));
         assertEquals(Long.valueOf(18L), result.get(2));
     }
-
-    // Tests for zip with valueForNone parameters for long
 
     @Test
     public void testZipLongArraysWithValueForNone() {
@@ -1357,8 +1339,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Long.valueOf(39L), result.get(2));
     }
 
-    // Tests for zip methods with float arrays and functions
-
     @Test
     public void testZipFloatArraysWithBiFunction() {
         float[] a = { 1f, 2f, 3f };
@@ -1471,8 +1451,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Float.valueOf(15f), result.get(1));
         assertEquals(Float.valueOf(18f), result.get(2));
     }
-
-    // Tests for zip with valueForNone parameters for float
 
     @Test
     public void testZipFloatArraysWithValueForNone() {
@@ -1702,8 +1680,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Double.valueOf(18d), result.get(2));
     }
 
-    // Tests for zip with valueForNone parameters for double
-
     @Test
     public void testZipDoubleArraysWithValueForNone() {
         double[] a = { 1d, 2d };
@@ -1819,7 +1795,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Double.valueOf(39d), result.get(2));
     }
 
-    // Test for split(CharSequence str, char delimiter)
     @Test
     public void testSplitWithCharDelimiter() {
         List<String> result = Stream.split("a,b,c", ',').toList();
@@ -1835,7 +1810,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("abc"), result);
     }
 
-    // Test for split(CharSequence str, CharSequence delimiter)
     @Test
     public void testSplitWithCharSequenceDelimiter() {
         List<String> result = Stream.split("a::b::c", "::").toList();
@@ -1848,7 +1822,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("test"), result);
     }
 
-    // Test for split(CharSequence str, Pattern pattern)
     @Test
     public void testSplitWithPattern() {
         Pattern pattern = Pattern.compile("\\s+");
@@ -1860,7 +1833,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("a", "b", "c", "d"), result);
     }
 
-    // Test for splitToLines(String str)
     @Test
     public void testSplitToLines() {
         String multiLine = "line1\nline2\rline3\r\nline4";
@@ -1878,35 +1850,29 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(""), result);
     }
 
-    // Test for splitToLines(String str, boolean trim, boolean omitEmptyLines)
     @Test
     public void testSplitToLinesWithOptions() {
         String multiLine = "  line1  \n\n  line2  \n\n";
 
-        // No trim, no omit empty
         List<String> result = Stream.splitToLines(multiLine, false, false).toList();
         assertTrue(result.contains("  line1  "));
         assertTrue(result.contains("  line2  "));
         assertTrue(result.contains(""));
 
-        // Trim only
         result = Stream.splitToLines(multiLine, true, false).toList();
         assertTrue(result.contains("line1"));
         assertTrue(result.contains("line2"));
         assertTrue(result.contains(""));
 
-        // Omit empty only
         result = Stream.splitToLines(multiLine, false, true).toList();
         assertTrue(result.contains("  line1  "));
         assertTrue(result.contains("  line2  "));
         assertFalse(result.contains(""));
 
-        // Both trim and omit empty
         result = Stream.splitToLines(multiLine, true, true).toList();
         assertEquals(Arrays.asList("line1", "line2"), result);
     }
 
-    // Test for splitByChunkCount(int totalSize, int maxChunkCount, IntBiFunction<T> mapper)
     @Test
     public void testSplitByChunkCount() {
         List<String> result = Stream.splitByChunkCount(10, 3, (from, to) -> from + "-" + to).toList();
@@ -1922,10 +1888,8 @@ public class Stream101Test extends TestBase {
         assertTrue(result.isEmpty());
     }
 
-    // Test for splitByChunkCount with sizeSmallerFirst option
     @Test
     public void testSplitByChunkCountWithSizeSmallerFirst() {
-        // Size smaller first = true
         List<String> result = Stream.splitByChunkCount(7, 5, true, (from, to) -> from + "-" + to).toList();
         assertEquals(5, result.size());
         assertEquals("0-1", result.get(0));
@@ -1934,7 +1898,6 @@ public class Stream101Test extends TestBase {
         assertEquals("3-5", result.get(3));
         assertEquals("5-7", result.get(4));
 
-        // Size smaller first = false
         result = Stream.splitByChunkCount(7, 5, false, (from, to) -> from + "-" + to).toList();
         assertEquals(5, result.size());
         assertEquals("0-2", result.get(0));
@@ -1954,7 +1917,6 @@ public class Stream101Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Stream.splitByChunkCount(10, 0, (from, to) -> from + "-" + to));
     }
 
-    // Test for flatten(Collection<? extends Collection<? extends T>> c)
     @Test
     public void testFlattenCollection() {
         List<List<Integer>> nested = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5), Arrays.asList(6, 7, 8, 9));
@@ -1962,18 +1924,15 @@ public class Stream101Test extends TestBase {
         List<Integer> result = Stream.flatten(nested).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), result);
 
-        // Empty collection
         List<List<Integer>> empty = new ArrayList<>();
         result = Stream.flatten(empty).toList();
         assertTrue(result.isEmpty());
 
-        // Collection with empty sub-collections
         nested = Arrays.asList(new ArrayList<>(), Arrays.asList(1, 2), new ArrayList<>());
         result = Stream.flatten(nested).toList();
         assertEquals(Arrays.asList(1, 2), result);
     }
 
-    // Test for flatten(T[][] a)
     @Test
     public void testFlatten2DArray() {
         Integer[][] array = { { 1, 2, 3 }, { 4, 5 }, { 6, 7, 8, 9 } };
@@ -1981,51 +1940,41 @@ public class Stream101Test extends TestBase {
         List<Integer> result = Stream.flatten(array).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), result);
 
-        // Empty array
         Integer[][] empty = new Integer[0][];
         result = Stream.flatten(empty).toList();
         assertTrue(result.isEmpty());
 
-        // Array with null rows
         Integer[][] withNulls = { { 1, 2 }, null, { 3, 4 } };
         result = Stream.flatten(withNulls).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }
 
-    // Test for flatten(T[][] a, boolean vertically)
     @Test
     public void testFlatten2DArrayVertically() {
         Integer[][] array = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
 
-        // Horizontal (default)
         List<Integer> result = Stream.flatten(array, false).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), result);
 
-        // Vertical
         result = Stream.flatten(array, true).toList();
         assertEquals(Arrays.asList(1, 4, 7, 2, 5, 8, 3, 6, 9), result);
 
-        // Jagged array vertical
         Integer[][] jagged = { { 1, 2, 3 }, { 4, 5 }, { 6 } };
         result = Stream.flatten(jagged, true).toList();
         assertEquals(Arrays.asList(1, 4, 6, 2, 5, 3), result);
     }
 
-    // Test for flatten(T[][] a, T valueForAlignment, boolean vertically)
     @Test
     public void testFlatten2DArrayWithAlignment() {
         Integer[][] array = { { 1, 2 }, { 3, 4, 5 }, { 6 } };
 
-        // Horizontal with alignment
         List<Integer> result = Stream.flatten(array, 0, false).toList();
         assertEquals(Arrays.asList(1, 2, 0, 3, 4, 5, 6, 0, 0), result);
 
-        // Vertical with alignment
         result = Stream.flatten(array, -1, true).toList();
         assertEquals(Arrays.asList(1, 3, 6, 2, 4, -1, -1, 5, -1), result);
     }
 
-    // Test for flatten(T[][][] a)
     @Test
     public void testFlatten3DArray() {
         Integer[][][] array = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
@@ -2033,13 +1982,11 @@ public class Stream101Test extends TestBase {
         List<Integer> result = Stream.flatten(array).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), result);
 
-        // Empty 3D array
         Integer[][][] empty = new Integer[0][][];
         result = Stream.flatten(empty).toList();
         assertTrue(result.isEmpty());
     }
 
-    // Test for repeat(T element, long n)
     @Test
     public void testRepeat() {
         List<String> result = Stream.repeat("test", 3).toList();
@@ -2057,7 +2004,6 @@ public class Stream101Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Stream.repeat("test", -1));
     }
 
-    // Test for iterate(BooleanSupplier hasNext, Supplier<T> next)
     @Test
     public void testIterateWithBooleanSupplier() {
         final int[] count = { 0 };
@@ -2066,7 +2012,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(0, 1, 2, 3, 4), result);
     }
 
-    // Test for iterate(T init, BooleanSupplier hasNext, UnaryOperator<T> f)
     @Test
     public void testIterateWithInitAndBooleanSupplier() {
         final int[] count = { 0 };
@@ -2075,7 +2020,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 4, 8), result);
     }
 
-    // Test for iterate(T init, Predicate<T> hasNext, UnaryOperator<T> f)
     @Test
     public void testIterateWithInitAndPredicate() {
         List<Integer> result = Stream.iterate(1, n -> n < 20, n -> n * 2).toList();
@@ -2083,7 +2027,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 4, 8, 16), result);
     }
 
-    // Test for iterate(T init, UnaryOperator<T> f)
     @Test
     public void testIterateInfinite() {
         List<Integer> result = Stream.iterate(1, n -> n + 1).limit(5).toList();
@@ -2091,7 +2034,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
     }
 
-    // Test for generate(Supplier<T> supplier)
     @Test
     public void testGenerate() {
         final int[] counter = { 0 };
@@ -2099,13 +2041,11 @@ public class Stream101Test extends TestBase {
 
         assertEquals(Arrays.asList(0, 1, 2, 3, 4), result);
 
-        // Constant generator
         result = Stream.generate(() -> 42).limit(3).toList();
 
         assertEquals(Arrays.asList(42, 42, 42), result);
     }
 
-    // Test for ofLines(File file)
     @Test
     public void testOfLinesFromFile() throws IOException {
         File tempFile = File.createTempFile("test", ".txt");
@@ -2119,7 +2059,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("line1", "line2", "line3"), result);
     }
 
-    // Test for ofLines(File file, Charset charset)
     @Test
     public void testOfLinesFromFileWithCharset() throws IOException {
         File tempFile = File.createTempFile("test", ".txt");
@@ -2132,7 +2071,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("Hello", "World", "你好"), result);
     }
 
-    // Test for ofLines(Path path)
     @Test
     public void testOfLinesFromPath() throws IOException {
         Path tempPath = Files.createTempFile("test", ".txt");
@@ -2146,7 +2084,6 @@ public class Stream101Test extends TestBase {
         Files.deleteIfExists(tempPath);
     }
 
-    // Test for ofLines(Path path, Charset charset)
     @Test
     public void testOfLinesFromPathWithCharset() throws IOException {
         Path tempPath = Files.createTempFile("test", ".txt");
@@ -2161,7 +2098,6 @@ public class Stream101Test extends TestBase {
         Files.deleteIfExists(tempPath);
     }
 
-    // Test for ofLines(Reader reader)
     @Test
     public void testOfLinesFromReader() throws IOException {
         String content = "reader1\nreader2\nreader3";
@@ -2171,7 +2107,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("reader1", "reader2", "reader3"), result);
     }
 
-    // Test for ofLines(Reader reader, boolean closeReaderWhenStreamIsClosed)
     @Test
     public void testOfLinesFromReaderWithCloseOption() throws IOException {
         String content = "test1\ntest2";
@@ -2182,10 +2117,8 @@ public class Stream101Test extends TestBase {
             assertEquals(Arrays.asList("test1", "test2"), result);
         }
 
-        // Reader should be closed, but StringReader doesn't throw on operations after close
     }
 
-    // Test for listFiles(File parentPath)
     @Test
     public void testListFiles() throws IOException {
         File tempDir = Files.createTempDirectory("test").toFile();
@@ -2206,13 +2139,11 @@ public class Stream101Test extends TestBase {
         List<File> files = Stream.listFiles(tempDir).toList();
         assertEquals(3, files.size());
 
-        // Non-existent directory
         File nonExistent = new File("non_existent_dir");
         files = Stream.listFiles(nonExistent).toList();
         assertTrue(files.isEmpty());
     }
 
-    // Test for listFiles(File parentPath, boolean recursively)
     @Test
     public void testListFilesRecursively() throws IOException {
         File tempDir = Files.createTempDirectory("test").toFile();
@@ -2230,16 +2161,13 @@ public class Stream101Test extends TestBase {
         file2.deleteOnExit();
         subDir.deleteOnExit();
 
-        // Non-recursive
         List<File> files = Stream.listFiles(tempDir, false).toList();
-        assertEquals(2, files.size()); // file1 and subdir
+        assertEquals(2, files.size());
 
-        // Recursive
         files = Stream.listFiles(tempDir, true).toList();
-        assertEquals(3, files.size()); // file1, subdir, and file2
+        assertEquals(3, files.size());
     }
 
-    // Test for listFiles(File parentPath, boolean recursively, boolean excludeDirectory)
     @Test
     public void testListFilesExcludeDirectory() throws IOException {
         File tempDir = Files.createTempDirectory("test").toFile();
@@ -2257,13 +2185,11 @@ public class Stream101Test extends TestBase {
         file2.deleteOnExit();
         subDir.deleteOnExit();
 
-        // Exclude directories
         List<File> files = Stream.listFiles(tempDir, true, true).toList();
-        assertEquals(2, files.size()); // Only file1 and file2, no subdir
+        assertEquals(2, files.size());
         assertTrue(files.stream().allMatch(File::isFile));
     }
 
-    // Test for interval(long intervalInMillis, Supplier<T> s)
     @Test
     public void testIntervalWithSupplier() throws InterruptedException {
         final int[] counter = { 0 };
@@ -2273,7 +2199,6 @@ public class Stream101Test extends TestBase {
         assertTrue(counter[0] >= 3);
     }
 
-    // Test for interval(long delayInMillis, long intervalInMillis, Supplier<T> s)
     @Test
     public void testIntervalWithDelayAndSupplier() throws InterruptedException {
         final int[] counter = { 0 };
@@ -2284,10 +2209,9 @@ public class Stream101Test extends TestBase {
         long elapsedTime = System.currentTimeMillis() - startTime;
 
         assertEquals(Arrays.asList(0, 1, 2), result);
-        assertTrue(elapsedTime >= 50); // Should have initial delay
+        assertTrue(elapsedTime >= 50);
     }
 
-    // Test for interval(long delay, long interval, TimeUnit unit, Supplier<T> s)
     @Test
     public void testIntervalWithTimeUnit() throws InterruptedException {
         final int[] counter = { 0 };
@@ -2297,7 +2221,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(0, 1, 2), result);
     }
 
-    // Test for interval(long intervalInMillis, LongFunction<T> s)
     @Test
     public void testIntervalWithLongFunction() throws InterruptedException {
         List<String> result = Stream.interval(10, time -> "Time: " + time).limit(2).toList();
@@ -2307,7 +2230,6 @@ public class Stream101Test extends TestBase {
         assertTrue(result.get(1).startsWith("Time: "));
     }
 
-    // Test for observe(BlockingQueue<T> queue, Duration duration)
     @Test
     public void testObserveWithDuration() throws InterruptedException {
         BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
@@ -2329,7 +2251,6 @@ public class Stream101Test extends TestBase {
         assertTrue(result.contains("item2"));
     }
 
-    // Test for observe(BlockingQueue<T> queue, BooleanSupplier hasMore, long maxWaitIntervalInMillis)
     @Test
     public void testObserveWithBooleanSupplier() throws InterruptedException {
         BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
@@ -2354,7 +2275,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("item1", "item2", "item3"), result);
     }
 
-    // Test for concat(T[]... a)
     @Test
     public void testConcatArrays() {
         Integer[] arr1 = { 1, 2, 3 };
@@ -2364,16 +2284,13 @@ public class Stream101Test extends TestBase {
         List<Integer> result = Stream.concat(arr1, arr2, arr3).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), result);
 
-        // Empty arrays
         result = Stream.concat(new Integer[0], arr1, new Integer[0]).toList();
         assertEquals(Arrays.asList(1, 2, 3), result);
 
-        // No arrays
         result = Stream.concat(new Integer[0][0]).toList();
         assertTrue(result.isEmpty());
     }
 
-    // Test for concat(Iterable<T>... a)
     @Test
     public void testConcatIterables() {
         List<Integer> list1 = Arrays.asList(1, 2, 3);
@@ -2385,7 +2302,6 @@ public class Stream101Test extends TestBase {
         assertTrue(result.containsAll(Arrays.asList(1, 2, 3, 4, 5, 6, 7)));
     }
 
-    // Test for concat(Iterator<T>... a)
     @Test
     public void testConcatIterators() {
         Iterator<Integer> iter1 = Arrays.asList(1, 2, 3).iterator();
@@ -2396,7 +2312,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), result);
     }
 
-    // Test for concat(Stream<T>... a)
     @Test
     public void testConcatStreams() {
         Stream<Integer> stream1 = createStream(1, 2, 3);
@@ -2407,7 +2322,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), result);
     }
 
-    // Test for concat(Collection<Stream<T>> streams)
     @Test
     public void testConcatStreamCollection() {
         List<Stream<Integer>> streams = Arrays.asList(createStream(1, 2), createStream(3, 4), createStream(5, 6));
@@ -2415,13 +2329,11 @@ public class Stream101Test extends TestBase {
         List<Integer> result = Stream.concat(streams).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
 
-        // Empty collection
         List<Stream<Integer>> emptyStreams = new ArrayList<>();
         result = Stream.concat(emptyStreams).toList();
         assertTrue(result.isEmpty());
     }
 
-    // Test for concatIterables(Collection<Iterable<T>> iterables)
     @Test
     public void testConcatIterablesCollection() {
         List<Iterable<Integer>> iterables = Arrays.asList(Arrays.asList(1, 2), new HashSet<>(Arrays.asList(3, 4)), Arrays.asList(5, 6));
@@ -2431,7 +2343,6 @@ public class Stream101Test extends TestBase {
         assertTrue(result.containsAll(Arrays.asList(1, 2, 3, 4, 5, 6)));
     }
 
-    // Test for concatIterators(Collection<Iterator<T>> c)
     @Test
     public void testConcatIteratorsCollection() {
         List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2).iterator(), Arrays.asList(3, 4).iterator(), Arrays.asList(5, 6).iterator());
@@ -2440,7 +2351,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
     }
 
-    // Test for zip with char arrays
     @Test
     public void testZipCharArrays() {
         char[] a = { 'a', 'b', 'c' };
@@ -2449,13 +2359,11 @@ public class Stream101Test extends TestBase {
         List<String> result = Stream.zip(a, b, (c1, c2) -> "" + c1 + c2).toList();
         assertEquals(Arrays.asList("ax", "by", "cz"), result);
 
-        // Different lengths
         char[] c = { '1', '2' };
         result = Stream.zip(a, c, (c1, c2) -> "" + c1 + c2).toList();
         assertEquals(Arrays.asList("a1", "b2"), result);
     }
 
-    // Test for zip with three char arrays
     @Test
     public void testZipThreeCharArrays() {
         char[] a = { 'a', 'b' };
@@ -2466,7 +2374,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("ax1", "by2"), result);
     }
 
-    // Test for zip with byte arrays
     @Test
     public void testZipByteArrays() {
         byte[] a = { 1, 2, 3 };
@@ -2476,7 +2383,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(11, 22, 33), result);
     }
 
-    // Test for zip with short arrays
     @Test
     public void testZipShortArrays() {
         short[] a = { 1, 2, 3 };
@@ -2486,7 +2392,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(11, 22, 33), result);
     }
 
-    // Test for zip with int arrays
     @Test
     public void testZipIntArrays() {
         int[] a = { 1, 2, 3 };
@@ -2496,7 +2401,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(11, 22, 33), result);
     }
 
-    // Test for zip with long arrays
     @Test
     public void testZipLongArrays() {
         long[] a = { 1L, 2L, 3L };
@@ -2506,7 +2410,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(11L, 22L, 33L), result);
     }
 
-    // Test for zip with float arrays
     @Test
     public void testZipFloatArrays() {
         float[] a = { 1.0f, 2.0f, 3.0f };
@@ -2516,7 +2419,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(11.0f, 22.0f, 33.0f), result);
     }
 
-    // Test for zip with double arrays
     @Test
     public void testZipDoubleArrays() {
         double[] a = { 1.0, 2.0, 3.0 };
@@ -2526,7 +2428,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(11.0, 22.0, 33.0), result);
     }
 
-    // Test for zip with object arrays
     @Test
     public void testZipObjectArrays() {
         String[] a = { "a", "b", "c" };
@@ -2536,7 +2437,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("a1", "b2", "c3"), result);
     }
 
-    // Test for zip with three object arrays
     @Test
     public void testZipThreeObjectArrays() {
         String[] a = { "a", "b" };
@@ -2547,7 +2447,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("a10.1", "b20.2"), result);
     }
 
-    // Test for zip with iterables
     @Test
     public void testZipIterables() {
         List<String> a = Arrays.asList("a", "b", "c");
@@ -2557,7 +2456,6 @@ public class Stream101Test extends TestBase {
         assertEquals(3, result.size());
     }
 
-    // Test for zip with iterators
     @Test
     public void testZipIterators() {
         Iterator<String> a = Arrays.asList("a", "b", "c").iterator();
@@ -2567,7 +2465,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("a1", "b2", "c3"), result);
     }
 
-    // Test for zip with streams
     @Test
     public void testZipStreams() {
         Stream<String> a = createStream01("a", "b", "c");
@@ -2577,7 +2474,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("a1", "b2", "c3"), result);
     }
 
-    // Test for zip with three streams
     @Test
     public void testZipThreeStreams() {
         Stream<String> a = createStream01("a", "b");
@@ -2588,7 +2484,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("a10.1", "b20.2"), result);
     }
 
-    // Test for zip with collection of streams
     @Test
     public void testZipStreamCollection() {
         List<Stream<Integer>> streams = Arrays.asList(createStream(1, 2, 3), createStream(10, 20, 30), createStream(100, 200, 300));
@@ -2597,7 +2492,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(111, 222, 333), result);
     }
 
-    // Test for zipIterables with collection
     @Test
     public void testZipIterablesWithFunction() {
         List<Iterable<Integer>> iterables = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(10, 20, 30), Arrays.asList(100, 200, 300));
@@ -2606,7 +2500,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(111, 222, 333), result);
     }
 
-    // Test for zipIterators with collection
     @Test
     public void testZipIteratorsWithFunction() {
         List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2, 3).iterator(), Arrays.asList(10, 20, 30).iterator(),
@@ -2616,7 +2509,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(111, 222, 333), result);
     }
 
-    // Test for zip with valueForNone (arrays)
     @Test
     public void testZipArraysWithValueForNone() {
         String[] a = { "a", "b", "c" };
@@ -2626,7 +2518,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("a1", "b2", "c99"), result);
     }
 
-    // Test for zip with valueForNone (three arrays)
     @Test
     public void testZipThreeArraysWithValueForNone() {
         String[] a = { "a", "b" };
@@ -2637,7 +2528,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("a10.1", "b990.2", "X990.3"), result);
     }
 
-    // Test for zip with valueForNone (iterables)
     @Test
     public void testZipIterablesWithValueForNone() {
         List<String> a = Arrays.asList("a", "b", "c");
@@ -2647,7 +2537,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("a1", "b2", "c99"), result);
     }
 
-    // Test for zip with valueForNone (iterators)
     @Test
     public void testZipIteratorsWithValueForNone() {
         Iterator<String> a = Arrays.asList("a", "b", "c").iterator();
@@ -2657,7 +2546,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("a1", "b2", "c99"), result);
     }
 
-    // Test for zip with valueForNone (streams)
     @Test
     public void testZipStreamsWithValueForNone() {
         Stream<String> a = createStream01("a", "b", "c");
@@ -2667,7 +2555,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("a1", "b2", "c99"), result);
     }
 
-    // Test for zip with collection and valuesForNone
     @Test
     public void testZipCollectionWithValuesForNone() {
         List<Stream<Integer>> streams = Arrays.asList(createStream(1, 2), createStream(10), createStream(100, 200, 300));
@@ -2678,7 +2565,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(111, 202, 300), result);
     }
 
-    // Test for zipIterables with valuesForNone
     @Test
     public void testZipIterablesCollectionWithValuesForNone() {
         List<Iterable<Integer>> iterables = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(10), Arrays.asList(100, 200, 300));
@@ -2689,7 +2575,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(111, 202, 300), result);
     }
 
-    // Test for zipIterators with valuesForNone
     @Test
     public void testZipIteratorsCollectionWithValuesForNone() {
         List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2).iterator(), Arrays.asList(10).iterator(),
@@ -2701,7 +2586,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(111, 202, 300), result);
     }
 
-    // Test zip with primitive streams (CharStream)
     @Test
     public void testZipCharStreams() {
         CharStream a = CharStream.of('a', 'b', 'c');
@@ -2711,7 +2595,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList("ax", "by", "cz"), result);
     }
 
-    // Test zip with primitive streams (ByteStream)
     @Test
     public void testZipByteStreams() {
         ByteStream a = ByteStream.of((byte) 1, (byte) 2, (byte) 3);
@@ -2721,7 +2604,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(11, 22, 33), result);
     }
 
-    // Test zip with primitive streams (IntStream)
     @Test
     public void testZipIntStreams() {
         IntStream a = IntStream.of(1, 2, 3);
@@ -2731,7 +2613,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(11, 22, 33), result);
     }
 
-    // Test zip with collection of primitive streams
     @Test
     public void testZipPrimitiveStreamCollection() {
         List<IntStream> streams = Arrays.asList(IntStream.of(1, 2, 3), IntStream.of(10, 20, 30), IntStream.of(100, 200, 300));
@@ -2740,7 +2621,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(111, 222, 333), result);
     }
 
-    // Test zip with primitive arrays and valueForNone
     @Test
     public void testZipPrimitiveArraysWithValueForNone() {
         int[] a = { 1, 2, 3 };
@@ -2750,7 +2630,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(11, 22, 102), result);
     }
 
-    // Test zip with primitive streams and valueForNone
     @Test
     public void testZipPrimitiveStreamsWithValueForNone() {
         IntStream a = IntStream.of(1, 2, 3);
@@ -2760,7 +2639,6 @@ public class Stream101Test extends TestBase {
         assertEquals(Arrays.asList(11, 22, 102), result);
     }
 
-    // Test zip with collection of primitive streams and valuesForNone
     @Test
     public void testZipPrimitiveStreamCollectionWithValuesForNone() {
         List<IntStream> streams = Arrays.asList(IntStream.of(1, 2), IntStream.of(10), IntStream.of(100, 200, 300));

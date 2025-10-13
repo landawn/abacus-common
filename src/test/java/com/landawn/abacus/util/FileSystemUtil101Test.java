@@ -1,13 +1,14 @@
 package com.landawn.abacus.util;
 
-
 import java.io.IOException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class FileSystemUtil101Test extends TestBase {
 
     @Test
@@ -16,9 +17,7 @@ public class FileSystemUtil101Test extends TestBase {
             long freeSpace = FileSystemUtil.freeSpaceKb(".");
             Assertions.assertTrue(freeSpace > 0);
         } catch (IOException e) {
-            // May fail on some systems
         } catch (IllegalStateException e) {
-            // OS not supported
         }
     }
 
@@ -28,9 +27,7 @@ public class FileSystemUtil101Test extends TestBase {
             long freeSpace = FileSystemUtil.freeSpaceKb(".", 5000);
             Assertions.assertTrue(freeSpace > 0);
         } catch (IOException e) {
-            // May fail on some systems
         } catch (IllegalStateException e) {
-            // OS not supported
         }
     }
 
@@ -40,9 +37,7 @@ public class FileSystemUtil101Test extends TestBase {
             long freeSpace = FileSystemUtil.freeSpaceKb();
             Assertions.assertTrue(freeSpace > 0);
         } catch (IOException e) {
-            // May fail on some systems
         } catch (IllegalStateException e) {
-            // OS not supported
         }
     }
 
@@ -52,9 +47,7 @@ public class FileSystemUtil101Test extends TestBase {
             long freeSpace = FileSystemUtil.freeSpaceKb(5000);
             Assertions.assertTrue(freeSpace > 0);
         } catch (IOException e) {
-            // May fail on some systems
         } catch (IllegalStateException e) {
-            // OS not supported
         }
     }
 }

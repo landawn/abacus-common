@@ -72,7 +72,6 @@ import lombok.Data;
  * ExcelUtil.writeSheet("Sheet1", data, new File("output.xlsx"));
  * }</pre>
  * 
- * @author Haiyang Li
  * @since 0.8
  */
 public final class ExcelUtil {
@@ -120,8 +119,13 @@ public final class ExcelUtil {
 
     /**
      * Loads the first sheet from the specified Excel file into a Dataset.
-     * Uses the first row as column headers and the default row extractor for data extraction.
-     * 
+     * This is a convenience method that uses the first row as column headers and applies
+     * the default row extractor (CELL_GETTER) for data extraction. Cell types are preserved
+     * as appropriate Java objects (String, Double, Boolean, etc.).
+     *
+     * <p>The method automatically handles Excel file format detection and resource cleanup.
+     * The resulting Dataset provides column-based access to the data with type preservation.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * Dataset dataset = ExcelUtil.loadSheet(new File("sales_data.xlsx"));
@@ -129,9 +133,9 @@ public final class ExcelUtil {
      * List<String> productNames = dataset.getColumn("Product");
      * }</pre>
      *
-     * @param excelFile the Excel file to read
-     * @return a Dataset containing the sheet data with the first row as column names
-     * @throws UncheckedException if an I/O error occurs while reading the file
+     * @param excelFile the Excel file to read, must exist and be a valid Excel file
+     * @return a Dataset containing the sheet data with the first row as column names, empty Dataset if sheet is empty
+     * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file
      */
     public static Dataset loadSheet(final File excelFile) {
         return loadSheet(excelFile, 0, RowExtractors.DEFAULT);
@@ -139,8 +143,13 @@ public final class ExcelUtil {
 
     /**
      * Loads the specified sheet from the Excel file into a Dataset using a custom row extractor.
-     * The first row is treated as column headers, and subsequent rows are processed by the extractor.
-     * 
+     * This method provides fine-grained control over how row data is extracted and converted,
+     * allowing for custom parsing logic, data validation, or type conversion. The first row
+     * is always treated as column headers.
+     *
+     * <p>The row extractor receives the header names, current row, and an output array to populate.
+     * This allows for conditional extraction, computed values, or format-specific parsing.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * TriConsumer<String[], Row, Object[]> customExtractor = (headers, row, output) -> {
@@ -152,12 +161,13 @@ public final class ExcelUtil {
      * Dataset dataset = ExcelUtil.loadSheet(new File("data.xlsx"), 0, customExtractor);
      * }</pre>
      *
-     * @param excelFile the Excel file to read
-     * @param sheetIndex the index of the sheet to read, starting from 0
-     * @param rowExtractor custom function to extract row data. Parameters are: column headers array, 
-     *                     current row, and output array to populate with extracted values
-     * @return a Dataset containing the extracted sheet data
-     * @throws UncheckedException if an I/O error occurs while reading the file
+     * @param excelFile the Excel file to read, must exist and be a valid Excel file
+     * @param sheetIndex the zero-based index of the sheet to read (0 for first sheet)
+     * @param rowExtractor custom function to extract row data. Receives three parameters:
+     *                     column headers array, current row, and output array to populate with extracted values
+     * @return a Dataset containing the extracted sheet data with the first row as column names
+     * @throws UncheckedException if an I/O error occurs while reading the file, if the file is not a valid Excel file,
+     *                            or if the sheet index is out of bounds
      */
     public static Dataset loadSheet(final File excelFile, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
@@ -172,23 +182,29 @@ public final class ExcelUtil {
 
     /**
      * Loads the sheet with the specified name from the Excel file into a Dataset.
-     * Uses a custom row extractor to process each row after the header row.
-     * 
+     * This method allows loading a specific sheet by name rather than index, which is useful
+     * when working with workbooks that have meaningful sheet names. Uses a custom row extractor
+     * to process each row after the header row.
+     *
+     * <p>The row extractor provides full control over data extraction and transformation,
+     * enabling custom parsing, validation, or type conversion logic per cell or row.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * Dataset dataset = ExcelUtil.loadSheet(
-     *     new File("workbook.xlsx"), 
-     *     "Sales2024", 
+     *     new File("workbook.xlsx"),
+     *     "Sales2024",
      *     RowExtractors.DEFAULT
      * );
      * }</pre>
      *
-     * @param excelFile the Excel file to read
-     * @param sheetName the name of the sheet to read
-     * @param rowExtractor custom function to extract row data. Parameters are: column headers array,
-     *                     current row, and output array to populate with extracted values
-     * @return a Dataset containing the extracted sheet data
-     * @throws UncheckedException if an I/O error occurs or if the sheet name is not found
+     * @param excelFile the Excel file to read, must exist and be a valid Excel file
+     * @param sheetName the name of the sheet to read, case-sensitive
+     * @param rowExtractor custom function to extract row data. Receives three parameters:
+     *                     column headers array, current row, and output array to populate with extracted values
+     * @return a Dataset containing the extracted sheet data with the first row as column names
+     * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
+     *                            or if the sheet name is not found in the workbook
      */
     public static Dataset loadSheet(final File excelFile, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
@@ -241,9 +257,14 @@ public final class ExcelUtil {
 
     /**
      * Reads the first sheet of the Excel file and returns rows as a list of lists.
-     * Each inner list represents a row with cell values as Objects.
-     * Does not skip any rows and uses the default row mapper.
-     * 
+     * This is a convenience method that processes all rows (including headers) and returns
+     * each row as a list of cell values. Cell types are preserved as appropriate Java objects
+     * (String, Double, Boolean, etc.) using the default row mapper.
+     *
+     * <p>Unlike loadSheet methods, this does not create a Dataset structure and instead
+     * provides direct access to row data. Useful for simple row-by-row processing without
+     * column-based access requirements.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * List<List<Object>> rows = ExcelUtil.readSheet(new File("data.xlsx"));
@@ -252,9 +273,9 @@ public final class ExcelUtil {
      * }
      * }</pre>
      *
-     * @param excelFile the Excel file to read
-     * @return a list of rows, where each row is a list of cell values
-     * @throws UncheckedException if an I/O error occurs while reading the file
+     * @param excelFile the Excel file to read, must exist and be a valid Excel file
+     * @return a list of rows, where each row is a list of cell values with preserved types
+     * @throws UncheckedException if an I/O error occurs while reading the file or if the file is not a valid Excel file
      */
     public static List<List<Object>> readSheet(final File excelFile) {
         return readSheet(excelFile, 0, false, RowMappers.DEFAULT);
@@ -262,8 +283,13 @@ public final class ExcelUtil {
 
     /**
      * Reads the specified sheet and maps each row to a custom object type using the provided mapper.
-     * Optionally skips the first row if it contains headers.
-     * 
+     * This method provides flexible row-to-object transformation, allowing conversion of Excel rows
+     * to domain objects, DTOs, or any custom type. Optionally skips the first row if it contains headers.
+     *
+     * <p>The row mapper receives the complete Row object from Apache POI, providing access to all
+     * cells, formatting information, and row metadata. This enables sophisticated mapping logic
+     * including conditional processing based on cell types or values.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * Function<Row, String> rowToString = row -> {
@@ -275,12 +301,13 @@ public final class ExcelUtil {
      * }</pre>
      *
      * @param <T> the type of objects to map rows to
-     * @param excelFile the Excel file to read
-     * @param sheetIndex the index of the sheet to read, starting from 0
-     * @param skipFirstRow true to skip the first row (typically headers), {@code false} otherwise
+     * @param excelFile the Excel file to read, must exist and be a valid Excel file
+     * @param sheetIndex the zero-based index of the sheet to read (0 for first sheet)
+     * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @param rowMapper function to convert each Row to an object of type T
-     * @return a list of mapped objects, one per row
-     * @throws UncheckedException if an I/O error occurs while reading the file
+     * @return a list of mapped objects, one per row (excluding skipped rows)
+     * @throws UncheckedException if an I/O error occurs while reading the file, if the file is not a valid Excel file,
+     *                            or if the sheet index is out of bounds
      */
     public static <T> List<T> readSheet(final File excelFile, final int sheetIndex, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) {
@@ -295,8 +322,13 @@ public final class ExcelUtil {
 
     /**
      * Reads the sheet with the specified name and maps each row to a custom object type.
-     * Allows skipping the first row and applying a custom row mapping function.
-     * 
+     * This method combines named sheet access with flexible row mapping, making it ideal
+     * for processing specific worksheets in multi-sheet workbooks. Allows skipping the first
+     * row and applying a custom row mapping function to transform rows into domain objects.
+     *
+     * <p>The row mapper provides full control over the transformation process, enabling
+     * validation, default value handling, and complex object construction from row data.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * Function<Row, Product> rowToProduct = row -> new Product(
@@ -304,20 +336,21 @@ public final class ExcelUtil {
      *     row.getCell(1).getNumericCellValue()  // price
      * );
      * List<Product> products = ExcelUtil.readSheet(
-     *     new File("products.xlsx"), 
-     *     "ProductList", 
-     *     true, 
+     *     new File("products.xlsx"),
+     *     "ProductList",
+     *     true,
      *     rowToProduct
      * );
      * }</pre>
      *
      * @param <T> the type of objects to map rows to
-     * @param excelFile the Excel file to read
-     * @param sheetName the name of the sheet to read
-     * @param skipFirstRow true to skip the first row (typically headers), {@code false} otherwise
+     * @param excelFile the Excel file to read, must exist and be a valid Excel file
+     * @param sheetName the name of the sheet to read, case-sensitive
+     * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @param rowMapper function to convert each Row to an object of type T
-     * @return a list of mapped objects, one per row
-     * @throws UncheckedException if an I/O error occurs or if the sheet name is not found
+     * @return a list of mapped objects, one per row (excluding skipped rows)
+     * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
+     *                            or if the sheet name is not found in the workbook
      */
     public static <T> List<T> readSheet(final File excelFile, final String sheetName, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) {
@@ -348,27 +381,46 @@ public final class ExcelUtil {
 
     /**
      * Creates a stream of Row objects from the specified sheet in the Excel file.
-     * Useful for processing large Excel files without loading all data into memory.
-     * 
+     * This method enables lazy, memory-efficient processing of large Excel files by streaming
+     * rows one at a time instead of loading the entire sheet into memory. Ideal for processing
+     * files that are too large to fit comfortably in memory or when early termination is possible.
+     *
+     * <p>The stream leverages Java's Stream API, allowing functional-style operations like
+     * filtering, mapping, and reduction. This enables powerful data processing pipelines while
+     * maintaining low memory footprint.</p>
+     *
+     * <p><strong>Important:</strong> The Stream must be closed after use to release file handles
+     * and workbook resources. Always use try-with-resources or explicitly call {@code close()}
+     * on the stream when done.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
-     * ExcelUtil.streamSheet(new File("large_data.xlsx"), 0, true)
-     *     .filter(row -> row.getCell(0).getNumericCellValue() > 1000)
-     *     .forEach(row -> processRow(row));
+     * try (Stream<Row> stream = ExcelUtil.streamSheet(new File("large_data.xlsx"), 0, true)) {
+     *     stream.filter(row -> row.getCell(0).getNumericCellValue() > 1000)
+     *           .forEach(row -> processRow(row));
+     * }
      * }</pre>
      *
-     * @param excelFile the Excel file to read
-     * @param sheetIndex the index of the sheet to stream, starting from 0
-     * @param skipFirstRow true to skip the first row (typically headers), {@code false} otherwise
-     * @return a Stream of Row objects from the specified sheet
-     * @throws UncheckedException if an I/O error occurs while reading the file
+     * @param excelFile the Excel file to read, must exist and be a valid Excel file
+     * @param sheetIndex the zero-based index of the sheet to stream (0 for first sheet)
+     * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
+     * @return a Stream of Row objects from the specified sheet that must be closed after use
+     * @throws UncheckedException if an I/O error occurs while reading the file or if the file is not a valid Excel file
      */
     public static Stream<Row> streamSheet(final File excelFile, final int sheetIndex, final boolean skipFirstRow) {
-        try (InputStream is = new FileInputStream(excelFile); //
-                Workbook workbook = new XSSFWorkbook(is)) {
+        try {
+            final InputStream is = new FileInputStream(excelFile);
+            final Workbook workbook = new XSSFWorkbook(is);
             final Sheet sheet = workbook.getSheetAt(sheetIndex);
 
-            return Stream.of(sheet.rowIterator()).skip(skipFirstRow ? 1 : 0);
+            return Stream.of(sheet.rowIterator()).skip(skipFirstRow ? 1 : 0).onClose(() -> {
+                try {
+                    workbook.close();
+                    is.close();
+                } catch (IOException e) {
+                    throw new UncheckedException(e);
+                }
+            });
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -376,28 +428,48 @@ public final class ExcelUtil {
 
     /**
      * Creates a stream of Row objects from the sheet with the specified name.
-     * Enables lazy processing of Excel data for better memory efficiency.
-     * 
+     * This method combines named sheet access with memory-efficient streaming, enabling
+     * lazy processing of specific worksheets in large Excel files. Particularly useful for
+     * multi-sheet workbooks where only certain sheets need to be processed.
+     *
+     * <p>Streaming allows for early termination, filtering, and transformation operations
+     * without loading the entire sheet into memory. This is essential for handling large
+     * datasets or when processing can be short-circuited based on conditions.</p>
+     *
+     * <p><strong>Important:</strong> The Stream must be closed after use to release file handles
+     * and workbook resources. Always use try-with-resources or explicitly call {@code close()}
+     * on the stream when done.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
-     * long count = ExcelUtil.streamSheet(new File("data.xlsx"), "Sales", true)
-     *     .map(row -> row.getCell(2).getNumericCellValue())
-     *     .filter(value -> value > 100)
-     *     .count();
+     * try (Stream<Row> stream = ExcelUtil.streamSheet(new File("data.xlsx"), "Sales", true)) {
+     *     long count = stream.map(row -> row.getCell(2).getNumericCellValue())
+     *                        .filter(value -> value > 100)
+     *                        .count();
+     * }
      * }</pre>
      *
-     * @param excelFile the Excel file to read
-     * @param sheetName the name of the sheet to stream
-     * @param skipFirstRow true to skip the first row (typically headers), {@code false} otherwise
-     * @return a Stream of Row objects from the specified sheet
-     * @throws UncheckedException if an I/O error occurs or if the sheet name is not found
+     * @param excelFile the Excel file to read, must exist and be a valid Excel file
+     * @param sheetName the name of the sheet to stream, case-sensitive
+     * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
+     * @return a Stream of Row objects from the specified sheet that must be closed after use
+     * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
+     *                            or if the sheet name is not found in the workbook
      */
     public static Stream<Row> streamSheet(final File excelFile, final String sheetName, final boolean skipFirstRow) {
-        try (InputStream is = new FileInputStream(excelFile); //
-                Workbook workbook = new XSSFWorkbook(is)) {
-            Sheet sheet = workbook.getSheet(sheetName);
+        try {
+            final InputStream is = new FileInputStream(excelFile);
+            final Workbook workbook = new XSSFWorkbook(is);
+            final Sheet sheet = workbook.getSheet(sheetName);
 
-            return Stream.of(sheet.rowIterator()).skip(skipFirstRow ? 1 : 0);
+            return Stream.of(sheet.rowIterator()).skip(skipFirstRow ? 1 : 0).onClose(() -> {
+                try {
+                    workbook.close();
+                    is.close();
+                } catch (IOException e) {
+                    throw new UncheckedException(e);
+                }
+            });
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -405,8 +477,14 @@ public final class ExcelUtil {
 
     /**
      * Writes data to a new Excel file with the specified sheet name and headers.
-     * Creates a simple Excel file without any special formatting or options.
-     * 
+     * This is a convenience method that creates a basic Excel file without any special
+     * formatting, auto-sizing, or freeze panes. The resulting file contains a single sheet
+     * with the provided headers and data rows.
+     *
+     * <p>Cell values are automatically converted based on their Java types: String, Boolean,
+     * Date, Calendar, Integer, and Double are set using type-specific cell methods, while
+     * other types are converted to strings.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * List<Object> headers = Arrays.asList("Name", "Age", "City");
@@ -416,12 +494,12 @@ public final class ExcelUtil {
      * );
      * ExcelUtil.writeSheet("Users", headers, rows, new File("users.xlsx"));
      * }</pre>
-     * 
-     * @param sheetName the name of the sheet to create
-     * @param headers the column headers as a list of objects
+     *
+     * @param sheetName the name of the sheet to create in the workbook
+     * @param headers the column headers as a list of objects (will be converted to strings)
      * @param rows the data rows, where each row is a collection of cell values
-     * @param outputExcelFile the file to write the Excel data to
-     * @throws UncheckedException if an I/O error occurs while writing the file
+     * @param outputExcelFile the file to write the Excel data to (will be created or overwritten)
+     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created
      */
     public static void writeSheet(final String sheetName, final List<Object> headers, final List<? extends Collection<?>> rows, final File outputExcelFile) {
         writeSheet(sheetName, headers, rows, (SheetCreateOptions) null, outputExcelFile);
@@ -429,8 +507,14 @@ public final class ExcelUtil {
 
     /**
      * Writes data to a new Excel file with additional formatting options.
-     * Supports auto-sizing columns, freezing panes, and setting auto-filters.
-     * 
+     * This method extends the basic write functionality by applying professional formatting
+     * options such as auto-sized columns, frozen panes, and auto-filters. These options
+     * improve readability and usability of the generated Excel files.
+     *
+     * <p>The SheetCreateOptions allows configuring multiple formatting aspects:
+     * auto-sizing columns to fit content, freezing rows/columns for easier navigation,
+     * and adding auto-filters for data filtering capabilities.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * SheetCreateOptions options = SheetCreateOptions.builder()
@@ -438,31 +522,31 @@ public final class ExcelUtil {
      *     .freezeFirstRow(true)
      *     .autoFilterByFirstRow(true)
      *     .build();
-     * 
+     *
      * ExcelUtil.writeSheet("Report", headers, data, options, new File("report.xlsx"));
      * }</pre>
-     * 
-     * @param sheetName the name of the sheet to create
-     * @param headers the column headers as a list of objects
+     *
+     * @param sheetName the name of the sheet to create in the workbook
+     * @param headers the column headers as a list of objects (will be converted to strings)
      * @param rows the data rows, where each row is a collection of cell values
-     * @param sheetCreateOptions configuration options for sheet formatting (can be null)
-     * @param outputExcelFile the file to write the Excel data to
-     * @throws UncheckedException if an I/O error occurs while writing the file
+     * @param sheetCreateOptions configuration options for sheet formatting (null to apply no formatting)
+     * @param outputExcelFile the file to write the Excel data to (will be created or overwritten)
+     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created
      */
     public static void writeSheet(final String sheetName, final List<Object> headers, final List<? extends Collection<?>> rows,
             final SheetCreateOptions sheetCreateOptions, final File outputExcelFile) {
-        final int columnColumn = headers.size();
+        final int columnCount = headers.size();
 
-        final Consumer<Sheet> sheetSetter = createSheetSetter(sheetCreateOptions, columnColumn);
+        final Consumer<Sheet> sheetSetter = createSheetSetter(sheetCreateOptions, columnCount);
 
         writeSheet(sheetName, headers, rows, sheetSetter, outputExcelFile);
     }
 
-    static Consumer<Sheet> createSheetSetter(final SheetCreateOptions sheetCreateOptions, final int columnColumn) {
+    static Consumer<Sheet> createSheetSetter(final SheetCreateOptions sheetCreateOptions, final int columnCount) {
         return sheetCreateOptions == null ? null : sheet -> {
             if (sheetCreateOptions.isAutoSizeColumn()) {
                 // Resize columns to fit content
-                for (int i = 0; i < columnColumn; i++) {
+                for (int i = 0; i < columnCount; i++) {
                     sheet.autoSizeColumn(i);
                 }
             }
@@ -478,15 +562,22 @@ public final class ExcelUtil {
             if (sheetCreateOptions.getAutoFilter() != null) {
                 sheet.setAutoFilter(sheetCreateOptions.getAutoFilter());
             } else if (sheetCreateOptions.isAutoFilterByFirstRow()) {
-                sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, columnColumn));
+                sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, columnCount - 1));
             }
         };
     }
 
     /**
      * Writes data to a new Excel file with a custom sheet configuration function.
-     * Provides full control over sheet formatting through the sheetSetter consumer.
-     * 
+     * This method provides maximum flexibility by allowing direct manipulation of the Sheet
+     * object through a custom consumer. Use this when you need formatting options beyond what
+     * SheetCreateOptions provides, such as custom column widths, conditional formatting,
+     * cell styles, or data validation rules.
+     *
+     * <p>The sheetSetter consumer is invoked after all data has been written, allowing you
+     * to apply formatting based on the actual content. This is useful for advanced scenarios
+     * like conditional formatting, merged cells, or complex styling requirements.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * Consumer<Sheet> customFormatter = sheet -> {
@@ -494,27 +585,27 @@ public final class ExcelUtil {
      *     sheet.createFreezePane(0, 1);
      *     sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, 3));
      * };
-     * 
+     *
      * ExcelUtil.writeSheet("CustomSheet", headers, data, customFormatter, new File("custom.xlsx"));
      * }</pre>
-     * 
-     * @param sheetName the name of the sheet to create
-     * @param headers the column headers as a list of objects
+     *
+     * @param sheetName the name of the sheet to create in the workbook
+     * @param headers the column headers as a list of objects (will be converted to strings)
      * @param rows the data rows, where each row is a collection of cell values
-     * @param sheetSetter a consumer to apply custom formatting to the sheet (can be null)
-     * @param outputExcelFile the file to write the Excel data to
-     * @throws UncheckedException if an I/O error occurs while writing the file
+     * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written (null to skip)
+     * @param outputExcelFile the file to write the Excel data to (will be created or overwritten)
+     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created
      */
     public static void writeSheet(final String sheetName, final List<Object> headers, final List<? extends Collection<?>> rows,
             final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet(sheetName);
 
-        final int columnColumn = headers.size();
+        final int columnCount = headers.size();
 
         final Row headerRow = sheet.createRow(0);
 
-        for (int i = 0; i < columnColumn; i++) {
+        for (int i = 0; i < columnCount; i++) {
             headerRow.createCell(i).setCellValue(N.stringOf(headers.get(i)));
         }
 
@@ -544,18 +635,24 @@ public final class ExcelUtil {
 
     /**
      * Writes a Dataset to a new Excel file with the specified sheet name.
-     * Uses the Dataset's column names as headers and writes all rows.
-     * 
+     * This convenience method automatically extracts column names from the Dataset to use
+     * as headers and writes all data rows to the Excel file. The Dataset's structure and
+     * column ordering are preserved in the output file.
+     *
+     * <p>This is the simplest way to export a Dataset to Excel format, creating a basic
+     * Excel file without any special formatting. For formatted output, use the overloaded
+     * methods that accept SheetCreateOptions or a custom sheetSetter.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * Dataset dataset = Dataset.fromCSV(new File("data.csv"));
      * ExcelUtil.writeSheet("ImportedData", dataset, new File("output.xlsx"));
      * }</pre>
-     * 
-     * @param sheetName the name of the sheet to create
-     * @param dataset the Dataset containing the data to write
-     * @param outputExcelFile the file to write the Excel data to
-     * @throws UncheckedException if an I/O error occurs while writing the file
+     *
+     * @param sheetName the name of the sheet to create in the workbook
+     * @param dataset the Dataset containing the data to write, must not be null
+     * @param outputExcelFile the file to write the Excel data to (will be created or overwritten)
+     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created
      */
     public static void writeSheet(final String sheetName, final Dataset dataset, final File outputExcelFile) {
         writeSheet(sheetName, dataset, (SheetCreateOptions) null, outputExcelFile);
@@ -563,23 +660,29 @@ public final class ExcelUtil {
 
     /**
      * Writes a Dataset to a new Excel file with additional formatting options.
-     * Combines the convenience of Dataset with flexible sheet formatting capabilities.
-     * 
+     * This method combines the convenience of Dataset export with professional formatting
+     * capabilities, enabling creation of polished Excel reports directly from Dataset objects.
+     * Automatically uses the Dataset's column names as headers.
+     *
+     * <p>The SheetCreateOptions allows applying various formatting enhancements such as
+     * auto-sizing columns to fit content, freezing panes for better navigation of large
+     * datasets, and adding auto-filters for interactive data exploration.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * SheetCreateOptions options = SheetCreateOptions.builder()
      *     .autoSizeColumn(true)
      *     .freezePane(new FreezePane(2, 1))  // Freeze first 2 columns and first row
      *     .build();
-     * 
+     *
      * ExcelUtil.writeSheet("Analysis", dataset, options, new File("analysis.xlsx"));
      * }</pre>
-     * 
-     * @param sheetName the name of the sheet to create
-     * @param dataset the Dataset containing the data to write
-     * @param sheetCreateOptions configuration options for sheet formatting (can be null)
-     * @param outputExcelFile the file to write the Excel data to
-     * @throws UncheckedException if an I/O error occurs while writing the file
+     *
+     * @param sheetName the name of the sheet to create in the workbook
+     * @param dataset the Dataset containing the data to write, must not be null
+     * @param sheetCreateOptions configuration options for sheet formatting (null to apply no formatting)
+     * @param outputExcelFile the file to write the Excel data to (will be created or overwritten)
+     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created
      */
     public static void writeSheet(final String sheetName, final Dataset dataset, final SheetCreateOptions sheetCreateOptions, final File outputExcelFile) {
         final int columnColumn = dataset.columnCount();
@@ -591,8 +694,15 @@ public final class ExcelUtil {
 
     /**
      * Writes a Dataset to a new Excel file with custom sheet formatting.
-     * Provides direct access to the Sheet object for advanced formatting needs.
-     * 
+     * This method provides maximum control over the output Excel file by allowing direct
+     * manipulation of the Sheet object after data is written. Use this for advanced scenarios
+     * requiring conditional formatting, cell styles, data validation, merged cells, or any
+     * other Apache POI sheet operations.
+     *
+     * <p>The sheetSetter consumer receives the Sheet object after all data has been written,
+     * enabling context-aware formatting decisions based on the actual content and structure.
+     * This is the most flexible write method for creating sophisticated Excel reports.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * Consumer<Sheet> formatter = sheet -> {
@@ -600,15 +710,15 @@ public final class ExcelUtil {
      *     SheetConditionalFormatting sheetCF = sheet.getSheetConditionalFormatting();
      *     // ... configure conditional formatting
      * };
-     * 
+     *
      * ExcelUtil.writeSheet("FormattedData", dataset, formatter, new File("formatted.xlsx"));
      * }</pre>
-     * 
-     * @param sheetName the name of the sheet to create
-     * @param dataset the Dataset containing the data to write
-     * @param sheetSetter a consumer to apply custom formatting to the sheet (can be null)
-     * @param outputExcelFile the file to write the Excel data to
-     * @throws UncheckedException if an I/O error occurs while writing the file
+     *
+     * @param sheetName the name of the sheet to create in the workbook
+     * @param dataset the Dataset containing the data to write, must not be null
+     * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written (null to skip)
+     * @param outputExcelFile the file to write the Excel data to (will be created or overwritten)
+     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created
      */
     public static void writeSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) {
         Workbook workbook = new XSSFWorkbook();
@@ -665,21 +775,29 @@ public final class ExcelUtil {
 
     /**
      * Converts the specified sheet from an Excel file to a CSV file using default charset.
-     * The first sheet (index 0) is exported without custom headers.
-     * 
+     * This convenience method exports an Excel sheet to comma-separated values format,
+     * preserving all data including the header row. Uses the platform's default charset
+     * for text encoding.
+     *
+     * <p>Cell values are converted to their string representations: numeric cells are
+     * formatted as numbers, formulas are exported as formula text, and blank cells
+     * become empty strings. The CSV format uses comma as delimiter and proper quoting
+     * for values containing special characters.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * ExcelUtil.saveSheetAsCsv(
-     *     new File("data.xlsx"), 
-     *     0, 
+     *     new File("data.xlsx"),
+     *     0,
      *     new File("output.csv")
      * );
      * }</pre>
      *
-     * @param excelFile the Excel file to read
-     * @param sheetIndex the index of the sheet to convert, starting from 0
-     * @param outputCsvFile the CSV file to write to
-     * @throws UncheckedException if an I/O error occurs during conversion
+     * @param excelFile the Excel file to read, must exist and be a valid Excel file
+     * @param sheetIndex the zero-based index of the sheet to convert (0 for first sheet)
+     * @param outputCsvFile the CSV file to write to (will be created or overwritten)
+     * @throws UncheckedException if an I/O error occurs during conversion, if the file is not a valid Excel file,
+     *                            or if the sheet index is out of bounds
      */
     public static void saveSheetAsCsv(final File excelFile, final int sheetIndex, File outputCsvFile) {
         saveSheetAsCsv(excelFile, sheetIndex, null, outputCsvFile, Charsets.DEFAULT);
@@ -687,21 +805,28 @@ public final class ExcelUtil {
 
     /**
      * Converts the sheet with the specified name from an Excel file to a CSV file.
-     * Uses the default charset and does not add custom headers.
-     * 
+     * This method allows exporting a specific worksheet by name rather than index, which is
+     * more robust when working with workbooks where sheet positions might change. Uses the
+     * platform's default charset for text encoding and preserves all original data including headers.
+     *
+     * <p>The conversion process maintains data fidelity by converting each cell type appropriately:
+     * strings remain as text, numbers are formatted, and formulas are exported as their text
+     * representation. The output CSV uses standard comma delimiting with proper escaping.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * ExcelUtil.saveSheetAsCsv(
-     *     new File("workbook.xlsx"), 
-     *     "SalesData", 
+     *     new File("workbook.xlsx"),
+     *     "SalesData",
      *     new File("sales.csv")
      * );
      * }</pre>
      *
-     * @param excelFile the Excel file to read
-     * @param sheetName the name of the sheet to convert
-     * @param outputCsvFile the CSV file to write to
-     * @throws UncheckedException if an I/O error occurs or if the sheet name is not found
+     * @param excelFile the Excel file to read, must exist and be a valid Excel file
+     * @param sheetName the name of the sheet to convert, case-sensitive
+     * @param outputCsvFile the CSV file to write to (will be created or overwritten)
+     * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
+     *                            or if the sheet name is not found in the workbook
      */
     public static void saveSheetAsCsv(final File excelFile, final String sheetName, File outputCsvFile) {
         saveSheetAsCsv(excelFile, sheetName, null, outputCsvFile, Charsets.DEFAULT);
@@ -709,26 +834,34 @@ public final class ExcelUtil {
 
     /**
      * Converts the specified sheet from an Excel file to a CSV file with custom options.
-     * Allows specifying custom CSV headers and character encoding.
-     * 
+     * This method provides full control over the CSV export process, allowing you to replace
+     * the original Excel headers with custom headers and specify the character encoding for
+     * the output file. When custom headers are provided, the first row of the Excel sheet
+     * is skipped and replaced with the custom headers.
+     *
+     * <p>The charset parameter is particularly important for international data or when
+     * the CSV will be consumed by systems with specific encoding requirements. Common
+     * choices include UTF-8 for universal compatibility or ISO-8859-1 for legacy systems.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * List<String> customHeaders = Arrays.asList("Product ID", "Product Name", "Price");
      * ExcelUtil.saveSheetAsCsv(
-     *     new File("products.xlsx"), 
-     *     0, 
+     *     new File("products.xlsx"),
+     *     0,
      *     customHeaders,
      *     new File("products.csv"),
      *     StandardCharsets.UTF_8
      * );
      * }</pre>
      *
-     * @param excelFile the Excel file to read
-     * @param sheetIndex the index of the sheet to convert, starting from 0
-     * @param csvHeaders custom headers for the CSV file (null to use Excel headers)
-     * @param outputCsvFile the CSV file to write to
-     * @param charset the character encoding to use for the CSV file
-     * @throws UncheckedException if an I/O error occurs during conversion
+     * @param excelFile the Excel file to read, must exist and be a valid Excel file
+     * @param sheetIndex the zero-based index of the sheet to convert (0 for first sheet)
+     * @param csvHeaders custom headers for the CSV file (null to use original Excel headers from first row)
+     * @param outputCsvFile the CSV file to write to (will be created or overwritten)
+     * @param charset the character encoding to use for the CSV file (e.g., UTF-8, ISO-8859-1)
+     * @throws UncheckedException if an I/O error occurs during conversion, if the file is not a valid Excel file,
+     *                            or if the sheet index is out of bounds
      */
     public static void saveSheetAsCsv(final File excelFile, final int sheetIndex, List<String> csvHeaders, File outputCsvFile, Charset charset) {
         try (InputStream is = new FileInputStream(excelFile); //
@@ -743,27 +876,35 @@ public final class ExcelUtil {
 
     /**
      * Converts the sheet with the specified name to a CSV file with full control over headers and encoding.
-     * Useful for exporting Excel data to systems that require specific CSV formats.
-     * 
+     * This is the most flexible CSV export method, combining named sheet access with custom
+     * header replacement and character encoding specification. Ideal for generating CSV files
+     * that need to conform to specific system requirements or international character sets.
+     *
+     * <p>When custom headers are provided, they replace the first row of the Excel sheet in
+     * the CSV output. This is useful for normalizing column names, translating headers, or
+     * adapting to target system naming conventions. The charset parameter ensures proper
+     * handling of special characters and international text.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
      * // Export with custom headers in ISO-8859-1 encoding
      * List<String> headers = Arrays.asList("Código", "Nombre", "Precio");
      * ExcelUtil.saveSheetAsCsv(
-     *     new File("productos.xlsx"), 
-     *     "Inventario", 
+     *     new File("productos.xlsx"),
+     *     "Inventario",
      *     headers,
      *     new File("productos.csv"),
      *     Charset.forName("ISO-8859-1")
      * );
      * }</pre>
      *
-     * @param excelFile the Excel file to read
-     * @param sheetName the name of the sheet to convert
-     * @param csvHeaders custom headers for the CSV file (null to use Excel headers)
-     * @param outputCsvFile the CSV file to write to
-     * @param charset the character encoding to use for the CSV file
-     * @throws UncheckedException if an I/O error occurs or if the sheet name is not found
+     * @param excelFile the Excel file to read, must exist and be a valid Excel file
+     * @param sheetName the name of the sheet to convert, case-sensitive
+     * @param csvHeaders custom headers for the CSV file (null to use original Excel headers from first row)
+     * @param outputCsvFile the CSV file to write to (will be created or overwritten)
+     * @param charset the character encoding to use for the CSV file (e.g., UTF-8, ISO-8859-1)
+     * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
+     *                            or if the sheet name is not found in the workbook
      */
     public static void saveSheetAsCsv(final File excelFile, final String sheetName, List<String> csvHeaders, File outputCsvFile, Charset charset) {
         try (InputStream is = new FileInputStream(excelFile); //
@@ -872,15 +1013,21 @@ public final class ExcelUtil {
 
         /**
          * Creates a row mapper that converts rows to delimited strings with a custom separator.
-         * Each cell is converted to string representation and joined with the specified separator.
-         * 
+         * Each cell is converted to its string representation using the default CELL2STRING mapper
+         * and the resulting strings are joined together with the specified separator. Useful for
+         * creating custom text representations of Excel rows.
+         *
+         * <p>This method uses CELL2STRING for cell conversion, which handles all cell types
+         * (STRING, NUMERIC, BOOLEAN, FORMULA, BLANK) and converts them to appropriate string
+         * representations.</p>
+         *
          * <p>Example usage:</p>
          * <pre>{@code
          * Function<Row, String> pipeMapper = RowMappers.toString("|");
          * List<String> rows = ExcelUtil.readSheet(file, 0, true, pipeMapper);
          * // Results in rows like: "John|30|New York"
          * }</pre>
-         * 
+         *
          * @param cellSeparator the string to use as separator between cell values
          * @return a Function that converts Row to delimited String
          */
@@ -890,18 +1037,24 @@ public final class ExcelUtil {
 
         /**
          * Creates a row mapper that converts rows to delimited strings with custom cell processing.
-         * Allows full control over how individual cells are converted to strings.
-         * 
+         * This method provides maximum flexibility by allowing you to specify both the separator
+         * and a custom cell-to-string conversion function. Use this when you need special formatting,
+         * value transformations, or custom handling of specific cell types.
+         *
+         * <p>The cellMapper function is applied to each cell individually, giving you complete
+         * control over formatting numbers, dates, handling null cells, or applying business logic
+         * during the conversion process.</p>
+         *
          * <p>Example usage:</p>
          * <pre>{@code
-         * Function<Cell, String> customCellMapper = cell -> 
-         *     cell.getCellType() == CellType.NUMERIC 
+         * Function<Cell, String> customCellMapper = cell ->
+         *     cell.getCellType() == CellType.NUMERIC
          *         ? String.format("%.2f", cell.getNumericCellValue())
          *         : CELL2STRING.apply(cell);
-         * 
+         *
          * Function<Row, String> mapper = RowMappers.toString(",", customCellMapper);
          * }</pre>
-         * 
+         *
          * @param cellSeparator the string to use as separator between cell values
          * @param cellMapper custom function to convert each cell to a string
          * @return a Function that converts Row to delimited String
@@ -931,23 +1084,29 @@ public final class ExcelUtil {
 
         /**
          * Creates a row mapper that converts rows to Lists with custom cell processing.
-         * Useful for extracting specific types of data from cells.
-         * 
+         * This method enables type-safe extraction of data from Excel rows by applying a custom
+         * cell mapper to each cell. Particularly useful when you need to extract specific data
+         * types, perform validation, or apply transformations during the read process.
+         *
+         * <p>The cellMapper function is applied to each cell in the row, and the results are
+         * collected into a List. This allows for strongly-typed data extraction and ensures
+         * consistent processing of all cells in each row.</p>
+         *
          * <p>Example usage:</p>
          * <pre>{@code
          * // Extract only numeric values as Double
-         * Function<Cell, Double> numericMapper = cell -> 
-         *     cell.getCellType() == CellType.NUMERIC 
-         *         ? cell.getNumericCellValue() 
+         * Function<Cell, Double> numericMapper = cell ->
+         *     cell.getCellType() == CellType.NUMERIC
+         *         ? cell.getNumericCellValue()
          *         : 0.0;
-         * 
+         *
          * Function<Row, List<Double>> mapper = RowMappers.toList(numericMapper);
          * List<List<Double>> numericData = ExcelUtil.readSheet(file, 0, true, mapper);
          * }</pre>
-         * 
+         *
          * @param <T> the type of objects to extract from cells
          * @param cellMapper function to convert each cell to type T
-         * @return a Function that converts Row to List<T>
+         * @return a Function that converts Row to List&lt;T&gt;
          */
         public static <T> Function<Row, List<T>> toList(final Function<Cell, T> cellMapper) {
             return row -> {
@@ -991,19 +1150,25 @@ public final class ExcelUtil {
 
         /**
          * Creates a custom row extractor with the specified cell mapping function.
-         * The extractor processes each cell in a row and populates the output array.
-         * 
+         * The extractor processes each cell in a row and populates the output array with
+         * transformed values. This is used with loadSheet methods to control how Excel
+         * cell data is extracted and converted for Dataset creation.
+         *
+         * <p>The cell mapper function receives each Cell from the row and returns the
+         * value to store in the output array. This enables custom type conversions,
+         * default value handling, data validation, or any other per-cell transformation logic.</p>
+         *
          * <p>Example usage:</p>
          * <pre>{@code
          * // Extract all values as strings, with empty string for null cells
-         * TriConsumer<String[], Row, Object[]> stringExtractor = 
-         *     RowExtractors.create(cell -> 
+         * TriConsumer<String[], Row, Object[]> stringExtractor =
+         *     RowExtractors.create(cell ->
          *         cell == null ? "" : CELL2STRING.apply(cell)
          *     );
-         * 
+         *
          * Dataset ds = ExcelUtil.loadSheet(file, "Sheet1", stringExtractor);
          * }</pre>
-         * 
+         *
          * @param cellMapper function to convert each cell to the desired output type
          * @return a TriConsumer that extracts row data using the cell mapper
          */

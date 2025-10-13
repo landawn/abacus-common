@@ -34,8 +34,28 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * The array is formatted as a comma-separated list of values enclosed in square brackets.
      * Null values in the array are represented as "null".
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * LongArrayType type = new LongArrayType();
+     *
+     * Long[] array = {1L, 2L, 3L};
+     * String result = type.stringOf(array);
+     * // Returns: "[1, 2, 3]"
+     *
+     * Long[] withNull = {1L, null, 3L};
+     * result = type.stringOf(withNull);
+     * // Returns: "[1, null, 3]"
+     *
+     * Long[] empty = {};
+     * result = type.stringOf(empty);
+     * // Returns: "[]"
+     *
+     * result = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x The Long array to convert
-     * @return The string representation of the array in format "[value1, value2, ...]", 
+     * @return The string representation of the array in format "[value1, value2, ...]",
      *         or null if the input array is null, or "[]" if the array is empty
      */
     @MayReturnNull
@@ -83,6 +103,26 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * - Values of "null" (case-sensitive, exactly 4 characters) are converted to null elements
      * - Other values are parsed as Long objects
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * LongArrayType type = new LongArrayType();
+     *
+     * Long[] result = type.valueOf("[1, 2, 3]");
+     * // Returns: Long[]{1L, 2L, 3L}
+     *
+     * result = type.valueOf("[1, null, 3]");
+     * // Returns: Long[]{1L, null, 3L}
+     *
+     * result = type.valueOf("[]");
+     * // Returns: empty Long array
+     *
+     * result = type.valueOf(null);
+     * // Returns: null
+     *
+     * result = type.valueOf("");
+     * // Returns: null
+     * }</pre>
+     *
      * @param str The string to parse
      * @return The parsed Long array, or null if the input is null
      * @throws NumberFormatException if any non-null value cannot be parsed as a Long
@@ -118,6 +158,25 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * The array is formatted as a comma-separated list of values enclosed in square brackets.
      * Null array is represented as "null", null elements are represented as "null".
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * LongArrayType type = new LongArrayType();
+     * StringBuilder sb = new StringBuilder();
+     *
+     * Long[] array = {1L, 2L, 3L};
+     * type.appendTo(sb, array);
+     * // sb contains: "[1, 2, 3]"
+     *
+     * sb.setLength(0);
+     * Long[] withNull = {1L, null, 3L};
+     * type.appendTo(sb, withNull);
+     * // sb contains: "[1, null, 3]"
+     *
+     * sb.setLength(0);
+     * type.appendTo(sb, null);
+     * // sb contains: "null"
+     * }</pre>
+     *
      * @param appendable The Appendable to write to
      * @param x The Long array to append
      * @throws IOException if an I/O error occurs while appending
@@ -150,6 +209,23 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * The array is formatted as a comma-separated list of values enclosed in square brackets.
      * This method is optimized for character-based writing and may be more efficient than appendTo
      * for certain output scenarios.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * LongArrayType type = new LongArrayType();
+     * CharacterWriter writer = new CharacterWriter();
+     * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
+     *
+     * Long[] array = {100L, 200L, 300L};
+     * type.writeCharacter(writer, array, config);
+     * String result = writer.toString();
+     * // result: "[100, 200, 300]"
+     *
+     * writer.reset();
+     * type.writeCharacter(writer, null, config);
+     * result = writer.toString();
+     * // result: "null"
+     * }</pre>
      *
      * @param writer The CharacterWriter to write to
      * @param x The Long array to write

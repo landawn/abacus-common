@@ -15,6 +15,7 @@ import java.util.List;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
@@ -22,7 +23,7 @@ import com.google.common.hash.PrimitiveSink;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class Hashing100Test extends TestBase {
 
     @Test
@@ -35,17 +36,14 @@ public class Hashing100Test extends TestBase {
         assertNotNull(hf2);
         assertTrue(hf2.bits() >= 128);
         
-        // Test that same minimumBits returns same function
         HashFunction hf3 = Hashing.goodFastHash(128);
         assertEquals(hf2.bits(), hf3.bits());
         
-        // Test with different data
         byte[] data = "test data".getBytes();
         HashCode hash1 = hf1.hash(data);
         HashCode hash2 = hf1.hash(data);
-        assertEquals(hash1, hash2); // Same input should produce same output
+        assertEquals(hash1, hash2);
         
-        // Test negative bits throws exception
         assertThrows(IllegalArgumentException.class, () -> Hashing.goodFastHash(-1));
         assertThrows(IllegalArgumentException.class, () -> Hashing.goodFastHash(0));
     }
@@ -63,8 +61,8 @@ public class Hashing100Test extends TestBase {
         HashCode hash2 = hf2.hash(data);
         HashCode hash3 = hf3.hash(data);
         
-        assertEquals(hash1, hash2); // Same seed should produce same result
-        assertNotEquals(hash1, hash3); // Different seed should produce different result
+        assertEquals(hash1, hash2);
+        assertNotEquals(hash1, hash3);
     }
 
     @Test
@@ -90,7 +88,7 @@ public class Hashing100Test extends TestBase {
         HashCode hash1 = hf1.hash(data);
         HashCode hash2 = hf2.hash(data);
         
-        assertNotEquals(hash1, hash2); // Different seeds
+        assertNotEquals(hash1, hash2);
     }
 
     @Test
@@ -100,7 +98,7 @@ public class Hashing100Test extends TestBase {
         assertEquals(128, hf.bits());
         
         HashCode hash = hf.hash("test".getBytes());
-        assertEquals(16, hash.asBytes().length); // 128 bits = 16 bytes
+        assertEquals(16, hash.asBytes().length);
     }
 
     @Test
@@ -110,7 +108,7 @@ public class Hashing100Test extends TestBase {
         assertEquals(64, hf.bits());
         
         HashCode hash = hf.hash("siphash test".getBytes());
-        assertEquals(8, hash.asBytes().length); // 64 bits = 8 bytes
+        assertEquals(8, hash.asBytes().length);
     }
 
     @Test
@@ -120,7 +118,7 @@ public class Hashing100Test extends TestBase {
         
         HashFunction hf1 = Hashing.sipHash24(k0, k1);
         HashFunction hf2 = Hashing.sipHash24(k0, k1);
-        HashFunction hf3 = Hashing.sipHash24(k1, k0); // Different key
+        HashFunction hf3 = Hashing.sipHash24(k1, k0);
         
         byte[] data = "test".getBytes();
         HashCode hash1 = hf1.hash(data);
@@ -148,7 +146,7 @@ public class Hashing100Test extends TestBase {
         assertEquals(160, hf.bits());
         
         HashCode hash = hf.hash("SHA-1 test".getBytes());
-        assertEquals(20, hash.asBytes().length); // 160 bits = 20 bytes
+        assertEquals(20, hash.asBytes().length);
     }
 
     @Test
@@ -200,7 +198,6 @@ public class Hashing100Test extends TestBase {
         HashCode hash = hf.hash("message".getBytes());
         assertNotNull(hash);
         
-        // Test empty key throws exception
         assertThrows(IllegalArgumentException.class, () -> Hashing.hmacMd5(new byte[0]));
     }
 
@@ -284,7 +281,6 @@ public class Hashing100Test extends TestBase {
         HashCode hash = hf.hash("file contents".getBytes());
         assertEquals(4, hash.asBytes().length);
         
-        // Test padToLong
         long crcValue = hash.padToLong();
         assertTrue(crcValue >= 0);
     }
@@ -319,7 +315,7 @@ public class Hashing100Test extends TestBase {
         
         HashFunction concatenated = Hashing.concatenating(first, second);
         assertNotNull(concatenated);
-        assertEquals(64, concatenated.bits()); // 32 + 32
+        assertEquals(64, concatenated.bits());
         
         HashCode hash = concatenated.hash("test".getBytes());
         assertEquals(8, hash.asBytes().length);
@@ -333,7 +329,7 @@ public class Hashing100Test extends TestBase {
         
         HashFunction concatenated = Hashing.concatenating(first, second, third);
         assertNotNull(concatenated);
-        assertEquals(384, concatenated.bits()); // 128 * 3
+        assertEquals(384, concatenated.bits());
         
         HashCode hash = concatenated.hash("test".getBytes());
         assertEquals(48, hash.asBytes().length);
@@ -348,12 +344,11 @@ public class Hashing100Test extends TestBase {
         
         HashFunction concatenated = Hashing.concatenating(functions);
         assertNotNull(concatenated);
-        assertEquals(512, concatenated.bits()); // 256 * 2
+        assertEquals(512, concatenated.bits());
         
         HashCode hash = concatenated.hash("test".getBytes());
         assertEquals(64, hash.asBytes().length);
         
-        // Test empty list throws exception
         List<HashFunction> emptyList = new ArrayList<>();
         assertThrows(IllegalArgumentException.class, () -> Hashing.concatenating(emptyList));
     }
@@ -368,9 +363,8 @@ public class Hashing100Test extends TestBase {
         
         assertNotNull(combined1);
         assertNotNull(combined2);
-        assertNotEquals(combined1, combined2); // Order matters
+        assertNotEquals(combined1, combined2);
         
-        // Test different bit lengths throw exception
         HashCode hash3 = Hashing.sha512().hash("third".getBytes());
         assertThrows(IllegalArgumentException.class, () -> Hashing.combineOrdered(hash1, hash3));
     }
@@ -397,7 +391,6 @@ public class Hashing100Test extends TestBase {
         HashCode combined = Hashing.combineOrdered(hashes);
         assertNotNull(combined);
         
-        // Test empty list throws exception
         List<HashCode> emptyList = new ArrayList<>();
         assertThrows(IllegalArgumentException.class, () -> Hashing.combineOrdered(emptyList));
     }
@@ -412,7 +405,7 @@ public class Hashing100Test extends TestBase {
         
         assertNotNull(combined1);
         assertNotNull(combined2);
-        assertEquals(combined1, combined2); // Order doesn't matter
+        assertEquals(combined1, combined2);
     }
 
     @Test
@@ -424,7 +417,7 @@ public class Hashing100Test extends TestBase {
         HashCode combined1 = Hashing.combineUnordered(hash1, hash2, hash3);
         HashCode combined2 = Hashing.combineUnordered(hash3, hash1, hash2);
         
-        assertEquals(combined1, combined2); // Order doesn't matter
+        assertEquals(combined1, combined2);
     }
 
     @Test
@@ -446,14 +439,12 @@ public class Hashing100Test extends TestBase {
         int bucket1 = Hashing.consistentHash(hashCode, 10);
         int bucket2 = Hashing.consistentHash(hashCode, 10);
         
-        assertEquals(bucket1, bucket2); // Consistent
+        assertEquals(bucket1, bucket2);
         assertTrue(bucket1 >= 0 && bucket1 < 10);
         
-        // Test with different bucket counts
         int bucket3 = Hashing.consistentHash(hashCode, 100);
         assertTrue(bucket3 >= 0 && bucket3 < 100);
         
-        // Test non-positive buckets throws exception
         assertThrows(IllegalArgumentException.class, () -> Hashing.consistentHash(hashCode, 0));
         assertThrows(IllegalArgumentException.class, () -> Hashing.consistentHash(hashCode, -1));
     }
@@ -465,18 +456,14 @@ public class Hashing100Test extends TestBase {
         int bucket1 = Hashing.consistentHash(input, 100);
         int bucket2 = Hashing.consistentHash(input, 100);
         
-        assertEquals(bucket1, bucket2); // Consistent
+        assertEquals(bucket1, bucket2);
         assertTrue(bucket1 >= 0 && bucket1 < 100);
         
-        // Test different inputs produce different results (usually)
         int bucket3 = Hashing.consistentHash(54321L, 100);
-        // Not guaranteed to be different, but likely
         
-        // Test non-positive buckets throws exception
         assertThrows(IllegalArgumentException.class, () -> Hashing.consistentHash(input, 0));
     }
 
-    // Test funnel usage
     private static class Person {
         String name;
         int age;
@@ -507,7 +494,7 @@ public class Hashing100Test extends TestBase {
         HashCode hash2 = hf.hash(person2, PERSON_FUNNEL);
         HashCode hash3 = hf.hash(person3, PERSON_FUNNEL);
         
-        assertEquals(hash1, hash2); // Same data
-        assertNotEquals(hash1, hash3); // Different data
+        assertEquals(hash1, hash2);
+        assertNotEquals(hash1, hash3);
     }
 }

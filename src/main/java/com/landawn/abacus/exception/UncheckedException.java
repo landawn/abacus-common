@@ -166,24 +166,4 @@ public class UncheckedException extends RuntimeException {
         return checkedException;
     }
 
-    //    /**
-    //     * Returns the cause of this exception.
-    //     *
-    //     * @return the {@code IOException} which is the cause of this exception.
-    //     */
-    //    @SuppressWarnings("sync-override")
-    //    @Override
-    //    public Throwable getCause() {
-    //        return checkedException.getCause();
-    //    }
-    //
-    //    /**
-    //     * Returns the stack trace of the checked exception.
-    //     *
-    //     * @return the stack trace elements of the checked exception
-    //     */
-    //    @Override
-    //    public StackTraceElement[] getStackTrace() {
-    //        return checkedException.getStackTrace();
-    //    }
 }

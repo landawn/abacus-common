@@ -46,6 +46,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * {@link java.time.ZonedDateTime} class that this type handles.
      * </p>
      *
+     * <pre>{@code
+     * ZonedDateTimeType type = new ZonedDateTimeType();
+     * Class<ZonedDateTime> clazz = type.clazz(); // Returns ZonedDateTime.class
+     * }</pre>
+     *
      * @return the Class object for ZonedDateTime.class
      */
     @Override
@@ -59,6 +64,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * This method formats the ZonedDateTime using the ISO 8601 timestamp format with timezone information.
      * If the input is null, this method returns null.
      * </p>
+     *
+     * <pre>{@code
+     * ZonedDateTime zdt = ZonedDateTime.now();
+     * String str = type.stringOf(zdt); // Returns "2023-10-15T10:30:00.123Z"
+     * }</pre>
      *
      * @param x the ZonedDateTime instance to convert to string
      * @return the ISO 8601 timestamp string representation, or null if the input is null
@@ -78,6 +88,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *   <li>null - returns null</li>
      * </ul>
      * </p>
+     *
+     * <pre>{@code
+     * ZonedDateTime zdt1 = type.valueOf(1697364600000L); // From epoch milliseconds
+     * ZonedDateTime zdt2 = type.valueOf("2023-10-15T10:30:00Z"); // From string
+     * }</pre>
      *
      * @param obj the object to convert to ZonedDateTime
      * @return a ZonedDateTime instance, or null if the input is null
@@ -104,6 +119,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *   <li>Other formats are parsed using the default ZonedDateTime parser</li>
      * </ul>
      * </p>
+     *
+     * <pre>{@code
+     * ZonedDateTime zdt1 = type.valueOf("2023-10-15T10:30:00Z"); // ISO 8601 format
+     * ZonedDateTime zdt2 = type.valueOf("SYS_TIME"); // Current time
+     * }</pre>
      *
      * @param str the string to convert to ZonedDateTime
      * @return a ZonedDateTime instance, or null if the string is empty
@@ -142,6 +162,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * character array to a string and delegates to {@link #valueOf(String)}.
      * </p>
      *
+     * <pre>{@code
+     * char[] chars = "1697364600000".toCharArray();
+     * ZonedDateTime zdt = type.valueOf(chars, 0, chars.length); // From epoch millis
+     * }</pre>
+     *
      * @param cbuf the character array containing the date/time representation
      * @param offset the starting position in the character array
      * @param len the number of characters to process
@@ -172,6 +197,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * ZonedDateTime in the default timezone.
      * </p>
      *
+     * <pre>{@code
+     * ZonedDateTime zdt = type.get(resultSet, 1);
+     * // Retrieves timestamp from first column as ZonedDateTime
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) of the timestamp value
      * @return the ZonedDateTime value, or null if the database value is NULL
@@ -190,6 +220,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * This method reads a Timestamp value from the ResultSet and converts it to a
      * ZonedDateTime in the default timezone.
      * </p>
+     *
+     * <pre>{@code
+     * ZonedDateTime zdt = type.get(resultSet, "created_date");
+     * // Retrieves timestamp from 'created_date' column
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnName the name of the column containing the timestamp value
@@ -210,6 +245,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * PreparedStatement. If the ZonedDateTime is null, a NULL value is set.
      * </p>
      *
+     * <pre>{@code
+     * ZonedDateTime zdt = ZonedDateTime.now();
+     * type.set(preparedStatement, 1, zdt); // Sets timestamp at first parameter
+     * }</pre>
+     *
      * @param stmt the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the value
      * @param x the ZonedDateTime value to set, or null for SQL NULL
@@ -227,6 +267,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * CallableStatement. If the ZonedDateTime is null, a NULL value is set.
      * </p>
      *
+     * <pre>{@code
+     * ZonedDateTime zdt = ZonedDateTime.now();
+     * type.set(callableStatement, "created_date", zdt); // Sets timestamp parameter
+     * }</pre>
+     *
      * @param stmt the CallableStatement to set the value in
      * @param columnName the name of the parameter where to set the value
      * @param x the ZonedDateTime value to set, or null for SQL NULL
@@ -243,6 +288,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * This method formats the ZonedDateTime using the ISO 8601 timestamp format and appends it
      * to the provided Appendable. If the ZonedDateTime is null, it appends the string "null".
      * </p>
+     *
+     * <pre>{@code
+     * StringBuilder sb = new StringBuilder();
+     * type.appendTo(sb, ZonedDateTime.now()); // Appends formatted date/time
+     * }</pre>
      *
      * @param appendable the Appendable to write to
      * @param x the ZonedDateTime value to append
@@ -269,6 +319,12 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </ul>
      * The output may be quoted based on the configuration settings, except for LONG format.
      * </p>
+     *
+     * <pre>{@code
+     * CharacterWriter writer = new CharacterWriter();
+     * JSONXMLSerializationConfig<?> config = JSONXMLSerializationConfig.of();
+     * type.writeCharacter(writer, ZonedDateTime.now(), config); // Writes formatted date/time
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the ZonedDateTime value to write

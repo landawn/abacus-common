@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationConfig;
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class XmlMappers100Test extends TestBase {
 
     @Test
@@ -204,7 +206,6 @@ public class XmlMappers100Test extends TestBase {
         String xml = "<Person><name>John</name><unknownField>value</unknownField><age>30</age></Person>";
 
         DeserializationFeature failOnUnknownProperties = DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-        // Should throw exception due to unknown field
         Assertions.assertThrows(RuntimeException.class, () -> {
             XmlMappers.fromXml(xml, Person.class, failOnUnknownProperties);
         });
@@ -326,31 +327,6 @@ public class XmlMappers100Test extends TestBase {
         Assertions.assertNotNull(person);
         Assertions.assertEquals("John", person.getName());
     }
-
-    //    @Test
-    //    public void testFromXmlDataInput() throws Exception {
-    //        String xml = "<Person><name>John</name><age>30</age></Person>";
-    //        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-    //        DataInputStream dis = new DataInputStream(bais);
-    //
-    //        Person person = XmlMappers.fromXml((DataInput) dis, Person.class);
-    //
-    //        Assertions.assertNotNull(person);
-    //        Assertions.assertEquals("John", person.getName());
-    //    }
-
-    //    @Test
-    //    public void testFromXmlDataInputWithConfig() throws Exception {
-    //        String xml = "<Person><name>John</name><age>30</age></Person>";
-    //        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-    //        DataInputStream dis = new DataInputStream(bais);
-    //        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-    //
-    //        Person person = XmlMappers.fromXml((DataInput) dis, Person.class, config);
-    //
-    //        Assertions.assertNotNull(person);
-    //        Assertions.assertEquals("John", person.getName());
-    //    }
 
     @Test
     public void testFromXmlWithTypeReferenceByteArray() {
@@ -525,33 +501,6 @@ public class XmlMappers100Test extends TestBase {
         Assertions.assertNotNull(list);
         Assertions.assertEquals(2, list.size());
     }
-
-    //    @Test
-    //    public void testFromXmlWithTypeReferenceDataInput() throws Exception {
-    //        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-    //        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-    //        DataInputStream dis = new DataInputStream(bais);
-    //
-    //        List<String> list = XmlMappers.fromXml((DataInput) dis, new TypeReference<List<String>>() {
-    //        });
-    //
-    //        Assertions.assertNotNull(list);
-    //        Assertions.assertEquals(2, list.size());
-    //    }
-    //
-    //    @Test
-    //    public void testFromXmlWithTypeReferenceDataInputWithConfig() throws Exception {
-    //        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-    //        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-    //        DataInputStream dis = new DataInputStream(bais);
-    //        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-    //
-    //        List<String> list = XmlMappers.fromXml((DataInput) dis, new TypeReference<List<String>>() {
-    //        }, config);
-    //
-    //        Assertions.assertNotNull(list);
-    //        Assertions.assertEquals(2, list.size());
-    //    }
 
     @Test
     public void testCreateSerializationConfig() {
@@ -751,20 +700,6 @@ public class XmlMappers100Test extends TestBase {
         Assertions.assertEquals("John", person.getName());
     }
 
-    //    @Test
-    //    public void testOneFromXmlDataInput() throws Exception {
-    //        XmlMapper mapper = new XmlMapper();
-    //        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-    //        String xml = "<Person><name>John</name><age>30</age></Person>";
-    //        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-    //        DataInputStream dis = new DataInputStream(bais);
-    //
-    //        Person person = wrapper.fromXml((DataInput) dis, Person.class);
-    //
-    //        Assertions.assertNotNull(person);
-    //        Assertions.assertEquals("John", person.getName());
-    //    }
-
     @Test
     public void testOneFromXmlWithTypeReferenceByteArray() {
         XmlMapper mapper = new XmlMapper();
@@ -869,22 +804,6 @@ public class XmlMappers100Test extends TestBase {
         Assertions.assertEquals(2, list.size());
     }
 
-    //    @Test
-    //    public void testOneFromXmlWithTypeReferenceDataInput() throws Exception {
-    //        XmlMapper mapper = new XmlMapper();
-    //        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-    //        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-    //        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-    //        DataInputStream dis = new DataInputStream(bais);
-    //
-    //        List<String> list = wrapper.fromXml((DataInput) dis, new TypeReference<List<String>>() {
-    //        });
-    //
-    //        Assertions.assertNotNull(list);
-    //        Assertions.assertEquals(2, list.size());
-    //    }
-
-    // Test bean class
     public static class Person {
         private String name;
         private Integer age;

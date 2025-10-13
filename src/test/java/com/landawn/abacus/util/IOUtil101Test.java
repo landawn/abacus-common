@@ -49,14 +49,13 @@ import java.util.zip.ZipOutputStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.BiPredicate;
 
-/**
- * Additional unit tests for IOUtil methods not covered in the main test file
- */
+@Tag("new-test")
 public class IOUtil101Test extends TestBase {
 
     @TempDir
@@ -75,7 +74,6 @@ public class IOUtil101Test extends TestBase {
         Files.write(tempFile.toPath(), TEST_CONTENT.getBytes(UTF_8));
     }
 
-    // Additional Read Tests with Edge Cases
     @Test
     public void testReadBytesFromInputStreamWithOffset() throws IOException {
         byte[] data = "0123456789ABCDEF".getBytes(UTF_8);
@@ -137,7 +135,6 @@ public class IOUtil101Test extends TestBase {
         }
     }
 
-    // Write Tests with Different Overloads
     @Test
     public void testWriteCharSequenceWithCharset() throws IOException {
         File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
@@ -294,7 +291,6 @@ public class IOUtil101Test extends TestBase {
         }
     }
 
-    // Append Tests with Different Overloads
     @Test
     public void testAppendBytesWithOffsetAndCount() throws IOException {
         File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
@@ -396,7 +392,6 @@ public class IOUtil101Test extends TestBase {
         }
     }
 
-    // URLConnection Tests
     @Test
     public void testCloseURLConnection() throws IOException {
         URL url = new URL("http://example.com");
@@ -407,13 +402,10 @@ public class IOUtil101Test extends TestBase {
         }
 
         IOUtil.close(conn);
-        // No exception should be thrown
     }
 
-    // Copy Directory Tests
     @Test
     public void testCopyToDirectoryRecursive() throws IOException {
-        // Create source directory structure
         File srcDir = Files.createTempDirectory(tempFolder, "src").toFile();
         File subDir = new File(srcDir, "subdir");
         subDir.mkdir();
@@ -423,11 +415,9 @@ public class IOUtil101Test extends TestBase {
         Files.write(file1.toPath(), "File 1".getBytes(UTF_8));
         Files.write(file2.toPath(), "File 2".getBytes(UTF_8));
 
-        // Copy to destination
         File destDir = Files.createTempDirectory(tempFolder, "dest").toFile();
         IOUtil.copyToDirectory(srcDir, destDir);
 
-        // Verify
         File copiedDir = new File(destDir, srcDir.getName());
         assertTrue(copiedDir.exists());
         assertTrue(copiedDir.isDirectory());
@@ -446,19 +436,16 @@ public class IOUtil101Test extends TestBase {
 
     @Test
     public void testCopyToDirectoryWithFilter() throws IOException {
-        // Create source directory structure
         File srcDir = Files.createTempDirectory(tempFolder, "src").toFile();
         File file1 = new File(srcDir, "file1.txt");
         File file2 = new File(srcDir, "file2.log");
         Files.write(file1.toPath(), "File 1".getBytes(UTF_8));
         Files.write(file2.toPath(), "File 2".getBytes(UTF_8));
 
-        // Copy with filter (only .txt files)
         File destDir = Files.createTempDirectory(tempFolder, "dest").toFile();
         BiPredicate<File, File> filter = (parent, file) -> file.getName().endsWith(".txt");
         IOUtil.copyToDirectory(srcDir, destDir, true, filter);
 
-        // Verify
         File copiedDir = new File(destDir, srcDir.getName());
         File copiedFile1 = new File(copiedDir, "file1.txt");
         File copiedFile2 = new File(copiedDir, "file2.log");
@@ -482,7 +469,6 @@ public class IOUtil101Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> IOUtil.copyToDirectory(tempFile, destFile));
     }
 
-    // Copy File Tests with Options
     @Test
     public void testCopyFileWithCopyOptions() throws IOException {
         File destFile = new File(tempDir, "copy.txt");
@@ -510,10 +496,8 @@ public class IOUtil101Test extends TestBase {
         assertEquals(TEST_CONTENT, baos.toString());
     }
 
-    // Delete with Filter Tests
     @Test
     public void testDeleteFilesFromDirectoryWithFilter() throws IOException {
-        // Create files
         File file1 = new File(tempDir, "file1.txt");
         File file2 = new File(tempDir, "file2.log");
         File subDir = new File(tempDir, "subdir");
@@ -524,7 +508,6 @@ public class IOUtil101Test extends TestBase {
         Files.write(file2.toPath(), "content".getBytes(UTF_8));
         Files.write(subFile.toPath(), "content".getBytes(UTF_8));
 
-        // Delete only .txt files
         BiPredicate<File, File> filter = (parent, file) -> file.getName().endsWith(".txt");
         boolean deleted = IOUtil.deleteFilesFromDirectory(tempDir, filter);
 
@@ -535,7 +518,6 @@ public class IOUtil101Test extends TestBase {
         assertFalse(subFile.exists());
     }
 
-    // File Type Tests with LinkOptions
     @Test
     public void testIsDirectoryWithLinkOptions() {
         assertTrue(IOUtil.isDirectory(tempDir, LinkOption.NOFOLLOW_LINKS));
@@ -548,7 +530,6 @@ public class IOUtil101Test extends TestBase {
         assertFalse(IOUtil.isRegularFile(tempDir, LinkOption.NOFOLLOW_LINKS));
     }
 
-    // Size Tests
     @Test
     public void testSizeOfWithNonExistingFileAsEmpty() throws FileNotFoundException {
         File nonExistent = new File(tempDir, "nonexistent.txt");
@@ -586,20 +567,16 @@ public class IOUtil101Test extends TestBase {
         assertEquals(BigInteger.valueOf(10), size);
     }
 
-    // Zip Tests with Multiple Files
     @Test
     public void testZipMultipleFiles() throws IOException {
-        // Create multiple files
         File file1 = Files.createTempFile(tempFolder, "file1", ".txt").toFile();
         File file2 = Files.createTempFile(tempFolder, "file2", ".txt").toFile();
         Files.write(file1.toPath(), "Content 1".getBytes(UTF_8));
         Files.write(file2.toPath(), "Content 2".getBytes(UTF_8));
 
-        // Zip them
         File zipFile = new File(tempDir, "test.zip");
         IOUtil.zip(Arrays.asList(file1, file2), zipFile);
 
-        // Verify
         assertTrue(zipFile.exists());
         try (ZipFile zf = new ZipFile(zipFile)) {
             assertEquals(2, zf.size());
@@ -614,7 +591,6 @@ public class IOUtil101Test extends TestBase {
 
     @Test
     public void testZipDirectory() throws IOException {
-        // Create directory structure
         File subDir = new File(tempDir, "subdir");
         subDir.mkdir();
         File file1 = new File(tempDir, "file1.txt");
@@ -622,21 +598,17 @@ public class IOUtil101Test extends TestBase {
         Files.write(file1.toPath(), "Content 1".getBytes(UTF_8));
         Files.write(file2.toPath(), "Content 2".getBytes(UTF_8));
 
-        // Zip directory
         File zipFile = new File(tempFolder.toFile(), "test.zip");
         IOUtil.zip(tempDir, zipFile);
 
-        // Verify
         assertTrue(zipFile.exists());
         try (ZipFile zf = new ZipFile(zipFile)) {
             assertTrue(zf.size() >= 2);
         }
     }
 
-    // Split Tests
     @Test
     public void testSplit() throws IOException {
-        // Create larger file
         StringBuilder content = new StringBuilder();
         for (int i = 0; i < 10; i++) {
             content.append("Line ").append(i).append(" with some content\n");
@@ -644,17 +616,14 @@ public class IOUtil101Test extends TestBase {
         File largeFile = Files.createTempFile(tempFolder, "large", ".txt").toFile();
         Files.write(largeFile.toPath(), content.toString().getBytes(UTF_8));
 
-        // Split into 3 parts
         IOUtil.split(largeFile, 3);
 
-        // Verify parts
         File[] parts = largeFile.getParentFile().listFiles((dir, name) -> name.startsWith(largeFile.getName() + "_"));
         assertEquals(3, parts.length);
     }
 
     @Test
     public void testSplitToSpecificDirectory() throws IOException {
-        // Create file
         StringBuilder content = new StringBuilder();
         for (int i = 0; i < 10; i++) {
             content.append("Line ").append(i).append("\n");
@@ -662,25 +631,20 @@ public class IOUtil101Test extends TestBase {
         File largeFile = Files.createTempFile(tempFolder, "large", ".txt").toFile();
         Files.write(largeFile.toPath(), content.toString().getBytes(UTF_8));
 
-        // Split to specific directory
         File splitDir = Files.createTempDirectory(tempFolder, "splits").toFile();
         IOUtil.split(largeFile, 2, splitDir);
 
-        // Verify
         File[] parts = splitDir.listFiles();
         assertEquals(2, parts.length);
     }
 
-    // List with Filter Tests
     @Test
     public void testListWithFilter() throws IOException {
-        // Create files
         File file1 = new File(tempDir, "file1.txt");
         File file2 = new File(tempDir, "file2.log");
         file1.createNewFile();
         file2.createNewFile();
 
-        // List only .txt files 
         List<String> files = IOUtil.walk(tempDir, false, false).filter(it -> it.getName().endsWith(".txt")).map(File::getName).toList();
 
         assertEquals(1, files.size());
@@ -689,7 +653,6 @@ public class IOUtil101Test extends TestBase {
 
     @Test
     public void testListFilesRecursivelyWithFilter() throws IOException {
-        // Create directory structure
         File subDir = new File(tempDir, "subdir");
         subDir.mkdir();
         File file1 = new File(tempDir, "file1.txt");
@@ -699,7 +662,6 @@ public class IOUtil101Test extends TestBase {
         file2.createNewFile();
         file3.createNewFile();
 
-        // List recursively only .txt files
         BiPredicate<File, File> filter = (parent, file) -> file.getName().endsWith(".txt");
         List<File> files = IOUtil.listFiles(tempDir, true, filter);
 
@@ -707,10 +669,8 @@ public class IOUtil101Test extends TestBase {
         assertTrue(files.stream().allMatch(f -> f.getName().endsWith(".txt")));
     }
 
-    // forLines with Collections Tests
     @Test
     public void testForLinesWithMultipleFiles() throws Exception {
-        // Create multiple files
         File file1 = Files.createTempFile(tempFolder, "file1", ".txt").toFile();
         File file2 = Files.createTempFile(tempFolder, "file2", ".txt").toFile();
         Files.write(file1.toPath(), "File1 Line1\nFile1 Line2\n".getBytes(UTF_8));
@@ -726,7 +686,6 @@ public class IOUtil101Test extends TestBase {
 
     @Test
     public void testForLinesWithOffsetAndCountMultipleFiles() throws Exception {
-        // Create files
         File file1 = Files.createTempFile(tempFolder, "file1", ".txt").toFile();
         File file2 = Files.createTempFile(tempFolder, "file2", ".txt").toFile();
         Files.write(file1.toPath(), "Line1\nLine2\nLine3\n".getBytes(UTF_8));
@@ -757,7 +716,6 @@ public class IOUtil101Test extends TestBase {
 
     @Test
     public void testForLinesWithProcessThreads() throws Exception {
-        // Create large file
         StringBuilder content = new StringBuilder();
         for (int i = 0; i < 100; i++) {
             content.append("Line ").append(i).append("\n");
@@ -767,7 +725,6 @@ public class IOUtil101Test extends TestBase {
 
         List<String> lines = Collections.synchronizedList(new ArrayList<>());
 
-        // Process with multiple threads
         IOUtil.forLines(largeFile, 0, Long.MAX_VALUE, 2, 10, lines::add);
 
         assertEquals(100, lines.size());
@@ -775,7 +732,6 @@ public class IOUtil101Test extends TestBase {
 
     @Test
     public void testForLinesWithReadAndProcessThreads() throws Exception {
-        // Create multiple files
         List<File> files = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             File file = Files.createTempFile(tempFolder, "file" + i, ".txt").toFile();
@@ -790,14 +746,12 @@ public class IOUtil101Test extends TestBase {
         List<String> lines = Collections.synchronizedList(new ArrayList<>());
         CountDownLatch completeLatch = new CountDownLatch(1);
 
-        // Process with multiple read and process threads
         IOUtil.forLines(files, 0, Long.MAX_VALUE, 2, 3, 10, lines::add, completeLatch::countDown);
 
         completeLatch.await();
         assertEquals(100, lines.size());
     }
 
-    // Stream Factory Tests
     @Test
     public void testNewFileReaderWithCharset() throws IOException {
         File file = Files.createTempFile(tempFolder, "utf8", ".txt").toFile();
@@ -863,7 +817,6 @@ public class IOUtil101Test extends TestBase {
         }
     }
 
-    // Compression Stream Tests with Buffer Size
     @Test
     public void testNewLZ4BlockOutputStreamWithBlockSize() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -886,13 +839,11 @@ public class IOUtil101Test extends TestBase {
 
     @Test
     public void testNewGZIPInputStreamWithBufferSize() throws IOException {
-        // Create GZIP data
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (GZIPOutputStream gzos = new GZIPOutputStream(baos)) {
             gzos.write(TEST_CONTENT.getBytes(UTF_8));
         }
 
-        // Read with buffer size
         try (GZIPInputStream gzis = IOUtil.newGZIPInputStream(new ByteArrayInputStream(baos.toByteArray()), 512)) {
             String decompressed = IOUtil.readAllToString(gzis, UTF_8);
             assertEquals(TEST_CONTENT, decompressed);
@@ -911,7 +862,6 @@ public class IOUtil101Test extends TestBase {
 
     @Test
     public void testNewZipInputStreamWithCharset() throws IOException {
-        // Create ZIP data
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zos = new ZipOutputStream(baos, StandardCharsets.UTF_8)) {
             zos.putNextEntry(new ZipEntry("test.txt"));
@@ -919,7 +869,6 @@ public class IOUtil101Test extends TestBase {
             zos.closeEntry();
         }
 
-        // Read with charset
         try (ZipInputStream zis = IOUtil.newZipInputStream(new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8)) {
             ZipEntry entry = zis.getNextEntry();
             assertEquals("test.txt", entry.getName());
@@ -941,12 +890,10 @@ public class IOUtil101Test extends TestBase {
         assertTrue(baos.size() > 0);
     }
 
-    // Edge Cases
     @Test
     public void testEmptyFileOperations() throws IOException {
         File emptyFile = Files.createTempFile(tempFolder, "empty", ".txt").toFile();
 
-        // Read operations
         assertEquals(0, IOUtil.readAllBytes(emptyFile).length);
         assertEquals(0, IOUtil.readAllChars(emptyFile).length);
         assertEquals("", IOUtil.readAllToString(emptyFile));
@@ -954,20 +901,16 @@ public class IOUtil101Test extends TestBase {
         assertNull(IOUtil.readFirstLine(emptyFile));
         assertNull(IOUtil.readLastLine(emptyFile));
 
-        // Size
         assertEquals(0, IOUtil.sizeOf(emptyFile));
         assertEquals(BigInteger.ZERO, IOUtil.sizeOfAsBigInteger(emptyFile));
     }
 
     @Test
     public void testNullAndEmptyInputs() throws IOException {
-        // chars2Bytes with empty array
         assertEquals(0, IOUtil.chars2Bytes(new char[0]).length);
 
-        // bytes2Chars with empty array
         assertEquals(0, IOUtil.bytes2Chars(new byte[0]).length);
 
-        // Write empty arrays
         File outputFile = Files.createTempFile(tempFolder, "empty_output", ".txt").toFile();
         IOUtil.write(new byte[0], outputFile);
         assertEquals(0, Files.size(outputFile.toPath()));
@@ -975,7 +918,6 @@ public class IOUtil101Test extends TestBase {
         IOUtil.write(new char[0], outputFile);
         assertEquals(0, Files.size(outputFile.toPath()));
 
-        // Append empty arrays
         IOUtil.append(new byte[0], outputFile);
         IOUtil.append(new char[0], outputFile);
         assertEquals(0, Files.size(outputFile.toPath()));
@@ -1005,7 +947,6 @@ public class IOUtil101Test extends TestBase {
 
     @Test
     public void testSizeOfDirectoryWithSymbolicLinks() throws IOException {
-        // Note: This test may not work on all platforms
         File file1 = new File(tempDir, "file1.txt");
         Files.write(file1.toPath(), "12345".getBytes(UTF_8));
 

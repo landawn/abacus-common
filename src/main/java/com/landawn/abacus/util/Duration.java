@@ -508,9 +508,21 @@ public final class Duration implements Comparable<Duration>, Immutable {
     }
 
     /**
-     * Converts this {@code Duration} to {@code java.time.Duration}.
-     * 
-     * @return a {@code java.time.Duration} with the same milliseconds.
+     * Converts this {@code Duration} to a {@code java.time.Duration}.
+     * <p>
+     * This method creates a new {@code java.time.Duration} instance representing the same amount of time
+     * as this Duration. The conversion is straightforward as both use milliseconds precision.
+     * This is useful for interoperability with Java's standard time API.
+     * </p>
+     * <p>
+     * Example:
+     * <pre>
+     * Duration d = Duration.ofHours(2);
+     * java.time.Duration jdkDuration = d.toJdkDuration(); // 2 hours
+     * </pre>
+     * </p>
+     *
+     * @return a {@code java.time.Duration} with the same milliseconds value, not null
      */
     public java.time.Duration toJdkDuration() {
         return java.time.Duration.ofMillis(milliseconds);
@@ -613,7 +625,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
         }
 
         if (seconds == 0 && millis == 0 && sb.length() > 2) {
-            return sb.toString();
+            final String result = sb.toString();
+            Objectory.recycle(sb);
+            return result;
         }
 
         if (seconds == 0 && millis < 0) {

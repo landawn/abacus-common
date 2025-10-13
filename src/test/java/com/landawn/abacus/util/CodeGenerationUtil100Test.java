@@ -11,6 +11,7 @@ import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -19,12 +20,12 @@ import com.landawn.abacus.entity.User;
 import com.landawn.abacus.util.CodeGenerationUtil.PropNameTableCodeConfig;
 import com.landawn.abacus.util.function.TriFunction;
 
+@Tag("new-test")
 public class CodeGenerationUtil100Test extends TestBase {
 
     @TempDir
     Path tempDir;
 
-    // Test entity classes for testing
     public static class TestEntity {
         private String id;
         private String name;
@@ -103,7 +104,6 @@ public class CodeGenerationUtil100Test extends TestBase {
         }
     }
 
-    // Test for generatePropNameTableClass(Class<?>) - single parameter
     @Test
     public void testGeneratePropNameTableClass_SingleParam() {
         String result = CodeGenerationUtil.generatePropNameTableClass(TestEntity.class);
@@ -118,7 +118,6 @@ public class CodeGenerationUtil100Test extends TestBase {
         Assertions.assertTrue(result.contains("Auto-generated class for property(field) name table"));
     }
 
-    // Test for generatePropNameTableClass(Class<?>, String) - two parameters
     @Test
     public void testGeneratePropNameTableClass_TwoParams() {
         String customClassName = "PropNames";
@@ -133,7 +132,6 @@ public class CodeGenerationUtil100Test extends TestBase {
         Assertions.assertTrue(result.contains("String active = \"active\""));
     }
 
-    // Test for generatePropNameTableClass(Class<?>, String, String) - three parameters with srcDir
     @Test
     public void testGeneratePropNameTableClass_ThreeParams() {
         N.println(CodeGenerationUtil.generatePropNameTableClass(Account.class, CodeGenerationUtil.X, "./src/test/java/"));
@@ -157,7 +155,6 @@ public class CodeGenerationUtil100Test extends TestBase {
         N.println(CodeGenerationUtil.generatePropNameTableClasses(codeConfig));
     }
 
-    // Test for generatePropNameTableClasses(Collection<Class<?>>) - single parameter
     @Test
     public void testGeneratePropNameTableClasses_SingleParam() {
         Collection<Class<?>> classes = Arrays.asList(TestEntity.class, AnotherTestEntity.class);
@@ -172,7 +169,6 @@ public class CodeGenerationUtil100Test extends TestBase {
         Assertions.assertTrue(result.contains("[TestEntity, AnotherTestEntity]"));
     }
 
-    // Test for generatePropNameTableClasses(Collection<Class<?>>, String) - two parameters
     @Test
     public void testGeneratePropNameTableClasses_TwoParams() {
         Collection<Class<?>> classes = Arrays.asList(TestEntity.class, AnotherTestEntity.class);
@@ -185,7 +181,6 @@ public class CodeGenerationUtil100Test extends TestBase {
         Assertions.assertTrue(result.contains("for classes: {@code [AnotherTestEntity, TestEntity]}"));
     }
 
-    // Test for generatePropNameTableClasses(Collection<Class<?>>, String, String, String) - four parameters
     @Test
     public void testGeneratePropNameTableClasses_FourParams() throws IOException {
         Collection<Class<?>> classes = Arrays.asList(TestEntity.class, AnotherTestEntity.class);
@@ -199,12 +194,10 @@ public class CodeGenerationUtil100Test extends TestBase {
         Assertions.assertTrue(result.contains("package " + packageName));
         Assertions.assertTrue(result.contains("public interface " + className));
 
-        // Verify file was created
         File generatedFile = new File(srcDir, packageName.replace('.', File.separatorChar) + File.separator + className + ".java");
         Assertions.assertTrue(generatedFile.exists());
     }
 
-    // Test for generatePropNameTableClasses(PropNameTableCodeConfig) - config parameter
     @Test
     public void testGeneratePropNameTableClasses_WithConfig() throws IOException {
         Collection<Class<?>> classes = Arrays.asList(TestEntity.class, AnotherTestEntity.class);
@@ -238,38 +231,30 @@ public class CodeGenerationUtil100Test extends TestBase {
         Assertions.assertTrue(result.contains("testEntityPropNameList"));
         Assertions.assertTrue(result.contains("anotherTestEntityPropNameList"));
 
-        // Verify lower case with underscore
         Assertions.assertTrue(result.contains("created_time = \"created_time\""));
 
-        // Verify upper case with underscore
         Assertions.assertTrue(result.contains("CREATED_TIME"));
 
-        // Verify function properties
         Assertions.assertTrue(result.contains("min_"));
         Assertions.assertTrue(result.contains("max_"));
     }
 
-    // Test for edge cases with null/empty inputs
     @Test
     public void testGeneratePropNameTableClasses_EdgeCases() {
-        // Test with empty collection
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             CodeGenerationUtil.generatePropNameTableClasses(Collections.emptyList());
         });
 
-        // Test with null config
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             CodeGenerationUtil.generatePropNameTableClasses((PropNameTableCodeConfig) null);
         });
 
-        // Test config with null entity classes
         PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().entityClasses(null).className("Test").build();
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             CodeGenerationUtil.generatePropNameTableClasses(config);
         });
 
-        // Test config with empty className
         PropNameTableCodeConfig config2 = PropNameTableCodeConfig.builder().entityClasses(Arrays.asList(TestEntity.class)).className("").build();
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -277,7 +262,6 @@ public class CodeGenerationUtil100Test extends TestBase {
         });
     }
 
-    // Test for interface filtering
     @Test
     public void testGeneratePropNameTableClasses_InterfaceFiltering() {
         interface TestInterface {
@@ -288,15 +272,12 @@ public class CodeGenerationUtil100Test extends TestBase {
         String result = CodeGenerationUtil.generatePropNameTableClasses(classes);
 
         Assertions.assertNotNull(result);
-        // Interface should be filtered out
         Assertions.assertFalse(result.contains("TestInterface"));
         Assertions.assertTrue(result.contains("TestEntity"));
     }
 
-    // Test for duplicate simple class names
     @Test
     public void testGeneratePropNameTableClasses_DuplicateSimpleClassNames() {
-        // Create another TestEntity in different package to test duplicate handling
         class TestEntity {
             private String field1;
 
@@ -313,13 +294,11 @@ public class CodeGenerationUtil100Test extends TestBase {
 
         PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().entityClasses(classes).className("Props").generateClassPropNameList(true).build();
 
-        // Should throw exception due to duplicate simple class names when generateClassPropNameList is true
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             CodeGenerationUtil.generatePropNameTableClasses(config);
         });
     }
 
-    // Test for keyword property names
     @Test
     public void testGeneratePropNameTableClasses_KeywordPropertyNames() {
         class TestEntityWithKeywords {
@@ -347,17 +326,15 @@ public class CodeGenerationUtil100Test extends TestBase {
         String result = CodeGenerationUtil.generatePropNameTableClasses(classes);
 
         Assertions.assertNotNull(result);
-        // Keywords should be prefixed with underscore
         Assertions.assertTrue(result.contains("String class_ = \"class_\""));
         Assertions.assertTrue(result.contains("String if_ = \"if_\""));
     }
 
-    // Test for custom prop name converters
     @Test
     public void testGeneratePropNameTableClasses_CustomConverters() {
         BiFunction<Class<?>, String, String> customConverter = (cls, propName) -> {
             if (propName.equals("id")) {
-                return null; // Skip id
+                return null;
             }
             return propName.toUpperCase();
         };
@@ -371,12 +348,11 @@ public class CodeGenerationUtil100Test extends TestBase {
         String result = CodeGenerationUtil.generatePropNameTableClasses(config);
 
         Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.contains("String id")); // id should be skipped
+        Assertions.assertFalse(result.contains("String id"));
         Assertions.assertTrue(result.contains("String NAME = \"NAME\""));
         Assertions.assertTrue(result.contains("String AGE = \"AGE\""));
     }
 
-    // Test constants
     @Test
     public void testConstants() {
         Assertions.assertEquals("s", CodeGenerationUtil.S);
@@ -386,32 +362,26 @@ public class CodeGenerationUtil100Test extends TestBase {
         Assertions.assertEquals("x", CodeGenerationUtil.X);
     }
 
-    // Test MIN_FUNC
     @Test
     public void testMinFunc() {
         TriFunction<Class<?>, Class<?>, String, String> minFunc = CodeGenerationUtil.MIN_FUNC;
 
-        // Test with Comparable property
         String result = minFunc.apply(TestEntity.class, String.class, "name");
         Assertions.assertEquals("min(name)", result);
 
-        // Test with non-Comparable property
         class NonComparable {
         }
         result = minFunc.apply(TestEntity.class, NonComparable.class, "prop");
         Assertions.assertNull(result);
     }
 
-    // Test MAX_FUNC
     @Test
     public void testMaxFunc() {
         TriFunction<Class<?>, Class<?>, String, String> maxFunc = CodeGenerationUtil.MAX_FUNC;
 
-        // Test with Comparable property
         String result = maxFunc.apply(TestEntity.class, Integer.class, "age");
         Assertions.assertEquals("max(age)", result);
 
-        // Test with non-Comparable property
         class NonComparable {
         }
         result = maxFunc.apply(TestEntity.class, NonComparable.class, "prop");

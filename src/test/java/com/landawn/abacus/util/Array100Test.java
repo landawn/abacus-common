@@ -11,15 +11,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Array100Test extends TestBase {
 
-    // Test newInstance methods
     @Test
     public void testNewInstance_SingleDimension() {
-        // Test with various component types
         Integer[] intArray = Array.newInstance(Integer.class, 5);
         assertNotNull(intArray);
         assertEquals(5, intArray.length);
@@ -28,7 +28,6 @@ public class Array100Test extends TestBase {
         assertNotNull(strArray);
         assertEquals(10, strArray.length);
 
-        // Test with zero length
         Double[] emptyArray = Array.newInstance(Double.class, 0);
         assertNotNull(emptyArray);
         assertEquals(0, emptyArray.length);
@@ -41,13 +40,11 @@ public class Array100Test extends TestBase {
 
     @Test
     public void testNewInstance_MultiDimension() {
-        // Test 2D array
         Integer[][] array2D = Array.newInstance(Integer.class, 3, 4);
         assertNotNull(array2D);
         assertEquals(3, array2D.length);
         assertEquals(4, array2D[0].length);
 
-        // Test 3D array
         String[][][] array3D = Array.newInstance(String.class, 2, 3, 4);
         assertNotNull(array3D);
         assertEquals(2, array3D.length);
@@ -60,7 +57,6 @@ public class Array100Test extends TestBase {
         assertThrows(NegativeArraySizeException.class, () -> Array.newInstance(String.class, 3, -1));
     }
 
-    // Test getLength method
     @Test
     public void testGetLength() {
         int[] intArray = new int[5];
@@ -69,10 +65,8 @@ public class Array100Test extends TestBase {
         String[] strArray = new String[10];
         assertEquals(10, Array.getLength(strArray));
 
-        // Test with null
         assertEquals(0, Array.getLength(null));
 
-        // Test with empty array
         Object[] emptyArray = new Object[0];
         assertEquals(0, Array.getLength(emptyArray));
     }
@@ -82,7 +76,6 @@ public class Array100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Array.getLength("not an array"));
     }
 
-    // Test get methods
     @Test
     public void testGet() {
         Integer[] array = { 1, 2, 3, 4, 5 };
@@ -161,7 +154,6 @@ public class Array100Test extends TestBase {
         assertEquals(3.33, Array.getDouble(array, 2), 0.001);
     }
 
-    // Test set methods
     @Test
     public void testSet() {
         Integer[] array = new Integer[3];
@@ -252,7 +244,6 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new double[] { 1.11, 2.22, 3.33 }, array, 0.001);
     }
 
-    // Test asList method
     @Test
     public void testAsList() {
         List<String> list = Array.asList("a", "b", "c");
@@ -261,16 +252,13 @@ public class Array100Test extends TestBase {
         assertEquals("b", list.get(1));
         assertEquals("c", list.get(2));
 
-        // Test with null array
         List<String> emptyList = Array.asList((String[]) null);
         assertTrue(emptyList.isEmpty());
 
-        // Test with empty array
         List<Integer> emptyIntList = Array.asList(new Integer[0]);
         assertTrue(emptyIntList.isEmpty());
     }
 
-    // Test of methods
     @Test
     public void testOf_Boolean() {
         boolean[] array = Array.of(true, false, true);
@@ -333,13 +321,11 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new java.util.Date[] { date1, date2 }, array);
     }
 
-    // Test range methods
     @Test
     public void testRange_Char() {
         char[] range = Array.range('a', 'e');
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, range);
 
-        // Test empty range
         char[] emptyRange = Array.range('a', 'a');
         assertEquals(0, emptyRange.length);
     }
@@ -368,13 +354,11 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new long[] { 1000L, 1001L, 1002L, 1003L, 1004L }, range);
     }
 
-    // Test range with step methods
     @Test
     public void testRange_CharWithStep() {
         char[] range = Array.range('a', 'g', 2);
         assertArrayEquals(new char[] { 'a', 'c', 'e' }, range);
 
-        // Test negative step
         char[] reverseRange = Array.range('e', 'a', -1);
         assertArrayEquals(new char[] { 'e', 'd', 'c', 'b' }, reverseRange);
     }
@@ -408,13 +392,11 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new long[] { 1000L, 1003L, 1006L, 1009L }, range);
     }
 
-    // Test rangeClosed methods
     @Test
     public void testRangeClosed_Char() {
         char[] range = Array.rangeClosed('a', 'd');
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, range);
 
-        // Test single element
         char[] singleElement = Array.rangeClosed('x', 'x');
         assertArrayEquals(new char[] { 'x' }, singleElement);
     }
@@ -443,7 +425,6 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new long[] { 1000L, 1001L, 1002L, 1003L }, range);
     }
 
-    // Test rangeClosed with step methods
     @Test
     public void testRangeClosed_CharWithStep() {
         char[] range = Array.rangeClosed('a', 'g', 2);
@@ -474,7 +455,6 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new long[] { 1000L, 1003L, 1006L, 1009L }, range);
     }
 
-    // Test repeat methods
     @Test
     public void testRepeat_Boolean() {
         boolean[] array = Array.repeat(true, 3);
@@ -546,13 +526,11 @@ public class Array100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Array.repeatNonNull(null, 3));
     }
 
-    // Test random methods
     @Test
     public void testRandom() {
         int[] array = Array.random(10);
         assertNotNull(array);
         assertEquals(10, array.length);
-        // All elements should be random integers
     }
 
     @Test
@@ -561,7 +539,6 @@ public class Array100Test extends TestBase {
         assertNotNull(array);
         assertEquals(100, array.length);
 
-        // Verify all elements are within range
         for (int value : array) {
             assertTrue(value >= 0 && value < 10);
         }
@@ -572,7 +549,6 @@ public class Array100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Array.random(10, 5, 10));
     }
 
-    // Test concat methods for 2D arrays
     @Test
     public void testConcat_Boolean2D() {
         boolean[][] a = { { true, false }, { false, true } };
@@ -672,7 +648,6 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new String[] { "c", "d", "g", "h" }, result[1]);
     }
 
-    // Test concat methods for 3D arrays
     @Test
     public void testConcat_Boolean3D() {
         boolean[][][] a = { { { true, false } }, { { false, true } } };
@@ -688,14 +663,12 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new boolean[] { true, false, true, true }, result[0][0]);
     }
 
-    // Test box methods
     @Test
     public void testBox_Boolean() {
         boolean[] primitives = { true, false, true };
         Boolean[] boxed = Array.box(primitives);
         assertArrayEquals(new Boolean[] { true, false, true }, boxed);
 
-        // Test null input
         assertNull(Array.box((boolean[]) null));
     }
 
@@ -755,7 +728,6 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new Double[] { 1.11, 2.22, 3.33 }, boxed);
     }
 
-    // Test box methods for 2D arrays
     @Test
     public void testBox_Boolean2D() {
         boolean[][] primitives = { { true, false }, { false, true } };
@@ -776,7 +748,6 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new Integer[] { 3, 4 }, boxed[1]);
     }
 
-    // Test box methods for 3D arrays
     @Test
     public void testBox_Boolean3D() {
         boolean[][][] primitives = { { { true, false } }, { { false, true } } };
@@ -787,7 +758,6 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new Boolean[] { true, false }, boxed[0][0]);
     }
 
-    // Test unbox methods
     @Test
     public void testUnbox_Boolean() {
         Boolean[] boxed = { true, false, null, true };
@@ -865,7 +835,6 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new double[] { 1.11, 2.22, 0d, 3.33 }, primitives, 0.001);
     }
 
-    // Test unbox methods for 2D arrays
     @Test
     public void testUnbox_Boolean2D() {
         Boolean[][] boxed = { { true, false, null }, { false, true, null } };
@@ -886,7 +855,6 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new int[] { 3, 4, 0 }, primitives[1]);
     }
 
-    // Test unbox methods for 3D arrays
     @Test
     public void testUnbox_Boolean3D() {
         Boolean[][][] boxed = { { { true, false, null } }, { { false, true, null } } };
@@ -897,7 +865,6 @@ public class Array100Test extends TestBase {
         assertArrayEquals(new boolean[] { true, false, false }, primitives[0][0]);
     }
 
-    // Test transpose methods
     @Test
     public void testTranspose_Boolean() {
         boolean[][] matrix = { { true, false, true }, { false, true, false } };
@@ -1017,10 +984,8 @@ public class Array100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Array.transpose(jagged));
     }
 
-    // Test edge cases
     @Test
     public void testEdgeCases_NullInputs() {
-        // Test null inputs for various methods
         assertNull(Array.box((boolean[]) null));
         assertNull(Array.box((char[]) null));
         assertNull(Array.box((byte[]) null));
@@ -1042,7 +1007,6 @@ public class Array100Test extends TestBase {
 
     @Test
     public void testEdgeCases_EmptyArrays() {
-        // Test empty arrays
         assertEquals(0, Array.box(new boolean[0]).length);
         assertEquals(0, Array.box(new char[0]).length);
         assertEquals(0, Array.box(new byte[0]).length);
@@ -1064,7 +1028,6 @@ public class Array100Test extends TestBase {
 
     @Test
     public void testArrayUtil_CannotInstantiate() {
-        // Test that ArrayUtil is a utility class
         assertTrue(java.lang.reflect.Modifier.isFinal(Array.ArrayUtil.class.getModifiers()));
     }
 }

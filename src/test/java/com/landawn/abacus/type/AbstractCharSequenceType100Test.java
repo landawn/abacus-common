@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class AbstractCharSequenceType100Test extends TestBase {
     private Type<String> type;
 
@@ -31,11 +33,9 @@ public class AbstractCharSequenceType100Test extends TestBase {
 
     @Test
     public void testIsCharSequence_DifferentImplementations() {
-        // Test with StringBuilder type
         Type<StringBuilder> stringBuilderType = createType(StringBuilder.class);
         assertTrue(stringBuilderType.isCharSequence());
 
-        // Test with StringBuffer type
         Type<StringBuffer> stringBufferType = createType(StringBuffer.class);
 
         assertTrue(stringBufferType.isCharSequence());
@@ -43,7 +43,6 @@ public class AbstractCharSequenceType100Test extends TestBase {
 
     @Test
     public void testIsCharSequence_CustomCharSequence() {
-        // Custom CharSequence implementation
         class CustomCharSequence implements CharSequence {
             private final String value;
 

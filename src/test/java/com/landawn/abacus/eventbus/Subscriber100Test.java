@@ -11,10 +11,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ThreadMode;
 
+@Tag("new-test")
 public class Subscriber100Test extends TestBase {
 
     private EventBus eventBus;
@@ -35,7 +37,6 @@ public class Subscriber100Test extends TestBase {
             }
         };
 
-        // Must register with event ID for lambda/anonymous subscribers
         eventBus.register(subscriber, "testEvent");
         eventBus.post("testEvent", "Hello World");
 
@@ -133,7 +134,6 @@ public class Subscriber100Test extends TestBase {
         eventBus.register(exceptionSubscriber, "test");
         eventBus.register(normalSubscriber, "test");
 
-        // Should not throw exception to caller
         Assertions.assertDoesNotThrow(() -> {
             eventBus.post("test", "Test Event");
         });
@@ -227,12 +227,10 @@ public class Subscriber100Test extends TestBase {
         Subscriber<Object> generalSubscriber = event -> {
         };
 
-        // Lambda subscribers must be registered with event ID
         Assertions.assertThrows(RuntimeException.class, () -> {
             eventBus.register(generalSubscriber);
         });
 
-        // Should work with event ID
         Assertions.assertDoesNotThrow(() -> {
             eventBus.register(generalSubscriber, "required");
         });
@@ -255,7 +253,6 @@ public class Subscriber100Test extends TestBase {
         Assertions.assertEquals("Event 2", receivedList.get().get(1).data);
     }
 
-    // Helper class for testing
     private static class CustomEvent {
         final String data;
 

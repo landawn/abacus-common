@@ -70,7 +70,6 @@ import java.lang.annotation.Target;
  * <p>This annotation serves as documentation and can be used by static analysis tools
  * to verify immutability constraints and detect potential violations.</p>
  * 
- * @author HaiYang Li
  * @since 2020
  * @see Mutable
  */

@@ -35,6 +35,20 @@ public class MillisTimeType extends TimeType {
      * The value is read as a long representing milliseconds since epoch.
      * A value of 0 is treated as NULL and returns null.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MillisTimeType type = new MillisTimeType();
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column contains milliseconds value 3600000 (01:00:00)
+     * Time time = type.get(rs, 1);
+     * // Returns: Time object for 01:00:00
+     *
+     * // Column contains 0 (representing NULL)
+     * time = type.get(rs, 2);
+     * // Returns: null
+     * }</pre>
+     *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
      * @return A Time object created from the milliseconds value, or null if the value is 0
@@ -51,6 +65,20 @@ public class MillisTimeType extends TimeType {
      * Retrieves a Time value from a ResultSet using the specified column label.
      * The value is read as a long representing milliseconds since epoch.
      * A value of 0 is treated as NULL and returns null.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MillisTimeType type = new MillisTimeType();
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column "start_time" contains milliseconds value 3600000 (01:00:00)
+     * Time time = type.get(rs, "start_time");
+     * // Returns: Time object for 01:00:00
+     *
+     * // Column "end_time" contains 0 (representing NULL)
+     * time = type.get(rs, "end_time");
+     * // Returns: null
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnLabel The label of the column to retrieve the value from
@@ -69,6 +97,20 @@ public class MillisTimeType extends TimeType {
      * The Time is stored as a long value representing milliseconds since epoch.
      * If the Time is null, 0 is stored.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MillisTimeType type = new MillisTimeType();
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO schedule (id, start_time) VALUES (?, ?)");
+     *
+     * Time time = new Time(3600000L); // 01:00:00
+     * type.set(stmt, 2, time);
+     * // Sets parameter to 3600000
+     *
+     * type.set(stmt, 2, null);
+     * // Sets parameter to 0
+     * }</pre>
+     *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
      * @param x The Time value to set, or null to store 0
@@ -83,6 +125,19 @@ public class MillisTimeType extends TimeType {
      * Sets a Time parameter in a CallableStatement using the specified parameter name.
      * The Time is stored as a long value representing milliseconds since epoch.
      * If the Time is null, 0 is stored.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MillisTimeType type = new MillisTimeType();
+     * CallableStatement stmt = connection.prepareCall("{call set_schedule(?, ?)}");
+     *
+     * Time time = new Time(3600000L); // 01:00:00
+     * type.set(stmt, "p_start_time", time);
+     * // Sets parameter to 3600000
+     *
+     * type.set(stmt, "p_end_time", null);
+     * // Sets parameter to 0
+     * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on
      * @param parameterName The name of the parameter to set

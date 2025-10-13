@@ -201,7 +201,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     /**
      * Transforms this range by applying the given mapping function to both endpoints.
      * The resulting range maintains the same bound types (open/closed) as the original range.
-     * 
+     * The mapper function is applied to both the lower and upper endpoints to create a new
+     * range with potentially different element types.
+     *
      * <p>Example:</p>
      * <pre>
      * Range&lt;Integer&gt; intRange = Range.closed(1, 5);
@@ -210,7 +212,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * </pre>
      *
      * @param <U> the type of elements in the resulting range, must implement Comparable
-     * @param mapper the function to apply to both endpoints, must not return null values
+     * @param mapper the function to apply to both endpoints, must not be null and must not return null values
      * @return a new Range with transformed endpoints maintaining the same bound types
      */
     public <U extends Comparable<? super U>> Range<U> map(final Function<? super T, ? extends U> mapper) {
@@ -468,15 +470,21 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Checks whether this range contains all elements of the specified range.
      * A range contains another range if every possible value in the other range
      * is also contained in this range, respecting bound types.
-     * 
+     *
+     * <p>For a closed endpoint in the other range, this range must contain that endpoint value.
+     * For an open endpoint in the other range, this range's corresponding endpoint must extend
+     * strictly beyond the other's endpoint.</p>
+     *
      * <p>Example:</p>
      * <pre>
      * Range&lt;Integer&gt; range1 = Range.closed(1, 10);
      * Range&lt;Integer&gt; range2 = Range.closed(3, 7);
      * Range&lt;Integer&gt; range3 = Range.closed(5, 15);
-     * 
+     * Range&lt;Integer&gt; range4 = Range.open(1, 10);
+     *
      * range1.containsRange(range2);  // returns true
      * range1.containsRange(range3);  // returns {@code false} (extends beyond upper bound)
+     * range1.containsRange(range4);  // returns true (open range (1,10) is within [1,10])
      * range1.containsRange(null);    // returns false
      * </pre>
      *
@@ -489,8 +497,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
             return false;
         }
 
-        return (other.lowerEndpoint.isClosed ? contains(other.lowerEndpoint.value) : lowerEndpoint.value.compareTo(other.lowerEndpoint.value) <= 0)
-                && (other.upperEndpoint.isClosed ? contains(other.upperEndpoint.value) : upperEndpoint.value.compareTo(other.upperEndpoint.value) >= 0);
+        return (lowerEndpoint.isClosed ? contains(other.lowerEndpoint.value) : lowerEndpoint.value.compareTo(other.lowerEndpoint.value) < 0)
+                && (upperEndpoint.isClosed ? contains(other.upperEndpoint.value) : upperEndpoint.value.compareTo(other.upperEndpoint.value) > 0);
     }
 
     /**
@@ -576,21 +584,27 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     /**
      * Calculates the intersection of this range with another overlapping range.
      * The intersection is the largest range that is contained by both input ranges.
-     * If the ranges do not overlap, returns an empty Optional.
-     * 
+     * If the ranges do not overlap, returns an empty Optional. The intersection preserves
+     * the appropriate bound types from both ranges.
+     *
      * <p>Example:</p>
      * <pre>
      * Range&lt;Integer&gt; range1 = Range.closed(1, 5);
      * Range&lt;Integer&gt; range2 = Range.closed(3, 8);
      * Optional&lt;Range&lt;Integer&gt;&gt; intersection = range1.intersection(range2);
      * // Returns Optional containing Range.closed(3, 5)
-     * 
+     *
      * Range&lt;Integer&gt; range3 = Range.closed(6, 10);
      * Optional&lt;Range&lt;Integer&gt;&gt; noIntersection = range1.intersection(range3);
      * // Returns Optional.empty()
+     *
+     * Range&lt;Integer&gt; range4 = Range.open(1, 5);
+     * Range&lt;Integer&gt; range5 = Range.closed(1, 5);
+     * Optional&lt;Range&lt;Integer&gt;&gt; intersection2 = range4.intersection(range5);
+     * // Returns Optional containing Range.open(1, 5) - more restrictive bounds
      * </pre>
      *
-     * @param other the range to intersect with this range
+     * @param other the range to intersect with this range, must not be null
      * @return an Optional containing the intersection range if the ranges overlap,
      *         Optional.empty() if they don't overlap, or Optional containing this range if they are equal
      */
@@ -621,23 +635,26 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * input ranges. If the input ranges are connected (overlapping or touching), the span
      * is their union. If they are not connected, the span includes values between the ranges
      * that are not in either input range.
-     * 
+     *
+     * <p>The span operation takes the minimum of the lower endpoints and the maximum of the
+     * upper endpoints, preserving the most inclusive bound type at each endpoint.</p>
+     *
      * <p>This operation is commutative, associative, and idempotent.</p>
-     * 
+     *
      * <p>Example:</p>
      * <pre>
      * Range&lt;Integer&gt; range1 = Range.closed(1, 3);
      * Range&lt;Integer&gt; range2 = Range.closed(5, 7);
      * Range&lt;Integer&gt; span = range1.span(range2);
      * // Returns Range.closed(1, 7) which includes values 4 not in either range
-     * 
+     *
      * Range&lt;Integer&gt; range3 = Range.open(1, 3);
      * Range&lt;Integer&gt; range4 = Range.open(5, 7);
      * Range&lt;Integer&gt; span2 = range3.span(range4);
      * // Returns Range.open(1, 7)
      * </pre>
      *
-     * @param other the range to span with this range
+     * @param other the range to span with this range, must not be null
      * @return the minimal range that contains all values from both input ranges
      */
     public Range<T> span(final Range<T> other) {

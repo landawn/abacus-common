@@ -15,12 +15,14 @@ import java.io.StringWriter;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Pair;
 
+@Tag("new-test")
 public class PairType100Test extends TestBase {
 
     private PairType<String, Integer> stringIntPairType;
@@ -117,7 +119,7 @@ public class PairType100Test extends TestBase {
 
     @Test
     public void testValueOfWithTypeConversion() {
-        String json = "[\"123\", \"456\"]"; // Both strings, but second should convert to Integer
+        String json = "[\"123\", \"456\"]";
         Pair<String, Integer> result = stringIntPairType.valueOf(json);
         assertNotNull(result);
         assertEquals("123", result.left());
@@ -184,7 +186,6 @@ public class PairType100Test extends TestBase {
 
     @Test
     public void testGetTypeName() {
-        // Test the static getTypeName method indirectly through type creation
         PairType<Long, String> longStringPairType = (PairType<Long, String>) createType("Pair<Long, String>");
         assertNotNull(longStringPairType);
         assertTrue(longStringPairType.name().contains("Long"));
@@ -193,13 +194,11 @@ public class PairType100Test extends TestBase {
 
     @Test
     public void testComplexPairTypes() {
-        // Test with different type combinations
         PairType<Object, Object> objectPairType = (PairType<Object, Object>) createType("Pair<Object, Object>");
         Pair<Object, Object> pair = Pair.of("string", 123);
         String result = objectPairType.stringOf(pair);
         assertNotNull(result);
 
-        // Test valueOf with mixed types
         Pair<Object, Object> parsed = objectPairType.valueOf(result);
         assertNotNull(parsed);
     }

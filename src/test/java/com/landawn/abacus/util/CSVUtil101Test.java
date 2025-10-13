@@ -27,6 +27,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -34,6 +35,7 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 import com.landawn.abacus.util.function.TriConsumer;
 
+@Tag("new-test")
 public class CSVUtil101Test extends TestBase {
 
     @TempDir
@@ -56,20 +58,16 @@ public class CSVUtil101Test extends TestBase {
     @Test
     @DisplayName("Test CSV parser constants")
     public void testCSVParserConstants() {
-        // Test CSV_HEADER_PARSER
         String[] headers = CSVUtil.CSV_HEADER_PARSER.apply("col1,col2,col3");
         assertArrayEquals(new String[] { "col1", "col2", "col3" }, headers);
 
-        // Test CSV_HEADER_PARSER with quoted values
         headers = CSVUtil.CSV_HEADER_PARSER.apply("\"col 1\",\"col,2\",col3");
         assertArrayEquals(new String[] { "col 1", "col,2", "col3" }, headers);
 
-        // Test CSV_LINE_PARSER
         String[] output = new String[3];
         CSVUtil.CSV_LINE_PARSER.accept("val1,val2,val3", output);
         assertArrayEquals(new String[] { "val1", "val2", "val3" }, output);
 
-        // Test CSV_LINE_PARSER with quoted values
         CSVUtil.CSV_LINE_PARSER.accept("\"val 1\",\"val,2\",val3", output);
         assertArrayEquals(new String[] { "val 1", "val,2", "val3" }, output);
     }
@@ -80,11 +78,9 @@ public class CSVUtil101Test extends TestBase {
         String[] headers = CSVUtil.CSV_HEADER_PARSER_BY_SPLITTER.apply("col1,col2,col3");
         assertArrayEquals(new String[] { "col1", "col2", "col3" }, headers);
 
-        // Test with quotes (should be removed)
         headers = CSVUtil.CSV_HEADER_PARSER_BY_SPLITTER.apply("\"col1\",\"col2\",\"col3\"");
         assertArrayEquals(new String[] { "col1", "col2", "col3" }, headers);
 
-        // Test with spaces
         headers = CSVUtil.CSV_HEADER_PARSER_BY_SPLITTER.apply(" col1 , col2 , col3 ");
         assertArrayEquals(new String[] { "col1", "col2", "col3" }, headers);
     }
@@ -96,11 +92,9 @@ public class CSVUtil101Test extends TestBase {
         CSVUtil.CSV_LINE_PARSER_BY_SPLITTER.accept("val1,val2,val3", output);
         assertArrayEquals(new String[] { "val1", "val2", "val3" }, output);
 
-        // Test with quotes
         CSVUtil.CSV_LINE_PARSER_BY_SPLITTER.accept("\"val1\",\"val2\",\"val3\"", output);
         assertArrayEquals(new String[] { "val1", "val2", "val3" }, output);
 
-        // Test with spaces
         CSVUtil.CSV_LINE_PARSER_BY_SPLITTER.accept(" val1 , val2 , val3 ", output);
         assertArrayEquals(new String[] { "val1", "val2", "val3" }, output);
     }
@@ -111,7 +105,6 @@ public class CSVUtil101Test extends TestBase {
         String[] headers = CSVUtil.CSV_HEADER_PARSER_IN_JSON.apply("[\"col1\",\"col2\",\"col3\"]");
         assertArrayEquals(new String[] { "col1", "col2", "col3" }, headers);
 
-        // Test with special characters
         headers = CSVUtil.CSV_HEADER_PARSER_IN_JSON.apply("[\"col,1\",\"col\\\"2\",\"col 3\"]");
         assertArrayEquals(new String[] { "col,1", "col\"2", "col 3" }, headers);
     }
@@ -123,7 +116,6 @@ public class CSVUtil101Test extends TestBase {
         CSVUtil.CSV_LINE_PARSER_IN_JSON.accept("[\"val1\",\"val2\",\"val3\"]", output);
         assertArrayEquals(new String[] { "val1", "val2", "val3" }, output);
 
-        // Test with special characters
         CSVUtil.CSV_LINE_PARSER_IN_JSON.accept("[\"val,1\",\"val\\\"2\",\"val 3\"]", output);
         assertArrayEquals(new String[] { "val,1", "val\"2", "val 3" }, output);
     }
@@ -134,42 +126,36 @@ public class CSVUtil101Test extends TestBase {
         StringWriter sw;
         BufferedCSVWriter writer;
 
-        // Test with null type and null value
         sw = new StringWriter();
         writer = Objectory.createBufferedCSVWriter(sw);
         CSVUtil.writeField(writer, null, null);
         writer.flush();
         assertEquals("null", sw.toString());
 
-        // Test with Boolean
         sw = new StringWriter();
         writer = Objectory.createBufferedCSVWriter(sw);
         CSVUtil.writeField(writer, Type.of(Boolean.class), true);
         writer.flush();
         assertEquals("true", sw.toString());
 
-        // Test with Double
         sw = new StringWriter();
         writer = Objectory.createBufferedCSVWriter(sw);
         CSVUtil.writeField(writer, Type.of(Double.class), 3.14159);
         writer.flush();
         assertEquals("3.14159", sw.toString());
 
-        // Test with BigDecimal
         sw = new StringWriter();
         writer = Objectory.createBufferedCSVWriter(sw);
         CSVUtil.writeField(writer, Type.of(BigDecimal.class), new BigDecimal("123.456"));
         writer.flush();
         assertEquals("123.456", sw.toString());
 
-        // Test with String containing special characters
         sw = new StringWriter();
         writer = Objectory.createBufferedCSVWriter(sw);
         CSVUtil.writeField(writer, Type.of(String.class), "Hello, \"World\"!");
         writer.flush();
         assertEquals("\"Hello, \"\"World\"\"!\"", sw.toString());
 
-        // Test with Date/Time types
         sw = new StringWriter();
         writer = Objectory.createBufferedCSVWriter(sw);
         LocalDateTime ldt = LocalDateTime.of(2023, 1, 1, 12, 0, 0);
@@ -177,7 +163,6 @@ public class CSVUtil101Test extends TestBase {
         writer.flush();
         assertTrue(sw.toString().contains("2023-01-01"));
 
-        // Test with Collection
         sw = new StringWriter();
         writer = Objectory.createBufferedCSVWriter(sw);
         List<String> list = Arrays.asList("a", "b", "c");
@@ -185,7 +170,6 @@ public class CSVUtil101Test extends TestBase {
         writer.flush();
         assertEquals("\"[\"\"a\"\", \"\"b\"\", \"\"c\"\"]\"", sw.toString());
 
-        // Test with Array
         sw = new StringWriter();
         writer = Objectory.createBufferedCSVWriter(sw);
         int[] array = { 1, 2, 3 };
@@ -197,7 +181,6 @@ public class CSVUtil101Test extends TestBase {
     @Test
     @DisplayName("Test writeField with escape character settings")
     public void testWriteFieldWithEscapeChar() throws IOException {
-        // Test with backslash escape character
         CSVUtil.setEscapeCharToBackSlashForWrite();
 
         StringWriter sw = new StringWriter();
@@ -205,7 +188,6 @@ public class CSVUtil101Test extends TestBase {
         CSVUtil.writeField(writer, Type.of(String.class), "Hello\\World");
         writer.flush();
 
-        // The exact output depends on the implementation
         assertNotNull(sw.toString());
 
         CSVUtil.resetEscapeCharForWrite();
@@ -218,7 +200,6 @@ public class CSVUtil101Test extends TestBase {
         File file = tempDir.resolve("offset.csv").toFile();
         Files.writeString(file.toPath(), csv);
 
-        // Offset beyond file size
         Dataset dataset = CSVUtil.loadCSV(file, null, 100, 10);
         assertEquals(0, dataset.size());
     }
@@ -257,7 +238,6 @@ public class CSVUtil101Test extends TestBase {
         File file = tempDir.resolve("unsupported.csv").toFile();
         Files.writeString(file.toPath(), csv);
 
-        // Custom class without proper bean structure
         class UnsupportedType {
         }
 
@@ -273,7 +253,6 @@ public class CSVUtil101Test extends TestBase {
         File file = tempDir.resolve("missing.csv").toFile();
         Files.writeString(file.toPath(), csv);
 
-        // TestBean doesn't have 'unknownField' property
         List<TestBean> beans = CSVUtil.stream(file, TestBean.class).toList();
 
         assertEquals(1, beans.size());
@@ -298,21 +277,17 @@ public class CSVUtil101Test extends TestBase {
     @Test
     @DisplayName("Test concurrent parser modification")
     public void testConcurrentParserModification() throws Exception {
-        // Test that parser changes are thread-local
         Function<String, String[]> mainThreadParser = CSVUtil.getCurrentHeaderParser();
 
         Thread thread = new Thread(() -> {
-            // Change parser in different thread
             CSVUtil.setHeaderParser(line -> line.split(";"));
 
-            // Verify it's changed in this thread
             assertNotEquals(mainThreadParser, CSVUtil.getCurrentHeaderParser());
         });
 
         thread.start();
         thread.join();
 
-        // Verify main thread parser unchanged
         assertEquals(mainThreadParser, CSVUtil.getCurrentHeaderParser());
     }
 
@@ -361,7 +336,6 @@ public class CSVUtil101Test extends TestBase {
 
         Dataset dataset = CSVUtil.loadCSV(file);
 
-        // Should handle rows with different column counts
         assertEquals(3, dataset.columnCount());
         assertEquals(2, dataset.size());
     }
@@ -470,7 +444,6 @@ public class CSVUtil101Test extends TestBase {
         assertEquals(10000, ((String) dataset.get(0, 1)).length());
     }
 
-    // Test classes
     public static class TestBean {
         public Integer id;
         public String name;

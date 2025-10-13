@@ -215,7 +215,7 @@ public final class Iterables {
      * Returns the first non-null element of the given iterable if it is not empty, otherwise returns the specified default value.
      *
      * @param <T> the type of the elements in the iterable
-     * @param c the array to check
+     * @param c the iterable to check
      * @param defaultValue the default value to return if the iterable is empty
      * @return the first non-null element of the given  iterable if it is not empty, otherwise the specified default value
      * @see #firstNonNullOrDefault(Iterator, Object)
@@ -270,7 +270,7 @@ public final class Iterables {
      * Returns the last non-null element from the provided two elements.
      * If both are {@code null}, it returns {@code null}.
      *
-     * @param a the last element to evaluate
+     * @param a the first element to evaluate
      * @param b the second element to evaluate
      * @return the last non-null element, or {@code null} if both are {@code null}
      * @see N#lastNonNull(Object, Object)
@@ -284,7 +284,7 @@ public final class Iterables {
      * Returns the last non-null element from the provided three elements.
      * If all are {@code null}, it returns {@code null}.
      *
-     * @param a the last element to evaluate
+     * @param a the first element to evaluate
      * @param b the second element to evaluate
      * @param c the third element to evaluate
      * @return the last non-null element, or {@code null} if all are {@code null}
@@ -394,7 +394,7 @@ public final class Iterables {
      * Returns the last non-null element of the given iterable if it is not empty, otherwise returns the specified default value.
      *
      * @param <T> the type of the elements in the iterable
-     * @param c the array to check
+     * @param c the iterable to check
      * @param defaultValue the default value to return if the iterable is empty
      * @return the last non-null element of the given  iterable if it is not empty, otherwise the specified default value
      * @see #lastNonNullOrDefault(Iterator, Object)
@@ -555,7 +555,7 @@ public final class Iterables {
      * Returns the minimum value from the provided iterable of elements according to the provided comparator.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
-     * @param c the iterable of elements to
+     * @param c the iterable of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return a {@code Nullable} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#min(Iterable, Comparator)
@@ -1021,7 +1021,7 @@ public final class Iterables {
      * Returns the maximum value from the provided iterable of elements according to the provided comparator.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
-     * @param c the iterable of elements to
+     * @param c the iterable of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return a {@code Nullable} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#max(Iterable, Comparator)
@@ -1829,7 +1829,7 @@ public final class Iterables {
      * @param a the array of elements to evaluate
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
+     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
      * @see N#averageInt(Number[], int, int)
      */
@@ -1864,7 +1864,7 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
      * @param func the function to extract an integer value from each element
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
+     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
      * @see N#averageInt(Object[], int, int, ToIntFunction)
      */
@@ -1887,7 +1887,7 @@ public final class Iterables {
      * @param c the collection of elements to evaluate
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
+     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
      * @see N#averageInt(Collection, int, int)
      */
@@ -1905,7 +1905,7 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
      * @param func the function to extract an integer value from each element
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
+     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
      * @see N#averageInt(Collection, int, int, ToIntFunction)
      */
@@ -1974,7 +1974,7 @@ public final class Iterables {
      * @param a the array of elements to evaluate
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
-     * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
+     * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
      * @see N#averageLong(Number[], int, int)
      */
@@ -2009,7 +2009,7 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
      * @param func the function to extract a long value from each element
-     * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
+     * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
      * @see N#averageLong(Object[], int, int, ToLongFunction)
      */
@@ -2032,7 +2032,7 @@ public final class Iterables {
      * @param c the collection of elements to evaluate
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
-     * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
+     * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
      * @see N#averageLong(Collection, int, int)
      */
@@ -2042,15 +2042,15 @@ public final class Iterables {
     }
 
     /**
-     * Returns the average of the integer values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
+     * Returns the average of the long values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
      *
-     * @param <T> the type of the elements in the array
+     * @param <T> the type of the elements in the collection
      * @param c the collection of elements to evaluate
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
-     * @param func the function to extract an integer value from each element
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
+     * @param func the function to extract a long value from each element
+     * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
      * @see N#averageLong(Object[], int, int, ToLongFunction)
      */
@@ -2119,7 +2119,7 @@ public final class Iterables {
      * @param a the array of elements to evaluate
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
-     * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
+     * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
      * @see N#averageDouble(Number[], int, int)
      */
@@ -2154,7 +2154,7 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
      * @param func the function to extract a double value from each element
-     * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
+     * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
      * @see N#averageDouble(Object[], int, int, ToDoubleFunction)
      */
@@ -2183,7 +2183,7 @@ public final class Iterables {
      * @param c the collection of elements to evaluate
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
-     * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
+     * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
      * @see N#averageDouble(Collection, int, int)
      */
@@ -2201,7 +2201,7 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
      * @param func the function to extract a double value from each element
-     * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the ranger is not empty, otherwise an empty {@code OptionalDouble}
+     * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
      * @see N#averageDouble(Object[], int, int, ToDoubleFunction)
      */

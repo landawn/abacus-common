@@ -16,14 +16,15 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
 import lombok.Data;
 
+@Tag("new-test")
 public class CommonUtil107Test extends TestBase {
 
-    // Tests for shuffle methods - float array
     @Test
     public void testShuffleFloatArrayWithRange() {
 
@@ -32,11 +33,9 @@ public class CommonUtil107Test extends TestBase {
             float[] original = arr.clone();
             N.shuffle(arr, 1, 4);
 
-            // Check that elements outside range are unchanged
             Assertions.assertEquals(original[0], arr[0]);
             Assertions.assertEquals(original[4], arr[4], 0.000001);
 
-            // Check that array still contains same elements
             Arrays.sort(arr);
             Arrays.sort(original);
             Assertions.assertArrayEquals(original, arr);
@@ -52,7 +51,6 @@ public class CommonUtil107Test extends TestBase {
             Random rnd = new Random(42);
             N.shuffle(arr, rnd);
 
-            // Check that array still contains same elements
             Arrays.sort(arr);
             Arrays.sort(original);
             Assertions.assertArrayEquals(original, arr);
@@ -68,11 +66,9 @@ public class CommonUtil107Test extends TestBase {
             Random rnd = new Random(42);
             N.shuffle(arr, 1, 4, rnd);
 
-            // Check that elements outside range are unchanged
             Assertions.assertEquals(original[0], arr[0]);
             Assertions.assertEquals(original[4], arr[4]);
 
-            // Check that array still contains same elements
             Arrays.sort(arr);
             Arrays.sort(original);
             Assertions.assertArrayEquals(original, arr);
@@ -93,7 +89,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNull(arr);
     }
 
-    // Tests for shuffle methods - double array
     @Test
     public void testShuffleDoubleArray() {
 
@@ -102,7 +97,6 @@ public class CommonUtil107Test extends TestBase {
             double[] original = arr.clone();
             N.shuffle(arr);
 
-            // Check that array still contains same elements
             Arrays.sort(arr);
             Arrays.sort(original);
             Assertions.assertArrayEquals(original, arr);
@@ -116,11 +110,9 @@ public class CommonUtil107Test extends TestBase {
             double[] original = arr.clone();
             N.shuffle(arr, 1, 4);
 
-            // Check that elements outside range are unchanged
             Assertions.assertEquals(original[0], arr[0]);
             Assertions.assertEquals(original[4], arr[4], 0.000001);
 
-            // Check that array still contains same elements
             Arrays.sort(arr);
             Arrays.sort(original);
             Assertions.assertArrayEquals(original, arr);
@@ -134,7 +126,6 @@ public class CommonUtil107Test extends TestBase {
         Random rnd = new Random(42);
         N.shuffle(arr, rnd);
 
-        // Check that array still contains same elements
         Arrays.sort(arr);
         Arrays.sort(original);
         Assertions.assertArrayEquals(original, arr);
@@ -147,24 +138,20 @@ public class CommonUtil107Test extends TestBase {
         Random rnd = new Random(42);
         N.shuffle(arr, 1, 4, rnd);
 
-        // Check that elements outside range are unchanged
         Assertions.assertEquals(original[0], arr[0]);
         Assertions.assertEquals(original[4], arr[4]);
 
-        // Check that array still contains same elements
         Arrays.sort(arr);
         Arrays.sort(original);
         Assertions.assertArrayEquals(original, arr);
     }
 
-    // Tests for shuffle methods - Object array
     @Test
     public void testShuffleObjectArray() {
         String[] arr = { "a", "b", "c", "d", "e" };
         String[] original = arr.clone();
         N.shuffle(arr);
 
-        // Check that array still contains same elements
         Arrays.sort(arr);
         Arrays.sort(original);
         Assertions.assertArrayEquals(original, arr);
@@ -176,11 +163,9 @@ public class CommonUtil107Test extends TestBase {
         String[] original = arr.clone();
         N.shuffle(arr, 1, 4);
 
-        // Check that elements outside range are unchanged
         Assertions.assertEquals(original[0], arr[0]);
         Assertions.assertEquals(original[4], arr[4]);
 
-        // Check that array still contains same elements
         Arrays.sort(arr);
         Arrays.sort(original);
         Assertions.assertArrayEquals(original, arr);
@@ -193,7 +178,6 @@ public class CommonUtil107Test extends TestBase {
         Random rnd = new Random(42);
         N.shuffle(arr, rnd);
 
-        // Check that array still contains same elements
         Arrays.sort(arr);
         Arrays.sort(original);
         Assertions.assertArrayEquals(original, arr);
@@ -206,24 +190,20 @@ public class CommonUtil107Test extends TestBase {
         Random rnd = new Random(42);
         N.shuffle(arr, 1, 4, rnd);
 
-        // Check that elements outside range are unchanged
         Assertions.assertEquals(original[0], arr[0]);
         Assertions.assertEquals(original[4], arr[4]);
 
-        // Check that array still contains same elements
         Arrays.sort(arr);
         Arrays.sort(original);
         Assertions.assertArrayEquals(original, arr);
     }
 
-    // Tests for shuffle methods - List
     @Test
     public void testShuffleList() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
         List<String> original = new ArrayList<>(list);
         N.shuffle(list);
 
-        // Check that list still contains same elements
         Collections.sort(list);
         Collections.sort(original);
         Assertions.assertEquals(original, list);
@@ -236,7 +216,6 @@ public class CommonUtil107Test extends TestBase {
         Random rnd = new Random(42);
         N.shuffle(list, rnd);
 
-        // Check that list still contains same elements
         Collections.sort(list);
         Collections.sort(original);
         Assertions.assertEquals(original, list);
@@ -257,14 +236,12 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals("a", list.get(0));
     }
 
-    // Tests for shuffle methods - Collection
     @Test
     public void testShuffleCollection() {
         Collection<String> coll = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
         List<String> original = new ArrayList<>(coll);
         N.shuffle(coll);
 
-        // Check that collection still contains same elements
         List<String> sorted = new ArrayList<>(coll);
         Collections.sort(sorted);
         Collections.sort(original);
@@ -278,7 +255,6 @@ public class CommonUtil107Test extends TestBase {
         Random rnd = new Random(42);
         N.shuffle(coll, rnd);
 
-        // Check that collection still contains same elements
         List<String> sorted = new ArrayList<>(coll);
         Collections.sort(sorted);
         Collections.sort(original);
@@ -300,7 +276,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertTrue(coll.contains("a"));
     }
 
-    // Tests for swap methods - boolean array
     @Test
     public void testSwapBooleanArray() {
         boolean[] arr = { true, false, true, false };
@@ -309,7 +284,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertTrue(arr[3]);
     }
 
-    // Tests for swap methods - char array
     @Test
     public void testSwapCharArray() {
         char[] arr = { 'a', 'b', 'c', 'd' };
@@ -318,7 +292,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals('b', arr[2]);
     }
 
-    // Tests for swap methods - byte array
     @Test
     public void testSwapByteArray() {
         byte[] arr = { 1, 2, 3, 4 };
@@ -327,7 +300,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(1, arr[3]);
     }
 
-    // Tests for swap methods - short array
     @Test
     public void testSwapShortArray() {
         short[] arr = { 10, 20, 30, 40 };
@@ -336,7 +308,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(20, arr[3]);
     }
 
-    // Tests for swap methods - int array
     @Test
     public void testSwapIntArray() {
         int[] arr = { 100, 200, 300, 400 };
@@ -345,7 +316,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(100, arr[2]);
     }
 
-    // Tests for swap methods - long array
     @Test
     public void testSwapLongArray() {
         long[] arr = { 1000L, 2000L, 3000L, 4000L };
@@ -354,7 +324,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(2000L, arr[2]);
     }
 
-    // Tests for swap methods - float array
     @Test
     public void testSwapFloatArray() {
         float[] arr = { 1.0f, 2.0f, 3.0f, 4.0f };
@@ -363,7 +332,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(1.0f, arr[3]);
     }
 
-    // Tests for swap methods - double array
     @Test
     public void testSwapDoubleArray() {
         double[] arr = { 1.0, 2.0, 3.0, 4.0 };
@@ -372,7 +340,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(2.0, arr[3]);
     }
 
-    // Tests for swap methods - Object array
     @Test
     public void testSwapObjectArray() {
         String[] arr = { "a", "b", "c", "d" };
@@ -381,7 +348,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals("a", arr[2]);
     }
 
-    // Tests for swap methods - List
     @Test
     public void testSwapList() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
@@ -390,7 +356,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals("b", list.get(3));
     }
 
-    // Tests for swap methods - Pair
     @Test
     public void testSwapPair() {
         Pair<String, String> pair = Pair.of("left", "right");
@@ -411,7 +376,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertFalse(swapped);
     }
 
-    // Tests for swap methods - Triple
     @Test
     public void testSwapTriple() {
         Triple<String, Integer, String> triple = Triple.of("left", 42, "right");
@@ -433,7 +397,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertFalse(swapped);
     }
 
-    // Tests for fill methods - boolean array
     @Test
     public void testFillBooleanArray() {
         boolean[] arr = new boolean[5];
@@ -461,7 +424,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0, arr.length);
     }
 
-    // Tests for fill methods - char array
     @Test
     public void testFillCharArray() {
         char[] arr = new char[5];
@@ -482,7 +444,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals('\0', arr[4]);
     }
 
-    // Tests for fill methods - byte array
     @Test
     public void testFillByteArray() {
         byte[] arr = new byte[5];
@@ -503,7 +464,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(42, arr[4]);
     }
 
-    // Tests for fill methods - short array
     @Test
     public void testFillShortArray() {
         short[] arr = new short[5];
@@ -524,7 +484,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0, arr[4]);
     }
 
-    // Tests for fill methods - int array
     @Test
     public void testFillIntArray() {
         int[] arr = new int[5];
@@ -545,7 +504,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0, arr[4]);
     }
 
-    // Tests for fill methods - long array
     @Test
     public void testFillLongArray() {
         long[] arr = new long[5];
@@ -566,7 +524,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0L, arr[4]);
     }
 
-    // Tests for fill methods - float array
     @Test
     public void testFillFloatArray() {
         float[] arr = new float[5];
@@ -587,7 +544,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0.0f, arr[4]);
     }
 
-    // Tests for fill methods - double array
     @Test
     public void testFillDoubleArray() {
         double[] arr = new double[5];
@@ -608,7 +564,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(2.718, arr[4]);
     }
 
-    // Tests for fill methods - Object array
     @Test
     public void testFillObjectArray() {
         String[] arr = new String[5];
@@ -636,7 +591,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0, arr.length);
     }
 
-    // Tests for fill methods - List
     @Test
     public void testFillList() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
@@ -679,12 +633,10 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals("x", list.get(4));
     }
 
-    // Tests for fill methods - Object (bean)
     @Test
     public void testFillBean() {
         TestBean bean = new TestBean();
         Beans.fill(bean);
-        // Cannot verify exact values as they're random, but check not null
         Assertions.assertNotNull(bean);
     }
 
@@ -703,7 +655,6 @@ public class CommonUtil107Test extends TestBase {
         }
     }
 
-    // Tests for padLeft method
     @Test
     public void testPadLeft() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
@@ -736,7 +687,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals("a", list.get(2));
     }
 
-    // Tests for padRight method
     @Test
     public void testPadRight() {
         Collection<String> coll = new ArrayList<>(Arrays.asList("a", "b", "c"));
@@ -771,7 +721,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNull(list.get(2));
     }
 
-    // Tests for repeat method
     @Test
     public void testRepeat() {
         List<String> result = N.repeat("x", 5);
@@ -796,7 +745,6 @@ public class CommonUtil107Test extends TestBase {
         }
     }
 
-    // Tests for repeatElements method
     @Test
     public void testRepeatElements() {
         List<String> input = Arrays.asList("a", "b", "c");
@@ -819,7 +767,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertTrue(result.isEmpty());
     }
 
-    // Tests for repeatCollection method
     @Test
     public void testRepeatCollection() {
         List<String> input = Arrays.asList("a", "b", "c");
@@ -842,7 +789,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertTrue(result.isEmpty());
     }
 
-    // Tests for repeatElementsToSize method
     @Test
     public void testRepeatElementsToSize() {
         List<String> input = Arrays.asList("a", "b", "c");
@@ -866,7 +812,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertTrue(result.isEmpty());
     }
 
-    // Tests for repeatCollectionToSize method
     @Test
     public void testRepeatCollectionToSize() {
         List<String> input = Arrays.asList("a", "b", "c");
@@ -890,7 +835,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertTrue(result.isEmpty());
     }
 
-    // Tests for copy methods - boolean array
     @Test
     public void testCopyBooleanArray() {
         boolean[] src = { true, false, true, false, true };
@@ -919,10 +863,8 @@ public class CommonUtil107Test extends TestBase {
         boolean[] src = {};
         boolean[] dest = new boolean[5];
         N.copy(src, 0, dest, 0, 0);
-        // Should not throw exception
     }
 
-    // Tests for copy methods - char array
     @Test
     public void testCopyCharArray() {
         char[] src = { 'a', 'b', 'c', 'd', 'e' };
@@ -935,7 +877,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals('\0', dest[4]);
     }
 
-    // Tests for copy methods - byte array
     @Test
     public void testCopyByteArray() {
         byte[] src = { 1, 2, 3, 4, 5 };
@@ -948,7 +889,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0, dest[4]);
     }
 
-    // Tests for copy methods - short array
     @Test
     public void testCopyShortArray() {
         short[] src = { 10, 20, 30, 40, 50 };
@@ -961,7 +901,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0, dest[4]);
     }
 
-    // Tests for copy methods - int array
     @Test
     public void testCopyIntArray() {
         int[] src = { 100, 200, 300, 400, 500 };
@@ -974,7 +913,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0, dest[4]);
     }
 
-    // Tests for copy methods - long array
     @Test
     public void testCopyLongArray() {
         long[] src = { 1000L, 2000L, 3000L, 4000L, 5000L };
@@ -987,7 +925,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0L, dest[4]);
     }
 
-    // Tests for copy methods - float array
     @Test
     public void testCopyFloatArray() {
         float[] src = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
@@ -996,7 +933,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertArrayEquals(src, dest);
     }
 
-    // Tests for copy methods - double array
     @Test
     public void testCopyDoubleArray() {
         double[] src = { 1.0, 2.0, 3.0, 4.0, 5.0 };
@@ -1009,7 +945,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(5.0, dest[4]);
     }
 
-    // Tests for copy methods - Object array
     @Test
     public void testCopyObjectArray() {
         String[] src = { "a", "b", "c", "d", "e" };
@@ -1022,7 +957,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNull(dest[4]);
     }
 
-    // Tests for copy methods - generic Object
     @Test
     public void testCopyGenericObject() {
         int[] src = { 1, 2, 3, 4, 5 };
@@ -1035,7 +969,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(4, dest[4]);
     }
 
-    // Tests for copyOf methods - boolean array
     @Test
     public void testCopyOfBooleanArray() {
         boolean[] original = { true, false, true };
@@ -1066,7 +999,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNotSame(original, copy);
     }
 
-    // Tests for copyOf methods - char array
     @Test
     public void testCopyOfCharArray() {
         char[] original = { 'a', 'b', 'c' };
@@ -1079,7 +1011,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals('\0', copy[4]);
     }
 
-    // Tests for copyOf methods - byte array
     @Test
     public void testCopyOfByteArray() {
         byte[] original = { 1, 2, 3 };
@@ -1089,7 +1020,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(2, copy[1]);
     }
 
-    // Tests for copyOf methods - short array
     @Test
     public void testCopyOfShortArray() {
         short[] original = { 10, 20, 30 };
@@ -1101,7 +1031,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0, copy[3]);
     }
 
-    // Tests for copyOf methods - int array
     @Test
     public void testCopyOfIntArray() {
         int[] original = { 100, 200, 300 };
@@ -1110,7 +1039,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNotSame(original, copy);
     }
 
-    // Tests for copyOf methods - long array
     @Test
     public void testCopyOfLongArray() {
         long[] original = { 1000L, 2000L, 3000L };
@@ -1123,7 +1051,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0L, copy[4]);
     }
 
-    // Tests for copyOf methods - float array
     @Test
     public void testCopyOfFloatArray() {
         float[] original = { 1.0f, 2.0f, 3.0f };
@@ -1133,7 +1060,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(2.0f, copy[1]);
     }
 
-    // Tests for copyOf methods - double array
     @Test
     public void testCopyOfDoubleArray() {
         double[] original = { 1.0, 2.0, 3.0 };
@@ -1145,7 +1071,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(0.0, copy[3]);
     }
 
-    // Tests for copyOf methods - Object array
     @Test
     public void testCopyOfObjectArray() {
         String[] original = { "a", "b", "c" };
@@ -1169,7 +1094,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNull(copy[3]);
     }
 
-    // Tests for copyOfRange methods - boolean array
     @Test
     public void testCopyOfRangeBooleanArray() {
         boolean[] original = { true, false, true, false, true };
@@ -1220,7 +1144,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertTrue(copy[4]);
     }
 
-    // Tests for copyOfRange methods - char array
     @Test
     public void testCopyOfRangeCharArray() {
         char[] original = { 'a', 'b', 'c', 'd', 'e' };
@@ -1241,7 +1164,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals('f', copy[2]);
     }
 
-    // Tests for copyOfRange methods - byte array
     @Test
     public void testCopyOfRangeByteArray() {
         byte[] original = { 1, 2, 3, 4, 5 };
@@ -1262,7 +1184,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(5, copy[2]);
     }
 
-    // Tests for copyOfRange methods - short array
     @Test
     public void testCopyOfRangeShortArray() {
         short[] original = { 10, 20, 30, 40, 50 };
@@ -1282,7 +1203,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(40, copy[1]);
     }
 
-    // Tests for copyOfRange methods - int array
     @Test
     public void testCopyOfRangeIntArray() {
         int[] original = { 100, 200, 300, 400, 500 };
@@ -1301,7 +1221,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(400, copy[1]);
     }
 
-    // Tests for copyOfRange methods - long array
     @Test
     public void testCopyOfRangeLongArray() {
         long[] original = { 1000L, 2000L, 3000L, 4000L, 5000L };
@@ -1320,7 +1239,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(3000L, copy[1]);
     }
 
-    // Tests for copyOfRange methods - float array
     @Test
     public void testCopyOfRangeFloatArray() {
         float[] original = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
@@ -1340,7 +1258,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(5.0f, copy[2]);
     }
 
-    // Tests for copyOfRange methods - double array
     @Test
     public void testCopyOfRangeDoubleArray() {
         double[] original = { 1.0, 2.0, 3.0, 4.0, 5.0 };
@@ -1359,7 +1276,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(4.0, copy[1]);
     }
 
-    // Tests for copyOfRange methods - Object array
     @Test
     public void testCopyOfRangeObjectArray() {
         String[] original = { "a", "b", "c", "d", "e" };
@@ -1399,7 +1315,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals(4, copy[1]);
     }
 
-    // Tests for copyOfRange methods - List
     @Test
     public void testCopyOfRangeList() {
         List<String> original = Arrays.asList("a", "b", "c", "d", "e");
@@ -1420,7 +1335,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals("e", copy.get(2));
     }
 
-    // Tests for copyOfRange methods - String
     @Test
     public void testCopyOfRangeString() {
         String original = "abcde";
@@ -1442,7 +1356,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertEquals("ace", copy);
     }
 
-    // Tests for clone methods - boolean array
     @Test
     public void testCloneBooleanArray() {
         boolean[] original = { true, false, true };
@@ -1458,7 +1371,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNull(cloned);
     }
 
-    // Tests for clone methods - char array
     @Test
     public void testCloneCharArray() {
         char[] original = { 'a', 'b', 'c' };
@@ -1467,7 +1379,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNotSame(original, cloned);
     }
 
-    // Tests for clone methods - byte array
     @Test
     public void testCloneByteArray() {
         byte[] original = { 1, 2, 3 };
@@ -1476,7 +1387,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNotSame(original, cloned);
     }
 
-    // Tests for clone methods - short array
     @Test
     public void testCloneShortArray() {
         short[] original = { 10, 20, 30 };
@@ -1485,7 +1395,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNotSame(original, cloned);
     }
 
-    // Tests for clone methods - int array
     @Test
     public void testCloneIntArray() {
         int[] original = { 100, 200, 300 };
@@ -1494,7 +1403,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNotSame(original, cloned);
     }
 
-    // Tests for clone methods - long array
     @Test
     public void testCloneLongArray() {
         long[] original = { 1000L, 2000L, 3000L };
@@ -1503,7 +1411,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNotSame(original, cloned);
     }
 
-    // Tests for clone methods - float array
     @Test
     public void testCloneFloatArray() {
         float[] original = { 1.0f, 2.0f, 3.0f };
@@ -1512,7 +1419,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNotSame(original, cloned);
     }
 
-    // Tests for clone methods - double array
     @Test
     public void testCloneDoubleArray() {
         double[] original = { 1.0, 2.0, 3.0 };
@@ -1521,7 +1427,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertNotSame(original, cloned);
     }
 
-    // Tests for clone methods - Object array
     @Test
     public void testCloneObjectArray() {
         String[] original = { "a", "b", "c" };
@@ -1529,8 +1434,6 @@ public class CommonUtil107Test extends TestBase {
         Assertions.assertArrayEquals(original, cloned);
         Assertions.assertNotSame(original, cloned);
     }
-
-    // Tests for clone methods - 2D boolean array
 
     @Test
     public void testClone2DBoolean() {

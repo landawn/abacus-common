@@ -314,7 +314,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             }
         } else {
             for (int i = 0; i < len; i++) {
-                a[i] = (int) (Math.abs(RAND.nextLong() % mod) + startInclusive);
+                final long randomValue = RAND.nextLong();
+                a[i] = (int) ((randomValue & Long.MAX_VALUE) % mod + startInclusive);
             }
         }
 
@@ -351,18 +352,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         rangeCheck(index);
 
         return elementData[index];
-    }
-
-    /**
-     * Checks if the specified index is within the valid range of the list.
-     *
-     * @param index the index to check
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
-     */
-    private void rangeCheck(final int index) {
-        if (index >= size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
-        }
     }
 
     /**
@@ -645,6 +634,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @return {@code true} if any elements were removed from this list
      */
     public boolean removeIf(final IntPredicate p) {
+        N.requireNonNull(p, cs.predicate);
+
         final IntList tmp = new IntList(size());
 
         for (int i = 0; i < size; i++) {
@@ -821,10 +812,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         N.copy(tmp, 0, elementData, 0, tmp.length);
 
         if (size > tmp.length) {
-            N.fill(elementData, tmp.length, size, (char) 0);
+            N.fill(elementData, tmp.length, size, 0);
         }
 
-        size -= elementData.length - tmp.length;
+        size = size - (elementData.length - tmp.length);
     }
 
     /**
@@ -859,25 +850,26 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Moves a range of elements within this list to a new position.
      * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
-     * so that the element originally at fromIndex will be at newPositionStartIndexAfterMove.
+     * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
      * 
      * <p>Example: 
      * <pre>
      * IntList list = IntList.of(0, 1, 2, 3, 4, 5);
-     * list.moveRange(1, 3, 4);  // Moves elements [1, 2] to position starting at index 4
+     * list.moveRange(1, 3, 3);  // Moves elements [1, 2] to position starting at index 3
      * // Result: [0, 3, 4, 1, 2, 5]
      * </pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionStartIndexAfterMove the start index where the range should be positioned after the move.
-     *        Must be in the range [0, size - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if any index is out of bounds or if the new position is invalid
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and size() - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndexAfterMove);
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
     /**
@@ -998,6 +990,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param operator the operator to apply to each element
      */
     public void replaceAll(final IntUnaryOperator operator) {
+        N.requireNonNull(operator, "operator");
+
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsInt(elementData[i]);
         }
@@ -1011,6 +1005,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @return {@code true} if at least one element was replaced
      */
     public boolean replaceIf(final IntPredicate predicate, final int newValue) {
+        N.requireNonNull(predicate, cs.predicate);
+
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1485,7 +1481,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @return the index of the last occurrence of the element, or -1 if not found
      */
     public int lastIndexOf(final int valueToFind) {
-        return lastIndexOf(valueToFind, size);
+        return lastIndexOf(valueToFind, size - 1);
     }
 
     /**
@@ -1602,6 +1598,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param action the action to be performed for each element
      */
     public void forEach(final IntConsumer action) {
+        N.requireNonNull(action, cs.action);
+
         forEach(0, size, action);
     }
 
@@ -1757,7 +1755,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *         as the point at which the key would be inserted into the list
      */
     public int binarySearch(final int valueToFind) {
-        return N.binarySearch(elementData, valueToFind);
+        return N.binarySearch(elementData, 0, size(), valueToFind);
     }
 
     /**
@@ -2356,7 +2354,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     private void ensureCapacity(final int minCapacity) {
-        if (minCapacity > MAX_ARRAY_SIZE || minCapacity < 0) {
+        if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
             throw new OutOfMemoryError();
         }
 

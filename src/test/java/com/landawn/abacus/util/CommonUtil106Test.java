@@ -11,9 +11,11 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class CommonUtil106Test extends TestBase {
 
     @Test
@@ -57,7 +59,6 @@ public class CommonUtil106Test extends TestBase {
         Assertions.assertFalse(N.haveSameElements(a, null));
         Assertions.assertFalse(N.haveSameElements(null, a));
 
-        // Test same reference
         Assertions.assertTrue(N.haveSameElements(a, a));
     }
 
@@ -174,7 +175,6 @@ public class CommonUtil106Test extends TestBase {
         Assertions.assertTrue(N.haveSameElements((Object[]) null, (Object[]) null));
         Assertions.assertTrue(N.haveSameElements(new Object[0], new Object[0]));
 
-        // Test with nulls
         String[] withNulls1 = { "a", null, "b", null };
         String[] withNulls2 = { null, "a", null, "b" };
         Assertions.assertTrue(N.haveSameElements(withNulls1, withNulls2));
@@ -193,7 +193,6 @@ public class CommonUtil106Test extends TestBase {
         Assertions.assertTrue(N.haveSameElements((Collection<?>) null, (Collection<?>) null));
         Assertions.assertTrue(N.haveSameElements(new ArrayList<>(), new ArrayList<>()));
 
-        // Test same reference
         Assertions.assertTrue(N.haveSameElements(a, a));
     }
 
@@ -212,7 +211,6 @@ public class CommonUtil106Test extends TestBase {
         Assertions.assertEquals(0, N.mismatch(a, null));
         Assertions.assertEquals(0, N.mismatch(null, a));
 
-        // Test same reference
         Assertions.assertEquals(-1, N.mismatch(a, a));
     }
 
@@ -226,10 +224,8 @@ public class CommonUtil106Test extends TestBase {
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> N.mismatch(a, 0, b, 0, 10));
         Assertions.assertThrows(IllegalArgumentException.class, () -> N.mismatch(a, 0, b, 0, -1));
 
-        // Test same array and indices
         Assertions.assertEquals(-1, N.mismatch(a, 1, a, 1, 2));
 
-        // Test zero length
         Assertions.assertEquals(-1, N.mismatch(a, 0, b, 0, 0));
     }
 
@@ -483,7 +479,6 @@ public class CommonUtil106Test extends TestBase {
         Assertions.assertEquals(0, N.mismatch((Iterable<String>) a, (Iterable<String>) null));
         Assertions.assertEquals(0, N.mismatch((Iterable<String>) null, (Iterable<String>) a));
 
-        // Test same reference
         Assertions.assertEquals(-1, N.mismatch((Iterable<String>) a, (Iterable<String>) a));
     }
 
@@ -511,7 +506,6 @@ public class CommonUtil106Test extends TestBase {
         Assertions.assertEquals(4, N.mismatch(a.iterator(), e.iterator()));
         Assertions.assertEquals(-1, N.mismatch((Iterator<String>) null, (Iterator<String>) null));
 
-        // Test same reference
         Iterator<String> iter = a.iterator();
         Assertions.assertEquals(-1, N.mismatch(iter, iter));
     }
@@ -533,15 +527,12 @@ public class CommonUtil106Test extends TestBase {
         N.reverse(a);
         Assertions.assertArrayEquals(expected, a);
 
-        // Test empty array
         boolean[] empty = {};
         N.reverse(empty);
         Assertions.assertArrayEquals(new boolean[0], empty);
 
-        // Test null
         N.reverse((boolean[]) null);
 
-        // Test single element
         boolean[] single = { true };
         N.reverse(single);
         Assertions.assertArrayEquals(new boolean[] { true }, single);
@@ -557,12 +548,10 @@ public class CommonUtil106Test extends TestBase {
         expected[3] = false;
         Assertions.assertArrayEquals(expected, a);
 
-        // Test invalid range
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> N.reverse(a, -1, 3));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> N.reverse(a, 0, 10));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> N.reverse(a, 3, 2));
 
-        // Test empty range
         boolean[] b = { true, false, true };
         boolean[] original = b.clone();
         N.reverse(b, 1, 1);
@@ -576,12 +565,10 @@ public class CommonUtil106Test extends TestBase {
         N.reverse(a);
         Assertions.assertArrayEquals(expected, a);
 
-        // Test empty array
         char[] empty = {};
         N.reverse(empty);
         Assertions.assertArrayEquals(new char[0], empty);
 
-        // Test null
         N.reverse((char[]) null);
     }
 
@@ -592,7 +579,6 @@ public class CommonUtil106Test extends TestBase {
         N.reverse(a, 1, 4);
         Assertions.assertArrayEquals(expected, a);
 
-        // Test invalid range
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> N.reverse(a, -1, 3));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> N.reverse(a, 0, 10));
     }
@@ -604,12 +590,10 @@ public class CommonUtil106Test extends TestBase {
         N.reverse(a);
         Assertions.assertArrayEquals(expected, a);
 
-        // Test empty array
         byte[] empty = {};
         N.reverse(empty);
         Assertions.assertArrayEquals(new byte[0], empty);
 
-        // Test null
         N.reverse((byte[]) null);
     }
 
@@ -628,12 +612,10 @@ public class CommonUtil106Test extends TestBase {
         N.reverse(a);
         Assertions.assertArrayEquals(expected, a);
 
-        // Test empty array
         short[] empty = {};
         N.reverse(empty);
         Assertions.assertArrayEquals(new short[0], empty);
 
-        // Test null
         N.reverse((short[]) null);
     }
 
@@ -652,12 +634,10 @@ public class CommonUtil106Test extends TestBase {
         N.reverse(a);
         Assertions.assertArrayEquals(expected, a);
 
-        // Test empty array
         int[] empty = {};
         N.reverse(empty);
         Assertions.assertArrayEquals(new int[0], empty);
 
-        // Test null
         N.reverse((int[]) null);
     }
 
@@ -676,12 +656,10 @@ public class CommonUtil106Test extends TestBase {
         N.reverse(a);
         Assertions.assertArrayEquals(expected, a);
 
-        // Test empty array
         long[] empty = {};
         N.reverse(empty);
         Assertions.assertArrayEquals(new long[0], empty);
 
-        // Test null
         N.reverse((long[]) null);
     }
 
@@ -700,12 +678,10 @@ public class CommonUtil106Test extends TestBase {
         N.reverse(a);
         Assertions.assertArrayEquals(expected, a, 0.0f);
 
-        // Test empty array
         float[] empty = {};
         N.reverse(empty);
         Assertions.assertArrayEquals(new float[0], empty, 0.0f);
 
-        // Test null
         N.reverse((float[]) null);
     }
 
@@ -724,12 +700,10 @@ public class CommonUtil106Test extends TestBase {
         N.reverse(a);
         Assertions.assertArrayEquals(expected, a, 0.0);
 
-        // Test empty array
         double[] empty = {};
         N.reverse(empty);
         Assertions.assertArrayEquals(new double[0], empty, 0.0);
 
-        // Test null
         N.reverse((double[]) null);
     }
 
@@ -748,12 +722,10 @@ public class CommonUtil106Test extends TestBase {
         N.reverse(a);
         Assertions.assertArrayEquals(expected, a);
 
-        // Test empty array
         String[] empty = {};
         N.reverse(empty);
         Assertions.assertArrayEquals(new String[0], empty);
 
-        // Test null
         N.reverse((String[]) null);
     }
 
@@ -771,15 +743,12 @@ public class CommonUtil106Test extends TestBase {
         N.reverse(list);
         Assertions.assertEquals(Arrays.asList("d", "c", "b", "a"), list);
 
-        // Test empty list
         List<String> empty = new ArrayList<>();
         N.reverse(empty);
         Assertions.assertTrue(empty.isEmpty());
 
-        // Test null
         N.reverse((List<?>) null);
 
-        // Test single element
         List<String> single = new ArrayList<>(Arrays.asList("a"));
         N.reverse(single);
         Assertions.assertEquals(Arrays.asList("a"), single);
@@ -791,11 +760,9 @@ public class CommonUtil106Test extends TestBase {
         N.reverse(list, 1, 4);
         Assertions.assertEquals(Arrays.asList("a", "d", "c", "b", "e"), list);
 
-        // Test invalid range
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> N.reverse(list, -1, 3));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> N.reverse(list, 0, 10));
 
-        // Test empty range
         List<String> list2 = new ArrayList<>(Arrays.asList("a", "b", "c"));
         N.reverse(list2, 1, 1);
         Assertions.assertEquals(Arrays.asList("a", "b", "c"), list2);
@@ -803,26 +770,20 @@ public class CommonUtil106Test extends TestBase {
 
     @Test
     public void testReverseCollection() {
-        // Test with List
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
         N.reverse((Collection<?>) list);
         Assertions.assertEquals(Arrays.asList("d", "c", "b", "a"), list);
 
-        // Test with Set (should convert to list internally)
         Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d"));
         N.reverse((Collection<?>) set);
-        // Note: Set order may not be preserved as expected, but size should remain same
         Assertions.assertEquals(4, set.size());
 
-        // Test empty collection
         Collection<String> empty = new ArrayList<>();
         N.reverse(empty);
         Assertions.assertTrue(empty.isEmpty());
 
-        // Test null
         N.reverse((Collection<?>) null);
 
-        // Test single element
         Collection<String> single = new ArrayList<>(Arrays.asList("a"));
         N.reverse(single);
         Assertions.assertEquals(1, single.size());
@@ -833,15 +794,12 @@ public class CommonUtil106Test extends TestBase {
         List<String> list = Arrays.asList("a", "b", "c", "d");
         List<String> reversed = N.reverseToList(list);
         Assertions.assertEquals(Arrays.asList("d", "c", "b", "a"), reversed);
-        // Original should be unchanged
         Assertions.assertEquals(Arrays.asList("a", "b", "c", "d"), list);
 
-        // Test empty collection
         List<String> empty = new ArrayList<>();
         List<String> emptyReversed = N.reverseToList(empty);
         Assertions.assertTrue(emptyReversed.isEmpty());
 
-        // Test null
         List<String> nullReversed = N.reverseToList(null);
         Assertions.assertNotNull(nullReversed);
         Assertions.assertTrue(nullReversed.isEmpty());
@@ -854,24 +812,20 @@ public class CommonUtil106Test extends TestBase {
         N.rotate(a, 1);
         Assertions.assertArrayEquals(expected, a);
 
-        // Test negative rotation
         boolean[] b = { true, false, true, false };
         boolean[] expected2 = { false, true, false, true };
         N.rotate(b, -1);
         Assertions.assertArrayEquals(expected2, b);
 
-        // Test rotation by array length
         boolean[] c = { true, false, true, false };
         boolean[] original = c.clone();
         N.rotate(c, 4);
         Assertions.assertArrayEquals(original, c);
 
-        // Test empty array
         boolean[] empty = {};
         N.rotate(empty, 1);
         Assertions.assertArrayEquals(new boolean[0], empty);
 
-        // Test null
         N.rotate((boolean[]) null, 1);
     }
 
@@ -885,11 +839,9 @@ public class CommonUtil106Test extends TestBase {
         expected[3] = true;
         Assertions.assertArrayEquals(expected, a);
 
-        // Test invalid range
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> N.rotate(a, -1, 3, 1));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> N.rotate(a, 0, 10, 1));
 
-        // Test empty range
         boolean[] b = { true, false, true };
         boolean[] original = b.clone();
         N.rotate(b, 1, 1, 1);
@@ -903,16 +855,14 @@ public class CommonUtil106Test extends TestBase {
         N.rotate(a, 1);
         Assertions.assertArrayEquals(expected, a);
 
-        // Test negative rotation
         char[] b = { 'a', 'b', 'c', 'd' };
         char[] expected2 = { 'b', 'c', 'd', 'a' };
         N.rotate(b, -1);
         Assertions.assertArrayEquals(expected2, b);
 
-        // Test large rotation
         char[] c = { 'a', 'b', 'c', 'd' };
         char[] expected3 = { 'b', 'c', 'd', 'a' };
-        N.rotate(c, 7); // 7 % 4 = 3
+        N.rotate(c, 7);
         Assertions.assertArrayEquals(expected3, c);
     }
 
@@ -963,16 +913,14 @@ public class CommonUtil106Test extends TestBase {
         N.rotate(a, 2);
         Assertions.assertArrayEquals(expected, a);
 
-        // Test negative rotation
         int[] b = { 1, 2, 3, 4, 5 };
         int[] expected2 = { 2, 3, 4, 5, 1 };
         N.rotate(b, -1);
         Assertions.assertArrayEquals(expected2, b);
 
-        // Test large rotation
         int[] c = { 1, 2, 3, 4, 5 };
         int[] expected3 = { 4, 5, 1, 2, 3 };
-        N.rotate(c, 7); // 7 % 5 = 2
+        N.rotate(c, 7);
         Assertions.assertArrayEquals(expected3, c);
     }
 
@@ -1141,15 +1089,12 @@ public class CommonUtil106Test extends TestBase {
         N.rotate(list, 1);
         Assertions.assertEquals(Arrays.asList("d", "a", "b", "c"), list);
 
-        // Test null list
         N.rotate((List<?>) null, 1);
 
-        // Test single element
         List<String> single = new ArrayList<>(Arrays.asList("a"));
         N.rotate(single, 1);
         Assertions.assertEquals(Arrays.asList("a"), single);
 
-        // Test rotation by list size
         List<String> list2 = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
         N.rotate(list2, 4);
         Assertions.assertEquals(Arrays.asList("a", "b", "c", "d"), list2);
@@ -1157,25 +1102,20 @@ public class CommonUtil106Test extends TestBase {
 
     @Test
     public void testRotateCollection() {
-        // Test with List
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
         N.rotate((Collection<?>) list, 1);
         Assertions.assertEquals(Arrays.asList("d", "a", "b", "c"), list);
 
-        // Test with Set (order may not be preserved as expected)
         Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d"));
         N.rotate((Collection<?>) set, 1);
         Assertions.assertEquals(4, set.size());
 
-        // Test empty collection
         Collection<String> empty = new ArrayList<>();
         N.rotate(empty, 1);
         Assertions.assertTrue(empty.isEmpty());
 
-        // Test null
         N.rotate((Collection<?>) null, 1);
 
-        // Test single element
         Collection<String> single = new ArrayList<>(Arrays.asList("a"));
         N.rotate(single, 1);
         Assertions.assertEquals(1, single.size());
@@ -1186,18 +1126,14 @@ public class CommonUtil106Test extends TestBase {
         boolean[] a = { true, false, true, false, true };
         boolean[] original = a.clone();
         N.shuffle(a);
-        // Can't test exact result due to randomness, but length should be same
         Assertions.assertEquals(original.length, a.length);
 
-        // Test empty array
         boolean[] empty = {};
         N.shuffle(empty);
         Assertions.assertArrayEquals(new boolean[0], empty);
 
-        // Test null
         N.shuffle((boolean[]) null);
 
-        // Test single element
         boolean[] single = { true };
         N.shuffle(single);
         Assertions.assertArrayEquals(new boolean[] { true }, single);
@@ -1209,11 +1145,9 @@ public class CommonUtil106Test extends TestBase {
         boolean first = a[0];
         boolean last = a[4];
         N.shuffle(a, 1, 4);
-        // First and last should remain unchanged
         Assertions.assertEquals(first, a[0]);
         Assertions.assertEquals(last, a[4]);
 
-        // Test invalid range
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> N.shuffle(a, -1, 3));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> N.shuffle(a, 0, 10));
     }
@@ -1221,7 +1155,7 @@ public class CommonUtil106Test extends TestBase {
     @Test
     public void testShuffleBooleanWithRandom() {
         boolean[] a = { true, false, true, false, true };
-        Random rnd = new Random(12345); // Fixed seed for reproducibility
+        Random rnd = new Random(12345);
         N.shuffle(a, rnd);
         Assertions.assertEquals(5, a.length);
     }
@@ -1233,7 +1167,6 @@ public class CommonUtil106Test extends TestBase {
         boolean last = a[4];
         Random rnd = new Random(12345);
         N.shuffle(a, 1, 4, rnd);
-        // First and last should remain unchanged
         Assertions.assertEquals(first, a[0]);
         Assertions.assertEquals(last, a[4]);
     }
@@ -1244,7 +1177,6 @@ public class CommonUtil106Test extends TestBase {
         char[] original = a.clone();
         N.shuffle(a);
         Assertions.assertEquals(original.length, a.length);
-        // All elements should still be present
         Arrays.sort(original);
         Arrays.sort(a);
         Assertions.assertArrayEquals(original, a);
@@ -1285,7 +1217,6 @@ public class CommonUtil106Test extends TestBase {
         byte[] original = a.clone();
         N.shuffle(a);
         Assertions.assertEquals(original.length, a.length);
-        // All elements should still be present
         Arrays.sort(original);
         Arrays.sort(a);
         Assertions.assertArrayEquals(original, a);

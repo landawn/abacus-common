@@ -14,6 +14,7 @@ import java.sql.Types;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -21,6 +22,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class AbstractCharacterType100Test extends TestBase {
     private Type<Character> type;
     private CharacterWriter characterWriter;
@@ -61,13 +63,13 @@ public class AbstractCharacterType100Test extends TestBase {
     @Test
     public void testValueOf_String_Null() {
         Character result = type.valueOf((String) null);
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
     public void testValueOf_String_Empty() {
         Character result = type.valueOf("");
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
@@ -80,22 +82,22 @@ public class AbstractCharacterType100Test extends TestBase {
 
     @Test
     public void testValueOf_String_NumericCode() {
-        assertEquals('A', type.valueOf("65")); // ASCII code for 'A'
-        assertEquals('a', type.valueOf("97")); // ASCII code for 'a'
-        assertEquals('0', type.valueOf("48")); // ASCII code for '0'
+        assertEquals('A', type.valueOf("65"));
+        assertEquals('a', type.valueOf("97"));
+        assertEquals('0', type.valueOf("48"));
     }
 
     @Test
     public void testValueOf_CharArray_Null() {
         Character result = type.valueOf(null, 0, 0);
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
     public void testValueOf_CharArray_Empty() {
         char[] cbuf = new char[0];
         Character result = type.valueOf(cbuf, 0, 0);
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
@@ -191,40 +193,34 @@ public class AbstractCharacterType100Test extends TestBase {
     @Test
     public void testWriteCharacter_Null() throws IOException {
         type.writeCharacter(characterWriter, null, null);
-        // Verify writer.write(NULL_CHAR_ARRAY) was called
     }
 
     @Test
     public void testWriteCharacter_Character_NoQuotation() throws IOException {
         type.writeCharacter(characterWriter, 'A', null);
-        // Verify writer.writeCharacter('A') was called
     }
 
     @Test
     public void testWriteCharacter_Character_NoQuotation_WithConfig() throws IOException {
         when(config.getCharQuotation()).thenReturn((char) 0);
         type.writeCharacter(characterWriter, 'A', config);
-        // Verify writer.writeCharacter('A') was called
     }
 
     @Test
     public void testWriteCharacter_Character_WithDoubleQuotes() throws IOException {
         when(config.getCharQuotation()).thenReturn('"');
         type.writeCharacter(characterWriter, 'A', config);
-        // Verify writer.write('"'), writer.writeCharacter('A'), writer.write('"') were called
     }
 
     @Test
     public void testWriteCharacter_Character_WithSingleQuotes() throws IOException {
         when(config.getCharQuotation()).thenReturn('\'');
         type.writeCharacter(characterWriter, 'A', config);
-        // Verify writer.write('\''), writer.writeCharacter('A'), writer.write('\'') were called
     }
 
     @Test
     public void testWriteCharacter_SingleQuote_WithSingleQuoteQuotation() throws IOException {
         when(config.getCharQuotation()).thenReturn('\'');
         type.writeCharacter(characterWriter, '\'', config);
-        // Verify writer.write('\''), writer.write('\\'), writer.writeCharacter('\''), writer.write('\'') were called
     }
 }

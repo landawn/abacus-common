@@ -109,7 +109,6 @@ import jakarta.xml.bind.Unmarshaller;
  * String attr = XmlUtil.getAttribute(elem, "id");
  * }</pre>
  *
- * @author Haiyang Li
  * @since 0.8
  */
 public final class XmlUtil {
@@ -964,9 +963,16 @@ public final class XmlUtil {
      * @see XMLDecoder#readObject()
      */
     public static <T> T xmlDecode(final String xml) {
-        final InputStream is = new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8));
-        try (XMLDecoder xmlDecoder = new XMLDecoder(is)) {
+        InputStream is = null;
+        XMLDecoder xmlDecoder = null;
+        try {
+            is = new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8));
+            xmlDecoder = new XMLDecoder(is);
             return (T) xmlDecoder.readObject();
+        } finally {
+            if (xmlDecoder != null) {
+                xmlDecoder.close();
+            }
         }
     }
 
@@ -1353,7 +1359,15 @@ public final class XmlUtil {
 
     /**
      * Writes XML-escaped characters from a portion of a character array to the given StringBuilder.
-     * Special XML characters are escaped to their XML entity representations.
+     * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * char[] chars = "Data: <value> & 'text'".toCharArray();
+     * StringBuilder sb = new StringBuilder();
+     * XmlUtil.writeCharacters(chars, 7, 14, sb);
+     * // Result: "&lt;value&gt; &amp; "
+     * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
      * @param off The start offset in the character array
@@ -1367,8 +1381,15 @@ public final class XmlUtil {
 
     /**
      * Writes XML-escaped characters from the specified string to the given StringBuilder.
-     * Special XML characters are escaped to their XML entity representations.
+     * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * If the string is null, the text "null" is written.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * StringBuilder sb = new StringBuilder();
+     * XmlUtil.writeCharacters("<tag attr='value'>text & more</tag>", sb);
+     * // Result: "&lt;tag attr=&apos;value&apos;&gt;text &amp; more&lt;/tag&gt;"
+     * }</pre>
      *
      * @param str The string containing the characters to be written
      * @param output The StringBuilder to which the escaped characters will be written
@@ -1381,6 +1402,15 @@ public final class XmlUtil {
 
     /**
      * Writes XML-escaped characters from a portion of a string to the given StringBuilder.
+     * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String text = "Hello <world> & friends";
+     * StringBuilder sb = new StringBuilder();
+     * XmlUtil.writeCharacters(text, 6, 8, sb);
+     * // Result: "&lt;world&gt;"
+     * }</pre>
      *
      * @param str The string containing the characters to be written
      * @param off The start offset in the string
@@ -1394,7 +1424,15 @@ public final class XmlUtil {
 
     /**
      * Writes XML-escaped characters from the specified character array to the given OutputStream.
-     * Special XML characters are escaped to their XML entity representations.
+     * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * char[] chars = "<data>value & more</data>".toCharArray();
+     * ByteArrayOutputStream baos = new ByteArrayOutputStream();
+     * XmlUtil.writeCharacters(chars, baos);
+     * // Result: "&lt;data&gt;value &amp; more&lt;/data&gt;"
+     * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
      * @param output The OutputStream to which the escaped characters will be written
@@ -1406,7 +1444,17 @@ public final class XmlUtil {
 
     /**
      * Writes XML-escaped characters from a portion of a character array to the given OutputStream.
+     * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * Uses a BufferedXMLWriter internally for efficient writing.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * char[] chars = "Data: <value> & 'text'".toCharArray();
+     * FileOutputStream fos = new FileOutputStream("output.xml");
+     * XmlUtil.writeCharacters(chars, 7, 14, fos);
+     * // Writes: "&lt;value&gt; &amp; "
+     * fos.close();
+     * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
      * @param off The start offset in the character array
@@ -1427,7 +1475,17 @@ public final class XmlUtil {
 
     /**
      * Writes XML-escaped characters from the specified string to the given OutputStream.
+     * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * If the string is null, the text "null" is written.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String data = "<message>Hello & goodbye</message>";
+     * FileOutputStream fos = new FileOutputStream("output.xml");
+     * XmlUtil.writeCharacters(data, fos);
+     * // Writes: "&lt;message&gt;Hello &amp; goodbye&lt;/message&gt;"
+     * fos.close();
+     * }</pre>
      *
      * @param str The string containing the characters to be written
      * @param output The OutputStream to which the escaped characters will be written
@@ -1440,7 +1498,17 @@ public final class XmlUtil {
 
     /**
      * Writes XML-escaped characters from a portion of a string to the given OutputStream.
+     * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * Uses a BufferedXMLWriter internally for efficient writing.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String text = "Prefix <tag>content</tag> suffix";
+     * FileOutputStream fos = new FileOutputStream("output.xml");
+     * XmlUtil.writeCharacters(text, 7, 17, fos);
+     * // Writes: "&lt;tag&gt;content&lt;/tag&gt;"
+     * fos.close();
+     * }</pre>
      *
      * @param str The string containing the characters to be written
      * @param off The start offset in the string
@@ -1461,7 +1529,16 @@ public final class XmlUtil {
 
     /**
      * Writes XML-escaped characters from the specified character array to the given Writer.
-     * Special XML characters are escaped to their XML entity representations.
+     * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * char[] chars = "Test: <value> & 'more'".toCharArray();
+     * StringWriter writer = new StringWriter();
+     * XmlUtil.writeCharacters(chars, writer);
+     * String result = writer.toString();
+     * // Result: "Test: &lt;value&gt; &amp; &apos;more&apos;"
+     * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
      * @param output The Writer to which the escaped characters will be written
@@ -1473,7 +1550,16 @@ public final class XmlUtil {
 
     /**
      * Writes XML-escaped characters from a portion of a character array to the given Writer.
+     * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * Uses a BufferedXMLWriter for efficient writing if the output is not already a BufferedXMLWriter.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * char[] chars = "Data: <tag>value</tag> end".toCharArray();
+     * StringWriter writer = new StringWriter();
+     * XmlUtil.writeCharacters(chars, 6, 16, writer);
+     * // Result: "&lt;tag&gt;value&lt;/tag&gt;"
+     * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
      * @param off The start offset in the character array
@@ -1497,7 +1583,17 @@ public final class XmlUtil {
 
     /**
      * Writes XML-escaped characters from the specified string to the given Writer.
+     * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * If the string is null, the text "null" is written.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String xml = "<book title='Java & XML'>Content</book>";
+     * StringWriter writer = new StringWriter();
+     * XmlUtil.writeCharacters(xml, writer);
+     * String result = writer.toString();
+     * // Result: "&lt;book title=&apos;Java &amp; XML&apos;&gt;Content&lt;/book&gt;"
+     * }</pre>
      *
      * @param str The string containing the characters to be written
      * @param output The Writer to which the escaped characters will be written

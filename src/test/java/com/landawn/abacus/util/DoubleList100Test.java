@@ -16,11 +16,13 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.DoubleStream;
 
+@Tag("new-test")
 public class DoubleList100Test extends TestBase {
 
     private DoubleList list;
@@ -31,7 +33,6 @@ public class DoubleList100Test extends TestBase {
         list = new DoubleList();
     }
 
-    // Constructor Tests
     @Test
     public void testDefaultConstructor() {
         DoubleList list = new DoubleList();
@@ -77,7 +78,6 @@ public class DoubleList100Test extends TestBase {
         assertThrows(NullPointerException.class, () -> new DoubleList(null));
     }
 
-    // Static Factory Method Tests
     @Test
     public void testOf() {
         DoubleList list = DoubleList.of(1.1, 2.2, 3.3, 4.4, 5.5);
@@ -110,9 +110,7 @@ public class DoubleList100Test extends TestBase {
         double[] array = { 1.1, 2.2, 3.3, 4.4, 5.5 };
         DoubleList list = DoubleList.copyOf(array);
         assertEquals(5, list.size());
-        // Modify original array
         array[0] = 100.0;
-        // List should not be affected
         assertEquals(1.1, list.get(0), DELTA);
     }
 
@@ -138,14 +136,12 @@ public class DoubleList100Test extends TestBase {
     public void testRandom() {
         DoubleList list = DoubleList.random(10);
         assertEquals(10, list.size());
-        // Check that all values are between 0.0 and 1.0
         for (int i = 0; i < 10; i++) {
             double value = list.get(i);
             assertTrue(value >= 0.0 && value < 1.0);
         }
     }
 
-    // Get and Set Tests
     @Test
     public void testGet() {
         list.add(10.5);
@@ -174,7 +170,6 @@ public class DoubleList100Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> list.set(0, 10.5));
     }
 
-    // Add Tests
     @Test
     public void testAdd() {
         list.add(10.5);
@@ -267,7 +262,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(3.3, list.get(2), DELTA);
     }
 
-    // Remove Tests
     @Test
     public void testRemove() {
         list.add(10.5);
@@ -396,7 +390,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(50.5, list.get(2), DELTA);
     }
 
-    // Move and Replace Tests
     @Test
     public void testMoveRange() {
         list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
@@ -472,7 +465,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(0.0, list.get(4), DELTA);
     }
 
-    // Fill Tests
     @Test
     public void testFill() {
         list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
@@ -495,7 +487,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(5.5, list.get(4), DELTA);
     }
 
-    // Contains Tests
     @Test
     public void testContains() {
         list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
@@ -542,7 +533,6 @@ public class DoubleList100Test extends TestBase {
         assertFalse(list.disjoint(other));
     }
 
-    // Set Operations Tests
     @Test
     public void testIntersection() {
         list.addAll(new double[] { 1.1, 2.2, 2.2, 3.3, 4.4 });
@@ -580,7 +570,6 @@ public class DoubleList100Test extends TestBase {
         assertTrue(result.contains(5.5));
     }
 
-    // Index and Occurrence Tests
     @Test
     public void testOccurrencesOf() {
         list.addAll(new double[] { 1.1, 2.2, 3.3, 2.2, 2.2, 4.4 });
@@ -624,7 +613,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(-1, list.lastIndexOf(5.5, 3));
     }
 
-    // Min/Max/Median Tests
     @Test
     public void testMin() {
         list.addAll(new double[] { 3.3, 1.1, 4.4, 1.1, 5.5 });
@@ -667,7 +655,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(3.3, median.getAsDouble(), DELTA);
     }
 
-    // forEach Tests
     @Test
     public void testForEach() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
@@ -694,7 +681,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(4.4, result.get(2), DELTA);
     }
 
-    // First/Last Tests
     @Test
     public void testFirst() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
@@ -780,7 +766,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(2.2, list.get(1), DELTA);
     }
 
-    // Distinct and Duplicates Tests
     @Test
     public void testDistinct() {
         list.addAll(new double[] { 1.1, 2.2, 2.2, 3.3, 3.3, 3.3 });
@@ -801,7 +786,6 @@ public class DoubleList100Test extends TestBase {
         assertTrue(list.hasDuplicates());
     }
 
-    // Sort Tests
     @Test
     public void testIsSorted() {
         list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
@@ -856,7 +840,6 @@ public class DoubleList100Test extends TestBase {
         assertTrue(list.binarySearch(1, 3, 4.4) < 0);
     }
 
-    // Reverse and Rotate Tests
     @Test
     public void testReverse() {
         list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
@@ -897,7 +880,6 @@ public class DoubleList100Test extends TestBase {
         list.shuffle();
         assertEquals(original.size(), list.size());
 
-        // Check all elements are still there
         for (int i = 0; i < original.size(); i++) {
             assertTrue(list.contains(original.get(i)));
         }
@@ -922,7 +904,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(1.1, list.get(2), DELTA);
     }
 
-    // Copy Tests
     @Test
     public void testCopy() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
@@ -930,9 +911,7 @@ public class DoubleList100Test extends TestBase {
         DoubleList copy = list.copy();
         assertEquals(list.size(), copy.size());
 
-        // Modify original
         list.set(0, 10.0);
-        // Copy should not be affected
         assertEquals(1.1, copy.get(0), DELTA);
     }
 
@@ -957,7 +936,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(5.5, copy.get(2), DELTA);
     }
 
-    // Split Tests
     @Test
     public void testSplit() {
         list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5, 6.6 });
@@ -974,7 +952,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(6.6, chunks.get(2).get(1), DELTA);
     }
 
-    // Utility Tests
     @Test
     public void testTrimToSize() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
@@ -1010,7 +987,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(2, list.size());
     }
 
-    // Conversion Tests
     @Test
     public void testBoxed() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
@@ -1040,7 +1016,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(1.1, array[0], DELTA);
         assertEquals(3.3, array[2], DELTA);
 
-        // Modify array should not affect list
         array[0] = 10.0;
         assertEquals(1.1, list.get(0), DELTA);
     }
@@ -1064,7 +1039,6 @@ public class DoubleList100Test extends TestBase {
         assertEquals(2, multiset.count(2.2));
     }
 
-    // Iterator and Stream Tests
     @Test
     public void testIterator() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
@@ -1094,10 +1068,9 @@ public class DoubleList100Test extends TestBase {
 
         DoubleStream stream = list.stream(1, 4);
         double sum = stream.sum();
-        assertEquals(9.0, sum, DELTA); // 2 + 3 + 4
+        assertEquals(9.0, sum, DELTA);
     }
 
-    // Equals and HashCode Tests
     @Test
     public void testEquals() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
@@ -1137,7 +1110,6 @@ public class DoubleList100Test extends TestBase {
         assertTrue(str.contains("3.3"));
     }
 
-    // Array method test
     @Test
     public void testArray() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
@@ -1147,12 +1119,10 @@ public class DoubleList100Test extends TestBase {
         assertEquals(2.2, array[1], DELTA);
         assertEquals(3.3, array[2], DELTA);
 
-        // Modifying the array should affect the list (since it's the internal array)
         array[0] = 10.0;
         assertEquals(10.0, list.get(0), DELTA);
     }
 
-    // Edge case tests
     @Test
     public void testLargeList() {
         int size = 10000;
@@ -1167,7 +1137,6 @@ public class DoubleList100Test extends TestBase {
 
     @Test
     public void testEmptyOperations() {
-        // Test operations on empty list
         assertFalse(list.remove(1.1));
         assertFalse(list.removeAllOccurrences(1.1));
         assertFalse(list.removeIf(x -> true));
@@ -1182,7 +1151,6 @@ public class DoubleList100Test extends TestBase {
         assertTrue(list.isEmpty());
     }
 
-    // Double-specific edge cases
     @Test
     public void testNaNHandling() {
         list.add(1.1);
@@ -1192,10 +1160,8 @@ public class DoubleList100Test extends TestBase {
         assertEquals(3, list.size());
         assertTrue(Double.isNaN(list.get(1)));
 
-        // Test contains with NaN
         assertTrue(list.contains(Double.NaN));
 
-        // Test indexOf with NaN
         assertEquals(1, list.indexOf(Double.NaN));
     }
 
@@ -1223,7 +1189,6 @@ public class DoubleList100Test extends TestBase {
         list.add(-0.0);
         list.add(0.0);
 
-        // Both -0.0 and 0.0 should be considered equal
         assertEquals(0.0, list.get(0), DELTA);
         assertEquals(0.0, list.get(1), DELTA);
 
@@ -1239,16 +1204,13 @@ public class DoubleList100Test extends TestBase {
         list.add(a);
         list.add(b);
 
-        // These might not be exactly equal due to floating point precision
-        // But replaceAll uses Double.compare which handles this correctly
         int replaced = list.replaceAll(0.3, 1.0);
         assertTrue(replaced > 0);
     }
 
     @Test
     public void testVeryLargePreciseValues() {
-        // Test with values that can be represented precisely in double
-        double largeValue = 9007199254740992.0; // 2^53
+        double largeValue = 9007199254740992.0;
         list.add(largeValue);
         list.add(largeValue + 1);
 

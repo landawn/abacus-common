@@ -18,23 +18,16 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
 import lombok.Data;
 
-/**
- * Unit tests for the Joiner class.
- *
- * Note: This test file includes stub implementations for Abacus-Util's internal
- * classes (`N`, `Strings`, `Objectory`, etc.) to ensure it is self-contained
- * and runnable without the full library dependency. The focus is on testing the
- * logic of the public methods within the Joiner class itself.
- */
+@Tag("new-test")
 public class Joiner200Test extends TestBase {
 
-    // Test bean for appendEntries(Object) tests.
     @Data
     public static class TestBean {
         private String name = "test";
@@ -71,7 +64,7 @@ public class Joiner200Test extends TestBase {
     @Test
     public void testUseForNull() {
         assertEquals("a, NA, c", Joiner.with(", ").useForNull("NA").append("a").append((String) null).append("c").toString());
-        assertEquals("a, null, c", Joiner.with(", ").append("a").append((String) null).append("c").toString()); // Default is "null"
+        assertEquals("a, null, c", Joiner.with(", ").append("a").append((String) null).append("c").toString());
     }
 
     @Test
@@ -168,15 +161,14 @@ public class Joiner200Test extends TestBase {
 
         Joiner j3 = Joiner.with(", ", "[", "]").append("a");
         Joiner j4 = Joiner.with(":", "{", "}").append("b");
-        // Note: merge appends the content of j4 (without its prefix/suffix)
         assertEquals("[a, b]", j3.merge(j4).toString());
     }
 
     @Test
     public void testLength() {
-        assertEquals(2, Joiner.with(", ", "[", "]").length()); // "[]"
-        assertEquals(4, Joiner.with(", ").append("a").append("b").length()); // "a, b"
-        assertEquals(6, Joiner.with(", ", "[", "]").append("a").append("b").length()); // "[a, b]"
+        assertEquals(2, Joiner.with(", ", "[", "]").length());
+        assertEquals(4, Joiner.with(", ").append("a").append("b").length());
+        assertEquals(6, Joiner.with(", ", "[", "]").append("a").append("b").length());
     }
 
     @Test
@@ -196,11 +188,9 @@ public class Joiner200Test extends TestBase {
         joiner.append("a").append("b");
         assertEquals("a, b", joiner.toString());
 
-        // After toString(), buffer is recycled. A new append starts fresh.
         joiner.append("c").append("d");
         assertEquals("a, b, c, d", joiner.toString());
 
-        // Test with close()
         Joiner joiner2 = Joiner.with(", ").reuseCachedBuffer();
         joiner2.append("x");
         joiner2.close();
@@ -230,10 +220,8 @@ public class Joiner200Test extends TestBase {
         assertThrows(IllegalStateException.class, () -> joiner.append("b"));
     }
 
-    // As Joiner doesn't have a public constructor, these tests are for the static factory methods.
     @Test
     public void testDefaultJoiner() {
-        // Assuming default separator is ", " and kv separator is "="
         assertEquals("a, b", Joiner.defauLt().append("a").append("b").toString());
         assertEquals("k=v", Joiner.defauLt().appendEntry("k", "v").toString());
     }
@@ -249,13 +237,6 @@ public class Joiner200Test extends TestBase {
         assertEquals("worl", Joiner.with("").trimBeforeAppend().append(" world ", 0, 5).toString());
         assertEquals("a, wo, b", Joiner.with(", ").append("a").append("world", 0, 2).append("b").toString());
     }
-
-    //    @Test
-    //    public void testAppendCharArrayWithRange() {
-    //        char[] chars = "hello".toCharArray();
-    //        assertEquals("ell", Joiner.with("").append(chars, 1, 3).toString());
-    //        assertEquals("a, ell, b", Joiner.with(", ").append("a").append(chars, 1, 3).append("b").toString());
-    //    }
 
     @Test
     public void testAppendAllPrimitiveArrays() {
@@ -284,7 +265,6 @@ public class Joiner200Test extends TestBase {
     @Test
     public void testAppendEntriesBean() {
         TestBean bean = new TestBean();
-        // The order depends on the stubbed ClassUtil.getPropNameList
         assertEquals("name=test&value=123", Joiner.with("&").appendBean(bean).toString());
     }
 
@@ -345,24 +325,5 @@ public class Joiner200Test extends TestBase {
         assertTrue(wasCalled.get());
         assertTrue(result.isPresent());
         assertEquals("mapped:a", result.get());
-    }
-
-    @Test
-    public void testMapToNonNullIfNotEmpty() {
-        u.Optional<Integer> result = Joiner.with(",").append("a,b").mapToNonNullIfNotEmpty(String::length);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.get().intValue());
-
-        u.Optional<Integer> emptyResult = Joiner.with(",").mapToNonNullIfNotEmpty(String::length);
-        assertFalse(emptyResult.isPresent());
-    }
-
-    @Test
-    public void testStreamIfNotEmpty() {
-        com.landawn.abacus.util.stream.Stream<String> stream = Joiner.with("-").append("a").append("b").streamIfNotEmpty();
-        assertEquals(1, stream.count());
-
-        com.landawn.abacus.util.stream.Stream<String> emptyStream = Joiner.with("-").streamIfNotEmpty();
-        assertEquals(0, emptyStream.count());
     }
 }

@@ -27,6 +27,7 @@ import java.util.TreeSet;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Nullable;
@@ -37,9 +38,9 @@ import com.landawn.abacus.util.function.ToDoubleFunction;
 import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongFunction;
 
+@Tag("new-test")
 public class Iterables201Test extends TestBase {
 
-    // Helper for comparators
     private static final Comparator<Integer> REVERSE_ORDER_NULLS_FIRST = Comparator.nullsFirst(Comparator.reverseOrder());
     private static final Comparator<Integer> REVERSE_ORDER_NULLS_LAST = Comparator.nullsLast(Comparator.reverseOrder());
 
@@ -86,7 +87,6 @@ public class Iterables201Test extends TestBase {
         }
     }
 
-    //region Min Methods
     @Test
     public void testMinCharArray() {
         assertTrue(Iterables.min((char[]) null).isEmpty());
@@ -141,7 +141,7 @@ public class Iterables201Test extends TestBase {
         assertTrue(Iterables.min((Integer[]) null).isEmpty());
         assertTrue(Iterables.min(new Integer[0]).isEmpty());
         assertEquals(1, Iterables.min(new Integer[] { 3, 1, 2 }).orElse(null));
-        assertEquals(1, Iterables.min(new Integer[] { null, 3, 1, 2 }).orElse(null)); // nulls are max
+        assertEquals(1, Iterables.min(new Integer[] { null, 3, 1, 2 }).orElse(null));
     }
 
     @Test
@@ -185,7 +185,6 @@ public class Iterables201Test extends TestBase {
         assertEquals(3, Iterables.min(Arrays.asList(3, 1, 2).iterator(), REVERSE_ORDER_NULLS_LAST).orElse(null));
         assertEquals(3, Iterables.min(Arrays.asList(null, 3, 1, 2).iterator(), REVERSE_ORDER_NULLS_LAST).orElse(null));
         assertNull(Iterables.min(Arrays.asList(null, 3, 1, 2).iterator(), REVERSE_ORDER_NULLS_FIRST).orElse(Integer.MAX_VALUE));
-        // Test specific null handling in min(Iterator, Comparator)
         assertNull(Iterables.min(Arrays.asList(null, 1, 2).iterator(), Comparator.nullsFirst(Integer::compareTo)).get());
         assertEquals(1, Iterables.min(Arrays.asList(1, null, 2).iterator(), Comparator.nullsLast(Integer::compareTo)).get());
     }
@@ -196,7 +195,7 @@ public class Iterables201Test extends TestBase {
         assertTrue(Iterables.minBy((TestObject[]) null, TestObject::getId).isEmpty());
         assertTrue(Iterables.minBy(new TestObject[0], TestObject::getId).isEmpty());
         assertEquals(arr[1], Iterables.minBy(arr, TestObject::getId).orElse(null));
-        assertEquals(arr[1], Iterables.minBy(arr, TestObject::getValue).orElse(null)); // "a" is shortest
+        assertEquals(arr[1], Iterables.minBy(arr, TestObject::getValue).orElse(null));
     }
 
     @Test
@@ -292,9 +291,7 @@ public class Iterables201Test extends TestBase {
         assertTrue(Iterables.minDouble(Collections.<TestObject> emptyList().iterator(), extractor).isEmpty());
         assertEquals(1.0, Iterables.minDouble(list.iterator(), extractor).orElseThrow(), 0.0);
     }
-    //endregion
 
-    //region Max Methods
     @Test
     public void testMaxCharArray() {
         assertTrue(Iterables.max((char[]) null).isEmpty());
@@ -349,7 +346,7 @@ public class Iterables201Test extends TestBase {
         assertTrue(Iterables.max((Integer[]) null).isEmpty());
         assertTrue(Iterables.max(new Integer[0]).isEmpty());
         assertEquals(3, Iterables.max(new Integer[] { 3, 1, 2 }).orElse(null));
-        assertEquals(3, Iterables.max(new Integer[] { null, 3, 1, 2 }).orElse(null)); // nulls are min
+        assertEquals(3, Iterables.max(new Integer[] { null, 3, 1, 2 }).orElse(null));
     }
 
     @Test
@@ -391,7 +388,6 @@ public class Iterables201Test extends TestBase {
         assertTrue(Iterables.max(Collections.<Integer> emptyList().iterator(), Comparator.naturalOrder()).isEmpty());
         assertEquals(1, Iterables.max(Arrays.asList(3, 1, 2).iterator(), REVERSE_ORDER_NULLS_FIRST).orElse(null));
         assertNull(Iterables.max(Arrays.asList(null, 3, 1, 2).iterator(), REVERSE_ORDER_NULLS_LAST).orElse(Integer.MAX_VALUE));
-        // Test specific null handling in max(Iterator, Comparator)
         assertNull(Iterables.max(Arrays.asList(null, 1, 2).iterator(), Comparator.nullsLast(Integer::compareTo)).get());
         assertEquals(2, Iterables.max(Arrays.asList(1, null, 2).iterator(), Comparator.nullsFirst(Integer::compareTo)).get());
     }
@@ -402,7 +398,7 @@ public class Iterables201Test extends TestBase {
         assertTrue(Iterables.maxBy((TestObject[]) null, TestObject::getId).isEmpty());
         assertTrue(Iterables.maxBy(new TestObject[0], TestObject::getId).isEmpty());
         assertEquals(arr[0], Iterables.maxBy(arr, TestObject::getId).orElse(null));
-        assertEquals(arr[0], Iterables.maxBy(arr, TestObject::getValue).orElse(null)); // "ccc" is longest
+        assertEquals(arr[0], Iterables.maxBy(arr, TestObject::getValue).orElse(null));
     }
 
     @Test
@@ -499,9 +495,6 @@ public class Iterables201Test extends TestBase {
         assertEquals(3.0, Iterables.maxDouble(list.iterator(), extractor).orElseThrow(), 0.0);
     }
 
-    //endregion
-
-    //region MinMax Methods
     @Test
     public void testMinMaxArray() {
         assertTrue(Iterables.minMax((Integer[]) null).isEmpty());
@@ -511,7 +504,7 @@ public class Iterables201Test extends TestBase {
         assertEquals(1, result.left());
         assertEquals(5, result.right());
 
-        result = Iterables.minMax(new Integer[] { null, 3, 1, 5, null, 2, 4 }).orElse(null); // nulls ignored by N.minMax by default for Comparable
+        result = Iterables.minMax(new Integer[] { null, 3, 1, 5, null, 2, 4 }).orElse(null);
         assertNotNull(result);
         assertEquals(null, result.left());
         assertEquals(5, result.right());
@@ -524,8 +517,8 @@ public class Iterables201Test extends TestBase {
 
         Pair<Integer, Integer> result = Iterables.minMax(new Integer[] { 3, 1, 5, 2, 4 }, REVERSE_ORDER_NULLS_FIRST).orElse(null);
         assertNotNull(result);
-        assertEquals(5, result.left()); // Min in reverse order
-        assertEquals(1, result.right()); // Max in reverse order
+        assertEquals(5, result.left());
+        assertEquals(1, result.right());
 
         result = Iterables.minMax(new Integer[] { null, 3, 1, 5, null, 2, 4 }, Comparator.nullsFirst(Comparator.naturalOrder())).orElse(null);
         assertNotNull(result);
@@ -577,23 +570,13 @@ public class Iterables201Test extends TestBase {
         assertEquals(5, result.left());
         assertEquals(1, result.right());
     }
-    //endregion
 
-    //region Median and KthLargest Methods
     @Test
     public void testMedianArray() {
         assertTrue(Iterables.median((Integer[]) null).isEmpty());
         assertTrue(Iterables.median(new Integer[0]).isEmpty());
-        assertEquals(3, Iterables.median(new Integer[] { 1, 5, 3, 2, 4 }).orElse(null)); // 1,2,3,4,5 -> 3
-        assertEquals(3, Iterables.median(new Integer[] { 1, 5, 3, 2, 4, 6 }).orElse(null)); // 1,2,3,4,5,6 -> 3 or 4 (length/2 +1 -> 4th largest which is 3 by N.median def)
-                                                                                            // N.median returns element at index length / 2 after sorting. (0-indexed)
-                                                                                            // For {1,2,3,4,5,6}, sorted is {1,2,3,4,5,6}, length is 6, length/2 is 3. Element at index 3 is 4.
-                                                                                            // The Javadoc says "length / 2 + 1 largest value", which means for length 6 -> 4th largest. (1-based)
-                                                                                            // If sorted: 1,2,3,4,5,6. 1st largest=6, 2nd=5, 3rd=4, 4th=3.
-                                                                                            // Let's recheck N.median logic or example
-                                                                                            // N.median -> sorts and returns a[a.length / 2]
-                                                                                            // for {1,2,3,4,5,6}, sorted is [1,2,3,4,5,6], a.length/2 = 3, a[3] = 4.
-                                                                                            // for {1,2,3,4,5}, sorted is [1,2,3,4,5], a.length/2 = 2, a[2] = 3.
+        assertEquals(3, Iterables.median(new Integer[] { 1, 5, 3, 2, 4 }).orElse(null));
+        assertEquals(3, Iterables.median(new Integer[] { 1, 5, 3, 2, 4, 6 }).orElse(null));
         assertEquals(3, Iterables.median(new Integer[] { 1, 5, 3, 2, 4, 6 }).orElse(null));
     }
 
@@ -601,9 +584,7 @@ public class Iterables201Test extends TestBase {
     public void testMedianArrayWithComparator() {
         assertTrue(Iterables.median((Integer[]) null, REVERSE_ORDER_NULLS_FIRST).isEmpty());
         assertTrue(Iterables.median(new Integer[0], REVERSE_ORDER_NULLS_FIRST).isEmpty());
-        // Array: {1, 5, 3, 2, 4} -> Sorted by REVERSE: {5, 4, 3, 2, 1} -> Median (index 2): 3
         assertEquals(3, Iterables.median(new Integer[] { 1, 5, 3, 2, 4 }, REVERSE_ORDER_NULLS_FIRST).orElse(null));
-        // Array: {1, 5, 3, 2, 4, 6} -> Sorted by REVERSE: {6, 5, 4, 3, 2, 1} -> Median (index 3): 3
         assertEquals(4, Iterables.median(new Integer[] { 1, 5, 3, 2, 4, 6 }, REVERSE_ORDER_NULLS_FIRST).orElse(null));
     }
 
@@ -628,20 +609,20 @@ public class Iterables201Test extends TestBase {
     public void testKthLargestArray() {
         assertTrue(Iterables.kthLargest((Integer[]) null, 1).isEmpty());
         assertTrue(Iterables.kthLargest(new Integer[0], 1).isEmpty());
-        assertTrue(Iterables.kthLargest(new Integer[] { 1, 2 }, 3).isEmpty()); // k > length
-        assertEquals(5, Iterables.kthLargest(new Integer[] { 1, 5, 3, 2, 4 }, 1).orElse(null)); // 1st largest
-        assertEquals(4, Iterables.kthLargest(new Integer[] { 1, 5, 3, 2, 4 }, 2).orElse(null)); // 2nd largest
-        assertEquals(1, Iterables.kthLargest(new Integer[] { 1, 5, 3, 2, 4 }, 5).orElse(null)); // 5th largest
+        assertTrue(Iterables.kthLargest(new Integer[] { 1, 2 }, 3).isEmpty());
+        assertEquals(5, Iterables.kthLargest(new Integer[] { 1, 5, 3, 2, 4 }, 1).orElse(null));
+        assertEquals(4, Iterables.kthLargest(new Integer[] { 1, 5, 3, 2, 4 }, 2).orElse(null));
+        assertEquals(1, Iterables.kthLargest(new Integer[] { 1, 5, 3, 2, 4 }, 5).orElse(null));
     }
 
     @Test
     public void testKthLargestArrayWithComparator() {
-        Integer[] arr = { 1, 5, 3, 2, 4 }; // Sorted reverse: 5,4,3,2,1
+        Integer[] arr = { 1, 5, 3, 2, 4 };
         assertTrue(Iterables.kthLargest((Integer[]) null, 1, REVERSE_ORDER_NULLS_FIRST).isEmpty());
         assertTrue(Iterables.kthLargest(new Integer[0], 1, REVERSE_ORDER_NULLS_FIRST).isEmpty());
         assertTrue(Iterables.kthLargest(arr, 6, REVERSE_ORDER_NULLS_FIRST).isEmpty());
-        assertEquals(1, Iterables.kthLargest(arr, 1, REVERSE_ORDER_NULLS_FIRST).orElse(null)); // 1st largest in reverse sort (smallest)
-        assertEquals(2, Iterables.kthLargest(arr, 2, REVERSE_ORDER_NULLS_FIRST).orElse(null)); // 2nd largest in reverse sort
+        assertEquals(1, Iterables.kthLargest(arr, 1, REVERSE_ORDER_NULLS_FIRST).orElse(null));
+        assertEquals(2, Iterables.kthLargest(arr, 2, REVERSE_ORDER_NULLS_FIRST).orElse(null));
     }
 
     @Test
@@ -680,9 +661,7 @@ public class Iterables201Test extends TestBase {
             assertEquals(6, Iterables.kthLargest(list, 6, REVERSE_ORDER_NULLS_FIRST).orElse(null));
         }
     }
-    //endregion
 
-    //region Sum Methods
     @Test
     public void testSumIntIterable() {
         assertTrue(Iterables.sumInt((Iterable<Integer>) null).isEmpty());
@@ -740,7 +719,7 @@ public class Iterables201Test extends TestBase {
     @Test
     public void testSumDoubleIterableWithFunction() {
         List<TestObject> list = Arrays.asList(new TestObject(1, "a"), new TestObject(2, "b"));
-        ToDoubleFunction<TestObject> extractor = obj -> (double) obj.getId() + 0.5; // 1.5, 2.5
+        ToDoubleFunction<TestObject> extractor = obj -> (double) obj.getId() + 0.5;
         assertTrue(Iterables.sumDouble((Iterable<TestObject>) null, extractor).isEmpty());
         assertTrue(Iterables.sumDouble(Collections.<TestObject> emptyList(), extractor).isEmpty());
         assertEquals(4.0, Iterables.sumDouble(list, extractor).orElseThrow(), 0.0);
@@ -779,9 +758,7 @@ public class Iterables201Test extends TestBase {
         assertTrue(Iterables.sumBigDecimal(Collections.<String> emptyList(), extractor).isEmpty());
         assertEquals(new BigDecimal("14.0"), Iterables.sumBigDecimal(list, extractor).orElse(null));
     }
-    //endregion
 
-    //region Average Methods
     @Test
     public void testAverageIntArray() {
         assertTrue(Iterables.averageInt((Number[]) null).isEmpty());
@@ -792,8 +769,8 @@ public class Iterables201Test extends TestBase {
     @Test
     public void testAverageIntArrayFromTo() {
         Integer[] arr = { 1, 2, 3, 4, 5 };
-        assertTrue(Iterables.averageInt(arr, 1, 1).isEmpty()); // Empty range
-        assertEquals(3.0, Iterables.averageInt(arr, 1, 4).orElseThrow(), 0.0); // avg(2,3,4)
+        assertTrue(Iterables.averageInt(arr, 1, 1).isEmpty());
+        assertEquals(3.0, Iterables.averageInt(arr, 1, 4).orElseThrow(), 0.0);
         assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(arr, -1, 2));
         assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(arr, 0, 6));
         assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(arr, 3, 2));
@@ -858,8 +835,8 @@ public class Iterables201Test extends TestBase {
     @Test
     public void testAverageLongArrayFromTo() {
         Long[] arr = { 1L, 2L, 3L, 4L, 5L };
-        assertTrue(Iterables.averageLong(arr, 1, 1).isEmpty()); // Empty range
-        assertEquals(3.0, Iterables.averageLong(arr, 1, 4).orElseThrow(), 0.0); // avg(2,3,4)
+        assertTrue(Iterables.averageLong(arr, 1, 1).isEmpty());
+        assertEquals(3.0, Iterables.averageLong(arr, 1, 4).orElseThrow(), 0.0);
     }
 
     @Test
@@ -922,13 +899,13 @@ public class Iterables201Test extends TestBase {
     public void testAverageDoubleArrayFromTo() {
         Double[] arr = { 1.1, 2.2, 3.3, 4.4, 5.5 };
         assertTrue(Iterables.averageDouble(arr, 1, 1).isEmpty());
-        assertEquals(3.3, Iterables.averageDouble(arr, 1, 4).orElseThrow(), 0.00001); // avg(2.2, 3.3, 4.4)
+        assertEquals(3.3, Iterables.averageDouble(arr, 1, 4).orElseThrow(), 0.00001);
     }
 
     @Test
     public void testAverageDoubleArrayWithFunction() {
         TestObject[] arr = { new TestObject(1, ""), new TestObject(2, ""), new TestObject(3, "") };
-        ToDoubleFunction<TestObject> extractor = obj -> obj.getId() + 0.1; // 1.1, 2.1, 3.1
+        ToDoubleFunction<TestObject> extractor = obj -> obj.getId() + 0.1;
         assertTrue(Iterables.averageDouble((TestObject[]) null, extractor).isEmpty());
         assertTrue(Iterables.averageDouble(new TestObject[0], extractor).isEmpty());
         assertEquals(2.1, Iterables.averageDouble(arr, extractor).orElseThrow(), 0.00001);
@@ -939,7 +916,7 @@ public class Iterables201Test extends TestBase {
         TestObject[] arr = { new TestObject(1, ""), new TestObject(2, ""), new TestObject(3, ""), new TestObject(4, ""), new TestObject(5, "") };
         ToDoubleFunction<TestObject> extractor = obj -> obj.getId() + 0.1;
         assertTrue(Iterables.averageDouble(arr, 1, 1, extractor).isEmpty());
-        assertEquals(3.1, Iterables.averageDouble(arr, 1, 4, extractor).orElseThrow(), 0.00001); // 2.1, 3.1, 4.1 -> avg = 3.1
+        assertEquals(3.1, Iterables.averageDouble(arr, 1, 4, extractor).orElseThrow(), 0.00001);
     }
 
     @Test
@@ -978,10 +955,10 @@ public class Iterables201Test extends TestBase {
     public void testAverageBigIntegerIterable() {
         assertTrue(Iterables.averageBigInteger((Iterable<BigInteger>) null).isEmpty());
         assertTrue(Iterables.averageBigInteger(Collections.<BigInteger> emptyList()).isEmpty());
-        List<BigInteger> biList = Arrays.asList(BigInteger.ONE, BigInteger.TWO, BigInteger.valueOf(3)); // Sum=6, Count=3
+        List<BigInteger> biList = Arrays.asList(BigInteger.ONE, BigInteger.TWO, BigInteger.valueOf(3));
         assertEquals(new BigDecimal("2"), Iterables.averageBigInteger(biList).orElse(null));
 
-        List<BigInteger> biList2 = Arrays.asList(BigInteger.ONE, BigInteger.TWO); // Sum=3, Count=2
+        List<BigInteger> biList2 = Arrays.asList(BigInteger.ONE, BigInteger.TWO);
         assertEquals(new BigDecimal("1.5"), Iterables.averageBigInteger(biList2).orElse(null));
     }
 
@@ -998,7 +975,7 @@ public class Iterables201Test extends TestBase {
     public void testAverageBigDecimalIterable() {
         assertTrue(Iterables.averageBigDecimal((Iterable<BigDecimal>) null).isEmpty());
         assertTrue(Iterables.averageBigDecimal(Collections.<BigDecimal> emptyList()).isEmpty());
-        List<BigDecimal> bdList = Arrays.asList(new BigDecimal("1.5"), new BigDecimal("2.5"), new BigDecimal("3.5")); // Sum=7.5, Count=3
+        List<BigDecimal> bdList = Arrays.asList(new BigDecimal("1.5"), new BigDecimal("2.5"), new BigDecimal("3.5"));
         assertEquals(new BigDecimal("2.5"), Iterables.averageBigDecimal(bdList).orElse(null));
     }
 
@@ -1011,9 +988,6 @@ public class Iterables201Test extends TestBase {
         assertEquals(new BigDecimal("2.5"), Iterables.averageBigDecimal(list, extractor).orElse(null));
     }
 
-    //endregion
-
-    //region IndexOf and Find Methods
     @Test
     public void testIndexOfArray() {
         assertTrue(Iterables.indexOf((Object[]) null, "a").isEmpty());
@@ -1058,13 +1032,11 @@ public class Iterables201Test extends TestBase {
         assertTrue(Iterables.findFirstOrLast((Integer[]) null, isEven, isOdd).isEmpty());
         assertTrue(Iterables.findFirstOrLast(new Integer[0], isEven, isOdd).isEmpty());
 
-        assertEquals(2, Iterables.findFirstOrLast(new Integer[] { 1, 2, 3, 4 }, isEven, isOdd).orElse(null)); // First even is 2
-        assertEquals(5, Iterables.findFirstOrLast(new Integer[] { 1, 3, 5 }, isEven, isOdd).orElse(null)); // No even, last odd is 5. Javadoc: last element that satisfies predicateForLast
-                                                                                                           // N.findLast finds last that matches. So it should be 5.
-                                                                                                           // The N.findLast will return the last matching. {1,3,5} -> predicateForFirst (isEven) fails. predicateForLast (isOdd) -> N.findLast is {5}. Correct.
+        assertEquals(2, Iterables.findFirstOrLast(new Integer[] { 1, 2, 3, 4 }, isEven, isOdd).orElse(null));
         assertEquals(5, Iterables.findFirstOrLast(new Integer[] { 1, 3, 5 }, isEven, isOdd).orElse(null));
-        assertTrue(Iterables.findFirstOrLast(new Integer[] { 10, 20 }, isEven, isOdd).get() == 10); // First even is 10
-        assertTrue(Iterables.findFirstOrLast(new Integer[] { 11, 21 }, isEven, isOdd).get() == 21); // No even, last odd is 21.
+        assertEquals(5, Iterables.findFirstOrLast(new Integer[] { 1, 3, 5 }, isEven, isOdd).orElse(null));
+        assertTrue(Iterables.findFirstOrLast(new Integer[] { 10, 20 }, isEven, isOdd).get() == 10);
+        assertTrue(Iterables.findFirstOrLast(new Integer[] { 11, 21 }, isEven, isOdd).get() == 21);
     }
 
     @Test
@@ -1087,8 +1059,8 @@ public class Iterables201Test extends TestBase {
         assertTrue(Iterables.findFirstOrLastIndex((Integer[]) null, isEven, isOdd).isEmpty());
         assertTrue(Iterables.findFirstOrLastIndex(new Integer[0], isEven, isOdd).isEmpty());
 
-        assertEquals(1, Iterables.findFirstOrLastIndex(new Integer[] { 1, 2, 3, 4 }, isEven, isOdd).orElse(-1)); // Index of 2
-        assertEquals(2, Iterables.findFirstOrLastIndex(new Integer[] { 1, 3, 5 }, isEven, isOdd).orElse(-1)); // Index of 5
+        assertEquals(1, Iterables.findFirstOrLastIndex(new Integer[] { 1, 2, 3, 4 }, isEven, isOdd).orElse(-1));
+        assertEquals(2, Iterables.findFirstOrLastIndex(new Integer[] { 1, 3, 5 }, isEven, isOdd).orElse(-1));
     }
 
     @Test
@@ -1124,13 +1096,13 @@ public class Iterables201Test extends TestBase {
 
     @Test
     public void testFindFirstAndLastArrayWithTwoPredicates() {
-        Predicate<Integer> isSmallEven = x -> x != null && x % 2 == 0 && x < 5; // 2, 4
-        Predicate<Integer> isLargeOdd = x -> x != null && x % 2 != 0 && x > 3; // 5
+        Predicate<Integer> isSmallEven = x -> x != null && x % 2 == 0 && x < 5;
+        Predicate<Integer> isLargeOdd = x -> x != null && x % 2 != 0 && x > 3;
         Pair<Nullable<Integer>, Nullable<Integer>> result;
 
         result = Iterables.findFirstAndLast(new Integer[] { 1, 2, 3, 4, 5, 6 }, isSmallEven, isLargeOdd);
-        assertEquals(2, result.left().orElse(null)); // first smallEven
-        assertEquals(5, result.right().orElse(null)); // last largeOdd
+        assertEquals(2, result.left().orElse(null));
+        assertEquals(5, result.right().orElse(null));
     }
 
     @Test
@@ -1171,7 +1143,7 @@ public class Iterables201Test extends TestBase {
         result = Iterables.findFirstAndLastIndex(new Integer[0], isEven);
         assertTrue(result.left().isEmpty() && result.right().isEmpty());
 
-        result = Iterables.findFirstAndLastIndex(new Integer[] { 1, 2, 3, 4, 5, 6 }, isEven); // Indices: 1 (for 2), 5 (for 6)
+        result = Iterables.findFirstAndLastIndex(new Integer[] { 1, 2, 3, 4, 5, 6 }, isEven);
         assertEquals(1, result.left().orElse(-1));
         assertEquals(5, result.right().orElse(-1));
 
@@ -1181,8 +1153,8 @@ public class Iterables201Test extends TestBase {
 
     @Test
     public void testFindFirstAndLastIndexArrayWithTwoPredicates() {
-        Predicate<Integer> isSmallEven = x -> x != null && x % 2 == 0 && x < 5; // {1, *2*, 3, *4*, 5, 6} -> first is 2 (idx 1)
-        Predicate<Integer> isLargeOdd = x -> x != null && x % 2 != 0 && x > 3; // {1, 2, 3, 4, *5*, 6} -> last is 5 (idx 4)
+        Predicate<Integer> isSmallEven = x -> x != null && x % 2 == 0 && x < 5;
+        Predicate<Integer> isLargeOdd = x -> x != null && x % 2 != 0 && x > 3;
         Pair<OptionalInt, OptionalInt> result;
 
         result = Iterables.findFirstAndLastIndex(new Integer[] { 1, 2, 3, 4, 5, 6 }, isSmallEven, isLargeOdd);
@@ -1217,12 +1189,9 @@ public class Iterables201Test extends TestBase {
         assertEquals(4, result.right().orElse(-1));
     }
 
-    //endregion
-
-    //region Fill and Reverse Methods
     @Test
     public void testFillArrayWithSupplier() {
-        Iterables.fill((String[]) null, () -> "a"); // Should not throw
+        Iterables.fill((String[]) null, () -> "a");
 
         String[] arrEmpty = new String[0];
         Iterables.fill(arrEmpty, () -> "a");
@@ -1241,17 +1210,15 @@ public class Iterables201Test extends TestBase {
 
     @Test
     public void testFillArrayFromToWithSupplier() {
-        Iterables.fill((String[]) null, 0, 0, () -> "a"); // Should not throw with null if len check handles it, but N.len(null) throws.
-                                                          // N.checkFromToIndex(from, to, N.len(a)) will throw for null array.
-                                                          //  assertThrows(NullPointerException.class, () -> Iterables.fill((String[]) null, 0, 0, () -> "a"));
+        Iterables.fill((String[]) null, 0, 0, () -> "a");
 
         String[] arr = new String[5];
         Arrays.fill(arr, "original");
-        Iterables.fill(arr, 1, 4, () -> "filled"); // Fill index 1, 2, 3
+        Iterables.fill(arr, 1, 4, () -> "filled");
         assertArrayEquals(new String[] { "original", "filled", "filled", "filled", "original" }, arr);
 
-        Iterables.fill(arr, 1, 1, () -> "no-fill"); // Empty range
-        assertArrayEquals(new String[] { "original", "filled", "filled", "filled", "original" }, arr); // no change
+        Iterables.fill(arr, 1, 1, () -> "no-fill");
+        assertArrayEquals(new String[] { "original", "filled", "filled", "filled", "original" }, arr);
 
         assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, -1, 2, () -> "fail"));
         assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, 0, 6, () -> "fail"));
@@ -1282,63 +1249,43 @@ public class Iterables201Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<String>) null, 0, 0, () -> "a"));
 
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        Iterables.fill(list, 1, 4, () -> "filled"); // Fill index 1, 2, 3
+        Iterables.fill(list, 1, 4, () -> "filled");
         assertEquals(Arrays.asList("a", "filled", "filled", "filled", "e"), list);
 
-        // Extend list
-        List<String> shortList = new ArrayList<>(Arrays.asList("a")); // size 1
-        Iterables.fill(shortList, 0, 3, () -> "new"); // from 0, to 3. current size 1.
-                                                      // list.set(0, "new")
-                                                      // list.add("new"), list.add("new")
+        List<String> shortList = new ArrayList<>(Arrays.asList("a"));
+        Iterables.fill(shortList, 0, 3, () -> "new");
         assertEquals(Arrays.asList("new", "new", "new"), shortList);
         assertEquals(3, shortList.size());
 
-        List<String> listToExtend = new ArrayList<>(Arrays.asList("a", "b")); // size 2
+        List<String> listToExtend = new ArrayList<>(Arrays.asList("a", "b"));
         Iterables.fill(listToExtend, 1, 4, () -> "Z");
-        // Expected: list[1] = Z. Then add Z, Z.
-        // a, Z, Z, Z
         assertEquals(Arrays.asList("a", "Z", "Z", "Z"), listToExtend);
 
         List<Integer> listInt = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
         final int[] counter = { 10 };
         Supplier<Integer> supplier = () -> counter[0]++;
-        Iterables.fill(listInt, 2, 5, supplier); // indices 2,3,4 with 10,11,12
+        Iterables.fill(listInt, 2, 5, supplier);
         assertEquals(Arrays.asList(1, 2, 10, 11, 12), listInt);
 
-        List<Integer> listFillAndExtend = new ArrayList<>(Arrays.asList(1, 2)); // size 2
+        List<Integer> listFillAndExtend = new ArrayList<>(Arrays.asList(1, 2));
         final int[] counter2 = { 100 };
         Supplier<Integer> supplier2 = () -> counter2[0]++;
-        Iterables.fill(listFillAndExtend, 1, 4, supplier2); // list[1]=100; list.add(101); list.add(102)
+        Iterables.fill(listFillAndExtend, 1, 4, supplier2);
         assertEquals(Arrays.asList(1, 100, 101, 102), listFillAndExtend);
 
-        // Fill with fromIndex >= size
-        List<Integer> listFillFromSize = new ArrayList<>(Arrays.asList(1, 2)); // size 2
+        List<Integer> listFillFromSize = new ArrayList<>(Arrays.asList(1, 2));
         final int[] counter3 = { 200 };
         Supplier<Integer> supplier3 = () -> counter3[0]++;
-        Iterables.fill(listFillFromSize, 2, 4, supplier3); // list.add(200); list.add(201)
-                                                           // The loop for (int i = size; i < fromIndex; i++) adds nulls.
-                                                           // Here size=2, fromIndex=2. Loop does not run.
-                                                           // Then for (int i = 0, len = toIndex - list.size(); i < len; i++)
-                                                           // list.size() is now 2. toIndex is 4. len = 2.
-                                                           // list.add(supplier.get()) twice.
+        Iterables.fill(listFillFromSize, 2, 4, supplier3);
         assertEquals(Arrays.asList(1, 2, 200, 201), listFillFromSize);
 
-        List<Integer> listFillFromSize2 = new ArrayList<>(Arrays.asList(1, 2)); // size 2
+        List<Integer> listFillFromSize2 = new ArrayList<>(Arrays.asList(1, 2));
         final int[] counter4 = { 300 };
         Supplier<Integer> supplier4 = () -> counter4[0]++;
-        Iterables.fill(listFillFromSize2, 3, 5, supplier4); // fromIndex=3, toIndex=5
-        // size=2.
-        // for (int i = size; i < fromIndex; i++) -> for (i=2; i<3; i++) -> list.add(null) -> list is {1,2,null}
-        // list.size() is now 3.
-        // for (int i = 0, len = toIndex - list.size(); i < len; i++) -> len = 5-3 = 2.
-        // list.add(supplier4.get()) -> 300
-        // list.add(supplier4.get()) -> 301
-        // Expected: {1,2,null,300,301}
+        Iterables.fill(listFillFromSize2, 3, 5, supplier4);
         assertEquals(Arrays.asList(1, 2, null, 300, 301), listFillFromSize2);
 
         assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(list, -1, 2, () -> "fail"));
-        // No: toIndex can be > list.size()
-        // assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(list, 0, list.size() + 2, () -> "fail"));
         assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(list, 3, 2, () -> "fail"));
 
     }
@@ -1353,20 +1300,15 @@ public class Iterables201Test extends TestBase {
         assertEquals(Integer.valueOf(4), reversed.get(0));
         assertEquals(Integer.valueOf(1), reversed.get(3));
 
-        // Modification through reversed view
-        reversed.set(0, 10); // Changes original's last element
+        reversed.set(0, 10);
         assertEquals(Arrays.asList(1, 2, 3, 10), original);
         assertEquals(Arrays.asList(10, 3, 2, 1), reversed);
 
-        reversed.add(0, 20); // Adds to beginning of reversed, which is end of original view (but adds before)
-                             // original.add(original.size() - 0, 20) effectively.
-                             // forwardList.add(reversePosition(index), element); reversePosition(0) is size().
-                             // So, original.add(size(), 20)
+        reversed.add(0, 20);
         assertEquals(Arrays.asList(1, 2, 3, 10, 20), original);
         assertEquals(Arrays.asList(20, 10, 3, 2, 1), reversed);
 
-        // Modification through original view
-        original.add(0, 0); // {0,1,2,3,10,20}
+        original.add(0, 0);
         assertEquals(Arrays.asList(20, 10, 3, 2, 1, 0), reversed);
 
         List<Integer> single = new ArrayList<>(Collections.singletonList(1));
@@ -1375,18 +1317,14 @@ public class Iterables201Test extends TestBase {
         List<Integer> empty = new ArrayList<>();
         assertEquals(Collections.emptyList(), Iterables.reverse(empty));
 
-        // Test RandomAccessReverseList
-        List<Integer> randomAccessOriginal = Arrays.asList(5, 6, 7); // This is RandomAccess
+        List<Integer> randomAccessOriginal = Arrays.asList(5, 6, 7);
         List<Integer> randomAccessReversed = Iterables.reverse(randomAccessOriginal);
         assertEquals(Arrays.asList(7, 6, 5), randomAccessReversed);
-        // Attempt to modify (Arrays.asList is fixed-size for add/remove, but set is ok)
         assertThrows(UnsupportedOperationException.class, () -> randomAccessReversed.add(33));
         randomAccessReversed.set(0, 77);
         assertEquals(Arrays.asList(5, 6, 77), randomAccessOriginal);
     }
-    //endregion
 
-    //region Set Operations
     @Test
     public void testUnion() {
         Set<Integer> set1 = new HashSet<>(Arrays.asList(1, 2, 3));
@@ -1401,17 +1339,14 @@ public class Iterables201Test extends TestBase {
             assertTrue(union.contains(4));
             assertFalse(union.contains(6));
 
-            // Order of iteration: set1 then set2 (excluding duplicates)
             List<Integer> iterated = new ArrayList<>();
             union.iterator().forEachRemaining(iterated::add);
-            // This is not strictly guaranteed for HashSet, but the implementation iterates set1 then set2.
-            // For predictability, let's use LinkedHashSet
         }
         Set<Integer> lhSet1 = new LinkedHashSet<>(Arrays.asList(1, 2, 3));
-        Set<Integer> lhSet2 = new LinkedHashSet<>(Arrays.asList(3, 4, 5)); // 3 is common
+        Set<Integer> lhSet2 = new LinkedHashSet<>(Arrays.asList(3, 4, 5));
         {
             Iterables.SetView<Integer> union = Iterables.union(lhSet1, lhSet2);
-            List<Integer> expectedOrder = Arrays.asList(1, 2, 3, 4, 5); // Iterates 1,2,3 from lhSet1. Then 4,5 from lhSet2 (3 is skipped).
+            List<Integer> expectedOrder = Arrays.asList(1, 2, 3, 4, 5);
             List<Integer> iterated = new ArrayList<>();
             union.iterator().forEachRemaining(iterated::add);
             assertEquals(expectedOrder, iterated);
@@ -1422,19 +1357,17 @@ public class Iterables201Test extends TestBase {
             assertEquals(set1, Iterables.union(set1, Collections.emptySet()));
             assertEquals(set2, Iterables.union(Collections.emptySet(), set2));
 
-            // Test copyInto
             HashSet<Integer> target = new HashSet<>();
             union.copyInto(target);
             assertEquals(new HashSet<>(Arrays.asList(1, 2, 3, 4, 5)), target);
 
-            // Test immutability of view
             assertThrows(UnsupportedOperationException.class, () -> union.add(10));
         }
     }
 
     @Test
     public void testIntersection() {
-        Set<Integer> set1 = new LinkedHashSet<>(Arrays.asList(1, 2, 3, 6)); // Use LinkedHashSet for predictable iteration
+        Set<Integer> set1 = new LinkedHashSet<>(Arrays.asList(1, 2, 3, 6));
         Set<Integer> set2 = new HashSet<>(Arrays.asList(3, 4, 5, 6));
         Iterables.SetView<Integer> intersection = Iterables.intersection(set1, set2);
 
@@ -1444,25 +1377,23 @@ public class Iterables201Test extends TestBase {
         assertTrue(intersection.contains(6));
         assertFalse(intersection.contains(1));
 
-        // Order of iteration: matches set1
         List<Integer> iterated = new ArrayList<>();
         intersection.iterator().forEachRemaining(iterated::add);
-        assertEquals(Arrays.asList(3, 6), iterated); // 3 appears before 6 in set1
+        assertEquals(Arrays.asList(3, 6), iterated);
 
         assertTrue(Iterables.intersection(null, null).isEmpty());
         assertTrue(Iterables.intersection(set1, null).isEmpty());
         assertTrue(Iterables.intersection(null, set2).isEmpty());
         assertTrue(Iterables.intersection(set1, Collections.emptySet()).isEmpty());
 
-        // Test immutability
         assertThrows(UnsupportedOperationException.class, () -> intersection.add(10));
     }
 
     @Test
     public void testDifference() {
-        Set<Integer> set1 = new LinkedHashSet<>(Arrays.asList(1, 2, 3, 6)); // Use LinkedHashSet for predictable iteration
+        Set<Integer> set1 = new LinkedHashSet<>(Arrays.asList(1, 2, 3, 6));
         Set<Integer> set2 = new HashSet<>(Arrays.asList(3, 4, 5, 6));
-        Iterables.SetView<Integer> difference = Iterables.difference(set1, set2); // set1 - set2
+        Iterables.SetView<Integer> difference = Iterables.difference(set1, set2);
 
         assertEquals(new HashSet<>(Arrays.asList(1, 2)), difference);
         assertEquals(2, difference.size());
@@ -1471,17 +1402,15 @@ public class Iterables201Test extends TestBase {
         assertFalse(difference.contains(3));
         assertFalse(difference.contains(6));
 
-        // Order of iteration: matches set1
         List<Integer> iterated = new ArrayList<>();
         difference.iterator().forEachRemaining(iterated::add);
         assertEquals(Arrays.asList(1, 2), iterated);
 
         assertTrue(Iterables.difference(null, null).isEmpty());
-        assertEquals(set1, Iterables.difference(set1, null)); // set1 - emptySet = set1
-        assertTrue(Iterables.difference(null, set2).isEmpty()); // emptySet - set2 = emptySet
+        assertEquals(set1, Iterables.difference(set1, null));
+        assertTrue(Iterables.difference(null, set2).isEmpty());
         assertEquals(set1, Iterables.difference(set1, Collections.emptySet()));
 
-        // Test immutability
         assertThrows(UnsupportedOperationException.class, () -> difference.add(10));
     }
 
@@ -1495,9 +1424,8 @@ public class Iterables201Test extends TestBase {
         assertEquals(4, symDiff.size());
         assertTrue(symDiff.contains(1));
         assertTrue(symDiff.contains(4));
-        assertFalse(symDiff.contains(3)); // Common element removed
+        assertFalse(symDiff.contains(3));
 
-        // Iteration order is (set1-set2) then (set2-set1)
         List<Integer> iterated = new ArrayList<>();
         symDiff.iterator().forEachRemaining(iterated::add);
         assertEquals(Arrays.asList(1, 2, 4, 5), iterated);
@@ -1507,7 +1435,6 @@ public class Iterables201Test extends TestBase {
         assertEquals(set2, Iterables.symmetricDifference(null, set2));
         assertEquals(set1, Iterables.symmetricDifference(set1, Collections.emptySet()));
 
-        // Test immutability
         assertThrows(UnsupportedOperationException.class, () -> symDiff.add(10));
     }
 
@@ -1517,49 +1444,28 @@ public class Iterables201Test extends TestBase {
 
         assertTrue(Iterables.subSet(N.emptyNavigableSet(), Range.closed(1, 5)).isEmpty());
 
-        // CLOSED_OPEN: [3, 7) -> {3, 4, 5, 6}
         Range<Integer> r1 = Range.closedOpen(3, 7);
         NavigableSet<Integer> sub1 = Iterables.subSet(set, r1);
         assertEquals(new TreeSet<>(Arrays.asList(3, 4, 5, 6)), sub1);
 
-        // CLOSED_CLOSED: [3, 7] -> {3, 4, 5, 6, 7}
         Range<Integer> r2 = Range.closed(3, 7);
         NavigableSet<Integer> sub2 = Iterables.subSet(set, r2);
         assertEquals(new TreeSet<>(Arrays.asList(3, 4, 5, 6, 7)), sub2);
 
-        // OPEN_CLOSED: (3, 7] -> {4, 5, 6, 7}
         Range<Integer> r3 = Range.openClosed(3, 7);
         NavigableSet<Integer> sub3 = Iterables.subSet(set, r3);
         assertEquals(new TreeSet<>(Arrays.asList(4, 5, 6, 7)), sub3);
 
-        // OPEN_OPEN: (3, 7) -> {4, 5, 6}
         Range<Integer> r4 = Range.open(3, 7);
         NavigableSet<Integer> sub4 = Iterables.subSet(set, r4);
         assertEquals(new TreeSet<>(Arrays.asList(4, 5, 6)), sub4);
 
-        // Test with custom comparator (should throw if range is not consistent with natural ordering, which N.subSet does not do)
-        // The Iterables.subSet checks this.
         NavigableSet<Integer> customSet = new TreeSet<>(Comparator.reverseOrder());
         customSet.addAll(Arrays.asList(1, 2, 3, 4, 5));
-        Range<Integer> naturalRange = Range.closed(2, 4); // 2 < 4 in natural order
-        // customSet sorted: 5,4,3,2,1. Comparator is reverse.
-        // comparator.compare(range.lowerEndpoint(), range.upperEndpoint()) <= 0
-        // reverseComparator.compare(2,4) -> 4.compareTo(2) -> 1 which is > 0. So should throw.
+        Range<Integer> naturalRange = Range.closed(2, 4);
         assertThrows(IllegalArgumentException.class, () -> Iterables.subSet(customSet, naturalRange));
 
-        Range<Integer> reverseRange = Range.closed(Integer.MIN_VALUE, 2); // Effectively Range.closed(Integer.MIN_VALUE, 2) if not bounded below
-                                                                          // Let's use a proper range for custom comparator
-                                                                          //        Range<Integer> customConsistentRange = Range.closed(4, 2, Comparators.reverseOrder()); // 4 >= 2 by natural order. reverseComparator.compare(4,2) = 2.compareTo(4) = -1 <=0. OK.
-                                                                          //                                                                   // This means lowerEndpoint by custom comparator is '4', upper is '2'.
-                                                                          //                                                                   // So, elements >= 4 and <= 2 (by reverse order means elements <=4 and >=2 by natural)
-                                                                          //                                                                   // subSet(fromElement, fromInclusive, toElement, toInclusive)
-                                                                          //                                                                   // subSet(4, true, 2, true) -> should give {4,3,2}
-                                                                          //        NavigableSet<Integer> customSub = Iterables.subSet(customSet, customConsistentRange);
-                                                                          //        assertEquals(new TreeSet<Integer>(Comparator.reverseOrder()) {
-                                                                          //            {
-                                                                          //                addAll(Arrays.asList(2, 3, 4));
-                                                                          //            }
-                                                                          //        }, customSub);
+        Range<Integer> reverseRange = Range.closed(Integer.MIN_VALUE, 2);
     }
 
     @Test
@@ -1575,7 +1481,7 @@ public class Iterables201Test extends TestBase {
         assertTrue(psSingle.contains(Collections.emptySet()));
         assertTrue(psSingle.contains(Collections.singleton(1)));
 
-        Set<Integer> two = new LinkedHashSet<>(Arrays.asList(1, 2)); // LinkedHashSet for predictable element order in subsets if it mattered
+        Set<Integer> two = new LinkedHashSet<>(Arrays.asList(1, 2));
         Set<Set<Integer>> psTwo = Iterables.powerSet(two);
         assertEquals(4, psTwo.size());
         assertTrue(psTwo.contains(Collections.emptySet()));
@@ -1583,10 +1489,8 @@ public class Iterables201Test extends TestBase {
         assertTrue(psTwo.contains(Collections.singleton(2)));
         assertTrue(psTwo.contains(new HashSet<>(Arrays.asList(1, 2))));
 
-        // Test contains with different set type but same elements
         assertTrue(psTwo.contains(new TreeSet<>(Arrays.asList(1, 2))));
 
-        // Test max size (30 elements)
         Set<Integer> largeSet = new HashSet<>();
         for (int i = 0; i < 30; i++)
             largeSet.add(i);
@@ -1598,14 +1502,11 @@ public class Iterables201Test extends TestBase {
             tooLargeSet.add(i);
         assertThrows(IllegalArgumentException.class, () -> Iterables.powerSet(tooLargeSet));
 
-        // Immutability (cannot test directly on PowerSet, but its iterator's remove)
         Iterator<Set<Integer>> iter = psTwo.iterator();
         iter.next();
         assertThrows(UnsupportedOperationException.class, iter::remove);
     }
-    //endregion
 
-    //region Rollup, Permutations, Cartesian Product
     @Test
     public void testRollup() {
         assertTrue(Iterables.rollup(null).get(0).isEmpty() && Iterables.rollup(null).size() == 1);
@@ -1619,14 +1520,12 @@ public class Iterables201Test extends TestBase {
         assertEquals(Arrays.asList("a", "b"), rollup.get(2));
         assertEquals(Arrays.asList("a", "b", "c"), rollup.get(3));
 
-        // Ensure lists are new instances
         assertNotSame(rollup.get(1), rollup.get(2));
     }
 
     @Test
     public void testPermutations() {
-        assertThrows(IllegalArgumentException.class, () -> Iterables.permutations(null).isEmpty()); // N.nullToEmpty results in empty list, permutation of empty list is a list containing an empty list.
-        // The PermutationCollection for empty inputList has size factorial(0)=1. Iterator returns one empty list.
+        assertThrows(IllegalArgumentException.class, () -> Iterables.permutations(null).isEmpty());
         Collection<List<Integer>> permEmpty = Iterables.permutations(Collections.emptyList());
         assertEquals(1, permEmpty.size());
         assertEquals(Collections.emptyList(), permEmpty.iterator().next());
@@ -1636,12 +1535,12 @@ public class Iterables201Test extends TestBase {
         assertEquals(Collections.singletonList(1), permSingle.iterator().next());
 
         Collection<List<Integer>> permTwo = Iterables.permutations(Arrays.asList(1, 2));
-        assertEquals(2, permTwo.size()); // 2! = 2
+        assertEquals(2, permTwo.size());
         assertTrue(permTwo.contains(Arrays.asList(1, 2)));
         assertTrue(permTwo.contains(Arrays.asList(2, 1)));
 
         Collection<List<Integer>> permThree = Iterables.permutations(Arrays.asList(1, 2, 3));
-        assertEquals(6, permThree.size()); // 3! = 6
+        assertEquals(6, permThree.size());
         assertTrue(permThree.contains(Arrays.asList(1, 2, 3)));
         assertTrue(permThree.contains(Arrays.asList(1, 3, 2)));
         assertTrue(permThree.contains(Arrays.asList(2, 1, 3)));
@@ -1649,13 +1548,8 @@ public class Iterables201Test extends TestBase {
         assertTrue(permThree.contains(Arrays.asList(3, 1, 2)));
         assertTrue(permThree.contains(Arrays.asList(3, 2, 1)));
 
-        // Test with duplicates - permutations are distinct in terms of list instances, but values might be same
         Collection<List<Integer>> permDuplicates = Iterables.permutations(Arrays.asList(1, 1, 2));
-        assertEquals(6, permDuplicates.size()); // Still 3! permutations if elements treated as distinct by position
-        // The PermutationCollection uses Plain Changes, which treats elements by position.
-        // It will generate [1,1,2], [1,2,1], [2,1,1] etc multiple times if we only look at values.
-        // Let's check if the count of distinct *value* lists is 3 for (1,1,2) which is 3!/2! = 3.
-        // The returned collection contains all 3! permutations. Some will be equal in content.
+        assertEquals(6, permDuplicates.size());
         Set<List<Integer>> distinctPerms = new HashSet<>(permDuplicates);
         assertEquals(3, distinctPerms.size());
         assertTrue(distinctPerms.contains(Arrays.asList(1, 1, 2)));
@@ -1673,7 +1567,6 @@ public class Iterables201Test extends TestBase {
         assertEquals(1, permSingle.size());
         assertEquals(Collections.singletonList(1), permSingle.iterator().next());
 
-        // For (1,2) -> (1,2), (2,1)
         List<Integer> twoElements = Arrays.asList(1, 2);
         Collection<List<Integer>> permTwo = Iterables.orderedPermutations(twoElements);
         assertEquals(2, permTwo.size());
@@ -1681,18 +1574,14 @@ public class Iterables201Test extends TestBase {
         assertEquals(Arrays.asList(1, 2), itTwo.next());
         assertEquals(Arrays.asList(2, 1), itTwo.next());
 
-        // For (1,1,2) -> (1,1,2), (1,2,1), (2,1,1)
         List<Integer> withDuplicates = Arrays.asList(1, 1, 2);
         Collection<List<Integer>> permDup = Iterables.orderedPermutations(withDuplicates);
-        assertEquals(3, permDup.size()); // 3!/2! = 3
+        assertEquals(3, permDup.size());
         Iterator<List<Integer>> itDup = permDup.iterator();
         assertEquals(Arrays.asList(1, 1, 2), itDup.next());
         assertEquals(Arrays.asList(1, 2, 1), itDup.next());
         assertEquals(Arrays.asList(2, 1, 1), itDup.next());
 
-        // Example from Guava docs: ("b", "c", "a") with natural order
-        // Sorted: ("a", "b", "c")
-        // Output: ["a", "b", "c"], ["a", "c", "b"], ["b", "a", "c"], ["b", "c", "a"], ["c", "a", "b"], ["c", "b", "a"]
         List<String> strings = Arrays.asList("b", "c", "a");
         Collection<List<String>> permStr = Iterables.orderedPermutations(strings);
         assertEquals(6, permStr.size());
@@ -1707,17 +1596,13 @@ public class Iterables201Test extends TestBase {
 
     @Test
     public void testOrderedPermutationsWithComparator() {
-        // (2,1) with reverse order comparator. Sorted input: (2,1)
-        // Perms: (2,1), (1,2)
-        List<Integer> list = Arrays.asList(2, 1); // Input order doesn't matter as it's sorted first
+        List<Integer> list = Arrays.asList(2, 1);
         Collection<List<Integer>> perms = Iterables.orderedPermutations(list, Comparator.reverseOrder());
         assertEquals(2, perms.size());
         Iterator<List<Integer>> it = perms.iterator();
-        assertEquals(Arrays.asList(2, 1), it.next()); // Largest first by reverse comparator
+        assertEquals(Arrays.asList(2, 1), it.next());
         assertEquals(Arrays.asList(1, 2), it.next());
 
-        // (1,1,2) with reverse comparator. Sorted: (2,1,1)
-        // Perms: (2,1,1), (1,2,1), (1,1,2)
         List<Integer> listDup = Arrays.asList(1, 1, 2);
         Collection<List<Integer>> permsDup = Iterables.orderedPermutations(listDup, Comparator.reverseOrder());
         assertEquals(3, permsDup.size());
@@ -1729,7 +1614,7 @@ public class Iterables201Test extends TestBase {
 
     @Test
     public void testCartesianProductVarargs() {
-        List<List<Object>> cpEmpty = Iterables.cartesianProduct(); // No lists
+        List<List<Object>> cpEmpty = Iterables.cartesianProduct();
         assertEquals(1, cpEmpty.size());
         assertTrue(cpEmpty.get(0).isEmpty());
 
@@ -1747,16 +1632,13 @@ public class Iterables201Test extends TestBase {
         assertEquals(Arrays.asList(2, "A"), cpTwoLists.get(2));
         assertEquals(Arrays.asList(2, "B"), cpTwoLists.get(3));
 
-        // One empty list
         List<List<Object>> cpWithEmpty = Iterables.cartesianProduct(list1, Collections.emptyList(), list2);
         assertTrue(cpWithEmpty.isEmpty());
 
-        // Test > Integer.MAX_VALUE (hard to test directly, relies on internal Numbers.multiplyExact)
-        // Small test for contains
         assertTrue(cpTwoLists.contains(Arrays.asList(1, "A")));
         assertFalse(cpTwoLists.contains(Arrays.asList(1, "C")));
-        assertFalse(cpTwoLists.contains(Arrays.asList(1))); // wrong size
-        assertFalse(cpTwoLists.contains(Arrays.asList(3, "A"))); // element not in source
+        assertFalse(cpTwoLists.contains(Arrays.asList(1)));
+        assertFalse(cpTwoLists.contains(Arrays.asList(3, "A")));
     }
 
     @Test
@@ -1780,10 +1662,8 @@ public class Iterables201Test extends TestBase {
         assertEquals(Arrays.asList(2, "A"), cpTwoLists.get(2));
         assertEquals(Arrays.asList(2, "B"), cpTwoLists.get(3));
 
-        // Test with null collection input
         List<List<Object>> cpNullInput = Iterables.cartesianProduct((Collection<? extends Collection<?>>) null);
-        assertEquals(1, cpNullInput.size()); // N.nullToEmpty makes it an empty list of lists.
+        assertEquals(1, cpNullInput.size());
         assertTrue(cpNullInput.get(0).isEmpty());
     }
-    //endregion
 }

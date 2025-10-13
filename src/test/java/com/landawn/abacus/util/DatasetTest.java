@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,6 +21,7 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -41,6 +38,7 @@ import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.IntStream.IntStreamEx;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("old-test")
 public class DatasetTest extends AbstractTest {
     final int threadNum = 100;
     final int recordCount = 10000;
@@ -442,15 +440,6 @@ public class DatasetTest extends AbstractTest {
         copy = sheet.copy();
         copy.transpose().println();
 
-        //        +-------------------+-----------------+--------------------+------------------+----------------+---------------------------------------+-------------------+
-        //        | 400               | 1000            | 1200               | 1500             | 1600           | 2000                                  | 4000              |
-        //+--------+-------------------+-----------------+--------------------+------------------+----------------+---------------------------------------+-------------------+
-        //| Canada | null              | null            | null               | null             | null           | [[Banana, Canada], [Carrots, Canada]] | null              |
-        //| China  | [[Banana, China]] | null            | [[Carrots, China]] | [[Beans, China]] | null           | null                                  | [[Orange, China]] |
-        //| Mexico | null              | null            | null               | null             | null           | [[Beans, Mexico]]                     | null              |
-        //| USA    | null              | [[Banana, USA]] | null               | [[Carrots, USA]] | [[Beans, USA]] | [[Orange, USA], [Orange, USA]]        | null              |
-        //+--------+-------------------+-----------------+--------------------+------------------+----------------+---------------------------------------+-------------------+
-
     }
 
     @Test
@@ -464,15 +453,6 @@ public class DatasetTest extends AbstractTest {
         final Sheet<String, Integer, List<String>> sheet = dataset.pivot("Country", "Amount", N.asList("Product", "Country"),
                 Collectors.mappingToList(N::toString));
         sheet.println();
-
-        //        +-------------------+-----------------+--------------------+------------------+----------------+---------------------------------------+-------------------+
-        //        | 400               | 1000            | 1200               | 1500             | 1600           | 2000                                  | 4000              |
-        //+--------+-------------------+-----------------+--------------------+------------------+----------------+---------------------------------------+-------------------+
-        //| Canada | null              | null            | null               | null             | null           | [[Banana, Canada], [Carrots, Canada]] | null              |
-        //| China  | [[Banana, China]] | null            | [[Carrots, China]] | [[Beans, China]] | null           | null                                  | [[Orange, China]] |
-        //| Mexico | null              | null            | null               | null             | null           | [[Beans, Mexico]]                     | null              |
-        //| USA    | null              | [[Banana, USA]] | null               | [[Carrots, USA]] | [[Beans, USA]] | [[Orange, USA], [Orange, USA]]        | null              |
-        //+--------+-------------------+-----------------+--------------------+------------------+----------------+---------------------------------------+-------------------+
 
         sheet.toDatasetH().println();
         sheet.toDatasetV().println();
@@ -496,8 +476,6 @@ public class DatasetTest extends AbstractTest {
         N.println(N.toJson(ds));
         N.println(N.toJson(ds, true));
 
-        //    N.println(N.toXml(ds));
-        //    N.println(N.toXml(ds, true));
     }
 
     @Test
@@ -588,8 +566,6 @@ public class DatasetTest extends AbstractTest {
         final List<String> columNames = N.asList("id", "name", "devices.id", "devices.model", "devices.serialNumber");
         final Dataset dataset = Dataset.rows(columNames,
                 new Object[][] { { 100, "Bob", 1, "iPhone", "abc123" }, { 100, "Bob", 2, "MacBook", "mmm123" }, { 200, "Alice", 3, "Android", "aaa223" } });
-
-        // dataset.toList(Account.class).stream().map(N::toJson).forEach(Fn.println());
 
         dataset.println("     * # ");
 
@@ -722,8 +698,6 @@ public class DatasetTest extends AbstractTest {
         ds.println(outputWriter);
         N.println(outputWriter.toString());
 
-        // ds.stream(Fn.<DisposableObjArray> identity()).forEach(Fn.println());
-
         ds.println(0, 2, N.asList("c"));
         ds.println(1, 3, N.asList("a", "c"));
 
@@ -839,19 +813,19 @@ public class DatasetTest extends AbstractTest {
         final Dataset ds1 = ds.copy();
         ds1.println();
 
-        ds1.removeRowRange(1, 5);
+        ds1.removeRows(1, 5);
         ds1.println();
 
         final Dataset ds2 = ds.copy();
         ds2.println();
 
-        ds2.removeRows(1, 3, 5);
+        ds2.removeMultiRows(1, 3, 5);
         ds2.println();
 
         final Dataset ds3 = ds.copy();
         ds3.println();
 
-        ds3.removeRows(0, 2, 4, 5);
+        ds3.removeMultiRows(0, 2, 4, 5);
         ds3.println();
     }
 
@@ -880,29 +854,6 @@ public class DatasetTest extends AbstractTest {
         ds2.println();
     }
 
-    //    @Test
-    //    public void test_move() throws Exception {
-    //        final Dataset ds1 = N.newDataset(N.asList(createAccount(Account.class), createAccount(Account.class), createAccount(Account.class)));
-    //        ds1.removeColumns(N.asList("gui", "emailAddress", "lastUpdateTime", "createdTime"));
-    //        ds1.updateRow(0, t -> t instanceof String ? t + "__0" : t);
-    //
-    //        ds1.updateRow(1, t -> t instanceof String ? t + "__1" : t);
-    //
-    //        ds1.println();
-    //
-    //        ds1.moveColumns(N.asMap("lastName", 0, "firstName", 1, "middleName", 2));
-    //        ds1.println();
-    //
-    //        ds1.moveRow(0, 2);
-    //        ds1.println();
-    //
-    //        ds1.swapRowPosition(0, 2);
-    //        ds1.println();
-    //
-    //        ds1.moveColumn("birthDate", 0);
-    //        ds1.println();
-    //    }
-
     @Test
     public void test_swap() throws Exception {
         final Dataset ds1 = N.newDataset(N.asList(createAccount(Account.class), createAccount(Account.class), createAccount(Account.class)));
@@ -929,7 +880,7 @@ public class DatasetTest extends AbstractTest {
 
         ds1.updateRow(0, t -> t instanceof String ? t + "___" : t);
 
-        ds1.updateRows(Array.of(1, 0), (i, v) -> v instanceof String ? v + "___" : v);
+        ds1.updateRows(Array.of(1, 0), (i, c, v) -> v instanceof String ? v + "___" : v);
 
         ds1.println();
 
@@ -937,7 +888,7 @@ public class DatasetTest extends AbstractTest {
 
         ds1.println();
 
-        ds1.updateColumns(N.asList("lastName", "firstName"), (c, v) -> v instanceof String ? v + "###" : v);
+        ds1.updateColumns(N.asList("lastName", "firstName"), (i, c, v) -> v instanceof String ? v + "###" : v);
 
         ds1.println();
 
@@ -1001,21 +952,6 @@ public class DatasetTest extends AbstractTest {
         assertEquals(3, ds3.intersectAll(ds2).size());
     }
 
-    //    @Test
-    //    public void test_moveColumn() throws Exception {
-    //        final List<Account> accountList = createAccountList(Account.class, 7);
-    //
-    //        final Dataset ds = N.newDataset(accountList);
-    //
-    //        ds.moveColumn("firstName", ds.columnNameList().size() - 1);
-    //        assertEquals(ds.columnNameList().size() - 1, ds.getColumnIndex("firstName"));
-    //        ds.println();
-    //
-    //        ds.moveColumns(N.asMap("firstName", 0));
-    //        assertEquals(0, ds.getColumnIndex("firstName"));
-    //        ds.println();
-    //    }
-
     @Test
     public void test_lift() throws Exception {
         final List<Account> accountList = createAccountList(Account.class, 7);
@@ -1043,7 +979,7 @@ public class DatasetTest extends AbstractTest {
         final List<Account> accountList = createAccountList(Account.class, 7);
         final MutableInt idx = MutableInt.of(100);
         final Dataset ds = N.newDataset(accountList);
-        ds.updateColumns(N.asList("firstName", "lastName"), (c, v) -> (String) v + idx.getAndIncrement());
+        ds.updateColumns(N.asList("firstName", "lastName"), (i, c, v) -> (String) v + idx.getAndIncrement());
         ds.println();
 
         ds.topBy("lastName", 3).println();
@@ -1062,7 +998,7 @@ public class DatasetTest extends AbstractTest {
         ds.renameColumns(ds.columnNameList(), t -> t + "2");
         ds.println();
 
-        ds.updateColumns(ds.columnNameList(), (c, v) -> N.toString(v));
+        ds.updateColumns(ds.columnNameList(), (i, c, v) -> N.toString(v));
         ds.println();
     }
 
@@ -1078,22 +1014,6 @@ public class DatasetTest extends AbstractTest {
         assertFalse(ds.containsColumn("Account.firstName"));
         assertFalse(ds.containsAllColumns(N.asList("firstName", "Account.lastName")));
     }
-
-    //    public void test_convertColumnType() throws Exception {
-    //        List<Account> accountList = createAccountList(Account.class, 7);
-    //
-    //        Dataset ds = N.newDataset(accountList);
-    //
-    //        ds.convertColumn("birthDate", String.class);
-    //        assertEquals(String.class, ds.get(0, ds.getColumnIndex("birthDate")).getClass());
-    //
-    //        ds.convertColumn("birthDate", Date.class);
-    //        assertEquals(Date.class, ds.get(0, ds.getColumnIndex("birthDate")).getClass());
-    //
-    //        Map<String, Class<?>> targetColumnTypes = N.asMap("createdTime", String.class, "lastUpdateTime", String.class);
-    //
-    //        ds.convertColumn(targetColumnTypes);
-    //    }
 
     @Test
     public void test_join() throws Exception {
@@ -1275,37 +1195,6 @@ public class DatasetTest extends AbstractTest {
         joinedDataset.println();
 
         {
-            //            try {
-            //                ds.join(ds2, "Account.firstName", "Account.firstName");
-            //                fail("SHould throw IllegalArgumentException");
-            //            } catch (IllegalArgumentException e) {
-            //
-            //            }
-            //
-            //            try {
-            //                ds.join(ds2, "firstName", "firstName");
-            //                fail("SHould throw IllegalArgumentException");
-            //            } catch (IllegalArgumentException e) {
-            //
-            //            }
-            //
-            //            ds2.renameColumn("Account.lastName", "lastName");
-            //
-            //            try {
-            //                ds.join(ds2, "firstName", "rightFirstName");
-            //                fail("SHould throw IllegalArgumentException");
-            //            } catch (IllegalArgumentException e) {
-            //
-            //            }
-            //
-            //            ds2.renameColumn("lastName", "Account.lastName");
-            //
-            //            try {
-            //                ds.join(ds2, (Map<String, String>) null);
-            //                fail("SHould throw IllegalArgumentException");
-            //            } catch (IllegalArgumentException e) {
-            //
-            //            }
 
             try {
                 ds.leftJoin(ds2, "Account.firstName11", "Account.firstName");
@@ -1805,20 +1694,10 @@ public class DatasetTest extends AbstractTest {
 
         ds2 = ds.distinctBy("gui", (Function<String, Object>) t -> t.substring(0, 2));
         ds2.println();
-        // assertEquals(1, ds2.size());
 
         ds2 = ds.distinctBy(N.asList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length);
         ds2.println();
         assertEquals(1, ds2.size());
-
-        //        ds2 = ds.groupBy("gui", new Function<String, Object>() {
-        //            @Override
-        //            public Object apply(String t) {
-        //                return t.substring(0, 2);
-        //            }
-        //        });
-        //        ds2.println();
-        //        // assertEquals(1, ds2.size());
 
         ds2 = ds.groupBy(N.asList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length);
         ds2.println();
@@ -1826,11 +1705,9 @@ public class DatasetTest extends AbstractTest {
 
         ds2 = ds.groupBy("gui", (Function<String, Object>) t -> t.substring(0, 2), "gui", "*", Collectors.counting());
         ds2.println();
-        // assertEquals(1, ds2.size());
 
         ds2 = ds.groupBy("gui", (Function<String, Object>) t -> t.substring(0, 2), N.asList("gui"), "*", Collectors.counting());
         ds2.println();
-        // assertEquals(1, ds2.size());
 
         ds2 = ds.groupBy(N.asList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length, "gui", "*",
                 Collectors.counting());
@@ -1884,18 +1761,6 @@ public class DatasetTest extends AbstractTest {
 
             copy.sortBy(N.asList(Account.GUI, Account.FIRST_NAME));
 
-            //                int columnIndex1 = copy.getColumnIndex(Account.GUI);
-            //                int columnIndex2 = copy.getColumnIndex(Account.FIRST_NAME);
-            //
-            //                for (int i = 1, size = copy.size(); i < size; i++) {
-            //                    String value1_1 = copy.absolute(i - 1).getColumnName(columnIndex1);
-            //                    String value1_2 = copy.absolute(i - 1).getColumnName(columnIndex2);
-            //
-            //                    String value2_1 = copy.absolute(i).getColumnName(columnIndex1);
-            //                    String value2_2 = copy.absolute(i).getColumnName(columnIndex2);
-            //
-            //                    assertTrue(value1_1.compareTo(value2_1) > 0 || (value1_1.compareTo(value2_1) == 0 && value1_2.compareTo(value2_2) >= 0));
-            //                }
         }).printResult();
 
     }
@@ -1914,7 +1779,6 @@ public class DatasetTest extends AbstractTest {
         dataType.setDoubleType(000000000000000000000000);
         dataType.setStringType("String");
 
-        // dataType.setEnumType(WeekDay.FRI);
         final ArrayList<String> stringArrayList = new ArrayList<>();
         stringArrayList.add("aa");
         stringArrayList.add("黎");

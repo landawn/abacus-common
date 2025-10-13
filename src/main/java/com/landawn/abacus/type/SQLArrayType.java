@@ -30,6 +30,12 @@ public class SQLArrayType extends AbstractType<Array> {
 
     /**
      * Returns the Class object representing the SQL Array type.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLArrayType type = new SQLArrayType();
+     * Class<Array> clazz = type.clazz(); // Returns Array.class
+     * }</pre>
      *
      * @return the Class object for java.sql.Array.class
      */
@@ -41,6 +47,12 @@ public class SQLArrayType extends AbstractType<Array> {
     /**
      * Indicates whether this type is serializable.
      * SQL Array types are not serializable as they represent database-specific array structures.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLArrayType type = new SQLArrayType();
+     * boolean serializable = type.isSerializable(); // Returns false
+     * }</pre>
      *
      * @return false, indicating this type is not serializable
      */
@@ -53,6 +65,13 @@ public class SQLArrayType extends AbstractType<Array> {
      * Converts an Array object to its string representation.
      * This operation is not supported for SQL Array types as they are database-specific
      * and cannot be reliably converted to a string format.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLArrayType type = new SQLArrayType();
+     * // This will throw UnsupportedOperationException
+     * String str = type.stringOf(sqlArray);
+     * }</pre>
      *
      * @param x the Array object to convert
      * @return never returns normally
@@ -67,6 +86,13 @@ public class SQLArrayType extends AbstractType<Array> {
      * Creates an Array object from a string representation.
      * This operation is not supported for SQL Array types as they are database-specific
      * and cannot be created from a string representation.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLArrayType type = new SQLArrayType();
+     * // This will throw UnsupportedOperationException
+     * Array array = type.valueOf("[1, 2, 3]");
+     * }</pre>
      *
      * @param str the string to convert
      * @return never returns normally
@@ -80,6 +106,13 @@ public class SQLArrayType extends AbstractType<Array> {
     /**
      * Retrieves a SQL ARRAY value from the specified column in the ResultSet.
      * A SQL ARRAY represents an array value in the database.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLArrayType type = new SQLArrayType();
+     * ResultSet rs = statement.executeQuery("SELECT tags FROM products");
+     * Array tags = type.get(rs, 1); // Get array from first column
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
@@ -94,6 +127,13 @@ public class SQLArrayType extends AbstractType<Array> {
     /**
      * Retrieves a SQL ARRAY value from the specified column in the ResultSet.
      * A SQL ARRAY represents an array value in the database.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLArrayType type = new SQLArrayType();
+     * ResultSet rs = statement.executeQuery("SELECT tags FROM products");
+     * Array tags = type.get(rs, "tags"); // Get array by column name
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to retrieve (column name or alias)
@@ -108,6 +148,13 @@ public class SQLArrayType extends AbstractType<Array> {
     /**
      * Sets an Array parameter in a PreparedStatement.
      * The Array represents a SQL ARRAY value.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLArrayType type = new SQLArrayType();
+     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO products (tags) VALUES (?)");
+     * type.set(stmt, 1, tagsArray); // Set array at parameter index 1
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
@@ -123,6 +170,13 @@ public class SQLArrayType extends AbstractType<Array> {
      * Sets an Array parameter in a CallableStatement.
      * The Array represents a SQL ARRAY value.
      * Note: This method uses setObject instead of setArray as CallableStatement may not support setArray with parameter names.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLArrayType type = new SQLArrayType();
+     * CallableStatement stmt = conn.prepareCall("{call update_product_tags(?)}");
+     * type.set(stmt, "tags_param", tagsArray); // Set array by parameter name
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

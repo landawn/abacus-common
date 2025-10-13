@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -34,13 +35,11 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
 
+@Tag("new-test")
 public class IntStream102Test extends TestBase {
 
     private IntStream stream;
 
-    // This method needs to be implemented by a concrete test class to provide a IntStream instance.
-    // For example, in ArrayIntStreamTest, it would return new ArrayIntStream(a);
-    // In IteratorIntStreamTest, it would return new IteratorIntStream(IntegerIterator.of(a));
     protected IntStream createIntStream(int... a) {
         return IntStream.of(a).map(e -> e + 0);
     }
@@ -67,18 +66,14 @@ public class IntStream102Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Initialize stream for each test if needed
     }
 
     @AfterEach
     public void tearDown() {
-        // Close stream if it's still open
         if (stream != null) {
             stream.close();
         }
     }
-
-    // Tests for Stream Creation Methods
 
     @Test
     public void testEmpty() {
@@ -89,15 +84,12 @@ public class IntStream102Test extends TestBase {
 
     @Test
     public void testOf() {
-        // Test single element
         stream = createIntStream(5);
         assertArrayEquals(new int[] { 5 }, stream.toArray());
 
-        // Test multiple elements
         stream = createIntStream(1, 2, 3, 4, 5);
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, stream.toArray());
 
-        // Test empty array
         stream = createIntStream(new int[] {});
         assertEquals(0, stream.count());
     }
@@ -111,11 +103,9 @@ public class IntStream102Test extends TestBase {
 
     @Test
     public void testOfNullable() {
-        // Test with null
         stream = IntStream.ofNullable(null);
         assertEquals(0, stream.count());
 
-        // Test with value
         stream = IntStream.ofNullable(42);
         assertArrayEquals(new int[] { 42 }, stream.toArray());
     }
@@ -125,7 +115,6 @@ public class IntStream102Test extends TestBase {
         stream = IntStream.range(1, 5);
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, stream.toArray());
 
-        // Test empty range
         stream = IntStream.range(5, 5);
         assertEquals(0, stream.count());
     }
@@ -135,7 +124,6 @@ public class IntStream102Test extends TestBase {
         stream = IntStream.range(0, 10, 2);
         assertArrayEquals(new int[] { 0, 2, 4, 6, 8 }, stream.toArray());
 
-        // Test negative step
         stream = IntStream.range(10, 0, -2);
         assertArrayEquals(new int[] { 10, 8, 6, 4, 2 }, stream.toArray());
     }
@@ -157,18 +145,15 @@ public class IntStream102Test extends TestBase {
         stream = IntStream.repeat(7, 3);
         assertArrayEquals(new int[] { 7, 7, 7 }, stream.toArray());
 
-        // Test zero repetitions
         stream = IntStream.repeat(7, 0);
         assertEquals(0, stream.count());
     }
 
     @Test
     public void testIterate() {
-        // Test with seed and unary operator
         stream = IntStream.iterate(1, n -> n * 2).limit(5);
         assertArrayEquals(new int[] { 1, 2, 4, 8, 16 }, stream.toArray());
 
-        // Test with predicate
         stream = IntStream.iterate(1, n -> n < 10, n -> n + 2);
         assertArrayEquals(new int[] { 1, 3, 5, 7, 9 }, stream.toArray());
     }
@@ -195,8 +180,6 @@ public class IntStream102Test extends TestBase {
         stream = IntStream.zip(s1, s2, Integer::sum);
         assertArrayEquals(new int[] { 11, 22, 33 }, stream.toArray());
     }
-
-    // Tests for Intermediate Operations
 
     @Test
     public void testFilter() {
@@ -274,7 +257,7 @@ public class IntStream102Test extends TestBase {
     public void testPeek() {
         List<Integer> sideEffect = new ArrayList<>();
         stream = createIntStream(1, 2, 3).peek(sideEffect::add);
-        stream.toArray(); // Force evaluation
+        stream.toArray();
         assertEquals(Arrays.asList(1, 2, 3), sideEffect);
     }
 
@@ -308,7 +291,6 @@ public class IntStream102Test extends TestBase {
         stream = createIntStream(original).shuffled();
         int[] shuffled = stream.toArray();
 
-        // Should contain same elements
         Arrays.sort(shuffled);
         assertArrayEquals(original, shuffled);
     }
@@ -349,8 +331,6 @@ public class IntStream102Test extends TestBase {
         int[] result = stream.sorted().toArray();
         assertArrayEquals(new int[] { 1, 4 }, result);
     }
-
-    // Tests for Terminal Operations
 
     @Test
     public void testToArray() {
@@ -492,11 +472,9 @@ public class IntStream102Test extends TestBase {
 
     @Test
     public void testReduce() {
-        // With identity
         int sum = createIntStream(1, 2, 3, 4, 5).reduce(0, Integer::sum);
         assertEquals(15, sum);
 
-        // Without identity
         OptionalInt product = createIntStream(2, 3, 4).reduce((a, b) -> a * b);
         assertTrue(product.isPresent());
         assertEquals(24, product.getAsInt());
@@ -543,14 +521,11 @@ public class IntStream102Test extends TestBase {
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, doubleStream.toArray(), 0.001);
     }
 
-    // Tests for Parallel Stream Operations
-
     @Test
     public void testParallel() {
         stream = IntStream.range(0, 1000).parallel();
         assertTrue(stream.isParallel());
 
-        // Test that parallel operations produce correct results
         int sum = stream.sum();
         assertEquals(499500, sum);
     }
@@ -560,8 +535,6 @@ public class IntStream102Test extends TestBase {
         stream = IntStream.range(0, 100).parallel().sequential();
         assertFalse(stream.isParallel());
     }
-
-    // Tests for Special Operations
 
     @Test
     public void testTop() {
@@ -592,11 +565,9 @@ public class IntStream102Test extends TestBase {
 
     @Test
     public void testAppendPrepend() {
-        // Test append
         stream = createIntStream(1, 2, 3).append(4, 5);
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, stream.toArray());
 
-        // Test prepend
         stream = createIntStream(3, 4, 5).prepend(1, 2);
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, stream.toArray());
     }
@@ -625,8 +596,6 @@ public class IntStream102Test extends TestBase {
         assertArrayEquals(new int[] { 7, 8, 9 }, chunks.get(2));
     }
 
-    // Tests for Error Handling
-
     @Test
     public void testRangeWithZeroStep() {
         assertThrows(IllegalArgumentException.class, () -> IntStream.range(0, 10, 0));
@@ -646,10 +615,8 @@ public class IntStream102Test extends TestBase {
     public void testOperationAfterClose() {
         stream = createIntStream(1, 2, 3);
         stream.close();
-        assertThrows(IllegalStateException.class, () -> stream.count()); // Should throw exception
+        assertThrows(IllegalStateException.class, () -> stream.count());
     }
-
-    // Tests for Close Handlers
 
     @Test
     public void testOnClose() {
@@ -659,21 +626,17 @@ public class IntStream102Test extends TestBase {
         assertTrue(closed.get());
     }
 
-    // Tests for Special Cases
-
     @Test
     public void testElementAt() {
         OptionalInt element = createIntStream(10, 20, 30, 40, 50).elementAt(2);
         assertTrue(element.isPresent());
         assertEquals(30, element.getAsInt());
 
-        // Test out of bounds
         assertFalse(IntStream.of(1, 2, 3).elementAt(10).isPresent());
     }
 
     @Test
     public void testThrowIfEmpty() {
-        // Should not throw for non-empty stream
         stream = createIntStream(1, 2, 3).throwIfEmpty();
         assertEquals(3, stream.count());
     }
@@ -685,8 +648,6 @@ public class IntStream102Test extends TestBase {
 
     @Test
     public void testPrintln() {
-        // This test is mainly to ensure println doesn't throw exceptions
-        // Actual output verification would require capturing System.out
         createIntStream(1, 2, 3).println();
     }
 
@@ -697,7 +658,6 @@ public class IntStream102Test extends TestBase {
 
         Map<Percentage, Integer> map = percentiles.get();
         assertNotNull(map);
-        // Verify some percentiles
         assertTrue(map.containsKey(Percentage._50));
     }
 

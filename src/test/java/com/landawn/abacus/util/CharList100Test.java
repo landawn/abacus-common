@@ -17,11 +17,13 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.stream.CharStream;
 
+@Tag("new-test")
 public class CharList100Test extends TestBase {
 
     private CharList list;
@@ -31,7 +33,6 @@ public class CharList100Test extends TestBase {
         list = new CharList();
     }
 
-    // Constructor Tests
     @Test
     @DisplayName("Test default constructor")
     public void testDefaultConstructor() {
@@ -78,7 +79,6 @@ public class CharList100Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> new CharList(array, -1));
     }
 
-    // Static Factory Method Tests
     @Test
     @DisplayName("Test of() factory method")
     public void testOf() {
@@ -111,7 +111,6 @@ public class CharList100Test extends TestBase {
         CharList newList = CharList.copyOf(array);
         assertEquals(3, newList.size());
 
-        // Verify it's a copy
         array[0] = 'z';
         assertEquals('a', newList.get(0));
     }
@@ -127,7 +126,6 @@ public class CharList100Test extends TestBase {
         assertEquals('d', newList.get(2));
     }
 
-    // Range Tests
     @Test
     @DisplayName("Test range()")
     public void testRange() {
@@ -166,7 +164,6 @@ public class CharList100Test extends TestBase {
         }
     }
 
-    // Random Tests
     @Test
     @DisplayName("Test random() generates list of specified length")
     public void testRandom() {
@@ -197,7 +194,6 @@ public class CharList100Test extends TestBase {
         }
     }
 
-    // Basic Operations Tests
     @Test
     @DisplayName("Test get() and set()")
     public void testGetAndSet() {
@@ -288,7 +284,6 @@ public class CharList100Test extends TestBase {
         assertEquals('c', list.get(2));
     }
 
-    // Remove Operations Tests
     @Test
     @DisplayName("Test remove()")
     public void testRemove() {
@@ -379,7 +374,6 @@ public class CharList100Test extends TestBase {
         assertThrows(NoSuchElementException.class, () -> list.removeFirst());
     }
 
-    // Delete Operations Tests
     @Test
     @DisplayName("Test delete()")
     public void testDelete() {
@@ -412,7 +406,6 @@ public class CharList100Test extends TestBase {
         assertEquals('e', list.get(1));
     }
 
-    // Retain Operations Tests
     @Test
     @DisplayName("Test retainAll()")
     public void testRetainAll() {
@@ -425,7 +418,6 @@ public class CharList100Test extends TestBase {
         assertEquals('d', list.get(1));
     }
 
-    // Replace Operations Tests
     @Test
     @DisplayName("Test replaceAll(char, char)")
     public void testReplaceAllValues() {
@@ -471,7 +463,6 @@ public class CharList100Test extends TestBase {
         assertEquals('e', list.get(3));
     }
 
-    // Fill Operations Tests
     @Test
     @DisplayName("Test fill()")
     public void testFill() {
@@ -495,7 +486,6 @@ public class CharList100Test extends TestBase {
         assertEquals('e', list.get(4));
     }
 
-    // Contains Operations Tests
     @Test
     @DisplayName("Test contains()")
     public void testContains() {
@@ -537,7 +527,6 @@ public class CharList100Test extends TestBase {
         assertFalse(list.disjoint(overlap));
     }
 
-    // Set Operations Tests
     @Test
     @DisplayName("Test intersection()")
     public void testIntersection() {
@@ -572,7 +561,6 @@ public class CharList100Test extends TestBase {
         assertTrue(result.contains('e'));
     }
 
-    // Search Operations Tests
     @Test
     @DisplayName("Test indexOf()")
     public void testIndexOf() {
@@ -610,7 +598,6 @@ public class CharList100Test extends TestBase {
         assertTrue(notFound < 0);
     }
 
-    // Min/Max Operations Tests
     @Test
     @DisplayName("Test min()")
     public void testMin() {
@@ -641,7 +628,6 @@ public class CharList100Test extends TestBase {
         assertEquals('c', median.get());
     }
 
-    // Sort and Order Operations Tests
     @Test
     @DisplayName("Test sort()")
     public void testSort() {
@@ -694,7 +680,6 @@ public class CharList100Test extends TestBase {
         list.shuffle();
         assertEquals(original.size(), list.size());
 
-        // Check all elements are still present
         for (int i = 0; i < original.size(); i++) {
             assertTrue(list.contains(original.get(i)));
         }
@@ -709,7 +694,6 @@ public class CharList100Test extends TestBase {
         assertEquals('b', list.get(3));
     }
 
-    // Utility Operations Tests
     @Test
     @DisplayName("Test distinct()")
     public void testDistinct() {
@@ -742,7 +726,6 @@ public class CharList100Test extends TestBase {
         assertFalse(list.isSorted());
     }
 
-    // Copy Operations Tests
     @Test
     @DisplayName("Test copy()")
     public void testCopy() {
@@ -750,7 +733,6 @@ public class CharList100Test extends TestBase {
         CharList copy = list.copy();
         assertEquals(list.size(), copy.size());
 
-        // Verify deep copy
         list.set(0, 'x');
         assertEquals('a', copy.get(0));
     }
@@ -777,7 +759,6 @@ public class CharList100Test extends TestBase {
         assertEquals('e', copy.get(2));
     }
 
-    // Split Operations Tests
     @Test
     @DisplayName("Test split()")
     public void testSplit() {
@@ -789,7 +770,6 @@ public class CharList100Test extends TestBase {
         assertEquals(1, chunks.get(2).size());
     }
 
-    // Conversion Operations Tests
     @Test
     @DisplayName("Test toArray()")
     public void testToArray() {
@@ -807,9 +787,9 @@ public class CharList100Test extends TestBase {
         list.addAll(CharList.of('a', 'b', 'c'));
         IntList intList = list.toIntList();
         assertEquals(3, intList.size());
-        assertEquals(97, intList.get(0)); // 'a' = 97
-        assertEquals(98, intList.get(1)); // 'b' = 98
-        assertEquals(99, intList.get(2)); // 'c' = 99
+        assertEquals(97, intList.get(0));
+        assertEquals(98, intList.get(1));
+        assertEquals(99, intList.get(2));
     }
 
     @Test
@@ -844,7 +824,6 @@ public class CharList100Test extends TestBase {
         assertEquals(1, multiset.occurrencesOf('c'));
     }
 
-    // Iterator and Stream Tests
     @Test
     @DisplayName("Test iterator()")
     public void testIterator() {
@@ -866,7 +845,6 @@ public class CharList100Test extends TestBase {
         assertEquals(3, stream.count());
     }
 
-    // First and Last Operations Tests
     @Test
     @DisplayName("Test first() and last()")
     public void testFirstAndLast() {
@@ -894,7 +872,6 @@ public class CharList100Test extends TestBase {
         assertThrows(NoSuchElementException.class, () -> list.getFirst());
     }
 
-    // Utility Methods Tests
     @Test
     @DisplayName("Test trimToSize()")
     public void testTrimToSize() {
@@ -955,7 +932,6 @@ public class CharList100Test extends TestBase {
         assertEquals('c', collected.get(2).charValue());
     }
 
-    // Equals and HashCode Tests
     @Test
     @DisplayName("Test equals()")
     public void testEquals() {

@@ -711,6 +711,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         int idx = 0;
 
         while (hasNext()) {
+            if (idx < 0) {
+                throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
+            }
             action.accept(idx++, next());
         }
     }

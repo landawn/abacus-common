@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -12,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,12 +20,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -39,60 +34,8 @@ import com.landawn.abacus.guava.Files;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("old-test")
 public class IOUtilTest extends AbstractTest {
-
-    //    @Test
-    //    public void test_readAllBytes() throws IOException {
-    //        File file = new File("./tmp.txt");
-    //        //    IOUtil.deleteIfExists(file);
-    //        //
-    //        //    String uuid = Strings.uuid();
-    //        //    int uuidLen = uuid.length();
-    //        //
-    //        //    try (Writer writer = IOUtil.newBufferedWriter(file)) {
-    //        //        long cnt = 0;
-    //        //        do {
-    //        //            writer.write(uuid);
-    //        //            cnt += uuidLen;
-    //        //        } while (cnt < Integer.MAX_VALUE);
-    //        //    }
-    //
-    //        N.println(IOUtil.readChars(file, 100, 1000));
-    //
-    //        try {
-    //            IOUtil.readAllBytes(file);
-    //            fail("should throw OutOfMemoryError");
-    //        } catch (OutOfMemoryError e) {
-    //            e.printStackTrace();
-    //        }
-    //
-    //        try {
-    //            IOUtil.readBytes(file);
-    //            fail("should throw OutOfMemoryError");
-    //        } catch (OutOfMemoryError e) {
-    //            e.printStackTrace();
-    //        }
-    //
-    //        IOUtil.readBytes(file, 10000, 1000000);
-    //
-    //        try {
-    //            IOUtil.readAllChars(file);
-    //            fail("should throw OutOfMemoryError");
-    //        } catch (OutOfMemoryError e) {
-    //            e.printStackTrace();
-    //        }
-    //
-    //        try {
-    //            IOUtil.readChars(file);
-    //            fail("should throw OutOfMemoryError");
-    //        } catch (OutOfMemoryError e) {
-    //            e.printStackTrace();
-    //        }
-    //
-    //        IOUtil.readChars(file, 10000, 1000000);
-    //
-    //        // IOUtil.deleteIfExists(file);
-    //    }
 
     @Test
     public void test_read_first_last_line() throws IOException {
@@ -124,39 +67,6 @@ public class IOUtilTest extends AbstractTest {
     public void test_freeDiskSpaceKb() {
         N.println(IOUtil.freeDiskSpaceKb());
     }
-    //
-    //    @Test
-    //    public void test_list() throws Exception {
-    //        final File dir = new File("./src");
-    //
-    //        List<String> filePathList = IOUtil.list(dir);
-    //        N.println(filePathList);
-    //
-    //        filePathList = IOUtil.list(dir, true, true);
-    //        N.println(filePathList);
-    //
-    //        filePathList = IOUtil.list(dir, true, (parentDir, file) -> true);
-    //
-    //        N.println(filePathList);
-    //
-    //        List<File> fileList = IOUtil.listFiles(dir);
-    //        N.println(fileList);
-    //
-    //        fileList = IOUtil.listFiles(dir, true, true);
-    //        N.println(fileList);
-    //
-    //        fileList = IOUtil.listFiles(dir, true, (parentDir, file) -> true);
-    //
-    //        N.println(fileList);
-    //
-    //        fileList = IOUtil.listDirectories(dir);
-    //        N.println(fileList);
-    //
-    //        fileList = IOUtil.listDirectories(dir, true);
-    //        N.println(fileList);
-    //
-    //        N.println(fileList);
-    //    }
 
     @Test
     public void test_list_2() throws Exception {
@@ -233,73 +143,6 @@ public class IOUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_readLine() throws Exception {
-        final String str = "abc";
-
-        final StringBuilder sb = new StringBuilder();
-        assertEquals(str, IOUtil.readFirstLine(IOUtil.string2InputStream(str)));
-        assertEquals(str, IOUtil.readLastLine(IOUtil.string2Reader(str)));
-        IOUtil.write(str, IOUtil.stringBuilder2Writer(sb));
-        assertEquals(str, sb.toString());
-    }
-
-    @Test
-    public void test_readLine_2() throws Exception {
-        final File file = new File("./src/test/resources/test.txt");
-        if (file.exists()) {
-            file.delete();
-        }
-
-        {
-            IOUtil.writeLines(N.asList("abc", "123", "efg"), file);
-
-            assertEquals("abc", IOUtil.readLine(file, 0));
-
-            assertEquals("efg", IOUtil.readLine(file, 2));
-
-            assertEquals(null, IOUtil.readLine(file, 3));
-
-            Reader reader = new FileReader(file);
-            assertEquals("abc", IOUtil.readLine(reader, 0));
-            reader.close();
-
-            reader = new FileReader(file);
-            assertEquals("efg", IOUtil.readLine(reader, 2));
-            reader.close();
-
-            reader = new FileReader(file);
-            assertEquals(null, IOUtil.readLine(reader, 3));
-            reader.close();
-        }
-
-        {
-            final OutputStream os = new FileOutputStream(file);
-            IOUtil.writeLines(N.asList("abc", "123", "efg"), os, true);
-            IOUtil.close(os);
-
-            assertEquals("abc", IOUtil.readLine(file, 0));
-
-            assertEquals("efg", IOUtil.readLine(file, 2));
-
-            assertEquals(null, IOUtil.readLine(file, 3));
-
-            Reader reader = new FileReader(file);
-            assertEquals("abc", IOUtil.readLine(reader, 0));
-            reader.close();
-
-            reader = new FileReader(file);
-            assertEquals("efg", IOUtil.readLine(reader, 2));
-            reader.close();
-
-            reader = new FileReader(file);
-            assertEquals(null, IOUtil.readLine(reader, 3));
-            reader.close();
-        }
-
-        file.delete();
-    }
-
-    @Test
     public void test_splite() throws Exception {
         final File dir = new File("./tmpDir");
         IOUtil.deleteAllIfExists(dir);
@@ -373,139 +216,6 @@ public class IOUtilTest extends AbstractTest {
         IOUtil.zip(file, zipFile);
 
         IOUtil.deleteAllIfExists(dir);
-    }
-
-    @Test
-    public void test_read_write() throws Exception {
-        final File file = new File("./src/test/resources/test.txt");
-
-        if (file.exists()) {
-            file.delete();
-        }
-
-        final String str = "###";
-        IOUtil.write(str.getBytes(), file);
-
-        byte[] bytes = IOUtil.readAllBytes(file);
-        assertEquals(str, new String(bytes));
-
-        InputStream is = new FileInputStream(file);
-        bytes = IOUtil.readAllBytes(is);
-        assertEquals(str, new String(bytes));
-        IOUtil.close(is);
-
-        assertEquals(str, String.valueOf(IOUtil.readAllChars(file)));
-
-        is = new FileInputStream(file);
-        assertEquals(str, String.valueOf(IOUtil.readAllChars(is)));
-        IOUtil.close(is);
-
-        Reader reader = new FileReader(file);
-        assertEquals(str, String.valueOf(IOUtil.readAllChars(reader)));
-        IOUtil.close(reader);
-
-        assertEquals(str, IOUtil.readAllToString(file));
-
-        is = new FileInputStream(file);
-        assertEquals(str, IOUtil.readAllToString(is));
-        IOUtil.close(is);
-
-        reader = new FileReader(file);
-        assertEquals(str, IOUtil.readAllToString(reader));
-        IOUtil.close(reader);
-
-        assertEquals(str, IOUtil.readFirstLine(file));
-
-        is = new FileInputStream(file);
-        assertEquals(str, IOUtil.readFirstLine(is));
-        IOUtil.close(is);
-
-        reader = new FileReader(file);
-        assertEquals(str, IOUtil.readFirstLine(reader));
-        IOUtil.close(reader);
-
-        IOUtil.write("abc3123", file);
-        IOUtil.write("abc3123".toCharArray(), file);
-        IOUtil.write("abc3123".getBytes(), file);
-
-        OutputStream os = new FileOutputStream(file, true);
-        IOUtil.write("9323999999", os);
-        IOUtil.write("abc3123".toCharArray(), os);
-        IOUtil.write("abc3123".getBytes(), os);
-        IOUtil.close(os);
-
-        FileWriter writer = new FileWriter(file, true);
-        IOUtil.write(100013, writer);
-        IOUtil.write(931283298, writer);
-        IOUtil.write(931283298.323f, writer);
-        IOUtil.write(931283298.323d, writer);
-        IOUtil.write("abc", writer);
-        IOUtil.write("###".toCharArray(), file);
-        IOUtil.close(writer);
-
-        N.println(IOUtil.readAllToString(file));
-
-        InputStream bb = new ByteArrayInputStream("aabbcc".getBytes());
-        IOUtil.write(bb, file);
-        bb = new ByteArrayInputStream("aabbcc".getBytes());
-        IOUtil.write(bb, 2, 3, file);
-
-        os = new FileOutputStream(file, true);
-        bb = new ByteArrayInputStream("aabbcc".getBytes());
-        IOUtil.write(bb, os);
-        bb = new ByteArrayInputStream("aabbcc".getBytes());
-        IOUtil.write(bb, 2, 3, os);
-        IOUtil.close(os);
-
-        writer = new FileWriter(file, true);
-        bb = new ByteArrayInputStream("aabbcc".getBytes());
-        IOUtil.write(new InputStreamReader(bb), writer);
-        bb = new ByteArrayInputStream("aabbcc".getBytes());
-        IOUtil.write(new InputStreamReader(bb), 2, 3, writer);
-        IOUtil.close(writer);
-
-        N.println(IOUtil.readAllToString(file));
-        Reader rd = new StringReader("eeffgg");
-        IOUtil.write(rd, file);
-        rd = new StringReader("eeffgg");
-        IOUtil.write(rd, 2, 3, file);
-
-        os = new FileOutputStream(file, true);
-        rd = new StringReader("eeffgg");
-        IOUtil.write(rd, new OutputStreamWriter(os));
-        rd = new StringReader("eeffgg");
-        IOUtil.write(rd, 2, 3, new OutputStreamWriter(os));
-        IOUtil.close(os);
-        N.println(IOUtil.readAllToString(file));
-
-        writer = new FileWriter(file, true);
-        rd = new StringReader("eeffgg");
-        IOUtil.write(rd, writer);
-        rd = new StringReader("eeffgg");
-        IOUtil.write(rd, 2, 3, writer);
-        IOUtil.close(writer);
-
-        N.println(IOUtil.readAllToString(file));
-        IOUtil.deleteAllIfExists(file);
-
-        writer = new FileWriter(file, true);
-        IOUtil.write(9, writer);
-        IOUtil.write(-1, writer);
-        IOUtil.write(-0, writer);
-        IOUtil.write(Integer.MAX_VALUE, writer);
-        IOUtil.write(Integer.MIN_VALUE, writer);
-
-        IOUtil.write(9, writer);
-        IOUtil.write(-1, writer);
-        IOUtil.write(-0, writer);
-        IOUtil.write(Long.MAX_VALUE, writer);
-        IOUtil.write(Long.MIN_VALUE, writer);
-
-        IOUtil.close(writer);
-
-        N.println(IOUtil.readAllToString(file));
-
-        IOUtil.deleteAllIfExists(file);
     }
 
     @Test
@@ -743,7 +453,6 @@ public class IOUtilTest extends AbstractTest {
         Objectory.recycle(bw);
     }
 
-
     @Test
     public void test_zipDir() throws IOException {
         final File file = new File("./src/test/resources/test.txt");
@@ -757,7 +466,6 @@ public class IOUtilTest extends AbstractTest {
         final File targetFile = new File("./test.zip");
         IOUtil.zip(new File("./src/test/resources"), targetFile);
 
-        // IOUtil.close(reader);
         final File targetDir = new File("./tmpDir");
         IOUtil.unzip(targetFile, targetDir);
 
@@ -768,7 +476,6 @@ public class IOUtilTest extends AbstractTest {
         IOUtil.deleteAllIfExists(targetFile);
         IOUtil.deleteAllIfExists(targetDir);
     }
-
 
     @Test
     public void test_writeString() throws Exception {
@@ -803,7 +510,6 @@ public class IOUtilTest extends AbstractTest {
 
         long startTime = System.currentTimeMillis();
 
-        //        OutputStream os = new FileOutputStream(file);
         final OutputStream os = new BufferedOutputStream(new FileOutputStream(file), 80920);
         final byte[] bytes = (Strings.uuid() + "\n").getBytes();
 
@@ -824,8 +530,6 @@ public class IOUtilTest extends AbstractTest {
             lineNum = (lineNum < 0) ? (-lineNum) : lineNum;
             raf.seek(lineNum);
             raf.read(bytes);
-
-            // N.println(new String(bytes));
 
             raf.close();
         }

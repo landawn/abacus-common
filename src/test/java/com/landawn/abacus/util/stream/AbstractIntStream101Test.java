@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -31,14 +32,13 @@ import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
 
-
+@Tag("new-test")
 public class AbstractIntStream101Test extends TestBase {
 
     private IntStream stream;
 
     @BeforeEach
     public void setUp() {
-        // Initialize stream using createIntStream method
         stream = createIntStream(new int[] { 1, 2, 3, 4, 5 });
     }
 
@@ -320,7 +320,6 @@ public class AbstractIntStream101Test extends TestBase {
         IntStream result = stream.shuffled(rnd);
         int[] array = result.toArray();
         assertEquals(5, array.length);
-        // Check all elements are present
         Arrays.sort(array);
         Assertions.assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, array);
     }

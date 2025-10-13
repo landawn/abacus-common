@@ -38,7 +38,6 @@ import java.lang.annotation.Target;
  * </ul>
  * 
  * @see SequentialOnly
- * @author HaiYang Li
  * @since 2018
  */
 @Documented

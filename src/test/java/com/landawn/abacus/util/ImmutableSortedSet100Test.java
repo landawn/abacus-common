@@ -12,9 +12,11 @@ import java.util.TreeSet;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class ImmutableSortedSet100Test extends TestBase {
 
     @Test
@@ -120,8 +122,8 @@ public class ImmutableSortedSet100Test extends TestBase {
     public void testCopyOf() {
         List<String> list = Arrays.asList("charlie", "alpha", "beta", "alpha");
         ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(list);
-        
-        Assertions.assertEquals(3, set.size()); // Duplicates removed
+
+        Assertions.assertEquals(3, set.size());
         Iterator<String> iter = set.iterator();
         Assertions.assertEquals("alpha", iter.next());
         Assertions.assertEquals("beta", iter.next());
@@ -152,11 +154,10 @@ public class ImmutableSortedSet100Test extends TestBase {
         SortedSet<String> mutable = new TreeSet<>();
         mutable.add("b");
         mutable.add("a");
-        
+
         ImmutableSortedSet<String> wrapped = ImmutableSortedSet.wrap(mutable);
         Assertions.assertEquals(2, wrapped.size());
-        
-        // Changes are reflected
+
         mutable.add("c");
         Assertions.assertEquals(3, wrapped.size());
         Assertions.assertTrue(wrapped.contains("c"));
@@ -187,7 +188,7 @@ public class ImmutableSortedSet100Test extends TestBase {
     public void testComparator() {
         ImmutableSortedSet<String> naturalOrder = ImmutableSortedSet.of("a", "b", "c");
         Assertions.assertNull(naturalOrder.comparator());
-        
+
         SortedSet<String> customOrder = new TreeSet<>(Comparator.reverseOrder());
         customOrder.add("a");
         customOrder.add("b");
@@ -199,7 +200,7 @@ public class ImmutableSortedSet100Test extends TestBase {
     public void testSubSet() {
         ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
         ImmutableSortedSet<Integer> sub = set.subSet(2, 4);
-        
+
         Assertions.assertEquals(2, sub.size());
         Assertions.assertTrue(sub.contains(2));
         Assertions.assertTrue(sub.contains(3));
@@ -225,7 +226,7 @@ public class ImmutableSortedSet100Test extends TestBase {
     public void testHeadSet() {
         ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c", "d");
         ImmutableSortedSet<String> head = set.headSet("c");
-        
+
         Assertions.assertEquals(2, head.size());
         Assertions.assertTrue(head.contains("a"));
         Assertions.assertTrue(head.contains("b"));
@@ -244,7 +245,7 @@ public class ImmutableSortedSet100Test extends TestBase {
     public void testTailSet() {
         ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(10, 20, 30, 40);
         ImmutableSortedSet<Integer> tail = set.tailSet(25);
-        
+
         Assertions.assertEquals(2, tail.size());
         Assertions.assertTrue(tail.contains(30));
         Assertions.assertTrue(tail.contains(40));
@@ -294,7 +295,7 @@ public class ImmutableSortedSet100Test extends TestBase {
     @Test
     public void testMutationMethods_ThrowUnsupported() {
         ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b");
-        
+
         Assertions.assertThrows(UnsupportedOperationException.class, () -> set.add("c"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> set.remove("a"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> set.clear());

@@ -2,9 +2,11 @@ package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class MutableLong100Test extends TestBase {
 
     @Test
@@ -51,13 +53,11 @@ public class MutableLong100Test extends TestBase {
     @Test
     public void testSetIf() throws Exception {
         MutableLong mutableLong = MutableLong.of(10L);
-        
-        // Test when predicate returns true
+
         boolean updated = mutableLong.setIf(20L, v -> v < 15L);
         Assertions.assertTrue(updated);
         Assertions.assertEquals(20L, mutableLong.value());
-        
-        // Test when predicate returns false
+
         updated = mutableLong.setIf(30L, v -> v < 15L);
         Assertions.assertFalse(updated);
         Assertions.assertEquals(20L, mutableLong.value());
@@ -82,7 +82,7 @@ public class MutableLong100Test extends TestBase {
         MutableLong mutableLong = MutableLong.of(10L);
         mutableLong.add(5L);
         Assertions.assertEquals(15L, mutableLong.value());
-        
+
         mutableLong.add(-3L);
         Assertions.assertEquals(12L, mutableLong.value());
     }
@@ -92,7 +92,7 @@ public class MutableLong100Test extends TestBase {
         MutableLong mutableLong = MutableLong.of(10L);
         mutableLong.subtract(3L);
         Assertions.assertEquals(7L, mutableLong.value());
-        
+
         mutableLong.subtract(-2L);
         Assertions.assertEquals(9L, mutableLong.value());
     }
@@ -149,8 +149,7 @@ public class MutableLong100Test extends TestBase {
     public void testIntValue() {
         MutableLong mutableLong = MutableLong.of(42L);
         Assertions.assertEquals(42, mutableLong.intValue());
-        
-        // Test truncation
+
         mutableLong.setValue(Long.MAX_VALUE);
         Assertions.assertEquals(-1, mutableLong.intValue());
     }
@@ -178,7 +177,7 @@ public class MutableLong100Test extends TestBase {
         MutableLong a = MutableLong.of(10L);
         MutableLong b = MutableLong.of(20L);
         MutableLong c = MutableLong.of(10L);
-        
+
         Assertions.assertTrue(a.compareTo(b) < 0);
         Assertions.assertTrue(b.compareTo(a) > 0);
         Assertions.assertEquals(0, a.compareTo(c));
@@ -189,7 +188,7 @@ public class MutableLong100Test extends TestBase {
         MutableLong a = MutableLong.of(10L);
         MutableLong b = MutableLong.of(10L);
         MutableLong c = MutableLong.of(20L);
-        
+
         Assertions.assertTrue(a.equals(b));
         Assertions.assertFalse(a.equals(c));
         Assertions.assertFalse(a.equals(null));
@@ -201,7 +200,7 @@ public class MutableLong100Test extends TestBase {
         MutableLong a = MutableLong.of(10L);
         MutableLong b = MutableLong.of(10L);
         MutableLong c = MutableLong.of(20L);
-        
+
         Assertions.assertEquals(a.hashCode(), b.hashCode());
         Assertions.assertNotEquals(a.hashCode(), c.hashCode());
         Assertions.assertEquals(Long.hashCode(10L), a.hashCode());
@@ -211,7 +210,7 @@ public class MutableLong100Test extends TestBase {
     public void testToString() {
         MutableLong mutableLong = MutableLong.of(42L);
         Assertions.assertEquals("42", mutableLong.toString());
-        
+
         mutableLong.setValue(-100L);
         Assertions.assertEquals("-100", mutableLong.toString());
     }
@@ -221,7 +220,7 @@ public class MutableLong100Test extends TestBase {
         MutableLong mutableLong = MutableLong.of(Long.MAX_VALUE);
         mutableLong.increment();
         Assertions.assertEquals(Long.MIN_VALUE, mutableLong.value());
-        
+
         mutableLong.setValue(Long.MIN_VALUE);
         mutableLong.decrement();
         Assertions.assertEquals(Long.MAX_VALUE, mutableLong.value());

@@ -10,9 +10,11 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class LineIterator100Test extends TestBase {
 
     @Test
@@ -141,10 +143,8 @@ public class LineIterator100Test extends TestBase {
         iterator.next();
         iterator.close();
 
-        // After close, hasNext should return false
         Assertions.assertFalse(iterator.hasNext());
 
-        // Multiple closes should be safe
         iterator.close();
     }
 

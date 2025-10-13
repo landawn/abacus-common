@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
@@ -21,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Tag("new-test")
 public class JSONUtil100Test extends TestBase {
 
     @Test
@@ -47,7 +49,6 @@ public class JSONUtil100Test extends TestBase {
 
         Assertions.assertNotNull(json);
         Assertions.assertFalse(json.has("nullValue"));
-        // Assertions.assertTrue(json.isNull("nullValue"));
     }
 
     @Test
@@ -384,7 +385,7 @@ public class JSONUtil100Test extends TestBase {
         Assertions.assertNotNull(array);
         Assertions.assertEquals(3, array.length);
         Assertions.assertEquals(1, array[0]);
-        Assertions.assertEquals(0, array[1]); // default value for null
+        Assertions.assertEquals(0, array[1]);
         Assertions.assertEquals(3, array[2]);
     }
 
@@ -427,7 +428,6 @@ public class JSONUtil100Test extends TestBase {
 
     @Test
     public void testNestedStructures() {
-        // Test nested JSON object
         JSONObject outer = new JSONObject();
         JSONObject inner = new JSONObject();
         inner.put("innerKey", "innerValue");
@@ -445,7 +445,6 @@ public class JSONUtil100Test extends TestBase {
 
     @Test
     public void testComplexNestedArray() {
-        // Test nested arrays
         JSONArray outer = new JSONArray();
         JSONArray inner1 = new JSONArray();
         inner1.put(1);
@@ -470,7 +469,6 @@ public class JSONUtil100Test extends TestBase {
 
     @Test
     public void testExceptionHandling() {
-        // Test invalid type for unwrap
         JSONObject json = new JSONObject();
         json.put("key", "value");
 
@@ -478,7 +476,6 @@ public class JSONUtil100Test extends TestBase {
             JSONUtil.unwrap(json, String.class);
         });
 
-        // Test invalid type for array unwrap
         JSONArray array = new JSONArray();
         array.put(1);
 

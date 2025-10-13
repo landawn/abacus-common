@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -52,13 +53,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Tag("new-test")
 public class AbstractStream101Test extends TestBase {
 
     @TempDir
     Path tempFolder;
 
     private <T> Stream<T> createStream(Iterable<? extends T> iter) {
-        // Empty method to be implemented
         return Stream.of(iter);
     }
 
@@ -72,9 +73,9 @@ public class AbstractStream101Test extends TestBase {
                 .toList();
 
         assertEquals(3, result.size());
-        assertEquals(5, result.get(0).right().intValue()); // 1 -> sum(2,3) = 5
-        assertEquals(13, result.get(1).right().intValue()); // 5 -> sum(6,7) = 13
-        assertEquals(11, result.get(2).right().intValue()); // 10 -> sum(11) = 11
+        assertEquals(5, result.get(0).right().intValue());
+        assertEquals(13, result.get(1).right().intValue());
+        assertEquals(11, result.get(2).right().intValue());
     }
 
     @Test
@@ -114,7 +115,6 @@ public class AbstractStream101Test extends TestBase {
         List<Pair<TestPerson, TestOrder>> result = stream.rightJoin(orders, TestPerson::getId, TestOrder::getPersonId).toList();
 
         assertEquals(3, result.size());
-        // One of the pairs should have null person (for Order3)
         assertTrue(result.stream().anyMatch(p -> p.left() == null));
     }
 
@@ -143,8 +143,8 @@ public class AbstractStream101Test extends TestBase {
         List<Pair<TestPerson, Long>> result = stream.groupJoin(orders, TestPerson::getId, TestOrder::getPersonId, Collectors.counting()).toList();
 
         assertEquals(2, result.size());
-        assertEquals(2L, result.get(0).right().longValue()); // John has 2 orders
-        assertEquals(1L, result.get(1).right().longValue()); // Jane has 1 order
+        assertEquals(2L, result.get(0).right().longValue());
+        assertEquals(1L, result.get(1).right().longValue());
     }
 
     @Test
@@ -704,7 +704,7 @@ public class AbstractStream101Test extends TestBase {
 
     @Test
     public void testRateLimit() {
-        RateLimiter rateLimiter = RateLimiter.create(10); // 10 permits per second
+        RateLimiter rateLimiter = RateLimiter.create(10);
         List<Integer> input = Arrays.asList(1, 2, 3);
         Stream<Integer> stream = createStream(input);
 
@@ -713,7 +713,7 @@ public class AbstractStream101Test extends TestBase {
         long duration = System.currentTimeMillis() - start;
 
         assertEquals(input, result);
-        assertTrue(duration >= 200); // At least 0.2 seconds for 3 items at 10/sec
+        assertTrue(duration >= 200);
     }
 
     @Test
@@ -726,7 +726,7 @@ public class AbstractStream101Test extends TestBase {
         long duration = System.currentTimeMillis() - start;
 
         assertEquals(input, result);
-        assertTrue(duration >= 200); // 2 items * 100ms
+        assertTrue(duration >= 200);
     }
 
     @Test

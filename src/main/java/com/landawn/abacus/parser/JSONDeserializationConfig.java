@@ -50,7 +50,6 @@ import com.landawn.abacus.util.cs;
  * Person person = parser.deserialize(jsonString, config, Person.class);
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 0.8
  * @see DeserializationConfig
  * @see JSONSerializationConfig

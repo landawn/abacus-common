@@ -42,36 +42,58 @@ abstract class AbstractIndexed implements Immutable {
 
     /**
      * Returns the index value as an int.
-     * 
-     * <p>Note: This method performs a narrowing conversion from long to int,
-     * which may result in loss of precision if the index value exceeds
-     * Integer.MAX_VALUE or is less than Integer.MIN_VALUE.</p>
-     * 
+     *
+     * <p>This method converts the internal long index value to an int representation.
+     * If the long value is outside the range of int values (Integer.MIN_VALUE to 
+     * Integer.MAX_VALUE), an ArithmeticException is thrown to prevent data loss.</p>
+     *
+     * <p>For accessing the full range of index values without conversion, use 
+     * {@link #longIndex()} instead.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
-     * int idx = indexedObject.index();
+     * Indexed<String> indexed = Indexed.of("val", 42L);
+     * int idx = indexed.index();  // Returns 42
      * System.out.println("Index: " + idx);
-     * }</pre>
      * 
+     * // This would throw ArithmeticException:
+     * Indexed<String> largeIndex = Indexed.of("val", Long.MAX_VALUE);
+     * int overflow = largeIndex.index();  // Throws ArithmeticException
+     * }</pre>
+     *
      * @return the index value as an int
+     * @throws ArithmeticException if the long index value overflows an int
+     * @see #longIndex()
+     * @see Math#toIntExact(long)
      */
-    public int index() {
-        return (int) index;
+    public int index() throws ArithmeticException {
+        return Math.toIntExact(index);
     }
 
     /**
      * Returns the index value as a long.
-     * 
+     *
      * <p>This method returns the full precision index value without any
-     * conversion or potential loss of data.</p>
-     * 
+     * conversion or potential loss of data. Unlike {@link #index()}, this method
+     * never throws an exception and can handle the full range of long values.</p>
+     *
+     * <p>Use this method when you need to work with large index values that might
+     * exceed the range of int values, or when you want to avoid the overhead of
+     * range checking performed by {@link #index()}.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
-     * long idx = indexedObject.longIndex();
+     * Indexed<String> indexed = Indexed.of("value", Long.MAX_VALUE);
+     * long idx = indexed.longIndex();  // Returns Long.MAX_VALUE safely
      * System.out.println("Long index: " + idx);
+     *
+     * // Safe for any long value:
+     * Indexed<String> largeIndex = Indexed.of("value", 9_223_372_036_854_775_807L);
+     * long safeIndex = largeIndex.longIndex();  // No exceptions thrown
      * }</pre>
-     * 
+     *
      * @return the index value as a long
+     * @see #index()
      */
     public long longIndex() {
         return index;

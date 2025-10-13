@@ -36,9 +36,11 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class CommonUtil103Test extends TestBase {
 
     @Test
@@ -186,7 +188,6 @@ public class CommonUtil103Test extends TestBase {
                 if ("test".equals(method.getName())) {
                     return "test";
                 } else if ("run".equals(method.getName())) {
-                    // run method
                 }
                 return null;
             }
@@ -225,11 +226,9 @@ public class CommonUtil103Test extends TestBase {
 
     @Test
     public void testNewInstance_NestedClass() {
-        // Test with static nested class
         StaticNested nested = N.newInstance(StaticNested.class);
         assertNotNull(nested);
 
-        // Test with non-static inner class - this requires special handling
         OuterClass outer = new OuterClass();
         OuterClass.InnerClass inner = N.newInstance(OuterClass.InnerClass.class);
         assertNotNull(inner);
@@ -351,7 +350,6 @@ public class CommonUtil103Test extends TestBase {
         ArrayList<String> list = N.newArrayList(100);
         assertNotNull(list);
         assertTrue(list.isEmpty());
-        // Add elements to test it works
         for (int i = 0; i < 50; i++) {
             list.add("item" + i);
         }
@@ -427,7 +425,7 @@ public class CommonUtil103Test extends TestBase {
         List<String> source = Arrays.asList("a", "b", "c", "a");
         Set<String> set = N.newHashSet(source);
         assertNotNull(set);
-        assertEquals(3, set.size()); // "a" appears only once
+        assertEquals(3, set.size());
         assertTrue(set.contains("a"));
         assertTrue(set.contains("b"));
         assertTrue(set.contains("c"));
@@ -465,7 +463,6 @@ public class CommonUtil103Test extends TestBase {
         assertEquals(3, set.size());
         assertTrue(set instanceof LinkedHashSet);
 
-        // Check order is preserved
         Iterator<String> iter = set.iterator();
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
@@ -635,7 +632,6 @@ public class CommonUtil103Test extends TestBase {
         assertEquals("key", entry.getKey());
         assertEquals(123, entry.getValue());
 
-        // Test setValue
         entry.setValue(456);
         assertEquals(456, entry.getValue());
     }
@@ -647,7 +643,6 @@ public class CommonUtil103Test extends TestBase {
         assertEquals("key", entry.getKey());
         assertEquals(123, entry.getValue());
 
-        // ImmutableEntry should not allow setValue
         assertThrows(UnsupportedOperationException.class, () -> entry.setValue(456));
     }
 
@@ -726,7 +721,6 @@ public class CommonUtil103Test extends TestBase {
         assertNotNull(map);
         assertEquals(3, map.size());
 
-        // Check order is preserved
         Iterator<String> iter = map.keySet().iterator();
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
@@ -742,7 +736,6 @@ public class CommonUtil103Test extends TestBase {
         assertEquals(3, map.size());
         assertTrue(map instanceof LinkedHashMap);
 
-        // Check order is preserved
         Iterator<String> iter = map.keySet().iterator();
         assertEquals("bean1", iter.next());
         assertEquals("bean2", iter.next());
@@ -939,7 +932,7 @@ public class CommonUtil103Test extends TestBase {
         Map<String, Integer> source = new HashMap<>();
         source.put("a", 1);
         source.put("b", 2);
-        source.put("a", 3); // Will overwrite previous "a"
+        source.put("a", 3);
 
         ListMultimap<String, Integer> multimap = N.newListMultimap(source);
         assertNotNull(multimap);
@@ -1009,7 +1002,6 @@ public class CommonUtil103Test extends TestBase {
         assertNotNull(multimap);
         assertEquals(3, multimap.size());
 
-        // Keys should be sorted
         Iterator<String> iter = multimap.keySet().iterator();
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
@@ -1064,23 +1056,21 @@ public class CommonUtil103Test extends TestBase {
 
     @Test
     public void testNewSetMultimap_WithCollectionAndKeyExtractor() {
-        List<TestBean> beans = Arrays.asList(createBean("group1", 1), createBean("group1", 1), // Duplicate value
-                createBean("group1", 2), createBean("group2", 3));
+        List<TestBean> beans = Arrays.asList(createBean("group1", 1), createBean("group1", 1), createBean("group1", 2), createBean("group2", 3));
 
         SetMultimap<String, TestBean> multimap = N.newSetMultimap(beans, TestBean::getName);
         assertNotNull(multimap);
-        assertEquals(3, multimap.get("group1").size()); // All 3 beans despite same value
+        assertEquals(3, multimap.get("group1").size());
         assertEquals(1, multimap.get("group2").size());
     }
 
     @Test
     public void testNewSetMultimap_WithCollectionAndExtractors() {
-        List<TestBean> beans = Arrays.asList(createBean("group1", 1), createBean("group1", 1), // Duplicate value
-                createBean("group1", 2), createBean("group2", 3));
+        List<TestBean> beans = Arrays.asList(createBean("group1", 1), createBean("group1", 1), createBean("group1", 2), createBean("group2", 3));
 
         SetMultimap<String, Integer> multimap = N.newSetMultimap(beans, TestBean::getName, TestBean::getValue);
         assertNotNull(multimap);
-        assertEquals(2, multimap.get("group1").size()); // Only 1 and 2 (no duplicates)
+        assertEquals(2, multimap.get("group1").size());
         assertEquals(1, multimap.get("group2").size());
     }
 
@@ -1127,7 +1117,6 @@ public class CommonUtil103Test extends TestBase {
         assertNotNull(multimap);
         assertEquals(3, multimap.size());
 
-        // Keys should be sorted
         Iterator<String> iter = multimap.keySet().iterator();
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
@@ -1268,8 +1257,8 @@ public class CommonUtil103Test extends TestBase {
 
         Dataset merged = N.merge(ds1, ds2);
         assertNotNull(merged);
-        assertEquals(4, merged.size()); // 2 + 2 rows
-        assertEquals(2, merged.columnCount()); // col1 and col2
+        assertEquals(4, merged.size());
+        assertEquals(2, merged.columnCount());
 
         assertThrows(IllegalArgumentException.class, () -> N.merge(null, ds2));
         assertThrows(IllegalArgumentException.class, () -> N.merge(ds1, null));
@@ -1302,10 +1291,8 @@ public class CommonUtil103Test extends TestBase {
         assertEquals(3, merged.size());
         assertEquals(3, merged.columnCount());
 
-        // Test empty collection
         assertThrows(IllegalArgumentException.class, () -> N.merge(new ArrayList<Dataset>()));
 
-        // Test single dataset
         Dataset single = N.merge(Arrays.asList(datasets.get(0)));
         assertNotNull(single);
         assertEquals(1, single.size());
@@ -1321,12 +1308,10 @@ public class CommonUtil103Test extends TestBase {
 
         Dataset ds3 = N.newDataset(Arrays.asList("col1", "col3"), N.asSingletonList(new Object[] { "C", 3 }));
 
-        // Should work with same columns
         Dataset merged = N.merge(Arrays.asList(ds1, ds2), true);
         assertNotNull(merged);
         assertEquals(2, merged.size());
 
-        // Should fail with different columns
         assertThrows(IllegalArgumentException.class, () -> N.merge(Arrays.asList(ds1, ds3), true));
     }
 
@@ -1340,11 +1325,9 @@ public class CommonUtil103Test extends TestBase {
         Object[] setArray = N.toArray(set);
         assertEquals(3, setArray.length);
 
-        // Empty collection
         Object[] emptyArray = N.toArray(new ArrayList<>());
         assertEquals(0, emptyArray.length);
 
-        // Null collection
         Object[] nullArray = N.toArray(null);
         assertEquals(0, nullArray.length);
     }
@@ -1355,11 +1338,9 @@ public class CommonUtil103Test extends TestBase {
         Object[] array = N.toArray(list, 1, 4);
         assertArrayEquals(new Object[] { "b", "c", "d" }, array);
 
-        // Full range
         Object[] fullArray = N.toArray(list, 0, list.size());
         assertArrayEquals(new Object[] { "a", "b", "c", "d", "e" }, fullArray);
 
-        // Empty range
         Object[] emptyArray = N.toArray(list, 2, 2);
         assertEquals(0, emptyArray.length);
 
@@ -1411,22 +1392,19 @@ public class CommonUtil103Test extends TestBase {
     public void testToArray_WithTargetArray() {
         List<String> list = Arrays.asList("a", "b", "c");
 
-        // Target array is large enough
         String[] target = new String[5];
         String[] result = N.toArray(list, target);
         assertSame(target, result);
         assertEquals("a", result[0]);
         assertEquals("b", result[1]);
         assertEquals("c", result[2]);
-        assertNull(result[3]); // Rest should be null
+        assertNull(result[3]);
 
-        // Target array is too small
         String[] smallTarget = new String[2];
         String[] newResult = N.toArray(list, smallTarget);
         assertNotSame(smallTarget, newResult);
         assertEquals(3, newResult.length);
 
-        // Empty collection
         String[] emptyResult = N.toArray(new ArrayList<String>(), new String[0]);
         assertEquals(0, emptyResult.length);
 
@@ -1451,7 +1429,6 @@ public class CommonUtil103Test extends TestBase {
         String[] array = N.toArray(list, String[]::new);
         assertArrayEquals(new String[] { "a", "b", "c" }, array);
 
-        // Empty collection
         String[] emptyArray = N.toArray(new ArrayList<String>(), String[]::new);
         assertEquals(0, emptyArray.length);
     }
@@ -1469,7 +1446,6 @@ public class CommonUtil103Test extends TestBase {
         String[] array = N.toArray(list, String[].class);
         assertArrayEquals(new String[] { "a", "b", "c" }, array);
 
-        // Empty collection
         String[] emptyArray = N.toArray(new ArrayList<String>(), String[].class);
         assertEquals(0, emptyArray.length);
 
@@ -1489,15 +1465,12 @@ public class CommonUtil103Test extends TestBase {
     public void testToBooleanArray() {
         List<Boolean> list = Arrays.asList(true, false, true, null, false);
 
-        // Default false for null
         boolean[] array = N.toBooleanArray(list);
         assertArrayEquals(new boolean[] { true, false, true, false, false }, array);
 
-        // Custom default for null
         boolean[] arrayWithDefault = N.toBooleanArray(list, true);
         assertArrayEquals(new boolean[] { true, false, true, true, false }, arrayWithDefault);
 
-        // Empty collection
         boolean[] emptyArray = N.toBooleanArray(new ArrayList<Boolean>());
         assertEquals(0, emptyArray.length);
     }
@@ -1512,7 +1485,6 @@ public class CommonUtil103Test extends TestBase {
         boolean[] arrayWithDefault = N.toBooleanArray(list, 1, 4, true);
         assertArrayEquals(new boolean[] { false, true, true }, arrayWithDefault);
 
-        // Empty range
         boolean[] emptyArray = N.toBooleanArray(list, 2, 2);
         assertEquals(0, emptyArray.length);
 
@@ -1526,7 +1498,6 @@ public class CommonUtil103Test extends TestBase {
         boolean[] expected = { false, true, false, true, false };
         assertArrayEquals(expected, N.toBooleanArray(bytes));
 
-        // Empty array
         assertArrayEquals(new boolean[0], N.toBooleanArray(new byte[0]));
         assertArrayEquals(new boolean[0], N.toBooleanArray((byte[]) null));
     }
@@ -1537,7 +1508,6 @@ public class CommonUtil103Test extends TestBase {
         boolean[] expected = { false, true, false, true, false };
         assertArrayEquals(expected, N.toBooleanArray(ints));
 
-        // Empty array
         assertArrayEquals(new boolean[0], N.toBooleanArray(new int[0]));
         assertArrayEquals(new boolean[0], N.toBooleanArray((int[]) null));
     }
@@ -1546,11 +1516,9 @@ public class CommonUtil103Test extends TestBase {
     public void testToCharArray() {
         List<Character> list = Arrays.asList('a', 'b', 'c', null, 'd');
 
-        // Default '\0' for null
         char[] array = N.toCharArray(list);
         assertArrayEquals(new char[] { 'a', 'b', 'c', '\0', 'd' }, array);
 
-        // Custom default for null
         char[] arrayWithDefault = N.toCharArray(list, 'X');
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'X', 'd' }, arrayWithDefault);
     }
@@ -1570,11 +1538,9 @@ public class CommonUtil103Test extends TestBase {
     public void testToByteArray() {
         List<Number> list = Arrays.asList((byte) 1, 2, 3L, null, 5.0);
 
-        // Default 0 for null
         byte[] array = N.toByteArray(list);
         assertArrayEquals(new byte[] { 1, 2, 3, 0, 5 }, array);
 
-        // Custom default for null
         byte[] arrayWithDefault = N.toByteArray(list, (byte) -1);
         assertArrayEquals(new byte[] { 1, 2, 3, -1, 5 }, arrayWithDefault);
     }
@@ -1596,7 +1562,6 @@ public class CommonUtil103Test extends TestBase {
         byte[] expected = { 1, 0, 1, 0 };
         assertArrayEquals(expected, N.toByteArray(bools));
 
-        // Empty array
         assertArrayEquals(new byte[0], N.toByteArray(new boolean[0]));
         assertArrayEquals(new byte[0], N.toByteArray((boolean[]) null));
     }
@@ -1605,11 +1570,9 @@ public class CommonUtil103Test extends TestBase {
     public void testToShortArray() {
         List<Number> list = Arrays.asList((short) 1, 2, 3L, null, 5.0);
 
-        // Default 0 for null
         short[] array = N.toShortArray(list);
         assertArrayEquals(new short[] { 1, 2, 3, 0, 5 }, array);
 
-        // Custom default for null
         short[] arrayWithDefault = N.toShortArray(list, (short) -1);
         assertArrayEquals(new short[] { 1, 2, 3, -1, 5 }, arrayWithDefault);
     }
@@ -1629,11 +1592,9 @@ public class CommonUtil103Test extends TestBase {
     public void testToIntArray() {
         List<Number> list = Arrays.asList(1, 2L, 3.0, null, (byte) 5);
 
-        // Default 0 for null
         int[] array = N.toIntArray(list);
         assertArrayEquals(new int[] { 1, 2, 3, 0, 5 }, array);
 
-        // Custom default for null
         int[] arrayWithDefault = N.toIntArray(list, -1);
         assertArrayEquals(new int[] { 1, 2, 3, -1, 5 }, arrayWithDefault);
     }
@@ -1655,7 +1616,6 @@ public class CommonUtil103Test extends TestBase {
         int[] expected = { 65, 66, 67 };
         assertArrayEquals(expected, N.toIntArray(chars));
 
-        // Empty array
         assertArrayEquals(new int[0], N.toIntArray(new char[0]));
         assertArrayEquals(new int[0], N.toIntArray((char[]) null));
     }
@@ -1666,7 +1626,6 @@ public class CommonUtil103Test extends TestBase {
         int[] expected = { 1, 0, 1, 0 };
         assertArrayEquals(expected, N.toIntArray(bools));
 
-        // Empty array
         assertArrayEquals(new int[0], N.toIntArray(new boolean[0]));
         assertArrayEquals(new int[0], N.toIntArray((boolean[]) null));
     }
@@ -1675,11 +1634,9 @@ public class CommonUtil103Test extends TestBase {
     public void testToLongArray() {
         List<Number> list = Arrays.asList(1, 2L, 3.0, null, (byte) 5);
 
-        // Default 0 for null
         long[] array = N.toLongArray(list);
         assertArrayEquals(new long[] { 1, 2, 3, 0, 5 }, array);
 
-        // Custom default for null
         long[] arrayWithDefault = N.toLongArray(list, -1L);
         assertArrayEquals(new long[] { 1, 2, 3, -1, 5 }, arrayWithDefault);
     }
@@ -1699,11 +1656,9 @@ public class CommonUtil103Test extends TestBase {
     public void testToFloatArray() {
         List<Number> list = Arrays.asList(1, 2L, 3.0, null, (byte) 5);
 
-        // Default 0 for null
         float[] array = N.toFloatArray(list);
         assertArrayEquals(new float[] { 1, 2, 3, 0, 5 }, array, 0.0f);
 
-        // Custom default for null
         float[] arrayWithDefault = N.toFloatArray(list, -1.0f);
         assertArrayEquals(new float[] { 1, 2, 3, -1, 5 }, arrayWithDefault, 0.0f);
     }
@@ -1723,11 +1678,9 @@ public class CommonUtil103Test extends TestBase {
     public void testToDoubleArray() {
         List<Number> list = Arrays.asList(1, 2L, 3.0, null, (byte) 5);
 
-        // Default 0 for null
         double[] array = N.toDoubleArray(list);
         assertArrayEquals(new double[] { 1, 2, 3, 0, 5 }, array, 0.0);
 
-        // Custom default for null
         double[] arrayWithDefault = N.toDoubleArray(list, -1.0);
         assertArrayEquals(new double[] { 1, 2, 3, -1, 5 }, arrayWithDefault, 0.0);
     }
@@ -1743,7 +1696,6 @@ public class CommonUtil103Test extends TestBase {
         assertArrayEquals(new double[] { 2, 3, -1 }, arrayWithDefault, 0.0);
     }
 
-    // Helper methods
     private static TestBean createBean(String name, int value) {
         TestBean bean = new TestBean();
         bean.setName(name);
@@ -1758,7 +1710,6 @@ public class CommonUtil103Test extends TestBase {
         return map;
     }
 
-    // Test interfaces and classes
     interface TestInterface {
         String test();
     }

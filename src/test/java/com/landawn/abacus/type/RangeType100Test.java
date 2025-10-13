@@ -11,12 +11,14 @@ import java.io.StringWriter;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Range;
 
+@Tag("new-test")
 public class RangeType100Test extends TestBase {
 
     private RangeType<Integer> rangeType;
@@ -56,53 +58,43 @@ public class RangeType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test open-open range
         Range<Integer> openOpen = Range.open(1, 5);
         String result = rangeType.stringOf(openOpen);
         assertNotNull(result);
         assertTrue(result.startsWith("(") && result.endsWith(")"));
 
-        // Test closed-closed range
         Range<Integer> closedClosed = Range.closed(1, 5);
         result = rangeType.stringOf(closedClosed);
         assertNotNull(result);
         assertTrue(result.startsWith("[") && result.endsWith("]"));
 
-        // Test open-closed range
         Range<Integer> openClosed = Range.openClosed(1, 5);
         result = rangeType.stringOf(openClosed);
         assertNotNull(result);
         assertTrue(result.startsWith("(") && result.endsWith("]"));
 
-        // Test closed-open range
         Range<Integer> closedOpen = Range.closedOpen(1, 5);
         result = rangeType.stringOf(closedOpen);
         assertNotNull(result);
         assertTrue(result.startsWith("[") && result.endsWith(")"));
 
-        // Test null
         assertNull(rangeType.stringOf(null));
     }
 
     @Test
     public void testValueOf() {
-        // Test parsing open-open range
         Range<Integer> range = rangeType.valueOf("(1, 5)");
         assertNotNull(range);
 
-        // Test parsing closed-closed range
         range = rangeType.valueOf("[1, 5]");
         assertNotNull(range);
 
-        // Test parsing open-closed range
         range = rangeType.valueOf("(1, 5]");
         assertNotNull(range);
 
-        // Test parsing closed-open range
         range = rangeType.valueOf("[1, 5)");
         assertNotNull(range);
 
-        // Test null/empty string
         assertNull(rangeType.valueOf(null));
         assertNull(rangeType.valueOf(""));
         assertNull(rangeType.valueOf(" "));
@@ -112,12 +104,10 @@ public class RangeType100Test extends TestBase {
     public void testAppendTo() throws IOException {
         StringWriter writer = new StringWriter();
 
-        // Test with range
         Range<Integer> range = Range.closed(1, 5);
         rangeType.appendTo(writer, range);
         assertTrue(writer.toString().length() > 0);
 
-        // Test with null
         writer = new StringWriter();
         rangeType.appendTo(writer, null);
         assertEquals("null", writer.toString());
@@ -128,11 +118,9 @@ public class RangeType100Test extends TestBase {
         CharacterWriter writer = createCharacterWriter();
         JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
 
-        // Test with range
         Range<Integer> range = Range.closed(1, 5);
         rangeType.writeCharacter(writer, range, config);
 
-        // Test with null
         rangeType.writeCharacter(writer, null, config);
     }
 }

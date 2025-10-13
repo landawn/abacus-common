@@ -5,9 +5,11 @@ import java.util.Properties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class EmailUtil100Test extends TestBase {
 
     private Properties props;
@@ -22,11 +24,9 @@ public class EmailUtil100Test extends TestBase {
 
     @Test
     public void testSendEmail() {
-        // Note: This test may fail without a real SMTP server
         try {
             EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "Test Content", "username", "password", props);
         } catch (RuntimeException e) {
-            // Expected when no SMTP server is available
             Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
         }
     }
@@ -37,7 +37,6 @@ public class EmailUtil100Test extends TestBase {
             EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "Test Content",
                     new String[] { "test.txt" }, "username", "password", props);
         } catch (RuntimeException e) {
-            // Expected when no SMTP server is available
             Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
         }
     }
@@ -48,7 +47,6 @@ public class EmailUtil100Test extends TestBase {
             EmailUtil.sendHTMLEmail(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "<h1>Test HTML</h1>", "username", "password",
                     props);
         } catch (RuntimeException e) {
-            // Expected when no SMTP server is available
             Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
         }
     }
@@ -59,7 +57,6 @@ public class EmailUtil100Test extends TestBase {
             EmailUtil.sendHTMLEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "<h1>Test HTML</h1>",
                     new String[] { "test.txt" }, "username", "password", props);
         } catch (RuntimeException e) {
-            // Expected when no SMTP server is available
             Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
         }
     }

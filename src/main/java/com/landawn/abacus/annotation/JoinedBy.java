@@ -108,7 +108,6 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  * 
- * @author HaiYang Li
  * @since 2019
  * @see Entity
  * @see Column

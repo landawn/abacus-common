@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
@@ -32,16 +33,14 @@ import com.landawn.abacus.util.function.CharUnaryOperator;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
+@Tag("new-test")
 public class ParallelArrayCharStream203Test extends TestBase {
 
-    private static final int testMaxThreadNum = 4; // Use a fixed small number of threads for predictable testing 
+    private static final int testMaxThreadNum = 4;
     private static final char[] TEST_ARRAY = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
             'w', 'x', 'y', 'z' };
 
-    // Empty method to be implemented by the user for initializing CharStream
     protected CharStream createCharStream(char... elements) {
-        // Using default values for maxThreadNum, executorNumForVirtualThread, splitor, cancelUncompletedThreads
-        // For testing, we might want to vary these parameters.
         return CharStream.of(elements).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum));
     }
 
@@ -87,7 +86,7 @@ public class ParallelArrayCharStream203Test extends TestBase {
         CharUnaryOperator mapper = c -> (char) (c + 1);
         List<Character> result = stream.map(mapper).toList();
         assertEquals(TEST_ARRAY.length, result.size());
-        assertTrue(result.contains('b')); // 'a' maps to 'b'
+        assertTrue(result.contains('b'));
         assertFalse(result.contains('a'));
     }
 
@@ -97,8 +96,8 @@ public class ParallelArrayCharStream203Test extends TestBase {
         CharToIntFunction mapper = c -> c - 'a';
         List<Integer> result = stream.mapToInt(mapper).toList();
         assertEquals(TEST_ARRAY.length, result.size());
-        assertTrue(result.contains(0)); // 'a' maps to 0
-        assertTrue(result.contains(25)); // 'z' maps to 25
+        assertTrue(result.contains(0));
+        assertTrue(result.contains(25));
     }
 
     @Test
@@ -176,12 +175,12 @@ public class ParallelArrayCharStream203Test extends TestBase {
         CharStream stream = createCharStream(TEST_ARRAY);
         List<Character> consumed = new ArrayList<>();
         CharConsumer action = it -> {
-            synchronized (consumed) { // Ensure thread safety
+            synchronized (consumed) {
                 consumed.add(it);
             }
         };
         stream.onEach(action).forEach(c -> {
-        }); // Trigger the onEach action
+        });
         assertEquals(TEST_ARRAY.length, consumed.size());
 
         assertHaveSameElements(N.toList(TEST_ARRAY), consumed);
@@ -192,7 +191,7 @@ public class ParallelArrayCharStream203Test extends TestBase {
         CharStream stream = createCharStream(TEST_ARRAY);
         List<Character> consumed = new ArrayList<>();
         CharConsumer action = it -> {
-            synchronized (consumed) { // Ensure thread safety
+            synchronized (consumed) {
                 consumed.add(it);
             }
         };
@@ -238,8 +237,8 @@ public class ParallelArrayCharStream203Test extends TestBase {
     @Test
     public void testReduceWithIdentity() {
         CharStream stream = createCharStream(new char[] { 'a', 'b', 'c' });
-        CharBinaryOperator op = (c1, c2) -> (char) (c1 + c2 - 'a'); // Simple sum-like operation
-        char result = stream.reduce('a', op); // 'a' + ('b'-'a') + ('c'-'a') = 'a' + 1 + 2 = 'd'
+        CharBinaryOperator op = (c1, c2) -> (char) (c1 + c2 - 'a');
+        char result = stream.reduce('a', op);
         assertEquals('d', result);
 
         CharStream emptyStream = createCharStream(new char[] {});
@@ -337,7 +336,7 @@ public class ParallelArrayCharStream203Test extends TestBase {
     public void testZipWithBinaryOperator() {
         CharStream streamA = createCharStream(new char[] { 'a', 'b', 'c' });
         CharStream streamB = CharStream.of('x', 'y', 'z');
-        CharBinaryOperator zipper = (c1, c2) -> (char) (c1 + c2 - 'a'); // Example: 'a' + 'x' - 'a' = 'x'
+        CharBinaryOperator zipper = (c1, c2) -> (char) (c1 + c2 - 'a');
         List<Character> result = streamA.zipWith(streamB, zipper).toList();
         assertEquals(3, result.size());
         assertHaveSameElements(List.of('x', (char) ('y' + 1), (char) ('z' + 2)), result);
@@ -348,7 +347,7 @@ public class ParallelArrayCharStream203Test extends TestBase {
         CharStream streamA = createCharStream(new char[] { 'a', 'b' });
         CharStream streamB = CharStream.of('x', 'y');
         CharStream streamC = CharStream.of('1', '2');
-        CharTernaryOperator zipper = (c1, c2, c3) -> (char) (c1 + c2 + c3 - 2 * 'a'); // Example
+        CharTernaryOperator zipper = (c1, c2, c3) -> (char) (c1 + c2 + c3 - 2 * 'a');
         List<Character> result = streamA.zipWith(streamB, streamC, zipper).sorted().toList();
         assertEquals(2, result.size());
         assertEquals((char) ('a' + 'x' + '1' - 2 * 'a'), result.get(0));
@@ -405,28 +404,14 @@ public class ParallelArrayCharStream203Test extends TestBase {
 
     @Test
     public void testMaxThreadNum() throws IllegalAccessException, NoSuchFieldException {
-        // Since maxThreadNum() is protected in the superclass,
-        // and its value is used internally, we can't directly call it from here.
-        // However, we can assert its behavior indirectly or via reflection if necessary.
-        // For this test, we'll assume the constructor correctly sets it and other tests
-        // indirectly verify its usage.
-        // If it was a public method of ParallelArrayCharStream, we would test it directly.
-        // CharStream stream = createCharStream(charArray);
-        //assertTrue(stream.maxThreadNum() > 0); // This line would work if maxThreadNum() was public in CharStream
     }
 
     @Test
     public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        // Similar to maxThreadNum, splitor() is protected.
-        // CharStream stream = createCharStream(charArray);
-        //assertNotNull(stream.splitor());
     }
 
     @Test
     public void testAsyncExecutor() throws IllegalAccessException, NoSuchFieldException {
-        // Similar to maxThreadNum, asyncExecutor() is protected.
-        // CharStream stream = createCharStream(charArray);
-        //assertNotNull(stream.asyncExecutor());
     }
 
     @Test
@@ -436,9 +421,9 @@ public class ParallelArrayCharStream203Test extends TestBase {
         Runnable closeHandler = () -> closedFlag.set(true);
 
         CharStream newStream = stream.onClose(closeHandler);
-        assertFalse(closedFlag.get()); // Not closed yet
-        newStream.close(); // Close the stream, which should trigger the handler
-        assertTrue(closedFlag.get()); // Now it should be closed
+        assertFalse(closedFlag.get());
+        newStream.close();
+        assertTrue(closedFlag.get());
     }
 
     @Test
@@ -458,7 +443,7 @@ public class ParallelArrayCharStream203Test extends TestBase {
     public void testOnCloseEmptyHandler() {
         CharStream stream = createCharStream(TEST_ARRAY);
         CharStream newStream = stream.onClose(null);
-        assertSame(stream, newStream); // Should return the same instance if handler is null
-        newStream.close(); // Should not throw
+        assertSame(stream, newStream);
+        newStream.close();
     }
 }

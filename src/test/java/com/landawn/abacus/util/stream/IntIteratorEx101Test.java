@@ -7,11 +7,13 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.IntList;
 
+@Tag("new-test")
 public class IntIteratorEx101Test extends TestBase {
 
     @Test
@@ -21,7 +23,7 @@ public class IntIteratorEx101Test extends TestBase {
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextInt());
         Assertions.assertEquals(0, iter.count());
         Assertions.assertArrayEquals(new int[0], iter.toArray());
-        iter.close(); // Should not throw
+        iter.close();
     }
 
     @Test
@@ -143,14 +145,11 @@ public class IntIteratorEx101Test extends TestBase {
         ObjIteratorEx<Integer> objIter = ObjIteratorEx.of(1, 2, 3);
         IntIteratorEx iter = IntIteratorEx.from(objIter);
         
-        // Test advance
         iter.advance(1);
         Assertions.assertEquals(2, iter.nextInt());
         
-        // Test count
         Assertions.assertEquals(1, iter.count());
         
-        // Test close
         iter.close();
     }
 
@@ -165,7 +164,6 @@ public class IntIteratorEx101Test extends TestBase {
         iter.advance(1);
         Assertions.assertEquals(5, iter.nextInt());
         
-        // Advance beyond end
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
@@ -182,7 +180,6 @@ public class IntIteratorEx101Test extends TestBase {
     @Test
     public void testAdvanceNegative() {
         IntIteratorEx iter = IntIteratorEx.of(1, 2, 3);
-        // Assertions.assertThrows(IllegalArgumentException.class, () -> iter.advance(-1));
         iter.advance(-1);
     }
 
@@ -244,6 +241,6 @@ public class IntIteratorEx101Test extends TestBase {
     @Test
     public void testClose() {
         IntIteratorEx iter = IntIteratorEx.of(1, 2, 3);
-        iter.close(); // Should not throw
+        iter.close();
     }
 }

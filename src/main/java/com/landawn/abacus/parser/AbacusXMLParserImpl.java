@@ -273,13 +273,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param obj
-     * @param config
-     * @param indentation
-     * @param serializedObjects
-     * @param type TODO
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param obj the bean object to serialize to XML
+     * @param config the XML serialization configuration settings
+     * @param indentation the indentation string for formatting the XML output
+     * @param serializedObjects set of already serialized objects to detect circular references
+     * @param type the Type information for the object being serialized
+     * @param bw the buffered XML writer to write the serialized output to
+     * @throws IOException if an I/O error occurs during writing
      */
     void writeBean(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
@@ -340,13 +340,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param obj
-     * @param config
-     * @param propIndentation
-     * @param serializedObjects
-     * @param type TODO
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param obj the object whose properties will be serialized
+     * @param config the XML serialization configuration settings
+     * @param propIndentation the indentation string for property formatting
+     * @param serializedObjects set of already serialized objects to detect circular references
+     * @param type the Type information for the object being serialized
+     * @param bw the buffered XML writer to write the serialized properties to
+     * @throws IOException if an I/O error occurs during writing
      */
     void writeProperties(final Object obj, final XMLSerializationConfig config, final String propIndentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
@@ -459,13 +459,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param m
-     * @param config
-     * @param indentation
-     * @param serializedObjects
-     * @param type TODO
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param m the map to serialize to XML
+     * @param config the XML serialization configuration settings
+     * @param indentation the indentation string for formatting the XML output
+     * @param serializedObjects set of already serialized objects to detect circular references
+     * @param type the Type information for the map being serialized
+     * @param bw the buffered XML writer to write the serialized map to
+     * @throws IOException if an I/O error occurs during writing
      */
     void writeMap(final Map<?, ?> m, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
@@ -630,13 +630,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param obj
-     * @param config
-     * @param indentation
-     * @param serializedObjects
-     * @param type TODO
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param obj the array object to serialize to XML
+     * @param config the XML serialization configuration settings
+     * @param indentation the indentation string for formatting the XML output
+     * @param serializedObjects set of already serialized objects to detect circular references
+     * @param type the Type information for the array being serialized
+     * @param bw the buffered XML writer to write the serialized array to
+     * @throws IOException if an I/O error occurs during writing
      */
     void writeArray(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
@@ -719,13 +719,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param c
-     * @param config
-     * @param indentation
-     * @param serializedObjects
-     * @param type TODO
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param c the collection to serialize to XML
+     * @param config the XML serialization configuration settings
+     * @param indentation the indentation string for formatting the XML output
+     * @param serializedObjects set of already serialized objects to detect circular references
+     * @param type the Type information for the collection being serialized
+     * @param bw the buffered XML writer to write the serialized collection to
+     * @throws IOException if an I/O error occurs during writing
      */
     void writeCollection(final Collection<?> c, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {

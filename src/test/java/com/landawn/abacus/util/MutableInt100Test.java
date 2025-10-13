@@ -2,9 +2,11 @@ package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class MutableInt100Test extends TestBase {
 
     @Test
@@ -51,13 +53,11 @@ public class MutableInt100Test extends TestBase {
     @Test
     public void testSetIf() throws Exception {
         MutableInt mutableInt = MutableInt.of(10);
-        
-        // Test when predicate returns true
+
         boolean updated = mutableInt.setIf(20, v -> v < 15);
         Assertions.assertTrue(updated);
         Assertions.assertEquals(20, mutableInt.value());
-        
-        // Test when predicate returns false
+
         updated = mutableInt.setIf(30, v -> v < 15);
         Assertions.assertFalse(updated);
         Assertions.assertEquals(20, mutableInt.value());
@@ -82,7 +82,7 @@ public class MutableInt100Test extends TestBase {
         MutableInt mutableInt = MutableInt.of(10);
         mutableInt.add(5);
         Assertions.assertEquals(15, mutableInt.value());
-        
+
         mutableInt.add(-3);
         Assertions.assertEquals(12, mutableInt.value());
     }
@@ -92,7 +92,7 @@ public class MutableInt100Test extends TestBase {
         MutableInt mutableInt = MutableInt.of(10);
         mutableInt.subtract(3);
         Assertions.assertEquals(7, mutableInt.value());
-        
+
         mutableInt.subtract(-2);
         Assertions.assertEquals(9, mutableInt.value());
     }
@@ -174,7 +174,7 @@ public class MutableInt100Test extends TestBase {
         MutableInt a = MutableInt.of(10);
         MutableInt b = MutableInt.of(20);
         MutableInt c = MutableInt.of(10);
-        
+
         Assertions.assertTrue(a.compareTo(b) < 0);
         Assertions.assertTrue(b.compareTo(a) > 0);
         Assertions.assertEquals(0, a.compareTo(c));
@@ -185,7 +185,7 @@ public class MutableInt100Test extends TestBase {
         MutableInt a = MutableInt.of(10);
         MutableInt b = MutableInt.of(10);
         MutableInt c = MutableInt.of(20);
-        
+
         Assertions.assertTrue(a.equals(b));
         Assertions.assertFalse(a.equals(c));
         Assertions.assertFalse(a.equals(null));
@@ -197,7 +197,7 @@ public class MutableInt100Test extends TestBase {
         MutableInt a = MutableInt.of(10);
         MutableInt b = MutableInt.of(10);
         MutableInt c = MutableInt.of(20);
-        
+
         Assertions.assertEquals(a.hashCode(), b.hashCode());
         Assertions.assertNotEquals(a.hashCode(), c.hashCode());
         Assertions.assertEquals(10, a.hashCode());
@@ -207,7 +207,7 @@ public class MutableInt100Test extends TestBase {
     public void testToString() {
         MutableInt mutableInt = MutableInt.of(42);
         Assertions.assertEquals("42", mutableInt.toString());
-        
+
         mutableInt.setValue(-100);
         Assertions.assertEquals("-100", mutableInt.toString());
     }
@@ -217,7 +217,7 @@ public class MutableInt100Test extends TestBase {
         MutableInt mutableInt = MutableInt.of(Integer.MAX_VALUE);
         mutableInt.increment();
         Assertions.assertEquals(Integer.MIN_VALUE, mutableInt.value());
-        
+
         mutableInt.setValue(Integer.MIN_VALUE);
         mutableInt.decrement();
         Assertions.assertEquals(Integer.MAX_VALUE, mutableInt.value());

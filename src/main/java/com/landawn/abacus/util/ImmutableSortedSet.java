@@ -321,7 +321,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
         } else if (N.isEmpty(c)) {
             return empty();
         } else if (c instanceof SortedSet sortedSet) {
-            return new ImmutableNavigableSet<>(new TreeSet<>(sortedSet));
+            return new ImmutableSortedSet<>(new TreeSet<>(sortedSet));
         } else {
             return new ImmutableSortedSet<>(new TreeSet<>(c));
         }

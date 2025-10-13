@@ -199,15 +199,53 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Returns the value collection associated with the specified key in the Multimap.
-     * If the key is not present in the Multimap, this method returns {@code null}.
+     * Returns the collection of values associated with the specified key.
+     *
+     * <p><b>IMPORTANT - Null vs Empty Behavior:</b></p>
+     * <ul>
+     *   <li>If the key has never been added: returns {@code null}</li>
+     *   <li>If all values for the key have been removed: returns {@code null} (key is removed from map)</li>
+     *   <li>If the key exists with values: returns mutable collection</li>
+     * </ul>
+     *
+     * <p><b>This is DIFFERENT from Guava's Multimap</b> which returns an empty collection
+     * for absent keys. This implementation returns {@code null} for absent keys.</p>
+     *
+     * <p><b>Key Lifecycle:</b></p>
+     * <ul>
+     *   <li>After {@code put(key, value)}: key exists, {@code get(key)} returns collection containing the value</li>
+     *   <li>After removing ALL values: key is automatically removed, {@code get(key)} returns {@code null}</li>
+     *   <li>After {@code removeAll(key)}: key is removed, {@code get(key)} returns {@code null}</li>
+     * </ul>
+     *
+     * <p>Examples:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> map = N.newListMultimap();
+     * map.put("a", 1);
+     * map.put("a", 2);
+     *
+     * List<Integer> values = map.get("a");
+     * // values = [1, 2] - not null
+     *
+     * map.remove("a", 1);
+     * map.remove("a", 2);
+     * // All values removed - key is removed from map
+     *
+     * List<Integer> empty = map.get("a");
+     * // empty = null - NOT empty collection!
+     *
+     * List<Integer> never = map.get("nonexistent");
+     * // never = null
+     * }</pre>
      *
      * <br />
      * The returned collection is backed by the Multimap, so changes to the returned collection are reflected in the Multimap.
      * Usually, the returned collection should not be modified outside this Multimap directly, because it may cause unexpected behavior.
      *
-     * @param key The key whose associated value collection is to be returned.
-     * @return The value collection associated with the specified key, or {@code null} if the key is not present in the Multimap.
+     * @param key the key whose associated values are to be returned
+     * @return the mutable collection of values for the key, or {@code null} if the key is not present
+     * @see #containsKey(Object)
+     * @see #getOrDefault(Object, Collection)
      */
     public V get(final Object key) {
         //noinspection SuspiciousMethodCalls
@@ -1213,57 +1251,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         return true;
     }
 
-    //    private boolean replaceAllWithOne(final V val, final E oldValue, final E newValue) {
-    //        boolean wasModified = false;
-    //
-    //        if (val instanceof List) {
-    //            final List<E> list = (List<E>) val;
-    //
-    //            if (list instanceof ArrayList) {
-    //                if (oldValue == null) {
-    //                    for (int i = 0, len = list.size(); i < len; i++) {
-    //                        if (list.get(i) == null) {
-    //                            list.set(i, newValue);
-    //                            wasModified = true;
-    //                        }
-    //                    }
-    //                } else {
-    //                    for (int i = 0, len = list.size(); i < len; i++) {
-    //                        if (oldValue.equals(list.get(i))) {
-    //                            list.set(i, newValue);
-    //                            wasModified = true;
-    //                        }
-    //                    }
-    //                }
-    //            } else {
-    //                final ListIterator<E> iter = list.listIterator();
-    //
-    //                if (oldValue == null) {
-    //                    while (iter.hasNext()) {
-    //                        if (iter.next() == null) {
-    //                            iter.set(newValue);
-    //                            wasModified = true;
-    //                        }
-    //                    }
-    //                } else {
-    //                    while (iter.hasNext()) {
-    //                        if (oldValue.equals(iter.next())) {
-    //                            iter.set(newValue);
-    //                            wasModified = true;
-    //                        }
-    //                    }
-    //                }
-    //            }
-    //        } else {
-    //            final Object[] tmp = val.toArray();
-    //            wasModified = N.replaceAll(tmp, oldValue, newValue) > 0;
-    //            val.clear();
-    //            val.addAll(Arrays.asList((E[]) tmp));
-    //        }
-    //
-    //        return wasModified;
-    //    }
-
     /**
      * Replaces all occurrences of multiple old values with a single new value for the given key.
      * This is useful for consolidating or normalizing multiple values into one.
@@ -1761,47 +1748,51 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Merges the given collection of elements with the current values associated with the specified key in this Multimap.
+     * Merges a collection of elements with the existing values for a key using a custom merging function.
+     * This method provides flexible control over how new elements are combined with existing ones.
      *
-     * This method first retrieves the current value associated with the specified key. If the key is not already associated with a value,
-     * it associates the key with the given collection of elements.
+     * <p>The merge operation works as follows:</p>
+     * <ul>
+     *   <li>If the key doesn't exist, the elements are added directly and the resulting collection is returned</li>
+     *   <li>If the key exists, the remapping function receives the current collection and the new elements,
+     *       allowing you to define custom merge logic (e.g., union, intersection, custom filtering)</li>
+     *   <li>If the function returns null or an empty collection, the key is removed from the Multimap</li>
+     *   <li>If the function returns the same collection instance (oldValue == newValue), no update occurs</li>
+     * </ul>
      *
-     * If the key is already associated with a value, it applies the remapping function to the current value and the given collection of elements,
-     * and updates the key's associated value in the Multimap with the result. If the remapping function returns {@code null} or an empty collection,
-     * the key is removed from the Multimap.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("numbers", Arrays.asList(1, 2, 3));
      *
-     * The implementation is equivalent to performing the following steps for this Multimap:
+     * // Union: add all new elements to existing ones
+     * multimap.merge("numbers", Arrays.asList(4, 5), (oldVals, newVals) -> {
+     *     List<Integer> result = new ArrayList<>(oldVals);
+     *     result.addAll(newVals);
+     *     return result;
+     * });
+     * // "numbers" -> [1, 2, 3, 4, 5]
      *
-     * <pre>
-     * final V oldValue = get(key);
+     * // Custom logic: only keep values > 10
+     * multimap.merge("scores", Arrays.asList(15, 8, 22), (oldVals, newVals) -> {
+     *     List<Integer> combined = new ArrayList<>(oldVals);
+     *     combined.addAll(newVals);
+     *     return combined.stream().filter(v -> v > 10).collect(Collectors.toList());
+     * });
      *
-     * if (oldValue == null) {
-     *     putMany(key, elements);
-     *     return get(key);
-     * }
+     * // Remove key if function returns empty
+     * multimap.merge("temp", Arrays.asList(1, 2), (old, neu) -> Collections.emptyList());
+     * // "temp" key is removed
+     * }</pre>
      *
-     * V ret = null;
-     * final V newValue = remappingFunction.apply(oldValue, elements);
-     *
-     * if (N.notEmpty(newValue)) {
-     *      if (oldValue != newValue) {
-     *          oldValue.clear();
-     *          oldValue.addAll(newValue);
-     *      }
-     *
-     *      ret = oldValue;
-     * } else if (oldValue != null) {
-     *     backingMap.remove(key);
-     * }
-     *
-     * return ret;
-     * </pre>
-     *
-     * @param key The key whose associated value is to be computed.
-     * @param elements The collection of elements to be merged with the current values associated with the key.
-     * @param remappingFunction The function to compute a value.
-     * @return The new value associated with the specified key, or {@code null} if the remapping function returns {@code null} or an empty collection.
-     * @throws IllegalArgumentException if the remappingFunction is {@code null}.
+     * @param <C> the type of the collection containing elements to merge
+     * @param key the key whose value should be merged with the elements
+     * @param elements the collection of elements to merge with existing values
+     * @param remappingFunction the function that defines how to merge old and new collections
+     * @return the updated collection associated with the key, or null if the key was removed
+     * @throws IllegalArgumentException if remappingFunction or elements is null
+     * @see #merge(Object, Object, BiFunction)
+     * @see #compute(Object, BiFunction)
      */
     public <C extends Collection<? extends E>> V merge(final K key, final C elements, final BiFunction<? super V, ? super C, ? extends V> remappingFunction)
             throws IllegalArgumentException {
@@ -1835,47 +1826,50 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Merges the given element with the current values associated with the specified key in this Multimap.
+     * Merges a single element with the existing values for a key using a custom merging function.
+     * This is the single-element variant of {@link #merge(Object, Collection, BiFunction)}.
      *
-     * This method first retrieves the current value associated with the specified key. If the key is not already associated with a value,
-     * it associates the key with the given element.
+     * <p>The merge operation works as follows:</p>
+     * <ul>
+     *   <li>If the key doesn't exist, the element is added directly and the resulting collection is returned</li>
+     *   <li>If the key exists, the remapping function receives the current collection and the new element,
+     *       allowing custom logic to determine the final collection state</li>
+     *   <li>If the function returns null or an empty collection, the key is removed</li>
+     *   <li>If the function returns the same collection instance, no update occurs (optimization)</li>
+     * </ul>
      *
-     * If the key is already associated with a value, it applies the remapping function to the current value and the given element,
-     * and updates the key's associated value in the Multimap with the result. If the remapping function returns {@code null} or an empty collection,
-     * the key is removed from the Multimap.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("scores", Arrays.asList(85, 92, 78));
      *
-     * The implementation is equivalent to performing the following steps for this Multimap:
+     * // Add element if it improves the average
+     * multimap.merge("scores", 95, (oldVals, newVal) -> {
+     *     double currentAvg = oldVals.stream().mapToInt(Integer::intValue).average().orElse(0);
+     *     if (newVal > currentAvg) {
+     *         List<Integer> updated = new ArrayList<>(oldVals);
+     *         updated.add(newVal);
+     *         return updated;
+     *     }
+     *     return oldVals; // Don't add if below average
+     * });
      *
-     * <pre>
-     * final V oldValue = get(key);
+     * // Replace all if new value meets condition
+     * multimap.merge("threshold", 100, (oldVals, newVal) -> {
+     *     if (newVal > 50) {
+     *         return Arrays.asList(newVal); // Replace all
+     *     }
+     *     return oldVals; // Keep existing
+     * });
+     * }</pre>
      *
-     * if (oldValue == null) {
-     *     put(key, e);
-     *     return get(key);
-     * }
-     *
-     * V ret = null;
-     * final V newValue = remappingFunction.apply(oldValue, e);
-     *
-     * if (N.notEmpty(newValue)) {
-     *      if (oldValue != newValue) {
-     *          oldValue.clear();
-     *          oldValue.addAll(newValue);
-     *      }
-     *
-     *      ret = oldValue;
-     * } else if (oldValue != null) {
-     *     backingMap.remove(key);
-     * }
-     *
-     * return ret;
-     * </pre>
-     *
-     * @param key The key whose associated value is to be computed.
-     * @param e The element to be merged with the current values associated with the key.
-     * @param remappingFunction The function to compute a value.
-     * @return The new value associated with the specified key, or {@code null} if the remapping function returns {@code null} or an empty collection.
-     * @throws IllegalArgumentException if the remappingFunction is {@code null}.
+     * @param key the key whose value should be merged with the element
+     * @param e the element to merge with existing values
+     * @param remappingFunction the function that defines how to merge the collection with the new element
+     * @return the updated collection associated with the key, or null if the key was removed
+     * @throws IllegalArgumentException if remappingFunction or e is null
+     * @see #merge(Object, Collection, BiFunction)
+     * @see #compute(Object, BiFunction)
      */
     public V merge(final K key, final E e, final BiFunction<? super V, ? super E, ? extends V> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction);
@@ -2170,13 +2164,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      */
     public Multimap<K, E, V> filter(final BiPredicate<? super K, ? super V> filter) {
         final Multimap<K, E, V> result = new Multimap<>(mapSupplier, valueSupplier);
-    
+
         for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey(), entry.getValue())) {
-                result.backingMap.put(entry.getKey(), entry.getValue());
+                result.putMany(entry.getKey(), entry.getValue());
             }
         }
-    
+
         return result;
     }
 
@@ -2213,7 +2207,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey())) {
-                result.backingMap.put(entry.getKey(), entry.getValue());
+                result.putMany(entry.getKey(), entry.getValue());
             }
         }
 
@@ -2258,7 +2252,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (filter.test(entry.getValue())) {
-                result.backingMap.put(entry.getKey(), entry.getValue());
+                result.putMany(entry.getKey(), entry.getValue());
             }
         }
 
@@ -2639,15 +2633,37 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Returns a collection of all values in the Multimap.
+     * Returns all individual values from all collections in this Multimap in a collection of a specific type.
+     * This is the customizable variant of {@link #flatValues()} that allows choosing the collection type.
      *
-     * This method retrieves all value collections present in the Multimap and flattens them into a single collection.
-     * The type of the returned collection is determined by the provided supplier function.
-     * The returned collection is a new collection and not backed by the Multimap, so changes to the Multimap are not reflected in the collection.
+     * <p>The supplier function receives the total count of values as a capacity hint,
+     * which can improve performance by pre-sizing the collection appropriately.</p>
      *
-     * @param <C> The type of the collection to be returned.
-     * @param supplier A function that creates a new collection of the desired type. The function is provided with an integer argument, which is the total count of values in the Multimap.
-     * @return A collection of all values contained in this Multimap.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("evens", Arrays.asList(2, 4, 6));
+     * multimap.putMany("odds", Arrays.asList(1, 3, 5));
+     *
+     * // Get as LinkedHashSet to preserve order and remove duplicates
+     * Set<Integer> uniqueOrdered = multimap.flatValues(size -> new LinkedHashSet<>(size));
+     *
+     * // Get as TreeSet for sorted unique values
+     * TreeSet<Integer> sorted = multimap.flatValues(size -> new TreeSet<>());
+     *
+     * // Get as ArrayList with pre-sized capacity
+     * ArrayList<Integer> allValues = multimap.flatValues(ArrayList::new);
+     *
+     * // Get as concurrent collection
+     * ConcurrentLinkedQueue<Integer> concurrent =
+     *     multimap.flatValues(size -> new ConcurrentLinkedQueue<>());
+     * }</pre>
+     *
+     * @param <C> the type of collection to return
+     * @param supplier function that creates the collection, receives total value count as parameter
+     * @return a new collection of the specified type containing all values from this Multimap
+     * @see #flatValues()
+     * @see #values()
      */
     public <C extends Collection<E>> C flatValues(final IntFunction<C> supplier) {
         final C result = supplier.apply(totalCountOfValues());
@@ -2660,12 +2676,30 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Converts the Multimap to a Map.
+     * Converts this Multimap to a standard Map with independent collection copies.
+     * Each value collection is copied to ensure the returned Map is completely independent.
      *
-     * This method creates a new Map and copies all key-value pairs from the Multimap to the new Map.
-     * The new Map has the same structural and hash characteristics as the Multimap.
+     * <p>The returned Map:</p>
+     * <ul>
+     *   <li>Has the same type as the backing map (e.g., HashMap if backed by HashMap)</li>
+     *   <li>Contains copies of all value collections (not references to original collections)</li>
+     *   <li>Is completely independent - changes to either the Map or Multimap don't affect each other</li>
+     * </ul>
      *
-     * @return A Map containing all the key-value pairs of this Multimap.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("group1", Arrays.asList(1, 2, 3));
+     * multimap.putMany("group2", Arrays.asList(4, 5));
+     *
+     * Map<String, List<Integer>> map = multimap.toMap();
+     * map.get("group1").add(99); // Only affects the map, not the multimap
+     *
+     * multimap.put("group1", 100); // Only affects the multimap, not the map
+     * }</pre>
+     *
+     * @return a new independent Map containing all key-collection pairs from this Multimap
+     * @see #toMap(IntFunction)
      */
     public Map<K, V> toMap() {
         final Map<K, V> result = Maps.newTargetMap(backingMap);
@@ -2685,13 +2719,34 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Converts the Multimap to a Map of a specific type.
+     * Converts this Multimap to a Map of a specific type with independent collection copies.
+     * This method provides control over the type of Map to create.
      *
-     * This method creates a new Map of the type specified by the supplier function and copies all key-value pairs from the Multimap to the new Map.
+     * <p>The supplier function receives the size of this Multimap as a hint for initial capacity,
+     * which can improve performance by reducing rehashing.</p>
      *
-     * @param <M> The type of the Map to be returned.
-     * @param supplier A function that creates a new Map of the desired type. The function is provided with an integer argument, which is the size of this Multimap.
-     * @return A Map of the specified type containing all the key-value pairs of this Multimap.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("a", Arrays.asList(1, 2));
+     * multimap.putMany("b", Arrays.asList(3, 4));
+     *
+     * // Convert to TreeMap for sorted keys
+     * TreeMap<String, List<Integer>> treeMap = multimap.toMap(size -> new TreeMap<>());
+     *
+     * // Convert to LinkedHashMap for insertion order
+     * LinkedHashMap<String, List<Integer>> linkedMap =
+     *     multimap.toMap(size -> new LinkedHashMap<>(size));
+     *
+     * // Convert to concurrent map
+     * ConcurrentHashMap<String, List<Integer>> concurrentMap =
+     *     multimap.toMap(ConcurrentHashMap::new);
+     * }</pre>
+     *
+     * @param <M> the specific Map type to create
+     * @param supplier function that creates a new Map instance, receives Multimap size as parameter
+     * @return a new Map of the specified type containing all key-collection pairs
+     * @see #toMap()
      */
     public <M extends Map<K, V>> M toMap(final IntFunction<? extends M> supplier) {
         final M result = supplier.apply(size());
@@ -2711,12 +2766,36 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Converts the Multimap to a Multiset.
+     * Converts this Multimap to a Multiset where each key's count equals the size of its value collection.
+     * This is useful for analyzing key frequencies or distribution of values across keys.
      *
-     * This method creates a new Multiset and adds all keys from the Multimap to the new Multiset.
-     * The count of each key in the Multiset is equal to the size of its corresponding value collection in the Multimap.
+     * <p>The conversion works as follows:</p>
+     * <ul>
+     *   <li>Each key from the Multimap becomes an element in the Multiset</li>
+     *   <li>The count for each key equals the number of values associated with that key</li>
+     *   <li>If a key has an empty collection, it won't appear in the Multiset (count = 0)</li>
+     * </ul>
      *
-     * @return A Multiset containing all the keys of this Multimap, with each key's count equal to the size of its corresponding value collection.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, String> multimap = N.newListMultimap();
+     * multimap.putMany("user1", Arrays.asList("action1", "action2", "action3"));
+     * multimap.putMany("user2", Arrays.asList("action1"));
+     * multimap.putMany("user3", Arrays.asList("action1", "action2"));
+     *
+     * Multiset<String> activityCount = multimap.toMultiset();
+     * // Result: {"user1"=3, "user2"=1, "user3"=2}
+     *
+     * // Find most active user
+     * String mostActive = activityCount.entrySet().stream()
+     *     .max(Comparator.comparingInt(Map.Entry::getValue))
+     *     .map(Map.Entry::getKey)
+     *     .orElse(null);
+     * // Returns "user1"
+     * }</pre>
+     *
+     * @return a new Multiset where each key's count equals its value collection size
+     * @see Multiset
      */
     public Multiset<K> toMultiset() {
         final Multiset<K> multiset = new Multiset<>(backingMap.getClass());
@@ -2756,10 +2835,32 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     //    }
 
     /**
-     * Returns an iterator over the entries in the Multimap.
-     * Each element in the iteration is a Map.Entry where the key is a key in the Multimap and the value is the corresponding collection of values.
+     * Returns an iterator over the key-collection entries in this Multimap.
+     * This iterator allows traversing all mappings in the Multimap.
      *
-     * @return An Iterator over the entries in the Multimap.
+     * <p>Each element in the iteration is a Map.Entry where:</p>
+     * <ul>
+     *   <li>The key is a key from the Multimap</li>
+     *   <li>The value is the entire collection of values associated with that key</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("group1", Arrays.asList(1, 2, 3));
+     * multimap.putMany("group2", Arrays.asList(4, 5));
+     *
+     * for (Map.Entry<String, List<Integer>> entry : multimap) {
+     *     System.out.println(entry.getKey() + " -> " + entry.getValue());
+     * }
+     * // Output:
+     * // group1 -> [1, 2, 3]
+     * // group2 -> [4, 5]
+     * }</pre>
+     *
+     * @return an iterator over the key-collection entries in this Multimap
+     * @see #stream()
+     * @see #entrySet()
      */
     @Override
     public Iterator<Entry<K, V>> iterator() {
@@ -2767,27 +2868,100 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Returns a Stream of the entries in the Multimap.
-     * Each element in the Stream is a Map.Entry where the key is a key in the Multimap and the value is the corresponding collection of values.
+     * Returns a Stream of key-collection entries for functional-style operations on this Multimap.
+     * This enables powerful stream-based transformations and queries.
      *
-     * @return A Stream of the entries in the Multimap.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("small", Arrays.asList(1, 2));
+     * multimap.putMany("medium", Arrays.asList(3, 4, 5));
+     * multimap.putMany("large", Arrays.asList(6, 7, 8, 9));
+     *
+     * // Find keys with more than 2 values
+     * List<String> bigKeys = multimap.stream()
+     *     .filter(e -> e.getValue().size() > 2)
+     *     .map(Map.Entry::getKey)
+     *     .collect(Collectors.toList());
+     * // Returns ["medium", "large"]
+     *
+     * // Calculate total of all values
+     * int total = multimap.stream()
+     *     .flatMap(e -> e.getValue().stream())
+     *     .mapToInt(Integer::intValue)
+     *     .sum();
+     *
+     * // Group by collection size
+     * Map<Integer, List<String>> bySize = multimap.stream()
+     *     .collect(Collectors.groupingBy(
+     *         e -> e.getValue().size(),
+     *         Collectors.mapping(Map.Entry::getKey, Collectors.toList())
+     *     ));
+     * }</pre>
+     *
+     * @return a Stream of key-collection entries from this Multimap
+     * @see #entryStream()
+     * @see #iterator()
      */
     public Stream<Map.Entry<K, V>> stream() {
         return Stream.of(backingMap.entrySet());
     }
 
     /**
-     * Returns an EntryStream of the entries in the Multimap.
-     * Each element in the EntryStream is a Map.Entry where the key is a key in the Multimap and the value is the corresponding collection of values.
+     * Returns an EntryStream for advanced key-collection entry operations with specialized stream methods.
+     * EntryStream provides enhanced functionality beyond standard streams, optimized for Map.Entry operations.
      *
-     * @return An EntryStream of the entries in the Multimap.
+     * <p>EntryStream offers additional methods like:</p>
+     * <ul>
+     *   <li>Direct key/value mapping without entry unwrapping</li>
+     *   <li>Entry-specific filters and transformations</li>
+     *   <li>Convenient methods for Map construction</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("a", Arrays.asList(1, 2, 3));
+     * multimap.putMany("b", Arrays.asList(4, 5));
+     *
+     * // Map keys to collection sizes
+     * Map<String, Integer> sizes = multimap.entryStream()
+     *     .mapValues(Collection::size)
+     *     .toMap();
+     * // Result: {a=3, b=2}
+     *
+     * // Filter and transform
+     * Map<String, String> transformed = multimap.entryStream()
+     *     .filter(e -> e.getValue().size() > 2)
+     *     .mapKeys(String::toUpperCase)
+     *     .mapValues(v -> "Count: " + v.size())
+     *     .toMap();
+     * // Result: {A="Count: 3"}
+     * }</pre>
+     *
+     * @return an EntryStream of key-collection entries from this Multimap
+     * @see #stream()
+     * @see EntryStream
      */
     public EntryStream<K, V> entryStream() {
         return EntryStream.of(backingMap);
     }
 
     /**
-     * Removes all key-value pairs from the Multimap.
+     * Removes all key-value pairs from this Multimap, leaving it empty.
+     * After this call, {@link #isEmpty()} will return true and {@link #size()} will return 0.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("key1", Arrays.asList(1, 2, 3));
+     * multimap.putMany("key2", Arrays.asList(4, 5));
+     *
+     * multimap.clear();
+     * // multimap is now empty
+     * // size() returns 0
+     * // isEmpty() returns true
+     * }</pre>
      */
     public void clear() {
         backingMap.clear();
@@ -2839,50 +3013,174 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Applies the given function to this Multimap and returns the result.
+     * Applies a function to this Multimap and returns the result.
+     * This enables functional-style transformations and method chaining.
      *
-     * @param <R> The type of the result returned by the function.
-     * @param <X> The type of the exception that can be thrown by the function.
-     * @param func The function to be applied to this Multimap.
-     * @return The result of applying the function to this Multimap.
-     * @throws X if the function throws an exception of type X.
+     * <p>This method is useful for:</p>
+     * <ul>
+     *   <li>Transforming the Multimap into another data structure</li>
+     *   <li>Extracting computed values from the Multimap</li>
+     *   <li>Integrating with functional pipelines</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("a", Arrays.asList(1, 2, 3));
+     * multimap.putMany("b", Arrays.asList(4, 5));
+     *
+     * // Transform to summary statistics
+     * String summary = multimap.apply(mm -> {
+     *     int totalKeys = mm.size();
+     *     int totalValues = mm.totalCountOfValues();
+     *     return String.format("Keys: %d, Values: %d", totalKeys, totalValues);
+     * });
+     * // Returns "Keys: 2, Values: 5"
+     *
+     * // Convert to custom object
+     * MyDataStructure data = multimap.apply(mm -> new MyDataStructure(mm));
+     *
+     * // Chain with other operations
+     * int maxCollectionSize = multimap.apply(mm ->
+     *     mm.stream()
+     *       .map(e -> e.getValue().size())
+     *       .max(Integer::compare)
+     *       .orElse(0)
+     * );
+     * }</pre>
+     *
+     * @param <R> the type of the result
+     * @param <X> the type of exception that may be thrown
+     * @param func the function to apply to this Multimap
+     * @return the result of applying the function
+     * @throws X if the function throws an exception
+     * @see #applyIfNotEmpty(Throwables.Function)
+     * @see #accept(Throwables.Consumer)
      */
     public <R, X extends Exception> R apply(final Throwables.Function<? super Multimap<K, E, V>, R, X> func) throws X {
         return func.apply(this);
     }
 
     /**
-     * Applies the given function to this Multimap and returns the result if the Multimap is not empty, and wraps the returned result with an Optional.
-     * If the Multimap is empty, the method returns an empty Optional.
+     * Applies a function to this Multimap only if it's not empty, returning the result wrapped in an Optional.
+     * This provides safe handling of potentially empty Multimaps in functional pipelines.
      *
-     * @param <R> The type of the result returned by the function.
-     * @param <X> The type of the exception that can be thrown by the function.
-     * @param func The function to be applied to this Multimap.
-     * @return An Optional containing the result of applying the function to this Multimap, or an empty Optional if the Multimap is empty.
-     * @throws X if the function throws an exception of type X.
+     * <p>If the Multimap is empty, returns {@link Optional#empty()} without calling the function.
+     * If the Multimap is not empty, applies the function and wraps the result in an Optional.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     *
+     * // Empty multimap - returns Optional.empty()
+     * Optional<Integer> result1 = multimap.applyIfNotEmpty(mm ->
+     *     mm.flatValues().stream().mapToInt(Integer::intValue).sum()
+     * );
+     * // result1 is empty
+     *
+     * // Non-empty multimap - applies function
+     * multimap.putMany("nums", Arrays.asList(1, 2, 3));
+     * Optional<Integer> result2 = multimap.applyIfNotEmpty(mm ->
+     *     mm.flatValues().stream().mapToInt(Integer::intValue).sum()
+     * );
+     * // result2 contains 6
+     *
+     * // Chain with Optional operations
+     * String message = multimap.applyIfNotEmpty(mm ->
+     *     "Total: " + mm.totalCountOfValues()
+     * ).orElse("No data");
+     * }</pre>
+     *
+     * @param <R> the type of the result
+     * @param <X> the type of exception that may be thrown
+     * @param func the function to apply if the Multimap is not empty
+     * @return an Optional containing the result if Multimap is not empty, otherwise empty Optional
+     * @throws X if the function throws an exception
+     * @see #apply(Throwables.Function)
+     * @see #acceptIfNotEmpty(Throwables.Consumer)
      */
     public <R, X extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Multimap<K, E, V>, R, X> func) throws X {
         return isEmpty() ? Optional.empty() : Optional.ofNullable(func.apply(this));
     }
 
     /**
-     * Applies the given action to this Multimap.
+     * Performs an action on this Multimap, useful for side effects and method chaining.
+     * This method enables functional-style operations that don't produce a return value.
      *
-     * @param <X> The type of the exception that can be thrown by the action.
-     * @param action The consumer action to be applied to this Multimap.
-     * @throws X if the action throws an exception of type X.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("scores", Arrays.asList(85, 92, 78));
+     *
+     * // Perform logging
+     * multimap.accept(mm -> {
+     *     System.out.println("Size: " + mm.size());
+     *     System.out.println("Total values: " + mm.totalCountOfValues());
+     * });
+     *
+     * // Perform validation
+     * multimap.accept(mm -> {
+     *     if (mm.totalCountOfValues() > 1000) {
+     *         throw new IllegalStateException("Too many values");
+     *     }
+     * });
+     *
+     * // Method chaining with side effects
+     * multimap.accept(mm -> logger.info("Processing " + mm.size() + " keys"))
+     *         .apply(mm -> transform(mm));
+     * }</pre>
+     *
+     * @param <X> the type of exception that may be thrown
+     * @param action the consumer action to perform on this Multimap
+     * @throws X if the action throws an exception
+     * @see #acceptIfNotEmpty(Throwables.Consumer)
+     * @see #apply(Throwables.Function)
      */
     public <X extends Exception> void accept(final Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X {
         action.accept(this);
     }
 
     /**
-     * Applies the given action to this Multimap if it is not empty.
+     * Performs an action on this Multimap only if it's not empty, with support for else clause.
+     * This enables conditional processing with fallback behavior for empty Multimaps.
      *
-     * @param <X> The type of the exception that can be thrown by the action.
-     * @param action The consumer action to be applied to this Multimap.
-     * @return An instance of OrElse which can be used to perform some other operation if the Multimap is empty.
-     * @throws X if the action throws an exception of type X.
+     * <p>The action is only executed if {@link #size()} is greater than 0.
+     * Returns an {@link OrElse} instance that allows chaining an alternative action for the empty case.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     *
+     * // Simple conditional action
+     * multimap.acceptIfNotEmpty(mm -> {
+     *     System.out.println("Processing " + mm.size() + " entries");
+     *     // Process the multimap
+     * });
+     *
+     * // With else clause
+     * multimap.acceptIfNotEmpty(mm -> {
+     *     processData(mm);
+     * }).orElse(() -> {
+     *     System.out.println("No data to process");
+     * });
+     *
+     * // More complex example
+     * multimap.putMany("data", Arrays.asList(1, 2, 3));
+     * multimap.acceptIfNotEmpty(mm -> {
+     *     mm.forEach((key, values) -> {
+     *         System.out.println(key + ": " + values);
+     *     });
+     * }).orElse(() -> {
+     *     loadDefaultData();
+     * });
+     * }</pre>
+     *
+     * @param <X> the type of exception that may be thrown
+     * @param action the consumer action to perform if the Multimap is not empty
+     * @return an OrElse instance for chaining an alternative action for the empty case
+     * @throws X if the action throws an exception
+     * @see #accept(Throwables.Consumer)
+     * @see #applyIfNotEmpty(Throwables.Function)
      */
     public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X {
         return If.is(size() > 0).then(this, action);

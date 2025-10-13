@@ -8,11 +8,13 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
 import com.landawn.abacus.util.DateTimeFormat;
 
+@Tag("new-test")
 public class JSONSerializationConfig100Test extends TestBase {
 
     private JSONSerializationConfig config;
@@ -26,7 +28,6 @@ public class JSONSerializationConfig100Test extends TestBase {
     public void testConstructor() {
         JSONSerializationConfig config = new JSONSerializationConfig();
         Assertions.assertNotNull(config);
-        // Test default values
         Assertions.assertTrue(config.quotePropName());
         Assertions.assertTrue(config.quoteMapKey());
         Assertions.assertTrue(config.bracketRootValue());
@@ -40,7 +41,7 @@ public class JSONSerializationConfig100Test extends TestBase {
         Assertions.assertFalse(config.writeNullToEmpty());
 
         JSONSerializationConfig result = config.writeNullToEmpty(true);
-        Assertions.assertSame(config, result); // Test fluent API
+        Assertions.assertSame(config, result);
         Assertions.assertTrue(config.writeNullToEmpty());
 
         config.writeNullToEmpty(false);
@@ -85,7 +86,6 @@ public class JSONSerializationConfig100Test extends TestBase {
 
     @Test
     public void testSetCharQuotation() {
-        // This method is deprecated but we still test it
         JSONSerializationConfig result = config.setCharQuotation('\'');
         Assertions.assertSame(config, result);
         Assertions.assertEquals('\'', config.getCharQuotation());
@@ -93,7 +93,6 @@ public class JSONSerializationConfig100Test extends TestBase {
 
     @Test
     public void testSetStringQuotation() {
-        // This method is deprecated but we still test it
         JSONSerializationConfig result = config.setStringQuotation('\'');
         Assertions.assertSame(config, result);
         Assertions.assertEquals('\'', config.getStringQuotation());
@@ -101,7 +100,6 @@ public class JSONSerializationConfig100Test extends TestBase {
 
     @Test
     public void testNoCharQuotation() {
-        // This method is deprecated but we still test it
         JSONSerializationConfig result = config.noCharQuotation();
         Assertions.assertSame(config, result);
         Assertions.assertEquals((char) 0, config.getCharQuotation());
@@ -109,7 +107,6 @@ public class JSONSerializationConfig100Test extends TestBase {
 
     @Test
     public void testNoStringQuotation() {
-        // This method is deprecated but we still test it
         JSONSerializationConfig result = config.noStringQuotation();
         Assertions.assertSame(config, result);
         Assertions.assertEquals((char) 0, config.getStringQuotation());
@@ -117,7 +114,6 @@ public class JSONSerializationConfig100Test extends TestBase {
 
     @Test
     public void testNoQuotation() {
-        // This method is deprecated but we still test it
         JSONSerializationConfig result = config.noQuotation();
         Assertions.assertSame(config, result);
         Assertions.assertEquals((char) 0, config.getCharQuotation());
@@ -188,8 +184,8 @@ public class JSONSerializationConfig100Test extends TestBase {
         JSONSerializationConfig config1 = new JSONSerializationConfig();
         JSONSerializationConfig config2 = new JSONSerializationConfig();
 
-        Assertions.assertEquals(config1, config1); // Same object
-        Assertions.assertEquals(config1, config2); // Equal objects
+        Assertions.assertEquals(config1, config1);
+        Assertions.assertEquals(config1, config2);
         Assertions.assertNotEquals(config1, null);
         Assertions.assertNotEquals(config1, "string");
 
@@ -220,7 +216,6 @@ public class JSONSerializationConfig100Test extends TestBase {
 
     @Test
     public void testJSCOf() {
-        // Test deprecated methods
         JSONSerializationConfig config1 = JSC.of(false, true);
         Assertions.assertFalse(config1.quotePropName());
         Assertions.assertTrue(config1.quoteMapKey());

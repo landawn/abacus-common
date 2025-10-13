@@ -1,9 +1,9 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -18,18 +18,17 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Joiner100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Clean up before each test
     }
-
-    // ===== Factory Methods Tests =====
 
     @Test
     public void testDefauLt() {
@@ -69,8 +68,6 @@ public class Joiner100Test extends TestBase {
         assertEquals("[k1:v1,k2:v2]", joiner.toString());
     }
 
-    // ===== Configuration Methods Tests =====
-
     @Test
     public void testSetEmptyValue() {
         Joiner joiner = Joiner.with(",").setEmptyValue("EMPTY");
@@ -109,10 +106,7 @@ public class Joiner100Test extends TestBase {
         joiner.append("a").append("b");
         String result = joiner.toString();
         assertEquals("a,b", result);
-        // After toString(), the buffer should be recycled
     }
-
-    // ===== Append Primitive Types Tests =====
 
     @Test
     public void testAppendBoolean() {
@@ -156,8 +150,6 @@ public class Joiner100Test extends TestBase {
         assertEquals("1.5,2.5", joiner.toString());
     }
 
-    // ===== Append String and CharSequence Tests =====
-
     @Test
     public void testAppendString() {
         Joiner joiner = Joiner.with(",");
@@ -180,13 +172,6 @@ public class Joiner100Test extends TestBase {
         joiner.append(arr1).append(arr2);
         assertEquals("[a, b],[c, d]", joiner.toString());
     }
-    //    @Test
-    //    public void testAppendCharArrayWithOffsetAndLength() {
-    //        Joiner joiner = Joiner.with(",");
-    //        char[] arr = { 'a', 'b', 'c', 'd' };
-    //        joiner.append(arr, 1, 2);
-    //        assertEquals("bc", joiner.toString());
-    //    }
 
     @Test
     public void testAppendCharSequence() {
@@ -234,8 +219,6 @@ public class Joiner100Test extends TestBase {
         joiner.appendIf(true, () -> "yes").appendIf(false, () -> "no");
         assertEquals("yes", joiner.toString());
     }
-
-    // ===== AppendAll Array Tests =====
 
     @Test
     public void testAppendAllBooleanArray() {
@@ -285,8 +268,6 @@ public class Joiner100Test extends TestBase {
         assertEquals("a,c", joiner.toString());
     }
 
-    // ===== AppendAll Collection Tests =====
-
     @Test
     public void testAppendAllCollection() {
         Joiner joiner = Joiner.with(",");
@@ -334,8 +315,6 @@ public class Joiner100Test extends TestBase {
         joiner.appendAll(list.iterator(), i -> i % 2 == 0);
         assertEquals("2,4", joiner.toString());
     }
-
-    // ===== AppendEntry Tests =====
 
     @Test
     public void testAppendEntryPrimitives() {
@@ -415,8 +394,6 @@ public class Joiner100Test extends TestBase {
         assertEquals("KEY1=val:100,KEY2=val:200", joiner.toString());
     }
 
-    // ===== Repeat Tests =====
-
     @Test
     public void testRepeatString() {
         Joiner joiner = Joiner.with(",");
@@ -436,8 +413,6 @@ public class Joiner100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").repeat("x", -1));
     }
 
-    // ===== Merge Tests =====
-
     @Test
     public void testMerge() {
         Joiner joiner1 = Joiner.with(",", "[", "]");
@@ -455,18 +430,14 @@ public class Joiner100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").merge(null));
     }
 
-    // ===== Length Tests =====
-
     @Test
     public void testLength() {
         Joiner joiner = Joiner.with(",", "[", "]");
-        assertEquals(2, joiner.length()); // "[" + "]"
+        assertEquals(2, joiner.length());
 
         joiner.append("hello");
-        assertEquals(7, joiner.length()); // "[hello]"
+        assertEquals(7, joiner.length());
     }
-
-    // ===== ToString Tests =====
 
     @Test
     public void testToStringEmpty() {
@@ -489,8 +460,6 @@ public class Joiner100Test extends TestBase {
         assertEquals("[a]", joiner.toString());
     }
 
-    // ===== AppendTo Tests =====
-
     @Test
     public void testAppendTo() throws IOException {
         Joiner joiner = Joiner.with(",");
@@ -500,8 +469,6 @@ public class Joiner100Test extends TestBase {
         joiner.appendTo(sb);
         assertEquals("prefix:a,b", sb.toString());
     }
-
-    // ===== Map Tests =====
 
     @Test
     public void testMap() {
@@ -524,52 +491,15 @@ public class Joiner100Test extends TestBase {
     }
 
     @Test
-    public void testMapToNonNullIfNotEmpty() {
-        Joiner emptyJoiner = Joiner.with(",");
-        assertFalse(emptyJoiner.mapToNonNullIfNotEmpty(String::length).isPresent());
-
-        Joiner joiner = Joiner.with(",");
-        joiner.append("a").append("b");
-        assertTrue(joiner.mapToNonNullIfNotEmpty(String::length).isPresent());
-        assertEquals(Integer.valueOf(3), joiner.mapToNonNullIfNotEmpty(String::length).get());
-    }
-
-    // ===== Stream Tests =====
-
-    @Test
-    public void testStream() {
-        Joiner joiner = Joiner.with(",");
-        joiner.append("a").append("b");
-
-        List<String> result = joiner.stream().toList();
-        assertEquals(1, result.size());
-        assertEquals("a,b", result.get(0));
-    }
-
-    @Test
-    public void testStreamIfNotEmpty() {
-        Joiner emptyJoiner = Joiner.with(",");
-        assertEquals(0, emptyJoiner.streamIfNotEmpty().count());
-
-        Joiner joiner = Joiner.with(",");
-        joiner.append("a");
-        assertEquals(1, joiner.streamIfNotEmpty().count());
-    }
-
-    // ===== Close Tests =====
-
-    @Test
     public void testClose() {
         Joiner joiner = Joiner.with(",").reuseCachedBuffer();
         joiner.append("a").append("b");
         joiner.close();
 
-        // After close, operations should throw IllegalStateException
         try {
             joiner.append("c");
             fail("Expected IllegalStateException");
         } catch (IllegalStateException e) {
-            // Expected
         }
     }
 
@@ -577,10 +507,8 @@ public class Joiner100Test extends TestBase {
     public void testMultipleClose() {
         Joiner joiner = Joiner.with(",");
         joiner.close();
-        joiner.close(); // Should not throw
+        joiner.close();
     }
-
-    // ===== Edge Cases and Complex Scenarios =====
 
     @Test
     public void testEmptySeparator() {
@@ -609,17 +537,14 @@ public class Joiner100Test extends TestBase {
 
     @Test
     public void testNullHandlingConsistency() {
-        // Test without skipNulls
         Joiner j1 = Joiner.with(",");
         j1.append((String) null);
         assertEquals("null", j1.toString());
 
-        // Test with skipNulls
         Joiner j2 = Joiner.with(",").skipNulls();
         j2.append((String) null);
         assertEquals("", j2.toString());
 
-        // Test with custom null text
         Joiner j3 = Joiner.with(",").useForNull("NONE");
         j3.append((String) null);
         assertEquals("NONE", j3.toString());

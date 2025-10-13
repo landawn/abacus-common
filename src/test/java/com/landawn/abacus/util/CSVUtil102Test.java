@@ -22,12 +22,14 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("new-test")
 public class CSVUtil102Test extends TestBase {
 
     private File tempFile;
@@ -75,7 +77,8 @@ public class CSVUtil102Test extends TestBase {
 
     @Test
     public void testResetCSVLineParser() {
-        BiConsumer<String, String[]> customParser = (line, output) -> {};
+        BiConsumer<String, String[]> customParser = (line, output) -> {
+        };
         CSVUtil.setLineParser(customParser);
         CSVUtil.resetLineParser();
         assertNotEquals(customParser, CSVUtil.getCurrentLineParser());
@@ -159,7 +162,7 @@ public class CSVUtil102Test extends TestBase {
     public void testLoadCSVFromReader() throws IOException {
         String csvContent = "Name,Age,City\nJohn,30,NYC\nJane,25,LA\n";
         Reader reader = new StringReader(csvContent);
-        
+
         Dataset ds = CSVUtil.loadCSV(reader);
         assertEquals(3, ds.columnNameList().size());
         assertEquals(2, ds.size());
@@ -189,56 +192,70 @@ public class CSVUtil102Test extends TestBase {
     @Test
     public void testCSVHeaderParserByDefault() {
         String[] result = CSVUtil.CSV_HEADER_PARSER.apply("Name,Age,\"Address, City\"");
-        assertArrayEquals(new String[]{"Name", "Age", "Address, City"}, result);
+        assertArrayEquals(new String[] { "Name", "Age", "Address, City" }, result);
     }
 
     @Test
     public void testCSVHeaderParserBySplitter() {
         String[] result = CSVUtil.CSV_HEADER_PARSER_BY_SPLITTER.apply("\"Name\",\"Age\",\"City\"");
-        assertArrayEquals(new String[]{"Name", "Age", "City"}, result);
+        assertArrayEquals(new String[] { "Name", "Age", "City" }, result);
     }
 
     @Test
     public void testCSVHeaderParserInJSON() {
         String[] result = CSVUtil.CSV_HEADER_PARSER_IN_JSON.apply("[\"Name\",\"Age\",\"City\"]");
-        assertArrayEquals(new String[]{"Name", "Age", "City"}, result);
+        assertArrayEquals(new String[] { "Name", "Age", "City" }, result);
     }
 
     @Test
     public void testCSVLineParserByDefault() {
         String[] output = new String[3];
         CSVUtil.CSV_LINE_PARSER.accept("John,30,\"New York, NY\"", output);
-        assertArrayEquals(new String[]{"John", "30", "New York, NY"}, output);
+        assertArrayEquals(new String[] { "John", "30", "New York, NY" }, output);
     }
 
     @Test
     public void testCSVLineParserBySplitter() {
         String[] output = new String[3];
         CSVUtil.CSV_LINE_PARSER_BY_SPLITTER.accept("\"John\",\"30\",\"NYC\"", output);
-        assertArrayEquals(new String[]{"John", "30", "NYC"}, output);
+        assertArrayEquals(new String[] { "John", "30", "NYC" }, output);
     }
 
     @Test
     public void testCSVLineParserInJSON() {
         String[] output = new String[3];
         CSVUtil.CSV_LINE_PARSER_IN_JSON.accept("[\"John\",\"30\",\"NYC\"]", output);
-        assertArrayEquals(new String[]{"John", "30", "NYC"}, output);
+        assertArrayEquals(new String[] { "John", "30", "NYC" }, output);
     }
 
-    // Test with bean class
     public static class Person {
         private String name;
         private int age;
         private String city;
 
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        
-        public int getAge() { return age; }
-        public void setAge(int age) { this.age = age; }
-        
-        public String getCity() { return city; }
-        public void setCity(String city) { this.city = city; }
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(String city) {
+            this.city = city;
+        }
     }
 
     @Test
@@ -269,7 +286,7 @@ public class CSVUtil102Test extends TestBase {
         columnTypeMap.put("name", N.typeOf(String.class));
         columnTypeMap.put("age", N.typeOf(Integer.class));
         columnTypeMap.put("salary", N.typeOf(Double.class));
-        
+
         Dataset ds = CSVUtil.loadCSV(tempFile, columnTypeMap);
         assertEquals("John", ds.get(0, 0));
         assertEquals(30, (Integer) ds.get(0, 1));
@@ -284,13 +301,12 @@ public class CSVUtil102Test extends TestBase {
             fw.write("Jane,25,LA\n");
         }
 
-        TriConsumer<List<String>, NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor = 
-            (columns, row, output) -> {
-                output[0] = row.get(0).toUpperCase();
-                output[1] = Integer.parseInt(row.get(1)) * 2;
-                output[2] = row.get(2).toLowerCase();
-            };
-        
+        TriConsumer<List<String>, NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor = (columns, row, output) -> {
+            output[0] = row.get(0).toUpperCase();
+            output[1] = Integer.parseInt(row.get(1)) * 2;
+            output[2] = row.get(2).toLowerCase();
+        };
+
         Dataset ds = CSVUtil.loadCSV(tempFile, rowExtractor);
         assertEquals("JOHN", ds.get(0, 0));
         assertEquals(60, (Integer) ds.get(0, 1));
@@ -369,11 +385,11 @@ public class CSVUtil102Test extends TestBase {
     public void testWriteField() throws IOException {
         StringWriter sw = new StringWriter();
         BufferedCSVWriter writer = new BufferedCSVWriter(sw);
-        
+
         CSVUtil.writeField(writer, N.typeOf(String.class), "Hello");
         CSVUtil.writeField(writer, N.typeOf(Integer.class), 42);
         CSVUtil.writeField(writer, null, null);
-        
+
         writer.flush();
         String result = sw.toString();
         assertTrue(result.contains("Hello"));

@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.google.common.base.Strings;
 import com.landawn.abacus.TestBase;
@@ -36,6 +37,7 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.u.OptionalDouble;
 
+@Tag("new-test")
 public class CharStream201Test extends TestBase {
 
     private static final char[] TEST_ARRAY = new char[] { 'h', 'e', 'l', 'l', 'o' };
@@ -43,8 +45,6 @@ public class CharStream201Test extends TestBase {
     private CharStream stream2;
     private CharStream stream3;
 
-    // This method will be used to initialize CharStream instances for tests.
-    // For ArrayCharStream, we directly instantiate it.
     protected CharStream createCharStream(char... array) {
         return CharStream.of(array).map(c -> (char) (c + 0));
     }
@@ -99,14 +99,10 @@ public class CharStream201Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Initialize with some default data for general tests if needed
-        // For static methods, this might not be directly used.
         stream = createCharStream(TEST_ARRAY);
         stream2 = createCharStream(TEST_ARRAY);
         stream3 = createCharStream(TEST_ARRAY);
     }
-
-    // Test cases for static methods in CharStream.java
 
     @Test
     public void testEmpty() {
@@ -122,9 +118,9 @@ public class CharStream201Test extends TestBase {
             counter.incrementAndGet();
             return createCharStream(new char[] { 'd', 'e', 'f' });
         });
-        assertEquals(0, counter.get()); // Should not be invoked yet
+        assertEquals(0, counter.get());
         List<Character> result = deferredStream.boxed().toList();
-        assertEquals(1, counter.get()); // Should be invoked now
+        assertEquals(1, counter.get());
         assertEquals(Arrays.asList('d', 'e', 'f'), result);
     }
 
@@ -159,21 +155,18 @@ public class CharStream201Test extends TestBase {
             createCharStream(data, -1, 2);
             fail("Expected IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
 
         try {
             createCharStream(data, 2, 1);
             fail("Expected IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
 
         try {
             createCharStream(data, 0, 10);
             fail("Expected IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
     }
 
@@ -199,7 +192,6 @@ public class CharStream201Test extends TestBase {
             createCharStream(str, -1, 2);
             fail("Expected IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
     }
 
@@ -243,7 +235,7 @@ public class CharStream201Test extends TestBase {
     @Test
     public void testOfCharBuffer() {
         CharBuffer buffer = CharBuffer.wrap(new char[] { 't', 'e', 's', 't' });
-        buffer.position(1).limit(3); // 'e', 's'
+        buffer.position(1).limit(3);
         CharStream stream1 = createCharStream(buffer);
         assertEquals(Arrays.asList('e', 's'), stream1.boxed().toList());
 
@@ -253,7 +245,6 @@ public class CharStream201Test extends TestBase {
 
     @Test
     public void testOfFile() throws IOException {
-        // This test requires a temporary file. Creating a dummy file for testing.
         File tempFile = File.createTempFile("charstream_test", ".txt");
         tempFile.deleteOnExit();
         IOUtil.write("Hello World".toCharArray(), tempFile);
@@ -267,8 +258,7 @@ public class CharStream201Test extends TestBase {
         Reader reader = new java.io.StringReader("abc");
         CharStream stream1 = createCharStream(reader);
         assertEquals(Arrays.asList('a', 'b', 'c'), stream1.boxed().toList());
-        // Reader should not be closed automatically
-        reader.read(); // Should be able to read more
+        reader.read();
     }
 
     @Test
@@ -278,10 +268,9 @@ public class CharStream201Test extends TestBase {
         assertEquals(Arrays.asList('x', 'y', 'z'), stream1.boxed().toList());
 
         try {
-            reader.read(); // Should throw IOException as it's now closed
+            reader.read();
             fail("Expected IOException due to closed reader");
         } catch (IOException e) {
-            // Expected
         }
     }
 
@@ -301,8 +290,6 @@ public class CharStream201Test extends TestBase {
     @Test
     public void testFlatten2DArrayVertically() {
         char[][] data = { { 'a', 'b' }, { 'c', 'd', 'e' } };
-        // Vertical flattening: a, c, b, d, e (padded with default for 'e' to make a rectangular shape if necessary)
-        // Without valueForAlignment, it's just iterating through existing elements.
         List<Character> result = CharStream.flatten(data, true).boxed().toList();
         assertEquals(Arrays.asList('a', 'c', 'b', 'd', 'e'), result);
 
@@ -314,14 +301,10 @@ public class CharStream201Test extends TestBase {
     public void testFlatten2DArrayWithAlignment() {
         char[][] data = { { 'a', 'b' }, { 'c', 'd', 'e' } };
         char padding = '-';
-        List<Character> result = CharStream.flatten(data, padding, false).boxed().toList(); // Horizontal
+        List<Character> result = CharStream.flatten(data, padding, false).boxed().toList();
         assertEquals(Arrays.asList('a', 'b', '-', 'c', 'd', 'e'), result);
 
-        result = CharStream.flatten(data, padding, true).boxed().toList(); // Vertical
-        // Max columns is 3.
-        // (0,0) 'a', (1,0) 'c'
-        // (0,1) 'b', (1,1) 'd'
-        // (0,2) '-', (1,2) 'e'
+        result = CharStream.flatten(data, padding, true).boxed().toList();
         assertEquals(Arrays.asList('a', 'c', 'b', 'd', '-', 'e'), result);
 
         result = CharStream.flatten(new char[][] { { 'x' } }, padding, false).boxed().toList();
@@ -415,7 +398,6 @@ public class CharStream201Test extends TestBase {
 
     @Test
     public void testRandom() {
-        // Cannot assert specific values, but can check type and basic properties 
         assertEquals(5, CharStream.random().limit(5).count());
         CharStream.random().limit(5).forEach(c -> assertTrue(c >= Character.MIN_VALUE && c <= Character.MAX_VALUE));
     }
@@ -462,7 +444,7 @@ public class CharStream201Test extends TestBase {
     @Test
     public void testIterateInitBooleanSupplierCharUnaryOperator() {
         AtomicInteger callCount = new AtomicInteger(0);
-        CharStream iteratedStream = CharStream.iterate('A', () -> callCount.incrementAndGet() <= 3, // true for first 3 iterations of hasNext.
+        CharStream iteratedStream = CharStream.iterate('A', () -> callCount.incrementAndGet() <= 3,
                 c -> (char) (c + 1));
         List<Character> result = iteratedStream.boxed().toList();
         assertEquals(Arrays.asList('A', 'B', 'C'), result);
@@ -470,7 +452,7 @@ public class CharStream201Test extends TestBase {
 
     @Test
     public void testIterateInitCharPredicateCharUnaryOperator() {
-        CharStream iteratedStream = CharStream.iterate('A', c -> c <= 'C', // Include 'A', 'B', 'C'
+        CharStream iteratedStream = CharStream.iterate('A', c -> c <= 'C',
                 c -> (char) (c + 1));
         List<Character> result = iteratedStream.boxed().toList();
         assertEquals(Arrays.asList('A', 'B', 'C'), result);
@@ -660,9 +642,9 @@ public class CharStream201Test extends TestBase {
     @Test
     public void testZipCollectionOfCharStreamsWithNoneValues() {
         Collection<CharStream> streams = Arrays.asList(createCharStream(new char[] { '1' }), createCharStream(new char[] { 'a', 'b' }));
-        char[] valuesForNone = { 'X', 'Y' }; // for stream1, for stream2
+        char[] valuesForNone = { 'X', 'Y' };
         List<Character> result = CharStream.zip(streams, valuesForNone, chars -> (char) (chars[0] + chars[1])).boxed().toList();
-        assertEquals(Arrays.asList((char) ('1' + 'a'), (char) ('X' + 'b')), result); // (stream1[0], stream2[0]), (valueForNone1, stream2[1])
+        assertEquals(Arrays.asList((char) ('1' + 'a'), (char) ('X' + 'b')), result);
     }
 
     @Test
@@ -729,15 +711,12 @@ public class CharStream201Test extends TestBase {
         Collection<CharStream> streams = Arrays.asList(createCharStream(new char[] { '1', '5' }), createCharStream(new char[] { '2', '6' }),
                 createCharStream(new char[] { '3', '4' }));
         List<Character> result = CharStream.merge(streams, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
-        // This is a complex merge order depending on internal logic, but for sorted streams, it should produce a sorted output.
         assertEquals(Arrays.asList('1', '2', '3', '4', '5', '6'), result);
     }
 
-    // Now, test all abstract methods defined in CharStream (and implemented by AbstractCharStream)
-
     @Test
     public void testMap() {
-        List<Character> result = stream.map(c -> (char) (c - 32)).boxed().toList(); // to upper case
+        List<Character> result = stream.map(c -> (char) (c - 32)).boxed().toList();
         assertEquals(Arrays.asList('H', 'E', 'L', 'L', 'O'), result);
 
         result = createCharStream(new char[] {}).map(c -> c).boxed().toList();
@@ -746,7 +725,7 @@ public class CharStream201Test extends TestBase {
 
     @Test
     public void testMapToInt() {
-        List<Integer> result = stream.mapToInt(c -> c).boxed().toList(); // ASCII values
+        List<Integer> result = stream.mapToInt(c -> c).boxed().toList();
         assertEquals(Arrays.asList(104, 101, 108, 108, 111), result);
 
         result = createCharStream(new char[] {}).mapToInt(c -> c).boxed().toList();
@@ -859,7 +838,7 @@ public class CharStream201Test extends TestBase {
 
     @Test
     public void testReduceIdentity() {
-        char sum = createCharStream(new char[] { '1', '2', '3' }).reduce('0', (c1, c2) -> (char) (c1 + c2 - '0')); // Summing char values as numbers
+        char sum = createCharStream(new char[] { '1', '2', '3' }).reduce('0', (c1, c2) -> (char) (c1 + c2 - '0'));
         assertEquals((char) ('0' + '1' + '2' + '3' - '0' - '0' - '0'), sum);
 
         sum = createCharStream(new char[] {}).reduce('Z', (c1, c2) -> c1);
@@ -926,14 +905,14 @@ public class CharStream201Test extends TestBase {
     @Test
     public void testAllMatch() {
         assertTrue(stream.allMatch(c -> c >= 'a' && c <= 'z'));
-        assertFalse(stream2.allMatch(c -> c == 'l')); // 'h', 'e', 'o' don't match
+        assertFalse(stream2.allMatch(c -> c == 'l'));
         assertTrue(createCharStream(new char[] {}).allMatch(c -> true));
     }
 
     @Test
     public void testNoneMatch() {
         assertTrue(stream.noneMatch(c -> c == 'x'));
-        assertFalse(stream2.noneMatch(c -> c == 'l')); // 'l' matches
+        assertFalse(stream2.noneMatch(c -> c == 'l'));
         assertTrue(createCharStream(new char[] {}).noneMatch(c -> true));
     }
 
@@ -952,7 +931,6 @@ public class CharStream201Test extends TestBase {
 
     @Test
     public void testFindAny() {
-        // For sequential streams, findAny typically behaves like findFirst
         OptionalChar any = stream.findAny(c -> c == 'l');
         assertTrue(any.isPresent());
         assertEquals('l', any.get());
@@ -965,7 +943,7 @@ public class CharStream201Test extends TestBase {
     public void testFindLast() {
         OptionalChar last = stream.findLast(c -> c == 'l');
         assertTrue(last.isPresent());
-        assertEquals('l', last.get()); // The second 'l' in "hello"
+        assertEquals('l', last.get());
 
         last = stream2.findLast(c -> c == 'o');
         assertTrue(last.isPresent());
@@ -1008,11 +986,11 @@ public class CharStream201Test extends TestBase {
     public void testKthLargest() {
         OptionalChar kl = createCharStream(new char[] { 'a', 'c', 'b', 'e', 'd' }).kthLargest(1);
         assertTrue(kl.isPresent());
-        assertEquals('e', kl.get()); // Largest
+        assertEquals('e', kl.get());
 
         kl = createCharStream(new char[] { 'a', 'c', 'b', 'e', 'd' }).kthLargest(3);
         assertTrue(kl.isPresent());
-        assertEquals('c', kl.get()); // 3rd largest: e,d,c,b,a -> c
+        assertEquals('c', kl.get());
 
         kl = createCharStream(new char[] { 'a' }).kthLargest(1);
         assertEquals('a', kl.get());
@@ -1031,7 +1009,7 @@ public class CharStream201Test extends TestBase {
 
     @Test
     public void testSum() {
-        int sum = createCharStream(new char[] { '1', '2', '3' }).sum(); // ASCII sum: 49+50+51 = 150
+        int sum = createCharStream(new char[] { '1', '2', '3' }).sum();
         assertEquals(150, sum);
 
         sum = createCharStream(new char[] {}).sum();
@@ -1040,7 +1018,7 @@ public class CharStream201Test extends TestBase {
 
     @Test
     public void testAverage() {
-        OptionalDouble avg = createCharStream(new char[] { '1', '2', '3' }).average(); // (49+50+51)/3 = 50.0
+        OptionalDouble avg = createCharStream(new char[] { '1', '2', '3' }).average();
         assertTrue(avg.isPresent());
         assertEquals(50.0, avg.getAsDouble(), 0.001);
 

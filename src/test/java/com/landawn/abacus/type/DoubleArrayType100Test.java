@@ -10,10 +10,12 @@ import java.io.StringWriter;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class DoubleArrayType100Test extends TestBase {
 
     private DoubleArrayType doubleArrayType;
@@ -27,26 +29,21 @@ public class DoubleArrayType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with null
         assertNull(doubleArrayType.stringOf(null));
 
-        // Test with empty array
         Double[] emptyArray = new Double[0];
         assertEquals("[]", doubleArrayType.stringOf(emptyArray));
 
-        // Test with single element
         Double[] singleElement = { 1.5 };
         String result = doubleArrayType.stringOf(singleElement);
         assertTrue(result.contains("1.5"));
 
-        // Test with multiple elements
         Double[] multipleElements = { 1.5, 2.5, 3.5 };
         result = doubleArrayType.stringOf(multipleElements);
         assertTrue(result.contains("1.5"));
         assertTrue(result.contains("2.5"));
         assertTrue(result.contains("3.5"));
 
-        // Test with null element
         Double[] withNull = { 1.5, null, 3.5 };
         result = doubleArrayType.stringOf(withNull);
         assertTrue(result.contains("1.5"));
@@ -56,25 +53,20 @@ public class DoubleArrayType100Test extends TestBase {
 
     @Test
     public void testValueOf() {
-        // Test with null
         assertNull(doubleArrayType.valueOf(null));
 
-        // Test with empty string
         Double[] result = doubleArrayType.valueOf("");
         assertNull(result);
 
-        // Test with empty array string
         result = doubleArrayType.valueOf("[]");
         assertNotNull(result);
         assertEquals(0, result.length);
 
-        // Test with single element
         result = doubleArrayType.valueOf("[1.5]");
         assertNotNull(result);
         assertEquals(1, result.length);
         assertEquals(1.5, result[0]);
 
-        // Test with multiple elements
         result = doubleArrayType.valueOf("[1.5, 2.5, 3.5]");
         assertNotNull(result);
         assertEquals(3, result.length);
@@ -82,7 +74,6 @@ public class DoubleArrayType100Test extends TestBase {
         assertEquals(2.5, result[1]);
         assertEquals(3.5, result[2]);
 
-        // Test with null element
         result = doubleArrayType.valueOf("[1.5, null, 3.5]");
         assertNotNull(result);
         assertEquals(3, result.length);
@@ -95,16 +86,13 @@ public class DoubleArrayType100Test extends TestBase {
     public void testAppendTo() throws IOException {
         StringWriter writer = new StringWriter();
 
-        // Test with null
         doubleArrayType.appendTo(writer, null);
         assertEquals("null", writer.toString());
 
-        // Test with empty array
         writer = new StringWriter();
         doubleArrayType.appendTo(writer, new Double[0]);
         assertEquals("[]", writer.toString());
 
-        // Test with elements
         writer = new StringWriter();
         Double[] array = { 1.5, null, 3.5 };
         doubleArrayType.appendTo(writer, array);
@@ -118,16 +106,11 @@ public class DoubleArrayType100Test extends TestBase {
 
     @Test
     public void testWriteCharacter() throws IOException {
-        // Assuming characterWriter is properly mocked
-        // Test would require mock verification
 
-        // Test with null
         doubleArrayType.writeCharacter(characterWriter, null, null);
 
-        // Test with empty array
         doubleArrayType.writeCharacter(characterWriter, new Double[0], null);
 
-        // Test with elements
         Double[] array = { 1.5, null, 3.5 };
         doubleArrayType.writeCharacter(characterWriter, array, null);
     }

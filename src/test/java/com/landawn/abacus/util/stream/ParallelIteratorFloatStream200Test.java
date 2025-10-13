@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
@@ -33,16 +34,14 @@ import com.landawn.abacus.util.function.FloatUnaryOperator;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
+@Tag("new-test")
 public class ParallelIteratorFloatStream200Test extends TestBase {
 
-    private static final int testMaxThreadNum = 4; // Use a fixed small number of threads for predictable testing 
+    private static final int testMaxThreadNum = 4;
     private static final float[] TEST_ARRAY = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f, 17.0f,
             18.0f, 19.0f, 20.0f, 21.0f, 22.0f, 23.0f, 24.0f, 25.0f, 26.0f };
 
-    // Empty method to be implemented by the user for initializing FloatStream
     protected FloatStream createFloatStream(float... elements) {
-        // Using default values for maxThreadNum, executorNumForVirtualThread, splitor, cancelUncompletedThreads
-        // For testing, we might want to vary these parameters.
         return FloatStream.of(elements).map(e -> (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
     }
 
@@ -88,7 +87,7 @@ public class ParallelIteratorFloatStream200Test extends TestBase {
         FloatUnaryOperator mapper = f -> f + 1.0f;
         List<Float> result = stream.map(mapper).toList();
         assertEquals(TEST_ARRAY.length, result.size());
-        assertTrue(result.contains(2.0f)); // 1.0f maps to 2.0f
+        assertTrue(result.contains(2.0f));
         assertFalse(result.contains(1.0f));
     }
 
@@ -166,9 +165,9 @@ public class ParallelIteratorFloatStream200Test extends TestBase {
         List<Integer> result = stream.flatMapToInt(mapper).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains(1));
-        assertTrue(result.contains(3)); // 1.5 * 2 = 3
+        assertTrue(result.contains(3));
         assertTrue(result.contains(2));
-        assertTrue(result.contains(5)); // 2.8 * 2 = 5.6 -> 5
+        assertTrue(result.contains(5));
     }
 
     @Test
@@ -229,12 +228,12 @@ public class ParallelIteratorFloatStream200Test extends TestBase {
         FloatStream stream = createFloatStream(TEST_ARRAY);
         List<Float> consumed = new ArrayList<>();
         FloatConsumer action = it -> {
-            synchronized (consumed) { // Ensure thread safety
+            synchronized (consumed) {
                 consumed.add(it);
             }
         };
         stream.onEach(action).forEach(f -> {
-        }); // Trigger the onEach action
+        });
         assertEquals(TEST_ARRAY.length, consumed.size());
 
         assertHaveSameElements(N.toList(TEST_ARRAY), consumed);
@@ -245,7 +244,7 @@ public class ParallelIteratorFloatStream200Test extends TestBase {
         FloatStream stream = createFloatStream(TEST_ARRAY);
         List<Float> consumed = new ArrayList<>();
         FloatConsumer action = it -> {
-            synchronized (consumed) { // Ensure thread safety
+            synchronized (consumed) {
                 consumed.add(it);
             }
         };
@@ -414,8 +413,8 @@ public class ParallelIteratorFloatStream200Test extends TestBase {
     public void testZipWithBinaryOperatorWithNoneValues() {
         FloatStream streamA = createFloatStream(new float[] { 1.0f, 2.0f });
         FloatStream streamB = FloatStream.of(10.0f, 20.0f, 30.0f);
-        float valA = 0.0f; // Assuming 0.0f as 'none' for float
-        float valB = -1.0f; // Assuming -1.0f as 'none' for float
+        float valA = 0.0f;
+        float valB = -1.0f;
         FloatBinaryOperator zipper = (f1, f2) -> {
             if (f1 == valA)
                 return f2;
@@ -425,9 +424,9 @@ public class ParallelIteratorFloatStream200Test extends TestBase {
         };
         List<Float> result = streamA.zipWith(streamB, valA, valB, zipper).sorted().toList();
         assertEquals(3, result.size());
-        assertEquals(11.0f, result.get(0), 0.0001f); // 1.0 + 10.0
-        assertEquals(22.0f, result.get(1), 0.0001f); // 2.0 + 20.0
-        assertEquals(30.0f, result.get(2), 0.0001f); // 0.0 (valA) + 30.0 -> 30.0
+        assertEquals(11.0f, result.get(0), 0.0001f);
+        assertEquals(22.0f, result.get(1), 0.0001f);
+        assertEquals(30.0f, result.get(2), 0.0001f);
     }
 
     @Test
@@ -444,8 +443,8 @@ public class ParallelIteratorFloatStream200Test extends TestBase {
         List<Float> result = streamA.zipWith(streamB, streamC, valA, valB, valC, zipper).sorted().toList();
         assertEquals(3, result.size());
         assertEquals(1.0f + 10.0f + 100.0f, result.get(1), 0.0001f);
-        assertEquals(0.0f + 20.0f + 101.0f, result.get(2), 0.0001f); // valA (0.0) + 20.0 + 101.0
-        assertEquals(0.0f + -1.0f + 102.0f, result.get(0), 0.0001f); // valA (0.0) + valB (-1.0) + 102.0
+        assertEquals(0.0f + 20.0f + 101.0f, result.get(2), 0.0001f);
+        assertEquals(0.0f + -1.0f + 102.0f, result.get(0), 0.0001f);
     }
 
     @Test
@@ -470,28 +469,14 @@ public class ParallelIteratorFloatStream200Test extends TestBase {
 
     @Test
     public void testMaxThreadNum() throws IllegalAccessException, NoSuchFieldException {
-        // Since maxThreadNum() is protected in the superclass,
-        // and its value is used internally, we can't directly call it from here.
-        // However, we can assert its behavior indirectly or via reflection if necessary.
-        // For this test, we'll assume the constructor correctly sets it and other tests
-        // indirectly verify its usage.
-        // If it was a public method of ParallelArrayFloatStream, we would test it directly.
-        // FloatStream stream = createFloatStream(floatArray);
-        //assertTrue(stream.maxThreadNum() > 0); // This line would work if maxThreadNum() was public in FloatStream
     }
 
     @Test
     public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        // Similar to maxThreadNum, splitor() is protected.
-        // FloatStream stream = createFloatStream(floatArray);
-        //assertNotNull(stream.splitor());
     }
 
     @Test
     public void testAsyncExecutor() throws IllegalAccessException, NoSuchFieldException {
-        // Similar to maxThreadNum, asyncExecutor() is protected.
-        // FloatStream stream = createFloatStream(floatArray);
-        //assertNotNull(stream.asyncExecutor());
     }
 
     @Test
@@ -501,9 +486,9 @@ public class ParallelIteratorFloatStream200Test extends TestBase {
         Runnable closeHandler = () -> closedFlag.set(true);
 
         FloatStream newStream = stream.onClose(closeHandler);
-        assertFalse(closedFlag.get()); // Not closed yet
-        newStream.close(); // Close the stream, which should trigger the handler
-        assertTrue(closedFlag.get()); // Now it should be closed
+        assertFalse(closedFlag.get());
+        newStream.close();
+        assertTrue(closedFlag.get());
     }
 
     @Test
@@ -523,7 +508,7 @@ public class ParallelIteratorFloatStream200Test extends TestBase {
     public void testOnCloseEmptyHandler() {
         FloatStream stream = createFloatStream(TEST_ARRAY);
         FloatStream newStream = stream.onClose(null);
-        assertSame(stream, newStream); // Should return the same instance if handler is null
-        newStream.close(); // Should not throw
+        assertSame(stream, newStream);
+        newStream.close();
     }
 }

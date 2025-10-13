@@ -118,10 +118,11 @@ public final class Iterators {
         }
 
         while (iter.hasNext()) {
-            if (index-- == 0) {
+            if (index == 0) {
                 return Nullable.of(iter.next());
             } else {
                 iter.next();
+                index--;
             }
         }
 
@@ -270,6 +271,17 @@ public final class Iterators {
      * number of elements forward.
      */
     public static boolean elementsEqual(final Iterator<?> iterator1, final Iterator<?> iterator2) {
+        final boolean isIterator1Empty = N.isEmpty(iterator1);
+        final boolean isIterator2Empty = N.isEmpty(iterator2);
+
+        if (isIterator1Empty && isIterator2Empty) {
+            return true;
+        }
+
+        if (isIterator1Empty || isIterator2Empty) {
+            return false;
+        }
+
         while (iterator1.hasNext()) {
             if (!iterator2.hasNext() || !N.equals(iterator1.next(), iterator2.next())) {
                 return false;
@@ -280,12 +292,16 @@ public final class Iterators {
     }
 
     /**
+     * Creates an iterator that returns the same element a specified number of times.
+     * This method is useful for generating a sequence of identical elements.
      *
-     * @param <T>
-     * @param e
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
+     * <p>Example: {@code Iterators.repeat("Hello", 3)} returns an iterator that yields "Hello" three times.
+     *
+     * @param <T> The type of the element to repeat.
+     * @param e The element to repeat (can be {@code null}).
+     * @param n The number of times to repeat the element. Must be non-negative.
+     * @return An {@code ObjIterator} that returns the element {@code n} times, or an empty iterator if {@code n} is 0.
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public static <T> ObjIterator<T> repeat(final T e, final int n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n); //NOSONAR
@@ -315,12 +331,16 @@ public final class Iterators {
     }
 
     /**
+     * Creates an iterator that returns the same element a specified number of times (long version).
+     * This method is similar to {@link #repeat(Object, int)} but supports a larger number of repetitions using {@code long}.
      *
-     * @param <T>
-     * @param e
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
+     * <p>Example: {@code Iterators.repeat("Hello", 1000000L)} returns an iterator that yields "Hello" one million times.
+     *
+     * @param <T> The type of the element to repeat.
+     * @param e The element to repeat (can be {@code null}).
+     * @param n The number of times to repeat the element. Must be non-negative.
+     * @return An {@code ObjIterator} that returns the element {@code n} times, or an empty iterator if {@code n} is 0.
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public static <T> ObjIterator<T> repeat(final T e, final long n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n); //NOSONAR
@@ -353,10 +373,10 @@ public final class Iterators {
      * Repeats each element in the specified Collection <i>n</i> times.
      *
      * @param <T> The type of elements in the collection.
-     * @param c The collection whose elements are to be repeated.
+     * @param c The collection whose elements are to be repeated; must not be empty if n > 0
      * @param n The number of times the collection's elements are to be repeated.
-     * @return An iterator over the elements in the collection, repeated<i>n</i>times.
-     * @throws IllegalArgumentException if<i>n</i>is negative.
+     * @return An iterator over the elements in the collection, repeated <i>n</i> times.
+     * @throws IllegalArgumentException if {@code c} is null or empty when {@code n} > 0, or if {@code n} is negative
      * @see N#repeatElements(Collection, int)
      */
     public static <T> ObjIterator<T> repeatElements(final Collection<? extends T> c, final long n) throws IllegalArgumentException {
@@ -395,13 +415,38 @@ public final class Iterators {
     }
 
     /**
-     * Repeats the entire collection<i>n</i>times.
+     * Repeats the entire collection <i>n</i> times.
+     *
+     * <p><b>Preconditions:</b></p>
+     * <ul>
+     *   <li>If {@code n} > 0, then {@code c} must not be {@code null} or empty</li>
+     *   <li>If {@code n} == 0, {@code c} can be anything (result is empty iterator)</li>
+     * </ul>
+     *
+     * <p><b>Common Mistakes:</b></p>
+     * <pre>{@code
+     * // DON'T: Pass empty collection with n > 0
+     * Iterators.repeatCollection(Collections.emptyList(), 5);  // IllegalArgumentException!
+     *
+     * // DO: Ensure collection has elements
+     * if (N.notEmpty(collection)) {
+     *     Iterator<T> it = Iterators.repeatCollection(collection, n);
+     * }
+     *
+     * // DON'T: Pass null collection with n > 0
+     * Iterators.repeatCollection(null, 3);  // IllegalArgumentException!
+     *
+     * // DO: Check for null first
+     * if (collection != null && !collection.isEmpty()) {
+     *     Iterator<T> it = Iterators.repeatCollection(collection, n);
+     * }
+     * }</pre>
      *
      * @param <T> The type of elements in the collection.
-     * @param c The collection to be repeated.
+     * @param c The collection to be repeated; must not be empty if n > 0
      * @param n The number of times the collection is to be repeated.
-     * @return An iterator over the collection, repeated<i>n</i>times.
-     * @throws IllegalArgumentException if<i>n</i>is negative.
+     * @return An iterator over the collection, repeated <i>n</i> times.
+     * @throws IllegalArgumentException if {@code c} is null or empty when {@code n} > 0, or if {@code n} is negative
      * @see N#repeatCollection(Collection, int)
      */
     public static <T> ObjIterator<T> repeatCollection(final Collection<? extends T> c, final long n) throws IllegalArgumentException {
@@ -437,13 +482,17 @@ public final class Iterators {
     }
 
     /**
-     * Repeats each element in the specified Collection <i>n</i> times till reach the specified size.
+     * Repeats each element in the specified Collection a calculated number of times until the specified total size is reached.
+     * Elements are repeated in order, with some elements potentially repeated more times than others to reach exactly the target size.
      *
-     * @param <T>
-     * @param c
-     * @param size
-     * @return
-     * @throws IllegalArgumentException
+     * <p>Example: {@code Iterators.repeatElementsToSize(Arrays.asList("A", "B", "C"), 7)}
+     * yields an iterator with elements: A, A, A, B, B, C, C (each element is repeated at least twice, with "A" repeated three times)
+     *
+     * @param <T> The type of elements in the collection.
+     * @param c The collection whose elements are to be repeated. Must not be empty or {@code null} if {@code size > 0}.
+     * @param size The total number of elements the resulting iterator should produce. Must be non-negative.
+     * @return An {@code ObjIterator} that repeats each element until {@code size} elements have been produced.
+     * @throws IllegalArgumentException if {@code size} is negative, or if {@code c} is empty or {@code null} when {@code size > 0}.
      * @see N#repeatElementsToSize(Collection, int)
      */
     public static <T> ObjIterator<T> repeatElementsToSize(final Collection<? extends T> c, final long size) throws IllegalArgumentException {
@@ -489,13 +538,17 @@ public final class Iterators {
     }
 
     /**
-     * Repeats the entire specified Collection till reach the specified size.
+     * Repeats the entire specified Collection cyclically until the specified total size is reached.
+     * The collection is repeated as a whole, cycling through it multiple times if necessary.
      *
-     * @param <T>
-     * @param c
-     * @param size
-     * @return
-     * @throws IllegalArgumentException
+     * <p>Example: {@code Iterators.repeatCollectionToSize(Arrays.asList("A", "B"), 5)}
+     * yields an iterator with elements: A, B, A, B, A
+     *
+     * @param <T> The type of elements in the collection.
+     * @param c The collection to be repeated. Must not be empty or {@code null} if {@code size > 0}.
+     * @param size The total number of elements the resulting iterator should produce. Must be non-negative.
+     * @return An {@code ObjIterator} that cycles through the collection until {@code size} elements have been produced.
+     * @throws IllegalArgumentException if {@code size} is negative, or if {@code c} is empty or {@code null} when {@code size > 0}.
      * @see N#repeatCollectionToSize(Collection, int)
      */
     public static <T> ObjIterator<T> repeatCollectionToSize(final Collection<? extends T> c, final long size) throws IllegalArgumentException {
@@ -1866,6 +1919,8 @@ public final class Iterators {
      * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
+        N.checkArgNotNull(zipFunction, cs.function);
+
         return new ObjIterator<>() {
             private final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
@@ -2181,6 +2236,10 @@ public final class Iterators {
     public static long advance(final Iterator<?> iterator, final long numberToAdvance) throws IllegalArgumentException {
         N.checkArgNotNegative(numberToAdvance, cs.numberToAdvance);
 
+        if (iterator == null) {
+            return 0;
+        }
+
         long i;
 
         for (i = 0; i < numberToAdvance && iterator.hasNext(); i++) {
@@ -2284,16 +2343,18 @@ public final class Iterators {
     }
 
     /**
-     * Calls {@code next()} on {@code iterator}, either {@code offset} times or until {@code hasNext()} returns {@code false}, whichever comes first.
+     * Returns a new ObjIterator that starts from the specified offset and is limited to the specified count of elements from the original Iterator.
+     * This method combines both {@link #skip(Iterator, long)} and {@link #limit(Iterator, long)} operations in a single call.
      *
-     * This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
+     * <p>This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
      *
+     * <p>Example: {@code Iterators.skipAndLimit(Arrays.asList(1, 2, 3, 4, 5).iterator(), 1, 3)} yields an iterator with elements: 2, 3, 4
      *
-     * @param <T>
-     * @param iter
-     * @param offset
-     * @param count
-     * @return
+     * @param <T> The type of elements in the iterator.
+     * @param iter The iterator to be skipped and limited.
+     * @param offset The number of elements to skip from the beginning. Must be non-negative.
+     * @param count The maximum number of elements to return after skipping. Must be non-negative.
+     * @return An {@code ObjIterator} that will iterate over up to {@code count} elements starting from the (offset+1)th element.
      * @see N#slice(Iterator, int, int)
      */
     public static <T> ObjIterator<T> skipAndLimit(final Iterator<? extends T> iter, final long offset, final long count) {
@@ -2376,11 +2437,14 @@ public final class Iterators {
     //    }
 
     /**
-     * Returns a new {@code ObjIterator} with {@code null} elements removed.
+     * Returns a new {@code ObjIterator} with {@code null} elements removed from the specified Iterable.
+     * All {@code null} elements will be filtered out, returning only non-null elements.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * <p>Example: {@code Iterators.skipNulls(Arrays.asList("A", null, "B", null, "C"))} yields an iterator with elements: "A", "B", "C"
+     *
+     * @param <T> The type of elements in the iterable.
+     * @param c The iterable whose {@code null} elements should be skipped.
+     * @return An {@code ObjIterator} that iterates over only the non-null elements.
      */
     @Beta
     public static <T> ObjIterator<T> skipNulls(final Iterable<? extends T> c) {
@@ -2388,11 +2452,14 @@ public final class Iterators {
     }
 
     /**
-     * Returns a new {@code ObjIterator} with {@code null} elements removed.
+     * Returns a new {@code ObjIterator} with {@code null} elements removed from the specified Iterator.
+     * All {@code null} elements will be filtered out, returning only non-null elements.
      *
-     * @param <T>
-     * @param iter
-     * @return
+     * <p>Example: {@code Iterators.skipNulls(Arrays.asList("A", null, "B", null, "C").iterator())} yields an iterator with elements: "A", "B", "C"
+     *
+     * @param <T> The type of elements in the iterator.
+     * @param iter The iterator whose {@code null} elements should be skipped.
+     * @return An {@code ObjIterator} that iterates over only the non-null elements.
      */
     public static <T> ObjIterator<T> skipNulls(final Iterator<? extends T> iter) {
         return filter(iter, Fn.notNull());
@@ -2544,6 +2611,8 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> filter(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, cs.Predicate);
+
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2560,6 +2629,8 @@ public final class Iterators {
      * @return A new ObjIterator that will iterate over the elements of the original Iterator that satisfy the provided Predicate.
      */
     public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, cs.Predicate);
+
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2609,6 +2680,8 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, cs.Predicate);
+
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2626,6 +2699,8 @@ public final class Iterators {
      * @return A new ObjIterator that will iterate over the elements of the original Iterator as long as they satisfy the provided Predicate.
      */
     public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, cs.Predicate);
+
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2675,6 +2750,8 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, cs.Predicate);
+
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2692,6 +2769,8 @@ public final class Iterators {
      * @return A new ObjIterator that will iterate over the elements of the original Iterator as long as they satisfy the provided Predicate, including the first element that does not satisfy the Predicate.
      */
     public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, cs.Predicate);
+
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2742,6 +2821,8 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, cs.Predicate);
+
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2759,6 +2840,8 @@ public final class Iterators {
      * @return A new ObjIterator that will iterate over the elements of the original Iterator starting from the first element that does not satisfy the provided Predicate.
      */
     public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, cs.Predicate);
+
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2814,6 +2897,8 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, cs.Predicate);
+
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2832,6 +2917,8 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, cs.Predicate);
+
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2887,6 +2974,8 @@ public final class Iterators {
      */
     @Beta
     public static <T, U> ObjIterator<U> map(final Iterable<? extends T> c, final Function<? super T, U> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2904,6 +2993,8 @@ public final class Iterators {
      * @return A new ObjIterator that will iterate over the transformed elements of the original Iterator.
      */
     public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, U> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2949,6 +3040,8 @@ public final class Iterators {
      * @return A new ObjIterator that will iterate over the transformed elements of the original Iterator.
      */
     public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Iterable<? extends U>> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -3012,6 +3105,8 @@ public final class Iterators {
      * @return A new ObjIterator that will iterate over the transformed elements of the original Iterator.
      */
     public static <T, U> ObjIterator<U> flatmap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
+        N.checkArgNotNull(mapper, cs.mapper);
+
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -3337,56 +3432,59 @@ public final class Iterators {
                 }
             } else {
                 final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
-                @SuppressWarnings("resource")
                 final ExecutorService executorService = Executors.newFixedThreadPool(processThreadNum);
                 final Holder<Exception> errorHolder = new Holder<>();
 
-                for (int i = 0; i < processThreadNum; i++) {
-                    executorService.execute(() -> {
-                        T element = null;
-                        try {
-                            while (errorHolder.value() == null) {
-                                synchronized (iteratorII) {
-                                    if (iteratorII.hasNext()) {
-                                        element = iteratorII.next();
+                try {
+                    for (int i = 0; i < processThreadNum; i++) {
+                        executorService.execute(() -> {
+                            T element = null;
+                            try {
+                                while (errorHolder.value() == null) {
+                                    synchronized (iteratorII) {
+                                        if (iteratorII.hasNext()) {
+                                            element = iteratorII.next();
+                                        } else {
+                                            break;
+                                        }
+                                    }
+
+                                    elementConsumer.accept(element);
+                                }
+                            } catch (final Exception e) {
+                                synchronized (errorHolder) {
+                                    if (errorHolder.value() == null) {
+                                        errorHolder.setValue(e);
                                     } else {
-                                        break;
+                                        errorHolder.value().addSuppressed(e);
                                     }
                                 }
-
-                                elementConsumer.accept(element);
+                            } finally {
+                                countDownLatch.countDown();
                             }
-                        } catch (final Exception e) {
-                            synchronized (errorHolder) {
-                                if (errorHolder.value() == null) {
-                                    errorHolder.setValue(e);
-                                } else {
-                                    errorHolder.value().addSuppressed(e);
-                                }
-                            }
-                        } finally {
-                            countDownLatch.countDown();
-                        }
-                    });
-                }
-
-                try {
-                    countDownLatch.await();
-                } catch (final InterruptedException e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
-                }
-
-                if (errorHolder.value() == null && onComplete != null) {
-                    //noinspection CatchMayIgnoreException
-                    try {
-                        onComplete.run();
-                    } catch (final Exception e) {
-                        errorHolder.setValue(e);
+                        });
                     }
-                }
 
-                if (errorHolder.value() != null) {
-                    throw ExceptionUtil.toRuntimeException(errorHolder.value(), true);
+                    try {
+                        countDownLatch.await();
+                    } catch (final InterruptedException e) {
+                        throw ExceptionUtil.toRuntimeException(e, true);
+                    }
+
+                    if (errorHolder.value() == null && onComplete != null) {
+                        //noinspection CatchMayIgnoreException
+                        try {
+                            onComplete.run();
+                        } catch (final Exception e) {
+                            errorHolder.setValue(e);
+                        }
+                    }
+
+                    if (errorHolder.value() != null) {
+                        throw ExceptionUtil.toRuntimeException(errorHolder.value(), true);
+                    }
+                } finally {
+                    executorService.shutdown();
                 }
             }
         } finally {
@@ -3397,9 +3495,11 @@ public final class Iterators {
     }
 
     /**
+     * Validates that the offset and count parameters are non-negative.
+     * This is a package-private utility method used internally for parameter validation.
      *
-     * @param offset
-     * @param count
+     * @param offset The offset value to check.
+     * @param count The count value to check.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
     static void checkOffsetCount(final int offset, final int count) throws IllegalArgumentException {
@@ -3409,9 +3509,11 @@ public final class Iterators {
     }
 
     /**
+     * Validates that the offset and count parameters are non-negative (long version).
+     * This is a package-private utility method used internally for parameter validation.
      *
-     * @param offset
-     * @param count
+     * @param offset The offset value to check.
+     * @param count The count value to check.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
     static void checkOffsetCount(final long offset, final long count) throws IllegalArgumentException {
@@ -3420,6 +3522,14 @@ public final class Iterators {
         }
     }
 
+    /**
+     * Calculates an appropriate buffer size based on the number of read threads.
+     * This is a package-private utility method used internally to optimize buffer allocation.
+     * The buffer size is calculated as the minimum of 1024 and (readThreadNum * 64).
+     *
+     * @param readThreadNum The number of threads that will be reading.
+     * @return The calculated buffer size, capped at 1024.
+     */
     static int calculateBufferedSize(final int readThreadNum) {
         return N.min(1024, readThreadNum * 64);
     }

@@ -24,28 +24,6 @@ public class NTest2 extends AbstractParserTest {
 
     static final XMLParser abacusXMLParser = ParserFactory.createAbacusXMLParser();
 
-    //    @Test
-    //    public void test_thread() throws Exception {
-    //        int activeCount = Thread.activeCount();
-    //        N.println(activeCount);
-    //        List<Future<Integer>> futureList = new ArrayList<>();
-    //
-    //        for (int i = 0; i < 200; i++) {
-    //            ContinuableFuture<Integer> f = N.asyncExecute(() -> {
-    //                N.sleep(1000);
-    //                return 1;
-    //            });
-    //
-    //            futureList.add(f);
-    //        }
-    //
-    //        assertEquals(200, Futures.allOf(futureList).get().stream().mapToInt(i -> i).sum());
-    //
-    //        int newActiveCount = Thread.activeCount();
-    //        N.println(newActiveCount);
-    //        assertTrue(newActiveCount - activeCount > 32);
-    //    }
-
     @Test
     public void test_stringOf() {
         {

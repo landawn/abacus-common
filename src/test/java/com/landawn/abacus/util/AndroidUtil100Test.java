@@ -4,9 +4,11 @@ import java.util.concurrent.Executor;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class AndroidUtil100Test extends TestBase {
 
     @Test
@@ -25,7 +27,6 @@ public class AndroidUtil100Test extends TestBase {
     public void testExecutorsAreDifferent() {
         Executor serial = AndroidUtil.getSerialExecutor();
         Executor threadPool = AndroidUtil.getThreadPoolExecutor();
-        // In non-Android environment, these should be different executors
         Assertions.assertNotSame(serial, threadPool);
     }
 }

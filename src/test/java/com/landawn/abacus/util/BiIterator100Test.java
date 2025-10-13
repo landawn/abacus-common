@@ -21,11 +21,13 @@ import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("new-test")
 public class BiIterator100Test extends TestBase {
 
     @Test
@@ -36,7 +38,6 @@ public class BiIterator100Test extends TestBase {
         assertFalse(iter.hasNext());
         assertThrows(NoSuchElementException.class, () -> iter.next());
 
-        // Test forEachRemaining doesn't throw on empty iterator
         assertDoesNotThrow(() -> iter.forEachRemaining((a, b) -> {
         }));
     }
@@ -121,7 +122,6 @@ public class BiIterator100Test extends TestBase {
             pair.set(val, "value" + val);
         });
 
-        // Should be able to get multiple values
         for (int i = 0; i < 5; i++) {
             assertTrue(iter.hasNext());
             Pair<Integer, String> pair = iter.next();
@@ -129,7 +129,6 @@ public class BiIterator100Test extends TestBase {
             assertEquals("value" + i, pair.right());
         }
 
-        // Should still have more
         assertTrue(iter.hasNext());
     }
 
@@ -641,10 +640,8 @@ public class BiIterator100Test extends TestBase {
 
         BiIterator<String, Integer> iter = BiIterator.zip(arr1, arr2);
 
-        // Consume first element
         iter.next();
 
-        // Collect remaining
         Map<String, Integer> remaining = new HashMap<>();
         iter.forEachRemaining((s, i) -> remaining.put(s, i));
 

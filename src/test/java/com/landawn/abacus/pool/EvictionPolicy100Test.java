@@ -7,18 +7,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class EvictionPolicy100Test extends TestBase {
 
     @Test
     public void testEnumValues() {
         EvictionPolicy[] values = EvictionPolicy.values();
         assertEquals(3, values.length);
-        
-        // Verify all enum constants exist
+
         assertEquals(EvictionPolicy.LAST_ACCESS_TIME, values[0]);
         assertEquals(EvictionPolicy.EXPIRATION_TIME, values[1]);
         assertEquals(EvictionPolicy.ACCESS_COUNT, values[2]);
@@ -83,7 +83,7 @@ public class EvictionPolicy100Test extends TestBase {
                 case EXPIRATION_TIME -> "Time-based";
                 case ACCESS_COUNT -> "LFU";
             };
-            
+
             switch (policy) {
                 case LAST_ACCESS_TIME:
                     assertEquals("LRU", description);

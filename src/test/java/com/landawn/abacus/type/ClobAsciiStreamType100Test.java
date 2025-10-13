@@ -23,11 +23,13 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class ClobAsciiStreamType100Test extends TestBase {
 
     private ClobAsciiStreamType type;
@@ -155,8 +157,6 @@ public class ClobAsciiStreamType100Test extends TestBase {
 
         type.appendTo(mockWriter, stream);
 
-        // Verify that data is written to the Writer
-        // verify(mockWriter, atLeastOnce()).write(anyString());
     }
 
     @Test
@@ -175,7 +175,6 @@ public class ClobAsciiStreamType100Test extends TestBase {
 
         type.writeCharacter(mockWriter, stream, config);
 
-        // Verify writeCharacter is called with the content
         verify(mockWriter, atLeastOnce()).writeCharacter(any(char[].class), anyInt(), anyInt());
     }
 
@@ -188,9 +187,7 @@ public class ClobAsciiStreamType100Test extends TestBase {
 
         type.writeCharacter(mockWriter, stream, config);
 
-        // Verify quotes are written
         verify(mockWriter, times(2)).write('"');
-        // Verify content is written
         verify(mockWriter, atLeastOnce()).writeCharacter(any(char[].class), anyInt(), anyInt());
     }
 

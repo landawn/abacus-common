@@ -274,7 +274,7 @@ public class Properties<K, V> implements Map<K, V> {
         V v = get(key);
 
         if (v == null) {
-            v = put(key, value);
+            put(key, value);
         }
 
         return v;
@@ -348,7 +348,7 @@ public class Properties<K, V> implements Map<K, V> {
      */
     @Override
     public V replace(final K key, final V value) {
-        V curValue;
+        V curValue = null;
         if (((curValue = get(key)) != null) || containsKey(key)) {
             curValue = put(key, value);
         }
@@ -427,6 +427,14 @@ public class Properties<K, V> implements Map<K, V> {
      * Returns a Set view of the keys contained in this map.
      * The set is backed by the map, so changes to the map are reflected in the set, and vice-versa.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Properties<String, Object> props = new Properties<>();
+     * props.put("name", "John");
+     * props.put("age", 30);
+     * Set<String> keys = props.keySet(); // Returns ["name", "age"]
+     * }</pre>
+     *
      * @return a set view of the keys contained in this map
      */
     @Override
@@ -438,6 +446,14 @@ public class Properties<K, V> implements Map<K, V> {
      * Returns a Collection view of the values contained in this map.
      * The collection is backed by the map, so changes to the map are reflected in the collection, and vice-versa.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Properties<String, Integer> props = new Properties<>();
+     * props.put("a", 1);
+     * props.put("b", 2);
+     * Collection<Integer> vals = props.values(); // Returns [1, 2]
+     * }</pre>
+     *
      * @return a collection view of the values contained in this map
      */
     @Override
@@ -448,6 +464,16 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Returns a Set view of the mappings contained in this map.
      * The set is backed by the map, so changes to the map are reflected in the set, and vice-versa.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Properties<String, Object> props = new Properties<>();
+     * props.put("x", 10);
+     * props.put("y", 20);
+     * for (Map.Entry<String, Object> entry : props.entrySet()) {
+     *     System.out.println(entry.getKey() + "=" + entry.getValue());
+     * }
+     * }</pre>
      *
      * @return a set view of the mappings contained in this map
      */
@@ -478,6 +504,14 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Returns the number of key-value mappings in this map.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Properties<String, Object> props = new Properties<>();
+     * props.put("a", 1);
+     * props.put("b", 2);
+     * int count = props.size(); // Returns 2
+     * }</pre>
+     *
      * @return the number of key-value mappings in this map
      */
     @Override
@@ -488,6 +522,14 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Removes all of the mappings from this map.
      * The map will be empty after this call returns.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Properties<String, Object> props = new Properties<>();
+     * props.put("a", 1);
+     * props.clear();
+     * boolean empty = props.isEmpty(); // Returns true
+     * }</pre>
      */
     @Override
     public void clear() {
@@ -519,6 +561,14 @@ public class Properties<K, V> implements Map<K, V> {
 
     /**
      * Returns a hash code value for this Properties object.
+     * The hash code is computed based on the underlying map of key-value mappings.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Properties<String, Object> props = new Properties<>();
+     * props.put("key", "value");
+     * int hash = props.hashCode();
+     * }</pre>
      *
      * @return a hash code value for this Properties object
      */
@@ -532,6 +582,17 @@ public class Properties<K, V> implements Map<K, V> {
      * Returns {@code true} if the given object is also a Properties instance
      * and the two Properties represent the same mappings.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Properties<String, Object> props1 = new Properties<>();
+     * props1.put("key", "value");
+     *
+     * Properties<String, Object> props2 = new Properties<>();
+     * props2.put("key", "value");
+     *
+     * boolean same = props1.equals(props2); // Returns true
+     * }</pre>
+     *
      * @param obj object to be compared for equality with this Properties
      * @return {@code true} if the specified object is equal to this Properties
      */
@@ -543,6 +604,14 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Returns a string representation of this Properties object.
      * The string representation consists of the string representation of the underlying map.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Properties<String, Object> props = new Properties<>();
+     * props.put("name", "John");
+     * props.put("age", 30);
+     * String str = props.toString(); // Returns "{name=John, age=30}"
+     * }</pre>
      *
      * @return a string representation of this Properties object
      */

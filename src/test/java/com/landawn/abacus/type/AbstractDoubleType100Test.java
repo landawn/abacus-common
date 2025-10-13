@@ -15,6 +15,7 @@ import java.sql.Types;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -22,6 +23,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class AbstractDoubleType100Test extends TestBase {
     private Type<Double> type;
     private CharacterWriter writer;
@@ -69,13 +71,13 @@ public class AbstractDoubleType100Test extends TestBase {
     @Test
     public void testValueOf_String_Null() {
         Double result = type.valueOf((String) null);
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
     public void testValueOf_String_Empty() {
         Double result = type.valueOf("");
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
@@ -112,7 +114,6 @@ public class AbstractDoubleType100Test extends TestBase {
 
     @Test
     public void testValueOf_String_SingleCharSuffix() {
-        // Test edge case with single character string
         assertEquals(1.0, type.valueOf("1"));
         assertThrows(NumberFormatException.class, () -> type.valueOf("l"));
     }
@@ -208,44 +209,36 @@ public class AbstractDoubleType100Test extends TestBase {
     @Test
     public void testWriteCharacter_Null_NoConfig() throws IOException {
         type.writeCharacter(writer, null, null);
-        // Verify writer.write(NULL_CHAR_ARRAY) was called
     }
 
     @Test
     public void testWriteCharacter_DoubleValue_NoConfig() throws IOException {
         type.writeCharacter(writer, 42.5, null);
-        // Verify writer.write(42.5) was called
     }
 
     @Test
     public void testWriteCharacter_Null_WithWriteNullNumberAsZero() throws IOException {
         when(config.writeNullNumberAsZero()).thenReturn(true);
         type.writeCharacter(writer, null, config);
-        // Verify writer.write(0.0) was called
     }
 
     @Test
     public void testWriteCharacter_Null_WithoutWriteNullNumberAsZero() throws IOException {
         when(config.writeNullNumberAsZero()).thenReturn(false);
         type.writeCharacter(writer, null, config);
-        // Verify writer.write(NULL_CHAR_ARRAY) was called
     }
 
     @Test
     public void testWriteCharacter_NumberValue() throws IOException {
         type.writeCharacter(writer, 100d, config);
-        // Verify writer.write(100.0) was called
 
         type.writeCharacter(writer, 3.14d, config);
-        // Verify writer.write(3.14) was called
     }
 
     @Test
     public void testWriteCharacter_SpecialValues() throws IOException {
         type.writeCharacter(writer, Double.NaN, config);
-        // Verify writer.write(Double.NaN) was called
 
         type.writeCharacter(writer, Double.POSITIVE_INFINITY, config);
-        // Verify writer.write(Double.POSITIVE_INFINITY) was called
     }
 }

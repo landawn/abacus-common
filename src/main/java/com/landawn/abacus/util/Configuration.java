@@ -865,10 +865,8 @@ public abstract class Configuration {
     protected String setAttribute(final String attrName, String attrValue) {
         attrValue = Strings.trimToEmpty(attrValue);
 
-        if (attrValue != null) {
-            if ((!props.isEmpty()) && attrValue.startsWith("${") && attrValue.endsWith("}")) {
-                attrValue = props.get(attrValue.substring(2, attrValue.length() - 1));
-            }
+        if ((!props.isEmpty()) && attrValue.startsWith("${") && attrValue.endsWith("}")) {
+            attrValue = props.get(attrValue.substring(2, attrValue.length() - 1));
         }
 
         return attrs.put(attrName, attrValue);

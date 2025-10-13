@@ -17,6 +17,7 @@ package com.landawn.abacus.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -226,7 +227,7 @@ public final class CodeGenerationUtil {
                 .append("    ")
                 .append(interfaceName)
                 .append(" {")
-                .append(Character.isLowerCase(interfaceName.charAt(0)) ? NOSONAR_COMMENTS : "")
+                .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? NOSONAR_COMMENTS : "")
                 .append(LINE_SEPARATOR)
                 .append(LINE_SEPARATOR); //
 
@@ -560,6 +561,10 @@ public final class CodeGenerationUtil {
 
                         propNameInLowerCaseWithUnderscore = propNameConverterForLowerCaseWithUnderscore.apply(cls, propName);
 
+                        if (Strings.isEmpty(propNameInLowerCaseWithUnderscore)) {
+                            continue;
+                        }
+
                         if (newPropName.equals(propName)) {
                             propNameMap.put(Tuple.of(newPropName, propNameInLowerCaseWithUnderscore), simpleClassName);
                         } else {
@@ -666,6 +671,10 @@ public final class CodeGenerationUtil {
 
                         propNameInUpperCaseWithUnderscore = propNameConverterForUpperCaseWithUnderscore.apply(cls, propName);
 
+                        if (Strings.isEmpty(propNameInUpperCaseWithUnderscore)) {
+                            continue;
+                        }
+
                         if (newPropName.equals(propName)) {
                             propNameMap.put(Tuple.of(newPropName, propNameInUpperCaseWithUnderscore), simpleClassName);
                         } else {
@@ -770,12 +779,17 @@ public final class CodeGenerationUtil {
                         for (final String propName : Beans.getPropNameList(cls)) {
                             newPropName = propNameConverter.apply(cls, propName);
 
-                            if (Beans.getPropGetMethod(cls, propName) == null) {
+                            if (Strings.isEmpty(newPropName)) {
                                 continue;
                             }
 
-                            //noinspection DataFlowIssue
-                            funcPropName = propFunc.apply(cls, Beans.getPropGetMethod(cls, propName).getReturnType(), newPropName);
+                            final Method propGetMethod = Beans.getPropGetMethod(cls, propName);
+
+                            if (propGetMethod == null) {
+                                continue;
+                            }
+
+                            funcPropName = propFunc.apply(cls, propGetMethod.getReturnType(), newPropName);
 
                             if (Strings.isEmpty(funcPropName)) {
                                 continue;
@@ -900,20 +914,53 @@ public final class CodeGenerationUtil {
     @AllArgsConstructor
     @Accessors(chain = true)
     public static final class PropNameTableCodeConfig {
+        /** Collection of entity classes to generate property name tables for. Required. */
         private Collection<Class<?>> entityClasses;
+
+        /** Name of the generated property name table class. Required. */
         private String className;
+
+        /** Package name for the generated class. If null, uses the package of the first entity class. */
         private String packageName;
+
+        /** Source directory to write the generated file to. If null, only returns the generated code as a string. */
         private String srcDir;
+
+        /** Function to convert property names. Receives the entity class and property name, returns the converted property name.
+         * Return null or empty string to skip a property. If null, uses identity function (no conversion). */
         private BiFunction<Class<?>, String, String> propNameConverter;
+
+        /** Whether to generate a List of property names for each class. Default is false. */
         private boolean generateClassPropNameList;
+
+        /** Whether to generate an inner interface with lower case property names concatenated with underscore. Default is false. */
         private boolean generateLowerCaseWithUnderscore;
+
+        /** Name for the lower case with underscore inner interface. If null, uses {@link #SL}. */
         private String classNameForLowerCaseWithUnderscore;
+
+        /** Function to convert property names to lower case with underscore format.
+         * If null, uses {@link Strings#toLowerCaseWithUnderscore(String)}. */
         private BiFunction<Class<?>, String, String> propNameConverterForLowerCaseWithUnderscore;
+
+        /** Whether to generate an inner interface with upper case property names concatenated with underscore. Default is false. */
         private boolean generateUpperCaseWithUnderscore;
+
+        /** Name for the upper case with underscore inner interface. If null, uses {@link #SU}. */
         private String classNameForUpperCaseWithUnderscore;
+
+        /** Function to convert property names to upper case with underscore format.
+         * If null, uses {@link Strings#toUpperCaseWithUnderscore(String)}. */
         private BiFunction<Class<?>, String, String> propNameConverterForUpperCaseWithUnderscore;
+
+        /** Whether to generate an inner interface with function-based property names (e.g., min(age), max(salary)). Default is false. */
         private boolean generateFunctionPropName;
+
+        /** Name for the function property name inner interface. If null, uses {@link #SF}. */
         private String functionClassName;
+
+        /** Map of function name to function implementation. The function receives entity class, property class, and property name,
+         * and returns the function property name string. Return null to skip a property for that function. */
         private Map<String, TriFunction<Class<?>, Class<?>, String, String>> propFunctions;
     }
 }

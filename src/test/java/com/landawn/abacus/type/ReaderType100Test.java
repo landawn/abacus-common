@@ -20,11 +20,13 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class ReaderType100Test extends TestBase {
 
     private ReaderType readerType;
@@ -46,28 +48,23 @@ public class ReaderType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with reader
         Reader reader = new StringReader("test content");
         String result = readerType.stringOf(reader);
         assertEquals("test content", result);
 
-        // Test with null
         assertNull(readerType.stringOf(null));
     }
 
     @Test
     public void testValueOfString() {
-        // Test with string
         Reader reader = readerType.valueOf("test content");
         assertNotNull(reader);
 
-        // Test with null
         assertNull(readerType.valueOf((String) null));
     }
 
     @Test
     public void testValueOfObject() throws SQLException {
-        // Test with Clob
         Clob clob = mock(Clob.class);
         Reader clobReader = new StringReader("clob content");
         when(clob.getCharacterStream()).thenReturn(clobReader);
@@ -75,10 +72,8 @@ public class ReaderType100Test extends TestBase {
         Reader result = readerType.valueOf(clob);
         assertEquals(clobReader, result);
 
-        // Test with null
         assertNull(readerType.valueOf((Object) null));
 
-        // Test with other object
         result = readerType.valueOf("test");
         assertNotNull(result);
     }
@@ -139,19 +134,16 @@ public class ReaderType100Test extends TestBase {
 
     @Test
     public void testAppendTo() throws IOException {
-        // Test with Writer
         StringWriter writer = new StringWriter();
         Reader reader = new StringReader("test content");
         readerType.appendTo(writer, reader);
         assertEquals("test content", writer.toString());
 
-        // Test with StringBuilder
         StringBuilder sb = new StringBuilder();
         reader = new StringReader("test content");
         readerType.appendTo(sb, reader);
         assertEquals("test content", sb.toString());
 
-        // Test with null
         writer = new StringWriter();
         readerType.appendTo(writer, null);
         assertEquals("null", writer.toString());
@@ -162,14 +154,11 @@ public class ReaderType100Test extends TestBase {
         CharacterWriter writer = createCharacterWriter();
         JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
 
-        // Test with reader
         Reader reader = new StringReader("test");
         readerType.writeCharacter(writer, reader, config);
 
-        // Test with null
         readerType.writeCharacter(writer, null, config);
 
-        // Test with quotation
         when(config.getStringQuotation()).thenReturn('"');
         reader = new StringReader("test");
         readerType.writeCharacter(writer, reader, config);

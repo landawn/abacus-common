@@ -78,7 +78,6 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * @see Futures
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html">CompletableFuture JavaDoc</a>
  * @since 0.8
- * @author Haiyang Li
  */
 public class ContinuableFuture<T> implements Future<T> {
 
@@ -385,15 +384,16 @@ public class ContinuableFuture<T> implements Future<T> {
      * @see Future#cancel(boolean)
      */
     public boolean cancelAll(final boolean mayInterruptIfRunning) {
-        boolean res = true;
+        boolean upFuturesCancelled = true;
 
-        if (N.notEmpty(upFutures)) {
+        if (upFutures != null && !upFutures.isEmpty()) {
             for (final ContinuableFuture<?> preFuture : upFutures) {
-                res = res & preFuture.cancelAll(mayInterruptIfRunning); //NOSONAR
+                upFuturesCancelled = upFuturesCancelled & preFuture.cancelAll(mayInterruptIfRunning);
             }
         }
 
-        return cancel(mayInterruptIfRunning) && res;
+        final boolean thisCancelled = cancel(mayInterruptIfRunning);
+        return thisCancelled && upFuturesCancelled;
     }
 
     /**
@@ -420,7 +420,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @see Future#isCancelled()
      */
     public boolean isAllCancelled() {
-        if (N.notEmpty(upFutures)) {
+        if (upFutures != null && !upFutures.isEmpty()) {
             for (final ContinuableFuture<?> preFuture : upFutures) {
                 if (!preFuture.isAllCancelled()) {
                     return false;
@@ -1145,6 +1145,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * <p>This method is useful for recovery scenarios where you want to provide alternative
      * values or transform exceptions into valid results.
+     * The bi-function always executes, regardless of whether this future completed normally or exceptionally.
      * 
      * <p><b>Example:</b>
      * <pre>{@code
@@ -1174,8 +1175,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * Executes the provided action after both this future and the other future complete.
      * The action is executed asynchronously using the configured executor.
      * 
-     * <p>The returned future completes when the action completes. If either input future
-     * fails, the returned future also fails without executing the action.
+     * <p>The returned future completes when the action completes.
+     * If either future fails, the returned future completes exceptionally with the first exception encountered.
      * 
      * <p><b>Example:</b>
      * <pre>{@code
@@ -1206,8 +1207,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * passing both results to the consumer. The consumer is executed asynchronously using
      * the configured executor.
      * 
-     * <p>The returned future completes when the consumer completes. If either input future
-     * fails, the returned future also fails without executing the consumer.
+     * <p>The returned future completes when the consumer completes.
+     * If either future fails, the returned future completes exceptionally with the first exception encountered.
      * 
      * <p><b>Example:</b>
      * <pre>{@code
@@ -1485,7 +1486,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public ContinuableFuture<Void> runAfterEither(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
-            Futures.anyOf(Array.asList(ContinuableFuture.this, other)).get();
+            Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
 
             action.run();
             return null;
@@ -1493,11 +1494,12 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided Consumer action after either this ContinuableFuture or the other ContinuableFuture
-     * completes successfully. The Consumer receives the result of whichever future completes first.
+     * Executes the provided Consumer action after either this ContinuableFuture or the other ContinuableFuture completes
+     * (successfully or exceptionally). The Consumer receives the result of whichever future completes first.
+     * If the future that completes first fails, the consumer receives null.
      * 
-     * <p>If the first future to complete fails, the action waits for the second future.
-     * If both futures fail, the returned future completes exceptionally.
+     * <p>This method is useful for triggering an action as soon as any of the futures completes,
+     * regardless of which one finishes first or whether it succeeds or fails.
      * 
      * <p><b>Example:</b>
      * <pre>{@code
@@ -1505,7 +1507,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Weather> remoteWeather = ContinuableFuture.call(() -> getRemoteWeather());
      * 
      * localWeather.runAfterEither(remoteWeather, weather -> {
-     *     displayWeather(weather);
+     *     displayWeather(weather); // weather may be null if the first future failed
      *     logSource(weather.getSource());
      * });
      * }</pre>
@@ -1517,20 +1519,20 @@ public class ContinuableFuture<T> implements Future<T> {
     public ContinuableFuture<Void> runAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.Consumer<? super T, ? extends Exception> action) {
         return execute(() -> {
-            final T result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).get();
+            final Result<T, Exception> ret = Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
 
-            action.accept(result);
+            action.accept(ret.orElseIfFailure(null));
             return null;
         }, other);
     }
 
     /**
-     * Executes the provided BiConsumer action after either this ContinuableFuture or the other ContinuableFuture
-     * completes (successfully or exceptionally). The BiConsumer receives both the result (if successful)
+     * Executes the provided Consumer action after either this ContinuableFuture or the other ContinuableFuture completes
+     * (successfully or exceptionally).The BiConsumer receives both the result (if successful)
      * and the exception (if failed) from whichever future completes first.
      * 
-     * <p>This method allows handling both success and failure cases of the first completing future
-     * in a unified way.
+     * <p>This method is useful for triggering an action as soon as any of the futures completes,
+     * regardless of which one finishes first or whether it succeeds or fails.
      * 
      * <p><b>Example:</b>
      * <pre>{@code
@@ -1567,7 +1569,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * completes (successfully or exceptionally).
      * 
      * <p>This method is useful when you need to compute a new value as soon as either future completes,
-     * regardless of the completion result.
+     * regardless of which one finishes first or whether it succeeds or fails.
      * 
      * <p><b>Example:</b>
      * <pre>{@code
@@ -1587,7 +1589,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public <R> ContinuableFuture<R> callAfterEither(final ContinuableFuture<?> other, final Callable<? extends R> action) {
         return execute(() -> {
-            Futures.anyOf(Array.asList(ContinuableFuture.this, other)).get();
+            Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
 
             return action.call();
         }, other);
@@ -1595,10 +1597,11 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided function after either this ContinuableFuture or the other ContinuableFuture
-     * completes successfully. The function transforms the result of whichever future completes first.
+     * completes (successfully or exceptionally). The function transforms the result of whichever future completes first.
+     * If the future that completes first fails, the function receives null.
      * 
-     * <p>If the first future to complete fails, the method waits for the second future.
-     * If both futures fail, the returned future completes exceptionally.
+     * <p>This method is useful when you need to compute a new value as soon as either future completes,
+     * regardless of which one finishes first or whether it succeeds or fails.
      * 
      * <p><b>Example:</b>
      * <pre>{@code
@@ -1607,7 +1610,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * ContinuableFuture<Order> order = vendorA.callAfterEither(vendorB, price -> {
      *     // Process the first available price
-     *     return createOrder(price);
+     *     return createOrder(price); // price may be null if the first future failed
      * });
      * }</pre>
      *
@@ -1619,9 +1622,9 @@ public class ContinuableFuture<T> implements Future<T> {
     public <R> ContinuableFuture<R> callAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
         return execute(() -> {
-            final T result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).get();
+            final Result<T, Exception> ret = Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
 
-            return action.apply(result);
+            return action.apply(ret.orElseIfFailure(null));
         }, other);
     }
 
@@ -1630,8 +1633,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * completes (successfully or exceptionally). The BiFunction receives both the result (if successful)
      * and the exception (if failed) from whichever future completes first, and returns a transformed result.
      * 
-     * <p>This method enables transformation based on both success and failure cases of the first
-     * completing future.
+     * <p>This method is useful when you need to compute a new value as soon as either future completes,
+     * regardless of which one finishes first or whether it succeeds or fails.
      * 
      * <p><b>Example:</b>
      * <pre>{@code
@@ -1656,9 +1659,9 @@ public class ContinuableFuture<T> implements Future<T> {
     public <R> ContinuableFuture<R> callAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
         return execute(() -> {
-            final Result<T, Exception> result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).gett();
+            final Result<T, Exception> ret = Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
 
-            return action.apply(result.orElseIfFailure(null), result.getException());
+            return action.apply(ret.orElseIfFailure(null), ret.getException());
         }, other);
     }
 
@@ -1757,8 +1760,6 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * <p>If the first future to complete succeeds, the BiConsumer receives (result, null).
      * If both futures fail, the BiConsumer receives (null, firstException).
-     * 
-     * <p>This method is marked as {@code @Beta} and may be subject to change in future versions.
      * 
      * <p><b>Example:</b>
      * <pre>{@code
@@ -1894,10 +1895,9 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided BiFunction after the first successful completion between this ContinuableFuture
-     * and the other ContinuableFuture. The BiFunction receives the result and exception, allowing transformation
-     * based on success or failure state.
+     * and the other ContinuableFuture. The BiFunction receives the result and exception, where at least one will be non-null.
      * 
-     * <p>If the first future succeeds, the BiFunction receives (result, null).
+     * <p>If the first future to complete succeeds, the BiFunction receives (result, null).
      * If both futures fail, the BiFunction receives (null, firstException).
      * This allows the BiFunction to handle both cases and produce an appropriate result.
      * 
@@ -1947,187 +1947,6 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     //    /**
-    //     * Returns a new ContinuableFuture that, when either this or the
-    //     * other given ContinuableFuture complete normally. If both of the given
-    //     * ContinuableFutures complete exceptionally, then the returned
-    //     * ContinuableFuture also does so.
-    //     *
-    //     * @param other
-    //     * @param action
-    //     * @return
-    //     */
-    //    public <U> ContinuableFuture<U> applyToEither(final ContinuableFuture<? extends T> other, final Function<? super T, U> action) {
-    //        return Futures.anyOf(Array.asList(this, other)).thenApply(action);
-    //    }
-    //
-    //    /**
-    //     * Returns a new ContinuableFuture that, when either this or the
-    //     * other given ContinuableFuture complete normally. If both of the given
-    //     * ContinuableFutures complete exceptionally, then the returned
-    //     * ContinuableFuture also does so.
-    //     *
-    //     * @param other
-    //     * @param action
-    //     * @return
-    //     */
-    //    public ContinuableFuture<Void> acceptEither(final ContinuableFuture<? extends T> other, final Consumer<? super T> action) {
-    //        return Futures.anyOf(Array.asList(this, other)).thenAccept(action);
-    //    }
-
-    //    /**
-    //     * Returns a new ContinuableFuture that, when this ContinuableFuture completes
-    //     * exceptionally, is executed with this ContinuableFuture's exception as the
-    //     * argument to the supplied function. Otherwise, if this ContinuableFuture
-    //     * completes normally, then the returned ContinuableFuture also completes
-    //     * normally with the same value.
-    //     *
-    //     * @param action
-    //     * @return
-    //     */
-    //    public ContinuableFuture<T> exceptionally(final Function<Exception, ? extends T> action) {
-    //        return new ContinuableFuture<T>(new Future<T>() {
-    //            @Override
-    //            public boolean cancel(boolean mayInterruptIfRunning) {
-    //                return future.cancel(mayInterruptIfRunning);
-    //            }
-    //
-    //            @Override
-    //            public boolean isCancelled() {
-    //                return future.isCancelled();
-    //            }
-    //
-    //            @Override
-    //            public boolean isDone() {
-    //                return future.isDone();
-    //            }
-    //
-    //            @Override
-    //            public T get() throws InterruptedException, ExecutionException {
-    //                try {
-    //                    return future.get();
-    //                } catch (Exception e) {
-    //                    return action.apply(e);
-    //                }
-    //            }
-    //
-    //            @Override
-    //            public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-    //                try {
-    //                    return future.get(timeout, unit);
-    //                } catch (Exception e) {
-    //                    return action.apply(e);
-    //                }
-    //            }
-    //        }, null, asyncExecutor) {
-    //            @Override
-    //            public boolean cancelAll(boolean mayInterruptIfRunning) {
-    //                return super.cancelAll(mayInterruptIfRunning);
-    //            }
-    //
-    //            @Override
-    //            public boolean isAllCancelled() {
-    //                return super.isAllCancelled();
-    //            }
-    //        };
-    //    }
-
-    //    public ContinuableFuture<T> whenComplete(final BiConsumer<? super T, ? super Exception> action) {
-    //        return new ContinuableFuture<>(new Future<T>() {
-    //            @Override
-    //            public boolean cancel(boolean mayInterruptIfRunning) {
-    //                return future.cancel(mayInterruptIfRunning);
-    //            }
-    //
-    //            @Override
-    //            public boolean isCancelled() {
-    //                return future.isCancelled();
-    //            }
-    //
-    //            @Override
-    //            public boolean isDone() {
-    //                return future.isDone();
-    //            }
-    //
-    //            @Override
-    //            public T get() throws InterruptedException, ExecutionException {
-    //                final Result<T, Exception> result = gett();
-    //
-    //                if (result.right != null) {
-    //                    try {
-    //                        action.accept(result.orElse(null), result.getException());
-    //                    } catch (Exception e) {
-    //                        // ignore.
-    //                    }
-    //
-    //                    if (result.right instanceof InterruptedException) {
-    //                        throw ((InterruptedException) result.right);
-    //                    } else if (result.right instanceof ExecutionException) {
-    //                        throw ((ExecutionException) result.right);
-    //                    } else {
-    //                        throw ExceptionUtil.toRuntimeException(result.right);
-    //                    }
-    //                } else {
-    //                    action.accept(result.orElse(null), result.getException());
-    //                    return result.left;
-    //                }
-    //            }
-    //
-    //            @Override
-    //            public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-    //                final Result<T, Exception> result = gett(timeout, unit);
-    //
-    //                if (result.right != null) {
-    //                    try {
-    //                        action.accept(result.orElse(null), result.getException());
-    //                    } catch (Exception e) {
-    //                        // ignore.
-    //                    }
-    //
-    //                    if (result.right instanceof InterruptedException) {
-    //                        throw ((InterruptedException) result.right);
-    //                    } else if (result.right instanceof ExecutionException) {
-    //                        throw ((ExecutionException) result.right);
-    //                    } else {
-    //                        throw ExceptionUtil.toRuntimeException(result.right);
-    //                    }
-    //                } else {
-    //                    action.accept(result.orElse(null), result.getException());
-    //                    return result.left;
-    //                }
-    //            }
-    //        }, asyncExecutor);
-    //    }
-    //
-    //    public <U> ContinuableFuture<U> handle(final BiFunction<? super T, ? super Exception, U> action) {
-    //        return new ContinuableFuture<>(new Future<U>() {
-    //            @Override
-    //            public boolean cancel(boolean mayInterruptIfRunning) {
-    //                return future.cancel(mayInterruptIfRunning);
-    //            }
-    //
-    //            @Override
-    //            public boolean isCancelled() {
-    //                return future.isCancelled();
-    //            }
-    //
-    //            @Override
-    //            public boolean isDone() {
-    //                return future.isDone();
-    //            }
-    //
-    //            @Override
-    //            public U get() throws InterruptedException, ExecutionException {
-    //                final Result<T, Exception> result = gett();
-    //                return action.apply(result.orElse(null), result.getException());
-    //            }
-    //
-    //            @Override
-    //            public U get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-    //                final Result<T, Exception> result = gett(timeout, unit);
-    //                return action.apply(result.orElse(null), result.getException());
-    //            }
-    //        }, asyncExecutor);
-    //    }
 
     private <R> ContinuableFuture<R> execute(final Callable<R> command) {
         return execute(command, null);
@@ -2285,46 +2104,4 @@ public class ContinuableFuture<T> implements Future<T> {
 
     // https://stackoverflow.com/questions/23301598/transform-java-future-into-a-completablefuture
 
-    // Doesn't work.
-    //    public CompletableFuture<T> toCompletableFuture() {
-    //        return new CompletableFuture<T>() {
-    //
-    //            @Override
-    //            public boolean cancel(boolean mayInterruptIfRunning) {
-    //                return ContinuableFuture.this.cancel(mayInterruptIfRunning);
-    //            }
-    //
-    //            @Override
-    //            public boolean isCancelled() {
-    //                return ContinuableFuture.this.isAllCancelled();
-    //            }
-    //
-    //            @Override
-    //            public boolean isDone() {
-    //                return ContinuableFuture.this.isDone();
-    //            }
-    //
-    //            @Override
-    //            public T get() throws InterruptedException, ExecutionException {
-    //                return ContinuableFuture.this.get();
-    //            }
-    //
-    //            @Override
-    //            public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-    //                return ContinuableFuture.this.get(timeout, unit);
-    //            }
-    //        };
-    //    }
-
-    //    public CompletableFuture<T> toCompletableFuture() {
-    //        return CompletableFuture.completedFuture(null).thenCompose(none -> {
-    //            try {
-    //                return CompletableFuture.completedFuture(this.get());
-    //            } catch (InterruptedException e) {
-    //                return CompletableFuture.failedFuture(e);
-    //            } catch (ExecutionException e) {
-    //                return CompletableFuture.failedFuture(e.getCause());
-    //            }
-    //        });
-    //    }
 }

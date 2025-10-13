@@ -562,44 +562,75 @@ public final class Fn {
         };
     }
 
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <R>
-    //     * @param func
-    //     * @return a stateful {@code IntFunction}. Don't save or cache for reuse, but it can be used in parallel stream.
-    //     */
-    //    @Beta
-    //    @Stateful
-    //    public static <R> IntFunction<R> memoize(final IntFunction<? extends R> func) {
-    //        return new IntFunction<R>() {
-    //            private volatile R resultForNull = (R) NONE;
-    //
-    //            @Override
-    //            public R apply(int t) {
-    //                R result = resultForNull;
-    //
-    //                if (result == NONE) {
-    //                    synchronized (this) {
-    //                        if (resultForNull == NONE) {
-    //                            resultForNull = func.apply(t);
-    //                        }
-    //
-    //                        result = resultForNull;
-    //                    }
-    //                }
-    //
-    //                return result;
-    //            }
-    //        };
-    //    }
+    /**
+     * Creates a memoizing supplier that caches the result of the delegate supplier and automatically
+     * expires the cached value after the specified duration. This is a convenience method that accepts
+     * a {@link Duration} object instead of separate duration and time unit parameters. 
+     *
+     * <p><b>Thread Safety:</b> The returned supplier is fully thread-safe. Multiple threads can
+     * safely call {@code get()} concurrently. The implementation uses double-checked locking to
+     * ensure that the delegate supplier is called at most once per expiration period, even under
+     * concurrent access. 
+     *
+     * @param <T> the type of object returned by the supplier
+     * @param supplier the delegate supplier whose results should be cached. Must not be null.
+     *                 This supplier will be called to provide values when the cache is empty
+     *                 or expired
+     * @param duration the length of time after a value is created that it should remain in
+     *                 the cache before expiring. Must represent a positive duration when
+     *                 converted to milliseconds. After this duration passes, the next call
+     *                 to {@code get()} will invoke the delegate supplier again
+     * @return a new supplier that caches the result of the delegate supplier for the specified
+     *         duration. The returned supplier's {@code get()} method will return cached values
+     *         within the expiration window and fetch fresh values when the cache expires
+     * @throws IllegalArgumentException if the duration converts to a non-positive number of
+     *                                  milliseconds (i.e., duration.toMillis() ≤ 0)
+     * @see #memoizeWithExpiration(java.util.function.Supplier, long, TimeUnit)
+     * @see Duration
+     */
+    public static <T> Supplier<T> memoizeWithExpiration(final java.util.function.Supplier<T> supplier, final Duration duration) {
+        return memoizeWithExpiration(supplier, duration.toMillis(), TimeUnit.MILLISECONDS);
+    }
 
     /**
+     * Returns a memoized (cached) version of the provided function.
+     * The memoized function caches the results of previous invocations and returns the cached result
+     * when called again with the same input, avoiding repeated computation.
      *
-     * @param <T>
-     * @param <R>
-     * @param func
-     * @return
+     * <p>This implementation is <b>thread-safe</b> and uses a {@link ConcurrentHashMap} internally
+     * for caching non-null inputs and a double-checked locking pattern for null inputs.
+     * The function will only be invoked once per unique input, even in concurrent scenarios.
+     *
+     * <p><b>Null Handling:</b> Both null inputs and null return values are properly supported.
+     * If the function returns null for a given input, that null result will be cached and returned
+     * on subsequent invocations with the same input, without re-executing the function.
+     *
+     * <p><b>Memory Considerations:</b> The cache grows unbounded as new inputs are processed.
+     * For scenarios where the input space is very large or unbounded, consider using
+     * {@link #memoizeWithExpiration(java.util.function.Supplier, long, TimeUnit)} to prevent memory leaks.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * // Expensive computation that we want to cache
+     * Function<Integer, Integer> factorial = Fn.memoize(n -> {
+     *     System.out.println("Computing factorial of " + n);
+     *     return IntStream.rangeClosed(1, n).reduce(1, (a, b) -> a * b);
+     * });
+     *
+     * System.out.println(factorial.apply(5)); // Prints "Computing factorial of 5", returns 120
+     * System.out.println(factorial.apply(5)); // Returns 120 immediately (cached, no computation)
+     *
+     * // Works with null inputs and outputs
+     * Function<String, String> processor = Fn.memoize(s -> s == null ? null : s.toUpperCase());
+     * processor.apply(null); // Computes and caches null -> null
+     * processor.apply(null); // Returns cached null without re-executing
+     * }</pre>
+     *
+     * @param <T> the type of the input to the function
+     * @param <R> the type of the result of the function
+     * @param func the function whose results should be memoized (must not be null)
+     * @return a memoized version of the function that caches results based on input values
+     * @see ConcurrentHashMap
      */
     public static <T, R> Function<T, R> memoize(final java.util.function.Function<? super T, ? extends R> func) {
         return new Function<>() {
@@ -625,12 +656,10 @@ public final class Fn {
                         }
                     }
                 } else {
-                    result = resultMap.get(t);
-
-                    if (result == null) {
-                        result = func.apply(t);
-                        resultMap.put(t, result == null ? none : result);
-                    }
+                    result = resultMap.computeIfAbsent(t, k -> {
+                        final R computed = func.apply(k);
+                        return computed == null ? none : computed;
+                    });
                 }
 
                 return result == none ? null : result;
@@ -891,7 +920,8 @@ public final class Fn {
                     //noinspection ResultOfMethodCallIgnored
                     service.awaitTermination(terminationTimeout, timeUnit);
                 } catch (final InterruptedException e) {
-                    // ignore.
+                    Thread.currentThread().interrupt(); // Restore interrupt status
+                    // Shutdown already initiated, so we can safely ignore the interruption
                 }
             }
         };
@@ -2812,12 +2842,35 @@ public final class Fn {
 
     /**
      * Returns a Predicate for Map.Entry that tests both key and value using a BiPredicate.
+     * This is particularly useful when filtering Map entry streams where you need to test
+     * both the key and value together.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param predicate the bi-predicate to test key and value
-     * @return a Predicate that tests Map.Entry using key and value
+     * <p>The returned Predicate extracts the key and value from the Map.Entry and passes them
+     * to the provided BiPredicate for evaluation.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * Map<String, Integer> map = Map.of("apple", 5, "banana", 12, "cherry", 3);
+     *
+     * // Filter entries where key starts with "a" AND value > 3
+     * List<Map.Entry<String, Integer>> filtered = map.entrySet().stream()
+     *     .filter(Fn.testKeyVal((k, v) -> k.startsWith("a") && v > 3))
+     *     .collect(Collectors.toList());
+     * // Result: [apple=5]
+     *
+     * // Find expensive items (key length > 5 and value > 10)
+     * map.entrySet().stream()
+     *     .filter(Fn.testKeyVal((k, v) -> k.length() > 5 && v > 10))
+     *     .forEach(System.out::println);
+     * }</pre>
+     *
+     * @param <K> the type of the map key
+     * @param <V> the type of the map value
+     * @param predicate the bi-predicate to test key and value together (must not be null)
+     * @return a Predicate that tests Map.Entry by extracting and testing its key and value
      * @throws IllegalArgumentException if predicate is null
+     * @see #acceptKeyVal(java.util.function.BiConsumer)
+     * @see #applyKeyVal(java.util.function.BiFunction)
      */
     public static <K, V> Predicate<Map.Entry<K, V>> testKeyVal(final java.util.function.BiPredicate<? super K, ? super V> predicate)
             throws IllegalArgumentException {
@@ -2844,13 +2897,38 @@ public final class Fn {
 
     /**
      * Returns a Function for Map.Entry that applies a BiFunction to both key and value.
+     * This is particularly useful when transforming Map entry streams where you need to combine
+     * or process both the key and value to produce a result.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <R> the result type
-     * @param func the bi-function to apply to key and value
-     * @return a Function that transforms Map.Entry using key and value
+     * <p>The returned Function extracts the key and value from the Map.Entry and passes them
+     * to the provided BiFunction to produce a result of type R.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * Map<String, Integer> inventory = Map.of("apple", 5, "banana", 12, "cherry", 3);
+     *
+     * // Create descriptive strings from map entries
+     * List<String> descriptions = inventory.entrySet().stream()
+     *     .map(Fn.applyKeyVal((fruit, count) ->
+     *         String.format("%s: %d in stock", fruit, count)))
+     *     .collect(Collectors.toList());
+     * // Result: ["apple: 5 in stock", "banana: 12 in stock", "cherry: 3 in stock"]
+     *
+     * // Calculate total value by combining key length and value
+     * int totalValue = inventory.entrySet().stream()
+     *     .map(Fn.applyKeyVal((k, v) -> k.length() * v))
+     *     .mapToInt(Integer::intValue)
+     *     .sum();
+     * }</pre>
+     *
+     * @param <K> the type of the map key
+     * @param <V> the type of the map value
+     * @param <R> the type of the result produced by the function
+     * @param func the bi-function to apply to key and value together (must not be null)
+     * @return a Function that transforms Map.Entry by extracting and applying the function to its key and value
      * @throws IllegalArgumentException if func is null
+     * @see #testKeyVal(java.util.function.BiPredicate)
+     * @see #acceptKeyVal(java.util.function.BiConsumer)
      */
     public static <K, V, R> Function<Map.Entry<K, V>, R> applyKeyVal(final java.util.function.BiFunction<? super K, ? super V, ? extends R> func)
             throws IllegalArgumentException {
@@ -3460,22 +3538,58 @@ public final class Fn {
     private static final Function<Future<Object>, Object> FUTURE_GETTER = f -> {
         try {
             return f.get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Restore interrupt status
+            throw ExceptionUtil.toRuntimeException(e, true);
+        } catch (ExecutionException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
     };
 
     /**
-     * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * 
-     * <p>The predicate limits the number of elements that can pass through. Once the limit is reached,
-     * all subsequent elements will fail the test.
+     * Returns a stateful {@code Predicate} that first limits the number of tests to perform,
+     * then applies the provided predicate to those limited elements.
+     *
+     * <p><b>Important:</b> This method tests elements in a specific order:
+     * <ol>
+     *   <li>First, check if the limit has been reached (using an internal counter)</li>
+     *   <li>If within limit, then apply the predicate to test the element</li>
+     *   <li>Once the limit is exhausted, all subsequent elements automatically fail (return false)</li>
+     * </ol>
+     *
+     * <p>This is useful when you only want to test the first N elements of a stream, and
+     * you want to filter those N elements according to some condition.
+     *
+     * <p><b>Contrast with {@link #filterThenLimit(java.util.function.Predicate, int)}:</b>
+     * <ul>
+     *   <li>{@code limitThenFilter(3, p)} - Tests only first 3 elements, filters those that match p</li>
+     *   <li>{@code filterThenLimit(p, 3)} - Tests all elements, but stops after 3 matches</li>
+     * </ul>
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * // Test only the first 5 elements, filter those that are even
+     * List<Integer> result = Stream.of(2, 4, 6, 8, 10, 12, 14, 16)
+     *     .filter(Fn.limitThenFilter(5, n -> n % 2 == 0))
+     *     .collect(Collectors.toList());
+     * // Result: [2, 4, 6, 8, 10] (tested first 5, all were even)
+     *
+     * // Compare with mixed odd/even:
+     * result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8)
+     *     .filter(Fn.limitThenFilter(5, n -> n % 2 == 0))
+     *     .collect(Collectors.toList());
+     * // Result: [2, 4] (tested first 5 elements [1,2,3,4,5], only 2 and 4 are even)
+     * }</pre>
+     *
+     * <p><b>Thread Safety:</b> This predicate is stateful and maintains an internal counter.
+     * Don't save or cache for reuse, but it can be used in parallel streams (uses AtomicInteger).
      *
      * @param <T> the type of the input to the predicate
-     * @param limit the maximum number of elements that can pass the predicate
-     * @param predicate the predicate to test elements after checking the limit
-     * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
+     * @param limit the maximum number of elements to test (must be non-negative)
+     * @param predicate the predicate to apply to elements within the limit (must not be null)
+     * @return a stateful {@code Predicate} that tests at most 'limit' elements using the provided predicate
      * @throws IllegalArgumentException if limit is negative or predicate is null
+     * @see #filterThenLimit(java.util.function.Predicate, int)
      */
     @Beta
     @Stateful
@@ -3601,18 +3715,18 @@ public final class Fn {
             return Fn.alwaysFalse();
         }
 
-        final MutableBoolean ongoing = MutableBoolean.of(true);
+        final java.util.concurrent.atomic.AtomicBoolean ongoing = new java.util.concurrent.atomic.AtomicBoolean(true);
 
         final TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                ongoing.setFalse();
+                ongoing.set(false);
             }
         };
 
         timer.schedule(task, timeInMillis);
 
-        return t -> ongoing.value();
+        return t -> ongoing.get();
     }
 
     /**
@@ -7156,8 +7270,28 @@ public final class Fn {
 
         /**
          * Returns a stateful BiFunction that applies a function based on element index position.
-         * The function maintains an internal counter that increments with each apply call.
-         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
+         * The function maintains an internal counter that increments with each apply call, starting from 0.
+         *
+         * <p><b>Important:</b> This method is marked as {@code @Beta}, {@code @SequentialOnly}, and {@code @Stateful},
+         * indicating it should not be saved, cached for reuse, or used in parallel streams. Each invocation
+         * creates a new instance with its own independent counter starting at 0.
+         *
+         * <p>Example usage:
+         * <pre>{@code
+         * // Create indexed pairs from two lists
+         * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+         * List<Integer> ages = Arrays.asList(25, 30, 35);
+         *
+         * BiFunction<String, Integer, String> indexedFormatter =
+         *     Fn.BiFunctions.indexed((idx, name, age) ->
+         *         String.format("[%d] %s is %d years old", idx, name, age));
+         *
+         * // Apply to pairs - index increments with each call
+         * System.out.println(indexedFormatter.apply(names.get(0), ages.get(0)));
+         * // Output: "[0] Alice is 25 years old"
+         * System.out.println(indexedFormatter.apply(names.get(1), ages.get(1)));
+         * // Output: "[1] Bob is 30 years old"
+         * }</pre>
          *
          * @param <T> the type of the first argument to the function
          * @param <U> the type of the second argument to the function

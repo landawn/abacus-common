@@ -96,6 +96,12 @@ public class u { // NOSONAR
         /**
          * Returns an empty {@code OptionalBoolean} instance. No value is present for this OptionalBoolean.
          *
+         * <p>Usage example:
+         * <pre>{@code
+         * OptionalBoolean empty = OptionalBoolean.empty();
+         * empty.isPresent(); // returns false
+         * }</pre>
+         *
          * @return an empty {@code OptionalBoolean}
          */
         public static OptionalBoolean empty() {
@@ -104,6 +110,13 @@ public class u { // NOSONAR
 
         /**
          * Returns an {@code OptionalBoolean} with the specified value present.
+         *
+         * <p>Usage example:
+         * <pre>{@code
+         * OptionalBoolean optTrue = OptionalBoolean.of(true);
+         * OptionalBoolean optFalse = OptionalBoolean.of(false);
+         * optTrue.get(); // returns true
+         * }</pre>
          *
          * @param value the value to describe
          * @return an {@code OptionalBoolean} with the value present
@@ -115,6 +128,14 @@ public class u { // NOSONAR
         /**
          * Returns an {@code OptionalBoolean} describing the given value, if
          * non-null, otherwise returns an empty {@code OptionalBoolean}.
+         *
+         * <p>Usage example:
+         * <pre>{@code
+         * Boolean nullValue = null;
+         * Boolean trueValue = Boolean.TRUE;
+         * OptionalBoolean.ofNullable(nullValue); // returns empty OptionalBoolean
+         * OptionalBoolean.ofNullable(trueValue); // returns OptionalBoolean with true
+         * }</pre>
          *
          * @param val the possibly-null value to describe
          * @return an {@code OptionalBoolean} with a present value if the specified value
@@ -175,6 +196,12 @@ public class u { // NOSONAR
          * If a value is present, performs the given action with the value,
          * otherwise does nothing.
          *
+         * <p>Usage example:
+         * <pre>{@code
+         * OptionalBoolean.of(true).ifPresent(val -> System.out.println("Value: " + val)); // prints "Value: true"
+         * OptionalBoolean.empty().ifPresent(val -> System.out.println("Value: " + val)); // does nothing
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed, if a value is present
          * @return this {@code OptionalBoolean}
@@ -223,6 +250,12 @@ public class u { // NOSONAR
          * returns an {@code OptionalBoolean} describing the value, otherwise returns an
          * empty {@code OptionalBoolean}.
          *
+         * <p>Usage example:
+         * <pre>{@code
+         * OptionalBoolean.of(true).filter(val -> val); // returns OptionalBoolean with true
+         * OptionalBoolean.of(false).filter(val -> val); // returns empty OptionalBoolean
+         * }</pre>
+         *
          * @param <E> the type of exception that the predicate may throw
          * @param predicate the predicate to apply to a value, if present
          * @return an {@code OptionalBoolean} describing the value of this
@@ -245,6 +278,12 @@ public class u { // NOSONAR
          * If a value is present, returns an {@code OptionalBoolean} describing (as if by
          * {@link #of}) the result of applying the given mapping function to
          * the value, otherwise returns an empty {@code OptionalBoolean}.
+         *
+         * <p>Usage example:
+         * <pre>{@code
+         * OptionalBoolean.of(true).map(val -> !val); // returns OptionalBoolean with false
+         * OptionalBoolean.empty().map(val -> !val); // returns empty OptionalBoolean
+         * }</pre>
          *
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to a value, if present
@@ -408,26 +447,6 @@ public class u { // NOSONAR
             }
         }
 
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final boolean valueToFind) {
-        //            return isPresent() && N.equals(this.value, valueToFind);
-        //        }
-        //
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final Boolean valueToFind) {
-        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.booleanValue());
-        //        }
-
         /**
          * If a value is present, returns this {@code OptionalBoolean}, otherwise
          * returns the {@code OptionalBoolean} produced by the supplying function.
@@ -445,36 +464,14 @@ public class u { // NOSONAR
             }
         }
 
-        //    /**
-        //     *
-        //     * @return
-        //     * @deprecated use {@link #orElse(false)}
-        //     */
-        //    @Deprecated
-        //    public boolean orFalse() {
-        //        return isPresent ? value : false;
-        //    }
-
-        //    public boolean orElseFalse() {
-        //        return isPresent ? value : false;
-        //    }
-
-        //    /**
-        //     *
-        //     * @return
-        //     * @deprecated use {@link #orElse(true)}
-        //     */
-        //    @Deprecated
-        //    public boolean orTrue() {
-        //        return isPresent ? value : true;
-        //    }
-        //
-        //    public boolean orElseTrue() {
-        //        return isPresent ? value : true;
-        //    }
-
         /**
          * If a value is present, returns the value, otherwise returns {@code other}.
+         *
+         * <p>Usage example:
+         * <pre>{@code
+         * OptionalBoolean.of(true).orElse(false); // returns true
+         * OptionalBoolean.empty().orElse(false); // returns false
+         * }</pre>
          *
          * @param other the value to be returned, if no value is present
          * @return the value, if present, otherwise {@code other}
@@ -852,6 +849,12 @@ public class u { // NOSONAR
         /**
          * Returns an empty {@code OptionalChar} instance. No value is present for this OptionalChar.
          *
+         * <p>Usage example:
+         * <pre>{@code
+         * OptionalChar empty = OptionalChar.empty();
+         * empty.isPresent(); // returns false
+         * }</pre>
+         *
          * @return an empty {@code OptionalChar}
          */
         public static OptionalChar empty() {
@@ -860,6 +863,12 @@ public class u { // NOSONAR
 
         /**
          * Returns an {@code OptionalChar} with the specified value present.
+         *
+         * <p>Usage example:
+         * <pre>{@code
+         * OptionalChar optChar = OptionalChar.of('A');
+         * optChar.get(); // returns 'A'
+         * }</pre>
          *
          * @param value the value to describe
          * @return an {@code OptionalChar} with the value present
@@ -872,6 +881,13 @@ public class u { // NOSONAR
         /**
          * Returns an {@code OptionalChar} describing the given value, if
          * non-null, otherwise returns an empty {@code OptionalChar}.
+         *
+         * <p>Usage example:
+         * <pre>{@code
+         * Character nullChar = null;
+         * OptionalChar.ofNullable(nullChar); // returns empty OptionalChar
+         * OptionalChar.ofNullable('B'); // returns OptionalChar with 'B'
+         * }</pre>
          *
          * @param val the possibly-null value to describe
          * @return an {@code OptionalChar} with a present value if the specified value
@@ -1119,26 +1135,6 @@ public class u { // NOSONAR
             }
         }
 
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final char valueToFind) {
-        //            return isPresent() && N.equals(this.value, valueToFind);
-        //        }
-        //
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final Character valueToFind) {
-        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.charValue());
-        //        }
-
         /**
          * If a value is present, returns this {@code OptionalChar}, otherwise
          * returns the {@code OptionalChar} produced by the supplying function.
@@ -1155,16 +1151,6 @@ public class u { // NOSONAR
                 return Objects.requireNonNull(supplier.get());
             }
         }
-
-        //    /**
-        //     *
-        //     * @return
-        //     * @deprecated use {@link #orElseZero()}
-        //     */
-        //    @Deprecated
-        //    public char orZero() {
-        //        return isPresent() ? value : 0;
-        //    }
 
         /**
          * If a value is present, returns the value, otherwise returns zero.
@@ -1790,26 +1776,6 @@ public class u { // NOSONAR
             }
         }
 
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final byte valueToFind) {
-        //            return isPresent() && N.equals(this.value, valueToFind);
-        //        }
-        //
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final Byte valueToFind) {
-        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.byteValue());
-        //        }
-
         /**
          * If a value is not present, returns an {@code OptionalByte} produced by the
          * supplying function. Otherwise returns this {@code OptionalByte}.
@@ -1826,16 +1792,6 @@ public class u { // NOSONAR
                 return Objects.requireNonNull(supplier.get());
             }
         }
-
-        //    /**
-        //     *
-        //     * @return
-        //     * @deprecated use {@link #orElseZero()}
-        //     */
-        //    @Deprecated
-        //    public byte orZero() {
-        //        return isPresent ? value : 0;
-        //    }
 
         /**
          * Returns the value if present, otherwise returns zero.
@@ -2450,26 +2406,6 @@ public class u { // NOSONAR
             }
         }
 
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final short valueToFind) {
-        //            return isPresent() && N.equals(this.value, valueToFind);
-        //        }
-        //
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final Short valueToFind) {
-        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.shortValue());
-        //        }
-
         /**
          * If a value is not present, returns an {@code OptionalShort} produced by the
          * supplying function. Otherwise returns this {@code OptionalShort}.
@@ -2486,16 +2422,6 @@ public class u { // NOSONAR
                 return Objects.requireNonNull(supplier.get());
             }
         }
-
-        //    /**
-        //     *
-        //     * @return
-        //     * @deprecated use {@link #orElseZero()}
-        //     */
-        //    @Deprecated
-        //    public short orZero() {
-        //        return isPresent ? value : 0;
-        //    }
 
         /**
          * Returns the value if present, otherwise returns zero.
@@ -2874,6 +2800,12 @@ public class u { // NOSONAR
          * Returns an empty {@code OptionalInt} instance. No value is present for this
          * {@code OptionalInt}.
          *
+         * <p>Usage example:
+         * <pre>{@code
+         * OptionalInt empty = OptionalInt.empty();
+         * empty.isPresent(); // returns false
+         * }</pre>
+         *
          * @return an empty {@code OptionalInt}
          */
         public static OptionalInt empty() {
@@ -2882,6 +2814,12 @@ public class u { // NOSONAR
 
         /**
          * Returns an {@code OptionalInt} with the specified value present.
+         *
+         * <p>Usage example:
+         * <pre>{@code
+         * OptionalInt opt = OptionalInt.of(42);
+         * opt.get(); // returns 42
+         * }</pre>
          *
          * @param value the int value to be present
          * @return an {@code OptionalInt} with the value present
@@ -2893,6 +2831,13 @@ public class u { // NOSONAR
         /**
          * Returns an {@code OptionalInt} describing the specified value, if non-null,
          * otherwise returns an empty {@code OptionalInt}.
+         *
+         * <p>Usage example:
+         * <pre>{@code
+         * Integer nullInt = null;
+         * OptionalInt.ofNullable(nullInt); // returns empty OptionalInt
+         * OptionalInt.ofNullable(100); // returns OptionalInt with 100
+         * }</pre>
          *
          * @param val the possibly-null value to describe
          * @return an {@code OptionalInt} with a present value if the specified value
@@ -3203,26 +3148,6 @@ public class u { // NOSONAR
             }
         }
 
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final int valueToFind) {
-        //            return isPresent() && N.equals(this.value, valueToFind);
-        //        }
-        //
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final Integer valueToFind) {
-        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.intValue());
-        //        }
-
         /**
          * Returns this OptionalInt if a value is present, otherwise returns the OptionalInt produced by the supplying function.
          *
@@ -3236,16 +3161,6 @@ public class u { // NOSONAR
                 return Objects.requireNonNull(supplier.get());
             }
         }
-
-        //    /**
-        //     *
-        //     * @return
-        //     * @deprecated use {@link #orElseZero()}
-        //     */
-        //    @Deprecated
-        //    public int orZero() {
-        //        return isPresent ? value : 0;
-        //    }
 
         /**
          * Returns the value if present, otherwise returns 0.
@@ -3893,26 +3808,6 @@ public class u { // NOSONAR
             }
         }
 
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final long valueToFind) {
-        //            return isPresent() && N.equals(this.value, valueToFind);
-        //        }
-        //
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final Long valueToFind) {
-        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.longValue());
-        //        }
-
         /**
          * Returns this OptionalLong if a value is present, otherwise returns the OptionalLong produced by the supplying function.
          *
@@ -3926,16 +3821,6 @@ public class u { // NOSONAR
                 return Objects.requireNonNull(supplier.get());
             }
         }
-
-        //    /**
-        //     *
-        //     * @return
-        //     * @deprecated use {@link #orElseZero()}
-        //     */
-        //    @Deprecated
-        //    public long orZero() {
-        //        return isPresent ? value : 0;
-        //    }
 
         /**
          * Returns the value if present, otherwise returns 0.
@@ -4323,7 +4208,7 @@ public class u { // NOSONAR
          * @return an OptionalFloat with the value present
          */
         public static OptionalFloat of(final float value) {
-            return value == 0f ? ZERO : new OptionalFloat(value);
+            return Float.compare(value, 0f) == 0 ? ZERO : new OptionalFloat(value);
         }
 
         /**
@@ -4555,26 +4440,6 @@ public class u { // NOSONAR
             }
         }
 
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final float valueToFind) {
-        //            return isPresent() && N.equals(this.value, valueToFind);
-        //        }
-        //
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final Float valueToFind) {
-        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.floatValue());
-        //        }
-
         /**
          * Returns this OptionalFloat if a value is present, otherwise returns the OptionalFloat produced by the supplying function.
          *
@@ -4588,16 +4453,6 @@ public class u { // NOSONAR
                 return Objects.requireNonNull(supplier.get());
             }
         }
-
-        //    /**
-        //     *
-        //     * @return
-        //     * @deprecated use {@link #orElseZero()}
-        //     */
-        //    @Deprecated
-        //    public float orZero() {
-        //        return isPresent ? value : 0;
-        //    }
 
         /**
          * Returns the value if present, otherwise returns 0.
@@ -4959,7 +4814,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalDouble} containing the specified value
          */
         public static OptionalDouble of(final double value) {
-            return value == 0d ? ZERO : new OptionalDouble(value);
+            return Double.compare(value, 0d) == 0 ? ZERO : new OptionalDouble(value);
         }
 
         /**
@@ -5191,26 +5046,6 @@ public class u { // NOSONAR
             }
         }
 
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final double valueToFind) {
-        //            return isPresent() && N.equals(this.value, valueToFind);
-        //        }
-        //
-        //        /**
-        //         *
-        //         *
-        //         * @param element
-        //         * @return
-        //         */
-        //        public boolean contains(final Double valueToFind) {
-        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.doubleValue());
-        //        }
-
         /**
          * If a value is present, returns this {@code OptionalDouble}, otherwise returns the {@code OptionalDouble} produced by the supplying function.
          *
@@ -5224,16 +5059,6 @@ public class u { // NOSONAR
                 return Objects.requireNonNull(supplier.get());
             }
         }
-
-        //    /**
-        //     *
-        //     * @return
-        //     * @deprecated use {@link #orElseZero()}
-        //     */
-        //    @Deprecated
-        //    public double orZero() {
-        //        return isPresent ? value : 0;
-        //    }
 
         /**
          * Returns the value if present, otherwise returns {@code 0}.
@@ -5615,6 +5440,12 @@ public class u { // NOSONAR
         /**
          * Returns an empty {@code Optional} instance. No value is present for this {@code Optional}.
          *
+         * <p>Usage example:
+         * <pre>{@code
+         * Optional<String> empty = Optional.empty();
+         * empty.isPresent(); // returns false
+         * }</pre>
+         *
          * @param <T> the type of the non-existent value
          * @return an empty {@code Optional}
          */
@@ -5626,8 +5457,15 @@ public class u { // NOSONAR
          * Returns an {@code Optional} containing the specified non-null value.
          * Special handling for empty strings: returns a cached instance for empty strings.
          *
+         * <p>Usage example:
+         * <pre>{@code
+         * Optional<String> opt = Optional.of("Hello");
+         * opt.get(); // returns "Hello"
+         * }</pre>
+         *
          * @param value the non-null value to store
          * @return an {@code Optional} containing the specified value
+         * @throws NullPointerException if value is null
          */
         public static Optional<String> of(final String value) throws NullPointerException {
             Objects.requireNonNull(value);
@@ -5642,9 +5480,16 @@ public class u { // NOSONAR
         /**
          * Returns an {@code Optional} containing the specified non-null value.
          *
+         * <p>Usage example:
+         * <pre>{@code
+         * Optional<Integer> opt = Optional.of(42);
+         * opt.get(); // returns 42
+         * }</pre>
+         *
          * @param <T> the type of the value
          * @param value the non-null value to store
          * @return an {@code Optional} containing the specified value
+         * @throws NullPointerException if value is null
          */
         public static <T> Optional<T> of(final T value) throws NullPointerException {
             return new Optional<>(value);
@@ -6008,16 +5853,6 @@ public class u { // NOSONAR
             }
         }
 
-        //    /**
-        //     *
-        //     * @return
-        //     * @deprecated using {@link #orElseNull()}
-        //     */
-        //    @Deprecated
-        //    public T orNull() {
-        //        return isPresent() ? value : null;
-        //    }
-
         /**
          * Returns the value if present, otherwise returns {@code null}.
          *
@@ -6043,18 +5878,17 @@ public class u { // NOSONAR
          *
          * @param other a {@code Supplier} whose result is returned if no value is present
          * @return the value if present, otherwise the result produced by the supplying function
+         * @throws IllegalArgumentException if no value is present and the supplying function is null
          */
-        public T orElseGet(final Supplier<? extends T> other) {
+        public T orElseGet(final Supplier<? extends T> other) throws IllegalArgumentException {
+            N.checkArgNotNull(other, cs.other);
+
             if (isPresent()) {
                 return value;
             } else {
                 return other.get();
             }
         }
-
-        //    public T orElseNull() {
-        //        return isPresent() ? value : null;
-        //    }
 
         /**
          * Returns the value if present, otherwise throws {@code NoSuchElementException}.
@@ -6358,6 +6192,13 @@ public class u { // NOSONAR
         /**
          * Returns an empty {@code Nullable} instance. No value is present for this {@code Nullable}.
          *
+         * <p>Usage example:
+         * <pre>{@code
+         * Nullable<String> empty = Nullable.empty();
+         * empty.isPresent(); // returns false
+         * empty.isNull(); // returns true
+         * }</pre>
+         *
          * @param <T> the type of the non-existent value
          * @return an empty {@code Nullable}
          */
@@ -6368,6 +6209,15 @@ public class u { // NOSONAR
         /**
          * Returns a {@code Nullable} containing the specified {@code String} value.
          * Special handling is provided for {@code null} and empty strings to return singleton instances.
+         *
+         * <p>Usage example:
+         * <pre>{@code
+         * Nullable<String> nullable = Nullable.of("Hello");
+         * Nullable<String> nullValue = Nullable.of((String) null);
+         * nullable.isPresent(); // returns true
+         * nullValue.isPresent(); // returns true
+         * nullValue.isNull(); // returns true
+         * }</pre>
          *
          * @param value the value to be present, which may be {@code null}
          * @return a {@code Nullable} containing the value
@@ -6384,6 +6234,14 @@ public class u { // NOSONAR
 
         /**
          * Returns a {@code Nullable} containing the specified value.
+         *
+         * <p>Usage example:
+         * <pre>{@code
+         * Nullable<Integer> nullable = Nullable.of(42);
+         * Nullable<Integer> nullValue = Nullable.of((Integer) null);
+         * nullable.orElse(0); // returns 42
+         * nullValue.orElse(0); // returns null (different from Optional!)
+         * }</pre>
          *
          * @param <T> the type of the value
          * @param value the value to be present, which may be {@code null}
@@ -7113,16 +6971,6 @@ public class u { // NOSONAR
                 return Objects.requireNonNull((Nullable<T>) supplier.get());
             }
         }
-
-        //    /**
-        //     *
-        //     * @return
-        //     * @deprecated using {@link #orElseNull()}
-        //     */
-        //    @Deprecated
-        //    public T orNull() {
-        //        return isPresent() ? value : null;
-        //    }
 
         /**
          * Returns the value if present, otherwise returns {@code null}.

@@ -6,10 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class PoolStats100Test extends TestBase {
 
     @Test
@@ -21,8 +22,8 @@ public class PoolStats100Test extends TestBase {
         long hitCount = 600L;
         long missCount = 200L;
         long evictionCount = 100L;
-        long maxMemory = 1024 * 1024L; // 1MB
-        long dataSize = 512 * 1024L; // 512KB
+        long maxMemory = 1024 * 1024L;
+        long dataSize = 512 * 1024L;
 
         PoolStats stats = new PoolStats(capacity, size, putCount, getCount, hitCount, missCount, evictionCount, maxMemory, dataSize);
 
@@ -39,7 +40,6 @@ public class PoolStats100Test extends TestBase {
 
     @Test
     public void testWithNegativeMemoryValues() {
-        // Test with -1 values for memory (indicating no memory tracking)
         PoolStats stats = new PoolStats(50, 25, 100, 80, 60, 20, 10, -1, -1);
 
         assertEquals(50, stats.capacity());
@@ -70,8 +70,8 @@ public class PoolStats100Test extends TestBase {
 
     @Test
     public void testWithMaxValues() {
-        PoolStats stats = new PoolStats(Integer.MAX_VALUE, Integer.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, 
-                                       Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE);
+        PoolStats stats = new PoolStats(Integer.MAX_VALUE, Integer.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
+                Long.MAX_VALUE, Long.MAX_VALUE);
 
         assertEquals(Integer.MAX_VALUE, stats.capacity());
         assertEquals(Integer.MAX_VALUE, stats.size());
@@ -88,7 +88,7 @@ public class PoolStats100Test extends TestBase {
     public void testRecordEquality() {
         PoolStats stats1 = new PoolStats(100, 50, 1000, 800, 600, 200, 100, 1024, 512);
         PoolStats stats2 = new PoolStats(100, 50, 1000, 800, 600, 200, 100, 1024, 512);
-        PoolStats stats3 = new PoolStats(100, 50, 1000, 800, 600, 200, 100, 1024, 513); // Different dataSize
+        PoolStats stats3 = new PoolStats(100, 50, 1000, 800, 600, 200, 100, 1024, 513);
 
         assertEquals(stats1, stats2);
         assertNotEquals(stats1, stats3);
@@ -121,31 +121,28 @@ public class PoolStats100Test extends TestBase {
 
     @Test
     public void testHitRateCalculation() {
-        // Test case with hits and misses
         PoolStats stats = new PoolStats(100, 50, 1000, 800, 600, 200, 100, -1, -1);
-        
-        // Verify hit rate calculation
+
         double hitRate = stats.getCount() > 0 ? (double) stats.hitCount() / stats.getCount() : 0.0;
-        assertEquals(0.75, hitRate, 0.001); // 600/800 = 0.75
-        
-        // Verify miss rate calculation
+        assertEquals(0.75, hitRate, 0.001);
+
         double missRate = stats.getCount() > 0 ? (double) stats.missCount() / stats.getCount() : 0.0;
-        assertEquals(0.25, missRate, 0.001); // 200/800 = 0.25
+        assertEquals(0.25, missRate, 0.001);
     }
 
     @Test
     public void testUtilizationCalculation() {
         PoolStats stats = new PoolStats(100, 75, 1000, 800, 600, 200, 100, -1, -1);
-        
+
         double utilization = (double) stats.size() / stats.capacity();
-        assertEquals(0.75, utilization, 0.001); // 75/100 = 0.75
+        assertEquals(0.75, utilization, 0.001);
     }
 
     @Test
     public void testMemoryUtilizationCalculation() {
         PoolStats stats = new PoolStats(100, 50, 1000, 800, 600, 200, 100, 1024 * 1024, 768 * 1024);
-        
+
         double memoryUtilization = (double) stats.dataSize() / stats.maxMemory();
-        assertEquals(0.75, memoryUtilization, 0.001); // 768KB/1024KB = 0.75
+        assertEquals(0.75, memoryUtilization, 0.001);
     }
 }

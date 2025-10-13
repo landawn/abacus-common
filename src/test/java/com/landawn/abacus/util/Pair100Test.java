@@ -14,11 +14,13 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
 
+@Tag("new-test")
 public class Pair100Test extends TestBase {
 
     private Pair<String, Integer> pair;
@@ -40,7 +42,6 @@ public class Pair100Test extends TestBase {
         assertEquals("test", p.left());
         assertEquals(42, p.right());
 
-        // Test with null values
         Pair<String, Integer> nullPair = Pair.of(null, null);
         assertNull(nullPair.left());
         assertNull(nullPair.right());
@@ -76,7 +77,6 @@ public class Pair100Test extends TestBase {
         assertNotNull(emptyArray);
         assertEquals(0, emptyArray.length);
 
-        // Should return the same instance
         assertSame(emptyArray, Pair.emptyArray());
     }
 
@@ -88,7 +88,6 @@ public class Pair100Test extends TestBase {
         assertEquals("hello", pair.left());
         assertEquals(123, pair.right());
 
-        // Test direct field access
         assertEquals("hello", pair.left());
         assertEquals(123, pair.right());
     }
@@ -138,47 +137,41 @@ public class Pair100Test extends TestBase {
     public void testSetLeftIf() throws Exception {
         pair.setLeft("original");
 
-        // Test when predicate returns true
         boolean result = pair.setLeftIf("new", (p, newLeft) -> newLeft.length() > 2);
         assertTrue(result);
         assertEquals("new", pair.left());
 
-        // Test when predicate returns false
         result = pair.setLeftIf("a", (p, newLeft) -> newLeft.length() > 2);
         assertFalse(result);
-        assertEquals("new", pair.left()); // Should remain unchanged
+        assertEquals("new", pair.left());
     }
 
     @Test
     public void testSetRightIf() throws Exception {
         pair.setRight(10);
 
-        // Test when predicate returns true
         boolean result = pair.setRightIf(20, (p, newRight) -> newRight > 15);
         assertTrue(result);
         assertEquals(20, pair.right());
 
-        // Test when predicate returns false
         result = pair.setRightIf(5, (p, newRight) -> newRight > 15);
         assertFalse(result);
-        assertEquals(20, pair.right()); // Should remain unchanged
+        assertEquals(20, pair.right());
     }
 
     @Test
     public void testSetIf() throws Exception {
         pair.set("old", 1);
 
-        // Test when predicate returns true
         boolean result = pair.setIf("new", 2, (p, newLeft, newRight) -> newRight > 1);
         assertTrue(result);
         assertEquals("new", pair.left());
         assertEquals(2, pair.right());
 
-        // Test when predicate returns false
         result = pair.setIf("newer", 0, (p, newLeft, newRight) -> newRight > 1);
         assertFalse(result);
-        assertEquals("new", pair.left()); // Should remain unchanged
-        assertEquals(2, pair.right()); // Should remain unchanged
+        assertEquals("new", pair.left());
+        assertEquals(2, pair.right());
     }
 
     @Test
@@ -189,7 +182,6 @@ public class Pair100Test extends TestBase {
         assertEquals(100, reversed.left());
         assertEquals("left", reversed.right());
 
-        // Original should remain unchanged
         assertEquals("left", pair.left());
         assertEquals(100, pair.right());
     }
@@ -203,7 +195,6 @@ public class Pair100Test extends TestBase {
         assertEquals(pair.right(), copy.right());
         assertNotSame(pair, copy);
 
-        // Modify copy and ensure original is unchanged
         copy.setLeft("modified");
         assertEquals("original", pair.left());
     }
@@ -222,14 +213,12 @@ public class Pair100Test extends TestBase {
     public void testToArrayWithParameter() {
         pair.set("test", 123);
 
-        // Test with array of exact size
         Object[] exactArray = new Object[2];
         Object[] result = pair.toArray(exactArray);
         assertSame(exactArray, result);
         assertEquals("test", result[0]);
         assertEquals(123, result[1]);
 
-        // Test with smaller array
         Object[] smallArray = new Object[1];
         result = pair.toArray(smallArray);
         assertNotSame(smallArray, result);
@@ -237,7 +226,6 @@ public class Pair100Test extends TestBase {
         assertEquals("test", result[0]);
         assertEquals(123, result[1]);
 
-        // Test with larger array
         Object[] largeArray = new Object[5];
         result = pair.toArray(largeArray);
         assertSame(largeArray, result);
@@ -297,12 +285,10 @@ public class Pair100Test extends TestBase {
     public void testFilterBiPredicate() throws Exception {
         pair.set("test", 4);
 
-        // Test when filter passes
         Optional<Pair<String, Integer>> result = pair.filter((left, right) -> left.length() == right);
         assertTrue(result.isPresent());
         assertSame(pair, result.get());
 
-        // Test when filter fails
         result = pair.filter((left, right) -> left.length() != right);
         assertFalse(result.isPresent());
     }
@@ -311,12 +297,10 @@ public class Pair100Test extends TestBase {
     public void testFilterPredicate() throws Exception {
         pair.set("test", 4);
 
-        // Test when filter passes
         Optional<Pair<String, Integer>> result = pair.filter(p -> p.right() > 0);
         assertTrue(result.isPresent());
         assertSame(pair, result.get());
 
-        // Test when filter fails
         result = pair.filter(p -> p.right() < 0);
         assertFalse(result.isPresent());
     }
@@ -343,11 +327,9 @@ public class Pair100Test extends TestBase {
     public void testMapEntryMethods() {
         pair.set("mapKey", 200);
 
-        // Test deprecated methods that implement Map.Entry
         assertEquals("mapKey", pair.getKey());
         assertEquals(200, pair.getValue());
 
-        // Test setValue (deprecated)
         Integer oldValue = pair.setValue(300);
         assertEquals(200, oldValue);
         assertEquals(300, pair.right());
@@ -364,12 +346,10 @@ public class Pair100Test extends TestBase {
         assertNotEquals(p1.hashCode(), p3.hashCode());
         assertNotEquals(p1.hashCode(), p4.hashCode());
 
-        // Test with null values
         Pair<String, Integer> nullLeft = Pair.of(null, 123);
         Pair<String, Integer> nullRight = Pair.of("test", null);
         Pair<String, Integer> bothNull = Pair.of(null, null);
 
-        // These should not throw exceptions
         assertDoesNotThrow(() -> nullLeft.hashCode());
         assertDoesNotThrow(() -> nullRight.hashCode());
         assertDoesNotThrow(() -> bothNull.hashCode());
@@ -382,22 +362,17 @@ public class Pair100Test extends TestBase {
         Pair<String, Integer> p3 = Pair.of("test", 124);
         Pair<String, Integer> p4 = Pair.of("other", 123);
 
-        // Test reflexivity
         assertEquals(p1, p1);
 
-        // Test symmetry
         assertEquals(p1, p2);
         assertEquals(p2, p1);
 
-        // Test inequality
         assertNotEquals(p1, p3);
         assertNotEquals(p1, p4);
 
-        // Test null values
         assertNotEquals(p1, null);
         assertNotEquals(p1, "not a pair");
 
-        // Test with null components
         Pair<String, Integer> nullLeft1 = Pair.of(null, 123);
         Pair<String, Integer> nullLeft2 = Pair.of(null, 123);
         Pair<String, Integer> nullRight1 = Pair.of("test", null);
@@ -413,7 +388,6 @@ public class Pair100Test extends TestBase {
         pair.set("hello", 42);
         assertEquals("(hello, 42)", pair.toString());
 
-        // Test with null values
         pair.set(null, null);
         assertEquals("(null, null)", pair.toString());
 
@@ -426,7 +400,6 @@ public class Pair100Test extends TestBase {
 
     @Test
     public void testMutableBehavior() {
-        // Test that Pair is mutable
         Pair<String, Integer> p = Pair.of("initial", 1);
 
         p.setLeft("modified");
@@ -438,7 +411,6 @@ public class Pair100Test extends TestBase {
 
     @Test
     public void testWithDifferentTypes() {
-        // Test with different type combinations
         Pair<Double, String> doublePair = Pair.of(3.14, "pi");
         assertEquals(3.14, doublePair.left());
         assertEquals("pi", doublePair.right());
@@ -447,7 +419,6 @@ public class Pair100Test extends TestBase {
         assertEquals(true, boolCharPair.left());
         assertEquals('A', boolCharPair.right());
 
-        // Test with custom objects
         Pair<StringBuilder, Thread> customPair = Pair.of(new StringBuilder("test"), Thread.currentThread());
         assertNotNull(customPair.left());
         assertNotNull(customPair.right());

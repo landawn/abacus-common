@@ -15,6 +15,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ByteIterator;
@@ -24,8 +25,8 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.u.OptionalByte;
 import com.landawn.abacus.util.function.ByteSupplier;
 
+@Tag("new-test")
 public class ByteStream104Test extends TestBase {
-    // Test 1: filter(P predicate)
     @Test
     public void testFilter() {
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).filter(i -> i > 2).count());
@@ -45,7 +46,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).filter(i -> i > 2).skip(1).toList());
     }
 
-    // Test 2: filter(P predicate, C actionOnDroppedItem)
     @Test
     public void testFilterWithAction() {
         List<Byte> dropped = new ArrayList<>();
@@ -92,7 +92,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).filter(i -> i > 2, dropped::add).skip(1).toList());
     }
 
-    // Test 3: takeWhile(P predicate)
     @Test
     public void testTakeWhile() {
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).takeWhile(i -> i < 3).count());
@@ -110,7 +109,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).takeWhile(i -> i < 3).skip(1).toList());
     }
 
-    // Test 4: dropWhile(P predicate)
     @Test
     public void testDropWhile() {
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).dropWhile(i -> i < 3).count());
@@ -130,7 +128,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).dropWhile(i -> i < 3).skip(1).toList());
     }
 
-    // Test 5: dropWhile(P predicate, C actionOnDroppedItem)
     @Test
     public void testDropWhileWithAction() {
         List<Byte> dropped = new ArrayList<>();
@@ -178,7 +175,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).dropWhile(i -> i < 3, dropped::add).skip(1).toList());
     }
 
-    // Test 6: skipUntil(P predicate)
     @Test
     public void testSkipUntil() {
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skipUntil(i -> i >= 3).count());
@@ -198,7 +194,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skipUntil(i -> i >= 3).skip(1).toList());
     }
 
-    // Test 7: distinct()
     @Test
     public void testDistinct() {
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).distinct().count());
@@ -215,7 +210,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).map(e -> e).distinct().skip(1).toList());
     }
 
-    // Test 8: intersection(Collection<?> c)
     @Test
     public void testIntersection() {
         List<Byte> collection = Arrays.asList((byte) 2, (byte) 3, (byte) 6);
@@ -235,7 +229,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).intersection(collection).skip(1).toList());
     }
 
-    // Test 9: difference(Collection<?> c)
     @Test
     public void testDifference() {
         List<Byte> collection = Arrays.asList((byte) 2, (byte) 3, (byte) 6);
@@ -256,7 +249,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).difference(collection).skip(1).toList());
     }
 
-    // Test 10: symmetricDifference(Collection<T> c)
     @Test
     public void testSymmetricDifference() {
         List<Byte> collection = Arrays.asList((byte) 3, (byte) 4, (byte) 6);
@@ -281,7 +273,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).symmetricDifference(collection).skip(1).toList());
     }
 
-    // Test 11: reversed()
     @Test
     public void testReversed() {
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().count());
@@ -302,7 +293,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).reversed().skip(1).toList());
     }
 
-    // Test 12: rotated(int distance)
     @Test
     public void testRotated() {
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rotated(2).count());
@@ -323,10 +313,8 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).rotated(2).skip(1).toList());
     }
 
-    // Test 13: shuffled()
     @Test
     public void testShuffled() {
-        // Since shuffled is random, we can only check the count and that all elements are present
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).shuffled().count());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).shuffled().skip(1).count());
         byte[] arr = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).shuffled().toArray();
@@ -349,10 +337,9 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, list4.size());
     }
 
-    // Test 14: shuffled(Random rnd)
     @Test
     public void testShuffledWithRandom() {
-        Random rnd = new Random(42); // Using a seed for reproducibility
+        Random rnd = new Random(42);
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).shuffled(new Random(42)).count());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).shuffled(new Random(42)).skip(1).count());
         byte[] arr = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).shuffled(new Random(42)).toArray();
@@ -375,7 +362,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, list4.size());
     }
 
-    // Test 15: sorted()
     @Test
     public void testSorted() {
         assertEquals(5, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).sorted().count());
@@ -396,7 +382,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).sorted().skip(1).toList());
     }
 
-    // Test 16: reverseSorted()
     @Test
     public void testReverseSorted() {
         assertEquals(5, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).reverseSorted().count());
@@ -418,7 +403,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).reverseSorted().skip(1).toList());
     }
 
-    // Test 17: cycled()
     @Test
     public void testCycled() {
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3).cycled().limit(10).count());
@@ -440,7 +424,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled().limit(10).skip(1).toList());
     }
 
-    // Test 18: cycled(long rounds)
     @Test
     public void testCycledWithRounds() {
         assertEquals(9, ByteStream.of((byte) 1, (byte) 2, (byte) 3).cycled(3).count());
@@ -461,7 +444,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled(3).skip(1).toList());
     }
 
-    // Test 19: indexed() - returns Stream<IndexedByte>
     @Test
     public void testIndexed() {
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).indexed().count());
@@ -495,9 +477,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, list4.size());
     }
 
-    // Test 20: skip(long n) - already inherited from BaseStream, tested implicitly in other tests
-
-    // Test 21: skip(long n, C actionOnSkippedItem)
     @Test
     public void testSkipWithAction() {
         List<Byte> skipped = new ArrayList<>();
@@ -546,7 +525,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skip(2, skipped::add).skip(1).toList());
     }
 
-    // Test 22: limit(long maxSize)
     @Test
     public void testLimit() {
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).limit(3).count());
@@ -563,7 +541,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).limit(3).skip(1).toList());
     }
 
-    // Test 23: step(long step)
     @Test
     public void testStep() {
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).step(2).count());
@@ -580,9 +557,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 3, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).step(2).skip(1).toList());
     }
 
-    // Test 24-28: rateLimited and delay - Skip these as they involve timing and are not suitable for unit tests
-
-    // Test 29: onEach(C action)
     @Test
     public void testOnEach() {
         List<Byte> processed = new ArrayList<>();
@@ -634,7 +608,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).onEach(processed::add).skip(1).toList());
     }
 
-    // Test 30: peek(C action) - same as onEach
     @Test
     public void testPeek() {
         List<Byte> processed = new ArrayList<>();
@@ -686,12 +659,8 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).peek(processed::add).skip(1).toList());
     }
 
-    // Test 31-34: prepend/append with streams - These need ByteStream instances, testing basic prepend/append with arrays
-
-    // Test 35-37: throwIfEmpty methods
     @Test
     public void testThrowIfEmpty() {
-        // Non-empty stream - should not throw
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).throwIfEmpty().count());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).throwIfEmpty().skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).throwIfEmpty().toArray());
@@ -710,16 +679,13 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).throwIfEmpty().skip(1).toList());
 
-        // Empty stream - should throw
         try {
             ByteStream.empty().throwIfEmpty().count();
             fail("Should have thrown NoSuchElementException");
         } catch (NoSuchElementException e) {
-            // Expected
         }
     }
 
-    // Test 38: onClose(Runnable closeHandler)
     @Test
     public void testOnClose() {
         AtomicBoolean closed = new AtomicBoolean(false);
@@ -779,7 +745,6 @@ public class ByteStream104Test extends TestBase {
         assertTrue(closed.get());
     }
 
-    // Test 39: map(ByteUnaryOperator mapper)
     @Test
     public void testMap() {
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> (byte) (e * 2)).count());
@@ -803,7 +768,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).map(e -> (byte) (e * 2)).skip(1).toList());
     }
 
-    // Test 40: mapToInt(ByteToIntFunction mapper) - returns IntStream
     @Test
     public void testMapToInt() {
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).mapToInt(e -> e * 10).count());
@@ -824,7 +788,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToInt(e -> e * 10).skip(1).toList());
     }
 
-    // Test 41: mapToObj(ByteFunction<? extends T> mapper) - returns Stream<T>
     @Test
     public void testMapToObj() {
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).mapToObj(e -> "Byte:" + e).count());
@@ -849,7 +812,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToObj(e -> "Byte:" + e).skip(1).toList());
     }
 
-    // Test 42: flatMap(ByteFunction<? extends ByteStream> mapper)
     @Test
     public void testFlatMap() {
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMap(e -> ByteStream.of(e, (byte) (e * 2))).count());
@@ -875,7 +837,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMap(e -> ByteStream.of(e, (byte) (e * 2))).skip(1).toList());
     }
 
-    // Test 43: flatmap(ByteFunction<byte[]> mapper)
     @Test
     public void testFlatmapArray() {
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmap(e -> new byte[] { e, (byte) (e * 2) }).count());
@@ -902,7 +863,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmap(e -> new byte[] { e, (byte) (e * 2) }).skip(1).toList());
     }
 
-    // Test 44: flatMapToInt(ByteFunction<? extends IntStream> mapper) - returns IntStream
     @Test
     public void testFlatMapToInt() {
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapToInt(e -> IntStream.of(e, e * 10)).count());
@@ -927,7 +887,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToInt(e -> IntStream.of(e, e * 10)).skip(1).toList());
     }
 
-    // Test 45: flatMapToObj(ByteFunction<? extends Stream<? extends T>> mapper) - returns Stream<T>
     @Test
     public void testFlatMapToObj() {
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapToObj(e -> Stream.of("A" + e, "B" + e)).count());
@@ -953,7 +912,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToObj(e -> Stream.of("A" + e, "B" + e)).skip(1).toList());
     }
 
-    // Test 46: flatmapToObj(ByteFunction<? extends Collection<? extends T>> mapper) - returns Stream<T>
     @Test
     public void testFlatmapToObjCollection() {
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmapToObj(e -> Arrays.asList("A" + e, "B" + e)).count());
@@ -988,7 +946,6 @@ public class ByteStream104Test extends TestBase {
                         .toList());
     }
 
-    // Test 47: flattmapToObj(ByteFunction<T[]> mapper) - returns Stream<T>
     @Test
     public void testFlattmapToObjArray() {
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).count());
@@ -1027,7 +984,6 @@ public class ByteStream104Test extends TestBase {
                         .toList());
     }
 
-    // Test 48: mapPartial(ByteFunction<OptionalByte> mapper)
     @Test
     public void testMapPartial() {
         assertEquals(2,
@@ -1092,7 +1048,6 @@ public class ByteStream104Test extends TestBase {
                         .toList());
     }
 
-    // Test 49: rangeMap(ByteBiPredicate sameRange, ByteBinaryOperator mapper)
     @Test
     public void testRangeMap() {
         assertEquals(3,
@@ -1151,7 +1106,6 @@ public class ByteStream104Test extends TestBase {
                         .toList());
     }
 
-    // Test 50: rangeMapToObj(ByteBiPredicate sameRange, ByteBiFunction<? extends T> mapper) - returns Stream<T>
     @Test
     public void testRangeMapToObj() {
         assertEquals(3,
@@ -1216,7 +1170,6 @@ public class ByteStream104Test extends TestBase {
                         .toList());
     }
 
-    // Test 51: collapse(ByteBiPredicate collapsible) - returns Stream<ByteList>
     @Test
     public void testCollapse() {
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 5, (byte) 6).collapse((a, b) -> Math.abs(b - a) <= 1).count());
@@ -1254,7 +1207,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(1, list4.size());
     }
 
-    // Test 52-53: collapse with merge functions
     @Test
     public void testCollapseWithMerge() {
         assertEquals(2,
@@ -1313,7 +1265,6 @@ public class ByteStream104Test extends TestBase {
                         .toList());
     }
 
-    // Test 54-56: scan methods
     @Test
     public void testScan() {
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((a, b) -> (byte) (a + b)).count());
@@ -1387,7 +1338,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((byte) 10, true, (a, b) -> (byte) (a + b)).skip(1).toList());
     }
 
-    // Test 60: mergeWith
     @Test
     public void testMergeWith() {
         ByteStream a = ByteStream.of((byte) 1, (byte) 3, (byte) 5);
@@ -1455,7 +1405,6 @@ public class ByteStream104Test extends TestBase {
                         .toList());
     }
 
-    // Test 61-64: zipWith methods
     @Test
     public void testZipWith() {
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3).zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), (x, y) -> (byte) (x + y)).count());
@@ -1701,7 +1650,6 @@ public class ByteStream104Test extends TestBase {
                         .toList());
     }
 
-    // Test 67: empty()
     @Test
     public void testEmpty() {
         assertEquals(0, ByteStream.empty().count());
@@ -1718,7 +1666,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(Collections.emptyList(), ByteStream.empty().map(e -> e).skip(1).toList());
     }
 
-    // Test 68: defer(Supplier<ByteStream> supplier)
     @Test
     public void testDefer() {
         assertEquals(5, ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).count());
@@ -1741,7 +1688,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).map(e -> e).skip(1).toList());
     }
 
-    // Test 69: ofNullable(Byte e)
     @Test
     public void testOfNullable() {
         assertEquals(1, ByteStream.ofNullable((byte) 5).count());
@@ -1757,7 +1703,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 5), ByteStream.ofNullable((byte) 5).map(e -> e).toList());
         assertEquals(Collections.emptyList(), ByteStream.ofNullable((byte) 5).map(e -> e).skip(1).toList());
 
-        // Test with null
         assertEquals(0, ByteStream.ofNullable((Byte) null).count());
         assertEquals(0, ByteStream.ofNullable((Byte) null).skip(1).count());
         assertArrayEquals(new byte[0], ByteStream.ofNullable((Byte) null).toArray());
@@ -1766,7 +1711,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(Collections.emptyList(), ByteStream.ofNullable((Byte) null).skip(1).toList());
     }
 
-    // Test 70: of(byte... a)
     @Test
     public void testOfArray() {
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).count());
@@ -1785,7 +1729,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skip(1).toList());
     }
 
-    // Test 71: of(byte[] a, int startIndex, int endIndex)
     @Test
     public void testOfArrayWithIndices() {
         byte[] array = { 1, 2, 3, 4, 5, 6, 7 };
@@ -1803,7 +1746,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 4, (byte) 5), ByteStream.of(array, 2, 5).map(e -> e).skip(1).toList());
     }
 
-    // Test 72: of(Byte[] a)
     @Test
     public void testOfByteObjectArray() {
         Byte[] array = { 1, 2, 3, 4, 5 };
@@ -1821,7 +1763,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(array).map(e -> e).skip(1).toList());
     }
 
-    // Test 73: of(Byte[] a, int startIndex, int endIndex)
     @Test
     public void testOfByteObjectArrayWithIndices() {
         Byte[] array = { 1, 2, 3, 4, 5, 6, 7 };
@@ -1839,7 +1780,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 4, (byte) 5), ByteStream.of(array, 2, 5).map(e -> e).skip(1).toList());
     }
 
-    // Test 74: of(Collection<Byte> c)
     @Test
     public void testOfCollection() {
         List<Byte> collection = Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
@@ -1857,7 +1797,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(collection).map(e -> e).skip(1).toList());
     }
 
-    // Test 75: of(ByteIterator iterator)
     @Test
     public void testOfIterator() {
         ByteIterator iter = ByteIterator.of(new byte[] { 1, 2, 3, 4, 5 });
@@ -1897,7 +1836,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(iter).map(e -> e).skip(1).toList());
     }
 
-    // Test 76: of(ByteBuffer buf)
     @Test
     public void testOfByteBuffer() {
         ByteBuffer buf = ByteBuffer.wrap(new byte[] { 1, 2, 3, 4, 5 });
@@ -1937,9 +1875,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(buf).map(e -> e).skip(1).toList());
     }
 
-    // Test 77-79: of(File file), of(InputStream is) - Skip these as they involve IO operations
-
-    // Test 80: flatten(byte[][] a)
     @Test
     public void testFlatten2D() {
         byte[][] array = { { 1, 2 }, { 3, 4, 5 }, { 6 } };
@@ -1957,7 +1892,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).map(e -> e).skip(1).toList());
     }
 
-    // Test 81: flatten(byte[][] a, boolean vertically)
     @Test
     public void testFlattenVertically() {
         byte[][] array = { { 1, 2, 3 }, { 4, 5, 6 } };
@@ -1975,7 +1909,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 4, (byte) 2, (byte) 5, (byte) 3, (byte) 6), ByteStream.flatten(array, true).map(e -> e).skip(1).toList());
     }
 
-    // Test 82: flatten(byte[][] a, byte valueForAlignment, boolean vertically)
     @Test
     public void testFlattenWithAlignment() {
         byte[][] array = { { 1, 2 }, { 3, 4, 5 }, { 6 } };
@@ -1997,7 +1930,6 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.flatten(array, (byte) 0, true).map(e -> e).skip(1).toList());
     }
 
-    // Test 83: flatten(byte[][][] a)
     @Test
     public void testFlatten3D() {
         byte[][][] array = { { { 1, 2 }, { 3 } }, { { 4, 5, 6 } } };
@@ -2015,7 +1947,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).map(e -> e).skip(1).toList());
     }
 
-    // Test 84: range(byte startInclusive, byte endExclusive)
     @Test
     public void testRange() {
         assertEquals(5, ByteStream.range((byte) 1, (byte) 6).count());
@@ -2032,7 +1963,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.range((byte) 1, (byte) 6).map(e -> e).skip(1).toList());
     }
 
-    // Test 85: range(byte startInclusive, byte endExclusive, byte by)
     @Test
     public void testRangeWithStep() {
         assertEquals(3, ByteStream.range((byte) 1, (byte) 10, (byte) 3).count());
@@ -2049,7 +1979,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 4, (byte) 7), ByteStream.range((byte) 1, (byte) 10, (byte) 3).map(e -> e).skip(1).toList());
     }
 
-    // Test 86: rangeClosed(byte startInclusive, byte endInclusive)
     @Test
     public void testRangeClosed() {
         assertEquals(5, ByteStream.rangeClosed((byte) 1, (byte) 5).count());
@@ -2066,7 +1995,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.rangeClosed((byte) 1, (byte) 5).map(e -> e).skip(1).toList());
     }
 
-    // Test 87: rangeClosed(byte startInclusive, byte endInclusive, byte by)
     @Test
     public void testRangeClosedWithStep() {
         assertEquals(4, ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).count());
@@ -2083,7 +2011,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 4, (byte) 7, (byte) 10), ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).map(e -> e).skip(1).toList());
     }
 
-    // Test 88: repeat(byte element, long n)
     @Test
     public void testRepeat() {
         assertEquals(5, ByteStream.repeat((byte) 7, 5).count());
@@ -2100,7 +2027,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 7, (byte) 7, (byte) 7, (byte) 7), ByteStream.repeat((byte) 7, 5).map(e -> e).skip(1).toList());
     }
 
-    // Test 89: random()
     @Test
     public void testRandom() {
         assertEquals(10, ByteStream.random().limit(10).count());
@@ -2125,7 +2051,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(9, list4.size());
     }
 
-    // Test 90-94: iterate and generate methods
     @Test
     public void testIterate() {
         assertEquals(5, ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).limit(5).count());
@@ -2267,7 +2192,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.generate(supplier).map(e -> e).limit(5).skip(1).toList());
     }
 
-    // Test 95-100: concat methods
     @Test
     public void testConcatArrays() {
         byte[] a1 = { 1, 2 };
@@ -2352,7 +2276,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(s1, s2, s3).map(e -> e).skip(1).toList());
     }
 
-    // Test 101-114: zip methods
     @Test
     public void testZipArrays() {
         byte[] a = { 1, 2, 3 };
@@ -2372,7 +2295,6 @@ public class ByteStream104Test extends TestBase {
         assertEquals(N.asList((byte) 7, (byte) 9), ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).map(e -> e).skip(1).toList());
     }
 
-    // Test 115-121: merge methods
     @Test
     public void testMergeArrays() {
         byte[] a = { 1, 3, 5 };

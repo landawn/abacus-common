@@ -14,6 +14,7 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -21,6 +22,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class AbstractBooleanType100Test extends TestBase {
     private Type<Boolean> type;
     private CharacterWriter characterWriter;
@@ -72,7 +74,7 @@ public class AbstractBooleanType100Test extends TestBase {
     @Test
     public void testValueOf_NullObject() {
         Boolean result = type.valueOf((Object) null);
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
@@ -134,13 +136,13 @@ public class AbstractBooleanType100Test extends TestBase {
     @Test
     public void testValueOf_String_Null() {
         Boolean result = type.valueOf((String) null);
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
     public void testValueOf_String_Empty() {
         Boolean result = type.valueOf("");
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
@@ -163,14 +165,14 @@ public class AbstractBooleanType100Test extends TestBase {
     @Test
     public void testValueOf_CharArray_Null() {
         Boolean result = type.valueOf(null, 0, 0);
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
     public void testValueOf_CharArray_Empty() {
         char[] cbuf = new char[0];
         Boolean result = type.valueOf(cbuf, 0, 0);
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
@@ -274,32 +276,27 @@ public class AbstractBooleanType100Test extends TestBase {
     @Test
     public void testWriteCharacter_Null_NoConfig() throws IOException {
         type.writeCharacter(characterWriter, null, null);
-        // Verify writer.write(NULL_CHAR_ARRAY) was called
     }
 
     @Test
     public void testWriteCharacter_True_NoConfig() throws IOException {
         type.writeCharacter(characterWriter, Boolean.TRUE, null);
-        // Verify writer.write(TRUE_CHAR_ARRAY) was called
     }
 
     @Test
     public void testWriteCharacter_False_NoConfig() throws IOException {
         type.writeCharacter(characterWriter, Boolean.FALSE, null);
-        // Verify writer.write(FALSE_CHAR_ARRAY) was called
     }
 
     @Test
     public void testWriteCharacter_Null_WithWriteNullBooleanAsFalse() throws IOException {
         when(config.writeNullBooleanAsFalse()).thenReturn(true);
         type.writeCharacter(characterWriter, null, config);
-        // Verify writer.write(FALSE_CHAR_ARRAY) was called
     }
 
     @Test
     public void testWriteCharacter_Null_WithoutWriteNullBooleanAsFalse() throws IOException {
         when(config.writeNullBooleanAsFalse()).thenReturn(false);
         type.writeCharacter(characterWriter, null, config);
-        // Verify writer.write(NULL_CHAR_ARRAY) was called
     }
 }

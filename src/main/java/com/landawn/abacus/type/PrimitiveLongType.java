@@ -27,7 +27,15 @@ public final class PrimitiveLongType extends AbstractLongType {
 
     /**
      * Returns the Class object representing the primitive long type.
-     * 
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveLongType type = new PrimitiveLongType();
+     * Class clazz = type.clazz();
+     * System.out.println(clazz.getName()); // Output: long
+     * System.out.println(clazz.isPrimitive()); // Output: true
+     * }</pre>
+     *
      * @return the Class object for long.class
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -40,6 +48,13 @@ public final class PrimitiveLongType extends AbstractLongType {
      * Indicates whether this type represents a primitive type.
      * For PrimitiveLongType, this always returns {@code true} since it represents the primitive long type.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveLongType type = new PrimitiveLongType();
+     * boolean isPrimitive = type.isPrimitiveType();
+     * System.out.println(isPrimitive); // Output: true
+     * }</pre>
+     *
      * @return true, indicating this is a primitive type
      */
     @Override
@@ -50,6 +65,13 @@ public final class PrimitiveLongType extends AbstractLongType {
     /**
      * Returns the default value for the primitive long type.
      * The default value for primitive long is 0L.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveLongType type = new PrimitiveLongType();
+     * Long defaultVal = type.defaultValue();
+     * System.out.println(defaultVal); // Output: 0
+     * }</pre>
      *
      * @return Long object containing the value 0L
      */

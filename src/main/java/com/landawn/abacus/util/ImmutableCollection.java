@@ -148,7 +148,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      */
     @Deprecated
     @Override
-    public boolean removeIf(final Predicate<? super E> filter) throws UnsupportedOperationException {
+    public final boolean removeIf(final Predicate<? super E> filter) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -200,7 +200,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * More formally, returns {@code true} if and only if this collection contains
      * at least one element {@code e} such that
      * {@code (valueToFind==null ? e==null : valueToFind.equals(e))}.
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("a", "b", "c");
@@ -212,8 +212,8 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * @param valueToFind element whose presence in this collection is to be tested
      * @return {@code true} if this collection contains the specified element
      * @throws ClassCastException if the type of the specified element
-     *         is incompatible with this collection
-     *         collection does not permit null elements
+     *         is incompatible with this collection (optional)
+     *         collection does not permit null elements (optional)
      */
     @Override
     public boolean contains(final Object valueToFind) {
@@ -319,23 +319,34 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     * Compares the specified object with this collection for equality.
-     * Returns {@code true} if the specified object is also a collection,
-     * the two collections have the same size, and every member of the
-     * specified collection is contained in this collection.
+     * Compares the specified object with this collection for equality. 
+     * Returns {@code true} if the specified object is also a collection, 
+     * the two collections have the same size, and every member of the 
+     * specified collection is contained in this collection (or equivalently, 
+     * every member of this collection is contained in the specified collection).
+     * This definition ensures that the equals method works properly across 
+     * different implementations of the Collection interface.
      * 
-     * <p>This implementation first checks if the specified object is this
-     * collection itself, in which case it returns {@code true}. Then, it
-     * checks if the specified object is a collection. If not, it returns
-     * {@code false}. If so, it delegates to the underlying collection's
-     * equals method.</p>
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableCollection<Integer> col1 = ImmutableList.of(1, 2, 3);
+     * ImmutableCollection<Integer> col2 = ImmutableList.of(1, 2, 3);
+     * ImmutableCollection<Integer> col3 = ImmutableList.of(4, 5, 6);
+     * System.out.println(col1.equals(col2)); // true
+     * System.out.println(col1.equals(col3)); // false
+     * }</pre>
+     * </p>
      *
-     * @param obj object to be compared for equality with this collection
+     * @param obj the object to be compared for equality with this collection
      * @return {@code true} if the specified object is equal to this collection
      */
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Collection && coll.equals(obj);
+        if (this == obj) {
+            return true;
+        }
+
+        return obj instanceof ImmutableCollection ic && coll.equals(ic.coll);
     }
 
     /**

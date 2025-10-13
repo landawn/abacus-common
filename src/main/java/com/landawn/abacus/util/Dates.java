@@ -294,22 +294,24 @@ public abstract sealed class Dates permits Dates.DateUtil {
     static {
         calendarCreatorPool.put(java.util.Calendar.class, (millis, c) -> {
             final Calendar ret = Calendar.getInstance();
-            ret.setTimeInMillis(millis);
 
-            if (N.equals(ret.getTimeZone(), c.getTimeZone()) && c.getTimeZone() != null) {
+            if (!N.equals(ret.getTimeZone(), c.getTimeZone()) && c.getTimeZone() != null) {
                 ret.setTimeZone(c.getTimeZone());
             }
+
+            ret.setTimeInMillis(millis);
 
             return ret;
         });
 
         calendarCreatorPool.put(java.util.GregorianCalendar.class, (millis, c) -> {
             final Calendar ret = GregorianCalendar.getInstance();
-            ret.setTimeInMillis(millis);
 
-            if (N.equals(ret.getTimeZone(), c.getTimeZone()) && c.getTimeZone() != null) {
+            if (!N.equals(ret.getTimeZone(), c.getTimeZone()) && c.getTimeZone() != null) {
                 ret.setTimeZone(c.getTimeZone());
             }
+
+            ret.setTimeInMillis(millis);
 
             return ret;
         });
@@ -328,7 +330,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return {@code true} if the date creator was successfully registered, {@code false} otherwise
      */
     public static <T extends java.util.Date> boolean registerDateCreator(final Class<? extends T> dateClass, final LongFunction<? extends T> dateCreator) {
-        if (dateCreatorPool.containsKey(dateClass) && !Strings.startsWithAny(ClassUtil.getPackageName(dateClass), "java.", "javax.", "com.landawn.abacus")) {
+        if (dateCreatorPool.containsKey(dateClass) || Strings.startsWithAny(ClassUtil.getPackageName(dateClass), "java.", "javax.", "com.landawn.abacus")) {
             return false;
         }
 
@@ -348,7 +350,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static <T extends java.util.Calendar> boolean registerCalendarCreator(final Class<? extends T> calendarClass,
             final BiFunction<? super Long, ? super Calendar, ? extends T> dateCreator) {
         if (calendarCreatorPool.containsKey(calendarClass)
-                && !Strings.startsWithAny(ClassUtil.getPackageName(calendarClass), "java.", "javax.", "com.landawn.abacus")) {
+                || Strings.startsWithAny(ClassUtil.getPackageName(calendarClass), "java.", "javax.", "com.landawn.abacus")) {
             return false;
         }
 
@@ -370,7 +372,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
     /**
      * Returns a new instance of {@code java.sql.Time} based on the current time in the default time zone with the default locale.
      *
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Time currentTime = Dates.currentTime(); // e.g., 14:30:45
+     * }</pre>
+     *
+     * @return A new {@code java.sql.Time} instance representing the current time.
      */
     public static Time currentTime() {
         return new Time(System.currentTimeMillis());
@@ -379,7 +386,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
     /**
      * Returns a new instance of {@code java.sql.Date} based on the current time in the default time zone with the default locale.
      *
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Date currentDate = Dates.currentDate(); // e.g., 2025-10-04
+     * }</pre>
+     *
+     * @return A new {@code java.sql.Date} instance representing the current date.
      */
     public static Date currentDate() {
         return new Date(System.currentTimeMillis());
@@ -388,7 +400,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
     /**
      * Returns a new instance of {@code java.sql.Timestamp} based on the current time in the default time zone with the default locale.
      *
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Timestamp currentTimestamp = Dates.currentTimestamp(); // e.g., 2025-10-04 14:30:45.123
+     * }</pre>
+     *
+     * @return A new {@code java.sql.Timestamp} instance representing the current date and time with millisecond precision.
      */
     public static Timestamp currentTimestamp() {
         return new Timestamp(System.currentTimeMillis());
@@ -397,7 +414,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
     /**
      * Returns a new instance of {@code java.util.Date} based on the current time in the default time zone with the default locale.
      *
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Date currentDate = Dates.currentJUDate(); // e.g., Sat Oct 04 14:30:45 UTC 2025
+     * }</pre>
+     *
+     * @return A new {@code java.util.Date} instance representing the current date and time.
      */
     public static java.util.Date currentJUDate() {
         return new java.util.Date();
@@ -406,7 +428,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
     /**
      * Returns a new instance of {@code java.util.Calendar} based on the current time in the default time zone with the default locale.
      *
-     * @return a Calendar.
+     * <p>Example:
+     * <pre>{@code
+     * Calendar cal = Dates.currentCalendar();
+     * int year = cal.get(Calendar.YEAR); // e.g., 2025
+     * }</pre>
+     *
+     * @return A new {@code Calendar} instance representing the current date and time.
      */
     public static Calendar currentCalendar() {
         return Calendar.getInstance();
@@ -431,12 +459,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Adds or subtracts the specified amount of time with the given time unit to current {@code java.sql.Time}
+     * Calculates the current time in milliseconds with the specified time amount added or subtracted.
+     * This method adds or subtracts the given amount in the specified time unit to the current system time.
      *
-     * @param amount
-     * @param unit
-     * @return
-     * @return a new {@code Time} by Adding or subtracting the specified amount of time to current {@code java.sql.Time}.
+     * <p>Example:
+     * <pre>{@code
+     * long futureTime = Dates.currentTimeMillisRolled(5, TimeUnit.MINUTES); // 5 minutes from now
+     * long pastTime = Dates.currentTimeMillisRolled(-2, TimeUnit.HOURS); // 2 hours ago
+     * }</pre>
+     *
+     * @param amount The amount of time to add (positive) or subtract (negative).
+     * @param unit The time unit of the amount parameter (e.g., TimeUnit.SECONDS, TimeUnit.MINUTES).
+     * @return The current time in milliseconds with the specified amount applied.
      */
     @Beta
     static long currentTimeMillisRolled(final long amount, final TimeUnit unit) {
@@ -444,11 +478,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Adds or subtracts the specified amount of time with the given time unit to current {@code java.sql.Time}
+     * Returns a new {@code java.sql.Time} instance representing the current time with the specified time amount added or subtracted.
+     * This method creates a new Time object by applying the given amount in the specified time unit to the current system time.
      *
-     * @param amount
-     * @param unit
-     * @return a new {@code Time} by Adding or subtracting the specified amount of time to current {@code java.sql.Time}.
+     * <p>Example:
+     * <pre>{@code
+     * Time futureTime = Dates.currentTimeRolled(30, TimeUnit.MINUTES); // Current time + 30 minutes
+     * Time pastTime = Dates.currentTimeRolled(-1, TimeUnit.HOURS); // Current time - 1 hour
+     * }</pre>
+     *
+     * @param amount The amount of time to add (positive) or subtract (negative).
+     * @param unit The time unit of the amount parameter (e.g., TimeUnit.SECONDS, TimeUnit.MINUTES, TimeUnit.HOURS).
+     * @return A new {@code java.sql.Time} instance representing the current time with the specified amount applied.
      */
     @Beta
     public static Time currentTimeRolled(final long amount, final TimeUnit unit) {
@@ -456,11 +497,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Adds or subtracts the specified amount of time with the given time unit to current {@code java.sql.Date}
+     * Returns a new {@code java.sql.Date} instance representing the current date with the specified time amount added or subtracted.
+     * This method creates a new Date object by applying the given amount in the specified time unit to the current system time.
      *
-     * @param amount
-     * @param unit
-     * @return a new {@code Date} by Adding or subtracting the specified amount of time to current {@code java.sql.Date}.
+     * <p>Example:
+     * <pre>{@code
+     * Date tomorrow = Dates.currentDateRolled(1, TimeUnit.DAYS); // Current date + 1 day
+     * Date lastWeek = Dates.currentDateRolled(-7, TimeUnit.DAYS); // Current date - 7 days
+     * }</pre>
+     *
+     * @param amount The amount of time to add (positive) or subtract (negative).
+     * @param unit The time unit of the amount parameter (e.g., TimeUnit.DAYS, TimeUnit.HOURS).
+     * @return A new {@code java.sql.Date} instance representing the current date with the specified amount applied.
      */
     @Beta
     public static Date currentDateRolled(final long amount, final TimeUnit unit) {
@@ -468,11 +516,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Adds or subtracts the specified amount of time with the given time unit to current {@code java.sql.Timestamp}
+     * Returns a new {@code java.sql.Timestamp} instance representing the current timestamp with the specified time amount added or subtracted.
+     * This method creates a new Timestamp object by applying the given amount in the specified time unit to the current system time.
      *
-     * @param amount
-     * @param unit
-     * @return a new {@code Timestamp} by Adding or subtracting the specified amount of time to current {@code java.sql.Timestamp}.
+     * <p>Example:
+     * <pre>{@code
+     * Timestamp future = Dates.currentTimestampRolled(5, TimeUnit.MINUTES); // Current timestamp + 5 minutes
+     * Timestamp past = Dates.currentTimestampRolled(-3, TimeUnit.HOURS); // Current timestamp - 3 hours
+     * }</pre>
+     *
+     * @param amount The amount of time to add (positive) or subtract (negative).
+     * @param unit The time unit of the amount parameter (e.g., TimeUnit.SECONDS, TimeUnit.MINUTES, TimeUnit.HOURS, TimeUnit.DAYS).
+     * @return A new {@code java.sql.Timestamp} instance representing the current timestamp with the specified amount applied.
      */
     @Beta
     public static Timestamp currentTimestampRolled(final long amount, final TimeUnit unit) {
@@ -480,12 +535,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Adds or subtracts the specified amount of time with the given time unit to current {@code java.util.Date}
+     * Returns a new {@code java.util.Date} instance representing the current date/time with the specified time amount added or subtracted.
+     * This method creates a new Date object by applying the given amount in the specified time unit to the current system time.
      *
+     * <p>Example:
+     * <pre>{@code
+     * Date future = Dates.currentJUDateRolled(2, TimeUnit.DAYS); // Current date + 2 days
+     * Date past = Dates.currentJUDateRolled(-1, TimeUnit.WEEKS); // Current date - 1 week
+     * }</pre>
      *
-     * @param amount
-     * @param unit
-     * @return a new {@code Date} by Adding or subtracting the specified amount of time to current {@code java.util.Date}.
+     * @param amount The amount of time to add (positive) or subtract (negative).
+     * @param unit The time unit of the amount parameter (e.g., TimeUnit.SECONDS, TimeUnit.MINUTES, TimeUnit.HOURS, TimeUnit.DAYS).
+     * @return A new {@code java.util.Date} instance representing the current date/time with the specified amount applied.
      */
     @Beta
     public static java.util.Date currentJUDateRolled(final long amount, final TimeUnit unit) {
@@ -493,12 +554,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Adds or subtracts the specified amount of time with the given time unit to current {@code java.util.Calendar}.
+     * Returns a new {@code java.util.Calendar} instance representing the current date/time with the specified time amount added or subtracted.
+     * This method creates a new Calendar object by applying the given amount in the specified time unit to the current system time.
      *
+     * <p>Example:
+     * <pre>{@code
+     * Calendar future = Dates.currentCalendarRolled(3, TimeUnit.HOURS); // Current time + 3 hours
+     * Calendar past = Dates.currentCalendarRolled(-10, TimeUnit.DAYS); // Current time - 10 days
+     * }</pre>
      *
-     * @param amount
-     * @param unit
-     * @return a new {@code Calendar} by Adding or subtracting the specified amount of time to current {@code java.util.Calendar}.
+     * @param amount The amount of time to add (positive) or subtract (negative).
+     * @param unit The time unit of the amount parameter (e.g., TimeUnit.SECONDS, TimeUnit.MINUTES, TimeUnit.HOURS, TimeUnit.DAYS).
+     * @return A new {@code java.util.Calendar} instance representing the current date/time with the specified amount applied.
      */
     @Beta
     public static Calendar currentCalendarRolled(final long amount, final TimeUnit unit) {
@@ -1259,99 +1326,6 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
     }
 
-    //    /**
-    //     * Parses the ZonedDateTime.
-    //     *
-    //     * @param dateTime
-    //     * @return
-    //     */
-    //    public static ZonedDateTime parseZonedDateTime(final String dateTime) {
-    //        return parseZonedDateTime(dateTime, null);
-    //    }
-    //
-    //    /**
-    //     * Parses the ZonedDateTime.
-    //     *
-    //     * @param dateTime
-    //     * @param format
-    //     * @return
-    //     */
-    //    public static ZonedDateTime parseZonedDateTime(final String dateTime, final String format) {
-    //        return parseZonedDateTime(dateTime, format, null);
-    //    }
-    //
-    //    /**
-    //     * Converts the specified <code>date</code> with the specified {@code format} to a new instance of ZonedDateTime.
-    //     * <code>null</code> is returned if the specified <code>date</code> is null or empty.
-    //     *
-    //     * @param dateTime
-    //     * @param format
-    //     * @param timeZone
-    //     * @return
-    //     */
-    //    public static ZonedDateTime parseZonedDateTime(final String dateTime, String format, TimeZone timeZone) {
-    //        if (N.isEmpty(dateTime) || (dateTime.length() == 4 && "null".equalsIgnoreCase(dateTime))) {
-    //            return null;
-    //        }
-    //
-    //        if ((format == null) && dateTime.length() > 4 && (dateTime.charAt(2) >= '0' && dateTime.charAt(2) <= '9' && dateTime.charAt(4) >= '0' && dateTime.charAt(4) <= '9')
-    //                && Strings.isAsciiDigitalInteger(dateTime)) {
-    //
-    //            if (timeZone == null) {
-    //                timeZone = LOCAL_TIME_ZONE;
-    //            }
-    //
-    //            return Instant.ofEpochMilli(Numbers.toLong(dateTime)).atZone(timeZone.toZoneId());
-    //        }
-    //
-    //        format = checkDateFormat(dateTime, format);
-    //
-    //        if (N.isEmpty(format)) {
-    //            if (dateTime.charAt(dateTime.length() - 1) == ']' && dateTime.lastIndexOf('[') > 0) {
-    //                ZonedDateTime ret = ZonedDateTime.parse(dateTime);
-    //
-    //                if (!(timeZone == null || timeZone.toZoneId().equals(ret.getZone()))) {
-    //                    ret = ret.withZoneSameInstant(timeZone.toZoneId());
-    //                }
-    //
-    //                return ret;
-    //            } else {
-    //                if (timeZone == null) {
-    //                    timeZone = LOCAL_TIME_ZONE;
-    //                }
-    //
-    //                return ISO8601Util.parse(dateTime).toInstant().atZone(timeZone.toZoneId());
-    //            }
-    //        }
-    //
-    //        timeZone = checkTimeZone(format, timeZone);
-    //
-    //        final DateTimeFormatter dtf = getDateTimeFormatter(format, timeZone.toZoneId());
-    //
-    //        return ZonedDateTime.parse(dateTime, dtf);
-    //    }
-    //
-    //    private static final Map<String, Map<ZoneId, DateTimeFormatter>> dateTimeFormatterMap = new ConcurrentHashMap<>();
-    //
-    //    private static DateTimeFormatter getDateTimeFormatter(final String format, final ZoneId zoneId) {
-    //        DateTimeFormatter dtf = null;
-    //        Map<ZoneId, DateTimeFormatter> tzdftMap = dateTimeFormatterMap.get(format);
-    //
-    //        if (tzdftMap == null) {
-    //            tzdftMap = new ConcurrentHashMap<>();
-    //            dateTimeFormatterMap.put(format, tzdftMap);
-    //        } else {
-    //            dtf = tzdftMap.get(zoneId);
-    //        }
-    //
-    //        if (dtf == null) {
-    //            dtf = DateTimeFormatter.ofPattern(format).withZone(zoneId);
-    //            tzdftMap.put(zoneId, dtf);
-    //        }
-    //
-    //        return dtf;
-    //    }
-
     /**
      * Formats current LocalDate with format {@code yyyy-MM-dd}.
      *
@@ -1804,131 +1778,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
     }
 
-    //    // https://stackoverflow.com/questions/47698046/datetimeformatter-iso-local-date-vs-datetimeformatter-ofpatternyyyy-mm-dd-in
     //    /**
-    //     *
-    //     * @param temporal
-    //     * @param pattern
-    //     * @return
-    //     */
-    //    public static String format(final TemporalAccessor temporal, String pattern) {
-    //        DateTimeFormatter dtf = dtfPool.get(pattern);
-    //
-    //        if (dtf == null) {
-    //            dtf = DateTimeFormatter.ofPattern(pattern);
-    //        }
-    //
-    //        return dtf.format(temporal);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param temporal
-    //    * @param pattern
-    //    * @param appendable
-    //    * @return
-    //    */
-    //    public static void formatTo(final TemporalAccessor temporal, String pattern, final Appendable appendable) {
-    //        DateTimeFormatter dtf = dtfPool.get(pattern);
-    //
-    //        if (dtf == null) {
-    //            dtf = DateTimeFormatter.ofPattern(pattern);
-    //        }
-    //
-    //        dtf.formatTo(temporal, appendable);
-    //    }
-
-    //    /**
-    //     *
-    //     * @param zonedDateTime
-    //     * @return
-    //     */
-    //    public static String format(final ZonedDateTime zonedDateTime) {
-    //        return format(zonedDateTime, null, null);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param zonedDateTime
-    //     * @param format
-    //     * @return
-    //     */
-    //    public static String format(final ZonedDateTime zonedDateTime, final String format) {
-    //        return format(zonedDateTime, format, null);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param zonedDateTime
-    //     * @param format
-    //     * @param timeZone
-    //     * @return
-    //     */
-    //    public static String format(final ZonedDateTime zonedDateTime, final String format, final TimeZone timeZone) {
-    //        return formatZonedDateTime(null, zonedDateTime, format, timeZone);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param appendable
-    //     * @param zonedDateTime
-    //     */
-    //    public static void formatTo(final Appendable appendable, final ZonedDateTime zonedDateTime) {
-    //        format(appendable, zonedDateTime, null, null);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param appendable
-    //     * @param zonedDateTime
-    //     * @param format
-    //     */
-    //    public static void formatTo(final Appendable appendable, final ZonedDateTime zonedDateTime, final String format) {
-    //        formatZonedDateTime(appendable, zonedDateTime, format, null);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param appendable
-    //     * @param zonedDateTime
-    //     * @param format
-    //     * @param timeZone
-    //     */
-    //    public static void formatTo(final Appendable appendable, final ZonedDateTime zonedDateTime, final String format, final TimeZone timeZone) {
-    //        formatZonedDateTime(appendable, zonedDateTime, format, timeZone);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param appendable
-    //     * @param date
-    //     * @param format
-    //     * @param timeZone
-    //     * @return
-    //     */
-    //    private static String formatZonedDateTime(final Appendable appendable, final ZonedDateTime zonedDateTime, String format, TimeZone timeZone) {
-    //        String ret = null;
-    //
-    //        if (format == null) {
-    //            final ZoneId zoneId = timeZone == null ? zonedDateTime.getZone() : timeZone.toZoneId();
-    //            ret = zonedDateTime.getZone().equals(zoneId) ? zonedDateTime.toString() : zonedDateTime.withZoneSameInstant(zoneId).toString();
-    //        } else {
-    //            final ZoneId zoneId = timeZone == null ? (format.endsWith("'Z'") ? UTC_TIME_ZONE.toZoneId() : zonedDateTime.getZone()) : timeZone.toZoneId();
-    //            final DateTimeFormatter dtf = getDateTimeFormatter(format, zoneId);
-    //
-    //            ret = zonedDateTime.format(dtf);
-    //        }
-    //
-    //        if (writer != null) {
-    //            try {
-    //                writer.write(ret);
-    //            } catch (IOException e) {
-    //                throw new UncheckedIOException(e);
-    //            }
-    //        }
-    //
-    //        return ret;
-    //    }
 
     //-----------------------------------------------------------------------
 
@@ -2120,7 +1970,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * unit, based on the calendar's rules. For example, to subtract 5 days from
      * the current time of the calendar, you can achieve it by calling:
      * <p>
-     * <code>N.roll(date, -5, CalendarUnit.DAY)</code>.
+     * <code>N.roll(date, -5, CalendarField.DAY_OF_MONTH)</code>.
      *
      * @param <T>
      * @param date
@@ -2176,7 +2026,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * unit, based on the calendar's rules. For example, to subtract 5 days from
      * the current time of the calendar, you can achieve it by calling:
      * <p>
-     * <code>N.roll(c, -5, CalendarUnit.DAY)</code>.
+     * <code>N.roll(c, -5, CalendarField.DAY_OF_MONTH)</code>.
      *
      * @param <T>
      * @param calendar
@@ -2215,13 +2065,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
             case MINUTE:
                 return amount * 60 * 1000L;
 
-            case HOUR:
+            case HOUR_OF_DAY:
                 return amount * 60 * 60 * 1000L;
 
-            case DAY:
+            case DAY_OF_MONTH:
                 return amount * 24 * 60 * 60 * 1000L;
 
-            case WEEK:
+            case WEEK_OF_YEAR:
                 return amount * 7 * 24 * 60 * 60 * 1000L;
 
             default:
@@ -2235,10 +2085,17 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Adds a number of years to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
-     * @param date the date, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Date date = new Date();
+     * Date nextYear = Dates.addYears(date, 1); // Add 1 year
+     * Date lastYear = Dates.addYears(date, -1); // Subtract 1 year
+     * }</pre>
+     *
+     * @param <T> the type of the date
+     * @param date the date to add years to, not null
+     * @param amount the amount of years to add, may be negative to subtract
+     * @return a new {@code Date} instance with the specified number of years added
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addYears(final T date, final int amount) {
@@ -2251,10 +2108,16 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Adds a number of months to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
-     * @param date the date, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Date date = new Date();
+     * Date nextMonth = Dates.addMonths(date, 3); // Add 3 months
+     * }</pre>
+     *
+     * @param <T> the type of the date
+     * @param date the date to add months to, not null
+     * @param amount the amount of months to add, may be negative to subtract
+     * @return a new {@code Date} instance with the specified number of months added
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addMonths(final T date, final int amount) {
@@ -2267,14 +2130,20 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Adds a number of weeks to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
-     * @param date the date, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Date date = new Date();
+     * Date nextWeek = Dates.addWeeks(date, 2); // Add 2 weeks
+     * }</pre>
+     *
+     * @param <T> the type of the date
+     * @param date the date to add weeks to, not null
+     * @param amount the amount of weeks to add, may be negative to subtract
+     * @return a new {@code Date} instance with the specified number of weeks added
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addWeeks(final T date, final int amount) {
-        return roll(date, amount, CalendarField.WEEK);
+        return roll(date, amount, CalendarField.WEEK_OF_YEAR);
     }
 
     //-----------------------------------------------------------------------
@@ -2283,14 +2152,20 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Adds a number of days to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
-     * @param date the date, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Date date = new Date();
+     * Date tomorrow = Dates.addDays(date, 1); // Add 1 day
+     * }</pre>
+     *
+     * @param <T> the type of the date
+     * @param date the date to add days to, not null
+     * @param amount the amount of days to add, may be negative to subtract
+     * @return a new {@code Date} instance with the specified number of days added
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addDays(final T date, final int amount) {
-        return roll(date, amount, CalendarField.DAY);
+        return roll(date, amount, CalendarField.DAY_OF_MONTH);
     }
 
     //-----------------------------------------------------------------------
@@ -2299,14 +2174,20 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Adds a number of hours to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
-     * @param date the date, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Date date = new Date();
+     * Date future = Dates.addHours(date, 3); // Add 3 hours
+     * }</pre>
+     *
+     * @param <T> the type of the date
+     * @param date the date to add hours to, not null
+     * @param amount the amount of hours to add, may be negative to subtract
+     * @return a new {@code Date} instance with the specified number of hours added
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addHours(final T date, final int amount) {
-        return roll(date, amount, CalendarField.HOUR);
+        return roll(date, amount, CalendarField.HOUR_OF_DAY);
     }
 
     //-----------------------------------------------------------------------
@@ -2315,10 +2196,16 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Adds a number of minutes to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
-     * @param date the date, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Date date = new Date();
+     * Date future = Dates.addMinutes(date, 30); // Add 30 minutes
+     * }</pre>
+     *
+     * @param <T> the type of the date
+     * @param date the date to add minutes to, not null
+     * @param amount the amount of minutes to add, may be negative to subtract
+     * @return a new {@code Date} instance with the specified number of minutes added
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addMinutes(final T date, final int amount) {
@@ -2331,10 +2218,16 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Adds a number of seconds to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
-     * @param date the date, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Date date = new Date();
+     * Date future = Dates.addSeconds(date, 45); // Add 45 seconds
+     * }</pre>
+     *
+     * @param <T> the type of the date
+     * @param date the date to add seconds to, not null
+     * @param amount the amount of seconds to add, may be negative to subtract
+     * @return a new {@code Date} instance with the specified number of seconds added
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addSeconds(final T date, final int amount) {
@@ -2347,10 +2240,16 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Adds a number of milliseconds to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
-     * @param date the date, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Date date = new Date();
+     * Date future = Dates.addMilliseconds(date, 500); // Add 500 milliseconds
+     * }</pre>
+     *
+     * @param <T> the type of the date
+     * @param date the date to add milliseconds to, not null
+     * @param amount the amount of milliseconds to add, may be negative to subtract
+     * @return a new {@code Date} instance with the specified number of milliseconds added
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addMilliseconds(final T date, final int amount) {
@@ -2361,12 +2260,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Adds a number of years to a calendar returning a new object.
-     * The original {@code Date} is unchanged.
+     * The original {@code Calendar} is unchanged.
      *
-     * @param <T>
-     * @param calendar the calendar, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Calendar cal = Calendar.getInstance();
+     * Calendar nextYear = Dates.addYears(cal, 1); // Add 1 year
+     * }</pre>
+     *
+     * @param <T> the type of the calendar
+     * @param calendar the calendar to add years to, not null
+     * @param amount the amount of years to add, may be negative to subtract
+     * @return a new {@code Calendar} instance with the specified number of years added
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addYears(final T calendar, final int amount) {
@@ -2377,12 +2282,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Adds a number of months to a calendar returning a new object.
-     * The original {@code Date} is unchanged.
+     * The original {@code Calendar} is unchanged.
      *
-     * @param <T>
-     * @param calendar the calendar, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Calendar cal = Calendar.getInstance();
+     * Calendar future = Dates.addMonths(cal, 6); // Add 6 months
+     * }</pre>
+     *
+     * @param <T> the type of the calendar
+     * @param calendar the calendar to add months to, not null
+     * @param amount the amount of months to add, may be negative to subtract
+     * @return a new {@code Calendar} instance with the specified number of months added
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addMonths(final T calendar, final int amount) {
@@ -2393,60 +2304,84 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Adds a number of weeks to a calendar returning a new object.
-     * The original {@code Date} is unchanged.
+     * The original {@code Calendar} is unchanged.
      *
-     * @param <T>
-     * @param calendar the calendar, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Calendar cal = Calendar.getInstance();
+     * Calendar nextWeek = Dates.addWeeks(cal, 2); // Add 2 weeks
+     * }</pre>
+     *
+     * @param <T> the type of the calendar
+     * @param calendar the calendar to add weeks to, not null
+     * @param amount the amount of weeks to add, may be negative to subtract
+     * @return a new {@code Calendar} instance with the specified number of weeks added
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addWeeks(final T calendar, final int amount) {
-        return roll(calendar, amount, CalendarField.WEEK);
+        return roll(calendar, amount, CalendarField.WEEK_OF_YEAR);
     }
 
     //-----------------------------------------------------------------------
 
     /**
      * Adds a number of days to a calendar returning a new object.
-     * The original {@code Date} is unchanged.
+     * The original {@code Calendar} is unchanged.
      *
-     * @param <T>
-     * @param calendar the calendar, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Calendar cal = Calendar.getInstance();
+     * Calendar tomorrow = Dates.addDays(cal, 1); // Add 1 day
+     * }</pre>
+     *
+     * @param <T> the type of the calendar
+     * @param calendar the calendar to add days to, not null
+     * @param amount the amount of days to add, may be negative to subtract
+     * @return a new {@code Calendar} instance with the specified number of days added
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addDays(final T calendar, final int amount) {
-        return roll(calendar, amount, CalendarField.DAY);
+        return roll(calendar, amount, CalendarField.DAY_OF_MONTH);
     }
 
     //-----------------------------------------------------------------------
 
     /**
      * Adds a number of hours to a calendar returning a new object.
-     * The original {@code Date} is unchanged.
+     * The original {@code Calendar} is unchanged.
      *
-     * @param <T>
-     * @param calendar the calendar, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Calendar cal = Calendar.getInstance();
+     * Calendar future = Dates.addHours(cal, 5); // Add 5 hours
+     * }</pre>
+     *
+     * @param <T> the type of the calendar
+     * @param calendar the calendar to add hours to, not null
+     * @param amount the amount of hours to add, may be negative to subtract
+     * @return a new {@code Calendar} instance with the specified number of hours added
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addHours(final T calendar, final int amount) {
-        return roll(calendar, amount, CalendarField.HOUR);
+        return roll(calendar, amount, CalendarField.HOUR_OF_DAY);
     }
 
     //-----------------------------------------------------------------------
 
     /**
      * Adds a number of minutes to a calendar returning a new object.
-     * The original {@code Date} is unchanged.
+     * The original {@code Calendar} is unchanged.
      *
-     * @param <T>
-     * @param calendar the calendar, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Calendar cal = Calendar.getInstance();
+     * Calendar future = Dates.addMinutes(cal, 15); // Add 15 minutes
+     * }</pre>
+     *
+     * @param <T> the type of the calendar
+     * @param calendar the calendar to add minutes to, not null
+     * @param amount the amount of minutes to add, may be negative to subtract
+     * @return a new {@code Calendar} instance with the specified number of minutes added
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addMinutes(final T calendar, final int amount) {
@@ -2457,12 +2392,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Adds a number of seconds to a calendar returning a new object.
-     * The original {@code Date} is unchanged.
+     * The original {@code Calendar} is unchanged.
      *
-     * @param <T>
-     * @param calendar the calendar, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Calendar cal = Calendar.getInstance();
+     * Calendar future = Dates.addSeconds(cal, 30); // Add 30 seconds
+     * }</pre>
+     *
+     * @param <T> the type of the calendar
+     * @param calendar the calendar to add seconds to, not null
+     * @param amount the amount of seconds to add, may be negative to subtract
+     * @return a new {@code Calendar} instance with the specified number of seconds added
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addSeconds(final T calendar, final int amount) {
@@ -2473,12 +2414,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Adds a number of milliseconds to a calendar returning a new object.
-     * The original {@code Date} is unchanged.
+     * The original {@code Calendar} is unchanged.
      *
-     * @param <T>
-     * @param calendar the calendar, not null
-     * @param amount the amount to add, may be negative
-     * @return
+     * <p>Example:
+     * <pre>{@code
+     * Calendar cal = Calendar.getInstance();
+     * Calendar future = Dates.addMilliseconds(cal, 250); // Add 250 milliseconds
+     * }</pre>
+     *
+     * @param <T> the type of the calendar
+     * @param calendar the calendar to add milliseconds to, not null
+     * @param amount the amount of milliseconds to add, may be negative to subtract
+     * @return a new {@code Calendar} instance with the specified number of milliseconds added
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addMilliseconds(final T calendar, final int amount) {
@@ -4138,17 +4085,6 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
     }
 
-    //    /**
-    //     * The Class Times.
-    //     */
-    //    @Beta
-    //    public static final class Times extends DateUtil {
-    //
-    //        private Times() {
-    //            // singleton.
-    //        }
-    //    }
-
     /**
      * The major purpose of this class is to get rid of the millisecond part: {@code .SSS} or nanosecond part: {@code .SSSSSS}
      *
@@ -4237,22 +4173,6 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
 
         //    DTF(final DateTimeFormatter dtf) {
-        //        this.format = dtf.toString();
-        //        this.dtf = dtf;
-        //    }
-        //
-        //    public static DTF of(DateTimeFormatter dtf) {
-        //        return new DTF(dtf);
-        //    }
-
-        //    DTF(final DateTimeFormatter dtf) {
-        //        this.format = dtf.toString();
-        //        this.dtf = dtf;
-        //    }
-        //
-        //    public static DTF of(DateTimeFormatter dtf) {
-        //        return new DTF(dtf);
-        //    }
 
         /**
          * Formats the provided java.util.Date instance into a string representation.
@@ -4814,25 +4734,5 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     //    /**
-    //     * The Class DateTimeUtil.
-    //     */
-    //    @Beta
-    //    public static final class DateTimeUtil extends Dates {
-    //
-    //        private DateTimeUtil() {
-    //            // singleton.
-    //        }
-    //    }
-
-    //    /**
-    //     * The Class Times.
-    //     */
-    //    @Beta
-    //    public static final class Times extends DateUtil {
-    //
-    //        private Times() {
-    //            // singleton.
-    //        }
-    //    }
 
 }

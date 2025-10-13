@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -46,10 +47,7 @@ import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
-/**
- * Comprehensive unit tests for the Iterables utility class.
- * Tests cover all public methods including edge cases and error conditions.
- */
+@Tag("new-test")
 public class Iterables101Test extends TestBase {
 
     @Nested
@@ -58,17 +56,14 @@ public class Iterables101Test extends TestBase {
 
         @Test
         public void testMinChar() {
-            // Test with valid array
             char[] array = { 'c', 'a', 'b' };
             OptionalChar result = Iterables.min(array);
             assertTrue(result.isPresent());
             assertEquals('a', result.get());
 
-            // Test with null array
             OptionalChar nullResult = Iterables.min((char[]) null);
             assertFalse(nullResult.isPresent());
 
-            // Test with empty array
             OptionalChar emptyResult = Iterables.min(new char[0]);
             assertFalse(emptyResult.isPresent());
         }
@@ -146,7 +141,6 @@ public class Iterables101Test extends TestBase {
             assertTrue(result.isPresent());
             assertEquals("a", result.get());
 
-            // Test with null values (null considered maximum)
             String[] arrayWithNulls = { "c", null, "a" };
             Nullable<String> resultWithNulls = Iterables.min(arrayWithNulls);
             assertTrue(resultWithNulls.isPresent());
@@ -212,7 +206,6 @@ public class Iterables101Test extends TestBase {
             assertTrue(result.isPresent());
             assertEquals("c", result.get());
 
-            // Test with array
             String[] array = { "aaa", "bb", "c" };
             Nullable<String> arrayResult = Iterables.minBy(array, lengthExtractor);
             assertTrue(arrayResult.isPresent());
@@ -283,7 +276,6 @@ public class Iterables101Test extends TestBase {
             assertTrue(result.isPresent());
             assertEquals("c", result.get());
 
-            // Test with null values (null considered minimum for max)
             String[] arrayWithNulls = { "c", null, "a" };
             Nullable<String> resultWithNulls = Iterables.max(arrayWithNulls);
             assertTrue(resultWithNulls.isPresent());
@@ -394,10 +386,8 @@ public class Iterables101Test extends TestBase {
             assertTrue(result.isPresent());
             assertEquals(Integer.valueOf(4), result.get());
 
-            // Test k larger than array size
             assertFalse(Iterables.kthLargest(array, 10).isPresent());
 
-            // Test null or empty
             assertFalse(Iterables.kthLargest((Integer[]) null, 1).isPresent());
             assertFalse(Iterables.kthLargest(new Integer[0], 1).isPresent());
         }
@@ -410,7 +400,6 @@ public class Iterables101Test extends TestBase {
             assertTrue(result.isPresent());
             assertEquals(Integer.valueOf(4), result.get());
 
-            // Test k larger than collection size
             assertFalse(Iterables.kthLargest(list, 10).isPresent());
         }
 
@@ -514,9 +503,8 @@ public class Iterables101Test extends TestBase {
             Integer[] array = { 1, 2, 3, 4, 5 };
             OptionalDouble result = Iterables.averageInt(array, 1, 4);
             assertTrue(result.isPresent());
-            assertEquals(3.0, result.get()); // (2+3+4)/3
+            assertEquals(3.0, result.get());
 
-            // Test empty range
             OptionalDouble emptyResult = Iterables.averageInt(array, 2, 2);
             assertFalse(emptyResult.isPresent());
         }
@@ -528,7 +516,7 @@ public class Iterables101Test extends TestBase {
 
             OptionalDouble result = Iterables.averageInt(list, lengthExtractor);
             assertTrue(result.isPresent());
-            assertEquals(2.0, result.get()); // (1+2+3)/3
+            assertEquals(2.0, result.get());
         }
 
         @Test
@@ -575,11 +563,9 @@ public class Iterables101Test extends TestBase {
             assertTrue(result.isPresent());
             assertEquals(1, result.get());
 
-            // Test not found
             OptionalInt notFound = Iterables.indexOf(array, "d");
             assertFalse(notFound.isPresent());
 
-            // Test null array
             assertFalse(Iterables.indexOf((Object[]) null, "b").isPresent());
         }
 
@@ -600,7 +586,6 @@ public class Iterables101Test extends TestBase {
             assertTrue(result.isPresent());
             assertEquals(3, result.get());
 
-            // Test not found
             OptionalInt notFound = Iterables.lastIndexOf(array, "d");
             assertFalse(notFound.isPresent());
         }
@@ -622,18 +607,13 @@ public class Iterables101Test extends TestBase {
         public void testFindFirstOrLast() {
             String[] array = { "a", "bb", "ccc", "dd" };
 
-            Nullable<String> result = Iterables.findFirstOrLast(array, s -> s.length() > 2, // first predicate
-                    s -> s.length() == 2 // last predicate
-            );
+            Nullable<String> result = Iterables.findFirstOrLast(array, s -> s.length() > 2, s -> s.length() == 2);
             assertTrue(result.isPresent());
-            assertEquals("ccc", result.get()); // First match for length > 2
+            assertEquals("ccc", result.get());
 
-            // Test when first predicate fails
-            Nullable<String> fallbackResult = Iterables.findFirstOrLast(array, s -> s.length() > 10, // no match
-                    s -> s.length() == 2 // fallback to last matching this
-            );
+            Nullable<String> fallbackResult = Iterables.findFirstOrLast(array, s -> s.length() > 10, s -> s.length() == 2);
             assertTrue(fallbackResult.isPresent());
-            assertEquals("dd", fallbackResult.get()); // Last match for length == 2
+            assertEquals("dd", fallbackResult.get());
         }
 
         @Test
@@ -642,7 +622,7 @@ public class Iterables101Test extends TestBase {
 
             OptionalInt result = Iterables.findFirstOrLastIndex(array, s -> s.length() > 2, s -> s.length() == 2);
             assertTrue(result.isPresent());
-            assertEquals(2, result.get()); // Index of "ccc"
+            assertEquals(2, result.get());
         }
 
         @Test
@@ -653,17 +633,15 @@ public class Iterables101Test extends TestBase {
 
             assertTrue(result.left().isPresent());
             assertTrue(result.right().isPresent());
-            assertEquals("bb", result.left().get()); // First match
-            assertEquals("eee", result.right().get()); // Last match
+            assertEquals("bb", result.left().get());
+            assertEquals("eee", result.right().get());
         }
 
         @Test
         public void testFindFirstAndLastWithDifferentPredicates() {
             String[] array = { "a", "bb", "ccc", "dd", "eee" };
 
-            Pair<Nullable<String>, Nullable<String>> result = Iterables.findFirstAndLast(array, s -> s.length() == 2, // first predicate
-                    s -> s.length() == 3 // last predicate
-            );
+            Pair<Nullable<String>, Nullable<String>> result = Iterables.findFirstAndLast(array, s -> s.length() == 2, s -> s.length() == 3);
 
             assertTrue(result.left().isPresent());
             assertTrue(result.right().isPresent());
@@ -679,8 +657,8 @@ public class Iterables101Test extends TestBase {
 
             assertTrue(result.left().isPresent());
             assertTrue(result.right().isPresent());
-            assertEquals(1, result.left().get()); // Index of "bb"
-            assertEquals(4, result.right().get()); // Index of "eee"
+            assertEquals(1, result.left().get());
+            assertEquals(4, result.right().get());
         }
     }
 
@@ -734,7 +712,6 @@ public class Iterables101Test extends TestBase {
             List<String> list = new ArrayList<>(Arrays.asList("a", "b"));
             Supplier<String> supplier = () -> "test";
 
-            // Fill beyond current size - should extend the list
             Iterables.fill(list, 0, 5, supplier);
 
             assertEquals(5, list.size());
@@ -743,7 +720,6 @@ public class Iterables101Test extends TestBase {
 
         @Test
         public void testFillNullArray() {
-            // Should not throw exception with null array
             assertDoesNotThrow(() -> Iterables.fill((String[]) null, () -> "test"));
         }
 
@@ -764,10 +740,8 @@ public class Iterables101Test extends TestBase {
 
             assertEquals(Arrays.asList("c", "b", "a"), reversed);
 
-            // Original list should not be modified
             assertEquals(Arrays.asList("a", "b", "c"), list);
 
-            // Changes to reversed list should reflect in original
             reversed.set(0, "changed");
             assertEquals("changed", list.get(2));
         }
@@ -999,9 +973,8 @@ public class Iterables101Test extends TestBase {
             Set<String> input = new HashSet<>(Arrays.asList("a", "b"));
             Set<Set<String>> powerSet = Iterables.powerSet(input);
 
-            assertEquals(4, powerSet.size()); // 2^2 = 4
+            assertEquals(4, powerSet.size());
 
-            // Should contain: {}, {a}, {b}, {a,b}
             assertTrue(powerSet.contains(Collections.emptySet()));
             assertTrue(powerSet.contains(Collections.singleton("a")));
             assertTrue(powerSet.contains(Collections.singleton("b")));
@@ -1032,7 +1005,7 @@ public class Iterables101Test extends TestBase {
             Set<String> input = new HashSet<>(Arrays.asList("a", "b", "c"));
             Set<Set<String>> powerSet = Iterables.powerSet(input);
 
-            assertEquals(8, powerSet.size()); // 2^3 = 8
+            assertEquals(8, powerSet.size());
         }
 
         @Test
@@ -1122,9 +1095,8 @@ public class Iterables101Test extends TestBase {
             List<String> input = Arrays.asList("a", "b", "c");
             Collection<List<String>> perms = Iterables.permutations(input);
 
-            assertEquals(6, perms.size()); // 3! = 6
+            assertEquals(6, perms.size());
 
-            // Convert to set for easier testing
             Set<List<String>> permSet = new HashSet<>(perms);
 
             assertTrue(permSet.contains(Arrays.asList("a", "b", "c")));
@@ -1167,7 +1139,7 @@ public class Iterables101Test extends TestBase {
             List<String> input = Arrays.asList("a", "a", "b");
             Collection<List<String>> perms = Iterables.permutations(input);
 
-            assertEquals(6, perms.size()); // Still 3! even with duplicates in this implementation
+            assertEquals(6, perms.size());
         }
 
         @Test
@@ -1193,7 +1165,6 @@ public class Iterables101Test extends TestBase {
 
             assertEquals(6, perms.size());
 
-            // Should be in lexicographical order
             Iterator<List<String>> iter = perms.iterator();
             assertEquals(Arrays.asList("a", "b", "c"), iter.next());
             assertEquals(Arrays.asList("a", "c", "b"), iter.next());
@@ -1211,10 +1182,9 @@ public class Iterables101Test extends TestBase {
 
             assertEquals(6, perms.size());
 
-            // Should be ordered by length
             Iterator<List<String>> iter = perms.iterator();
             List<String> first = iter.next();
-            assertEquals("c", first.get(0)); // shortest first
+            assertEquals("c", first.get(0));
         }
 
         @Test
@@ -1222,7 +1192,7 @@ public class Iterables101Test extends TestBase {
             List<Integer> input = Arrays.asList(1, 1, 2);
             Collection<List<Integer>> perms = Iterables.orderedPermutations(input);
 
-            assertEquals(3, perms.size()); // 3!/2! = 3 (accounting for duplicates)
+            assertEquals(3, perms.size());
 
             Iterator<List<Integer>> iter = perms.iterator();
             assertEquals(Arrays.asList(1, 1, 2), iter.next());
@@ -1280,7 +1250,7 @@ public class Iterables101Test extends TestBase {
 
             List<List<String>> product = Iterables.cartesianProduct(list1, list2, list3);
 
-            assertEquals(8, product.size()); // 2 * 2 * 2 = 8
+            assertEquals(8, product.size());
             assertEquals(Arrays.asList("a", "1", "x"), product.get(0));
             assertEquals(Arrays.asList("b", "2", "y"), product.get(7));
         }
@@ -1336,7 +1306,6 @@ public class Iterables101Test extends TestBase {
 
             assertTrue(product instanceof RandomAccess);
 
-            // Test random access
             assertEquals(Arrays.asList("b", "1"), product.get(2));
             assertEquals(Arrays.asList("a", "2"), product.get(1));
         }
@@ -1364,7 +1333,6 @@ public class Iterables101Test extends TestBase {
 
         @Test
         public void testNullInputHandling() {
-            // Most methods should handle null gracefully
             assertFalse(Iterables.min((int[]) null).isPresent());
             assertFalse(Iterables.max((String[]) null).isPresent());
             assertFalse(Iterables.median((Integer[]) null).isPresent());
@@ -1374,7 +1342,6 @@ public class Iterables101Test extends TestBase {
 
         @Test
         public void testEmptyInputHandling() {
-            // Empty collections should return empty optionals
             assertFalse(Iterables.min(new int[0]).isPresent());
             assertFalse(Iterables.max(new String[0]).isPresent());
             assertFalse(Iterables.median(Collections.emptyList()).isPresent());
@@ -1384,7 +1351,6 @@ public class Iterables101Test extends TestBase {
 
         @Test
         public void testSingleElementCollections() {
-            // Single element collections should work correctly
             assertEquals(5, Iterables.min(new int[] { 5 }).get());
             assertEquals("test", Iterables.max(new String[] { "test" }).get());
             assertEquals(Integer.valueOf(42), Iterables.median(Arrays.asList(42)).get());
@@ -1394,7 +1360,6 @@ public class Iterables101Test extends TestBase {
 
         @Test
         public void testLargeCollections() {
-            // Test with larger collections to ensure performance is reasonable
             List<Integer> largeList = new ArrayList<>();
             for (int i = 1; i <= 1000; i++) {
                 largeList.add(i);
@@ -1402,40 +1367,35 @@ public class Iterables101Test extends TestBase {
 
             assertEquals(Integer.valueOf(1), Iterables.min(largeList).get());
             assertEquals(Integer.valueOf(1000), Iterables.max(largeList).get());
-            assertEquals(500500, Iterables.sumInt(largeList).get()); // sum of 1 to 1000
-            assertEquals(500.5, Iterables.averageInt(largeList).get()); // average of 1 to 1000
+            assertEquals(500500, Iterables.sumInt(largeList).get());
+            assertEquals(500.5, Iterables.averageInt(largeList).get());
         }
 
         @Test
         public void testWithNullElements() {
-            // Test collections containing null elements
             List<String> listWithNulls = Arrays.asList("a", null, "b", null, "c");
 
-            // Min/Max should handle nulls according to null comparator semantics
             Nullable<String> minResult = Iterables.min(listWithNulls);
             assertTrue(minResult.isPresent());
-            assertEquals("a", minResult.get()); // null considered maximum
+            assertEquals("a", minResult.get());
 
             Nullable<String> maxResult = Iterables.max(listWithNulls);
             assertTrue(maxResult.isPresent());
-            assertEquals("c", maxResult.get()); // null considered minimum for max
+            assertEquals("c", maxResult.get());
         }
 
         @Test
         public void testRangeValidation() {
             Integer[] array = { 1, 2, 3, 4, 5 };
 
-            // Valid range
             assertTrue(Iterables.averageInt(array, 1, 4).isPresent());
 
-            // Invalid ranges should throw exceptions
             assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(array, -1, 3));
             assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(array, 2, 6));
             assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(array, 3, 2));
         }
     }
 
-    // Tests for firstNonNull(T, T)
     @Test
     public void testFirstNonNull_TwoParams_BothNull() {
         String result = Iterables.firstNonNull(null, null);
@@ -1460,7 +1420,6 @@ public class Iterables101Test extends TestBase {
         Assertions.assertEquals("first", result);
     }
 
-    // Tests for firstNonNull(T, T, T)
     @Test
     public void testFirstNonNull_ThreeParams_AllNull() {
         String result = Iterables.firstNonNull(null, null, null);
@@ -1497,7 +1456,6 @@ public class Iterables101Test extends TestBase {
         Assertions.assertEquals("second", result);
     }
 
-    // Tests for firstNonNull(T...)
     @Test
     public void testFirstNonNull_Varargs_NullArray() {
         String result = Iterables.firstNonNull((String[]) null);
@@ -1540,7 +1498,6 @@ public class Iterables101Test extends TestBase {
         Assertions.assertEquals("first", result);
     }
 
-    // Tests for firstNonNull(Iterable)
     @Test
     public void testFirstNonNull_Iterable_Null() {
         String result = Iterables.firstNonNull((Iterable<String>) null);
@@ -1582,7 +1539,6 @@ public class Iterables101Test extends TestBase {
         Assertions.assertEquals("first", result);
     }
 
-    // Tests for firstNonNull(Iterator)
     @Test
     public void testFirstNonNull_Iterator_Null() {
         String result = Iterables.firstNonNull((Iterator<String>) null);
@@ -1624,7 +1580,6 @@ public class Iterables101Test extends TestBase {
         Assertions.assertEquals("first", result);
     }
 
-    // Tests for firstNonNullOrDefault(Iterable, T)
     @Test
     public void testFirstNonNullOrDefault_Iterable_NullIterableReturnsDefault() {
         String result = Iterables.firstNonNullOrDefault((Iterable<String>) null, "default");
@@ -1667,7 +1622,6 @@ public class Iterables101Test extends TestBase {
         });
     }
 
-    // Tests for firstNonNullOrDefault(Iterator, T)
     @Test
     public void testFirstNonNullOrDefault_Iterator_NullIteratorReturnsDefault() {
         String result = Iterables.firstNonNullOrDefault((Iterator<String>) null, "default");
@@ -1710,7 +1664,6 @@ public class Iterables101Test extends TestBase {
         });
     }
 
-    // Tests for lastNonNull(T, T)
     @Test
     public void testLastNonNull_TwoParams_BothNull() {
         String result = Iterables.lastNonNull(null, null);
@@ -1735,7 +1688,6 @@ public class Iterables101Test extends TestBase {
         Assertions.assertEquals("second", result);
     }
 
-    // Tests for lastNonNull(T, T, T)
     @Test
     public void testLastNonNull_ThreeParams_AllNull() {
         String result = Iterables.lastNonNull(null, null, null);
@@ -1772,7 +1724,6 @@ public class Iterables101Test extends TestBase {
         Assertions.assertEquals("second", result);
     }
 
-    // Tests for lastNonNull(T...)
     @Test
     public void testLastNonNull_Varargs_NullArray() {
         String result = Iterables.lastNonNull((String[]) null);
@@ -1815,7 +1766,6 @@ public class Iterables101Test extends TestBase {
         Assertions.assertEquals("third", result);
     }
 
-    // Tests for lastNonNull(Iterable)
     @Test
     public void testLastNonNull_Iterable_Null() {
         String result = Iterables.lastNonNull((Iterable<String>) null);
@@ -1859,7 +1809,6 @@ public class Iterables101Test extends TestBase {
 
     @Test
     public void testLastNonNull_Iterable_RandomAccessList() {
-        // Test with ArrayList (RandomAccess)
         ArrayList<String> list = new ArrayList<>();
         list.add(null);
         list.add("first");
@@ -1872,7 +1821,6 @@ public class Iterables101Test extends TestBase {
 
     @Test
     public void testLastNonNull_Iterable_NonRandomAccessList() {
-        // Test with LinkedList (non-RandomAccess)
         List<String> list = new LinkedList<>();
         list.add(null);
         list.add("first");
@@ -1883,7 +1831,6 @@ public class Iterables101Test extends TestBase {
         Assertions.assertEquals("last", result);
     }
 
-    // Tests for lastNonNull(Iterator)
     @Test
     public void testLastNonNull_Iterator_Null() {
         String result = Iterables.lastNonNull((Iterator<String>) null);
@@ -1925,7 +1872,6 @@ public class Iterables101Test extends TestBase {
         Assertions.assertEquals("third", result);
     }
 
-    // Tests for lastNonNullOrDefault(Iterable, T)
     @Test
     public void testLastNonNullOrDefault_Iterable_NullIterableReturnsDefault() {
         String result = Iterables.lastNonNullOrDefault((Iterable<String>) null, "default");
@@ -1968,7 +1914,6 @@ public class Iterables101Test extends TestBase {
         });
     }
 
-    // Tests for lastNonNullOrDefault(Iterator, T)
     @Test
     public void testLastNonNullOrDefault_Iterator_NullIteratorReturnsDefault() {
         String result = Iterables.lastNonNullOrDefault((Iterator<String>) null, "default");
@@ -2011,7 +1956,6 @@ public class Iterables101Test extends TestBase {
         });
     }
 
-    // Additional tests for different types
     @Test
     public void testFirstNonNull_WithIntegers() {
         Integer result = Iterables.firstNonNull(null, 42, 100);

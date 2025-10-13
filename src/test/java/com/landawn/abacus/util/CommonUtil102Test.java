@@ -34,11 +34,13 @@ import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.u.Nullable;
 
+@Tag("new-test")
 public class CommonUtil102Test extends TestBase {
 
     @Test
@@ -838,86 +840,40 @@ public class CommonUtil102Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> N.valueOf("test", null));
     }
 
-    //    @Test
-    //    public void testRegisterConverter() {
-    //        // Create a custom class for testing
-    //        class CustomClass {
-    //            String value;
-    //            CustomClass(String value) {
-    //                this.value = value;
-    //            }
-    //        }
-    //        
-    //        // Register a converter
-    //        assertTrue(N.registerConverter(CustomClass.class,
-    //            (obj, targetClass) -> {
-    //                if (targetClass == String.class) {
-    //                    return ((CustomClass) obj).value;
-    //                }
-    //                return obj;
-    //            }));
-    //        
-    //        // Should return false when registering again
-    //        assertFalse(N.registerConverter(CustomClass.class,
-    //            (obj, targetClass) -> obj));
-    //        
-    //        // Test the converter
-    //        CustomClass custom = new CustomClass("test");
-    //        assertEquals("test", N.convert(custom, String.class));
-    //        
-    //        // Test registering converter for built-in class should throw exception
-    //        assertThrows(IllegalArgumentException.class, 
-    //                () -> N.registerConverter(String.class, (obj, targetClass) -> obj));
-    //            
-    //        assertThrows(IllegalArgumentException.class, 
-    //                () -> N.registerConverter(null, (obj, targetClass) -> obj));
-    //            
-    //        assertThrows(IllegalArgumentException.class, 
-    //                () -> N.registerConverter(CustomClass.class, null));
-    //    }
-
     @Test
     public void testConvert_Basic() {
-        // Null conversions
         assertEquals(0, N.convert(null, int.class));
         assertEquals(null, N.convert(null, Integer.class));
         assertEquals(null, N.convert(null, String.class));
 
-        // String conversions
         assertEquals(Integer.valueOf(123), N.convert("123", Integer.class));
         assertEquals(Long.valueOf(123L), N.convert("123", Long.class));
         assertEquals(Double.valueOf(3.14), N.convert("3.14", Double.class));
         assertEquals(Boolean.TRUE, N.convert("true", Boolean.class));
 
-        // Number conversions
         assertEquals(Integer.valueOf(123), N.convert(123L, Integer.class));
         assertEquals(Long.valueOf(123L), N.convert(123, Long.class));
         assertEquals(Float.valueOf(3.14f), N.convert(3.14d, Float.class));
         assertEquals(Double.valueOf(3.14d), N.convert(3.14f, Double.class));
 
-        // Boolean conversions
         assertEquals(true, N.convert(1, boolean.class));
         assertEquals(false, N.convert(0, boolean.class));
         assertEquals(true, N.convert(5L, Boolean.class));
 
-        // Character conversions
         assertEquals(Character.valueOf('A'), N.convert(65, Character.class));
         assertEquals(Integer.valueOf(65), N.convert('A', Integer.class));
     }
 
     @Test
     public void testConvert_Collections() {
-        // List to List
         List<String> strList = Arrays.asList("1", "2", "3");
         List<String> convertedList = N.convert(strList, List.class);
         assertEquals(strList, convertedList);
 
-        // Set to Set
         Set<String> strSet = new HashSet<>(Arrays.asList("1", "2", "3"));
         Set<String> convertedSet = N.convert(strSet, Set.class);
         assertEquals(strSet, convertedSet);
 
-        // Array to Collection
         String[] strArray = { "1", "2", "3" };
         Collection<String> collection = N.convert(strArray, Collection.class);
         assertEquals(3, collection.size());
@@ -925,7 +881,6 @@ public class CommonUtil102Test extends TestBase {
         assertTrue(collection.contains("2"));
         assertTrue(collection.contains("3"));
 
-        // Collection to Array
         List<String> list = Arrays.asList("1", "2", "3");
         String[] array = N.convert(list, String[].class);
         assertArrayEquals(new String[] { "1", "2", "3" }, array);
@@ -933,7 +888,6 @@ public class CommonUtil102Test extends TestBase {
 
     @Test
     public void testConvert_Maps() {
-        // Map to Map
         Map<String, Integer> map = new HashMap<>();
         map.put("one", 1);
         map.put("two", 2);
@@ -943,14 +897,12 @@ public class CommonUtil102Test extends TestBase {
 
     @Test
     public void testConvert_Dates() {
-        // Long to Date conversions
         long timestamp = 1000000L;
         assertEquals(new java.util.Date(timestamp), N.convert(timestamp, java.util.Date.class));
         assertEquals(new java.sql.Timestamp(timestamp), N.convert(timestamp, java.sql.Timestamp.class));
         assertEquals(new java.sql.Date(timestamp), N.convert(timestamp, java.sql.Date.class));
         assertEquals(new java.sql.Time(timestamp), N.convert(timestamp, java.sql.Time.class));
 
-        // Date to Long conversion
         java.util.Date date = new java.util.Date(timestamp);
         assertEquals(Long.valueOf(timestamp), N.convert(date, Long.class));
     }
@@ -969,7 +921,6 @@ public class CommonUtil102Test extends TestBase {
 
     @Test
     public void testCastIfAssignable() {
-        // Successful casts
         String str = "test";
         Nullable<String> strResult = N.castIfAssignable(str, String.class);
         assertTrue(strResult.isPresent());
@@ -980,16 +931,13 @@ public class CommonUtil102Test extends TestBase {
         assertTrue(numResult.isPresent());
         assertEquals(123, numResult.get());
 
-        // Failed casts
         Nullable<Integer> failedCast = N.castIfAssignable("test", Integer.class);
         assertFalse(failedCast.isPresent());
 
-        // Null handling
         Nullable<String> nullResult = N.castIfAssignable(null, String.class);
         assertTrue(nullResult.isPresent());
         assertNull(nullResult.get());
 
-        // Primitive type handling
         Nullable<Integer> primitiveResult = N.castIfAssignable(123, int.class);
         assertTrue(primitiveResult.isPresent());
         assertEquals(123, primitiveResult.get());
@@ -1012,7 +960,6 @@ public class CommonUtil102Test extends TestBase {
 
     @Test
     public void testClone_Object() {
-        // Simple object clone
         List<String> list = new ArrayList<>();
         list.add("test1");
         list.add("test2");
@@ -1021,13 +968,11 @@ public class CommonUtil102Test extends TestBase {
         assertNotSame(list, cloned);
         assertEquals(list, cloned);
 
-        // Null handling
         assertNull(Beans.clone((Object) null));
     }
 
     @Test
     public void testClone_WithTargetType() {
-        // Clone to same type
         List<String> list = new ArrayList<>();
         list.add("test1");
         list.add("test2");
@@ -1037,7 +982,6 @@ public class CommonUtil102Test extends TestBase {
         assertEquals(list, cloned);
         assertTrue(cloned instanceof ArrayList);
 
-        // Clone null to bean type
         TestBean bean = Beans.clone(null, TestBean.class);
         assertNotNull(bean);
 
@@ -1068,7 +1012,7 @@ public class CommonUtil102Test extends TestBase {
         TestBean copy = Beans.copy(source, Arrays.asList("name"));
         assertNotNull(copy);
         assertEquals("test", copy.getName());
-        assertEquals(0, copy.getValue()); // Not copied
+        assertEquals(0, copy.getValue());
 
         assertNull(Beans.copy(null, Arrays.asList("name")));
     }
@@ -1083,7 +1027,7 @@ public class CommonUtil102Test extends TestBase {
         TestBean copy = Beans.copy(source, filter);
         assertNotNull(copy);
         assertEquals("test", copy.getName());
-        assertEquals(0, copy.getValue()); // Filtered out
+        assertEquals(0, copy.getValue());
 
         assertNull(Beans.copy(null, filter));
     }
@@ -1170,7 +1114,7 @@ public class CommonUtil102Test extends TestBase {
 
         Beans.merge(source, target, Arrays.asList("name"));
         assertEquals("source", target.getName());
-        assertEquals(200, target.getValue()); // Not merged
+        assertEquals(200, target.getValue());
 
         assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null, Arrays.asList("name")));
     }
@@ -1188,7 +1132,7 @@ public class CommonUtil102Test extends TestBase {
         BiPredicate<String, Object> filter = (name, value) -> "name".equals(name);
         Beans.merge(source, target, filter);
         assertEquals("source", target.getName());
-        assertEquals(200, target.getValue()); // Filtered out
+        assertEquals(200, target.getValue());
 
         assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null, filter));
     }
@@ -1213,7 +1157,7 @@ public class CommonUtil102Test extends TestBase {
         target2.setName("target");
         target2.setValue(200);
         Beans.merge(source, target2, true, ignoredProps);
-        assertEquals("target", target2.getName()); // Ignored
+        assertEquals("target", target2.getName());
         assertEquals(100, target2.getValue());
 
         assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null, true, null));
@@ -1234,8 +1178,8 @@ public class CommonUtil102Test extends TestBase {
         assertNull(bean.getName());
         assertEquals(0, bean.getValue());
 
-        Beans.erase(null, "name"); // Should not throw
-        Beans.erase(bean); // Empty array, should not throw
+        Beans.erase(null, "name");
+        Beans.erase(bean);
     }
 
     @Test
@@ -1253,8 +1197,8 @@ public class CommonUtil102Test extends TestBase {
         assertNull(bean.getName());
         assertEquals(0, bean.getValue());
 
-        Beans.erase(null, Arrays.asList("name")); // Should not throw
-        Beans.erase(bean, new ArrayList<>()); // Empty collection, should not throw
+        Beans.erase(null, Arrays.asList("name"));
+        Beans.erase(bean, new ArrayList<>());
     }
 
     @Test
@@ -1267,7 +1211,7 @@ public class CommonUtil102Test extends TestBase {
         assertNull(bean.getName());
         assertEquals(0, bean.getValue());
 
-        Beans.eraseAll(null); // Should not throw
+        Beans.eraseAll(null);
     }
 
     @Test
@@ -1292,7 +1236,6 @@ public class CommonUtil102Test extends TestBase {
 
         assertThrows(IllegalArgumentException.class, () -> Beans.getPropNames(null, exclude));
     }
-
 
     @Test
     public void testGetPropNames_ObjectWithIgnoreNull() {
@@ -1369,9 +1312,9 @@ public class CommonUtil102Test extends TestBase {
         assertArrayEquals(new boolean[] { false, true, false, true }, array);
 
         boolean[] emptyArray = {};
-        N.negate(emptyArray); // Should not throw
+        N.negate(emptyArray);
 
-        N.negate((boolean[]) null); // Should not throw
+        N.negate((boolean[]) null);
     }
 
     @Test
@@ -1380,7 +1323,7 @@ public class CommonUtil102Test extends TestBase {
         N.negate(array, 1, 4);
         assertArrayEquals(new boolean[] { true, true, false, true, true }, array);
 
-        N.negate(array, 0, 0); // Empty range, should not throw
+        N.negate(array, 0, 0);
 
         assertThrows(IndexOutOfBoundsException.class, () -> N.negate(array, -1, 2));
         assertThrows(IndexOutOfBoundsException.class, () -> N.negate(array, 0, 6));
@@ -1396,7 +1339,6 @@ public class CommonUtil102Test extends TestBase {
         assertTrue(list.contains(TestEnum.TWO));
         assertTrue(list.contains(TestEnum.THREE));
 
-        // Test caching
         assertSame(list, N.enumListOf(TestEnum.class));
 
         assertThrows(IllegalArgumentException.class, () -> N.enumListOf(null));
@@ -1411,7 +1353,6 @@ public class CommonUtil102Test extends TestBase {
         assertTrue(set.contains(TestEnum.TWO));
         assertTrue(set.contains(TestEnum.THREE));
 
-        // Test caching
         assertSame(set, N.enumSetOf(TestEnum.class));
 
         assertThrows(IllegalArgumentException.class, () -> N.enumSetOf(null));
@@ -1429,7 +1370,6 @@ public class CommonUtil102Test extends TestBase {
         assertEquals(TestEnum.TWO, map.getByValue("TWO"));
         assertEquals(TestEnum.THREE, map.getByValue("THREE"));
 
-        // Test caching
         assertSame(map, N.enumMapOf(TestEnum.class));
 
         assertThrows(IllegalArgumentException.class, () -> N.enumMapOf(null));
@@ -1451,7 +1391,6 @@ public class CommonUtil102Test extends TestBase {
         assertThrows(UnsupportedOperationException.class, () -> unmodifiableList.add("new"));
     }
 
-    // Test helper classes
     public static class TestBean {
         private String name;
         private int value;

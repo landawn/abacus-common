@@ -164,7 +164,6 @@ import com.landawn.abacus.util.u.OptionalShort;
  * List<String> propNames = Beans.getPropNameList(MyBean.class);
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 0.8
  */
 @SuppressWarnings({ "java:S1942" })
@@ -673,10 +672,17 @@ public final class ClassUtil {
     // ----------------------------------------------------------------------
 
     /**
-     * Returns the type name of the specified type.
+     * Returns the formatted type name of the specified type.
+     * This method retrieves the type name and formats it using {@link #formatParameterizedTypeName(String)}.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Type type = MyClass.class.getGenericSuperclass();
+     * String typeName = ClassUtil.getTypeName(type);
+     * }</pre>
      *
      * @param type the type whose name is to be retrieved
-     * @return the name of the specified type
+     * @return the formatted name of the specified type
      */
     public static String getTypeName(final java.lang.reflect.Type type) {
         return formatParameterizedTypeName(type.getTypeName());
@@ -684,7 +690,12 @@ public final class ClassUtil {
 
     /**
      * Retrieves the canonical name of the specified class.
-     * If the canonical name is not available, it returns the class name.
+     * If the canonical name is not available (e.g., for anonymous classes), it returns the class name instead.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String name = ClassUtil.getCanonicalClassName(String.class); // Returns "java.lang.String"
+     * }</pre>
      *
      * @param cls the class whose canonical name is to be retrieved
      * @return the canonical name of the class, or the class name if the canonical name is not available
@@ -707,87 +718,32 @@ public final class ClassUtil {
     }
 
     /**
-     * Retrieves the name of the specified class.
+     * Retrieves the fully qualified name of the specified class.
+     * This method returns the name as defined by {@link Class#getName()}.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String name = ClassUtil.getClassName(String.class); // Returns "java.lang.String"
+     * }</pre>
      *
      * @param cls the class whose name is to be retrieved
-     * @return the name of the class
+     * @return the fully qualified name of the class
      */
-
     public static String getClassName(final Class<?> cls) {
 
         return nameClassPool.computeIfAbsent(cls, k -> cls.getName());
     }
 
-    //    private static Class[] getTypeArguments(Class cls) {
-    //        java.lang.reflect.Type[] typeArgs = null;
-    //        java.lang.reflect.Type[] genericInterfaces = cls.getGenericInterfaces();
-    //
-    //        if (notEmpty(genericInterfaces)) {
-    //            for (java.lang.reflect.Type type : genericInterfaces) {
-    //                typeArgs = ((ParameterizedType) type).getActualTypeArguments();
-    //
-    //                if (notEmpty(typeArgs)) {
-    //                    break;
-    //                }
-    //            }
-    //        } else {
-    //            java.lang.reflect.Type genericSuperclass = cls.getGenericSuperclass();
-    //
-    //            if (genericSuperclass != null) {
-    //                typeArgs = ((ParameterizedType) genericSuperclass).getActualTypeArguments();
-    //            }
-    //        }
-    //
-    //        if (notEmpty(typeArgs)) {
-    //            Class[] classes = new Class[typeArgs.length];
-    //
-    //            for (int i = 0; i < typeArgs.length; i++) {
-    //                classes[i] = (Class) typeArgs[i];
-    //            }
-    //
-    //            return classes;
-    //        } else {
-    //            return null;
-    //        }
-    //    }
-
     //    /**
-    //     * Returns the method declared in the specified {@code cls} with the specified method name.
-    //     *
-    //     * @param cls
-    //     * @param methodName is case-insensitive
-    //     * @return {@code null} if no method is found by specified name
-    //     */
-    //    public static Method findDeclaredMethodByName(Class<?> cls, String methodName) {
-    //        Method method = null;
-    //
-    //        Method[] methods = cls.getDeclaredMethods();
-    //
-    //        for (Method m : methods) {
-    //            if (m.getName().equalsIgnoreCase(methodName)) {
-    //                if ((method == null) || Modifier.isPublic(m.getModifiers())
-    //                        || (Modifier.isProtected(m.getModifiers()) && (!Modifier.isProtected(method.getModifiers())))
-    //                        || (!Modifier.isPrivate(m.getModifiers()) && Modifier.isPrivate(method.getModifiers()))) {
-    //
-    //                    method = m;
-    //                }
-    //
-    //                if (Modifier.isPublic(method.getModifiers())) {
-    //                    break;
-    //                }
-    //            }
-    //        }
-    //
-    //        // SHOULD NOT set it true here.
-    //        // If (method != null) {
-    //        // ClassUtil.setAccessible(method, true);
-    //        // }
-    //
-    //        return method;
-    //    }
 
     /**
-     * Retrieves the simple name of the specified class.
+     * Retrieves the simple name of the specified class as returned by {@link Class#getSimpleName()}.
+     * The simple name is the name of the class without the package prefix.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String name = ClassUtil.getSimpleClassName(String.class); // Returns "String"
+     * }</pre>
      *
      * @param cls the class whose simple name is to be retrieved
      * @return the simple name of the class
@@ -799,6 +755,12 @@ public final class ClassUtil {
 
     /**
      * Retrieves the package of the specified class.
+     * Returns {@code null} if the class is a primitive type or if no package is defined.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Package pkg = ClassUtil.getPackage(String.class); // Returns java.lang package
+     * }</pre>
      *
      * @param cls the class whose package is to be retrieved
      * @return the package of the class, or {@code null} if the class is a primitive type or no package is defined
@@ -825,6 +787,11 @@ public final class ClassUtil {
      * Retrieves the package name of the specified class.
      * If the class is a primitive type or no package is defined, it returns an empty string.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String pkgName = ClassUtil.getPackageName(String.class); // Returns "java.lang"
+     * }</pre>
+     *
      * @param cls the class whose package name is to be retrieved
      * @return the package name of the class, or an empty string if the class is a primitive type or no package is defined
      */
@@ -842,14 +809,21 @@ public final class ClassUtil {
 
     /**
      * Retrieves a list of classes in the specified package.
-     * <p>Note: this method does not work for jdk packages</p>
+     * This method scans the classpath to discover classes within the given package.
+     *
+     * <p><b>Note:</b> This method does not work for JDK packages (e.g., java.lang, java.util).</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<Class<?>> classes = ClassUtil.getClassesByPackage("com.example.myapp", true, false);
+     * }</pre>
      *
      * @param pkgName the name of the package to search for classes
      * @param isRecursive if {@code true}, searches recursively in sub-packages
-     * @param skipClassLoadingException if {@code true}, skips classes that cannot be loaded
+     * @param skipClassLoadingException if {@code true}, skips classes that cannot be loaded and continues scanning
      * @return a list of classes in the specified package
-     * @throws IllegalArgumentException if no resources are found for the specified package(e.g., package does not exist or jdk packages)
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws IllegalArgumentException if no resources are found for the specified package (e.g., package does not exist or JDK packages)
+     * @throws UncheckedIOException if an I/O error occurs during package scanning
      */
     public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException)
             throws IllegalArgumentException, UncheckedIOException {
@@ -857,15 +831,28 @@ public final class ClassUtil {
     }
 
     /**
-     * Retrieves a list of classes in the specified package.
+     * Retrieves a filtered list of classes in the specified package.
+     * This method scans the classpath to discover classes within the given package and applies the specified predicate filter.
+     *
+     * <p><b>Note:</b> This method does not work for JDK packages (e.g., java.lang, java.util).</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<Class<?>> interfaces = ClassUtil.getClassesByPackage(
+     *     "com.example.myapp",
+     *     true,
+     *     false,
+     *     cls -> cls.isInterface()
+     * );
+     * }</pre>
      *
      * @param pkgName the name of the package to search for classes
      * @param isRecursive if {@code true}, searches recursively in sub-packages
-     * @param skipClassLoadingException if {@code true}, skips classes that cannot be loaded
-     * @param predicate a predicate to filter the classes
-     * @return a list of classes in the specified package
-     * @throws IllegalArgumentException if no resources are found for the specified package(e.g., package does not exist or jdk packages)
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param skipClassLoadingException if {@code true}, skips classes that cannot be loaded and continues scanning
+     * @param predicate a predicate to filter the classes; only classes for which the predicate returns {@code true} are included
+     * @return a list of classes in the specified package that match the predicate
+     * @throws IllegalArgumentException if no resources are found for the specified package (e.g., package does not exist or JDK packages)
+     * @throws UncheckedIOException if an I/O error occurs during package scanning
      */
     public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException,
             final Predicate<? super Class<?>> predicate) throws IllegalArgumentException, UncheckedIOException {
@@ -986,73 +973,7 @@ public final class ClassUtil {
         return classes;
     }
 
-    //    private static Class[] getTypeArguments(Class cls) {
-    //        java.lang.reflect.Type[] typeArgs = null;
-    //        java.lang.reflect.Type[] genericInterfaces = cls.getGenericInterfaces();
-    //
-    //        if (notEmpty(genericInterfaces)) {
-    //            for (java.lang.reflect.Type type : genericInterfaces) {
-    //                typeArgs = ((ParameterizedType) type).getActualTypeArguments();
-    //
-    //                if (notEmpty(typeArgs)) {
-    //                    break;
-    //                }
-    //            }
-    //        } else {
-    //            java.lang.reflect.Type genericSuperclass = cls.getGenericSuperclass();
-    //
-    //            if (genericSuperclass != null) {
-    //                typeArgs = ((ParameterizedType) genericSuperclass).getActualTypeArguments();
-    //            }
-    //        }
-    //
-    //        if (notEmpty(typeArgs)) {
-    //            Class[] classes = new Class[typeArgs.length];
-    //
-    //            for (int i = 0; i < typeArgs.length; i++) {
-    //                classes[i] = (Class) typeArgs[i];
-    //            }
-    //
-    //            return classes;
-    //        } else {
-    //            return null;
-    //        }
-    //    }
-
     //    /**
-    //     * Returns the method declared in the specified {@code cls} with the specified method name.
-    //     *
-    //     * @param cls
-    //     * @param methodName is case-insensitive
-    //     * @return {@code null} if no method is found by specified name
-    //     */
-    //    public static Method findDeclaredMethodByName(Class<?> cls, String methodName) {
-    //        Method method = null;
-    //
-    //        Method[] methods = cls.getDeclaredMethods();
-    //
-    //        for (Method m : methods) {
-    //            if (m.getName().equalsIgnoreCase(methodName)) {
-    //                if ((method == null) || Modifier.isPublic(m.getModifiers())
-    //                        || (Modifier.isProtected(m.getModifiers()) && (!Modifier.isProtected(method.getModifiers())))
-    //                        || (!Modifier.isPrivate(m.getModifiers()) && Modifier.isPrivate(method.getModifiers()))) {
-    //
-    //                    method = m;
-    //                }
-    //
-    //                if (Modifier.isPublic(method.getModifiers())) {
-    //                    break;
-    //                }
-    //            }
-    //        }
-    //
-    //        // SHOULD NOT set it true here.
-    //        // If (method != null) {
-    //        // ClassUtil.setAccessible(method, true);
-    //        // }
-    //
-    //        return method;
-    //    }
 
     /**
      * Gets the resources.
@@ -1131,18 +1052,22 @@ public final class ClassUtil {
     }
 
     /**
+     * Gets a set of all interfaces implemented by the given class and its superclasses.
      * Copied from Apache Commons Lang under Apache License v2.
-     *
-     * <p>Gets a {@code List} of all interfaces implemented by the given
-     * class and its super classes.</p>
      *
      * <p>The order is determined by looking through each interface in turn as
      * declared in the source file and following its hierarchy up. Then each
      * superclass is considered in the same way. Later duplicates are ignored,
      * so the order is maintained.</p>
      *
-     * @param cls the class to look up.
-     * @return
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Set<Class<?>> interfaces = ClassUtil.getAllInterfaces(ArrayList.class);
+     * // Returns: List, Collection, Iterable, RandomAccess, Cloneable, Serializable
+     * }</pre>
+     *
+     * @param cls the class to look up
+     * @return a set of all interfaces implemented by the class and its superclasses
      */
     public static Set<Class<?>> getAllInterfaces(final Class<?> cls) {
         final Set<Class<?>> interfacesFound = N.newLinkedHashSet();
@@ -1153,12 +1078,17 @@ public final class ClassUtil {
     }
 
     /**
+     * Gets a list of all superclasses for the given class, excluding {@code Object.class}.
      * Copied from Apache Commons Lang under Apache License v2.
      *
-     * <p>Gets a {@code List} of super classes for the given class, excluding {@code Object.class}.</p>
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<Class<?>> superclasses = ClassUtil.getAllSuperclasses(ArrayList.class);
+     * // Returns: AbstractList, AbstractCollection
+     * }</pre>
      *
-     * @param cls the class to look up.
-     * @return
+     * @param cls the class to look up
+     * @return a list of all superclasses, excluding {@code Object.class}
      */
     public static List<Class<?>> getAllSuperclasses(final Class<?> cls) {
         final List<Class<?>> classes = new ArrayList<>();
@@ -1173,10 +1103,17 @@ public final class ClassUtil {
     }
 
     /**
-     * Returns all the interfaces and super classes the specified class implements or extends, excluding {@code Object.class}.
+     * Returns all interfaces and superclasses that the specified class implements or extends, excluding {@code Object.class}.
+     * This combines the results of {@link #getAllInterfaces(Class)} and {@link #getAllSuperclasses(Class)}.
      *
-     * @param cls
-     * @return
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Set<Class<?>> superTypes = ClassUtil.getAllSuperTypes(ArrayList.class);
+     * // Returns: List, Collection, Iterable, RandomAccess, Cloneable, Serializable, AbstractList, AbstractCollection
+     * }</pre>
+     *
+     * @param cls the class to look up
+     * @return a set of all interfaces and superclasses, excluding {@code Object.class}
      */
     public static Set<Class<?>> getAllSuperTypes(final Class<?> cls) {
         final Set<Class<?>> superTypesFound = N.newLinkedHashSet();
@@ -1236,6 +1173,15 @@ public final class ClassUtil {
 
     /**
      * Retrieves the enclosing class of the specified class.
+     * Returns {@code null} if the class is not an inner class or has no enclosing class.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * class Outer {
+     *     class Inner { }
+     * }
+     * Class<?> enclosing = ClassUtil.getEnclosingClass(Outer.Inner.class); // Returns Outer.class
+     * }</pre>
      *
      * @param cls the class whose enclosing class is to be retrieved
      * @return the enclosing class of the specified class, or {@code null} if the class is not an inner class
@@ -1257,13 +1203,19 @@ public final class ClassUtil {
     }
 
     /**
-     * Returns the constructor declared in the specified {@code cls} with the specified {@code parameterTypes}.
-     * {@code null} is returned if no constructor is found.
+     * Returns the constructor declared in the specified class with the given parameter types.
+     * Returns {@code null} if no constructor is found.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Constructor<String> ctor = ClassUtil.getDeclaredConstructor(String.class, char[].class);
+     * String str = ctor.newInstance(new char[]{'a', 'b', 'c'});
+     * }</pre>
      *
      * @param <T> the type of the class
      * @param cls the class object
      * @param parameterTypes the parameter types of the constructor
-     * @return the constructor declared in the specified class with the specified parameter types, or {@code null} if no constructor is found.
+     * @return the constructor declared in the specified class with the specified parameter types, or {@code null} if no constructor is found
      */
     public static <T> Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>... parameterTypes) {
         Constructor<?> constructor = null;
@@ -1320,8 +1272,14 @@ public final class ClassUtil {
     }
 
     /**
-     * Returns the method declared in the specified {@code cls} with the specified {@code methodName} and {@code parameterTypes}.
-     * {@code null} is returned if no method is found by the specified name.
+     * Returns the method declared in the specified class with the given method name and parameter types.
+     * Returns {@code null} if no method is found with the specified name and parameter types.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Method method = ClassUtil.getDeclaredMethod(String.class, "substring", int.class, int.class);
+     * String result = (String) method.invoke("Hello", 0, 2); // Returns "He"
+     * }</pre>
      *
      * @param cls the class object
      * @param methodName the name of the method to retrieve
@@ -1389,10 +1347,21 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the parameterized type name of the specified field.
+     * Gets the parameterized type name of the specified field, including generic type information.
+     * This method attempts to resolve the field's generic type if available.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * class MyClass {
+     *     List<String> names;
+     * }
+     * Field field = MyClass.class.getDeclaredField("names");
+     * String typeName = ClassUtil.getParameterizedTypeNameByField(field);
+     * // Returns "List<String>"
+     * }</pre>
      *
      * @param field the field whose parameterized type name is to be retrieved
-     * @return the parameterized type name of the field
+     * @return the parameterized type name of the field, including generic type information if available
      */
     public static String getParameterizedTypeNameByField(final Field field) {
         final String typeName = formatParameterizedTypeName(field.getGenericType().getTypeName());
@@ -1413,10 +1382,22 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the parameterized type name of the specified method.
+     * Gets the parameterized type name of the specified method, including generic type information.
+     * This method examines the method's first parameter type (if present) or the return type to extract generic type information.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * class MyClass {
+     *     void setNames(List<String> names) { }
+     *     List<Integer> getNumbers() { return null; }
+     * }
+     * Method setter = MyClass.class.getDeclaredMethod("setNames", List.class);
+     * String typeName = ClassUtil.getParameterizedTypeNameByMethod(setter);
+     * // Returns "List<String>"
+     * }</pre>
      *
      * @param method the method whose parameterized type name is to be retrieved
-     * @return the parameterized type name of the method
+     * @return the parameterized type name of the method's parameter or return type, including generic type information if available
      */
     public static String getParameterizedTypeNameByMethod(final Method method) {
         String typeName = null;
@@ -1556,22 +1537,41 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets an {@link Iterator} that can iterate over a class hierarchy in ascending (subclass to superclass) order,
+     * Gets an iterator that can iterate over a class hierarchy in ascending (subclass to superclass) order,
      * excluding interfaces.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ObjIterator<Class<?>> iter = ClassUtil.hierarchy(ArrayList.class);
+     * while (iter.hasNext()) {
+     *     System.out.println(iter.next()); // Prints: ArrayList, AbstractList, AbstractCollection, Object
+     * }
+     * }</pre>
+     *
      * @param type the type to get the class hierarchy from
-     * @return Iterator an Iterator over the class hierarchy of the given class
+     * @return an iterator over the class hierarchy of the given class, excluding interfaces
      */
     public static ObjIterator<Class<?>> hierarchy(final Class<?> type) {
         return hierarchy(type, false);
     }
 
     /**
-     * Gets an {@link Iterator} that can iterate over a class hierarchy in ascending (subclass to superclass) order.
+     * Gets an iterator that can iterate over a class hierarchy in ascending (subclass to superclass) order.
+     * Optionally includes interfaces implemented by the class and its superclasses.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * ObjIterator<Class<?>> iter = ClassUtil.hierarchy(ArrayList.class, true);
+     * while (iter.hasNext()) {
+     *     System.out.println(iter.next());
+     *     // Prints: ArrayList, List, Collection, Iterable, RandomAccess, Cloneable, Serializable,
+     *     //         AbstractList, AbstractCollection, Object
+     * }
+     * }</pre>
      *
      * @param type the type to get the class hierarchy from
-     * @param includeInterface switch indicating whether to include or exclude interfaces
-     * @return Iterator an Iterator over the class hierarchy of the given class
+     * @param includeInterface if {@code true}, includes interfaces; if {@code false}, excludes interfaces
+     * @return an iterator over the class hierarchy of the given class
      */
     public static ObjIterator<Class<?>> hierarchy(final Class<?> type, final boolean includeInterface) {
         final ObjIterator<Class<?>> superClassesIter = new ObjIterator<>() {
@@ -1625,11 +1625,6 @@ public final class ClassUtil {
                 return nextSuperclass;
             }
 
-            //    @Override
-            //    public void remove() {
-            //        throw new UnsupportedOperationException();
-            //    }
-
             private void walkInterfaces(final Set<Class<?>> addTo, final Class<?> c) {
                 for (final Class<?> cls : c.getInterfaces()) {
                     if (!seenInterfaces.contains(cls)) {
@@ -1667,13 +1662,20 @@ public final class ClassUtil {
     }
 
     /**
-     * Invokes the specified constructor with the given arguments.
+     * Invokes the specified constructor with the given arguments and returns the newly created instance.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Constructor<String> ctor = ClassUtil.getDeclaredConstructor(String.class, char[].class);
+     * String str = ClassUtil.invokeConstructor(ctor, new char[]{'a', 'b', 'c'});
+     * }</pre>
      *
      * @param <T> the type of the object to be created
      * @param constructor the constructor to be invoked
      * @param args the arguments to be passed to the constructor
      * @return the newly created object
-     * @throws RuntimeException if the class that declares the underlying constructor represents an abstract class or the underlying constructor is inaccessible or the underlying constructor throws an exception.
+     * @throws RuntimeException if the class that declares the underlying constructor represents an abstract class,
+     *         or the underlying constructor is inaccessible, or the underlying constructor throws an exception
      */
     public static <T> T invokeConstructor(final Constructor<T> constructor, final Object... args) {
         try {
@@ -1684,13 +1686,21 @@ public final class ClassUtil {
     }
 
     /**
-     * Invokes the specified method with the given arguments.
+     * Invokes the specified static method with the given arguments.
+     * This is a convenience method for invoking static methods.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Method method = Integer.class.getDeclaredMethod("parseInt", String.class);
+     * int result = ClassUtil.invokeMethod(method, "123"); // Returns 123
+     * }</pre>
      *
      * @param <T> the type of the object to be returned
-     * @param method the method to be invoked
+     * @param method the static method to be invoked
      * @param args the arguments to be passed to the method
      * @return the result of invoking the method
-     * @throws RuntimeException if the underlying method is inaccessible or the method is invoked with incorrect arguments or the underlying method throws an exception
+     * @throws RuntimeException if the underlying method is inaccessible, the method is invoked with incorrect arguments,
+     *         or the underlying method throws an exception
      */
     public static <T> T invokeMethod(final Method method, final Object... args) {
         return invokeMethod(null, method, args);
@@ -1698,13 +1708,22 @@ public final class ClassUtil {
 
     /**
      * Invokes the specified method on the given instance with the provided arguments.
+     * For static methods, pass {@code null} as the instance parameter.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Method method = String.class.getDeclaredMethod("substring", int.class, int.class);
+     * String result = ClassUtil.invokeMethod("Hello World", method, 0, 5);
+     * // Returns "Hello"
+     * }</pre>
      *
      * @param <T> the type of the object to be returned
      * @param instance the object on which the method is to be invoked, or {@code null} for static methods
      * @param method the method to be invoked
      * @param args the arguments to be passed to the method
      * @return the result of invoking the method
-     * @throws RuntimeException if the underlying method is inaccessible, the method is invoked with incorrect arguments, or the underlying method throws an exception
+     * @throws RuntimeException if the underlying method is inaccessible, the method is invoked with incorrect arguments,
+     *         or the underlying method throws an exception
      */
     public static <T> T invokeMethod(final Object instance, final Method method, final Object... args) {
         try {
@@ -1728,7 +1747,7 @@ public final class ClassUtil {
         final File classFileFolder = new File(classFilePath);
 
         if (!classFileFolder.exists()) {
-            if (classFileFolder.mkdirs()) {
+            if (!classFileFolder.mkdirs()) {
                 throw new RuntimeException("Failed to create folder: " + classFileFolder);
             }
         }
@@ -1738,9 +1757,17 @@ public final class ClassUtil {
 
     /**
      * Sets the accessibility flag for the specified {@link AccessibleObject}.
+     * This method is typically used to enable access to private fields, methods, or constructors.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Field field = MyClass.class.getDeclaredField("privateField");
+     * ClassUtil.setAccessible(field, true);
+     * Object value = field.get(instance); // Can now access private field
+     * }</pre>
      *
      * @param accessibleObject the object whose accessibility is to be set
-     * @param flag the new accessibility flag
+     * @param flag the new accessibility flag ({@code true} to make accessible, {@code false} otherwise)
      */
     @SuppressWarnings("deprecation")
     public static void setAccessible(final AccessibleObject accessibleObject, final boolean flag) {
@@ -1750,11 +1777,21 @@ public final class ClassUtil {
     }
 
     /**
-     * Sets the accessibility flag for the specified {@link AccessibleObject} quietly.
+     * Sets the accessibility flag for the specified {@link AccessibleObject} quietly, suppressing any exceptions.
+     * This method attempts to set the accessibility but catches and logs any exceptions that occur.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Field field = MyClass.class.getDeclaredField("privateField");
+     * boolean success = ClassUtil.setAccessibleQuietly(field, true);
+     * if (success) {
+     *     Object value = field.get(instance);
+     * }
+     * }</pre>
      *
      * @param accessibleObject the object whose accessibility is to be set
-     * @param flag the new accessibility flag
-     * @return {@code true} if no error happens, otherwise {@code false} is returned
+     * @param flag the new accessibility flag ({@code true} to make accessible, {@code false} otherwise)
+     * @return {@code true} if the accessibility was successfully set, {@code false} if an error occurred or the object is {@code null}
      */
     @SuppressWarnings({ "deprecation", "UnusedReturnValue" })
     public static boolean setAccessibleQuietly(final AccessibleObject accessibleObject, final boolean flag) {
@@ -1776,77 +1813,11 @@ public final class ClassUtil {
         return accessibleObject.isAccessible() == flag;
     }
 
-    //    private static Class[] getTypeArguments(Class cls) {
-    //        java.lang.reflect.Type[] typeArgs = null;
-    //        java.lang.reflect.Type[] genericInterfaces = cls.getGenericInterfaces();
-    //
-    //        if (notEmpty(genericInterfaces)) {
-    //            for (java.lang.reflect.Type type : genericInterfaces) {
-    //                typeArgs = ((ParameterizedType) type).getActualTypeArguments();
-    //
-    //                if (notEmpty(typeArgs)) {
-    //                    break;
-    //                }
-    //            }
-    //        } else {
-    //            java.lang.reflect.Type genericSuperclass = cls.getGenericSuperclass();
-    //
-    //            if (genericSuperclass != null) {
-    //                typeArgs = ((ParameterizedType) genericSuperclass).getActualTypeArguments();
-    //            }
-    //        }
-    //
-    //        if (notEmpty(typeArgs)) {
-    //            Class[] classes = new Class[typeArgs.length];
-    //
-    //            for (int i = 0; i < typeArgs.length; i++) {
-    //                classes[i] = (Class) typeArgs[i];
-    //            }
-    //
-    //            return classes;
-    //        } else {
-    //            return null;
-    //        }
-    //    }
-
     //    /**
-    //     * Returns the method declared in the specified {@code cls} with the specified method name.
-    //     *
-    //     * @param cls
-    //     * @param methodName is case-insensitive
-    //     * @return {@code null} if no method is found by specified name
-    //     */
-    //    public static Method findDeclaredMethodByName(Class<?> cls, String methodName) {
-    //        Method method = null;
-    //
-    //        Method[] methods = cls.getDeclaredMethods();
-    //
-    //        for (Method m : methods) {
-    //            if (m.getName().equalsIgnoreCase(methodName)) {
-    //                if ((method == null) || Modifier.isPublic(m.getModifiers())
-    //                        || (Modifier.isProtected(m.getModifiers()) && (!Modifier.isProtected(method.getModifiers())))
-    //                        || (!Modifier.isPrivate(m.getModifiers()) && Modifier.isPrivate(method.getModifiers()))) {
-    //
-    //                    method = m;
-    //                }
-    //
-    //                if (Modifier.isPublic(method.getModifiers())) {
-    //                    break;
-    //                }
-    //            }
-    //        }
-    //
-    //        // SHOULD NOT set it true here.
-    //        // If (method != null) {
-    //        // ClassUtil.setAccessible(method, true);
-    //        // }
-    //
-    //        return method;
-    //    }
 
     static boolean isPossibleImmutable(final Class<?> cls) {
-        return Strings.containsAnyIgnoreCase(getSimpleClassName(cls), "Immutable", " Unmodifiable") //
-                || getAllSuperclasses(cls).stream().anyMatch(c -> Strings.containsAnyIgnoreCase(getSimpleClassName(c), "Immutable", " Unmodifiable"));
+        return Strings.containsAnyIgnoreCase(getSimpleClassName(cls), "Immutable", "Unmodifiable") //
+                || getAllSuperclasses(cls).stream().anyMatch(c -> Strings.containsAnyIgnoreCase(getSimpleClassName(c), "Immutable", "Unmodifiable"));
     }
 
     /**
@@ -1879,6 +1850,15 @@ public final class ClassUtil {
 
     /**
      * Checks if the specified class is an anonymous class.
+     * An anonymous class is a local class without a name that is defined and instantiated in a single expression.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Runnable r = new Runnable() {
+     *     public void run() { }
+     * };
+     * boolean isAnon = ClassUtil.isAnonymousClass(r.getClass()); // Returns true
+     * }</pre>
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is an anonymous class, {@code false} otherwise
@@ -1890,6 +1870,15 @@ public final class ClassUtil {
 
     /**
      * Checks if the specified class is a member class.
+     * A member class is a non-static nested class that is directly enclosed within another class.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * class Outer {
+     *     class Inner { }
+     * }
+     * boolean isMember = ClassUtil.isMemberClass(Outer.Inner.class); // Returns true
+     * }</pre>
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a member class, {@code false} otherwise
@@ -1901,6 +1890,12 @@ public final class ClassUtil {
 
     /**
      * Checks if the specified class is either an anonymous class or a member class.
+     * This is a convenience method that combines {@link #isAnonymousClass(Class)} and {@link #isMemberClass(Class)}.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean result = ClassUtil.isAnonymousOrMemberClass(someClass);
+     * }</pre>
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is either an anonymous class or a member class, {@code false} otherwise
@@ -1918,6 +1913,13 @@ public final class ClassUtil {
 
     /**
      * Checks if the specified class is a primitive type.
+     * Primitive types include: boolean, char, byte, short, int, long, float, and double.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean result = ClassUtil.isPrimitiveType(int.class); // Returns true
+     * boolean result2 = ClassUtil.isPrimitiveType(Integer.class); // Returns false
+     * }</pre>
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a primitive type, {@code false} otherwise
@@ -1931,6 +1933,13 @@ public final class ClassUtil {
 
     /**
      * Checks if the specified class is a primitive wrapper type.
+     * Primitive wrapper types include: Boolean, Character, Byte, Short, Integer, Long, Float, and Double.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean result = ClassUtil.isPrimitiveWrapper(Integer.class); // Returns true
+     * boolean result2 = ClassUtil.isPrimitiveWrapper(int.class); // Returns false
+     * }</pre>
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a primitive wrapper type, {@code false} otherwise
@@ -1944,6 +1953,13 @@ public final class ClassUtil {
 
     /**
      * Checks if the specified class is a primitive array type.
+     * Primitive array types include: boolean[], char[], byte[], short[], int[], long[], float[], and double[].
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean result = ClassUtil.isPrimitiveArrayType(int[].class); // Returns true
+     * boolean result2 = ClassUtil.isPrimitiveArrayType(Integer[].class); // Returns false
+     * }</pre>
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a primitive array type, {@code false} otherwise
@@ -1979,16 +1995,19 @@ public final class ClassUtil {
     }
 
     /**
-     * Returns the corresponding wrapper type of {@code cls} if it is a primitive type; otherwise returns {@code cls} itself.
+     * Returns the corresponding wrapper type of the specified class if it is a primitive type; otherwise returns the class itself.
+     * This method also handles primitive array types, converting them to their wrapper array equivalents.
      *
-     * <pre>
-     *     wrap(int.class) == Integer.class
-     *     wrap(Integer.class) == Integer.class
-     *     wrap(String.class) == String.class
-     * </pre>
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Class<?> wrapped = ClassUtil.wrap(int.class); // Returns Integer.class
+     * Class<?> wrapped2 = ClassUtil.wrap(Integer.class); // Returns Integer.class
+     * Class<?> wrapped3 = ClassUtil.wrap(String.class); // Returns String.class
+     * Class<?> wrapped4 = ClassUtil.wrap(int[].class); // Returns Integer[].class
+     * }</pre>
      *
      * @param cls the class to be wrapped
-     * @return the corresponding wrapper type if {@code cls} is a primitive type, otherwise {@code cls} itself
+     * @return the corresponding wrapper type if {@code cls} is a primitive type or primitive array, otherwise {@code cls} itself
      * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
     public static Class<?> wrap(final Class<?> cls) throws IllegalArgumentException {
@@ -2000,16 +2019,19 @@ public final class ClassUtil {
     }
 
     /**
-     * Returns the corresponding primitive type of {@code cls} if it is a wrapper type; otherwise returns {@code cls} itself.
+     * Returns the corresponding primitive type of the specified class if it is a wrapper type; otherwise returns the class itself.
+     * This method also handles wrapper array types, converting them to their primitive array equivalents.
      *
-     * <pre>
-     *     unwrap(Integer.class) == int.class
-     *     unwrap(int.class) == int.class
-     *     unwrap(String.class) == String.class
-     * </pre>
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Class<?> unwrapped = ClassUtil.unwrap(Integer.class); // Returns int.class
+     * Class<?> unwrapped2 = ClassUtil.unwrap(int.class); // Returns int.class
+     * Class<?> unwrapped3 = ClassUtil.unwrap(String.class); // Returns String.class
+     * Class<?> unwrapped4 = ClassUtil.unwrap(Integer[].class); // Returns int[].class
+     * }</pre>
      *
      * @param cls the class to be unwrapped
-     * @return the corresponding primitive type if {@code cls} is a wrapper type, otherwise {@code cls} itself
+     * @return the corresponding primitive type if {@code cls} is a wrapper type or wrapper array, otherwise {@code cls} itself
      * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
     public static Class<?> unwrap(final Class<?> cls) throws IllegalArgumentException {
@@ -2063,8 +2085,16 @@ public final class ClassUtil {
 
     /**
      * Creates and returns a new instance of the <i>None</i> class, which serves as a {@code null} mask.
+     * This object can be used as a placeholder to distinguish between an explicitly set {@code null} value
+     * and an absent value.
      *
-     * @return a new instance of the <i>None</i> class
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Object nullMask = ClassUtil.createNullMask();
+     * // Use nullMask as a sentinel value to represent null in contexts where null itself cannot be used
+     * }</pre>
+     *
+     * @return a new instance of the <i>None</i> class that serves as a null placeholder
      */
     public static Object createNullMask() {
         return new None();

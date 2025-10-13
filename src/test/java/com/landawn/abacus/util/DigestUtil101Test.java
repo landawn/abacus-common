@@ -8,9 +8,11 @@ import java.security.MessageDigest;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class DigestUtil101Test extends TestBase {
 
     @Test
@@ -21,7 +23,7 @@ public class DigestUtil101Test extends TestBase {
         byte[] digest = DigestUtil.digest(md, data);
 
         Assertions.assertNotNull(digest);
-        Assertions.assertEquals(16, digest.length); // MD5 produces 16 bytes
+        Assertions.assertEquals(16, digest.length);
     }
 
     @Test
@@ -32,7 +34,7 @@ public class DigestUtil101Test extends TestBase {
         byte[] digest = DigestUtil.digest(md, buffer);
 
         Assertions.assertNotNull(digest);
-        Assertions.assertEquals(20, digest.length); // SHA-1 produces 20 bytes
+        Assertions.assertEquals(20, digest.length);
     }
 
     @Test
@@ -43,7 +45,7 @@ public class DigestUtil101Test extends TestBase {
         byte[] digest = DigestUtil.digest(md, is);
 
         Assertions.assertNotNull(digest);
-        Assertions.assertEquals(32, digest.length); // SHA-256 produces 32 bytes
+        Assertions.assertEquals(32, digest.length);
     }
 
     @Test
@@ -155,7 +157,7 @@ public class DigestUtil101Test extends TestBase {
         String hex = DigestUtil.md5Hex("test");
 
         Assertions.assertNotNull(hex);
-        Assertions.assertEquals(32, hex.length()); // MD5 hex is 32 chars
+        Assertions.assertEquals(32, hex.length());
         Assertions.assertTrue(hex.matches("[0-9a-f]+"));
     }
 

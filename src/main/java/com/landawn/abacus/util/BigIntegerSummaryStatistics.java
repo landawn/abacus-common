@@ -249,22 +249,6 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
         return count == 0L ? BigDecimal.ZERO : new BigDecimal(getSum()).divide(BigDecimal.valueOf(count), MathContext.DECIMAL128);
     }
 
-    //    @Deprecated
-    //    @Beta
-    //    public final BigInteger sum() {
-    //        return sum;
-    //    }
-    //
-    //    @Deprecated
-    //    @Beta
-    //    public final Optional<BigDecimal> average() {
-    //        if (count == 0) {
-    //            return Optional.<BigDecimal> empty();
-    //        }
-    //
-    //        return Optional.of(getAverage());
-    //    }
-
     /**
      * Returns a string representation of this summary statistics object.
      * 

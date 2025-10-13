@@ -61,7 +61,6 @@ import java.lang.annotation.Target;
  * <p><strong>Note:</strong> This annotation is marked as {@link Beta}, indicating it may
  * undergo changes in future versions.</p>
  * 
- * @author HaiYang Li
  * @since 2021
  * @see Table
  * @see Column

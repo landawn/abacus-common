@@ -7,9 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class BaseEncodedType100Test extends TestBase {
 
     private Type<byte[]> base64Type;
@@ -60,16 +62,13 @@ public class BaseEncodedType100Test extends TestBase {
         assertNotNull(binary);
         assertArrayEquals(new byte[] { 0, 1, 2, 3, 4, 5 }, binary);
 
-        // Test invalid Base64
         assertThrows(IllegalArgumentException.class, () -> base64Type.valueOf("!@#$%"));
     }
 
     @Test
     public void testRoundTrip() {
-        // Test various data patterns
         byte[][] testData = { "".getBytes(), "a".getBytes(), "ab".getBytes(), "abc".getBytes(), "Hello, World!".getBytes(), { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
-                { -128, -1, 0, 1, 127 }, new byte[100] // Large array
-        };
+                { -128, -1, 0, 1, 127 }, new byte[100] };
 
         for (byte[] original : testData) {
             String encoded = base64Type.stringOf(original);

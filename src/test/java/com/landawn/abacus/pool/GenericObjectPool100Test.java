@@ -16,10 +16,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class GenericObjectPool100Test extends TestBase {
 
     private GenericObjectPool<TestPoolable> pool;
@@ -127,12 +128,10 @@ public class GenericObjectPool100Test extends TestBase {
     public void testAddToFullPoolWithoutAutoBalance() {
         GenericObjectPool<TestPoolable> noBalancePool = new GenericObjectPool<>(3, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
 
-        // Fill the pool
         for (int i = 0; i < 3; i++) {
             assertTrue(noBalancePool.add(new TestPoolable("test" + i)));
         }
 
-        // Should fail to add more
         assertFalse(noBalancePool.add(new TestPoolable("extra")));
         assertEquals(3, noBalancePool.size());
 
@@ -143,14 +142,12 @@ public class GenericObjectPool100Test extends TestBase {
     public void testAddToFullPoolWithAutoBalance() {
         GenericObjectPool<TestPoolable> balancePool = new GenericObjectPool<>(3, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.4f);
 
-        // Fill the pool
         for (int i = 0; i < 3; i++) {
             assertTrue(balancePool.add(new TestPoolable("test" + i)));
         }
 
-        // Should succeed by vacating
         assertTrue(balancePool.add(new TestPoolable("extra")));
-        assertEquals(3, balancePool.size()); // Should still be at capacity after balancing
+        assertEquals(3, balancePool.size());
 
         balancePool.close();
     }
@@ -160,16 +157,15 @@ public class GenericObjectPool100Test extends TestBase {
         ObjectPool.MemoryMeasure<TestPoolable> measure = e -> 100;
         GenericObjectPool<TestPoolable> memPool = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 250, measure);
 
-        assertTrue(memPool.add(new TestPoolable("test1"))); // 100 bytes
-        assertTrue(memPool.add(new TestPoolable("test2"))); // 200 bytes
-        assertFalse(memPool.add(new TestPoolable("test3"))); // Would exceed 250 bytes
+        assertTrue(memPool.add(new TestPoolable("test1")));
+        assertTrue(memPool.add(new TestPoolable("test2")));
+        assertFalse(memPool.add(new TestPoolable("test3")));
 
         memPool.close();
     }
 
     @Test
     public void testAddWithAutoDestroy() {
-        // Fill the pool
         for (int i = 0; i < 10; i++) {
             pool.add(new TestPoolable("test" + i));
         }
@@ -182,7 +178,6 @@ public class GenericObjectPool100Test extends TestBase {
 
     @Test
     public void testAddWithTimeout() throws InterruptedException {
-        // Fill the pool
         for (int i = 0; i < 10; i++) {
             pool.add(new TestPoolable("test" + i));
         }
@@ -195,7 +190,6 @@ public class GenericObjectPool100Test extends TestBase {
 
     @Test
     public void testAddWithTimeoutAndSpace() throws InterruptedException {
-        // Add 9 out of 10
         for (int i = 0; i < 9; i++) {
             pool.add(new TestPoolable("test" + i));
         }
@@ -206,7 +200,6 @@ public class GenericObjectPool100Test extends TestBase {
 
     @Test
     public void testAddWithTimeoutAndAutoDestroy() throws InterruptedException {
-        // Fill the pool
         for (int i = 0; i < 10; i++) {
             pool.add(new TestPoolable("test" + i));
         }
@@ -264,7 +257,6 @@ public class GenericObjectPool100Test extends TestBase {
                 pool.add(new TestPoolable("delayed"));
                 addLatch.countDown();
             } catch (InterruptedException e) {
-                // Ignore
             }
         }).start();
 
@@ -291,13 +283,12 @@ public class GenericObjectPool100Test extends TestBase {
 
     @Test
     public void testVacate() {
-        // Fill the pool
         for (int i = 0; i < 10; i++) {
             pool.add(new TestPoolable("test" + i));
         }
 
         pool.vacate();
-        assertEquals(8, pool.size()); // Should remove 20% (2 elements)
+        assertEquals(8, pool.size());
     }
 
     @Test
@@ -309,14 +300,13 @@ public class GenericObjectPool100Test extends TestBase {
         }
 
         customPool.vacate();
-        assertEquals(5, customPool.size()); // Should remove 50% (5 elements)
+        assertEquals(5, customPool.size());
 
         customPool.close();
     }
 
     @Test
     public void testVacateWithEvictionPolicy() throws InterruptedException {
-        // Test LAST_ACCESS_TIME policy
         TestPoolable p1 = new TestPoolable("p1");
         TestPoolable p2 = new TestPoolable("p2");
         TestPoolable p3 = new TestPoolable("p3");
@@ -333,12 +323,10 @@ public class GenericObjectPool100Test extends TestBase {
         Thread.sleep(10);
         pool.add(p5);
 
-        // Access p1 to update its last access time
         pool.take();
         pool.add(p1);
 
-        // Now order should be p2 (oldest), p3, p1 (newest)
-        pool.vacate(); // Should remove p2
+        pool.vacate();
 
         assertTrue(pool.contains(p1));
         assertTrue(pool.contains(p3));
@@ -357,7 +345,6 @@ public class GenericObjectPool100Test extends TestBase {
         pool.clear();
         assertEquals(0, pool.size());
 
-        // All should be destroyed
         for (TestPoolable p : poolables) {
             assertTrue(p.isDestroyed());
             assertEquals(Poolable.Caller.REMOVE_REPLACE_CLEAR, p.getDestroyedByCaller());
@@ -381,14 +368,12 @@ public class GenericObjectPool100Test extends TestBase {
         assertEquals(Poolable.Caller.CLOSE, p1.getDestroyedByCaller());
         assertEquals(Poolable.Caller.CLOSE, p2.getDestroyedByCaller());
 
-        // Operations should throw after close
         assertThrows(IllegalStateException.class, () -> pool.add(new TestPoolable("p3")));
         assertThrows(IllegalStateException.class, () -> pool.take());
     }
 
     @Test
     public void testEviction() throws InterruptedException {
-        // Create pool with short eviction delay
         GenericObjectPool<TestPoolable> evictPool = new GenericObjectPool<>(10, 100, EvictionPolicy.LAST_ACCESS_TIME);
 
         TestPoolable shortLived = new TestPoolable("short", 50, 50);
@@ -399,10 +384,8 @@ public class GenericObjectPool100Test extends TestBase {
 
         assertEquals(2, evictPool.size());
 
-        // Wait for eviction to run
         Thread.sleep(300);
 
-        // Short-lived should be evicted
         assertEquals(1, evictPool.size());
         assertTrue(evictPool.contains(longLived));
         assertFalse(evictPool.contains(shortLived));
@@ -427,15 +410,15 @@ public class GenericObjectPool100Test extends TestBase {
         GenericObjectPool<TestPoolable> pool1 = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
         GenericObjectPool<TestPoolable> pool2 = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
 
-        assertTrue(pool1.equals(pool1)); // Reflexive
-        assertFalse(pool1.equals(pool2)); // Both empty
+        assertTrue(pool1.equals(pool1));
+        assertFalse(pool1.equals(pool2));
 
         TestPoolable p = new TestPoolable("p1");
         pool1.add(p);
-        assertFalse(pool1.equals(pool2)); // Different contents
+        assertFalse(pool1.equals(pool2));
 
         pool2.add(p);
-        assertFalse(pool1.equals(pool2)); // Same contents
+        assertFalse(pool1.equals(pool2));
 
         assertFalse(pool1.equals(null));
         assertFalse(pool1.equals("not a pool"));
@@ -502,7 +485,6 @@ public class GenericObjectPool100Test extends TestBase {
                         }
                     }
                 } catch (InterruptedException e) {
-                    // Ignore
                 } finally {
                     endLatch.countDown();
                 }
@@ -512,7 +494,6 @@ public class GenericObjectPool100Test extends TestBase {
         startLatch.countDown();
         assertTrue(endLatch.await(5, TimeUnit.SECONDS));
 
-        // Verify consistency
         assertEquals(addCount.get() - takeCount.get(), pool.size());
     }
 
@@ -526,7 +507,6 @@ public class GenericObjectPool100Test extends TestBase {
         pool.add(p2);
         pool.add(p3);
 
-        // Should retrieve in LIFO order
         assertEquals(p3, pool.take());
         assertEquals(p2, pool.take());
         assertEquals(p1, pool.take());
@@ -538,7 +518,7 @@ public class GenericObjectPool100Test extends TestBase {
         pool.add(new TestPoolable("p2"));
         pool.take();
         pool.take();
-        pool.take(); // This should miss
+        pool.take();
 
         PoolStats stats = pool.stats();
         assertEquals(10, stats.capacity());

@@ -81,21 +81,6 @@ public class JSONType<T> extends AbstractType<T> {
         return typeClass;
     }
 
-    //    @Override
-    //    public Type<T> getElementType() {
-    //        return elementType;
-    //    }
-    //
-    //    @Override
-    //    public Type<T>[] getParameterTypes() {
-    //        return parameterTypes;
-    //    }
-    //
-    //    @Override
-    //    public boolean isGenericType() {
-    //        return true;
-    //    }
-
     /**
      * Converts the specified object to its JSON string representation.
      * 

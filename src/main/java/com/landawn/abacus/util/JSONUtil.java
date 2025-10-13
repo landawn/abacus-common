@@ -542,12 +542,14 @@ public final class JSONUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(final JSONObject jsonObject, Type<? extends T> targetType) throws JSONException {
+        if (!targetType.clazz().equals(Object.class) && targetType.clazz().isAssignableFrom(JSONObject.class)) {
+            return (T) jsonObject;
+        }
+
         targetType = targetType.isObjectType() ? N.typeOf("Map<String, Object>") : targetType;
         final Class<?> cls = targetType.clazz();
 
-        if (targetType.clazz().isAssignableFrom(JSONObject.class)) {
-            return (T) jsonObject;
-        } else if (targetType.isMap()) {
+        if (targetType.isMap()) {
             @SuppressWarnings("rawtypes")
             final Map<String, Object> map = N.newMap((Class<Map>) cls, jsonObject.keySet().size());
             final Iterator<String> iter = jsonObject.keys();
@@ -587,17 +589,19 @@ public final class JSONUtil {
 
                 propInfo = beanInfo.getPropInfo(key);
 
-                if (value == JSONObject.NULL) {
-                    value = null;
-                } else if (value != null) {
-                    if (value instanceof JSONObject) {
-                        value = unwrap((JSONObject) value, propInfo.jsonXmlType);
-                    } else if (value instanceof JSONArray) {
-                        value = unwrap((JSONArray) value, propInfo.jsonXmlType);
+                if (propInfo != null) {
+                    if (value == JSONObject.NULL) {
+                        value = null;
+                    } else if (value != null) {
+                        if (value instanceof JSONObject) {
+                            value = unwrap((JSONObject) value, propInfo.jsonXmlType);
+                        } else if (value instanceof JSONArray) {
+                            value = unwrap((JSONArray) value, propInfo.jsonXmlType);
+                        }
                     }
-                }
 
-                propInfo.setPropValue(result, value);
+                    propInfo.setPropValue(result, value);
+                }
             }
 
             return beanInfo.finishBeanResult(result);
@@ -641,6 +645,7 @@ public final class JSONUtil {
      * @return a List containing all elements from the JSONArray
      * @throws JSONException if there is an error during the conversion
      */
+    @SuppressWarnings("unchecked")
     public static <T> List<T> unwrap(final JSONArray jsonArray) throws JSONException {
         return (List<T>) toList(jsonArray, Object.class);
     }
@@ -732,6 +737,10 @@ public final class JSONUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(final JSONArray jsonArray, Type<? extends T> targetType) throws JSONException {
+        if (!targetType.clazz().equals(Object.class) && targetType.clazz().isAssignableFrom(JSONArray.class)) {
+            return (T) jsonArray;
+        }
+
         targetType = targetType.isObjectType() ? N.typeOf("List<Object>") : targetType;
         final int len = jsonArray.length();
 
@@ -836,7 +845,7 @@ public final class JSONUtil {
      * @throws ClassCastException if elements cannot be converted to the specified type
      */
     public static <T> List<T> toList(final JSONArray jsonArray, final Class<? extends T> elementClass) throws JSONException {
-        return toList(jsonArray, Type.of(elementClass));
+        return toList(jsonArray, N.typeOf(elementClass));
     }
 
     /**

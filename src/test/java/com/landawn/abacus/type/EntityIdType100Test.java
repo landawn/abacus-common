@@ -7,10 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.EntityId;
 
+@Tag("new-test")
 public class EntityIdType100Test extends TestBase {
 
     private EntityIdType entityIdType;
@@ -42,20 +44,14 @@ public class EntityIdType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with null
         assertNull(entityIdType.stringOf(null));
 
-        // Test with EntityId would require mocking Utils.jsonParser
-        // Since the implementation depends on external parser
     }
 
     @Test
     public void testValueOf() {
-        // Test with null and empty string
         assertNull(entityIdType.valueOf(null));
         assertNull(entityIdType.valueOf(""));
 
-        // Test with actual JSON would require mocking Utils.jsonParser
-        // Since the implementation depends on external parser
     }
 }

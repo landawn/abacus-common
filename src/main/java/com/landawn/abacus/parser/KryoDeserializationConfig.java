@@ -37,24 +37,6 @@ package com.landawn.abacus.parser;
  */
 public class KryoDeserializationConfig extends DeserializationConfig<KryoDeserializationConfig> {
 
-    //    /**
-    //     *
-    //     * @return
-    //     */
-    //    @Override
-    //    public KryoDeserializationConfig copy() {
-    //        final KryoDeserializationConfig copy = new KryoDeserializationConfig();
-    //
-    //        copy.setIgnoredPropNames(this.getIgnoredPropNames());
-    //        copy.ignoreUnmatchedProperty = this.ignoreUnmatchedProperty;
-    //        copy.elementType = this.elementType;
-    //        copy.keyType = this.keyType;
-    //        copy.valueType = this.valueType;
-    //        copy.propTypes = this.propTypes;
-    //
-    //        return copy;
-    //    }
-
     /**
      * Factory class for creating {@link KryoDeserializationConfig} instances.
      * Provides convenient static factory methods for configuration creation.

@@ -35,11 +35,19 @@ class JSONStreamReader extends JSONStringReader {
     }
 
     /**
+     * Creates a JSON reader that parses JSON content from a character stream.
+     * This method provides streaming JSON parsing capabilities for efficient processing of large JSON documents.
      *
-     * @param reader
-     * @param rbuf
-     * @param cbuf
-     * @return
+     * <pre>{@code
+     * Reader reader = new FileReader("data.json");
+     * JSONReader jsonReader = JSONStreamReader.parse(reader, new char[8192], new char[8192]);
+     * }</pre>
+     *
+     * @param reader the character stream containing JSON content to parse
+     * @param rbuf the read buffer for streaming input (recommended size: 8192 or larger)
+     * @param cbuf the character buffer for token processing (recommended size: 8192 or larger)
+     * @return a JSONReader instance configured for streaming JSON parsing
+     * @throws UncheckedIOException if an I/O error occurs during initial setup
      */
     public static JSONReader parse(final Reader reader, final char[] rbuf, final char[] cbuf) {
         // Warning. There is a bug in below code ---> empty value is returned if the input source is InputStream/Reader.

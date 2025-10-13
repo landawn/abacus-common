@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ByteIterator;
@@ -33,11 +34,9 @@ import com.landawn.abacus.util.function.ByteBinaryOperator;
 import com.landawn.abacus.util.function.ByteNFunction;
 import com.landawn.abacus.util.function.ByteTriPredicate;
 
+@Tag("new-test")
 public class ByteStream103Test extends TestBase {
 
-    // This method needs to be implemented by a concrete test class to provide a ByteStream instance.
-    // For example, in ArrayByteStreamTest, it would return new ArrayByteStream(a);
-    // In IteratorByteStreamTest, it would return new IteratorByteStream(ByteIterator.of(a));
     protected ByteStream createByteStream(byte... a) {
         return ByteStream.of(a).map(e -> (byte) (e + 0));
     }
@@ -131,11 +130,9 @@ public class ByteStream103Test extends TestBase {
     public void testPrependOptionalByte() {
         ByteStream stream = createByteStream((byte) 2, (byte) 3);
 
-        // Test with present optional
         ByteStream result1 = stream.prepend(OptionalByte.of((byte) 1));
         assertArrayEquals(new byte[] { 1, 2, 3 }, result1.toArray());
 
-        // Test with empty optional
         ByteStream stream2 = createByteStream((byte) 2, (byte) 3);
         ByteStream result2 = stream2.prepend(OptionalByte.empty());
         assertArrayEquals(new byte[] { 2, 3 }, result2.toArray());
@@ -154,11 +151,9 @@ public class ByteStream103Test extends TestBase {
     public void testAppendOptionalByte() {
         ByteStream stream = createByteStream((byte) 1, (byte) 2);
 
-        // Test with present optional
         ByteStream result1 = stream.append(OptionalByte.of((byte) 3));
         assertArrayEquals(new byte[] { 1, 2, 3 }, result1.toArray());
 
-        // Test with empty optional
         ByteStream stream2 = createByteStream((byte) 1, (byte) 2);
         ByteStream result2 = stream2.append(OptionalByte.empty());
         assertArrayEquals(new byte[] { 1, 2 }, result2.toArray());
@@ -166,12 +161,10 @@ public class ByteStream103Test extends TestBase {
 
     @Test
     public void testAppendIfEmptySupplier() {
-        // Test with empty stream
         ByteStream empty = ByteStream.empty();
         ByteStream result1 = empty.appendIfEmpty(() -> createByteStream((byte) 1, (byte) 2));
         assertArrayEquals(new byte[] { 1, 2 }, result1.toArray());
 
-        // Test with non-empty stream
         ByteStream nonEmpty = createByteStream((byte) 3);
         ByteStream result2 = nonEmpty.appendIfEmpty(() -> createByteStream((byte) 1, (byte) 2));
         assertArrayEquals(new byte[] { 3 }, result2.toArray());
@@ -179,12 +172,10 @@ public class ByteStream103Test extends TestBase {
 
     @Test
     public void testDefaultIfEmpty() {
-        // Test with empty stream
         ByteStream empty = ByteStream.empty();
         ByteStream result1 = empty.defaultIfEmpty(() -> createByteStream((byte) 1, (byte) 2));
         assertArrayEquals(new byte[] { 1, 2 }, result1.toArray());
 
-        // Test with non-empty stream
         ByteStream nonEmpty = createByteStream((byte) 3);
         ByteStream result2 = nonEmpty.defaultIfEmpty(() -> createByteStream((byte) 1, (byte) 2));
         assertArrayEquals(new byte[] { 3 }, result2.toArray());
@@ -203,35 +194,31 @@ public class ByteStream103Test extends TestBase {
     public void testIfEmpty() {
         AtomicInteger counter = new AtomicInteger(0);
 
-        // Test with empty stream
         ByteStream empty = ByteStream.empty();
         empty.ifEmpty(() -> counter.incrementAndGet()).toArray();
         assertEquals(1, counter.get());
 
-        // Test with non-empty stream
         ByteStream nonEmpty = createByteStream((byte) 1);
         nonEmpty.ifEmpty(() -> counter.incrementAndGet()).toArray();
-        assertEquals(1, counter.get()); // Should not increment
+        assertEquals(1, counter.get());
     }
 
     @Test
     public void testElementAt() {
         ByteStream stream = createByteStream((byte) 10, (byte) 20, (byte) 30, (byte) 40);
 
-        // Test valid positions
         assertEquals(10, stream.elementAt(0).get());
 
         ByteStream stream2 = createByteStream((byte) 10, (byte) 20, (byte) 30, (byte) 40);
         assertEquals(30, stream2.elementAt(2).get());
 
-        // Test position beyond stream length
         ByteStream stream3 = createByteStream((byte) 10, (byte) 20);
         assertFalse(stream3.elementAt(5).isPresent());
     }
 
     @Test
     public void testRateLimited() {
-        RateLimiter rateLimiter = RateLimiter.create(10); // 10 permits per second
+        RateLimiter rateLimiter = RateLimiter.create(10);
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
 
         long startTime = System.currentTimeMillis();
@@ -239,8 +226,7 @@ public class ByteStream103Test extends TestBase {
         long duration = System.currentTimeMillis() - startTime;
 
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, result);
-        // With 5 elements at 10 permits/second, it should take at least some time
-        assertTrue(duration >= 0); // Just verify it completes
+        assertTrue(duration >= 0);
     }
 
     @Test
@@ -248,11 +234,11 @@ public class ByteStream103Test extends TestBase {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3);
 
         long startTime = System.currentTimeMillis();
-        byte[] result = stream.rateLimited(100).toArray(); // 100 permits per second
+        byte[] result = stream.rateLimited(100).toArray();
         long duration = System.currentTimeMillis() - startTime;
 
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
-        assertTrue(duration >= 0); // Just verify it completes
+        assertTrue(duration >= 0);
     }
 
     @Test
@@ -265,18 +251,17 @@ public class ByteStream103Test extends TestBase {
         long duration = System.currentTimeMillis() - startTime;
 
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
-        assertTrue(duration >= 20); // At least 2 delays (after elements 2 and 3)
+        assertTrue(duration >= 20);
     }
 
     @Test
     public void testToMapWithMergeFunction() {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 1, (byte) 3);
 
-        // Test with merge function to handle duplicates
         var map = stream.toMap(b -> b % 2 == 0 ? "even" : "odd", b -> (int) b, (v1, v2) -> v1 + v2);
 
         assertEquals(2, map.size());
-        assertEquals(Integer.valueOf(5), map.get("odd")); // 1 + 1 + 3
+        assertEquals(Integer.valueOf(5), map.get("odd"));
         assertEquals(Integer.valueOf(2), map.get("even"));
     }
 
@@ -449,9 +434,8 @@ public class ByteStream103Test extends TestBase {
 
     @Test
     public void testPrintln() {
-        // This test just verifies the method doesn't throw
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3);
-        stream.println(); // Should print to console
+        stream.println();
     }
 
     @Test
@@ -503,13 +487,13 @@ public class ByteStream103Test extends TestBase {
         OptionalByte result = stream.first();
 
         assertTrue(result.isPresent());
-        assertEquals(1, result.get()); // In sequential stream, findAny() should behave like findFirst()
+        assertEquals(1, result.get());
     }
 
     @Test
     public void testParallelWithMaxThreadNum() {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        ByteStream parallel = stream.parallel(2); // Max 2 threads
+        ByteStream parallel = stream.parallel(2);
 
         assertTrue(parallel.isParallel());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, parallel.toArray());
@@ -543,7 +527,6 @@ public class ByteStream103Test extends TestBase {
     public void testSps() {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
 
-        // Apply parallel operation and then return to sequential
         ByteStream result = stream.sps(s -> s.map(b -> (byte) (b * 2)));
 
         assertFalse(result.isParallel());
@@ -564,7 +547,6 @@ public class ByteStream103Test extends TestBase {
     public void testPsp() {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
 
-        // Apply sequential operation and then return to parallel
         ByteStream result = stream.parallel().psp(s -> s.filter(b -> b % 2 == 0));
 
         assertTrue(result.isParallel());
@@ -575,7 +557,6 @@ public class ByteStream103Test extends TestBase {
     public void testTransform() {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3);
 
-        // Transform to IntStream
         IntStream intStream = stream.transform(s -> s.mapToInt(b -> b * 10));
 
         assertArrayEquals(new int[] { 10, 20, 30 }, intStream.toArray());
@@ -585,7 +566,6 @@ public class ByteStream103Test extends TestBase {
     public void testDoubleUnderscore() {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3);
 
-        // __ is an alias for transform
         IntStream intStream = stream.__(s -> s.mapToInt(b -> b * 10));
 
         assertArrayEquals(new int[] { 10, 20, 30 }, intStream.toArray());
@@ -593,14 +573,12 @@ public class ByteStream103Test extends TestBase {
 
     @Test
     public void testApplyIfNotEmpty() {
-        // Test with non-empty stream
         ByteStream nonEmpty = createByteStream((byte) 1, (byte) 2, (byte) 3);
         Optional<Integer> result1 = nonEmpty.applyIfNotEmpty(s -> s.sum());
 
         assertTrue(result1.isPresent());
         assertEquals(6, result1.get().intValue());
 
-        // Test with empty stream
         ByteStream empty = ByteStream.empty();
         Optional<Integer> result2 = empty.applyIfNotEmpty(s -> s.sum());
 
@@ -611,25 +589,21 @@ public class ByteStream103Test extends TestBase {
     public void testAcceptIfNotEmpty() {
         AtomicInteger sum = new AtomicInteger(0);
 
-        // Test with non-empty stream
         ByteStream nonEmpty = createByteStream((byte) 1, (byte) 2, (byte) 3);
         var orElse1 = nonEmpty.acceptIfNotEmpty(s -> sum.set(s.sum()));
 
         assertEquals(6, sum.get());
 
-        // Test orElse on non-empty stream (should not execute)
         AtomicInteger counter = new AtomicInteger(0);
         orElse1.orElse(() -> counter.incrementAndGet());
         assertEquals(0, counter.get());
 
-        // Test with empty stream
         sum.set(0);
         ByteStream empty = ByteStream.empty();
         var orElse2 = empty.acceptIfNotEmpty(s -> sum.set(s.sum()));
 
         assertEquals(0, sum.get());
 
-        // Test orElse on empty stream (should execute)
         orElse2.orElse(() -> counter.incrementAndGet());
         assertEquals(1, counter.get());
     }
@@ -642,7 +616,6 @@ public class ByteStream103Test extends TestBase {
 
         assertEquals(0, closeCount.get());
 
-        // Terminal operation should trigger close
         stream.toArray();
 
         assertEquals(11, closeCount.get());
@@ -653,8 +626,6 @@ public class ByteStream103Test extends TestBase {
         AtomicInteger closeCount = new AtomicInteger(0);
         List<Runnable> closeHandlers = Arrays.asList(() -> closeCount.incrementAndGet(), () -> closeCount.addAndGet(10));
 
-        // This would require access to a constructor that accepts closeHandlers
-        // which might not be directly accessible, so we'll test through operations
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3).onClose(closeHandlers.get(0)).onClose(closeHandlers.get(1));
 
         stream.close();

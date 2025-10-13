@@ -14,6 +14,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.LongSupplier;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.LongIterator;
@@ -22,6 +23,7 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.function.LongBiFunction;
 import com.landawn.abacus.util.function.LongNFunction;
 
+@Tag("new-test")
 public class LongStream104Test extends TestBase {
     @Test
     public void testFilter() {
@@ -393,7 +395,6 @@ public class LongStream104Test extends TestBase {
         assertEquals(Arrays.asList(3L, 1L, 2L, 3L), LongStream.of(1, 2, 3).map(e -> e).cycled(2).skip(2).toList());
     }
 
-    // Note: indexed() returns Stream<IndexedLong>, not LongStream, so we need to adjust our tests
     @Test
     public void testIndexed() {
         assertEquals(5, LongStream.of(1, 2, 3, 4, 5).indexed().count());
@@ -509,8 +510,6 @@ public class LongStream104Test extends TestBase {
         assertEquals(Arrays.asList(3L, 5L), LongStream.of(1, 2, 3, 4, 5).map(e -> e).step(2).skip(1).toList());
     }
 
-    // Skipping rateLimited and delay tests as they involve timing
-
     @Test
     public void testOnEach() {
         List<Long> collected = new ArrayList<>();
@@ -612,9 +611,6 @@ public class LongStream104Test extends TestBase {
         assertEquals(Arrays.asList(2L, 3L, 4L, 5L), LongStream.of(1, 2, 3, 4, 5).map(e -> e).peek(collected::add).skip(1).toList());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
     }
-
-    // Continue with more tests for prepend, append, appendIfEmpty, defaultIfEmpty, throwIfEmpty, ifEmpty, onClose
-    // These would follow the same pattern but need appropriate handling for their specific behaviors
 
     @Test
     public void testMap() {
@@ -1010,7 +1006,6 @@ public class LongStream104Test extends TestBase {
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), LongStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(10, 20, 30).toList());
         assertEquals(Arrays.asList(2L, 3L, 4L, 5L), LongStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(10, 20, 30).skip(1).toList());
 
-        // Test with empty stream
         assertEquals(3, LongStream.empty().appendIfEmpty(10, 20, 30).count());
         assertArrayEquals(new long[] { 10, 20, 30 }, LongStream.empty().appendIfEmpty(10, 20, 30).toArray());
         assertEquals(Arrays.asList(10L, 20L, 30L), LongStream.empty().appendIfEmpty(10, 20, 30).toList());
@@ -1135,7 +1130,6 @@ public class LongStream104Test extends TestBase {
         assertEquals(Arrays.asList(5L), LongStream.ofNullable(5L).map(e -> e).toList());
         assertEquals(Arrays.asList(), LongStream.ofNullable(5L).map(e -> e).skip(1).toList());
 
-        // Test with null
         assertEquals(0, LongStream.ofNullable(null).count());
         assertArrayEquals(new long[] {}, LongStream.ofNullable(null).toArray());
         assertEquals(Arrays.asList(), LongStream.ofNullable(null).toList());
@@ -1244,7 +1238,6 @@ public class LongStream104Test extends TestBase {
 
         assertEquals(5, LongStream.of(iter).count());
 
-        // Need new iterator for each test
         iter = LongIterator.of(new long[] { 1, 2, 3, 4, 5 });
         assertEquals(4, LongStream.of(iter).skip(1).count());
 
@@ -1333,7 +1326,6 @@ public class LongStream104Test extends TestBase {
         assertEquals(Arrays.asList(5L), LongStream.of(OptionalLong.of(5)).map(e -> e).toList());
         assertEquals(Arrays.asList(), LongStream.of(OptionalLong.of(5)).map(e -> e).skip(1).toList());
 
-        // Test empty optional
         assertEquals(0, LongStream.of(OptionalLong.empty()).count());
         assertArrayEquals(new long[] {}, LongStream.of(OptionalLong.empty()).toArray());
         assertEquals(Arrays.asList(), LongStream.of(OptionalLong.empty()).toList());
@@ -1354,7 +1346,6 @@ public class LongStream104Test extends TestBase {
         assertEquals(Arrays.asList(5L), LongStream.of(java.util.OptionalLong.of(5)).map(e -> e).toList());
         assertEquals(Arrays.asList(), LongStream.of(java.util.OptionalLong.of(5)).map(e -> e).skip(1).toList());
 
-        // Test empty optional
         assertEquals(0, LongStream.of(java.util.OptionalLong.empty()).count());
         assertArrayEquals(new long[] {}, LongStream.of(java.util.OptionalLong.empty()).toArray());
         assertEquals(Arrays.asList(), LongStream.of(java.util.OptionalLong.empty()).toList());
@@ -1524,8 +1515,6 @@ public class LongStream104Test extends TestBase {
         assertEquals(4, LongStream.random().map(e -> e).limit(5).skip(1).toList().size());
     }
 
-    // Skipping interval tests as they involve timing
-
     @Test
     public void testIterate() {
         BooleanSupplier hasNext = new BooleanSupplier() {
@@ -1547,7 +1536,6 @@ public class LongStream104Test extends TestBase {
 
         assertEquals(5, LongStream.iterate(hasNext, next).count());
 
-        // Need new suppliers for each test
         hasNext = new BooleanSupplier() {
             private int count = 0;
 
@@ -1642,8 +1630,6 @@ public class LongStream104Test extends TestBase {
         };
         assertArrayEquals(new long[] { 2, 3, 4, 5 }, LongStream.generate(supplier).limit(5).skip(1).toArray());
     }
-
-    // Continue with concat, zip, merge tests...
 
     @Test
     public void testConcatArrays() {

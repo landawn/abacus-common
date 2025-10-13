@@ -14,10 +14,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class AbstractPool100Test extends TestBase {
 
     private TestAbstractPool pool;
@@ -25,8 +26,7 @@ public class AbstractPool100Test extends TestBase {
     private static class TestAbstractPool extends AbstractPool {
         private int currentSize = 0;
 
-        TestAbstractPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, 
-                        boolean autoBalance, float balanceFactor, long maxMemorySize) {
+        TestAbstractPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor, long maxMemorySize) {
             super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
         }
 
@@ -99,34 +99,29 @@ public class AbstractPool100Test extends TestBase {
 
     @Test
     public void testConstructorWithNegativeCapacity() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            new TestAbstractPool(-1, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 0));
+        assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(-1, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 0));
     }
 
     @Test
     public void testConstructorWithNegativeEvictDelay() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            new TestAbstractPool(100, -1, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 0));
+        assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(100, -1, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 0));
     }
 
     @Test
     public void testConstructorWithNegativeBalanceFactor() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, -0.1f, 0));
+        assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, -0.1f, 0));
     }
 
     @Test
     public void testConstructorWithNegativeMaxMemorySize() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, -1));
+        assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, -1));
     }
 
     @Test
     public void testConstructorWithCustomBalanceFactor() {
         TestAbstractPool customPool = new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.5f, 0);
         assertEquals(0.5f, customPool.balanceFactor);
-        
-        // Test with 0 balance factor (should use default)
+
         TestAbstractPool defaultPool = new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0f, 0);
         assertEquals(AbstractPool.DEFAULT_BALANCE_FACTOR, defaultPool.balanceFactor);
     }
@@ -140,11 +135,11 @@ public class AbstractPool100Test extends TestBase {
     @Test
     public void testLockAndUnlock() throws InterruptedException {
         assertFalse(pool.getLock().isLocked());
-        
+
         pool.lock();
         assertTrue(pool.getLock().isLocked());
         assertTrue(pool.getLock().isHeldByCurrentThread());
-        
+
         pool.unlock();
         assertFalse(pool.getLock().isLocked());
     }
@@ -157,14 +152,14 @@ public class AbstractPool100Test extends TestBase {
     @Test
     public void testLockIsReentrant() {
         pool.lock();
-        pool.lock(); // Should not deadlock
+        pool.lock();
         assertTrue(pool.getLock().isLocked());
         assertEquals(2, pool.getLock().getHoldCount());
-        
+
         pool.unlock();
         assertTrue(pool.getLock().isLocked());
         assertEquals(1, pool.getLock().getHoldCount());
-        
+
         pool.unlock();
         assertFalse(pool.getLock().isLocked());
     }
@@ -173,9 +168,9 @@ public class AbstractPool100Test extends TestBase {
     public void testConcurrentLock() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         CountDownLatch done = new CountDownLatch(1);
-        
+
         pool.lock();
-        
+
         Thread other = new Thread(() -> {
             latch.countDown();
             pool.lock();
@@ -186,14 +181,14 @@ public class AbstractPool100Test extends TestBase {
             }
         });
         other.start();
-        
+
         latch.await();
-        Thread.sleep(50); // Ensure other thread is waiting
+        Thread.sleep(50);
         assertTrue(pool.getLock().hasQueuedThreads());
-        
+
         pool.unlock();
         assertTrue(done.await(1, TimeUnit.SECONDS));
-        
+
         other.join();
     }
 
@@ -226,13 +221,13 @@ public class AbstractPool100Test extends TestBase {
         pool.incrementHitCount();
         pool.incrementMissCount();
         pool.incrementEvictionCount();
-        
+
         PoolStats stats = pool.stats();
         assertNotNull(stats);
         assertEquals(100, stats.capacity());
         assertEquals(25, stats.size());
         assertEquals(2, stats.putCount());
-        assertEquals(2, stats.getCount()); // hit + miss
+        assertEquals(2, stats.getCount());
         assertEquals(1, stats.hitCount());
         assertEquals(1, stats.missCount());
         assertEquals(1, stats.evictionCount());
@@ -242,10 +237,9 @@ public class AbstractPool100Test extends TestBase {
 
     @Test
     public void testStatsWithMemory() {
-        TestAbstractPool memPool = new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, 
-                                                        true, 0.2f, 1024 * 1024); // 1MB
-        memPool.setTotalDataSize(512 * 1024); // 512KB
-        
+        TestAbstractPool memPool = new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 1024 * 1024);
+        memPool.setTotalDataSize(512 * 1024);
+
         PoolStats stats = memPool.stats();
         assertEquals(1024 * 1024, stats.maxMemory());
         assertEquals(512 * 1024, stats.dataSize());
@@ -285,8 +279,7 @@ public class AbstractPool100Test extends TestBase {
         pool.close();
         assertTrue(pool.isClosed());
         assertEquals(0, pool.size());
-        
-        // Close again should be idempotent
+
         pool.close();
         assertTrue(pool.isClosed());
     }
@@ -300,11 +293,9 @@ public class AbstractPool100Test extends TestBase {
 
     @Test
     public void testAssertNotClosed() {
-        // Should not throw when open
         assertDoesNotThrow(() -> pool.assertNotClosed());
-        
+
         pool.close();
-        // Should throw when closed
         assertThrows(IllegalStateException.class, () -> pool.assertNotClosed());
     }
 
@@ -320,12 +311,11 @@ public class AbstractPool100Test extends TestBase {
 
     @Test
     public void testAtomicCounters() {
-        // Test thread-safe increments
         int threads = 10;
         int incrementsPerThread = 1000;
         CountDownLatch startLatch = new CountDownLatch(1);
         CountDownLatch endLatch = new CountDownLatch(threads);
-        
+
         for (int i = 0; i < threads; i++) {
             new Thread(() -> {
                 try {
@@ -343,32 +333,31 @@ public class AbstractPool100Test extends TestBase {
                 }
             }).start();
         }
-        
+
         startLatch.countDown();
-        
+
         try {
             assertTrue(endLatch.await(5, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             fail("Test interrupted");
         }
-        
+
         PoolStats stats = pool.stats();
         assertEquals(threads * incrementsPerThread, stats.putCount());
         assertEquals(threads * incrementsPerThread, stats.hitCount());
         assertEquals(threads * incrementsPerThread, stats.missCount());
-        assertEquals(threads * incrementsPerThread * 2, stats.getCount()); // hit + miss
+        assertEquals(threads * incrementsPerThread * 2, stats.getCount());
         assertEquals(threads * incrementsPerThread, stats.evictionCount());
     }
 
     @Test
     public void testEvictionPolicies() {
-        // Test different eviction policies
         TestAbstractPool lastAccessPool = new TestAbstractPool(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 0);
         assertEquals(EvictionPolicy.LAST_ACCESS_TIME, lastAccessPool.evictionPolicy);
-        
+
         TestAbstractPool accessCountPool = new TestAbstractPool(10, 0, EvictionPolicy.ACCESS_COUNT, false, 0.2f, 0);
         assertEquals(EvictionPolicy.ACCESS_COUNT, accessCountPool.evictionPolicy);
-        
+
         TestAbstractPool expirationPool = new TestAbstractPool(10, 0, EvictionPolicy.EXPIRATION_TIME, false, 0.2f, 0);
         assertEquals(EvictionPolicy.EXPIRATION_TIME, expirationPool.evictionPolicy);
     }

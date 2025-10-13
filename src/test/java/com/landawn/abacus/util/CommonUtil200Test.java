@@ -19,9 +19,11 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class CommonUtil200Test extends TestBase {
 
     @Test
@@ -54,10 +56,10 @@ public class CommonUtil200Test extends TestBase {
     public void checkFromIndexSize_invalid() {
         assertThrows(IndexOutOfBoundsException.class, () -> N.checkFromIndexSize(-1, 5, 10));
         assertThrows(IndexOutOfBoundsException.class, () -> N.checkFromIndexSize(0, 11, 10));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.checkFromIndexSize(6, 5, 10)); // fromIndex + size > length
+        assertThrows(IndexOutOfBoundsException.class, () -> N.checkFromIndexSize(6, 5, 10));
         assertThrows(IndexOutOfBoundsException.class, () -> N.checkFromIndexSize(0, 1, 0));
         assertThrows(IndexOutOfBoundsException.class, () -> N.checkFromIndexSize(0, -1, 10));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.checkFromIndexSize(0, 1, -1)); // Negative length
+        assertThrows(IndexOutOfBoundsException.class, () -> N.checkFromIndexSize(0, 1, -1));
     }
 
     @Test
@@ -326,7 +328,7 @@ public class CommonUtil200Test extends TestBase {
         @Test
         public void checkArgNotEmpty_iterable_invalid() {
             assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty((Iterable<?>) null, "iterable"));
-            assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty(Collections.emptyList(), "iterable")); // An empty list is an empty iterable
+            assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty(Collections.emptyList(), "iterable"));
         }
 
         @Test
@@ -340,16 +342,11 @@ public class CommonUtil200Test extends TestBase {
             assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty((Iterator<?>) null, "iterator"));
             assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty(Collections.emptyIterator(), "iterator"));
 
-            // Test with an iterator that becomes empty after one next()
             List<String> listWithOne = new ArrayList<>(Collections.singletonList("a"));
             Iterator<String> iter = listWithOne.iterator();
-            iter.next(); // Make it empty
-            // This test is tricky because checkArgNotEmpty for iterator checks iter.hasNext().
-            // If the iterator was initially non-empty but is now consumed, it will still pass if it was not null.
-            // The check is: if (arg == null || !arg.hasNext()) for iterators.
-            // So an iterator that *was* non-empty but is now consumed, will be seen as "empty" by this check.
+            iter.next();
             Iterator<String> consumedIterator = Arrays.asList("a").iterator();
-            consumedIterator.next(); // now it's empty
+            consumedIterator.next();
             assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty(consumedIterator, "consumedIterator"));
 
             Iterator<String> trulyEmptyIterator = Collections.emptyIterator();
@@ -372,7 +369,7 @@ public class CommonUtil200Test extends TestBase {
 
         @Test
         public void checkArgNotEmpty_primitiveList_valid() {
-            BooleanList pList = BooleanList.of(true, false); // Assuming a concrete implementation
+            BooleanList pList = BooleanList.of(true, false);
             assertSame(pList, N.checkArgNotEmpty(pList, "pList"));
         }
 
@@ -384,7 +381,7 @@ public class CommonUtil200Test extends TestBase {
 
         @Test
         public void checkArgNotEmpty_multiset_valid() {
-            Multiset<String> multiset = Multiset.of("a", "b"); // Assuming a concrete implementation
+            Multiset<String> multiset = Multiset.of("a", "b");
             assertSame(multiset, N.checkArgNotEmpty(multiset, "multiset"));
         }
 
@@ -396,7 +393,7 @@ public class CommonUtil200Test extends TestBase {
 
         @Test
         public void checkArgNotEmpty_multimap_valid() {
-            Multimap<String, Integer, List<Integer>> multimap = N.newListMultimap(Map.of("a", 1)); // Assuming 
+            Multimap<String, Integer, List<Integer>> multimap = N.newListMultimap(Map.of("a", 1));
             assertSame(multimap, N.checkArgNotEmpty(multimap, "multimap"));
         }
 
@@ -411,14 +408,14 @@ public class CommonUtil200Test extends TestBase {
             List<String> columnNames = Arrays.asList("col1");
             List<List<?>> rows = new ArrayList<>();
             rows.add(Arrays.asList("val1"));
-            Dataset dataset = N.newDataset(columnNames, rows); // Assuming a concrete implementation
+            Dataset dataset = N.newDataset(columnNames, rows);
             assertSame(dataset, N.checkArgNotEmpty(dataset, "dataset"));
         }
 
         @Test
         public void checkArgNotEmpty_dataset_invalid() {
             assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty((Dataset) null, "dataset"));
-            Dataset emptyDs = N.emptyDataset(); // Empty rows
+            Dataset emptyDs = N.emptyDataset();
             assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty(emptyDs, "dataset"));
         }
 
@@ -590,14 +587,14 @@ public class CommonUtil200Test extends TestBase {
         @Test
         public void checkElementNotNull_array_valid() {
             assertDoesNotThrow(() -> N.checkElementNotNull(new String[] { "a", "b" }));
-            assertDoesNotThrow(() -> N.checkElementNotNull(new String[0])); // Empty array is fine
-            assertDoesNotThrow(() -> N.checkElementNotNull((Object[]) null)); // Null array is fine
+            assertDoesNotThrow(() -> N.checkElementNotNull(new String[0]));
+            assertDoesNotThrow(() -> N.checkElementNotNull((Object[]) null));
         }
 
         @Test
         public void checkElementNotNull_array_invalid() {
             IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> N.checkElementNotNull(new String[] { "a", null, "b" }));
-            assertEquals("null element is found in collection", ex.getMessage()); // Default message
+            assertEquals("null element is found in collection", ex.getMessage());
         }
 
         @Test
@@ -618,8 +615,8 @@ public class CommonUtil200Test extends TestBase {
         @Test
         public void checkElementNotNull_collection_valid() {
             assertDoesNotThrow(() -> N.checkElementNotNull(Arrays.asList("a", "b")));
-            assertDoesNotThrow(() -> N.checkElementNotNull(Collections.emptyList())); // Empty collection is fine
-            assertDoesNotThrow(() -> N.checkElementNotNull((Collection<?>) null)); // Null collection is fine
+            assertDoesNotThrow(() -> N.checkElementNotNull(Collections.emptyList()));
+            assertDoesNotThrow(() -> N.checkElementNotNull((Collection<?>) null));
         }
 
         @Test
@@ -652,7 +649,7 @@ public class CommonUtil200Test extends TestBase {
         public void checkKeyNotNull_map_valid() {
             Map<String, Integer> map = new HashMap<>();
             map.put("a", 1);
-            map.put("b", null); // Null value is fine
+            map.put("b", null);
             assertDoesNotThrow(() -> N.checkKeyNotNull(map));
             assertDoesNotThrow(() -> N.checkKeyNotNull(Collections.emptyMap()));
             assertDoesNotThrow(() -> N.checkKeyNotNull((Map<?, ?>) null));
@@ -691,7 +688,7 @@ public class CommonUtil200Test extends TestBase {
             map.put("b", 2);
             assertDoesNotThrow(() -> N.checkValueNotNull(map));
             Map<Object, String> mapWithNullKey = new HashMap<>();
-            mapWithNullKey.put(null, "value"); // Null key is fine here
+            mapWithNullKey.put(null, "value");
             assertDoesNotThrow(() -> N.checkValueNotNull(mapWithNullKey));
             assertDoesNotThrow(() -> N.checkValueNotNull(Collections.emptyMap()));
             assertDoesNotThrow(() -> N.checkValueNotNull((Map<?, ?>) null));
@@ -758,7 +755,7 @@ public class CommonUtil200Test extends TestBase {
             assertEquals("Message with arg", ex.getMessage());
 
             IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class, () -> N.checkArgument(false, "{} and %s", "arg1", "arg2"));
-            assertEquals("arg1 and %s: [arg2]", ex2.getMessage()); // {} takes precedence
+            assertEquals("arg1 and %s: [arg2]", ex2.getMessage());
 
             IllegalArgumentException ex3 = assertThrows(IllegalArgumentException.class, () -> N.checkArgument(false, "%s and %s", "arg1", "arg2"));
             assertEquals("arg1 and arg2", ex3.getMessage());
@@ -825,7 +822,6 @@ public class CommonUtil200Test extends TestBase {
             assertEquals("Object: test", ex.getMessage());
         }
 
-        // Test a few of the two-parameter template methods
         @Test
         public void checkArgument_booleanTemplateCharChar_valid() {
             assertDoesNotThrow(() -> N.checkArgument(true, "{}, {}", 'a', 'b'));
@@ -973,7 +969,6 @@ public class CommonUtil200Test extends TestBase {
             assertEquals("Object: test", ex.getMessage());
         }
 
-        // Test a few of the two-parameter template methods
         @Test
         public void checkState_booleanTemplateCharChar_valid() {
             assertDoesNotThrow(() -> N.checkState(true, "{}, {}", 'a', 'b'));
@@ -1069,7 +1064,7 @@ public class CommonUtil200Test extends TestBase {
             assertTrue(supplierCalled[0]);
             assertEquals("'paramName' cannot be null", ex1.getMessage());
 
-            supplierCalled[0] = false; // reset
+            supplierCalled[0] = false;
             Supplier<String> supplierCustomMsg = () -> {
                 supplierCalled[0] = true;
                 return "Custom detailed error message from supplier";

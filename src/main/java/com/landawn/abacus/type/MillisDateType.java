@@ -35,6 +35,20 @@ public class MillisDateType extends DateType {
      * The value is read as a long representing milliseconds since epoch.
      * A value of 0 is treated as NULL and returns null.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MillisDateType type = new MillisDateType();
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column contains milliseconds value 1609459200000 (Jan 1, 2021)
+     * Date date = type.get(rs, 1);
+     * // Returns: Date object for Jan 1, 2021
+     *
+     * // Column contains 0 (representing NULL)
+     * date = type.get(rs, 2);
+     * // Returns: null
+     * }</pre>
+     *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
      * @return A Date object created from the milliseconds value, or null if the value is 0
@@ -51,6 +65,20 @@ public class MillisDateType extends DateType {
      * Retrieves a Date value from a ResultSet using the specified column label.
      * The value is read as a long representing milliseconds since epoch.
      * A value of 0 is treated as NULL and returns null.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MillisDateType type = new MillisDateType();
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column "created_date" contains milliseconds value 1609459200000
+     * Date date = type.get(rs, "created_date");
+     * // Returns: Date object for Jan 1, 2021
+     *
+     * // Column "deleted_date" contains 0 (representing NULL)
+     * date = type.get(rs, "deleted_date");
+     * // Returns: null
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnLabel The label of the column to retrieve the value from
@@ -69,6 +97,20 @@ public class MillisDateType extends DateType {
      * The Date is stored as a long value representing milliseconds since epoch.
      * If the Date is null, 0 is stored.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MillisDateType type = new MillisDateType();
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO users (id, created_date) VALUES (?, ?)");
+     *
+     * Date date = new Date(1609459200000L); // Jan 1, 2021
+     * type.set(stmt, 2, date);
+     * // Sets parameter to 1609459200000
+     *
+     * type.set(stmt, 2, null);
+     * // Sets parameter to 0
+     * }</pre>
+     *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
      * @param x The Date value to set, or null to store 0
@@ -83,6 +125,19 @@ public class MillisDateType extends DateType {
      * Sets a Date parameter in a CallableStatement using the specified parameter name.
      * The Date is stored as a long value representing milliseconds since epoch.
      * If the Date is null, 0 is stored.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MillisDateType type = new MillisDateType();
+     * CallableStatement stmt = connection.prepareCall("{call update_date(?, ?)}");
+     *
+     * Date date = new Date(1609459200000L); // Jan 1, 2021
+     * type.set(stmt, "p_created_date", date);
+     * // Sets parameter to 1609459200000
+     *
+     * type.set(stmt, "p_deleted_date", null);
+     * // Sets parameter to 0
+     * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on
      * @param parameterName The name of the parameter to set

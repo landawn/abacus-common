@@ -13,13 +13,14 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.PrimitiveSink;
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class Hasher100Test extends TestBase {
 
     private Hasher hasher;
@@ -32,18 +33,16 @@ public class Hasher100Test extends TestBase {
     @Test
     public void testPutByte() {
         Hasher result = hasher.put((byte) 0xFF);
-        assertSame(hasher, result); // Should return same instance for chaining
+        assertSame(hasher, result);
 
         HashCode hash1 = hasher.hash();
 
-        // Compare with new hasher
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put((byte) 0xFF);
         HashCode hash2 = hasher2.hash();
 
         assertEquals(hash1, hash2);
 
-        // Test multiple bytes
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put((byte) 0xFF).put((byte) 0x00).put((byte) 0x42);
         assertNotNull(hasher3.hash());
@@ -57,19 +56,16 @@ public class Hasher100Test extends TestBase {
 
         HashCode hash1 = hasher.hash();
 
-        // Compare with new hasher
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put(data);
         HashCode hash2 = hasher2.hash();
 
         assertEquals(hash1, hash2);
 
-        // Test empty array
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put(new byte[0]);
         assertNotNull(hasher3.hash());
 
-        // Test null throws exception
         Hasher hasher4 = Hashing.sha256().newHasher();
         assertThrows(NullPointerException.class, () -> hasher4.put((byte[]) null));
     }
@@ -78,29 +74,24 @@ public class Hasher100Test extends TestBase {
     public void testPutByteArrayWithOffsetAndLength() {
         byte[] buffer = "Hello World".getBytes();
 
-        // Hash "Hello"
         Hasher hasher1 = Hashing.sha256().newHasher();
         hasher1.put(buffer, 0, 5);
         HashCode hash1 = hasher1.hash();
 
-        // Hash "World"
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put(buffer, 6, 5);
         HashCode hash2 = hasher2.hash();
 
         assertNotEquals(hash1, hash2);
 
-        // Test chaining
         Hasher hasher3 = Hashing.sha256().newHasher();
         Hasher result = hasher3.put(buffer, 0, 5);
         assertSame(hasher3, result);
 
-        // Test boundary cases
         Hasher hasher4 = Hashing.sha256().newHasher();
-        hasher4.put(buffer, 0, 0); // Empty range
+        hasher4.put(buffer, 0, 0);
         assertNotNull(hasher4.hash());
 
-        // Test exceptions
         Hasher hasher5 = Hashing.sha256().newHasher();
         assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, -1, 5));
         assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, 0, -1));
@@ -116,25 +107,22 @@ public class Hasher100Test extends TestBase {
 
         Hasher result = hasher.put(buffer);
         assertSame(hasher, result);
-        assertEquals(data.length, buffer.position()); // Buffer position should advance
+        assertEquals(data.length, buffer.position());
 
         HashCode hash1 = hasher.hash();
 
-        // Compare with byte array
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put(data);
         HashCode hash2 = hasher2.hash();
 
         assertEquals(hash1, hash2);
 
-        // Test partial buffer
         ByteBuffer buffer2 = ByteBuffer.wrap(data);
-        buffer2.position(5); // Skip first 5 bytes
+        buffer2.position(5);
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put(buffer2);
         assertNotNull(hasher3.hash());
 
-        // Test null throws exception
         Hasher hasher4 = Hashing.sha256().newHasher();
         assertThrows(NullPointerException.class, () -> hasher4.put((ByteBuffer) null));
     }
@@ -146,14 +134,12 @@ public class Hasher100Test extends TestBase {
 
         HashCode hash1 = hasher.hash();
 
-        // Test consistency
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put((short) 12345);
         HashCode hash2 = hasher2.hash();
 
         assertEquals(hash1, hash2);
 
-        // Test edge cases
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put(Short.MIN_VALUE).put(Short.MAX_VALUE).put((short) 0);
         assertNotNull(hasher3.hash());
@@ -166,14 +152,12 @@ public class Hasher100Test extends TestBase {
 
         HashCode hash1 = hasher.hash();
 
-        // Test consistency
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put(42);
         HashCode hash2 = hasher2.hash();
 
         assertEquals(hash1, hash2);
 
-        // Test edge cases
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put(Integer.MIN_VALUE).put(Integer.MAX_VALUE).put(0);
         assertNotNull(hasher3.hash());
@@ -186,14 +170,12 @@ public class Hasher100Test extends TestBase {
 
         HashCode hash1 = hasher.hash();
 
-        // Test consistency
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put(1234567890L);
         HashCode hash2 = hasher2.hash();
 
         assertEquals(hash1, hash2);
 
-        // Test edge cases
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put(Long.MIN_VALUE).put(Long.MAX_VALUE).put(0L);
         assertNotNull(hasher3.hash());
@@ -206,19 +188,16 @@ public class Hasher100Test extends TestBase {
 
         HashCode hash1 = hasher.hash();
 
-        // Test consistency
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put(3.14159f);
         HashCode hash2 = hasher2.hash();
 
         assertEquals(hash1, hash2);
 
-        // Test special values
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put(Float.NaN).put(Float.POSITIVE_INFINITY).put(Float.NEGATIVE_INFINITY);
         assertNotNull(hasher3.hash());
 
-        // Test that equivalent int representation produces same hash
         float f = 42.0f;
         int intBits = Float.floatToRawIntBits(f);
 
@@ -240,19 +219,16 @@ public class Hasher100Test extends TestBase {
 
         HashCode hash1 = hasher.hash();
 
-        // Test consistency
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put(Math.PI);
         HashCode hash2 = hasher2.hash();
 
         assertEquals(hash1, hash2);
 
-        // Test special values
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put(Double.NaN).put(Double.POSITIVE_INFINITY).put(Double.NEGATIVE_INFINITY);
         assertNotNull(hasher3.hash());
 
-        // Test that equivalent long representation produces same hash
         double d = 42.0;
         long longBits = Double.doubleToRawLongBits(d);
 
@@ -280,7 +256,6 @@ public class Hasher100Test extends TestBase {
 
         assertNotEquals(hashTrue, hashFalse);
 
-        // Test that true equals put((byte) 1) and false equals put((byte) 0)
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put((byte) 1);
         assertEquals(hashTrue, hasher3.hash());
@@ -297,14 +272,12 @@ public class Hasher100Test extends TestBase {
 
         HashCode hash1 = hasher.hash();
 
-        // Test consistency
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put('A');
         HashCode hash2 = hasher2.hash();
 
         assertEquals(hash1, hash2);
 
-        // Test different characters
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put('A').put('\n').put('中');
         assertNotNull(hasher3.hash());
@@ -318,21 +291,17 @@ public class Hasher100Test extends TestBase {
 
         HashCode hash1 = hasher.hash();
 
-        // Test consistency
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put(chars);
         HashCode hash2 = hasher2.hash();
 
         assertEquals(hash1, hash2);
 
-        // Test empty array
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put(new char[0]);
         assertNotNull(hasher3.hash());
 
-        // Test null throws exception
         Hasher hasher4 = Hashing.sha256().newHasher();
-        // assertThrows(NullPointerException.class, () -> hasher4.put((char[]) null));
         hasher4.put((char[]) null);
     }
 
@@ -340,35 +309,29 @@ public class Hasher100Test extends TestBase {
     public void testPutCharArrayWithOffsetAndLength() {
         char[] buffer = "Hello World".toCharArray();
 
-        // Hash "Hello"
         Hasher hasher1 = Hashing.sha256().newHasher();
         hasher1.put(buffer, 0, 5);
         HashCode hash1 = hasher1.hash();
 
-        // Hash "World"
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put(buffer, 6, 5);
         HashCode hash2 = hasher2.hash();
 
         assertNotEquals(hash1, hash2);
 
-        // Test chaining
         Hasher hasher3 = Hashing.sha256().newHasher();
         Hasher result = hasher3.put(buffer, 0, 5);
         assertSame(hasher3, result);
 
-        // Test boundary cases
         Hasher hasher4 = Hashing.sha256().newHasher();
-        hasher4.put(buffer, 0, 0); // Empty range
+        hasher4.put(buffer, 0, 0);
         assertNotNull(hasher4.hash());
 
-        // Test exceptions
         Hasher hasher5 = Hashing.sha256().newHasher();
         assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, -1, 5));
         assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, 0, -1));
         assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, 0, buffer.length + 1));
         assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, buffer.length, 1));
-        // assertThrows(NullPointerException.class, () -> hasher5.put((char[]) null, 0, 0));
         hasher5.put((char[]) null, 0, 0);
     }
 
@@ -380,19 +343,16 @@ public class Hasher100Test extends TestBase {
 
         HashCode hash1 = hasher.hash();
 
-        // Test different CharSequence implementations
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put(new StringBuilder("fast hash"));
         HashCode hash2 = hasher2.hash();
 
         assertEquals(hash1, hash2);
 
-        // Test empty string
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put("");
         assertNotNull(hasher3.hash());
 
-        // Test null throws exception
         Hasher hasher4 = Hashing.sha256().newHasher();
         assertThrows(NullPointerException.class, () -> hasher4.put((CharSequence) null));
     }
@@ -405,19 +365,16 @@ public class Hasher100Test extends TestBase {
 
         HashCode hashUtf8 = hasher.hash();
 
-        // Test different charset produces different hash
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put(text, StandardCharsets.UTF_16);
         HashCode hashUtf16 = hasher2.hash();
 
         assertNotEquals(hashUtf8, hashUtf16);
 
-        // Test consistency
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put(text, StandardCharsets.UTF_8);
         assertEquals(hashUtf8, hasher3.hash());
 
-        // Test null throws exception
         Hasher hasher4 = Hashing.sha256().newHasher();
         assertThrows(NullPointerException.class, () -> hasher4.put(text, (Charset) null));
         assertThrows(NullPointerException.class, () -> hasher4.put((String) null, StandardCharsets.UTF_8));
@@ -439,21 +396,18 @@ public class Hasher100Test extends TestBase {
 
         HashCode hash1 = hasher.hash();
 
-        // Test consistency
         Hasher hasher2 = Hashing.sha256().newHasher();
         hasher2.put(person, personFunnel);
         HashCode hash2 = hasher2.hash();
 
         assertEquals(hash1, hash2);
 
-        // Test that funnel decomposition matches manual decomposition
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put(person.name, StandardCharsets.UTF_8).put(person.age);
         HashCode hash3 = hasher3.hash();
 
         assertEquals(hash1, hash3);
 
-        // Test null throws exception
         Hasher hasher4 = Hashing.sha256().newHasher();
         assertThrows(NullPointerException.class, () -> hasher4.put(person, null));
         assertThrows(NullPointerException.class, () -> hasher4.put(null, personFunnel));
@@ -461,18 +415,15 @@ public class Hasher100Test extends TestBase {
 
     @Test
     public void testHash() {
-        // Test simple hash
         hasher.put("test data".getBytes());
         HashCode hash1 = hasher.hash();
         assertNotNull(hash1);
         assertTrue(hash1.bits() > 0);
 
-        // Test chained operations
         Hasher hasher2 = Hashing.sha256().newHasher();
         HashCode hash2 = hasher2.put("data".getBytes()).put(42).put(true).put('X').hash();
         assertNotNull(hash2);
 
-        // Test empty hasher
         Hasher hasher3 = Hashing.sha256().newHasher();
         HashCode hashEmpty = hasher3.hash();
         assertNotNull(hashEmpty);
@@ -480,7 +431,6 @@ public class Hasher100Test extends TestBase {
 
     @Test
     public void testComplexChaining() {
-        // Test that all put methods support chaining
         HashCode hash = Hashing.sha256()
                 .newHasher()
                 .put((byte) 1)
@@ -505,27 +455,22 @@ public class Hasher100Test extends TestBase {
 
     @Test
     public void testConsistencyAcrossDataTypes() {
-        // Test that equivalent data produces same hash
 
-        // Boolean: true = (byte) 1, false = (byte) 0
         HashCode hashTrue1 = Hashing.sha256().newHasher().put(true).hash();
         HashCode hashTrue2 = Hashing.sha256().newHasher().put((byte) 1).hash();
         assertEquals(hashTrue1, hashTrue2);
 
-        // Float to int bits
         float f = 123.456f;
         HashCode hashFloat = Hashing.sha256().newHasher().put(f).hash();
         HashCode hashIntBits = Hashing.sha256().newHasher().put(Float.floatToRawIntBits(f)).hash();
         assertEquals(hashFloat, hashIntBits);
 
-        // Double to long bits
         double d = 123.456789;
         HashCode hashDouble = Hashing.sha256().newHasher().put(d).hash();
         HashCode hashLongBits = Hashing.sha256().newHasher().put(Double.doubleToRawLongBits(d)).hash();
         assertEquals(hashDouble, hashLongBits);
     }
 
-    // Helper class for testing
     private static class Person {
         final String name;
         final int age;

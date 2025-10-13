@@ -51,6 +51,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -65,28 +66,25 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
+@Tag("new-test")
 public class Seq200Test extends TestBase {
 
     @TempDir
     Path tempDir;
 
-    // Helper to collect results from a Seq
     private <T, E extends Exception> List<T> drain(Seq<T, E> seq) throws E {
         return seq.toList();
     }
 
-    // Helper to collect results and handle Exception specifically
     private <T> List<T> drainWithException(Seq<T, Exception> seq) throws Exception {
         return seq.toList();
     }
-
-    //region Static Factory Methods Tests
 
     @Test
     public void test_empty() throws Exception {
         Seq<Object, Exception> emptySeq = Seq.empty();
         assertTrue(emptySeq.toList().isEmpty(), "Empty sequence should have no elements.");
-        assertDoesNotThrow(emptySeq::close); // Closing an empty sequence should be fine
+        assertDoesNotThrow(emptySeq::close);
     }
 
     @Test
@@ -104,7 +102,6 @@ public class Seq200Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3), result);
         assertEquals(1, supplierCalls.get(), "Supplier should be called once after terminal operation.");
 
-        // Test defer with a supplier that throws
         Supplier<Seq<Integer, Exception>> failingSupplier = () -> {
             supplierCalls.incrementAndGet();
             throw new RuntimeException("Supplier failed");
@@ -334,7 +331,7 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_of_map() throws Exception {
-        Map<Integer, String> map = new LinkedHashMap<>(); // Keep order for assertion
+        Map<Integer, String> map = new LinkedHashMap<>();
         map.put(1, "a");
         map.put(2, "b");
         Seq<Map.Entry<Integer, String>, Exception> seq = Seq.of(map);
@@ -457,7 +454,7 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_range_startEnd() throws Exception {
-        Seq<Integer, Exception> seq = Seq.range(1, 4); // 1, 2, 3
+        Seq<Integer, Exception> seq = Seq.range(1, 4);
         assertEquals(Arrays.asList(1, 2, 3), drainWithException(seq));
 
         Seq<Integer, Exception> emptyRangeSeq = Seq.range(1, 1);
@@ -469,10 +466,10 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_range_startEndStep() throws Exception {
-        Seq<Integer, Exception> seq = Seq.range(1, 6, 2); // 1, 3, 5
+        Seq<Integer, Exception> seq = Seq.range(1, 6, 2);
         assertEquals(Arrays.asList(1, 3, 5), drainWithException(seq));
 
-        Seq<Integer, Exception> seqNegStep = Seq.range(5, 0, -2); // 5, 3, 1
+        Seq<Integer, Exception> seqNegStep = Seq.range(5, 0, -2);
         assertEquals(Arrays.asList(5, 3, 1), drainWithException(seqNegStep));
 
         assertThrows(IllegalArgumentException.class, () -> Seq.range(1, 5, 0));
@@ -480,7 +477,7 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_rangeClosed_startEnd() throws Exception {
-        Seq<Integer, Exception> seq = Seq.rangeClosed(1, 3); // 1, 2, 3
+        Seq<Integer, Exception> seq = Seq.rangeClosed(1, 3);
         assertEquals(Arrays.asList(1, 2, 3), drainWithException(seq));
 
         Seq<Integer, Exception> singleElementSeq = Seq.rangeClosed(1, 1);
@@ -492,10 +489,10 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_rangeClosed_startEndStep() throws Exception {
-        Seq<Integer, Exception> seq = Seq.rangeClosed(1, 5, 2); // 1, 3, 5
+        Seq<Integer, Exception> seq = Seq.rangeClosed(1, 5, 2);
         assertEquals(Arrays.asList(1, 3, 5), drainWithException(seq));
 
-        Seq<Integer, Exception> seqNegStep = Seq.rangeClosed(5, 1, -2); // 5, 3, 1
+        Seq<Integer, Exception> seqNegStep = Seq.rangeClosed(5, 1, -2);
         assertEquals(Arrays.asList(5, 3, 1), drainWithException(seqNegStep));
 
         assertThrows(IllegalArgumentException.class, () -> Seq.rangeClosed(1, 5, 0));
@@ -506,7 +503,7 @@ public class Seq200Test extends TestBase {
         Seq<String, Exception> seq = Seq.split("a,b,c", ',');
         assertEquals(Arrays.asList("a", "b", "c"), drainWithException(seq));
         Seq<String, Exception> seqEmpty = Seq.split("", ',');
-        assertEquals(Collections.singletonList(""), drainWithException(seqEmpty)); // Splitter behavior
+        assertEquals(Collections.singletonList(""), drainWithException(seqEmpty));
     }
 
     @Test
@@ -536,14 +533,10 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_splitByChunkCount() throws Exception {
         Seq<Pair<Integer, Integer>, Exception> seq = Seq.splitByChunkCount(7, 3, (from, to) -> Pair.of(from, to));
-        // Default is sizeLargerFirst (false) => [[0,3],[3,5],[5,7]] (approx) depends on implementation details
-        // The provided code produces: [[0,3], [3,5], [5,7]]
         List<Pair<Integer, Integer>> expected = Arrays.asList(Pair.of(0, 3), Pair.of(3, 5), Pair.of(5, 7));
         assertEquals(expected, drainWithException(seq));
 
         Seq<Pair<Integer, Integer>, Exception> seqSmallerFirst = Seq.splitByChunkCount(7, 3, true, (from, to) -> Pair.of(from, to));
-        // sizeSmallerFirst (true) => [[0,2],[2,4],[4,7]] (approx)
-        // The provided code produces: [[0,2], [2,4], [4,7]]
         List<Pair<Integer, Integer>> expectedSmallerFirst = Arrays.asList(Pair.of(0, 2), Pair.of(2, 4), Pair.of(4, 7));
         assertEquals(expectedSmallerFirst, drainWithException(seqSmallerFirst));
 
@@ -599,15 +592,12 @@ public class Seq200Test extends TestBase {
         StringReader reader = new StringReader("readerLine1\nreaderLine2");
         Seq<String, IOException> seq = Seq.ofLines(reader);
         assertEquals(Arrays.asList("readerLine1", "readerLine2"), drain(seq));
-        // Reader is not closed by default
         assertTrue(reader.ready());
     }
 
     @Test
     public void test_ofLines_reader_close() throws IOException {
         StringReader stringReader = new StringReader("line1\nline2");
-        // Wrap to check closure. A bit tricky to test directly if StringReader itself is closed.
-        // We'll rely on the close handler being called.
         AtomicBoolean readerClosed = new AtomicBoolean(false);
         Reader mockReader = new BufferedReader(stringReader) {
             @Override
@@ -618,7 +608,7 @@ public class Seq200Test extends TestBase {
         };
 
         Seq<String, IOException> seq = Seq.ofLines(mockReader, true);
-        assertEquals(Arrays.asList("line1", "line2"), drain(seq)); // Draining closes the seq
+        assertEquals(Arrays.asList("line1", "line2"), drain(seq));
         assertTrue(readerClosed.get(), "Reader should be closed when closeReaderWhenStreamIsClosed is true");
     }
 
@@ -636,7 +626,7 @@ public class Seq200Test extends TestBase {
 
         assertTrue(files.contains(file1));
         assertTrue(files.contains(subDir));
-        assertFalse(files.contains(file2InSub)); // Not recursive
+        assertFalse(files.contains(file2InSub));
         assertEquals(2, files.size());
     }
 
@@ -726,7 +716,7 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_zip_arrays_biFunction() throws Exception {
         Integer[] a = { 1, 2, 3 };
-        String[] b = { "a", "b" }; // Shorter
+        String[] b = { "a", "b" };
         Seq<String, Exception> seq = Seq.zip(a, b, (x, y) -> x + y);
         assertEquals(Arrays.asList("1a", "2b"), drainWithException(seq));
     }
@@ -735,7 +725,7 @@ public class Seq200Test extends TestBase {
     public void test_zip_arrays_triFunction() throws Exception {
         Integer[] a = { 1, 2 };
         String[] b = { "a", "b", "c" };
-        Boolean[] c = { true, false }; // Shortest
+        Boolean[] c = { true, false };
         Seq<String, Exception> seq = Seq.zip(a, b, c, (x, y, z) -> x + y + z);
         assertEquals(Arrays.asList("1atrue", "2bfalse"), drainWithException(seq));
     }
@@ -933,9 +923,6 @@ public class Seq200Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7), drainWithException(resultSeq));
     }
 
-    //endregion
-
-    //region Instance Methods (Intermediate) Tests
     @Test
     public void test_filter() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5).filter(x -> x % 2 == 0);
@@ -965,75 +952,11 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_dropWhile_withActionOnDropped() throws Exception {
         List<Integer> dropped = new ArrayList<>();
-        Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 2, 1).dropWhile(x -> x < 3, dropped::add); // Predicate inverted here.
-        // Correct logic: dropWhile(x -> x<3) means the predicate in dropWhile is (value -> ! (value < 3)) or (value -> value >=3)
-        // So, when (x < 3) is true, we drop. if (x < 3) is false, we keep.
-        // The actionOnDroppedItem is called on items dropped by the filter.
-        // The filter in dropWhile(pred, action) becomes:
-        //  value -> { if (!pred.test(value)) { action.accept(value); return false; } return true; }
-        // This is a bit confusing. Let's re-check the source.
-        // dropWhile(predicate) keeps elements AFTER predicate becomes false.
-        // dropWhile(predicate, actionOnDropped) -> dropWhile(value -> { if(!predicate.test(value)) { actionOnDropped.accept(value); return false; } return true; })
-        // This seems to mean actionOnDropped is called if predicate is FALSE.
-        // This is inconsistent with filter(predicate, actionOnDropped) where action is called if predicate is FALSE.
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 2, 1).dropWhile(x -> x < 3, dropped::add);
 
-        // Let's trace Seq.of(1,2,3,2,1).dropWhile(x -> x < 3, dropped::add)
-        // 1. element = 1. predicate (1 < 3) is true. Kept by original dropWhile.
-        //    In the transformed predicate: (value -> { if(!(value < 3)) { dropped.add(value); return false;} return true;})
-        //    For 1: !(1<3) is false. Returns true. (Kept by the inner filter, means dropped by outer dropWhile logic).
-        //    This means actionOnDropped will be called if original predicate is FALSE.
-        //    Let's assume the intention for actionOnDroppedItem in dropWhile is to act on items that *are* dropped because the initial while(predicate) loop is true.
-
-        // Re-reading the `dropWhile(predicate, action)`:
-        // It's `dropWhile(value -> { if (!predicate.test(value)) { actionOnDroppedItem.accept(value); return false; } return true; })`
-        // This `dropWhile` (the one taking the lambda) will drop elements as long as its lambda returns true.
-        // So, if original `predicate.test(value)` is `true`, the lambda returns `true`. These are the elements dropped by the high-level `dropWhile` operation.
-        // If original `predicate.test(value)` is `false`, the lambda calls `actionOnDroppedItem.accept(value)` and returns `false`. This signals the `dropWhile` to stop.
-        // This seems incorrect. The `actionOnDroppedItem` should be called for items that are actually being dropped by the `dropWhile` logic.
-
-        // The `dropWhile(Predicate predicate)` works like this:
-        // It iterates and drops elements as long as `predicate.test(element)` is true.
-        // Once `predicate.test(element)` is false, it stops dropping and returns the rest.
-        // So, elements for which `predicate.test(element)` is true are dropped.
-
-        // If `dropWhile(predicate, action)` is implemented as `dropWhile(value -> { if(!originalPredicate.test(value)) { action.accept(value); return false; } return true; })`
-        // Let originalPredicate be P. The new predicate is P_new = (v -> !P(v) ? (action(v), false) : true).
-        // dropWhile(P_new) will drop elements as long as P_new is true.
-        // P_new is true if P(v) is true.
-        // So, if P(v) is true, element v is dropped. action is NOT called.
-        // If P(v) is false, P_new calls action(v) and returns false. dropWhile(P_new) stops.
-        // This means `action` is called on the FIRST element that makes the original predicate FALSE. This is not "action on dropped item".
-
-        // Let's assume the more intuitive meaning: action is called on items dropped by `dropWhile(predicate)`.
-        // Those are the items for which `predicate` is true during the initial dropping phase.
-        // Seq.of(1, 2, 3, 2, 1).dropWhile(x -> x < 3, dropped::add);
-        // 1: (1 < 3) is true. Drop 1. Call dropped.add(1).
-        // 2: (2 < 3) is true. Drop 2. Call dropped.add(2).
-        // 3: (3 < 3) is false. Stop dropping. Keep 3, 2, 1.
-        // Expected dropped: [1, 2]. Result: [3, 2, 1].
-
-        // Given the current implementation:
-        // final Throwables.Predicate<T, E> filter = value -> {
-        //    if (!predicate.test(value)) { // If original predicate is FALSE
-        //        actionOnDroppedItem.accept(value); // Action is called
-        //        return false; // Stop dropping (effective predicate is false)
-        //    }
-        //    return true; // Continue dropping (effective predicate is true)
-        // };
-        // return dropWhile(filter, actionOnDroppedItem); // This is recursive-like call, let's assume it means dropWhile(filter)
-        // Seq.of(1,2,3,2,1).dropWhile(x -> x < 3, dropped::add)
-        // Effective predicate for dropWhile: effPred = v -> { if (!(v<3)) { dropped.add(v); return false; } return true; }
-        // 1: (1<3) is true. effPred(1) returns true. (1 is dropped by outer dropWhile)
-        // 2: (2<3) is true. effPred(2) returns true. (2 is dropped by outer dropWhile)
-        // 3: (3<3) is false. effPred(3) -> !(false) is true. dropped.add(3). returns false. (3 is NOT dropped by outer dropWhile, outer dropWhile stops).
-        // Resulting seq: [3,2,1]. Dropped list: [3]. This is also not quite "action on dropped item" for the main dropWhile.
-
-        // The beta status is important here. The current implementation of `dropWhile(pred, action)` seems to call the action on the first element *not* dropped.
-        // Let's test based on the provided code's behavior.
         Seq<Integer, Exception> seqActual = Seq.of(1, 2, 3, 2, 1).dropWhile(x -> x < 3, dropped::add);
         assertEquals(Arrays.asList(3, 2, 1), drainWithException(seqActual));
-        assertEquals(N.asList(1, 2), dropped,
-                "Action should be called on the first element not satisfying the drop condition, based on current impl.");
+        assertEquals(N.asList(1, 2), dropped, "Action should be called on the first element not satisfying the drop condition, based on current impl.");
     }
 
     @Test
@@ -1050,42 +973,21 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_distinct_withMergeFunction() throws Exception {
-        Seq<Integer, Exception> seq = Seq.of(1, 2, 2, 3, 1, 4).distinct((a, b) -> a + b); // Merge duplicates by summing
-        // GroupBy: {1:[1,1], 2:[2,2], 3:[3], 4:[4]}
-        // Merge: {1:2, 2:4, 3:3, 4:4} -> map(value) -> [2,4,3,4] (order of map values)
-        // The distinct(merge) is distinctBy(identity, merge).
-        // It uses a LinkedHashMap for grouping, so order of first appearance is preserved for keys.
-        // 1st 1: map.put(1, 1)
-        // 1st 2: map.put(2, 2)
-        // 2nd 2: map.put(2, merge(map.get(2), 2)) -> map.put(2, 2+2=4)
-        // 1st 3: map.put(3, 3)
-        // 2nd 1: map.put(1, merge(map.get(1), 1)) -> map.put(1, 1+1=2)
-        // 1st 4: map.put(4, 4)
-        // Resulting map values in order of key appearance: [2, 4, 3, 4]
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 2, 3, 1, 4).distinct((a, b) -> a + b);
         assertEquals(Arrays.asList(2, 4, 3, 4), drainWithException(seq));
     }
 
     @Test
     public void test_distinctBy_keyMapper() throws Exception {
-        Seq<String, Exception> seq = Seq.of("apple", "banana", "apricot", "blueberry", "avocado").distinctBy(s -> s.charAt(0)); // Distinct by first letter
-        assertEquals(Arrays.asList("apple", "banana"), drainWithException(seq)); // apricot, avocado are skipped
+        Seq<String, Exception> seq = Seq.of("apple", "banana", "apricot", "blueberry", "avocado").distinctBy(s -> s.charAt(0));
+        assertEquals(Arrays.asList("apple", "banana"), drainWithException(seq));
     }
 
     @Test
     public void test_distinctBy_keyMapperAndMerge() throws Exception {
         Seq<Pair<Character, Integer>, Exception> data = Seq.of(Pair.of('a', 1), Pair.of('b', 2), Pair.of('a', 3), Pair.of('c', 4), Pair.of('b', 5));
 
-        Seq<Pair<Character, Integer>, Exception> seq = data.distinctBy(Pair::left, // keyMapper: extract the character
-                (p1, p2) -> Pair.of(p1.left(), p1.right() + p2.right()) // mergeFunction: sum integers
-        );
-        // ('a',1), ('b',2), ('a',1+3), ('c',4), ('b',2+5)
-        // Order of keys in LinkedHashMap: 'a', 'b', 'c'
-        // 'a': Pair.of('a', 1)
-        // 'b': Pair.of('b', 2)
-        // 'a': merge(Pair('a',1), Pair('a',3)) -> Pair('a', 1+3=4). Map: {'a':Pair('a',4), 'b':Pair('b',2)}
-        // 'c': Pair.of('c', 4). Map: {'a':Pair('a',4), 'b':Pair('b',2), 'c':Pair('c',4)}
-        // 'b': merge(Pair('b',2), Pair('b',5)) -> Pair('b', 2+5=7). Map: {'a':Pair('a',4), 'b':Pair('b',7), 'c':Pair('c',4)}
-        // Values: [Pair('a',4), Pair('b',7), Pair('c',4)]
+        Seq<Pair<Character, Integer>, Exception> seq = data.distinctBy(Pair::left, (p1, p2) -> Pair.of(p1.left(), p1.right() + p2.right()));
         List<Pair<Character, Integer>> expected = Arrays.asList(Pair.of('a', 4), Pair.of('b', 7), Pair.of('c', 4));
         assertEquals(expected, drainWithException(seq));
     }
@@ -1133,15 +1035,13 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_flatMap_toSeq() throws Exception {
-        Seq<Integer, Exception> seq = Seq.of(1, 2).flatMap(x -> Seq.of(x, x * 10)); // 1 -> (1,10), 2 -> (2,20)
+        Seq<Integer, Exception> seq = Seq.of(1, 2).flatMap(x -> Seq.of(x, x * 10));
         assertEquals(Arrays.asList(1, 10, 2, 20), drainWithException(seq));
     }
 
     @Test
-    public void test_flatmap_toCollection() throws Exception { // Note: flatmap lowercase
-        Seq<Integer, Exception> seq = Seq.of("a b", "c")
-                .flatmap(s -> Arrays.asList(s.split(" "))) // "a b" -> ["a","b"], "c" -> ["c"]
-                .map(String::length); // ["a","b","c"] -> [1,1,1]
+    public void test_flatmap_toCollection() throws Exception {
+        Seq<Integer, Exception> seq = Seq.of("a b", "c").flatmap(s -> Arrays.asList(s.split(" "))).map(String::length);
         assertEquals(Arrays.asList(1, 1, 1), drainWithException(seq));
     }
 
@@ -1155,9 +1055,7 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_flatmapIfNotNull_twoLevels() throws Exception {
         Seq<String, Exception> input = Seq.of("a:b,c", null, "d:e");
-        Seq<String, Exception> result = input.flatmapIfNotNull(s -> Arrays.asList(s.split(",")), // "a:b", "c", "d:e"
-                ss -> Arrays.asList(ss.split(":")) // "a","b", "c", "d","e"
-        );
+        Seq<String, Exception> result = input.flatmapIfNotNull(s -> Arrays.asList(s.split(",")), ss -> Arrays.asList(ss.split(":")));
         assertEquals(Arrays.asList("a", "b", "c", "d", "e"), drainWithException(result));
     }
 
@@ -1217,16 +1115,12 @@ public class Seq200Test extends TestBase {
                 consumer.accept("Even:" + num);
             }
         });
-        // 1 -> N:1
-        // 2 -> N:2, Even:2
-        // 3 -> N:3
         assertEquals(Arrays.asList("N:1", "N:2", "Even:2", "N:3"), drainWithException(seq));
     }
 
     @Test
     public void test_slidingMap_biFunction() throws Exception {
         Seq<String, Exception> seq = Seq.of(1, 2, 3, 4).map(String::valueOf).slidingMap((a, b) -> (a == null ? "null" : a) + (b == null ? "null" : b));
-        // (1,2)->12, (2,3)->23, (3,4)->34, (4,null)->4null
         assertEquals(Arrays.asList("12", "23", "34"), drainWithException(seq));
         Seq<String, Exception> oneElement = Seq.of(1).map(String::valueOf).slidingMap((a, b) -> (a == null ? "null" : a) + (b == null ? "null" : b));
         assertEquals(Collections.singletonList("1null"), drainWithException(oneElement));
@@ -1239,7 +1133,6 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_slidingMap_biFunction_increment() throws Exception {
         Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5).map(String::valueOf).slidingMap(2, (a, b) -> (a == null ? "null" : a) + (b == null ? "null" : b));
-        // (1,2)->12, (3,4)->34, (5,null)->5null
         assertEquals(Arrays.asList("12", "34", "5null"), drainWithException(seq));
     }
 
@@ -1248,7 +1141,6 @@ public class Seq200Test extends TestBase {
         Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5)
                 .map(String::valueOf)
                 .slidingMap(2, true, (a, b) -> (a == null ? "null" : a) + (b == null ? "null" : b));
-        // (1,2)->12, (3,4)->34. 5 is not paired.
         assertEquals(Arrays.asList("12", "34"), drainWithException(seq));
     }
 
@@ -1256,38 +1148,28 @@ public class Seq200Test extends TestBase {
     public void test_slidingMap_triFunction() throws Exception {
         Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5)
                 .slidingMap((a, b, c) -> (a == null ? "n" : a) + "" + (b == null ? "n" : b) + "" + (c == null ? "n" : c));
-        // (1,2,3)->123, (2,3,4)->234, (3,4,5)->345, (4,5,null)->45n, (5,null,null)->5nn
         assertEquals(Arrays.asList("123", "234", "345"), drainWithException(seq));
     }
 
     @Test
     public void test_slidingMap_triFunction_increment() throws Exception {
-        //        {
-        //            List<List<Integer>> lists = Seq.of(1, 2, 3, 4, 5, 6, 7).sliding(2).toList();
-        //            // (1,2,3)->123, (3,4,5)->345, (5,6,7)->567, (7,null,null) -> 7nn
-        //            assertEquals(Arrays.asList(List.of(1, null)), lists);
-        //        }
         {
             Seq<String, Exception> seq = Seq.of(1).slidingMap(2, (a, b, c) -> (a == null ? "n" : a) + "" + (b == null ? "n" : b) + "" + (c == null ? "n" : c));
-            // (1,2,3)->123, (3,4,5)->345, (5,6,7)->567, (7,null,null) -> 7nn
             assertEquals(Arrays.asList("1nn"), drainWithException(seq));
         }
         {
             Seq<String, Exception> seq = Seq.of(1, 2)
                     .slidingMap(1, (a, b, c) -> (a == null ? "n" : a) + "" + (b == null ? "n" : b) + "" + (c == null ? "n" : c));
-            // (1,2,3)->123, (3,4,5)->345, (5,6,7)->567, (7,null,null) -> 7nn
             assertEquals(Arrays.asList("12n"), drainWithException(seq));
         }
         {
             Seq<String, Exception> seq = Seq.of(1, 2)
                     .slidingMap(2, (a, b, c) -> (a == null ? "n" : a) + "" + (b == null ? "n" : b) + "" + (c == null ? "n" : c));
-            // (1,2,3)->123, (3,4,5)->345, (5,6,7)->567, (7,null,null) -> 7nn
             assertEquals(Arrays.asList("12n"), drainWithException(seq));
         }
         {
             Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6, 7)
                     .slidingMap(2, (a, b, c) -> (a == null ? "n" : a) + "" + (b == null ? "n" : b) + "" + (c == null ? "n" : c));
-            // (1,2,3)->123, (3,4,5)->345, (5,6,7)->567, (7,null,null) -> 7nn
             assertEquals(Arrays.asList("123", "345", "567"), drainWithException(seq));
         }
     }
@@ -1296,13 +1178,8 @@ public class Seq200Test extends TestBase {
     public void test_slidingMap_triFunction_increment_ignoreNotPaired() throws Exception {
         Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6)
                 .slidingMap(2, true, (a, b, c) -> (a == null ? "n" : a) + "" + (b == null ? "n" : b) + "" + (c == null ? "n" : c));
-        // (1,2,3)->123, (3,4,5)->345. 6 is not paired.
         assertEquals(Arrays.asList("123", "345"), drainWithException(seq));
     }
-
-    // ... More intermediate operations ...
-    // For brevity, I'll skip some of the groupBy, join, and other complex intermediate ops here,
-    // but the pattern would be similar: set up input, apply the operation, assert the output.
 
     @Test
     public void test_onClose() throws Exception {
@@ -1310,7 +1187,7 @@ public class Seq200Test extends TestBase {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3).onClose(() -> closed.set(true));
 
         assertFalse(closed.get(), "Should not be closed before terminal operation");
-        drainWithException(seq); // Terminal operation
+        drainWithException(seq);
         assertTrue(closed.get(), "Should be closed after terminal operation");
     }
 
@@ -1322,17 +1199,12 @@ public class Seq200Test extends TestBase {
 
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3).onClose(handler1).onClose(handler2);
         assertEquals(0, closeCount.get());
-        seq.toList(); // terminal operation
+        seq.toList();
         assertEquals(11, closeCount.get(), "Both close handlers should run");
 
-        // Test idempotency of close
         seq.close();
         assertEquals(11, closeCount.get(), "Close handlers should not run again");
     }
-
-    //endregion
-
-    //region Instance Methods (Terminal) Tests
 
     @Test
     public void test_forEach_consumer() throws Exception {
@@ -1405,10 +1277,8 @@ public class Seq200Test extends TestBase {
     public void test_forEach_flatMapper_flatMapper2_triConsumer() throws Exception {
         List<Triple<Integer, String, Character>> result = new ArrayList<>();
         Seq.of(1, 2)
-                .forEach(num -> Arrays.asList("A" + num, "B" + num), // T -> Iterable<T2>
-                        str -> Arrays.asList(str.charAt(0), str.charAt(1)), // T2 -> Iterable<T3>
-                        (originalNum, intermediateStr, finalChar) -> // (T, T2, T3)
-                        result.add(Triple.of(originalNum, intermediateStr, finalChar)));
+                .forEach(num -> Arrays.asList("A" + num, "B" + num), str -> Arrays.asList(str.charAt(0), str.charAt(1)),
+                        (originalNum, intermediateStr, finalChar) -> result.add(Triple.of(originalNum, intermediateStr, finalChar)));
 
         List<Triple<Integer, String, Character>> expected = Arrays.asList(Triple.of(1, "A1", 'A'), Triple.of(1, "A1", '1'), Triple.of(1, "B1", 'B'),
                 Triple.of(1, "B1", '1'), Triple.of(2, "A2", 'A'), Triple.of(2, "A2", '2'), Triple.of(2, "B2", 'B'), Triple.of(2, "B2", '2'));
@@ -1438,7 +1308,7 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_maxBy_keyMapper() throws Exception {
         Optional<String> max = Seq.of("apple", "banana", "kiwi").maxBy(String::length);
-        assertEquals(Optional.of("banana"), max); // or "apple" if stable sort not guaranteed by underlying (it is not)
+        assertEquals(Optional.of("banana"), max);
     }
 
     @Test
@@ -1452,7 +1322,7 @@ public class Seq200Test extends TestBase {
     public void test_allMatch() throws Exception {
         assertTrue(Seq.of(2, 4, 6).allMatch(x -> x % 2 == 0));
         assertFalse(Seq.of(1, 2, 3).allMatch(x -> x % 2 == 0));
-        assertTrue(Seq.<Integer, Exception> empty().allMatch(x -> false)); // Vacuously true
+        assertTrue(Seq.<Integer, Exception> empty().allMatch(x -> false));
     }
 
     @Test
@@ -1465,9 +1335,9 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_nMatch() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertTrue(seq.nMatch(3, 3, x -> x % 2 == 0)); // 2,4,6
+        assertTrue(seq.nMatch(3, 3, x -> x % 2 == 0));
 
-        seq = Seq.of(1, 2, 3, 4, 5, 6); // re-initialize
+        seq = Seq.of(1, 2, 3, 4, 5, 6);
         assertFalse(seq.nMatch(2, 2, x -> x % 2 == 0));
 
         seq = Seq.of(1, 2, 3, 4, 5, 6);
@@ -1488,7 +1358,7 @@ public class Seq200Test extends TestBase {
     }
 
     @Test
-    public void test_findAny_predicate() throws Exception { // same as findFirst for Seq
+    public void test_findAny_predicate() throws Exception {
         Optional<Integer> anyEven = Seq.of(1, 3, 2, 4, 5).findAny(x -> x % 2 == 0);
         assertEquals(Optional.of(2), anyEven);
     }
@@ -1504,7 +1374,7 @@ public class Seq200Test extends TestBase {
     public void test_containsAll_varargs() throws Exception {
         assertTrue(Seq.of(1, 2, 3, 4).containsAll(2, 4));
         assertFalse(Seq.of(1, 2, 3, 4).containsAll(2, 5));
-        assertTrue(Seq.of(1, 2, 3, 4).containsAll()); // Empty varargs
+        assertTrue(Seq.of(1, 2, 3, 4).containsAll());
     }
 
     @Test
@@ -1551,16 +1421,16 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_kthLargest() throws Exception {
-        Seq<Integer, Exception> seq = Seq.of(3, 1, 4, 1, 5, 9, 2, 6); // 1,1,2,3,4,5,6,9
-        Optional<Integer> thirdLargest = seq.kthLargest(3, Comparator.naturalOrder()); // 5
+        Seq<Integer, Exception> seq = Seq.of(3, 1, 4, 1, 5, 9, 2, 6);
+        Optional<Integer> thirdLargest = seq.kthLargest(3, Comparator.naturalOrder());
         assertEquals(Optional.of(5), thirdLargest);
 
         seq = Seq.of(3, 1, 4, 1, 5, 9, 2, 6);
-        Optional<Integer> firstLargest = seq.kthLargest(1, Comparator.naturalOrder()); // 9
+        Optional<Integer> firstLargest = seq.kthLargest(1, Comparator.naturalOrder());
         assertEquals(Optional.of(9), firstLargest);
 
         seq = Seq.of(3, 1, 4, 1, 5, 9, 2, 6);
-        Optional<Integer> lastLargest = seq.kthLargest(8, Comparator.naturalOrder()); // 1
+        Optional<Integer> lastLargest = seq.kthLargest(8, Comparator.naturalOrder());
         assertEquals(Optional.of(1), lastLargest);
 
         seq = Seq.of(3, 1, 4);
@@ -1571,34 +1441,16 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_percentiles() throws Exception {
-        Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10); // Already sorted for simplicity
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         Optional<Map<Percentage, Integer>> percentiles = seq.percentiles();
         assertTrue(percentiles.isPresent());
         Map<Percentage, Integer> pMap = percentiles.get();
-        // N.PERCENTILES_ARRAY contains MIN, P25, P50_Median, P75, MAX
         assertEquals(1, pMap.get(Percentage._0_0001));
-        assertEquals(3, pMap.get(Percentage._20)); // (10-1)*0.25 = 2.25 -> index 2 -> 3
-        assertEquals(6, pMap.get(Percentage._50)); // (10-1)*0.5 = 4.5 -> index 4 -> 5 (or avg of 5,6 if more complex)
-                                                   // Abacus N.percentiles uses simple indexing after sorting.
-                                                   // For P50 with 10 elements (indices 0-9): (9 * 0.5) = 4.5. floor(4.5) = 4.  a[4] = 5.
-        assertEquals(8, pMap.get(Percentage._70)); // (10-1)*0.75 = 6.75 -> index 6 -> 7 or 8 depending on rounding.
-                                                   // (9 * 0.75) = 6.75. floor(6.75) = 6. a[6] = 7
-                                                   // It seems N.percentiles uses (n-1)*p.  If result is x.y, it takes a[floor(x)].
-                                                   // For P75: (10-1)*0.75 = 6.75. element at index 6 is 7.
-                                                   // Let's check N.PERCENTILES_ARRAY values: 0, 25, 50, 75, 100
-                                                   // P25: (9 * 0.25) = 2.25 -> index 2 -> Value 3
-                                                   // P50: (9 * 0.50) = 4.5  -> index 4 -> Value 5
-                                                   // P75: (9 * 0.75) = 6.75 -> index 6 -> Value 7
+        assertEquals(3, pMap.get(Percentage._20));
+        assertEquals(6, pMap.get(Percentage._50));
+        assertEquals(8, pMap.get(Percentage._70));
 
         assertEquals(10, pMap.get(Percentage._99_9999));
-
-        // Re-check calculation from N.percentiles (based on common methods):
-        // Sorted: 1,2,3,4,5,6,7,8,9,10 (n=10)
-        // Min: 1
-        // Max: 10
-        // P25: (index = 0.25 * (10-1) = 2.25. Value at index 2 is 3).
-        // P50: (index = 0.50 * (10-1) = 4.5. Value at index 4 is 5).
-        // P75: (index = 0.75 * (10-1) = 6.75. Value at index 6 is 7).
 
         assertEquals(3, pMap.get(Percentage._20));
         assertEquals(6, pMap.get(Percentage._50));
@@ -1611,15 +1463,14 @@ public class Seq200Test extends TestBase {
     public void test_percentiles_comparator() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
         Optional<Map<Percentage, Integer>> percentiles = seq.percentiles(Comparator.reverseOrder());
-        // Sorted by reverseOrder: 10,9,8,7,6,5,4,3,2,1
         assertTrue(percentiles.isPresent());
         Map<Percentage, Integer> pMap = percentiles.get();
 
-        assertEquals(10, pMap.get(Percentage._0_0001)); // Min in reverse sorted is largest
+        assertEquals(10, pMap.get(Percentage._0_0001));
         assertEquals(8, pMap.get(Percentage._20));
         assertEquals(5, pMap.get(Percentage._50));
         assertEquals(3, pMap.get(Percentage._70));
-        assertEquals(1, pMap.get(Percentage._99_9999)); // Max in reverse sorted is smallest
+        assertEquals(1, pMap.get(Percentage._99_9999));
     }
 
     @Test
@@ -1720,7 +1571,7 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_toSetThenApply() throws Exception {
         Integer sum = Seq.of(1, 2, 3, 2).toSetThenApply(set -> set.stream().mapToInt(Integer::intValue).sum());
-        assertEquals(6, sum.intValue()); // 1+2+3
+        assertEquals(6, sum.intValue());
     }
 
     @Test
@@ -1738,7 +1589,7 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_toCollectionThenAccept() throws Exception {
-        List<Integer> target = new ArrayList<>(); // Use a different list type to show supplier is used
+        List<Integer> target = new ArrayList<>();
         Seq.of(1, 2, 3).toCollectionThenAccept(LinkedList::new, list -> target.addAll(list));
         assertEquals(Arrays.asList(1, 2, 3), target);
     }
@@ -1753,14 +1604,13 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_toMap_keyValMappers_duplicateKey_throws() {
-        Seq<Pair<Character, Integer>, Exception> seq = Seq.of("apple", "apricot").map(s -> Pair.of(s.charAt(0), s.length())); // 'a' key is duplicated
-        // Default mergeFunction throws IllegalStateException for duplicates
+        Seq<Pair<Character, Integer>, Exception> seq = Seq.of("apple", "apricot").map(s -> Pair.of(s.charAt(0), s.length()));
         assertThrows(IllegalStateException.class, () -> seq.toMap(Pair::left, Pair::right));
     }
 
     @Test
     public void test_toMap_keyValMappers_mapFactory() throws Exception {
-        Map<String, Integer> map = Seq.of("a", "bb").toMap(s -> s, String::length, Suppliers.ofLinkedHashMap()); // Test specific map type
+        Map<String, Integer> map = Seq.of("a", "bb").toMap(s -> s, String::length, Suppliers.ofLinkedHashMap());
         assertTrue(map instanceof LinkedHashMap);
         assertEquals(1, map.get("a").intValue());
     }
@@ -1768,13 +1618,13 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_toMap_keyValMergeMappers() throws Exception {
         Map<Character, Integer> map = Seq.of("apple", "apricot", "banana").toMap(s -> s.charAt(0), String::length, Integer::sum);
-        assertEquals(Integer.valueOf(5 + 7), map.get('a')); // apple (5) + apricot (7) = 12
+        assertEquals(Integer.valueOf(5 + 7), map.get('a'));
         assertEquals(Integer.valueOf(6), map.get('b'));
     }
 
     @Test
     public void test_toMap_keyValMergeMappers_mapFactory() throws Exception {
-        Map<Character, Integer> map = Seq.of("apple", "apricot", "banana").toMap(s -> s.charAt(0), String::length, Integer::sum, TreeMap::new); // Test specific map type
+        Map<Character, Integer> map = Seq.of("apple", "apricot", "banana").toMap(s -> s.charAt(0), String::length, Integer::sum, TreeMap::new);
         assertTrue(map instanceof TreeMap);
         assertEquals(Integer.valueOf(12), map.get('a'));
     }
@@ -1792,10 +1642,6 @@ public class Seq200Test extends TestBase {
         assertEquals(Integer.valueOf(12), map.get('a'));
         assertThrows(UnsupportedOperationException.class, () -> map.put('d', 3));
     }
-
-    // ... More terminal operations ...
-    // For brevity, I'll skip some more of the toMap, groupTo, partitionTo, toMultimap, etc.
-    // and persist/save methods as they require more setup (mocks, temp files).
 
     @Test
     public void test_sumInt() throws Exception {
@@ -1901,183 +1747,8 @@ public class Seq200Test extends TestBase {
         assertEquals("<1-2-3>", joiner.toString());
     }
 
-    //    // Persist/Save methods require file IO, using @TempDir
-    //    @Test
-    //    public void test_saveEach_toFile_defaultToString() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("saveEachDefault.txt").toFile();
-    //        Seq<Integer, Exception> seq = Seq.of(1, 2, 3).saveEach(outFile);
-    //        // saveEach is intermediate, consume it
-    //        drainWithException(seq); // This executes the saveEach logic
-    //
-    //        List<String> lines = Files.readAllLines(outFile.toPath());
-    //        assertEquals(Arrays.asList("1", "2", "3"), lines);
-    //    }
-    //
-    //    @Test
-    //    public void test_saveEach_toFile_customToLine() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("saveEachCustom.txt").toFile();
-    //        Seq<Integer, Exception> seq = Seq.of(1, 2, 3).saveEach(i -> "val:" + i, outFile);
-    //        drainWithException(seq);
-    //
-    //        List<String> lines = Files.readAllLines(outFile.toPath());
-    //        assertEquals(Arrays.asList("val:1", "val:2", "val:3"), lines);
-    //    }
-    //
-    //    @Test
-    //    public void test_saveEach_toOutputStream() throws IOException, Exception {
-    //        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    //        Seq<Integer, Exception> seq = Seq.of(1, 2).saveEach(i -> "num:" + i, baos);
-    //        drainWithException(seq); // Consume to trigger save
-    //
-    //        String expected = "num:1" + IOUtil.LINE_SEPARATOR + "num:2" + IOUtil.LINE_SEPARATOR;
-    //        assertEquals(expected, baos.toString(StandardCharsets.UTF_8));
-    //    }
-    //
-    //    @Test
-    //    public void test_saveEach_toWriter() throws IOException, Exception {
-    //        StringWriter sw = new StringWriter();
-    //        Seq<Integer, Exception> seq = Seq.of(1, 2).saveEach(i -> "item:" + i, sw);
-    //        drainWithException(seq); // Consume to trigger save
-    //
-    //        String expected = "item:1" + IOUtil.LINE_SEPARATOR + "item:2" + IOUtil.LINE_SEPARATOR;
-    //        assertEquals(expected, sw.toString());
-    //    }
-    //
-    //    @Test
-    //    public void test_saveEach_toFile_biConsumer() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("saveEachBiConsumer.txt").toFile();
-    //        Seq<Integer, Exception> seq = Seq.of(1, 2).saveEach((i, writer) -> writer.write("Num-" + i), outFile);
-    //        drainWithException(seq);
-    //
-    //        List<String> lines = Files.readAllLines(outFile.toPath());
-    //        assertEquals(Arrays.asList("Num-1", "Num-2"), lines);
-    //    }
-    //
-    //    @Test
-    //    public void test_saveEach_toWriter_biConsumer() throws IOException, Exception {
-    //        StringWriter sw = new StringWriter();
-    //        Seq<Integer, Exception> seq = Seq.of(1, 2).saveEach((i, writer) -> writer.write("Item-" + i), sw);
-    //        drainWithException(seq);
-    //
-    //        String expected = "Item-1" + IOUtil.LINE_SEPARATOR + "Item-2" + IOUtil.LINE_SEPARATOR;
-    //        assertEquals(expected, sw.toString());
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_toFile_defaultToString() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("persistDefault.txt").toFile();
-    //        long count = Seq.of(1, 2, 3).persist(outFile);
-    //
-    //        assertEquals(3, count);
-    //        List<String> lines = Files.readAllLines(outFile.toPath());
-    //        assertEquals(Arrays.asList("1", "2", "3"), lines);
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_toFile_headerTail() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("persistHeaderTail.txt").toFile();
-    //        long count = Seq.of(1, 2).persist("Header", "Tail", outFile);
-    //
-    //        assertEquals(2, count);
-    //        List<String> lines = Files.readAllLines(outFile.toPath());
-    //        assertEquals(Arrays.asList("Header", "1", "2", "Tail"), lines);
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_toFile_customToLine() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("persistCustom.txt").toFile();
-    //        long count = Seq.of(1, 2).persist(i -> "val:" + i, outFile);
-    //
-    //        assertEquals(2, count);
-    //        List<String> lines = Files.readAllLines(outFile.toPath());
-    //        assertEquals(Arrays.asList("val:1", "val:2"), lines);
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_toFile_headerTail_customToLine() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("persistHeaderTailCustom.txt").toFile();
-    //        long count = Seq.of(1, 2).persist("H", "T", i -> "v:" + i, outFile);
-    //
-    //        assertEquals(2, count);
-    //        List<String> lines = Files.readAllLines(outFile.toPath());
-    //        assertEquals(Arrays.asList("H", "v:1", "v:2", "T"), lines);
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_toOutputStream() throws IOException, Exception {
-    //        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    //        long count = Seq.of(1, 2).persist(i -> "num:" + i, baos);
-    //        assertEquals(2, count);
-    //        String expected = "num:1" + IOUtil.LINE_SEPARATOR + "num:2" + IOUtil.LINE_SEPARATOR;
-    //        assertEquals(expected, baos.toString(StandardCharsets.UTF_8));
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_toOutputStream_headerTail() throws IOException, Exception {
-    //        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    //        long count = Seq.of(1, 2).persist("START", "END", i -> "num:" + i, baos);
-    //        assertEquals(2, count);
-    //        String expected = "START" + IOUtil.LINE_SEPARATOR + "num:1" + IOUtil.LINE_SEPARATOR + "num:2" + IOUtil.LINE_SEPARATOR + "END" + IOUtil.LINE_SEPARATOR;
-    //        assertEquals(expected, baos.toString(StandardCharsets.UTF_8));
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_toWriter() throws IOException, Exception {
-    //        StringWriter sw = new StringWriter();
-    //        long count = Seq.of(1, 2).persist(i -> "item:" + i, sw);
-    //        assertEquals(2, count);
-    //        String expected = "item:1" + IOUtil.LINE_SEPARATOR + "item:2" + IOUtil.LINE_SEPARATOR;
-    //        assertEquals(expected, sw.toString());
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_toWriter_headerTail() throws IOException, Exception {
-    //        StringWriter sw = new StringWriter();
-    //        long count = Seq.of(1, 2).persist("S", "E", i -> "item:" + i, sw);
-    //        assertEquals(2, count);
-    //        String expected = "S" + IOUtil.LINE_SEPARATOR + "item:1" + IOUtil.LINE_SEPARATOR + "item:2" + IOUtil.LINE_SEPARATOR + "E" + IOUtil.LINE_SEPARATOR;
-    //        assertEquals(expected, sw.toString());
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_toFile_biConsumer() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("persistBiConsumer.txt").toFile();
-    //        long count = Seq.of(1, 2).persist((i, writer) -> writer.write("Num-" + i), outFile);
-    //        assertEquals(2, count);
-    //        List<String> lines = Files.readAllLines(outFile.toPath());
-    //        assertEquals(Arrays.asList("Num-1", "Num-2"), lines);
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_toFile_headerTail_biConsumer() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("persistHTBiConsumer.txt").toFile();
-    //        long count = Seq.of(1, 2).persist("H", "T", (i, writer) -> writer.write("Num-" + i), outFile);
-    //        assertEquals(2, count);
-    //        List<String> lines = Files.readAllLines(outFile.toPath());
-    //        assertEquals(Arrays.asList("H", "Num-1", "Num-2", "T"), lines);
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_toWriter_biConsumer() throws IOException, Exception {
-    //        StringWriter sw = new StringWriter();
-    //        long count = Seq.of(1, 2).persist((i, writer) -> writer.write("Item-" + i), sw);
-    //        assertEquals(2, count);
-    //        String expected = "Item-1" + IOUtil.LINE_SEPARATOR + "Item-2" + IOUtil.LINE_SEPARATOR;
-    //        assertEquals(expected, sw.toString());
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_toWriter_headerTail_biConsumer() throws IOException, Exception {
-    //        StringWriter sw = new StringWriter();
-    //        long count = Seq.of(1, 2).persist("S", "E", (i, writer) -> writer.write("Item-" + i), sw);
-    //        assertEquals(2, count);
-    //        String expected = "S" + IOUtil.LINE_SEPARATOR + "Item-1" + IOUtil.LINE_SEPARATOR + "Item-2" + IOUtil.LINE_SEPARATOR + "E" + IOUtil.LINE_SEPARATOR;
-    //        assertEquals(expected, sw.toString());
-    //    }
-
     @Test
     public void test_println() throws Exception {
-        // Capture System.out
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream originalOut = System.out;
         System.setOut(new PrintStream(baos));
@@ -2117,13 +1788,10 @@ public class Seq200Test extends TestBase {
         Seq<Integer, Exception> seq = Seq.of(1).onClose(() -> closed.set(true));
         seq.close();
         assertTrue(closed.get());
-        // Test double close
         seq.close();
-        assertTrue(closed.get()); // Should still be true, no error
+        assertTrue(closed.get());
     }
-    //endregion
 
-    //region Stream and Transformation Method Tests
     @Test
     public void test_stream_conversion() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
@@ -2135,9 +1803,9 @@ public class Seq200Test extends TestBase {
     public void test_stream_conversion_withCloseHandler() throws Exception {
         AtomicBoolean closedBySeq = new AtomicBoolean(false);
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3).onClose(() -> closedBySeq.set(true));
-        Stream<Integer> stream = seq.stream(); // onClose from Seq should be transferred.
+        Stream<Integer> stream = seq.stream();
 
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList()); // This closes the stream, and thus the Seq.
+        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
         assertTrue(closedBySeq.get());
     }
 
@@ -2173,11 +1841,8 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_sps_switchParallelSwitch() throws Exception {
-        // This test primarily checks the structure and type transformation.
-        // True parallelism testing is more complex.
         Seq<Integer, Exception> original = Seq.of(1, 2, 3, 4, 5);
         Seq<String, Exception> transformed = original.sps(stream -> stream.filter(x -> x % 2 == 0).map(x -> "E:" + x));
-        // Order might not be guaranteed due to parallel hint, but for this simple case it often is.
         List<String> result = drainWithException(transformed);
         Set<String> resultSet = new HashSet<>(result);
         assertEquals(new HashSet<>(Arrays.asList("E:2", "E:4")), resultSet);
@@ -2186,18 +1851,15 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_sps_withMaxThreadNum() throws Exception {
         Seq<Integer, Exception> original = Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        Seq<String, Exception> transformed = original.sps(2, // Max 2 threads
-                stream -> stream.map(x -> {
-                    // Simulate some work
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                    }
-                    return "T" + Thread.currentThread().getId() + ":" + x;
-                }));
+        Seq<String, Exception> transformed = original.sps(2, stream -> stream.map(x -> {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+            }
+            return "T" + Thread.currentThread().getId() + ":" + x;
+        }));
         List<String> results = drainWithException(transformed);
-        assertEquals(10, results.size()); // Ensure all elements are processed
-        // Cannot easily assert specific thread IDs, but check structure
+        assertEquals(10, results.size());
         for (String s : results) {
             assertTrue(s.matches("T\\d+:\\d+"));
         }
@@ -2206,24 +1868,15 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_cast() throws Exception {
         Seq<Number, Exception> numSeq = Seq.of(1, 2L, 3.0f);
-        Seq<Number, Exception> castedSeq = numSeq.cast(); // E is already Exception
-        assertSame(numSeq, castedSeq); // Should be same object if E is already Exception
-                                       // Or at least behave identically
+        Seq<Number, Exception> castedSeq = numSeq.cast();
+        assertSame(numSeq, castedSeq);
         assertEquals(Arrays.asList(1, 2L, 3.0f), drain(castedSeq));
 
-        // More specific cast
-        Seq<String, IOException> ioSeq = Seq.ofLines(tempDir.resolve("dummy.txt").toFile()); // Creates Seq<String, IOException>
-        // This cast is not directly possible from Seq<String, IOException> to Seq<Integer, Exception> via .cast()
-        // .cast() is for the Exception type, not element type.
-        // Let's test the Exception type cast
+        Seq<String, IOException> ioSeq = Seq.ofLines(tempDir.resolve("dummy.txt").toFile());
         Seq<String, IOException> stringIoSeq = Seq.<String, IOException> of("a", "b").map(Fnn.identity());
         Seq<String, Exception> stringExSeq = stringIoSeq.cast();
         assertEquals(Arrays.asList("a", "b"), stringExSeq.toList());
     }
-
-    //endregion
-
-    //region Other specific instance methods
 
     @Test
     public void test_buffered() throws Exception, InterruptedException {
@@ -2235,7 +1888,6 @@ public class Seq200Test extends TestBase {
         for (int i = 0; i < numElements; i++)
             sourceList.add(i);
 
-        // Simulate a slow producer
         Throwables.Iterator<Integer, Exception> slowIterator = new Throwables.Iterator<>() {
             private int current = 0;
 
@@ -2249,7 +1901,7 @@ public class Seq200Test extends TestBase {
                 if (current >= numElements)
                     throw new NoSuchElementException();
                 try {
-                    Thread.sleep(10); // Slow down production
+                    Thread.sleep(10);
                 } catch (InterruptedException e) {
                     throw new Exception("Interrupted", e);
                 }
@@ -2263,13 +1915,12 @@ public class Seq200Test extends TestBase {
         Seq<Integer, Exception> bufferedSeq = originalSeq.buffered(bufferSize);
 
         List<Integer> result = new ArrayList<>();
-        // Simulate a slow consumer for some elements
         Thread consumerThread = new Thread(() -> {
             try {
                 bufferedSeq.forEach(val -> {
                     result.add(val);
                     consumeLatch.countDown();
-                    if (val < 2) { // Make first few consumes slower
+                    if (val < 2) {
                         try {
                             Thread.sleep(50);
                         } catch (InterruptedException e) {
@@ -2301,7 +1952,7 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_step() throws Exception {
-        Seq<Integer, Exception> seq = Seq.of(0, 1, 2, 3, 4, 5, 6).step(3); // 0, 3, 6
+        Seq<Integer, Exception> seq = Seq.of(0, 1, 2, 3, 4, 5, 6).step(3);
         assertEquals(Arrays.asList(0, 3, 6), drainWithException(seq));
 
         Seq<Integer, Exception> stepOne = Seq.of(0, 1, 2).step(1);
@@ -2322,14 +1973,6 @@ public class Seq200Test extends TestBase {
         assertTrue(drainWithException(empty).isEmpty());
     }
 
-    //endregion
-    // [Previous imports and SeqTest class definition would be here]
-    // [Including Exception and @TempDir setup]
-
-    // Continuing with more tests in the SeqTest class:
-
-    //region More Complex Grouping and Collection Tests
-
     @Test
     public void test_groupBy_withCollector() throws Exception {
         Map<Character, Long> counts = Seq.of("apple", "apricot", "banana", "avocado")
@@ -2343,7 +1986,7 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_groupBy_withCollectorAndMapFactory() throws Exception {
         Map<Character, String> joined = Seq.of("apple", "apricot", "banana", "avocado")
-                .groupBy(s -> s.charAt(0), Collectors.joining(","), TreeMap::new) // TreeMap for ordered keys
+                .groupBy(s -> s.charAt(0), Collectors.joining(","), TreeMap::new)
                 .toMap(Map.Entry::getKey, Map.Entry::getValue);
 
         assertFalse(joined instanceof TreeMap);
@@ -2356,8 +1999,6 @@ public class Seq200Test extends TestBase {
         Map<Character, Long> counts = Seq.of("apple", "apricot", "banana", "avocado")
                 .groupBy(s -> s.charAt(0), String::length, Collectors.summingLong(len -> (long) len))
                 .toMap(Map.Entry::getKey, Map.Entry::getValue);
-        // a: apple(5), apricot(7), avocado(7) -> 5+7+7 = 19
-        // b: banana(6) -> 6
         assertEquals(19L, counts.get('a'));
         assertEquals(6L, counts.get('b'));
     }
@@ -2366,8 +2007,8 @@ public class Seq200Test extends TestBase {
     public void test_partitionBy_withCollector() throws Exception {
         Map<Boolean, Long> partition = Seq.of(1, 2, 3, 4, 5).partitionBy(x -> x % 2 == 0, Collectors.counting()).toMap(Map.Entry::getKey, Map.Entry::getValue);
 
-        assertEquals(2L, partition.get(true)); // 2, 4
-        assertEquals(3L, partition.get(false)); // 1, 3, 5
+        assertEquals(2L, partition.get(true));
+        assertEquals(3L, partition.get(false));
     }
 
     @Test
@@ -2382,9 +2023,8 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_countBy_keyMapperAndMapFactory() throws Exception {
         Map<Character, Integer> counts = Seq.of("apple", "apricot", "banana", "avocado")
-                .countBy(s -> s.charAt(0), TreeMap::new) // Ensure specific map type
+                .countBy(s -> s.charAt(0), TreeMap::new)
                 .toMap(Map.Entry::getKey, Map.Entry::getValue);
-        // assertTrue(counts instanceof TreeMap);
         assertEquals(3, counts.get('a').intValue());
     }
 
@@ -2398,7 +2038,7 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_toMultimap_keyMapperAndMapFactory() throws Exception {
         ListMultimap<Character, String> multimap = Seq.of("apple", "apricot", "banana", "avocado")
-                .toMultimap(s -> s.charAt(0), Suppliers.ofListMultimap(TreeMap.class)); // Custom underlying map
+                .toMultimap(s -> s.charAt(0), Suppliers.ofListMultimap(TreeMap.class));
         assertTrue(multimap.toMap() instanceof TreeMap);
         assertEquals(Arrays.asList("apple", "apricot", "avocado"), multimap.get('a'));
     }
@@ -2406,8 +2046,8 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_toMultimap_keyValueMappers() throws Exception {
         ListMultimap<Character, Integer> multimap = Seq.of("apple", "apricot", "banana").toMultimap(s -> s.charAt(0), String::length);
-        assertEquals(Arrays.asList(5, 7), multimap.get('a')); // apple, apricot
-        assertEquals(Collections.singletonList(6), multimap.get('b')); // banana
+        assertEquals(Arrays.asList(5, 7), multimap.get('a'));
+        assertEquals(Collections.singletonList(6), multimap.get('b'));
     }
 
     @Test
@@ -2453,10 +2093,6 @@ public class Seq200Test extends TestBase {
         assertEquals("Bob", dataset.absolute(1).get("UserName"));
     }
 
-    //endregion
-
-    //region More Intermediate Operation Tests
-
     @Test
     public void test_skipLast() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5).skipLast(2);
@@ -2479,31 +2115,22 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_top_naturalOrder() throws Exception {
-        // top returns smallest N using natural comparator (nullsFirst)
         Seq<Integer, Exception> seq = Seq.of(5, 1, null, 4, 2, null, 3).top(3);
-        //        List<Integer> result = drainWithException(seq);
-        //        // Expected: null, null, 1 (smallest 3)
-        //        assertEquals(3, result.size());
-        //        assertTrue(result.contains(null));
-        //        assertTrue(result.contains(1));
-        //        assertEquals(2, result.stream().filter(Fn.isNull()).count());
-        assertThrows(NullPointerException.class, () -> drainWithException(seq)); // Nulls should throw NPE
+        assertThrows(NullPointerException.class, () -> drainWithException(seq));
     }
 
     @Test
     public void test_top_withComparator() throws Exception {
-        // top returns smallest N using given comparator. To get "largest", use reverseOrder.
         Seq<Integer, Exception> seq = Seq.of(5, 1, 4, 2, 3).top(3, Comparator.reverseOrder());
         List<Integer> result = drainWithException(seq);
-        // Expected: 5,4,3 (largest 3)
         assertEquals(Arrays.asList(3, 2, 1), result.stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList()));
     }
 
     @Test
     public void test_rotated() throws Exception {
-        Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5).rotated(2); // 4,5,1,2,3
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5).rotated(2);
         assertEquals(Arrays.asList(4, 5, 1, 2, 3), drainWithException(seq));
-        Seq<Integer, Exception> seqNeg = Seq.of(1, 2, 3, 4, 5).rotated(-2); // 3,4,5,1,2
+        Seq<Integer, Exception> seqNeg = Seq.of(1, 2, 3, 4, 5).rotated(-2);
         assertEquals(Arrays.asList(3, 4, 5, 1, 2), drainWithException(seqNeg));
         Seq<Integer, Exception> seqZero = Seq.of(1, 2, 3).rotated(0);
         assertEquals(Arrays.asList(1, 2, 3), drainWithException(seqZero));
@@ -2518,9 +2145,7 @@ public class Seq200Test extends TestBase {
         List<Integer> shuffledList = drainWithException(seq);
         assertEquals(originalList.size(), shuffledList.size());
         assertTrue(shuffledList.containsAll(originalList));
-        // It's hard to assert true randomness, but it shouldn't be identical for large enough list.
-        // For small lists, it might be identical by chance.
-        if (originalList.size() > 5) { // Heuristic
+        if (originalList.size() > 5) {
             assertNotEquals(originalList, shuffledList, "Shuffled list should ideally not be identical to original for non-trivial lists");
         }
     }
@@ -2528,17 +2153,10 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_shuffled_withRandom() throws Exception {
         List<Integer> originalList = Arrays.asList(1, 2, 3, 4, 5);
-        // Using a fixed seed for predictable shuffle in test
         Seq<Integer, Exception> seq = Seq.of(originalList).shuffled(new Random(12345L));
         List<Integer> shuffledList = drainWithException(seq);
         assertEquals(originalList.size(), shuffledList.size());
         assertTrue(shuffledList.containsAll(originalList));
-        // With a fixed seed, the shuffle is deterministic.
-        // Output for Random(12345L) and [1,2,3,4,5]: (example, actual depends on N.shuffle)
-        // You'd need to run N.shuffle(array, new Random(12345L)) to get the expected order.
-        // For this test, we primarily check it runs and produces a permutation.
-        // Example: if it produces [3, 1, 5, 2, 4]
-        // assertEquals(Arrays.asList(3,1,5,2,4), shuffledList); // This requires knowing N.shuffle's output for that seed
     }
 
     @Test
@@ -2551,7 +2169,7 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_cycled_withRounds() throws Exception {
-        Seq<Integer, Exception> seq = Seq.of(1, 2).cycled(3); // (1,2), (1,2), (1,2)
+        Seq<Integer, Exception> seq = Seq.of(1, 2).cycled(3);
         assertEquals(Arrays.asList(1, 2, 1, 2, 1, 2), drainWithException(seq));
         Seq<Integer, Exception> zeroRounds = Seq.of(1, 2).cycled(0);
         assertTrue(drainWithException(zeroRounds).isEmpty());
@@ -2559,235 +2177,28 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_rateLimited() throws Exception {
-        // This is hard to test precisely without timing tools.
-        // We'll check if it runs and produces the same elements.
         RateLimiter mockLimiter = mock(RateLimiter.class);
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3).rateLimited(mockLimiter);
         List<Integer> result = drainWithException(seq);
         assertEquals(Arrays.asList(1, 2, 3), result);
-        verify(mockLimiter, times(3)).acquire(); // acquire is called for each element
+        verify(mockLimiter, times(3)).acquire();
     }
 
     @Test
     public void test_delay() throws Exception {
-        // Also hard to test exact timing. Check elements and that it runs.
         long startTime = System.currentTimeMillis();
         Seq<Integer, Exception> seq = Seq.of(1, 2).delay(Duration.ofMillis(10));
         List<Integer> result = drainWithException(seq);
         long endTime = System.currentTimeMillis();
         assertEquals(Arrays.asList(1, 2), result);
-        // Each element (except potentially the first, depending on onEach impl) introduces delay.
-        // Total 2 elements, onEach typically applies to each. So ~20ms.
-        assertTrue(endTime - startTime >= 15, "Should have some delay, approx 20ms for 2 elements. Actual: " + (endTime - startTime)); // Allow some leeway
+        assertTrue(endTime - startTime >= 15, "Should have some delay, approx 20ms for 2 elements. Actual: " + (endTime - startTime));
     }
-
-    //endregion
-
-    //region Save/Persist with Mocks and TempDir
-
-    //    @Test
-    //    public void test_saveEach_preparedStatement() throws SQLException, Exception {
-    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
-    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-    //
-    //        Seq<String, Exception> seq = Seq.of("a", "b").saveEach(mockStmt, setter);
-    //        drainWithException(seq); // Consume to trigger execution
-    //
-    //        verify(mockStmt, times(1)).setString(1, "a");
-    //        verify(mockStmt, times(1)).setString(1, "b");
-    //        verify(mockStmt, times(2)).execute(); // Default is no batching
-    //    }
-    //
-    //    @Test
-    //    public void test_saveEach_preparedStatement_withBatching() throws SQLException, Exception {
-    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
-    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-    //
-    //        Seq<String, Exception> seq = Seq.of("a", "b", "c").saveEach(mockStmt, 2, 0, setter);
-    //        drainWithException(seq);
-    //
-    //        verify(mockStmt, times(3)).addBatch();
-    //        verify(mockStmt, times(2)).executeBatch(); // Once for the first 2, once for the remaining 1.
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_preparedStatement() throws SQLException, Exception {
-    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
-    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-    //
-    //        long count = Seq.of("a", "b", "c").persist(mockStmt, 2, 0, setter);
-    //        assertEquals(3, count);
-    //
-    //        verify(mockStmt, times(3)).addBatch();
-    //        verify(mockStmt, times(2)).executeBatch();
-    //    }
-    //
-    //    @Test
-    //    public void test_persistToCSV_defaultHeaders() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("data.csv").toFile();
-    //        List<Map<String, Object>> data = Arrays.asList(N.asLinkedHashMap("name", "Alice", "age", 30), // LinkedHashMap to preserve key order for header
-    //                N.asLinkedHashMap("name", "Bob", "age", 24));
-    //
-    //        long count = Seq.of(data).persistToCSV(outFile);
-    //        assertEquals(2, count);
-    //
-    //        List<String> csvLines = Files.readAllLines(outFile.toPath());
-    //        assertEquals(3, csvLines.size()); // Header + 2 data lines
-    //        assertEquals("\"name\",\"age\"", csvLines.get(0)); // Default header from first map's keys
-    //        assertEquals("\"Alice\",30", csvLines.get(1));
-    //        assertEquals("\"Bob\",24", csvLines.get(2));
-    //    }
-    //
-    //    @Test
-    //    public void test_persistToCSV_withHeaders() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("dataWithHeaders.csv").toFile();
-    //        List<Map<String, Object>> data = Arrays.asList(N.asMap("name", "Alice", "age", 30, "city", "NY"), N.asMap("name", "Bob", "age", 24, "city", "LA"));
-    //        List<String> headers = Arrays.asList("name", "city"); // Select specific headers
-    //
-    //        long count = Seq.of(data).persistToCSV(headers, outFile);
-    //        assertEquals(2, count);
-    //
-    //        List<String> csvLines = Files.readAllLines(outFile.toPath());
-    //        assertEquals(3, csvLines.size());
-    //        assertEquals("\"name\",\"city\"", csvLines.get(0));
-    //        assertEquals("\"Alice\",\"NY\"", csvLines.get(1));
-    //        assertEquals("\"Bob\",\"LA\"", csvLines.get(2));
-    //    }
-    //
-    //    @Test
-    //    public void test_persistToJSON() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("data.json").toFile();
-    //        List<Map<String, Object>> data = Arrays.asList(N.asMap("name", "Alice", "age", 30), N.asMap("name", "Bob", "age", 24));
-    //        long count = Seq.of(data).persistToJSON(outFile);
-    //        assertEquals(2, count); // Number of top-level objects in the array
-    //
-    //        String jsonContent = Files.readString(outFile.toPath());
-    //        // Basic check, actual JSON parsing would be more robust
-    //        assertTrue(jsonContent.startsWith("["));
-    //        assertTrue(jsonContent.endsWith("]")); // Seq adds a final line separator
-    //        assertTrue(jsonContent.contains("\"name\": \"Alice\""));
-    //        assertTrue(jsonContent.contains("\"name\": \"Bob\""));
-    //    }
-    //
-    //    //endregion
-    //
-    //    //region Async Method Tests
-    //    @Test
-    //    public void test_asyncRun() throws Exception {
-    //        AtomicBoolean executed = new AtomicBoolean(false);
-    //        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-    //        ContinuableFuture<Void> future = seq.asyncRun(s -> {
-    //            s.forEach(e -> {
-    //            }); // consume the seq
-    //            executed.set(true);
-    //        });
-    //        future.get(1, TimeUnit.SECONDS); // Wait for completion
-    //        assertTrue(executed.get());
-    //    }
-    //
-    //    @Test
-    //    public void test_asyncCall() throws Exception {
-    //        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-    //        ContinuableFuture<Long> future = seq.asyncCall(s -> s.count());
-    //        assertEquals(3L, future.get(1, TimeUnit.SECONDS).longValue());
-    //    }
-    //
-    //    //endregion  
-    //
-    //    //region Save/Persist with Connection/DataSource Mocking
-    //
-    //    @Test
-    //    public void test_saveEach_connection_sql_setter() throws SQLException, Exception {
-    //        Connection mockConn = mock(Connection.class);
-    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
-    //        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
-    //
-    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-    //        String sql = "INSERT INTO foo(bar) VALUES (?)";
-    //
-    //        Seq<String, Exception> seq = Seq.of("x", "y").saveEach(mockConn, sql, setter);
-    //        drainWithException(seq);
-    //
-    //        verify(mockConn, times(1)).prepareStatement(sql);
-    //        verify(mockStmt, times(1)).setString(1, "x");
-    //        verify(mockStmt, times(1)).setString(1, "y");
-    //        verify(mockStmt, times(2)).execute();
-    //        verify(mockStmt, times(1)).close(); // Underlying iterator for saveEach should close the PreparedStatement
-    //    }
-    //
-    //    @Test
-    //    public void test_saveEach_dataSource_sql_batch_setter() throws SQLException, Exception {
-    //        javax.sql.DataSource mockDS = mock(javax.sql.DataSource.class);
-    //        Connection mockConn = mock(Connection.class);
-    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
-    //        when(mockDS.getConnection()).thenReturn(mockConn);
-    //        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
-    //
-    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-    //        String sql = "INSERT INTO foo(bar) VALUES (?)";
-    //
-    //        Seq<String, Exception> seq = Seq.of("x", "y", "z").saveEach(mockDS, sql, 2, 0, setter);
-    //        drainWithException(seq);
-    //
-    //        verify(mockDS, times(1)).getConnection();
-    //        verify(mockConn, times(1)).prepareStatement(sql);
-    //        verify(mockStmt, times(3)).addBatch();
-    //        verify(mockStmt, times(2)).executeBatch(); // once for x,y; once for z
-    //        verify(mockStmt, times(1)).close();
-    //        verify(mockConn, times(1)).close(); // Assuming DataSourceUtil.releaseConnection closes it
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_connection_sql_batch_setter() throws SQLException, Exception {
-    //        Connection mockConn = mock(Connection.class);
-    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
-    //        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
-    //
-    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-    //        String sql = "INSERT INTO foo(bar) VALUES (?)";
-    //
-    //        long count = Seq.of("x", "y", "z").persist(mockConn, sql, 2, 0, setter);
-    //        assertEquals(3, count);
-    //
-    //        verify(mockConn, times(1)).prepareStatement(sql);
-    //        verify(mockStmt, times(3)).addBatch();
-    //        verify(mockStmt, times(2)).executeBatch();
-    //        verify(mockStmt, times(1)).close(); // Persist directly closes resources it creates.
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_dataSource_sql_batch_setter() throws SQLException, Exception {
-    //        javax.sql.DataSource mockDS = mock(javax.sql.DataSource.class);
-    //        Connection mockConn = mock(Connection.class);
-    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
-    //        when(mockDS.getConnection()).thenReturn(mockConn);
-    //        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
-    //
-    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-    //        String sql = "INSERT INTO foo(bar) VALUES (?)";
-    //
-    //        long count = Seq.of("x", "y", "z", "w").persist(mockDS, sql, 2, 0, setter);
-    //        assertEquals(4, count);
-    //
-    //        verify(mockDS, times(1)).getConnection();
-    //        verify(mockConn, times(1)).prepareStatement(sql);
-    //        verify(mockStmt, times(4)).addBatch();
-    //        verify(mockStmt, times(2)).executeBatch(); // for x,y and z,w
-    //        verify(mockStmt, times(1)).close();
-    //        verify(mockConn, times(1)).close(); // Assuming DataSourceUtil.releaseConnection closes it
-    //    }
-
-    //[Previous imports and SeqTest class definition would be here]
-    //[Including Exception and @TempDir setup]
 
     @Test
     public void test_symmetricDifference() throws Exception {
         Seq<Integer, Exception> seqA = Seq.of(1, 2, 3, 4);
         Collection<Integer> colB = Arrays.asList(3, 4, 5, 6);
         Seq<Integer, Exception> result = seqA.symmetricDifference(colB);
-        // In A not B: 1, 2
-        // In B not A: 5, 6
-        // Expected: 1, 2, 5, 6 (order depends on implementation, set for comparison)
         Set<Integer> expectedSet = new HashSet<>(Arrays.asList(1, 2, 5, 6));
         assertEquals(expectedSet, new HashSet<>(drainWithException(result)));
     }
@@ -2933,13 +2344,6 @@ public class Seq200Test extends TestBase {
         assertEquals(Arrays.asList("1atrue", "0bfalse", "0defStrue"), drainWithException(zipped));
     }
 
-    // [Previous imports and SeqTest class definition would be here]
-    // [Including Exception and @TempDir setup]
-
-    // Continuing with more tests in the SeqTest class:
-
-    //region Further Miscellaneous Instance Method Tests and Complex Scenarios
-
     @Test
     public void test_symmetricDifference_withEmptyInputs() throws Exception {
         Seq<Integer, Exception> seqA = Seq.of(1, 2, 3);
@@ -3021,7 +2425,7 @@ public class Seq200Test extends TestBase {
             if (i == 1) {
                 return Seq.of("a" + i);
             } else {
-                return null; // Return null Seq
+                return null;
             }
         });
 
@@ -3033,9 +2437,6 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_split_withCollector() throws Exception {
         Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6, 7).split(3, Collectors.mapping(String::valueOf, Collectors.joining("-")));
-        // Window 1: 1,2,3 -> "1-2-3"
-        // Window 2: 4,5,6 -> "4-5-6"
-        // Window 3: 7 -> "7"
         assertEquals(Arrays.asList("1-2-3", "4-5-6", "7"), drainWithException(seq));
 
         Seq<String, Exception> emptySplit = Seq.<Integer, Exception> empty().split(3, Collectors.mapping(String::valueOf, Collectors.joining("-")));
@@ -3044,140 +2445,24 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_split_byPredicate_withCollector() throws Exception {
-        Seq<String, Exception> seq = Seq.of(1, 2, 10, 11, 5, 6, 20) // predicate: x < 10
-                .split(x -> x < 10, Collectors.summingInt(x -> x))
-                .map(String::valueOf); // Convert sum to string for easier comparison if needed
-        // Window 1 (true): 1,2 -> sum 3
-        // Window 2 (false): 10,11 -> sum 21
-        // Window 3 (true): 5,6 -> sum 11
-        // Window 4 (false): 20 -> sum 20
+        Seq<String, Exception> seq = Seq.of(1, 2, 10, 11, 5, 6, 20).split(x -> x < 10, Collectors.summingInt(x -> x)).map(String::valueOf);
         assertEquals(Arrays.asList("3", "21", "11", "20"), drainWithException(seq));
     }
 
     @Test
     public void test_sliding_withCollector() throws Exception {
         Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5).sliding(3, Collectors.mapping(String::valueOf, Collectors.joining(",")));
-        // Window 1: 1,2,3 -> "1,2,3"
-        // Window 2: 2,3,4 -> "2,3,4" (default increment is 1)
-        // Window 3: 3,4,5 -> "3,4,5"
         assertEquals(Arrays.asList("1,2,3", "2,3,4", "3,4,5"), drainWithException(seq));
     }
 
     @Test
     public void test_sliding_withCollector_andIncrement() throws Exception {
-        Seq<Long, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6, 7).sliding(3, 2, Collectors.counting()); // windowSize=3, increment=2
-        // Window 1: 1,2,3 -> count 3
-        // Window 2: 3,4,5 -> count 3 (queue was [3], add 4,5)
-        // Window 3: 5,6,7 -> count 3 (queue was [5], add 6,7)
+        Seq<Long, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6, 7).sliding(3, 2, Collectors.counting());
         assertEquals(Arrays.asList(3L, 3L, 3L), drainWithException(seq));
 
         Seq<Long, Exception> smallSeq = Seq.of(1, 2).sliding(3, 1, Collectors.counting());
         assertEquals(Collections.singletonList(2L), drainWithException(smallSeq));
     }
-
-    //endregion
-
-    //    //region JDBC related saveEach/persist with empty Seq
-    //    @Test
-    //    public void test_saveEach_preparedStatement_emptySeq() throws SQLException, Exception {
-    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
-    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-    //
-    //        Seq<String, Exception> seq = Seq.<String, Exception> empty().saveEach(mockStmt, setter);
-    //        drainWithException(seq); // Consume to trigger execution
-    //
-    //        verify(mockStmt, never()).setString(anyInt(), anyString());
-    //        verify(mockStmt, never()).execute();
-    //        verify(mockStmt, never()).addBatch();
-    //        verify(mockStmt, never()).executeBatch();
-    //        // The internal iterator's closeResource will be called, but PreparedStatement is not closed by saveEach itself.
-    //    }
-    //
-    //    @Test
-    //    public void test_persist_preparedStatement_emptySeq() throws SQLException, Exception {
-    //        PreparedStatement mockStmt = mock(PreparedStatement.class);
-    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-    //
-    //        long count = Seq.<String, Exception> empty().persist(mockStmt, 2, 0, setter);
-    //        assertEquals(0, count);
-    //
-    //        verify(mockStmt, never()).setString(anyInt(), anyString());
-    //        verify(mockStmt, never()).execute();
-    //        verify(mockStmt, never()).addBatch();
-    //        verify(mockStmt, never()).executeBatch();
-    //    }
-    //
-    //    @Test
-    //    public void test_saveEach_connection_emptySeq() throws SQLException, Exception {
-    //        Connection mockConn = mock(Connection.class);
-    //        // No PreparedStatement should be created if seq is empty
-    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-    //        String sql = "INSERT INTO foo(bar) VALUES (?)";
-    //
-    //        Seq<String, Exception> seq = Seq.<String, Exception> empty().saveEach(mockConn, sql, setter);
-    //        drainWithException(seq);
-    //
-    //        verify(mockConn, never()).prepareStatement(anyString());
-    //    }
-    //
-    //    //    @Test
-    //    //    public void test_persist_dataSource_emptySeq() throws SQLException, Exception {
-    //    //        javax.sql.DataSource mockDS = mock(javax.sql.DataSource.class);
-    //    //        // No Connection or PreparedStatement should be obtained/created if seq is empty
-    //    //        Throwables.BiConsumer<String, PreparedStatement, SQLException> setter = (val, stmt) -> stmt.setString(1, val);
-    //    //        String sql = "INSERT INTO foo(bar) VALUES (?)";
-    //    //
-    //    //        long count = Seq.<String, Exception> empty().persist(mockDS, sql, 2, 0, setter);
-    //    //        assertEquals(0, count);
-    //    //
-    //    //        verify(mockDS, never()).getConnection();
-    //    //    }
-    //
-    //    //endregion
-    //
-    //    //region Specific I/O method scenarios
-    //
-    //    @Test
-    //    public void test_persistToCSV_emptySeq() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("empty.csv").toFile();
-    //        List<String> headers = Arrays.asList("h1", "h2");
-    //
-    //        long count = Seq.<Map<String, Object>, Exception> empty().persistToCSV(headers, outFile);
-    //        assertEquals(0, count);
-    //
-    //        List<String> csvLines = Files.readAllLines(outFile.toPath());
-    //        // Only header should be written if headers are provided and sequence is empty.
-    //        // The current implementation writes header only if there's at least one row to infer columns from,
-    //        // or if headers are explicitly passed. If headers passed and seq empty, it should write header.
-    //        assertEquals(1, csvLines.size(), "Should write header even for empty data if headers provided");
-    //        assertEquals("\"h1\",\"h2\"", csvLines.get(0));
-    //
-    //        // Without explicit headers and empty sequence (e.g. Seq.<Map<String,Object>>empty().persistToCSV(outFile))
-    //        // The method doesn't know what headers to write.
-    //        File outFileNoHeader = tempDir.resolve("emptyNoHeader.csv").toFile();
-    //        count = Seq.<Map<String, Object>, Exception> empty().persistToCSV(outFileNoHeader);
-    //        assertEquals(0, count);
-    //        csvLines = Files.readAllLines(outFileNoHeader.toPath());
-    //        assertTrue(csvLines.isEmpty(), "Should be empty if no headers and no data");
-    //    }
-    //
-    //    @Test
-    //    public void test_persistToJSON_emptySeq() throws IOException, Exception {
-    //        File outFile = tempDir.resolve("empty.json").toFile();
-    //        long count = Seq.<Map<String, Object>, Exception> empty().persistToJSON(outFile);
-    //        assertEquals(0, count);
-    //
-    //        String jsonContent = Files.readString(outFile.toPath());
-    //        // Expects "[]" with line separators
-    //        assertEquals("[" + IOUtil.LINE_SEPARATOR + "]", jsonContent.trim());
-    //    }
-
-    // [Previous imports and SeqTest class definition would be here]
-    // [Including Exception and @TempDir setup]
-
-    // Continuing with more tests in the SeqTest class:
-
-    //region Tests for Sorted Flag Behavior and Complex Close/FlatMap Scenarios
 
     @Test
     public void test_onClose_handlerThrowsException() {
@@ -3195,43 +2480,33 @@ public class Seq200Test extends TestBase {
         assertTrue(firstHandlerCalled.get(), "First close handler should have been called.");
         assertTrue(secondHandlerCalled.get(), "Second close handler should have been called despite previous error.");
         assertEquals(exceptionFromClose, thrown, "The exception from the first handler should be the primary exception.");
-        // If Seq.close collects suppressed exceptions, check for that.
-        // The current Seq.close() implementation: if (ex == null) ex = e; else ex.addSuppressed(e);
-        // So, the first exception is primary. Others (if any from other handlers) would be suppressed.
     }
 
     @Test
     public void test_flatMap_withEmptyInnerSeqs() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3).flatMap(i -> {
-            if (i % 2 == 0) { // For even numbers, return an empty Seq
+            if (i % 2 == 0) {
                 return Seq.empty();
             }
-            return Seq.of(i, i * 10); // For odd, return elements
+            return Seq.of(i, i * 10);
         });
-        // 1 -> (1, 10)
-        // 2 -> ()
-        // 3 -> (3, 30)
         assertEquals(Arrays.asList(1, 10, 3, 30), drainWithException(seq));
     }
 
     @Test
     public void test_flatMap_withNullInnerSeq() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3).flatMap(i -> {
-            if (i % 2 == 0) { // For even numbers, return null
+            if (i % 2 == 0) {
                 return null;
             }
-            return Seq.of(i, i * 10); // For odd, return elements
+            return Seq.of(i, i * 10);
         });
-        // 1 -> (1, 10)
-        // 2 -> (skipped as inner seq is null)
-        // 3 -> (3, 30)
         assertEquals(Arrays.asList(1, 10, 3, 30), drainWithException(seq));
     }
 
     @Test
     public void test_collect_withComplexCollector_groupingBy() throws Exception {
         List<String> items = Arrays.asList("apple", "banana", "apricot", "blueberry", "avocado");
-        // Collecting into a Map<Character, List<String>>
         Map<Character, List<String>> result = Seq.of(items).collect(Collectors.groupingBy(s -> s.charAt(0)));
 
         assertEquals(Arrays.asList("apple", "apricot", "avocado"), result.get('a'));
@@ -3240,7 +2515,7 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_collect_withComplexCollector_summarizingInt() throws Exception {
-        List<String> items = Arrays.asList("apple", "banana", "kiwi"); // lengths 5, 6, 4
+        List<String> items = Arrays.asList("apple", "banana", "kiwi");
         IntSummaryStatistics stats = Seq.of(items).collect(Collectors.summarizingInt(String::length));
 
         assertEquals(3, stats.getCount());
@@ -3251,17 +2526,8 @@ public class Seq200Test extends TestBase {
     }
 
     private <T, E extends Exception> Comparator<? super T> extractComparator(Seq<T, E> seq) {
-        // Similar to extractSortedFlag, this would require reflection.
-        // try {
-        //    java.lang.reflect.Field cmpField = Seq.class.getDeclaredField("cmp");
-        //    cmpField.setAccessible(true);
-        //    return (Comparator<? super T>) cmpField.get(seq);
-        // } catch (Exception e) {
-        //    throw new RuntimeException("Cannot access comparator for test", e);
-        // }
         throw new UnsupportedOperationException("Cannot reliably extract comparator without reflection/internal access.");
     }
-    //endregion
 
     @Test
     public void test_of_throwablesIterator_withCloseHandler() throws Exception {
@@ -3292,26 +2558,10 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_splitByChunkCount_totalSizeLessThanMaxChunkCount() throws Exception {
         Seq<Pair<Integer, Integer>, Exception> seq = Seq.splitByChunkCount(2, 5, (from, to) -> Pair.of(from, to));
-        // totalSize = 2, maxChunkCount = 5. Should result in one chunk [0,2]
-        // count = min(2,5) = 2.
-        // biggerSize = 2 % 5 == 0 ? 2/5 : 2/5+1 => 0+1 = 1.
-        // biggerCount = 2 % 5 = 2.
-        // smallerSize = max(2/5, 1) = 1.
-        // smallerCount = 2 - 2 = 0.
-        // Default (sizeLargerFirst = false): cnt < biggerCount (2) -> cursor + biggerSize (1)
-        // Iter 1: cnt=0. mapper(0, 0+1=1). cursor=1.
-        // Iter 2: cnt=1. mapper(1, 1+1=2). cursor=2.
         List<Pair<Integer, Integer>> expected = Arrays.asList(Pair.of(0, 1), Pair.of(1, 2));
         assertEquals(expected, drainWithException(seq));
 
         Seq<Pair<Integer, Integer>, Exception> seqSingle = Seq.splitByChunkCount(1, 5, (from, to) -> Pair.of(from, to));
-        // totalSize = 1, maxChunkCount = 5
-        // count = min(1,5) = 1.
-        // biggerSize = 1%5==0 ? ... : 1/5+1 = 1.
-        // biggerCount = 1%5 = 1.
-        // smallerSize = max(1/5,1) = 1.
-        // smallerCount = 1-1 = 0.
-        // Iter 1: cnt=0. mapper(0, 0+1=1). cursor=1.
         List<Pair<Integer, Integer>> expectedSingle = Collections.singletonList(Pair.of(0, 1));
         assertEquals(expectedSingle, drainWithException(seqSingle));
     }
@@ -3320,14 +2570,6 @@ public class Seq200Test extends TestBase {
     public void test_distinctBy_keyMapper_withNullKeys() throws Exception {
         List<String> data = Arrays.asList("apple", null, "banana", "apricot", null, "avocado");
         Seq<String, Exception> seq = Seq.of(data).distinctBy(s -> s == null ? null : s.charAt(0));
-        // Key sequence: 'a', null, 'b', 'a', null, 'a'
-        // distinctBy uses a HashSet for keys. NONE is used for null key.
-        // 1. "apple" (key 'a') -> kept. seenKeys.add('a')
-        // 2. null (key NONE) -> kept. seenKeys.add(NONE)
-        // 3. "banana" (key 'b') -> kept. seenKeys.add('b')
-        // 4. "apricot" (key 'a') -> skipped.
-        // 5. null (key NONE) -> skipped.
-        // 6. "avocado" (key 'a') -> skipped.
         List<String> expected = Arrays.asList("apple", null, "banana");
         assertEquals(expected, drainWithException(seq));
     }
@@ -3378,12 +2620,11 @@ public class Seq200Test extends TestBase {
 
         Seq<Object, Exception> emptySeq = Seq.<Object, Exception> empty().onClose(close1Count::incrementAndGet).onClose(close2Count::incrementAndGet);
 
-        emptySeq.close(); // Explicitly close or call a terminal op
+        emptySeq.close();
 
         assertEquals(1, close1Count.get());
         assertEquals(1, close2Count.get());
 
-        // Subsequent closes should be idempotent
         emptySeq.close();
         assertEquals(1, close1Count.get());
         assertEquals(1, close2Count.get());
@@ -3392,28 +2633,28 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_skip_onAlreadyClosedSeq_throwsIllegalStateException() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-        drainWithException(seq); // close it by consuming
+        drainWithException(seq);
         assertThrows(IllegalStateException.class, () -> seq.skip(1));
     }
 
     @Test
     public void test_limit_onAlreadyClosedSeq_throwsIllegalStateException() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-        drainWithException(seq); // close it by consuming
+        drainWithException(seq);
         assertThrows(IllegalStateException.class, () -> seq.limit(1));
     }
 
     @Test
     public void test_map_onAlreadyClosedSeq_throwsIllegalStateException() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-        drainWithException(seq); // close it by consuming
+        drainWithException(seq);
         assertThrows(IllegalStateException.class, () -> seq.map(x -> x * 2));
     }
 
     @Test
     public void test_forEach_onAlreadyClosedSeq_throwsIllegalStateException() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-        drainWithException(seq); // close it by consuming
+        drainWithException(seq);
         assertThrows(IllegalStateException.class, () -> seq.forEach(x -> {
         }));
     }

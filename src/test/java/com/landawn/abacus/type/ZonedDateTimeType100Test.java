@@ -27,6 +27,7 @@ import java.time.format.DateTimeParseException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -35,6 +36,7 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
+@Tag("new-test")
 public class ZonedDateTimeType100Test extends TestBase {
 
     private ZonedDateTimeType zonedDateTimeType;
@@ -86,7 +88,7 @@ public class ZonedDateTimeType100Test extends TestBase {
 
     @Test
     public void testValueOfObjectWithNumber() {
-        long epochMilli = 1703502645000L; // 2023-12-25 10:30:45 UTC
+        long epochMilli = 1703502645000L;
         ZonedDateTime result = zonedDateTimeType.valueOf((Object) epochMilli);
         assertNotNull(result);
         assertEquals(epochMilli, result.toInstant().toEpochMilli());
@@ -132,7 +134,7 @@ public class ZonedDateTimeType100Test extends TestBase {
 
     @Test
     public void testValueOfStringWithISO8601DateTime() {
-        String iso8601DateTime = "2023-12-25T10:30:45Z"; // 20 chars with Z
+        String iso8601DateTime = "2023-12-25T10:30:45Z";
         ZonedDateTime result = zonedDateTimeType.valueOf(iso8601DateTime);
         assertNotNull(result);
         assertEquals(2023, result.getYear());
@@ -142,7 +144,7 @@ public class ZonedDateTimeType100Test extends TestBase {
 
     @Test
     public void testValueOfStringWithISO8601Timestamp() {
-        String iso8601Timestamp = "2023-12-25T10:30:45.123Z"; // 24 chars with Z
+        String iso8601Timestamp = "2023-12-25T10:30:45.123Z";
         ZonedDateTime result = zonedDateTimeType.valueOf(iso8601Timestamp);
         assertNotNull(result);
         assertEquals(2023, result.getYear());

@@ -86,14 +86,14 @@ public final class Enumerations {
      * The returned Enumeration has no elements and calling {@code nextElement()} will throw
      * {@link NoSuchElementException}.
      *
-     * @param <T> the type of elements (not) enumerated
-     * @return an empty Enumeration
-     * 
      * <p>Example:</p>
      * <pre>
      * Enumeration<String> empty = Enumerations.empty();
      * empty.hasMoreElements(); // false
      * </pre>
+     *
+     * @param <T> the type of elements (not) enumerated
+     * @return an empty Enumeration
      */
     public static <T> Enumeration<T> empty() {
         return EMPTY;
@@ -103,10 +103,6 @@ public final class Enumerations {
      * Creates an Enumeration containing a single element.
      * The returned Enumeration will have exactly one element to enumerate.
      *
-     * @param <T> the type of the element
-     * @param single the single element to enumerate
-     * @return an Enumeration containing only the specified element
-     * 
      * <p>Example:</p>
      * <pre>
      * Enumeration<String> single = Enumerations.just("Hello");
@@ -114,6 +110,10 @@ public final class Enumerations {
      * single.nextElement();     // "Hello"
      * single.hasMoreElements(); // false
      * </pre>
+     *
+     * @param <T> the type of the element
+     * @param single the single element to enumerate
+     * @return an Enumeration containing only the specified element
      */
     public static <T> Enumeration<T> just(final T single) {
         return new Enumeration<>() {
@@ -141,10 +141,6 @@ public final class Enumerations {
      * Creates an Enumeration from a varargs array of elements.
      * The elements will be enumerated in the order they appear in the array.
      *
-     * @param <T> the type of elements
-     * @param a the elements to enumerate
-     * @return an Enumeration over the specified elements
-     * 
      * <p>Example:</p>
      * <pre>
      * Enumeration<Integer> numbers = Enumerations.of(1, 2, 3, 4, 5);
@@ -152,6 +148,10 @@ public final class Enumerations {
      *     System.out.println(numbers.nextElement());
      * }
      * </pre>
+     *
+     * @param <T> the type of elements
+     * @param a the elements to enumerate
+     * @return an Enumeration over the specified elements
      */
     @SafeVarargs
     public static <T> Enumeration<T> of(final T... a) {
@@ -183,15 +183,15 @@ public final class Enumerations {
      * Creates an Enumeration from a Collection.
      * The enumeration order depends on the collection's iterator order.
      *
-     * @param <T> the type of elements
-     * @param c the collection to create an Enumeration from
-     * @return an Enumeration over the collection's elements, or empty if collection is null/empty
-     * 
      * <p>Example:</p>
      * <pre>
      * List<String> list = Arrays.asList("a", "b", "c");
      * Enumeration<String> enum1 = Enumerations.create(list);
      * </pre>
+     *
+     * @param <T> the type of elements
+     * @param c the collection to create an Enumeration from
+     * @return an Enumeration over the collection's elements, or empty if collection is null/empty
      */
     public static <T> Enumeration<T> create(final Collection<? extends T> c) {
         if (N.isEmpty(c)) {
@@ -208,15 +208,15 @@ public final class Enumerations {
      * <p>Note: The returned Enumeration is backed by the Iterator, so any modifications
      * to the underlying collection during enumeration may cause undefined behavior.</p>
      *
-     * @param <T> the type of elements
-     * @param iter the iterator to wrap as an Enumeration
-     * @return an Enumeration that delegates to the specified Iterator
-     * 
      * <p>Example:</p>
      * <pre>
      * Iterator<String> iter = list.iterator();
      * Enumeration<String> enum1 = Enumerations.create(iter);
      * </pre>
+     *
+     * @param <T> the type of elements
+     * @param iter the iterator to wrap as an Enumeration
+     * @return an Enumeration that delegates to the specified Iterator
      */
     public static <T> Enumeration<T> create(final Iterator<? extends T> iter) {
         return new Enumeration<>() {
@@ -237,10 +237,6 @@ public final class Enumerations {
      * Elements are enumerated in order: all elements from the first Enumeration,
      * then all elements from the second, and so on.
      *
-     * @param <T> the type of elements
-     * @param a the Enumerations to concatenate
-     * @return a single Enumeration containing all elements from all input Enumerations
-     * 
      * <p>Example:</p>
      * <pre>
      * Enumeration<String> enum1 = Enumerations.of("a", "b");
@@ -248,6 +244,10 @@ public final class Enumerations {
      * Enumeration<String> combined = Enumerations.concat(enum1, enum2);
      * // combined will enumerate: "a", "b", "c", "d"
      * </pre>
+     *
+     * @param <T> the type of elements
+     * @param a the Enumerations to concatenate
+     * @return a single Enumeration containing all elements from all input Enumerations
      */
     @SafeVarargs
     public static <T> Enumeration<T> concat(final Enumeration<? extends T>... a) {
@@ -263,10 +263,6 @@ public final class Enumerations {
      * Elements are enumerated in the order of the Enumerations in the collection,
      * with all elements from each Enumeration being exhausted before moving to the next.
      *
-     * @param <T> the type of elements
-     * @param c a collection of Enumerations to concatenate
-     * @return a single Enumeration containing all elements from all input Enumerations
-     * 
      * <p>Example:</p>
      * <pre>
      * List<Enumeration<Integer>> enums = new ArrayList<>();
@@ -276,6 +272,10 @@ public final class Enumerations {
      * Enumeration<Integer> combined = Enumerations.concat(enums);
      * // combined will enumerate: 1, 2, 3, 4, 5, 6
      * </pre>
+     *
+     * @param <T> the type of elements
+     * @param c a collection of Enumerations to concatenate
+     * @return a single Enumeration containing all elements from all input Enumerations
      */
     public static <T> Enumeration<T> concat(final Collection<? extends Enumeration<? extends T>> c) {
         if (N.isEmpty(c)) {
@@ -311,10 +311,6 @@ public final class Enumerations {
      * This provides a bridge from the legacy Enumeration interface to the modern Iterator-based API.
      * The returned ObjIterator provides additional functional operations like map, filter, etc.
      *
-     * @param <T> the type of elements
-     * @param e the Enumeration to convert, may be null
-     * @return an ObjIterator over the Enumeration's elements, or empty iterator if null
-     * 
      * <p>Example:</p>
      * <pre>
      * Enumeration<String> enum1 = getEnumeration();
@@ -325,6 +321,10 @@ public final class Enumerations {
      *     .filter(s -> s.length() > 5)
      *     .toList();
      * </pre>
+     *
+     * @param <T> the type of elements
+     * @param e the Enumeration to convert, may be null
+     * @return an ObjIterator over the Enumeration's elements, or empty iterator if null
      */
     public static <T> ObjIterator<T> toIterator(final Enumeration<? extends T> e) {
         if (e == null) {
@@ -349,16 +349,16 @@ public final class Enumerations {
      * All elements from the Enumeration are consumed and added to a new ArrayList
      * in the order they are enumerated.
      *
-     * @param <T> the type of elements
-     * @param e the Enumeration to convert, may be null
-     * @return a new ArrayList containing all elements from the Enumeration, or empty list if null
-     * 
      * <p>Example:</p>
      * <pre>
      * Enumeration<String> enum1 = getEnumeration();
      * List<String> list = Enumerations.toList(enum1);
      * // list now contains all elements from the enumeration
      * </pre>
+     *
+     * @param <T> the type of elements
+     * @param e the Enumeration to convert, may be null
+     * @return a new ArrayList containing all elements from the Enumeration, or empty list if null
      */
     public static <T> List<T> toList(final Enumeration<? extends T> e) {
         if (e == null) {
@@ -379,16 +379,16 @@ public final class Enumerations {
      * All elements from the Enumeration are consumed and added to a new HashSet.
      * Duplicate elements (according to equals()) will be removed.
      *
-     * @param <T> the type of elements
-     * @param e the Enumeration to convert, may be null
-     * @return a new HashSet containing unique elements from the Enumeration, or empty set if null
-     * 
      * <p>Example:</p>
      * <pre>
      * Enumeration<String> enum1 = Enumerations.of("a", "b", "a", "c");
      * Set<String> set = Enumerations.toSet(enum1);
      * // set contains: "a", "b", "c" (duplicates removed)
      * </pre>
+     *
+     * @param <T> the type of elements
+     * @param e the Enumeration to convert, may be null
+     * @return a new HashSet containing unique elements from the Enumeration, or empty set if null
      */
     public static <T> Set<T> toSet(final Enumeration<? extends T> e) {
         if (e == null) {
@@ -409,12 +409,6 @@ public final class Enumerations {
      * This allows converting to any Collection type by providing an appropriate supplier.
      * All elements from the Enumeration are consumed and added to the collection.
      *
-     * @param <T> the type of elements
-     * @param <C> the type of the Collection to create
-     * @param e the Enumeration to convert, may be null
-     * @param supplier the supplier to create the target collection
-     * @return a collection containing all elements from the Enumeration
-     * 
      * <p>Example:</p>
      * <pre>
      * // Convert to LinkedList
@@ -424,6 +418,12 @@ public final class Enumerations {
      * // Convert to TreeSet
      * TreeSet<String> sorted = Enumerations.toCollection(enum1, TreeSet::new);
      * </pre>
+     *
+     * @param <T> the type of elements
+     * @param <C> the type of the Collection to create
+     * @param e the Enumeration to convert, may be null
+     * @param supplier the supplier to create the target collection
+     * @return a collection containing all elements from the Enumeration
      */
     public static <T, C extends Collection<T>> C toCollection(final Enumeration<? extends T> e, final Supplier<? extends C> supplier) {
         final C c = supplier.get();

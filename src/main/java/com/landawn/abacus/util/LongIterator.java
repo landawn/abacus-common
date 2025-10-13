@@ -307,7 +307,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @throws IllegalArgumentException if n is negative
      */
     public LongIterator skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, cs.n);
+        N.checkArgNotNegative(n, "n");
 
         if (n <= 0) {
             return this;
@@ -364,7 +364,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @throws IllegalArgumentException if count is negative
      */
     public LongIterator limit(final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, cs.count);
+        N.checkArgNotNegative(count, "count");
 
         if (count == 0) {
             return LongIterator.EMPTY;
@@ -408,7 +408,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @throws IllegalArgumentException if predicate is null
      */
     public LongIterator filter(final LongPredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, "predicate");
 
         final LongIterator iter = this;
 
@@ -663,6 +663,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         int idx = 0;
 
         while (hasNext()) {
+            if (idx < 0) {
+                throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
+            }
             action.accept(idx++, nextLong());
         }
     }

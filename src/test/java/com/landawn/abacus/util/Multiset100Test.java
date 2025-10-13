@@ -27,11 +27,13 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 
+@Tag("new-test")
 public class Multiset100Test extends TestBase {
 
     private Multiset<String> multiset;
@@ -43,7 +45,6 @@ public class Multiset100Test extends TestBase {
         intMultiset = new Multiset<>();
     }
 
-    // Constructor Tests
     @Test
     @DisplayName("Test default constructor")
     public void testDefaultConstructor() {
@@ -96,7 +97,6 @@ public class Multiset100Test extends TestBase {
         assertTrue(ms.isEmpty());
     }
 
-    // Static Factory Method Tests
     @Test
     @DisplayName("Test of() factory method")
     public void testOf() {
@@ -139,7 +139,6 @@ public class Multiset100Test extends TestBase {
         assertTrue(ms.isEmpty());
     }
 
-    // Count and Occurrence Tests
     @Test
     @DisplayName("Test occurrencesOf()")
     public void testOccurrencesOf() {
@@ -165,7 +164,6 @@ public class Multiset100Test extends TestBase {
         assertEquals(7, multiset.count("item"));
     }
 
-    // Min/Max Occurrence Tests
     @Test
     @DisplayName("Test minOccurrences()")
     public void testMinOccurrences() {
@@ -230,7 +228,6 @@ public class Multiset100Test extends TestBase {
         assertEquals(2, allMax.get().right().size());
     }
 
-    // Statistical Tests
     @Test
     @DisplayName("Test sumOfOccurrences()")
     public void testSumOfOccurrences() {
@@ -257,7 +254,6 @@ public class Multiset100Test extends TestBase {
         assertEquals(20.0, avg.getAsDouble(), 0.001);
     }
 
-    // setCount Tests
     @Test
     @DisplayName("Test setCount()")
     public void testSetCount() {
@@ -293,7 +289,6 @@ public class Multiset100Test extends TestBase {
         assertFalse(multiset.contains("apple"));
     }
 
-    // add Tests
     @Test
     @DisplayName("Test add() single element")
     public void testAddSingle() {
@@ -333,7 +328,6 @@ public class Multiset100Test extends TestBase {
         assertEquals(8, multiset.getCount("apple"));
     }
 
-    // addAll Tests
     @Test
     @DisplayName("Test addAll() collection")
     public void testAddAllCollection() {
@@ -365,7 +359,6 @@ public class Multiset100Test extends TestBase {
         assertEquals(3, multiset.getCount("c"));
     }
 
-    // remove Tests
     @Test
     @DisplayName("Test remove() single occurrence")
     public void testRemoveSingle() {
@@ -405,7 +398,6 @@ public class Multiset100Test extends TestBase {
         assertEquals(0, multiset.removeAndGetCount("banana", 5));
     }
 
-    // removeAll Tests
     @Test
     @DisplayName("Test removeAll() collection")
     public void testRemoveAllCollection() {
@@ -482,7 +474,6 @@ public class Multiset100Test extends TestBase {
         assertFalse(multiset.contains("d"));
     }
 
-    // Update Tests
     @Test
     @DisplayName("Test updateAllOccurrences()")
     public void testUpdateAllOccurrences() {
@@ -511,7 +502,6 @@ public class Multiset100Test extends TestBase {
         assertEquals(3, multiset.getCount("c"));
     }
 
-    // Compute Tests
     @Test
     @DisplayName("Test computeIfAbsent()")
     public void testComputeIfAbsent() {
@@ -561,7 +551,6 @@ public class Multiset100Test extends TestBase {
         assertFalse(multiset.contains("apple"));
     }
 
-    // Collection Operation Tests
     @Test
     @DisplayName("Test contains()")
     public void testContains() {
@@ -610,7 +599,6 @@ public class Multiset100Test extends TestBase {
         assertTrue(multiset.isEmpty());
     }
 
-    // View Tests
     @Test
     @DisplayName("Test elementSet()")
     public void testElementSet() {
@@ -648,7 +636,6 @@ public class Multiset100Test extends TestBase {
 
         Set<Multiset.Entry<String>> entries = multiset.entrySet();
 
-        // Create a test entry
         Multiset.Entry<String> testEntry = new Multiset.Entry<String>() {
             public String element() {
                 return "a";
@@ -677,7 +664,6 @@ public class Multiset100Test extends TestBase {
         assertTrue(entries.contains(testEntry));
     }
 
-    // Iterator Tests
     @Test
     @DisplayName("Test iterator()")
     public void testIterator() {
@@ -697,7 +683,6 @@ public class Multiset100Test extends TestBase {
         assertEquals(2, counts.get("b").intValue());
     }
 
-    // Size Tests
     @Test
     @DisplayName("Test size()")
     public void testSize() {
@@ -752,7 +737,6 @@ public class Multiset100Test extends TestBase {
         assertEquals(0, multiset.countOfDistinctElements());
     }
 
-    // Array Conversion Tests
     @Test
     @DisplayName("Test toArray()")
     public void testToArray() {
@@ -785,7 +769,6 @@ public class Multiset100Test extends TestBase {
         assertSame(providedArray, result);
     }
 
-    // Map Conversion Tests
     @Test
     @DisplayName("Test toMap()")
     public void testToMap() {
@@ -858,7 +841,6 @@ public class Multiset100Test extends TestBase {
         assertEquals(2, map.get("b").intValue());
     }
 
-    // forEach Tests
     @Test
     @DisplayName("Test forEach(Consumer)")
     public void testForEachConsumer() {
@@ -887,7 +869,6 @@ public class Multiset100Test extends TestBase {
         assertEquals(2, counts.get("b").intValue());
     }
 
-    // Stream Tests
     @Test
     @DisplayName("Test elements()")
     public void testElements() {
@@ -915,7 +896,6 @@ public class Multiset100Test extends TestBase {
         assertEquals(2, counts.get("b").intValue());
     }
 
-    // Functional Tests
     @Test
     @DisplayName("Test apply()")
     public void testApply() {
@@ -965,7 +945,6 @@ public class Multiset100Test extends TestBase {
         assertTrue(called[0]);
     }
 
-    // Equals and HashCode Tests
     @Test
     @DisplayName("Test equals()")
     public void testEquals() {
@@ -1018,7 +997,6 @@ public class Multiset100Test extends TestBase {
         assertTrue(str.contains("2"));
     }
 
-    // Entry Tests
     @Test
     @DisplayName("Test Entry interface")
     public void testEntryInterface() {
@@ -1029,10 +1007,8 @@ public class Multiset100Test extends TestBase {
         assertEquals("test", entry.element());
         assertEquals(5, entry.count());
 
-        // Test toString
         assertEquals("test x 5", entry.toString());
 
-        // Test equals
         Multiset.Entry<String> sameEntry = new Multiset.Entry<String>() {
             public String element() {
                 return "test";
@@ -1071,11 +1047,9 @@ public class Multiset100Test extends TestBase {
         assertEquals("single", entry.toString());
     }
 
-    // Edge Cases
     @Test
     @DisplayName("Test operations with null elements when supported")
     public void testNullElements() {
-        // HashMap-based multiset should support null
         multiset.add(null, 2);
         assertEquals(2, multiset.getCount(null));
         assertTrue(multiset.contains(null));

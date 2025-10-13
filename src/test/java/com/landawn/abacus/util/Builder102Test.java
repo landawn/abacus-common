@@ -14,11 +14,13 @@ import java.util.function.ToIntFunction;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("new-test")
 public class Builder102Test extends TestBase {
 
     @Test
@@ -140,12 +142,10 @@ public class Builder102Test extends TestBase {
         Assertions.assertNotNull(builder);
         Assertions.assertEquals(str, builder.val());
 
-        // Test with different types
         Integer num = 42;
         Builder<Integer> intBuilder = Builder.of(num);
         Assertions.assertEquals(num, intBuilder.val());
 
-        // Test automatic type selection
         List<String> list = new ArrayList<>();
         Builder builder2 = Builder.of(list);
         Assertions.assertTrue(builder2 instanceof Builder.ListBuilder);
@@ -208,7 +208,6 @@ public class Builder102Test extends TestBase {
         Assertions.assertEquals(1, stream.count());
     }
 
-    // BooleanListBuilder tests
     @Test
     public void testBooleanListBuilderSet() {
         BooleanList list = new BooleanList();
@@ -301,7 +300,6 @@ public class Builder102Test extends TestBase {
         Assertions.assertFalse(list.get(0));
     }
 
-    // Similar pattern tests for other primitive list builders
     @Test
     public void testCharListBuilderOperations() {
         CharList list = new CharList();
@@ -383,7 +381,6 @@ public class Builder102Test extends TestBase {
         Assertions.assertEquals(1, list.size());
     }
 
-    // ListBuilder tests
     @Test
     public void testListBuilderOperations() {
         List<String> list = new ArrayList<>();
@@ -423,7 +420,6 @@ public class Builder102Test extends TestBase {
         Assertions.assertEquals("c", list.get(1));
     }
 
-    // CollectionBuilder tests
     @Test
     public void testCollectionBuilderOperations() {
         Set<String> set = new HashSet<>();
@@ -452,7 +448,6 @@ public class Builder102Test extends TestBase {
         Assertions.assertTrue(set.contains(3));
     }
 
-    // MultisetBuilder tests
     @Test
     public void testMultisetBuilderSetCount() {
         Multiset<String> multiset = new Multiset<>();
@@ -505,7 +500,6 @@ public class Builder102Test extends TestBase {
         Assertions.assertEquals(0, multiset.getCount("other"));
     }
 
-    // MapBuilder tests
     @Test
     public void testMapBuilderPut() {
         Map<String, Integer> map = new HashMap<>();
@@ -584,7 +578,6 @@ public class Builder102Test extends TestBase {
         Assertions.assertTrue(map.containsKey("three"));
     }
 
-    // MultimapBuilder tests
     @Test
     public void testMultimapBuilderPut() {
         ListMultimap<String, Integer> multimap = N.newListMultimap();
@@ -696,7 +689,6 @@ public class Builder102Test extends TestBase {
         Assertions.assertTrue(multimap.get("key").contains(4));
     }
 
-    // DatasetBuilder tests would require more complex setup, showing a few examples
     @Test
     public void testDatasetBuilderRenameColumn() {
         Dataset ds = new RowDataset(Arrays.asList("oldName"), Arrays.asList(Arrays.asList("value")));
@@ -727,7 +719,6 @@ public class Builder102Test extends TestBase {
         Assertions.assertFalse(ds.columnNameList().contains("col2"));
     }
 
-    // Comparison Builder tests
     @Test
     public void testCompare() {
         int result = Builder.compare("a", "b").result();
@@ -831,7 +822,6 @@ public class Builder102Test extends TestBase {
         Assertions.assertTrue(result < 0);
     }
 
-    // EquivalenceBuilder tests
     @Test
     public void testEquals() {
         boolean result = Builder.equals("a", "a").result();
@@ -900,7 +890,6 @@ public class Builder102Test extends TestBase {
         Assertions.assertFalse(result);
     }
 
-    // HashCodeBuilder tests
     @Test
     public void testHash() {
         int hash1 = Builder.hash("test").result();

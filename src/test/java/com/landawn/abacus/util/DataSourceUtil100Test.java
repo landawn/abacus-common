@@ -13,15 +13,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedSQLException;
 
+@Tag("new-test")
 public class DataSourceUtil100Test extends TestBase {
 
     @Test
     public void testReleaseConnectionWithNull() {
-        // Should not throw exception
         DataSourceUtil.releaseConnection(null, null);
     }
 
@@ -41,15 +42,14 @@ public class DataSourceUtil100Test extends TestBase {
 
     @Test
     public void testCloseResultSetNull() {
-        // Should not throw exception
-        DataSourceUtil.close((ResultSet)null);
+        DataSourceUtil.close((ResultSet) null);
     }
 
     @Test
     public void testCloseResultSetWithSQLException() throws SQLException {
         ResultSet mockRs = mock(ResultSet.class);
         doThrow(new SQLException("Test exception")).when(mockRs).close();
-        
+
         assertThrows(UncheckedSQLException.class, () -> DataSourceUtil.close(mockRs));
     }
 
@@ -58,9 +58,9 @@ public class DataSourceUtil100Test extends TestBase {
         ResultSet mockRs = mock(ResultSet.class);
         Statement mockStmt = mock(Statement.class);
         when(mockRs.getStatement()).thenReturn(mockStmt);
-        
+
         DataSourceUtil.close(mockRs, true);
-        
+
         verify(mockRs).close();
         verify(mockStmt).close();
     }
@@ -70,12 +70,12 @@ public class DataSourceUtil100Test extends TestBase {
         ResultSet mockRs = mock(ResultSet.class);
         Statement mockStmt = mock(Statement.class);
         Connection mockConn = mock(Connection.class);
-        
+
         when(mockRs.getStatement()).thenReturn(mockStmt);
         when(mockStmt.getConnection()).thenReturn(mockConn);
-        
+
         DataSourceUtil.close(mockRs, true, true);
-        
+
         verify(mockRs).close();
         verify(mockStmt).close();
         verify(mockConn).close();
@@ -84,8 +84,7 @@ public class DataSourceUtil100Test extends TestBase {
     @Test
     public void testCloseResultSetInvalidArguments() {
         ResultSet mockRs = mock(ResultSet.class);
-        assertThrows(IllegalArgumentException.class, 
-            () -> DataSourceUtil.close(mockRs, false, true));
+        assertThrows(IllegalArgumentException.class, () -> DataSourceUtil.close(mockRs, false, true));
     }
 
     @Test
@@ -97,8 +96,7 @@ public class DataSourceUtil100Test extends TestBase {
 
     @Test
     public void testCloseStatementNull() {
-        // Should not throw exception
-        DataSourceUtil.close((Statement)null);
+        DataSourceUtil.close((Statement) null);
     }
 
     @Test
@@ -110,17 +108,16 @@ public class DataSourceUtil100Test extends TestBase {
 
     @Test
     public void testCloseConnectionNull() {
-        // Should not throw exception
-        DataSourceUtil.close((Connection)null);
+        DataSourceUtil.close((Connection) null);
     }
 
     @Test
     public void testCloseResultSetAndStatement() throws SQLException {
         ResultSet mockRs = mock(ResultSet.class);
         Statement mockStmt = mock(Statement.class);
-        
+
         DataSourceUtil.close(mockRs, mockStmt);
-        
+
         verify(mockRs).close();
         verify(mockStmt).close();
     }
@@ -129,9 +126,9 @@ public class DataSourceUtil100Test extends TestBase {
     public void testCloseStatementAndConnection() throws SQLException {
         Statement mockStmt = mock(Statement.class);
         Connection mockConn = mock(Connection.class);
-        
+
         DataSourceUtil.close(mockStmt, mockConn);
-        
+
         verify(mockStmt).close();
         verify(mockConn).close();
     }
@@ -141,9 +138,9 @@ public class DataSourceUtil100Test extends TestBase {
         ResultSet mockRs = mock(ResultSet.class);
         Statement mockStmt = mock(Statement.class);
         Connection mockConn = mock(Connection.class);
-        
+
         DataSourceUtil.close(mockRs, mockStmt, mockConn);
-        
+
         verify(mockRs).close();
         verify(mockStmt).close();
         verify(mockConn).close();
@@ -154,14 +151,12 @@ public class DataSourceUtil100Test extends TestBase {
         ResultSet mockRs = mock(ResultSet.class);
         doThrow(new SQLException("Test exception")).when(mockRs).close();
 
-        // Should not throw exception
         DataSourceUtil.closeQuietly(mockRs);
         verify(mockRs).close();
     }
 
     @Test
     public void testCloseQuietlyResultSetNull() {
-        // Should not throw exception
         DataSourceUtil.closeQuietly((ResultSet) null);
     }
 
@@ -204,14 +199,12 @@ public class DataSourceUtil100Test extends TestBase {
         Statement mockStmt = mock(Statement.class);
         doThrow(new SQLException("Test exception")).when(mockStmt).close();
 
-        // Should not throw exception
         DataSourceUtil.closeQuietly(mockStmt);
         verify(mockStmt).close();
     }
 
     @Test
     public void testCloseQuietlyStatementNull() {
-        // Should not throw exception
         DataSourceUtil.closeQuietly((Statement) null);
     }
 
@@ -220,14 +213,12 @@ public class DataSourceUtil100Test extends TestBase {
         Connection mockConn = mock(Connection.class);
         doThrow(new SQLException("Test exception")).when(mockConn).close();
 
-        // Should not throw exception
         DataSourceUtil.closeQuietly(mockConn);
         verify(mockConn).close();
     }
 
     @Test
     public void testCloseQuietlyConnectionNull() {
-        // Should not throw exception
         DataSourceUtil.closeQuietly((Connection) null);
     }
 
@@ -239,7 +230,6 @@ public class DataSourceUtil100Test extends TestBase {
         doThrow(new SQLException("Test exception")).when(mockRs).close();
         doThrow(new SQLException("Test exception")).when(mockStmt).close();
 
-        // Should not throw exception
         DataSourceUtil.closeQuietly(mockRs, mockStmt);
 
         verify(mockRs).close();
@@ -254,7 +244,6 @@ public class DataSourceUtil100Test extends TestBase {
         doThrow(new SQLException("Test exception")).when(mockStmt).close();
         doThrow(new SQLException("Test exception")).when(mockConn).close();
 
-        // Should not throw exception
         DataSourceUtil.closeQuietly(mockStmt, mockConn);
 
         verify(mockStmt).close();
@@ -271,7 +260,6 @@ public class DataSourceUtil100Test extends TestBase {
         doThrow(new SQLException("Test exception")).when(mockStmt).close();
         doThrow(new SQLException("Test exception")).when(mockConn).close();
 
-        // Should not throw exception
         DataSourceUtil.closeQuietly(mockRs, mockStmt, mockConn);
 
         verify(mockRs).close();
@@ -299,7 +287,6 @@ public class DataSourceUtil100Test extends TestBase {
 
         assertThrows(SQLException.class, () -> DataSourceUtil.executeBatch(mockStmt));
 
-        // clearBatch should still be called
         verify(mockStmt).clearBatch();
     }
 
@@ -310,7 +297,6 @@ public class DataSourceUtil100Test extends TestBase {
         when(mockStmt.executeBatch()).thenReturn(expected);
         doThrow(new SQLException("Clear batch exception")).when(mockStmt).clearBatch();
 
-        // Should not throw exception from clearBatch
         int[] result = DataSourceUtil.executeBatch(mockStmt);
 
         assertArrayEquals(expected, result);
@@ -320,7 +306,6 @@ public class DataSourceUtil100Test extends TestBase {
 
     @Test
     public void testCloseQuietlyWithNullResources() {
-        // All null resources should not throw exception
         DataSourceUtil.closeQuietly(null, null, null);
     }
 
@@ -329,7 +314,6 @@ public class DataSourceUtil100Test extends TestBase {
         ResultSet mockRs = mock(ResultSet.class);
         when(mockRs.getStatement()).thenThrow(new SQLException("Test exception"));
 
-        // Should not throw exception
         DataSourceUtil.closeQuietly(mockRs, true);
 
         verify(mockRs).close();
@@ -343,7 +327,6 @@ public class DataSourceUtil100Test extends TestBase {
         when(mockRs.getStatement()).thenReturn(mockStmt);
         when(mockStmt.getConnection()).thenThrow(new SQLException("Test exception"));
 
-        // Should not throw exception
         DataSourceUtil.closeQuietly(mockRs, true, true);
 
         verify(mockRs).close();

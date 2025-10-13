@@ -176,7 +176,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @return the left element of this pair (can be null)
      */
     public L left() {
-        return left;
+        return this.left;
     }
 
     /**
@@ -193,7 +193,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @return the right element of this pair (can be null)
      */
     public R right() {
-        return right;
+        return this.right;
     }
 
     /**
@@ -462,58 +462,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
         return false;
     }
-    //
-    //    /**
-    //     *
-    //     * @deprecated don't access this method by {@code Pair} interface.
-    //     */
-    //    @Deprecated
-    //    @Override
-    //    public L getKey() {
-    //        return left;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @deprecated don't access this method by {@code Pair} interface.
-    //     */
-    //    @Deprecated
-    //    @Override
-    //    public R getValue() {
-    //        return right;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @deprecated don't access this method by {@code Pair} interface.
-    //     */
-    //    @Deprecated
-    //    @Override
-    //    public R setValue(R value) {
-    //        R oldValue = this.right;
-    //        this.right = value;
-    //
-    //        return oldValue;
-    //    }
-
-    //    public R getAndSetValue(R newRight) {
-    //        return getAndSetRight(newRight);
-    //    }
-    //
-    //    public R setAndGetValue(R newRight) {
-    //        return setAndGetRight(newRight);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param newRight
-    //     * @param predicate
-    //     * @return
-    //     * @see #setRightIf(Object, BiPredicate)
-    //     */
-    //    public boolean setValueIf(final R newRight, BiPredicate<? super Pair<L, R>, ? super R> predicate) {
-    //        return setRightIf(newRight, predicate);
-    //    }
 
     /**
      * Creates and returns a new Pair with the left and right elements swapped.
@@ -901,9 +849,20 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     /**
      * Returns the left element of this pair, implementing the Map.Entry interface.
      * This method allows Pair to be used wherever a Map.Entry is expected.
-     * 
+     *
+     * <p>This method is deprecated in favor of {@link #left()} which provides
+     * a more concise API. When using Pair as a Map.Entry, the left element
+     * serves as the key.</p>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * Pair<String, Integer> pair = Pair.of("key", 100);
+     * Map.Entry<String, Integer> entry = pair;
+     * String key = entry.getKey(); // Returns "key"
+     * }</pre>
+     *
      * @return the left element of this pair (can be null)
-     * @deprecated using {@link #left}
+     * @deprecated Use {@link #left()} instead for cleaner code
      */
     @Deprecated
     @Override
@@ -914,9 +873,20 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     /**
      * Returns the right element of this pair, implementing the Map.Entry interface.
      * This method allows Pair to be used wherever a Map.Entry is expected.
-     * 
+     *
+     * <p>This method is deprecated in favor of {@link #right()} which provides
+     * a more concise API. When using Pair as a Map.Entry, the right element
+     * serves as the value.</p>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * Pair<String, Integer> pair = Pair.of("key", 100);
+     * Map.Entry<String, Integer> entry = pair;
+     * Integer value = entry.getValue(); // Returns 100
+     * }</pre>
+     *
      * @return the right element of this pair (can be null)
-     * @deprecated using {@link #right}
+     * @deprecated Use {@link #right()} instead for cleaner code
      */
     @Deprecated
     @Override
@@ -928,10 +898,23 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Sets the right element of this pair to the specified value and returns
      * the previous value, implementing the Map.Entry interface.
      * This method allows Pair to be used wherever a mutable Map.Entry is expected.
-     * 
+     *
+     * <p>This method is deprecated in favor of {@link #setRight(Object)} or
+     * {@link #getAndSetRight(Object)} which provide a clearer API. When using
+     * Pair as a Map.Entry, this method modifies the value (right element) and
+     * returns the old value.</p>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * Pair<String, Integer> pair = Pair.of("key", 100);
+     * Map.Entry<String, Integer> entry = pair;
+     * Integer oldValue = entry.setValue(200);
+     * // oldValue equals 100, pair.right() now returns 200
+     * }</pre>
+     *
      * @param value the new value to set for the right element (can be null)
      * @return the previous value of the right element (can be null)
-     * @deprecated using {@link #setRight(Object)}
+     * @deprecated Use {@link #setRight(Object)} or {@link #getAndSetRight(Object)} instead
      */
     @Deprecated
     @Override

@@ -69,11 +69,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Strings.StrUtil;
 
+@Tag("new-test")
 public class Strings101Test extends TestBase {
 
     @Test
@@ -88,7 +90,6 @@ public class Strings101Test extends TestBase {
         assertEquals(", ", Strings.ELEMENT_SEPARATOR);
     }
 
-    // substring tests
     @Test
     public void testSubstring_WithInclusiveBeginIndex() {
         assertEquals("World", substring("Hello World", 6));
@@ -108,7 +109,7 @@ public class Strings101Test extends TestBase {
         assertNull(substring("Hello", 0, -1));
         assertNull(substring("Hello", 3, 2));
         assertNull(substring(null, 0, 5));
-        assertEquals("ello", substring("Hello", 1, 10)); // End index beyond length
+        assertEquals("ello", substring("Hello", 1, 10));
     }
 
     @Test
@@ -129,7 +130,6 @@ public class Strings101Test extends TestBase {
         assertNull(substring("Hello", i -> 0, -1));
     }
 
-    // substringAfter tests
     @Test
     public void testSubstringAfter_Char() {
         assertEquals("llo World", substringAfter("Hello World", 'e'));
@@ -172,7 +172,6 @@ public class Strings101Test extends TestBase {
         assertEquals("test", substringAfterIgnoreCase("test", ""));
     }
 
-    // substringAfterLast tests
     @Test
     public void testSubstringAfterLast_Char() {
         assertEquals("txt", substringAfterLast("file.name.txt", '.'));
@@ -212,7 +211,6 @@ public class Strings101Test extends TestBase {
         assertEquals("", substringAfterLastIgnoreCase("test", ""));
     }
 
-    // substringAfterAny tests
     @Test
     public void testSubstringAfterAny_Chars() {
         assertEquals("llo World", substringAfterAny("Hello World", 'x', 'e', 'z'));
@@ -231,7 +229,6 @@ public class Strings101Test extends TestBase {
         assertNull(substringAfterAny("test", N.EMPTY_STRING_ARRAY));
     }
 
-    // substringBefore tests
     @Test
     public void testSubstringBefore_Char() {
         assertEquals("He", substringBefore("Hello World", 'l'));
@@ -271,7 +268,6 @@ public class Strings101Test extends TestBase {
         assertEquals("", substringBeforeIgnoreCase("test", ""));
     }
 
-    // substringBeforeLast tests
     @Test
     public void testSubstringBeforeLast_Char() {
         assertEquals("file.name", substringBeforeLast("file.name.txt", '.'));
@@ -311,7 +307,6 @@ public class Strings101Test extends TestBase {
         assertEquals("test", substringBeforeLastIgnoreCase("test", ""));
     }
 
-    // substringBeforeAny tests
     @Test
     public void testSubstringBeforeAny_Chars() {
         assertEquals("He", substringBeforeAny("Hello World", 'x', 'l', 'z'));
@@ -330,7 +325,6 @@ public class Strings101Test extends TestBase {
         assertNull(substringBeforeAny("test", N.EMPTY_STRING_ARRAY));
     }
 
-    // substringBetween tests
     @Test
     public void testSubstringBetween_Indexes() {
         assertEquals("ll", substringBetween("Hello", 1, 4));
@@ -421,19 +415,16 @@ public class Strings101Test extends TestBase {
 
     @Test
     public void testSubstringBetween_WithFunctions() {
-        // With function of exclusive end index
         assertEquals("e", substringBetween("Hello", 0, i -> i + 2));
         assertNull(substringBetween("Hello", 0, i -> -1));
         assertEquals("Hello", substringBetween("Hello", -1, i -> 5));
         assertNull(substringBetween(null, 0, i -> 5));
 
-        // With function of inclusive begin index
         assertEquals("l", substringBetween("Hello", i -> i - 2, 4));
         assertEquals("Hell", substringBetween("Hello", i -> -1, 4));
         assertNull(substringBetween("Hello", i -> 5, 4));
         assertNull(substringBetween(null, i -> 0, 4));
 
-        // With delimiter and function
         assertEquals("ello Wor", substringBetween("Hello World", "H", i -> i + 8));
         assertNull(substringBetween("Hello", "H", i -> -1));
 
@@ -441,7 +432,6 @@ public class Strings101Test extends TestBase {
         assertEquals(null, substringBetween("Hello", i -> -1, "World"));
     }
 
-    // substringsBetween tests
     @Test
     public void testSubstringsBetween_Chars() {
         List<String> result = substringsBetween("3[a2[c]]2[a]", '[', ']');
@@ -487,7 +477,6 @@ public class Strings101Test extends TestBase {
         assertTrue(substringsBetween("abc", 0, 3, "<", ">").isEmpty());
     }
 
-    // substringIndicesBetween tests
     @Test
     public void testSubstringIndicesBetween_Chars() {
         List<int[]> indices = substringIndicesBetween("3[a2[c]]2[a]", '[', ']');
@@ -528,7 +517,6 @@ public class Strings101Test extends TestBase {
 
     }
 
-    // replaceRange tests
     @Test
     public void testReplaceRange() {
         assertEquals("Heo World", replaceRange("Hello World", 2, 4, ""));
@@ -541,50 +529,44 @@ public class Strings101Test extends TestBase {
             replaceRange("Hello", -1, 3, "x");
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
 
         try {
             replaceRange("Hello", 2, 1, "x");
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
     }
 
-    // moveRange tests
     @Test
     public void testMoveRange() {
         assertEquals("lo WoHelrld", moveRange("Hello World", 0, 3, 5));
         assertEquals("Hlo Worldel", moveRange("Hello World", 1, 3, 9));
         assertEquals("lo HelWorld", moveRange("Hello World", 3, 6, 0));
         assertEquals("", moveRange("", 0, 0, 0));
-        assertEquals("Hello", moveRange("Hello", 0, 3, 0)); // No change
-        assertEquals("Hello", moveRange("Hello", 2, 2, 3)); // Empty range
+        assertEquals("Hello", moveRange("Hello", 0, 3, 0));
+        assertEquals("Hello", moveRange("Hello", 2, 2, 3));
 
         try {
             moveRange("Hello", -1, 3, 0);
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
 
         try {
             moveRange("Hello", 0, 3, 6);
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
     }
 
-    // deleteRange tests
     @Test
     public void testDeleteRange() {
         assertEquals("Ho World", deleteRange("Hello World", 1, 4));
         assertEquals("World", deleteRange("Hello World", 0, 6));
         assertEquals("Hello", deleteRange("Hello World", 5, 11));
         assertEquals("", deleteRange("Hello", 0, 5));
-        assertEquals("Hello", deleteRange("Hello", 2, 2)); // Empty range 
+        assertEquals("Hello", deleteRange("Hello", 2, 2));
 
         assertEquals("", deleteRange("", 0, 0));
 
@@ -592,25 +574,21 @@ public class Strings101Test extends TestBase {
             deleteRange("Hello", 5, 10);
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
 
         try {
             deleteRange("Hello", -1, 3);
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
 
         try {
             deleteRange("Hello", 3, 1);
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
     }
 
-    // join tests for boolean arrays
     @Test
     public void testJoin_BooleanArray() {
         assertEquals("true, false, true", join(new boolean[] { true, false, true }));
@@ -631,7 +609,6 @@ public class Strings101Test extends TestBase {
             join(new boolean[] { true, false }, 0, 3, ",");
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
     }
 
@@ -644,7 +621,6 @@ public class Strings101Test extends TestBase {
         assertEquals("suffix", join(new boolean[] {}, 0, 0, ", ", null, "suffix"));
     }
 
-    // join tests for char arrays
     @Test
     public void testJoin_CharArray() {
         assertEquals("a, b, c", join(new char[] { 'a', 'b', 'c' }));
@@ -668,7 +644,6 @@ public class Strings101Test extends TestBase {
         assertEquals("<a-b-c>", join(new char[] { 'a', 'b', 'c' }, 0, 3, "-", "<", ">"));
     }
 
-    // join tests for byte arrays
     @Test
     public void testJoin_ByteArray() {
         assertEquals("1, 2, 3", join(new byte[] { 1, 2, 3 }));
@@ -691,7 +666,6 @@ public class Strings101Test extends TestBase {
         assertEquals("{1-2-3}", join(new byte[] { 1, 2, 3 }, 0, 3, "-", "{", "}"));
     }
 
-    // join tests for short arrays
     @Test
     public void testJoin_ShortArray() {
         assertEquals("1, 2, 3", join(new short[] { 1, 2, 3 }));
@@ -712,7 +686,6 @@ public class Strings101Test extends TestBase {
         assertEquals("[1, 2]", join(new short[] { 1, 2 }, 0, 2, ", ", "[", "]"));
     }
 
-    // join tests for int arrays
     @Test
     public void testJoin_IntArray() {
         assertEquals("1, 2, 3", join(new int[] { 1, 2, 3 }));
@@ -734,7 +707,6 @@ public class Strings101Test extends TestBase {
         assertEquals("START:100:200:END", join(new int[] { 100, 200 }, 0, 2, ":", "START:", ":END"));
     }
 
-    // join tests for long arrays
     @Test
     public void testJoin_LongArray() {
         assertEquals("1, 2, 3", join(new long[] { 1L, 2L, 3L }));
@@ -755,7 +727,6 @@ public class Strings101Test extends TestBase {
         assertEquals("[1, 2]", join(new long[] { 1L, 2L }, 0, 2, ", ", "[", "]"));
     }
 
-    // join tests for float arrays
     @Test
     public void testJoin_FloatArray() {
         assertEquals("1.0, 2.0, 3.0", join(new float[] { 1.0f, 2.0f, 3.0f }));
@@ -776,7 +747,6 @@ public class Strings101Test extends TestBase {
         assertEquals("[1.0, 2.0]", join(new float[] { 1.0f, 2.0f }, 0, 2, ", ", "[", "]"));
     }
 
-    // join tests for double arrays
     @Test
     public void testJoin_DoubleArray() {
         assertEquals("1.0, 2.0, 3.0", join(new double[] { 1.0, 2.0, 3.0 }));
@@ -797,7 +767,6 @@ public class Strings101Test extends TestBase {
         assertEquals("[1.0, 2.0]", join(new double[] { 1.0, 2.0 }, 0, 2, ", ", "[", "]"));
     }
 
-    // join tests for Object arrays
     @Test
     public void testJoin_ObjectArray() {
         assertEquals("a, b, c", join(new Object[] { "a", "b", "c" }));
@@ -829,7 +798,6 @@ public class Strings101Test extends TestBase {
         assertEquals("[a, b]", join(new Object[] { " a ", " b " }, 0, 2, ", ", "[", "]", true));
     }
 
-    // join tests for Iterable
     @Test
     public void testJoin_Iterable() {
         assertEquals("a, b, c", join(Arrays.asList("a", "b", "c")));
@@ -851,7 +819,6 @@ public class Strings101Test extends TestBase {
         assertEquals("[a, b]", join(Arrays.asList(" a ", " b "), ", ", "[", "]", true));
     }
 
-    // join tests for Collection
     @Test
     public void testJoin_CollectionWithRange() {
         List<String> list = Arrays.asList("a", "b", "c", "d");
@@ -864,7 +831,6 @@ public class Strings101Test extends TestBase {
             join(list, 0, 5, ",");
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
     }
 
@@ -883,7 +849,6 @@ public class Strings101Test extends TestBase {
         assertEquals("[a, b]", join(list, 0, 2, ", ", "[", "]", true));
     }
 
-    // join tests for Iterator
     @Test
     public void testJoin_Iterator() {
         assertEquals("a, b, c", join(Arrays.asList("a", "b", "c").iterator()));
@@ -905,7 +870,6 @@ public class Strings101Test extends TestBase {
         assertEquals("[a, b]", join(Arrays.asList(" a ", " b ").iterator(), ", ", "[", "]", true));
     }
 
-    // joinEntries tests for Map
     @Test
     public void testJoinEntries_Map() {
         Map<String, Integer> map = new LinkedHashMap<>();
@@ -974,11 +938,9 @@ public class Strings101Test extends TestBase {
             joinEntries(map, 0, 4, ",");
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
     }
 
-    // concat tests
     @Test
     public void testConcat_TwoStrings() {
         assertEquals("HelloWorld", concat("Hello", "World"));
@@ -1017,7 +979,6 @@ public class Strings101Test extends TestBase {
         assertEquals("", concat(null, null));
     }
 
-    // lenientFormat test
     @Test
     public void testLenientFormat() {
         assertEquals("Hello World", lenientFormat("Hello %s", "World"));
@@ -1028,7 +989,6 @@ public class Strings101Test extends TestBase {
         assertEquals("Hello (Object[])null", lenientFormat("Hello %s", (Object[]) null));
     }
 
-    // reverse tests
     @Test
     public void testReverse() {
         assertEquals("dlroW olleH", reverse("Hello World"));
@@ -1056,7 +1016,6 @@ public class Strings101Test extends TestBase {
         assertNull(reverseDelimited(null, "."));
     }
 
-    // sort test
     @Test
     public void testSort() {
         assertEquals("abcde", sort("edcba"));
@@ -1067,7 +1026,6 @@ public class Strings101Test extends TestBase {
         assertEquals("a", sort("a"));
     }
 
-    // rotate test
     @Test
     public void testRotate() {
         assertEquals("fgabcde", rotate("abcdefg", 2));
@@ -1082,14 +1040,12 @@ public class Strings101Test extends TestBase {
         assertEquals("a", rotate("a", 5));
     }
 
-    // shuffle test
     @Test
     public void testShuffle() {
         String original = "abcdefghijk";
         String shuffled = shuffle(original);
         assertEquals(original.length(), shuffled.length());
 
-        // Check all characters are present
         for (char c : original.toCharArray()) {
             assertTrue(shuffled.indexOf(c) >= 0);
         }
@@ -1101,18 +1057,16 @@ public class Strings101Test extends TestBase {
 
     @Test
     public void testShuffle_WithRandom() {
-        Random rnd = new Random(12345); // Fixed seed for reproducible tests
+        Random rnd = new Random(12345);
         String original = "abcdefghijk";
         String shuffled = shuffle(original, rnd);
         assertEquals(original.length(), shuffled.length());
 
-        // Check all characters are present
         for (char c : original.toCharArray()) {
             assertTrue(shuffled.indexOf(c) >= 0);
         }
     }
 
-    // parseBoolean test
     @Test
     public void testParseBoolean() {
         assertTrue(parseBoolean("true"));
@@ -1125,7 +1079,6 @@ public class Strings101Test extends TestBase {
         assertFalse(parseBoolean(null));
     }
 
-    // parseChar test
     @Test
     public void testParseChar() {
         assertEquals('a', parseChar("a"));
@@ -1136,7 +1089,6 @@ public class Strings101Test extends TestBase {
         assertEquals((char) 0, parseChar(null));
     }
 
-    // Base64 tests
     @Test
     public void testBase64Encode() {
         assertEquals("SGVsbG8gV29ybGQ=", base64Encode("Hello World".getBytes()));
@@ -1193,7 +1145,6 @@ public class Strings101Test extends TestBase {
         assertEquals("", base64DecodeToString(null, StandardCharsets.UTF_8));
     }
 
-    // Base64 URL tests
     @Test
     public void testBase64UrlEncode() {
         byte[] data = "Hello World!".getBytes();
@@ -1237,7 +1188,6 @@ public class Strings101Test extends TestBase {
         assertEquals("", base64UrlDecodeToString(null, StandardCharsets.UTF_8));
     }
 
-    // isBase64 tests
     @Test
     public void testIsBase64_Byte() {
         assertTrue(isBase64((byte) 'A'));
@@ -1255,7 +1205,7 @@ public class Strings101Test extends TestBase {
         assertTrue(isBase64("SGVsbG8gV29ybGQ=".getBytes()));
         assertTrue(isBase64("".getBytes()));
         assertFalse(isBase64("Hello#World".getBytes()));
-        assertTrue(isBase64("SGVsbG8 V29ybGQ=".getBytes())); // Contains whitespace
+        assertTrue(isBase64("SGVsbG8 V29ybGQ=".getBytes()));
     }
 
     @Test
@@ -1263,10 +1213,9 @@ public class Strings101Test extends TestBase {
         assertTrue(isBase64("SGVsbG8gV29ybGQ="));
         assertTrue(isBase64(""));
         assertFalse(isBase64("Hello#World"));
-        assertTrue(isBase64("SGVsbG8 V29ybGQ=")); // Contains whitespace
+        assertTrue(isBase64("SGVsbG8 V29ybGQ="));
     }
 
-    // Email tests
     @Test
     public void testFindFirstEmailAddress() {
         assertEquals("test@example.com", findFirstEmailAddress("Contact us at test@example.com"));
@@ -1288,13 +1237,12 @@ public class Strings101Test extends TestBase {
         assertTrue(findAllEmailAddresses(null).isEmpty());
     }
 
-    // copyThenTrim and copyThenStrip tests
     @Test
     public void testCopyThenTrim() {
         String[] input = { " a ", " b ", " c " };
         String[] result = copyThenTrim(input);
         assertArrayEquals(new String[] { "a", "b", "c" }, result);
-        assertNotSame(input, result); // Ensure it's a copy
+        assertNotSame(input, result);
 
         assertArrayEquals(new String[] {}, copyThenTrim(new String[] {}));
         assertNull(copyThenTrim(null));
@@ -1305,21 +1253,20 @@ public class Strings101Test extends TestBase {
         String[] input = { " a ", " b ", " c " };
         String[] result = copyThenStrip(input);
         assertArrayEquals(new String[] { "a", "b", "c" }, result);
-        assertNotSame(input, result); // Ensure it's a copy
+        assertNotSame(input, result);
 
         assertArrayEquals(new String[] {}, copyThenStrip(new String[] {}));
         assertNull(copyThenStrip(null));
     }
 
-    // extractFirstInteger and extractFirstDouble tests
     @Test
     public void testExtractFirstInteger() {
         assertEquals("123", extractFirstInteger("abc123def"));
         assertEquals("-456", extractFirstInteger("test-456test"));
         assertEquals("789", extractFirstInteger("789"));
-        assertEquals("", extractFirstInteger("no numbers"));
-        assertEquals("", extractFirstInteger(""));
-        assertEquals("", extractFirstInteger(null));
+        assertNull(extractFirstInteger("no numbers"));
+        assertNull(extractFirstInteger(""));
+        assertNull(extractFirstInteger(null));
     }
 
     @Test
@@ -1328,9 +1275,9 @@ public class Strings101Test extends TestBase {
         assertEquals("-456.78", extractFirstDouble("test-456.78test"));
         assertEquals("789", extractFirstDouble("789"));
         assertEquals("3.14", extractFirstDouble("pi=3.14"));
-        assertEquals("", extractFirstDouble("no numbers"));
-        assertEquals("", extractFirstDouble(""));
-        assertEquals("", extractFirstDouble(null));
+        assertNull(extractFirstDouble("no numbers"));
+        assertNull(extractFirstDouble(""));
+        assertNull(extractFirstDouble(null));
     }
 
     @Test
@@ -1338,12 +1285,11 @@ public class Strings101Test extends TestBase {
         assertEquals("1.23e4", extractFirstDouble("value=1.23e4", true));
         assertEquals("1.23E-4", extractFirstDouble("small=1.23E-4", true));
         assertEquals("123.45", extractFirstDouble("abc123.45def", true));
-        assertEquals("", extractFirstDouble("no numbers", true));
-        assertEquals("", extractFirstDouble("", true));
-        assertEquals("", extractFirstDouble(null, true));
+        assertNull(extractFirstDouble("no numbers", true));
+        assertNull(extractFirstDouble("", true));
+        assertNull(extractFirstDouble(null, true));
     }
 
-    // replaceFirstInteger and replaceFirstDouble tests
     @Test
     public void testReplaceFirstInteger() {
         assertEquals("abcXXXdef", replaceFirstInteger("abc123def", "XXX"));
@@ -1375,10 +1321,8 @@ public class Strings101Test extends TestBase {
         assertEquals("", replaceFirstDouble(null, "XXX", true));
     }
 
-    // StrUtil nested class tests
     @Test
     public void testStrUtil_Substring() {
-        // Test Optional<String> substring methods
         assertEquals("World", StrUtil.substring("Hello World", 6).orElse(null));
         assertFalse(StrUtil.substring("Hello", -1).isPresent());
         assertFalse(StrUtil.substring(null, 0).isPresent());
@@ -1494,26 +1438,21 @@ public class Strings101Test extends TestBase {
 
     @Test
     public void testStrUtil_SubstringOrElseMethods() {
-        // substringAfterOrElse
         assertEquals("World", StrUtil.substringAfterOrElse("Hello World", "Hello ", "default"));
         assertEquals("default", StrUtil.substringAfterOrElse("Hello", "xyz", "default"));
 
-        // substringAfterLastOrElse
         assertEquals("txt", StrUtil.substringAfterLastOrElse("file.name.txt", ".", "default"));
         assertEquals("default", StrUtil.substringAfterLastOrElse("Hello", "xyz", "default"));
 
-        // substringBeforeOrElse
         assertEquals("Hello", StrUtil.substringBeforeOrElse("Hello World", " World", "default"));
         assertEquals("default", StrUtil.substringBeforeOrElse("Hello", "xyz", "default"));
 
-        // substringBeforeLastOrElse
         assertEquals("file.name", StrUtil.substringBeforeLastOrElse("file.name.txt", ".", "default"));
         assertEquals("default", StrUtil.substringBeforeLastOrElse("Hello", "xyz", "default"));
     }
 
     @Test
     public void testStrUtil_SubstringOrElseItselfMethods() {
-        // substringAfterOrElseItself
         assertEquals("llo World", StrUtil.substringAfterOrElseItself("Hello World", 'e'));
         assertEquals("Hello", StrUtil.substringAfterOrElseItself("Hello", 'x'));
 
@@ -1523,7 +1462,6 @@ public class Strings101Test extends TestBase {
         assertEquals("Wo", StrUtil.substringAfterOrElseItself("Hello World", "Hello ", 8));
         assertEquals("Hello World", StrUtil.substringAfterOrElseItself("Hello World", "World", 8));
 
-        // substringAfterLastOrElseItself
         assertEquals("txt", StrUtil.substringAfterLastOrElseItself("file.name.txt", '.'));
         assertEquals("Hello", StrUtil.substringAfterLastOrElseItself("Hello", 'x'));
 
@@ -1533,7 +1471,6 @@ public class Strings101Test extends TestBase {
         assertEquals("name", StrUtil.substringAfterLastOrElseItself("file.name.txt", ".", 9));
         assertEquals("file.name.txt", StrUtil.substringAfterLastOrElseItself("file.name.txt", ".", 3));
 
-        // substringBeforeOrElseItself
         assertEquals("He", StrUtil.substringBeforeOrElseItself("Hello World", 'l'));
         assertEquals("Hello", StrUtil.substringBeforeOrElseItself("Hello", 'x'));
 
@@ -1543,7 +1480,6 @@ public class Strings101Test extends TestBase {
         assertEquals("lo", StrUtil.substringBeforeOrElseItself("Hello World", 3, " World"));
         assertEquals("Hello World", StrUtil.substringBeforeOrElseItself("Hello World", 7, " "));
 
-        // substringBeforeLastOrElseItself
         assertEquals("file.name", StrUtil.substringBeforeLastOrElseItself("file.name.txt", '.'));
         assertEquals("Hello", StrUtil.substringBeforeLastOrElseItself("Hello", 'x'));
 
@@ -1582,7 +1518,6 @@ public class Strings101Test extends TestBase {
         assertEquals("", StrUtil.substringBetween("abcabc", 2, "b", "").orElse(null));
         assertFalse(StrUtil.substringBetween("abc", 5, "a", "c").isPresent());
 
-        // With functions
         assertEquals("e", StrUtil.substringBetween("Hello", 0, i -> i + 2).orElse(null));
         assertFalse(StrUtil.substringBetween("Hello", 0, i -> -1).isPresent());
 
@@ -1598,43 +1533,36 @@ public class Strings101Test extends TestBase {
 
     @Test
     public void testStrUtil_CreateNumber() {
-        // createInteger
         assertEquals(123, StrUtil.createInteger("123").orElse(-1));
         assertFalse(StrUtil.createInteger("abc").isPresent());
         assertFalse(StrUtil.createInteger("").isPresent());
         assertFalse(StrUtil.createInteger(null).isPresent());
 
-        // createLong
         assertEquals(123L, StrUtil.createLong("123").orElse(-1L));
         assertFalse(StrUtil.createLong("abc").isPresent());
         assertFalse(StrUtil.createLong("").isPresent());
         assertFalse(StrUtil.createLong(null).isPresent());
 
-        // createFloat
         assertEquals(123.45f, StrUtil.createFloat("123.45").orElse(-1f), 0.001f);
         assertFalse(StrUtil.createFloat("abc").isPresent());
         assertFalse(StrUtil.createFloat("").isPresent());
         assertFalse(StrUtil.createFloat(null).isPresent());
 
-        // createDouble
         assertEquals(123.45, StrUtil.createDouble("123.45").orElse(-1.0), 0.001);
         assertFalse(StrUtil.createDouble("abc").isPresent());
         assertFalse(StrUtil.createDouble("").isPresent());
         assertFalse(StrUtil.createDouble(null).isPresent());
 
-        // createBigInteger
         assertEquals(new BigInteger("123456789012345678901234567890"), StrUtil.createBigInteger("123456789012345678901234567890").orElse(null));
         assertFalse(StrUtil.createBigInteger("abc").isPresent());
         assertFalse(StrUtil.createBigInteger("").isPresent());
         assertFalse(StrUtil.createBigInteger(null).isPresent());
 
-        // createBigDecimal
         assertEquals(new BigDecimal("123.45678901234567890"), StrUtil.createBigDecimal("123.45678901234567890").orElse(null));
         assertFalse(StrUtil.createBigDecimal("abc").isPresent());
         assertFalse(StrUtil.createBigDecimal("").isPresent());
         assertFalse(StrUtil.createBigDecimal(null).isPresent());
 
-        // createNumber
         assertTrue(StrUtil.createNumber("123").isPresent());
         assertTrue(StrUtil.createNumber("123.45").isPresent());
         assertTrue(StrUtil.createNumber("123L").isPresent());
@@ -1643,20 +1571,16 @@ public class Strings101Test extends TestBase {
         assertFalse(StrUtil.createNumber(null).isPresent());
     }
 
-    // Additional edge case tests
     @Test
     public void testEdgeCases() {
-        // Test with very long strings
         String longString = "a".repeat(10000);
         assertEquals(10000, reverse(longString).length());
         assertEquals(10000, sort(longString).length());
 
-        // Test with unicode characters
         String unicode = "Hello 世界 🌍";
         assertNotNull(reverse(unicode));
         assertNotNull(sort(unicode));
 
-        // Test with special characters
         String special = "!@#$%^&*()_+-=[]{}|;:'\",.<>?/\\`~";
         assertNotNull(reverse(special));
         assertNotNull(sort(special));
@@ -1664,7 +1588,6 @@ public class Strings101Test extends TestBase {
 
     @Test
     public void testNullHandling() {
-        // Ensure consistent null handling across all methods
         assertNull(substring(null, 0));
         assertNull(substringAfter(null, 'a'));
         assertNull(substringBefore(null, 'a'));
@@ -1679,7 +1602,6 @@ public class Strings101Test extends TestBase {
 
     @Test
     public void testEmptyStringHandling() {
-        // Ensure consistent empty string handling
         assertEquals("", substring("", 0));
         assertNull(substringAfter("", 'a'));
         assertEquals("", reverse(""));

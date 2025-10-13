@@ -15,9 +15,11 @@ import java.sql.SQLXML;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class SQLXMLType100Test extends TestBase {
 
     private SQLXMLType sqlXMLType;

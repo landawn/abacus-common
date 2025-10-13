@@ -8,12 +8,14 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SetMultimap;
 
+@Tag("new-test")
 public class MultimapType100Test extends TestBase {
 
     private MultimapType<String, Integer, List<Integer>, ListMultimap<String, Integer>> listMultimapType;

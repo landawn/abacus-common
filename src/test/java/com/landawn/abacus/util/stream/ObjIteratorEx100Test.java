@@ -9,9 +9,11 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class ObjIteratorEx100Test extends TestBase {
 
     @Test
@@ -20,7 +22,7 @@ public class ObjIteratorEx100Test extends TestBase {
         Assertions.assertFalse(iter.hasNext());
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.next());
         Assertions.assertEquals(0, iter.count());
-        iter.close(); // Should not throw
+        iter.close();
     }
 
     @Test
@@ -153,14 +155,11 @@ public class ObjIteratorEx100Test extends TestBase {
         Supplier<Iterator<String>> supplier = () -> ObjIteratorEx.of(array);
         ObjIteratorEx<String> iter = ObjIteratorEx.defer(supplier);
         
-        // Test advance
         iter.advance(1);
         Assertions.assertEquals("b", iter.next());
         
-        // Test count
         Assertions.assertEquals(1, iter.count());
         
-        // Test close
         iter.close();
     }
 
@@ -180,7 +179,6 @@ public class ObjIteratorEx100Test extends TestBase {
         iter.advance(1);
         Assertions.assertEquals("e", iter.next());
         
-        // Advance beyond end
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
@@ -239,6 +237,6 @@ public class ObjIteratorEx100Test extends TestBase {
     @Test
     public void testClose() {
         ObjIteratorEx<String> iter = ObjIteratorEx.of("a", "b", "c");
-        iter.close(); // Should not throw
+        iter.close();
     }
 }

@@ -49,7 +49,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * int age = user.get("age", Integer.class); // returns 30
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 1.0
  */
 @Internal

@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ContinuableFuture;
@@ -36,6 +37,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
+@Tag("new-test")
 public class OkHttpRequest100Test extends TestBase {
 
     private MockWebServer server;
@@ -949,7 +951,6 @@ public class OkHttpRequest100Test extends TestBase {
         assertTrue(recordedRequest.getPath().contains("num=123"));
     }
 
-    // Helper classes
     public static class TestBean {
         private String field1;
         private String field2;

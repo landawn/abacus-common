@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -38,6 +39,7 @@ import com.esotericsoftware.kryo.io.Output;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Strings;
 
+@Tag("new-test")
 public class KryoParser100Test extends TestBase {
 
     private KryoParser parser;
@@ -50,7 +52,6 @@ public class KryoParser100Test extends TestBase {
         parser = new KryoParser();
     }
 
-    // Test Data Classes
     public static class TestObject implements Serializable {
         private String name;
         private int value;
@@ -332,7 +333,6 @@ public class KryoParser100Test extends TestBase {
 
     @Test
     public void testSerializePrimitiveTypes() {
-        // Test various primitive types
         assertEquals(123, (int) parser.decode(parser.encode(123)));
         assertEquals(123L, (long) parser.decode(parser.encode(123L)));
         assertEquals(123.45f, (float) parser.decode(parser.encode(123.45f)), 0.001);

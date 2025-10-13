@@ -43,7 +43,17 @@ public class JUDateType extends AbstractDateType<Date> {
 
     /**
      * Gets the declaring name of this type.
-     * 
+     * This method returns the canonical class name for java.util.Date, which is used
+     * for type identification in serialization and metadata operations.
+     *
+     * <pre>
+     * {@code
+     * JUDateType type = new JUDateType();
+     * String name = type.declaringName();
+     * System.out.println(name); // Outputs: java.util.Date
+     * }
+     * </pre>
+     *
      * @return the canonical name of java.util.Date class
      */
     @Override
@@ -53,6 +63,16 @@ public class JUDateType extends AbstractDateType<Date> {
 
     /**
      * Gets the class type for java.util.Date.
+     * This method returns the Class object representing java.util.Date, which is used
+     * for type identification and reflection operations.
+     *
+     * <pre>
+     * {@code
+     * JUDateType type = new JUDateType();
+     * Class<Date> clazz = type.clazz();
+     * System.out.println(clazz.getName()); // Outputs: java.util.Date
+     * }
+     * </pre>
      *
      * @return the Class object representing java.util.Date
      */
@@ -63,13 +83,31 @@ public class JUDateType extends AbstractDateType<Date> {
 
     /**
      * Converts the specified object to a java.util.Date instance.
-     * 
+     * This method provides flexible conversion from various types, supporting Numbers,
+     * existing Date objects, and string representations.
+     *
      * This method handles the following conversions:
      * - Number: treated as milliseconds since epoch and converted to Date
      * - Date: creates a new Date instance with the same time value
      * - String: parsed using the valueOf(String) method
      * - null: returns null
      * - Other types: converted to string first, then parsed
+     *
+     * <pre>
+     * {@code
+     * JUDateType type = new JUDateType();
+     *
+     * // From Number (milliseconds since epoch)
+     * Date date1 = type.valueOf(1609459200000L);
+     *
+     * // From existing Date
+     * Date existing = new Date();
+     * Date date2 = type.valueOf(existing); // Creates a new instance
+     *
+     * // From String
+     * Date date3 = type.valueOf("2021-01-01");
+     * }
+     * </pre>
      *
      * @param obj the object to convert to Date
      * @return a Date instance, or null if the input is null
@@ -87,11 +125,29 @@ public class JUDateType extends AbstractDateType<Date> {
 
     /**
      * Parses a string representation into a java.util.Date instance.
-     * 
+     * This method supports multiple date formats including ISO 8601 and common date patterns,
+     * delegating to the Dates utility for flexible parsing.
+     *
      * This method handles the following string formats:
      * - Empty/null string: returns null
      * - "SYS_TIME": returns current system time as Date
      * - Other formats: parsed using the Dates.parseJUDate utility method
+     *
+     * <pre>
+     * {@code
+     * JUDateType type = new JUDateType();
+     *
+     * // Parse ISO 8601 date
+     * Date date1 = type.valueOf("2021-01-01");
+     *
+     * // Get current system time
+     * Date date2 = type.valueOf("SYS_TIME");
+     *
+     * // Parse common date formats (supported by Dates utility)
+     * Date date3 = type.valueOf("01/01/2021");
+     * Date date4 = type.valueOf("2021-01-01 10:30:00");
+     * }
+     * </pre>
      *
      * @param str the string to parse
      * @return a Date instance, or null if the string is empty or null
@@ -104,9 +160,25 @@ public class JUDateType extends AbstractDateType<Date> {
 
     /**
      * Parses a character array into a java.util.Date instance.
-     * 
+     * This method provides efficient parsing from character arrays, attempting numeric parsing first
+     * for performance optimization.
+     *
      * This method first attempts to parse the character array as a long value (milliseconds since epoch).
      * If that fails, it converts the character array to a string and delegates to valueOf(String).
+     *
+     * <pre>
+     * {@code
+     * JUDateType type = new JUDateType();
+     *
+     * // Parse from character array containing milliseconds
+     * char[] millisChars = "1609459200000".toCharArray();
+     * Date date1 = type.valueOf(millisChars, 0, millisChars.length);
+     *
+     * // Parse from character array containing date string
+     * char[] dateChars = "2021-01-01".toCharArray();
+     * Date date2 = type.valueOf(dateChars, 0, dateChars.length);
+     * }
+     * </pre>
      *
      * @param cbuf the character buffer containing the value to parse
      * @param offset the start offset in the character buffer
@@ -133,9 +205,18 @@ public class JUDateType extends AbstractDateType<Date> {
 
     /**
      * Retrieves a Date value from the specified column in a ResultSet.
-     * 
-     * This method reads a Timestamp from the ResultSet and converts it to a java.util.Date.
-     * If the timestamp is null, this method returns null.
+     * This method provides database-to-Java type conversion for java.util.Date objects.
+     *
+     * <pre>
+     * {@code
+     * JUDateType type = new JUDateType();
+     * try (ResultSet rs = stmt.executeQuery()) {
+     *     if (rs.next()) {
+     *         Date date = type.get(rs, 1);
+     *     }
+     * }
+     * }
+     * </pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
@@ -150,10 +231,19 @@ public class JUDateType extends AbstractDateType<Date> {
     }
 
     /**
-     * Retrieves a Date value from the specified column in a ResultSet.
-     * 
-     * This method reads a Timestamp from the ResultSet and converts it to a java.util.Date.
-     * If the timestamp is null, this method returns null.
+     * Retrieves a Date value from the specified column in a ResultSet using column label.
+     * This method provides database-to-Java type conversion for java.util.Date objects by column name.
+     *
+     * <pre>
+     * {@code
+     * JUDateType type = new JUDateType();
+     * try (ResultSet rs = stmt.executeQuery()) {
+     *     if (rs.next()) {
+     *         Date date = type.get(rs, "created_at");
+     *     }
+     * }
+     * }
+     * </pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label to retrieve the value from
@@ -169,10 +259,23 @@ public class JUDateType extends AbstractDateType<Date> {
 
     /**
      * Sets a Date parameter in a PreparedStatement.
-     * 
+     * This method provides Java-to-database type conversion for java.util.Date objects,
+     * efficiently handling both regular Date and Timestamp instances.
+     *
      * This method converts the java.util.Date to a SQL Timestamp before setting it in the statement.
      * If the Date is already a Timestamp instance, it is used directly.
      * If the Date is null, a SQL NULL is set for the parameter.
+     *
+     * <pre>
+     * {@code
+     * JUDateType type = new JUDateType();
+     * Date date = new Date();
+     * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO events (timestamp) VALUES (?)")) {
+     *     type.set(stmt, 1, date);
+     *     stmt.executeUpdate();
+     * }
+     * }
+     * </pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -186,10 +289,23 @@ public class JUDateType extends AbstractDateType<Date> {
 
     /**
      * Sets a named Date parameter in a CallableStatement.
-     * 
+     * This method provides Java-to-database type conversion for stored procedure calls
+     * using named parameters, efficiently handling both regular Date and Timestamp instances.
+     *
      * This method converts the java.util.Date to a SQL Timestamp before setting it in the statement.
      * If the Date is already a Timestamp instance, it is used directly.
      * If the Date is null, a SQL NULL is set for the parameter.
+     *
+     * <pre>
+     * {@code
+     * JUDateType type = new JUDateType();
+     * Date date = new Date();
+     * try (CallableStatement stmt = conn.prepareCall("{call log_event(?)}")) {
+     *     type.set(stmt, "event_time", date);
+     *     stmt.execute();
+     * }
+     * }
+     * </pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

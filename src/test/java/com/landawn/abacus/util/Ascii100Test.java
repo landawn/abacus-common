@@ -2,9 +2,11 @@ package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Ascii100Test extends TestBase {
 
     @Test
@@ -57,7 +59,6 @@ public class Ascii100Test extends TestBase {
 
     @Test
     public void testAsciiRange() {
-        // Test that all ASCII values are within range
         for (int i = Ascii.MIN; i <= Ascii.MAX; i++) {
             Assertions.assertTrue(i >= 0 && i <= 127);
         }

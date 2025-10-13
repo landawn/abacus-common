@@ -7,11 +7,13 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.FloatList;
 
+@Tag("new-test")
 public class FloatIteratorEx100Test extends TestBase {
 
     @Test
@@ -21,7 +23,7 @@ public class FloatIteratorEx100Test extends TestBase {
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextFloat());
         Assertions.assertEquals(0, iter.count());
         Assertions.assertArrayEquals(new float[0], iter.toArray());
-        iter.close(); // Should not throw
+        iter.close();
     }
 
     @Test
@@ -143,14 +145,11 @@ public class FloatIteratorEx100Test extends TestBase {
         ObjIteratorEx<Float> objIter = ObjIteratorEx.of(1.0f, 2.0f, 3.0f);
         FloatIteratorEx iter = FloatIteratorEx.from(objIter);
         
-        // Test advance
         iter.advance(1);
         Assertions.assertEquals(2.0f, iter.nextFloat());
         
-        // Test count
         Assertions.assertEquals(1, iter.count());
         
-        // Test close
         iter.close();
     }
 
@@ -165,7 +164,6 @@ public class FloatIteratorEx100Test extends TestBase {
         iter.advance(1);
         Assertions.assertEquals(5.0f, iter.nextFloat());
         
-        // Advance beyond end
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
@@ -182,7 +180,6 @@ public class FloatIteratorEx100Test extends TestBase {
     @Test
     public void testAdvanceNegative() {
         FloatIteratorEx iter = FloatIteratorEx.of(1.0f, 2.0f, 3.0f);
-        // Assertions.assertThrows(IllegalArgumentException.class, () -> iter.advance(-1));
         iter.advance(-1);
     }
 
@@ -244,12 +241,11 @@ public class FloatIteratorEx100Test extends TestBase {
     @Test
     public void testClose() {
         FloatIteratorEx iter = FloatIteratorEx.of(1.0f, 2.0f, 3.0f);
-        iter.close(); // Should not throw
+        iter.close();
     }
 
     @Test
     public void testFloatSpecialValues() {
-        // Test with special float values
         float[] array = {Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, 0.0f, -0.0f};
         FloatIteratorEx iter = FloatIteratorEx.of(array);
         
@@ -263,7 +259,6 @@ public class FloatIteratorEx100Test extends TestBase {
 
     @Test
     public void testLargeArrayAdvance() {
-        // Test advance with large arrays
         float[] array = new float[1000];
         for (int i = 0; i < array.length; i++) {
             array[i] = i * 1.0f;

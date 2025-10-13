@@ -81,6 +81,8 @@ public abstract class RateLimiter {
     /**
      * Creates a {@code RateLimiter} with the specified stable throughput, given as
      * "permits per second" (commonly referred to as <i>QPS</i>, queries per second).
+     * This factory method creates a rate limiter with smooth bursty behavior, allowing
+     * unused permits to accumulate up to one second's worth.
      *
      * <p>The returned {@code RateLimiter} ensures that on average no more than {@code
      * permitsPerSecond} are issued during any given second, with sustained requests being smoothly
@@ -90,10 +92,16 @@ public abstract class RateLimiter {
      * {@code permitsPerSecond} permits will be allowed, with subsequent requests being smoothly
      * limited at the stable rate of {@code permitsPerSecond}.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * RateLimiter limiter = RateLimiter.create(5.0); // 5 permits per second
+     * limiter.acquire(); // Acquires one permit, may wait if necessary
+     * }</pre>
+     *
      * @param permitsPerSecond the rate of the returned {@code RateLimiter}, measured in how many
-     *     permits become available per second
-     * @return
-     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero
+     *     permits become available per second, must be positive and not NaN
+     * @return a newly created {@code RateLimiter} with the specified rate
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN
      */
     // TODO(user): "This is equivalent to
     // {@code createWithCapacity(permitsPerSecond, 1, TimeUnit.SECONDS)}".
@@ -111,6 +119,7 @@ public abstract class RateLimiter {
          * Due to the slight delay of T1, T2 would have to sleep till 2.05 seconds, and T3 would also
          * have to sleep till 3.05 seconds.
          */
+        N.checkArgument(permitsPerSecond > 0.0 && !Double.isNaN(permitsPerSecond), "rate must be positive");
         return create(permitsPerSecond, SleepingStopwatch.createFromSystemTimer());
     }
 
@@ -142,13 +151,20 @@ public abstract class RateLimiter {
      * <p>The returned {@code RateLimiter} starts in a "cold" state (i.e., the warmup period will
      * follow), and if it is left unused for long enough, it will return to that state.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Create a rate limiter with 10 permits/sec and 3 second warmup
+     * RateLimiter limiter = RateLimiter.create(10.0, 3, TimeUnit.SECONDS);
+     * limiter.acquire(); // Initial requests will be slower during warmup
+     * }</pre>
+     *
      * @param permitsPerSecond the rate of the returned {@code RateLimiter}, measured in how many
-     *     permits become available per second
+     *     permits become available per second, must be positive
      * @param warmupPeriod the duration of the period where the {@code RateLimiter} ramps up its rate,
-     *     before reaching its stable (maximum) rate
-     * @param unit the time unit of the warmupPeriod argument
-     * @return
-     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero or
+     *     before reaching its stable (maximum) rate, must be non-negative
+     * @param unit the time unit of the warmupPeriod argument, must not be null
+     * @return a newly created {@code RateLimiter} with the specified rate and warmup period
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero, or
      *     {@code warmupPeriod} is negative
      */
     public static RateLimiter create(final double permitsPerSecond, final long warmupPeriod, final TimeUnit unit) throws IllegalArgumentException {
@@ -182,16 +198,17 @@ public abstract class RateLimiter {
     private volatile Object mutexDoNotUseDirectly; //NOSONAR
 
     private Object mutex() {
-        Object mutex = mutexDoNotUseDirectly;
-        if (mutex == null) {
+        Object result = mutexDoNotUseDirectly;
+        if (result == null) {
             synchronized (this) {
-                mutex = mutexDoNotUseDirectly;
-                if (mutex == null) {
-                    mutexDoNotUseDirectly = mutex = new Object();
+                result = mutexDoNotUseDirectly;
+                if (result == null) {
+                    result = new Object();
+                    mutexDoNotUseDirectly = result;
                 }
             }
         }
-        return mutex;
+        return result;
     }
 
     RateLimiter(final SleepingStopwatch stopwatch) {
@@ -200,9 +217,11 @@ public abstract class RateLimiter {
 
     /**
      * Updates the stable rate of this {@code RateLimiter}, that is, the {@code permitsPerSecond}
-     * argument provided in the factory method that constructed the {@code RateLimiter}. Currently
-     * throttled threads will <b>not</b> be awakened as a result of this invocation, thus they do not
-     * observe the new rate; only subsequent requests will.
+     * argument provided in the factory method that constructed the {@code RateLimiter}. This method
+     * allows dynamic adjustment of the rate limiter's throughput without creating a new instance.
+     *
+     * <p>Currently throttled threads will <b>not</b> be awakened as a result of this invocation,
+     * thus they do not observe the new rate; only subsequent requests will.
      *
      * <p>Note though that, since each request repays (by waiting, if necessary) the cost of the
      * <i>previous</i> request, this means that the very next request after an invocation to
@@ -213,8 +232,14 @@ public abstract class RateLimiter {
      * {@code RateLimiter} was configured with a warmup period of 20 seconds, it still has a warmup
      * period of 20 seconds after this method invocation.
      *
-     * @param permitsPerSecond the new stable rate of this {@code RateLimiter}
-     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * RateLimiter limiter = RateLimiter.create(5.0);
+     * limiter.setRate(10.0); // Increase rate to 10 permits/second
+     * }</pre>
+     *
+     * @param permitsPerSecond the new stable rate of this {@code RateLimiter}, must be positive and not NaN
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN
      */
     public final void setRate(final double permitsPerSecond) throws IllegalArgumentException {
         //noinspection ConstantValue
@@ -234,11 +259,19 @@ public abstract class RateLimiter {
 
     /**
      * Returns the stable rate (as {@code permits per seconds}) with which this {@code RateLimiter} is
-     * configured with. The initial value of this is the same as the {@code permitsPerSecond} argument
+     * configured. The initial value of this is the same as the {@code permitsPerSecond} argument
      * passed in the factory method that produced this {@code RateLimiter}, and it is only updated
      * after invocations to {@linkplain #setRate}.
      *
-     * @return
+     * <p>This method is thread-safe and can be called concurrently with other rate limiter operations.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * RateLimiter limiter = RateLimiter.create(5.0);
+     * double currentRate = limiter.getRate(); // Returns 5.0
+     * }</pre>
+     *
+     * @return the current stable rate in permits per second
      */
     public final double getRate() {
         synchronized (mutex()) {
@@ -255,9 +288,20 @@ public abstract class RateLimiter {
 
     /**
      * Acquires a single permit from this {@code RateLimiter}, blocking until the request can be
-     * granted. Tells the amount of time slept, if any.
+     * granted. This method blocks indefinitely until a permit is available and returns the amount
+     * of time spent waiting.
      *
      * <p>This method is equivalent to {@code acquire(1)}.
+     *
+     * <p>If the rate limiter has unused permits available, this method will return immediately
+     * with a return value of 0.0. Otherwise, it will sleep until a permit becomes available.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * RateLimiter limiter = RateLimiter.create(2.0); // 2 permits per second
+     * double waitTime = limiter.acquire(); // Acquires 1 permit
+     * System.out.println("Waited " + waitTime + " seconds");
+     * }</pre>
      *
      * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
      */
@@ -267,9 +311,21 @@ public abstract class RateLimiter {
 
     /**
      * Acquires the given number of permits from this {@code RateLimiter}, blocking until the request
-     * can be granted. Tells the amount of time slept, if any.
+     * can be granted. This method blocks indefinitely until the requested permits are available and
+     * returns the amount of time spent waiting.
      *
-     * @param permits the number of permits to acquire
+     * <p>Note that the number of permits requested affects the throttling of the <i>next</i> request,
+     * not the current one. If this method is called on an idle rate limiter, it will return immediately
+     * (even for a large number of permits), but subsequent requests will be throttled to compensate.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * RateLimiter limiter = RateLimiter.create(5.0); // 5 permits per second
+     * double waitTime = limiter.acquire(3); // Acquires 3 permits
+     * System.out.println("Waited " + waitTime + " seconds for 3 permits");
+     * }</pre>
+     *
+     * @param permits the number of permits to acquire, must be positive
      * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
      */
@@ -300,8 +356,18 @@ public abstract class RateLimiter {
      *
      * <p>This method is equivalent to {@code tryAcquire(1, timeout, unit)}.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * RateLimiter limiter = RateLimiter.create(2.0);
+     * if (limiter.tryAcquire(100, TimeUnit.MILLISECONDS)) {
+     *     // Permit acquired within 100ms
+     * } else {
+     *     // Timeout expired
+     * }
+     * }</pre>
+     *
      * @param timeout the maximum time to wait for the permit. Negative values are treated as zero.
-     * @param unit the time unit of the timeout argument
+     * @param unit the time unit of the timeout argument, must not be null
      * @return {@code true} if the permit was acquired, {@code false} otherwise
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
      */
@@ -310,11 +376,22 @@ public abstract class RateLimiter {
     }
 
     /**
-     * Acquires permits from this {@link RateLimiter} if it can be acquired immediately without delay.
+     * Acquires the specified number of permits from this {@link RateLimiter} if they can be acquired
+     * immediately without any delay. This is a non-blocking operation that returns immediately.
      *
      * <p>This method is equivalent to {@code tryAcquire(permits, 0, anyUnit)}.
      *
-     * @param permits the number of permits to acquire
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * RateLimiter limiter = RateLimiter.create(5.0);
+     * if (limiter.tryAcquire(3)) {
+     *     // Successfully acquired 3 permits immediately
+     * } else {
+     *     // Permits not available, no waiting performed
+     * }
+     * }</pre>
+     *
+     * @param permits the number of permits to acquire, must be positive
      * @return {@code true} if the permits were acquired, {@code false} otherwise
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
      */
@@ -323,10 +400,24 @@ public abstract class RateLimiter {
     }
 
     /**
-     * Acquires a permit from this {@link RateLimiter} if it can be acquired immediately without
-     * delay.
+     * Acquires a single permit from this {@link RateLimiter} if it can be acquired immediately without
+     * any delay. This is a non-blocking operation that returns immediately.
      *
      * <p>This method is equivalent to {@code tryAcquire(1)}.
+     *
+     * <p>This is useful for operations that should only proceed if resources are immediately available,
+     * without waiting or queueing.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * RateLimiter limiter = RateLimiter.create(10.0);
+     * if (limiter.tryAcquire()) {
+     *     // Permit acquired immediately, proceed with operation
+     *     processRequest();
+     * } else {
+     *     // No permit available, skip or defer operation
+     * }
+     * }</pre>
      *
      * @return {@code true} if the permit was acquired, {@code false} otherwise
      */
@@ -335,13 +426,29 @@ public abstract class RateLimiter {
     }
 
     /**
-     * Acquires the given number of permits from this {@code RateLimiter} if it can be obtained
+     * Acquires the given number of permits from this {@code RateLimiter} if they can be obtained
      * without exceeding the specified {@code timeout}, or returns {@code false} immediately (without
      * waiting) if the permits had not been granted before the timeout expired.
      *
-     * @param permits the number of permits to acquire
+     * <p>This method will block for up to the specified timeout duration waiting for permits to become
+     * available. If permits are available within the timeout, they are acquired and the method returns
+     * {@code true}. Otherwise, it returns {@code false} without acquiring any permits.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * RateLimiter limiter = RateLimiter.create(2.0);
+     * if (limiter.tryAcquire(5, 2, TimeUnit.SECONDS)) {
+     *     // Successfully acquired 5 permits within 2 seconds
+     *     processBatch();
+     * } else {
+     *     // Could not acquire permits within timeout
+     *     handleTimeout();
+     * }
+     * }</pre>
+     *
+     * @param permits the number of permits to acquire, must be positive
      * @param timeout the maximum time to wait for the permits. Negative values are treated as zero.
-     * @param unit the time unit of the timeout argument
+     * @param unit the time unit of the timeout argument, must not be null
      * @return {@code true} if the permits were acquired, {@code false} otherwise
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
      */
@@ -403,6 +510,14 @@ public abstract class RateLimiter {
      */
     abstract long reserveEarliestAvailable(int permits, long nowMicros);
 
+    /**
+     * Returns a string representation of this {@code RateLimiter}, showing its current stable rate.
+     * The format is "RateLimiter[stableRate=X.Xqps]" where X.X is the current rate in queries per second.
+     *
+     * <p>Example output: {@code RateLimiter[stableRate=5.0qps]}
+     *
+     * @return a string representation of this rate limiter
+     */
     @Override
     public String toString() {
         return String.format(Locale.ROOT, "RateLimiter[stableRate=%3.1fqps]", getRate());
@@ -431,9 +546,14 @@ public abstract class RateLimiter {
         protected abstract void sleepMicrosUninterruptibly(long micros);
 
         /**
-         * Creates from system timer.
+         * Creates a {@code SleepingStopwatch} instance that uses the system timer for time measurement
+         * and {@link N#sleepUninterruptibly} for sleeping. This is the standard implementation used by
+         * {@code RateLimiter} for production use.
          *
-         * @return
+         * <p>The returned stopwatch starts measuring elapsed time immediately from the moment of creation.
+         * Time is measured in microseconds using a {@link Stopwatch} instance.
+         *
+         * @return a new {@code SleepingStopwatch} instance based on the system timer
          */
         public static SleepingStopwatch createFromSystemTimer() {
             return new SleepingStopwatch() {

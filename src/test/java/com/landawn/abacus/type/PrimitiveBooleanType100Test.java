@@ -7,9 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class PrimitiveBooleanType100Test extends TestBase {
 
     private PrimitiveBooleanType primitiveBooleanType;
@@ -41,7 +43,6 @@ public class PrimitiveBooleanType100Test extends TestBase {
 
     @Test
     public void testAlternativeName() {
-        // Test that the type can be created with alternative name
         PrimitiveBooleanType boolType = (PrimitiveBooleanType) createType("bool");
         assertNotNull(boolType);
     }
@@ -91,7 +92,6 @@ public class PrimitiveBooleanType100Test extends TestBase {
 
     @Test
     public void testValueOfWithNull() {
-        // For primitive boolean type, null should return default value
         assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf(null));
     }
 
@@ -102,7 +102,6 @@ public class PrimitiveBooleanType100Test extends TestBase {
 
     @Test
     public void testValueOfWithInvalidString() {
-        // Invalid strings should return false
         assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("invalid"));
         assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("maybe"));
         assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("2"));
@@ -120,7 +119,6 @@ public class PrimitiveBooleanType100Test extends TestBase {
 
     @Test
     public void testStringOfWithNull() {
-        // For primitive types, null typically becomes the default value
         assertEquals(null, primitiveBooleanType.stringOf(null));
     }
 

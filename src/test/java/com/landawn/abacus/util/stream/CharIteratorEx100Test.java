@@ -7,11 +7,13 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.CharList;
 
+@Tag("new-test")
 public class CharIteratorEx100Test extends TestBase {
 
     @Test
@@ -21,7 +23,7 @@ public class CharIteratorEx100Test extends TestBase {
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextChar());
         Assertions.assertEquals(0, iter.count());
         Assertions.assertArrayEquals(new char[0], iter.toArray());
-        iter.close(); // Should not throw
+        iter.close();
     }
 
     @Test
@@ -143,14 +145,11 @@ public class CharIteratorEx100Test extends TestBase {
         ObjIteratorEx<Character> objIter = ObjIteratorEx.of('a', 'b', 'c');
         CharIteratorEx iter = CharIteratorEx.from(objIter);
         
-        // Test advance
         iter.advance(1);
         Assertions.assertEquals('b', iter.nextChar());
         
-        // Test count
         Assertions.assertEquals(1, iter.count());
         
-        // Test close
         iter.close();
     }
 
@@ -165,7 +164,6 @@ public class CharIteratorEx100Test extends TestBase {
         iter.advance(1);
         Assertions.assertEquals('e', iter.nextChar());
         
-        // Advance beyond end
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
@@ -182,7 +180,6 @@ public class CharIteratorEx100Test extends TestBase {
     @Test
     public void testAdvanceNegative() {
         CharIteratorEx iter = CharIteratorEx.of('a', 'b', 'c');
-        // Assertions.assertThrows(IllegalArgumentException.class, () -> iter.advance(-1));
         iter.advance(-1);
     }
 
@@ -244,6 +241,6 @@ public class CharIteratorEx100Test extends TestBase {
     @Test
     public void testClose() {
         CharIteratorEx iter = CharIteratorEx.of('a', 'b', 'c');
-        iter.close(); // Should not throw
+        iter.close();
     }
 }

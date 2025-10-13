@@ -365,7 +365,7 @@ public final class FastJson {
      * <p>Example:</p>
      * <pre>{@code
      * byte[] buffer = "prefix{\"name\":\"John\",\"age\":30}suffix".getBytes();
-     * Person person = FastJson.fromJson(buffer, 6, 22, Person.class);
+     * Person person = FastJson.fromJson(buffer, 6, 24, Person.class);
      * }</pre>
      * 
      * @param <T> the type of the target object

@@ -26,6 +26,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -47,6 +48,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Tag("new-test")
 public class AbstractStream100Test extends TestBase {
 
     @TempDir
@@ -113,15 +115,12 @@ public class AbstractStream100Test extends TestBase {
     public void testStep() {
         List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-        // Test step 1 (no change)
         Stream<Integer> stream1 = createStream(input);
         assertEquals(input, stream1.step(1).toList());
 
-        // Test step 2
         Stream<Integer> stream2 = createStream(input);
         assertEquals(Arrays.asList(1, 3, 5, 7, 9), stream2.step(2).toList());
 
-        // Test step 3
         Stream<Integer> stream3 = createStream(input);
         assertEquals(Arrays.asList(1, 4, 7), stream3.step(3).toList());
     }
@@ -961,7 +960,7 @@ public class AbstractStream100Test extends TestBase {
         Stream<String> stream = createStream(input);
 
         List<List<String>> all = stream.combinations().toList();
-        assertEquals(8, all.size()); // 2^3 = 8
+        assertEquals(8, all.size());
         assertTrue(all.contains(Collections.emptyList()));
         assertTrue(all.contains(Arrays.asList("A", "B", "C")));
     }
@@ -984,7 +983,7 @@ public class AbstractStream100Test extends TestBase {
         Stream<String> stream = createStream(input);
 
         List<List<String>> permutations = stream.permutations().toList();
-        assertEquals(6, permutations.size()); // 3! = 6
+        assertEquals(6, permutations.size());
         assertTrue(permutations.contains(Arrays.asList("A", "B", "C")));
         assertTrue(permutations.contains(Arrays.asList("C", "B", "A")));
     }
@@ -1006,7 +1005,7 @@ public class AbstractStream100Test extends TestBase {
         Stream<String> stream = createStream(input);
 
         List<List<Object>> product = stream.cartesianProduct((Collection) other).toList();
-        assertEquals(4, product.size()); // 2 * 2 * 1 = 4
+        assertEquals(4, product.size());
     }
 
     @Test
@@ -1204,7 +1203,7 @@ public class AbstractStream100Test extends TestBase {
         assertEquals(2, count);
 
         List<String> lines = IOUtil.readAllLines(file);
-        assertEquals(3, lines.size()); // header + 2 rows
+        assertEquals(3, lines.size());
         assertTrue(lines.get(0).contains("name"));
         assertTrue(lines.get(0).contains("age"));
     }
@@ -1269,7 +1268,7 @@ public class AbstractStream100Test extends TestBase {
         Stream<TestPerson> stream = createStream(persons);
         List<Pair<TestPerson, TestOrder>> result = stream.leftJoin(orders, TestPerson::getId, TestOrder::getPersonId).toList();
 
-        assertEquals(4, result.size()); // 2 for John, 1 each for Jane and Bob (with null)
+        assertEquals(4, result.size());
     }
 
     @Test
@@ -1306,7 +1305,7 @@ public class AbstractStream100Test extends TestBase {
         Stream<TestPerson> stream = createStream(persons);
         List<Pair<TestPerson, TestOrder>> result = stream.fullJoin(orders, TestPerson::getId, TestOrder::getPersonId).toList();
 
-        assertEquals(3, result.size()); // John-Order1, Jane-null, null-Order2
+        assertEquals(3, result.size());
     }
 
     @Test
@@ -1332,8 +1331,8 @@ public class AbstractStream100Test extends TestBase {
         List<Pair<TestPerson, List<TestOrder>>> result = stream.groupJoin(orders, TestPerson::getId, TestOrder::getPersonId).toList();
 
         assertEquals(2, result.size());
-        assertEquals(2, result.get(0).right().size()); // John has 2 orders
-        assertEquals(1, result.get(1).right().size()); // Jane has 1 order
+        assertEquals(2, result.get(0).right().size());
+        assertEquals(1, result.get(1).right().size());
     }
 
     @Test
@@ -1345,8 +1344,8 @@ public class AbstractStream100Test extends TestBase {
         List<Pair<TestPerson, List<TestOrder>>> result = stream.groupJoin(Stream.of(orders), TestPerson::getId, TestOrder::getPersonId, Pair::of).toList();
 
         assertEquals(2, result.size());
-        assertEquals(2, result.get(0).right().size()); // John has 2 orders
-        assertEquals(1, result.get(1).right().size()); // Jane has 1 order
+        assertEquals(2, result.get(0).right().size());
+        assertEquals(1, result.get(1).right().size());
     }
 
     @Test
@@ -1377,13 +1376,13 @@ public class AbstractStream100Test extends TestBase {
                 .toList();
 
         assertEquals(2, result.size());
-        assertEquals(2, result.get(0).right().size()); // John has 2 orders
-        assertEquals(1, result.get(1).right().size()); // Jane has 1 order
+        assertEquals(2, result.get(0).right().size());
+        assertEquals(1, result.get(1).right().size());
     }
 
     @Test
     public void testRateLimited() throws InterruptedException {
-        RateLimiter rateLimiter = RateLimiter.create(2); // 2 permits per second
+        RateLimiter rateLimiter = RateLimiter.create(2);
         List<Integer> input = Arrays.asList(1, 2, 3, 4);
         Stream<Integer> stream = createStream(input);
 
@@ -1392,7 +1391,7 @@ public class AbstractStream100Test extends TestBase {
         long duration = System.currentTimeMillis() - startTime;
 
         assertEquals(input, result);
-        assertTrue(duration >= 1000); // Should take at least 1 second for 4 items at 2/sec
+        assertTrue(duration >= 1000);
     }
 
     @Test
@@ -1404,10 +1403,10 @@ public class AbstractStream100Test extends TestBase {
         List<Pair<Integer, List<Integer>>> result = stream.joinByRange(right.iterator(), (l, r) -> r > l && r < l + 5).toList();
 
         assertEquals(4, result.size());
-        assertEquals(Arrays.asList(2, 3), result.get(0).right()); // 1 -> [2, 3]
-        assertEquals(Arrays.asList(6, 7), result.get(1).right()); // 5 -> [6, 7]
-        assertEquals(Arrays.asList(11, 12), result.get(2).right()); // 10 -> [11, 12]
-        assertEquals(Collections.emptyList(), result.get(3).right()); // 15 -> []
+        assertEquals(Arrays.asList(2, 3), result.get(0).right());
+        assertEquals(Arrays.asList(6, 7), result.get(1).right());
+        assertEquals(Arrays.asList(11, 12), result.get(2).right());
+        assertEquals(Collections.emptyList(), result.get(3).right());
     }
 
     @Test
@@ -1419,10 +1418,10 @@ public class AbstractStream100Test extends TestBase {
         List<Pair<Integer, List<Integer>>> result = stream.joinByRange(right.iterator(), (l, r) -> r > l && r < l + 5).toList();
 
         assertEquals(4, result.size());
-        assertEquals(Arrays.asList(2, 3), result.get(0).right()); // 1 -> [2, 3]
-        assertEquals(Arrays.asList(6, 7), result.get(1).right()); // 5 -> [6, 7]
-        assertEquals(Arrays.asList(11, 12), result.get(2).right()); // 10 -> [11, 12]
-        assertEquals(Collections.emptyList(), result.get(3).right()); // 15 -> []
+        assertEquals(Arrays.asList(2, 3), result.get(0).right());
+        assertEquals(Arrays.asList(6, 7), result.get(1).right());
+        assertEquals(Arrays.asList(11, 12), result.get(2).right());
+        assertEquals(Collections.emptyList(), result.get(3).right());
     }
 
     @Test
@@ -1435,7 +1434,7 @@ public class AbstractStream100Test extends TestBase {
         long duration = System.currentTimeMillis() - startTime;
 
         assertEquals(input, result);
-        assertTrue(duration >= 150); // 3 items * 50ms = 150ms minimum
+        assertTrue(duration >= 150);
     }
 
     @Data

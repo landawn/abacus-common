@@ -39,6 +39,13 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
     /**
      * Returns the Class object representing the ShortList type.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * Class<ShortList> clazz = type.clazz();
+     * System.out.println(clazz.getName()); // Output: com.landawn.abacus.util.ShortList
+     * }</pre>
+     *
      * @return the Class object for ShortList.class
      */
     @Override
@@ -50,6 +57,13 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * Returns the Type instance for the element type of this list, which is primitive short.
      * This method provides access to the Type representation of individual list elements.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * Type<Short> elementType = type.getElementType();
+     * System.out.println(elementType.name()); // Output: short
+     * }</pre>
+     *
      * @return the Type instance representing short type for list elements
      */
     @Override
@@ -58,9 +72,17 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
     }
 
     /**
-     * Returns the parameter types associated with this array type.
+     * Returns the parameter types associated with this list type.
      *
-     * @return an array containing the Short Type that describes the elements of this array type
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * Type<Short>[] paramTypes = type.getParameterTypes();
+     * System.out.println(paramTypes.length); // Output: 1
+     * System.out.println(paramTypes[0].name()); // Output: short
+     * }</pre>
+     *
+     * @return an array containing the Short Type that describes the elements of this list type
      * @see #getElementType()
      */
     @Override
@@ -70,10 +92,20 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
 
     /**
      * Converts a ShortList to its string representation.
-     * The list is converted to an array first, then formatted as comma-separated values 
-     * enclosed in square brackets. For example, a ShortList containing {1, 2, 3} 
-     * becomes "[1, 2, 3]".
-     * 
+     * The list is converted to an array first, then formatted as comma-separated values
+     * enclosed in square brackets.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * ShortList list = ShortList.of((short) 1, (short) 2, (short) 3);
+     * String str = type.stringOf(list);
+     * System.out.println(str); // Output: [1, 2, 3]
+     *
+     * String nullStr = type.stringOf(null);
+     * System.out.println(nullStr); // Output: null
+     * }</pre>
+     *
      * @param x the ShortList to convert to string
      * @return the string representation of the list, or null if the input list is null
      */
@@ -85,8 +117,21 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
     /**
      * Parses a string representation of a short list and returns the corresponding ShortList.
      * The string should contain comma-separated short values enclosed in square brackets.
-     * For example, "[1, 2, 3]" will be parsed to a ShortList containing {1, 2, 3}.
-     * 
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * ShortList list = type.valueOf("[1, 2, 3]");
+     * System.out.println(list.size()); // Output: 3
+     * System.out.println(list.get(0)); // Output: 1
+     *
+     * ShortList emptyList = type.valueOf("[]");
+     * System.out.println(emptyList.isEmpty()); // Output: true
+     *
+     * ShortList nullList = type.valueOf(null);
+     * System.out.println(nullList); // Output: null
+     * }</pre>
+     *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
      * @return the parsed ShortList, or null if the input string is null or empty
      * @throws NumberFormatException if any element in the string cannot be parsed as a short
@@ -100,7 +145,20 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * Appends the string representation of a ShortList to the given Appendable.
      * The list is formatted as comma-separated values enclosed in square brackets.
      * If the list is null, appends "null".
-     * 
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * ShortList list = ShortList.of((short) 10, (short) 20, (short) 30);
+     * StringBuilder sb = new StringBuilder("Values: ");
+     * type.appendTo(sb, list);
+     * System.out.println(sb.toString()); // Output: Values: [10, 20, 30]
+     *
+     * StringBuilder nullSb = new StringBuilder();
+     * type.appendTo(nullSb, null);
+     * System.out.println(nullSb.toString()); // Output: null
+     * }</pre>
+     *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the ShortList to append
      * @throws IOException if an I/O error occurs during the append operation
@@ -117,9 +175,23 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
     /**
      * Writes the character representation of a ShortList to the given CharacterWriter.
      * This method is optimized for performance when writing to character-based outputs.
-     * The list is converted to an array and then written as comma-separated values 
+     * The list is converted to an array and then written as comma-separated values
      * enclosed in square brackets.
-     * 
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * ShortList list = ShortList.of((short) 100, (short) 200, (short) 300);
+     * CharacterWriter writer = new CharacterWriter();
+     * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();
+     * type.writeCharacter(writer, list, config);
+     * System.out.println(writer.toString()); // Output: [100, 200, 300]
+     *
+     * CharacterWriter nullWriter = new CharacterWriter();
+     * type.writeCharacter(nullWriter, null, config);
+     * System.out.println(nullWriter.toString()); // Output: null
+     * }</pre>
+     *
      * @param writer the CharacterWriter to write to
      * @param x the ShortList to write
      * @param config the serialization configuration (passed through to the array type writer)

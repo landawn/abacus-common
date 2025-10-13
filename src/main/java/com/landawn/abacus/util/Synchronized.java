@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.annotation.Beta;
+
 /**
  * A utility class that provides thread-safe synchronized operations on objects.
  * This class offers both static methods for one-time synchronized operations and instance methods
@@ -45,6 +47,7 @@ package com.landawn.abacus.util;
  *
  * @param <T> The type of the object on which the synchronized operations are to be performed
  */
+@Beta
 @SuppressWarnings("java:S2445")
 public final class Synchronized<T> {
 
@@ -347,7 +350,7 @@ public final class Synchronized<T> {
      * @throws E if the function throws an exception of type E
      */
     public static <T, U, R, E extends Throwable> R apply(final T mutex, final U u, final Throwables.BiFunction<? super T, ? super U, ? extends R, E> function)
-            throws E {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex);
         N.checkArgNotNull(function);
 
@@ -419,10 +422,10 @@ public final class Synchronized<T> {
     /**
      * Tests the provided predicate in a synchronized block on this instance's mutex.
      * The predicate receives the mutex as its argument and returns a boolean result.
-     * 
+     *
      * <p>This instance method is useful for repeated synchronized conditional checks
-     * on the same object.
-     * 
+     * on the same object where the predicate needs access to the mutex.
+     *
      * <p>Example usage:
      * <pre>{@code
      * List<String> list = new ArrayList<>();

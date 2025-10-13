@@ -1,8 +1,5 @@
 package com.landawn.abacus.util;
 
-/**
- * Additional unit tests for IOUtil methods not covered in the main test file
- */
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -38,13 +35,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 
-/**
- * Final unit tests for IOUtil methods to ensure complete coverage
- */
+@Tag("new-test")
 public class IOUtil102Test extends TestBase {
 
     @TempDir
@@ -71,10 +67,8 @@ public class IOUtil102Test extends TestBase {
         Files.write(tempFile.toPath(), TEST_CONTENT.getBytes(UTF_8));
     }
 
-    // Test constants
     @Test
     public void testConstants() {
-        // File size constants
         assertEquals(1024L, IOUtil.ONE_KB);
         assertEquals(1024L * 1024L, IOUtil.ONE_MB);
         assertEquals(1024L * 1024L * 1024L, IOUtil.ONE_GB);
@@ -82,7 +76,6 @@ public class IOUtil102Test extends TestBase {
         assertEquals(1024L * 1024L * 1024L * 1024L * 1024L, IOUtil.ONE_PB);
         assertEquals(1024L * 1024L * 1024L * 1024L * 1024L * 1024L, IOUtil.ONE_EB);
 
-        // System properties
         assertNotNull(IOUtil.OS_NAME);
         assertNotNull(IOUtil.OS_VERSION);
         assertNotNull(IOUtil.OS_ARCH);
@@ -92,33 +85,26 @@ public class IOUtil102Test extends TestBase {
         assertNotNull(IOUtil.USER_HOME);
         assertNotNull(IOUtil.USER_NAME);
 
-        // Separators
         assertEquals(File.pathSeparator, IOUtil.PATH_SEPARATOR);
         assertEquals(File.separator, IOUtil.DIR_SEPARATOR);
         assertEquals(System.lineSeparator(), IOUtil.LINE_SEPARATOR);
 
-        // CPU cores
         assertTrue(IOUtil.CPU_CORES > 0);
 
-        // Memory
         assertTrue(IOUtil.MAX_MEMORY_IN_MB > 0);
 
-        // EOF
         assertEquals(-1, IOUtil.EOF);
     }
 
     @Test
     public void testOSFlags() {
-        // At least one should be true
         assertTrue(IOUtil.IS_OS_WINDOWS || IOUtil.IS_OS_MAC || IOUtil.IS_OS_LINUX || true);
 
-        // If Mac OS X, then Mac should also be true
         if (IOUtil.IS_OS_MAC_OSX) {
             assertTrue(IOUtil.IS_OS_MAC);
         }
     }
 
-    // Test writeLines with Iterator
     @Test
     public void testWriteLinesWithIterator() throws IOException {
         File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
@@ -129,19 +115,6 @@ public class IOUtil102Test extends TestBase {
         List<String> readLines = Files.readAllLines(outputFile.toPath());
         assertEquals(3, readLines.size());
         assertEquals(lines, readLines);
-    }
-
-    @Test
-    public void testWriteLinesWithIteratorToOutputStream() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        List<String> lines = Arrays.asList("Line 1", "Line 2", "Line 3");
-
-        IOUtil.writeLines(lines.iterator(), baos);
-
-        String result = baos.toString();
-        assertTrue(result.contains("Line 1"));
-        assertTrue(result.contains("Line 2"));
-        assertTrue(result.contains("Line 3"));
     }
 
     @Test
@@ -180,7 +153,6 @@ public class IOUtil102Test extends TestBase {
         assertTrue(result.contains("Line 3"));
     }
 
-    // Test write operations with null object
     @Test
     public void testWriteNullObject() throws IOException {
         StringWriter sw = new StringWriter();
@@ -195,7 +167,6 @@ public class IOUtil102Test extends TestBase {
         assertEquals("null" + IOUtil.LINE_SEPARATOR, sw.toString());
     }
 
-    // Test closeAll variations
     @Test
     public void testCloseAllIterable() throws IOException {
         List<AutoCloseable> closeables = new ArrayList<>();
@@ -205,7 +176,6 @@ public class IOUtil102Test extends TestBase {
         closeables.add(baos2);
 
         IOUtil.closeAll(closeables);
-        // Should not throw
     }
 
     @Test
@@ -222,8 +192,7 @@ public class IOUtil102Test extends TestBase {
             IOUtil.closeAll(c1, c2, c3);
             fail("Should throw exception");
         } catch (RuntimeException e) {
-            // Expected
-            assertEquals(2, closedCount.get()); // c1 and c3 should still be closed
+            assertEquals(2, closedCount.get());
         }
     }
 
@@ -237,14 +206,11 @@ public class IOUtil102Test extends TestBase {
             throw new IOException("Test exception 2");
         });
 
-        // Should not throw
         IOUtil.closeAllQuietly(closeables);
     }
 
-    // Test read operations with partial reads
     @Test
     public void testReadWithPartialData() throws IOException {
-        // Test with InputStream that returns partial data
         InputStream is = new InputStream() {
             private int position = 0;
             private final byte[] data = TEST_CONTENT.getBytes(UTF_8);
@@ -253,7 +219,6 @@ public class IOUtil102Test extends TestBase {
             public int read(byte[] b, int off, int len) {
                 if (position >= data.length)
                     return -1;
-                // Return only 1 byte at a time to test partial read handling
                 b[off] = data[position++];
                 return 1;
             }
@@ -278,7 +243,6 @@ public class IOUtil102Test extends TestBase {
         int read = IOUtil.read(tempFile, buffer, 2, 5);
 
         assertEquals(5, read);
-        // Check that data was written to correct position
         byte[] expected = new byte[10];
         System.arraycopy(TEST_CONTENT.getBytes(UTF_8), 0, expected, 2, 5);
         assertArrayEquals(expected, buffer);
@@ -286,7 +250,6 @@ public class IOUtil102Test extends TestBase {
 
     @Test
     public void testReadReaderWithPartialData() throws IOException {
-        // Test with Reader that returns partial data
         Reader reader = new Reader() {
             private int position = 0;
             private final char[] data = TEST_CONTENT.toCharArray();
@@ -295,7 +258,6 @@ public class IOUtil102Test extends TestBase {
             public int read(char[] cbuf, int off, int len) {
                 if (position >= data.length)
                     return -1;
-                // Return only 1 char at a time
                 cbuf[off] = data[position++];
                 return 1;
             }
@@ -311,25 +273,20 @@ public class IOUtil102Test extends TestBase {
         assertArrayEquals(TEST_CONTENT.toCharArray(), buffer);
     }
 
-    // Test split by line (package-private, but we can test indirectly)
     @Test
     public void testLargeFileSplitBySize() throws IOException {
-        // Create a large file
         File largeFile = Files.createTempFile(tempFolder, "large", ".txt").toFile();
         Files.write(largeFile.toPath(), LONG_CONTENT.getBytes(UTF_8));
 
-        // Split by size
         long fileSize = largeFile.length();
 
         IOUtil.split(largeFile, 4);
         IOUtil.listFiles(largeFile.getParentFile()).forEach(f -> System.out.println("Part: " + f.getName()));
 
-        // Verify parts were created
         File[] parts = largeFile.getParentFile().listFiles((dir, name) -> name.startsWith(largeFile.getName() + "_") && !name.equals("large.txt"));
 
         assertEquals(4, parts.length);
 
-        // Verify total size
         long totalSize = 0;
         for (File part : parts) {
             totalSize += part.length();
@@ -337,7 +294,6 @@ public class IOUtil102Test extends TestBase {
         assertEquals(fileSize, totalSize);
     }
 
-    // Test merge with different scenarios
     @Test
     public void testMergeEmptyFiles() throws IOException {
         File file1 = new File(tempDir, "empty1.txt");
@@ -366,10 +322,8 @@ public class IOUtil102Test extends TestBase {
         assertEquals("Part1Part2", new String(Files.readAllBytes(mergedFile.toPath()), UTF_8));
     }
 
-    // Test forLines with directory containing subdirectories
     @Test
     public void testForLinesWithDirectoryRecursive() throws Exception {
-        // Create directory structure
         File subDir1 = new File(tempDir, "sub1");
         File subDir2 = new File(tempDir, "sub2");
         subDir1.mkdir();
@@ -412,7 +366,6 @@ public class IOUtil102Test extends TestBase {
         assertEquals(0, lines.size());
     }
 
-    // Test edge cases for skip operations
     @Test
     public void testSkipNegativeCount() throws IOException {
         try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
@@ -450,7 +403,6 @@ public class IOUtil102Test extends TestBase {
         }
     }
 
-    // Test write operations with edge cases
     @Test
     public void testWriteEmptyFile() throws IOException {
         File emptySource = Files.createTempFile(tempFolder, "empty", ".txt").toFile();
@@ -493,7 +445,6 @@ public class IOUtil102Test extends TestBase {
         }
     }
 
-    // Test file listing edge cases
     @Test
     public void testListNonExistentDirectory() {
         File nonExistent = new File(tempDir, "nonexistent");
@@ -508,7 +459,6 @@ public class IOUtil102Test extends TestBase {
         assertEquals(0, dirs.size());
     }
 
-    // Test map operations edge cases
     @Test
     public void testMapNonExistentFile() throws IOException {
         File nonExistent = new File(tempDir, "nonexistent.txt");
@@ -525,7 +475,6 @@ public class IOUtil102Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> IOUtil.map(tempFile, MapMode.READ_ONLY, 0, -1));
     }
 
-    // Test path operations
     @Test
     public void testSimplifyPathEdgeCases() {
         assertEquals(".", IOUtil.simplifyPath(""));
@@ -542,12 +491,10 @@ public class IOUtil102Test extends TestBase {
         assertEquals("/b", IOUtil.simplifyPath("/a/../b"));
         assertEquals("b", IOUtil.simplifyPath("a/../b"));
 
-        // Windows-style paths
         assertEquals("a/b", IOUtil.simplifyPath("a\\b"));
         assertEquals("/a/b", IOUtil.simplifyPath("\\a\\b"));
     }
 
-    // Test file extension operations
     @Test
     public void testFileExtensionEdgeCases() {
         assertEquals("", IOUtil.getFileExtension("noextension"));
@@ -570,7 +517,6 @@ public class IOUtil102Test extends TestBase {
         assertEquals(".", IOUtil.getNameWithoutExtension(".."));
     }
 
-    // Test CURRENT_DIR constant
     @Test
     public void testCurrentDir() {
         assertNotNull(IOUtil.CURRENT_DIR);
@@ -578,7 +524,6 @@ public class IOUtil102Test extends TestBase {
         assertTrue(new File(IOUtil.CURRENT_DIR).exists());
     }
 
-    // Test with different line separators
     @Test
     public void testReadLinesWithDifferentLineSeparators() throws IOException {
         File file = Files.createTempFile(tempFolder, "mixed_line_endings", ".txt").toFile();
@@ -593,7 +538,6 @@ public class IOUtil102Test extends TestBase {
         assertEquals("Line4", lines.get(3));
     }
 
-    // Test contentEqualsIgnoreEOL with same content different line endings
     @Test
     public void testContentEqualsIgnoreEOLDifferentLineEndings() throws IOException {
         File file1 = Files.createTempFile(tempFolder, "file1", ".txt").toFile();
@@ -616,40 +560,32 @@ public class IOUtil102Test extends TestBase {
         assertFalse(IOUtil.contentEqualsIgnoreEOL(file1, file2, "UTF-8"));
     }
 
-    // Test with symbolic links (if supported by OS)
     @Test
     public void testSymbolicLinkOperations() throws IOException {
-        // This test might not work on all platforms
         try {
             Path linkPath = Files.createSymbolicLink(Paths.get(tempDir.getAbsolutePath(), "link.txt"), tempFile.toPath());
             File linkFile = linkPath.toFile();
 
             assertTrue(IOUtil.isSymbolicLink(linkFile));
             assertFalse(IOUtil.isRegularFile(linkFile, LinkOption.NOFOLLOW_LINKS));
-            assertTrue(IOUtil.isRegularFile(linkFile)); // Without NOFOLLOW_LINKS
+            assertTrue(IOUtil.isRegularFile(linkFile));
 
         } catch (UnsupportedOperationException | IOException e) {
-            // Symbolic links not supported on this platform
-            // Skip this test
         }
     }
 
-    // Test read/write with different buffer sizes
     @Test
     public void testReadWriteWithSmallBuffer() throws IOException {
-        // Create a custom InputStream with small internal buffer
         byte[] data = new byte[1024];
         Arrays.fill(data, (byte) 'A');
 
         File largeFile = Files.createTempFile(tempFolder, "large", ".txt").toFile();
         Files.write(largeFile.toPath(), data);
 
-        // Read with small buffer indirectly through readBytes
         byte[] result = IOUtil.readBytes(largeFile);
         assertArrayEquals(data, result);
     }
 
-    // Test error cases for file operations
     @Test
     public void testCopyFileToItself() throws IOException {
         assertThrows(IllegalArgumentException.class, () -> IOUtil.copyFile(tempFile, tempFile));
@@ -663,34 +599,29 @@ public class IOUtil102Test extends TestBase {
         assertEquals(TEST_CONTENT, new String(Files.readAllBytes(dest.toPath()), UTF_8));
     }
 
-    // Test with read-only files
     @Test
     public void testOperationsOnReadOnlyFile() throws IOException {
-        if (!IOUtil.IS_OS_WINDOWS) { // setWritable doesn't always work on Windows
+        if (!IOUtil.IS_OS_WINDOWS) {
             File readOnlyFile = Files.createTempFile(tempFolder, "readonly", ".txt").toFile();
             Files.write(readOnlyFile.toPath(), TEST_CONTENT.getBytes(UTF_8));
             readOnlyFile.setWritable(false);
 
             try {
-                // Reading should work
                 String content = IOUtil.readAllToString(readOnlyFile);
                 assertEquals(TEST_CONTENT, content);
 
-                // Size should work
                 assertEquals(TEST_CONTENT.length(), IOUtil.sizeOf(readOnlyFile));
 
             } finally {
-                readOnlyFile.setWritable(true); // Restore for cleanup
+                readOnlyFile.setWritable(true);
             }
         }
     }
 
-    // Test edge cases for numeric write methods
     @Test
     public void testWriteNumericEdgeCases() throws IOException {
         StringWriter sw = new StringWriter();
 
-        // Write edge values
         IOUtil.write(Byte.MIN_VALUE, sw);
         IOUtil.write(Byte.MAX_VALUE, sw);
         IOUtil.write(Short.MIN_VALUE, sw);
@@ -713,7 +644,6 @@ public class IOUtil102Test extends TestBase {
         assertTrue(result.contains("Infinity"));
     }
 
-    // Test with very long file names
     @Test
     public void testLongFileNames() throws IOException {
         StringBuilder longName = new StringBuilder();
@@ -726,21 +656,16 @@ public class IOUtil102Test extends TestBase {
             File longNameFile = new File(tempDir, longName.toString());
             longNameFile.createNewFile();
 
-            // Basic operations should work
             IOUtil.write(TEST_CONTENT, longNameFile);
             String content = IOUtil.readAllToString(longNameFile);
             assertEquals(TEST_CONTENT, content);
 
         } catch (IOException e) {
-            // Some file systems don't support very long names
-            // This is expected and ok
         }
     }
 
-    // Test concurrent operations
     @Test
     public void testConcurrentForLines() throws Exception {
-        // Create file with many lines
         File largeFile = Files.createTempFile(tempFolder, "concurrent", ".txt").toFile();
         StringBuilder content = new StringBuilder();
         for (int i = 0; i < 1000; i++) {
@@ -748,13 +673,11 @@ public class IOUtil102Test extends TestBase {
         }
         Files.write(largeFile.toPath(), content.toString().getBytes(UTF_8));
 
-        // Process with multiple threads
         List<String> lines = Collections.synchronizedList(new ArrayList<>());
         AtomicBoolean completed = new AtomicBoolean(false);
 
         IOUtil.forLines(largeFile, 0, Long.MAX_VALUE, 4, 100, line -> {
             lines.add(line);
-            // Simulate some processing time
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
@@ -766,7 +689,6 @@ public class IOUtil102Test extends TestBase {
         assertEquals(1000, lines.size());
     }
 
-    // Test with special characters in file names
     @Test
     public void testSpecialCharactersInFileNames() throws IOException {
         String[] specialNames = { "file with spaces.txt", "file-with-dashes.txt", "file_with_underscores.txt", "file.multiple.dots.txt",
@@ -781,16 +703,12 @@ public class IOUtil102Test extends TestBase {
                     assertEquals(TEST_CONTENT, content);
                 }
             } catch (IOException e) {
-                // Some file systems don't support certain characters
-                // This is expected and ok
             }
         }
     }
 
-    // Test directory operations
     @Test
     public void testDirectorySize() throws IOException {
-        // Create nested directory structure
         File dir1 = new File(tempDir, "dir1");
         File dir2 = new File(dir1, "dir2");
         dir1.mkdir();
@@ -813,7 +731,6 @@ public class IOUtil102Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> IOUtil.sizeOfDirectory(tempFile));
     }
 
-    // Test append operations with edge cases
     @Test
     public void testAppendToNonExistentFile() throws IOException {
         File nonExistent = new File(tempDir, "nonexistent.txt");
@@ -825,15 +742,14 @@ public class IOUtil102Test extends TestBase {
         assertEquals(TEST_CONTENT, new String(Files.readAllBytes(nonExistent.toPath()), UTF_8));
     }
 
-    // Final edge cases
     @Test
     public void testReadBeyondEOF() throws IOException {
         byte[] smallData = "123".getBytes(UTF_8);
         try (InputStream is = new ByteArrayInputStream(smallData)) {
-            is.read(); // Read one byte
+            is.read();
             byte[] buffer = new byte[10];
             int read = IOUtil.read(is, buffer);
-            assertEquals(2, read); // Should read remaining 2 bytes
+            assertEquals(2, read);
         }
     }
 
@@ -841,13 +757,13 @@ public class IOUtil102Test extends TestBase {
     public void testWriteNullCharArray() throws IOException {
         File output = new File(tempDir, "null_output.txt");
         IOUtil.write((char[]) null, output);
-        assertEquals(0, output.length()); // Should handle null gracefully
+        assertEquals(0, output.length());
     }
 
     @Test
     public void testWriteNullByteArray() throws IOException {
         File output = new File(tempDir, "null_output.txt");
         IOUtil.write((byte[]) null, output);
-        assertEquals(0, output.length()); // Should handle null gracefully
+        assertEquals(0, output.length());
     }
 }

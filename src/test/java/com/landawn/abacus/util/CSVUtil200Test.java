@@ -7,9 +7,11 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class CSVUtil200Test extends TestBase {
 
     @Test

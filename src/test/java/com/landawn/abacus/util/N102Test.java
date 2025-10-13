@@ -22,12 +22,13 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class N102Test extends TestBase {
 
-    // Test data
     private char[] charArray;
     private byte[] byteArray;
     private short[] shortArray;
@@ -55,17 +56,14 @@ public class N102Test extends TestBase {
         stringList = Arrays.asList("one", "two", "three", "four", "five");
     }
 
-    // Tests for deleteRange methods
     @Test
     public void testDeleteRange_boolean() {
         boolean[] arr = { true, false, true, false, true };
         boolean[] result = N.deleteRange(arr, 1, 3);
         assertArrayEquals(new boolean[] { true, false, true }, result);
 
-        // Test empty array
         assertEquals(N.EMPTY_BOOLEAN_ARRAY, N.deleteRange((boolean[]) null, 0, 0));
 
-        // Test no deletion
         boolean[] original = { true, false };
         boolean[] noDeletion = N.deleteRange(original, 0, 0);
         assertArrayEquals(original, noDeletion);
@@ -76,7 +74,6 @@ public class N102Test extends TestBase {
         char[] result = N.deleteRange(charArray, 1, 3);
         assertArrayEquals(new char[] { 'a', 'd', 'e' }, result);
 
-        // Test edge cases
         assertEquals(N.EMPTY_CHAR_ARRAY, N.deleteRange((char[]) null, 0, 0));
         assertArrayEquals(charArray.clone(), N.deleteRange(charArray, 0, 0));
     }
@@ -149,7 +146,6 @@ public class N102Test extends TestBase {
         assertTrue(N.deleteRange(list, 1, 3));
         assertEquals(Arrays.asList(1, 4, 5), list);
 
-        // Test no change
         List<Integer> emptyList = new ArrayList<>();
         assertFalse(N.deleteRange(emptyList, 0, 0));
     }
@@ -160,7 +156,6 @@ public class N102Test extends TestBase {
         assertEquals("helloworld", result);
     }
 
-    // Tests for replaceRange methods
     @Test
     public void testReplaceRange_boolean() {
         boolean[] arr = { true, false, true, false, true };
@@ -168,7 +163,6 @@ public class N102Test extends TestBase {
         boolean[] result = N.replaceRange(arr, 1, 3, replacement);
         assertArrayEquals(new boolean[] { true, false, false, false, true }, result);
 
-        // Test with empty replacement
         boolean[] emptyReplacement = {};
         result = N.replaceRange(arr, 1, 3, emptyReplacement);
         assertArrayEquals(new boolean[] { true, false, true }, result);
@@ -244,7 +238,6 @@ public class N102Test extends TestBase {
         assertTrue(N.replaceRange(list, 1, 3, replacement));
         assertEquals(Arrays.asList(1, 10, 20, 4, 5), list);
 
-        // Test no change
         assertFalse(N.replaceRange(list, 0, 0, Collections.emptyList()));
     }
 
@@ -254,7 +247,6 @@ public class N102Test extends TestBase {
         assertEquals("hello my world", result);
     }
 
-    // Tests for moveRange methods
     @Test
     public void testMoveRange_boolean() {
         boolean[] arr = { true, false, true, false, true };
@@ -268,12 +260,11 @@ public class N102Test extends TestBase {
         N.moveRange(arr, 1, 3, 3);
         assertArrayEquals(new char[] { 'a', 'd', 'e', 'b', 'c' }, arr);
 
-        // Test no-op cases
         char[] arr2 = { 'a', 'b', 'c' };
-        N.moveRange(arr2, 1, 1, 0); // fromIndex == toIndex
+        N.moveRange(arr2, 1, 1, 0);
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, arr2);
 
-        N.moveRange(arr2, 1, 2, 1); // fromIndex == newPositionStartIndexAfterMove
+        N.moveRange(arr2, 1, 2, 1);
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, arr2);
     }
 
@@ -332,7 +323,6 @@ public class N102Test extends TestBase {
         assertTrue(N.moveRange(list, 1, 3, 3));
         assertEquals(Arrays.asList(1, 4, 5, 2, 3), list);
 
-        // Test no change
         assertFalse(N.moveRange(list, 1, 1, 0));
     }
 
@@ -342,16 +332,13 @@ public class N102Test extends TestBase {
         assertEquals("hloel", result);
     }
 
-    // Tests for skipRange methods
     @Test
     public void testSkipRange_generic() {
         Integer[] result = N.skipRange(integerArray, 1, 3);
         assertArrayEquals(new Integer[] { 1, 4, 5 }, result);
 
-        // Test null array
         assertNull(N.skipRange((Integer[]) null, 0, 0));
 
-        // Test no skip
         assertArrayEquals(integerArray.clone(), N.skipRange(integerArray, 0, 0));
     }
 
@@ -360,12 +347,10 @@ public class N102Test extends TestBase {
         List<Integer> result = N.skipRange(integerList, 1, 3);
         assertEquals(Arrays.asList(1, 4, 5), result);
 
-        // Test with custom supplier
         Set<Integer> resultSet = N.skipRange(integerList, 1, 3, HashSet::new);
         assertEquals(new HashSet<>(Arrays.asList(1, 4, 5)), resultSet);
     }
 
-    // Tests for hasDuplicates methods
     @Test
     public void testHasDuplicates_boolean() {
         boolean[] noDups = { true, false };
@@ -385,7 +370,6 @@ public class N102Test extends TestBase {
         assertTrue(N.hasDuplicates(hasDups));
         assertFalse(N.hasDuplicates(new char[] {}));
 
-        // Test sorted version
         char[] sortedDups = { 'a', 'a', 'b' };
         assertTrue(N.hasDuplicates(sortedDups, true));
     }
@@ -399,7 +383,6 @@ public class N102Test extends TestBase {
         assertTrue(N.hasDuplicates(hasDups));
         assertFalse(N.hasDuplicates(new byte[] {}));
 
-        // Test sorted version
         byte[] sortedDups = { 1, 1, 2 };
         assertTrue(N.hasDuplicates(sortedDups, true));
     }
@@ -413,7 +396,6 @@ public class N102Test extends TestBase {
         assertTrue(N.hasDuplicates(hasDups));
         assertFalse(N.hasDuplicates(new short[] {}));
 
-        // Test sorted version
         short[] sortedDups = { 1, 1, 2 };
         assertTrue(N.hasDuplicates(sortedDups, true));
     }
@@ -427,7 +409,6 @@ public class N102Test extends TestBase {
         assertTrue(N.hasDuplicates(hasDups));
         assertFalse(N.hasDuplicates(new int[] {}));
 
-        // Test sorted version
         int[] sortedDups = { 1, 1, 2 };
         assertTrue(N.hasDuplicates(sortedDups, true));
     }
@@ -441,7 +422,6 @@ public class N102Test extends TestBase {
         assertTrue(N.hasDuplicates(hasDups));
         assertFalse(N.hasDuplicates(new long[] {}));
 
-        // Test sorted version
         long[] sortedDups = { 1L, 1L, 2L };
         assertTrue(N.hasDuplicates(sortedDups, true));
     }
@@ -455,7 +435,6 @@ public class N102Test extends TestBase {
         assertTrue(N.hasDuplicates(hasDups));
         assertFalse(N.hasDuplicates(new float[] {}));
 
-        // Test sorted version
         float[] sortedDups = { 1.0f, 1.0f, 2.0f };
         assertTrue(N.hasDuplicates(sortedDups, true));
     }
@@ -469,7 +448,6 @@ public class N102Test extends TestBase {
         assertTrue(N.hasDuplicates(hasDups));
         assertFalse(N.hasDuplicates(new double[] {}));
 
-        // Test sorted version
         double[] sortedDups = { 1.0, 1.0, 2.0 };
         assertTrue(N.hasDuplicates(sortedDups, true));
     }
@@ -483,7 +461,6 @@ public class N102Test extends TestBase {
         assertTrue(N.hasDuplicates(hasDups));
         assertFalse(N.hasDuplicates(new String[] {}));
 
-        // Test sorted version
         String[] sortedDups = { "a", "a", "b" };
         assertTrue(N.hasDuplicates(sortedDups, true));
     }
@@ -497,7 +474,6 @@ public class N102Test extends TestBase {
         assertTrue(N.hasDuplicates(hasDups));
         assertFalse(N.hasDuplicates(Collections.emptyList()));
 
-        // Test sorted version
         List<String> sortedDups = Arrays.asList("a", "a", "b");
         assertTrue(N.hasDuplicates(sortedDups, true));
     }
@@ -510,20 +486,17 @@ public class N102Test extends TestBase {
         assertTrue(N.retainAll(c, toKeep));
         assertEquals(Arrays.asList(2, 4), c);
 
-        // Test empty collection
         Collection<Integer> empty = new ArrayList<>();
         assertFalse(N.retainAll(empty, toKeep));
 
-        // Test empty toKeep
         Collection<Integer> c2 = new ArrayList<>(Arrays.asList(1, 2, 3));
         assertTrue(N.retainAll(c2, Collections.emptyList()));
         assertTrue(c2.isEmpty());
     }
 
-    // Tests for sum methods
     @Test
     public void testSum_char() {
-        assertEquals(294, N.sum('a', 'b', 'c')); // 97 + 98 + 99 = 294, but char arithmetic
+        assertEquals(294, N.sum('a', 'b', 'c'));
         assertEquals(0, N.sum(new char[] {}));
 
         char[] chars = { 'a', 'b', 'c', 'd', 'e' };
@@ -534,110 +507,108 @@ public class N102Test extends TestBase {
     public void testSum_byte() {
         assertEquals(15, N.sum(byteArray));
         assertEquals(0, N.sum(new byte[] {}));
-        assertEquals(9, N.sum(byteArray, 1, 4)); // 2 + 3 + 4
+        assertEquals(9, N.sum(byteArray, 1, 4));
     }
 
     @Test
     public void testSum_short() {
         assertEquals(15, N.sum(shortArray));
         assertEquals(0, N.sum(new short[] {}));
-        assertEquals(9, N.sum(shortArray, 1, 4)); // 2 + 3 + 4
+        assertEquals(9, N.sum(shortArray, 1, 4));
     }
 
     @Test
     public void testSum_int() {
         assertEquals(15, N.sum(intArray));
         assertEquals(0, N.sum(new int[] {}));
-        assertEquals(9, N.sum(intArray, 1, 4)); // 2 + 3 + 4
+        assertEquals(9, N.sum(intArray, 1, 4));
     }
 
     @Test
     public void testSumToLong_int() {
         assertEquals(15L, N.sumToLong(intArray));
         assertEquals(0L, N.sumToLong(new int[] {}));
-        assertEquals(9L, N.sumToLong(intArray, 1, 4)); // 2 + 3 + 4
+        assertEquals(9L, N.sumToLong(intArray, 1, 4));
     }
 
     @Test
     public void testSum_long() {
         assertEquals(15L, N.sum(longArray));
         assertEquals(0L, N.sum(new long[] {}));
-        assertEquals(9L, N.sum(longArray, 1, 4)); // 2 + 3 + 4
+        assertEquals(9L, N.sum(longArray, 1, 4));
     }
 
     @Test
     public void testSum_float() {
         assertEquals(15.0f, N.sum(floatArray), 0.001);
         assertEquals(0f, N.sum(new float[] {}), 0.001);
-        assertEquals(9.0f, N.sum(floatArray, 1, 4), 0.001); // 2 + 3 + 4
+        assertEquals(9.0f, N.sum(floatArray, 1, 4), 0.001);
     }
 
     @Test
     public void testSumToDouble_float() {
         assertEquals(15.0, N.sumToDouble(floatArray), 0.001);
         assertEquals(0.0, N.sumToDouble(new float[] {}), 0.001);
-        assertEquals(9.0, N.sumToDouble(floatArray, 1, 4), 0.001); // 2 + 3 + 4
+        assertEquals(9.0, N.sumToDouble(floatArray, 1, 4), 0.001);
     }
 
     @Test
     public void testSum_double() {
         assertEquals(15.0, N.sum(doubleArray), 0.001);
         assertEquals(0.0, N.sum(new double[] {}), 0.001);
-        assertEquals(9.0, N.sum(doubleArray, 1, 4), 0.001); // 2 + 3 + 4
+        assertEquals(9.0, N.sum(doubleArray, 1, 4), 0.001);
     }
 
-    // Tests for average methods
     @Test
     public void testAverage_char() {
         char[] chars = { 'a', 'b', 'c' };
-        assertEquals(98.0, N.average(chars), 0.001); // (97 + 98 + 99) / 3
+        assertEquals(98.0, N.average(chars), 0.001);
         assertEquals(0.0, N.average(new char[] {}), 0.001);
-        assertEquals(98.5, N.average(chars, 1, 3), 0.001); // (98 + 99) / 2
+        assertEquals(98.5, N.average(chars, 1, 3), 0.001);
     }
 
     @Test
     public void testAverage_byte() {
         assertEquals(3.0, N.average(byteArray), 0.001);
         assertEquals(0.0, N.average(new byte[] {}), 0.001);
-        assertEquals(3.0, N.average(byteArray, 1, 4), 0.001); // (2 + 3 + 4) / 3
+        assertEquals(3.0, N.average(byteArray, 1, 4), 0.001);
     }
 
     @Test
     public void testAverage_short() {
         assertEquals(3.0, N.average(shortArray), 0.001);
         assertEquals(0.0, N.average(new short[] {}), 0.001);
-        assertEquals(3.0, N.average(shortArray, 1, 4), 0.001); // (2 + 3 + 4) / 3
+        assertEquals(3.0, N.average(shortArray, 1, 4), 0.001);
     }
 
     @Test
     public void testAverage_int() {
         assertEquals(3.0, N.average(intArray), 0.001);
         assertEquals(0.0, N.average(new int[] {}), 0.001);
-        assertEquals(3.0, N.average(intArray, 1, 4), 0.001); // (2 + 3 + 4) / 3
+        assertEquals(3.0, N.average(intArray, 1, 4), 0.001);
     }
 
     @Test
     public void testAverage_long() {
         assertEquals(3.0, N.average(longArray), 0.001);
         assertEquals(0.0, N.average(new long[] {}), 0.001);
-        assertEquals(3.0, N.average(longArray, 1, 4), 0.001); // (2 + 3 + 4) / 3
+        assertEquals(3.0, N.average(longArray, 1, 4), 0.001);
     }
 
     @Test
     public void testAverage_float() {
         assertEquals(3.0, N.average(floatArray), 0.001);
         assertEquals(0.0, N.average(new float[] {}), 0.001);
-        assertEquals(3.0, N.average(floatArray, 1, 4), 0.001); // (2 + 3 + 4) / 3
+        assertEquals(3.0, N.average(floatArray, 1, 4), 0.001);
     }
 
     @Test
     public void testAverage_double() {
         assertEquals(3.0, N.average(doubleArray), 0.001);
         assertEquals(0.0, N.average(new double[] {}), 0.001);
-        assertEquals(3.0, N.average(doubleArray, 1, 4), 0.001); // (2 + 3 + 4) / 3
+        assertEquals(3.0, N.average(doubleArray, 1, 4), 0.001);
     }
 
-    // Tests for sumInt/Long/Double methods with functions
     @Test
     public void testSumInt_array() {
         assertEquals(15, N.sumInt(integerArray));
@@ -716,7 +687,6 @@ public class N102Test extends TestBase {
         assertEquals(BigInteger.valueOf(6), N.sumBigInteger(bigIntList));
         assertEquals(BigInteger.valueOf(12), N.sumBigInteger(bigIntList, x -> x.multiply(BigInteger.valueOf(2))));
 
-        // Test with empty list
         assertEquals(BigInteger.ZERO, N.sumBigInteger(Collections.emptyList()));
     }
 
@@ -726,11 +696,9 @@ public class N102Test extends TestBase {
         assertEquals(BigDecimal.valueOf(6), N.sumBigDecimal(bigDecList));
         assertEquals(BigDecimal.valueOf(12), N.sumBigDecimal(bigDecList, x -> x.multiply(BigDecimal.valueOf(2))));
 
-        // Test with empty list
         assertEquals(BigDecimal.ZERO, N.sumBigDecimal(Collections.emptyList()));
     }
 
-    // Tests for averageInt/Long/Double methods
     @Test
     public void testAverageInt_array() {
         assertEquals(3.0, N.averageInt(integerArray), 0.001);
@@ -803,7 +771,6 @@ public class N102Test extends TestBase {
         assertEquals(BigDecimal.valueOf(2), N.averageBigInteger(bigIntList));
         assertEquals(BigDecimal.valueOf(4), N.averageBigInteger(bigIntList, x -> x.multiply(BigInteger.valueOf(2))));
 
-        // Test with empty list
         assertEquals(BigDecimal.ZERO, N.averageBigInteger(Collections.emptyList()));
     }
 
@@ -813,11 +780,9 @@ public class N102Test extends TestBase {
         assertEquals(BigDecimal.valueOf(2), N.averageBigDecimal(bigDecList));
         assertEquals(BigDecimal.valueOf(4), N.averageBigDecimal(bigDecList, x -> x.multiply(BigDecimal.valueOf(2))));
 
-        // Test with empty list
         assertEquals(BigDecimal.ZERO, N.averageBigDecimal(Collections.emptyList()));
     }
 
-    // Tests for min methods
     @Test
     public void testMin_primitives() {
         assertEquals('a', N.min('a', 'b'));
@@ -845,7 +810,6 @@ public class N102Test extends TestBase {
         assertEquals("a", N.min("a", "b"));
         assertEquals("a", N.min("a", "b", "c"));
 
-        // Test with null
         assertEquals("a", N.min(null, "a"));
         assertEquals("a", N.min("a", null));
     }
@@ -938,7 +902,6 @@ public class N102Test extends TestBase {
         result = N.minAll(coll.iterator());
         assertEquals(Arrays.asList("a", "a"), result);
 
-        // Test with comparator
         result = N.minAll(arr, Comparator.reverseOrder());
         assertEquals(Arrays.asList("c"), result);
     }
@@ -1015,7 +978,6 @@ public class N102Test extends TestBase {
         assertEquals(2.0, N.minDoubleOrDefaultIfEmpty(coll.iterator(), x -> x * 2, 10.0), 0.001);
     }
 
-    // Tests for minMax methods
     @Test
     public void testMinMax_array() {
         assertThrows(IllegalArgumentException.class, () -> N.minMax(new String[] {}));
@@ -1043,7 +1005,6 @@ public class N102Test extends TestBase {
         assertEquals(Pair.of("five", "two"), N.minMax(stringList.iterator(), Comparator.naturalOrder()));
     }
 
-    // Tests for max methods
     @Test
     public void testMax_primitives() {
         assertEquals('b', N.max('a', 'b'));
@@ -1071,7 +1032,6 @@ public class N102Test extends TestBase {
         assertEquals("b", N.max("a", "b"));
         assertEquals("c", N.max("a", "b", "c"));
 
-        // Test with null
         assertEquals("a", N.max(null, "a"));
         assertEquals("a", N.max("a", null));
     }
@@ -1164,7 +1124,6 @@ public class N102Test extends TestBase {
         result = N.maxAll(coll.iterator());
         assertEquals(Arrays.asList("c", "c"), result);
 
-        // Test with comparator
         result = N.maxAll(arr, Comparator.reverseOrder());
         assertEquals(Arrays.asList("a"), result);
     }
@@ -1241,7 +1200,6 @@ public class N102Test extends TestBase {
         assertEquals(6.0, N.maxDoubleOrDefaultIfEmpty(coll.iterator(), x -> x * 2, 10.0), 0.001);
     }
 
-    // Tests for median methods
     @Test
     public void testMedian_three_primitives() {
         assertEquals('b', N.median('a', 'b', 'c'));
@@ -1270,6 +1228,14 @@ public class N102Test extends TestBase {
     public void testMedian_three_comparable() {
         assertEquals("b", N.median("a", "b", "c"));
         assertEquals("b", N.median("c", "b", "a"));
+
+        assertEquals("bee", N.median("ant", "bee", "tiger", Comparator.comparing(String::length)));
+        assertEquals("ant", N.median("bee", "ant", "tiger", Comparator.comparing(String::length)));
+        assertEquals("ant", N.median("bee", "tiger", "ant", Comparator.comparing(String::length)));
+        assertEquals("bee", N.median("tiger", "bee", "ant", Comparator.comparing(String::length)));
+        assertEquals("ant", N.median("be", "ant", "tiger", Comparator.comparing(String::length)));
+        assertEquals("ant", N.median("be", "tiger", "ant", Comparator.comparing(String::length)));
+        assertEquals("ant", N.median("tiger", "be", "ant", Comparator.comparing(String::length)));
     }
 
     @Test
@@ -1286,8 +1252,8 @@ public class N102Test extends TestBase {
         assertEquals('a', N.median(new char[] { 'a' }));
         assertEquals('a', N.median(new char[] { 'a', 'b' }));
         assertEquals('b', N.median(new char[] { 'a', 'b', 'c' }));
-        assertEquals('c', N.median(charArray)); // a,b,c,d,e -> median is c
-        assertEquals('c', N.median(charArray, 1, 4)); // b,c,d -> median is c
+        assertEquals('c', N.median(charArray));
+        assertEquals('c', N.median(charArray, 1, 4));
 
         assertEquals((byte) 3, N.median(byteArray));
         assertEquals((byte) 3, N.median(byteArray, 1, 4));
@@ -1317,6 +1283,8 @@ public class N102Test extends TestBase {
         assertEquals("c", N.median(sorted, 1, 4));
         assertEquals("c", N.median(sorted, Comparator.naturalOrder()));
         assertEquals("c", N.median(sorted, 0, 5, Comparator.naturalOrder()));
+
+        assertEquals("bee", N.median(Array.of("ant", "bee", "tiger"), Comparator.comparing(String::length)));
     }
 
     @Test
@@ -1328,17 +1296,17 @@ public class N102Test extends TestBase {
         assertEquals("c", N.median(sorted, 1, 4));
         assertEquals("c", N.median(sorted, Comparator.naturalOrder()));
         assertEquals("c", N.median(sorted, 0, 5, Comparator.naturalOrder()));
+        assertEquals("bee", N.median(N.asList("ant", "bee", "tiger"), Comparator.comparing(String::length)));
     }
 
-    // Tests for kthLargest methods
     @Test
     public void testKthLargest_array_primitives() {
         assertThrows(IllegalArgumentException.class, () -> N.kthLargest(new char[] {}, 1));
 
-        assertEquals('e', N.kthLargest(charArray, 1)); // largest
-        assertEquals('a', N.kthLargest(charArray, 5)); // smallest
-        assertEquals('c', N.kthLargest(charArray, 3)); // median
-        assertEquals('d', N.kthLargest(charArray, 1, 4, 1)); // largest in range b,c,d
+        assertEquals('e', N.kthLargest(charArray, 1));
+        assertEquals('a', N.kthLargest(charArray, 5));
+        assertEquals('c', N.kthLargest(charArray, 3));
+        assertEquals('d', N.kthLargest(charArray, 1, 4, 1));
 
         assertEquals((byte) 5, N.kthLargest(byteArray, 1));
         assertEquals((byte) 1, N.kthLargest(byteArray, 5));
@@ -1391,7 +1359,6 @@ public class N102Test extends TestBase {
         assertEquals("c", N.kthLargest(list, 0, 5, 3, Comparator.naturalOrder()));
     }
 
-    // Tests for top methods
     @Test
     public void testTop_array_primitives() {
         assertThrows(IllegalArgumentException.class, () -> N.top(shortArray, -1));
@@ -1425,7 +1392,6 @@ public class N102Test extends TestBase {
         result = N.top(stringArray, 3, Comparator.naturalOrder());
         assertEquals(3, result.size());
 
-        // Test with keepEncounterOrder
         String[] arr = { "d", "b", "e", "a", "c" };
         result = N.top(arr, 3, true);
         assertEquals(Arrays.asList("d", "e", "c"), result);
@@ -1455,7 +1421,6 @@ public class N102Test extends TestBase {
         result = N.top(stringList, 3, Comparator.naturalOrder());
         assertEquals(3, result.size());
 
-        // Test with keepEncounterOrder
         List<String> list = Arrays.asList("d", "b", "e", "a", "c");
         result = N.top(list, 3, true);
         assertEquals(Arrays.asList("d", "e", "c"), result);
@@ -1470,7 +1435,6 @@ public class N102Test extends TestBase {
         assertEquals(Arrays.asList("b", "e"), result);
     }
 
-    // Tests for percentiles methods
     @Test
     public void testPercentiles_primitives() {
         assertThrows(IllegalArgumentException.class, () -> N.percentiles(new char[] {}));

@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Fn;
@@ -26,6 +27,7 @@ import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.u.Optional;
 
+@Tag("new-test")
 public class Stream104Test extends TestBase {
     @Test
     public void testStreamCreatedAfterFilter() {
@@ -245,7 +247,6 @@ public class Stream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterShuffled() {
-        // Note: shuffled() produces random order, so we can only test count and that all elements are present
         assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled().count());
         assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled().skip(1).count());
         assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled().toArray().length);
@@ -511,7 +512,6 @@ public class Stream104Test extends TestBase {
         assertEquals(N.asList(1, 2, 3), Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).toList());
         assertEquals(N.asList(2, 3), Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).skip(1).toList());
 
-        // Test non-empty stream
         assertEquals(2, Stream.of(4, 5).appendIfEmpty(1, 2, 3).count());
         assertEquals(1, Stream.of(4, 5).appendIfEmpty(1, 2, 3).skip(1).count());
         assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(4, 5).appendIfEmpty(1, 2, 3).toArray());
@@ -1804,7 +1804,6 @@ public class Stream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterAppendIfEmptyVarargs() {
-        // Non-empty stream should not append
         assertEquals(3, Stream.of(1, 2, 3).appendIfEmpty(4, 5).count());
         assertEquals(2, Stream.of(1, 2, 3).appendIfEmpty(4, 5).skip(1).count());
         assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, 2, 3).appendIfEmpty(4, 5).toArray());
@@ -1812,7 +1811,6 @@ public class Stream104Test extends TestBase {
         assertEquals(N.asList(1, 2, 3), Stream.of(1, 2, 3).appendIfEmpty(4, 5).toList());
         assertEquals(N.asList(2, 3), Stream.of(1, 2, 3).appendIfEmpty(4, 5).skip(1).toList());
 
-        // Empty stream should append
         assertEquals(2, Stream.<Integer> empty().appendIfEmpty(4, 5).count());
         assertEquals(1, Stream.<Integer> empty().appendIfEmpty(4, 5).skip(1).count());
         assertArrayEquals(new Integer[] { 4, 5 }, Stream.<Integer> empty().appendIfEmpty(4, 5).toArray());

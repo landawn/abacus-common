@@ -55,7 +55,6 @@ import com.landawn.abacus.util.u.OptionalShort;
  * 
  * <p>This is an internal class and should not be used directly by application code.</p>
  * 
- * @author HaiYang Li
  * @since 0.8
  */
 class JSONStringReader extends AbstractJSONReader {
@@ -689,7 +688,13 @@ class JSONStringReader extends AbstractJSONReader {
      */
 
     void enlargeCharBuffer() {
-        cbuf = N.copyOf(cbuf, (int) (cbufLen * 1.75));
+        int newCapacity = (int) (cbufLen * 1.75);
+
+        if (newCapacity < 0) {
+            newCapacity = Integer.MAX_VALUE;
+        }
+
+        cbuf = N.copyOf(cbuf, newCapacity);
         cbufLen = cbuf.length;
     }
 

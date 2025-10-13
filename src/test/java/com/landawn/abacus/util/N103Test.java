@@ -21,12 +21,13 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class N103Test extends TestBase {
 
-    // Test data
     private boolean[] booleanArray;
     private char[] charArray;
     private byte[] byteArray;
@@ -42,7 +43,6 @@ public class N103Test extends TestBase {
     private Set<String> stringSet;
     private Map<String, Integer> stringIntMap;
 
-    // Test data setup
     private boolean[] emptyBooleanArray = new boolean[0];
     private char[] emptyCharArray = new char[0];
     private int[] emptyIntArray = new int[0];
@@ -58,7 +58,6 @@ public class N103Test extends TestBase {
     private Integer[] nullContainingArray = new Integer[] { 1, null, 3, null, 5 };
     private List<String> nullContainingList = Arrays.asList("a", null, "c", null, "e");
 
-    // Large data sets for performance edge cases
     private int[] largeIntArray;
     private List<Integer> largeIntList;
 
@@ -81,7 +80,6 @@ public class N103Test extends TestBase {
         stringIntMap.put("one", 1);
         stringIntMap.put("two", 2);
         stringIntMap.put("three", 3);
-        // Create large data sets
         largeIntArray = new int[10000];
         largeIntList = new ArrayList<>(10000);
         for (int i = 0; i < 10000; i++) {
@@ -90,7 +88,6 @@ public class N103Test extends TestBase {
         }
     }
 
-    // Filter tests
     @Test
     public void testFilterBooleanArray() {
         boolean[] result = N.filter(booleanArray, b -> b);
@@ -99,11 +96,9 @@ public class N103Test extends TestBase {
         result = N.filter(booleanArray, b -> !b);
         assertArrayEquals(new boolean[] { false, false }, result);
 
-        // Test with empty array
         result = N.filter(new boolean[0], b -> b);
         assertArrayEquals(new boolean[0], result);
 
-        // Test with null array
         result = N.filter((boolean[]) null, b -> b);
         assertArrayEquals(new boolean[0], result);
     }
@@ -267,7 +262,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList(4, 5), result);
     }
 
-    // MapTo tests
     @Test
     public void testMapToBoolean() {
         boolean[] result = N.mapToBoolean(stringArray, s -> s.length() > 3);
@@ -406,7 +400,6 @@ public class N103Test extends TestBase {
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.001);
     }
 
-    // Map tests
     @Test
     public void testMap() {
         List<Integer> result = N.map(stringArray, String::length);
@@ -443,7 +436,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList("num1", "num2", "num3", "num4", "num5"), result);
     }
 
-    // FlatMap tests
     @Test
     public void testFlatMap() {
         List<Character> result = N.flatMap(stringArray, s -> Arrays.asList(s.charAt(0), s.charAt(1)));
@@ -487,7 +479,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }
 
-    // TakeWhile tests
     @Test
     public void testTakeWhile() {
         List<Integer> result = N.takeWhile(integerArray, i -> i < 4);
@@ -527,7 +518,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3), result);
     }
 
-    // DropWhile tests
     @Test
     public void testDropWhile() {
         List<Integer> result = N.dropWhile(integerArray, i -> i < 3);
@@ -549,7 +539,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList(4, 5), result);
     }
 
-    // SkipUntil tests
     @Test
     public void testSkipUntil() {
         List<Integer> result = N.skipUntil(integerArray, i -> i > 3);
@@ -568,7 +557,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList(3, 4, 5), result);
     }
 
-    // MapAndFilter tests
     @Test
     public void testMapAndFilter() {
         List<Integer> result = N.mapAndFilter(stringList, String::length, len -> len > 3);
@@ -581,7 +569,6 @@ public class N103Test extends TestBase {
         assertEquals(new HashSet<>(Arrays.asList(5, 4)), result);
     }
 
-    // FilterAndMap tests
     @Test
     public void testFilterAndMap() {
         List<Integer> result = N.filterAndMap(stringList, s -> s.length() > 3, String::length);
@@ -594,7 +581,6 @@ public class N103Test extends TestBase {
         assertEquals(new HashSet<>(Arrays.asList("even:2", "even:4")), result);
     }
 
-    // FlatMapAndFilter tests
     @Test
     public void testFlatMapAndFilter() {
         List<Character> result = N.flatMapAndFilter(Arrays.asList("abc", "de", "fghi"), s -> s.chars().mapToObj(c -> (char) c).collect(Collectors.toList()),
@@ -602,7 +588,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList('d', 'e', 'f', 'g', 'h', 'i'), result);
     }
 
-    // FilterAndFlatMap tests
     @Test
     public void testFilterAndFlatMap() {
         List<Character> result = N.filterAndFlatMap(Arrays.asList("abc", "de", "fghi"), s -> s.length() > 2,
@@ -667,7 +652,7 @@ public class N103Test extends TestBase {
     @Test
     public void testDistinctBy() {
         List<String> result = N.distinctBy(stringArray, String::length);
-        assertEquals(3, result.size()); // lengths: 3, 5, 4
+        assertEquals(3, result.size());
     }
 
     @Test
@@ -676,12 +661,11 @@ public class N103Test extends TestBase {
         assertEquals(3, result.size());
     }
 
-    // Match tests
     @Test
     public void testAllMatch() {
         assertTrue(N.allMatch(new Integer[] { 2, 4, 6 }, i -> i % 2 == 0));
         assertFalse(N.allMatch(integerArray, i -> i % 2 == 0));
-        assertTrue(N.allMatch(new Integer[0], i -> false)); // empty array
+        assertTrue(N.allMatch(new Integer[0], i -> false));
     }
 
     @Test
@@ -700,7 +684,7 @@ public class N103Test extends TestBase {
     public void testAnyMatch() {
         assertTrue(N.anyMatch(integerArray, i -> i > 4));
         assertFalse(N.anyMatch(integerArray, i -> i > 10));
-        assertFalse(N.anyMatch(new Integer[0], i -> true)); // empty array
+        assertFalse(N.anyMatch(new Integer[0], i -> true));
     }
 
     @Test
@@ -719,7 +703,7 @@ public class N103Test extends TestBase {
     public void testNoneMatch() {
         assertTrue(N.noneMatch(integerArray, i -> i > 10));
         assertFalse(N.noneMatch(integerArray, i -> i > 3));
-        assertTrue(N.noneMatch(new Integer[0], i -> true)); // empty array
+        assertTrue(N.noneMatch(new Integer[0], i -> true));
     }
 
     @Test
@@ -757,31 +741,30 @@ public class N103Test extends TestBase {
     public void testAllTrue() {
         assertTrue(N.allTrue(new boolean[] { true, true, true }));
         assertFalse(N.allTrue(booleanArray));
-        assertTrue(N.allTrue(new boolean[0])); // empty array
+        assertTrue(N.allTrue(new boolean[0]));
     }
 
     @Test
     public void testAllFalse() {
         assertTrue(N.allFalse(new boolean[] { false, false, false }));
         assertFalse(N.allFalse(booleanArray));
-        assertTrue(N.allFalse(new boolean[0])); // empty array
+        assertTrue(N.allFalse(new boolean[0]));
     }
 
     @Test
     public void testAnyTrue() {
         assertTrue(N.anyTrue(booleanArray));
         assertFalse(N.anyTrue(new boolean[] { false, false }));
-        assertFalse(N.anyTrue(new boolean[0])); // empty array
+        assertFalse(N.anyTrue(new boolean[0]));
     }
 
     @Test
     public void testAnyFalse() {
         assertTrue(N.anyFalse(booleanArray));
         assertFalse(N.anyFalse(new boolean[] { true, true }));
-        assertFalse(N.anyFalse(new boolean[0])); // empty array
+        assertFalse(N.anyFalse(new boolean[0]));
     }
 
-    // Count tests
     @Test
     public void testCountBooleanArray() {
         assertEquals(3, N.count(booleanArray, b -> b));
@@ -826,7 +809,6 @@ public class N103Test extends TestBase {
         assertEquals(2, N.count(integerList.iterator(), i -> i > 3));
     }
 
-    // Merge tests
     @Test
     public void testMergeArrays() {
         Integer[] a1 = { 1, 3, 5 };
@@ -850,7 +832,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
     }
 
-    // Zip tests
     @Test
     public void testZipArrays() {
         Integer[] a1 = { 1, 2, 3 };
@@ -897,7 +878,6 @@ public class N103Test extends TestBase {
         assertArrayEquals(new Integer[] { 11, 22, 33 }, result);
     }
 
-    // Unzip tests
     @Test
     public void testUnzip() {
         List<Pair<Integer, String>> pairs = Arrays.asList(Pair.of(1, "a"), Pair.of(2, "b"), Pair.of(3, "c"));
@@ -922,7 +902,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList(1.0, 2.0), result.right());
     }
 
-    // GroupBy tests
     @Test
     public void testGroupByArray() {
         Map<Integer, List<String>> result = N.groupBy(stringArray, String::length);
@@ -976,7 +955,6 @@ public class N103Test extends TestBase {
         assertEquals(Long.valueOf(2), result.get(4));
     }
 
-    // CountBy tests
     @Test
     public void testCountBy() {
         Map<Integer, Integer> result = N.countBy(stringList, String::length);
@@ -994,7 +972,6 @@ public class N103Test extends TestBase {
         assertEquals(Integer.valueOf(3), result.get(false));
     }
 
-    // Iterate tests
     @Test
     public void testIterateArray() {
         ObjIterator<String> iter = N.iterate(stringArray);
@@ -1050,7 +1027,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
     }
 
-    // Disjoint tests
     @Test
     public void testDisjointArrays() {
         Integer[] a1 = { 1, 2, 3 };
@@ -1078,7 +1054,6 @@ public class N103Test extends TestBase {
         assertTrue(N.disjoint(Collections.emptyList(), integerList));
     }
 
-    // Helper methods
     private boolean contains(char[] array, char value) {
         for (char c : array) {
             if (c == value)
@@ -1095,35 +1070,28 @@ public class N103Test extends TestBase {
         return false;
     }
 
-    // Edge case tests
     @Test
     public void testNullHandling() {
-        // Filter with null
         assertArrayEquals(new boolean[0], N.filter((boolean[]) null, b -> b));
         assertEquals(Collections.emptyList(), N.filter((String[]) null, s -> true));
 
-        // Map with null
         assertArrayEquals(new boolean[0], N.mapToBoolean((String[]) null, s -> true));
         assertEquals(Collections.emptyList(), N.map((String[]) null, s -> s));
 
-        // Count with null
         assertEquals(0, N.count((int[]) null, i -> true));
         assertEquals(0, N.count((Iterator<?>) null));
 
-        // Distinct with null
         assertArrayEquals(new boolean[0], N.distinct((boolean[]) null));
         assertEquals(Collections.emptyList(), N.distinct((String[]) null));
     }
 
     @Test
     public void testEmptyCollectionHandling() {
-        // Empty array
         String[] emptyArray = new String[0];
         assertEquals(Collections.emptyList(), N.filter(emptyArray, s -> true));
         assertEquals(Collections.emptyList(), N.map(emptyArray, s -> s));
         assertEquals(Collections.emptyList(), N.distinct(emptyArray));
 
-        // Empty list
         List<String> emptyList = Collections.emptyList();
         assertEquals(Collections.emptyList(), N.filter(emptyList, s -> true));
         assertEquals(Collections.emptyList(), N.map(emptyList, s -> s));
@@ -1160,7 +1128,6 @@ public class N103Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> N.nMatch(integerArray, 3, 2, i -> true));
     }
 
-    // Additional Filter tests with edge cases
     @Test
     public void testFilterWithEmptyArrays() {
         assertArrayEquals(new boolean[0], N.filter(emptyBooleanArray, b -> b));
@@ -1210,26 +1177,20 @@ public class N103Test extends TestBase {
     public void testFilterRangeEdgeCases() {
         int[] arr = { 1, 2, 3, 4, 5 };
 
-        // Empty range
         assertArrayEquals(new int[0], N.filter(arr, 2, 2, i -> true));
 
-        // Full array range
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, N.filter(arr, 0, 5, i -> true));
 
-        // Single element range
         assertArrayEquals(new int[] { 3 }, N.filter(arr, 2, 3, i -> true));
     }
 
-    // Additional Map tests
     @Test
     public void testMapWithComplexTransformations() {
         String[] words = { "hello", "world", "java", "test" };
 
-        // Map to uppercase first character
         List<Character> firstChars = N.map(words, s -> Character.toUpperCase(s.charAt(0)));
         assertEquals(Arrays.asList('H', 'W', 'J', 'T'), firstChars);
 
-        // Map to word statistics
         List<String> stats = N.map(words, s -> s + ":" + s.length());
         assertEquals(Arrays.asList("hello:5", "world:5", "java:4", "test:4"), stats);
     }
@@ -1238,28 +1199,23 @@ public class N103Test extends TestBase {
     public void testMapToIntWithComplexFunctions() {
         String[] sentences = { "Hello world", "Java programming", "Unit testing" };
 
-        // Count spaces
         int[] spaceCounts = N.mapToInt(sentences, s -> (int) s.chars().filter(c -> c == ' ').count());
         assertArrayEquals(new int[] { 1, 1, 1 }, spaceCounts);
 
-        // Get hash codes
         int[] hashCodes = N.mapToInt(sentences, String::hashCode);
         assertEquals(3, hashCodes.length);
     }
 
     @Test
     public void testMapPrimitiveConversions() {
-        // Int to other primitives
         int[] ints = { 1, 2, 3 };
         assertArrayEquals(new long[] { 1L, 2L, 3L }, N.mapToLong(ints, i -> (long) i));
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, N.mapToDouble(ints, i -> (double) i), 0.001);
 
-        // Long to other primitives
         long[] longs = { 100L, 200L, 300L };
         assertArrayEquals(new int[] { 100, 200, 300 }, N.mapToInt(longs, l -> (int) l));
         assertArrayEquals(new double[] { 100.0, 200.0, 300.0 }, N.mapToDouble(longs, l -> (double) l), 0.001);
 
-        // Double to other primitives
         double[] doubles = { 1.5, 2.5, 3.5 };
         assertArrayEquals(new int[] { 1, 2, 3 }, N.mapToInt(doubles, d -> (int) d));
         assertArrayEquals(new long[] { 1L, 2L, 3L }, N.mapToLong(doubles, d -> (long) d));
@@ -1271,7 +1227,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList("1", "NULL", "3", "NULL", "5"), result);
     }
 
-    // Additional FlatMap tests
     @Test
     public void testFlatMapEmptyCollections() {
         String[] arr = { "", "a", "", "bc" };
@@ -1296,7 +1251,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList("a", "b", "c", "d"), result);
     }
 
-    // Additional Distinct tests
     @Test
     public void testDistinctAllDuplicates() {
         assertArrayEquals(new int[] { 1 }, N.distinct(duplicateIntArray));
@@ -1313,7 +1267,7 @@ public class N103Test extends TestBase {
     public void testDistinctWithNulls() {
         Integer[] withNulls = { 1, null, 2, null, 3, null, 1, 2, 3 };
         List<Integer> result = N.distinct(withNulls);
-        assertEquals(4, result.size()); // 1, null, 2, 3
+        assertEquals(4, result.size());
         assertTrue(result.contains(null));
         assertTrue(result.contains(1));
         assertTrue(result.contains(2));
@@ -1334,24 +1288,19 @@ public class N103Test extends TestBase {
 
         Person[] people = { new Person("John", 25), new Person("Jane", 25), new Person("Bob", 30), new Person("Alice", 25) };
 
-        // Distinct by age
         List<Person> byAge = N.distinctBy(people, p -> p.age);
         assertEquals(2, byAge.size());
 
-        // Distinct by name length
         List<Person> byNameLength = N.distinctBy(people, p -> p.name.length());
-        assertEquals(3, byNameLength.size()); // 4, 3, 5 letters
+        assertEquals(3, byNameLength.size());
     }
 
-    // Additional Match tests
     @Test
     public void testMatchWithEmptyPredicates() {
-        // Always true predicate
         assertTrue(N.allMatch(new Integer[] { 1, 2, 3 }, i -> true));
         assertTrue(N.anyMatch(new Integer[] { 1, 2, 3 }, i -> true));
         assertFalse(N.noneMatch(new Integer[] { 1, 2, 3 }, i -> true));
 
-        // Always false predicate
         assertFalse(N.allMatch(new Integer[] { 1, 2, 3 }, i -> false));
         assertFalse(N.anyMatch(new Integer[] { 1, 2, 3 }, i -> false));
         assertTrue(N.noneMatch(new Integer[] { 1, 2, 3 }, i -> false));
@@ -1361,17 +1310,13 @@ public class N103Test extends TestBase {
     public void testNMatchEdgeCases() {
         Integer[] arr = { 1, 2, 3, 4, 5 };
 
-        // Exact match
         assertTrue(N.nMatch(arr, 2, 2, i -> i % 2 == 0));
 
-        // At least 0 (always true)
         assertTrue(N.nMatch(arr, 0, 5, i -> false));
 
-        // Impossible range
         assertFalse(N.nMatch(arr, 10, 10, i -> true));
     }
 
-    // Additional Count tests
     @Test
     public void testCountAllPrimitiveTypes() {
         assertEquals(2, N.count(new boolean[] { true, false, true }, b -> b));
@@ -1386,17 +1331,13 @@ public class N103Test extends TestBase {
     public void testCountWithComplexPredicates() {
         String[] words = { "hello", "world", "java", "programming", "test" };
 
-        // Count palindromes
         assertEquals(0, N.count(words, s -> s.equals(new StringBuilder(s).reverse().toString())));
 
-        // Count words containing 'a'
         assertEquals(2, N.count(words, s -> s.contains("a")));
 
-        // Count words with even length
         assertEquals(2, N.count(words, s -> s.length() % 2 == 0));
     }
 
-    // Additional Merge tests
     @Test
     public void testMergeWithEmptyArrays() {
         Integer[] empty = new Integer[0];
@@ -1417,7 +1358,6 @@ public class N103Test extends TestBase {
         String[] arr1 = { "apple", "cherry", "elderberry" };
         String[] arr2 = { "banana", "date", "fig" };
 
-        // Merge alphabetically
         List<String> result = N.merge(arr1, arr2, Fn.f((a, b) -> a.compareTo(b) < 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND));
         assertEquals(Arrays.asList("apple", "banana", "cherry", "date", "elderberry", "fig"), result);
     }
@@ -1430,7 +1370,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), result);
     }
 
-    // Additional Zip tests
     @Test
     public void testZipDifferentLengths() {
         Integer[] short1 = { 1, 2 };
@@ -1461,7 +1400,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList("1a1.0", "2z2.0", "0z3.0"), result);
     }
 
-    // Additional Unzip tests
     @Test
     public void testUnzipEmptyCollection() {
         List<Pair<String, Integer>> empty = Collections.emptyList();
@@ -1487,7 +1425,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3), result.right());
     }
 
-    // Additional GroupBy tests
     @Test
     public void testGroupByEmptyCollection() {
         Map<String, List<String>> result = N.groupBy(Collections.<String> emptyList(), s -> s);
@@ -1522,18 +1459,15 @@ public class N103Test extends TestBase {
         assertEquals("1,3,5", result.get(false));
     }
 
-    // Additional CountBy tests
     @Test
     public void testCountByWithTransformations() {
         String[] words = { "Hello", "World", "JAVA", "test", "CODE" };
 
-        // Count by case type
         Map<Boolean, Integer> byCase = N.countBy(Arrays.asList(words), s -> s.equals(s.toUpperCase()));
-        assertEquals(Integer.valueOf(2), byCase.get(true)); // JAVA, CODE
-        assertEquals(Integer.valueOf(3), byCase.get(false)); // Hello, World, test
+        assertEquals(Integer.valueOf(2), byCase.get(true));
+        assertEquals(Integer.valueOf(3), byCase.get(false));
     }
 
-    // Additional Iterator tests
     @Test
     public void testIterateWithModification() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
@@ -1542,13 +1476,9 @@ public class N103Test extends TestBase {
         assertTrue(iter.hasNext());
         assertEquals("a", iter.next());
 
-        // Concurrent modification should not affect already created iterator
         list.add("d");
 
-        // assertEquals("b", iter.next());
         assertThrows(ConcurrentModificationException.class, () -> iter.next());
-        // assertEquals("c", iter.next());
-        // assertFalse(iter.hasNext());
     }
 
     @Test
@@ -1572,7 +1502,6 @@ public class N103Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
     }
 
-    // Additional Disjoint tests
     @Test
     public void testDisjointWithDuplicates() {
         Integer[] a1 = { 1, 1, 2, 2, 3, 3 };
@@ -1587,7 +1516,7 @@ public class N103Test extends TestBase {
     public void testDisjointWithNulls() {
         Object[] a1 = { 1, null, 3 };
         Object[] a2 = { 2, null, 4 };
-        assertFalse(N.disjoint(a1, a2)); // Both contain null
+        assertFalse(N.disjoint(a1, a2));
 
         Object[] a3 = { 2, 4, 6 };
         assertTrue(N.disjoint(a1, a3));
@@ -1595,7 +1524,6 @@ public class N103Test extends TestBase {
 
     @Test
     public void testDisjointPerformance() {
-        // Test that disjoint uses efficient algorithm
         Set<Integer> bigSet = new HashSet<>();
         List<Integer> smallList = new ArrayList<>();
 
@@ -1607,27 +1535,21 @@ public class N103Test extends TestBase {
             smallList.add(i);
         }
 
-        // Should check small list against big set, not vice versa
         assertTrue(N.disjoint(bigSet, smallList));
         assertTrue(N.disjoint(smallList, bigSet));
     }
 
-    // Performance edge case tests
     @Test
     public void testLargeDatasetOperations() {
-        // Filter large dataset
         int[] filtered = N.filter(largeIntArray, i -> i % 100 == 0);
         assertEquals(100, filtered.length);
 
-        // Map large dataset
         boolean[] mapped = N.mapToBoolean(largeIntList, i -> i % 2 == 0);
         assertEquals(10000, mapped.length);
 
-        // Count large dataset
         int count = N.count(largeIntArray, i -> i < 5000);
         assertEquals(5000, count);
 
-        // Distinct on dataset with many duplicates
         int[] manyDupes = new int[10000];
         Arrays.fill(manyDupes, 0, 5000, 1);
         Arrays.fill(manyDupes, 5000, 10000, 2);
@@ -1635,7 +1557,6 @@ public class N103Test extends TestBase {
         assertEquals(2, distinct.length);
     }
 
-    // Complex predicate tests
     @Test
     public void testComplexPredicates() {
         class Product {
@@ -1656,95 +1577,76 @@ public class N103Test extends TestBase {
                 new Product("Desk", 299.99, "Furniture", false), new Product("Chair", 199.99, "Furniture", true),
                 new Product("Monitor", 399.99, "Electronics", false) };
 
-        // Complex filter
         List<Product> result = N.filter(products, p -> p.inStock && p.price < 500 && "Electronics".equals(p.category));
         assertEquals(1, result.size());
         assertEquals("Mouse", result.get(0).name);
 
-        // Complex grouping
         Map<String, List<Product>> byCategory = N.groupBy(products, p -> p.category);
         assertEquals(2, byCategory.size());
         assertEquals(3, byCategory.get("Electronics").size());
         assertEquals(2, byCategory.get("Furniture").size());
 
-        // Complex counting
         Map<Boolean, Integer> stockCount = N.countBy(Arrays.asList(products), p -> p.inStock);
         assertEquals(Integer.valueOf(3), stockCount.get(true));
         assertEquals(Integer.valueOf(2), stockCount.get(false));
     }
 
-    // Thread safety edge cases (single-threaded test)
     @Test
     public void testStatelessOperations() {
-        // Verify that operations don't maintain state between calls
         int[] arr = { 1, 2, 3, 4, 5 };
 
-        // Multiple filters should produce same results
         int[] result1 = N.filter(arr, i -> i > 2);
         int[] result2 = N.filter(arr, i -> i > 2);
         assertArrayEquals(result1, result2);
 
-        // Original array should not be modified
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, arr);
     }
 
-    // Special number cases
     @Test
     public void testSpecialNumberCases() {
-        // Test with special float values
         float[] floats = { Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, 0.0f, -0.0f };
         float[] filtered = N.filter(floats, f -> !Float.isNaN(f) && Float.isFinite(f));
         assertArrayEquals(new float[] { 0.0f, -0.0f }, filtered, 0.001f);
 
-        // Test with special double values
         double[] doubles = { Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, 0.0, -0.0 };
         int count = N.count(doubles, d -> Double.isInfinite(d));
         assertEquals(2, count);
     }
 
-    // Boundary value tests
     @Test
     public void testBoundaryValues() {
-        // Test with maximum array sizes (small for test performance)
         byte[] maxBytes = new byte[Byte.MAX_VALUE];
         Arrays.fill(maxBytes, (byte) 1);
         assertEquals(Byte.MAX_VALUE, N.count(maxBytes, b -> b == 1));
 
-        // Test with minimum values
         int[] minValues = { Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE };
         int[] positives = N.filter(minValues, i -> i > 0);
         assertArrayEquals(new int[] { 1, Integer.MAX_VALUE }, positives);
     }
 
-    // Functional composition tests
     @Test
     public void testFunctionalComposition() {
         String[] words = { "hello", "world", "java", "programming" };
 
-        // Filter then map
         List<String> filtered = N.filter(words, s -> s.length() > 4);
         List<Integer> lengths = N.map(filtered.toArray(new String[0]), String::length);
         assertEquals(Arrays.asList(5, 5, 11), lengths);
 
-        // Map then filter
         int[] wordLengths = N.mapToInt(words, String::length);
         int[] longLengths = N.filter(wordLengths, len -> len > 4);
         assertArrayEquals(new int[] { 5, 5, 11 }, longLengths);
     }
 
-    // Custom collector tests
     @Test
     public void testGroupByWithCustomCollectors() {
         String[] words = { "one", "two", "three", "four", "five", "six" };
 
-        // Group by length and join
         Map<Integer, String> joined = N.groupBy(Arrays.asList(words), String::length, Collectors.joining("-"));
 
         assertEquals("one-two-six", joined.get(3));
         assertEquals("four-five", joined.get(4));
         assertEquals("three", joined.get(5));
 
-        // Group by length and get first
         Map<Integer, Optional<String>> firstByLength = N.groupBy(Arrays.asList(words), String::length, Collectors.reducing((a, b) -> a));
 
         assertEquals("one", firstByLength.get(3).get());
@@ -1752,24 +1654,19 @@ public class N103Test extends TestBase {
         assertEquals("three", firstByLength.get(5).get());
     }
 
-    // Iterator exhaustion tests
     @Test
     public void testIteratorExhaustion() {
         List<Integer> list = Arrays.asList(1, 2, 3);
         Iterator<Integer> iter = list.iterator();
 
-        // Use iterator partially
         assertEquals(Integer.valueOf(1), iter.next());
 
-        // Now use it in N operations
         List<Integer> result = N.filter(iter, i -> i > 1);
         assertEquals(Arrays.asList(2, 3), result);
 
-        // Iterator should be exhausted
         assertFalse(iter.hasNext());
     }
 
-    // Helper method usage tests
     @Test
     public void testComplexMapOperations() {
         Map<String, List<Integer>> map = new HashMap<>();
@@ -1777,7 +1674,6 @@ public class N103Test extends TestBase {
         map.put("odds", Arrays.asList(1, 3, 5));
         map.put("mixed", Arrays.asList(1, 2, 3));
 
-        // Iterate over map entries
         Iterator<Map.Entry<String, List<Integer>>> iter = N.iterate(map);
         int entryCount = 0;
         while (iter.hasNext()) {

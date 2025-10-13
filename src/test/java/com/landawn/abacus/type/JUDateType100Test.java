@@ -20,9 +20,11 @@ import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class JUDateType100Test extends TestBase {
 
     private JUDateType dateType;
@@ -61,7 +63,7 @@ public class JUDateType100Test extends TestBase {
         Date result = dateType.valueOf((Object) date);
         assertNotNull(result);
         assertEquals(date.getTime(), result.getTime());
-        assertNotSame(date, result); // Should be a new instance
+        assertNotSame(date, result);
     }
 
     @Test

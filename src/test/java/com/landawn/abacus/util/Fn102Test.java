@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -70,6 +71,7 @@ import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.function.UnaryOperator;
 
+@Tag("new-test")
 public class Fn102Test extends TestBase {
 
     @Test
@@ -78,9 +80,9 @@ public class Fn102Test extends TestBase {
         Supplier<Integer> supplier = Fn.memoize(() -> counter.incrementAndGet());
 
         assertEquals(1, supplier.get());
-        assertEquals(1, supplier.get()); // Should return cached value
-        assertEquals(1, supplier.get()); // Should return cached value
-        assertEquals(1, counter.get()); // Counter should only be incremented once
+        assertEquals(1, supplier.get());
+        assertEquals(1, supplier.get());
+        assertEquals(1, counter.get());
     }
 
     @Test
@@ -89,12 +91,12 @@ public class Fn102Test extends TestBase {
         Supplier<Integer> supplier = Fn.memoizeWithExpiration(() -> counter.incrementAndGet(), 100, TimeUnit.MILLISECONDS);
 
         assertEquals(1, supplier.get());
-        assertEquals(1, supplier.get()); // Should return cached value
+        assertEquals(1, supplier.get());
 
-        Thread.sleep(150); // Wait for expiration
+        Thread.sleep(150);
 
-        assertEquals(2, supplier.get()); // Should compute new value
-        assertEquals(2, supplier.get()); // Should return new cached value
+        assertEquals(2, supplier.get());
+        assertEquals(2, supplier.get());
     }
 
     @Test
@@ -106,13 +108,12 @@ public class Fn102Test extends TestBase {
         });
 
         assertEquals(5, func.apply("hello"));
-        assertEquals(5, func.apply("hello")); // Should return cached value
+        assertEquals(5, func.apply("hello"));
         assertEquals(3, func.apply("bye"));
-        assertEquals(2, counter.get()); // Counter should be incremented twice
+        assertEquals(2, counter.get());
 
-        // Test null handling
         assertEquals(0, func.apply(null));
-        assertEquals(0, func.apply(null)); // Should return cached null result
+        assertEquals(0, func.apply(null));
     }
 
     @Test
@@ -124,7 +125,6 @@ public class Fn102Test extends TestBase {
         closeRunnable.run();
         assertTrue(closeable.isClosed());
 
-        // Should only close once
         closeRunnable.run();
         assertEquals(1, closeable.getCloseCount());
     }
@@ -283,7 +283,7 @@ public class Fn102Test extends TestBase {
         long start = System.currentTimeMillis();
         sleepConsumer.accept("test");
         long duration = System.currentTimeMillis() - start;
-        assertTrue(duration >= 40); // Allow some margin
+        assertTrue(duration >= 40);
     }
 
     @Test
@@ -292,20 +292,20 @@ public class Fn102Test extends TestBase {
         long start = System.currentTimeMillis();
         sleepConsumer.accept("test");
         long duration = System.currentTimeMillis() - start;
-        assertTrue(duration >= 40); // Allow some margin
+        assertTrue(duration >= 40);
     }
 
     @Test
     public void testRateLimiter() throws InterruptedException {
-        Consumer<String> rateLimitedConsumer = Fn.rateLimiter(2.0); // 2 permits per second
+        Consumer<String> rateLimitedConsumer = Fn.rateLimiter(2.0);
 
         long start = System.currentTimeMillis();
         rateLimitedConsumer.accept("1");
         rateLimitedConsumer.accept("2");
-        rateLimitedConsumer.accept("3"); // This should wait
+        rateLimitedConsumer.accept("3");
         long duration = System.currentTimeMillis() - start;
 
-        assertTrue(duration >= 400); // Should take at least 500ms for 3 permits at 2/sec
+        assertTrue(duration >= 400);
     }
 
     @Test
@@ -319,7 +319,6 @@ public class Fn102Test extends TestBase {
         BiConsumer<String, String> printlnConsumer = Fn.println("=");
         assertDoesNotThrow(() -> printlnConsumer.accept("key", "value"));
 
-        // Test various separators
         assertDoesNotThrow(() -> Fn.println(":").accept("key", "value"));
         assertDoesNotThrow(() -> Fn.println(", ").accept("key", "value"));
         assertDoesNotThrow(() -> Fn.println("-").accept("key", "value"));
@@ -860,7 +859,7 @@ public class Fn102Test extends TestBase {
         Predicate<File> isFile = Fn.isFile();
         File file = new File("test.txt");
         File dir = new File(".");
-        assertFalse(isFile.test(file)); // Doesn't exist
+        assertFalse(isFile.test(file));
         assertFalse(isFile.test(new File(getClass().getResource("/").getFile())));
         assertFalse(isFile.test(null));
     }
@@ -1412,7 +1411,7 @@ public class Fn102Test extends TestBase {
         assertEquals(1, results.size());
 
         acceptIfNotNull.accept(null);
-        assertEquals(1, results.size()); // Should not add null
+        assertEquals(1, results.size());
     }
 
     @Test
@@ -1424,7 +1423,7 @@ public class Fn102Test extends TestBase {
         assertEquals(1, results.size());
 
         acceptIf.accept(3);
-        assertEquals(1, results.size()); // Should not add 3
+        assertEquals(1, results.size());
     }
 
     @Test
@@ -1473,7 +1472,7 @@ public class Fn102Test extends TestBase {
     public void testApplyIfNotNullOrDefault3() {
         Function<String, Integer> func = Fn.applyIfNotNullOrDefault(String::length, i -> i * 2, i -> i + 10, -1);
 
-        assertEquals(20, func.apply("hello")); // length=5, *2=10, +10=20
+        assertEquals(20, func.apply("hello"));
         assertEquals(-1, func.apply(null));
     }
 
@@ -1481,7 +1480,7 @@ public class Fn102Test extends TestBase {
     public void testApplyIfNotNullOrDefault4() {
         Function<String, Integer> func = Fn.applyIfNotNullOrDefault(String::length, i -> i * 2, i -> i + 10, i -> i / 2, -1);
 
-        assertEquals(10, func.apply("hello")); // length=5, *2=10, +10=20, /2=10
+        assertEquals(10, func.apply("hello"));
         assertEquals(-1, func.apply(null));
     }
 
@@ -1626,12 +1625,12 @@ public class Fn102Test extends TestBase {
             return i > 5;
         });
 
-        assertFalse(limitThenFilter.test(3)); // Fails predicate
-        assertTrue(limitThenFilter.test(7)); // Passes
-        assertTrue(limitThenFilter.test(8)); // Passes
-        assertFalse(limitThenFilter.test(10)); // Limit reached
+        assertFalse(limitThenFilter.test(3));
+        assertTrue(limitThenFilter.test(7));
+        assertTrue(limitThenFilter.test(8));
+        assertFalse(limitThenFilter.test(10));
 
-        assertEquals(3, counter.get()); // Predicate only called 3 times
+        assertEquals(3, counter.get());
     }
 
     @Test
@@ -1642,9 +1641,9 @@ public class Fn102Test extends TestBase {
             return a + b > 10;
         });
 
-        assertFalse(limitThenFilter.test(3, 5)); // Sum = 8, fails
-        assertTrue(limitThenFilter.test(7, 6)); // Sum = 13, passes
-        assertFalse(limitThenFilter.test(8, 8)); // Limit reached
+        assertFalse(limitThenFilter.test(3, 5));
+        assertTrue(limitThenFilter.test(7, 6));
+        assertFalse(limitThenFilter.test(8, 8));
 
         assertEquals(2, counter.get());
     }
@@ -1657,12 +1656,12 @@ public class Fn102Test extends TestBase {
             return i > 5;
         }, 2);
 
-        assertFalse(filterThenLimit.test(3)); // Fails predicate
-        assertTrue(filterThenLimit.test(7)); // Passes
-        assertTrue(filterThenLimit.test(8)); // Passes
-        assertFalse(filterThenLimit.test(10)); // Passes predicate but limit reached
+        assertFalse(filterThenLimit.test(3));
+        assertTrue(filterThenLimit.test(7));
+        assertTrue(filterThenLimit.test(8));
+        assertFalse(filterThenLimit.test(10));
 
-        assertEquals(4, counter.get()); // Predicate called for all 4 tests
+        assertEquals(4, counter.get());
     }
 
     @Test
@@ -1673,10 +1672,10 @@ public class Fn102Test extends TestBase {
             return a + b > 10;
         }, 2);
 
-        assertFalse(filterThenLimit.test(3, 5)); // Sum = 8, fails
-        assertTrue(filterThenLimit.test(7, 6)); // Sum = 13, passes
-        assertTrue(filterThenLimit.test(8, 5)); // Sum = 13, passes
-        assertFalse(filterThenLimit.test(8, 8)); // Sum = 16, passes but limit reached
+        assertFalse(filterThenLimit.test(3, 5));
+        assertTrue(filterThenLimit.test(7, 6));
+        assertTrue(filterThenLimit.test(8, 5));
+        assertFalse(filterThenLimit.test(8, 8));
 
         assertEquals(4, counter.get());
     }
@@ -1688,7 +1687,7 @@ public class Fn102Test extends TestBase {
         assertTrue(timeLimit.test("1"));
         Thread.sleep(50);
         assertTrue(timeLimit.test("2"));
-        Thread.sleep(80); // Total > 100ms
+        Thread.sleep(80);
         assertFalse(timeLimit.test("3"));
     }
 
@@ -1699,7 +1698,7 @@ public class Fn102Test extends TestBase {
         assertTrue(timeLimit.test("1"));
         Thread.sleep(50);
         assertTrue(timeLimit.test("2"));
-        Thread.sleep(80); // Total > 100ms
+        Thread.sleep(80);
         assertFalse(timeLimit.test("3"));
     }
 
@@ -1720,10 +1719,10 @@ public class Fn102Test extends TestBase {
     public void testIndexedPredicate() {
         Predicate<String> indexed = Fn.indexed((index, value) -> index < 2 && value.startsWith("t"));
 
-        assertTrue(indexed.test("test")); // index 0
-        assertTrue(indexed.test("two")); // index 1
-        assertFalse(indexed.test("three")); // index 2
-        assertFalse(indexed.test("one")); // index 3, doesn't start with 't'
+        assertTrue(indexed.test("test"));
+        assertTrue(indexed.test("two"));
+        assertFalse(indexed.test("three"));
+        assertFalse(indexed.test("one"));
     }
 
     @Test
@@ -1819,17 +1818,17 @@ public class Fn102Test extends TestBase {
     @Test
     public void testCompareTo() {
         Function<Integer, Integer> compareTo = Fn.compareTo(5);
-        assertTrue(compareTo.apply(3) < 0); // 3 < 5
-        assertEquals(0, compareTo.apply(5)); // 5 == 5
-        assertTrue(compareTo.apply(7) > 0); // 7 > 5
+        assertTrue(compareTo.apply(3) < 0);
+        assertEquals(0, compareTo.apply(5));
+        assertTrue(compareTo.apply(7) > 0);
     }
 
     @Test
     public void testCompareToWithComparator() {
         Function<String, Integer> compareTo = Fn.compareTo("hello", Comparator.comparingInt(String::length));
-        assertTrue(compareTo.apply("hi") < 0); // length 2 < 5
-        assertEquals(0, compareTo.apply("world")); // length 5 == 5
-        assertTrue(compareTo.apply("goodbye") > 0); // length 7 > 5
+        assertTrue(compareTo.apply("hi") < 0);
+        assertEquals(0, compareTo.apply("world"));
+        assertTrue(compareTo.apply("goodbye") > 0);
     }
 
     @Test
@@ -1878,7 +1877,6 @@ public class Fn102Test extends TestBase {
         Supplier<String> abacusSupplier = Fn.from(jdkSupplier);
         assertEquals("test", abacusSupplier.get());
 
-        // Test when already an abacus Supplier
         Supplier<String> supplier = () -> "test";
         assertSame(supplier, Fn.from(supplier));
     }
@@ -2550,7 +2548,6 @@ public class Fn102Test extends TestBase {
         Runnable abacusRunnable = Fn.jr2r(javaRunnable);
         assertDoesNotThrow(abacusRunnable::run);
 
-        // Test when already an abacus Runnable
         Runnable runnable = () -> {
         };
         assertSame(runnable, Fn.jr2r(runnable));
@@ -2562,7 +2559,6 @@ public class Fn102Test extends TestBase {
         Callable<String> abacusCallable = Fn.jc2c(javaCallable);
         assertEquals("test", abacusCallable.call());
 
-        // Test when already an abacus Callable
         Callable<String> callable = () -> "test";
         assertSame(callable, Fn.jc2c(callable));
     }
@@ -2636,88 +2632,65 @@ public class Fn102Test extends TestBase {
 
     @Test
     public void testPublicStaticFieldsAsGetters() {
-        // Test GET_AS_BOOLEAN
         assertEquals(true, Fn.GET_AS_BOOLEAN.applyAsBoolean(OptionalBoolean.of(true)));
 
-        // Test GET_AS_CHAR
         assertEquals('a', Fn.GET_AS_CHAR.applyAsChar(OptionalChar.of('a')));
 
-        // Test GET_AS_BYTE
         assertEquals((byte) 5, Fn.GET_AS_BYTE.applyAsByte(OptionalByte.of((byte) 5)));
 
-        // Test GET_AS_SHORT
         assertEquals((short) 10, Fn.GET_AS_SHORT.applyAsShort(OptionalShort.of((short) 10)));
 
-        // Test GET_AS_INT
         assertEquals(100, Fn.GET_AS_INT.applyAsInt(OptionalInt.of(100)));
 
-        // Test GET_AS_LONG
         assertEquals(1000L, Fn.GET_AS_LONG.applyAsLong(OptionalLong.of(1000L)));
 
-        // Test GET_AS_FLOAT
         assertEquals(3.14f, Fn.GET_AS_FLOAT.applyAsFloat(OptionalFloat.of(3.14f)), 0.001f);
 
-        // Test GET_AS_DOUBLE
         assertEquals(2.718, Fn.GET_AS_DOUBLE.applyAsDouble(OptionalDouble.of(2.718)), 0.001);
 
-        // Test GET_AS_INT_JDK
         assertEquals(100, Fn.GET_AS_INT_JDK.applyAsInt(java.util.OptionalInt.of(100)));
 
-        // Test GET_AS_LONG_JDK
         assertEquals(1000L, Fn.GET_AS_LONG_JDK.applyAsLong(java.util.OptionalLong.of(1000L)));
 
-        // Test GET_AS_DOUBLE_JDK
         assertEquals(2.718, Fn.GET_AS_DOUBLE_JDK.applyAsDouble(java.util.OptionalDouble.of(2.718)), 0.001);
     }
 
     @Test
     public void testPublicStaticFieldsAsPredicates() {
-        // Test IS_PRESENT_BOOLEAN
         assertTrue(Fn.IS_PRESENT_BOOLEAN.test(OptionalBoolean.of(true)));
         assertFalse(Fn.IS_PRESENT_BOOLEAN.test(OptionalBoolean.empty()));
 
-        // Test IS_PRESENT_CHAR
         assertTrue(Fn.IS_PRESENT_CHAR.test(OptionalChar.of('a')));
         assertFalse(Fn.IS_PRESENT_CHAR.test(OptionalChar.empty()));
 
-        // Test IS_PRESENT_BYTE
         assertTrue(Fn.IS_PRESENT_BYTE.test(OptionalByte.of((byte) 5)));
         assertFalse(Fn.IS_PRESENT_BYTE.test(OptionalByte.empty()));
 
-        // Test IS_PRESENT_SHORT
         assertTrue(Fn.IS_PRESENT_SHORT.test(OptionalShort.of((short) 10)));
         assertFalse(Fn.IS_PRESENT_SHORT.test(OptionalShort.empty()));
 
-        // Test IS_PRESENT_INT
         assertTrue(Fn.IS_PRESENT_INT.test(OptionalInt.of(100)));
         assertFalse(Fn.IS_PRESENT_INT.test(OptionalInt.empty()));
 
-        // Test IS_PRESENT_LONG
         assertTrue(Fn.IS_PRESENT_LONG.test(OptionalLong.of(1000L)));
         assertFalse(Fn.IS_PRESENT_LONG.test(OptionalLong.empty()));
 
-        // Test IS_PRESENT_FLOAT
         assertTrue(Fn.IS_PRESENT_FLOAT.test(OptionalFloat.of(3.14f)));
         assertFalse(Fn.IS_PRESENT_FLOAT.test(OptionalFloat.empty()));
 
-        // Test IS_PRESENT_DOUBLE
         assertTrue(Fn.IS_PRESENT_DOUBLE.test(OptionalDouble.of(2.718)));
         assertFalse(Fn.IS_PRESENT_DOUBLE.test(OptionalDouble.empty()));
 
-        // Test IS_PRESENT_INT_JDK
         assertTrue(Fn.IS_PRESENT_INT_JDK.test(java.util.OptionalInt.of(100)));
         assertFalse(Fn.IS_PRESENT_INT_JDK.test(java.util.OptionalInt.empty()));
 
-        // Test IS_PRESENT_LONG_JDK
         assertTrue(Fn.IS_PRESENT_LONG_JDK.test(java.util.OptionalLong.of(1000L)));
         assertFalse(Fn.IS_PRESENT_LONG_JDK.test(java.util.OptionalLong.empty()));
 
-        // Test IS_PRESENT_DOUBLE_JDK
         assertTrue(Fn.IS_PRESENT_DOUBLE_JDK.test(java.util.OptionalDouble.of(2.718)));
         assertFalse(Fn.IS_PRESENT_DOUBLE_JDK.test(java.util.OptionalDouble.empty()));
     }
 
-    // Helper classes for testing
     private static class TestAutoCloseable implements AutoCloseable {
         private boolean closed = false;
         private int closeCount = 0;

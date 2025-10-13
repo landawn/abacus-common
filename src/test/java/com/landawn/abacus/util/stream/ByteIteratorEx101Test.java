@@ -7,11 +7,13 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.ByteList;
 
+@Tag("new-test")
 public class ByteIteratorEx101Test extends TestBase {
 
     @Test
@@ -21,7 +23,7 @@ public class ByteIteratorEx101Test extends TestBase {
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextByte());
         Assertions.assertEquals(0, iter.count());
         Assertions.assertArrayEquals(new byte[0], iter.toArray());
-        iter.close(); // Should not throw
+        iter.close();
     }
 
     @Test
@@ -143,14 +145,11 @@ public class ByteIteratorEx101Test extends TestBase {
         ObjIteratorEx<Byte> objIter = ObjIteratorEx.of((byte) 1, (byte) 2, (byte) 3);
         ByteIteratorEx iter = ByteIteratorEx.from(objIter);
 
-        // Test advance
         iter.advance(1);
         Assertions.assertEquals((byte) 2, iter.nextByte());
 
-        // Test count
         Assertions.assertEquals(1, iter.count());
 
-        // Test close
         iter.close();
     }
 
@@ -165,7 +164,6 @@ public class ByteIteratorEx101Test extends TestBase {
         iter.advance(1);
         Assertions.assertEquals((byte) 5, iter.nextByte());
 
-        // Advance beyond end
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
@@ -243,6 +241,6 @@ public class ByteIteratorEx101Test extends TestBase {
     @Test
     public void testClose() {
         ByteIteratorEx iter = ByteIteratorEx.of((byte) 1, (byte) 2, (byte) 3);
-        iter.close(); // Should not throw
+        iter.close();
     }
 }

@@ -11,14 +11,15 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class AbstractLogger100Test extends TestBase {
 
     private TestLogger logger;
 
-    // Test implementation of AbstractLogger
     private static class TestLogger extends AbstractLogger {
         public final List<LogEntry> logs = new ArrayList<>();
         public boolean traceEnabled = true;
@@ -153,7 +154,6 @@ public class AbstractLogger100Test extends TestBase {
         assertEquals("another.logger", logger2.getName());
     }
 
-    // TRACE level tests
     @Test
     @DisplayName("Test trace with template and one argument")
     public void testTraceWithOneArg() {
@@ -241,7 +241,6 @@ public class AbstractLogger100Test extends TestBase {
         logger.trace(supplier);
         assertEquals("Expensive message", logger.logs.get(0).message);
 
-        // Test that supplier is not called when trace is disabled
         logger.logs.clear();
         logger.traceEnabled = false;
         boolean[] called = { false };
@@ -272,7 +271,6 @@ public class AbstractLogger100Test extends TestBase {
         assertSame(ex, logger.logs.get(0).throwable);
     }
 
-    // DEBUG level tests
     @Test
     @DisplayName("Test debug with template and arguments")
     public void testDebugWithArguments() {
@@ -293,7 +291,6 @@ public class AbstractLogger100Test extends TestBase {
         assertEquals(0, logger.logs.size());
     }
 
-    // INFO level tests
     @Test
     @DisplayName("Test info with various argument counts")
     public void testInfoWithArguments() {
@@ -309,7 +306,6 @@ public class AbstractLogger100Test extends TestBase {
         assertEquals("a b c d e", logger.logs.get(0).message);
     }
 
-    // WARN level tests
     @Test
     @DisplayName("Test warn with exception")
     public void testWarnWithException() {
@@ -320,20 +316,16 @@ public class AbstractLogger100Test extends TestBase {
         assertSame(ex, logger.logs.get(0).throwable);
     }
 
-    // ERROR level tests
     @Test
     @DisplayName("Test error with all argument variations")
     public void testErrorWithAllVariations() {
-        // Simple message
         logger.error("Error!");
         assertEquals("ERROR", logger.logs.get(0).level);
 
-        // With arguments
         logger.logs.clear();
         logger.error("Error code: {}", 500);
         assertEquals("Error code: 500", logger.logs.get(0).message);
 
-        // With supplier
         logger.logs.clear();
         logger.error(() -> "Error from supplier");
         assertEquals("Error from supplier", logger.logs.get(0).message);
@@ -342,25 +334,19 @@ public class AbstractLogger100Test extends TestBase {
     @Test
     @DisplayName("Test format method with various scenarios")
     public void testFormatMethod() {
-        // Test with {} placeholder
         assertEquals("Hello World", AbstractLogger.format("Hello {}", "World"));
         assertEquals("a b c", AbstractLogger.format("{} {} {}", "a", "b", "c"));
 
-        // Test with %s placeholder
         assertEquals("Hello World", AbstractLogger.format("Hello %s", "World"));
         assertEquals("a b c", AbstractLogger.format("%s %s %s", "a", "b", "c"));
 
-        // Test with no placeholder
         assertEquals("Hello [World]", AbstractLogger.format("Hello", "World"));
 
-        // Test with null values
         assertEquals("Value: null", AbstractLogger.format("Value: {}", (Object) null));
         assertEquals("null [arg]", AbstractLogger.format(null, "arg"));
 
-        // Test with more arguments than placeholders
         assertEquals("a b [c, d]", AbstractLogger.format("{} {}", "a", "b", "c", "d"));
 
-        // Test with varargs
         Object[] args = { 1, 2, 3, 4, 5 };
         assertEquals("1 2 3 4 5", AbstractLogger.format("{} {} {} {} {}", args));
     }
@@ -368,49 +354,38 @@ public class AbstractLogger100Test extends TestBase {
     @Test
     @DisplayName("Test format with different argument counts")
     public void testFormatWithDifferentArgCounts() {
-        // Test single argument
         assertEquals("Value: 42", AbstractLogger.format("Value: {}", 42));
 
-        // Test two arguments
         assertEquals("x=10, y=20", AbstractLogger.format("x={}, y={}", 10, 20));
 
-        // Test three arguments
         assertEquals("RGB: 255,128,0", AbstractLogger.format("RGB: {},{},{}", 255, 128, 0));
 
-        // Test four arguments
         assertEquals("1-2-3-4", AbstractLogger.format("{}-{}-{}-{}", 1, 2, 3, 4));
 
-        // Test five arguments
         assertEquals("a b c d e", AbstractLogger.format("{} {} {} {} {}", "a", "b", "c", "d", "e"));
 
-        // Test six arguments
         assertEquals("1,2,3,4,5,6", AbstractLogger.format("{},{},{},{},{},{}", 1, 2, 3, 4, 5, 6));
 
-        // Test seven arguments
         assertEquals("Mon Tue Wed Thu Fri Sat Sun", AbstractLogger.format("{} {} {} {} {} {} {}", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"));
     }
 
     @Test
     @DisplayName("Test logging when levels are disabled")
     public void testLoggingWhenDisabled() {
-        // Disable all levels
         logger.traceEnabled = false;
         logger.debugEnabled = false;
         logger.infoEnabled = false;
         logger.warnEnabled = false;
         logger.errorEnabled = false;
 
-        // Try logging at each level
         logger.trace("trace");
         logger.debug("debug");
         logger.info("info");
         logger.warn("warn");
         logger.error("error");
 
-        // Nothing should be logged
         assertEquals(0, logger.logs.size());
 
-        // Try with suppliers - they should not be called
         boolean[] called = { false };
         Supplier<String> supplier = () -> {
             called[0] = true;

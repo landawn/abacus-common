@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -51,15 +52,12 @@ import com.landawn.abacus.util.function.BytePredicate;
 import com.landawn.abacus.util.function.ByteTernaryOperator;
 import com.landawn.abacus.util.function.ByteTriPredicate;
 
+@Tag("new-test")
 public class AbstractByteStream102Test extends TestBase {
 
     private ByteStream stream;
     private byte[] testData;
 
-
-    // This method needs to be implemented by a concrete test class to provide a ByteStream instance.
-    // For example, in ArrayByteStreamTest, it would return new ArrayByteStream(a);
-    // In IteratorByteStreamTest, it would return new IteratorByteStream(ByteIterator.of(a));
     protected ByteStream createByteStream(byte... a) {
         return ByteStream.of(a).map(e -> (byte) (e + 0));
     }
@@ -128,8 +126,7 @@ public class AbstractByteStream102Test extends TestBase {
         long endTime = System.currentTimeMillis();
 
         assertArrayEquals(testData, array);
-        // Allow some tolerance for timing
-        assertTrue((endTime - startTime) >= 40); // At least 4 elements * 10ms
+        assertTrue((endTime - startTime) >= 40);
     }
 
     @Test
@@ -194,7 +191,6 @@ public class AbstractByteStream102Test extends TestBase {
         ByteBiPredicate sameRange = (a, b) -> Math.abs(b - a) == 1;
         ByteBinaryOperator mapper = (first, last) -> (byte) ((first + last) / 2);
         ByteStream result = stream.rangeMap(sameRange, mapper);
-        // Groups: [1,2,3] -> 2, [5,6] -> 5, [8] -> 8
         assertArrayEquals(new byte[] { 1, 3, 5, 8 }, result.toArray());
     }
 
@@ -220,7 +216,7 @@ public class AbstractByteStream102Test extends TestBase {
         ByteBiPredicate collapsible = (a, b) -> true;
         ByteBinaryOperator mergeFunction = (a, b) -> (byte) (a + b);
         ByteStream result = stream.collapse(collapsible, mergeFunction);
-        assertArrayEquals(new byte[] { 15 }, result.toArray()); // Sum of 1+2+3+4+5
+        assertArrayEquals(new byte[] { 15 }, result.toArray());
     }
 
     @Test
@@ -341,11 +337,10 @@ public class AbstractByteStream102Test extends TestBase {
 
     @Test
     public void testShuffled() {
-        Random rnd = new Random(42); // Use fixed seed for reproducibility
+        Random rnd = new Random(42);
         ByteStream result = stream.shuffled(rnd);
         byte[] shuffled = result.toArray();
         assertEquals(5, shuffled.length);
-        // Check all elements are present
         Set<Byte> set = new HashSet<>();
         for (byte b : shuffled) {
             set.add(b);
@@ -619,7 +614,6 @@ public class AbstractByteStream102Test extends TestBase {
         assertTrue(result.isPresent());
         Map<Percentage, Byte> percentiles = result.get();
         assertNotNull(percentiles);
-        // Check some percentiles exist
         assertTrue(percentiles.containsKey(Percentage._50));
     }
 

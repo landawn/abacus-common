@@ -26,12 +26,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
+@Tag("new-test")
 public class XMLGregorianCalendarType100Test extends TestBase {
 
     private XMLGregorianCalendarType xmlCalendarType;
@@ -210,7 +212,6 @@ public class XMLGregorianCalendarType100Test extends TestBase {
 
         xmlCalendarType.writeCharacter(writer, testCalendar, null);
 
-        // verify(writer, atLeastOnce()).write(anyString());
     }
 
     @Test

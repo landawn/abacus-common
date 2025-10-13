@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Duration;
@@ -30,11 +31,9 @@ import com.landawn.abacus.util.RateLimiter;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
 
+@Tag("new-test")
 public class IntStream103Test extends TestBase {
 
-    // This method needs to be implemented by a concrete test class to provide a IntStream instance.
-    // For example, in ArrayIntStreamTest, it would return new ArrayIntStream(a);
-    // In IteratorIntStreamTest, it would return new IteratorIntStream(IntegerIterator.of(a));
     protected IntStream createIntStream(int... a) {
         return IntStream.of(a).map(e -> e + 0);
     }
@@ -92,8 +91,6 @@ public class IntStream103Test extends TestBase {
         assertArrayEquals(new String[] { "1-1", "2-2", "3-3" }, stream.toArray());
     }
 
-    // Tests for Complex Transformations
-
     @Test
     public void testFlatMapToChar() {
         CharStream charStream = createIntStream(65, 66, 67).flatMapToChar(n -> CharStream.of((char) n, (char) (n + 32)));
@@ -118,8 +115,6 @@ public class IntStream103Test extends TestBase {
         assertArrayEquals(new float[] { 0.1f, 0.2f, 0.2f, 0.4f, 0.3f, 0.6f }, floatStream.toArray(), 0.001f);
     }
 
-    // Tests for Grouping and Collecting
-
     @Test
     public void testGroupTo() {
         Map<Boolean, List<Integer>> grouped = createIntStream(1, 2, 3, 4, 5, 6).groupTo(n -> n % 2 == 0, java.util.stream.Collectors.toList());
@@ -142,8 +137,8 @@ public class IntStream103Test extends TestBase {
     public void testToMapWithMergeFunction() {
         Map<Boolean, Integer> map = createIntStream(1, 2, 3, 4, 5, 6).toMap(n -> n % 2 == 0, n -> n, Integer::sum);
 
-        assertEquals(Integer.valueOf(12), map.get(true)); // 2 + 4 + 6
-        assertEquals(Integer.valueOf(9), map.get(false)); // 1 + 3 + 5
+        assertEquals(Integer.valueOf(12), map.get(true));
+        assertEquals(Integer.valueOf(9), map.get(false));
     }
 
     @Test
@@ -154,8 +149,6 @@ public class IntStream103Test extends TestBase {
         assertEquals(2, multiset.occurrencesOf(2));
         assertEquals(3, multiset.occurrencesOf(3));
     }
-
-    // Tests for Collapse Operations
 
     @Test
     public void testCollapseWithMergeFunction() {
@@ -168,8 +161,6 @@ public class IntStream103Test extends TestBase {
         IntStream stream = createIntStream(1, 2, 3, 5, 6, 8, 9).collapse((first, prev, curr) -> curr - first <= 2, Integer::max);
         assertArrayEquals(new int[] { 3, 6, 9 }, stream.toArray());
     }
-
-    // Tests for Advanced Stream Operations
 
     @Test
     public void testScanWithInit() {
@@ -190,17 +181,15 @@ public class IntStream103Test extends TestBase {
         assertArrayEquals(new int[] { 1, 2, 3 }, bottom3);
     }
 
-    // Tests for Rate Limiting and Delay
-
     @Test
     public void testRateLimited() throws InterruptedException {
-        RateLimiter rateLimiter = RateLimiter.create(5); // 5 permits per second
+        RateLimiter rateLimiter = RateLimiter.create(5);
         long startTime = System.currentTimeMillis();
 
         createIntStream(1, 2, 3).rateLimited(rateLimiter).count();
 
         long duration = System.currentTimeMillis() - startTime;
-        assertTrue(duration >= 400, "Rate limiting should introduce delay"); // At least 400ms for 3 items at 5/sec
+        assertTrue(duration >= 400, "Rate limiting should introduce delay");
     }
 
     @Test
@@ -211,10 +200,8 @@ public class IntStream103Test extends TestBase {
         createIntStream(1, 2, 3).delay(delay).count();
 
         long duration = System.currentTimeMillis() - startTime;
-        assertTrue(duration >= 200, "Delay should be applied"); // At least 200ms for 2 delays
+        assertTrue(duration >= 200, "Delay should be applied");
     }
-
-    // Tests for Advanced Filtering
 
     @Test
     public void testFilterWithAction() {
@@ -243,8 +230,6 @@ public class IntStream103Test extends TestBase {
         assertEquals(Arrays.asList(1, 2), dropped);
     }
 
-    // Tests for Zipping Operations
-
     @Test
     public void testZipWithDefault() {
         IntStream s1 = createIntStream(1, 2, 3);
@@ -263,8 +248,6 @@ public class IntStream103Test extends TestBase {
 
         assertArrayEquals(new int[] { 111, 222, 333 }, zipped.toArray());
     }
-
-    // Tests for Iterator-based Operations
 
     @Test
     public void testFromIterator() {
@@ -294,8 +277,6 @@ public class IntStream103Test extends TestBase {
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4 }, stream.toArray());
     }
 
-    // Tests for Special Find Operations
-
     @Test
     public void testFindFirstWithPredicate() throws Exception {
         OptionalInt found = createIntStream(1, 2, 3, 4, 5).findFirst(n -> n > 3);
@@ -310,15 +291,11 @@ public class IntStream103Test extends TestBase {
         assertEquals(3, found.getAsInt());
     }
 
-    // Tests for Append/Prepend Operations
-
     @Test
     public void testAppendIfEmpty() {
-        // Non-empty stream should not append
         IntStream stream = createIntStream(1, 2, 3).appendIfEmpty(4, 5, 6);
         assertArrayEquals(new int[] { 1, 2, 3 }, stream.toArray());
 
-        // Empty stream should append
         stream = IntStream.empty().appendIfEmpty(4, 5, 6);
         assertArrayEquals(new int[] { 4, 5, 6 }, stream.toArray());
     }
@@ -331,12 +308,9 @@ public class IntStream103Test extends TestBase {
         stream = createIntStream(1, 2).append(OptionalInt.of(3));
         assertArrayEquals(new int[] { 1, 2, 3 }, stream.toArray());
 
-        // Empty optional should not affect stream
         stream = createIntStream(1, 2).append(OptionalInt.empty());
         assertArrayEquals(new int[] { 1, 2 }, stream.toArray());
     }
-
-    // Tests for ForEach with Index
 
     @Test
     public void testForEachIndexed() throws Exception {
@@ -350,8 +324,6 @@ public class IntStream103Test extends TestBase {
         assertEquals(Integer.valueOf(20), indexToValue.get(1));
         assertEquals(Integer.valueOf(30), indexToValue.get(2));
     }
-
-    // Tests for Summary Statistics with Percentiles
 
     @Test
     public void testSummarizeAndPercentiles() {
@@ -367,8 +339,6 @@ public class IntStream103Test extends TestBase {
         Map<Percentage, Integer> percentiles = result.right().get();
         assertNotNull(percentiles);
     }
-
-    // Tests for Flatten Operations
 
     @Test
     public void testFlatten() {
@@ -391,15 +361,11 @@ public class IntStream103Test extends TestBase {
         assertArrayEquals(new int[] { 1, 2, 0, 3, 4, 5, 6, 0, 0 }, stream.toArray());
     }
 
-    // Tests for Code Points
-
     @Test
     public void testOfCodePoints() {
         IntStream stream = IntStream.ofCodePoints("Hello");
         assertArrayEquals(new int[] { 72, 101, 108, 108, 111 }, stream.toArray());
     }
-
-    // Tests for Parallel Stream with Custom Settings
 
     @Test
     public void testParallelWithMaxThreadNum() {
@@ -422,23 +388,18 @@ public class IntStream103Test extends TestBase {
 
     @Test
     public void testSps() {
-        // Test switching to parallel for specific operation
         IntStream stream = IntStream.range(0, 100);
         IntStream result = stream.sps(s -> s.filter(n -> n % 2 == 0));
         assertFalse(result.isParallel());
         assertEquals(50, result.count());
     }
 
-    // Tests for Transform Operations
-
     @Test
     public void testTransform() {
         IntStream stream = createIntStream(1, 2, 3, 4, 5);
         int sum = stream.transform(s -> s.filter(n -> n % 2 == 0)).sum();
-        assertEquals(6, sum); // 2 + 4
+        assertEquals(6, sum);
     }
-
-    // Tests for Apply/Accept If Not Empty
 
     @Test
     public void testApplyIfNotEmpty() throws Exception {
@@ -462,8 +423,6 @@ public class IntStream103Test extends TestBase {
         assertEquals(-1, sum.get());
     }
 
-    // Tests for IfEmpty
-
     @Test
     public void testIfEmpty() {
         AtomicBoolean called = new AtomicBoolean(false);
@@ -474,8 +433,6 @@ public class IntStream103Test extends TestBase {
         IntStream.empty().ifEmpty(() -> called.set(true)).count();
         assertTrue(called.get());
     }
-
-    // Edge Cases and Error Conditions
 
     @Test
     public void testEmptyStreamOperations() {
@@ -495,7 +452,6 @@ public class IntStream103Test extends TestBase {
 
     @Test
     public void testLargeStreamOperations() {
-        // Test with large stream
         int size = 10_000;
         IntStream stream = IntStream.range(0, size);
 

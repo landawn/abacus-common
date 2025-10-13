@@ -78,6 +78,13 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      * Returns the Class object representing the Reader type or its subclass.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     * Class<Reader> clazz = type.clazz();
+     * System.out.println(clazz.getName()); // Output: java.io.Reader
+     * }</pre>
+     *
      * @return the Class object for Reader.class or the specific Reader subclass
      */
     @Override
@@ -89,6 +96,13 @@ public class ReaderType extends AbstractType<Reader> {
      * Indicates whether this type represents a Reader.
      * For ReaderType, this always returns true.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     * boolean isReader = type.isReader();
+     * System.out.println(isReader); // Output: true
+     * }</pre>
+     *
      * @return true, indicating this is a Reader type
      */
     @Override
@@ -99,6 +113,17 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      * Converts a Reader to its string representation by reading all content from the Reader.
      * The Reader is fully consumed and closed after this operation.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     * Reader reader = new StringReader("Hello World");
+     * String content = type.stringOf(reader);
+     * System.out.println(content); // Output: Hello World
+     *
+     * String nullStr = type.stringOf(null);
+     * System.out.println(nullStr); // Output: null
+     * }</pre>
      *
      * @param x the Reader to convert to string
      * @return the string containing all content read from the Reader, or null if the input is null
@@ -113,6 +138,17 @@ public class ReaderType extends AbstractType<Reader> {
      * Creates a Reader instance from a string value.
      * If the concrete Reader class has a constructor accepting String or Reader,
      * it will be used. Otherwise, a StringReader is returned.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     * Reader reader = type.valueOf("Sample text");
+     * String content = IOUtil.readAllToString(reader);
+     * System.out.println(content); // Output: Sample text
+     *
+     * Reader nullReader = type.valueOf(null);
+     * System.out.println(nullReader); // Output: null
+     * }</pre>
      *
      * @param str the string to create a Reader from
      * @return a Reader containing the string content, or null if the input string is null
@@ -139,6 +175,22 @@ public class ReaderType extends AbstractType<Reader> {
      * If the object is a Clob, its character stream is returned.
      * Otherwise, the object is converted to string and then to a Reader.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     *
+     * // From String
+     * Reader reader1 = type.valueOf("Hello");
+     * System.out.println(IOUtil.readAllToString(reader1)); // Output: Hello
+     *
+     * // From Clob (assuming clob is a valid SQL Clob object)
+     * Reader reader2 = type.valueOf(clob);
+     *
+     * // From null
+     * Reader nullReader = type.valueOf((Object) null);
+     * System.out.println(nullReader); // Output: null
+     * }</pre>
+     *
      * @param obj the object to convert to a Reader
      * @return a Reader representation of the object, or null if the input is null
      * @throws UncheckedSQLException if accessing the Clob's character stream fails
@@ -163,6 +215,15 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      * Retrieves a character stream (Reader) from the specified column in the ResultSet.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     * // Assuming rs is a ResultSet with a character stream in column 1
+     * Reader reader = type.get(rs, 1);
+     * String content = IOUtil.readAllToString(reader);
+     * System.out.println(content); // Output: content from the database
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
      * @return the Reader for the specified column, or null if the column value is SQL NULL
@@ -175,6 +236,15 @@ public class ReaderType extends AbstractType<Reader> {
 
     /**
      * Retrieves a character stream (Reader) from the specified column in the ResultSet.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     * // Assuming rs is a ResultSet with a character stream in column "content"
+     * Reader reader = type.get(rs, "content");
+     * String text = IOUtil.readAllToString(reader);
+     * System.out.println(text); // Output: content from the database
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to retrieve (column name or alias)
@@ -190,6 +260,15 @@ public class ReaderType extends AbstractType<Reader> {
      * Sets a Reader parameter in a PreparedStatement.
      * The Reader will be used to provide character stream data to the database.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     * PreparedStatement stmt = connection.prepareStatement("INSERT INTO docs (content) VALUES (?)");
+     * Reader reader = new StringReader("Large text content");
+     * type.set(stmt, 1, reader);
+     * stmt.executeUpdate();
+     * }</pre>
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the Reader to set as the parameter value
@@ -203,6 +282,15 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      * Sets a Reader parameter in a CallableStatement.
      * The Reader will be used to provide character stream data to the database.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     * CallableStatement stmt = connection.prepareCall("{call update_content(?)}");
+     * Reader reader = new StringReader("Updated content");
+     * type.set(stmt, "content", reader);
+     * stmt.execute();
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
@@ -218,6 +306,16 @@ public class ReaderType extends AbstractType<Reader> {
      * Sets a Reader parameter in a PreparedStatement with a specified length.
      * The Reader will be used to provide character stream data to the database.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     * PreparedStatement stmt = connection.prepareStatement("INSERT INTO docs (content) VALUES (?)");
+     * String text = "Fixed length content";
+     * Reader reader = new StringReader(text);
+     * type.set(stmt, 1, reader, text.length());
+     * stmt.executeUpdate();
+     * }</pre>
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the Reader to set as the parameter value
@@ -232,6 +330,16 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      * Sets a Reader parameter in a CallableStatement with a specified length.
      * The Reader will be used to provide character stream data to the database.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     * CallableStatement stmt = connection.prepareCall("{call update_content(?)}");
+     * String text = "Content with known length";
+     * Reader reader = new StringReader(text);
+     * type.set(stmt, "content", reader, text.length());
+     * stmt.execute();
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
@@ -249,6 +357,21 @@ public class ReaderType extends AbstractType<Reader> {
      * If the Appendable is a Writer, the content is copied directly.
      * Otherwise, the Reader content is read as a string and appended.
      * The Reader is fully consumed after this operation.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     * Reader reader = new StringReader("Hello World");
+     * StringBuilder sb = new StringBuilder("Message: ");
+     * type.appendTo(sb, reader);
+     * System.out.println(sb.toString()); // Output: Message: Hello World
+     *
+     * // With Writer
+     * StringWriter writer = new StringWriter();
+     * Reader reader2 = new StringReader("Content");
+     * type.appendTo(writer, reader2);
+     * System.out.println(writer.toString()); // Output: Content
+     * }</pre>
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the Reader whose content should be appended
@@ -271,6 +394,23 @@ public class ReaderType extends AbstractType<Reader> {
      * Writes the content of a Reader to the given CharacterWriter.
      * The content is optionally quoted based on the serialization configuration.
      * The Reader is fully consumed after this operation.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * ReaderType type = new ReaderType();
+     * Reader reader = new StringReader("Sample text");
+     * CharacterWriter writer = new CharacterWriter();
+     * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();
+     * config.setStringQuotation('"');
+     * type.writeCharacter(writer, reader, config);
+     * System.out.println(writer.toString()); // Output: "Sample text"
+     *
+     * // Without quotation
+     * Reader reader2 = new StringReader("No quotes");
+     * CharacterWriter writer2 = new CharacterWriter();
+     * type.writeCharacter(writer2, reader2, null);
+     * System.out.println(writer2.toString()); // Output: No quotes
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the Reader whose content should be written

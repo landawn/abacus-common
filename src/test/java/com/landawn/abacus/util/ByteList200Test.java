@@ -16,10 +16,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalByte;
 
+@Tag("new-test")
 public class ByteList200Test extends TestBase {
 
     @Test
@@ -46,7 +48,6 @@ public class ByteList200Test extends TestBase {
         ByteList list = new ByteList(data);
         assertEquals(3, list.size());
         assertArrayEquals(data, list.toArray());
-        // Test that it's a wrapper, not a copy
         data[0] = 10;
         assertEquals((byte) 10, list.get(0), "Internal array modification should be reflected");
     }
@@ -69,7 +70,6 @@ public class ByteList200Test extends TestBase {
         ByteList list = ByteList.copyOf(original);
         assertEquals(3, list.size());
         assertArrayEquals(original, list.toArray());
-        // Ensure it's a copy, not a reference
         original[0] = 10;
         assertEquals((byte) 1, list.get(0));
     }
@@ -102,9 +102,9 @@ public class ByteList200Test extends TestBase {
     @DisplayName("Test adding, getting, and setting elements")
     public void testAddGetSet() {
         ByteList list = new ByteList();
-        list.add((byte) 5); // [5]
-        list.add(0, (byte) 1); // [1, 5]
-        list.add((byte) 10); // [1, 5, 10]
+        list.add((byte) 5);
+        list.add(0, (byte) 1);
+        list.add((byte) 10);
 
         assertEquals(3, list.size());
         assertEquals((byte) 1, list.get(0));
@@ -138,7 +138,7 @@ public class ByteList200Test extends TestBase {
         assertTrue(list.removeAllOccurrences((byte) 2));
         assertArrayEquals(new byte[] { 1, 3, 4 }, list.toArray());
 
-        list.add((byte) -1); // [1, 3, 4, -1]
+        list.add((byte) -1);
         assertTrue(list.removeIf(b -> b > 2));
         assertArrayEquals(new byte[] { 1, -1 }, list.toArray());
     }
@@ -190,9 +190,9 @@ public class ByteList200Test extends TestBase {
         assertArrayEquals(new byte[] { 1, 2, 5, 7, 9 }, list.toArray());
         assertTrue(list.isSorted());
         assertEquals(2, list.binarySearch((byte) 5));
-        assertTrue(list.binarySearch((byte) 6) < 0); // Not found
+        assertTrue(list.binarySearch((byte) 6) < 0);
 
-        list.parallelSort(); // Should remain sorted
+        list.parallelSort();
         assertArrayEquals(new byte[] { 1, 2, 5, 7, 9 }, list.toArray());
     }
 
@@ -319,34 +319,28 @@ public class ByteList200Test extends TestBase {
     @Test
     @DisplayName("Test constructors and static factories")
     public void testConstructorsAndFactories() {
-        // Default constructor
         ByteList list1 = new ByteList();
         assertTrue(list1.isEmpty());
 
-        // Constructor with capacity
         ByteList list2 = new ByteList(20);
         assertTrue(list2.isEmpty());
         assertEquals(20, list2.array().length);
 
-        // Constructor wrapping an array
         byte[] data = { 1, 2, 3 };
         ByteList list3 = new ByteList(data);
         assertEquals(3, list3.size());
-        data[0] = 5; // Should reflect change
+        data[0] = 5;
         assertEquals((byte) 5, list3.get(0));
 
-        // 'of' factory
         ByteList list4 = ByteList.of((byte) 1, (byte) 2);
         assertArrayEquals(new byte[] { 1, 2 }, list4.toArray());
 
-        // 'copyOf' factory
         byte[] original = { 10, 20 };
         ByteList list5 = ByteList.copyOf(original);
-        original[0] = 15; // Should not reflect change
+        original[0] = 15;
         assertEquals((byte) 10, list5.get(0));
         assertArrayEquals(new byte[] { 10, 20 }, list5.toArray());
 
-        // 'copyOfRange' factory
         ByteList list6 = ByteList.copyOf(new byte[] { 1, 2, 3, 4, 5 }, 1, 4);
         assertArrayEquals(new byte[] { 2, 3, 4 }, list6.toArray());
     }
@@ -365,17 +359,15 @@ public class ByteList200Test extends TestBase {
     @DisplayName("Test add, addFirst, addLast, and addAll methods")
     public void testAddMethods() {
         ByteList list = ByteList.of((byte) 10);
-        list.add((byte) 20); // add to end
-        list.add(1, (byte) 15); // add at index
-        list.addFirst((byte) 5); // add to start
-        list.addLast((byte) 25); // add to end again
+        list.add((byte) 20);
+        list.add(1, (byte) 15);
+        list.addFirst((byte) 5);
+        list.addLast((byte) 25);
         assertArrayEquals(new byte[] { 5, 10, 15, 20, 25 }, list.toArray());
 
-        // addAll array
         list.addAll(new byte[] { 30, 35 });
         assertArrayEquals(new byte[] { 5, 10, 15, 20, 25, 30, 35 }, list.toArray());
 
-        // addAll list at index
         list.addAll(0, ByteList.of((byte) 1, (byte) 2));
         assertArrayEquals(new byte[] { 1, 2, 5, 10, 15, 20, 25, 30, 35 }, list.toArray());
     }
@@ -385,7 +377,7 @@ public class ByteList200Test extends TestBase {
     public void testRemoveMethods() {
         ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 3);
 
-        assertTrue(list.remove((byte) 3)); // removes first 3
+        assertTrue(list.remove((byte) 3));
         assertArrayEquals(new byte[] { 1, 2, 4, 5, 3 }, list.toArray());
 
         assertTrue(list.removeAll(ByteList.of((byte) 1, (byte) 5, (byte) 9)));
@@ -415,7 +407,7 @@ public class ByteList200Test extends TestBase {
     @DisplayName("Test moveRange and replaceRange methods")
     public void testMoveAndReplaceRange() {
         ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        list.moveRange(1, 3, 3); // move {2,3} to the end
+        list.moveRange(1, 3, 3);
         assertArrayEquals(new byte[] { 1, 4, 5, 2, 3 }, list.toArray());
 
         list.replaceRange(0, 2, ByteList.of((byte) 9, (byte) 8, (byte) 7));
@@ -525,7 +517,7 @@ public class ByteList200Test extends TestBase {
     @DisplayName("Test stream creation on a sub-range")
     public void testStreamRange() {
         ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        long sum = list.stream(1, 4).sum(); // streams over {2, 3, 4}
+        long sum = list.stream(1, 4).sum();
         assertEquals(9, sum);
     }
 
@@ -541,7 +533,6 @@ public class ByteList200Test extends TestBase {
         assertEquals((byte) 1, internalArray[0]);
         assertEquals((byte) 2, internalArray[1]);
 
-        // Modify through the exposed array
         internalArray[0] = (byte) 99;
         assertEquals((byte) 99, list.get(0));
     }

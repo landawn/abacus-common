@@ -112,20 +112,25 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
- * Class {@code N} is a general java utility class. It provides the most daily used operations for Object/primitive types/String/Array/Collection/Map/Bean...:
  *
- * <br />
- * <br />
- * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. For example, if
- * user tries to reverse a {@code null} or empty String. The input String will be
- * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
- * <br />
- * <br />
- * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
- * <br />
- * There are only {@code fromIndex/startIndex} and {toIndex/endIndex} parameters in the methods defined in class {@code CommonUtil/N}, no {@code offset/count} parameters.
- * <br />
+ * <p>
+ * {@code CommonUtil} is a comprehensive Java utility class providing commonly used operations for
+ * Object/primitive types/String/Array/Collection/Map/Bean and more. This class serves as the foundation
+ * for the {@code N} class which extends it.
+ * </p>
+ *
+ * <h2>Design Philosophy:</h2>
+ * <ul>
+ * <li><b>Exception Handling:</b> Designed to avoid throwing unnecessary exceptions if the contract defined
+ * by a method is not broken. For example, reversing a {@code null} or empty String returns the input String.
+ * However, exceptions are thrown when attempting invalid operations like adding elements to a {@code null} array or collection.</li>
+ *
+ * <li><b>Return Values:</b> An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader is always
+ * preferred over {@code null} for method return values.</li>
+ *
+ * <li><b>Index Parameters:</b> Methods use {@code fromIndex/startIndex} and {@code toIndex/endIndex} parameters
+ * (not {@code offset/count} parameters) for consistency.</li>
+ * </ul>
  *
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.Fn
@@ -149,20 +154,43 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  */
 @SuppressWarnings({ "java:S1192", "java:S6539" })
 sealed class CommonUtil permits N {
+    /**
+     * Threshold for using binary search algorithms. Arrays with length less than this threshold
+     * use linear search for better performance on small datasets.
+     */
     static final int BINARY_SEARCH_THRESHOLD = 64;
 
-    // ...
+    /**
+     * Threshold for in-place array reversal. Arrays smaller than this threshold are reversed
+     * in place; larger arrays may use alternative strategies.
+     */
     static final int REVERSE_THRESHOLD = 18;
 
+    /**
+     * Threshold for array fill operations. Determines the strategy used for filling array elements.
+     */
     static final int FILL_THRESHOLD = 25;
 
+    /**
+     * Threshold for replaceAll operations. Arrays smaller than this use simple iteration;
+     * larger arrays may use optimized bulk operations.
+     */
     static final int REPLACE_ALL_THRESHOLD = 11;
 
+    /**
+     * Minimum size threshold for using copyAll operations. Collections smaller than this
+     * may use element-by-element copying instead.
+     */
     static final int MIN_SIZE_FOR_COPY_ALL = 9;
 
+    /**
+     * Default initial capacity for newly created collections when size is not specified.
+     */
     static final int DEFAULT_SIZE_FOR_NEW_COLLECTION = 9;
 
-    // ...
+    /**
+     * Shared SecureRandom instance for generating random values throughout the utility class.
+     */
     static final Random RAND = new SecureRandom();
 
     // ... it has to be big enough to make it's safety to add element to
@@ -856,9 +884,10 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified collection argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg the boolean collection argument to check
+     * @param <T> the type of the collection
+     * @param arg the collection argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @return the {@code non-null} and non-empty boolean collection argument
+     * @return the {@code non-null} and non-empty collection argument
      * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static <T extends Collection<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -872,6 +901,7 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified Iterable argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
+     * @param <T> the type of the Iterable
      * @param arg the Iterable argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and non-empty Iterable argument
@@ -889,6 +919,7 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified Iterator argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
+     * @param <T> the type of the Iterator
      * @param arg the Iterator argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and non-empty Iterator argument
@@ -1961,10 +1992,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Formats a template string by substituting the first {@code {}} or {@code %s} placeholder with the provided argument.
+     * If no placeholder is found, the argument is appended to the template in square brackets.
      *
-     * @param template
-     * @param arg
-     * @return
+     * @param template the template string containing 0 or 1 placeholder
+     * @param arg the argument to be substituted into the template
+     * @return the formatted string with the placeholder replaced, or the template with the argument appended if no placeholder found
      */
     static String format(String template, final Object arg) {
         template = String.valueOf(template); // null -> "null"
@@ -1995,11 +2028,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Formats a template string by substituting {@code {}} or {@code %s} placeholders with the provided arguments.
+     * Arguments are matched by position. If there are more arguments than placeholders,
+     * unmatched arguments are appended in square brackets.
      *
-     * @param template
-     * @param arg1
-     * @param arg2
-     * @return
+     * @param template the template string containing 0 or more placeholders
+     * @param arg1 the first argument to be substituted
+     * @param arg2 the second argument to be substituted
+     * @return the formatted string with placeholders replaced
      */
     static String format(String template, final Object arg1, final Object arg2) {
         template = String.valueOf(template); // null -> "null"
@@ -2059,12 +2095,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Formats a template string by substituting {@code {}} or {@code %s} placeholders with the provided arguments.
+     * Arguments are matched by position. If there are more arguments than placeholders,
+     * unmatched arguments are appended in square brackets.
      *
-     * @param template
-     * @param arg1
-     * @param arg2
-     * @param arg3
-     * @return
+     * @param template the template string containing 0 or more placeholders
+     * @param arg1 the first argument to be substituted
+     * @param arg2 the second argument to be substituted
+     * @param arg3 the third argument to be substituted
+     * @return the formatted string with placeholders replaced
      */
     static String format(String template, final Object arg1, final Object arg2, final Object arg3) {
         template = String.valueOf(template); // null -> "null"
@@ -3264,7 +3303,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the arrays are equal within the specified delta, {@code false} otherwise
      */
     public static boolean equals(final float[] a, final float[] b, final float delta) {
-        if (a == b && (isEmpty(a) && isEmpty(b))) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
             return true;
         }
 
@@ -3336,7 +3375,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the arrays are equal within the specified delta, {@code false} otherwise
      */
     public static boolean equals(final double[] a, final double[] b, final double delta) {
-        if (a == b && (isEmpty(a) && isEmpty(b))) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
             return true;
         }
 
@@ -5013,9 +5052,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Appends the string representation of the double array to the provided StringBuilder.
+     * If the array is {@code null}, appends "null". If empty, appends "[]".
      *
-     * @param sb
-     * @param a
+     * @param sb the StringBuilder to append to
+     * @param a the double array to convert to string representation
      */
     static void toString(final StringBuilder sb, final double[] a) {
         if (a == null) {
@@ -5028,11 +5069,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Appends the string representation of the specified range of the double array to the provided StringBuilder.
+     * Elements are formatted as "[element1, element2, ...]".
      *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
+     * @param sb the StringBuilder to append to
+     * @param a the double array to convert to string representation
+     * @param fromIndex the starting index (inclusive) of the range to convert
+     * @param toIndex the ending index (exclusive) of the range to convert
      */
     static void toString(final StringBuilder sb, final double[] a, final int fromIndex, final int toIndex) {
         sb.append(WD._BRACKET_L);
@@ -5097,9 +5140,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Appends the string representation of the Object array to the provided StringBuilder.
+     * If the array is {@code null}, appends "null". If empty, appends "[]".
      *
-     * @param sb
-     * @param a
+     * @param sb the StringBuilder to append to
+     * @param a the Object array to convert to string representation
      */
     static void toString(final StringBuilder sb, final Object[] a) {
         if (a == null) {
@@ -5112,11 +5157,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Appends the string representation of the specified range of the Object array to the provided StringBuilder.
+     * Elements are formatted as "[element1, element2, ...]".
      *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
+     * @param sb the StringBuilder to append to
+     * @param a the Object array to convert to string representation
+     * @param fromIndex the starting index (inclusive) of the range to convert
+     * @param toIndex the ending index (exclusive) of the range to convert
      */
     static void toString(final StringBuilder sb, final Object[] a, final int fromIndex, final int toIndex) {
         sb.append(WD._BRACKET_L);
@@ -5237,24 +5284,28 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Deep to string.
+     * Appends the deep string representation of the Object array to the provided StringBuilder.
+     * This method recursively converts nested arrays and objects to their string representations.
+     * The processedElements set is used to detect and handle circular references.
      *
-     * @param sb
-     * @param a
-     * @param processedElements
+     * @param sb the StringBuilder to append to
+     * @param a the Object array to convert to deep string representation
+     * @param processedElements the set of already processed elements to detect circular references
      */
     static void deepToString(final StringBuilder sb, final Object[] a, final Set<Object> processedElements) {
         deepToString(sb, a, 0, a.length, processedElements);
     }
 
     /**
-     * Deep to string.
+     * Appends the deep string representation of the specified range of the Object array to the provided StringBuilder.
+     * This method recursively converts nested arrays and objects to their string representations.
+     * The processedElements set is used to detect and handle circular references, which are represented as "[...]".
      *
-     * @param sb
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param processedElements
+     * @param sb the StringBuilder to append to
+     * @param a the Object array to convert to deep string representation
+     * @param fromIndex the starting index (inclusive) of the range to convert
+     * @param toIndex the ending index (exclusive) of the range to convert
+     * @param processedElements the set of already processed elements to detect circular references
      */
     static void deepToString(final StringBuilder sb, final Object[] a, final int fromIndex, final int toIndex, final Set<Object> processedElements) {
         processedElements.add(a);
@@ -5486,20 +5537,6 @@ sealed class CommonUtil permits N {
         return c == null ? 0 : c.size();
     }
 
-    //    /**
-    //     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
-    //     *
-    //     * @param s
-    //     * @return true, if is null or default
-    //     * @deprecated internal only
-    //     */
-    //    @Deprecated
-    //    @Internal
-    //    @Beta
-    //    static boolean isNullOrDefault(final Object value) {
-    //        return (value == null) || equals(value, defaultValueOf(value.getClass()));
-    //    }
-
     /**
      * Checks if the specified {@code CharSequence} is {@code null} or empty.
      *
@@ -5729,24 +5766,6 @@ sealed class CommonUtil permits N {
 
         return true;
     }
-
-    //    @Beta
-    //    public static boolean isNullOrFalse(final Boolean bool) {
-    //        if (bool == null) {
-    //            return true;
-    //        }
-    //
-    //        return Boolean.FALSE.equals(bool);
-    //    }
-    //
-    //    @Beta
-    //    public static boolean isNullOrTrue(final Boolean bool) {
-    //        if (bool == null) {
-    //            return true;
-    //        }
-    //
-    //        return Boolean.TRUE.equals(bool);
-    //    }
 
     /**
      * Returns {@code true} if the specified {@code boolean} is {@code Boolean.TRUE}, not {@code null} or {@code Boolean.FALSE}.
@@ -6860,26 +6879,6 @@ sealed class CommonUtil permits N {
 
         return a;
     }
-
-    //    /**
-    //     * Converts the specified String array to an empty {@code String[0]} if it's {@code null} and each {@code null} element String to empty String {@code ""}.
-    //     *
-    //     * @param a
-    //     * @return
-    //     * @see Strings#nullToEmpty(String)
-    //     * @see Strings#nullToEmpty(String[])
-    //     */
-    //    static String[] nullToEmptyForAll(final String[] a) { // nullToEmptyForAll is better?
-    //        If (a == null) {
-    //            return EMPTY_STRING_ARRAY;
-    //        }
-    //
-    //        for (int i = 0, len = a.length; i < len; i++) {
-    //            a[i] = a[i] == null ? Strings.EMPTY : a[i];
-    //        }
-    //
-    //        return a;
-    //    }
 
     /**
      * Returns an empty Date array if the specified array is {@code null}, otherwise returns the original array.
@@ -8023,53 +8022,6 @@ sealed class CommonUtil permits N {
         return castIfAssignable(val, targetType.clazz());
     }
 
-    //    /**
-    //     * Returns {@code 0} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 1} is returned.
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static int toIntOneZero(final Boolean bool) {
-    //        if (bool == null) {
-    //            return 0;
-    //        }
-    //
-    //        return bool.booleanValue() ? 1 : 0;
-    //    }
-    //
-    //    /**
-    //     * Returns {@code 'N'} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 'Y'} is returned.
-    //     *
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static char toCharYN(final Boolean bool) {
-    //        if (bool == null) {
-    //            return 'N';
-    //        }
-    //
-    //        return bool.booleanValue() ? 'Y' : 'N';
-    //    }
-    //
-    //    /**
-    //     * Returns {@code "no"} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code "yes"} is returned.
-    //     *
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static String toStringYesNo(final Boolean bool) {
-    //        if (bool == null) {
-    //            return "no";
-    //        }
-    //
-    //        return bool.booleanValue() ? "yes" : "no";
-    //    }
-
     /**
      * <p>Note: copied from Apache commons Lang under Apache license v2.0 </p>
      *
@@ -8133,53 +8085,6 @@ sealed class CommonUtil permits N {
             a[i] = !a[i];
         }
     }
-
-    //    /**
-    //     * Returns {@code 0} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 1} is returned.
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static int toIntOneZero(final Boolean bool) {
-    //        if (bool == null) {
-    //            return 0;
-    //        }
-    //
-    //        return bool.booleanValue() ? 1 : 0;
-    //    }
-    //
-    //    /**
-    //     * Returns {@code 'N'} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 'Y'} is returned.
-    //     *
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static char toCharYN(final Boolean bool) {
-    //        if (bool == null) {
-    //            return 'N';
-    //        }
-    //
-    //        return bool.booleanValue() ? 'Y' : 'N';
-    //    }
-    //
-    //    /**
-    //     * Returns {@code "no"} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code "yes"} is returned.
-    //     *
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static String toStringYesNo(final Boolean bool) {
-    //        if (bool == null) {
-    //            return "no";
-    //        }
-    //
-    //        return bool.booleanValue() ? "yes" : "no";
-    //    }
 
     /**
      * Returns an immutable/unmodifiable list of all the enum constants in the specified enum class.
@@ -10246,7 +10151,7 @@ sealed class CommonUtil permits N {
 
         if (isEmpty(c)) {
             return EMPTY_OBJECT_ARRAY;
-        } else if (fromIndex == 0 || toIndex == c.size()) {
+        } else if (fromIndex == 0 && toIndex == c.size()) {
             return c.toArray(new Object[0]);
         } else if (c instanceof List) {
             return ((List) c).subList(fromIndex, toIndex).toArray(new Object[toIndex - fromIndex]);
@@ -10311,7 +10216,7 @@ sealed class CommonUtil permits N {
 
         if (isEmpty(c)) {
             return a;
-        } else if (fromIndex == 0 || toIndex == c.size()) {
+        } else if (fromIndex == 0 && toIndex == c.size()) {
             return c.toArray(a);
         } else if (c instanceof List) {
             return ((List<T>) c).subList(fromIndex, toIndex).toArray(a);
@@ -10370,7 +10275,7 @@ sealed class CommonUtil permits N {
 
         if (isEmpty(c)) {
             return arraySupplier.apply(0);
-        } else if (fromIndex == 0 || toIndex == c.size()) {
+        } else if (fromIndex == 0 && toIndex == c.size()) {
             return c.toArray(arraySupplier.apply(c.size()));
         } else if (c instanceof List) {
             return ((List<T>) c).subList(fromIndex, toIndex).toArray(arraySupplier.apply(toIndex - fromIndex));
@@ -10436,7 +10341,7 @@ sealed class CommonUtil permits N {
 
         if (isEmpty(c)) {
             return res;
-        } else if (fromIndex == 0 || toIndex == c.size()) {
+        } else if (fromIndex == 0 && toIndex == c.size()) {
             return c.toArray(res);
         } else if (c instanceof List) {
             return ((List<T>) c).subList(fromIndex, toIndex).toArray(res);
@@ -14760,6 +14665,10 @@ sealed class CommonUtil permits N {
            Profiler.run(1, 1000, 3, "Arrays.compare(...)", () -> assertEquals(-1, Arrays.compare(a, b))).printResult();
        }
     */
+    /**
+     * Threshold for array comparison operations. Arrays with length greater than this threshold
+     * use optimized comparison methods from {@link java.util.Arrays}; smaller arrays use simple loops.
+     */
     private static final int MISMATCH_THRESHOLD = 1000;
 
     /**
@@ -21873,7 +21782,7 @@ sealed class CommonUtil permits N {
     public static boolean[] copyOf(final boolean[] original, final int newLength) {
         checkArgNotNegative(newLength, cs.newLength);
 
-        if (newLength == original.length) {
+        if (original != null && newLength == original.length) {
             return original.clone();
         }
 
@@ -21899,7 +21808,7 @@ sealed class CommonUtil permits N {
     public static char[] copyOf(final char[] original, final int newLength) {
         checkArgNotNegative(newLength, cs.newLength);
 
-        if (newLength == original.length) {
+        if (original != null && newLength == original.length) {
             return original.clone();
         }
 
@@ -21925,7 +21834,7 @@ sealed class CommonUtil permits N {
     public static byte[] copyOf(final byte[] original, final int newLength) {
         checkArgNotNegative(newLength, cs.newLength);
 
-        if (newLength == original.length) {
+        if (original != null && newLength == original.length) {
             return original.clone();
         }
 
@@ -21951,7 +21860,7 @@ sealed class CommonUtil permits N {
     public static short[] copyOf(final short[] original, final int newLength) {
         checkArgNotNegative(newLength, cs.newLength);
 
-        if (newLength == original.length) {
+        if (original != null && newLength == original.length) {
             return original.clone();
         }
 
@@ -21977,7 +21886,7 @@ sealed class CommonUtil permits N {
     public static int[] copyOf(final int[] original, final int newLength) {
         checkArgNotNegative(newLength, cs.newLength);
 
-        if (newLength == original.length) {
+        if (original != null && newLength == original.length) {
             return original.clone();
         }
 
@@ -22003,7 +21912,7 @@ sealed class CommonUtil permits N {
     public static long[] copyOf(final long[] original, final int newLength) {
         checkArgNotNegative(newLength, cs.newLength);
 
-        if (newLength == original.length) {
+        if (original != null && newLength == original.length) {
             return original.clone();
         }
 
@@ -22029,7 +21938,7 @@ sealed class CommonUtil permits N {
     public static float[] copyOf(final float[] original, final int newLength) {
         checkArgNotNegative(newLength, cs.newLength);
 
-        if (newLength == original.length) {
+        if (original != null && newLength == original.length) {
             return original.clone();
         }
 
@@ -22055,7 +21964,7 @@ sealed class CommonUtil permits N {
     public static double[] copyOf(final double[] original, final int newLength) {
         checkArgNotNegative(newLength, cs.newLength);
 
-        if (newLength == original.length) {
+        if (original != null && newLength == original.length) {
             return original.clone();
         }
 
@@ -22153,7 +22062,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
+            throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22215,7 +22124,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
+            throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22277,7 +22186,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
+            throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22339,7 +22248,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
+            throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22413,7 +22322,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
+            throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22475,7 +22384,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
+            throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22537,7 +22446,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
+            throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22599,7 +22508,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
+            throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22699,7 +22608,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
+            throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22758,7 +22667,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), c.size());
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
+            throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -22801,7 +22710,7 @@ sealed class CommonUtil permits N {
     public static String copyOfRange(final String str, final int fromIndex, final int toIndex) {
         final int len = len(str);
 
-        checkFromIndexSize(fromIndex, toIndex, len);
+        checkFromToIndex(fromIndex, toIndex, len);
 
         if (fromIndex == 0 && toIndex == len) {
             return str;
@@ -22828,7 +22737,7 @@ sealed class CommonUtil permits N {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), str.length());
 
         if (step == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' cannot be zero");
+            throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -25808,382 +25717,6 @@ sealed class CommonUtil permits N {
     //        return Comparators.reverseOrder(cmp);
     //    }
 
-    //    /**
-    //     *
-    //     * @param a
-    //     */
-    //    public static void bucketSort(final int[] a) {
-    //        if (isEmpty(a)) {
-    //            return;
-    //        }
-    //
-    //        bucketSort(a, 0, a.length);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     */
-    //    public static void bucketSort(final int[] a, final int fromIndex, final int toIndex) {
-    //        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        if (toIndex - fromIndex < 32) {
-    //            sort(a, fromIndex, toIndex);
-    //            return;
-    //        }
-    //
-    //        final Multiset<Integer> multiset = new Multiset<>();
-    //
-    //        for (int i = fromIndex; i < toIndex; i++) {
-    //            multiset.add(a[i]);
-    //        }
-    //
-    //        final Map<Integer, Integer> m = multiset.toMapSortedBy((a1, b) -> compare(a1.getKey().intValue(), a1.getKey().intValue()));
-    //        int idx = fromIndex;
-    //
-    //        for (Map.Entry<Integer, Integer> entry : m.entrySet()) {
-    //            fill(a, idx, idx + entry.getValue(), entry.getKey());
-    //            idx += entry.getValue();
-    //        }
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param a
-    //     */
-    //    public static void bucketSort(final long[] a) {
-    //        if (isEmpty(a)) {
-    //            return;
-    //        }
-    //
-    //        bucketSort(a, 0, a.length);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     */
-    //    public static void bucketSort(final long[] a, final int fromIndex, final int toIndex) {
-    //        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        if (toIndex - fromIndex < 32) {
-    //            sort(a, fromIndex, toIndex);
-    //            return;
-    //        }
-    //
-    //        final Multiset<Long> multiset = new Multiset<>();
-    //
-    //        for (int i = fromIndex; i < toIndex; i++) {
-    //            multiset.add(a[i]);
-    //        }
-    //
-    //        final Map<Long, Integer> m = multiset.toMapSortedBy((a1, b) -> compare(a1.getKey().longValue(), a1.getKey().longValue()));
-    //
-    //        int idx = fromIndex;
-    //
-    //        for (Map.Entry<Long, Integer> entry : m.entrySet()) {
-    //            fill(a, idx, idx + entry.getValue(), entry.getKey());
-    //            idx += entry.getValue();
-    //        }
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param a
-    //     */
-    //    public static void bucketSort(final float[] a) {
-    //        if (isEmpty(a)) {
-    //            return;
-    //        }
-    //
-    //        bucketSort(a, 0, a.length);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     */
-    //    public static void bucketSort(final float[] a, final int fromIndex, final int toIndex) {
-    //        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        if (toIndex - fromIndex < 32) {
-    //            sort(a, fromIndex, toIndex);
-    //            return;
-    //        }
-    //
-    //        final Multiset<Float> multiset = new Multiset<>();
-    //
-    //        for (int i = fromIndex; i < toIndex; i++) {
-    //            multiset.add(a[i]);
-    //        }
-    //
-    //        final Map<Float, Integer> m = multiset.toMapSortedBy((a1, b) -> compare(a1.getKey(), a1.getKey()));
-    //        int idx = fromIndex;
-    //
-    //        for (Map.Entry<Float, Integer> entry : m.entrySet()) {
-    //            fill(a, idx, idx + entry.getValue(), entry.getKey());
-    //            idx += entry.getValue();
-    //        }
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param a
-    //     */
-    //    public static void bucketSort(final double[] a) {
-    //        if (isEmpty(a)) {
-    //            return;
-    //        }
-    //
-    //        bucketSort(a, 0, a.length);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     */
-    //    public static void bucketSort(final double[] a, final int fromIndex, final int toIndex) {
-    //        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        if (toIndex - fromIndex < 32) {
-    //            sort(a, fromIndex, toIndex);
-    //            return;
-    //        }
-    //
-    //        final Multiset<Double> multiset = new Multiset<>();
-    //
-    //        for (int i = fromIndex; i < toIndex; i++) {
-    //            multiset.add(a[i]);
-    //        }
-    //
-    //        final Map<Double, Integer> m = multiset.toMapSortedBy((a1, b) -> compare(a1.getKey(), a1.getKey()));
-    //        int idx = fromIndex;
-    //
-    //        for (Map.Entry<Double, Integer> entry : m.entrySet()) {
-    //            fill(a, idx, idx + entry.getValue(), entry.getKey());
-    //            idx += entry.getValue();
-    //        }
-    //    }
-    //
-    //    /**
-    //     * Note: All the objects with same value will be replaced by first element with the same value.
-    //     *
-    //     * @param a
-    //     */
-    //    public static void bucketSort(final Object[] a) {
-    //        if (isEmpty(a)) {
-    //            return;
-    //        }
-    //
-    //        bucketSort(a, 0, a.length);
-    //    }
-    //
-    //    /**
-    //     * Note: All the objects with same value will be replaced by first element with the same value.
-    //     *
-    //     * @param a the elements in the array must implements the <code>Comparable</code> interface.
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     */
-    //    public static void bucketSort(final Object[] a, final int fromIndex, final int toIndex) {
-    //        bucketSort(a, fromIndex, toIndex, NATURAL_COMPARATOR);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param a
-    //     * @param cmp
-    //     */
-    //    public static <T> void bucketSort(final T[] a, final Comparator<? super T> cmp) {
-    //        if (isEmpty(a)) {
-    //            return;
-    //        }
-    //
-    //        bucketSort(a, 0, a.length, cmp);
-    //    }
-    //
-    //    /**
-    //     * Note: All the objects with same value will be replaced by first element with the same value.
-    //     *
-    //     * @param <T>
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param cmp
-    //     */
-    //    public static <T> void bucketSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-    //        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        if (toIndex - fromIndex < 32) {
-    //            sort(a, fromIndex, toIndex, cmp);
-    //            return;
-    //        }
-    //
-    //        final Comparator<? super T> comparator = checkComparator(cmp);
-    //        final Multiset<T> multiset = new Multiset<>();
-    //
-    //        for (int i = fromIndex; i < toIndex; i++) {
-    //            multiset.add(a[i]);
-    //        }
-    //
-    //        final Map<T, Integer> m = multiset.toMapSortedBy((a1, b) -> comparator.compare(a1.getKey(), a1.getKey()));
-    //        int idx = fromIndex;
-    //
-    //        for (Map.Entry<T, Integer> entry : m.entrySet()) {
-    //            fill(a, idx, idx + entry.getValue(), entry.getKey());
-    //            idx += entry.getValue();
-    //        }
-    //    }
-    //
-    //    /**
-    //     * Note: All the objects with same value will be replaced by first element with the same value.
-    //     *
-    //     * @param <T>
-    //     * @param list
-    //     */
-    //    public static <T extends Comparable<? super T>> void bucketSort(final List<T> list) {
-    //        if (isEmpty(list)) {
-    //            return;
-    //        }
-    //
-    //        bucketSort(list, 0, list.size());
-    //    }
-    //
-    //    /**
-    //     * Note: All the objects with same value will be replaced by first element with the same value.
-    //     *
-    //     * @param <T>
-    //     * @param list
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     */
-    //    public static <T extends Comparable<? super T>> void bucketSort(final List<T> list, final int fromIndex, final int toIndex) {
-    //        bucketSort(list, fromIndex, toIndex, NATURAL_COMPARATOR);
-    //    }
-    //
-    //    /**
-    //     * Note: All the objects with same value will be replaced by first element with the same value.
-    //     *
-    //     * @param <T>
-    //     * @param list
-    //     * @param cmp
-    //     */
-    //    public static <T> void bucketSort(final List<? extends T> list, final Comparator<? super T> cmp) {
-    //        if (isEmpty(list)) {
-    //            return;
-    //        }
-    //
-    //        bucketSort(list, 0, list.size(), cmp);
-    //    }
-    //
-    //    /**
-    //     * Note: All the objects with same value will be replaced by first element with the same value.
-    //     *
-    //     * @param <T>
-    //     * @param list
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param cmp
-    //     */
-    //    public static <T> void bucketSort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-    //        checkFromToIndex(fromIndex, toIndex, list == null ? 0 : list.size());
-    //
-    //        if ((isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        if (toIndex - fromIndex < 32) {
-    //            sort(list, fromIndex, toIndex, cmp);
-    //            return;
-    //        }
-    //
-    //        final Comparator<? super T> comparator = checkComparator(cmp);
-    //        final Multiset<T> multiset = new Multiset<>();
-    //        ListIterator<T> itr = (ListIterator<T>) list.listIterator(fromIndex);
-    //        int i = fromIndex;
-    //
-    //        while (itr.hasNext()) {
-    //            if (i++ >= toIndex) {
-    //                break;
-    //            }
-    //
-    //            multiset.add(itr.next());
-    //        }
-    //
-    //        final Map<T, Integer> m = multiset.toMapSortedBy((a, b) -> comparator.compare(a.getKey(), a.getKey()));
-    //
-    //        itr = (ListIterator<T>) list.listIterator(fromIndex);
-    //
-    //        for (Map.Entry<T, Integer> entry : m.entrySet()) {
-    //            final T key = entry.getKey();
-    //            for (int j = 0; j < entry.getValue(); j++) {
-    //                itr.next();
-    //                itr.set(key);
-    //            }
-    //        }
-    //    }
-    //
-    //    /**
-    //     * Bucket sort by.
-    //     *
-    //     * @param <T>
-    //     * @param <U>
-    //     * @param a
-    //     * @param keyExtractor
-    //     */
-    //    public static <T, U extends Comparable<? super U>> void bucketSortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor) {
-    //        if (isEmpty(a)) {
-    //            return;
-    //        }
-    //
-    //        bucketSort(a, Comparators.comparingBy(keyExtractor));
-    //    }
-    //
-    //    /**
-    //     * Bucket sort by.
-    //     *
-    //     * @param <T>
-    //     * @param <U>
-    //     * @param list
-    //     * @param keyExtractor
-    //     */
-    //    public static <T, U extends Comparable<? super U>> void bucketSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor) {
-    //        if (isEmpty(list)) {
-    //            return;
-    //        }
-    //
-    //        bucketSort(list, Comparators.comparingBy(keyExtractor));
-    //    }
-
     /**
      * Performs a binary search on the specified array of booleans to find the specified value.
      * The array must be sorted (as by the {@link #sort(boolean[])} method) before making this call.
@@ -27076,7 +26609,7 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex; i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (Numbers.fuzzyEquals(a[i], valueToFind, tolerance)) {
                 return i;
             }
@@ -27151,7 +26684,6 @@ sealed class CommonUtil permits N {
         }
 
         if (c instanceof final List<?> list && c instanceof RandomAccess) {
-
             for (int i = N.max(fromIndex, 0); i < len; i++) {
                 if (equals(list.get(i), valueToFind)) {
                     return i;
@@ -27272,7 +26804,7 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex; i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (equalsIgnoreCase(a[i], valueToFind)) {
                 return i;
             }

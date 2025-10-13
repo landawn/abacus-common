@@ -27,6 +27,7 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.DiffIgnore;
@@ -34,9 +35,9 @@ import com.landawn.abacus.annotation.Entity;
 import com.landawn.abacus.annotation.Record;
 import com.landawn.abacus.util.Tuple.Tuple3;
 
+@Tag("new-test")
 public class ClassUtil100Test extends TestBase {
 
-    // Test classes for testing
     public static class TestBean {
         private String name;
         private int age;
@@ -211,7 +212,6 @@ public class ClassUtil100Test extends TestBase {
     }
 
     public static class NonBean {
-        // No properties
     }
 
     public interface TestInterface {
@@ -242,31 +242,24 @@ public class ClassUtil100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Clear any cached data if needed
     }
 
     @AfterEach
     public void tearDown() {
-        // Clean up after tests
     }
 
     @Test
     public void testRegisterNonBeanClass() {
-        // Test registering a non-bean class
         Beans.registerNonBeanClass(NonBean.class);
 
-        // Verify it's registered as non-bean
         List<String> propNames = Beans.getPropNameList(NonBean.class);
         assertTrue(propNames.isEmpty() || propNames.size() == 0);
     }
 
     @Test
     public void testRegisterNonPropGetSetMethod() {
-        // Test registering a non-property method
         Beans.registerNonPropGetSetMethod(TestBean.class, "name");
 
-        // The property should be excluded from property list
-        // Note: This might affect other tests, so we should be careful
     }
 
     @Test
@@ -274,11 +267,9 @@ public class ClassUtil100Test extends TestBase {
         Method getMethod = TestBean.class.getMethod("getName");
         Beans.registerPropGetSetMethod("customName", getMethod);
 
-        // Test with setter
         Method setMethod = TestBean.class.getMethod("setName", String.class);
         Beans.registerPropGetSetMethod("customName", setMethod);
 
-        // Test with invalid method - should throw exception
         Method invalidMethod = Object.class.getMethod("toString");
         assertThrows(IllegalArgumentException.class, () -> {
             Beans.registerPropGetSetMethod("invalid", invalidMethod);
@@ -290,7 +281,6 @@ public class ClassUtil100Test extends TestBase {
         Beans.registerXMLBindingClass(EntityBean.class);
         assertTrue(Beans.isRegisteredXMLBindingClass(EntityBean.class));
 
-        // Test with non-registered class
         assertFalse(Beans.isRegisteredXMLBindingClass(TestBean.class));
     }
 
@@ -303,18 +293,14 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testDistanceOfInheritance() {
-        // Test same class
         assertEquals(0, ClassUtil.distanceOfInheritance(String.class, String.class));
 
-        // Test direct inheritance
         assertEquals(1, ClassUtil.distanceOfInheritance(ArrayList.class, AbstractList.class));
         assertEquals(2, ClassUtil.distanceOfInheritance(ArrayList.class, AbstractCollection.class));
         assertEquals(1, ClassUtil.distanceOfInheritance(String.class, Object.class));
 
-        // Test unrelated classes
         assertEquals(-1, ClassUtil.distanceOfInheritance(String.class, Integer.class));
 
-        // Test null cases
         assertEquals(-1, ClassUtil.distanceOfInheritance(null, String.class));
         assertEquals(-1, ClassUtil.distanceOfInheritance(String.class, null));
         assertEquals(-1, ClassUtil.distanceOfInheritance(null, null));
@@ -322,31 +308,25 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testForClass() {
-        // Test primitive types
         assertEquals(int.class, ClassUtil.forClass("int"));
         assertEquals(boolean.class, ClassUtil.forClass("boolean"));
         assertEquals(double.class, ClassUtil.forClass("double"));
 
-        // Test wrapper types
         assertEquals(Integer.class, ClassUtil.forClass("java.lang.Integer"));
         assertEquals(Integer.class, ClassUtil.forClass("Integer"));
 
-        // Test array types
         assertEquals(String[].class, ClassUtil.forClass("String[]"));
         assertEquals(int[].class, ClassUtil.forClass("int[]"));
         assertEquals(String[][].class, ClassUtil.forClass("String[][]"));
 
-        // Test common classes
         assertEquals(String.class, ClassUtil.forClass("java.lang.String"));
         assertEquals(String.class, ClassUtil.forClass("String"));
         assertEquals(ArrayList.class, ClassUtil.forClass("java.util.ArrayList"));
         assertEquals(HashMap.class, ClassUtil.forClass("java.util.HashMap"));
 
-        // Test inner classes
         assertEquals(Map.Entry.class, ClassUtil.forClass("java.util.Map$Entry"));
         assertEquals(Map.Entry.class, ClassUtil.forClass("Map.Entry"));
 
-        // Test invalid class name
         assertThrows(IllegalArgumentException.class, () -> {
             ClassUtil.forClass("com.invalid.NonExistentClass");
         });
@@ -354,27 +334,22 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testFormalizePropName() {
-        // Test camel case conversion
         assertEquals("userName", Beans.formalizePropName("user_name"));
         assertEquals("firstName", Beans.formalizePropName("first_name"));
         assertEquals("id", Beans.formalizePropName("id"));
 
-        // Test reserved keywords
         assertEquals("clazz", Beans.formalizePropName("class"));
         assertEquals("clazz", Beans.formalizePropName("CLASS"));
     }
 
     @Test
     public void testFormatParameterizedTypeName() {
-        // Test array types
         assertEquals("String[]", ClassUtil.formatParameterizedTypeName("class [Ljava.lang.String;"));
         assertEquals("Integer[]", ClassUtil.formatParameterizedTypeName("class [Ljava.lang.Integer;"));
 
-        // Test removing prefixes
         assertEquals("String", ClassUtil.formatParameterizedTypeName("class java.lang.String"));
         assertEquals("java.util.ArrayList", ClassUtil.formatParameterizedTypeName("class java.util.ArrayList"));
 
-        // Test already formatted names
         assertEquals("String", ClassUtil.formatParameterizedTypeName("String"));
     }
 
@@ -384,7 +359,6 @@ public class ClassUtil100Test extends TestBase {
         assertEquals("java.util.ArrayList", ClassUtil.getCanonicalClassName(ArrayList.class));
         assertEquals("int", ClassUtil.getCanonicalClassName(int.class));
 
-        // Test with array
         assertEquals("java.lang.String[]", ClassUtil.getCanonicalClassName(String[].class));
     }
 
@@ -409,7 +383,6 @@ public class ClassUtil100Test extends TestBase {
         assertNotNull(pkg);
         assertEquals("java.lang", pkg.getName());
 
-        // Test primitive type
         assertNull(ClassUtil.getPackage(int.class));
     }
 
@@ -418,17 +391,14 @@ public class ClassUtil100Test extends TestBase {
         assertEquals("java.lang", ClassUtil.getPackageName(String.class));
         assertEquals("java.util", ClassUtil.getPackageName(ArrayList.class));
 
-        // Test primitive type
         assertEquals("", ClassUtil.getPackageName(int.class));
     }
 
     @Test
     public void testGetClassesByPackage() {
-        // Test with java.lang package (should always exist)
         assertThrows(IllegalArgumentException.class, () -> ClassUtil.getClassesByPackage("java.lang", false, true));
         assertThrows(IllegalArgumentException.class, () -> ClassUtil.getClassesByPackage("java.util", false, true));
 
-        // Test with invalid package
         assertThrows(IllegalArgumentException.class, () -> {
             ClassUtil.getClassesByPackage("com.invalid.package.that.does.not.exist", false, false);
         });
@@ -436,35 +406,30 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testGetAllInterfaces() {
-        // Test with ArrayList
         Set<Class<?>> interfaces = ClassUtil.getAllInterfaces(ArrayList.class);
         assertNotNull(interfaces);
         assertTrue(interfaces.contains(List.class));
         assertTrue(interfaces.contains(Collection.class));
         assertTrue(interfaces.contains(Iterable.class));
 
-        // Test with class that implements multiple interfaces
         interfaces = ClassUtil.getAllInterfaces(ConcreteTestClass.class);
         assertTrue(interfaces.contains(TestInterface.class));
     }
 
     @Test
     public void testGetAllSuperclasses() {
-        // Test with ArrayList
         List<Class<?>> superclasses = ClassUtil.getAllSuperclasses(ArrayList.class);
         assertNotNull(superclasses);
         assertTrue(superclasses.contains(AbstractList.class));
         assertTrue(superclasses.contains(AbstractCollection.class));
-        assertFalse(superclasses.contains(Object.class)); // Object.class is excluded
+        assertFalse(superclasses.contains(Object.class));
 
-        // Test with direct Object subclass
         superclasses = ClassUtil.getAllSuperclasses(String.class);
         assertTrue(superclasses.isEmpty());
     }
 
     @Test
     public void testGetAllSuperTypes() {
-        // Test with ArrayList
         Set<Class<?>> superTypes = ClassUtil.getAllSuperTypes(ArrayList.class);
         assertNotNull(superTypes);
         assertTrue(superTypes.contains(List.class));
@@ -475,42 +440,34 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testGetEnclosingClass() {
-        // Test with inner class
         assertEquals(InnerClassContainer.class, ClassUtil.getEnclosingClass(InnerClassContainer.InnerClass.class));
         assertEquals(InnerClassContainer.class, ClassUtil.getEnclosingClass(InnerClassContainer.StaticInnerClass.class));
 
-        // Test with top-level class
         assertNull(ClassUtil.getEnclosingClass(String.class));
     }
 
     @Test
     public void testGetDeclaredConstructor() {
-        // Test no-arg constructor
         Constructor<TestBean> noArgConstructor = ClassUtil.getDeclaredConstructor(TestBean.class);
         assertNotNull(noArgConstructor);
 
-        // Test with parameters
         Constructor<ImmutableBean> paramConstructor = ClassUtil.getDeclaredConstructor(ImmutableBean.class, String.class);
         assertNotNull(paramConstructor);
 
-        // Test non-existent constructor
         Constructor<ImmutableBean> nonExistent = ClassUtil.getDeclaredConstructor(ImmutableBean.class, Integer.class);
         assertNull(nonExistent);
     }
 
     @Test
     public void testGetDeclaredMethod() {
-        // Test method with no parameters
         Method method = ClassUtil.getDeclaredMethod(TestBean.class, "getName");
         assertNotNull(method);
         assertEquals("getName", method.getName());
 
-        // Test method with parameters
         method = ClassUtil.getDeclaredMethod(TestBean.class, "setName", String.class);
         assertNotNull(method);
         assertEquals("setName", method.getName());
 
-        // Test non-existent method
         method = ClassUtil.getDeclaredMethod(TestBean.class, "nonExistent");
         assertNull(method);
     }
@@ -561,7 +518,6 @@ public class ClassUtil100Test extends TestBase {
         assertTrue(propNames.contains("active"));
         assertTrue(propNames.contains("publicField"));
 
-        // Test with non-bean class
         propNames = Beans.getPropNameList(String.class);
         assertNotNull(propNames);
     }
@@ -578,7 +534,6 @@ public class ClassUtil100Test extends TestBase {
         assertFalse(propNames.contains("age"));
         assertFalse(propNames.contains("active"));
 
-        // Test with empty exclusion set
         propNames = Beans.getPropNames(TestBean.class, new HashSet<>());
         assertTrue(propNames.contains("name"));
         assertTrue(propNames.contains("age"));
@@ -590,7 +545,6 @@ public class ClassUtil100Test extends TestBase {
         bean.setName("test");
         bean.setAge(25);
 
-        // Test with property name predicate
         List<String> propNames = Beans.getPropNames(bean, name -> name.startsWith("a"));
         assertNotNull(propNames);
         assertTrue(propNames.contains("age"));
@@ -605,7 +559,6 @@ public class ClassUtil100Test extends TestBase {
         bean.setAge(25);
         bean.setActive(true);
 
-        // Test with property name and value predicate
         List<String> propNames = Beans.getPropNames(bean, (name, value) -> value != null && !value.equals(false));
         assertNotNull(propNames);
         assertTrue(propNames.contains("name"));
@@ -623,11 +576,9 @@ public class ClassUtil100Test extends TestBase {
         assertNotNull(field);
         assertEquals("age", field.getName());
 
-        // Test with non-existent property
         field = Beans.getPropField(TestBean.class, "nonExistent");
         assertNull(field);
 
-        // Test with different case
         field = Beans.getPropField(TestBean.class, "NAME");
         assertNotNull(field);
     }
@@ -651,7 +602,6 @@ public class ClassUtil100Test extends TestBase {
         assertNotNull(method);
         assertEquals("isActive", method.getName());
 
-        // Test with non-existent property
         method = Beans.getPropGetMethod(TestBean.class, "nonExistent");
         assertNull(method);
     }
@@ -676,7 +626,6 @@ public class ClassUtil100Test extends TestBase {
         assertNotNull(method);
         assertEquals("setAge", method.getName());
 
-        // Test with non-existent property
         method = Beans.getPropSetMethod(TestBean.class, "nonExistent");
         assertNull(method);
     }
@@ -716,23 +665,19 @@ public class ClassUtil100Test extends TestBase {
         assertEquals(30, (Integer) Beans.getPropValue(bean, "age"));
         assertEquals(true, Beans.getPropValue(bean, "active"));
 
-        // Test with nested property
         NestedBean nested = new NestedBean();
         nested.setInner(bean);
         assertEquals("John", Beans.getPropValue(nested, "inner.name"));
         assertEquals(30, (Integer) Beans.getPropValue(nested, "inner.age"));
 
-        // Test with null nested property
         NestedBean emptyNested = new NestedBean();
         Object result = Beans.getPropValue(emptyNested, "inner.name", true);
         assertNull(result);
 
-        // Test with non-existent property
         assertThrows(IllegalArgumentException.class, () -> {
             Beans.getPropValue(bean, "nonExistent");
         });
 
-        // Test with ignoreUnmatchedProperty
         assertNull(Beans.getPropValue(bean, "nonExistent", true));
     }
 
@@ -745,12 +690,10 @@ public class ClassUtil100Test extends TestBase {
         assertEquals("John", result);
         assertEquals("John", bean.getName());
 
-        // Test with null value
         result = Beans.setPropValue(bean, method, null);
         assertNull(result);
         assertNull(bean.getName());
 
-        // Test with type conversion
         method = TestBean.class.getMethod("setAge", int.class);
         result = Beans.setPropValue(bean, method, "25");
         assertEquals(25, bean.getAge());
@@ -769,7 +712,6 @@ public class ClassUtil100Test extends TestBase {
         Beans.setPropValue(bean, "active", true);
         assertTrue(bean.isActive());
 
-        // Test with nested property
         NestedBean nested = new NestedBean();
         TestBean inner = new TestBean();
         nested.setInner(inner);
@@ -778,12 +720,10 @@ public class ClassUtil100Test extends TestBase {
         assertTrue(result);
         assertEquals("Jane", nested.getInner().getName());
 
-        // Test with non-existent property
         assertThrows(IllegalArgumentException.class, () -> {
             Beans.setPropValue(bean, "nonExistent", "value");
         });
 
-        // Test with ignoreUnmatchedProperty
         result = Beans.setPropValue(bean, "nonExistent", "value", true);
         assertFalse(result);
     }
@@ -800,11 +740,9 @@ public class ClassUtil100Test extends TestBase {
         assertTrue(bean.getTags().contains("tag1"));
         assertTrue(bean.getTags().contains("tag2"));
 
-        // Test with null value
         Beans.setPropValueByGet(bean, method, null);
-        assertEquals(2, bean.getTags().size()); // Should remain unchanged
+        assertEquals(2, bean.getTags().size());
 
-        // Test with invalid method
         Method invalidMethod = TestBean.class.getMethod("getName");
         TestBean testBean = new TestBean();
         assertThrows(IllegalArgumentException.class, () -> {
@@ -830,12 +768,10 @@ public class ClassUtil100Test extends TestBase {
         assertNotNull(builderInfo._2);
         assertNotNull(builderInfo._3);
 
-        // Test creating instance with builder
         Object builder = builderInfo._2.get();
         assertNotNull(builder);
         assertTrue(builder instanceof BuilderBean.Builder);
 
-        // Test with non-builder class
         builderInfo = Beans.getBuilderInfo(TestBean.class);
         assertNull(builderInfo);
     }
@@ -849,7 +785,6 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testHierarchy() {
-        // Test without interfaces
         ObjIterator<Class<?>> hierarchy = ClassUtil.hierarchy(ArrayList.class);
         List<Class<?>> classes = new ArrayList<>();
         while (hierarchy.hasNext()) {
@@ -861,7 +796,6 @@ public class ClassUtil100Test extends TestBase {
         assertTrue(classes.contains(Object.class));
         assertFalse(classes.stream().anyMatch(Class::isInterface));
 
-        // Test with interfaces
         hierarchy = ClassUtil.hierarchy(ArrayList.class, true);
         classes.clear();
         while (hierarchy.hasNext()) {
@@ -895,12 +829,10 @@ public class ClassUtil100Test extends TestBase {
         String name = ClassUtil.invokeMethod(bean, method);
         assertEquals("John", name);
 
-        // Test static method invocation
         Method staticMethod = Integer.class.getMethod("valueOf", String.class);
         Integer value = ClassUtil.invokeMethod(staticMethod, "123");
         assertEquals(123, value);
 
-        // Test with setter
         method = TestBean.class.getMethod("setAge", int.class);
         ClassUtil.invokeMethod(bean, method, 25);
         assertEquals(25, bean.getAge());
@@ -928,7 +860,6 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testIsAnonymousClass() {
-        // Create anonymous class instance
         Runnable anonymous = new Runnable() {
             @Override
             public void run() {
@@ -1015,7 +946,6 @@ public class ClassUtil100Test extends TestBase {
         assertEquals(Integer[].class, ClassUtil.wrap(int[].class));
         assertEquals(Boolean[].class, ClassUtil.wrap(boolean[].class));
 
-        // Non-primitive types should return themselves
         assertEquals(String.class, ClassUtil.wrap(String.class));
         assertEquals(Integer.class, ClassUtil.wrap(Integer.class));
 
@@ -1033,7 +963,6 @@ public class ClassUtil100Test extends TestBase {
         assertEquals(int[].class, ClassUtil.unwrap(Integer[].class));
         assertEquals(boolean[].class, ClassUtil.unwrap(Boolean[].class));
 
-        // Non-wrapper types should return themselves
         assertEquals(String.class, ClassUtil.unwrap(String.class));
         assertEquals(int.class, ClassUtil.unwrap(int.class));
 
@@ -1152,7 +1081,6 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testSetAccessible() throws NoSuchMethodException, NoSuchFieldException {
-        // Test with method
         Method method = TestBean.class.getDeclaredMethod("getName");
         ClassUtil.setAccessible(method, true);
         assertTrue(method.isAccessible());
@@ -1160,50 +1088,41 @@ public class ClassUtil100Test extends TestBase {
         ClassUtil.setAccessible(method, false);
         assertFalse(method.isAccessible());
 
-        // Test with field
         Field field = TestBean.class.getDeclaredField("name");
         ClassUtil.setAccessible(field, true);
         assertTrue(field.isAccessible());
 
-        // Test with null
-        ClassUtil.setAccessible(null, true); // Should not throw exception
+        ClassUtil.setAccessible(null, true);
     }
 
     @Test
     public void testSetAccessibleQuietly() throws NoSuchMethodException, NoSuchFieldException {
-        // Test with method
         Method method = TestBean.class.getDeclaredMethod("getName");
         boolean result = ClassUtil.setAccessibleQuietly(method, true);
         assertTrue(result);
         assertTrue(method.isAccessible());
 
-        // Test with null
         result = ClassUtil.setAccessibleQuietly(null, true);
         assertFalse(result);
 
-        // Test when already accessible
         result = ClassUtil.setAccessibleQuietly(method, true);
         assertTrue(result);
     }
 
     @Test
     public void testConstantFields() {
-        // Test CLASS_MASK constant
         assertNotNull(ClassUtil.CLASS_MASK);
         assertEquals("ClassMask", ClassUtil.CLASS_MASK.getSimpleName());
 
-        // Test METHOD_MASK constant
         assertNotNull(ClassUtil.METHOD_MASK);
         assertEquals("methodMask", ClassUtil.METHOD_MASK.getName());
 
-        // Test FIELD_MASK constant
         assertNotNull(ClassUtil.FIELD_MASK);
         assertEquals("FIELD_MASK", ClassUtil.FIELD_MASK.getName());
     }
 
     @Test
     public void testComplexScenarios() {
-        // Test with anonymous class
         Object anonymous = new Object() {
             private String value = "test";
 
@@ -1216,11 +1135,9 @@ public class ClassUtil100Test extends TestBase {
             }
         };
 
-        // Anonymous classes should have properties
         List<String> propNames = Beans.getPropNameList(anonymous.getClass());
         assertTrue(propNames.contains("value"));
 
-        // Test property access on anonymous class
         assertEquals("test", Beans.getPropValue(anonymous, "value"));
         Beans.setPropValue(anonymous, "value", "updated");
         assertEquals("updated", Beans.getPropValue(anonymous, "value"));
@@ -1228,19 +1145,14 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testEdgeCases() {
-        // Test with array class
         assertFalse(Beans.isBeanClass(String[].class));
 
-        // Test with primitive array
         assertFalse(Beans.isBeanClass(int[].class));
 
-        // Test with interface
         assertFalse(Beans.isBeanClass(List.class));
 
-        // Test with abstract class
         assertFalse(Beans.isBeanClass(AbstractList.class));
 
-        // Test with enum
         assertFalse(Beans.isBeanClass(Thread.State.class));
     }
 
@@ -1248,7 +1160,6 @@ public class ClassUtil100Test extends TestBase {
     public void testPerformance() {
         Beans.getPropNameList(TestBean.class);
 
-        // Test that repeated calls use cached values
         long start = System.currentTimeMillis();
 
         for (int i = 0; i < 1000; i++) {
@@ -1259,13 +1170,11 @@ public class ClassUtil100Test extends TestBase {
 
         long elapsed = System.currentTimeMillis() - start;
 
-        // Should be very fast due to caching
         assertTrue(elapsed < 100, start + ": Performance test failed. Elapsed time: " + elapsed);
     }
 
     @Test
     public void testThreadSafety() throws InterruptedException {
-        // Test concurrent access to ClassUtil methods
         int threadCount = 10;
         Thread[] threads = new Thread[threadCount];
         final List<Exception> exceptions = Collections.synchronizedList(new ArrayList<>());

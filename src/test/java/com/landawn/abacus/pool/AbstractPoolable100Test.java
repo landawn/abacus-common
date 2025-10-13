@@ -9,10 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class AbstractPoolable100Test extends TestBase {
 
     private static class TestAbstractPoolable extends AbstractPoolable {
@@ -43,7 +44,7 @@ public class AbstractPoolable100Test extends TestBase {
         long liveTime = 10000;
         long maxIdleTime = 5000;
         TestAbstractPoolable poolable = new TestAbstractPoolable(liveTime, maxIdleTime);
-        
+
         assertNotNull(poolable);
         assertNotNull(poolable.activityPrint());
         assertEquals(liveTime, poolable.activityPrint().getLiveTime());
@@ -66,22 +67,21 @@ public class AbstractPoolable100Test extends TestBase {
     public void testActivityPrint() {
         TestAbstractPoolable poolable = new TestAbstractPoolable(10000, 5000);
         ActivityPrint activityPrint = poolable.activityPrint();
-        
+
         assertNotNull(activityPrint);
         assertEquals(10000, activityPrint.getLiveTime());
         assertEquals(5000, activityPrint.getMaxIdleTime());
-        
-        // Test that same instance is returned
+
         assertSame(activityPrint, poolable.activityPrint());
     }
 
     @Test
     public void testDestroy() {
         TestAbstractPoolable poolable = new TestAbstractPoolable(10000, 5000);
-        
+
         assertFalse(poolable.isDestroyed());
         assertNull(poolable.getDestroyedByCaller());
-        
+
         poolable.destroy(Poolable.Caller.CLOSE);
         assertTrue(poolable.isDestroyed());
         assertEquals(Poolable.Caller.CLOSE, poolable.getDestroyedByCaller());
@@ -90,7 +90,7 @@ public class AbstractPoolable100Test extends TestBase {
     @Test
     public void testDestroyWithDifferentCallers() {
         Poolable.Caller[] callers = Poolable.Caller.values();
-        
+
         for (Poolable.Caller caller : callers) {
             TestAbstractPoolable poolable = new TestAbstractPoolable(10000, 5000);
             poolable.destroy(caller);
@@ -103,21 +103,18 @@ public class AbstractPoolable100Test extends TestBase {
     public void testActivityPrintOperations() {
         TestAbstractPoolable poolable = new TestAbstractPoolable(10000, 5000);
         ActivityPrint activityPrint = poolable.activityPrint();
-        
-        // Test initial state
+
         assertEquals(0, activityPrint.getAccessCount());
         long initialLastAccessTime = activityPrint.getLastAccessTime();
-        
-        // Test update operations
+
         activityPrint.updateAccessCount();
         assertEquals(1, activityPrint.getAccessCount());
-        
+
         try {
-            Thread.sleep(10); // Ensure time difference
+            Thread.sleep(10);
         } catch (InterruptedException e) {
-            // Ignore
         }
-        
+
         activityPrint.updateLastAccessTime();
         assertTrue(activityPrint.getLastAccessTime() > initialLastAccessTime);
     }
@@ -126,7 +123,7 @@ public class AbstractPoolable100Test extends TestBase {
     public void testExpiration() throws InterruptedException {
         TestAbstractPoolable poolable = new TestAbstractPoolable(50, 100);
         assertFalse(poolable.activityPrint().isExpired());
-        
+
         Thread.sleep(60);
         assertTrue(poolable.activityPrint().isExpired());
     }

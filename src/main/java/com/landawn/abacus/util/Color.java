@@ -29,7 +29,6 @@ package com.landawn.abacus.util;
  * Color fromCode = Color.valueOf(2);  // returns Color.RED
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 0.8
  */
 public enum Color {

@@ -12,12 +12,14 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableBoolean;
 
+@Tag("new-test")
 public class MutableBooleanType100Test extends TestBase {
 
     private MutableBooleanType mutableBooleanType;
@@ -185,18 +187,15 @@ public class MutableBooleanType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithNull() throws IOException {
         mutableBooleanType.writeCharacter(characterWriter, null, null);
-        // Verify null array was written
     }
 
     @Test
     public void testWriteCharacterWithTrue() throws IOException {
         mutableBooleanType.writeCharacter(characterWriter, MutableBoolean.of(true), null);
-        // Verify true array was written
     }
 
     @Test
     public void testWriteCharacterWithFalse() throws IOException {
         mutableBooleanType.writeCharacter(characterWriter, MutableBoolean.of(false), null);
-        // Verify false array was written
     }
 }

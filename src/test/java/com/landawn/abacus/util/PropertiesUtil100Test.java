@@ -17,12 +17,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 
+@Tag("new-test")
 public class PropertiesUtil100Test extends TestBase {
 
     @TempDir
@@ -34,7 +36,6 @@ public class PropertiesUtil100Test extends TestBase {
 
     @BeforeEach
     public void setUp() throws IOException {
-        // Create test properties file
         testPropertiesFile = tempDir.resolve("test.properties").toFile();
         try (FileWriter writer = new FileWriter(testPropertiesFile)) {
             writer.write("key1=value1\n");
@@ -43,7 +44,6 @@ public class PropertiesUtil100Test extends TestBase {
             writer.write("nested.key=nested.value\n");
         }
 
-        // Create test XML file
         testXmlFile = tempDir.resolve("test.xml").toFile();
         try (FileWriter writer = new FileWriter(testXmlFile)) {
             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -58,7 +58,6 @@ public class PropertiesUtil100Test extends TestBase {
             writer.write("</config>\n");
         }
 
-        // Create invalid XML file
         testInvalidXmlFile = tempDir.resolve("invalid.xml").toFile();
         try (FileWriter writer = new FileWriter(testInvalidXmlFile)) {
             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -70,30 +69,20 @@ public class PropertiesUtil100Test extends TestBase {
 
     @AfterEach
     public void tearDown() {
-        // Clean up is handled by @TempDir
     }
 
     @Test
     public void testFindFile() {
-        // Test finding existing file
         File configFile = PropertiesUtil.findFile("PropertiesUtil.java");
-        // The file might or might not exist depending on the test environment
-        // Just ensure the method doesn't throw exception
 
-        // Test finding non-existing file
         File nonExistingFile = PropertiesUtil.findFile("non-existing-file.txt");
-        // Method should return null or a non-existing file
     }
 
     @Test
     public void testFindDir() {
-        // Test finding existing directory
         File configDir = PropertiesUtil.findDir("com");
-        // The directory might or might not exist depending on the test environment
 
-        // Test finding non-existing directory
         File nonExistingDir = PropertiesUtil.findDir("non-existing-directory");
-        // Method should return null or a non-existing directory
     }
 
     @Test
@@ -114,21 +103,19 @@ public class PropertiesUtil100Test extends TestBase {
         Assertions.assertNotNull(props);
         Assertions.assertEquals("value1", props.get("key1"));
 
-        // Modify the file
-        Thread.sleep(1100); // Wait for auto-refresh to kick in
+        Thread.sleep(1100);
         try (FileWriter writer = new FileWriter(testPropertiesFile)) {
             writer.write("key1=modified_value1\n");
             writer.write("key2=value2\n");
             writer.write("newKey=newValue\n");
         }
 
-        Thread.sleep(2000); // Wait for auto-refresh to process the change
+        Thread.sleep(2000);
 
-        // Check if properties were refreshed
         Assertions.assertEquals("modified_value1", props.get("key1"));
         Assertions.assertEquals("value2", props.get("key2"));
         Assertions.assertEquals("newValue", props.get("newKey"));
-        Assertions.assertNull(props.get("key3")); // Removed key
+        Assertions.assertNull(props.get("key3"));
     }
 
     @Test
@@ -176,7 +163,6 @@ public class PropertiesUtil100Test extends TestBase {
         Assertions.assertNotNull(props);
         Assertions.assertEquals(5000L, props.get("timeout"));
 
-        // Modify the XML file
         Thread.sleep(1100);
         try (FileWriter writer = new FileWriter(testXmlFile)) {
             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -186,11 +172,11 @@ public class PropertiesUtil100Test extends TestBase {
             writer.write("</config>\n");
         }
 
-        Thread.sleep(2000); // Wait for auto-refresh
+        Thread.sleep(2000);
 
         Assertions.assertEquals(10000L, props.get("timeout"));
         Assertions.assertEquals("newValue", props.get("newProperty"));
-        Assertions.assertNull(props.get("database")); // Removed property
+        Assertions.assertNull(props.get("database"));
     }
 
     @Test
@@ -239,7 +225,6 @@ public class PropertiesUtil100Test extends TestBase {
             super();
         }
 
-        // Custom methods can be added here if needed
     }
 
     @Test
@@ -276,7 +261,6 @@ public class PropertiesUtil100Test extends TestBase {
 
         Assertions.assertTrue(outputFile.exists());
 
-        // Load and verify
         Properties<String, String> loadedProps = PropertiesUtil.load(outputFile);
         Assertions.assertEquals("test.value1", loadedProps.get("test.key1"));
         Assertions.assertEquals("test.value2", loadedProps.get("test.key2"));
@@ -293,7 +277,6 @@ public class PropertiesUtil100Test extends TestBase {
             PropertiesUtil.store(props, "Test Properties", os);
         }
 
-        // Load and verify
         Properties<String, String> loadedProps = PropertiesUtil.load(outputFile);
         Assertions.assertEquals("test.value1", loadedProps.get("test.key1"));
         Assertions.assertEquals("test.value2", loadedProps.get("test.key2"));
@@ -310,7 +293,6 @@ public class PropertiesUtil100Test extends TestBase {
             PropertiesUtil.store(props, "Test Properties", writer);
         }
 
-        // Load and verify
         Properties<String, String> loadedProps = PropertiesUtil.load(outputFile);
         Assertions.assertEquals("test.value1", loadedProps.get("test.key1"));
         Assertions.assertEquals("test.value2", loadedProps.get("test.key2"));
@@ -333,7 +315,6 @@ public class PropertiesUtil100Test extends TestBase {
 
         Assertions.assertTrue(outputFile.exists());
 
-        // Load and verify
         Properties<String, Object> loadedProps = PropertiesUtil.loadFromXml(outputFile);
         Assertions.assertEquals("test", loadedProps.get("stringValue"));
         Assertions.assertEquals(123, loadedProps.get("intValue"));
@@ -355,10 +336,9 @@ public class PropertiesUtil100Test extends TestBase {
             PropertiesUtil.storeToXml(props, "config", false, os);
         }
 
-        // Load and verify
         Properties<String, Object> loadedProps = PropertiesUtil.loadFromXml(outputFile);
         Assertions.assertEquals("value1", loadedProps.get("key1"));
-        Assertions.assertEquals("100", loadedProps.get("key2")); // Without type info, loaded as string
+        Assertions.assertEquals("100", loadedProps.get("key2"));
     }
 
     @Test
@@ -372,7 +352,6 @@ public class PropertiesUtil100Test extends TestBase {
             PropertiesUtil.storeToXml(props, "settings", true, writer);
         }
 
-        // Load and verify
         Properties<String, Object> loadedProps = PropertiesUtil.loadFromXml(outputFile);
         Assertions.assertEquals("value1", loadedProps.get("key1"));
         Assertions.assertEquals(200L, loadedProps.get("key2"));
@@ -391,11 +370,9 @@ public class PropertiesUtil100Test extends TestBase {
 
         PropertiesUtil.xml2Java(xml, srcPath, packageName, className, false);
 
-        // Verify the generated file exists
         File generatedFile = new File(srcPath + "/com/test/generated/TestConfig.java");
         Assertions.assertTrue(generatedFile.exists());
 
-        // Read and verify basic structure
         String content = new String(Files.readAllBytes(generatedFile.toPath()));
         Assertions.assertTrue(content.contains("package com.test.generated;"));
         Assertions.assertTrue(content.contains("public class TestConfig extends Properties<String, Object>"));
@@ -416,11 +393,9 @@ public class PropertiesUtil100Test extends TestBase {
 
         PropertiesUtil.xml2Java(testXmlFile, srcPath, packageName, className, true);
 
-        // Verify the generated file exists
         File generatedFile = new File(srcPath + "/com/test/generated/ConfigFromFile.java");
         Assertions.assertTrue(generatedFile.exists());
 
-        // Read and verify content
         String content = new String(Files.readAllBytes(generatedFile.toPath()));
         Assertions.assertTrue(content.contains("public class ConfigFromFile extends Properties<String, Object>"));
     }
@@ -437,7 +412,6 @@ public class PropertiesUtil100Test extends TestBase {
             PropertiesUtil.xml2Java(is, srcPath, packageName, className, false);
         }
 
-        // Verify the generated file exists
         File generatedFile = new File(srcPath + "/com/test/generated/ConfigFromStream.java");
         Assertions.assertTrue(generatedFile.exists());
     }
@@ -450,10 +424,9 @@ public class PropertiesUtil100Test extends TestBase {
         IOUtil.mkdirsIfNotExists(new File(srcPath + "/com/test/generated"));
 
         try (Reader reader = new FileReader(testXmlFile)) {
-            PropertiesUtil.xml2Java(reader, srcPath, packageName, null, false); // null className
+            PropertiesUtil.xml2Java(reader, srcPath, packageName, null, false);
         }
 
-        // When className is null, it uses the root element name
         File generatedFile = new File(srcPath + "/com/test/generated/Config.java");
         Assertions.assertTrue(generatedFile.exists());
     }
@@ -475,7 +448,6 @@ public class PropertiesUtil100Test extends TestBase {
 
     @Test
     public void testEmptyProperties() throws IOException {
-        // Test with empty properties file
         File emptyFile = tempDir.resolve("empty.properties").toFile();
         emptyFile.createNewFile();
 
@@ -486,7 +458,6 @@ public class PropertiesUtil100Test extends TestBase {
 
     @Test
     public void testXmlWithComplexTypes() throws IOException {
-        // Create XML with various types
         File complexXml = tempDir.resolve("complex.xml").toFile();
         try (FileWriter writer = new FileWriter(complexXml)) {
             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -524,7 +495,6 @@ public class PropertiesUtil100Test extends TestBase {
         File outputFile = tempDir.resolve("special.properties").toFile();
         PropertiesUtil.store(props, "Special Characters Test", outputFile);
 
-        // Load and verify
         Properties<String, String> loadedProps = PropertiesUtil.load(outputFile);
         Assertions.assertEquals("value with spaces", loadedProps.get("key.with.dots"));
         Assertions.assertEquals("value=with=equals", loadedProps.get("key:with:colons"));
@@ -533,7 +503,6 @@ public class PropertiesUtil100Test extends TestBase {
 
     @Test
     public void testXmlWithDuplicatedPropertyNames() throws IOException {
-        // Create XML with duplicated property names (should throw exception)
         File duplicatedXml = tempDir.resolve("duplicated.xml").toFile();
         try (FileWriter writer = new FileWriter(duplicatedXml)) {
             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -563,7 +532,6 @@ public class PropertiesUtil100Test extends TestBase {
 
     @Test
     public void testStoreAndLoadConsistency() throws IOException {
-        // Test that storing and loading maintains data consistency
         Properties<String, Object> originalProps = new Properties<>();
         originalProps.put("string", "value");
         originalProps.put("integer", 123);
@@ -595,7 +563,6 @@ public class PropertiesUtil100Test extends TestBase {
 
     @Test
     public void testMultipleAutoRefreshProperties() throws IOException, InterruptedException {
-        // Test multiple properties files with auto-refresh
         File file1 = tempDir.resolve("auto1.properties").toFile();
         File file2 = tempDir.resolve("auto2.properties").toFile();
 
@@ -613,7 +580,6 @@ public class PropertiesUtil100Test extends TestBase {
         Assertions.assertEquals("value1", props1.get("file1.key"));
         Assertions.assertEquals("value2", props2.get("file2.key"));
 
-        // Load same file again with auto-refresh should return same instance
         Properties<String, String> props1Again = PropertiesUtil.load(file1, true);
         Assertions.assertSame(props1, props1Again);
     }

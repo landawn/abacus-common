@@ -26,10 +26,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class PrimitiveByteArrayType100Test extends TestBase {
 
     private PrimitiveByteArrayType type;

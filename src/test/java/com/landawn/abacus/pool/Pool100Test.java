@@ -8,10 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class Pool100Test extends TestBase {
 
     private TestPool pool;
@@ -23,7 +24,6 @@ public class Pool100Test extends TestBase {
 
         @Override
         public void destroy(Poolable.Caller caller) {
-            // No-op
         }
     }
 
@@ -66,7 +66,7 @@ public class Pool100Test extends TestBase {
             if (closed) {
                 throw new IllegalStateException("Pool is closed");
             }
-            size = Math.max(0, size - 2); // Remove some elements
+            size = Math.max(0, size - 2);
         }
 
         @Override
@@ -159,11 +159,11 @@ public class Pool100Test extends TestBase {
         pool.setSize(5);
         assertEquals(5, pool.size());
         pool.vacate();
-        assertEquals(3, pool.size()); // Should remove 2 elements
+        assertEquals(3, pool.size());
         pool.vacate();
         assertEquals(1, pool.size());
         pool.vacate();
-        assertEquals(0, pool.size()); // Should not go below 0
+        assertEquals(0, pool.size());
     }
 
     @Test
@@ -207,7 +207,7 @@ public class Pool100Test extends TestBase {
         pool.setSize(5);
         pool.close();
         assertTrue(pool.isClosed());
-        assertEquals(0, pool.size()); // Should clear on close
+        assertEquals(0, pool.size());
     }
 
     @Test
@@ -219,7 +219,6 @@ public class Pool100Test extends TestBase {
 
     @Test
     public void testMultipleLockUnlock() {
-        // Test multiple lock/unlock cycles
         for (int i = 0; i < 5; i++) {
             assertFalse(pool.isLocked());
             pool.lock();
@@ -231,23 +230,22 @@ public class Pool100Test extends TestBase {
 
     @Test
     public void testPoolOperationsSequence() {
-        // Test a typical sequence of pool operations
         assertTrue(pool.isEmpty());
         assertEquals(10, pool.capacity());
-        
+
         pool.setSize(8);
         assertFalse(pool.isEmpty());
         assertEquals(8, pool.size());
-        
+
         pool.vacate();
         assertEquals(6, pool.size());
-        
+
         PoolStats stats = pool.stats();
         assertEquals(6, stats.size());
-        
+
         pool.clear();
         assertTrue(pool.isEmpty());
-        
+
         assertFalse(pool.isClosed());
         pool.close();
         assertTrue(pool.isClosed());

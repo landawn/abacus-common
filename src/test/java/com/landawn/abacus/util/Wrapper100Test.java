@@ -1,15 +1,16 @@
 package com.landawn.abacus.util;
 
-
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Wrapper100Test extends TestBase {
 
     @Test
@@ -34,7 +35,6 @@ public class Wrapper100Test extends TestBase {
         Wrapper<int[]> wrapper1 = Wrapper.of(emptyArray);
         Wrapper<int[]> wrapper2 = Wrapper.of(new int[0]);
 
-        // Empty arrays of the same type should return the same wrapper instance
         Assertions.assertSame(wrapper1, wrapper2);
     }
 
@@ -47,7 +47,7 @@ public class Wrapper100Test extends TestBase {
         Wrapper<String> wrapper = Wrapper.of(value, hashFunction, equalsFunction);
 
         Assertions.assertEquals(value, wrapper.value());
-        Assertions.assertEquals(4, wrapper.hashCode()); // length of "test"
+        Assertions.assertEquals(4, wrapper.hashCode());
     }
 
     @Test
@@ -94,14 +94,13 @@ public class Wrapper100Test extends TestBase {
         Wrapper<int[]> wrapper1 = Wrapper.of(array1);
         Wrapper<int[]> wrapper2 = Wrapper.of(array2);
 
-        // Arrays with same content should have same hash code
         Assertions.assertEquals(wrapper1.hashCode(), wrapper2.hashCode());
     }
 
     @Test
     public void testHashCodeCustom() {
         String value = "test";
-        ToIntFunction<String> hashFunction = s -> 42; // Always return 42
+        ToIntFunction<String> hashFunction = s -> 42;
         BiPredicate<String, String> equalsFunction = String::equals;
 
         Wrapper<String> wrapper = Wrapper.of(value, hashFunction, equalsFunction);
@@ -135,7 +134,7 @@ public class Wrapper100Test extends TestBase {
         Wrapper<String> wrapper2 = Wrapper.of("test", hashFunction, equalsFunction);
         Wrapper<String> wrapper3 = Wrapper.of("other", hashFunction, equalsFunction);
 
-        Assertions.assertEquals(wrapper1, wrapper2); // Case insensitive
+        Assertions.assertEquals(wrapper1, wrapper2);
         Assertions.assertNotEquals(wrapper1, wrapper3);
     }
 

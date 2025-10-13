@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Comparator;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Duration;
@@ -13,6 +14,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.RateLimiter;
 import com.landawn.abacus.util.u.OptionalShort;
 
+@Tag("new-test")
 public class ShortStream106Test extends TestBase {
 
     @Test

@@ -16,12 +16,11 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-/**
- * Unit tests for public methods in Iterators class after line 2390
- */
+@Tag("new-test")
 public class Iterators102Test extends TestBase {
 
     private List<Integer> testList;
@@ -33,7 +32,6 @@ public class Iterators102Test extends TestBase {
         emptyList = new ArrayList<>();
     }
 
-    // Tests for advance method
     @Test
     public void testAdvance() {
         Iterator<Integer> iter = testList.iterator();
@@ -78,7 +76,6 @@ public class Iterators102Test extends TestBase {
         assertFalse(iter.hasNext());
     }
 
-    // Tests for skip method
     @Test
     public void testSkip() {
         Iterator<Integer> iter = testList.iterator();
@@ -125,7 +122,6 @@ public class Iterators102Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Iterators.skip(iter, -1));
     }
 
-    // Tests for limit method
     @Test
     public void testLimit() {
         Iterator<Integer> iter = testList.iterator();
@@ -172,7 +168,6 @@ public class Iterators102Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Iterators.limit(iter, -1));
     }
 
-    // Tests for skipAndLimit method
     @Test
     public void testSkipAndLimit() {
         Iterator<Integer> iter = testList.iterator();
@@ -224,7 +219,6 @@ public class Iterators102Test extends TestBase {
         assertEquals(Arrays.asList(2, 3, 4), resultList);
     }
 
-    // Tests for skipNulls method
     @Test
     public void testSkipNullsIterable() {
         List<String> listWithNulls = Arrays.asList("a", null, "b", null, "c");
@@ -259,7 +253,6 @@ public class Iterators102Test extends TestBase {
         assertFalse(result.hasNext());
     }
 
-    // Tests for distinct method
     @Test
     public void testDistinctIterable() {
         List<Integer> listWithDuplicates = Arrays.asList(1, 2, 2, 3, 3, 3, 4);
@@ -298,7 +291,6 @@ public class Iterators102Test extends TestBase {
         assertFalse(result.hasNext());
     }
 
-    // Tests for distinctBy method
     @Test
     public void testDistinctByIterable() {
         List<String> strings = Arrays.asList("a", "bb", "c", "dd", "eee");
@@ -332,7 +324,6 @@ public class Iterators102Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Iterators.distinctBy(testList, null));
     }
 
-    // Tests for filter method
     @Test
     public void testFilterIterable() {
         Predicate<Integer> isEven = x -> x % 2 == 0;
@@ -373,7 +364,6 @@ public class Iterators102Test extends TestBase {
         assertFalse(result.hasNext());
     }
 
-    // Tests for takeWhile method
     @Test
     public void testTakeWhileIterable() {
         Predicate<Integer> lessThanFour = x -> x < 4;
@@ -408,7 +398,6 @@ public class Iterators102Test extends TestBase {
         assertFalse(result.hasNext());
     }
 
-    // Tests for takeWhileInclusive method
     @Test
     public void testTakeWhileInclusiveIterable() {
         Predicate<Integer> lessThanThree = x -> x < 3;
@@ -419,7 +408,7 @@ public class Iterators102Test extends TestBase {
             resultList.add(result.next());
         }
 
-        assertEquals(Arrays.asList(1, 2, 3), resultList); // includes the first element that fails predicate
+        assertEquals(Arrays.asList(1, 2, 3), resultList);
     }
 
     @Test
@@ -435,7 +424,6 @@ public class Iterators102Test extends TestBase {
         assertEquals(Arrays.asList(1, 2), resultList);
     }
 
-    // Tests for dropWhile method
     @Test
     public void testDropWhileIterable() {
         Predicate<Integer> lessThanThree = x -> x < 3;
@@ -470,7 +458,6 @@ public class Iterators102Test extends TestBase {
         assertFalse(result.hasNext());
     }
 
-    // Tests for skipUntil method
     @Test
     public void testSkipUntilIterable() {
         Predicate<Integer> equalsThree = x -> x == 3;
@@ -505,7 +492,6 @@ public class Iterators102Test extends TestBase {
         assertFalse(result.hasNext());
     }
 
-    // Tests for map method
     @Test
     public void testMapIterable() {
         Function<Integer, String> toString = Object::toString;
@@ -546,7 +532,6 @@ public class Iterators102Test extends TestBase {
         assertFalse(result.hasNext());
     }
 
-    // Tests for flatMap method
     @Test
     public void testFlatMapIterable() {
         List<List<Integer>> nestedList = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5));
@@ -581,7 +566,6 @@ public class Iterators102Test extends TestBase {
         assertEquals(Arrays.asList('a', 'b', 'c', 'd'), resultList);
     }
 
-    // Tests for flatmap method (array version)
     @Test
     public void testFlatmapIterable() {
         List<String> words = Arrays.asList("ab", "cd");
@@ -616,7 +600,6 @@ public class Iterators102Test extends TestBase {
         assertEquals(Arrays.asList(2, 2, 3, 3), resultList);
     }
 
-    // Tests for forEach methods
     @Test
     public void testForEachBasic() {
         List<Integer> processed = new ArrayList<>();
@@ -658,7 +641,6 @@ public class Iterators102Test extends TestBase {
 
         Iterators.forEach(testList.iterator(), 0, Long.MAX_VALUE, 2, 4, consumer);
 
-        // Sort the result since order is not guaranteed with multiple threads
         processed.sort(Integer::compareTo);
         assertEquals(testList, processed);
     }
@@ -684,7 +666,6 @@ public class Iterators102Test extends TestBase {
 
         Iterators.forEach(iterators, 2, 2, 4, consumer);
 
-        // Sort the result since order is not guaranteed with multiple threads
         processed.sort(Integer::compareTo);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), processed);
     }
@@ -700,7 +681,6 @@ public class Iterators102Test extends TestBase {
         assertTrue(processed.isEmpty());
     }
 
-    // Additional edge case tests
     @Test
     public void testLazyEvaluationSkip() {
         AtomicInteger callCount = new AtomicInteger(0);
@@ -720,10 +700,10 @@ public class Iterators102Test extends TestBase {
         };
 
         ObjIterator<Integer> skipped = Iterators.skip(countingIterator, 2);
-        assertEquals(0, callCount.get()); // No elements consumed yet
+        assertEquals(0, callCount.get());
 
-        skipped.next(); // Should skip 2 and return 3
-        assertEquals(3, callCount.get()); // Should have consumed 3 elements (1, 2, 3)
+        skipped.next();
+        assertEquals(3, callCount.get());
     }
 
     @Test
@@ -745,9 +725,9 @@ public class Iterators102Test extends TestBase {
         };
 
         ObjIterator<Integer> filtered = Iterators.filter(countingIterator, x -> x % 2 == 0);
-        assertEquals(0, callCount.get()); // No elements consumed yet
+        assertEquals(0, callCount.get());
 
-        filtered.next(); // Should return 2
-        assertTrue(callCount.get() >= 2); // Should have consumed at least elements 1 and 2
+        filtered.next();
+        assertTrue(callCount.get() >= 2);
     }
 }

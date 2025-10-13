@@ -28,6 +28,13 @@ public class MutableByteType extends NumberType<MutableByte> {
     /**
      * Returns the Class object representing the MutableByte type.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableByteType type = new MutableByteType();
+     * Class<MutableByte> clazz = type.clazz();
+     * // Returns: MutableByte.class
+     * }</pre>
+     *
      * @return The Class object for MutableByte
      */
     @Override
@@ -38,6 +45,22 @@ public class MutableByteType extends NumberType<MutableByte> {
     /**
      * Converts a MutableByte object to its string representation.
      * The byte value is converted to a decimal string.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableByteType type = new MutableByteType();
+     *
+     * MutableByte mb = MutableByte.of((byte) 42);
+     * String result = type.stringOf(mb);
+     * // Returns: "42"
+     *
+     * mb = MutableByte.of((byte) -10);
+     * result = type.stringOf(mb);
+     * // Returns: "-10"
+     *
+     * result = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
      *
      * @param x The MutableByte object to convert
      * @return The string representation of the byte value, or null if the input is null
@@ -51,6 +74,23 @@ public class MutableByteType extends NumberType<MutableByte> {
      * Parses a string to create a MutableByte object.
      * The string is parsed as a byte value.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableByteType type = new MutableByteType();
+     *
+     * MutableByte result = type.valueOf("42");
+     * // Returns: MutableByte with value 42
+     *
+     * result = type.valueOf("-10");
+     * // Returns: MutableByte with value -10
+     *
+     * result = type.valueOf(null);
+     * // Returns: null
+     *
+     * result = type.valueOf("");
+     * // Returns: null
+     * }</pre>
+     *
      * @param str The string to parse
      * @return A MutableByte containing the parsed value, or null if the input is null or empty
      * @throws NumberFormatException if the string cannot be parsed as a byte
@@ -63,6 +103,20 @@ public class MutableByteType extends NumberType<MutableByte> {
     /**
      * Retrieves a MutableByte value from a ResultSet at the specified column index.
      * The database byte value is wrapped in a MutableByte object.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableByteType type = new MutableByteType();
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column contains byte value 42
+     * MutableByte mb = type.get(rs, 1);
+     * // Returns: MutableByte with value 42
+     *
+     * // Column contains byte value -10
+     * mb = type.get(rs, 2);
+     * // Returns: MutableByte with value -10
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
@@ -78,6 +132,20 @@ public class MutableByteType extends NumberType<MutableByte> {
      * Retrieves a MutableByte value from a ResultSet using the specified column label.
      * The database byte value is wrapped in a MutableByte object.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableByteType type = new MutableByteType();
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column "status_code" contains byte value 1
+     * MutableByte mb = type.get(rs, "status_code");
+     * // Returns: MutableByte with value 1
+     *
+     * // Column "priority" contains byte value 5
+     * mb = type.get(rs, "priority");
+     * // Returns: MutableByte with value 5
+     * }</pre>
+     *
      * @param rs The ResultSet containing the data
      * @param columnLabel The label of the column to retrieve the value from
      * @return A MutableByte containing the retrieved value
@@ -91,6 +159,20 @@ public class MutableByteType extends NumberType<MutableByte> {
     /**
      * Sets a MutableByte parameter in a PreparedStatement at the specified position.
      * If the MutableByte is null, 0 is stored. Otherwise, the wrapped byte value is stored.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableByteType type = new MutableByteType();
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO settings (id, status) VALUES (?, ?)");
+     *
+     * MutableByte mb = MutableByte.of((byte) 1);
+     * type.set(stmt, 2, mb);
+     * // Sets parameter to 1
+     *
+     * type.set(stmt, 2, null);
+     * // Sets parameter to 0
+     * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
@@ -106,6 +188,19 @@ public class MutableByteType extends NumberType<MutableByte> {
      * Sets a MutableByte parameter in a CallableStatement using the specified parameter name.
      * If the MutableByte is null, 0 is stored. Otherwise, the wrapped byte value is stored.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableByteType type = new MutableByteType();
+     * CallableStatement stmt = connection.prepareCall("{call update_status(?, ?)}");
+     *
+     * MutableByte mb = MutableByte.of((byte) 1);
+     * type.set(stmt, "p_status", mb);
+     * // Sets parameter to 1
+     *
+     * type.set(stmt, "p_priority", null);
+     * // Sets parameter to 0
+     * }</pre>
+     *
      * @param stmt The CallableStatement to set the parameter on
      * @param parameterName The name of the parameter to set
      * @param x The MutableByte value to set
@@ -119,6 +214,25 @@ public class MutableByteType extends NumberType<MutableByte> {
     /**
      * Appends the string representation of a MutableByte to an Appendable.
      * The value is written as a decimal string or "null".
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableByteType type = new MutableByteType();
+     * StringBuilder sb = new StringBuilder();
+     *
+     * MutableByte mb = MutableByte.of((byte) 42);
+     * type.appendTo(sb, mb);
+     * // sb contains: "42"
+     *
+     * sb.setLength(0);
+     * mb = MutableByte.of((byte) -10);
+     * type.appendTo(sb, mb);
+     * // sb contains: "-10"
+     *
+     * sb.setLength(0);
+     * type.appendTo(sb, null);
+     * // sb contains: "null"
+     * }</pre>
      *
      * @param appendable The Appendable to write to
      * @param x The MutableByte to append
@@ -137,6 +251,23 @@ public class MutableByteType extends NumberType<MutableByte> {
      * Writes the character representation of a MutableByte to a CharacterWriter.
      * The value is written as numeric characters or the null character array.
      * This method is optimized for character-based writing.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableByteType type = new MutableByteType();
+     * CharacterWriter writer = new CharacterWriter();
+     * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
+     *
+     * MutableByte mb = MutableByte.of((byte) 42);
+     * type.writeCharacter(writer, mb, config);
+     * String result = writer.toString();
+     * // result: "42"
+     *
+     * writer.reset();
+     * type.writeCharacter(writer, null, config);
+     * result = writer.toString();
+     * // result: "null"
+     * }</pre>
      *
      * @param writer The CharacterWriter to write to
      * @param x The MutableByte to write

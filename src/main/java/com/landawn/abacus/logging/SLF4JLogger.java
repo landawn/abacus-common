@@ -42,7 +42,6 @@ import org.slf4j.spi.LocationAwareLogger;
  * logger.error("Operation failed", exception);
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 1.0
  */
 class SLF4JLogger extends AbstractLogger {

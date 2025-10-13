@@ -11,12 +11,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.Supplier;
 
+@Tag("new-test")
 public class Fn200Test extends TestBase {
 
     @Test
@@ -47,7 +49,6 @@ public class Fn200Test extends TestBase {
         try {
             verify(closeable, times(1)).close();
         } catch (Exception e) {
-            // ignore
         }
     }
 
@@ -60,7 +61,6 @@ public class Fn200Test extends TestBase {
             verify(closeable1, times(1)).close();
             verify(closeable2, times(1)).close();
         } catch (Exception e) {
-            // ignore
         }
     }
 
@@ -73,7 +73,6 @@ public class Fn200Test extends TestBase {
             verify(closeable1, times(1)).close();
             verify(closeable2, times(1)).close();
         } catch (Exception e) {
-            // ignore
         }
     }
 
@@ -154,8 +153,6 @@ public class Fn200Test extends TestBase {
 
     @Test
     public void toXml() {
-        // Assuming a simple XML conversion for the test
-        // The actual implementation might be more complex
         assertThat(Fn.toXml().apply(new int[] { 1, 2 })).isNotEmpty();
     }
 

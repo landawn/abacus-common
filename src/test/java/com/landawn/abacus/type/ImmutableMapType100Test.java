@@ -15,11 +15,13 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type.SerializationType;
 import com.landawn.abacus.util.ImmutableMap;
 
+@Tag("new-test")
 public class ImmutableMapType100Test extends TestBase {
 
     private ImmutableMapType<String, Integer, ImmutableMap<String, Integer>> immutableMapType;
@@ -58,8 +60,8 @@ public class ImmutableMapType100Test extends TestBase {
         Type<?>[] paramTypes = immutableMapType.getParameterTypes();
         assertNotNull(paramTypes);
         assertEquals(2, paramTypes.length);
-        assertNotNull(paramTypes[0]); // Key type
-        assertNotNull(paramTypes[1]); // Value type
+        assertNotNull(paramTypes[0]);
+        assertNotNull(paramTypes[1]);
     }
 
     @Test
@@ -281,7 +283,6 @@ public class ImmutableMapType100Test extends TestBase {
     @DisplayName("Test declaringName() format verification")
     public void testDeclaringNameFormat() {
         String declaringName = immutableMapType.declaringName();
-        // Should contain ImmutableMap<declaringNameOfKey, declaringNameOfValue>
         assertTrue(declaringName.startsWith("ImmutableMap<"));
         assertTrue(declaringName.endsWith(">"));
         assertTrue(declaringName.contains(", "));
@@ -293,7 +294,7 @@ public class ImmutableMapType100Test extends TestBase {
         Type<?>[] params1 = immutableMapType.getParameterTypes();
         Type<?>[] params2 = immutableMapType.getParameterTypes();
 
-        assertSame(params1, params2); // Should return the same array instance
+        assertSame(params1, params2);
         assertEquals(params1.length, params2.length);
     }
 }

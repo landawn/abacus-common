@@ -27,14 +27,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Clazz100Test extends TestBase {
 
     @Test
     public void testConstants() {
-        // Test predefined constants
         Assertions.assertEquals(LinkedHashMap.class, Clazz.PROPS_MAP);
         Assertions.assertEquals(Map.class, Clazz.MAP);
         Assertions.assertEquals(LinkedHashMap.class, Clazz.LINKED_HASH_MAP);
@@ -54,7 +55,7 @@ public class Clazz100Test extends TestBase {
     public void testOf() {
         Class<ArrayList<String>> arrayListClass = Clazz.of(ArrayList.class);
         Assertions.assertEquals(ArrayList.class, arrayListClass);
-        
+
         Class<HashMap<String, Integer>> hashMapClass = Clazz.of(HashMap.class);
         Assertions.assertEquals(HashMap.class, hashMapClass);
     }
@@ -63,7 +64,7 @@ public class Clazz100Test extends TestBase {
     public void testOfList() {
         Class<List<String>> listClass = Clazz.ofList();
         Assertions.assertEquals(List.class, listClass);
-        
+
         Class<List<Integer>> intListClass = Clazz.ofList(Integer.class);
         Assertions.assertEquals(List.class, intListClass);
     }
@@ -72,7 +73,7 @@ public class Clazz100Test extends TestBase {
     public void testOfLinkedList() {
         Class<List<String>> linkedListClass = Clazz.ofLinkedList();
         Assertions.assertEquals(LinkedList.class, linkedListClass);
-        
+
         Class<List<Double>> doubleLinkedListClass = Clazz.ofLinkedList(Double.class);
         Assertions.assertEquals(LinkedList.class, doubleLinkedListClass);
     }
@@ -93,7 +94,7 @@ public class Clazz100Test extends TestBase {
     public void testOfSet() {
         Class<Set<String>> setClass = Clazz.ofSet();
         Assertions.assertEquals(Set.class, setClass);
-        
+
         Class<Set<Long>> longSetClass = Clazz.ofSet(Long.class);
         Assertions.assertEquals(Set.class, longSetClass);
     }
@@ -102,7 +103,7 @@ public class Clazz100Test extends TestBase {
     public void testOfLinkedHashSet() {
         Class<Set<String>> linkedHashSetClass = Clazz.ofLinkedHashSet();
         Assertions.assertEquals(LinkedHashSet.class, linkedHashSetClass);
-        
+
         Class<Set<Integer>> intLinkedHashSetClass = Clazz.ofLinkedHashSet(Integer.class);
         Assertions.assertEquals(LinkedHashSet.class, intLinkedHashSetClass);
     }
@@ -111,7 +112,7 @@ public class Clazz100Test extends TestBase {
     public void testOfSortedSet() {
         Class<SortedSet<String>> sortedSetClass = Clazz.ofSortedSet();
         Assertions.assertEquals(SortedSet.class, sortedSetClass);
-        
+
         Class<SortedSet<Integer>> intSortedSetClass = Clazz.ofSortedSet(Integer.class);
         Assertions.assertEquals(SortedSet.class, intSortedSetClass);
     }
@@ -120,7 +121,7 @@ public class Clazz100Test extends TestBase {
     public void testOfNavigableSet() {
         Class<NavigableSet<String>> navigableSetClass = Clazz.ofNavigableSet();
         Assertions.assertEquals(NavigableSet.class, navigableSetClass);
-        
+
         Class<NavigableSet<Double>> doubleNavigableSetClass = Clazz.ofNavigableSet(Double.class);
         Assertions.assertEquals(NavigableSet.class, doubleNavigableSetClass);
     }
@@ -129,7 +130,7 @@ public class Clazz100Test extends TestBase {
     public void testOfTreeSet() {
         Class<NavigableSet<String>> treeSetClass = Clazz.ofTreeSet();
         Assertions.assertEquals(TreeSet.class, treeSetClass);
-        
+
         Class<NavigableSet<Integer>> intTreeSetClass = Clazz.ofTreeSet(Integer.class);
         Assertions.assertEquals(TreeSet.class, intTreeSetClass);
     }
@@ -138,7 +139,7 @@ public class Clazz100Test extends TestBase {
     public void testOfQueue() {
         Class<Queue<String>> queueClass = Clazz.ofQueue();
         Assertions.assertEquals(Queue.class, queueClass);
-        
+
         Class<Queue<Object>> objectQueueClass = Clazz.ofQueue(Object.class);
         Assertions.assertEquals(Queue.class, objectQueueClass);
     }
@@ -147,7 +148,7 @@ public class Clazz100Test extends TestBase {
     public void testOfDeque() {
         Class<Deque<String>> dequeClass = Clazz.ofDeque();
         Assertions.assertEquals(Deque.class, dequeClass);
-        
+
         Class<Deque<Integer>> intDequeClass = Clazz.ofDeque(Integer.class);
         Assertions.assertEquals(Deque.class, intDequeClass);
     }
@@ -156,7 +157,7 @@ public class Clazz100Test extends TestBase {
     public void testOfArrayDeque() {
         Class<Deque<String>> arrayDequeClass = Clazz.ofArrayDeque();
         Assertions.assertEquals(ArrayDeque.class, arrayDequeClass);
-        
+
         Class<Deque<Long>> longArrayDequeClass = Clazz.ofArrayDeque(Long.class);
         Assertions.assertEquals(ArrayDeque.class, longArrayDequeClass);
     }
@@ -165,7 +166,7 @@ public class Clazz100Test extends TestBase {
     public void testOfConcurrentLinkedQueue() {
         Class<Queue<String>> concurrentQueueClass = Clazz.ofConcurrentLinkedQueue();
         Assertions.assertEquals(ConcurrentLinkedQueue.class, concurrentQueueClass);
-        
+
         Class<Queue<Integer>> intConcurrentQueueClass = Clazz.ofConcurrentLinkedQueue(Integer.class);
         Assertions.assertEquals(ConcurrentLinkedQueue.class, intConcurrentQueueClass);
     }
@@ -174,7 +175,7 @@ public class Clazz100Test extends TestBase {
     public void testOfPriorityQueue() {
         Class<Queue<String>> priorityQueueClass = Clazz.ofPriorityQueue();
         Assertions.assertEquals(PriorityQueue.class, priorityQueueClass);
-        
+
         Class<Queue<Integer>> intPriorityQueueClass = Clazz.ofPriorityQueue(Integer.class);
         Assertions.assertEquals(PriorityQueue.class, intPriorityQueueClass);
     }
@@ -183,7 +184,7 @@ public class Clazz100Test extends TestBase {
     public void testOfLinkedBlockingQueue() {
         Class<BlockingQueue<String>> blockingQueueClass = Clazz.ofLinkedBlockingQueue();
         Assertions.assertEquals(LinkedBlockingQueue.class, blockingQueueClass);
-        
+
         Class<BlockingQueue<Object>> objectBlockingQueueClass = Clazz.ofLinkedBlockingQueue(Object.class);
         Assertions.assertEquals(LinkedBlockingQueue.class, objectBlockingQueueClass);
     }
@@ -192,7 +193,7 @@ public class Clazz100Test extends TestBase {
     public void testOfCollection() {
         Class<Collection<String>> collectionClass = Clazz.ofCollection();
         Assertions.assertEquals(Collection.class, collectionClass);
-        
+
         Class<Collection<Integer>> intCollectionClass = Clazz.ofCollection(Integer.class);
         Assertions.assertEquals(Collection.class, intCollectionClass);
     }
@@ -201,10 +202,10 @@ public class Clazz100Test extends TestBase {
     public void testOfMap() {
         Class<Map<String, Object>> mapClass = Clazz.ofMap();
         Assertions.assertEquals(Map.class, mapClass);
-        
+
         Class<Map<String, Integer>> stringIntMapClass = Clazz.ofMap(String.class, Integer.class);
         Assertions.assertEquals(Map.class, stringIntMapClass);
-        
+
         Class<Map<Long, String>> longStringMapClass = Clazz.ofMap(Long.class, String.class);
         Assertions.assertEquals(Map.class, longStringMapClass);
     }
@@ -213,7 +214,7 @@ public class Clazz100Test extends TestBase {
     public void testOfLinkedHashMap() {
         Class<Map<String, Object>> linkedHashMapClass = Clazz.ofLinkedHashMap();
         Assertions.assertEquals(LinkedHashMap.class, linkedHashMapClass);
-        
+
         Class<Map<Integer, String>> intStringLinkedHashMapClass = Clazz.ofLinkedHashMap(Integer.class, String.class);
         Assertions.assertEquals(LinkedHashMap.class, intStringLinkedHashMapClass);
     }
@@ -222,7 +223,7 @@ public class Clazz100Test extends TestBase {
     public void testOfSortedMap() {
         Class<SortedMap<String, Object>> sortedMapClass = Clazz.ofSortedMap();
         Assertions.assertEquals(SortedMap.class, sortedMapClass);
-        
+
         Class<SortedMap<Integer, String>> intStringSortedMapClass = Clazz.ofSortedMap(Integer.class, String.class);
         Assertions.assertEquals(SortedMap.class, intStringSortedMapClass);
     }
@@ -231,7 +232,7 @@ public class Clazz100Test extends TestBase {
     public void testOfNavigableMap() {
         Class<NavigableMap<String, Object>> navigableMapClass = Clazz.ofNavigableMap();
         Assertions.assertEquals(NavigableMap.class, navigableMapClass);
-        
+
         Class<NavigableMap<Long, Double>> longDoubleNavigableMapClass = Clazz.ofNavigableMap(Long.class, Double.class);
         Assertions.assertEquals(NavigableMap.class, longDoubleNavigableMapClass);
     }
@@ -240,7 +241,7 @@ public class Clazz100Test extends TestBase {
     public void testOfTreeMap() {
         Class<NavigableMap<String, Object>> treeMapClass = Clazz.ofTreeMap();
         Assertions.assertEquals(TreeMap.class, treeMapClass);
-        
+
         Class<NavigableMap<Integer, String>> intStringTreeMapClass = Clazz.ofTreeMap(Integer.class, String.class);
         Assertions.assertEquals(TreeMap.class, intStringTreeMapClass);
     }
@@ -249,7 +250,7 @@ public class Clazz100Test extends TestBase {
     public void testOfConcurrentMap() {
         Class<ConcurrentMap<String, Object>> concurrentMapClass = Clazz.ofConcurrentMap();
         Assertions.assertEquals(ConcurrentMap.class, concurrentMapClass);
-        
+
         Class<ConcurrentMap<Long, String>> longStringConcurrentMapClass = Clazz.ofConcurrentMap(Long.class, String.class);
         Assertions.assertEquals(ConcurrentMap.class, longStringConcurrentMapClass);
     }
@@ -258,7 +259,7 @@ public class Clazz100Test extends TestBase {
     public void testOfConcurrentHashMap() {
         Class<ConcurrentMap<String, Object>> concurrentHashMapClass = Clazz.ofConcurrentHashMap();
         Assertions.assertEquals(ConcurrentHashMap.class, concurrentHashMapClass);
-        
+
         Class<ConcurrentMap<Integer, Double>> intDoubleConcurrentHashMapClass = Clazz.ofConcurrentHashMap(Integer.class, Double.class);
         Assertions.assertEquals(ConcurrentHashMap.class, intDoubleConcurrentHashMapClass);
     }
@@ -267,7 +268,7 @@ public class Clazz100Test extends TestBase {
     public void testOfBiMap() {
         Class<BiMap<String, Integer>> biMapClass = Clazz.ofBiMap();
         Assertions.assertEquals(BiMap.class, biMapClass);
-        
+
         Class<BiMap<Long, String>> longStringBiMapClass = Clazz.ofBiMap(Long.class, String.class);
         Assertions.assertEquals(BiMap.class, longStringBiMapClass);
     }
@@ -276,7 +277,7 @@ public class Clazz100Test extends TestBase {
     public void testOfMultiset() {
         Class<Multiset<String>> multisetClass = Clazz.ofMultiset();
         Assertions.assertEquals(Multiset.class, multisetClass);
-        
+
         Class<Multiset<Integer>> intMultisetClass = Clazz.ofMultiset(Integer.class);
         Assertions.assertEquals(Multiset.class, intMultisetClass);
     }
@@ -285,7 +286,7 @@ public class Clazz100Test extends TestBase {
     public void testOfListMultimap() {
         Class<ListMultimap<String, Integer>> listMultimapClass = Clazz.ofListMultimap();
         Assertions.assertEquals(ListMultimap.class, listMultimapClass);
-        
+
         Class<ListMultimap<Long, String>> longStringListMultimapClass = Clazz.ofListMultimap(Long.class, String.class);
         Assertions.assertEquals(ListMultimap.class, longStringListMultimapClass);
     }
@@ -294,18 +295,16 @@ public class Clazz100Test extends TestBase {
     public void testOfSetMultimap() {
         Class<SetMultimap<String, Integer>> setMultimapClass = Clazz.ofSetMultimap();
         Assertions.assertEquals(SetMultimap.class, setMultimapClass);
-        
+
         Class<SetMultimap<Integer, String>> intStringSetMultimapClass = Clazz.ofSetMultimap(Integer.class, String.class);
         Assertions.assertEquals(SetMultimap.class, intStringSetMultimapClass);
     }
 
     @Test
     public void testTypeErasure() {
-        // Verify that type parameters are erased at runtime
         Class<List<String>> stringListClass = Clazz.ofList(String.class);
         Class<List<Integer>> intListClass = Clazz.ofList(Integer.class);
-        
-        // Both should be the same class at runtime due to type erasure
+
         Assertions.assertEquals(stringListClass, intListClass);
         Assertions.assertEquals(List.class, stringListClass);
         Assertions.assertEquals(List.class, intListClass);
@@ -313,20 +312,18 @@ public class Clazz100Test extends TestBase {
 
     @Test
     public void testUsageWithInstanceOf() {
-        // Test practical usage scenarios
         Object obj = new ArrayList<String>();
         Assertions.assertTrue(Clazz.ofList().isInstance(obj));
-        
+
         obj = new LinkedHashMap<String, Object>();
         Assertions.assertTrue(Clazz.PROPS_MAP.isInstance(obj));
-        
+
         obj = new TreeSet<Integer>();
         Assertions.assertTrue(Clazz.ofTreeSet().isInstance(obj));
     }
 
     @Test
     public void testPrivateConstructor() {
-        // Verify that Clazz cannot be instantiated
         try {
             java.lang.reflect.Constructor<Clazz> constructor = Clazz.class.getDeclaredConstructor();
             Assertions.assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()));

@@ -34,6 +34,12 @@ public class RowIdType extends AbstractType<RowId> {
 
     /**
      * Returns the Class object representing the SQL RowId type.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * RowIdType type = new RowIdType();
+     * Class<RowId> clazz = type.clazz(); // Returns RowId.class
+     * }</pre>
      *
      * @return the Class object for java.sql.RowId.class
      */
@@ -45,6 +51,12 @@ public class RowIdType extends AbstractType<RowId> {
     /**
      * Indicates whether this type is serializable.
      * SQL RowId types are not serializable as they represent database-specific row identifiers.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * RowIdType type = new RowIdType();
+     * boolean serializable = type.isSerializable(); // Returns false
+     * }</pre>
      *
      * @return false, indicating this type is not serializable
      */
@@ -56,6 +68,13 @@ public class RowIdType extends AbstractType<RowId> {
     /**
      * Converts a RowId object to its string representation.
      * The string representation is obtained by calling toString() on the RowId object.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * RowIdType type = new RowIdType();
+     * RowId rowId = resultSet.getRowId(1);
+     * String str = type.stringOf(rowId); // Converts RowId to String
+     * }</pre>
      *
      * @param x the RowId object to convert
      * @return the string representation of the RowId, or null if the input is null
@@ -69,6 +88,13 @@ public class RowIdType extends AbstractType<RowId> {
      * Creates a RowId object from a string representation.
      * This operation is not supported for SQL RowId types as they are database-specific
      * and cannot be reliably reconstructed from a string.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * RowIdType type = new RowIdType();
+     * // This will throw UnsupportedOperationException
+     * RowId rowId = type.valueOf("some-string");
+     * }</pre>
      *
      * @param str the string to convert
      * @return never returns normally
@@ -82,6 +108,13 @@ public class RowIdType extends AbstractType<RowId> {
     /**
      * Retrieves a SQL ROWID value from the specified column in the ResultSet.
      * A ROWID is a unique identifier for a row in a database table.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * RowIdType type = new RowIdType();
+     * ResultSet rs = statement.executeQuery("SELECT ROWID, name FROM users");
+     * RowId rowId = type.get(rs, 1); // Get RowId from first column
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
@@ -96,6 +129,13 @@ public class RowIdType extends AbstractType<RowId> {
     /**
      * Retrieves a SQL ROWID value from the specified column in the ResultSet.
      * A ROWID is a unique identifier for a row in a database table.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * RowIdType type = new RowIdType();
+     * ResultSet rs = statement.executeQuery("SELECT ROWID as row_id, name FROM users");
+     * RowId rowId = type.get(rs, "row_id"); // Get RowId by column name
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to retrieve (column name or alias)
@@ -110,6 +150,13 @@ public class RowIdType extends AbstractType<RowId> {
     /**
      * Sets a RowId parameter in a PreparedStatement.
      * The RowId represents a unique identifier for a row in a database table.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * RowIdType type = new RowIdType();
+     * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET status = ? WHERE ROWID = ?");
+     * type.set(stmt, 2, rowId); // Set RowId at parameter index 2
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
@@ -124,6 +171,13 @@ public class RowIdType extends AbstractType<RowId> {
     /**
      * Sets a RowId parameter in a CallableStatement.
      * The RowId represents a unique identifier for a row in a database table.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * RowIdType type = new RowIdType();
+     * CallableStatement stmt = conn.prepareCall("{call update_user_status(?, ?)}");
+     * type.set(stmt, "user_rowid", rowId); // Set RowId by parameter name
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
@@ -139,6 +193,13 @@ public class RowIdType extends AbstractType<RowId> {
      * Writes the character representation of a RowId to the given CharacterWriter.
      * If the RowId is null, writes "null". Otherwise, writes the string representation
      * of the RowId obtained from its toString() method.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * RowIdType type = new RowIdType();
+     * CharacterWriter writer = new CharacterWriter();
+     * type.writeCharacter(writer, rowId, config); // Writes RowId to character stream
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the RowId to write

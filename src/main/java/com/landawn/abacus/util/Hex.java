@@ -51,16 +51,16 @@ public final class Hex {
     private static final char[] DIGITS_UPPER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
     private Hex() {
-        // Singleton for utility class
+        // Utility class - prevent instantiation
     }
 
     /**
      * Converts an array of bytes into an array of lowercase hexadecimal characters.
-     * 
+     *
      * <p>Each byte in the input array is converted to two hexadecimal characters.
      * The returned array will be exactly double the length of the input array.
      * This method is equivalent to calling {@code encode(data, true)}.</p>
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
      * byte[] data = {0x01, 0x23, (byte)0xAB, (byte)0xCD};
@@ -69,6 +69,7 @@ public final class Hex {
      *
      * @param data the byte array to convert to hexadecimal characters
      * @return a char array containing lowercase hexadecimal characters representing the input bytes
+     * @throws IllegalArgumentException if data is null
      */
     public static char[] encode(final byte[] data) {
         return encode(data, true);
@@ -76,10 +77,10 @@ public final class Hex {
 
     /**
      * Converts an array of bytes into an array of hexadecimal characters with specified case.
-     * 
+     *
      * <p>Each byte in the input array is converted to two hexadecimal characters.
      * The returned array will be exactly double the length of the input array.</p>
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
      * byte[] data = {0x01, (byte)0xAB};
@@ -90,18 +91,22 @@ public final class Hex {
      * @param data the byte array to convert to hexadecimal characters
      * @param toLowerCase if {@code true}, returns lowercase hex digits; if {@code false}, returns uppercase
      * @return a char array containing hexadecimal characters representing the input bytes
+     * @throws IllegalArgumentException if data is null
      */
     public static char[] encode(final byte[] data, final boolean toLowerCase) {
+        if (data == null) {
+            throw new IllegalArgumentException("Data array cannot be null");
+        }
         return encode(data, toLowerCase ? DIGITS_LOWER : DIGITS_UPPER);
     }
 
     /**
      * Converts an array of bytes into a lowercase hexadecimal string.
-     * 
+     *
      * <p>This is a convenience method that combines {@link #encode(byte[])} with
      * string conversion. Each byte is represented by exactly two hexadecimal characters
      * in the resulting string.</p>
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
      * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F}; // "Hello" in ASCII
@@ -110,6 +115,7 @@ public final class Hex {
      *
      * @param data the byte array to convert to a hexadecimal string
      * @return a string containing lowercase hexadecimal characters representing the input bytes
+     * @throws IllegalArgumentException if data is null
      */
     public static String encodeToString(final byte[] data) {
         return String.valueOf(encode(data));
@@ -117,11 +123,11 @@ public final class Hex {
 
     /**
      * Converts an array of bytes into a hexadecimal string with specified case.
-     * 
+     *
      * <p>This is a convenience method that combines {@link #encode(byte[], boolean)} with
      * string conversion. Each byte is represented by exactly two hexadecimal characters
      * in the resulting string.</p>
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
      * byte[] data = {(byte)0xFF, 0x00, 0x42};
@@ -132,6 +138,7 @@ public final class Hex {
      * @param data the byte array to convert to a hexadecimal string
      * @param toLowerCase if {@code true}, returns lowercase hex digits; if {@code false}, returns uppercase
      * @return a string containing hexadecimal characters representing the input bytes
+     * @throws IllegalArgumentException if data is null
      */
     public static String encodeToString(final byte[] data, final boolean toLowerCase) {
         return String.valueOf(encode(data, toLowerCase));
@@ -161,11 +168,11 @@ public final class Hex {
 
     /**
      * Converts a hexadecimal string into an array of bytes.
-     * 
+     *
      * <p>The input string must contain an even number of hexadecimal characters.
      * Each pair of characters represents one byte in the output array. Both uppercase
      * and lowercase hexadecimal digits are accepted.</p>
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
      * byte[] data1 = Hex.decode("48656c6c6f");     // returns bytes for "Hello"
@@ -175,20 +182,23 @@ public final class Hex {
      *
      * @param data a string containing hexadecimal digits (0-9, A-F, a-f)
      * @return a byte array containing the binary data decoded from the hexadecimal string
-     * @throws IllegalArgumentException if the string has an odd number of characters or contains non-hexadecimal characters
+     * @throws IllegalArgumentException if data is null, the string has an odd number of characters, or contains non-hexadecimal characters
      * @see #decode(char[])
      */
     public static byte[] decode(final String data) throws IllegalArgumentException {
+        if (data == null) {
+            throw new IllegalArgumentException("Data string cannot be null");
+        }
         return decode(data.toCharArray());
     }
 
     /**
      * Converts an array of hexadecimal characters into an array of bytes.
-     * 
+     *
      * <p>The input array must contain an even number of hexadecimal characters.
      * Each pair of characters represents one byte in the output array. Both uppercase
      * and lowercase hexadecimal digits are accepted.</p>
-     * 
+     *
      * <p>The conversion process:</p>
      * <ul>
      *   <li>Characters '0'-'9' represent values 0-9</li>
@@ -196,7 +206,7 @@ public final class Hex {
      *   <li>Characters 'a'-'f' represent values 10-15</li>
      *   <li>Each pair of characters forms one byte: first char = high nibble, second char = low nibble</li>
      * </ul>
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
      * char[] hex = {'4', '8', '6', '5', '6', 'C', '6', 'C', '6', 'F'};
@@ -205,9 +215,12 @@ public final class Hex {
      *
      * @param data an array of characters containing hexadecimal digits
      * @return a byte array containing the binary data decoded from the hexadecimal characters
-     * @throws IllegalArgumentException if the array has an odd number of elements or contains non-hexadecimal characters
+     * @throws IllegalArgumentException if data is null, the array has an odd number of elements, or contains non-hexadecimal characters
      */
     public static byte[] decode(final char[] data) throws IllegalArgumentException {
+        if (data == null) {
+            throw new IllegalArgumentException("Data array cannot be null");
+        }
 
         final int len = data.length;
 
@@ -230,12 +243,22 @@ public final class Hex {
     }
 
     /**
-     * Converts a hexadecimal character to an integer.
+     * Converts a hexadecimal character to its integer value (0-15).
      *
-     * @param ch A character to convert to an integer digit
-     * @param index The index of the character in the source
-     * @return An integer
-     * @throws IllegalArgumentException the illegal argument exception
+     * <p>This method validates that the character is a valid hexadecimal digit and converts it
+     * to its corresponding integer value. Valid characters are '0'-'9', 'A'-'F', and 'a'-'f'.</p>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * int value1 = toDigit('5', 0);  // returns 5
+     * int value2 = toDigit('A', 1);  // returns 10
+     * int value3 = toDigit('f', 2);  // returns 15
+     * }</pre>
+     *
+     * @param ch the hexadecimal character to convert (0-9, A-F, a-f)
+     * @param index the position of the character in the source string (used for error reporting)
+     * @return the integer value (0-15) represented by the hexadecimal character
+     * @throws IllegalArgumentException if the character is not a valid hexadecimal digit
      */
     static int toDigit(final char ch, final int index) throws IllegalArgumentException {
         final int digit = Character.digit(ch, 16);

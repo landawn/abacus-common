@@ -30,7 +30,6 @@ package com.landawn.abacus.util;
  * System.out.println(ifloat.index()); // prints: 2
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 1.0
  */
 public final class IndexedFloat extends AbstractIndexed {

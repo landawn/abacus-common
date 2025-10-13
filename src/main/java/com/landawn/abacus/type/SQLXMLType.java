@@ -30,6 +30,12 @@ public class SQLXMLType extends AbstractType<SQLXML> {
 
     /**
      * Returns the Class object representing the SQL XML type.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLXMLType type = new SQLXMLType();
+     * Class<SQLXML> clazz = type.clazz(); // Returns SQLXML.class
+     * }</pre>
      *
      * @return the Class object for java.sql.SQLXML.class
      */
@@ -41,6 +47,12 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     /**
      * Indicates whether this type is serializable.
      * SQL XML types are not serializable as they represent database-specific XML data.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLXMLType type = new SQLXMLType();
+     * boolean serializable = type.isSerializable(); // Returns false
+     * }</pre>
      *
      * @return false, indicating this type is not serializable
      */
@@ -53,6 +65,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * Converts a SQLXML object to its string representation.
      * This operation is not supported for SQL XML types as they are database-specific
      * and require special handling for XML data extraction.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLXMLType type = new SQLXMLType();
+     * // This will throw UnsupportedOperationException
+     * String str = type.stringOf(sqlXml);
+     * }</pre>
      *
      * @param x the SQLXML object to convert
      * @return never returns normally
@@ -67,6 +86,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * Creates a SQLXML object from a string representation.
      * This operation is not supported for SQL XML types as they must be created
      * by the database connection and cannot be instantiated from a string.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLXMLType type = new SQLXMLType();
+     * // This will throw UnsupportedOperationException
+     * SQLXML xml = type.valueOf("<root>data</root>");
+     * }</pre>
      *
      * @param str the string to convert
      * @return never returns normally
@@ -80,6 +106,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     /**
      * Retrieves a SQL XML value from the specified column in the ResultSet.
      * A SQL XML represents XML data stored in the database.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLXMLType type = new SQLXMLType();
+     * ResultSet rs = statement.executeQuery("SELECT config_xml FROM settings");
+     * SQLXML xml = type.get(rs, 1); // Get XML from first column
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
@@ -94,6 +127,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     /**
      * Retrieves a SQL XML value from the specified column in the ResultSet.
      * A SQL XML represents XML data stored in the database.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLXMLType type = new SQLXMLType();
+     * ResultSet rs = statement.executeQuery("SELECT config_xml FROM settings");
+     * SQLXML xml = type.get(rs, "config_xml"); // Get XML by column name
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to retrieve (column name or alias)
@@ -108,6 +148,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     /**
      * Sets a SQLXML parameter in a PreparedStatement.
      * The SQLXML represents XML data to be stored in the database.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLXMLType type = new SQLXMLType();
+     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO settings (config_xml) VALUES (?)");
+     * type.set(stmt, 1, xmlData); // Set XML at parameter index 1
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
@@ -122,6 +169,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     /**
      * Sets a SQLXML parameter in a CallableStatement.
      * The SQLXML represents XML data to be stored in the database.
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * SQLXMLType type = new SQLXMLType();
+     * CallableStatement stmt = conn.prepareCall("{call update_config(?)}");
+     * type.set(stmt, "xml_param", xmlData); // Set XML by parameter name
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

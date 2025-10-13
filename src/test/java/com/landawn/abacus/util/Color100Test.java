@@ -4,16 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Color100Test extends TestBase {
 
     @Test
     public void testEnumValues() {
         Color[] values = Color.values();
         assertEquals(9, values.length);
-        
+
         assertEquals(Color.BLACK, values[0]);
         assertEquals(Color.WHITE, values[1]);
         assertEquals(Color.RED, values[2]);
@@ -74,7 +76,7 @@ public class Color100Test extends TestBase {
     @Test
     public void testValueOfStringInvalid() {
         assertThrows(IllegalArgumentException.class, () -> Color.valueOf("INVALID"));
-        assertThrows(IllegalArgumentException.class, () -> Color.valueOf("black")); // case sensitive
+        assertThrows(IllegalArgumentException.class, () -> Color.valueOf("black"));
     }
 
     @Test

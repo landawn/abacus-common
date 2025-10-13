@@ -19,12 +19,14 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalLong;
 
+@Tag("new-test")
 public class OptionalLongType100Test extends TestBase {
 
     private OptionalLongType optionalLongType;
@@ -143,7 +145,7 @@ public class OptionalLongType100Test extends TestBase {
     @Test
     public void testGetFromResultSetByIndexWithNonLong() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        when(rs.getObject(1)).thenReturn(100); // Integer
+        when(rs.getObject(1)).thenReturn(100);
 
         OptionalLong result = optionalLongType.get(rs, 1);
         assertNotNull(result);

@@ -4,10 +4,11 @@ import java.text.ParseException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class UncheckedParseException100Test extends TestBase {
 
     @Test
@@ -57,7 +58,7 @@ public class UncheckedParseException100Test extends TestBase {
         ParseException parseException = new ParseException("Parse error", 10);
         ParseException suppressed = new ParseException("Suppressed parse error", 20);
         parseException.addSuppressed(suppressed);
-        
+
         UncheckedParseException exception = new UncheckedParseException(parseException);
         Throwable[] suppressedExceptions = exception.getSuppressed();
         Assertions.assertNotNull(suppressedExceptions);
@@ -70,8 +71,7 @@ public class UncheckedParseException100Test extends TestBase {
         ParseException parseException = new ParseException("Parse error", 0);
         UncheckedParseException exception = new UncheckedParseException(parseException);
         Assertions.assertEquals(parseException, exception.getCause());
-        // Verify the original ParseException's error offset is preserved
-        Assertions.assertEquals(0, ((ParseException)exception.getCause()).getErrorOffset());
+        Assertions.assertEquals(0, ((ParseException) exception.getCause()).getErrorOffset());
     }
 
     @Test
@@ -79,8 +79,7 @@ public class UncheckedParseException100Test extends TestBase {
         ParseException parseException = new ParseException("Parse error", -1);
         UncheckedParseException exception = new UncheckedParseException(parseException);
         Assertions.assertEquals(parseException, exception.getCause());
-        // Verify the original ParseException's error offset is preserved
-        Assertions.assertEquals(-1, ((ParseException)exception.getCause()).getErrorOffset());
+        Assertions.assertEquals(-1, ((ParseException) exception.getCause()).getErrorOffset());
     }
 
     @Test

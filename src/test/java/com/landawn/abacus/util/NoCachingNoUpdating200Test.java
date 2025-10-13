@@ -24,9 +24,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class NoCachingNoUpdating200Test extends TestBase {
 
     @Nested
@@ -227,7 +229,6 @@ public class NoCachingNoUpdating200Test extends TestBase {
         @Test
         @DisplayName("Should calculate the sum of char values")
         public void testSum() {
-            // 'a' = 97, 'b' = 98, 'c' = 99
             assertEquals(97 + 98 + 99, disposableArray.sum());
         }
 

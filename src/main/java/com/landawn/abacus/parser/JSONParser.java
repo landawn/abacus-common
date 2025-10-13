@@ -55,7 +55,6 @@ import com.landawn.abacus.util.stream.Stream;
  * }
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 0.8
  * @see JSONSerializationConfig
  * @see JSONDeserializationConfig
@@ -66,80 +65,94 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
     /**
      * Parses a JSON string into an object of the specified type.
      * This is a convenience method that uses default deserialization configuration.
-     * 
+     *
      * <p>Usage example:</p>
      * <pre>{@code
      * String json = "{\"name\":\"John\",\"age\":30}";
      * Person person = parser.readString(json, Person.class);
-     * 
+     *
      * // For collections
      * String jsonArray = "[{\"id\":1},{\"id\":2}]";
      * List<Item> items = parser.readString(jsonArray, List.class);
      * }</pre>
      *
-     * @param <T> the target type
-     * @param source the JSON string to parse
-     * @param targetClass the class of the target object
-     * @return the parsed object
+     * @param <T> the target type parameter
+     * @param source the JSON string to parse, must be valid JSON format
+     * @param targetClass the class of the target object to deserialize into
+     * @return the parsed object of type T, never null
+     * @throws IllegalArgumentException if the source string is null or invalid JSON
      */
     <T> T readString(String source, Class<? extends T> targetClass);
 
     /**
      * Parses a JSON string into an object of the specified type with custom configuration.
      * The configuration allows control over deserialization behavior such as
-     * ignoring unknown properties, handling null values, etc.
-     * 
+     * ignoring unknown properties, handling null values, date formats, and more.
+     *
      * <p>Usage example:</p>
      * <pre>{@code
      * JSONDeserializationConfig config = new JSONDeserializationConfig()
      *     .ignoreUnmatchedProperty(true)
      *     .readNullToEmpty(true);
-     * 
+     *
      * String json = "{\"name\":\"John\",\"age\":30,\"unknown\":\"value\"}";
      * Person person = parser.readString(json, config, Person.class);
      * // "unknown" field will be ignored
      * }</pre>
      *
-     * @param <T> the target type
-     * @param source the JSON string to parse
-     * @param config the deserialization configuration
-     * @param targetClass the class of the target object
-     * @return the parsed object
+     * @param <T> the target type parameter
+     * @param source the JSON string to parse, must be valid JSON format
+     * @param config the deserialization configuration to control parsing behavior, may be null for default behavior
+     * @param targetClass the class of the target object to deserialize into
+     * @return the parsed object of type T, never null
+     * @throws IllegalArgumentException if the source string is null or invalid JSON
      */
     <T> T readString(String source, JSONDeserializationConfig config, Class<? extends T> targetClass);
 
     /**
      * Parses a JSON string into an existing array.
-     * The array must be pre-allocated with the correct size.
-     * This method fills the provided array with parsed values.
-     * 
+     * The array must be pre-allocated with the correct size to match the JSON array length.
+     * This method fills the provided array with parsed values from the JSON array.
+     *
      * <p>Usage example:</p>
      * <pre>{@code
      * String json = "[1, 2, 3, 4, 5]";
      * Integer[] numbers = new Integer[5];
      * parser.readString(json, numbers);
-     * // numbers array is now filled with values
+     * // numbers array is now filled with values [1, 2, 3, 4, 5]
      * }</pre>
      *
-     * @param source the JSON string to parse
-     * @param output the array to populate with parsed values
+     * @param source the JSON string to parse, must contain a JSON array
+     * @param output the pre-allocated array to populate with parsed values, must not be null
+     * @throws IllegalArgumentException if the source is null, invalid JSON, or array size doesn't match
      */
     void readString(String source, Object[] output);
 
     /**
      * Parses a JSON string into an existing array with custom configuration.
-     * The array must be pre-allocated with the correct size.
+     * The array must be pre-allocated with the correct size to match the JSON array length.
+     * This method fills the provided array with parsed values from the JSON array.
      *
-     * @param source the JSON string to parse
-     * @param config the deserialization configuration
-     * @param output the array to populate with parsed values
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     * String json = "[1, 2, 3]";
+     * Integer[] numbers = new Integer[3];
+     * parser.readString(json, config, numbers);
+     * }</pre>
+     *
+     * @param source the JSON string to parse, must contain a JSON array
+     * @param config the deserialization configuration to control parsing behavior, may be null for default behavior
+     * @param output the pre-allocated array to populate with parsed values, must not be null
+     * @throws IllegalArgumentException if the source is null, invalid JSON, or array size doesn't match
      */
     void readString(String source, JSONDeserializationConfig config, Object[] output);
 
     /**
      * Parses a JSON string into an existing Collection.
-     * The collection is cleared before adding parsed elements.
-     * 
+     * The collection is cleared before adding parsed elements from the JSON array.
+     *
      * <p>Usage example:</p>
      * <pre>{@code
      * String json = "[\"apple\", \"banana\", \"orange\"]";
@@ -148,25 +161,38 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * // fruits now contains: ["apple", "banana", "orange"]
      * }</pre>
      *
-     * @param source the JSON string to parse
-     * @param output the Collection to populate with parsed values
+     * @param source the JSON string to parse, must contain a JSON array
+     * @param output the Collection to populate with parsed values, must not be null and will be cleared first
+     * @throws IllegalArgumentException if the source is null or invalid JSON
+     * @throws UnsupportedOperationException if the collection is unmodifiable
      */
     void readString(String source, Collection<?> output);
 
     /**
      * Parses a JSON string into an existing Collection with custom configuration.
-     * The collection is cleared before adding parsed elements.
+     * The collection is cleared before adding parsed elements from the JSON array.
      *
-     * @param source the JSON string to parse
-     * @param config the deserialization configuration
-     * @param output the Collection to populate with parsed values
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     * String json = "[\"item1\", \"item2\"]";
+     * List<String> items = new ArrayList<>();
+     * parser.readString(json, config, items);
+     * }</pre>
+     *
+     * @param source the JSON string to parse, must contain a JSON array
+     * @param config the deserialization configuration to control parsing behavior, may be null for default behavior
+     * @param output the Collection to populate with parsed values, must not be null and will be cleared first
+     * @throws IllegalArgumentException if the source is null or invalid JSON
+     * @throws UnsupportedOperationException if the collection is unmodifiable
      */
     void readString(String source, JSONDeserializationConfig config, Collection<?> output);
 
     /**
      * Parses a JSON string into an existing Map.
-     * The map is cleared before adding parsed entries.
-     * 
+     * The map is cleared before adding parsed entries from the JSON object.
+     *
      * <p>Usage example:</p>
      * <pre>{@code
      * String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
@@ -175,64 +201,87 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * // map now contains: {key1=value1, key2=value2}
      * }</pre>
      *
-     * @param source the JSON string to parse
-     * @param output the Map to populate with parsed values
+     * @param source the JSON string to parse, must contain a JSON object
+     * @param output the Map to populate with parsed key-value pairs, must not be null and will be cleared first
+     * @throws IllegalArgumentException if the source is null or invalid JSON
+     * @throws UnsupportedOperationException if the map is unmodifiable
      */
     void readString(String source, Map<?, ?> output);
 
     /**
      * Parses a JSON string into an existing Map with custom configuration.
-     * The map is cleared before adding parsed entries.
+     * The map is cleared before adding parsed entries from the JSON object.
      *
-     * @param source the JSON string to parse
-     * @param config the deserialization configuration
-     * @param output the Map to populate with parsed values
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     * String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
+     * Map<String, String> map = new HashMap<>();
+     * parser.readString(json, config, map);
+     * }</pre>
+     *
+     * @param source the JSON string to parse, must contain a JSON object
+     * @param config the deserialization configuration to control parsing behavior, may be null for default behavior
+     * @param output the Map to populate with parsed key-value pairs, must not be null and will be cleared first
+     * @throws IllegalArgumentException if the source is null or invalid JSON
+     * @throws UnsupportedOperationException if the map is unmodifiable
      */
     void readString(String source, JSONDeserializationConfig config, Map<?, ?> output);
 
     /**
      * Parses a substring of a JSON string into an object of the specified type.
-     * This method allows parsing a portion of a larger string without creating a substring.
-     * 
+     * This method allows parsing a portion of a larger string without creating a substring,
+     * which can improve performance when working with large strings.
+     *
      * <p>Usage example:</p>
      * <pre>{@code
      * String json = "prefix{\"name\":\"John\"}suffix";
-     * // Parse only the JSON object part
-     * Person person = parser.deserialize(json, 6, json.length() - 6, Person.class);
+     * // Parse only the JSON object part (indices 6 to 23)
+     * Person person = parser.deserialize(json, 6, 23, Person.class);
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the JSON string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
+     * @param source the JSON string containing the data to parse
+     * @param fromIndex the starting index (inclusive) of the JSON content
+     * @param toIndex the ending index (exclusive) of the JSON content
      * @param targetClass the class of the target object
-     * @return the parsed object
-     * @throws IndexOutOfBoundsException if the indices are invalid
+     * @return the parsed object of type T
+     * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex > toIndex
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, Class<? extends T> targetClass);
 
     /**
      * Parses a substring of a JSON string into an object with custom configuration.
-     * This method allows parsing a portion of a larger string without creating a substring.
+     * This method allows parsing a portion of a larger string without creating a substring,
+     * which can improve performance when working with large strings.
+     *
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     * String json = "prefix{\"name\":\"John\",\"extra\":\"ignored\"}suffix";
+     * Person person = parser.deserialize(json, 6, 40, config, Person.class);
+     * }</pre>
      *
      * @param <T> the target type
-     * @param source the JSON string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @param config the deserialization configuration
+     * @param source the JSON string containing the data to parse
+     * @param fromIndex the starting index (inclusive) of the JSON content
+     * @param toIndex the ending index (exclusive) of the JSON content
+     * @param config the deserialization configuration to control parsing behavior
      * @param targetClass the class of the target object
-     * @return the parsed object
-     * @throws IndexOutOfBoundsException if the indices are invalid
+     * @return the parsed object of type T
+     * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex > toIndex
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, JSONDeserializationConfig config, Class<? extends T> targetClass);
 
     /**
-     * Creates a stream for parsing JSON array elements lazily.
+     * Creates a stream for parsing JSON array elements lazily from a JSON string.
      * The stream should be closed after use to free resources.
-     * 
+     *
      * <p>This method is useful for processing large JSON arrays without loading
      * the entire content into memory. Elements are parsed on-demand as the stream is consumed.</p>
-     * 
+     *
      * <p>Usage example:</p>
      * <pre>{@code
      * String json = "[{\"id\":1},{\"id\":2},{\"id\":3}]";
@@ -242,32 +291,44 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * }
      * }</pre>
      *
-     * @param <T> the element type
-     * @param source the JSON string containing an array
+     * @param <T> the element type parameter
+     * @param source the JSON string containing a JSON array
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements
+     * @return a Stream of parsed elements that must be closed after use
+     * @throws IllegalArgumentException if the source is null, invalid JSON, or not a JSON array
      */
     <T> Stream<T> stream(String source, Type<? extends T> elementType);
 
     /**
-     * Creates a stream for parsing JSON array elements lazily with custom configuration.
+     * Creates a stream for parsing JSON array elements lazily with custom configuration from a JSON string.
      * The stream should be closed after use to free resources.
      *
-     * @param <T> the element type
-     * @param source the JSON string containing an array
-     * @param config the deserialization configuration
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     * String json = "[{\"id\":1,\"extra\":\"data\"},{\"id\":2}]";
+     * try (Stream<MyObject> stream = parser.stream(json, config, Type.of(MyObject.class))) {
+     *     stream.forEach(obj -> process(obj));
+     * }
+     * }</pre>
+     *
+     * @param <T> the element type parameter
+     * @param source the JSON string containing a JSON array
+     * @param config the deserialization configuration to control parsing behavior, may be null for default behavior
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements
+     * @return a Stream of parsed elements that must be closed after use
+     * @throws IllegalArgumentException if the source is null, invalid JSON, or not a JSON array
      */
     <T> Stream<T> stream(String source, JSONDeserializationConfig config, Type<? extends T> elementType);
 
     /**
      * Creates a stream for parsing JSON array elements from a file.
-     * The stream should be closed after use to free resources and close the file.
-     * 
+     * The stream should be closed after use to free resources and close the underlying file handle.
+     *
      * <p>This method is ideal for processing large JSON files containing arrays
-     * without loading the entire file into memory.</p>
-     * 
+     * without loading the entire file into memory. Elements are parsed lazily as consumed.</p>
+     *
      * <p>Usage example:</p>
      * <pre>{@code
      * File jsonFile = new File("data.json");
@@ -277,22 +338,36 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * }
      * }</pre>
      *
-     * @param <T> the element type
-     * @param source the JSON file
+     * @param <T> the element type parameter
+     * @param source the JSON file containing a JSON array, must exist and be readable
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements
+     * @return a Stream of parsed elements that must be closed after use
+     * @throws IllegalArgumentException if the source is null or the file contains invalid JSON
+     * @throws java.io.IOException if the file cannot be read
      */
     <T> Stream<T> stream(File source, Type<? extends T> elementType);
 
     /**
      * Creates a stream for parsing JSON array elements from a file with custom configuration.
-     * The stream should be closed after use to free resources and close the file.
+     * The stream should be closed after use to free resources and close the underlying file handle.
      *
-     * @param <T> the element type
-     * @param source the JSON file
-     * @param config the deserialization configuration
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     * File jsonFile = new File("data.json");
+     * try (Stream<Person> stream = parser.stream(jsonFile, config, Type.of(Person.class))) {
+     *     stream.forEach(person -> process(person));
+     * }
+     * }</pre>
+     *
+     * @param <T> the element type parameter
+     * @param source the JSON file containing a JSON array, must exist and be readable
+     * @param config the deserialization configuration to control parsing behavior, may be null for default behavior
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements
+     * @return a Stream of parsed elements that must be closed after use
+     * @throws IllegalArgumentException if the source is null or the file contains invalid JSON
+     * @throws java.io.IOException if the file cannot be read
      */
     <T> Stream<T> stream(File source, JSONDeserializationConfig config, Type<? extends T> elementType);
 
@@ -300,7 +375,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * Creates a stream for parsing JSON array elements from an InputStream.
      * The closeInputStreamWhenStreamIsClosed parameter controls whether the input stream
      * is closed when the returned stream is closed.
-     * 
+     *
      * <p>Usage example:</p>
      * <pre>{@code
      * try (InputStream is = new FileInputStream("data.json");
@@ -311,11 +386,13 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * // InputStream is automatically closed when stream is closed
      * }</pre>
      *
-     * @param <T> the element type
-     * @param source the input stream containing JSON
-     * @param closeInputStreamWhenStreamIsClosed whether to close the input stream when the returned stream is closed
+     * @param <T> the element type parameter
+     * @param source the input stream containing a JSON array, must not be null
+     * @param closeInputStreamWhenStreamIsClosed if true, the input stream will be closed when the returned stream is closed
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements
+     * @return a Stream of parsed elements that must be closed after use
+     * @throws IllegalArgumentException if the source is null or contains invalid JSON
+     * @throws java.io.IOException if an I/O error occurs while reading from the stream
      */
     <T> Stream<T> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, Type<? extends T> elementType);
 
@@ -324,12 +401,24 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * The closeInputStreamWhenStreamIsClosed parameter controls whether the input stream
      * is closed when the returned stream is closed.
      *
-     * @param <T> the element type
-     * @param source the input stream containing JSON
-     * @param config the deserialization configuration
-     * @param closeInputStreamWhenStreamIsClosed whether to close the input stream when the returned stream is closed
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     * try (InputStream is = new FileInputStream("data.json");
+     *      Stream<Item> stream = parser.stream(is, config, true, Type.of(Item.class))) {
+     *     stream.forEach(item -> process(item));
+     * }
+     * }</pre>
+     *
+     * @param <T> the element type parameter
+     * @param source the input stream containing a JSON array, must not be null
+     * @param config the deserialization configuration to control parsing behavior, may be null for default behavior
+     * @param closeInputStreamWhenStreamIsClosed if true, the input stream will be closed when the returned stream is closed
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements
+     * @return a Stream of parsed elements that must be closed after use
+     * @throws IllegalArgumentException if the source is null or contains invalid JSON
+     * @throws java.io.IOException if an I/O error occurs while reading from the stream
      */
     <T> Stream<T> stream(InputStream source, JSONDeserializationConfig config, boolean closeInputStreamWhenStreamIsClosed, Type<? extends T> elementType);
 
@@ -337,7 +426,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * Creates a stream for parsing JSON array elements from a Reader.
      * The closeReaderWhenStreamIsClosed parameter controls whether the reader
      * is closed when the returned stream is closed.
-     * 
+     *
      * <p>Usage example:</p>
      * <pre>{@code
      * try (Reader reader = new FileReader("data.json");
@@ -348,11 +437,13 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * // Reader is automatically closed when stream is closed
      * }</pre>
      *
-     * @param <T> the element type
-     * @param source the reader containing JSON
-     * @param closeReaderWhenStreamIsClosed whether to close the reader when the returned stream is closed
+     * @param <T> the element type parameter
+     * @param source the reader containing a JSON array, must not be null
+     * @param closeReaderWhenStreamIsClosed if true, the reader will be closed when the returned stream is closed
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements
+     * @return a Stream of parsed elements that must be closed after use
+     * @throws IllegalArgumentException if the source is null or contains invalid JSON
+     * @throws java.io.IOException if an I/O error occurs while reading from the reader
      */
     <T> Stream<T> stream(Reader source, boolean closeReaderWhenStreamIsClosed, Type<? extends T> elementType);
 
@@ -361,12 +452,24 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * The closeReaderWhenStreamIsClosed parameter controls whether the reader
      * is closed when the returned stream is closed.
      *
-     * @param <T> the element type
-     * @param source the reader containing JSON
-     * @param config the deserialization configuration
-     * @param closeReaderWhenStreamIsClosed whether to close the reader when the returned stream is closed
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     * try (Reader reader = new FileReader("data.json");
+     *      Stream<Product> stream = parser.stream(reader, config, true, Type.of(Product.class))) {
+     *     stream.forEach(product -> process(product));
+     * }
+     * }</pre>
+     *
+     * @param <T> the element type parameter
+     * @param source the reader containing a JSON array, must not be null
+     * @param config the deserialization configuration to control parsing behavior, may be null for default behavior
+     * @param closeReaderWhenStreamIsClosed if true, the reader will be closed when the returned stream is closed
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements
+     * @return a Stream of parsed elements that must be closed after use
+     * @throws IllegalArgumentException if the source is null or contains invalid JSON
+     * @throws java.io.IOException if an I/O error occurs while reading from the reader
      */
     <T> Stream<T> stream(Reader source, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed, Type<? extends T> elementType);
 }

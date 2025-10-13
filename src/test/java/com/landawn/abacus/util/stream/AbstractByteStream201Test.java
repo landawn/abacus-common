@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ByteList;
@@ -21,7 +22,7 @@ import com.landawn.abacus.util.u.OptionalByte;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.ObjByteConsumer;
 
-
+@Tag("new-test")
 public class AbstractByteStream201Test extends TestBase {
 
     private ByteStream stream;
@@ -46,7 +47,7 @@ public class AbstractByteStream201Test extends TestBase {
     @Test
     public void reduceWithIdentity() {
         byte result = stream.reduce((byte) 10, (a, b) -> (byte) (a + b));
-        assertEquals((byte) 25, result); // 10 + 1 + 2 + 3 + 4 + 5
+        assertEquals((byte) 25, result);
 
         byte emptyResult = emptyStream.reduce((byte) 10, (a, b) -> (byte) (a + b));
         assertEquals((byte) 10, emptyResult);
@@ -56,7 +57,7 @@ public class AbstractByteStream201Test extends TestBase {
     public void reduce() {
         OptionalByte result = stream.reduce((a, b) -> (byte) (a + b));
         assertTrue(result.isPresent());
-        assertEquals((byte) 15, result.get()); // 1 + 2 + 3 + 4 + 5
+        assertEquals((byte) 15, result.get());
 
         OptionalByte emptyResult = emptyStream.reduce((a, b) -> (byte) (a + b));
         assertFalse(emptyResult.isPresent());
@@ -87,7 +88,7 @@ public class AbstractByteStream201Test extends TestBase {
     public void allMatch() {
         assertTrue(stream.allMatch(b -> b > 0));
         assertFalse(stream2.allMatch(b -> b > 3));
-        assertTrue(emptyStream.allMatch(b -> b > 0)); // Vacuously true
+        assertTrue(emptyStream.allMatch(b -> b > 0));
     }
 
     @Test
@@ -194,8 +195,6 @@ public class AbstractByteStream201Test extends TestBase {
         ByteSummaryStatistics emptyStats = emptyStream.summarize();
         assertEquals(0, emptyStats.getCount());
         assertEquals(0, emptyStats.getSum());
-        // assertThrows(NoSuchElementException.class, emptyStats::getMin);
-        // assertThrows(NoSuchElementException.class, emptyStats::getMax);
         assertEquals(Byte.MAX_VALUE, emptyStats.getMin());
         assertEquals(Byte.MIN_VALUE, emptyStats.getMax());
         assertEquals(0.0, emptyStats.getAverage(), 0.001);

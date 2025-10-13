@@ -7,10 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.HBaseColumn;
 
+@Tag("new-test")
 public class HBaseColumnType100Test extends TestBase {
 
     private HBaseColumnType<String> hbaseColumnType;
@@ -53,10 +55,8 @@ public class HBaseColumnType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with null
         assertNull(hbaseColumnType.stringOf(null));
 
-        // Test with HBaseColumn
         HBaseColumn<String> column = new HBaseColumn<>("value", 12345L);
         String result = hbaseColumnType.stringOf(column);
         assertNotNull(result);
@@ -66,27 +66,22 @@ public class HBaseColumnType100Test extends TestBase {
 
     @Test
     public void testValueOf() {
-        // Test with null and empty string
         assertNull(hbaseColumnType.valueOf(null));
         assertNull(hbaseColumnType.valueOf(""));
 
-        // Test with valid string
         String input = "12345:testValue";
         HBaseColumn<String> result = hbaseColumnType.valueOf(input);
         assertNotNull(result);
         assertEquals(12345L, result.version());
-        // Value assertion depends on elementType.valueOf() implementation
     }
 
     @Test
     public void testGetTypeName() {
-        // Test static method with declaring name
         String typeName = HBaseColumnType.getTypeName(HBaseColumn.class, "String", true);
         assertNotNull(typeName);
         assertTrue(typeName.contains("HBaseColumn"));
         assertTrue(typeName.contains("String"));
 
-        // Test static method without declaring name
         typeName = HBaseColumnType.getTypeName(HBaseColumn.class, "String", false);
         assertNotNull(typeName);
         assertTrue(typeName.contains("HBaseColumn"));

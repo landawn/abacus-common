@@ -10,9 +10,11 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class JSONType100Test extends TestBase {
 
     private JSONType<Map> jsonMapType;
@@ -63,7 +65,6 @@ public class JSONType100Test extends TestBase {
         assertNull(jsonCustomType.valueOf(""));
     }
 
-    // Test helper class
     public static class TestClass {
         private String field1;
         private int field2;

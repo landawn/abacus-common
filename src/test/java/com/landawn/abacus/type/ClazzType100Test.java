@@ -5,10 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class ClazzType100Test extends TestBase {
 
     private ClazzType type;
@@ -16,14 +18,12 @@ public class ClazzType100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Create ClazzType for String.class
         type = (ClazzType) createType("Clazz<String>");
         writer = createCharacterWriter();
     }
 
     @Test
     public void testClazz() {
-        // The clazz() method should return the Class loaded from the type name
         Class<Class> result = type.clazz();
         Assertions.assertNotNull(result);
     }
@@ -150,7 +150,6 @@ public class ClazzType100Test extends TestBase {
 
     @Test
     public void testAllPrimitiveTypes() {
-        // Test all primitive types
         Class[] primitives = { boolean.class, byte.class, char.class, short.class, int.class, long.class, float.class, double.class };
 
         for (Class primitive : primitives) {
@@ -162,7 +161,6 @@ public class ClazzType100Test extends TestBase {
 
     @Test
     public void testWrapperClasses() {
-        // Test wrapper classes
         Class[] wrappers = { Boolean.class, Byte.class, Character.class, Short.class, Integer.class, Long.class, Float.class, Double.class };
 
         for (Class wrapper : wrappers) {

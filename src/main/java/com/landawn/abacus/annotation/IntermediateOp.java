@@ -73,7 +73,6 @@ import java.lang.annotation.Target;
  * @see TerminalOp
  * @see LazyEvaluation
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.Stream</a>
- * @author HaiYang Li
  * @since 2018
  */
 @Documented

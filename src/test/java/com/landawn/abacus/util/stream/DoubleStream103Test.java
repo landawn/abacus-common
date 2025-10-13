@@ -25,6 +25,7 @@ import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DoubleIterator;
@@ -43,11 +44,9 @@ import com.landawn.abacus.util.function.DoubleMapMultiConsumer;
 import com.landawn.abacus.util.function.DoubleToFloatFunction;
 import com.landawn.abacus.util.function.DoubleTriPredicate;
 
+@Tag("new-test")
 public class DoubleStream103Test extends TestBase {
 
-    // This method needs to be implemented by a concrete test class to provide a DoubleStream instance.
-    // For example, in ArrayDoubleStreamTest, it would return new ArrayDoubleStream(a);
-    // In IteratorDoubleStreamTest, it would return new IteratorDoubleStream(DoubleIterator.of(a));
     protected DoubleStream createDoubleStream(double... a) {
         return DoubleStream.of(a).map(e -> e + 0d);
     }
@@ -343,9 +342,9 @@ public class DoubleStream103Test extends TestBase {
 
         List<DoubleList> result = stream.collapse(collapsible).toList();
         assertEquals(3, result.size());
-        assertEquals(3, result.get(0).size()); // [1.0, 1.1, 1.2]
-        assertEquals(2, result.get(1).size()); // [3.0, 3.1]
-        assertEquals(1, result.get(2).size()); // [5.0]
+        assertEquals(3, result.get(0).size());
+        assertEquals(2, result.get(1).size());
+        assertEquals(1, result.get(2).size());
     }
 
     @Test
@@ -355,7 +354,7 @@ public class DoubleStream103Test extends TestBase {
         DoubleBinaryOperator mergeFunction = Double::sum;
 
         double[] result = stream.collapse(collapsible, mergeFunction).toArray();
-        assertArrayEquals(new double[] { 6.0, 21.0 }, result, 0.0001); // (1+2+3), (10+11)
+        assertArrayEquals(new double[] { 6.0, 21.0 }, result, 0.0001);
     }
 
     @Test
@@ -366,7 +365,7 @@ public class DoubleStream103Test extends TestBase {
 
         double[] result = stream.collapse(collapsible, mergeFunction).toArray();
         assertEquals(3, result.length);
-        assertArrayEquals(new double[] { 3.0, 10.0, 20.0 }, result, 0.0001); // (1,2,3), (10), (20)
+        assertArrayEquals(new double[] { 3.0, 10.0, 20.0 }, result, 0.0001);
     }
 
     @Test
@@ -456,7 +455,7 @@ public class DoubleStream103Test extends TestBase {
         Map<Integer, Double> map = stream.toMap(x -> (int) x, x -> x, Double::sum);
 
         assertEquals(3, map.size());
-        assertEquals(2.0, map.get(1), 0.0001); // 1.0 + 1.0
+        assertEquals(2.0, map.get(1), 0.0001);
         assertEquals(2.0, map.get(2), 0.0001);
         assertEquals(3.0, map.get(3), 0.0001);
     }
@@ -467,8 +466,8 @@ public class DoubleStream103Test extends TestBase {
         Map<Integer, List<Double>> grouped = stream.groupTo(x -> (int) x, Collectors.toList());
 
         assertEquals(2, grouped.size());
-        assertEquals(3, grouped.get(1).size()); // [1.1, 1.3, 1.5]
-        assertEquals(2, grouped.get(2).size()); // [2.2, 2.4]
+        assertEquals(3, grouped.get(1).size());
+        assertEquals(2, grouped.get(2).size());
     }
 
     @Test
@@ -607,7 +606,7 @@ public class DoubleStream103Test extends TestBase {
     @Test
     public void testKthLargest() {
         DoubleStream stream = createDoubleStream(3.0, 1.0, 4.0, 5.0, 2.0);
-        OptionalDouble result = stream.kthLargest(2); // 2nd largest
+        OptionalDouble result = stream.kthLargest(2);
         assertTrue(result.isPresent());
         assertEquals(4.0, result.getAsDouble(), 0.0001);
     }
@@ -725,10 +724,10 @@ public class DoubleStream103Test extends TestBase {
         };
 
         DoubleStream transformed = stream.transformB(transfer, true);
-        assertEquals(0, counter.get()); // Not executed yet due to deferred
+        assertEquals(0, counter.get());
 
         double[] result = transformed.toArray();
-        assertEquals(1, counter.get()); // Executed once
+        assertEquals(1, counter.get());
         assertArrayEquals(new double[] { 2.0, 4.0, 6.0 }, result, 0.0001);
     }
 

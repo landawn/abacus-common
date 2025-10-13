@@ -2,9 +2,11 @@ package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Reflection101Test extends TestBase {
 
     public static class TestClass {
@@ -36,7 +38,6 @@ public class Reflection101Test extends TestBase {
         }
 
         public void voidMethod() {
-            // Does nothing
         }
     }
 

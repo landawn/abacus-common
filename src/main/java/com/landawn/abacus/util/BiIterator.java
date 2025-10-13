@@ -86,24 +86,46 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     };
 
     /**
-     * Returns an empty BiIterator instance.
+     * Returns an empty {@code BiIterator} instance.
+     * The returned iterator has no elements and all operations that expect elements will throw {@code NoSuchElementException}.
+     *
+     * <p>This is a singleton instance that is reused for all empty BiIterator requests,
+     * making it efficient for representing empty iterations.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BiIterator<String, Integer> empty = BiIterator.empty();
+     * assertFalse(empty.hasNext()); // true - no elements
+     * }</pre>
      *
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
-     * @return an empty BiIterator instance
+     * @return an empty BiIterator instance that contains no elements
      */
     public static <A, B> BiIterator<A, B> empty() {
         return EMPTY;
     }
 
     /**
-     * Returns a BiIterator for the given map.
-     * If the map is empty, returns an empty BiIterator.
+     * Creates a {@code BiIterator} from the given map's entries.
+     * The iterator will yield pairs of keys and values from the map.
+     * If the map is {@code null} or empty, returns an empty {@code BiIterator}.
+     *
+     * <p>The iteration order depends on the map's implementation. For example,
+     * a {@code HashMap} provides no iteration order guarantees, while a {@code LinkedHashMap}
+     * maintains insertion order.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Map<String, Integer> map = Map.of("a", 1, "b", 2);
+     * BiIterator<String, Integer> iter = BiIterator.of(map);
+     * iter.forEachRemaining((key, value) -> System.out.println(key + "=" + value));
+     * }</pre>
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
-     * @param map the map to create the BiIterator from
-     * @return a BiIterator over the entries of the map
+     * @param map the map to create the BiIterator from, may be {@code null}
+     * @return a BiIterator over the entries of the map, or an empty BiIterator if the map is {@code null} or empty
      */
     public static <K, V> BiIterator<K, V> of(final Map<K, V> map) {
         if (N.isEmpty(map)) {
@@ -114,13 +136,24 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Returns a BiIterator for the given iterator of map entries.
-     * If the iterator is {@code null}, returns an empty BiIterator.
+     * Creates a {@code BiIterator} from an iterator of map entries.
+     * The iterator will yield pairs of keys and values extracted from each {@code Map.Entry}.
+     * If the iterator is {@code null}, returns an empty {@code BiIterator}.
+     *
+     * <p>This method is useful when you already have an iterator over map entries
+     * and want to process keys and values separately without creating intermediate {@code Pair} objects.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Map<String, Integer> map = Map.of("a", 1, "b", 2);
+     * Iterator<Map.Entry<String, Integer>> entryIter = map.entrySet().iterator();
+     * BiIterator<String, Integer> iter = BiIterator.of(entryIter);
+     * }</pre>
      *
      * @param <K> the type of keys in the map entries
      * @param <V> the type of values in the map entries
-     * @param iter the iterator of map entries to create the BiIterator from
-     * @return a BiIterator over the entries of the iterator
+     * @param iter the iterator of map entries to create the BiIterator from, may be {@code null}
+     * @return a BiIterator over the entries of the iterator, or an empty BiIterator if the iterator is {@code null}
      */
     public static <K, V> BiIterator<K, V> of(final Iterator<Map.Entry<K, V>> iter) {
         if (iter == null) {
@@ -188,14 +221,29 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Generates an infinite {@code BiIterator} instance with the provided output Consumer.
-     * The output Consumer is responsible for producing the next Pair<A, B> on each iteration.
-     * This method is typically used for generating a BiIterator with custom logic.
+     * Generates an infinite {@code BiIterator} with elements produced by the given output consumer.
+     * The output consumer is invoked for each iteration to populate a {@code Pair} with the next values.
+     *
+     * <p><strong>Warning:</strong> This creates an infinite iterator. Always use with operations
+     * that limit the iteration (e.g., {@link #limit(long)}, {@link #filter(BiPredicate)}) to avoid infinite loops.</p>
+     *
+     * <p>The output consumer receives a mutable {@code Pair} object that should be populated
+     * with the next pair of values using {@code pair.set(a, b)} or {@code pair.setLeft(a)} and {@code pair.setRight(b)}.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * AtomicInteger counter = new AtomicInteger(0);
+     * BiIterator<Integer, String> iter = BiIterator.generate(pair -> {
+     *     int n = counter.incrementAndGet();
+     *     pair.set(n, "value" + n);
+     * }).limit(5);
+     * }</pre>
      *
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
-     * @param output A Consumer that accepts a Pair<A, B> and produces the next Pair<A, B> on each iteration.
-     * @return A BiIterator<A, B> that uses the provided output Consumer to generate its elements.
+     * @param output a Consumer that populates a Pair with the next values on each iteration, must not be {@code null}
+     * @return an infinite BiIterator that uses the output Consumer to generate its elements
+     * @throws IllegalArgumentException if output is {@code null}
      * @see #generate(BooleanSupplier, Consumer)
      */
     public static <A, B> BiIterator<A, B> generate(final Consumer<Pair<A, B>> output) {
@@ -203,16 +251,33 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Generates a BiIterator instance with the provided hasNext BooleanSupplier and output Consumer.
-     * The hasNext BooleanSupplier is used to determine if the iterator has more elements.
-     * The output Consumer is responsible for producing the next Pair<A, B> on each iteration.
+     * Generates a {@code BiIterator} with elements produced by the output consumer while the hasNext supplier returns {@code true}.
+     * The hasNext supplier controls when the iteration should stop, and the output consumer populates each pair of values.
+     *
+     * <p>This method provides full control over iteration termination and element generation.
+     * The hasNext supplier is called before each element is produced to determine if iteration should continue.</p>
+     *
+     * <p>The output consumer receives a mutable {@code Pair} object that should be populated
+     * with the next pair of values using {@code pair.set(a, b)} or {@code pair.setLeft(a)} and {@code pair.setRight(b)}.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * AtomicInteger counter = new AtomicInteger(0);
+     * BiIterator<Integer, String> iter = BiIterator.generate(
+     *     () -> counter.get() < 5,
+     *     pair -> {
+     *         int n = counter.incrementAndGet();
+     *         pair.set(n, "value" + n);
+     *     }
+     * );
+     * }</pre>
      *
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
-     * @param hasNext A BooleanSupplier that returns {@code true} if the iterator has more elements.
-     * @param output A Consumer that accepts a Pair<A, B> and produces the next Pair<A, B> on each iteration.
-     * @return A BiIterator<A, B> that uses the provided hasNext BooleanSupplier and output Consumer to generate its elements.
-     * @throws IllegalArgumentException If hasNext or output is {@code null}.
+     * @param hasNext a BooleanSupplier that returns {@code true} if the iterator should have more elements, must not be {@code null}
+     * @param output a Consumer that populates a Pair with the next values on each iteration, must not be {@code null}
+     * @return a BiIterator that uses the hasNext supplier and output consumer to generate its elements
+     * @throws IllegalArgumentException if hasNext or output is {@code null}
      */
     public static <A, B> BiIterator<A, B> generate(final BooleanSupplier hasNext, final Consumer<Pair<A, B>> output) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
@@ -310,18 +375,33 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Generates a BiIterator instance with the provided fromIndex, toIndex, and output IntObjConsumer.
-     * The fromIndex and toIndex define the size of the returned iterator.
-     * The output IntObjConsumer is responsible for producing the next Pair<A, B> on each iteration.
+     * Generates a {@code BiIterator} over an index range, with elements produced by the output consumer for each index.
+     * The iterator will produce {@code toIndex - fromIndex} elements, with indices ranging from {@code fromIndex} (inclusive)
+     * to {@code toIndex} (exclusive).
+     *
+     * <p>This method is useful for generating pairs based on an index, such as creating coordinate pairs,
+     * index-value pairs, or any other index-dependent data.</p>
+     *
+     * <p>The output consumer receives the current index and a mutable {@code Pair} object that should be
+     * populated with the values corresponding to that index.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Generate pairs of (index, square of index)
+     * BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> {
+     *     pair.set(i, i * i);
+     * });
+     * // Produces: (0,0), (1,1), (2,4), (3,9), (4,16)
+     * }</pre>
      *
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
-     * @param fromIndex The starting index of the iterator.
-     * @param toIndex The ending index of the iterator.
-     * @param output An IntObjConsumer that accepts an integer and a Pair<A, B> and produces the next Pair<A, B> on each iteration.
-     * @return A BiIterator<A, B> that uses the provided fromIndex, toIndex, and output IntObjConsumer to generate its elements.
-     * @throws IllegalArgumentException If fromIndex is greater than toIndex.
-     * @throws IndexOutOfBoundsException If fromIndex or toIndex is out of range.
+     * @param fromIndex the starting index (inclusive), must be non-negative and not greater than {@code toIndex}
+     * @param toIndex the ending index (exclusive), must be non-negative
+     * @param output an IntObjConsumer that accepts an index and a Pair to populate with values, must not be {@code null}
+     * @return a BiIterator that generates elements for each index in the range [fromIndex, toIndex)
+     * @throws IllegalArgumentException if fromIndex is greater than toIndex, or if output is {@code null}
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is negative or exceeds {@code Integer.MAX_VALUE}
      */
     public static <A, B> BiIterator<A, B> generate(final int fromIndex, final int toIndex, final IntObjConsumer<Pair<A, B>> output)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -401,84 +481,103 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Zips two arrays into a BiIterator.
-     * The resulting BiIterator will iterate over pairs of elements from the two arrays.
-     * If the arrays have different lengths, the resulting BiIterator will have the length of the shorter array.
-     * If either array is {@code null}, returns an empty BiIterator.
+     * Zips two arrays into a {@code BiIterator} by pairing elements at corresponding indices.
+     * The resulting iterator will produce pairs from matching positions in both arrays.
+     * If the arrays have different lengths, iteration stops when the shorter array is exhausted.
+     * If either array is {@code null}, returns an empty {@code BiIterator}.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Bob", "Charlie"};
+     * Integer[] ages = {25, 30, 35};
+     * BiIterator<String, Integer> iter = BiIterator.zip(names, ages);
+     * iter.forEachRemaining((name, age) -> System.out.println(name + ": " + age));
+     * // Output: Alice: 25, Bob: 30, Charlie: 35
+     * }</pre>
      *
      * @param <A> the type of elements in the first array
      * @param <B> the type of elements in the second array
-     * @param a the first array
-     * @param b the second array
-     * @return a BiIterator that iterates over pairs of elements from the two arrays
+     * @param a the first array, may be {@code null}
+     * @param b the second array, may be {@code null}
+     * @return a BiIterator that produces pairs of elements at matching indices from both arrays
      */
     public static <A, B> BiIterator<A, B> zip(final A[] a, final B[] b) {
         return zip(Array.asList(a), Array.asList(b));
     }
 
     /**
-     * Zips two arrays into a BiIterator with specified default values for missing elements.
-     * The resulting BiIterator will iterate over pairs of elements from the two arrays.
-     * If the arrays have different lengths, the resulting BiIterator will continue with the default values
-     * for the shorter array until the longer array is exhausted.
+     * Zips two arrays into a {@code BiIterator} with default values for missing elements.
+     * The resulting iterator continues until both arrays are exhausted, using default values
+     * when one array is shorter than the other.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Bob"};
+     * Integer[] ages = {25, 30, 35, 40};
+     * BiIterator<String, Integer> iter = BiIterator.zip(names, ages, "Unknown", 0);
+     * // Produces: (Alice,25), (Bob,30), (Unknown,35), (Unknown,40)
+     * }</pre>
      *
      * @param <A> the type of elements in the first array
      * @param <B> the type of elements in the second array
-     * @param a the first array
-     * @param b the second array
-     * @param valueForNoneA the default value for missing elements in the first array
-     * @param valueForNoneB the default value for missing elements in the second array
-     * @return a BiIterator that iterates over pairs of elements from the two arrays
+     * @param a the first array, may be {@code null}
+     * @param b the second array, may be {@code null}
+     * @param valueForNoneA the default value used when the first array is shorter
+     * @param valueForNoneB the default value used when the second array is shorter
+     * @return a BiIterator that produces pairs until both arrays are exhausted
      */
     public static <A, B> BiIterator<A, B> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB) {
         return zip(Array.asList(a), Array.asList(b), valueForNoneA, valueForNoneB);
     }
 
     /**
-     * Zips two iterables into a BiIterator.
-     * The resulting BiIterator will iterate over pairs of elements from the two iterables.
-     * If the iterables have different lengths, the resulting BiIterator will have the length of the shorter iterable.
-     * If either iterable is {@code null}, returns an empty BiIterator.
+     * Zips two iterables into a {@code BiIterator} by pairing elements at corresponding positions.
+     * Iteration stops when the shorter iterable is exhausted.
      *
      * @param <A> the type of elements in the first iterable
      * @param <B> the type of elements in the second iterable
-     * @param a the first iterable
-     * @param b the second iterable
-     * @return a BiIterator that iterates over pairs of elements from the two iterables
+     * @param a the first iterable, may be {@code null}
+     * @param b the second iterable, may be {@code null}
+     * @return a BiIterator over pairs of elements, or empty if either iterable is {@code null}
      */
     public static <A, B> BiIterator<A, B> zip(final Iterable<A> a, final Iterable<B> b) {
         return zip(a == null ? null : a.iterator(), b == null ? null : b.iterator());
     }
 
     /**
-     * Zips two iterables into a BiIterator with specified default values for missing elements.
-     * The resulting BiIterator will iterate over pairs of elements from the two iterables.
-     * If the iterables have different lengths, the resulting BiIterator will continue with the default values
-     * for the shorter iterable until the longer iterable is exhausted.
+     * Zips two iterables into a {@code BiIterator} with default values for missing elements.
+     * Iteration continues until both iterables are exhausted, using defaults for the shorter one.
      *
      * @param <A> the type of elements in the first iterable
      * @param <B> the type of elements in the second iterable
-     * @param a the first iterable
-     * @param b the second iterable
-     * @param valueForNoneA the default value for missing elements in the first iterable
-     * @param valueForNoneB the default value for missing elements in the second iterable
-     * @return a BiIterator that iterates over pairs of elements from the two iterables
+     * @param a the first iterable, may be {@code null}
+     * @param b the second iterable, may be {@code null}
+     * @param valueForNoneA the default value when the first iterable is shorter
+     * @param valueForNoneB the default value when the second iterable is shorter
+     * @return a BiIterator that produces pairs until both iterables are exhausted
      */
     public static <A, B> BiIterator<A, B> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB) {
         return zip(a == null ? null : a.iterator(), b == null ? null : b.iterator(), valueForNoneA, valueForNoneB);
     }
 
     /**
-     * Zips two iterators into a BiIterator.
-     * The resulting BiIterator will iterate over pairs of elements from the two iterators.
-     * If the iterators have different lengths, the resulting BiIterator will have the length of the shorter iterator.
-     * If either iterator is {@code null}, returns an empty BiIterator.
+     * Zips two iterators into a {@code BiIterator} by pairing elements at corresponding positions.
+     * Iteration stops when the shorter iterator is exhausted. Elements from the longer iterator
+     * beyond that point are ignored.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Iterator<String> names = List.of("Alice", "Bob").iterator();
+     * Iterator<Integer> ages = List.of(25, 30, 35).iterator();
+     * BiIterator<String, Integer> iter = BiIterator.zip(names, ages);
+     * // Produces: (Alice,25), (Bob,30) - third age is ignored
+     * }</pre>
      *
      * @param <A> the type of elements in the first iterator
      * @param <B> the type of elements in the second iterator
-     * @param iterA the first iterator
-     * @param iterB the second iterator
-     * @return a BiIterator that iterates over pairs of elements from the two iterators
+     * @param iterA the first iterator, may be {@code null}
+     * @param iterB the second iterator, may be {@code null}
+     * @return a BiIterator over pairs of elements, or empty if either iterator is {@code null}
      */
     public static <A, B> BiIterator<A, B> zip(final Iterator<A> iterA, final Iterator<B> iterB) {
         if (iterA == null || iterB == null) {
@@ -566,18 +665,25 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Zips two iterators into a BiIterator with specified default values for missing elements.
-     * The resulting BiIterator will iterate over pairs of elements from the two iterators.
-     * If the iterators have different lengths, the resulting BiIterator will continue with the default values
-     * for the shorter iterator until the longer iterator is exhausted.
+     * Zips two iterators into a {@code BiIterator} with default values for missing elements.
+     * Iteration continues until both iterators are exhausted, using the specified default values
+     * when one iterator is shorter than the other.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Iterator<String> names = List.of("Alice", "Bob").iterator();
+     * Iterator<Integer> ages = List.of(25, 30, 35).iterator();
+     * BiIterator<String, Integer> iter = BiIterator.zip(names, ages, "Unknown", 0);
+     * // Produces: (Alice,25), (Bob,30), (Unknown,35)
+     * }</pre>
      *
      * @param <A> the type of elements in the first iterator
      * @param <B> the type of elements in the second iterator
-     * @param iterA the first iterator
-     * @param iterB the second iterator
-     * @param valueForNoneA the default value for missing elements in the first iterator
-     * @param valueForNoneB the default value for missing elements in the second iterator
-     * @return a BiIterator that iterates over pairs of elements from the two iterators
+     * @param iterA the first iterator, may be {@code null}
+     * @param iterB the second iterator, may be {@code null}
+     * @param valueForNoneA the default value used when the first iterator is exhausted
+     * @param valueForNoneB the default value used when the second iterator is exhausted
+     * @return a BiIterator that produces pairs until both iterators are exhausted
      */
     public static <A, B> BiIterator<A, B> zip(final Iterator<A> iterA, final Iterator<B> iterB, final A valueForNoneA, final B valueForNoneB) {
         final Iterator<A> iter1 = iterA == null ? ObjIterator.empty() : iterA;
@@ -663,45 +769,55 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Unzips an iterable of elements into a BiIterator.
-     * The resulting BiIterator will iterate over pairs of elements produced by the unzip function.
-     * If the iterable is {@code null}, returns an empty BiIterator.
+     * Unzips an iterable into a {@code BiIterator} by splitting each element into a pair using the unzip function.
+     * This is the inverse operation of zipping - it transforms single elements into pairs of values.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<String> data = List.of("Alice:25", "Bob:30");
+     * BiIterator<String, Integer> iter = BiIterator.unzip(data, (s, pair) -> {
+     *     String[] parts = s.split(":");
+     *     pair.set(parts[0], Integer.parseInt(parts[1]));
+     * });
+     * // Produces: (Alice,25), (Bob,30)
+     * }</pre>
      *
      * @param <T> the type of elements in the iterable
-     * @param <A> the first type of elements returned by the BiIterator
-     * @param <B> the second type of elements returned by the BiIterator
-     * @param iter the iterable to unzip
-     * @param unzipFunc a BiConsumer that accepts an element of type T and a {@code Pair<A, B>} and populates the pair with the unzipped values
-     * @return a BiIterator that iterates over pairs of elements produced by the unzip function
+     * @param <A> the first type of elements in the resulting pairs
+     * @param <B> the second type of elements in the resulting pairs
+     * @param iter the iterable to unzip, may be {@code null}
+     * @param unzipFunction a BiConsumer that splits each element into a pair by populating the provided Pair object
+     * @return a BiIterator of pairs produced by the unzip function, or empty if iter is {@code null}
      */
-    public static <T, A, B> BiIterator<A, B> unzip(final Iterable<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunc) {
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterable<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunction) {
         if (iter == null) {
             return BiIterator.empty();
         }
 
-        return unzip(iter.iterator(), unzipFunc);
+        return unzip(iter.iterator(), unzipFunction);
     }
 
     /**
-     * Unzips an iterator of elements into a BiIterator.
-     * The resulting BiIterator will iterate over pairs of elements produced by the unzip function.
-     * If the iterator is {@code null}, returns an empty BiIterator.
+     * Unzips an iterator into a {@code BiIterator} by splitting each element into a pair using the unzip function.
+     * This is the inverse operation of zipping - it transforms single elements into pairs of values.
      *
      * @param <T> the type of elements in the iterator
-     * @param <A> the first type of elements returned by the BiIterator
-     * @param <B> the second type of elements returned by the BiIterator
-     * @param iter the iterator to unzip
-     * @param unzipFunc a BiConsumer that accepts an element of type T and a {@code Pair<A, B>} and populates the pair with the unzipped values
-     * @return a BiIterator that iterates over pairs of elements produced by the unzip function
+     * @param <A> the first type of elements in the resulting pairs
+     * @param <B> the second type of elements in the resulting pairs
+     * @param iter the iterator to unzip, may be {@code null}
+     * @param unzipFunction a BiConsumer that splits each element into a pair by populating the provided Pair object
+     * @return a BiIterator of pairs produced by the unzip function, or empty if iter is {@code null}
      */
-    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunc) {
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunction) {
+        N.checkArgNotNull(unzipFunction, cs.function);
+
         if (iter == null) {
             return BiIterator.empty();
         }
 
         final BooleanSupplier booleanSupplier = iter::hasNext;
 
-        final Consumer<Pair<A, B>> output = out -> unzipFunc.accept(iter.next(), out);
+        final Consumer<Pair<A, B>> output = out -> unzipFunction.accept(iter.next(), out);
 
         return BiIterator.generate(booleanSupplier, output);
     }
@@ -732,28 +848,43 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Performs the given action for each remaining element in the iterator until all elements have been processed or the action throws an exception.
+     * Performs the given action for each remaining pair of elements in this iterator.
+     * The action is executed for each pair until all elements are consumed or the action throws an exception.
      *
-     * @param action the action to be performed for each element
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
+     * iter.forEachRemaining((key, value) -> System.out.println(key + "=" + value));
+     * }</pre>
+     *
+     * @param action the action to be performed for each pair of elements, must not be {@code null}
      */
     public abstract void forEachRemaining(final BiConsumer<? super A, ? super B> action);
 
     /**
-     * Performs the given action for each remaining element in the iterator until all elements
-     * have been processed or the action throws an exception.
+     * Performs the given action for each remaining pair of elements in this iterator.
+     * This variant allows the action to throw checked exceptions.
      *
      * @param <E> the type of exception that the action may throw
-     * @param action a BiConsumer that processes the next pair of elements
+     * @param action a BiConsumer that processes each pair of elements, must not be {@code null}
      * @throws E if the action throws an exception
      */
     public abstract <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E; // NOSONAR
 
     /**
-     * Returns a new BiIterator with <i>n</i> elements skipped from the beginning of this BiIterator.
+     * Returns a new {@code BiIterator} that skips the first {@code n} pairs of elements.
+     * The resulting iterator will begin iteration after discarding the specified number of elements.
      *
-     * @param n the number of elements to skip
-     * @return A new BiIterator that skips the first <i>n</i> elements.
-     * @throws IllegalArgumentException If <i>n</i> is negative.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2, "c", 3));
+     * BiIterator<String, Integer> skipped = iter.skip(1);
+     * // Skips first pair, iterates over remaining pairs
+     * }</pre>
+     *
+     * @param n the number of pairs to skip from the beginning, must be non-negative
+     * @return a new BiIterator that begins after skipping {@code n} pairs, or this iterator if {@code n} is 0
+     * @throws IllegalArgumentException if {@code n} is negative
      */
     public BiIterator<A, B> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -839,12 +970,19 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Returns a new BiIterator with a limited number of elements.
-     * The resulting BiIterator will contain at most the specified number of elements.
+     * Returns a new {@code BiIterator} that is limited to at most {@code count} pairs of elements.
+     * The resulting iterator will produce at most the specified number of pairs, even if more are available.
      *
-     * @param count the maximum number of elements to include in the resulting BiIterator
-     * @return a new BiIterator that contains at most the specified number of elements
-     * @throws IllegalArgumentException If <i>count</i> is negative.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BiIterator<Integer, Integer> infinite = BiIterator.generate(pair -> pair.set(1, 2));
+     * BiIterator<Integer, Integer> limited = infinite.limit(5);
+     * // Produces exactly 5 pairs
+     * }</pre>
+     *
+     * @param count the maximum number of pairs to include, must be non-negative
+     * @return a new BiIterator limited to {@code count} pairs, or an empty iterator if {@code count} is 0
+     * @throws IllegalArgumentException if {@code count} is negative
      */
     public BiIterator<A, B> limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -913,10 +1051,18 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Returns a new BiIterator that includes only the elements that satisfy the provided predicate.
+     * Returns a new {@code BiIterator} that includes only pairs satisfying the given predicate.
+     * Pairs for which the predicate returns {@code false} are skipped during iteration.
      *
-     * @param predicate the predicate to apply to each pair of elements
-     * @return a new BiIterator containing only the elements that match the predicate
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2, "c", 3));
+     * BiIterator<String, Integer> filtered = iter.filter((k, v) -> v > 1);
+     * // Produces only pairs where value > 1: (b,2), (c,3)
+     * }</pre>
+     *
+     * @param predicate the predicate to test each pair, must not be {@code null}
+     * @return a new BiIterator containing only pairs that satisfy the predicate
      */
     public BiIterator<A, B> filter(final BiPredicate<? super A, ? super B> predicate) {
         N.checkArgNotNull(predicate, cs.Predicate);
@@ -1020,19 +1166,27 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Transforms the elements of this BiIterator using the given mapper function.
+     * Transforms each pair of elements in this {@code BiIterator} using the given mapper function,
+     * producing an {@code ObjIterator} of the mapped results.
      *
-     * @param <R> the type of elements in the resulting ObjIterator
-     * @param mapper the function to apply to each pair of elements
-     * @return an ObjIterator containing the elements produced by the mapper function
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
+     * ObjIterator<String> mapped = iter.map((k, v) -> k + "=" + v);
+     * // Produces: "a=1", "b=2"
+     * }</pre>
+     *
+     * @param <R> the type of elements in the resulting iterator
+     * @param mapper the function to apply to each pair of elements, must not be {@code null}
+     * @return an ObjIterator containing the results of applying the mapper to each pair
      */
     public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper);
 
     /**
-     * Returns an Optional containing the first pair of elements in the iterator.
-     * If the iterator is empty, returns an empty Optional.
+     * Returns an {@code Optional} containing the first pair of elements, or empty if this iterator has no elements.
+     * This method consumes the first pair from the iterator.
      *
-     * @return an Optional containing the first pair of elements, or an empty Optional if the iterator is empty
+     * @return an Optional containing the first pair if available, otherwise empty
      */
     public Optional<Pair<A, B>> first() {
         if (hasNext()) {
@@ -1043,10 +1197,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Returns an Optional containing the last pair of elements in the iterator.
-     * If the iterator is empty, returns an empty Optional.
+     * Returns an {@code Optional} containing the last pair of elements, or empty if this iterator has no elements.
+     * This method consumes all remaining pairs in the iterator to find the last one.
      *
-     * @return an Optional containing the last pair of elements, or an empty Optional if the iterator is empty
+     * <p><strong>Note:</strong> This operation is expensive for large iterators as it must iterate through all elements.</p>
+     *
+     * @return an Optional containing the last pair if the iterator is non-empty, otherwise empty
      */
     public Optional<Pair<A, B>> last() {
         if (hasNext()) {
@@ -1062,19 +1218,34 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Returns an EntryStream of the elements in this BiIterator.
+     * Converts this {@code BiIterator} into an {@code EntryStream} for further stream processing.
+     * The resulting stream will contain all remaining pairs from this iterator.
      *
-     * @return A Stream containing the remaining elements in the BiIterator.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
+     * EntryStream<String, Integer> stream = iter.stream();
+     * Map<String, Integer> result = stream.toMap();
+     * }</pre>
+     *
+     * @return an EntryStream containing the remaining pairs in this BiIterator
      */
     public EntryStream<A, B> stream() {
         return EntryStream.of(this);
     }
 
     /**
-     * Returns a Stream of elements produced by applying the given mapper function to each pair of elements in this BiIterator.
+     * Converts this {@code BiIterator} into a {@code Stream} by applying the mapper function to each pair.
+     * The resulting stream will contain the mapped values.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
+     * Stream<String> stream = iter.stream((k, v) -> k + "=" + v);
+     * }</pre>
      *
      * @param <R> the type of elements in the resulting Stream
-     * @param mapper the function to apply to each pair of elements
+     * @param mapper the function to apply to each pair, must not be {@code null}
      * @return a Stream containing the elements produced by the mapper function
      */
     public <R> Stream<R> stream(final BiFunction<? super A, ? super B, ? extends R> mapper) {
@@ -1082,9 +1253,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Converts the elements in this BiIterator to an array of Pair objects.
+     * Converts all remaining pairs in this {@code BiIterator} to an array of {@code Pair} objects.
+     * This method consumes the entire iterator.
      *
-     * @return An array containing the remaining pairs of elements in this BiIterator.
+     * @return an array containing all remaining pairs from this BiIterator
      */
     public Pair<A, B>[] toArray() {
         return toArray(new Pair[0]);
@@ -1105,20 +1277,29 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Converts the elements in this BiIterator to a List of Pair objects.
+     * Converts all remaining pairs in this {@code BiIterator} to a {@code List} of {@code Pair} objects.
+     * This method consumes the entire iterator.
      *
-     * @return a List containing all pairs of elements in this BiIterator
+     * @return a List containing all remaining pairs from this BiIterator
      */
     public List<Pair<A, B>> toList() {
         return toCollection(Suppliers.ofList());
     }
 
     /**
-     * Converts the elements in this BiIterator to a Pair of Lists.
-     * The first list contains all the first elements of the pairs, and the second list contains all the second elements of the pairs.
+     * Converts all remaining pairs in this {@code BiIterator} to a {@code Pair} of {@code List}s.
+     * The first list contains all first elements from the pairs, and the second list contains all second elements.
+     * This method consumes the entire iterator and "unzips" the pairs into separate lists.
      *
-     * @param supplier a Supplier that provides new instances of List
-     * @return a Pair containing two Lists: one with the first elements and one with the second elements
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
+     * Pair<List<String>, List<Integer>> lists = iter.toMultiList(ArrayList::new);
+     * // lists.left() = ["a", "b"], lists.right() = [1, 2]
+     * }</pre>
+     *
+     * @param supplier a Supplier that provides new List instances, must not be {@code null}
+     * @return a Pair containing two Lists: the first with all first elements, the second with all second elements
      */
     public Pair<List<A>, List<B>> toMultiList(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
         final List<A> listA = supplier.get();
@@ -1133,11 +1314,18 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Converts the elements in this BiIterator to a Pair of Sets.
-     * The first set contains all the first elements of the pairs, and the second set contains all the second elements of the pairs.
+     * Converts all remaining pairs in this {@code BiIterator} to a {@code Pair} of {@code Set}s.
+     * The first set contains all unique first elements from the pairs, and the second set contains all unique second elements.
+     * This method consumes the entire iterator and "unzips" the pairs into separate sets, removing duplicates.
      *
-     * @param supplier a Supplier that provides new instances of Set
-     * @return a Pair containing two Sets: one with the first elements and one with the second elements
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
+     * Pair<Set<String>, Set<Integer>> sets = iter.toMultiSet(HashSet::new);
+     * }</pre>
+     *
+     * @param supplier a Supplier that provides new Set instances, must not be {@code null}
+     * @return a Pair containing two Sets: the first with all unique first elements, the second with all unique second elements
      */
     public Pair<Set<A>, Set<B>> toMultiSet(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
         final Set<A> listA = supplier.get();

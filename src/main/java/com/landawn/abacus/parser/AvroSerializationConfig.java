@@ -35,7 +35,6 @@ import com.landawn.abacus.util.N;
  *     .setExclusion(Exclusion.NULL);
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 0.8
  */
 public class AvroSerializationConfig extends SerializationConfig<AvroSerializationConfig> {

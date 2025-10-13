@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -278,14 +274,14 @@ public class NTest extends AbstractParserTest {
             final double[] a = { Double.NEGATIVE_INFINITY, Double.NaN, Double.POSITIVE_INFINITY };
             assertTrue(N.contains(a, Double.POSITIVE_INFINITY));
             assertTrue(N.contains(a, Double.NEGATIVE_INFINITY));
-            assertTrue(N.contains(a, Double.NaN)); // false ?
+            assertTrue(N.contains(a, Double.NaN));
         }
 
         {
             final float[] a = { Float.NEGATIVE_INFINITY, Float.NaN, Float.POSITIVE_INFINITY };
             assertTrue(N.contains(a, Float.POSITIVE_INFINITY));
             assertTrue(N.contains(a, Float.NEGATIVE_INFINITY));
-            assertTrue(N.contains(a, Float.NaN)); // false ?
+            assertTrue(N.contains(a, Float.NaN));
         }
     }
 
@@ -603,20 +599,6 @@ public class NTest extends AbstractParserTest {
         assertTrue(N.equals(Array.of(3, 5), b));
     }
 
-    //    @Test
-    //    public void test_0002() {
-    //        String str = "-a-";
-    //
-    //        assertEquals("a", N.findFirst(str, "-", "-").orElse(null));
-    //        assertEquals("a", N.findLast(str, "-", "-").orElse(null));
-    //
-    //        str = "--";
-    //
-    //        assertEquals("", N.findFirst(str, "-", "-").orElse(null));
-    //        assertEquals("", N.findLast(str, "-", "-").orElse(null));
-    //    }
-
-    //
     @Test
     public void test_0003() {
         String str = "-a-";
@@ -766,116 +748,7 @@ public class NTest extends AbstractParserTest {
         N.println(triple);
     }
 
-    //    @Test
-    //    public void test_bucketSort() {
-    //        /*
-    //        {
-    //            char[] a = { '3', '3', '3', '2', '2', '1' };
-    //            N.bucketSort(a);
-    //            assertTrue(N.equals(new char[] { '1', '2', '2', '3', '3', '3' }, a));
     //
-    //            a = new char[] { '3', '3', '3', '2', '2', '1' };
-    //            N.bucketSort(a, 1, 5);
-    //            assertTrue(N.equals(new char[] { '3', '2', '2', '3', '3', '1' }, a));
-    //        }
-    //
-    //        {
-    //            byte[] a = { 3, 3, 3, 2, 2, 1 };
-    //            N.bucketSort(a);
-    //            assertTrue(N.equals(new byte[] { 1, 2, 2, 3, 3, 3 }, a));
-    //
-    //            a = new byte[] { 3, 3, 3, 2, 2, 1 };
-    //            N.bucketSort(a, 1, 5);
-    //            assertTrue(N.equals(new byte[] { 3, 2, 2, 3, 3, 1 }, a));
-    //        }
-    //
-    //        {
-    //            short[] a = { 3, 3, 3, 2, 2, 1 };
-    //            N.bucketSort(a);
-    //            assertTrue(N.equals(new short[] { 1, 2, 2, 3, 3, 3 }, a));
-    //
-    //            a = new short[] { 3, 3, 3, 2, 2, 1 };
-    //            N.bucketSort(a, 1, 5);
-    //            assertTrue(N.equals(new short[] { 3, 2, 2, 3, 3, 1 }, a));
-    //        }
-    //         */
-    //        {
-    //            int[] a = { 3, 3, 3, 2, 2, 1 };
-    //            N.bucketSort(a);
-    //            assertTrue(N.equals(new int[] { 1, 2, 2, 3, 3, 3 }, a));
-    //
-    //            a = new int[] { 3, 3, 3, 2, 2, 1 };
-    //            N.bucketSort(a, 1, 5);
-    //            assertTrue(N.equals(new int[] { 3, 2, 2, 3, 3, 1 }, a));
-    //        }
-    //        {
-    //            long[] a = { 3, 3, 3, 2, 2, 1 };
-    //            N.bucketSort(a);
-    //            assertTrue(N.equals(new long[] { 1, 2, 2, 3, 3, 3 }, a));
-    //
-    //            a = new long[] { 3, 3, 3, 2, 2, 1 };
-    //            N.bucketSort(a, 1, 5);
-    //            assertTrue(N.equals(new long[] { 3, 2, 2, 3, 3, 1 }, a));
-    //        }
-    //        {
-    //            float[] a = { 3, 3, 3, 2, 2, 1 };
-    //            N.bucketSort(a);
-    //            assertTrue(N.equals(new float[] { 1, 2, 2, 3, 3, 3 }, a));
-    //
-    //            a = new float[] { 3, 3, 3, 2, 2, 1 };
-    //            N.bucketSort(a, 1, 5);
-    //            assertTrue(N.equals(new float[] { 3, 2, 2, 3, 3, 1 }, a));
-    //        }
-    //        {
-    //            double[] a = { 3, 3, 3, 2, 2, 1 };
-    //            N.bucketSort(a);
-    //            assertTrue(N.equals(new double[] { 1, 2, 2, 3, 3, 3 }, a));
-    //
-    //            a = new double[] { 3, 3, 3, 2, 2, 1 };
-    //            N.bucketSort(a, 1, 5);
-    //            assertTrue(N.equals(new double[] { 3, 2, 2, 3, 3, 1 }, a));
-    //        }
-    //
-    //        {
-    //            String[] a = { "3", "3", "3", "2", "2", "1" };
-    //            N.bucketSort(a);
-    //            assertTrue(N.equals(new String[] { "1", "2", "2", "3", "3", "3" }, a));
-    //
-    //            a = new String[] { "3", "3", "3", "2", "2", "1" };
-    //            N.bucketSort(a, 1, 5);
-    //            assertTrue(N.equals(new String[] { "3", "2", "2", "3", "3", "1" }, a));
-    //        }
-    //        {
-    //            List<Integer> c = N.asList(3, 3, 3, 2, 2, 1);
-    //            N.bucketSort(c);
-    //            assertEquals(N.asList(1, 2, 2, 3, 3, 3), c);
-    //
-    //            c = N.asList(3, 3, 3, 2, 2, 1);
-    //            N.bucketSort(c, 0, c.size());
-    //            assertEquals(N.asList(1, 2, 2, 3, 3, 3), c);
-    //
-    //            c = N.asList(3, 3, 3, 2, 2, 1);
-    //            N.bucketSort(c, 1, c.size());
-    //            assertEquals(N.asList(3, 1, 2, 2, 3, 3), c);
-    //
-    //            c = N.asList(3, 3, 3, 2, 2, 1);
-    //            N.bucketSort(c, 4, c.size());
-    //            assertEquals(N.asList(3, 3, 3, 2, 1, 2), c);
-    //
-    //            c = N.asList(3, 3, 3, 2, 2, 1);
-    //            N.bucketSort(c, 5, c.size());
-    //            assertEquals(N.asList(3, 3, 3, 2, 2, 1), c);
-    //
-    //            c = N.asList(3, 3, 3, 2, 2, 1);
-    //            N.bucketSort(c, 0, 0);
-    //            assertEquals(N.asList(3, 3, 3, 2, 2, 1), c);
-    //
-    //            c = N.asList(3, 3, 3, 2, 2, 1);
-    //            N.bucketSort(c, c.size(), c.size());
-    //            assertEquals(N.asList(3, 3, 3, 2, 2, 1), c);
-    //        }
-    //    }
-
     @Test
     public void test_copy_2() {
         final List<Integer> list1 = N.asList(1, 2, 3);
@@ -908,14 +781,6 @@ public class NTest extends AbstractParserTest {
         final String[][][] e = null;
         N.println(N.clone(e));
 
-        //        Object[] c1 = N.copy(Object[].class, c);
-        //        N.println(c1);
-        //
-        //        Object[] d1 = N.copy(Object[][].class, d);
-        //        N.println(d1);
-        //
-        //        Object[][] e1 = N.copy(Object[][][].class, e);
-        //        N.println(e1);
     }
 
     @Test
@@ -940,58 +805,31 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_lambda() {
-        //        // fill/nCopies/reverse/rotate/shuffle/sum/avg/min/max/median...
         int[] a = Array.repeat(3, 10);
-        N.println(a); // [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+        N.println(a);
 
         N.fill(a, 0);
-        N.println(a); // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        N.println(a);
 
         a = Array.of(1, 2, 3, 4, 5, 6);
         N.reverse(a);
-        N.println(a); // [6, 5, 4, 3, 2, 1]
+        N.println(a);
 
         a = Array.of(1, 2, 3, 4, 5, 6);
         N.rotate(a, 2);
-        N.println(a); // [5, 6, 1, 2, 3, 4]
+        N.println(a);
 
         a = Array.of(1, 2, 3, 4, 5, 6);
         N.shuffle(a);
-        N.println(a); // [5, 3, 1, 4, 6, 2]
+        N.println(a);
 
         a = Array.of(1, 2, 3, 4, 5, 6);
-        N.println(N.sum(a)); // 21
-        N.println(N.average(a)); // 3.5
-        N.println(N.min(a)); // 1
-        N.println(N.max(a)); // 6
-        N.println(N.median(a)); // 3
+        N.println(N.sum(a));
+        N.println(N.average(a));
+        N.println(N.min(a));
+        N.println(N.max(a));
+        N.println(N.median(a));
 
-        //        // add/addAll/remove/removeAll/insert/insertAll/delete/deleteAll/replaceAll...
-        //        int[] a = { 1, 2, 3, 4, 5, 6 };
-        //        int[] b = N.add(a, 7);
-        //        N.println(b); // [1, 2, 3, 4, 5, 6, 7]
-        //        int[] c = N.remove(a, 7);
-        //        N.println(c); // [1, 2, 3, 4, 5, 6]
-        //
-        //        b = N.addAll(a, 7, 8);
-        //        N.println(b); // [1, 2, 3, 4, 5, 6, 7, 8]
-        //        c = N.removeAll(a, 7, 8);
-        //        N.println(c); // [1, 2, 3, 4, 5, 6]
-        //
-        //        b = N.insert(a, 0, 7);
-        //        N.println(b); // [7, 1, 2, 3, 4, 5, 6]
-        //        c = N.delete(b, 0);
-        //        N.println(c); // [1, 2, 3, 4, 5, 6]
-        //
-        //        b = N.insertAll(a, 0, 7, 8);
-        //        N.println(b); // [7, 8, 1, 2, 3, 4, 5, 6]
-        //        c = N.deleteAllByIndices(b, 0, 1);
-        //        N.println(c); // [1, 2, 3, 4, 5, 6]
-        //
-        //        c = N.concat(a, b);
-        //        N.println(c); // [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6]
-        //        N.replaceAll(c, 1, 9);
-        //        N.println(c); // [9, 2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5, 6]
     }
 
     @Test
@@ -1010,10 +848,6 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_isNumber() {
-        /*
-        N.println(N.parseLong("2e3"));
-        N.println(N.parseInt("2e3"));
-         */
         N.println(1.2345354);
         N.println(Double.valueOf("2e10"));
         N.println(Numbers.toDouble("2e10"));
@@ -1022,76 +856,6 @@ public class NTest extends AbstractParserTest {
         N.println(Numbers.createFloat("2e3"));
         N.println(Numbers.createNumber("2e10"));
     }
-    //
-    //    @Test
-    //    public void test_groupBy() {
-    //        Account[] a = { createAccount(Account.class), createAccount(Account.class), createAccount(Account.class) };
-    //        List<Account> c = N.asList(a);
-    //
-    //        Map<String, List<Account>> m = N.groupBy(a, new Function<Account, String>() {
-    //            @Override
-    //            public String apply(final Account t) {
-    //                return t.getFirstName();
-    //            }
-    //        });
-    //
-    //        N.println(m);
-    //
-    //        m = N.groupBy(List.class, a, new Function<Account, String>() {
-    //            @Override
-    //            public String apply(final Account t) {
-    //                return t.getFirstName();
-    //            }
-    //        });
-    //
-    //        N.println(m);
-    //
-    //        m = N.groupBy(c, new Function<Account, String>() {
-    //            @Override
-    //            public String apply(final Account t) {
-    //                return t.getFirstName();
-    //            }
-    //        });
-    //
-    //        N.println(m);
-    //
-    //        m = N.groupBy(List.class, c, new Function<Account, String>() {
-    //            @Override
-    //            public String apply(final Account t) {
-    //                return t.getFirstName();
-    //            }
-    //        });
-    //
-    //        N.println(m);
-    //
-    //        Map<String, Set<Account>> m2 = N.groupBy(Set.class, a, new Function<Account, String>() {
-    //            @Override
-    //            public String apply(final Account t) {
-    //                return t.getFirstName();
-    //            }
-    //        });
-    //
-    //        m2 = N.groupBy(Set.class, c, new Function<Account, String>() {
-    //            @Override
-    //            public String apply(final Account t) {
-    //                return t.getFirstName();
-    //            }
-    //        });
-    //
-    //        N.println(m2);
-    //
-    //        Set<Account> list = m2.values().iterator().next();
-    //        N.println(list);
-    //
-    //        Map<String, Set<Account>> m3 = N.groupBy(LinkedHashMap.class, Set.class, c, 0, 1, new Function<Account, String>() {
-    //            @Override
-    //            public String apply(final Account t) {
-    //                return t.getFirstName();
-    //            }
-    //        });
-    //
-    //        N.println(m3);
-    //    }
 
     @Test
     public void test_distinct() {
@@ -1106,45 +870,6 @@ public class NTest extends AbstractParserTest {
 
         N.println(m2);
     }
-
-    //    @Test
-    //    public void test_stringOf_2() {
-    //        {
-    //            String[] a = { "a", "b", "c" };
-    //
-    //            String str = N.stringOf(a);
-    //            N.println(str);
-    //            assertEquals("[\"a\", \"b\", \"c\"]", str);
-    //            assertTrue(N.equals(a, N.valueOf(String[].class, str)));
-    //
-    //            String str2 = N.array2String(a);
-    //            N.println(str2);
-    //            assertEquals("a, b, c", str2);
-    //            assertTrue(N.equals(a, N.string2Array(String[].class, str2)));
-    //
-    //            assertTrue(N.equals(a, N.valueOf(String[].class, str2)));
-    //
-    //            // assertTrue(N.equals(a, N.string2Array(String[].class, str)));
-    //        }
-    //
-    //        {
-    //            char[] a = { 'a', 'b', 'c' };
-    //
-    //            String str = N.stringOf(a);
-    //            N.println(str);
-    //            assertEquals("['a', 'b', 'c']", str);
-    //            assertTrue(N.equals(a, N.valueOf(char[].class, str)));
-    //
-    //            String str2 = N.array2String(a);
-    //            N.println(str2);
-    //            assertEquals("a, b, c", str2);
-    //            assertTrue(N.equals(a, N.string2Array(char[].class, str2)));
-    //
-    //            assertTrue(N.equals(a, N.valueOf(char[].class, str2)));
-    //
-    //            // assertTrue(N.equals(a, N.string2Array(String[].class, str)));
-    //        }
-    //    }
 
     @Test
     public void test_asyncExecute() throws InterruptedException, ExecutionException {
@@ -1311,132 +1036,6 @@ public class NTest extends AbstractParserTest {
         }
     }
 
-    //    @Test
-    //    public void test_parseInt() {
-    //        char[] cbuf = "123".toCharArray();
-    //
-    //        try {
-    //            AbstractType.parseInt(cbuf, -1, 2);
-    //            fail("SHould throw IllegalArgumentException");
-    //        } catch (IllegalArgumentException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseInt(cbuf, 1, -2);
-    //            fail("SHould throw IllegalArgumentException");
-    //        } catch (IllegalArgumentException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseInt(cbuf, 1, 3, Character.MIN_RADIX - 1);
-    //            fail("SHould throw NumberFormatException");
-    //        } catch (NumberFormatException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseInt(cbuf, 1, 3, Character.MAX_RADIX + 1);
-    //            fail("SHould throw NumberFormatException");
-    //        } catch (NumberFormatException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseInt("-".toCharArray(), 0, 1, Character.MAX_RADIX);
-    //            fail("SHould throw NumberFormatException");
-    //        } catch (NumberFormatException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseInt("+".toCharArray(), 0, 1, Character.MIN_RADIX);
-    //            fail("SHould throw NumberFormatException");
-    //        } catch (NumberFormatException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseInt(".".toCharArray(), 0, 1, Character.MIN_CODE_POINT);
-    //            fail("SHould throw NumberFormatException");
-    //        } catch (NumberFormatException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseInt("$".toCharArray(), 0, 1, Character.MAX_RADIX);
-    //            fail("SHould throw NumberFormatException");
-    //        } catch (NumberFormatException e) {
-    //
-    //        }
-    //
-    //        assertEquals(0, AbstractType.parseInt(cbuf, 0, 0, Character.MAX_RADIX));
-    //    }
-    //
-    //    @Test
-    //    public void test_parseLong() {
-    //        char[] cbuf = "123".toCharArray();
-    //
-    //        try {
-    //            AbstractType.parseLong(cbuf, -1, 2);
-    //            fail("SHould throw IllegalArgumentException");
-    //        } catch (IllegalArgumentException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseLong(cbuf, 1, -2);
-    //            fail("SHould throw IllegalArgumentException");
-    //        } catch (IllegalArgumentException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseLong(cbuf, 1, 3, Character.MIN_RADIX - 1);
-    //            fail("SHould throw NumberFormatException");
-    //        } catch (NumberFormatException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseLong(cbuf, 1, 3, Character.MAX_RADIX + 1);
-    //            fail("SHould throw NumberFormatException");
-    //        } catch (NumberFormatException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseLong("-".toCharArray(), 0, 1, Character.MAX_RADIX);
-    //            fail("SHould throw NumberFormatException");
-    //        } catch (NumberFormatException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseLong("+".toCharArray(), 0, 1, Character.MIN_RADIX);
-    //            fail("SHould throw NumberFormatException");
-    //        } catch (NumberFormatException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseLong(".".toCharArray(), 0, 1, Character.MIN_CODE_POINT);
-    //            fail("SHould throw NumberFormatException");
-    //        } catch (NumberFormatException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            AbstractType.parseLong("$".toCharArray(), 0, 1, Character.MAX_RADIX);
-    //            fail("SHould throw NumberFormatException");
-    //        } catch (NumberFormatException e) {
-    //
-    //        }
-    //
-    //        assertEquals(0, AbstractType.parseLong(cbuf, 0, 0, Character.MAX_RADIX));
-    //    }
-
     @Test
     public void test_asImmutableMap() {
         final Map<String, String> m = ImmutableMap.of("123", "abc", "234", "ijk");
@@ -1444,7 +1043,6 @@ public class NTest extends AbstractParserTest {
 
         for (final Map.Entry<String, String> entry : m.entrySet()) {
             N.println(entry.getKey() + ": " + entry.getValue());
-            // entry.setValue(entry.getKey());
         }
 
     }
@@ -1488,15 +1086,12 @@ public class NTest extends AbstractParserTest {
 
         rs2 = N.newDataset(rs1.toList(Map.class));
         rs2.println();
-        // assertEquals(rs1, rs2);
 
         final Dataset rs3 = N.newDataset(rs1.columnNameList(), rs1.toList(Object[].class));
         rs3.println();
-        // assertEquals(rs1, rs3);
 
         final Dataset rs4 = N.newDataset(rs1.columnNameList(), rs1.toList(List.class));
         rs4.println();
-        //  assertEquals(rs1, rs4);
 
     }
 
@@ -1552,40 +1147,6 @@ public class NTest extends AbstractParserTest {
             N.println(multiSet4);
         }
 
-        //        {
-        //            Multimap<String, String, List<String>> multiMap = N.asListMultimap("1", "1", "2", "1", "2", "2", "3", "1", "3", "2", "3", "3");
-        //            N.println(multiMap);
-        //
-        //            String str = N.stringOf(multiMap);
-        //
-        //            Multimap<String, String, List<String>> multiMap2 = N.valueOf(Multimap.class, str);
-        //            N.println(multiMap2);
-        //
-        //            Multimap<String, String, Set<String>> multiMap3 = (Multimap<String, String, Set<String>>) N.typeOf("Multimap<String, Set<String>>").valueOf(str);
-        //            N.println(multiMap3);
-        //
-        //            Multimap<String, String, Queue<String>> multiMap4 = (Multimap<String, String, Queue<String>>) N.typeOf("Multimap<String, Queue<String>>")
-        //                    .valueOf(str);
-        //            N.println(multiMap4);
-        //
-        //        }
-
-        //        {
-        //            Multimap<String, String, Set<String>> multiMap = N.asSetMultimap("1", "1", "2", "1", "2", "2", "3", "1", "3", "2", "3", "3");
-        //            N.println(multiMap);
-        //
-        //            String str = N.stringOf(multiMap);
-        //
-        //            Multimap<String, String, List<String>> multiMap2 = N.valueOf(Multimap.class, str);
-        //            N.println(multiMap2);
-        //
-        //            Multimap<String, String, List<String>> multiMap3 = (Multimap<String, String, List<String>>) N.typeOf("Multimap<String, List<String>>").valueOf(str);
-        //            N.println(multiMap3);
-        //
-        //            Multimap<String, String, Queue<String>> multiMap4 = (Multimap<String, String, Queue<String>>) N.typeOf("Multimap<String, Queue<String>>")
-        //                    .valueOf(str);
-        //            N.println(multiMap4);
-        //        }
     }
 
     @Test
@@ -1616,137 +1177,38 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_parallel_sort() {
-        //        final String[] array = new String[1000 * 10];
-        //        for (int i = 0, len = array.length; i < len; i++) {
-        //            array[i] = Strings.uuid();
-        //        }
-        //
-        //        final String[] array2 = N.copyOf(array, array.length);
-        //        assertTrue(N.equals(array, array2));
-        //
-        //        Arrays.sort(array);
-        //        assertFalse(N.equals(array, array2));
-        //
-        //        N.parallelSort(array2);
-        //        assertTrue(N.equals(array, array2));
     }
 
     @Test
     public void test_sort_big_int_array() {
-        //    final Random rand = new Random();
-        //    final int[] array = new int[1000 * 10];
-        //
-        //    Profiler.run(1, 1, 1, () -> {
-        //        for (int i = 0, len = array.length; i < len; i++) {
-        //            array[i] = rand.nextInt();
-        //        }
-        //
-        //    }).printResult();
-        //
-        //    Profiler.run(1, 1, 1, () -> N.sort(array)).printResult();
     }
 
     @Test
     public void test_sort_big_int_array_by_parallel_sort() {
-        //        final Random rand = new Random();
-        //        final int[] array = new int[1000 * 10];
-        //
-        //        Profiler.run(1, 1, 1, () -> {
-        //            for (int i = 0, len = array.length; i < len; i++) {
-        //                array[i] = rand.nextInt();
-        //            }
-        //
-        //        }).printResult();
-        //
-        //        Profiler.run(1, 1, 1, () -> N.parallelSort(array)).printResult();
     }
 
     @Test
     public void test_sort_big_long_array() {
-        //    final Random rand = new Random();
-        //    final long[] array = new long[1000 * 10];
-        //
-        //    Profiler.run(1, 1, 1, () -> {
-        //        for (int i = 0, len = array.length; i < len; i++) {
-        //            array[i] = rand.nextLong();
-        //        }
-        //
-        //    }).printResult();
-        //
-        //    Profiler.run(1, 1, 1, () -> N.sort(array)).printResult();
     }
 
     @Test
     public void test_sort_big_long_array_by_parallel_sort() {
-        //    final Random rand = new Random();
-        //    final long[] array = new long[1000 * 10];
-        //
-        //    Profiler.run(1, 1, 1, () -> {
-        //        for (int i = 0, len = array.length; i < len; i++) {
-        //            array[i] = rand.nextLong();
-        //        }
-        //
-        //    }).printResult();
-        //
-        //    Profiler.run(1, 1, 1, () -> N.parallelSort(array)).printResult();
     }
 
     @Test
     public void test_sort_big_double_array() {
-        //        final Random rand = new Random();
-        //        final double[] array = new double[1000 * 10];
-        //
-        //        Profiler.run(1, 1, 1, () -> {
-        //            for (int i = 0, len = array.length; i < len; i++) {
-        //                array[i] = rand.nextDouble();
-        //            }
-        //
-        //        }).printResult();
-        //
-        //        Profiler.run(1, 1, 1, () -> N.sort(array)).printResult();
     }
 
     @Test
     public void test_sort_big_double_array_by_parallel_sort() {
-        //        final Random rand = new Random();
-        //        final double[] array = new double[1000 * 10];
-        //
-        //        for (int i = 0, len = array.length; i < len; i++) {
-        //            array[i] = rand.nextDouble();
-        //        }
-        //
-        //        Profiler.run(1, 100, 3, "parallelSortByJdk", () -> N.parallelSort(array.clone())).printResult();
-        //        // Profiler.run(1, 100, 3, "parallelSortByAbacus", () -> Array.parallelSort(array.clone())).printResult();
     }
 
     @Test
     public void test_sort_big_string_array() {
-        //    final String[] array = new String[1000 * 10];
-        //
-        //    Profiler.run(1, 1, 1, () -> {
-        //        for (int i = 0, len = array.length; i < len; i++) {
-        //            array[i] = Strings.uuid();
-        //        }
-        //
-        //    }).printResult();
-        //
-        //    Profiler.run(1, 1, 1, () -> N.sort(array)).printResult();
-        //
-        //    Profiler.run(1, 1, 1, () -> N.sort(array)).printResult();
     }
 
     @Test
     public void test_sort_big_string_array_by_parallel_sort() {
-        //    final String[] array = new String[1000 * 10];
-        //
-        //    Profiler.run(1, 1, 1, () -> {
-        //        for (int i = 0, len = array.length; i < len; i++) {
-        //            array[i] = Strings.uuid();
-        //        }
-        //
-        //    }).printResult();
-        //
-        //    Profiler.run(1, 1, 1, () -> N.parallelSort(array)).printResult();
     }
 
     @Test
@@ -1826,70 +1288,7 @@ public class NTest extends AbstractParserTest {
 
             assertTrue(N.equals(Array.of((double) 2, (double) 3), b));
         }
-        //
-        //        {
-        //            List<String> list = N.asList("a", "b", "c");
-        //
-        //            List<String> newList = N.filter2(list, new Predicate<String>() {
-        //                @Override
-        //                public boolean test(final String value) {
-        //                    return value.equals("a") || value.equals("b");
-        //                }
-        //            });
-        //
-        //            N.println(newList);
-        //        }
-        //
-        //        {
-        //            String[] array = { "a", "b", "c" };
-        //
-        //            String[] newArray = N.filter2(array, new Predicate<String>() {
-        //                @Override
-        //                public boolean test(final String value) {
-        //                    return value.equals("a") || value.equals("b");
-        //                }
-        //            });
-        //
-        //            N.println(newArray);
-        //        }
-        //
-        //        {
-        //            List<String> c = N.asList("a", "b", "c");
-        //
-        //            List<String> newC = N.filter2(c, new Predicate<String>() {
-        //                @Override
-        //                public boolean test(final String value) {
-        //                    return value.equals("a") || value.equals("b");
-        //                }
-        //            });
-        //
-        //            N.println(newC);
-        //        }
 
-        //        {
-        //            List<String> c = N.asList("a", "b", "c");
-        //
-        //            List<String> newC = N.filter(new ArrayList<String>(), c, new Predicate<String>() {
-        //                @Override
-        //                public boolean test(final String value) {
-        //                    return value.equals("a") || value.equals("b");
-        //                }
-        //            });
-        //
-        //            N.println(newC);
-        //        }
-
-        //        {
-        //            List<String> c = N.asList("a", "b", "c");
-        //            List<Object> newC2 = N.filter(new ArrayList<Object>(), c, new Predicate<String>() {
-        //                @Override
-        //                public boolean test(final String value) {
-        //                    return value.equals("a") || value.equals("b");
-        //                }
-        //            });
-        //
-        //            N.println(newC2);
-        //        }
     }
 
     @Test
@@ -2308,10 +1707,6 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_array_performance() {
-        //    for (int i = 0; i < 1; i++) {
-        //        Profiler.run(this, "add_1", 1, 100, 1).printResult();
-        //        Profiler.run(this, "add_2", 1, 100, 1).printResult();
-        //    }
     }
 
     double add_1() {
@@ -2391,22 +1786,6 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_requireNonNull() {
-        //        N.checkNull("ok", "ok");
-        //        N.checkNull("ok", "it's ok");
-        //
-        //        try {
-        //            N.checkNull(null, "null");
-        //            fail("Should throw NullPointerException");
-        //        } catch (IllegalArgumentException e) {
-        //            N.println(e.getMessage());
-        //        }
-        //
-        //        try {
-        //            N.checkNull(null, "It can't be null");
-        //            fail("Should throw NullPointerException");
-        //        } catch (IllegalArgumentException e) {
-        //            N.println(e.getMessage());
-        //        }
     }
 
     @Test
@@ -2481,161 +1860,6 @@ public class NTest extends AbstractParserTest {
         assertTrue(Strings.isAsciiDigitalNumber("90239.0329"));
         assertFalse(Strings.isAsciiDigitalNumber("90239.0329f"));
     }
-
-    //    @Test
-    //    public void test_String2Collection() {
-    //        String st = "1, 2, 3";
-    //        N.println(N.string2Array(st));
-    //        N.println(N.string2Array(st, N.ELEMENT_SEPARATOR));
-    //        N.println(N.string2Array(st, N.ELEMENT_SEPARATOR, false));
-    //        N.println(N.string2Array(char[].class, st));
-    //        N.println(N.string2Array(int[].class, st));
-    //        N.println(N.string2Array(int[].class, st, N.ELEMENT_SEPARATOR));
-    //        N.println(N.string2Array(int[].class, st, N.ELEMENT_SEPARATOR, true));
-    //
-    //        N.println(N.string2List(st));
-    //        N.println(N.string2List(char.class, st));
-    //        N.println(N.string2List(st, N.ELEMENT_SEPARATOR));
-    //        // N.println(N.string2Queue(st, N.ELEMENT_SEPARATOR, false));
-    //        N.println(N.string2List(int.class, st));
-    //        N.println(N.string2List(int.class, st, N.ELEMENT_SEPARATOR));
-    //        N.println(N.string2List(int.class, st, N.ELEMENT_SEPARATOR, true));
-    //
-    //        N.println(N.string2Set(st));
-    //        N.println(N.string2Set(st, N.ELEMENT_SEPARATOR));
-    //        // N.println(N.string2Queue(st, N.ELEMENT_SEPARATOR, false));
-    //        N.println(N.string2Set(char.class, st));
-    //        N.println(N.string2Set(int.class, st));
-    //        N.println(N.string2Set(int.class, st, N.ELEMENT_SEPARATOR));
-    //        N.println(N.string2Set(int.class, st, N.ELEMENT_SEPARATOR, true));
-    //
-    //        //        N.println(N.string2Queue(st));
-    //        //        N.println(N.string2Queue(st, N.ELEMENT_SEPARATOR));
-    //        //        N.println(N.string2Queue(st, N.ELEMENT_SEPARATOR, false));
-    //        //
-    //        //        Queue<Character> queue = N.string2Queue(char.class, st);
-    //        //        N.println(N.string2Queue(char.class, st));
-    //        //        N.println(N.string2Queue(int.class, st));
-    //        //        N.println(N.string2Queue(int.class, st, N.ELEMENT_SEPARATOR));
-    //        //        N.println(N.string2Queue(int.class, st, N.ELEMENT_SEPARATOR, true));
-    //
-    //        List<Integer> list1 = new ArrayList<>();
-    //        N.string2Collection(list1, int.class, st, N.ELEMENT_SEPARATOR, true);
-    //        N.println(list1);
-    //
-    //        String[] a = { "1", "2", "3" };
-    //        N.println(N.array2String(a));
-    //        N.println(N.array2String(a, N.ELEMENT_SEPARATOR));
-    //        N.println(N.array2String(a, N.ELEMENT_SEPARATOR, false));
-    //
-    //        List<String> list = N.asList("1", "2", "3");
-    //        N.println(N.collection2String(list));
-    //        N.println(N.collection2String(list, N.ELEMENT_SEPARATOR));
-    //        N.println(N.collection2String(list, N.ELEMENT_SEPARATOR, false));
-    //
-    //        Set<String> set = N.asSet("1", "2", "3");
-    //        N.println(N.collection2String(set));
-    //        N.println(N.collection2String(set, N.ELEMENT_SEPARATOR));
-    //        N.println(N.collection2String(set, N.ELEMENT_SEPARATOR, false));
-    //
-    //        //        Queue<String> queue2 = N.asQueue("1", "2", "3");
-    //        //        N.println(N.queue2String(queue2));
-    //        //        N.println(N.queue2String(queue2, N.ELEMENT_SEPARATOR));
-    //        //        N.println(N.queue2String(queue2, N.ELEMENT_SEPARATOR, false));
-    //
-    //        // N.println(N.collection2String(queue, N.ELEMENT_SEPARATOR, false));
-    //        // N.println(N.collection2String(queue, N.ELEMENT_SEPARATOR, true));
-    //        N.println(N.collection2String(N.asList("a"), N.ELEMENT_SEPARATOR, false));
-    //        N.println(N.collection2String(N.asList("a", "b"), N.ELEMENT_SEPARATOR, false));
-    //        N.println(N.collection2String(N.asList("a", "b", "c"), N.ELEMENT_SEPARATOR, false));
-    //        N.println(N.collection2String(N.asList("a", "b", "c", "d"), N.ELEMENT_SEPARATOR, false));
-    //
-    //        N.println(N.collection2String(N.asList("a"), N.ELEMENT_SEPARATOR, true));
-    //        N.println(N.collection2String(N.asList("a", "b"), N.ELEMENT_SEPARATOR, true));
-    //        N.println(N.collection2String(N.asList("a", "b", "c"), N.ELEMENT_SEPARATOR, true));
-    //        N.println(N.collection2String(N.asList("a", "b", "c", "d"), N.ELEMENT_SEPARATOR, true));
-    //    }
-    //
-    //    @Test
-    //    public void test_array2Collection() {
-    //        int[] a = { 1, 2, 3 };
-    //        N.println(N.array2List(a));
-    //        // N.println(N.array2Queue(a));
-    //        N.println(N.array2Set(a));
-    //        N.println(N.array2String(a));
-    //        N.println(N.array2String(a, ":"));
-    //
-    //        List<Integer> list = new ArrayList<Integer>();
-    //        N.array2Collection(list, a);
-    //        N.println(list);
-    //
-    //        Set<Integer> set = new HashSet<Integer>();
-    //        N.array2Collection(set, a);
-    //        N.println(set);
-    //
-    //        String[] a2 = { "1", "2", "3", "4" };
-    //        N.println(N.array2List(a2));
-    //        // N.println(N.array2Queue(a2));
-    //        N.println(N.array2Set(a2));
-    //        N.println(N.array2String(a2));
-    //        N.println(N.array2String(a2, ":"));
-    //
-    //        List<String> list2 = new LinkedList<String>();
-    //        N.array2Collection(list2, a2);
-    //        N.println(list2);
-    //
-    //        Set<String> set2 = new LinkedHashSet<String>();
-    //        N.array2Collection(set2, a2);
-    //        N.println(set2);
-    //    }
-
-    //    @Test
-    //    public void test_encode_decode() {
-    //        N.println(Strings.base64Encode(new byte[0]));
-    //
-    //        String str = "abc";
-    //        assertEquals(str, new String((Strings.base64Decode(Strings.base64Encode(str.getBytes())))));
-    //
-    //        str = "abc//\\\\- jjj  kd//l. dkeif";
-    //        assertEquals(str, new String((N.base64UrlDecode(N.base64UrlEncode(str.getBytes())))));
-    //
-    //        Account account = new Account();
-    //        account.setFirstName("fristName");
-    //        account.setLastName("lastName");
-    //
-    //        String url = N.urlEncode(account);
-    //        N.println(url);
-    //
-    //        String encodedUrl = "firstName=abc%2F%2F%5C%5C-+jjj++kd%2F%2Fl.+dkeif&lastName=+abc%2F%2F%5C%5C-+jjj++kd%2F%2Fl.+dkeif+";
-    //        account.setFirstName("abc//\\\\- jjj  kd//l. dkeif");
-    //        account.setLastName(" abc//\\\\- jjj  kd//l. dkeif ");
-    //        url = N.urlEncode(account);
-    //        N.println(url);
-    //        assertEquals(encodedUrl, url);
-    //
-    //        url = N.urlEncode(account, IOUtil.DEFAULT_CHARSET);
-    //        N.println(url);
-    //        assertEquals(encodedUrl, url);
-    //
-    //        N.println(N.urlDecode(url));
-    //        N.println(N.urlDecode(url, IOUtil.DEFAULT_CHARSET));
-    //        assertEquals(account, N.urlDecode(Account.class, url));
-    //        assertEquals(account, N.urlDecode(Account.class, url, IOUtil.DEFAULT_CHARSET));
-    //
-    //        assertEquals(url.length(), N.urlEncode(Beans.bean2Map(account), IOUtil.DEFAULT_CHARSET).length());
-    //
-    //        url = N.urlEncode(N.asProps("firstName", "abc//\\\\- jjj  kd//l. dkeif", "lastName", " abc//\\\\- jjj  kd//l. dkeif "));
-    //        N.println(url);
-    //        assertEquals(encodedUrl.length(), url.length());
-    //
-    //        url = N.urlEncode(N.asArray("firstName", "abc//\\\\- jjj  kd//l. dkeif", "lastName", " abc//\\\\- jjj  kd//l. dkeif "));
-    //        N.println(url);
-    //        assertEquals(encodedUrl.length(), url.length());
-    //
-    //        N.println(N.urlDecode(url));
-    //        assertEquals(N.asProps("firstName", "abc//\\\\- jjj  kd//l. dkeif", "lastName", " abc//\\\\- jjj  kd//l. dkeif "), N.urlDecode(url));
-    //
-    //    }
 
     @Test
     public void test_encode_decode_2() {
@@ -2759,7 +1983,6 @@ public class NTest extends AbstractParserTest {
                 N.convert(Integer.MAX_VALUE, byte.class);
                 fail("Should throw ArithmeticException");
             } catch (final ArithmeticException e) {
-                // ignore
             }
         }
 
@@ -2768,7 +1991,6 @@ public class NTest extends AbstractParserTest {
                 N.convert(Integer.MAX_VALUE, short.class);
                 fail("Should throw ArithmeticException");
             } catch (final ArithmeticException e) {
-                // ignore
             }
         }
 
@@ -2777,7 +1999,6 @@ public class NTest extends AbstractParserTest {
                 N.convert(Long.MIN_VALUE, int.class);
                 fail("Should throw ArithmeticException");
             } catch (final ArithmeticException e) {
-                // ignore
             }
         }
 
@@ -2786,7 +2007,6 @@ public class NTest extends AbstractParserTest {
                 N.convert(Float.MAX_VALUE, long.class);
                 fail("Should throw ArithmeticException");
             } catch (final ArithmeticException e) {
-                // ignore
             }
         }
 
@@ -2795,7 +2015,6 @@ public class NTest extends AbstractParserTest {
                 N.convert(-Float.MAX_VALUE, long.class);
                 fail("Should throw ArithmeticException");
             } catch (final ArithmeticException e) {
-                // ignore
             }
         }
 
@@ -2804,7 +2023,6 @@ public class NTest extends AbstractParserTest {
                 N.convert(-Double.MAX_VALUE, float.class);
                 fail("Should throw ArithmeticException");
             } catch (final ArithmeticException e) {
-                // ignore
             }
         }
 
@@ -2813,7 +2031,6 @@ public class NTest extends AbstractParserTest {
                 N.convert(Double.MAX_VALUE, float.class);
                 fail("Should throw ArithmeticException");
             } catch (final ArithmeticException e) {
-                // ignore
             }
         }
     }
@@ -2848,7 +2065,6 @@ public class NTest extends AbstractParserTest {
         N.println(N.newLinkedSetMultimap());
         N.println(N.newLinkedSetMultimap());
 
-        // N.println(N.asMapEntity(Account.__, "firstName", "1)1"));
         N.println(new MapEntity(Account.__, N.asProps("firstName", "1)1")));
 
         N.println(new MapEntity(Account.__));
@@ -2887,13 +2103,11 @@ public class NTest extends AbstractParserTest {
         final Delayed d = new Delayed() {
             @Override
             public int compareTo(final Delayed o) {
-                // TODO Auto-generated method stub
                 return 0;
             }
 
             @Override
             public long getDelay(final TimeUnit unit) {
-                // TODO Auto-generated method stub
                 return 0;
             }
         };
@@ -2909,8 +2123,6 @@ public class NTest extends AbstractParserTest {
         N.println(N.asLinkedBlockingDeque("ab", "c"));
 
         N.println(N.asConcurrentLinkedDeque("ab", "c"));
-
-        // N.println(N.asArray(N.asList("ab", "c")));
 
         assertEquals(true, Strings.parseBoolean("True"));
         assertEquals(1, Numbers.toByte("1"));
@@ -3107,109 +2319,6 @@ public class NTest extends AbstractParserTest {
         N.println(json3);
     }
 
-    //    @Test
-    //    public void test_bean2FlatMap() {
-    //        Account account1 = new Account();
-    //        account1.setFirstName("firstName1");
-    //        account1.setLastName("lastName1");
-    //
-    //        AccountContact contact1 = new AccountContact();
-    //        contact1.setCity("Sunnyvalue");
-    //        account1.setContact(contact1);
-    //
-    //        Map<String, Object> props = Beans.bean2FlatMap(account1);
-    //        N.println(props);
-    //        assertEquals(3, props.size());
-    //
-    //        props.clear();
-    //
-    //        Beans.bean2FlatMap(props, account1);
-    //        N.println(props);
-    //        assertEquals(3, props.size());
-    //
-    //        Account account2 = Beans.map2Bean(Account.class, props);
-    //        N.println(account2);
-    //
-    //        assertEquals(account1, account2);
-    //
-    //        List<Map<String, Object>> mList = Beans.bean2FlatMap(N.asList(account1));
-    //        assertEquals(N.asList(account1), Beans.map2Bean(Account.class, mList));
-    //
-    //        PersonType personType1 = new PersonType();
-    //        personType1.setBirthday(DateUtil.currentDate());
-    //        personType1.setFirstName("firstName");
-    //
-    //        props = Beans.bean2FlatMap(personType1);
-    //
-    //        PersonType personType2 = Beans.map2Bean(PersonType.class, props);
-    //        assertEquals("firstName", personType2.getFirstName());
-    //
-    //        PersonsType personsType1 = new PersonsType();
-    //        personsType1.getPerson().add(personType1);
-    //        personsType1.getPerson().add(personType2);
-    //
-    //        props = Beans.bean2FlatMap(personsType1);
-    //
-    //        PersonsType personsType2 = Beans.map2Bean(PersonsType.class, props);
-    //        N.println(personsType2.getPerson());
-    //
-    //        // assertEquals("firstName", personsType2.getPerson().get(0).getFirstName());
-    //    }
-
-    //    @Test
-    //    public void test_bean2Map() {
-    //        Account account1 = new Account();
-    //        account1.setFirstName("firstName1");
-    //        account1.setLastName("lastName1");
-    //
-    //        AccountContact contact1 = new AccountContact();
-    //        contact1.setCity("Sunnyvalue");
-    //        account1.setContact(contact1);
-    //
-    //        Map<String, Object> props = Beans.bean2Map(account1);
-    //        N.println(props);
-    //        assertEquals(3, props.size());
-    //
-    //        props.clear();
-    //        Beans.bean2Map(props, account1);
-    //        N.println(props);
-    //        assertEquals(3, props.size());
-    //
-    //        Account account2 = Beans.map2Bean(Account.class, props);
-    //        N.println(account2);
-    //
-    //        assertEquals(account1, account2);
-    //
-    //        props = Beans.deepBean2Map(account1);
-    //        N.println(props);
-    //        assertEquals(3, props.size());
-    //
-    //        props.clear();
-    //        Beans.deepBean2Map(props, account1);
-    //        N.println(props);
-    //        assertEquals(3, props.size());
-    //
-    //        account2 = Beans.map2Bean(Account.class, props);
-    //        N.println(account2);
-    //
-    //        assertEquals(account1, account2);
-    //
-    //        PersonType personType1 = new PersonType();
-    //        personType1.setBirthday(DateUtil.currentDate());
-    //        personType1.setFirstName("firstName");
-    //
-    //        props = Beans.deepBean2Map(personType1);
-    //
-    //        PersonType personType2 = Beans.map2Bean(PersonType.class, props);
-    //        assertEquals("firstName", personType2.getFirstName());
-    //
-    //        List<Map<String, Object>> mList = Beans.bean2Map(N.asList(account1));
-    //        assertEquals(N.asList(account1), Beans.map2Bean(Account.class, mList));
-    //
-    //        mList = Beans.deepBean2Map(N.asList(account1));
-    //        assertEquals(N.asList(account1), Beans.map2Bean(Account.class, mList));
-    //    }
-
     @Test
     public void test_bean2Map_2() {
         final Map<String, Object> props = new HashMap<>();
@@ -3361,14 +2470,6 @@ public class NTest extends AbstractParserTest {
         N.println(account);
     }
 
-    //    @Test
-    //    public void test_findDeclaredMethodByName() {
-    //        N.println(N.findDeclaredMethodByName(N.class, "findDeclaredMethodByName"));
-    //        N.println(N.getDeclaredMethod(N.class, "findDeclaredMethodByName", Class.class, String.class));
-    //        assertEquals(N.findDeclaredMethodByName(N.class, "findDeclaredMethodByName"),
-    //                N.getDeclaredMethod(N.class, "findDeclaredMethodByName", Class.class, String.class));
-    //    }
-
     @Test
     public void test_getClassName() {
         N.println(ClassUtil.getSimpleClassName(long.class));
@@ -3435,7 +2536,6 @@ public class NTest extends AbstractParserTest {
         final Timestamp date = Dates.currentTimestamp();
         final String st = Dates.format(date);
 
-        // N.println(st);
         Dates.parseTimestamp(st);
     }
 
@@ -3445,7 +2545,6 @@ public class NTest extends AbstractParserTest {
         final Timestamp date = Dates.currentTimestamp();
         final String st = df.format(date);
 
-        // N.println(st);
         df.parse(st);
     }
 
@@ -3562,10 +2661,8 @@ public class NTest extends AbstractParserTest {
         final AccountContact contact = createAccountContact(AccountContact.class);
         account.setContact(contact);
 
-        // println(N.serialize(account));
         abacusXMLParser.deserialize(abacusXMLParser.serialize(account), Account.class);
 
-        // assertEquals(account, N.deserialize(Account.class, N.serialize(account)));
     }
 
     @Test
@@ -3622,12 +2719,6 @@ public class NTest extends AbstractParserTest {
     protected String getDomainName() {
         return ExtendDirtyBasicPNL._DN;
     }
-
-    //    public void testArray2String() {
-    //        N.println(N.array2String(new char[] { 'a', 'b' }, D.COMMA_SPACE));
-    //        N.println(N.array2String(new double[] { 1.1, 2.1, 3.1, 4.1 }, D.COMMA_SPACE));
-    //        N.println(N.array2String(new Object[] { 1.1, 2.1, 3.1, 4.1 }, D.COMMA_SPACE));
-    //    }
 
     @Test
     public void testString2Array() {
@@ -3857,7 +2948,6 @@ public class NTest extends AbstractParserTest {
 
         final Date date = Dates.currentDate();
         Beans.setPropValue(account, setMethod, date);
-        // assertEquals(N.format(date), N.format((Timestamp) Beans.getPropValue(account, getMethod)));
         println(account);
 
         Beans.setPropValue(account, "firstName", "newfn");
@@ -3955,11 +3045,6 @@ public class NTest extends AbstractParserTest {
         Beans.eraseAll(account);
         N.println(account);
 
-        //        N.merge(Beans.bean2Map(account2), account);
-        //        N.println(account);
-        //        N.println(account2);
-        //
-        //        assertEquals(account, account2);
     }
 
     @Test
@@ -4296,18 +3381,19 @@ public class NTest extends AbstractParserTest {
 
         println(Dates.roll(Dates.createDate(c), 10000, TimeUnit.DAYS));
 
-        println(Dates.roll(Dates.createDate(c), 1000, CalendarField.WEEK));
+        println(Dates.roll(Dates.createDate(c), 1000, CalendarField.WEEK_OF_YEAR));
 
-        println(Dates.roll(Dates.createDate(c), 7000, CalendarField.DAY));
+        println(Dates.roll(Dates.createDate(c), 7000, CalendarField.DAY_OF_MONTH));
 
-        assertEquals((Dates.roll(Dates.createDate(c), 1000, CalendarField.WEEK)), Dates.roll(Dates.createDate(c), 7000, CalendarField.DAY));
+        assertEquals((Dates.roll(Dates.createDate(c), 1000, CalendarField.WEEK_OF_YEAR)), Dates.roll(Dates.createDate(c), 7000, CalendarField.DAY_OF_MONTH));
 
-        assertEquals((Dates.roll(Dates.createTime(c), -1000, CalendarField.WEEK)), Dates.roll(Dates.createTime(c), -7000, CalendarField.DAY));
+        assertEquals((Dates.roll(Dates.createTime(c), -1000, CalendarField.WEEK_OF_YEAR)), Dates.roll(Dates.createTime(c), -7000, CalendarField.DAY_OF_MONTH));
 
-        assertEquals((Dates.roll(Dates.createTimestamp(c), -1000, CalendarField.WEEK)), Dates.roll(Dates.createTimestamp(c), -7000, CalendarField.DAY));
+        assertEquals((Dates.roll(Dates.createTimestamp(c), -1000, CalendarField.WEEK_OF_YEAR)),
+                Dates.roll(Dates.createTimestamp(c), -7000, CalendarField.DAY_OF_MONTH));
 
         println(Dates.createDate(Dates.roll(Dates.currentCalendar(), 10, TimeUnit.DAYS)));
-        println(Dates.createDate(Dates.roll(Dates.currentCalendar(), 10, CalendarField.DAY)));
+        println(Dates.createDate(Dates.roll(Dates.currentCalendar(), 10, CalendarField.DAY_OF_MONTH)));
     }
 
     @Test
@@ -4407,7 +3493,6 @@ public class NTest extends AbstractParserTest {
         account.setContact(contact);
         abacusXMLParser.deserialize(abacusXMLParser.serialize(account), Account.class);
 
-        // assertEquals(account, N.parse(Account.class, N.xmlOf(account)));
     }
 
     @Test
@@ -4512,18 +3597,6 @@ public class NTest extends AbstractParserTest {
         println(xml);
 
         final Bean xmlBean = abacusXMLParser.deserialize(xml, Bean.class);
-        // N.println(bean);
-        // N.println(xmlBean);
-        // N.println(xmlParser.serialize(bean));
-        // N.println(xmlParser.serialize(xmlBean));
-        // N.println(N.stringOf(bean));
-        // N.println(N.stringOf(xmlBean));
-        // assertEquals(bean, xmlBean);
-        // assertEquals(N.deserialize(Bean.class, N.serialize(bean)),
-        // N.deserialize(Bean.class, N.serialize(xmlBean)));
-        // TODO, uncommented for test
-        // assertEquals(abacusXMLParser.serialize(bean), abacusXMLParser.serialize(xmlBean));
-        // assertEquals(N.stringOf(bean), N.stringOf(xmlBean));
         N.println(abacusXMLParser.serialize(bean));
         N.println(abacusXMLParser.serialize(xmlBean));
 
@@ -4549,17 +3622,7 @@ public class NTest extends AbstractParserTest {
         println(xml);
 
         final Bean xmlBean = abacusXMLDOMParser.deserialize(xml, Bean.class);
-        // N.println(bean);
-        // N.println(xmlBean);
-        // N.println(xmlParser.serialize(bean));
-        // N.println(xmlParser.serialize(xmlBean));
-        // N.println(N.stringOf(bean));
-        // N.println(N.stringOf(xmlBean));
-        // assertEquals(bean, xmlBean);
-        // assertEquals(N.deserialize(Bean.class, N.serialize(bean)),
-        // N.deserialize(Bean.class, N.serialize(xmlBean)));
         assertEquals(abacusXMLDOMParser.serialize(bean), abacusXMLDOMParser.serialize(xmlBean));
-        // assertEquals(N.stringOf(bean), N.stringOf(xmlBean));
         N.println(abacusXMLDOMParser.serialize(bean));
         N.println(abacusXMLDOMParser.serialize(xmlBean));
 
@@ -4772,12 +3835,6 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testPerformanceForBigBean() throws Exception {
-        //    File file = new File("./src/test/resources/bigBean.xml");
-        //    IOUtil.write(file, abacusXMLParser.serialize(createBigXBean(10000)));
-        //
-        //    Profiler.run(this, "executeBigBean", 1, 3, 3).printResult();
-        //
-        //    file.delete();
     }
 
     void executeBigBean() {
@@ -4986,8 +4043,6 @@ public class NTest extends AbstractParserTest {
         N.println(N.stringOf(accounts));
         N.println(N.stringOf(xmlAccounts));
 
-        // assertEquals(38080, N.stringOf(accounts).length());
-        // assertEquals(40080, N.stringOf(xmlAccounts).length());
     }
 
     @Test
@@ -5001,8 +4056,6 @@ public class NTest extends AbstractParserTest {
         N.println(N.stringOf(accounts));
         N.println(N.stringOf(xmlAccounts));
 
-        // assertEquals(38080, N.stringOf(accounts).length());
-        // assertEquals(40080, N.stringOf(xmlAccounts).length());
     }
 
     @Test
@@ -5069,8 +4122,6 @@ public class NTest extends AbstractParserTest {
         assertEquals(abacusXMLParser.deserialize(abacusXMLParser.serialize(bean), XBean.class),
                 abacusXMLParser.deserialize(abacusXMLParser.serialize(xmlBean), XBean.class));
 
-        // assertEquals(N.serialize(bean), N.serialize(xmlBean));
-        // assertEquals(N.asString(bean), N.asString(xmlBean));
     }
 
     @Test
@@ -5097,8 +4148,6 @@ public class NTest extends AbstractParserTest {
         assertEquals(abacusXMLDOMParser.deserialize(abacusXMLDOMParser.serialize(bean), XBean.class),
                 abacusXMLDOMParser.deserialize(abacusXMLDOMParser.serialize(xmlBean), XBean.class));
 
-        // assertEquals(N.serialize(bean), N.serialize(xmlBean));
-        // assertEquals(N.asString(bean), N.asString(xmlBean));
     }
 
     @Test
@@ -5133,138 +4182,6 @@ public class NTest extends AbstractParserTest {
         assertEquals(customer, newCustomer);
     }
 
-    //
-    // public void testXMLEncoder2() throws JAXBException {
-    // Name name = new Name("fn", "mn", "ln");
-    // Account account = new Account();
-    // account.setName(name);
-    // account.setId(100);
-    // account.setBirthDate(N.currentTimestamp());
-    //
-    // List<Account> bookList = new ArrayList<>();
-    // Book book1 = new Book();
-    // book1.setName("book1");
-    // bookList.add(book1);
-    //
-    // Book book2 = new Book();
-    // book2.setName("book2");
-    // bookList.add(book2);
-    //
-    // account.setBook(bookList);
-    //
-    // XBean xBean = new XBean();
-    // xBean.setTypeBoolean(true);
-    // xBean.setTypeBoolean2(Boolean.FALSE);
-    // xBean.setTypeChar('<');
-    // xBean.setTypeChar2('>');
-    // xBean.setTypeByte((byte) 0);
-    // xBean.setTypeShort((short) 2);
-    // xBean.setTypeInt(3);
-    // xBean.setTypeLong(4);
-    // xBean.setTypeLong2(Long.valueOf(5));
-    // xBean.setTypeFloat(1.01f);
-    // xBean.setTypeDouble(2.3134454d);
-    //
-    // xBean.setTypeString(">string< > </ <//");
-    //
-    // xBean.setTypeCalendar(N.currentCalendar());
-    //
-    // xBean.setTypeDate(new java.util.Date());
-    // xBean.setTypeSqlDate(N.currentDate());
-    // xBean.setTypeSqlTime(N.currentTime());
-    // xBean.setTypeSqlTimestamp(N.currentTimestamp());
-    //
-    // List<Date> typeGenericList = new LinkedList<>();
-    // typeGenericList.add(null);
-    // typeGenericList.add(N.currentDate());
-    // typeGenericList.add(null);
-    // typeGenericList.add(N.currentDate());
-    // typeGenericList.add(N.currentDate());
-    // typeGenericList.add(null);
-    // xBean.setTypeGenericList(typeGenericList);
-    //
-    // Set<Long> typeGenericSet = N.asSortedSet();
-    // typeGenericSet.add(1332333L);
-    // typeGenericSet.add(Long.MAX_VALUE);
-    // typeGenericSet.add(Long.MIN_VALUE);
-    // xBean.setTypeGenericSet(typeGenericSet);
-    //
-    // List typeList = new ArrayList();
-    // typeList.add(name);
-    // typeList.add(account);
-    // typeList.add(bookList);
-    // typeList.add(book1);
-    // typeList.add(null);
-    // typeList.add(book1);
-    // typeList.add(book2);
-    // typeList.add(null);
-    // typeList.add(new HashMap<>());
-    // typeList.add(new ArrayList<>());
-    // typeList.add(new HashSet<>());
-    // xBean.setTypeList(typeList);
-    //
-    // Set typeSet = new HashSet<>();
-    // typeSet.add(new HashMap<>());
-    // typeSet.add(new ArrayList<>());
-    // typeSet.add(new HashMap<>());
-    // typeSet.add(new HashMap<>());
-    // typeSet.add(account);
-    // typeSet.add(book1);
-    // typeSet.add(bookList);
-    // typeSet.add(null);
-    // typeSet.add(null);
-    // typeSet.add(null);
-    // typeSet.add(name);
-    // xBean.setTypeSet(typeSet);
-    //
-    // Map<String, Book> typeGenericMap = new HashMap<>();
-    // typeGenericMap.put(book1.getName(), book1);
-    // typeGenericMap.put(book2.getName(), book2);
-    // typeGenericMap.put(null, book2);
-    // typeGenericMap.put("null", null);
-    // xBean.setTypeGenericMap(typeGenericMap);
-    //
-    // Map<String, Object> typeGenericMap2 = N.asSortedMap();
-    // typeGenericMap2.put(book1.getName(), book1);
-    // typeGenericMap2.put(book2.getName(), account);
-    // typeGenericMap2.put("null", null);
-    // typeGenericMap2.put("bookList", bookList);
-    // xBean.setTypeGenericMap(typeGenericMap);
-    // xBean.setTypeGenericMap2(typeGenericMap2);
-    //
-    // Map<Object, Object> typeGenericMap4 = N.asConcurrentMap();
-    // typeGenericMap4.put(book1, book1);
-    // typeGenericMap4.put(book1, book2);
-    // typeGenericMap4.put(account, book2);
-    // typeGenericMap4.put(bookList, name);
-    // typeGenericMap4.put(name, bookList);
-    // typeGenericMap4.put(" ", " ");
-    // typeGenericMap4.put(new HashMap<>(), " ");
-    // typeGenericMap4.put(new ArrayList<>(), new HashSet<>());
-    // typeGenericMap4.put(typeGenericMap2, typeGenericMap);
-    // xBean.setTypeGenericMap4(typeGenericMap4);
-    //
-    // Map typeMap = new HashMap<>();
-    // typeMap.put(book1, book1);
-    // typeMap.put(book1, book2);
-    // typeMap.put(account, book2);
-    // typeMap.put(bookList, name);
-    // typeMap.put(name, bookList);
-    // typeMap.put(null, null);
-    // typeMap.put(new HashMap<>(), null);
-    // typeMap.put(new ArrayList<>(), new HashSet<>());
-    // xBean.setTypeMap(typeMap);
-    //
-    // String xml = N.xmlEncode(xBean);
-    // println(xml);
-    //
-    // XBean newBean = N.xmlDecode(XBean.class, xml);
-    //
-    // println(xBean);
-    // println(newBean);
-    //
-    // // assertEquals(bean, newBean);
-    // }
     @Test
     public void testJAXB() throws JAXBException {
         final Customer customer = new Customer();
@@ -5277,7 +4194,6 @@ public class NTest extends AbstractParserTest {
             final JAXBContext jaxbContext = JAXBContext.newInstance(Customer.class);
             final Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 
-            // output pretty printed
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
             jaxbMarshaller.marshal(customer, System.out);
@@ -5285,11 +4201,6 @@ public class NTest extends AbstractParserTest {
             e.printStackTrace();
         }
     }
-
-    //    public void testAsyncExecute() throws Exception {
-    //        Future<Object> result = N.asyncInvoke(N.getDeclaredMethod(N.class, "uuid"));
-    //        N.println(result.get());
-    //    }
 
     public static class Bean_1 {
         private List<String> strList;

@@ -9,19 +9,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.WD;
 
+@Tag("new-test")
 public class JSONXMLSerializationConfig100Test extends TestBase {
 
     private TestConfig config;
 
-    // Concrete implementation for testing
     public static class TestConfig extends JSONXMLSerializationConfig<TestConfig> {
-        // Empty implementation for testing
     }
 
     @BeforeEach

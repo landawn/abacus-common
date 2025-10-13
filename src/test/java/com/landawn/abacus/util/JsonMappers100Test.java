@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationConfig;
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class JsonMappers100Test extends TestBase {
 
     @Test
@@ -200,19 +202,6 @@ public class JsonMappers100Test extends TestBase {
         Assertions.assertEquals("John", person.getName());
         Assertions.assertEquals(30, person.getAge());
     }
-
-    //    @Test
-    //    public void testFromJsonStringWithDefault() {
-    //        Person defaultPerson = new Person("Default", 0);
-    //
-    //        Person person1 = JsonMappers.fromJson("", Person.class, defaultPerson);
-    //        Person person2 = JsonMappers.fromJson(null, Person.class, defaultPerson);
-    //        Person person3 = JsonMappers.fromJson("{\"name\":\"John\",\"age\":30}", Person.class, defaultPerson);
-    //
-    //        Assertions.assertEquals("Default", person1.getName());
-    //        Assertions.assertEquals("Default", person2.getName());
-    //        Assertions.assertEquals("John", person3.getName());
-    //    }
 
     @Test
     public void testFromJsonStringWithFeatures() {
@@ -403,19 +392,6 @@ public class JsonMappers100Test extends TestBase {
         Assertions.assertEquals("value1", map.get("key1"));
         Assertions.assertEquals("value2", map.get("key2"));
     }
-
-    //    @Test
-    //    public void testFromJsonWithTypeReferenceStringWithDefault() {
-    //        List<String> defaultList = Arrays.asList("default");
-    //
-    //        List<String> list1 = JsonMappers.fromJson("", new TypeReference<List<String>>() {
-    //        }, defaultList);
-    //        List<String> list2 = JsonMappers.fromJson(null, new TypeReference<List<String>>() {
-    //        }, defaultList);
-    //
-    //        Assertions.assertEquals(defaultList, list1);
-    //        Assertions.assertEquals(defaultList, list2);
-    //    }
 
     @Test
     public void testFromJsonWithTypeReferenceStringWithFeatures() {
@@ -720,19 +696,6 @@ public class JsonMappers100Test extends TestBase {
         Assertions.assertEquals("John", person.getName());
     }
 
-    //    @Test
-    //    public void testOneFromJsonStringWithDefault() {
-    //        ObjectMapper mapper = new ObjectMapper();
-    //        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-    //        Person defaultPerson = new Person("Default", 0);
-    //
-    //        Person person1 = wrapper.fromJson("", Person.class, defaultPerson);
-    //        Person person2 = wrapper.fromJson(null, Person.class, defaultPerson);
-    //
-    //        Assertions.assertEquals("Default", person1.getName());
-    //        Assertions.assertEquals("Default", person2.getName());
-    //    }
-
     @Test
     public void testOneFromJsonFile() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
@@ -847,21 +810,6 @@ public class JsonMappers100Test extends TestBase {
         Assertions.assertEquals(2, list.size());
     }
 
-    //    @Test
-    //    public void testOneFromJsonWithTypeReferenceStringWithDefault() {
-    //        ObjectMapper mapper = new ObjectMapper();
-    //        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-    //        List<String> defaultList = Arrays.asList("default");
-    //
-    //        List<String> list1 = wrapper.fromJson("", new TypeReference<List<String>>() {
-    //        }, defaultList);
-    //        List<String> list2 = wrapper.fromJson(null, new TypeReference<List<String>>() {
-    //        }, defaultList);
-    //
-    //        Assertions.assertEquals(defaultList, list1);
-    //        Assertions.assertEquals(defaultList, list2);
-    //    }
-
     @Test
     public void testOneFromJsonWithTypeReferenceFile() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
@@ -940,7 +888,6 @@ public class JsonMappers100Test extends TestBase {
         Assertions.assertEquals(2, list.size());
     }
 
-    // Test bean class
     public static class Person {
         private String name;
         private Integer age;

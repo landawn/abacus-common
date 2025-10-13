@@ -36,7 +36,6 @@ import java.lang.annotation.Target;
  *   <li>Properties that are calculated when first accessed</li>
  * </ul>
  * 
- * @author HaiYang Li
  * @since 2020
  */
 @Target({ ElementType.METHOD, ElementType.TYPE })

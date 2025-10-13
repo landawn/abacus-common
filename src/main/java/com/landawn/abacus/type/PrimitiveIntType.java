@@ -27,7 +27,15 @@ public final class PrimitiveIntType extends AbstractIntegerType {
 
     /**
      * Returns the Class object representing the primitive int type.
-     * 
+     *
+     * <pre>
+     * <code>
+     * PrimitiveIntType type = new PrimitiveIntType();
+     * Class&lt;?&gt; clazz = type.clazz();
+     * // clazz equals int.class
+     * </code>
+     * </pre>
+     *
      * @return the Class object for int.class
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -40,6 +48,14 @@ public final class PrimitiveIntType extends AbstractIntegerType {
      * Indicates whether this type represents a primitive type.
      * For PrimitiveIntType, this always returns {@code true} since it represents the primitive int type.
      *
+     * <pre>
+     * <code>
+     * PrimitiveIntType type = new PrimitiveIntType();
+     * boolean isPrimitive = type.isPrimitiveType();
+     * // isPrimitive is true
+     * </code>
+     * </pre>
+     *
      * @return true, indicating this is a primitive type
      */
     @Override
@@ -50,6 +66,14 @@ public final class PrimitiveIntType extends AbstractIntegerType {
     /**
      * Returns the default value for the primitive int type.
      * The default value for primitive int is 0.
+     *
+     * <pre>
+     * <code>
+     * PrimitiveIntType type = new PrimitiveIntType();
+     * Integer defaultVal = type.defaultValue();
+     * // defaultVal equals 0
+     * </code>
+     * </pre>
      *
      * @return Integer object containing the value 0
      */

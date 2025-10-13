@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class CharSummaryStatistics100Test extends TestBase {
 
     @Test
@@ -33,11 +35,11 @@ public class CharSummaryStatistics100Test extends TestBase {
     public void testAcceptSingleValue() {
         CharSummaryStatistics stats = new CharSummaryStatistics();
         stats.accept('X');
-        
+
         assertEquals(1, stats.getCount());
         assertEquals('X', stats.getMin());
         assertEquals('X', stats.getMax());
-        assertEquals(88L, stats.getSum()); // ASCII value of 'X'
+        assertEquals(88L, stats.getSum());
         assertEquals(88.0, stats.getAverage());
     }
 
@@ -47,11 +49,11 @@ public class CharSummaryStatistics100Test extends TestBase {
         stats.accept('A');
         stats.accept('B');
         stats.accept('C');
-        
+
         assertEquals(3, stats.getCount());
         assertEquals('A', stats.getMin());
         assertEquals('C', stats.getMax());
-        assertEquals(198L, stats.getSum()); // 65 + 66 + 67
+        assertEquals(198L, stats.getSum());
         assertEquals(66.0, stats.getAverage());
     }
 
@@ -61,11 +63,11 @@ public class CharSummaryStatistics100Test extends TestBase {
         stats.accept('a');
         stats.accept('A');
         stats.accept('Z');
-        
+
         assertEquals(3, stats.getCount());
-        assertEquals('A', stats.getMin()); // 'A' (65) < 'Z' (90) < 'a' (97)
+        assertEquals('A', stats.getMin());
         assertEquals('a', stats.getMax());
-        assertEquals(252L, stats.getSum()); // 97 + 65 + 90
+        assertEquals(252L, stats.getSum());
         assertEquals(84.0, stats.getAverage());
     }
 
@@ -74,17 +76,17 @@ public class CharSummaryStatistics100Test extends TestBase {
         CharSummaryStatistics stats1 = new CharSummaryStatistics();
         stats1.accept('A');
         stats1.accept('B');
-        
+
         CharSummaryStatistics stats2 = new CharSummaryStatistics();
         stats2.accept('Y');
         stats2.accept('Z');
-        
+
         stats1.combine(stats2);
-        
+
         assertEquals(4, stats1.getCount());
         assertEquals('A', stats1.getMin());
         assertEquals('Z', stats1.getMax());
-        assertEquals(310L, stats1.getSum()); // 65 + 66 + 89 + 90
+        assertEquals(310L, stats1.getSum());
         assertEquals(77.5, stats1.getAverage());
     }
 
@@ -93,32 +95,32 @@ public class CharSummaryStatistics100Test extends TestBase {
         CharSummaryStatistics stats1 = new CharSummaryStatistics();
         stats1.accept('M');
         stats1.accept('N');
-        
+
         CharSummaryStatistics stats2 = new CharSummaryStatistics();
-        
+
         stats1.combine(stats2);
-        
+
         assertEquals(2, stats1.getCount());
         assertEquals('M', stats1.getMin());
         assertEquals('N', stats1.getMax());
-        assertEquals(155L, stats1.getSum()); // 77 + 78
+        assertEquals(155L, stats1.getSum());
         assertEquals(77.5, stats1.getAverage());
     }
 
     @Test
     public void testCombineEmptyWithNonEmpty() {
         CharSummaryStatistics stats1 = new CharSummaryStatistics();
-        
+
         CharSummaryStatistics stats2 = new CharSummaryStatistics();
         stats2.accept('X');
         stats2.accept('Y');
-        
+
         stats1.combine(stats2);
-        
+
         assertEquals(2, stats1.getCount());
         assertEquals('X', stats1.getMin());
         assertEquals('Y', stats1.getMax());
-        assertEquals(177L, stats1.getSum()); // 88 + 89
+        assertEquals(177L, stats1.getSum());
         assertEquals(88.5, stats1.getAverage());
     }
 
@@ -157,7 +159,7 @@ public class CharSummaryStatistics100Test extends TestBase {
         CharSummaryStatistics stats = new CharSummaryStatistics();
         stats.accept('A');
         stats.accept('B');
-        
+
         String result = stats.toString();
         assertTrue(result.contains("min=A"));
         assertTrue(result.contains("max=B"));
@@ -172,11 +174,11 @@ public class CharSummaryStatistics100Test extends TestBase {
         stats.accept('\n');
         stats.accept('\t');
         stats.accept(' ');
-        
+
         assertEquals(3, stats.getCount());
-        assertEquals('\t', stats.getMin()); // tab (9)
-        assertEquals(' ', stats.getMax()); // space (32)
-        assertEquals(51L, stats.getSum()); // 10 + 9 + 32
+        assertEquals('\t', stats.getMin());
+        assertEquals(' ', stats.getMax());
+        assertEquals(51L, stats.getSum());
         assertEquals(17.0, stats.getAverage());
     }
 
@@ -186,11 +188,11 @@ public class CharSummaryStatistics100Test extends TestBase {
         stats.accept('0');
         stats.accept('5');
         stats.accept('9');
-        
+
         assertEquals(3, stats.getCount());
         assertEquals('0', stats.getMin());
         assertEquals('9', stats.getMax());
-        assertEquals(158L, stats.getSum()); // 48 + 53 + 57
+        assertEquals(158L, stats.getSum());
         assertEquals(52.666666666666664, stats.getAverage(), 0.000001);
     }
 }

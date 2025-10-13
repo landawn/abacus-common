@@ -76,6 +76,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     private final Map<K, V> map;
 
+    private final Map<K, V> valueMap;
+
     /**
      * Constructs an ImmutableMap from the provided map.
      *
@@ -92,7 +94,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @param isUnmodifiable a boolean value indicating if the provided map is unmodifiable
      */
     ImmutableMap(final Map<? extends K, ? extends V> map, final boolean isUnmodifiable) {
-        this.map = isUnmodifiable ? (Map<K, V>) map : Collections.unmodifiableMap(map); // to create immutable keySet(), values(), entrySet()
+        this.valueMap = (Map<K, V>) map;
+        this.map = isUnmodifiable ? valueMap : Collections.unmodifiableMap(valueMap); // to create immutable keySet(), values(), entrySet()
     }
 
     /**
@@ -786,6 +789,77 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     @Override
     public int size() {
         return map.size();
+    }
+
+    /**
+     * Compares the specified object with this map for equality.
+     * Returns true if the given object is also a map and the two maps represent the same mappings.
+     * More formally, two maps m1 and m2 are equal if m1.entrySet().equals(m2.entrySet()).
+     * This ensures that the equals method works properly across different implementations of the Map interface.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableMap<String, Integer> map1 = ImmutableMap.of("a", 1, "b", 2);
+     * ImmutableMap<String, Integer> map2 = ImmutableMap.of("a", 1, "b", 2);
+     * ImmutableMap<String, Integer> map3 = ImmutableMap.of("a", 1, "c", 3);
+     * System.out.println(map1.equals(map2)); // true
+     * System.out.println(map1.equals(map3)); // false
+     * }</pre>
+     * </p>
+     *
+     * @param obj the object to be compared for equality with this map
+     * @return {@code true} if the specified object is equal to this map
+     * @see java.util.Map#equals(Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        return obj instanceof ImmutableMap im && valueMap.equals(im.valueMap);
+    }
+
+    /**
+     * Returns the hash code value for this map.
+     * The hash code is computed as the sum of the hash codes of each entry in the map's entry set.
+     * This ensures that two maps that are equal (according to the equals method) will have the same hash code.
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableMap<String, Integer> map1 = ImmutableMap.of("a", 1, "b", 2);
+     * ImmutableMap<String, Integer> map2 = ImmutableMap.of("a", 1, "b", 2);
+     * System.out.println(map1.hashCode() == map2.hashCode()); // true
+     * }</pre>
+     * </p>
+     *
+     * @return the hash code value for this map
+     * @see java.util.Map#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return valueMap.hashCode();
+    }
+
+    /**
+     * Returns a string representation of this map.
+     * The string representation consists of a list of key-value mappings in the order returned by the map's entry set,
+     * enclosed in braces ("{}"). Each key-value mapping is represented as the key followed by an equals sign ("=")
+     * followed by the value. Adjacent mappings are separated by the characters ", " (comma and space).
+     * 
+     * <p>Example:
+     * <pre>{@code
+     * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
+     * System.out.println(map); // {a=1, b=2}
+     * }</pre>
+     * </p>
+     *
+     * @return a string representation of this map
+     * @see java.util.Map#toString()
+     */
+    @Override
+    public String toString() {
+        return valueMap.toString();
     }
 
     /**

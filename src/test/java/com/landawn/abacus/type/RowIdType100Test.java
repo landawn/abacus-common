@@ -17,11 +17,13 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class RowIdType100Test extends TestBase {
 
     private RowIdType rowIdType;
@@ -43,12 +45,10 @@ public class RowIdType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with RowId
         RowId rowId = mock(RowId.class);
         when(rowId.toString()).thenReturn("rowid123");
         assertEquals("rowid123", rowIdType.stringOf(rowId));
 
-        // Test with null
         assertNull(rowIdType.stringOf(null));
     }
 
@@ -98,12 +98,10 @@ public class RowIdType100Test extends TestBase {
         CharacterWriter writer = createCharacterWriter();
         JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
 
-        // Test with RowId
         RowId rowId = mock(RowId.class);
         when(rowId.toString()).thenReturn("rowid123");
         rowIdType.writeCharacter(writer, rowId, config);
 
-        // Test with null
         rowIdType.writeCharacter(writer, null, config);
     }
 }

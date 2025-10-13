@@ -7,9 +7,11 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Try100Test extends TestBase {
 
     public static class TestAutoCloseable implements AutoCloseable {
@@ -110,7 +112,7 @@ public class Try100Test extends TestBase {
     public void testStatic_Call_WithSupplier() {
         String result = Try.call(() -> {
             throw new IOException("Test exception");
-        },  Fn.s(() -> "default value"));
+        }, Fn.s(() -> "default value"));
         Assertions.assertEquals("default value", result);
     }
 
@@ -126,7 +128,7 @@ public class Try100Test extends TestBase {
     public void testStatic_Call_WithPredicateAndSupplier_PredicateTrue() {
         String result = Try.call(() -> {
             throw new IOException("Test exception");
-        }, e -> e instanceof IOException,  Fn.s(() -> "handled"));
+        }, e -> e instanceof IOException, Fn.s(() -> "handled"));
         Assertions.assertEquals("handled", result);
     }
 
@@ -135,7 +137,7 @@ public class Try100Test extends TestBase {
         Assertions.assertThrows(RuntimeException.class, () -> {
             Try.call((Callable<String>) () -> {
                 throw new IOException("Test exception");
-            }, (Predicate<? super Exception>) e -> e instanceof IllegalArgumentException,  Fn.s(() -> "handled"));
+            }, (Predicate<? super Exception>) e -> e instanceof IllegalArgumentException, Fn.s(() -> "handled"));
         });
     }
 
@@ -176,7 +178,6 @@ public class Try100Test extends TestBase {
         boolean[] finalActionCalled = { false };
 
         Try.with(resource, () -> finalActionCalled[0] = true).run(r -> {
-            // Do something
         });
 
         Assertions.assertTrue(resource.closed);
@@ -229,7 +230,7 @@ public class Try100Test extends TestBase {
 
         String result = Try.with(resource).call(r -> {
             throw new IOException("Test exception");
-        },  Fn.s(() -> "default value"));
+        }, Fn.s(() -> "default value"));
 
         Assertions.assertEquals("default value", result);
         Assertions.assertTrue(resource.closed);
@@ -253,7 +254,7 @@ public class Try100Test extends TestBase {
 
         String result = Try.with(resource).call(r -> {
             throw new IOException("Test exception");
-        }, e -> e instanceof IOException,  Fn.s(() -> "handled"));
+        }, e -> e instanceof IOException, Fn.s(() -> "handled"));
 
         Assertions.assertEquals("handled", result);
         Assertions.assertTrue(resource.closed);
@@ -280,21 +281,13 @@ public class Try100Test extends TestBase {
             return new TestAutoCloseable();
         });
 
-        Assertions.assertFalse(resourceCreated[0]); // Not created yet
+        Assertions.assertFalse(resourceCreated[0]);
 
         tryInstance.run(r -> {
-            // Use resource
         });
 
-        Assertions.assertTrue(resourceCreated[0]); // Created when needed
+        Assertions.assertTrue(resourceCreated[0]);
     }
-
-    //    @Test
-    //    public void testInstance_Method() {
-    //        TestAutoCloseable resource = new TestAutoCloseable();
-    //        TestAutoCloseable instance = Try.with(resource).instance();
-    //        Assertions.assertSame(resource, instance);
-    //    }
 
     @Test
     public void testNullResource() {
@@ -318,7 +311,6 @@ public class Try100Test extends TestBase {
             resource.throwOnClose = false;
         });
 
-        // Should still close despite exception
         Assertions.assertTrue(resource.closed);
     }
 
@@ -332,7 +324,6 @@ public class Try100Test extends TestBase {
                 throw new RuntimeException("Test exception");
             });
         } catch (RuntimeException e) {
-            // Expected
         }
 
         Assertions.assertTrue(resource.closed);
@@ -365,7 +356,7 @@ public class Try100Test extends TestBase {
     @Test
     public void testNullPredicate() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.call(() -> "test", null,  Fn.s(() -> "default"));
+            Try.call(() -> "test", null, Fn.s(() -> "default"));
         });
     }
 

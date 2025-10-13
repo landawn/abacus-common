@@ -21,13 +21,14 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class JSONHttpMessageConverter100Test extends TestBase {
 
     private JSONHttpMessageConverter converter;
@@ -41,8 +42,7 @@ public class JSONHttpMessageConverter100Test extends TestBase {
     public void testConstructor() {
         JSONHttpMessageConverter newConverter = new JSONHttpMessageConverter();
         assertNotNull(newConverter);
-        
-        // Verify it supports JSON media types
+
         List<MediaType> supportedMediaTypes = newConverter.getSupportedMediaTypes();
         assertTrue(supportedMediaTypes.contains(MediaType.APPLICATION_JSON));
         assertTrue(supportedMediaTypes.contains(new MediaType("application", "*+json")));
@@ -52,9 +52,9 @@ public class JSONHttpMessageConverter100Test extends TestBase {
     public void testReadInternal_SimpleObject() throws IOException {
         String json = "{\"name\":\"John\",\"age\":30,\"active\":true}";
         StringReader reader = new StringReader(json);
-        
+
         Object result = converter.readInternal(TestPerson.class, reader);
-        
+
         assertNotNull(result);
         assertTrue(result instanceof TestPerson);
         TestPerson person = (TestPerson) result;
@@ -67,26 +67,26 @@ public class JSONHttpMessageConverter100Test extends TestBase {
     public void testReadInternal_List() throws IOException {
         String json = "[\"item1\",\"item2\",\"item3\"]";
         StringReader reader = new StringReader(json);
-        
+
         Type listType = new ParameterizedType() {
             @Override
             public Type[] getActualTypeArguments() {
-                return new Type[]{String.class};
+                return new Type[] { String.class };
             }
-            
+
             @Override
             public Type getRawType() {
                 return List.class;
             }
-            
+
             @Override
             public Type getOwnerType() {
                 return null;
             }
         };
-        
+
         Object result = converter.readInternal(listType, reader);
-        
+
         assertNotNull(result);
         assertTrue(result instanceof List);
         List<?> list = (List<?>) result;
@@ -100,26 +100,26 @@ public class JSONHttpMessageConverter100Test extends TestBase {
     public void testReadInternal_Map() throws IOException {
         String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
         StringReader reader = new StringReader(json);
-        
+
         Type mapType = new ParameterizedType() {
             @Override
             public Type[] getActualTypeArguments() {
-                return new Type[]{String.class, String.class};
+                return new Type[] { String.class, String.class };
             }
-            
+
             @Override
             public Type getRawType() {
                 return Map.class;
             }
-            
+
             @Override
             public Type getOwnerType() {
                 return null;
             }
         };
-        
+
         Object result = converter.readInternal(mapType, reader);
-        
+
         assertNotNull(result);
         assertTrue(result instanceof Map);
         Map<?, ?> map = (Map<?, ?>) result;
@@ -132,9 +132,9 @@ public class JSONHttpMessageConverter100Test extends TestBase {
     public void testReadInternal_Array() throws IOException {
         String json = "[1,2,3,4,5]";
         StringReader reader = new StringReader(json);
-        
+
         Object result = converter.readInternal(int[].class, reader);
-        
+
         assertNotNull(result);
         assertTrue(result instanceof int[]);
         int[] array = (int[]) result;
@@ -147,9 +147,9 @@ public class JSONHttpMessageConverter100Test extends TestBase {
     public void testReadInternal_NestedObject() throws IOException {
         String json = "{\"person\":{\"name\":\"Jane\",\"age\":25,\"active\":false},\"score\":95.5}";
         StringReader reader = new StringReader(json);
-        
+
         Object result = converter.readInternal(TestWrapper.class, reader);
-        
+
         assertNotNull(result);
         assertTrue(result instanceof TestWrapper);
         TestWrapper wrapper = (TestWrapper) result;
@@ -164,9 +164,9 @@ public class JSONHttpMessageConverter100Test extends TestBase {
     public void testReadInternal_Null() throws IOException {
         String json = "";
         StringReader reader = new StringReader(json);
-        
+
         Object result = converter.readInternal(TestPerson.class, reader);
-        
+
         assertNull(result);
     }
 
@@ -174,9 +174,9 @@ public class JSONHttpMessageConverter100Test extends TestBase {
     public void testReadInternal_EmptyObject() throws IOException {
         String json = "{}";
         StringReader reader = new StringReader(json);
-        
+
         Object result = converter.readInternal(TestPerson.class, reader);
-        
+
         assertNotNull(result);
         assertTrue(result instanceof TestPerson);
         TestPerson person = (TestPerson) result;
@@ -191,10 +191,10 @@ public class JSONHttpMessageConverter100Test extends TestBase {
         person.name = "Alice";
         person.age = 28;
         person.active = true;
-        
+
         StringWriter writer = new StringWriter();
         converter.writeInternal(person, TestPerson.class, writer);
-        
+
         String json = writer.toString();
         assertNotNull(json);
         assertTrue(json.contains("\"name\": \"Alice\""));
@@ -208,10 +208,10 @@ public class JSONHttpMessageConverter100Test extends TestBase {
         list.add("apple");
         list.add("banana");
         list.add("cherry");
-        
+
         StringWriter writer = new StringWriter();
         converter.writeInternal(list, List.class, writer);
-        
+
         String json = writer.toString();
         assertEquals("[\"apple\", \"banana\", \"cherry\"]", json);
     }
@@ -222,10 +222,10 @@ public class JSONHttpMessageConverter100Test extends TestBase {
         map.put("string", "test");
         map.put("number", 42);
         map.put("boolean", true);
-        
+
         StringWriter writer = new StringWriter();
         converter.writeInternal(map, Map.class, writer);
-        
+
         String json = writer.toString();
         assertNotNull(json);
         assertTrue(json.contains("\"string\": \"test\""));
@@ -235,11 +235,11 @@ public class JSONHttpMessageConverter100Test extends TestBase {
 
     @Test
     public void testWriteInternal_Array() throws IOException {
-        int[] array = {10, 20, 30, 40, 50};
-        
+        int[] array = { 10, 20, 30, 40, 50 };
+
         StringWriter writer = new StringWriter();
         converter.writeInternal(array, int[].class, writer);
-        
+
         String json = writer.toString();
         assertEquals("[10, 20, 30, 40, 50]", json);
     }
@@ -252,10 +252,10 @@ public class JSONHttpMessageConverter100Test extends TestBase {
         wrapper.person.age = 35;
         wrapper.person.active = false;
         wrapper.score = 88.8;
-        
+
         StringWriter writer = new StringWriter();
         converter.writeInternal(wrapper, TestWrapper.class, writer);
-        
+
         String json = writer.toString();
         assertNotNull(json);
         assertTrue(json.contains("\"person\": {"));
@@ -269,7 +269,7 @@ public class JSONHttpMessageConverter100Test extends TestBase {
     public void testWriteInternal_Null() throws IOException {
         StringWriter writer = new StringWriter();
         converter.writeInternal(null, Object.class, writer);
-        
+
         String json = writer.toString();
         assertEquals("", json);
     }
@@ -277,10 +277,10 @@ public class JSONHttpMessageConverter100Test extends TestBase {
     @Test
     public void testWriteInternal_EmptyObject() throws IOException {
         TestPerson person = new TestPerson();
-        
+
         StringWriter writer = new StringWriter();
         converter.writeInternal(person, TestPerson.class, writer);
-        
+
         String json = writer.toString();
         assertNotNull(json);
         assertTrue(json.contains("\"age\": 0"));
@@ -292,14 +292,12 @@ public class JSONHttpMessageConverter100Test extends TestBase {
         TestPerson person = new TestPerson();
         person.name = "Test";
         person.age = 40;
-        
+
         StringWriter writer = new StringWriter();
-        // Pass different type parameter - should not affect output
         converter.writeInternal(person, String.class, writer);
-        
+
         String json = writer.toString();
         assertNotNull(json);
-        // Should still serialize as TestPerson
         assertTrue(json.contains("\"name\": \"Test\""));
         assertTrue(json.contains("\"age\": 40"));
     }
@@ -310,11 +308,9 @@ public class JSONHttpMessageConverter100Test extends TestBase {
         assertTrue(converter.canRead(List.class, MediaType.APPLICATION_JSON));
         assertTrue(converter.canRead(Map.class, MediaType.APPLICATION_JSON));
         assertTrue(converter.canRead(String.class, MediaType.APPLICATION_JSON));
-        
-        // Test with custom JSON media type
+
         assertTrue(converter.canRead(TestPerson.class, new MediaType("application", "vnd.api+json")));
-        
-        // Test non-JSON media type
+
         assertFalse(converter.canRead(TestPerson.class, MediaType.APPLICATION_XML));
     }
 
@@ -324,11 +320,9 @@ public class JSONHttpMessageConverter100Test extends TestBase {
         assertTrue(converter.canWrite(List.class, MediaType.APPLICATION_JSON));
         assertTrue(converter.canWrite(Map.class, MediaType.APPLICATION_JSON));
         assertTrue(converter.canWrite(String.class, MediaType.APPLICATION_JSON));
-        
-        // Test with custom JSON media type
+
         assertTrue(converter.canWrite(TestPerson.class, new MediaType("application", "vnd.api+json")));
-        
-        // Test non-JSON media type
+
         assertFalse(converter.canWrite(TestPerson.class, MediaType.APPLICATION_XML));
     }
 
@@ -337,9 +331,9 @@ public class JSONHttpMessageConverter100Test extends TestBase {
         String json = "{\"name\":\"Charlie\",\"age\":45,\"active\":true}";
         MockHttpInputMessage inputMessage = new MockHttpInputMessage(json);
         inputMessage.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        
+
         TestPerson person = (TestPerson) converter.read(TestPerson.class, inputMessage);
-        
+
         assertNotNull(person);
         assertEquals("Charlie", person.name);
         assertEquals(45, person.age);
@@ -352,10 +346,10 @@ public class JSONHttpMessageConverter100Test extends TestBase {
         person.name = "David";
         person.age = 50;
         person.active = false;
-        
+
         MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
         converter.write(person, MediaType.APPLICATION_JSON, outputMessage);
-        
+
         String json = outputMessage.getBodyAsString();
         assertNotNull(json);
         assertTrue(json.contains("\"name\": \"David\""));
@@ -365,12 +359,11 @@ public class JSONHttpMessageConverter100Test extends TestBase {
 
     @Test
     public void testComplexGenericType() throws IOException {
-        String json = "{\"items\":[{\"name\":\"Item1\",\"age\":10,\"active\":true}," +
-                      "{\"name\":\"Item2\",\"age\":20,\"active\":false}],\"count\":2}";
+        String json = "{\"items\":[{\"name\":\"Item1\",\"age\":10,\"active\":true}," + "{\"name\":\"Item2\",\"age\":20,\"active\":false}],\"count\":2}";
         StringReader reader = new StringReader(json);
-        
+
         Object result = converter.readInternal(TestGenericWrapper.class, reader);
-        
+
         assertNotNull(result);
         assertTrue(result instanceof TestGenericWrapper);
         TestGenericWrapper wrapper = (TestGenericWrapper) result;
@@ -381,7 +374,6 @@ public class JSONHttpMessageConverter100Test extends TestBase {
         assertEquals("Item2", wrapper.items.get(1).name);
     }
 
-    // Test helper classes
     public static class TestPerson {
         public String name;
         public int age;
@@ -398,7 +390,6 @@ public class JSONHttpMessageConverter100Test extends TestBase {
         public int count;
     }
 
-    // Mock HTTP message classes
     private static class MockHttpInputMessage implements HttpInputMessage {
         private final byte[] body;
         private final org.springframework.http.HttpHeaders headers;

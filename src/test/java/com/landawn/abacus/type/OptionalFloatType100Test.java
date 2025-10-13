@@ -19,12 +19,14 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalFloat;
 
+@Tag("new-test")
 public class OptionalFloatType100Test extends TestBase {
 
     private OptionalFloatType optionalFloatType;
@@ -135,7 +137,7 @@ public class OptionalFloatType100Test extends TestBase {
     @Test
     public void testGetFromResultSetByIndexWithNonFloat() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        when(rs.getObject(1)).thenReturn(50); // Integer
+        when(rs.getObject(1)).thenReturn(50);
 
         OptionalFloat result = optionalFloatType.get(rs, 1);
         assertNotNull(result);

@@ -16,6 +16,7 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -23,6 +24,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Duration;
 
+@Tag("new-test")
 public class DurationType100Test extends TestBase {
 
     private DurationType durationType;
@@ -56,10 +58,8 @@ public class DurationType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with null
         assertNull(durationType.stringOf(null));
 
-        // Test with Duration
         Duration duration = Duration.ofMillis(1000);
         assertEquals("1000", durationType.stringOf(duration));
 
@@ -69,11 +69,9 @@ public class DurationType100Test extends TestBase {
 
     @Test
     public void testValueOf() {
-        // Test with null and empty string
         assertNull(durationType.valueOf(null));
         assertNull(durationType.valueOf(""));
 
-        // Test with valid string
         Duration duration = durationType.valueOf("1000");
         assertNotNull(duration);
         assertEquals(1000, duration.toMillis());
@@ -127,11 +125,9 @@ public class DurationType100Test extends TestBase {
     public void testAppendTo() throws IOException {
         StringWriter writer = new StringWriter();
 
-        // Test with null
         durationType.appendTo(writer, null);
         assertEquals("null", writer.toString());
 
-        // Test with Duration
         writer = new StringWriter();
         Duration duration = Duration.ofMillis(1234);
         durationType.appendTo(writer, duration);
@@ -140,10 +136,8 @@ public class DurationType100Test extends TestBase {
 
     @Test
     public void testWriteCharacter() throws IOException {
-        // Test with null
         durationType.writeCharacter(characterWriter, null, null);
 
-        // Test with Duration
         Duration duration = Duration.ofMillis(5678);
         durationType.writeCharacter(characterWriter, duration, null);
     }

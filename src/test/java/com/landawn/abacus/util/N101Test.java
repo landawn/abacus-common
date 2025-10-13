@@ -14,12 +14,13 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class N101Test extends TestBase {
 
-    // Test data
     private boolean[] booleanArray;
     private char[] charArray;
     private byte[] byteArray;
@@ -45,8 +46,6 @@ public class N101Test extends TestBase {
         integerArray = new Integer[] { 1, 2, 3, 4 };
     }
 
-    // Tests for replaceIf methods
-
     @Test
     public void testReplaceIfBooleanArray() {
         boolean[] arr = { true, false, true, false };
@@ -54,7 +53,6 @@ public class N101Test extends TestBase {
         assertEquals(2, count);
         assertArrayEquals(new boolean[] { false, false, false, false }, arr);
 
-        // Test with empty array
         assertEquals(0, N.replaceIf(new boolean[0], val -> val == true, false));
         assertEquals(0, N.replaceIf((boolean[]) null, val -> val == true, false));
     }
@@ -131,8 +129,6 @@ public class N101Test extends TestBase {
         assertEquals(Arrays.asList("x", "b", "x", "c"), list);
     }
 
-    // Tests for replaceAll methods
-
     @Test
     public void testReplaceAllBooleanArray() {
         boolean[] arr = { true, false, true, false };
@@ -140,7 +136,6 @@ public class N101Test extends TestBase {
         assertEquals(2, count);
         assertArrayEquals(new boolean[] { false, false, false, false }, arr);
 
-        // Test with empty array
         assertEquals(0, N.replaceAll(new boolean[0], true, false));
         assertEquals(0, N.replaceAll((boolean[]) null, true, false));
     }
@@ -208,7 +203,6 @@ public class N101Test extends TestBase {
         assertEquals(2, count);
         assertArrayEquals(new String[] { "x", "b", "x", "c" }, arr);
 
-        // Test with null values
         String[] arrWithNull = { "a", null, "a", null };
         count = N.replaceAll(arrWithNull, null, "x");
         assertEquals(2, count);
@@ -222,8 +216,6 @@ public class N101Test extends TestBase {
         assertEquals(2, count);
         assertEquals(Arrays.asList("x", "b", "x", "c"), list);
     }
-
-    // Tests for replaceAll with operators
 
     @Test
     public void testReplaceAllBooleanArrayWithOperator() {
@@ -295,8 +287,6 @@ public class N101Test extends TestBase {
         assertEquals(Arrays.asList("A", "B", "C", "D"), list);
     }
 
-    // Tests for setAll methods
-
     @Test
     public void testSetAllBooleanArray() {
         boolean[] arr = new boolean[4];
@@ -367,19 +357,15 @@ public class N101Test extends TestBase {
         assertEquals(Arrays.asList("a", "b", "c", "d"), list);
     }
 
-    // Tests for add methods
-
     @Test
     public void testAddBoolean() {
         boolean[] arr = { true, false };
         boolean[] result = N.add(arr, true);
         assertArrayEquals(new boolean[] { true, false, true }, result);
 
-        // Test with empty array
         result = N.add(new boolean[0], true);
         assertArrayEquals(new boolean[] { true }, result);
 
-        // Test with null array
         result = N.add((boolean[]) null, true);
         assertArrayEquals(new boolean[] { true }, result);
     }
@@ -447,15 +433,12 @@ public class N101Test extends TestBase {
         assertArrayEquals(new Integer[] { 1, 2, 3 }, result);
     }
 
-    // Tests for addAll methods
-
     @Test
     public void testAddAllBoolean() {
         boolean[] arr = { true, false };
         boolean[] result = N.addAll(arr, true, false);
         assertArrayEquals(new boolean[] { true, false, true, false }, result);
 
-        // Test with empty arrays
         result = N.addAll(new boolean[0], true, false);
         assertArrayEquals(new boolean[] { true, false }, result);
 
@@ -533,7 +516,6 @@ public class N101Test extends TestBase {
         assertTrue(result);
         assertEquals(Arrays.asList("a", "b", "c", "d"), list);
 
-        // Test with empty elements to add
         result = N.addAll(list, new String[0]);
         assertFalse(result);
     }
@@ -556,19 +538,15 @@ public class N101Test extends TestBase {
         assertEquals(Arrays.asList("a", "b", "c", "d"), list);
     }
 
-    // Tests for insert methods
-
     @Test
     public void testInsertBoolean() {
         boolean[] arr = { true, false, true };
         boolean[] result = N.insert(arr, 1, false);
         assertArrayEquals(new boolean[] { true, false, false, true }, result);
 
-        // Test at beginning
         result = N.insert(arr, 0, false);
         assertArrayEquals(new boolean[] { false, true, false, true }, result);
 
-        // Test at end
         result = N.insert(arr, 3, false);
         assertArrayEquals(new boolean[] { true, false, true, false }, result);
     }
@@ -634,8 +612,6 @@ public class N101Test extends TestBase {
         int[] arr = { 1, 2, 3 };
         assertThrows(IndexOutOfBoundsException.class, () -> N.insert(arr, 4, 9));
     }
-
-    // Tests for insertAll methods
 
     @Test
     public void testInsertAllBoolean() {
@@ -724,19 +700,15 @@ public class N101Test extends TestBase {
         assertEquals(Arrays.asList("a", "x", "y", "b", "c"), list);
     }
 
-    // Tests for deleteByIndex methods
-
     @Test
     public void testDeleteByIndexBoolean() {
         boolean[] arr = { true, false, true, false };
         boolean[] result = N.deleteByIndex(arr, 1);
         assertArrayEquals(new boolean[] { true, true, false }, result);
 
-        // Test deleting first element
         result = N.deleteByIndex(arr, 0);
         assertArrayEquals(new boolean[] { false, true, false }, result);
 
-        // Test deleting last element
         result = N.deleteByIndex(arr, 3);
         assertArrayEquals(new boolean[] { true, false, true }, result);
     }
@@ -803,19 +775,15 @@ public class N101Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> N.deleteByIndex(arr, 3));
     }
 
-    // Tests for deleteAllByIndices methods
-
     @Test
     public void testDeleteAllByIndicesBoolean() {
         boolean[] arr = { true, false, true, false, true };
         boolean[] result = N.deleteAllByIndices(arr, 1, 3);
         assertArrayEquals(new boolean[] { true, true, true }, result);
 
-        // Test with duplicate indices
         result = N.deleteAllByIndices(arr, 1, 1, 3);
         assertArrayEquals(new boolean[] { true, true, true }, result);
 
-        // Test with unsorted indices
         result = N.deleteAllByIndices(arr, 3, 1);
         assertArrayEquals(new boolean[] { true, true, true }, result);
     }
@@ -890,14 +858,11 @@ public class N101Test extends TestBase {
         assertTrue(result);
         assertEquals(Arrays.asList("a", "c", "e"), list);
 
-        // Test with empty indices
         list = new ArrayList<>(Arrays.asList("a", "b", "c"));
         result = N.deleteAllByIndices(list);
         assertFalse(result);
         assertEquals(Arrays.asList("a", "b", "c"), list);
     }
-
-    // Tests for remove methods
 
     @Test
     public void testRemoveBoolean() {
@@ -905,11 +870,9 @@ public class N101Test extends TestBase {
         boolean[] result = N.remove(arr, true);
         assertArrayEquals(new boolean[] { false, true, false }, result);
 
-        // Test removing non-existent value
         result = N.remove(new boolean[] { false, false }, true);
         assertArrayEquals(new boolean[] { false, false }, result);
 
-        // Test with empty array
         result = N.remove(new boolean[0], true);
         assertEquals(0, result.length);
     }
@@ -984,12 +947,9 @@ public class N101Test extends TestBase {
         assertTrue(result);
         assertEquals(Arrays.asList("b", "a", "c"), list);
 
-        // Test removing non-existent value
         result = N.remove(list, "x");
         assertFalse(result);
     }
-
-    // Tests for removeAll methods
 
     @Test
     public void testRemoveAllBoolean() {
@@ -997,11 +957,9 @@ public class N101Test extends TestBase {
         boolean[] result = N.removeAll(arr, true, false);
         assertEquals(0, result.length);
 
-        // Test removing single value
         result = N.removeAll(arr, true);
         assertArrayEquals(new boolean[] { false, false }, result);
 
-        // Test with empty values to remove
         result = N.removeAll(arr);
         assertArrayEquals(arr, result);
     }
@@ -1095,19 +1053,15 @@ public class N101Test extends TestBase {
         assertEquals(Arrays.asList("b", "d"), list);
     }
 
-    // Tests for removeAllOccurrences methods
-
     @Test
     public void testRemoveAllOccurrencesBoolean() {
         boolean[] arr = { true, false, true, false, true };
         boolean[] result = N.removeAllOccurrences(arr, true);
         assertArrayEquals(new boolean[] { false, false }, result);
 
-        // Test with array containing only the value to remove
         result = N.removeAllOccurrences(new boolean[] { true, true, true }, true);
         assertEquals(0, result.length);
 
-        // Test with empty array
         result = N.removeAllOccurrences(new boolean[0], true);
         assertEquals(0, result.length);
     }
@@ -1167,7 +1121,6 @@ public class N101Test extends TestBase {
         String[] result = N.removeAllOccurrences(arr, "a");
         assertArrayEquals(new String[] { "b", "c" }, result);
 
-        // Test with null values
         String[] arrWithNull = { "a", null, "a", null, "b" };
         result = N.removeAllOccurrences(arrWithNull, null);
         assertArrayEquals(new String[] { "a", "a", "b" }, result);
@@ -1188,19 +1141,15 @@ public class N101Test extends TestBase {
         assertEquals(Arrays.asList("b", "c"), list);
     }
 
-    // Tests for removeDuplicates methods
-
     @Test
     public void testRemoveDuplicatesBoolean() {
         boolean[] arr = { true, false, true, false, true };
         boolean[] result = N.removeDuplicates(arr);
         assertArrayEquals(new boolean[] { true, false }, result);
 
-        // Test with no duplicates
         result = N.removeDuplicates(new boolean[] { true, false });
         assertArrayEquals(new boolean[] { true, false }, result);
 
-        // Test with all same values
         result = N.removeDuplicates(new boolean[] { true, true, true });
         assertArrayEquals(new boolean[] { true }, result);
     }
@@ -1211,7 +1160,6 @@ public class N101Test extends TestBase {
         char[] result = N.removeDuplicates(arr);
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
 
-        // Test with sorted array
         char[] sortedArr = { 'a', 'a', 'b', 'b', 'c' };
         result = N.removeDuplicates(sortedArr, true);
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
@@ -1223,7 +1171,6 @@ public class N101Test extends TestBase {
         byte[] result = N.removeDuplicates(arr);
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
 
-        // Test with sorted array
         byte[] sortedArr = { 1, 1, 2, 2, 3 };
         result = N.removeDuplicates(sortedArr, true);
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
@@ -1235,7 +1182,6 @@ public class N101Test extends TestBase {
         short[] result = N.removeDuplicates(arr);
         assertArrayEquals(new short[] { 1, 2, 3 }, result);
 
-        // Test with sorted array
         short[] sortedArr = { 1, 1, 2, 2, 3 };
         result = N.removeDuplicates(sortedArr, true);
         assertArrayEquals(new short[] { 1, 2, 3 }, result);
@@ -1247,7 +1193,6 @@ public class N101Test extends TestBase {
         int[] result = N.removeDuplicates(arr);
         assertArrayEquals(new int[] { 1, 2, 3 }, result);
 
-        // Test with sorted array
         int[] sortedArr = { 1, 1, 2, 2, 3 };
         result = N.removeDuplicates(sortedArr, true);
         assertArrayEquals(new int[] { 1, 2, 3 }, result);
@@ -1259,7 +1204,6 @@ public class N101Test extends TestBase {
         long[] result = N.removeDuplicates(arr);
         assertArrayEquals(new long[] { 1L, 2L, 3L }, result);
 
-        // Test with sorted array
         long[] sortedArr = { 1L, 1L, 2L, 2L, 3L };
         result = N.removeDuplicates(sortedArr, true);
         assertArrayEquals(new long[] { 1L, 2L, 3L }, result);
@@ -1271,7 +1215,6 @@ public class N101Test extends TestBase {
         float[] result = N.removeDuplicates(arr);
         assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, result, 0.001f);
 
-        // Test with sorted array
         float[] sortedArr = { 1.0f, 1.0f, 2.0f, 2.0f, 3.0f };
         result = N.removeDuplicates(sortedArr, true);
         assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, result, 0.001f);
@@ -1283,7 +1226,6 @@ public class N101Test extends TestBase {
         double[] result = N.removeDuplicates(arr);
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.001);
 
-        // Test with sorted array
         double[] sortedArr = { 1.0, 1.0, 2.0, 2.0, 3.0 };
         result = N.removeDuplicates(sortedArr, true);
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.001);
@@ -1295,7 +1237,6 @@ public class N101Test extends TestBase {
         String[] result = N.removeDuplicates(arr);
         assertArrayEquals(new String[] { "a", "b", "c" }, result);
 
-        // Test with sorted array
         String[] sortedArr = { "a", "a", "b", "b", "c" };
         result = N.removeDuplicates(sortedArr, true);
         assertArrayEquals(new String[] { "a", "b", "c" }, result);
@@ -1307,7 +1248,6 @@ public class N101Test extends TestBase {
         Integer[] result = N.removeDuplicates(arr);
         assertArrayEquals(new Integer[] { 1, 2, 3 }, result);
 
-        // Test with sorted array
         Integer[] sortedArr = { 1, 1, 2, 2, 3 };
         result = N.removeDuplicates(sortedArr, true);
         assertArrayEquals(new Integer[] { 1, 2, 3 }, result);
@@ -1320,19 +1260,15 @@ public class N101Test extends TestBase {
         assertTrue(result);
         assertEquals(Arrays.asList("a", "b", "c"), list);
 
-        // Test with no duplicates
         list = new ArrayList<>(Arrays.asList("a", "b", "c"));
         result = N.removeDuplicates(list);
         assertFalse(result);
 
-        // Test with sorted collection
         list = new ArrayList<>(Arrays.asList("a", "a", "b", "b", "c"));
         result = N.removeDuplicates(list, true);
         assertTrue(result);
         assertEquals(Arrays.asList("a", "b", "c"), list);
     }
-
-    // Tests for updateAll methods (which throw exceptions)
 
     @Test
     public void testUpdateAllUsingReplaceAllInstead() {
@@ -1344,20 +1280,15 @@ public class N101Test extends TestBase {
         assertThrows(UnsupportedOperationException.class, () -> N.updateIfUsingReplaceIfInstead());
     }
 
-    // Tests for copyThenSetAll methods
-
     @Test
     public void testCopyThenSetAll() {
         Integer[] arr = { 1, 2, 3, 4 };
         Integer[] result = N.copyThenSetAll(arr, i -> i * 10);
         assertArrayEquals(new Integer[] { 0, 10, 20, 30 }, result);
-        // Verify original array is unchanged
         assertArrayEquals(new Integer[] { 1, 2, 3, 4 }, arr);
 
-        // Test with null array
         assertNull(N.copyThenSetAll((Integer[]) null, i -> i));
 
-        // Test with empty array
         Integer[] empty = new Integer[0];
         result = N.copyThenSetAll(empty, i -> i);
         assertEquals(0, result.length);
@@ -1368,19 +1299,14 @@ public class N101Test extends TestBase {
         Integer[] arr = { 1, 2, 3, 4 };
         Integer[] result = N.copyThenReplaceAll(arr, val -> val * 2);
         assertArrayEquals(new Integer[] { 2, 4, 6, 8 }, result);
-        // Verify original array is unchanged
         assertArrayEquals(new Integer[] { 1, 2, 3, 4 }, arr);
 
-        // Test with null array
         assertNull(N.copyThenReplaceAll((Integer[]) null, val -> val));
 
-        // Test with empty array
         Integer[] empty = new Integer[0];
         result = N.copyThenReplaceAll(empty, val -> val);
         assertEquals(0, result.length);
     }
-
-    // Tests for setAll with IntObjFunction
 
     @Test
     public void testSetAllArrayWithIntObjFunction() throws Exception {
@@ -1395,8 +1321,6 @@ public class N101Test extends TestBase {
         N.setAll(list, (i, val) -> val + i);
         assertEquals(Arrays.asList("a0", "b1", "c2", "d3"), list);
     }
-
-    // Tests for updateAll methods
 
     @Test
     public void testUpdateAllArray() throws Exception {
@@ -1429,29 +1353,21 @@ public class N101Test extends TestBase {
         }
     }
 
-    // Tests for copyThenSetAll with IntObjFunction
-
     @Test
     public void testCopyThenSetAllWithIntObjFunction() throws Exception {
         String[] arr = { "a", "b", "c", "d" };
         String[] result = N.copyThenSetAll(arr, (i, val) -> val + i);
         assertArrayEquals(new String[] { "a0", "b1", "c2", "d3" }, result);
-        // Verify original array is unchanged
         assertArrayEquals(new String[] { "a", "b", "c", "d" }, arr);
     }
-
-    // Tests for copyThenUpdateAll
 
     @Test
     public void testCopyThenUpdateAll() throws Exception {
         String[] arr = { "a", "b", "c", "d" };
         String[] result = N.copyThenUpdateAll(arr, String::toUpperCase);
         assertArrayEquals(new String[] { "A", "B", "C", "D" }, result);
-        // Verify original array is unchanged
         assertArrayEquals(new String[] { "a", "b", "c", "d" }, arr);
     }
-
-    // Additional tests for insert with String
 
     @Test
     public void testInsertString() {
@@ -1460,23 +1376,18 @@ public class N101Test extends TestBase {
             String result = N.insert(str, 2, "XX");
             assertEquals("heXXllo", result);
 
-            // Test at beginning
             result = N.insert(str, 0, "XX");
             assertEquals("XXhello", result);
 
-            // Test at end
             result = N.insert(str, 5, "XX");
             assertEquals("helloXX", result);
 
-            // Test with empty string to insert
             result = N.insert(str, 2, "");
             assertEquals("hello", result);
 
-            // Test with null string
             result = N.insert((String) null, 0, "XX");
             assertEquals("XX", result);
 
-            // Test with empty string
             result = N.insert("", 0, "XX");
             assertEquals("XX", result);
         }
@@ -1488,22 +1399,12 @@ public class N101Test extends TestBase {
 
     }
 
-    // Tests for removeDuplicates with range
-
-    //    @Test
-    //    public void testRemoveDuplicatesBooleanRange() {
-    //        boolean[] arr = { true, false, true, false, true };
-    //        boolean[] result = N.removeDuplicates(arr, 1, 4);
-    //        assertArrayEquals(new boolean[] { false, true }, result);
-    //    }
-
     @Test
     public void testRemoveDuplicatesCharRange() {
         char[] arr = { 'a', 'b', 'a', 'b', 'c' };
         char[] result = N.removeDuplicates(arr, 1, 4, false);
         assertArrayEquals(new char[] { 'b', 'a' }, result);
 
-        // Test with sorted range
         char[] sortedArr = { 'x', 'a', 'a', 'b', 'y' };
         result = N.removeDuplicates(sortedArr, 1, 4, true);
         assertArrayEquals(new char[] { 'a', 'b' }, result);
@@ -1565,63 +1466,46 @@ public class N101Test extends TestBase {
         assertArrayEquals(new Integer[] { 1, 2 }, result);
     }
 
-    // Edge case tests
-
     @Test
     public void testEmptyArrayOperations() {
-        // Test replaceIf with empty array
         assertEquals(0, N.replaceIf(new int[0], val -> true, 1));
 
-        // Test replaceAll with empty array
         assertEquals(0, N.replaceAll(new int[0], 1, 2));
 
-        // Test add with empty array
         assertArrayEquals(new int[] { 1 }, N.add(new int[0], 1));
 
-        // Test remove with empty array
         assertArrayEquals(new int[0], N.remove(new int[0], 1));
 
-        // Test removeAll with empty array
         assertArrayEquals(new int[0], N.removeAll(new int[0], 1, 2));
 
-        // Test removeDuplicates with empty array
         assertArrayEquals(new int[0], N.removeDuplicates(new int[0]));
     }
 
     @Test
     public void testNullArrayOperations() {
-        // Test replaceIf with null array
         assertEquals(0, N.replaceIf((int[]) null, val -> true, 1));
 
-        // Test replaceAll with null array
         assertEquals(0, N.replaceAll((int[]) null, 1, 2));
 
-        // Test add with null array
         assertArrayEquals(new int[] { 1 }, N.add((int[]) null, 1));
 
-        // Test remove with null array
         assertArrayEquals(new int[0], N.remove((int[]) null, 1));
 
-        // Test removeAll with null array
         assertArrayEquals(new int[0], N.removeAll((int[]) null, 1, 2));
 
-        // Test removeDuplicates with null array
         assertArrayEquals(new int[0], N.removeDuplicates((int[]) null));
     }
 
     @Test
     public void testLargeArrayOperations() {
-        // Create a large array
         int[] largeArray = new int[1000];
         for (int i = 0; i < largeArray.length; i++) {
-            largeArray[i] = i % 100; // Creates duplicates
+            largeArray[i] = i % 100;
         }
 
-        // Test replaceIf
         int count = N.replaceIf(largeArray, val -> val < 50, -1);
         assertEquals(500, count);
 
-        // Test removeDuplicates
         int[] unique = N.removeDuplicates(largeArray);
         assertEquals(51, unique.length);
     }
@@ -1630,18 +1514,15 @@ public class N101Test extends TestBase {
     public void testCollectionWithNullElements() {
         List<String> list = new ArrayList<>(Arrays.asList("a", null, "b", null, "c"));
 
-        // Test replaceAll with null
         int count = N.replaceAll(list, null, "x");
         assertEquals(2, count);
         assertEquals(Arrays.asList("a", "x", "b", "x", "c"), list);
 
-        // Test remove with null
         list = new ArrayList<>(Arrays.asList("a", null, "b", null, "c"));
         boolean removed = N.remove(list, null);
         assertTrue(removed);
         assertEquals(Arrays.asList("a", "b", null, "c"), list);
 
-        // Test removeAllOccurrences with null
         list = new ArrayList<>(Arrays.asList("a", null, "b", null, "c"));
         removed = N.removeAllOccurrences(list, null);
         assertTrue(removed);
@@ -1650,16 +1531,14 @@ public class N101Test extends TestBase {
 
     @Test
     public void testSpecialFloatingPointValues() {
-        // Test with NaN
         float[] floatArr = { 1.0f, Float.NaN, 2.0f, Float.NaN };
         int count = N.replaceAll(floatArr, Float.NaN, 0.0f);
-        assertEquals(2, count); // NaN != NaN
+        assertEquals(2, count);
 
         double[] doubleArr = { 1.0, Double.NaN, 2.0, Double.NaN };
         count = N.replaceAll(doubleArr, Double.NaN, 0.0);
-        assertEquals(2, count); // NaN != NaN
+        assertEquals(2, count);
 
-        // Test with positive/negative infinity
         floatArr = new float[] { 1.0f, Float.POSITIVE_INFINITY, 2.0f, Float.NEGATIVE_INFINITY };
         count = N.replaceAll(floatArr, Float.POSITIVE_INFINITY, 999.0f);
         assertEquals(1, count);
@@ -1673,15 +1552,12 @@ public class N101Test extends TestBase {
 
     @Test
     public void testLinkedListOperations() {
-        // LinkedList has different performance characteristics
         LinkedList<String> linkedList = new LinkedList<>(Arrays.asList("a", "b", "c", "d", "e"));
 
-        // Test deleteAllByIndices with LinkedList
         boolean result = N.deleteAllByIndices(linkedList, 1, 3);
         assertTrue(result);
         assertEquals(Arrays.asList("a", "c", "e"), linkedList);
 
-        // Test replaceAll with LinkedList
         linkedList = new LinkedList<>(Arrays.asList("a", "b", "a", "c"));
         int count = N.replaceAll(linkedList, "a", "x");
         assertEquals(2, count);
@@ -1692,42 +1568,36 @@ public class N101Test extends TestBase {
     public void testBoundaryIndices() {
         int[] arr = { 1, 2, 3, 4, 5 };
 
-        // Test insert at boundary
         int[] result = N.insert(arr, 0, 0);
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4, 5 }, result);
 
         result = N.insert(arr, 5, 6);
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6 }, result);
 
-        // Test deleteByIndex at boundaries
         result = N.deleteByIndex(arr, 0);
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, result);
 
         result = N.deleteByIndex(arr, 4);
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, result);
 
-        // Test removeDuplicates with single element range
         result = N.removeDuplicates(arr, 2, 3, false);
         assertArrayEquals(new int[] { 3 }, result);
     }
 
     @Test
     public void testPerformanceConsiderations() {
-        // Test with RandomAccess list (ArrayList)
         List<Integer> arrayList = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             arrayList.add(i);
         }
         N.replaceAll(arrayList, val -> val * 2);
 
-        // Test with non-RandomAccess list (LinkedList)
         List<Integer> linkedList = new LinkedList<>();
         for (int i = 0; i < 100; i++) {
             linkedList.add(i);
         }
         N.replaceAll(linkedList, val -> val * 2);
 
-        // Both should produce same result
         assertEquals(arrayList, linkedList);
     }
 }

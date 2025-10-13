@@ -338,18 +338,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Checks if the specified index is valid for accessing an element.
-     * 
-     * @param index the index to check
-     * @throws IndexOutOfBoundsException if the index is out of range
-     */
-    private void rangeCheck(final int index) {
-        if (index >= size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
-        }
-    }
-
-    /**
      * Replaces the element at the specified position in this list with the specified element.
      * 
      * @param index the index of the element to replace
@@ -793,7 +781,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             N.fill(elementData, tmp.length, size, (char) 0);
         }
 
-        size -= elementData.length - tmp.length;
+        size = size - (elementData.length - tmp.length);
     }
 
     /**
@@ -828,21 +816,20 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Moves a range of elements within this list to a new position.
-     * The elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive)
-     * are moved to start at position {@code newPositionStartIndexAfterMove}.
-     * 
-     * <p>No elements are deleted in the process; this list maintains its size.
-     * Elements are shifted as necessary to accommodate the move.
+     * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
+     * so that the element originally at fromIndex will be at newPositionAfterMove.
+     * Other elements are shifted as necessary to accommodate the move.
      * 
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionStartIndexAfterMove the start index where the range should be positioned after the move
-     * @throws IndexOutOfBoundsException if the range is out of bounds or if
-     *         {@code newPositionStartIndexAfterMove} would result in elements being moved outside the list bounds
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and size() - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndexAfterMove);
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
     /**
@@ -1436,7 +1423,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *         or -1 if this list does not contain the element
      */
     public int lastIndexOf(final char valueToFind) {
-        return lastIndexOf(valueToFind, size);
+        return lastIndexOf(valueToFind, size - 1);
     }
 
     /**
@@ -1720,7 +1707,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *         list are less than the specified key.
      */
     public int binarySearch(final char valueToFind) {
-        return N.binarySearch(elementData, valueToFind);
+        return N.binarySearch(elementData, 0, size(), valueToFind);
     }
 
     /**
@@ -1977,34 +1964,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
         return result;
     }
-
-    //    @Override
-    //    public List<CharList> split(int fromIndex, int toIndex, CharPredicate predicate) {
-    //        checkIndex(fromIndex, toIndex);
-    //
-    //        final List<CharList> result = new ArrayList<>();
-    //        CharList piece = null;
-    //
-    //        for (int i = fromIndex; i < toIndex;) {
-    //            if (piece == null) {
-    //                piece = CharList.of(N.EMPTY_CHAR_ARRAY);
-    //            }
-    //
-    //            if (predicate.test(elementData[i])) {
-    //                piece.add(elementData[i]);
-    //                i++;
-    //            } else {
-    //                result.add(piece);
-    //                piece = null;
-    //            }
-    //        }
-    //
-    //        if (piece != null) {
-    //            result.add(piece);
-    //        }
-    //
-    //        return result;
-    //    }
 
     /**
      * Trims the capacity of this list to be the list's current size.
@@ -2361,70 +2320,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return delete(size - 1);
     }
 
-    //    /**
-    //     * Returns a new CharList with the elements in reverse order.
-    //     *
-    //     * @return A new CharList with all elements of the current list in reverse order.
-    //     */
-    //    public CharList reversed() {
-    //        final char[] a = N.copyOfRange(elementData, 0, size);
-    //
-    //        N.reverse(a);
-    //
-    //        return new CharList(a);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param <E>
-    //     * @param func
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <R, E extends Exception> R apply(final Throwables.Function<? super CharList, ? extends R, E> func) throws E {
-    //        return func.apply(this);
-    //    }
-    //
-    //    /**
-    //     * Apply if not empty.
-    //     *
-    //     * @param <R>
-    //     * @param <E>
-    //     * @param func
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super CharList, ? extends R, E> func) throws E {
-    //        return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <E extends Exception> void accept(final Throwables.Consumer<? super CharList, E> action) throws E {
-    //        action.accept(this);
-    //    }
-    //
-    //    /**
-    //     * Accept if not empty.
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super CharList, E> action) throws E {
-    //        return If.is(size > 0).then(this, action);
-    //    }
-
     /**
      * Returns a hash code value for this list.
      * 
@@ -2492,7 +2387,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     private void ensureCapacity(final int minCapacity) {
-        if (minCapacity > MAX_ARRAY_SIZE || minCapacity < 0) {
+        if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
             throw new OutOfMemoryError();
         }
 

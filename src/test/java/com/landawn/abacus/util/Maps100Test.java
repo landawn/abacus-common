@@ -31,6 +31,7 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
@@ -50,6 +51,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Tag("new-test")
 public class Maps100Test extends TestBase {
 
     private Map<String, String> testMap;
@@ -102,7 +104,6 @@ public class Maps100Test extends TestBase {
         assertEquals("key", entry.getKey());
         assertEquals(Integer.valueOf(100), entry.getValue());
 
-        // Test mutation
         entry.setValue(200);
         assertEquals(Integer.valueOf(200), entry.getValue());
     }
@@ -113,7 +114,6 @@ public class Maps100Test extends TestBase {
         assertEquals("key", entry.getKey());
         assertEquals(Integer.valueOf(100), entry.getValue());
 
-        // Immutable entries should throw exception when trying to set value 
         assertThrows(UnsupportedOperationException.class, () -> entry.setValue(200));
     }
 
@@ -125,7 +125,6 @@ public class Maps100Test extends TestBase {
         assertTrue(keys.contains("key2"));
         assertTrue(keys.contains("key3"));
 
-        // Test with null/empty map
         assertTrue(Maps.keys(null).isEmpty());
         assertTrue(Maps.keys(new HashMap<>()).isEmpty());
     }
@@ -138,7 +137,6 @@ public class Maps100Test extends TestBase {
         assertTrue(values.contains("value2"));
         assertTrue(values.contains("value3"));
 
-        // Test with null/empty map
         assertTrue(Maps.values(null).isEmpty());
         assertTrue(Maps.values(new HashMap<>()).isEmpty());
     }
@@ -148,7 +146,6 @@ public class Maps100Test extends TestBase {
         Set<Map.Entry<String, String>> entries = Maps.entrySet(testMap);
         assertEquals(3, entries.size());
 
-        // Test with null/empty map
         assertTrue(Maps.entrySet(null).isEmpty());
         assertTrue(Maps.entrySet(new HashMap<>()).isEmpty());
     }
@@ -164,12 +161,10 @@ public class Maps100Test extends TestBase {
         assertEquals(Integer.valueOf(2), result.get("b"));
         assertEquals(Integer.valueOf(3), result.get("c"));
 
-        // Test with different sizes
         List<String> longerKeys = Arrays.asList("a", "b", "c", "d");
         Map<String, Integer> result2 = Maps.zip(longerKeys, values);
         assertEquals(3, result2.size());
 
-        // Test with null/empty
         assertTrue(Maps.zip(null, values).isEmpty());
         assertTrue(Maps.zip(keys, null).isEmpty());
         assertTrue(Maps.zip(new ArrayList<>(), values).isEmpty());
@@ -184,7 +179,6 @@ public class Maps100Test extends TestBase {
         assertEquals(3, result.size());
         assertTrue(result instanceof LinkedHashMap);
 
-        // Verify order is preserved
         Iterator<String> keyIterator = result.keySet().iterator();
         assertEquals("a", keyIterator.next());
         assertEquals("b", keyIterator.next());
@@ -198,7 +192,7 @@ public class Maps100Test extends TestBase {
 
         Map<String, Integer> result = Maps.zip(keys, values, Integer::sum, HashMap::new);
         assertEquals(2, result.size());
-        assertEquals(Integer.valueOf(4), result.get("a")); // 1 + 3
+        assertEquals(Integer.valueOf(4), result.get("a"));
         assertEquals(Integer.valueOf(2), result.get("b"));
     }
 
@@ -213,7 +207,6 @@ public class Maps100Test extends TestBase {
         assertEquals(Integer.valueOf(2), result.get("b"));
         assertEquals(Integer.valueOf(3), result.get("default"));
 
-        // Test opposite case
         List<String> longerKeys = Arrays.asList("a", "b", "c");
         List<Integer> shorterValues = Arrays.asList(1, 2);
         Map<String, Integer> result2 = Maps.zip(longerKeys, shorterValues, "default", 99);
@@ -227,17 +220,14 @@ public class Maps100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals("value1", result.get());
 
-        // Test missing key
         Nullable<String> missing = Maps.get(testMap, "missing");
         assertFalse(missing.isPresent());
 
-        // Test null value
         objectMap.put("nullKey", null);
         Nullable<Object> nullResult = Maps.get(objectMap, "nullKey");
         assertTrue(nullResult.isPresent());
         assertNull(nullResult.get());
 
-        // Test with null/empty map
         assertFalse(Maps.get(null, "key").isPresent());
         assertFalse(Maps.get(new HashMap<>(), "key").isPresent());
     }
@@ -248,13 +238,10 @@ public class Maps100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals("innerValue1", result.get());
 
-        // Test missing outer key
         assertFalse(Maps.get(nestedMap, "missing", "innerKey1").isPresent());
 
-        // Test missing inner key
         assertFalse(Maps.get(nestedMap, "outer1", "missing").isPresent());
 
-        // Test with null/empty map
         assertFalse(Maps.get(null, "key", "key2").isPresent());
     }
 
@@ -263,7 +250,6 @@ public class Maps100Test extends TestBase {
         assertEquals("value1", Maps.getOrDefaultIfAbsent(testMap, "key1", "default"));
         assertEquals("default", Maps.getOrDefaultIfAbsent(testMap, "missing", "default"));
 
-        // Test with null default - should throw exception 
         assertThrows(IllegalArgumentException.class, () -> Maps.getOrDefaultIfAbsent(testMap, "key1", null));
     }
 
@@ -273,7 +259,6 @@ public class Maps100Test extends TestBase {
         assertEquals("default", Maps.getOrDefaultIfAbsent(nestedMap, "outer1", "missing", "default"));
         assertEquals("default", Maps.getOrDefaultIfAbsent(nestedMap, "missing", "innerKey1", "default"));
 
-        // Test with null default - should throw exception 
         assertThrows(IllegalArgumentException.class, () -> Maps.getOrDefaultIfAbsent(nestedMap, "outer1", "innerKey1", null));
     }
 
@@ -286,7 +271,6 @@ public class Maps100Test extends TestBase {
         List<String> empty = Maps.getOrEmptyListIfAbsent(listMap, "missing");
         assertTrue(empty.isEmpty());
 
-        // Test with null value
         listMap.put("nullList", null);
         List<String> nullResult = Maps.getOrEmptyListIfAbsent(listMap, "nullList");
         assertTrue(nullResult.isEmpty());
@@ -499,7 +483,6 @@ public class Maps100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals("test", result.get());
 
-        // Test conversion from other types
         Optional<String> intAsString = Maps.getString(objectMap, "integer");
         assertTrue(intAsString.isPresent());
         assertEquals("123", intAsString.get());
@@ -512,7 +495,6 @@ public class Maps100Test extends TestBase {
         assertEquals("test", Maps.getString(objectMap, "string", "default"));
         assertEquals("default", Maps.getString(objectMap, "missing", "default"));
 
-        // Test null default - should throw 
         assertThrows(IllegalArgumentException.class, () -> Maps.getString(objectMap, "missing", null));
     }
 
@@ -522,7 +504,6 @@ public class Maps100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(123), result.get());
 
-        // Test type conversion
         objectMap.put("stringInt", "456");
         Optional<Integer> converted = Maps.getNonNull(objectMap, "stringInt", Integer.class);
         assertTrue(converted.isPresent());
@@ -547,7 +528,6 @@ public class Maps100Test extends TestBase {
         Integer defaultResult = Maps.getNonNull(objectMap, "missing", 999);
         assertEquals(Integer.valueOf(999), defaultResult);
 
-        // Test null default - should throw ;
         assertThrows(IllegalArgumentException.class, () -> Maps.getNonNull(objectMap, "missing", (Integer) null));
     }
 
@@ -558,7 +538,6 @@ public class Maps100Test extends TestBase {
         assertEquals("value", result1);
         assertEquals("value", map.get("key"));
 
-        // Second call should return existing value
         String result2 = Maps.getAndPutIfAbsent(map, "key", () -> "newValue");
         assertEquals("value", result2);
         assertEquals("value", map.get("key"));
@@ -572,7 +551,6 @@ public class Maps100Test extends TestBase {
         assertTrue(list.isEmpty());
         assertEquals(list, map.get("key"));
 
-        // Add to list and verify
         list.add("item");
         assertEquals(1, map.get("key").size());
     }
@@ -618,7 +596,6 @@ public class Maps100Test extends TestBase {
         assertEquals(3, values.size());
         assertEquals(Arrays.asList("value1", "value2", "value3"), values);
 
-        // Test with null/empty
         assertTrue(Maps.getIfPresentForEach(null, keys).isEmpty());
         assertTrue(Maps.getIfPresentForEach(testMap, null).isEmpty());
     }
@@ -630,7 +607,6 @@ public class Maps100Test extends TestBase {
         assertEquals(3, values.size());
         assertEquals(Arrays.asList("value1", "default", "value2"), values);
 
-        // Test with empty map
         List<String> defaultValues = Maps.getOrDefaultIfAbsentForEach(new HashMap<>(), keys, "default");
         assertEquals(Arrays.asList("default", "default", "default"), defaultValues);
     }
@@ -644,22 +620,17 @@ public class Maps100Test extends TestBase {
         nested.put("key2", "val22");
         map.put("nested", nested);
 
-        // Simple path
         assertEquals("val1", Maps.getByPath(map, "key1"));
 
-        // Nested path
         assertEquals("val22", Maps.getByPath(map, "nested.key2"));
 
-        // Missing path
         assertNull(Maps.getByPath(map, "missing"));
         assertNull(Maps.getByPath(map, "nested.missing"));
 
-        // Array notation
         List<String> list = Arrays.asList("a", "b", "c");
         map.put("array", list);
         assertEquals("b", Maps.getByPath(map, "array[1]"));
 
-        // Complex path with array and nested
         List<Map<String, Object>> complexList = new ArrayList<>();
         Map<String, Object> item = new HashMap<>();
         item.put("prop", "value");
@@ -724,11 +695,9 @@ public class Maps100Test extends TestBase {
         assertFalse(Maps.contains(testMap, "key1", "wrongValue"));
         assertFalse(Maps.contains(testMap, "missing", "value1"));
 
-        // Test with null value
         testMap.put("nullKey", null);
         assertTrue(Maps.contains(testMap, "nullKey", null));
 
-        // Test with empty map
         assertFalse(Maps.contains(new HashMap<>(), "key", "value"));
         assertFalse(Maps.contains(null, "key", "value"));
     }
@@ -752,7 +721,6 @@ public class Maps100Test extends TestBase {
         assertNull(result.get("a"));
         assertNull(result.get("d"));
 
-        // Test with null/empty
         assertTrue(Maps.intersection(null, map2).isEmpty());
         assertTrue(Maps.intersection(map1, null).isEmpty());
         assertTrue(Maps.intersection(map1, new HashMap<>()).isEmpty());
@@ -773,18 +741,15 @@ public class Maps100Test extends TestBase {
         Map<String, Pair<String, Nullable<String>>> result = Maps.difference(map1, map2);
         assertEquals(2, result.size());
 
-        // Key 'a' exists only in map1
         Pair<String, Nullable<String>> pairA = result.get("a");
         assertEquals("1", pairA.left());
         assertFalse(pairA.right().isPresent());
 
-        // Key 'c' has different values
         Pair<String, Nullable<String>> pairC = result.get("c");
         assertEquals("3", pairC.left());
         assertTrue(pairC.right().isPresent());
         assertEquals("different", pairC.right().get());
 
-        // Key 'b' has same value - should not be in result
         assertNull(result.get("b"));
 
         Map<String, Pair<String, Nullable<String>>> result2 = Maps.difference(map1, null);
@@ -808,26 +773,22 @@ public class Maps100Test extends TestBase {
         Map<String, Pair<Nullable<String>, Nullable<String>>> result = Maps.symmetricDifference(map1, map2);
         assertEquals(3, result.size());
 
-        // Key 'a' exists only in map1
         Pair<Nullable<String>, Nullable<String>> pairA = result.get("a");
         assertTrue(pairA.left().isPresent());
         assertEquals("1", pairA.left().get());
         assertFalse(pairA.right().isPresent());
 
-        // Key 'd' exists only in map2
         Pair<Nullable<String>, Nullable<String>> pairD = result.get("d");
         assertFalse(pairD.left().isPresent());
         assertTrue(pairD.right().isPresent());
         assertEquals("4", pairD.right().get());
 
-        // Key 'c' has different values
         Pair<Nullable<String>, Nullable<String>> pairC = result.get("c");
         assertTrue(pairC.left().isPresent());
         assertEquals("3", pairC.left().get());
         assertTrue(pairC.right().isPresent());
         assertEquals("different", pairC.right().get());
 
-        // Key 'b' has same value - should not be in result
         assertNull(result.get("b"));
     }
 
@@ -836,15 +797,12 @@ public class Maps100Test extends TestBase {
         Map<String, String> map = new HashMap<>();
         map.put("existing", "value");
 
-        // Put new key
         assertNull(Maps.putIfAbsent(map, "new", "newValue"));
         assertEquals("newValue", map.get("new"));
 
-        // Try to put existing key
         assertEquals("value", Maps.putIfAbsent(map, "existing", "anotherValue"));
         assertEquals("value", map.get("existing"));
 
-        // Put with null value
         assertNull(Maps.putIfAbsent(map, "nullKey", (String) null));
         assertTrue(map.containsKey("nullKey"));
         assertNull(map.get("nullKey"));
@@ -855,11 +813,9 @@ public class Maps100Test extends TestBase {
         Map<String, String> map = new HashMap<>();
         map.put("existing", "value");
 
-        // Put new key
         assertNull(Maps.putIfAbsent(map, "new", Fn.s(() -> "newValue")));
         assertEquals("newValue", map.get("new"));
 
-        // Try to put existing key - supplier should not be called
         final boolean[] supplierCalled = { false };
         assertEquals("value", Maps.putIfAbsent(map, "existing", Fn.s(() -> {
             supplierCalled[0] = true;
@@ -884,7 +840,6 @@ public class Maps100Test extends TestBase {
         assertNull(target.get("b"));
         assertEquals("3", target.get("c"));
 
-        // Test with empty source
         assertFalse(Maps.putIf(target, new HashMap<>(), key -> true));
     }
 
@@ -913,11 +868,9 @@ public class Maps100Test extends TestBase {
         assertTrue(Maps.remove(map, entry));
         assertFalse(map.containsKey("key1"));
 
-        // Try to remove non-existent entry
         Map.Entry<String, String> missing = new AbstractMap.SimpleEntry<>("missing", "value");
         assertFalse(Maps.remove(map, missing));
 
-        // Wrong value
         Map.Entry<String, String> wrongValue = new AbstractMap.SimpleEntry<>("key2", "wrongValue");
         assertFalse(Maps.remove(map, wrongValue));
         assertTrue(map.containsKey("key2"));
@@ -935,7 +888,6 @@ public class Maps100Test extends TestBase {
 
         assertFalse(Maps.remove(map, "missing", "value"));
 
-        // Test with null/empty map
         assertFalse(Maps.remove(null, "key", "value"));
         assertFalse(Maps.remove(new HashMap<>(), "key", "value"));
     }
@@ -949,7 +901,6 @@ public class Maps100Test extends TestBase {
         assertEquals(1, map.size());
         assertTrue(map.containsKey("key2"));
 
-        // Test with empty collections
         assertFalse(Maps.removeKeys(map, new ArrayList<>()));
         assertFalse(Maps.removeKeys(new HashMap<>(), keysToRemove));
     }
@@ -959,7 +910,7 @@ public class Maps100Test extends TestBase {
         Map<String, String> map = new HashMap<>(testMap);
         Map<String, String> entriesToRemove = new HashMap<>();
         entriesToRemove.put("key1", "value1");
-        entriesToRemove.put("key2", "wrongValue"); // Should not be removed
+        entriesToRemove.put("key2", "wrongValue");
         entriesToRemove.put("key3", "value3");
 
         assertTrue(Maps.removeEntries(map, entriesToRemove));
@@ -976,10 +927,8 @@ public class Maps100Test extends TestBase {
         assertEquals(2, map.size());
         assertFalse(map.containsKey("key1"));
 
-        // No match
         assertFalse(Maps.removeIf(map, entry -> entry.getKey().equals("missing")));
 
-        // Empty map
         assertFalse(Maps.removeIf(new HashMap<>(), entry -> true));
     }
 
@@ -1025,7 +974,6 @@ public class Maps100Test extends TestBase {
 
         assertFalse(Maps.replace(map, "missing", "oldValue", "newValue"));
 
-        // Test with empty map
         assertFalse(Maps.replace(new HashMap<>(), "key", "old", "new"));
     }
 
@@ -1039,7 +987,6 @@ public class Maps100Test extends TestBase {
         assertNull(Maps.replace(map, "missing", "newValue"));
         assertFalse(map.containsKey("missing"));
 
-        // Test with null value
         map.put("nullKey", null);
         assertNull(Maps.replace(map, "nullKey", "newValue"));
         assertEquals("newValue", map.get("nullKey"));
@@ -1054,7 +1001,6 @@ public class Maps100Test extends TestBase {
         assertEquals("key2-value2", map.get("key2"));
         assertEquals("key3-value3", map.get("key3"));
 
-        // Test with empty map
         Map<String, String> emptyMap = new HashMap<>();
         Maps.replaceAll(emptyMap, (k, v) -> "new");
         assertTrue(emptyMap.isEmpty());
@@ -1068,7 +1014,6 @@ public class Maps100Test extends TestBase {
         assertEquals("value3", result.get("key3"));
         assertNull(result.get("key2"));
 
-        // Test with null map
         assertTrue(Maps.filter(null, entry -> true).isEmpty());
     }
 
@@ -1111,7 +1056,6 @@ public class Maps100Test extends TestBase {
         assertEquals("two", inverted.get(2));
         assertEquals("three", inverted.get(3));
 
-        // Test with null map
         assertTrue(Maps.invert(null).isEmpty());
     }
 
@@ -1233,23 +1177,6 @@ public class Maps100Test extends TestBase {
         assertEquals("value", outer.get("inner"));
     }
 
-    //    @Test
-    //    public void testMerge() {
-    //        Map<String, Integer> map = new HashMap<>();
-    //        map.put("a", 1);
-    //
-    //        Maps.merge(map, "a", 2, Integer::sum);
-    //        assertEquals(Integer.valueOf(3), map.get("a"));
-    //
-    //        Maps.merge(map, "b", 5, Integer::sum);
-    //        assertEquals(Integer.valueOf(5), map.get("b"));
-    //
-    //        // Test with null old value
-    //        map.put("nullKey", null);
-    //        Maps.merge(map, "nullKey", 10, (oldVal, newVal) -> oldVal == null ? newVal : oldVal + newVal);
-    //        assertEquals(Integer.valueOf(10), map.get("nullKey"));
-    //    }
-
     @Test
     public void testMap2Bean() {
         Map<String, Object> map = new HashMap<>();
@@ -1263,7 +1190,6 @@ public class Maps100Test extends TestBase {
         assertEquals(30, bean.getAge());
         assertTrue(bean.isActive());
 
-        // Test with null map
         assertNull(Beans.map2Bean((Map) null, TestBean.class));
     }
 
@@ -1274,17 +1200,14 @@ public class Maps100Test extends TestBase {
         map.put("age", null);
         map.put("unknownProperty", "value");
 
-        // Test ignoring null properties
         TestBean bean1 = Beans.map2Bean(map, true, true, TestBean.class);
         assertEquals("John", bean1.getName());
-        assertEquals(0, bean1.getAge()); // Primitive int defaults to 0
+        assertEquals(0, bean1.getAge());
 
-        // Test not ignoring unmatched properties (should throw exception)
         try {
             Beans.map2Bean(map, false, false, TestBean.class);
             fail("Should throw exception for unmatched property");
         } catch (Exception e) {
-            // Expected
         }
     }
 
@@ -1298,7 +1221,7 @@ public class Maps100Test extends TestBase {
         TestBean bean = Beans.map2Bean(map, Arrays.asList("name", "age"), TestBean.class);
         assertEquals("John", bean.getName());
         assertEquals(30, bean.getAge());
-        assertFalse(bean.isActive()); // Not selected, should be default value
+        assertFalse(bean.isActive());
     }
 
     @Test
@@ -1401,7 +1324,7 @@ public class Maps100Test extends TestBase {
         Set<String> ignored = new HashSet<>(Arrays.asList("age", "active"));
         Map<String, Object> map = Beans.bean2Map(bean, false, ignored);
 
-        assertEquals(3, map.size()); // name + nullableField + nestedBean
+        assertEquals(3, map.size());
         assertEquals("John", map.get("name"));
         assertFalse(map.containsKey("age"));
         assertFalse(map.containsKey("active"));
@@ -1497,15 +1420,12 @@ public class Maps100Test extends TestBase {
         map.put("a2", 20);
         map.put("b", 30);
 
-        // Both a1 and a2 will become "a"
         Maps.replaceKeys(map, key -> key.startsWith("a") ? "a" : key, Integer::sum);
 
         assertEquals(2, map.size());
-        assertEquals(Integer.valueOf(30), map.get("a")); // 10 + 20
+        assertEquals(Integer.valueOf(30), map.get("a"));
         assertEquals(Integer.valueOf(30), map.get("b"));
     }
-
-    // Additional edge case tests
 
     @Test
     public void testGetWithNullValues() {
@@ -1541,7 +1461,6 @@ public class Maps100Test extends TestBase {
     public void testGetByPathComplexCases() {
         Map<String, Object> complexMap = new HashMap<>();
 
-        // Nested collections
         List<Map<String, Object>> list = new ArrayList<>();
         Map<String, Object> item1 = new HashMap<>();
         item1.put("prop", "value1");
@@ -1557,7 +1476,6 @@ public class Maps100Test extends TestBase {
         assertEquals("value1", Maps.getByPath(complexMap, "list[0].prop"));
         assertEquals("b", Maps.getByPath(complexMap, "list[1].innerList[1]"));
 
-        // Test out of bounds
         assertNull(Maps.getByPath(complexMap, "list[5].prop"));
         assertNull(Maps.getByPath(complexMap, "list[1].innerList[10]"));
     }
@@ -1571,18 +1489,15 @@ public class Maps100Test extends TestBase {
         conversionMap.put("boolAsInt", 1);
         conversionMap.put("hexString", "0xFF");
 
-        // Test various conversions
         assertEquals(123, Maps.getInt(conversionMap, "intAsString", 0));
         assertEquals(45.67, Maps.getDouble(conversionMap, "doubleAsString", 0.0), 0.001);
         assertTrue(Maps.getBoolean(conversionMap, "boolAsString", false));
 
-        // Test number format handling
         conversionMap.put("invalidNumber", "not-a-number");
         try {
             Maps.getInt(conversionMap, "invalidNumber");
             fail("Should throw NumberFormatException");
         } catch (Exception e) {
-            // Expected
         }
     }
 
@@ -1596,7 +1511,6 @@ public class Maps100Test extends TestBase {
         IdentityHashMap<String, String> identityMap2 = new IdentityHashMap<>();
         identityMap2.put(key2, "value2");
 
-        // Symmetric difference should preserve IdentityHashMap behavior
         Map<String, Pair<Nullable<String>, Nullable<String>>> diff = Maps.symmetricDifference(identityMap1, identityMap2);
         assertTrue(diff instanceof IdentityHashMap);
     }
@@ -1606,13 +1520,11 @@ public class Maps100Test extends TestBase {
         Map<String, String> map = new HashMap<>();
         map.put("key1", "value1");
 
-        // Test null predicate 
         assertThrows(IllegalArgumentException.class, () -> Maps.filter(map, (Predicate<Map.Entry<String, String>>) null));
     }
 
     @Test
     public void testNestedMapConversions() {
-        // Test deep nesting
         Map<String, Object> deepMap = new HashMap<>();
         Map<String, Object> level1 = new HashMap<>();
         Map<String, Object> level2 = new HashMap<>();
@@ -1664,31 +1576,26 @@ public class Maps100Test extends TestBase {
     public void testConcurrentModification() {
         Map<String, String> map = new HashMap<>(testMap);
 
-        // Test removeIf with concurrent modification
         try {
             Maps.removeIf(map, entry -> {
-                map.put("newKey", "newValue"); // Modify during iteration
+                map.put("newKey", "newValue");
                 return true;
             });
             fail("Should throw ConcurrentModificationException");
         } catch (Exception e) {
-            // Expected
         }
     }
 
     @Test
     public void testLargeMapOperations() {
-        // Test with larger maps for performance edge cases
         Map<String, Integer> largeMap = new HashMap<>();
         for (int i = 0; i < 1000; i++) {
             largeMap.put("key" + i, i);
         }
 
-        // Test filtering
         Map<String, Integer> filtered = Maps.filterByValue(largeMap, v -> v % 2 == 0);
         assertEquals(500, filtered.size());
 
-        // Test inversion
         Map<Integer, String> inverted = Maps.invert(largeMap);
         assertEquals(1000, inverted.size());
         assertEquals("key500", inverted.get(500));
@@ -1700,26 +1607,21 @@ public class Maps100Test extends TestBase {
         map.put("key.with.dots", "value1");
         map.put("key[with]brackets", "value2");
 
-        // These should work as direct keys, not paths
         assertEquals("value1", map.get("key.with.dots"));
         assertEquals("value2", map.get("key[with]brackets"));
 
-        // Path parsing with special characters
         Map<String, Object> nested = new HashMap<>();
         nested.put("special.key", "specialValue");
         map.put("normal", nested);
 
-        // This should navigate the path
-        assertNull(Maps.getByPath(map, "normal.special.key")); // Won't find because "special.key" is one key
+        assertNull(Maps.getByPath(map, "normal.special.key"));
     }
 
     @Test
     public void testNullHandlingInAllMethods() {
-        // Comprehensive null testing
         Map<String, String> nullMap = null;
         Map<String, String> emptyMap = new HashMap<>();
 
-        // Test all methods with null map
         assertFalse(Maps.get(nullMap, "key").isPresent());
         assertTrue(Maps.keys(nullMap).isEmpty());
         assertTrue(Maps.values(nullMap).isEmpty());
@@ -1731,19 +1633,17 @@ public class Maps100Test extends TestBase {
         assertTrue(Maps.flatInvert((Map<String, Collection<String>>) null).isEmpty());
         assertTrue(Maps.intersection(nullMap, emptyMap).isEmpty());
 
-        // Test with maps containing null values
         Map<String, String> mapWithNulls = new HashMap<>();
         mapWithNulls.put("null1", null);
         mapWithNulls.put("null2", null);
         mapWithNulls.put("notNull", "value");
 
         Map<String, String> inverted = Maps.invert(mapWithNulls);
-        assertEquals(2, inverted.size()); // null keys will overwrite
+        assertEquals(2, inverted.size());
         assertTrue(inverted.containsKey(null));
         assertEquals("notNull", inverted.get("value"));
     }
 
-    // Helper classes for testing
     public static class TestBean {
         private String name;
         private int age;
@@ -1806,15 +1706,12 @@ public class Maps100Test extends TestBase {
 
     @Test
     public void testThreadSafetyConsiderations() {
-        // Note: Maps utility methods are not thread-safe by design
-        // This test documents expected behavior with concurrent access
 
         final Map<String, String> concurrentMap = new HashMap<>();
         for (int i = 0; i < 100; i++) {
             concurrentMap.put("key" + i, "value" + i);
         }
 
-        // Single-threaded operation should work fine
         Map<String, String> filtered = Maps.filterByKey(concurrentMap, k -> k.contains("5"));
         assertTrue(filtered.size() > 0);
     }
@@ -1834,7 +1731,6 @@ public class Maps100Test extends TestBase {
         assertEquals(100, filtered.size());
         System.out.println("Filter operation on 100k entries took: " + duration + "ms");
 
-        // Test invert performance
         start = System.currentTimeMillis();
         Map<Integer, String> inverted = Maps.invert(veryLargeMap);
         duration = System.currentTimeMillis() - start;
@@ -1850,11 +1746,9 @@ public class Maps100Test extends TestBase {
         sortedMap.put("a", "1");
         sortedMap.put("b", "2");
 
-        // Filter should preserve sorted map type
         Map<String, String> filtered = Maps.filterByKey(sortedMap, k -> !k.equals("b"));
         assertTrue(filtered instanceof TreeMap);
 
-        // Verify order is preserved
         Iterator<String> keys = filtered.keySet().iterator();
         assertEquals("a", keys.next());
         assertEquals("c", keys.next());
@@ -1869,7 +1763,6 @@ public class Maps100Test extends TestBase {
 
         Map<String, String> filtered = Maps.filter(linkedMap, e -> !e.getKey().equals("second"));
 
-        // Check order preservation
         Iterator<Map.Entry<String, String>> entries = filtered.entrySet().iterator();
         assertEquals("first", entries.next().getKey());
         assertEquals("third", entries.next().getKey());
@@ -1879,7 +1772,6 @@ public class Maps100Test extends TestBase {
     public void testEdgeCasesForTypeConversions() {
         Map<String, Object> edgeCaseMap = new HashMap<>();
 
-        // Test extreme values
         edgeCaseMap.put("maxLong", Long.MAX_VALUE);
         edgeCaseMap.put("minLong", Long.MIN_VALUE);
         edgeCaseMap.put("infinity", Double.POSITIVE_INFINITY);
@@ -1890,14 +1782,12 @@ public class Maps100Test extends TestBase {
         assertTrue(Double.isInfinite(Maps.getDouble(edgeCaseMap, "infinity", 0.0)));
         assertTrue(Double.isNaN(Maps.getDouble(edgeCaseMap, "nan", 0.0)));
 
-        // Test scientific notation
         edgeCaseMap.put("scientific", "1.23e4");
         assertEquals(12300.0, Maps.getDouble(edgeCaseMap, "scientific", 0.0), 0.001);
     }
 
     @Test
     public void testMapSupplierBehavior() {
-        // Test that map suppliers are called correctly
         final boolean[] supplierCalled = { false };
         IntFunction<HashMap<String, String>> trackingSupplier = size -> {
             supplierCalled[0] = true;
@@ -1913,21 +1803,17 @@ public class Maps100Test extends TestBase {
 
     @Test
     public void testCompleteCodeCoverage() {
-        // Additional tests for complete code coverage
 
-        // Test getByPath with various edge cases
         Map<String, Object> pathMap = new HashMap<>();
         pathMap.put("", "emptyKey");
         assertEquals("emptyKey", Maps.getByPath(pathMap, ""));
 
-        // Test with collections in path
         Set<String> set = new LinkedHashSet<>();
         set.add("first");
         set.add("second");
         pathMap.put("set", set);
         assertEquals("first", Maps.getByPath(pathMap, "set[0]"));
 
-        // Test bean2Map with different naming policies
         TestBean bean = new TestBean();
         bean.setName("Test");
 
@@ -1940,7 +1826,6 @@ public class Maps100Test extends TestBase {
 
     @Test
     public void testCircularReferenceHandling() {
-        // Test what happens with circular references in bean2Map
         CircularBean bean1 = new CircularBean();
         CircularBean bean2 = new CircularBean();
         bean1.setName("Bean1");
@@ -1948,18 +1833,13 @@ public class Maps100Test extends TestBase {
         bean1.setReference(bean2);
         bean2.setReference(bean1);
 
-        // This should work for shallow conversion
         Map<String, Object> map = Beans.bean2Map(bean1);
         assertEquals("Bean1", map.get("name"));
         assertEquals(bean2, map.get("reference"));
 
-        // Deep conversion might have issues with circular references
-        // The implementation doesn't handle this, so we document the behavior
         try {
             Beans.deepBean2Map(bean1);
-            // If it doesn't throw StackOverflowError, it might have some protection
         } catch (StackOverflowError e) {
-            // Expected behavior with circular references
         }
     }
 

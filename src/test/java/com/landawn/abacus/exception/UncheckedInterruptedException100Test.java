@@ -2,9 +2,11 @@ package com.landawn.abacus.exception;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class UncheckedInterruptedException100Test extends TestBase {
 
     @Test
@@ -78,12 +80,9 @@ public class UncheckedInterruptedException100Test extends TestBase {
 
     @Test
     public void testInterruptedStatus() {
-        // Note: This test demonstrates that wrapping InterruptedException doesn't automatically
-        // restore the interrupted status. Users should manually call Thread.currentThread().interrupt()
         InterruptedException interruptedException = new InterruptedException("Thread interrupted");
         UncheckedInterruptedException exception = new UncheckedInterruptedException(interruptedException);
 
-        // The interrupted status is not automatically restored
         Assertions.assertFalse(Thread.currentThread().isInterrupted());
     }
 

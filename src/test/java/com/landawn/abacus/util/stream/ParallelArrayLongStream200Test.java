@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
@@ -33,13 +34,13 @@ import com.landawn.abacus.util.function.LongUnaryOperator;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
+@Tag("new-test")
 public class ParallelArrayLongStream200Test extends TestBase {
 
-    private static final int testMaxThreadNum = 4; // Use a fixed small number of threads for predictable testing 
+    private static final int testMaxThreadNum = 4;
     private static final long[] TEST_ARRAY = new long[] { 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L, 20L, 21L, 22L,
             23L, 24L, 25L, 26L };
 
-    // Empty method to be implemented by the user for initializing LongStream
     protected LongStream createLongStream(long... elements) {
         return LongStream.of(elements).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
     }
@@ -86,7 +87,7 @@ public class ParallelArrayLongStream200Test extends TestBase {
         LongUnaryOperator mapper = l -> l + 1L;
         List<Long> result = stream.map(mapper).toList();
         assertEquals(TEST_ARRAY.length, result.size());
-        assertTrue(result.contains(2L)); // 1 maps to 2
+        assertTrue(result.contains(2L));
         assertFalse(result.contains(1L));
     }
 
@@ -226,12 +227,12 @@ public class ParallelArrayLongStream200Test extends TestBase {
         LongStream stream = createLongStream(TEST_ARRAY);
         List<Long> consumed = new ArrayList<>();
         LongConsumer action = it -> {
-            synchronized (consumed) { // Ensure thread safety
+            synchronized (consumed) {
                 consumed.add(it);
             }
         };
         stream.onEach(action).forEach(l -> {
-        }); // Trigger the onEach action
+        });
         assertEquals(TEST_ARRAY.length, consumed.size());
 
         assertHaveSameElements(N.toList(TEST_ARRAY), consumed);
@@ -242,7 +243,7 @@ public class ParallelArrayLongStream200Test extends TestBase {
         LongStream stream = createLongStream(TEST_ARRAY);
         List<Long> consumed = new ArrayList<>();
         LongConsumer action = it -> {
-            synchronized (consumed) { // Ensure thread safety
+            synchronized (consumed) {
                 consumed.add(it);
             }
         };
@@ -405,16 +406,16 @@ public class ParallelArrayLongStream200Test extends TestBase {
     public void testZipWithBinaryOperatorWithNoneValues() {
         LongStream streamA = createLongStream(new long[] { 1L, 2L });
         LongStream streamB = LongStream.of(10L, 20L, 30L);
-        long valA = 0L; // Assuming 0L as 'none' for long
-        long valB = -1L; // Assuming -1L as 'none' for long
+        long valA = 0L;
+        long valB = -1L;
         LongBinaryOperator zipper = (l1, l2) -> {
             return l1 + l2;
         };
         List<Long> result = streamA.zipWith(streamB, valA, valB, zipper).sorted().toList();
         assertEquals(3, result.size());
-        assertEquals(11L, result.get(0)); // 1 + 10
-        assertEquals(22L, result.get(1)); // 2 + 20
-        assertEquals(30L, result.get(2)); // 0 (valA) + 30 -> 30
+        assertEquals(11L, result.get(0));
+        assertEquals(22L, result.get(1));
+        assertEquals(30L, result.get(2));
     }
 
     @Test
@@ -431,8 +432,8 @@ public class ParallelArrayLongStream200Test extends TestBase {
         List<Long> result = streamA.zipWith(streamB, streamC, valA, valB, valC, zipper).toList();
         assertEquals(3, result.size());
         assertEquals(1L + 10L + 100L, result.get(0));
-        assertEquals(0L + 20L + 101L, result.get(1)); // valA (0) + 20 + 101
-        assertEquals(0L + -1L + 102L, result.get(2)); // valA (0) + valB (-1) + 102
+        assertEquals(0L + 20L + 101L, result.get(1));
+        assertEquals(0L + -1L + 102L, result.get(2));
     }
 
     @Test
@@ -457,28 +458,14 @@ public class ParallelArrayLongStream200Test extends TestBase {
 
     @Test
     public void testMaxThreadNum() throws IllegalAccessException, NoSuchFieldException {
-        // Since maxThreadNum() is protected in the superclass,
-        // and its value is used internally, we can't directly call it from here.
-        // However, we can assert its behavior indirectly or via reflection if necessary.
-        // For this test, we'll assume the constructor correctly sets it and other tests
-        // indirectly verify its usage.
-        // If it was a public method of ParallelArrayLongStream, we would test it directly.
-        // LongStream stream = createLongStream(longArray);
-        //assertTrue(stream.maxThreadNum() > 0); // This line would work if maxThreadNum() was public in LongStream
     }
 
     @Test
     public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        // Similar to maxThreadNum, splitor() is protected.
-        // LongStream stream = createLongStream(longArray);
-        //assertNotNull(stream.splitor());
     }
 
     @Test
     public void testAsyncExecutor() throws IllegalAccessException, NoSuchFieldException {
-        // Similar to maxThreadNum, asyncExecutor() is protected.
-        // LongStream stream = createLongStream(longArray);
-        //assertNotNull(stream.asyncExecutor());
     }
 
     @Test
@@ -488,9 +475,9 @@ public class ParallelArrayLongStream200Test extends TestBase {
         Runnable closeHandler = () -> closedFlag.set(true);
 
         LongStream newStream = stream.onClose(closeHandler);
-        assertFalse(closedFlag.get()); // Not closed yet
-        newStream.close(); // Close the stream, which should trigger the handler
-        assertTrue(closedFlag.get()); // Now it should be closed
+        assertFalse(closedFlag.get());
+        newStream.close();
+        assertTrue(closedFlag.get());
     }
 
     @Test
@@ -510,7 +497,7 @@ public class ParallelArrayLongStream200Test extends TestBase {
     public void testOnCloseEmptyHandler() {
         LongStream stream = createLongStream(TEST_ARRAY);
         LongStream newStream = stream.onClose(null);
-        assertSame(stream, newStream); // Should return the same instance if handler is null
-        newStream.close(); // Should not throw
+        assertSame(stream, newStream);
+        newStream.close();
     }
 }

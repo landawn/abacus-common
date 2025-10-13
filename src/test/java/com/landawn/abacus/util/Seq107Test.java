@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
@@ -19,6 +20,7 @@ import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 
+@Tag("new-test")
 public class Seq107Test extends TestBase {
     @Test
     public void testFilterWithSkipCountAndToArray() throws Exception {
@@ -932,9 +934,6 @@ public class Seq107Test extends TestBase {
                 Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").delay(java.time.Duration.ofMillis(1)).skip(2).toArray(String[]::new));
     }
 
-    // Note: The following methods are annotated with @TerminalOpTriggered, which means they trigger terminal evaluation
-    // and consume all elements when a terminal operation is called. They still need to be tested as intermediate operations.
-
     @Test
     public void testDistinctMergeFunctionWithSkipCountAndToArray() throws Exception {
         assertEquals(5, Seq.<String, RuntimeException> of("a", "A", "b", "B", "c").distinct((a, b) -> a.toLowerCase()).count());
@@ -979,7 +978,6 @@ public class Seq107Test extends TestBase {
 
     @Test
     public void testGroupByKeyMapperWithSkipCountAndToArray() throws Exception {
-        // groupBy returns a Seq of Map.Entry objects
         assertEquals(3, Seq.<String, RuntimeException> of("a", "bb", "aa", "ccc", "bbb").groupBy(String::length).count());
         assertEquals(1, Seq.<String, RuntimeException> of("a", "bb", "aa", "ccc", "bbb").groupBy(String::length).skip(2).count());
 
@@ -994,7 +992,6 @@ public class Seq107Test extends TestBase {
 
     @Test
     public void testPartitionByWithSkipCountAndToArray() throws Exception {
-        // partitionBy returns exactly 2 entries (true and false)
         assertEquals(2, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").partitionBy(s -> s.compareTo("c") < 0).count());
         assertEquals(1, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").partitionBy(s -> s.compareTo("c") < 0).skip(1).count());
 

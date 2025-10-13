@@ -45,7 +45,6 @@ import com.landawn.abacus.util.N;
  *   <li>writeDatasetByRow: false - Datasets are written by columns by default</li>
  * </ul>
  * 
- * @author HaiYang Li
  * @since 0.8
  * @see JSONParser
  * @see JSONDeserializationConfig

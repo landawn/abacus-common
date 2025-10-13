@@ -12,9 +12,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class BiMap100Test extends TestBase {
 
     @Test
@@ -161,7 +163,7 @@ public class BiMap100Test extends TestBase {
         map.put("one", 1);
         map.put("two", 2);
         map.put("three", 3);
-        
+
         biMap.putAll(map);
         assertEquals(3, biMap.size());
         assertEquals(1, biMap.get("one"));
@@ -175,7 +177,7 @@ public class BiMap100Test extends TestBase {
         biMap.put("one", 1);
         biMap.put("two", 2);
         assertEquals(2, biMap.size());
-        
+
         biMap.clear();
         assertEquals(0, biMap.size());
         assertTrue(biMap.isEmpty());
@@ -186,7 +188,7 @@ public class BiMap100Test extends TestBase {
         BiMap<String, Integer> biMap = new BiMap<>();
         biMap.put("one", 1);
         biMap.put("two", 2);
-        
+
         ImmutableSet<String> keys = biMap.keySet();
         assertEquals(2, keys.size());
         assertTrue(keys.contains("one"));
@@ -198,7 +200,7 @@ public class BiMap100Test extends TestBase {
         BiMap<String, Integer> biMap = new BiMap<>();
         biMap.put("one", 1);
         biMap.put("two", 2);
-        
+
         ImmutableSet<Integer> values = biMap.values();
         assertEquals(2, values.size());
         assertTrue(values.contains(1));
@@ -210,7 +212,7 @@ public class BiMap100Test extends TestBase {
         BiMap<String, Integer> biMap = new BiMap<>();
         biMap.put("one", 1);
         biMap.put("two", 2);
-        
+
         ImmutableSet<Map.Entry<String, Integer>> entries = biMap.entrySet();
         assertEquals(2, entries.size());
     }
@@ -220,15 +222,14 @@ public class BiMap100Test extends TestBase {
         BiMap<String, Integer> biMap = new BiMap<>();
         biMap.put("one", 1);
         biMap.put("two", 2);
-        
+
         BiMap<Integer, String> inverse = biMap.inversed();
         assertEquals(2, inverse.size());
         assertEquals("one", inverse.get(1));
         assertEquals("two", inverse.get(2));
         assertEquals(1, inverse.getByValue("one"));
         assertEquals(2, inverse.getByValue("two"));
-        
-        // Test that inverse is a view
+
         biMap.put("three", 3);
         assertEquals("three", inverse.get(3));
     }
@@ -237,10 +238,10 @@ public class BiMap100Test extends TestBase {
     public void testInversedTwice() {
         BiMap<String, Integer> biMap = new BiMap<>();
         biMap.put("one", 1);
-        
+
         BiMap<Integer, String> inverse = biMap.inversed();
         BiMap<String, Integer> inverseInverse = inverse.inversed();
-        
+
         assertSame(biMap, inverseInverse);
     }
 
@@ -249,13 +250,12 @@ public class BiMap100Test extends TestBase {
         BiMap<String, Integer> biMap = new BiMap<>();
         biMap.put("one", 1);
         biMap.put("two", 2);
-        
+
         BiMap<String, Integer> copy = biMap.copy();
         assertEquals(biMap.size(), copy.size());
         assertEquals(biMap.get("one"), copy.get("one"));
         assertEquals(biMap.get("two"), copy.get("two"));
-        
-        // Test that copy is independent
+
         copy.put("three", 3);
         assertFalse(biMap.containsKey("three"));
     }
@@ -278,11 +278,7 @@ public class BiMap100Test extends TestBase {
 
     @Test
     public void testOfManyPairs() {
-        BiMap<String, Integer> biMap = BiMap.of(
-            "one", 1, "two", 2, "three", 3, "four", 4, 
-            "five", 5, "six", 6, "seven", 7, "eight", 8,
-            "nine", 9, "ten", 10
-        );
+        BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2, "three", 3, "four", 4, "five", 5, "six", 6, "seven", 7, "eight", 8, "nine", 9, "ten", 10);
         assertEquals(10, biMap.size());
         assertEquals(10, biMap.get("ten"));
     }
@@ -292,7 +288,7 @@ public class BiMap100Test extends TestBase {
         Map<String, Integer> map = new HashMap<>();
         map.put("one", 1);
         map.put("two", 2);
-        
+
         BiMap<String, Integer> biMap = BiMap.copyOf(map);
         assertEquals(2, biMap.size());
         assertEquals(1, biMap.get("one"));
@@ -301,12 +297,8 @@ public class BiMap100Test extends TestBase {
 
     @Test
     public void testBuilder() {
-        BiMap<String, Integer> biMap = BiMap.<String, Integer>builder()
-            .put("one", 1)
-            .put("two", 2)
-            .put("three", 3)
-            .build();
-            
+        BiMap<String, Integer> biMap = BiMap.<String, Integer> builder().put("one", 1).put("two", 2).put("three", 3).build();
+
         assertEquals(3, biMap.size());
         assertEquals(1, biMap.get("one"));
         assertEquals(2, biMap.get("two"));
@@ -318,11 +310,9 @@ public class BiMap100Test extends TestBase {
         Map<String, Integer> map = new HashMap<>();
         map.put("one", 1);
         map.put("two", 2);
-        
-        BiMap<String, Integer> biMap = BiMap.builder(map)
-            .put("three", 3)
-            .build();
-            
+
+        BiMap<String, Integer> biMap = BiMap.builder(map).put("three", 3).build();
+
         assertEquals(3, biMap.size());
         assertEquals(1, biMap.get("one"));
         assertEquals(2, biMap.get("two"));
@@ -331,11 +321,8 @@ public class BiMap100Test extends TestBase {
 
     @Test
     public void testBuilderForcePut() {
-        BiMap<String, Integer> biMap = BiMap.<String, Integer>builder()
-            .put("one", 1)
-            .forcePut("two", 1)
-            .build();
-            
+        BiMap<String, Integer> biMap = BiMap.<String, Integer> builder().put("one", 1).forcePut("two", 1).build();
+
         assertEquals(1, biMap.size());
         assertNull(biMap.get("one"));
         assertEquals(1, biMap.get("two"));
@@ -346,11 +333,9 @@ public class BiMap100Test extends TestBase {
         Map<String, Integer> map = new HashMap<>();
         map.put("one", 1);
         map.put("two", 2);
-        
-        BiMap<String, Integer> biMap = BiMap.<String, Integer>builder()
-            .putAll(map)
-            .build();
-            
+
+        BiMap<String, Integer> biMap = BiMap.<String, Integer> builder().putAll(map).build();
+
         assertEquals(2, biMap.size());
         assertEquals(1, biMap.get("one"));
         assertEquals(2, biMap.get("two"));
@@ -361,14 +346,14 @@ public class BiMap100Test extends TestBase {
         BiMap<String, Integer> biMap1 = new BiMap<>();
         biMap1.put("one", 1);
         biMap1.put("two", 2);
-        
+
         BiMap<String, Integer> biMap2 = new BiMap<>();
         biMap2.put("one", 1);
         biMap2.put("two", 2);
-        
+
         assertEquals(biMap1, biMap2);
         assertEquals(biMap1.hashCode(), biMap2.hashCode());
-        
+
         biMap2.put("three", 3);
         assertNotEquals(biMap1, biMap2);
     }
@@ -377,7 +362,7 @@ public class BiMap100Test extends TestBase {
     public void testToString() {
         BiMap<String, Integer> biMap = new BiMap<>();
         biMap.put("one", 1);
-        
+
         String str = biMap.toString();
         assertTrue(str.contains("one"));
         assertTrue(str.contains("1"));
@@ -387,10 +372,10 @@ public class BiMap100Test extends TestBase {
     public void testIsEmpty() {
         BiMap<String, Integer> biMap = new BiMap<>();
         assertTrue(biMap.isEmpty());
-        
+
         biMap.put("one", 1);
         assertFalse(biMap.isEmpty());
-        
+
         biMap.remove("one");
         assertTrue(biMap.isEmpty());
     }
@@ -399,13 +384,13 @@ public class BiMap100Test extends TestBase {
     public void testSize() {
         BiMap<String, Integer> biMap = new BiMap<>();
         assertEquals(0, biMap.size());
-        
+
         biMap.put("one", 1);
         assertEquals(1, biMap.size());
-        
+
         biMap.put("two", 2);
         assertEquals(2, biMap.size());
-        
+
         biMap.remove("one");
         assertEquals(1, biMap.size());
     }

@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class EscapeUtil200Test extends TestBase {
 
     @Test
@@ -49,7 +51,6 @@ public class EscapeUtil200Test extends TestBase {
 
     @Test
     public void testUnescapeEcmaScript() {
-        // UNESCAPE_ECMASCRIPT is an alias for UNESCAPE_JAVA
         assertNull(EscapeUtil.unescapeEcmaScript(null));
         assertEquals("", EscapeUtil.unescapeEcmaScript(""));
         assertEquals("He didn't say, \"Stop!\"", EscapeUtil.unescapeEcmaScript("He didn\\'t say, \\\"Stop!\\\""));
@@ -68,7 +69,6 @@ public class EscapeUtil200Test extends TestBase {
 
     @Test
     public void testUnescapeJson() {
-        // UNESCAPE_JSON is an alias for UNESCAPE_JAVA
         assertNull(EscapeUtil.unescapeJson(null));
         assertEquals("", EscapeUtil.unescapeJson(""));
         assertEquals("He didn't say, \"Stop!\"", EscapeUtil.unescapeJson("He didn't say, \\\"Stop!\\\""));

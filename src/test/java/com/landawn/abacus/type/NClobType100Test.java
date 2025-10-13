@@ -11,10 +11,12 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class NClobType100Test extends TestBase {
 
     private NClobType nClobType;
@@ -40,9 +42,6 @@ public class NClobType100Test extends TestBase {
 
     @Test
     public void testStringOfThrowsException() {
-        //    Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-        //        nClobType.stringOf(mockNClob);
-        //    });
         nClobType.stringOf(mockNClob);
     }
 

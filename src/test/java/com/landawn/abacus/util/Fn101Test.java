@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -58,6 +59,7 @@ import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.function.UnaryOperator;
 import com.landawn.abacus.util.stream.Collectors;
 
+@Tag("new-test")
 public class Fn101Test extends TestBase {
 
     @Test
@@ -281,11 +283,10 @@ public class Fn101Test extends TestBase {
         assertEquals("hello", castToString.apply("hello"));
 
         try {
-            String str = castToString.apply(123); // Will throw ClassCastException at runtime
+            String str = castToString.apply(123);
             N.println(str);
             fail("Should have thrown ClassCastException");
         } catch (ClassCastException e) {
-            // Expected
         }
     }
 
@@ -431,7 +432,6 @@ public class Fn101Test extends TestBase {
         File dir = new File(".");
 
         assertFalse(isFile.test(null));
-        // Note: Actual file system checks would depend on the environment
     }
 
     @Test
@@ -442,7 +442,6 @@ public class Fn101Test extends TestBase {
         File dir = new File(".");
 
         assertFalse(isDirectory.test(null));
-        // Note: Actual file system checks would depend on the environment
     }
 
     @Test
@@ -691,9 +690,9 @@ public class Fn101Test extends TestBase {
         Predicate<Integer> combined = Fn.and(predicates);
 
         assertTrue(combined.test(50));
-        assertFalse(combined.test(51)); // Not even
-        assertFalse(combined.test(0)); // Not > 0
-        assertFalse(combined.test(100)); // Not < 100
+        assertFalse(combined.test(51));
+        assertFalse(combined.test(0));
+        assertFalse(combined.test(100));
     }
 
     @Test
@@ -705,8 +704,8 @@ public class Fn101Test extends TestBase {
         BiPredicate<String, Integer> combined = Fn.and(notNullAndPositive, longerThanValue, containsA);
 
         assertTrue(combined.test("banana", 3));
-        assertFalse(combined.test("bnn", 2)); // No 'a'
-        assertFalse(combined.test("a", 2)); // Not longer than value
+        assertFalse(combined.test("bnn", 2));
+        assertFalse(combined.test("a", 2));
     }
 
     @Test
@@ -917,7 +916,7 @@ public class Fn101Test extends TestBase {
 
         List<Map<String, Integer>> result = flatmap.apply(input);
 
-        assertEquals(3, result.size()); // Max size of any collection
+        assertEquals(3, result.size());
         assertTrue(result.get(0).containsKey("a"));
         assertTrue(result.get(0).containsKey("b"));
         assertEquals(Integer.valueOf(1), result.get(0).get("a"));
@@ -966,21 +965,21 @@ public class Fn101Test extends TestBase {
     public void testLimitThenFilter() {
         Predicate<Integer> limitThenEven = Fn.limitThenFilter(3, n -> n % 2 == 0);
 
-        assertTrue(limitThenEven.test(2)); // 1st element, even
-        assertFalse(limitThenEven.test(3)); // 2nd element, odd
-        assertTrue(limitThenEven.test(4)); // 3rd element, even
-        assertFalse(limitThenEven.test(6)); // Beyond limit
+        assertTrue(limitThenEven.test(2));
+        assertFalse(limitThenEven.test(3));
+        assertTrue(limitThenEven.test(4));
+        assertFalse(limitThenEven.test(6));
     }
 
     @Test
     public void testFilterThenLimit() {
         Predicate<Integer> evenThenLimit = Fn.filterThenLimit(n -> n % 2 == 0, 2);
 
-        assertFalse(evenThenLimit.test(1)); // Odd
-        assertTrue(evenThenLimit.test(2)); // Even, 1st
-        assertFalse(evenThenLimit.test(3)); // Odd
-        assertTrue(evenThenLimit.test(4)); // Even, 2nd
-        assertFalse(evenThenLimit.test(6)); // Even but beyond limit
+        assertFalse(evenThenLimit.test(1));
+        assertTrue(evenThenLimit.test(2));
+        assertFalse(evenThenLimit.test(3));
+        assertTrue(evenThenLimit.test(4));
+        assertFalse(evenThenLimit.test(6));
     }
 
     @Test
@@ -990,7 +989,7 @@ public class Fn101Test extends TestBase {
         assertTrue(timeLimit.test("first"));
         Thread.sleep(50);
         assertTrue(timeLimit.test("second"));
-        Thread.sleep(89); // Total > 100ms
+        Thread.sleep(89);
         assertFalse(timeLimit.test("third"));
     }
 
@@ -1001,7 +1000,7 @@ public class Fn101Test extends TestBase {
         assertTrue(timeLimit.test("first"));
         Thread.sleep(50);
         assertTrue(timeLimit.test("second"));
-        Thread.sleep(89); // Total > 100ms
+        Thread.sleep(89);
         assertFalse(timeLimit.test("third"));
     }
 
@@ -1022,10 +1021,10 @@ public class Fn101Test extends TestBase {
     public void testIndexedPredicate() {
         Predicate<String> indexedPredicate = Fn.indexed((index, value) -> index % 2 == 0 || value.length() > 5);
 
-        assertTrue(indexedPredicate.test("short")); // Index 0 (even)
-        assertTrue(indexedPredicate.test("verylongstring")); // Long string
-        assertTrue(indexedPredicate.test("any")); // Index 2 (even)
-        assertFalse(indexedPredicate.test("no")); // Index 3 (odd) and short
+        assertTrue(indexedPredicate.test("short"));
+        assertTrue(indexedPredicate.test("verylongstring"));
+        assertTrue(indexedPredicate.test("any"));
+        assertFalse(indexedPredicate.test("no"));
     }
 
     @Test
@@ -1085,18 +1084,15 @@ public class Fn101Test extends TestBase {
 
     @Test
     public void testFrom() {
-        // Test from Supplier
         java.util.function.Supplier<String> jdkSupplier = () -> "hello";
         Supplier<String> abacusSupplier = Fn.from(jdkSupplier);
         assertEquals("hello", abacusSupplier.get());
 
-        // Test from Predicate
         java.util.function.Predicate<String> jdkPredicate = s -> s.length() > 3;
         Predicate<String> abacusPredicate = Fn.from(jdkPredicate);
         assertTrue(abacusPredicate.test("hello"));
         assertFalse(abacusPredicate.test("hi"));
 
-        // Test from Function
         java.util.function.Function<String, Integer> jdkFunction = String::length;
         Function<String, Integer> abacusFunction = Fn.from(jdkFunction);
         assertEquals(Integer.valueOf(5), abacusFunction.apply("hello"));
@@ -1111,7 +1107,6 @@ public class Fn101Test extends TestBase {
         assertEquals(MergeResult.TAKE_FIRST, alternate.apply("e", "f"));
     }
 
-    // Test inner classes
     @Test
     public void testLongSuppliersCurrentTimeMillis() {
         LongSupplier currentTime = Fn.LongSuppliers.ofCurrentTimeMillis();
@@ -1122,7 +1117,6 @@ public class Fn101Test extends TestBase {
         try {
             Thread.sleep(10);
         } catch (InterruptedException e) {
-            // Ignore
         }
 
         long time2 = currentTime.getAsLong();
@@ -1131,27 +1125,21 @@ public class Fn101Test extends TestBase {
 
     @Test
     public void testOptionalOperations() {
-        // Test GET_AS_BOOLEAN
         OptionalBoolean ob = OptionalBoolean.of(true);
         assertTrue(Fn.GET_AS_BOOLEAN.applyAsBoolean(ob));
 
-        // Test GET_AS_CHAR
         OptionalChar oc = OptionalChar.of('A');
         assertEquals('A', Fn.GET_AS_CHAR.applyAsChar(oc));
 
-        // Test GET_AS_BYTE
         OptionalByte oby = OptionalByte.of((byte) 42);
         assertEquals(42, Fn.GET_AS_BYTE.applyAsByte(oby));
 
-        // Test GET_AS_SHORT
         OptionalShort os = OptionalShort.of((short) 42);
         assertEquals(42, Fn.GET_AS_SHORT.applyAsShort(os));
 
-        // Test GET_AS_FLOAT
         OptionalFloat of = OptionalFloat.of(42.5f);
         assertEquals(42.5f, Fn.GET_AS_FLOAT.applyAsFloat(of), 0.001f);
 
-        // Test IS_PRESENT predicates
         assertTrue(Fn.IS_PRESENT_BOOLEAN.test(OptionalBoolean.of(true)));
         assertFalse(Fn.IS_PRESENT_BOOLEAN.test(OptionalBoolean.empty()));
 
@@ -1170,19 +1158,15 @@ public class Fn101Test extends TestBase {
 
     @Test
     public void testJdkOptionalOperations() {
-        // Test GET_AS_INT_JDK
         java.util.OptionalInt oi = java.util.OptionalInt.of(42);
         assertEquals(42, Fn.GET_AS_INT_JDK.applyAsInt(oi));
 
-        // Test GET_AS_LONG_JDK
         java.util.OptionalLong ol = java.util.OptionalLong.of(42L);
         assertEquals(42L, Fn.GET_AS_LONG_JDK.applyAsLong(ol));
 
-        // Test GET_AS_DOUBLE_JDK
         java.util.OptionalDouble od = java.util.OptionalDouble.of(42.5);
         assertEquals(42.5, Fn.GET_AS_DOUBLE_JDK.applyAsDouble(od), 0.001);
 
-        // Test IS_PRESENT predicates
         assertTrue(Fn.IS_PRESENT_INT_JDK.test(java.util.OptionalInt.of(1)));
         assertFalse(Fn.IS_PRESENT_INT_JDK.test(java.util.OptionalInt.empty()));
 
@@ -1202,7 +1186,6 @@ public class Fn101Test extends TestBase {
         shutdown.run();
         assertTrue(executor.isShutdown());
 
-        // Should be idempotent
         shutdown.run();
         assertTrue(executor.isShutdown());
     }
@@ -1214,7 +1197,6 @@ public class Fn101Test extends TestBase {
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
-                // Ignore
             }
         });
 
@@ -1229,7 +1211,7 @@ public class Fn101Test extends TestBase {
 
     @Test
     public void testRateLimiter() {
-        Consumer<String> rateLimited = Fn.rateLimiter(5.0); // 5 permits per second
+        Consumer<String> rateLimited = Fn.rateLimiter(5.0);
 
         long start = System.currentTimeMillis();
         for (int i = 0; i < 5; i++) {
@@ -1237,8 +1219,7 @@ public class Fn101Test extends TestBase {
         }
         long duration = System.currentTimeMillis() - start;
 
-        // Should take approximately 1 second for 5 permits at 5/sec
-        assertTrue(duration < 1500); // Allow some margin
+        assertTrue(duration < 1500);
     }
 
     @Test
@@ -1246,18 +1227,15 @@ public class Fn101Test extends TestBase {
         RateLimiter rateLimiter = RateLimiter.create(10.0);
         Consumer<String> rateLimited = Fn.rateLimiter(rateLimiter);
 
-        // Just ensure it doesn't throw
         rateLimited.accept("test");
     }
 
     @Test
     public void testPrintlnWithSeparator() {
-        // Test various separators
         BiConsumer<String, Integer> printEqual = Fn.println("=");
         BiConsumer<String, Integer> printColon = Fn.println(":");
         BiConsumer<String, Integer> printComma = Fn.println(",");
 
-        // Just ensure they don't throw
         printEqual.accept("key", 42);
         printColon.accept("key", 42);
         printComma.accept("key", 42);
@@ -1319,7 +1297,6 @@ public class Fn101Test extends TestBase {
         Callable<String> callable = () -> "result";
         Runnable runnable = Fn.c2r(callable);
 
-        // Just ensure it doesn't throw
         runnable.run();
     }
 
@@ -1328,7 +1305,6 @@ public class Fn101Test extends TestBase {
         java.lang.Runnable javaRunnable = () -> System.out.println("Running");
         Runnable abacusRunnable = Fn.jr2r(javaRunnable);
 
-        // Just ensure it doesn't throw
         abacusRunnable.run();
     }
 
@@ -1345,7 +1321,6 @@ public class Fn101Test extends TestBase {
         java.util.concurrent.Callable<String> callable = () -> "result";
         Runnable runnable = Fn.jc2r(callable);
 
-        // Just ensure it doesn't throw
         runnable.run();
     }
 
@@ -1357,7 +1332,7 @@ public class Fn101Test extends TestBase {
         };
 
         Runnable runnable = Fn.rr(throwableRunnable);
-        runnable.run(); // Should not throw
+        runnable.run();
     }
 
     @Test
@@ -1376,7 +1351,7 @@ public class Fn101Test extends TestBase {
     public void testR() {
         Runnable runnable = Fn.r(() -> System.out.println("test"));
         assertNotNull(runnable);
-        runnable.run(); // Should not throw
+        runnable.run();
     }
 
     @Test
@@ -1390,7 +1365,7 @@ public class Fn101Test extends TestBase {
     public void testJr() {
         java.lang.Runnable runnable = Fn.jr(() -> System.out.println("test"));
         assertNotNull(runnable);
-        runnable.run(); // Should not throw
+        runnable.run();
     }
 
     @Test

@@ -21,6 +21,8 @@ import static com.landawn.abacus.util.WD._QUOTATION_S;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.text.Normalizer;
 import java.util.ArrayList;
@@ -477,7 +479,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isValidUrl("http://www.example.com");          // returns true
      * isValidUrl("https://example.com:8080/path");   // returns true
      * isValidUrl("ftp://files.example.com/doc.pdf"); // returns true
-     * isValidUrl("file:///C:/Users/doc.txt");        // returns true
+     * isValidUrl("file://C:/Users/doc.txt");         // returns true
      * 
      * // Invalid URLs
      * isValidUrl("not a url");                       // returns false
@@ -2086,8 +2088,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>Example:
      * <pre>
-     * Strings.center(null, 4)     = "    "
-     * Strings.center("", 4)     = "    "
+     * Strings.center(null, 3)     = "   "
+     * Strings.center("", 3)     = "   "
      * Strings.center("ab", 4)   = " ab "
      * Strings.center("abcd", 2) = "abcd"
      * Strings.center("a", 4)    = " a  "
@@ -2266,6 +2268,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padStart(String str, final int minLength, final String padStr) {
+        N.checkArgNotEmpty(padStr, "padStr");
+
         if (str == null) {
             str = EMPTY;
         }
@@ -2378,13 +2382,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str The string to be padded. It can be {@code null}, in which case it will be treated as an empty string.
      * @param minLength The minimum length the string should have after padding. Must be non-negative.
-     * @param padStr The string to be used for padding.
+     * @param padStr The string to be used for padding. Must not be {@code null} or empty.
      * @return A new string that is a copy of the original string padded with the padStr so that it reaches the specified minimum length.
      *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
+     * @throws IllegalArgumentException if padStr is {@code null} or empty
      */
     public static String padEnd(String str, final int minLength, final String padStr) {
         if (str == null) {
             str = EMPTY;
+        }
+
+        if (padStr == null || padStr.isEmpty()) {
+            throw new IllegalArgumentException("padStr cannot be null or empty");
         }
 
         if (str.length() >= minLength) {
@@ -2486,7 +2495,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Repeats the given string a specified number of times and returns the resulting string.
      *
      * <p>This method creates a string consisting of the specified string repeated n times.
-     * If the input string is null or empty, or n is 0, appropriate results are returned.</p>
+     * If the input string is null or empty, or n is 0, empty string {@code ""} is returned.</p>
      *
      * <p>Example:
      * <pre>{@code
@@ -2500,7 +2509,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str The string to be repeated. It can be {@code null} or empty.
      * @param n The number of times the string should be repeated. Must be non-negative.
-     * @return A string consisting of the given string repeated n times.
+     * @return A string consisting of the given string repeated n times, an empty string {@code ""} if the input string is null or empty, or n is 0.
      * @throws IllegalArgumentException if n is negative.
      * @see #repeat(char, int, char)
      * @see #repeat(String, int, String)
@@ -3046,18 +3055,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        String[] substrs = null;
-        int idx = str.indexOf('_');
-
-        if (idx < 0) {
-            idx = str.indexOf('-');
-        }
-
-        if (idx >= 0) {
-            substrs = RegExUtil.split(str, RegExUtil.CAMEL_CASE_SEPARATOR);
-        }
-
-        return toCamelCase(str, idx, substrs);
+        return toCamelCase(str, RegExUtil.split(str, RegExUtil.CAMEL_CASE_SEPARATOR));
     }
 
     /**
@@ -3088,17 +3086,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        String[] substrs = null;
-        final int idx = str.indexOf(splitChar);
-
-        if (idx >= 0) {
-            substrs = Strings.split(str, splitChar);
-        }
-
-        return toCamelCase(str, idx, substrs);
+        return toCamelCase(str, Strings.split(str, splitChar));
     }
 
-    private static String toCamelCase(final String str, final int firstSplitorIndex, final String[] substrs) {
+    private static String toCamelCase(final String str, final String[] substrs) {
+        final int firstSplitorIndex = N.len(substrs) == 1 ? -1 : substrs[0].length() + 1;
+
         if (firstSplitorIndex >= 0) {
             final StringBuilder sb = Objectory.createStringBuilder(str.length());
 
@@ -3168,18 +3161,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        String[] substrs = null;
-        int idx = str.indexOf('_');
-
-        if (idx < 0) {
-            idx = str.indexOf('-');
-        }
-
-        if (idx >= 0) {
-            substrs = RegExUtil.split(str, RegExUtil.CAMEL_CASE_SEPARATOR);
-        }
-
-        return toPascalCase(str, idx, substrs);
+        return toPascalCase(str, RegExUtil.split(str, RegExUtil.CAMEL_CASE_SEPARATOR));
     }
 
     /**
@@ -3213,17 +3195,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        String[] substrs = null;
-        final int idx = str.indexOf(splitChar);
-
-        if (idx >= 0) {
-            substrs = Strings.split(str, splitChar);
-        }
-
-        return toPascalCase(str, idx, substrs);
+        return toPascalCase(str, Strings.split(str, splitChar));
     }
 
-    private static String toPascalCase(final String str, final int firstSplitorIndex, final String[] substrs) {
+    private static String toPascalCase(final String str, final String[] substrs) {
+        final int firstSplitorIndex = N.len(substrs) == 1 ? -1 : substrs[0].length() + 1;
+
         if (firstSplitorIndex >= 0) {
             final StringBuilder sb = Objectory.createStringBuilder(str.length());
 
@@ -4580,22 +4557,24 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Removes all occurrences of a character from within the source string.
+     * Removes all occurrences of a specified character from the input string.
      *
-     * <p>A {@code null} source string will return {@code null}. An empty ("") source string will return the empty string.</p>
+     * <p>This method searches for all occurrences of the specified character in the input string
+     * and removes them. If the character is not found, the original string is returned unchanged.</p>
      *
      * <p>Example:
      * <pre>{@code
-     * removeAll(null, '*');        // returns null
-     * removeAll("", '*');          // returns ""
-     * removeAll("queued", 'u');    // returns "qeed"
-     * removeAll("queued", 'z');    // returns "queued"
-     * removeAll("aaa", 'a');       // returns ""
+     * removeAll("abcabc", 'a');    // returns "bcbc"
+     * removeAll("hello", 'l');     // returns "heo"
+     * removeAll("test", 'x');      // returns "test" (character not found)
+     * removeAll(null, 'a');        // returns null
+     * removeAll("", 'a');          // returns null
      * }</pre>
      *
-     * @param str the source String to search, which may be null
-     * @param removeChar the char to search for and remove, which may be null
-     * @return the specified String if it's {@code null} or empty.
+     * @param str The input string from which the character should be removed. It can be {@code null} or empty.
+     * @param removeChar The character to be removed.
+     * @return A new string with all occurrences of the specified character removed.
+     *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the character is not found, the input string is returned unchanged.
      */
     public static String removeAll(final String str, final char removeChar) {
         return removeAll(str, 0, removeChar);
@@ -6112,6 +6091,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * chomp(null)          = null
      * chomp("")            = ""
+     * chomp("a")           = "a"
      * chomp("abc \r")      = "abc "
      * chomp("abc\n")       = "abc"
      * chomp("abc\r\n")     = "abc"
@@ -6125,6 +6105,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str the String to chomp a newline from, which may be null
      * @return String without newline at the end, {@code null} if {@code null} String input
+     * @see #chop(String)
      */
     public static String chomp(final String str) {
         if (str == null || str.isEmpty()) {
@@ -6212,6 +6193,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str the String to chop last character from, which may be null
      * @return String without last character, {@code null} if {@code null} String input
+     * @see #chomp(String)
      */
     public static String chop(final String str) {
         if (str == null || str.isEmpty()) {
@@ -6962,7 +6944,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param cs the CharSequence to check, which may be null
-     * @return {@code true} if all characters are lowercase or the CharSequence is empty; {@code false} otherwise
+     * @return {@code true} if all characters are lowercase or the CharSequence is empty or {@code null}; {@code false} otherwise
      */
     public static boolean isAllLowerCase(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -7791,7 +7773,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // Unicode alphanumeric strings with spaces
      * isAlphanumericSpace("Hello World 123");       // returns true
      * isAlphanumericSpace("café au lait 2023");     // returns true
-     * isAlphanumericSpace("你好 123");                // returns true
+     * isAlphanumericSpace("你好 123");              // returns true
      * isAlphanumericSpace("");                      // returns {@code true} (empty string)
      * isAlphanumericSpace("  ");                    // returns {@code true} (only spaces)
      * 
@@ -8419,7 +8401,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOf(String, int, int)
      */
     public static int indexOfAny(final String str, int fromIndex, final char... valuesToFind) {
-        // public static int indexOfAny(final String str, int fromIndex, final char... valuesToFind) { // indexOfAny is ambiguous both method indexOfAny(java.lang.String,int,char...) in com.landawn.abacus.util.Strings and method indexOfAny(java.lang.String,int,java.lang.String...)
         fromIndex = Math.max(0, fromIndex);
 
         checkInputChars(valuesToFind, cs.valuesToFind, true);
@@ -9425,13 +9406,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
             }
 
             if (++found >= ordinal) {
-                break;
+                return fromIndex;
             }
 
             fromIndex = isLastIndex ? (fromIndex - substr.length()) : (fromIndex + substr.length());
         }
 
-        return fromIndex;
+        return N.INDEX_NOT_FOUND;
     }
 
     /**
@@ -9775,10 +9756,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Example:
      * <pre>{@code
      * ordinalIndexOf("aabaabaa", "a", 1);      // returns 0
-     * ordinalIndexOf("aabaabaa", "a", 3);      // returns 5
-     * ordinalIndexOf("aabaabaa", "b", 2);      // returns 4
-     * ordinalIndexOf("aabaabaa", "ab", 2);     // returns 3
+     * ordinalIndexOf("aabaabaa", "a", 3);      // returns 3
+     * ordinalIndexOf("aabaabaa", "b", 2);      // returns 5
+     * ordinalIndexOf("aabaabaa", "ab", 2);     // returns 4
      * ordinalIndexOf("aabaabaa", "c", 1);      // returns -1
+     * ordinalIndexOf("", "", 1)                // returns 0
+     * ordinalIndexOf("", null, 1)              // returns -1
+     * ordinalIndexOf(null, "", 1)              // returns -1
+     * ordinalIndexOf(null, null, 1)            // returns -1
      * }</pre>
      *
      * @param str The string to be checked. May be {@code null} or empty.
@@ -9804,10 +9789,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Example:
      * <pre>{@code
      * lastOrdinalIndexOf("aabaabaa", "a", 1);      // returns 7
-     * lastOrdinalIndexOf("aabaabaa", "a", 3);      // returns 3
+     * lastOrdinalIndexOf("aabaabaa", "a", 3);      // returns 4
      * lastOrdinalIndexOf("aabaabaa", "b", 2);      // returns 2
      * lastOrdinalIndexOf("aabaabaa", "ab", 2);     // returns 1
      * lastOrdinalIndexOf("aabaabaa", "c", 1);      // returns -1
+     * lastOrdinalIndexOf("", "", 1)                // returns 0
+     * lastOrdinalIndexOf("", null, 1)              // returns -1
+     * lastOrdinalIndexOf(null, "", 1)              // returns -1
+     * lastOrdinalIndexOf(null, null, 1)            // returns -1
      * }</pre>
      *
      * @param str The string to be checked. May be {@code null} or empty.
@@ -10381,6 +10370,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * containsAny("programming", "gram", "xyz");    // returns true
      * containsAny("", "test");                      // returns false
      * containsAny(null, "test");                    // returns false
+     * containsAny(null, "");                        // returns false
+     * containsAny(null, null);                      // returns false
+     * containsAny("", "");                          // returns false
+     * containsAny("", null);                        // returns false
      * containsAny("test");                          // returns {@code false} (empty array)
      * }</pre>
      *
@@ -10510,8 +10503,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if none of the specified substrings are present in the given string.
      *
      * <p>This method determines whether none of the substrings in the specified array appear
-     * in the input string. The search is case-sensitive. The method returns {@code true} if 
-     * the string is {@code null} or empty, or if the specified substring array is empty or {@code null}.</p>
+     * in the input string. The search is case-sensitive. If either the input string or the 
+     * substring array is {@code null} or empty, the method returns {@code true}.</p>
      *
      * <p>This method is equivalent to {@code !containsAny(str, valuesToFind)}.</p>
      *
@@ -10523,6 +10516,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * containsNone("test", "abc", "xyz");           // returns true
      * containsNone("", "test");                     // returns true
      * containsNone(null, "test");                   // returns true
+     * containsNone(null, null);                     // returns true
+     * containsNone("", "");                         // returns true
+     * containsNone("", null);                       // returns true
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10584,8 +10580,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Check if string contains only specified characters
      * containsOnly("aaa", 'a');                     // returns true
-     * containsOnly("abc", 'a', 'b', 'c', 'd');     // returns true
-     * containsOnly("abcd", 'a', 'b', 'c');         // returns {@code false} ('d' not allowed)
+     * containsOnly("abc", 'a', 'b', 'c', 'd');      // returns true
+     * containsOnly("abcd", 'a', 'b', 'c');          // returns {@code false} ('d' not allowed)
      * containsOnly("", 'a');                        // returns true
      * containsOnly(null, 'a');                      // returns true
      * containsOnly("test");                         // returns {@code false} (empty allowed set)
@@ -11129,7 +11125,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOfDifference("abcde", "abxyz");                    // returns 2
      * indexOfDifference("abcde", "xyz");                      // returns 0
      * indexOfDifference("", "abc");                           // returns 0
+     * indexOfDifference(null, "abc");                         // returns 0
      * indexOfDifference(null, null);                          // returns -1
+     * indexOfDifference("", "");                              // returns -1
+     * indexOfDifference(null, "");                            // returns -1
      * }</pre>
      *
      * @param a the first String, which may be null
@@ -11185,7 +11184,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the index where strings begin to differ, or -1 if all strings are equal or null/empty
      */
     public static int indexOfDifference(final String... strs) {
-        if (N.isEmpty(strs) || strs.length == 1) {
+        if (N.len(strs) <= 1) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -11766,27 +11765,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return str.substring(inclusiveBeginIndex);
     }
 
-    //    /**
-    //     * Returns {@code null} which means it doesn't exist if {@code (str == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())},
-    //     * otherwise returns: {@code str.substring(inclusiveBeginIndex)}.
-    //     *
-    //     * @param str
-    //     * @param inclusiveBeginIndex
-    //     * @return
-    //     * @see #substring(String, int)
-    //     * @see StrUtil#substring(String, int)
-    //     * @see #substring(String, int, int)
-    //     * @see #largestSubstring(String, int, int)
-    //     */
-    //    @MayReturnNull
-    //    public static String substringAfter(String str, int inclusiveBeginIndex) {
-    //        if (str == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
-    //            return null;
-    //        }
-    //
-    //        return str.substring(inclusiveBeginIndex);
-    //    }
-
     /**
      * Returns a substring from the specified string between the given indices.
      *
@@ -11864,25 +11842,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex));
     }
 
-    //    /**
-    //     * Returns {@code null} which means it doesn't exist if {@code (str == null || inclusiveBeginIndex < 0)}, or {@code funcOfExclusiveEndIndex.apply(str, inclusiveBeginIndex) < 0}.
-    //     *
-    //     * @param str
-    //     * @param inclusiveBeginIndex
-    //     * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.apply(str, inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
-    //     * @return {@code null} if {@code (str == null || inclusiveBeginIndex < 0)}. (auto-generated java doc for return)
-    //     * @see #substring(String, int, int)
-    //     */
-    //    @MayReturnNull
-    //    @Beta
-    //    public static String substring(final String str, final int inclusiveBeginIndex, final BiFunction<? super String, Integer, Integer> funcOfExclusiveEndIndex) {
-    //        if (str == null || inclusiveBeginIndex < 0) {
-    //            return null;
-    //        }
-    //
-    //        return substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex.apply(str, inclusiveBeginIndex));
-    //    }
-
     /**
      * Returns a substring from the specified string using a function to determine the begin index.
      *
@@ -11922,26 +11881,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         return substring(str, funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex), exclusiveEndIndex);
     }
-
-    //    /**
-    //     * Returns {@code null} which means it doesn't exist if {@code (str == null || exclusiveEndIndex < 0)}, or {@code funcOfInclusiveBeginIndex.apply(str, exclusiveEndIndex) < 0}.
-    //     *
-    //     *
-    //     * @param str
-    //     * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.apply(str, exclusiveEndIndex)) if exclusiveEndIndex > 0}
-    //     * @param exclusiveEndIndex
-    //     * @return {@code null} if {@code (str == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
-    //     * @see #substring(String, int, int)
-    //     */
-    //    @MayReturnNull
-    //    @Beta
-    //    public static String substring(final String str, final BiFunction<? super String, Integer, Integer> funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
-    //        if (str == null || exclusiveEndIndex < 0) {
-    //            return null;
-    //        }
-    //
-    //        return substring(str, funcOfInclusiveBeginIndex.apply(str, exclusiveEndIndex), exclusiveEndIndex);
-    //    }
 
     /**
      * Returns a substring starting from the first occurrence of the specified character.
@@ -13375,7 +13314,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str The string to extract from. It can be {@code null}.
      * @param delimiter The delimiter string marking both the beginning and end of the substring. It can be {@code null}.
-     * @return The substring between two occurrences of the delimiter, or {@code null} if not found.
+     * @return The substring between two occurrences of the delimiter, or {@code null} if not found or the specified source string is emmpty or {@code null}.
      * @see #substringBetween(String, String, String)
      * @see #substringBetween(String, int, int)
      */
@@ -13642,24 +13581,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return str.substring(exclusiveBeginIndex + 1, endIndex);
     }
 
-    //    /**
-    //     *
-    //     * @param str
-    //     * @param exclusiveBeginIndex
-    //     * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.apply(str, exclusiveBeginIndex) if inclusiveBeginIndex >= 0}
-    //     * @return {@code null} if {@code (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length())}. (auto-generated java doc for return)
-    //     * @see #substringBetween(String, int, int)
-    //     */
-    //    @MayReturnNull
-    //    @Beta
-    //    public static String substringBetween(String str, int exclusiveBeginIndex, final BiFunction<? super String, Integer, Integer> funcOfExclusiveEndIndex) {
-    //        if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
-    //            return null;
-    //        }
-    //
-    //        return substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex.apply(str, exclusiveBeginIndex));
-    //    }
-
     /**
      * Extracts a substring between two exclusive indices, where the begin index is calculated by a function.
      *
@@ -13705,24 +13626,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         return str.substring(startIndex + 1, endIndex);
     }
-
-    //    /**
-    //     *
-    //     * @param str
-    //     * @param funcOfExclusiveBeginIndex {@code exclusiveBeginIndex <- funcOfExclusiveBeginIndex.apply(str, exclusiveEndIndex)) if exclusiveEndIndex >= 0}
-    //     * @param exclusiveEndIndex
-    //     * @return {@code null} if {@code (str == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
-    //     * @see #substringBetween(String, int, int)
-    //     */
-    //    @MayReturnNull
-    //    @Beta
-    //    public static String substringBetween(String str, final BiFunction<? super String, Integer, Integer> funcOfExclusiveBeginIndex, int exclusiveEndIndex) {
-    //        if (str == null || exclusiveEndIndex < 0) {
-    //            return null;
-    //        }
-    //
-    //        return substringBetween(str, funcOfExclusiveBeginIndex.apply(str, exclusiveEndIndex), exclusiveEndIndex);
-    //    }
 
     /**
      * Extracts a substring between a delimiter and a calculated end index.
@@ -14531,22 +14434,22 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceRange("Hello World", 6, 11, "Java");           // returns "Hello Java"
      * replaceRange("Hello World", 0, 5, "Hi");              // returns "Hi World"
      * replaceRange("Hello World", 5, 5, " Beautiful");      // returns "Hello Beautiful World"
-     * 
+     *
      * // Delete range (null or empty replacement)
      * replaceRange("Hello World", 5, 11, null);            // returns "Hello"
      * replaceRange("Hello World", 5, 11, "");              // returns "Hello"
-     * 
+     *
      * // Edge cases
      * replaceRange(null, 0, 0, "Text");                    // returns "Text"
      * replaceRange("", 0, 0, "Text");                      // returns "Text"
      * }</pre>
      *
      * @param str The original string. It can be {@code null}.
-     * @param fromIndex The initial index of the range to be replaced, inclusive.
-     * @param toIndex The final index of the range to be replaced, exclusive.
+     * @param fromIndex The initial index of the range to be replaced, inclusive; must be valid index
+     * @param toIndex The final index of the range to be replaced, exclusive; must be valid
      * @param replacement The string to replace the specified range in the original string. It can be {@code null}.
      * @return A new string with the specified range replaced by the replacement string.
-     * @throws IndexOutOfBoundsException if the range is out of the string bounds.
+     * @throws IndexOutOfBoundsException if the range is out of the string bounds or indices are invalid.
      * @see N#replaceRange(String, int, int, String)
      */
     @Beta
@@ -14570,7 +14473,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Moves a specified range of characters within a string to a new position.
      *
      * <p>This method extracts a substring from the range [fromIndex, toIndex) and moves it to the specified
-     * new position. The newPositionStartIndexAfterMove parameter indicates where the start of the moved range
+     * new position. The newPositionAfterMove parameter indicates where the start of the moved range
      * should be positioned in the resulting string. The original string remains unchanged, and a new string
      * with the rearranged characters is returned.</p>
      *
@@ -14580,9 +14483,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <pre>{@code
      * // Moving a range of characters
      * moveRange("ABCDEFGH", 2, 5, 0);      // returns "CDEABFGH" (moves "CDE" to position 0)
-     * moveRange("ABCDEFGH", 2, 5, 6);      // returns "ABFGHCDE" (moves "CDE" to position 6)
-     * moveRange("Hello World", 0, 5, 6);   // returns " WorldHello" (moves "Hello" after "World")
-     * 
+     * moveRange("ABCDEFGH", 2, 5, 5);      // returns "ABFGHCDE" (moves "CDE" to position 6)
+     * moveRange("Hello World", 0, 5, 5);   // returns " WorldHello" (moves "Hello" after "World")
+     *
      * // Edge cases
      * moveRange(null, 0, 0, 0);            // returns ""
      * moveRange("", 0, 0, 0);              // returns ""
@@ -14591,33 +14494,33 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str the original string to be modified
-     * @param fromIndex the initial index of the range to be moved, inclusive
-     * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and lengthOfString - lengthOfRange, inclusive.
      * @return a new string with the specified range moved to the new position. An empty String is returned if the specified String is {@code null} or empty.
-     * @throws IndexOutOfBoundsException if the range is out of the string bounds or newPositionStartIndexAfterMove is invalid
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the string
      * @see N#moveRange(String, int, int, int)
      */
     @Beta
-    public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
-            throws IndexOutOfBoundsException {
+    public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         final int len = N.len(str);
-        N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
+        N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, len);
 
         if (N.isEmpty(str)) {
             return EMPTY;
         }
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
+        if (fromIndex == toIndex || fromIndex == newPositionAfterMove) {
             return str;
         }
 
-        if (newPositionStartIndexAfterMove < fromIndex) {
-            return Strings.concat(str.substring(0, newPositionStartIndexAfterMove), str.substring(fromIndex, toIndex),
-                    str.substring(newPositionStartIndexAfterMove, fromIndex), str.substring(toIndex));
+        if (newPositionAfterMove < fromIndex) {
+            return Strings.concat(str.substring(0, newPositionAfterMove), str.substring(fromIndex, toIndex), str.substring(newPositionAfterMove, fromIndex),
+                    str.substring(toIndex));
         } else {
-            final int m = toIndex + (newPositionStartIndexAfterMove - fromIndex);
+            final int m = toIndex + (newPositionAfterMove - fromIndex);
 
             return Strings.concat(str.substring(0, fromIndex), str.substring(toIndex, m), str.substring(fromIndex, toIndex), str.substring(m));
         }
@@ -14638,21 +14541,22 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * deleteRange("ABCDEFGH", 2, 5);       // returns "ABFGH" (removes "CDE")
      * deleteRange("Hello World", 5, 11);   // returns "Hello" (removes " World")
      * deleteRange("Test", 0, 2);           // returns "st" (removes "Te")
-     * 
+     *
      * // Edge cases
      * deleteRange(null, 0, 1);             // returns ""
-     * deleteRange("", 0, 0);               // returns ""
+     * deleteRange("", 0, 0);               // returns "" (OK - valid range for empty string)
      * deleteRange("ABC", 1, 1);            // returns "ABC" (no deletion when fromIndex == toIndex)
      * deleteRange("ABC", 3, 5);            // returns "ABC" (no deletion when fromIndex >= length)
      * deleteRange("ABC", 0, 10);           // returns "" (deletes entire string and beyond)
      * }</pre>
      *
-     * @param str the input string from which a range of characters are to be deleted
-     * @param fromIndex the initial index of the range to be deleted, inclusive
-     * @param toIndex the final index of the range to be deleted, exclusive
+     * @param str the input string from which a range of characters are to be deleted; may be {@code null}
+     * @param fromIndex the initial index of the range to be deleted, inclusive; must be >= 0 and <= {@code str.length()}
+     * @param toIndex the final index of the range to be deleted, exclusive; must be >= {@code fromIndex} and <= {@code str.length()}
      * @return a new string with the specified range of characters deleted. An empty String is returned if the specified String is {@code null} or empty.
-     * @throws IndexOutOfBoundsException if the range is out of the string bounds
+     * @throws IndexOutOfBoundsException if the range is invalid
      * @see N#deleteRange(String, int, int)
+     * @see #replaceRange(String, int, int, String)
      */
     @Beta
     public static String deleteRange(final String str, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -15267,8 +15171,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return join(a, 0, a.length, delimiter);
     }
 
-    /**     
-     * oins a range of elements from a short array into a single String using the specified string delimiter.
+    /**
+     * Joins a range of elements from a short array into a single String using the specified string delimiter.
      *
      * <p>This method concatenates elements from the specified range [fromIndex, toIndex) in the array,
      * separating them with the provided delimiter string. The short values are converted to their
@@ -17189,13 +17093,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
             }
 
             int i = 0;
+            boolean isFirst = true;
 
             for (final Map.Entry<?, ?> entry : m.entrySet()) {
-                if (i++ > fromIndex) {
-                    sb.append(entryDelimiter);
-                }
+                if (i >= fromIndex && i < toIndex) {
+                    if (!isFirst) {
+                        sb.append(entryDelimiter);
+                    }
+                    isFirst = false;
 
-                if (i > fromIndex) {
                     if (trim) {
                         sb.append(N.toString(entry.getKey()).trim());
                         sb.append(keyValueDelimiter);
@@ -17206,6 +17112,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
                         sb.append(N.toString(entry.getValue()));
                     }
                 }
+
+                i++;
 
                 if (i >= toIndex) {
                     break;
@@ -17900,58 +17808,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 N.toString(i));
     }
 
-    //    /**
-    //     *
-    //     * @param a
-    //     * @return
-    //     * @see #concat(Object, Object)
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    @SafeVarargs
-    //    public static String concat(final Object... a) {
-    //        if (N.isEmpty(a)) {
-    //            return EMPTY_STRING;
-    //        } else if (a.getClass().equals(String[].class)) {
-    //            return Strings.concat((String[]) a);
-    //        }
-    //
-    //        final StringBuilder sb = ObjectFactory.createStringBuilder();
-    //
-    //        try {
-    //            for (Object e : a) {
-    //                sb.append(N.toString(e));
-    //            }
-    //            return sb.toString();
-    //        } finally {
-    //            ObjectFactory.recycle(sb);
-    //        }
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param c
-    //     * @return
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    public static String concat(final Collection<?> c) {
-    //        if (N.isEmpty(c)) {
-    //            return EMPTY_STRING;
-    //        }
-    //
-    //        final StringBuilder sb = ObjectFactory.createStringBuilder();
-    //
-    //        try {
-    //            for (Object e : c) {
-    //                sb.append(N.toString(e));
-    //            }
-    //            return sb.toString();
-    //        } finally {
-    //            ObjectFactory.recycle(sb);
-    //        }
-    //    }
-
     private static String toString(final Object e, final boolean trim) {
         if (e == null) {
             return NULL;
@@ -18354,10 +18210,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str the String to do overlaying in, which may be null
      * @param overlay the String to overlay, which may be null
-     * @param start the position to start overlaying at
-     * @param end the position to stop overlaying before
+     * @param start the position to start overlaying at; must be valid index
+     * @param end the position to stop overlaying before; must be valid
      * @return overlayed String, or {@code overlay} if {@code null} String input
-     * @throws IndexOutOfBoundsException if start or end is negative, or end is greater than the length of str
+     * @throws IndexOutOfBoundsException if start or end is negative, or end is greater than the length of str, or indices are invalid
      * @deprecated replaced by {@code replace(String, int, int, String)}
      * @see #replace(String, int, int, String)
      * @see N#replaceRange(String, int, int, String)
@@ -18421,6 +18277,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str The string to be parsed. May be {@code null}.
      * @return The char represented by the string argument.
      * @throws NumberFormatException if the string has more than one character and cannot be parsed as an integer
+     * @throws IllegalArgumentException if the string represents an integer outside the valid char range [0, 65535]
      */
     public static char parseChar(final String str) {
         if (Strings.isEmpty(str)) {
@@ -18469,13 +18326,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns the value by calling {@code Integer.valueOf(String)} if
-     * {@code str} is not {@code null}, otherwise, the default value 0 for
-     * {@code int} is returned.
+     * Converts the given string to an integer value.
      *
-     * @param str
-     * @return
-     * @throws NumberFormatException If the string is not a parsable {@code int}.
+     * <p>This method attempts to convert the provided string to an integer. If the string is {@code null} or empty,
+     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as an integer.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @return The integer representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as an integer.
      * @see Numbers#toInt(String)
      * @deprecated replaced by {@code Numbers.toInt(String)}
      */
@@ -18855,6 +18713,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param base64String The Base64 URL encoded string to be decoded.
      * @return The decoded string, or an empty String {@code ""} if the input string is {@code null} or empty.
+     * @throws  IllegalArgumentException if {@code base64String} is not in valid Base64 scheme
      */
     public static String base64UrlDecodeToString(final String base64String) {
         if (Strings.isEmpty(base64String)) {
@@ -18946,11 +18805,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * data.put("email", "test@example.com");
      * data.put("info", "hello world!");
      * urlEncode(data);                                // returns "email=test%40example.com&info=hello+world%21"
+     * 
+     * urlEncode(null);                                // returns ""        
      * }</pre>
      *
      * @param parameters The parameters to be URL-encoded.
      * @return The URL-encoded string representation of the parameters.
      * @see URLEncodedUtil#encode(Object)
+     * @see URLEncoder#encode(String, String)
      */
     public static String urlEncode(final Object parameters) {
         return URLEncodedUtil.encode(parameters);
@@ -18981,6 +18843,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param charset The charset to be used for encoding.
      * @return The URL-encoded string representation of the parameters.
      * @see URLEncodedUtil#encode(Object, Charset)
+     * @see URLEncoder#encode(String, Charset)
      */
     public static String urlEncode(final Object parameters, final Charset charset) {
         return URLEncodedUtil.encode(parameters, charset);
@@ -19012,6 +18875,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param urlQuery The URL query string to be decoded.
      * @return A map containing the decoded key-value pairs from the URL query string.
      * @see URLEncodedUtil#decode(String)
+     * @see URLDecoder#decode(String)
      */
     public static Map<String, String> urlDecode(final String urlQuery) {
         return URLEncodedUtil.decode(urlQuery);
@@ -19041,6 +18905,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param charset The charset to be used for decoding.
      * @return A map containing the decoded key-value pairs from the URL query string.
      * @see URLEncodedUtil#decode(String, Charset)
+     * @see URLDecoder#decode(String, Charset)
      */
     public static Map<String, String> urlDecode(final String urlQuery, final Charset charset) {
         return URLEncodedUtil.decode(urlQuery, charset);
@@ -19186,7 +19051,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * or whitespace. Currently the method treats whitespace as valid, which allows for Base64
      * strings that may contain line breaks or spaces for formatting purposes.</p>
      *
-     * <p>The method returns {@code true} for empty arrays.</p>
+     * <p>The method returns {@code true} for empty arrays and {@code false} for {@code null} array</p>
      *
      * <p>Example:
      * <pre>{@code
@@ -19198,6 +19063,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // Invalid Base64 byte arrays
      * isBase64("Hello!".getBytes());                 // returns {@code false} (contains '!')
      * isBase64("SGVs@G8=".getBytes());               // returns {@code false} (contains '@')
+     * isBase64((byte[]) null);                       // returns false
      * }</pre>
      *
      * @param arrayOctet byte array to test
@@ -19205,6 +19071,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         {@code false}, otherwise
      */
     public static boolean isBase64(final byte[] arrayOctet) {
+        if (arrayOctet == null) {
+            return false;
+        }
+
         for (final byte element : arrayOctet) {
             if (!isBase64(element) && !Character.isWhitespace(element)) {
                 return false;
@@ -19220,7 +19090,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Like the byte array version, this method currently treats whitespace as valid, allowing
      * for formatted Base64 strings with line breaks or spaces.</p>
      *
-     * <p>The method returns {@code true} for empty strings.</p>
+     * <p>The method returns {@code true} for empty strings. and {@code false} for {@code null} string</p>
      *
      * <p>Example:
      * <pre>{@code
@@ -19233,6 +19103,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isBase64("Hello World!");                      // returns false
      * isBase64("SGVs!G8=");                          // returns {@code false} (contains '!')
      * isBase64("test@123");                          // returns {@code false} (contains '@')
+     * isBase64((String) null);                       // returns {@code false}
      * }</pre>
      *
      * @param base64 String to test
@@ -19240,6 +19111,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         the String is empty; {@code false}, otherwise
      */
     public static boolean isBase64(final String base64) {
+        if (base64 == null) {
+            return false;
+        }
+
         return isBase64(getBytes(base64, Charsets.DEFAULT));
     }
 
@@ -19414,7 +19289,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * for negative numbers) in the input string and returns it as a string. The method uses regular
      * expressions to find integer patterns.</p>
      *
-     * <p>The method returns an empty string if no integer is found or if the input is {@code null} or empty.</p>
+     * <p>The method returns {@code null} if no integer is found or if the input is {@code null} or empty.</p>
      *
      * <p>Example:
      * <pre>{@code
@@ -19424,20 +19299,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * extractFirstInteger("Room 404, Floor 2");      // returns "404" (first integer)
      * 
      * // No integer found
-     * extractFirstInteger("No numbers here");        // returns ""
-     * extractFirstInteger(null);                     // returns ""
-     * extractFirstInteger("");                       // returns ""
+     * extractFirstInteger("No numbers here");        // returns null
+     * extractFirstInteger(null);                     // returns null
+     * extractFirstInteger("");                       // returns null
      * }</pre>
      *
      * @param str The string to extract the integer from. It can be {@code null} or empty.
-     * @return The extracted integer as a string, or an empty string {@code ""} if no integer is found.
+     * @return The extracted integer as a string, or {@code null} if no integer is found, or the input string is {@code null} or empty.
      * @see #replaceFirstInteger(String, String)
      * @see Numbers#extractFirstInt(String)
      * @see Numbers#extractFirstLong(String)
      */
     public static String extractFirstInteger(final String str) {
         if (Strings.isEmpty(str)) {
-            return Strings.EMPTY;
+            return null;
         }
 
         final Matcher matcher = RegExUtil.INTEGER_FINDER.matcher(str);
@@ -19445,7 +19320,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return matcher.group(1);
         }
 
-        return Strings.EMPTY;
+        return null;
     }
 
     /**
@@ -19455,7 +19330,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * and returns it as a string. It handles both integer and floating-point numbers with
      * decimal points. Scientific notation is not included by default.</p>
      *
-     * <p>The method returns an empty string if no number is found or if the input is {@code null} or empty.</p>
+     * <p>The method returns {@code null} if no number is found or the input is {@code null} or empty.</p>
      *
      * <p>Example:
      * <pre>{@code
@@ -19465,13 +19340,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * extractFirstDouble("Value: 42");               // returns "42"
      * 
      * // No double found
-     * extractFirstDouble("No numbers");              // returns ""
-     * extractFirstDouble(null);                      // returns ""
-     * extractFirstDouble("");                        // returns ""
+     * extractFirstDouble("No numbers");              // returns null
+     * extractFirstDouble(null);                      // returns null
+     * extractFirstDouble("");                        // returns null
      * }</pre>
      *
      * @param str The string to extract the double from. It can be {@code null} or empty.
-     * @return The extracted double as a string, or an empty string {@code ""} if no double is found.
+     * @return The extracted double as a string, or {@code null} if no double is found, or the input string is {@code null} or empty.
      * @see #extractFirstInteger(String)
      * @see #replaceFirstDouble(String, String)
      * @see Numbers#extractFirstDouble(String)
@@ -19487,7 +19362,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * scientific notation. When scientific notation is enabled, it can extract numbers like
      * "1.23e10" or "5E-3". Otherwise, it only extracts regular decimal numbers.</p>
      *
-     * <p>The method returns an empty string if no number is found or if the input is {@code null} or empty.</p>
+     * <p>The method returns {@code null} if no number is found or if the input is {@code null} or empty.</p>
      *
      * <p>Example:
      * <pre>{@code
@@ -19496,14 +19371,19 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * extractFirstDouble("Count: -42.0", false);     // returns "-42.0"
      * 
      * // Scientific notation
-     * extractFirstDouble("Result: 1.23e10", true);   // returns "1.23e10"
+     * extractFirstDouble("Result: 1.23e10", true);    // returns "1.23e10"
      * extractFirstDouble("Small: 5E-3", true);        // returns "5E-3"
-     * extractFirstDouble("Result: 1.23e10", false);  // returns "1.23" (no scientific)
+     * extractFirstDouble("Result: 1.23e10", false);   // returns "1.23" (no scientific)
+     * 
+     * // No double found
+     * extractFirstDouble("No numbers", true);          // returns null
+     * extractFirstDouble(null, true);                  // returns null
+     * extractFirstDouble("", true;                     // returns null
      * }</pre>
      *
      * @param str The string to extract the double from. It can be {@code null} or empty.
      * @param includingCientificNumber If {@code true}, it will also include scientific numbers in the search.
-     * @return The extracted double as a string, or an empty string {@code ""} if no double is found.
+     * @return The extracted double as a string, or {@code null} if no double is found, or the input string is {@code null} or empty.
      * @see #extractFirstInteger(String)
      * @see #extractFirstDouble(String)
      * @see #replaceFirstDouble(String, String)
@@ -19511,7 +19391,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String extractFirstDouble(final String str, final boolean includingCientificNumber) {
         if (Strings.isEmpty(str)) {
-            return Strings.EMPTY;
+            return null;
         }
 
         final Matcher matcher = (includingCientificNumber ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str);
@@ -19520,7 +19400,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return matcher.group(1);
         }
 
-        return Strings.EMPTY;
+        return null;
     }
 
     /**
@@ -19547,7 +19427,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str The string to be modified. It can be {@code null} or empty.
      * @param replacement The string to replace the integer with.
-     * @return The modified string with the first integer replaced by the specified replacement string.
+     * @return The modified string with the first integer replaced by the specified replacement string, or an empty string if the input is {@code null} or empty.
      * @see #extractFirstInteger(String)
      */
     public static String replaceFirstInteger(final String str, final String replacement) {
@@ -19581,7 +19461,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str The string to be modified. It can be {@code null} or empty.
      * @param replacement The string to replace the double with.
-     * @return The modified string with the first double replaced by the specified replacement string.
+     * @return The modified string with the first double replaced by the specified replacement string, or an empty string if the input is {@code null} or empty.
      * @see #extractFirstDouble(String)
      */
     public static String replaceFirstDouble(final String str, final String replacement) {
@@ -19615,7 +19495,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str The string to be modified. It can be {@code null} or empty.
      * @param replacement The string to replace the double with.
      * @param includingCientificNumber If {@code true}, it will also include scientific numbers in the search.
-     * @return The modified string with the first double replaced by the specified replacement string.
+     * @return The modified string with the first double replaced by the specified replacement string, or an empty string if the input is {@code null} or empty.
      * @see #extractFirstDouble(String, boolean)
      */
     public static String replaceFirstDouble(final String str, final String replacement, final boolean includingCientificNumber) {
@@ -19830,94 +19710,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //            return Optional.ofNullable(Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex));
         //        }
 
-        //    /**
-        //     * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-        //     *
-        //     * @param str
-        //     * @param delimiterOfInclusiveBeginIndex
-        //     * @return
-        //     * @see Strings#substring(String, char)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    public static Optional<String> substring(String str, char delimiterOfInclusiveBeginIndex) {
-        //        return Optional.ofNullable(Strings.substring(str, delimiterOfInclusiveBeginIndex));
-        //    }
-        //
-        //    /**
-        //     * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-        //     *
-        //     * @param str
-        //     * @param delimiterOfInclusiveBeginIndex
-        //     * @return
-        //     * @see Strings#substring(String, String)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    public static Optional<String> substring(String str, String delimiterOfInclusiveBeginIndex) {
-        //        return Optional.ofNullable(Strings.substring(str, delimiterOfInclusiveBeginIndex));
-        //    }
-        //
-        //    /**
-        //     * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-        //     *
-        //     * @param str
-        //     * @param inclusiveBeginIndex
-        //     * @param delimiterOfExclusiveEndIndex
-        //     * @return
-        //     * @see Strings#substring(String, int, char)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    public static Optional<String> substring(String str, int inclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
-        //        return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex));
-        //    }
-        //
-        //    /**
-        //     * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-        //     *
-        //     * @param str
-        //     * @param inclusiveBeginIndex
-        //     * @param delimiterOfExclusiveEndIndex
-        //     * @return
-        //     * @see Strings#substring(String, int, String)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    public static Optional<String> substring(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-        //        return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex));
-        //    }
-        //
-        //    /**
-        //     * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-        //     *
-        //     * @param str
-        //     * @param delimiterOfInclusiveBeginIndex
-        //     * @param exclusiveEndIndex
-        //     * @return
-        //     * @see Strings#substring(String, char, int)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    public static Optional<String> substring(String str, char delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
-        //        return Optional.ofNullable(Strings.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex));
-        //    }
-        //
-        //    /**
-        //     * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-        //     *
-        //     * @param str
-        //     * @param delimiterOfInclusiveBeginIndex
-        //     * @param exclusiveEndIndex
-        //     * @return
-        //     * @see Strings#substring(String, String, int)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    public static Optional<String> substring(String str, String delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
-        //        return Optional.ofNullable(Strings.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex));
-        //    }
-
         /**
          * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
@@ -20033,117 +19825,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return ret == null ? defaultStr : ret;
         }
 
-        //    /**
-        //     * Returns the substring if it exists, otherwise returns {@code defaultStr}.
-        //     *
-        //     * @param str
-        //     * @param delimiterOfInclusiveBeginIndex
-        //     * @param defaultStr
-        //     * @return
-        //     * @see Strings#substring(String, char)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    @Beta
-        //    public static String substringOrElse(String str, char delimiterOfInclusiveBeginIndex, final String defaultStr) {
-        //        final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex);
-        //
-        //        return ret == null ? defaultStr : ret;
-        //    }
-        //
-        //    /**
-        //     * Returns the substring if it exists, otherwise returns {@code defaultStr}.
-        //     *
-        //     * @param str
-        //     * @param delimiterOfInclusiveBeginIndex
-        //     * @param defaultStr
-        //     * @return
-        //     * @see Strings#substring(String, String)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    @Beta
-        //    public static String substringOrElse(String str, String delimiterOfInclusiveBeginIndex, final String defaultStr) {
-        //        final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex);
-        //
-        //        return ret == null ? defaultStr : ret;
-        //    }
-        //
-        //    /**
-        //     * Returns the substring if it exists, otherwise returns {@code defaultStr}.
-        //     *
-        //     * @param str
-        //     * @param inclusiveBeginIndex
-        //     * @param delimiterOfExclusiveEndIndex
-        //     * @param defaultStr
-        //     * @return
-        //     * @see Strings#substring(String, int, char)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    @Beta
-        //    public static String substringOrElse(String str, int inclusiveBeginIndex, char delimiterOfExclusiveEndIndex, final String defaultStr) {
-        //        final String ret = Strings.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex);
-        //
-        //        return ret == null ? defaultStr : ret;
-        //    }
-        //
-        //    /**
-        //     * Returns the substring if it exists, otherwise returns {@code defaultStr}.
-        //     *
-        //     * @param str
-        //     * @param inclusiveBeginIndex
-        //     * @param delimiterOfExclusiveEndIndex
-        //     * @param defaultStr
-        //     * @return
-        //     * @see Strings#substring(String, int, String)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    @Beta
-        //    public static String substringOrElse(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex, final String defaultStr) {
-        //        final String ret = Strings.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex);
-        //
-        //        return ret == null ? defaultStr : ret;
-        //    }
-        //
-        //    /**
-        //     * Returns the substring if it exists, otherwise returns {@code defaultStr}.
-        //     *
-        //     * @param str
-        //     * @param delimiterOfInclusiveBeginIndex
-        //     * @param exclusiveEndIndex
-        //     * @param defaultStr
-        //     * @return
-        //     * @see Strings#substring(String, char, int)
-        //     * @deprecated
-        //     */
-        //    @Beta
-        //    public static String substringOrElse(String str, char delimiterOfInclusiveBeginIndex, int exclusiveEndIndex, final String defaultStr) {
-        //        final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex);
-        //
-        //        return ret == null ? defaultStr : ret;
-        //    }
-        //
-        //    /**
-        //     * Returns the substring if it exists, otherwise returns {@code defaultStr}.
-        //     *
-        //     * @param str
-        //     * @param delimiterOfInclusiveBeginIndex
-        //     * @param exclusiveEndIndex
-        //     * @param defaultStr
-        //     * @return
-        //     * @see Strings#substring(String, String, int)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    @Beta
-        //    public static String substringOrElse(String str, String delimiterOfInclusiveBeginIndex, int exclusiveEndIndex, final String defaultStr) {
-        //        final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex);
-        //
-        //        return ret == null ? defaultStr : ret;
-        //    }
-
         /**
          * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
@@ -20254,112 +19935,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             return ret == null ? str : ret;
         }
-
-        //    /**
-        //     * Returns the substring if it exists, otherwise returns {@code str} itself.
-        //     *
-        //     * @param str
-        //     * @param delimiterOfInclusiveBeginIndex
-        //     * @return
-        //     * @see Strings#substring(String, char)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    @Beta
-        //    public static String substringOrElseItself(String str, char delimiterOfInclusiveBeginIndex) {
-        //        final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex);
-        //
-        //        return ret == null ? str : ret;
-        //    }
-        //
-        //    /**
-        //     * Returns the substring if it exists, otherwise returns {@code str} itself.
-        //     *
-        //     * @param str
-        //     * @param delimiterOfInclusiveBeginIndex
-        //     * @return
-        //     * @see Strings#substring(String, String)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    @Beta
-        //    public static String substringOrElseItself(String str, String delimiterOfInclusiveBeginIndex) {
-        //        final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex);
-        //
-        //        return ret == null ? str : ret;
-        //    }
-        //
-        //    /**
-        //     * Returns the substring if it exists, otherwise returns {@code str} itself.
-        //     *
-        //     * @param str
-        //     * @param inclusiveBeginIndex
-        //     * @param delimiterOfExclusiveEndIndex
-        //     * @return
-        //     * @see Strings#substring(String, int, char)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    @Beta
-        //    public static String substringOrElseItself(String str, int inclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
-        //        final String ret = Strings.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex);
-        //
-        //        return ret == null ? str : ret;
-        //    }
-        //
-        //    /**
-        //     * Returns the substring if it exists, otherwise returns {@code str} itself.
-        //     *
-        //     * @param str
-        //     * @param inclusiveBeginIndex
-        //     * @param delimiterOfExclusiveEndIndex
-        //     * @return
-        //     * @see Strings#substring(String, int, String)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    @Beta
-        //    public static String substringOrElseItself(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-        //        final String ret = Strings.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex);
-        //
-        //        return ret == null ? str : ret;
-        //    }
-        //
-        //    /**
-        //     * Returns the substring if it exists, otherwise returns {@code str} itself.
-        //     *
-        //     * @param str
-        //     * @param delimiterOfInclusiveBeginIndex
-        //     * @param exclusiveEndIndex
-        //     * @return
-        //     * @see Strings#substring(String, char, int)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    @Beta
-        //    public static String substringOrElseItself(String str, char delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
-        //        final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex);
-        //
-        //        return ret == null ? str : ret;
-        //    }
-        //
-        //    /**
-        //     * Returns the substring if it exists, otherwise returns {@code str} itself.
-        //     *
-        //     * @param str
-        //     * @param delimiterOfInclusiveBeginIndex
-        //     * @param exclusiveEndIndex
-        //     * @return
-        //     * @see Strings#substring(String, String, int)
-        //     * @deprecated
-        //     */
-        //    @Deprecated
-        //    @Beta
-        //    public static String substringOrElseItself(String str, String delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
-        //        final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex);
-        //
-        //        return ret == null ? str : ret;
-        //    }
 
         /**
          * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.

@@ -48,7 +48,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * }</pre>
  *
  * @param <T> the type of the target class or object being reflected upon
- * @author Haiyang Li
  * @since 0.8
  */
 public final class Reflection<T> {

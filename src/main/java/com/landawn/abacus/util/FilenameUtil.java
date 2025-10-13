@@ -545,7 +545,7 @@ public final class FilenameUtil {
             } else if (isSeparator(ch0) && isSeparator(ch1)) {
                 int posUnix = filename.indexOf(UNIX_SEPARATOR, 2);
                 int posWin = filename.indexOf(WINDOWS_SEPARATOR, 2);
-                if (posUnix == NOT_FOUND && posWin == NOT_FOUND || posUnix == 2 || posWin == 2) {
+                if ((posUnix == NOT_FOUND && posWin == NOT_FOUND) || posUnix == 2 || posWin == 2) {
                     return NOT_FOUND;
                 }
                 posUnix = posUnix == NOT_FOUND ? posWin : posUnix;
@@ -738,6 +738,7 @@ public final class FilenameUtil {
      * FilenameUtil.getFullPathNoEndSeparator("~/a/b/c.txt");     // Returns "~/a/b"
      * FilenameUtil.getFullPathNoEndSeparator("a.txt");           // Returns ""
      * FilenameUtil.getFullPathNoEndSeparator("a/b/c/");          // Returns "a/b/c"
+     * FilenameUtil.getFullPathNoEndSeparator("C:\\");          // Returns "C:\"
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns null
@@ -875,9 +876,12 @@ public final class FilenameUtil {
     //-----------------------------------------------------------------------
 
     /**
-     * Removes the extension from a filename.
+     * Removes the file extension from a filename.
      * 
-     * <p>This method returns the text before the last dot. There must be no directory separator after the dot.</p>
+     * <p>This method removes the extension (the suffix starting from the last dot '.')
+     * from the given filename. If no extension is found, the original filename is returned
+     * unchanged.</p>
+     * 
      *
      * <p>Example:</p>
      * <pre>{@code
@@ -885,6 +889,7 @@ public final class FilenameUtil {
      * FilenameUtil.removeExtension("a\\b\\c.jpg"); // Returns "a\\b\\c"
      * FilenameUtil.removeExtension("a\\b\\c");     // Returns "a\\b\\c"
      * FilenameUtil.removeExtension("a.b\\c");      // Returns "a.b\\c"
+     * FilenameUtil.removeExtension(null)            = null
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns null
@@ -998,14 +1003,27 @@ public final class FilenameUtil {
     }
 
     /**
-     * Checks whether two filenames are equal with full control over processing.
+     * Checks whether two filenames are equal with full control over processing and case sensitivity.
+     *
+     * <p>This method provides comprehensive control over filename comparison by allowing
+     * normalization and custom case sensitivity rules. When normalization is enabled,
+     * both filenames are normalized before comparison using {@link #normalize(String)}.</p>
+     *
+     * <p>The comparison can be case-sensitive or case-insensitive based on the provided
+     * {@code IOCase} parameter. If {@code null} is provided, defaults to case-sensitive.</p>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * FilenameUtil.equals("/foo/bar", "/foo/./bar", true, IOCase.SENSITIVE);  // Returns true
+     * FilenameUtil.equals("file.txt", "FILE.TXT", false, IOCase.INSENSITIVE); // Returns true
+     * }</pre>
      *
      * @param filename1 the first filename to query, may be null
      * @param filename2 the second filename to query, may be null
-     * @param normalized whether to normalize the filenames
+     * @param normalized whether to normalize the filenames before comparison
      * @param caseSensitivity what case sensitivity rule to use, {@code null} means case-sensitive
      * @return {@code true} if the filenames are equal, {@code null} equals {@code null}
-     * @throws IllegalArgumentException if normalizing fails
+     * @throws IllegalArgumentException if normalizing fails (when {@code normalized} is {@code true})
      */
     public static boolean equals(String filename1, String filename2, final boolean normalized, IOCase caseSensitivity) {
         if (filename1 == null || filename2 == null) {
@@ -1178,15 +1196,30 @@ public final class FilenameUtil {
     }
 
     /**
-     * Checks a filename against a wildcard matcher with control over case-sensitivity.
-     * 
-     * <p>The wildcard matcher uses the characters '?' and '*' to represent a
-     * single or multiple (zero or more) wildcard characters.</p>
+     * Checks a filename against a wildcard matcher with full control over case-sensitivity.
      *
-     * @param filename the filename to match on
-     * @param wildcardMatcher the wildcard string to match against
+     * <p>The wildcard matcher uses the characters '?' and '*' to represent a
+     * single or multiple (zero or more) wildcard characters. This method provides
+     * complete control over case sensitivity rules during matching.</p>
+     *
+     * <p>Wildcard semantics:</p>
+     * <ul>
+     * <li>'?' matches exactly one character</li>
+     * <li>'*' matches zero or more characters</li>
+     * <li>All other characters match themselves</li>
+     * </ul>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * FilenameUtil.wildcardMatch("file.txt", "*.txt", IOCase.SENSITIVE);   // Returns true
+     * FilenameUtil.wildcardMatch("FILE.TXT", "*.txt", IOCase.INSENSITIVE); // Returns true
+     * FilenameUtil.wildcardMatch("FILE.TXT", "*.txt", IOCase.SENSITIVE);   // Returns false
+     * }</pre>
+     *
+     * @param filename the filename to match on, {@code null} returns {@code true} only if wildcardMatcher is also {@code null}
+     * @param wildcardMatcher the wildcard string to match against, {@code null} returns {@code true} only if filename is also {@code null}
      * @param caseSensitivity what case sensitivity rule to use, {@code null} means case-sensitive
-     * @return {@code true} if the filename matches the wildcard string
+     * @return {@code true} if the filename matches the wildcard string, both {@code null} returns {@code true}
      */
     public static boolean wildcardMatch(final String filename, final String wildcardMatcher, IOCase caseSensitivity) {
         if (filename == null && wildcardMatcher == null) {
@@ -1271,12 +1304,31 @@ public final class FilenameUtil {
     }
 
     /**
-     * Splits a string into a number of tokens.
-     * The text is split by '?' and '*'.
-     * Where multiple '*' occur consecutively, they are collapsed into a single '*'.
+     * Splits a wildcard pattern string into a sequence of tokens for matching.
      *
-     * @param text the text to split
-     * @return the array of tokens, never null
+     * <p>This method tokenizes wildcard patterns by splitting on the special
+     * characters '?' and '*'. The resulting tokens are used internally for
+     * efficient wildcard matching operations.</p>
+     *
+     * <p>Tokenization rules:</p>
+     * <ul>
+     * <li>Text between wildcards becomes a literal token</li>
+     * <li>Each '?' becomes a separate "?" token</li>
+     * <li>Each '*' becomes a separate "*" token</li>
+     * <li>Multiple consecutive '*' characters are collapsed into a single "*" token</li>
+     * <li>If no wildcards exist, returns the original text as a single-element array</li>
+     * </ul>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * splitOnTokens("*.txt")        // Returns ["*", ".txt"]
+     * splitOnTokens("file?.txt")    // Returns ["file", "?", ".txt"]
+     * splitOnTokens("a**b")         // Returns ["a", "*", "b"]
+     * splitOnTokens("plain")        // Returns ["plain"]
+     * }</pre>
+     *
+     * @param text the wildcard pattern text to split, must not be {@code null}
+     * @return the array of tokens representing the pattern, never {@code null}
      */
     static String[] splitOnTokens(final String text) {
         // used by wildcardMatch

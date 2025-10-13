@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Throwables;
@@ -29,15 +30,15 @@ import com.landawn.abacus.util.function.DoubleConsumer;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
+@Tag("new-test")
 public class ParallelArrayDoubleStream100Test extends TestBase {
 
-    private static final int testMaxThreadNum = 4; // Use a fixed small number of threads for predictable testing 
+    private static final int testMaxThreadNum = 4;
     private static final double[] TEST_ARRAY = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
 
     private DoubleStream parallelStream;
 
     DoubleStream createDoubleStream(double... elements) {
-        // Will be implemented by the user
         return DoubleStream.of(elements).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
     }
 
@@ -49,18 +50,15 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
     @Test
     @DisplayName("Test filter method")
     public void testFilter() {
-        // Test filtering even numbers
         DoubleStream filtered = parallelStream.filter(d -> d % 2 == 0);
         double[] result = filtered.toArray();
 
         assertHaveSameElements(new double[] { 2.0, 4.0, 6.0, 8.0, 10.0 }, result);
 
-        // Test filtering with no matches
         parallelStream = createDoubleStream(TEST_ARRAY);
         filtered = parallelStream.filter(d -> d > 20);
         assertEquals(0, filtered.count());
 
-        // Test filtering all elements
         parallelStream = createDoubleStream(TEST_ARRAY);
         filtered = parallelStream.filter(d -> d > 0);
         assertEquals(10, filtered.count());
@@ -74,12 +72,10 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
 
         assertHaveSameElements(new double[] { 1.0, 2.0, 3.0, 4.0 }, array);
 
-        // Test takeWhile with no elements matching
         parallelStream = createDoubleStream(TEST_ARRAY);
         result = parallelStream.takeWhile(d -> d < 0);
         assertEquals(0, result.count());
 
-        // Test takeWhile with all elements matching
         parallelStream = createDoubleStream(TEST_ARRAY);
         result = parallelStream.takeWhile(d -> d <= 10);
         assertEquals(10, result.count());
@@ -93,12 +89,10 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
 
         assertHaveSameElements(new double[] { 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 }, array);
 
-        // Test dropWhile with all elements matching
         parallelStream = createDoubleStream(TEST_ARRAY);
         result = parallelStream.dropWhile(d -> d <= 10);
         assertEquals(0, result.count());
 
-        // Test dropWhile with no elements matching
         parallelStream = createDoubleStream(TEST_ARRAY);
         result = parallelStream.dropWhile(d -> d > 10);
         assertEquals(10, result.count());
@@ -112,7 +106,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
 
         assertHaveSameElements(new double[] { 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0 }, result);
 
-        // Test map with identity function
         parallelStream = createDoubleStream(TEST_ARRAY);
         mapped = parallelStream.map(d -> d);
         assertHaveSameElements(TEST_ARRAY, mapped.toArray());
@@ -126,7 +119,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
 
         assertHaveSameElements(new int[] { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 }, result);
 
-        // Test simple conversion
         parallelStream = createDoubleStream(TEST_ARRAY);
         intStream = parallelStream.mapToInt(d -> (int) d);
         assertHaveSameElements(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, intStream.toArray());
@@ -140,7 +132,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
 
         assertHaveSameElements(new long[] { 100L, 200L, 300L, 400L, 500L, 600L, 700L, 800L, 900L, 1000L }, result);
 
-        // Test simple conversion
         parallelStream = createDoubleStream(TEST_ARRAY);
         longStream = parallelStream.mapToLong(d -> (long) d);
         assertHaveSameElements(new long[] { 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L }, longStream.toArray());
@@ -154,7 +145,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
 
         assertHaveSameElements(new float[] { 0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 3.5f, 4.0f, 4.5f, 5.0f }, result);
 
-        // Test simple conversion
         parallelStream = createDoubleStream(TEST_ARRAY);
         floatStream = parallelStream.mapToFloat(d -> (float) d);
         assertHaveSameElements(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f }, floatStream.toArray());
@@ -170,7 +160,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
         assertEquals("Value: 10.0", result.get(1));
         assertEquals("Value: 9.0", result.get(9));
 
-        // Test mapping to Double
         parallelStream = createDoubleStream(TEST_ARRAY);
         Stream<Double> doubleObjStream = parallelStream.mapToObj(d -> Double.valueOf(d));
         List<Double> doubleResult = doubleObjStream.toList();
@@ -185,7 +174,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
 
         assertEquals(20, result.length);
 
-        // Test flatMap with empty streams
         parallelStream = createDoubleStream(new double[] { 1.0, 2.0, 3.0 });
         flattened = parallelStream.flatMap(d -> d % 2 == 0 ? DoubleStream.of(d) : DoubleStream.empty());
         assertArrayEquals(new double[] { 2.0 }, flattened.toArray());
@@ -199,7 +187,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
 
         assertEquals(20, result.length);
 
-        // Test with empty arrays
         parallelStream = createDoubleStream(new double[] { 1.0, 2.0, 3.0 });
         flattened = parallelStream.flatmap(d -> d % 2 == 0 ? new double[] { d } : new double[0]);
         assertArrayEquals(new double[] { 2.0 }, flattened.toArray());
@@ -265,19 +252,17 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
     public void testOnEach() {
         List<Double> capturedValues = new ArrayList<>();
         DoubleConsumer action = it -> {
-            synchronized (capturedValues) { // Ensure thread safety
+            synchronized (capturedValues) {
                 capturedValues.add(it);
             }
         };
         DoubleStream result = parallelStream.onEach(action);
 
-        // onEach should not consume the stream
         double[] array = result.toArray();
 
         assertEquals(10, capturedValues.size());
         assertHaveSameElements(TEST_ARRAY, array);
 
-        // Test that values are captured
         Collections.sort(capturedValues);
         for (int i = 0; i < TEST_ARRAY.length; i++) {
             assertEquals(TEST_ARRAY[i], capturedValues.get(i).doubleValue());
@@ -297,7 +282,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
             assertEquals(TEST_ARRAY[i], result.get(i).doubleValue());
         }
 
-        // Test with exception
         parallelStream = createDoubleStream(TEST_ARRAY);
         assertThrows(RuntimeException.class, () -> {
             parallelStream.forEach((Throwables.DoubleConsumer<Exception>) d -> {
@@ -316,7 +300,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
         assertEquals(Double.valueOf(1.0), result.get("Key1.0"));
         assertEquals(Double.valueOf(10.0), result.get("Key10.0"));
 
-        // Test with duplicate keys and merge function
         parallelStream = createDoubleStream(new double[] { 1.0, 1.0, 2.0, 2.0, 3.0 });
         Map<String, Double> mergedResult = parallelStream.toMap(d -> "Key" + (int) (d % 2), d -> Double.valueOf(d), Double::sum, HashMap::new);
 
@@ -332,7 +315,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
         assertEquals(5, result.get("even").size());
         assertEquals(5, result.get("odd").size());
 
-        // Test with custom downstream collector
         parallelStream = createDoubleStream(TEST_ARRAY);
         Map<Boolean, Long> countResult = parallelStream.groupTo(d -> d > 5, Collectors.counting(), HashMap::new);
 
@@ -348,12 +330,10 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
 
         assertEquals(55.0, result);
 
-        // Test with multiplication
         parallelStream = createDoubleStream(new double[] { 1.0, 2.0, 3.0, 4.0 });
         result = parallelStream.reduce(1.0, (a, b) -> a * b);
         assertEquals(24.0, result);
 
-        // Test with empty stream
         parallelStream = createDoubleStream(new double[0]);
         result = parallelStream.reduce(10.0, (a, b) -> a + b);
         assertEquals(10.0, result);
@@ -367,13 +347,11 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(55.0, result.getAsDouble());
 
-        // Test with max operation
         parallelStream = createDoubleStream(TEST_ARRAY);
         result = parallelStream.reduce((a, b) -> a > b ? a : b);
         assertTrue(result.isPresent());
         assertEquals(10.0, result.getAsDouble());
 
-        // Test with empty stream
         parallelStream = createDoubleStream(new double[0]);
         result = parallelStream.reduce((a, b) -> a + b);
         assertFalse(result.isPresent());
@@ -390,7 +368,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
             assertEquals(TEST_ARRAY[i], result.get(i).doubleValue());
         }
 
-        // Test with custom collector
         parallelStream = createDoubleStream(TEST_ARRAY);
         String concatenated = parallelStream.collect(StringBuilder::new, (sb, d) -> sb.append(d).append(","), StringBuilder::append).toString();
 
@@ -412,7 +389,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
         result = parallelStream.anyMatch(d -> d == 7.0);
         assertTrue(result);
 
-        // Test with empty stream
         parallelStream = createDoubleStream(new double[0]);
         result = parallelStream.anyMatch(d -> true);
         assertFalse(result);
@@ -432,7 +408,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
         result = parallelStream.allMatch(d -> d <= 10);
         assertTrue(result);
 
-        // Test with empty stream
         parallelStream = createDoubleStream(new double[0]);
         result = parallelStream.allMatch(d -> false);
         assertTrue(result);
@@ -452,7 +427,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
         result = parallelStream.noneMatch(d -> d == 0);
         assertTrue(result);
 
-        // Test with empty stream
         parallelStream = createDoubleStream(new double[0]);
         result = parallelStream.noneMatch(d -> true);
         assertTrue(result);
@@ -522,7 +496,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
         assertEquals(5, result.length);
         assertHaveSameElements(new double[] { 11.0, 22.0, 33.0, 44.0, 55.0 }, result);
 
-        // Test with different length streams
         parallelStream = createDoubleStream(new double[] { 1.0, 2.0, 3.0 });
         stream2 = createDoubleStream(new double[] { 10.0, 20.0, 30.0, 40.0, 50.0 });
         zipped = parallelStream.zipWith(stream2, (a, b) -> a * b);
@@ -548,11 +521,9 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
         double[] result = parallelStream.zipWith(stream2, 0.0, 100.0, (a, b) -> a + b).sorted().toArray();
 
         assertEquals(10, result.length);
-        // First 3 elements: 1+10, 2+20, 3+30
         assertEquals(11.0, result[0]);
         assertEquals(22.0, result[1]);
         assertEquals(33.0, result[2]);
-        // the next elements: 4+100, 5+100, etc.
         assertEquals(104.0, result[3]);
     }
 
@@ -564,9 +535,8 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
         double[] result = parallelStream.zipWith(stream2, stream3, 0.0, 0.0, 1.0, (a, b, c) -> a + b + c).sorted().toArray();
 
         assertEquals(10, result.length);
-        // Check first two elements
-        assertEquals(6.0, result[0]); // 1 + 10 + 1
-        assertEquals(24.0, result[9]); // 2 + 20 + 2
+        assertEquals(6.0, result[0]);
+        assertEquals(24.0, result[9]);
     }
 
     @Test
@@ -583,7 +553,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
         assertNotNull(sequential);
         assertFalse(sequential.isParallel());
 
-        // Verify data is preserved
         double[] result = sequential.toArray();
         assertArrayEquals(TEST_ARRAY, result);
     }
@@ -595,29 +564,23 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
 
         DoubleStream streamWithCloseHandler = parallelStream.onClose(() -> closeCalled.set(true));
 
-        // onClose should return the same stream
         assertSame(parallelStream, streamWithCloseHandler);
 
-        // Close handler should be called when stream is closed
         streamWithCloseHandler.close();
         assertTrue(closeCalled.get());
 
-        // Test with null close handler
         parallelStream = createDoubleStream(TEST_ARRAY);
         DoubleStream sameStream = parallelStream.onClose(null);
-        // Should return the same stream instance for null handler
         assertSame(parallelStream, sameStream);
     }
 
     @Test
     @DisplayName("Test complex parallel operations")
     public void testComplexParallelOperations() {
-        // Test chaining multiple operations
         double[] result = parallelStream.filter(d -> d % 2 == 0).map(d -> d * 2).sorted().toArray();
 
         assertArrayEquals(new double[] { 4.0, 8.0, 12.0, 16.0, 20.0 }, result);
 
-        // Test parallel reduction
         parallelStream = createDoubleStream(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 });
         double sum = parallelStream.map(d -> d * 2).reduce(0.0, Double::sum);
 
@@ -627,20 +590,16 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
     @Test
     @DisplayName("Test edge cases")
     public void testEdgeCases() {
-        // Test with empty array
         parallelStream = createDoubleStream(new double[0]);
         assertEquals(0, parallelStream.count());
 
-        // Test with single element
         parallelStream = createDoubleStream(new double[] { 42.5 });
         assertEquals(42.5, parallelStream.first().getAsDouble());
 
-        // Test with negative values
         parallelStream = createDoubleStream(new double[] { -5.0, -3.0, -1.0, 0.0, 1.0, 3.0, 5.0 });
         long positiveCount = parallelStream.filter(d -> d > 0).count();
         assertEquals(3, positiveCount);
 
-        // Test with NaN and infinity
         parallelStream = createDoubleStream(new double[] { Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, 1.0 });
         long finiteCount = parallelStream.filter(Double::isFinite).count();
         assertEquals(1, finiteCount);
@@ -649,12 +608,10 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
     @Test
     @DisplayName("Test thread safety")
     public void testThreadSafety() throws Exception {
-        // Test concurrent modification during parallel operation
         AtomicInteger counter = new AtomicInteger(0);
 
         parallelStream.forEach(d -> {
             counter.incrementAndGet();
-            // Simulate some work
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
@@ -668,7 +625,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
     @Test
     @DisplayName("Test exception handling in parallel operations")
     public void testExceptionHandling() {
-        // Test exception in filter
         assertThrows(RuntimeException.class, () -> {
             parallelStream.filter(d -> {
                 if (d == 5.0)
@@ -677,7 +633,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
             }).count();
         });
 
-        // Test exception in map
         parallelStream = createDoubleStream(TEST_ARRAY);
         assertThrows(RuntimeException.class, () -> {
             parallelStream.map(d -> {
@@ -691,14 +646,11 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
     @Test
     @DisplayName("Test precision in calculations")
     public void testDoublePrecision() {
-        // Test with values that might have precision issues
         parallelStream = createDoubleStream(new double[] { 0.1, 0.2, 0.3 });
         double sum = parallelStream.reduce(0.0, Double::sum);
 
-        // Use delta for floating point comparison
         assertEquals(0.6, sum, 0.0000001);
 
-        // Test with very small values
         parallelStream = createDoubleStream(new double[] { 1e-15, 1e-15, 1e-15 });
         double smallSum = parallelStream.reduce(0.0, Double::sum);
         assertEquals(3e-15, smallSum, 1e-20);
@@ -707,7 +659,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
     @Test
     @DisplayName("Test with large arrays")
     public void testLargeArrays() {
-        // Create a large array
         double[] largeArray = new double[1000];
         for (int i = 0; i < largeArray.length; i++) {
             largeArray[i] = i + 1.0;
@@ -715,11 +666,9 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
 
         parallelStream = createDoubleStream(largeArray);
 
-        // Test sum of large array
         double sum = parallelStream.reduce(0.0, Double::sum);
         assertEquals(500500.0, sum);
 
-        // Test filtering on large array
         parallelStream = createDoubleStream(largeArray);
         long evenCount = parallelStream.filter(d -> d % 2 == 0).count();
         assertEquals(500, evenCount);
@@ -728,7 +677,6 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
     @Test
     @DisplayName("Test method chaining")
     public void testMethodChaining() {
-        // Complex chaining test
         List<String> result = parallelStream.filter(d -> d > 3)
                 .map(d -> d * 2)
                 .flatMapToObj(d -> Stream.of("Value: " + d, "Half: " + (d / 2)))
@@ -743,10 +691,8 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
     @Test
     @DisplayName("Test parallel stream state after operations")
     public void testStreamStateAfterOperations() {
-        // Test that stream is closed after terminal operation
         parallelStream.count();
 
-        // Should throw exception when trying to use closed stream
         assertThrows(IllegalStateException.class, () -> {
             parallelStream.filter(d -> d > 5).count();
         });
@@ -755,15 +701,12 @@ public class ParallelArrayDoubleStream100Test extends TestBase {
     @Test
     @DisplayName("Test special double values")
     public void testSpecialDoubleValues() {
-        // Test with special values
         parallelStream = createDoubleStream(new double[] { Double.MIN_VALUE, Double.MAX_VALUE, Double.MIN_NORMAL, Double.NaN, Double.POSITIVE_INFINITY,
                 Double.NEGATIVE_INFINITY, 0.0, -0.0 });
 
-        // Count finite values
         long finiteCount = parallelStream.filter(Double::isFinite).count();
-        assertEquals(5, finiteCount); // MIN_VALUE, MAX_VALUE, MIN_NORMAL, 0.0, -0.0
+        assertEquals(5, finiteCount);
 
-        // Test NaN handling
         parallelStream = createDoubleStream(new double[] { Double.NaN, 1.0, 2.0 });
         OptionalDouble max = parallelStream.reduce(Double::max);
         assertTrue(max.isPresent());

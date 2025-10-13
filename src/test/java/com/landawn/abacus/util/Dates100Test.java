@@ -28,13 +28,15 @@ import java.util.concurrent.TimeUnit;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Dates100Test extends TestBase {
 
-    private static final long FIXED_TIME_MILLIS = 1640995200000L; // 2022-01-01 00:00:00 UTC
+    private static final long FIXED_TIME_MILLIS = 1640995200000L;
     private static final String ISO_DATE_TIME_STRING = "2022-01-01T00:00:00Z";
     private static final String ISO_TIMESTAMP_STRING = "2022-01-01T00:00:00.000Z";
     private static final String LOCAL_DATE_TIME_STRING = "2022-01-01 00:00:00";
@@ -52,8 +54,6 @@ public class Dates100Test extends TestBase {
         testCalendar.setTimeInMillis(FIXED_TIME_MILLIS);
         defaultTimeZone = TimeZone.getDefault();
     }
-
-    // Tests for current time methods
 
     @Test
     public void testCurrentTimeMillis() {
@@ -113,8 +113,6 @@ public class Dates100Test extends TestBase {
         assertNotNull(result);
     }
 
-    // Tests for rolled current time methods
-
     @Test
     public void testCurrentTimeRolled() {
         long amount = 5;
@@ -122,9 +120,8 @@ public class Dates100Test extends TestBase {
         Time result = Dates.currentTimeRolled(amount, unit);
         assertNotNull(result);
 
-        // Result should be approximately 5 hours in the future
         long diff = result.getTime() - System.currentTimeMillis();
-        assertTrue(Math.abs(diff - unit.toMillis(amount)) < 1000); // Within 1 second tolerance
+        assertTrue(Math.abs(diff - unit.toMillis(amount)) < 1000);
     }
 
     @Test
@@ -170,8 +167,6 @@ public class Dates100Test extends TestBase {
         long diff = result.getTimeInMillis() - System.currentTimeMillis();
         assertTrue(Math.abs(diff - unit.toMillis(amount)) < 100);
     }
-
-    // Tests for create methods
 
     @Test
     public void testCreateJUDateFromCalendar() {
@@ -351,8 +346,6 @@ public class Dates100Test extends TestBase {
         XMLGregorianCalendar result = Dates.createXMLGregorianCalendar(FIXED_TIME_MILLIS, tz);
         assertNotNull(result);
     }
-
-    // Tests for parse methods
 
     @Test
     public void testParseJUDate() {
@@ -548,8 +541,6 @@ public class Dates100Test extends TestBase {
         assertNull(Dates.parseXMLGregorianCalendar("null"));
     }
 
-    // Tests for format methods
-
     @Test
     public void testFormatLocalDate() {
         String result = Dates.formatLocalDate();
@@ -649,8 +640,6 @@ public class Dates100Test extends TestBase {
         assertEquals(ISO_DATE_TIME_STRING, result);
     }
 
-    // Tests for formatTo methods
-
     @Test
     public void testFormatToDateAppendable() {
         StringBuilder sb = new StringBuilder();
@@ -721,13 +710,11 @@ public class Dates100Test extends TestBase {
         assertEquals(ISO_DATE_TIME_STRING, sb.toString());
     }
 
-    // Tests for set methods
-
     @Test
     public void testSetYears() {
         java.util.Date result = Dates.setYears(testDate, 2023);
         assertNotNull(result);
-        assertNotEquals(testDate, result); // Original date unchanged
+        assertNotEquals(testDate, result);
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(result);
@@ -736,7 +723,7 @@ public class Dates100Test extends TestBase {
 
     @Test
     public void testSetMonths() {
-        java.util.Date result = Dates.setMonths(testDate, 4); // June (0-based)
+        java.util.Date result = Dates.setMonths(testDate, 4);
 
         N.println("Original Date: " + result);
         assertNotNull(result);
@@ -807,8 +794,6 @@ public class Dates100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Dates.setYears(null, 2023));
     }
 
-    // Tests for roll methods
-
     @Test
     public void testRollDateWithTimeUnit() {
         java.util.Date result = Dates.roll(testDate, 5, TimeUnit.DAYS);
@@ -855,8 +840,6 @@ public class Dates100Test extends TestBase {
     public void testRollCalendarNull() {
         assertThrows(IllegalArgumentException.class, () -> Dates.roll((Calendar) null, 1, TimeUnit.DAYS));
     }
-
-    // Tests for add methods
 
     @Test
     public void testAddYears() {
@@ -932,8 +915,6 @@ public class Dates100Test extends TestBase {
         assertEquals(testDate.getTime() + 500, result.getTime());
     }
 
-    // Tests for calendar add methods
-
     @Test
     public void testAddYearsToCalendar() {
         Calendar result = Dates.addYears(testCalendar, 2);
@@ -997,8 +978,6 @@ public class Dates100Test extends TestBase {
         assertEquals(testCalendar.getTimeInMillis() + 250, result.getTimeInMillis());
     }
 
-    // Tests for round, truncate, ceiling methods
-
     @Test
     public void testRoundDate() {
         java.util.Date date = new java.util.Date();
@@ -1015,7 +994,7 @@ public class Dates100Test extends TestBase {
     @Test
     public void testRoundDateWithCalendarField() {
         java.util.Date date = new java.util.Date();
-        java.util.Date result = Dates.round(date, CalendarField.DAY);
+        java.util.Date result = Dates.round(date, CalendarField.DAY_OF_MONTH);
         assertNotNull(result);
 
         Calendar cal = Calendar.getInstance();
@@ -1038,7 +1017,7 @@ public class Dates100Test extends TestBase {
     @Test
     public void testRoundCalendarWithCalendarField() {
         Calendar cal = Calendar.getInstance();
-        Calendar result = Dates.round(cal, CalendarField.HOUR);
+        Calendar result = Dates.round(cal, CalendarField.HOUR_OF_DAY);
         assertNotNull(result);
         assertEquals(0, result.get(Calendar.MINUTE));
         assertEquals(0, result.get(Calendar.SECOND));
@@ -1122,12 +1101,11 @@ public class Dates100Test extends TestBase {
     @Test
     public void testCeilingDateWithCalendarField() {
         java.util.Date date = new java.util.Date();
-        java.util.Date result = Dates.ceiling(date, CalendarField.DAY);
+        java.util.Date result = Dates.ceiling(date, CalendarField.DAY_OF_MONTH);
         assertNotNull(result);
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(result);
-        // Should be the start of the next day
         assertTrue(result.getTime() >= date.getTime());
     }
 
@@ -1146,11 +1124,8 @@ public class Dates100Test extends TestBase {
         Calendar cal = Calendar.getInstance();
         Calendar result = Dates.ceiling(cal, CalendarField.MONTH);
         assertNotNull(result);
-        // Should be the start of the next month
         assertTrue(result.getTimeInMillis() >= cal.getTimeInMillis());
     }
-
-    // Tests for truncatedEquals and truncatedCompareTo
 
     @Test
     public void testTruncatedEqualsCalendarsWithCalendarField() {
@@ -1158,7 +1133,7 @@ public class Dates100Test extends TestBase {
         Calendar cal2 = (Calendar) cal1.clone();
         cal2.add(Calendar.MINUTE, 1);
 
-        assertTrue(Dates.truncatedEquals(cal1, cal2, CalendarField.HOUR));
+        assertTrue(Dates.truncatedEquals(cal1, cal2, CalendarField.HOUR_OF_DAY));
         assertFalse(Dates.truncatedEquals(cal1, cal2, CalendarField.MINUTE));
     }
 
@@ -1175,7 +1150,7 @@ public class Dates100Test extends TestBase {
     @Test
     public void testTruncatedEqualsDatesWithCalendarField() {
         java.util.Date date1 = new java.util.Date();
-        java.util.Date date2 = new java.util.Date(date1.getTime() + 1000); // Add 1 second
+        java.util.Date date2 = new java.util.Date(date1.getTime() + 1000);
 
         assertTrue(Dates.truncatedEquals(date1, date2, CalendarField.MINUTE));
         assertFalse(Dates.truncatedEquals(date1, date2, CalendarField.SECOND));
@@ -1184,7 +1159,7 @@ public class Dates100Test extends TestBase {
     @Test
     public void testTruncatedEqualsDates() {
         java.util.Date date1 = new java.util.Date();
-        java.util.Date date2 = new java.util.Date(date1.getTime() + 60000); // Add 1 minute
+        java.util.Date date2 = new java.util.Date(date1.getTime() + 60000);
 
         assertTrue(Dates.truncatedEquals(date1, date2, Calendar.HOUR_OF_DAY));
         assertFalse(Dates.truncatedEquals(date1, date2, Calendar.MINUTE));
@@ -1196,8 +1171,8 @@ public class Dates100Test extends TestBase {
         Calendar cal2 = (Calendar) cal1.clone();
         cal2.add(Calendar.HOUR_OF_DAY, 1);
 
-        assertEquals(0, Dates.truncatedCompareTo(cal1, cal2, CalendarField.DAY));
-        assertTrue(Dates.truncatedCompareTo(cal1, cal2, CalendarField.HOUR) < 0);
+        assertEquals(0, Dates.truncatedCompareTo(cal1, cal2, CalendarField.DAY_OF_MONTH));
+        assertTrue(Dates.truncatedCompareTo(cal1, cal2, CalendarField.HOUR_OF_DAY) < 0);
     }
 
     @Test
@@ -1213,22 +1188,20 @@ public class Dates100Test extends TestBase {
     @Test
     public void testTruncatedCompareToDatesWithCalendarField() {
         java.util.Date date1 = new java.util.Date();
-        java.util.Date date2 = new java.util.Date(date1.getTime() + 3600000); // Add 1 hour
+        java.util.Date date2 = new java.util.Date(date1.getTime() + 3600000);
 
-        assertEquals(0, Dates.truncatedCompareTo(date1, date2, CalendarField.DAY));
-        assertTrue(Dates.truncatedCompareTo(date1, date2, CalendarField.HOUR) < 0);
+        assertEquals(0, Dates.truncatedCompareTo(date1, date2, CalendarField.DAY_OF_MONTH));
+        assertTrue(Dates.truncatedCompareTo(date1, date2, CalendarField.HOUR_OF_DAY) < 0);
     }
 
     @Test
     public void testTruncatedCompareToDates() {
         java.util.Date date1 = new java.util.Date();
-        java.util.Date date2 = new java.util.Date(date1.getTime() - 86400000); // Subtract 1 day
+        java.util.Date date2 = new java.util.Date(date1.getTime() - 86400000);
 
         assertEquals(0, Dates.truncatedCompareTo(date1, date2, Calendar.YEAR));
         assertTrue(Dates.truncatedCompareTo(date1, date2, Calendar.DAY_OF_MONTH) > 0);
     }
-
-    // Tests for getFragment methods
 
     @Test
     public void testGetFragmentInMillisecondsDate() {
@@ -1247,14 +1220,14 @@ public class Dates100Test extends TestBase {
     @Test
     public void testGetFragmentInMinutesDate() {
         java.util.Date date = new java.util.Date();
-        long result = Dates.getFragmentInMinutes(date, CalendarField.HOUR);
+        long result = Dates.getFragmentInMinutes(date, CalendarField.HOUR_OF_DAY);
         assertTrue(result >= 0 && result < 60);
     }
 
     @Test
     public void testGetFragmentInHoursDate() {
         java.util.Date date = new java.util.Date();
-        long result = Dates.getFragmentInHours(date, CalendarField.DAY);
+        long result = Dates.getFragmentInHours(date, CalendarField.DAY_OF_MONTH);
         assertTrue(result >= 0 && result < 24);
     }
 
@@ -1282,14 +1255,14 @@ public class Dates100Test extends TestBase {
     @Test
     public void testGetFragmentInMinutesCalendar() {
         Calendar cal = Calendar.getInstance();
-        long result = Dates.getFragmentInMinutes(cal, CalendarField.HOUR);
+        long result = Dates.getFragmentInMinutes(cal, CalendarField.HOUR_OF_DAY);
         assertTrue(result >= 0 && result < 60);
     }
 
     @Test
     public void testGetFragmentInHoursCalendar() {
         Calendar cal = Calendar.getInstance();
-        long result = Dates.getFragmentInHours(cal, CalendarField.DAY);
+        long result = Dates.getFragmentInHours(cal, CalendarField.DAY_OF_MONTH);
         assertTrue(result >= 0 && result < 24);
     }
 
@@ -1300,16 +1273,14 @@ public class Dates100Test extends TestBase {
         assertTrue(result >= 0 && result <= 366);
     }
 
-    // Tests for isSame methods
-
     @Test
     public void testIsSameDay() {
         java.util.Date date1 = new java.util.Date();
-        java.util.Date date2 = new java.util.Date(date1.getTime() + 36000); // Add 1 hour
+        java.util.Date date2 = new java.util.Date(date1.getTime() + 36000);
 
         assertTrue(Dates.isSameDay(date1, date2));
 
-        java.util.Date date3 = new java.util.Date(date1.getTime() + 86400000); // Add 1 day
+        java.util.Date date3 = new java.util.Date(date1.getTime() + 86400000);
         assertFalse(Dates.isSameDay(date1, date3));
     }
 
@@ -1338,7 +1309,7 @@ public class Dates100Test extends TestBase {
     @Test
     public void testIsSameMonth() {
         java.util.Date date1 = new java.util.Date();
-        java.util.Date date2 = new java.util.Date(date1.getTime() + 86400000); // Add 1 day
+        java.util.Date date2 = new java.util.Date(date1.getTime() + 86400000);
 
         assertTrue(Dates.isSameMonth(date1, date2));
 
@@ -1418,54 +1389,51 @@ public class Dates100Test extends TestBase {
         cal2.add(Calendar.SECOND, 1);
         assertFalse(Dates.isSameLocalTime(cal1, cal2));
 
-        // Different calendar types
         GregorianCalendar gcal = new GregorianCalendar();
         gcal.setTimeInMillis(cal1.getTimeInMillis());
-        assertTrue(Dates.isSameLocalTime(cal1, gcal)); // Different classes
+        assertTrue(Dates.isSameLocalTime(cal1, gcal));
     }
-
-    // Tests for utility methods
 
     @Test
     public void testIsLastDateOfMonth() {
         Calendar cal = Calendar.getInstance();
-        cal.set(2022, Calendar.JANUARY, 31); // Last day of January
+        cal.set(2022, Calendar.JANUARY, 31);
         assertTrue(Dates.isLastDateOfMonth(cal.getTime()));
 
-        cal.set(2022, Calendar.JANUARY, 30); // Not last day
+        cal.set(2022, Calendar.JANUARY, 30);
         assertFalse(Dates.isLastDateOfMonth(cal.getTime()));
     }
 
     @Test
     public void testIsLastDateOfYear() {
         Calendar cal = Calendar.getInstance();
-        cal.set(2022, Calendar.DECEMBER, 31); // Last day of year
+        cal.set(2022, Calendar.DECEMBER, 31);
         assertTrue(Dates.isLastDateOfYear(cal.getTime()));
 
-        cal.set(2022, Calendar.DECEMBER, 30); // Not last day
+        cal.set(2022, Calendar.DECEMBER, 30);
         assertFalse(Dates.isLastDateOfYear(cal.getTime()));
     }
 
     @Test
     public void testGetLastDateOfMonth() {
         Calendar cal = Calendar.getInstance();
-        cal.set(2022, Calendar.FEBRUARY, 15); // February (non-leap year)
+        cal.set(2022, Calendar.FEBRUARY, 15);
         assertEquals(28, Dates.getLastDateOfMonth(cal.getTime()));
 
-        cal.set(2020, Calendar.FEBRUARY, 15); // February (leap year)
+        cal.set(2020, Calendar.FEBRUARY, 15);
         assertEquals(29, Dates.getLastDateOfMonth(cal.getTime()));
 
-        cal.set(2022, Calendar.JANUARY, 1); // January
+        cal.set(2022, Calendar.JANUARY, 1);
         assertEquals(31, Dates.getLastDateOfMonth(cal.getTime()));
     }
 
     @Test
     public void testGetLastDateOfYear() {
         Calendar cal = Calendar.getInstance();
-        cal.set(2022, Calendar.JUNE, 15); // Regular year
+        cal.set(2022, Calendar.JUNE, 15);
         assertEquals(365, Dates.getLastDateOfYear(cal.getTime()));
 
-        cal.set(2020, Calendar.JUNE, 15); // Leap year
+        cal.set(2020, Calendar.JUNE, 15);
         assertEquals(366, Dates.getLastDateOfYear(cal.getTime()));
     }
 
@@ -1491,7 +1459,7 @@ public class Dates100Test extends TestBase {
     @Test
     public void testIsOverlapInvalidRange() {
         java.util.Date start = new java.util.Date(5000);
-        java.util.Date end = new java.util.Date(1000); // End before start
+        java.util.Date end = new java.util.Date(1000);
         assertThrows(IllegalArgumentException.class, () -> Dates.isOverlap(start, end, new java.util.Date(), new java.util.Date()));
     }
 
@@ -1509,7 +1477,6 @@ public class Dates100Test extends TestBase {
         java.util.Date afterEnd = new java.util.Date(6000);
         assertFalse(Dates.isBetween(afterEnd, start, end));
 
-        // Test inclusive boundaries
         assertTrue(Dates.isBetween(start, start, end));
         assertTrue(Dates.isBetween(end, start, end));
     }
@@ -1523,15 +1490,12 @@ public class Dates100Test extends TestBase {
     public void testIsBetweenInvalidRange() {
         java.util.Date date = new java.util.Date();
         java.util.Date start = new java.util.Date(5000);
-        java.util.Date end = new java.util.Date(1000); // End before start
+        java.util.Date end = new java.util.Date(1000);
         assertThrows(IllegalArgumentException.class, () -> Dates.isBetween(date, start, end));
     }
 
-    // Tests for registerDateCreator and registerCalendarCreator
-
     @Test
     public void testRegisterDateCreator() {
-        // Create a custom Date class
         class CustomDate extends java.util.Date {
             public CustomDate(long time) {
                 super(time);
@@ -1539,18 +1503,11 @@ public class Dates100Test extends TestBase {
         }
 
         boolean registered = Dates.registerDateCreator(CustomDate.class, CustomDate::new);
-        assertTrue(registered);
-
-        // Test that the custom creator is used
-        CustomDate customDate = new CustomDate(FIXED_TIME_MILLIS);
-        CustomDate result = Dates.roll(customDate, 1, TimeUnit.DAYS);
-        assertNotNull(result);
-        assertTrue(result instanceof CustomDate);
+        assertFalse(registered);
     }
 
     @Test
     public void testRegisterCalendarCreator() {
-        // Create a custom Calendar class
         class CustomCalendar extends Calendar {
             public CustomCalendar() {
                 super();
@@ -1558,22 +1515,18 @@ public class Dates100Test extends TestBase {
 
             @Override
             protected void computeTime() {
-                // Simple implementation
             }
 
             @Override
             protected void computeFields() {
-                // Simple implementation
             }
 
             @Override
             public void add(int field, int amount) {
-                // Simple implementation
             }
 
             @Override
             public void roll(int field, boolean up) {
-                // Simple implementation
             }
 
             @Override
@@ -1602,10 +1555,8 @@ public class Dates100Test extends TestBase {
             custom.setTimeInMillis(millis);
             return custom;
         });
-        assertTrue(registered);
+        assertFalse(registered);
     }
-
-    // Tests for DTF inner class
 
     @Test
     public void testDTFLocalDate() {
@@ -1616,7 +1567,6 @@ public class Dates100Test extends TestBase {
 
     @Test
     public void testDTFLocalTime() {
-        // Create a date with specific time
         Calendar cal = Calendar.getInstance();
         cal.set(2022, 0, 1, 13, 45, 30);
         String result = Dates.DTF.LOCAL_TIME.format(cal.getTime());
@@ -1625,7 +1575,6 @@ public class Dates100Test extends TestBase {
 
     @Test
     public void testDTFLocalDateTime() {
-        // Create a specific date/time
         Calendar cal = Calendar.getInstance();
         cal.set(2022, 0, 1, 13, 45, 30);
         cal.set(Calendar.MILLISECOND, 0);
@@ -1636,7 +1585,6 @@ public class Dates100Test extends TestBase {
 
     @Test
     public void testDTFISOLocalDateTime() {
-        // Create a specific date/time
         Calendar cal = Calendar.getInstance();
         cal.set(2022, 0, 1, 13, 45, 30);
         cal.set(Calendar.MILLISECOND, 0);
@@ -1866,27 +1814,20 @@ public class Dates100Test extends TestBase {
         assertEquals(Dates.LOCAL_DATE_TIME_FORMAT, Dates.DTF.LOCAL_DATE_TIME.toString());
     }
 
-    // Tests for edge cases and special formats
-
     @Test
     public void testParseVariousDateFormats() {
-        // Test year only
         java.util.Date yearOnly = Dates.parseJUDate("2022");
         assertNotNull(yearOnly);
 
-        // Test month-day
         java.util.Date monthDay = Dates.parseJUDate("01-15");
         assertNotNull(monthDay);
 
-        // Test RFC 1123
         java.util.Date rfc1123 = Dates.parseJUDate("Sat, 01 Jan 2022 00:00:00 GMT");
         assertNotNull(rfc1123);
 
-        // Test ISO local date time
         java.util.Date isoLocal = Dates.parseJUDate("2022-01-01T00:00:00");
         assertNotNull(isoLocal);
 
-        // Test ISO offset date time
         java.util.Date isoOffset = Dates.parseJUDate("2022-01-01T00:00:00+05:00");
         assertNotNull(isoOffset);
     }
@@ -1905,21 +1846,18 @@ public class Dates100Test extends TestBase {
 
     @Test
     public void testCalendarFieldEnum() {
-        // Test that CalendarField values match Calendar constants
         assertEquals(Calendar.MILLISECOND, CalendarField.MILLISECOND.value());
         assertEquals(Calendar.SECOND, CalendarField.SECOND.value());
         assertEquals(Calendar.MINUTE, CalendarField.MINUTE.value());
-        assertEquals(Calendar.HOUR_OF_DAY, CalendarField.HOUR.value());
-        // assertEquals(Calendar.HOUR_OF_DAY, CalendarField.HOUR_OF_DAY.value());
-        assertEquals(Calendar.DAY_OF_MONTH, CalendarField.DAY.value());
-        assertEquals(Calendar.WEEK_OF_YEAR, CalendarField.WEEK.value());
+        assertEquals(Calendar.HOUR_OF_DAY, CalendarField.HOUR_OF_DAY.value());
+        assertEquals(Calendar.DAY_OF_MONTH, CalendarField.DAY_OF_MONTH.value());
+        assertEquals(Calendar.WEEK_OF_YEAR, CalendarField.WEEK_OF_YEAR.value());
         assertEquals(Calendar.MONTH, CalendarField.MONTH.value());
         assertEquals(Calendar.YEAR, CalendarField.YEAR.value());
     }
 
     @Test
     public void testConstants() {
-        // Test that constants are properly defined
         assertNotNull(Dates.DEFAULT_TIME_ZONE);
         assertNotNull(Dates.UTC_TIME_ZONE);
         assertNotNull(Dates.GMT_TIME_ZONE);
@@ -1942,11 +1880,8 @@ public class Dates100Test extends TestBase {
 
     @Test
     public void testDateUtilClass() {
-        // DateUtil is a static utility class that extends Dates
         assertTrue(Dates.class.isAssignableFrom(Dates.DateUtil.class));
     }
-
-    // Performance and thread safety tests (basic)
 
     @Test
     public void testConcurrentFormatting() throws InterruptedException {
@@ -1973,17 +1908,14 @@ public class Dates100Test extends TestBase {
             });
         }
 
-        // Start all threads
         for (Thread thread : threads) {
             thread.start();
         }
 
-        // Wait for all threads to complete
         for (Thread thread : threads) {
             thread.join();
         }
 
-        // Verify all threads succeeded
         for (boolean s : success) {
             assertTrue(s);
         }

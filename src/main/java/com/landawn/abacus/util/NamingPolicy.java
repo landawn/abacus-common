@@ -114,19 +114,35 @@ public enum NamingPolicy {
     }
 
     /**
-     * Converts the specified string according to this naming policy.
-     * 
-     * <p>This method applies the transformation function associated with this
-     * naming policy to convert the input string to the desired format.</p>
-     * 
-     * <p>Example:</p>
+     * Converts the specified string according to this naming policy's transformation rules.
+     *
+     * <p>This method applies the transformation function associated with this naming policy
+     * to convert the input string to the desired format. The exact transformation depends on
+     * which naming policy constant is used (e.g., LOWER_CAMEL_CASE, UPPER_CASE_WITH_UNDERSCORE, etc.).</p>
+     *
+     * <p>The method handles various input formats and intelligently detects word boundaries based on:
+     * <ul>
+     *   <li>Underscores (_)</li>
+     *   <li>Hyphens (-)</li>
+     *   <li>Spaces</li>
+     *   <li>Case transitions (e.g., "camelCase" to "camel case")</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
      * <pre>{@code
-     * String original = "user-name";
-     * String converted = NamingPolicy.LOWER_CAMEL_CASE.convert(original); // "userName"
+     * // Convert to lower camel case
+     * String result1 = NamingPolicy.LOWER_CAMEL_CASE.convert("user-name"); // "userName"
+     * String result2 = NamingPolicy.LOWER_CAMEL_CASE.convert("USER_NAME"); // "userName"
+     *
+     * // Convert to snake case
+     * String result3 = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert("userName"); // "user_name"
      * }</pre>
-     * 
-     * @param str the string to convert
-     * @return the converted string according to this naming policy
+     *
+     * @param str the string to convert; may contain various separators (underscores, hyphens, spaces)
+     *            or be in camelCase/PascalCase format
+     * @return the converted string according to this naming policy's rules; returns the result of
+     *         applying the policy's transformation function to the input string
+     * @see #func()
      */
     public String convert(final String str) {
         return converter.apply(str);
@@ -134,11 +150,11 @@ public enum NamingPolicy {
 
     /**
      * Returns the underlying function that performs the string conversion.
-     * 
+     *
      * <p>This method provides access to the raw conversion function, which can be
      * useful when you need to pass the converter to methods that accept functions
      * or when composing multiple transformations.</p>
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
      * Function<String, String> converter = NamingPolicy.LOWER_CAMEL_CASE.func();
@@ -147,9 +163,11 @@ public enum NamingPolicy {
      *     .map(converter)
      *     .collect(Collectors.toList());
      * }</pre>
-     * 
+     *
      * @return the function that performs the string transformation for this policy
-     * @deprecated This method is marked as Beta and may be subject to change
+     * @deprecated This method is deprecated. Use {@link #convert(String)} directly or obtain
+     *             the converter through other means. This API is experimental and may be removed
+     *             in a future release.
      */
     @Deprecated
     @Beta

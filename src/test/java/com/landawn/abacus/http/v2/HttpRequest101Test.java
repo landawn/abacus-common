@@ -26,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,8 +38,8 @@ import com.landawn.abacus.http.HttpMethod;
 
 import lombok.Data;
 
-
 @ExtendWith(MockitoExtension.class)
+@Tag("new-test")
 public class HttpRequest101Test extends TestBase {
 
     @Mock
@@ -65,20 +66,7 @@ public class HttpRequest101Test extends TestBase {
     @BeforeEach
     public void setUp() throws Exception {
         testUri = new URI(testUrl);
-        //    when(mockStringResponse.statusCode()).thenReturn(200);
-        //    when(mockStringResponse.body()).thenReturn("test response");
-        //    when(mockByteArrayResponse.statusCode()).thenReturn(200);
-        //    when(mockByteArrayResponse.body()).thenReturn("test response".getBytes());
-        //    when(mockInputStreamResponse.statusCode()).thenReturn(200);
-        //    when(mockInputStreamResponse.body()).thenReturn(new java.io.ByteArrayInputStream("test response".getBytes()));
-        //    when(mockVoidResponse.statusCode()).thenReturn(200);
-        //    when(mockFutureResponse.get()).thenReturn(mockStringResponse);
-        //    when(mockFutureResponse.getNow(null)).thenReturn(mockStringResponse);
-        //    when(mockHttpClient.sendAsync(any(java.net.http.HttpRequest.class), any(BodyHandler.class))).thenReturn(mockFutureResponse);
-        //    when(mockHttpClient.send(any(java.net.http.HttpRequest.class), any(BodyHandler.class))).thenReturn(mockStringResponse);
     }
-
-    // Test static factory methods
 
     @Test
     public void testCreateWithUrlAndHttpClient() {
@@ -137,8 +125,6 @@ public class HttpRequest101Test extends TestBase {
         assertNotNull(request);
     }
 
-    // Test configuration methods
-
     @Test
     public void testConnectTimeout() {
         HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofSeconds(10));
@@ -163,8 +149,6 @@ public class HttpRequest101Test extends TestBase {
         HttpRequest request = HttpRequest.url(testUrl).basicAuth("username", "password");
         assertNotNull(request);
     }
-
-    // Test header methods
 
     @Test
     public void testHeader() {
@@ -204,8 +188,6 @@ public class HttpRequest101Test extends TestBase {
         assertNotNull(request);
     }
 
-    // Test query methods
-
     @Test
     public void testQueryWithString() {
         HttpRequest request = HttpRequest.url(testUrl).query("param1=value1&param2=value2");
@@ -221,8 +203,6 @@ public class HttpRequest101Test extends TestBase {
         HttpRequest request = HttpRequest.url(testUrl).query(params);
         assertNotNull(request);
     }
-
-    // Test body methods
 
     @Test
     public void testJsonBodyWithString() {
@@ -278,8 +258,6 @@ public class HttpRequest101Test extends TestBase {
         HttpRequest request = HttpRequest.url(testUrl).body(publisher);
         assertNotNull(request);
     }
-
-    // Test synchronous execution methods
 
     @Test
     public void testGet() throws Exception {
@@ -466,8 +444,6 @@ public class HttpRequest101Test extends TestBase {
         String result = request.execute(HttpMethod.PUT, String.class);
         assertEquals("test response", result);
     }
-
-    // Test asynchronous execution methods
 
     @Test
     public void testAsyncGet() throws Exception {
@@ -709,8 +685,6 @@ public class HttpRequest101Test extends TestBase {
         CompletableFuture<HttpResponse<String>> future = request.asyncExecute(HttpMethod.PATCH, BodyHandlers.ofString(), pushHandler);
         assertNotNull(future);
     }
-
-    // Test error cases
 
     @Test
     public void testGetWithNon200StatusCode() throws Exception {

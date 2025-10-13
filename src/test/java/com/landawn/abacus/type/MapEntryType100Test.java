@@ -10,11 +10,13 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class MapEntryType100Test extends TestBase {
 
     private MapEntryType<String, Integer> mapEntryType;
@@ -126,7 +128,6 @@ public class MapEntryType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithNull() throws IOException {
         mapEntryType.writeCharacter(characterWriter, null, null);
-        // Verify write was called with null array - implementation specific
     }
 
     @Test
@@ -134,6 +135,5 @@ public class MapEntryType100Test extends TestBase {
         Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 123);
         JSONXMLSerializationConfig<?> config = null;
         mapEntryType.writeCharacter(characterWriter, entry, config);
-        // Verify proper write calls were made - implementation specific
     }
 }

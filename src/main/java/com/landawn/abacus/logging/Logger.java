@@ -68,8 +68,7 @@ import java.util.function.Supplier;
  * }
  * }</pre>
  * 
- * @author Ceki G&uuml;lc&uuml; (original SLF4J author)
- * @author HaiYang Li (adaptations for Abacus)
+ * @author Ceki G&uuml;lc&uuml; (original SLF4J author) (adaptations for Abacus)
  * @since 1.0
  */
 public interface Logger {

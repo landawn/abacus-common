@@ -35,7 +35,6 @@ import com.landawn.abacus.util.N;
  * List<Person> people = parser.deserialize(inputStream, config, List.class);
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 0.8
  */
 public class AvroDeserializationConfig extends DeserializationConfig<AvroDeserializationConfig> {

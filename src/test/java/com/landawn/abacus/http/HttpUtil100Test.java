@@ -30,10 +30,12 @@ import java.util.TimeZone;
 import java.util.zip.GZIPOutputStream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Charsets;
 
+@Tag("new-test")
 public class HttpUtil100Test extends TestBase {
 
     @Test

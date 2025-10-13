@@ -12,12 +12,14 @@ import java.io.StringWriter;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Timed;
 
+@Tag("new-test")
 public class TimedType100Test extends TestBase {
 
     private TimedType<String> timedType;
@@ -52,27 +54,23 @@ public class TimedType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with timed value
         Timed<String> timed = Timed.of("test", 123456789L);
         String result = timedType.stringOf(timed);
         assertNotNull(result);
         assertTrue(result.contains("123456789"));
         assertTrue(result.contains("test"));
 
-        // Test with null
         assertNull(timedType.stringOf(null));
     }
 
     @Test
     public void testValueOf() {
-        // Test with valid JSON array
         String json = "[123456789, \"test\"]";
         Timed<String> result = timedType.valueOf(json);
         assertNotNull(result);
         assertEquals(123456789L, result.timestamp());
         assertEquals("test", result.value());
 
-        // Test with null/empty string
         assertNull(timedType.valueOf(null));
         assertNull(timedType.valueOf(""));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> timedType.valueOf(" "));
@@ -82,14 +80,12 @@ public class TimedType100Test extends TestBase {
     public void testAppendTo() throws IOException {
         StringWriter writer = new StringWriter();
 
-        // Test with timed value
         Timed<String> timed = Timed.of("test", 123456789L);
         timedType.appendTo(writer, timed);
         String result = writer.toString();
         assertTrue(result.contains("123456789"));
         assertTrue(result.contains("test"));
 
-        // Test with null
         writer = new StringWriter();
         timedType.appendTo(writer, null);
         assertEquals("null", writer.toString());
@@ -100,11 +96,9 @@ public class TimedType100Test extends TestBase {
         CharacterWriter writer = createCharacterWriter();
         JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
 
-        // Test with timed value
         Timed<String> timed = Timed.of("test", 123456789L);
         timedType.writeCharacter(writer, timed, config);
 
-        // Test with null
         timedType.writeCharacter(writer, null, config);
     }
 

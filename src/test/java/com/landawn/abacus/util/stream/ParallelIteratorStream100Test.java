@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -53,6 +54,7 @@ import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
 @ExtendWith(MockitoExtension.class)
+@Tag("new-test")
 public class ParallelIteratorStream100Test extends TestBase {
 
     @Mock
@@ -602,7 +604,7 @@ public class ParallelIteratorStream100Test extends TestBase {
     public void testNMatch() throws Exception {
         boolean result = stream.nMatch(3, 5, n -> n % 2 == 0);
 
-        assertTrue(result); // We have exactly 5 even numbers
+        assertTrue(result);
     }
 
     @Test
@@ -633,16 +635,16 @@ public class ParallelIteratorStream100Test extends TestBase {
     public void testIntersection() {
         List<Integer> result = stream.intersection(n -> n % 3, Arrays.asList(0, 1)).toList();
 
-        assertEquals(2, result.size()); // Elements where n%3 is 0 or 1
+        assertEquals(2, result.size());
     }
 
     @Test
     public void testDifference() {
         List<Integer> result = stream.difference(n -> n % 3, Arrays.asList(0)).toList();
 
-        assertEquals(9, result.size()); // Elements where n%3 is not 0
+        assertEquals(9, result.size());
         N.println(result);
-        assertTrue(N.asList(3, 6, 9).containsAll(N.difference(TEST_DATA, result))); // Ensure 3, 6, 9 are not in the result)) 
+        assertTrue(N.asList(3, 6, 9).containsAll(N.difference(TEST_DATA, result)));
     }
 
     @Test
@@ -941,7 +943,6 @@ public class ParallelIteratorStream100Test extends TestBase {
 
         assertFalse(seqStream.isParallel());
 
-        // Verify it's the same data
         List<Integer> result = seqStream.toList();
         assertEquals(TEST_DATA, result);
     }
@@ -959,7 +960,6 @@ public class ParallelIteratorStream100Test extends TestBase {
 
     @Test
     public void testParallelExecution() {
-        // Test that operations actually run in parallel
         List<String> threadNames = new CopyOnWriteArrayList<>();
 
         List<Integer> result = stream.map(n -> {
@@ -968,18 +968,14 @@ public class ParallelIteratorStream100Test extends TestBase {
         }).toList();
 
         assertEquals(10, result.size());
-        // In true parallel execution, we should see multiple thread names
-        // Note: This might not always be true in small datasets or certain environments
     }
 
     @Test
     public void testConcurrentModification() {
-        // Test thread safety with concurrent operations
         ConcurrentHashMap<Integer, Integer> map = new ConcurrentHashMap<>();
 
         stream.forEach(n -> {
             map.put(n, n * n);
-            // Simulate some work
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -994,7 +990,7 @@ public class ParallelIteratorStream100Test extends TestBase {
     @Test
     public void testOperationAfterClose() {
         stream.close();
-        assertThrows(IllegalStateException.class, () -> stream.toList()); // Should throw IllegalStateException
+        assertThrows(IllegalStateException.class, () -> stream.toList());
     }
 
     @Test
@@ -1010,7 +1006,6 @@ public class ParallelIteratorStream100Test extends TestBase {
 
     @Test
     public void testLargeDataProcessing() {
-        // Test with larger dataset to ensure parallel processing works correctly
         List<Integer> largeData = new ArrayList<>();
         for (int i = 1; i <= 1000; i++) {
             largeData.add(i);
@@ -1019,7 +1014,7 @@ public class ParallelIteratorStream100Test extends TestBase {
         try (Stream<Integer> largeStream = createStream(largeData)) {
             long sum = largeStream.mapToLong(Integer::longValue).sum();
 
-            assertEquals(500500L, sum); // Sum of 1 to 1000
+            assertEquals(500500L, sum);
         }
     }
 

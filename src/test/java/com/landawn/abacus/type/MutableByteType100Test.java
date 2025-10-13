@@ -12,12 +12,14 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableByte;
 
+@Tag("new-test")
 public class MutableByteType100Test extends TestBase {
 
     private MutableByteType mutableByteType;
@@ -137,12 +139,10 @@ public class MutableByteType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithNull() throws IOException {
         mutableByteType.writeCharacter(characterWriter, null, null);
-        // Verify null array was written
     }
 
     @Test
     public void testWriteCharacterWithNonNull() throws IOException {
         mutableByteType.writeCharacter(characterWriter, MutableByte.of((byte) 10), null);
-        // Verify byte value was written
     }
 }

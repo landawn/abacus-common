@@ -40,6 +40,12 @@ public class URLType extends AbstractType<URL> {
      * This method returns {@code URL.class}, which is the Class object for the
      * {@link java.net.URL} class that this URLType handles.
      * </p>
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * URLType type = new URLType();
+     * Class<URL> clazz = type.clazz(); // Returns URL.class
+     * }</pre>
      *
      * @return the Class object for URL.class
      */
@@ -55,6 +61,13 @@ public class URLType extends AbstractType<URL> {
      * which produces a string representation of the URL suitable for use in creating new URL instances.
      * If the input URL is null, this method returns null.
      * </p>
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * URLType type = new URLType();
+     * URL url = new URL("https://example.com/path");
+     * String str = type.stringOf(url); // Returns "https://example.com/path"
+     * }</pre>
      *
      * @param x the URL instance to convert to string
      * @return the external string representation of the URL, or null if the input is null
@@ -71,8 +84,11 @@ public class URLType extends AbstractType<URL> {
      * and then converting it to a URL. If the string is null or empty, this method returns null.
      * </p>
      * <p>
-     * If the string is not a valid URL format, this method throws a runtime exception.
-     * </p>
+     * Usage example:
+     * <pre>{@code
+     * URLType type = new URLType();
+     * URL url = type.valueOf("https://example.com/path"); // Creates a URL
+     * }</pre>
      *
      * @param str the string to convert to a URL
      * @return a URL instance created from the string, or null if the string is empty
@@ -98,6 +114,13 @@ public class URLType extends AbstractType<URL> {
      * This method uses the ResultSet's {@code getURL} method to directly retrieve
      * the URL value from the database.
      * </p>
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * URLType type = new URLType();
+     * ResultSet rs = statement.executeQuery("SELECT website FROM companies");
+     * URL website = type.get(rs, 1); // Get URL from first column
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) of the URL value
@@ -115,6 +138,13 @@ public class URLType extends AbstractType<URL> {
      * This method uses the ResultSet's {@code getURL} method to directly retrieve
      * the URL value from the database using the column name.
      * </p>
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * URLType type = new URLType();
+     * ResultSet rs = statement.executeQuery("SELECT website FROM companies");
+     * URL website = type.get(rs, "website"); // Get URL by column name
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column containing the URL value
@@ -132,6 +162,13 @@ public class URLType extends AbstractType<URL> {
      * This method uses the PreparedStatement's {@code setURL} method to directly set
      * the URL value. If the URL is null, a NULL value is set in the database.
      * </p>
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * URLType type = new URLType();
+     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO companies (website) VALUES (?)");
+     * type.set(stmt, 1, new URL("https://example.com")); // Set URL at parameter index 1
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the URL value
@@ -149,6 +186,13 @@ public class URLType extends AbstractType<URL> {
      * This method uses the CallableStatement's {@code setURL} method to directly set
      * the URL value. If the URL is null, a NULL value is set in the database.
      * </p>
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * URLType type = new URLType();
+     * CallableStatement stmt = conn.prepareCall("{call update_company(?)}");
+     * type.set(stmt, "website", new URL("https://example.com")); // Set URL by parameter name
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the value in
      * @param parameterName the name of the parameter where to set the URL value

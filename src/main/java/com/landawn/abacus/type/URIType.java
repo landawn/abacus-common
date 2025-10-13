@@ -37,6 +37,12 @@ public class URIType extends AbstractType<URI> {
      * This method returns {@code URI.class}, which is the Class object for the
      * {@link java.net.URI} class that this URIType handles.
      * </p>
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * URIType type = new URIType();
+     * Class<URI> clazz = type.clazz(); // Returns URI.class
+     * }</pre>
      *
      * @return the Class object for URI.class
      */
@@ -51,6 +57,13 @@ public class URIType extends AbstractType<URI> {
      * This method returns the string representation of the URI by calling its {@code toString()} method.
      * If the input URI is null, this method returns null.
      * </p>
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * URIType type = new URIType();
+     * URI uri = URI.create("https://example.com/path");
+     * String str = type.stringOf(uri); // Returns "https://example.com/path"
+     * }</pre>
      *
      * @param x the URI instance to convert to string
      * @return the string representation of the URI, or null if the input is null
@@ -67,8 +80,11 @@ public class URIType extends AbstractType<URI> {
      * If the string is null or empty, this method returns null.
      * </p>
      * <p>
-     * Note: This method may throw a runtime exception if the string is not a valid URI format.
-     * </p>
+     * Usage example:
+     * <pre>{@code
+     * URIType type = new URIType();
+     * URI uri = type.valueOf("https://example.com/path"); // Creates a URI
+     * }</pre>
      *
      * @param str the string to convert to a URI
      * @return a URI instance created from the string, or null if the string is empty
@@ -90,6 +106,13 @@ public class URIType extends AbstractType<URI> {
      * This method reads a string value from the ResultSet and converts it to a URI
      * using the {@link #valueOf(String)} method.
      * </p>
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * URIType type = new URIType();
+     * ResultSet rs = statement.executeQuery("SELECT homepage FROM websites");
+     * URI homepage = type.get(rs, 1); // Get URI from first column
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) of the URI value
@@ -107,6 +130,13 @@ public class URIType extends AbstractType<URI> {
      * This method reads a string value from the ResultSet and converts it to a URI
      * using the {@link #valueOf(String)} method.
      * </p>
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * URIType type = new URIType();
+     * ResultSet rs = statement.executeQuery("SELECT homepage FROM websites");
+     * URI homepage = type.get(rs, "homepage"); // Get URI by column name
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column containing the URI value
@@ -124,6 +154,13 @@ public class URIType extends AbstractType<URI> {
      * This method converts the URI to its string representation and sets it in the
      * PreparedStatement. If the URI is null, a NULL value is set.
      * </p>
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * URIType type = new URIType();
+     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO websites (homepage) VALUES (?)");
+     * type.set(stmt, 1, URI.create("https://example.com")); // Set URI at parameter index 1
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the URI value
@@ -141,6 +178,13 @@ public class URIType extends AbstractType<URI> {
      * This method converts the URI to its string representation and sets it in the
      * CallableStatement. If the URI is null, a NULL value is set.
      * </p>
+     * <p>
+     * Usage example:
+     * <pre>{@code
+     * URIType type = new URIType();
+     * CallableStatement stmt = conn.prepareCall("{call update_website(?)}");
+     * type.set(stmt, "homepage", URI.create("https://example.com")); // Set URI by parameter name
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the value in
      * @param parameterName the name of the parameter where to set the URI value

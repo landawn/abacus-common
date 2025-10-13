@@ -79,7 +79,6 @@ import com.landawn.abacus.type.Type;
  * parser.serialize(data, config, outputStream);
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 0.8
  */
 public final class AvroParser extends AbstractParser<AvroSerializationConfig, AvroDeserializationConfig> {

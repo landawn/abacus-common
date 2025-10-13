@@ -25,6 +25,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -39,6 +40,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Tag("new-test")
 public class XMLParserImpl100Test extends TestBase {
 
     private XMLParser staxParser;
@@ -287,7 +289,6 @@ public class XMLParserImpl100Test extends TestBase {
         assertEquals((short) 2, (Short) mapEntity2.get("shortValue"));
         assertEquals(longString, ((String[]) mapEntity2.get("arrayValue"))[2]);
 
-        // assertEquals(mapEntity, mapEntity2);
     }
 
     @Test
@@ -350,8 +351,5 @@ public class XMLParserImpl100Test extends TestBase {
             assertEquals(map, map2);
         }
 
-        // assertEquals(mapEntity, mapEntity2);
     }
 }
-
-// ParserConfigTest.java

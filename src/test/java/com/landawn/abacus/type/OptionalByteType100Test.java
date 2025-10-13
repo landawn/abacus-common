@@ -19,12 +19,14 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalByte;
 
+@Tag("new-test")
 public class OptionalByteType100Test extends TestBase {
 
     private OptionalByteType optionalByteType;
@@ -117,7 +119,7 @@ public class OptionalByteType100Test extends TestBase {
     @Test
     public void testValueOfWithInvalidString() {
         assertThrows(NumberFormatException.class, () -> optionalByteType.valueOf("abc"));
-        assertThrows(NumberFormatException.class, () -> optionalByteType.valueOf("256")); // Out of byte range
+        assertThrows(NumberFormatException.class, () -> optionalByteType.valueOf("256"));
     }
 
     @Test
@@ -144,7 +146,7 @@ public class OptionalByteType100Test extends TestBase {
     @Test
     public void testGetFromResultSetByIndexWithNonByte() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        when(rs.getObject(1)).thenReturn(100); // Integer
+        when(rs.getObject(1)).thenReturn(100);
 
         OptionalByte result = optionalByteType.get(rs, 1);
         assertNotNull(result);

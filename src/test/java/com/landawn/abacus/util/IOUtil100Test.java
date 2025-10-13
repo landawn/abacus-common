@@ -49,10 +49,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class IOUtil100Test extends TestBase {
 
     @TempDir
@@ -73,10 +75,8 @@ public class IOUtil100Test extends TestBase {
 
     @AfterEach
     public void tearDown() throws Exception {
-        // Cleanup is handled by TemporaryFolder
     }
 
-    // System Information Tests
     @Test
     public void testGetHostName() {
         String hostName = IOUtil.getHostName();
@@ -108,7 +108,6 @@ public class IOUtil100Test extends TestBase {
         assertTrue(freeSpace > 0);
     }
 
-    // Byte/Char Conversion Tests
     @Test
     public void testChars2Bytes() {
         char[] chars = TEST_CONTENT.toCharArray();
@@ -151,7 +150,6 @@ public class IOUtil100Test extends TestBase {
         assertArrayEquals("Hello".toCharArray(), chars);
     }
 
-    // String/Stream Conversion Tests
     @Test
     public void testString2InputStream() throws IOException {
         InputStream is = IOUtil.string2InputStream(TEST_CONTENT);
@@ -181,7 +179,6 @@ public class IOUtil100Test extends TestBase {
         assertEquals(TEST_CONTENT + " Additional", sb.toString());
     }
 
-    // Read File Tests
     @Test
     public void testReadAllBytes() {
         byte[] bytes = IOUtil.readAllBytes(tempFile);
@@ -282,7 +279,6 @@ public class IOUtil100Test extends TestBase {
         assertEquals("Line 2", line);
     }
 
-    // Write Tests
     @Test
     public void testWriteLine() throws IOException {
         File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
@@ -365,7 +361,6 @@ public class IOUtil100Test extends TestBase {
         assertEquals(TEST_CONTENT, content);
     }
 
-    // Append Tests
     @Test
     public void testAppendBytes() throws IOException {
         File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
@@ -425,7 +420,6 @@ public class IOUtil100Test extends TestBase {
         assertEquals(3, lines.size());
     }
 
-    // Skip Tests
     @Test
     public void testSkipInputStream() throws IOException {
         byte[] data = "0123456789".getBytes(UTF_8);
@@ -473,7 +467,6 @@ public class IOUtil100Test extends TestBase {
         });
     }
 
-    // File Operations Tests
     @Test
     public void testCopyToDirectory() throws IOException {
         File destDir = Files.createTempDirectory(tempFolder, "dest").toFile();
@@ -626,7 +619,6 @@ public class IOUtil100Test extends TestBase {
         assertTrue(newDirs.isDirectory());
     }
 
-    // File Listing Tests
     @Test
     public void testList() throws IOException {
         File file1 = new File(tempDir, "file1.txt");
@@ -670,7 +662,6 @@ public class IOUtil100Test extends TestBase {
         assertFalse(dirs.contains(file));
     }
 
-    // Stream Creation Tests
     @Test
     public void testNewFileInputStream() throws IOException {
         try (FileInputStream fis = IOUtil.newFileInputStream(tempFile)) {
@@ -711,7 +702,6 @@ public class IOUtil100Test extends TestBase {
         assertEquals(TEST_CONTENT, new String(Files.readAllBytes(outputFile.toPath()), UTF_8));
     }
 
-    // Compression Tests
     @Test
     public void testGZIPStreams() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -735,7 +725,6 @@ public class IOUtil100Test extends TestBase {
         assertTrue(zipFile.exists());
         assertTrue(zipFile.length() > 0);
 
-        // Verify zip content
         try (ZipFile zf = new ZipFile(zipFile)) {
             assertEquals(1, zf.size());
             ZipEntry entry = zf.entries().nextElement();
@@ -745,26 +734,20 @@ public class IOUtil100Test extends TestBase {
 
     @Test
     public void testUnzip() throws IOException {
-        // Create a zip file
         File zipFile = new File(tempDir, "test.zip");
         IOUtil.zip(tempFile, zipFile);
 
-        // Create extraction directory
         File extractDir = Files.createTempDirectory(tempFolder, "extract").toFile();
 
-        // Unzip
         IOUtil.unzip(zipFile, extractDir);
 
-        // Verify
         File extractedFile = new File(extractDir, tempFile.getName());
         assertTrue(extractedFile.exists());
         assertEquals(TEST_CONTENT, new String(Files.readAllBytes(extractedFile.toPath()), UTF_8));
     }
 
-    // Split and Merge Tests
     @Test
     public void testSplitBySize() throws IOException {
-        // Create larger file
         File largeFile = Files.createTempFile(tempFolder, "large", ".txt").toFile();
         StringBuilder content = new StringBuilder();
         for (int i = 0; i < 100; i++) {
@@ -772,17 +755,14 @@ public class IOUtil100Test extends TestBase {
         }
         Files.write(largeFile.toPath(), content.toString().getBytes(UTF_8));
 
-        // Split into parts of 100 bytes each
         IOUtil.splitBySize(largeFile, 100, tempDir);
 
-        // Verify parts were created
         File[] parts = tempDir.listFiles((dir, name) -> name.startsWith(largeFile.getName() + "_"));
         assertTrue(parts.length > 1);
     }
 
     @Test
     public void testMerge() throws IOException {
-        // Create multiple files
         File file1 = new File(tempDir, "part1.txt");
         File file2 = new File(tempDir, "part2.txt");
         File file3 = new File(tempDir, "part3.txt");
@@ -791,36 +771,30 @@ public class IOUtil100Test extends TestBase {
         Files.write(file2.toPath(), "Part 2".getBytes(UTF_8));
         Files.write(file3.toPath(), "Part 3".getBytes(UTF_8));
 
-        // Merge
         File mergedFile = new File(tempDir, "merged.txt");
         long bytesWritten = IOUtil.merge(Arrays.asList(file1, file2, file3), mergedFile);
 
-        // Verify
-        assertEquals(18, bytesWritten); // "Part 1Part 2Part 3"
+        assertEquals(18, bytesWritten);
         String mergedContent = new String(Files.readAllBytes(mergedFile.toPath()), UTF_8);
         assertEquals("Part 1Part 2Part 3", mergedContent);
     }
 
     @Test
     public void testMergeWithDelimiter() throws IOException {
-        // Create multiple files
         File file1 = new File(tempDir, "part1.txt");
         File file2 = new File(tempDir, "part2.txt");
 
         Files.write(file1.toPath(), "Part 1".getBytes(UTF_8));
         Files.write(file2.toPath(), "Part 2".getBytes(UTF_8));
 
-        // Merge with delimiter
         File mergedFile = new File(tempDir, "merged.txt");
         byte[] delimiter = " | ".getBytes(UTF_8);
         long bytesWritten = IOUtil.merge(Arrays.asList(file1, file2), delimiter, mergedFile);
 
-        // Verify
         String mergedContent = new String(Files.readAllBytes(mergedFile.toPath()), UTF_8);
         assertEquals("Part 1 | Part 2", mergedContent);
     }
 
-    // Map Tests
     @Test
     @Disabled("This test is disabled due to platform-specific issues with memory mapping.")
     public void testMap() throws IOException {
@@ -853,7 +827,6 @@ public class IOUtil100Test extends TestBase {
         assertArrayEquals("Hello".getBytes(UTF_8), buffer);
     }
 
-    // Path Tests
     @Test
     public void testSimplifyPath() {
         assertEquals(".", IOUtil.simplifyPath(""));
@@ -897,7 +870,6 @@ public class IOUtil100Test extends TestBase {
         assertNull(IOUtil.getNameWithoutExtension((String) null));
     }
 
-    // URL Conversion Tests
     @Test
     public void testToFile() throws Exception {
         URL url = tempFile.toURI().toURL();
@@ -938,11 +910,10 @@ public class IOUtil100Test extends TestBase {
         assertEquals("file", urls[1].getProtocol());
     }
 
-    // Touch Test
     @Test
     public void testTouch() throws Exception {
         long originalTime = tempFile.lastModified();
-        Thread.sleep(10); // Ensure time difference
+        Thread.sleep(10);
 
         boolean touched = IOUtil.touch(tempFile);
 
@@ -950,7 +921,6 @@ public class IOUtil100Test extends TestBase {
         assertTrue(tempFile.lastModified() > originalTime);
     }
 
-    // Content Comparison Tests
     @Test
     public void testContentEquals() throws IOException {
         File file1 = Files.createTempFile(tempFolder, "file1", ".txt").toFile();
@@ -1002,7 +972,6 @@ public class IOUtil100Test extends TestBase {
         }
     }
 
-    // File Check Tests
     @Test
     public void testIsFileNewer() throws Exception {
         File newerFile = Files.createTempFile(tempFolder, "newer", ".txt").toFile();
@@ -1057,7 +1026,6 @@ public class IOUtil100Test extends TestBase {
         assertFalse(IOUtil.isSymbolicLink(null));
     }
 
-    // Size Tests
     @Test
     public void testSizeOf() throws FileNotFoundException {
         assertEquals(TEST_CONTENT.length(), IOUtil.sizeOf(tempFile));
@@ -1079,13 +1047,11 @@ public class IOUtil100Test extends TestBase {
         assertEquals(10, IOUtil.sizeOfDirectory(tempDir));
     }
 
-    // Close Tests
     @Test
     public void testClose() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtil.close(baos);
 
-        // Should not throw
         IOUtil.close((AutoCloseable) null);
     }
 
@@ -1109,7 +1075,6 @@ public class IOUtil100Test extends TestBase {
 
         IOUtil.closeAll(baos1, baos2);
 
-        // Should not throw
         IOUtil.closeAll((AutoCloseable[]) null);
         IOUtil.closeAll(new AutoCloseable[0]);
     }
@@ -1120,12 +1085,10 @@ public class IOUtil100Test extends TestBase {
             throw new IOException("Test exception");
         };
 
-        // Should not throw
         IOUtil.closeQuietly(failingCloseable);
         IOUtil.closeQuietly(null);
     }
 
-    // Buffer Check Tests
     @Test
     public void testIsBufferedReader() {
         Reader reader = new StringReader(TEST_CONTENT);
@@ -1144,7 +1107,6 @@ public class IOUtil100Test extends TestBase {
         assertTrue(IOUtil.isBufferedWriter(bw));
     }
 
-    // ForLines Tests
     @Test
     public void testForLines() throws Exception {
         File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
@@ -1192,7 +1154,6 @@ public class IOUtil100Test extends TestBase {
         assertEquals(3, lines.size());
     }
 
-    // Writer Creation Tests
     @Test
     public void testNewAppendableWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -1236,7 +1197,6 @@ public class IOUtil100Test extends TestBase {
         assertNotNull(baos);
     }
 
-    // Read with buffer tests
     @Test
     public void testReadFileWithBuffer() throws IOException {
         byte[] buffer = new byte[TEST_CONTENT.length()];
@@ -1268,7 +1228,6 @@ public class IOUtil100Test extends TestBase {
         }
     }
 
-    // Write primitive types tests
     @Test
     public void testWritePrimitives() throws IOException {
         StringWriter sw = new StringWriter();
@@ -1293,7 +1252,6 @@ public class IOUtil100Test extends TestBase {
         assertTrue(result.contains("4.56"));
     }
 
-    // Transfer test
     @Test
     public void testTransfer() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1308,7 +1266,6 @@ public class IOUtil100Test extends TestBase {
         }
     }
 
-    // Copy Path operations
     @Test
     public void testCopyPath() throws IOException {
         Path source = tempFile.toPath();
@@ -1345,7 +1302,6 @@ public class IOUtil100Test extends TestBase {
         assertArrayEquals(TEST_CONTENT.getBytes(UTF_8), baos.toByteArray());
     }
 
-    // Compression stream tests
     @Test
     public void testLZ4Streams() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1401,14 +1357,11 @@ public class IOUtil100Test extends TestBase {
 
     @Test
     public void testBrotliInputStream() throws IOException {
-        // Note: This test requires a pre-compressed Brotli file or mock
-        // For now, we'll just test creation
         ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
 
         try (BrotliInputStream bis = IOUtil.newBrotliInputStream(bais)) {
             assertNotNull(bis);
         } catch (IOException e) {
-            // Expected if input is not valid Brotli format
         }
     }
 }

@@ -29,7 +29,6 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.stream.Stream;
 
 /**
  * This is the Joiner class. It provides various methods to join elements into a string.
@@ -221,19 +220,6 @@ public final class Joiner implements Closeable {
         return this;
     }
 
-    //    /**
-    //     *
-    //     * @param trim
-    //     * @return
-    //     * @deprecated replaced by {@link #trimBeforeAppend()}
-    //     */
-    //    @Deprecated
-    //    public Joiner trim(boolean trim) {
-    //        this.trimBeforeAppend = trim;
-    //
-    //        return this;
-    //    }
-
     /**
      * Configures the joiner to trim whitespace from the beginning and end of each string element before appending.
      * This affects String, CharSequence, and the string representation of objects.
@@ -252,20 +238,6 @@ public final class Joiner implements Closeable {
 
         return this;
     }
-
-    //    /**
-    //     * Ignore the {@code null} element/value for {@code key/value, Map, Bean} when the specified {@code element} or {@code value} is {@code null} if it's set to {@code true}.
-    //     *
-    //     * @param skipNull
-    //     * @return
-    //     * @deprecated replaced by {@link #skipNulls()}
-    //     */
-    //    @Deprecated
-    //    public Joiner skipNull(boolean skipNull) {
-    //        this.skipNulls = skipNull;
-    //
-    //        return this;
-    //    }
 
     /**
      * Configures the joiner to skip null elements instead of adding them to the result.
@@ -307,40 +279,6 @@ public final class Joiner implements Closeable {
     }
 
     //    /**
-    //     * Get the {@code StringBuilder} from object factory to improve performance if it's set to true, and must remember to call {@code toString()/map()/mapIfNotEmpty()/stream()/streamIfNotEmpty()} or {@code close()} to recycle the {@code StringBuilder}.
-    //     *
-    //     * @param reuseStringBuilder
-    //     * @return
-    //     * @deprecated replaced by {@code #reuseCachedBuffer(boolean)}
-    //     */
-    //    @Deprecated
-    //    public Joiner reuseStringBuilder(boolean reuseStringBuilder) {
-    //        if (buffer != null) {
-    //            throw new IllegalStateException("Can't reset because the StringBuilder has been created");
-    //        }
-    //
-    //        this.useCachedBuffer = reuseStringBuilder;
-    //
-    //        return this;
-    //    }
-
-    //    /**
-    //     * Improving performance by set {@code useCachedBuffer=true}, and must remember to call {@code toString()/map()/mapIfNotEmpty()/stream()/streamIfNotEmpty()} or {@code close()} to recycle the cached buffer.
-    //     *
-    //     * @param useCachedBuffer
-    //     * @return
-    //     * @deprecated replaced by {@link #reuseCachedBuffer()}
-    //     */
-    //    @Deprecated
-    //    public Joiner reuseCachedBuffer(boolean useCachedBuffer) {
-    //        if (buffer != null) {
-    //            throw new IllegalStateException("Can't reset because the buffer has been created");
-    //        }
-    //
-    //        this.useCachedBuffer = useCachedBuffer;
-    //
-    //        return this;
-    //    }
 
     /**
      * Enables the use of a cached StringBuilder from an object pool to improve performance.
@@ -348,7 +286,7 @@ public final class Joiner implements Closeable {
      * 
      * <p><b>Important:</b> When using cached buffer, you must call one of the terminal operations
      * ({@link #toString()}, {@link #appendTo(Appendable)}, {@link #map(Function)}, {@link #mapIfNotEmpty(Function)}, 
-     * {@link #stream()}, {@link #streamIfNotEmpty()}) or {@link #close()} to properly recycle the buffer.</p>
+     * or {@link #close()} to properly recycle the buffer.</p>
      * 
      * <p>Example:
      * <pre>{@code
@@ -492,45 +430,6 @@ public final class Joiner implements Closeable {
 
         return this;
     }
-
-    //    /**
-    //     *
-    //     * @param element
-    //     * @return
-    //     */
-    // This is wrong. is it to join a char array, like int[], Object[] or String[]?
-    //    public Joiner append(final char[] element) {
-    //        if (element != null || !skipNulls) {
-    //            if (element == null) {
-    //                prepareBuilder().append(nullText);
-    //            } else {
-    //                prepareBuilder().append(element);
-    //            }
-    //        }
-    //
-    //        return this;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param element
-    //     * @param offset
-    //     * @param len
-    //     * @return
-    //     * @see StringBuilder#append(char[], int, int)
-    //     */
-    // This is wrong. is it to join a char array, like int[], Object[] or String[]?
-    //    public Joiner append(final char[] element, final int offset, final int len) {
-    //        if (element != null || !skipNulls) {
-    //            if (element == null) {
-    //                prepareBuilder().append(nullText);
-    //            } else {
-    //                prepareBuilder().append(element, offset, len);
-    //            }
-    //        }
-    //
-    //        return this;
-    //    }
 
     /**
      * Appends a CharSequence to the joiner.
@@ -1743,7 +1642,7 @@ public final class Joiner implements Closeable {
      * Appends elements from an Iterable that satisfy the given filter predicate.
      * Only elements that pass the filter test are appended to the joiner.
      * The skipNulls setting is ignored; only the filter determines inclusion.
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
@@ -1752,9 +1651,9 @@ public final class Joiner implements Closeable {
      *
      * @param <T> the type of elements in the Iterable
      * @param c the Iterable to append from
-     * @param filter the predicate to test elements; only elements that pass are appended
+     * @param filter the predicate to test elements; only elements that pass are appended; must not be {@code null}
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if filter is null
+     * @throws IllegalArgumentException if {@code filter} is {@code null}
      */
     public <T> Joiner appendAll(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); //NOSONAR
@@ -1825,7 +1724,7 @@ public final class Joiner implements Closeable {
      * Appends elements from an Iterator that satisfy the given filter predicate.
      * Only elements that pass the filter test are appended to the joiner.
      * The skipNulls setting is ignored; only the filter determines inclusion.
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("cat", "dog", "bird", "fish").iterator();
@@ -1834,9 +1733,9 @@ public final class Joiner implements Closeable {
      *
      * @param <T> the type of elements from the Iterator
      * @param iter the Iterator to append from
-     * @param filter the predicate to test elements; only elements that pass are appended
+     * @param filter the predicate to test elements; only elements that pass are appended; must not be {@code null}
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if filter is null
+     * @throws IllegalArgumentException if {@code filter} is {@code null}
      */
     public <T> Joiner appendAll(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
@@ -2101,31 +2000,6 @@ public final class Joiner implements Closeable {
         return this;
     }
 
-    //    /**
-    //     *
-    //     * @param key
-    //     * @param value
-    //     * @return
-    //     */
-    //    // This is wrong. is it to join a char array, like int[], Object[] or String[]?
-    //    public Joiner appendEntry(final String key, final char[] value) {
-    //        if (value == null) {
-    //            if (isEmptyKeyValueSeparator) {
-    //                prepareBuilder().append(format(key)).append(nullText);
-    //            } else {
-    //                prepareBuilder().append(format(key)).append(keyValueSeparator).append(nullText);
-    //            }
-    //        } else {
-    //            if (isEmptyKeyValueSeparator) {
-    //                prepareBuilder().append(format(key)).append(value);
-    //            } else {
-    //                prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
-    //            }
-    //        }
-    //
-    //        return this;
-    //    }
-
     /**
      * Appends a key-value pair with an Object value to the joiner.
      * The key and value are separated by the configured keyValueSeparator.
@@ -2176,22 +2050,6 @@ public final class Joiner implements Closeable {
 
         return this;
     }
-
-    //    public Joiner appendEntryIf(boolean b, String key, Object value) {
-    //        if (b) {
-    //            appendEntry(key, value);
-    //        }
-    //
-    //        return this;
-    //    }
-    //
-    //    public Joiner appendEntryIf(boolean b, Map.Entry<?, ?> entry) {
-    //        if (b) {
-    //            appendEntry(entry);
-    //        }
-    //
-    //        return this;
-    //    }
 
     /**
      * Appends all entries from a given map to the Joiner.
@@ -2278,7 +2136,7 @@ public final class Joiner implements Closeable {
      * Appends entries from a Map that satisfy the given filter predicate.
      * Only entries that pass the filter test are appended to the joiner.
      * Each entry is formatted as key-value pair using the configured separators.
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -2289,12 +2147,16 @@ public final class Joiner implements Closeable {
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
      * @param m the Map to append entries from
-     * @param filter the predicate to test entries; only entries that pass are appended
+     * @param filter the predicate to test entries; only entries that pass are appended; must not be {@code null}
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if filter is null
+     * @throws IllegalArgumentException if {@code filter} is {@code null}
      */
     public <K, V> Joiner appendEntries(final Map<K, V> m, final Predicate<? super Map.Entry<K, V>> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
+
+        if (N.isEmpty(m)) {
+            return this;
+        }
 
         StringBuilder sb = null;
 
@@ -2327,7 +2189,7 @@ public final class Joiner implements Closeable {
      * Appends entries from a Map that satisfy the given key-value filter predicate.
      * Only entries whose key and value pass the filter test are appended.
      * Each entry is formatted as key-value pair using the configured separators.
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -2338,12 +2200,16 @@ public final class Joiner implements Closeable {
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
      * @param m the Map to append entries from
-     * @param filter the bi-predicate to test keys and values; only entries that pass are appended
+     * @param filter the bi-predicate to test keys and values; only entries that pass are appended; must not be {@code null}
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if filter is null
+     * @throws IllegalArgumentException if {@code filter} is {@code null}
      */
     public <K, V> Joiner appendEntries(final Map<K, V> m, final BiPredicate<? super K, ? super V> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
+
+        if (N.isEmpty(m)) {
+            return this;
+        }
 
         StringBuilder sb = null;
 
@@ -2399,6 +2265,10 @@ public final class Joiner implements Closeable {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
         N.checkArgNotNull(valueExtractor, cs.valueExtractor);
 
+        if (N.isEmpty(m)) {
+            return this;
+        }
+
         StringBuilder sb = null;
 
         for (final Map.Entry<K, V> entry : m.entrySet()) {
@@ -2414,7 +2284,7 @@ public final class Joiner implements Closeable {
                 }
 
                 if (isEmptyKeyValueSeparator) {
-                    sb.append(toString(toString(valueExtractor.apply(entry.getValue()))));
+                    sb.append(toString(valueExtractor.apply(entry.getValue())));
                 } else {
                     sb.append(keyValueSeparator).append(toString(valueExtractor.apply(entry.getValue())));
                 }
@@ -2444,38 +2314,49 @@ public final class Joiner implements Closeable {
      * @return this Joiner instance for method chaining
      */
     public Joiner appendBean(final Object bean) {
-        return appendBean(bean, (Collection<String>) null);
+        return appendBean(bean, true, null);
     }
 
     /**
      * Appends selected properties of a bean object to the joiner.
-     * Only properties whose names are in the selectPropNames collection are appended.
-     * Each property is formatted as a key-value pair.
+     * <p>
+     * This method extracts and appends only the properties whose names are included in the
+     * {@code selectPropNames} collection. Each property is formatted as a key-value pair
+     * using the configured separators. The bean object must be a valid JavaBean with
+     * proper getter/setter methods.
+     * If {@code selectPropNames} is {@code null} or empty, no properties are appended.
+     * </p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
-     * class Person { 
-     *     String name = "John"; 
-     *     int age = 30; 
-     *     String city = "NYC";
-     *     // getters/setters...
+     * class Person {
+     *     private String name = "John";
+     *     private int age = 30;
+     *     private String city = "NYC";
+     *     // getter/setter methods...
      * }
-     * Person p = new Person();
-     * Joiner.with(", ").appendBean(p, Arrays.asList("name", "city")).toString(); // Returns: "name=John, city=NYC"
+     *
+     * Person person = new Person();
+     * String result = Joiner.with(", ")
+     *     .appendBean(person, Arrays.asList("name", "city"))
+     *     .toString(); // Returns: "name=John, city=NYC"
+     *
+     * // With custom separators
+     * String result2 = Joiner.with(" | ", ":")
+     *     .appendBean(person, Arrays.asList("name", "age"))
+     *     .toString(); // Returns: "name:John | age:30"
      * }</pre>
      *
-     * @param bean the bean object whose properties to append
-     * @param selectPropNames collection of property names to include; if null or empty, all properties are included
+     * @param bean the bean object whose selected properties to append; may be {@code null}
+     * @param selectPropNames collection of property names to include; if {@code null} or empty, no properties are appended
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if bean is not a valid bean class with getter/setter methods
+     * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean (i.e., doesn't have proper getter/setter methods)
+     * @see #appendBean(Object)
+     * @see #appendBean(Object, boolean, Set)
      */
     public Joiner appendBean(final Object bean, final Collection<String> selectPropNames) throws IllegalArgumentException {
-        if (bean == null) {
+        if (bean == null || N.isEmpty(selectPropNames)) {
             return this;
-        }
-
-        if (N.isEmpty(selectPropNames)) {
-            return appendBean(bean, true, null);
         }
 
         final Class<?> cls = bean.getClass();
@@ -2848,6 +2729,7 @@ public final class Joiner implements Closeable {
      * <p>Example:
      * <pre>{@code
      * Optional<Integer> result1 = Joiner.with(", ").mapIfNotEmpty(String::length); // Returns: Optional.empty()
+     * Optional<Integer> result1 = Joiner.with(", ", "[", "]").mapIfNotEmpty(String::length); // Returns: Optional.empty()
      * Optional<Integer> result2 = Joiner.with(", ").append("hello").mapIfNotEmpty(String::length); // Returns: Optional.of(5)
      * }</pre>
      *
@@ -2860,64 +2742,6 @@ public final class Joiner implements Closeable {
         N.checkArgNotNull(mapper);
 
         return buffer == null ? Optional.empty() : Optional.of(mapper.apply(toString()));
-    }
-
-    /**
-     * Applies the given mapping function to the joined string only if at least one element has been appended.
-     * Returns an empty Optional if no elements have been appended.
-     * The underlying {@code StringBuilder} will be recycled after this method is called 
-     * if {@code reuseStringBuilder} is set to {@code true}.
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * Optional<String> result = Joiner.with(", ").append("test").mapToNonNullIfNotEmpty(String::toUpperCase); 
-     * // Returns: Optional.of("TEST")
-     * }</pre>
-     *
-     * @param <T> the type of the result
-     * @param mapper the function to apply to the joined string if not empty
-     * @return an Optional containing the result, or empty if no elements were appended
-     * @throws IllegalArgumentException if mapper is null
-     */
-    public <T> u.Optional<T> mapToNonNullIfNotEmpty(final Function<? super String, T> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper);
-
-        return buffer == null ? u.Optional.empty() : u.Optional.of(mapper.apply(toString()));
-    }
-
-    /**
-     * Returns a Stream containing the joined string as a single element.
-     * The underlying {@code StringBuilder} will be recycled after this method is called 
-     * if {@code reuseStringBuilder} is set to {@code true}.
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * Stream<String> stream = Joiner.with(", ").append("a").append("b").stream();
-     * stream.forEach(System.out::println); // Prints: "a, b"
-     * }</pre>
-     *
-     * @return a Stream containing the joined string
-     */
-    public Stream<String> stream() {
-        return Stream.of(toString());
-    }
-
-    /**
-     * Returns a stream with the String value generated by {@code toString()} if at least one element/object/entry is appended, 
-     * otherwise an empty {@code Stream} is returned.
-     * The underlying {@code StringBuilder} will be recycled after this method is called 
-     * if {@code reuseStringBuilder} is set to {@code true}.
-     * 
-     * <p>Example:
-     * <pre>{@code
-     * Stream<String> emptyStream = Joiner.with(", ").streamIfNotEmpty(); // Returns: empty stream
-     * Stream<String> stream = Joiner.with(", ").append("data").streamIfNotEmpty(); // Returns: stream with "data"
-     * }</pre>
-     *
-     * @return a Stream containing the joined string if not empty, otherwise an empty Stream
-     */
-    public Stream<String> streamIfNotEmpty() {
-        return buffer == null ? Stream.empty() : Stream.of(toString());
     }
 
     /**

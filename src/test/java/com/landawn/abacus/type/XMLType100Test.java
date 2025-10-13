@@ -10,9 +10,11 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class XMLType100Test extends TestBase {
 
     private XMLType<Map<String, Object>> xmlMapType;
@@ -57,8 +59,6 @@ public class XMLType100Test extends TestBase {
     public void testValueOf() {
         String xml = "<root><key>value</key></root>";
         Map<String, Object> result = xmlMapType.valueOf(xml);
-        // Note: The actual parsing behavior depends on the XML parser implementation
-        // We just verify it doesn't throw an exception and returns something
     }
 
     @Test
@@ -87,7 +87,6 @@ public class XMLType100Test extends TestBase {
     public void testBeanTypeValueOf() {
         String xml = "<TestBean><name>test</name><value>123</value></TestBean>";
         TestBean result = xmlBeanType.valueOf(xml);
-        // Note: The actual parsing behavior depends on the XML parser implementation
     }
 
     public static class TestBean {

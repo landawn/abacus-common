@@ -11,10 +11,12 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class MillisDateType100Test extends TestBase {
 
     private MillisDateType millisDateType;

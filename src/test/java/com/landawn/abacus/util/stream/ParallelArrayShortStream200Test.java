@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Array;
@@ -24,8 +25,9 @@ import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
+@Tag("new-test")
 public class ParallelArrayShortStream200Test extends TestBase {
-    private static final int testMaxThreadNum = 4; // Use a fixed small number of threads for predictable testing 
+    private static final int testMaxThreadNum = 4;
 
     private short[] largeArray;
     private short[] smallArray;
@@ -34,10 +36,7 @@ public class ParallelArrayShortStream200Test extends TestBase {
     private ShortStream emptyParallelStream;
     private ShortStream smallParallelStream;
 
-    // This method is a placeholder as requested by the prompt.
-    // In practice, we create parallel streams via .parallel() on a sequential stream.
     ShortStream createShortStream(short... data) {
-        // Not used for creating the test streams.
         return ShortStream.of(data).parallel(PS.create(testMaxThreadNum, Splitor.ARRAY));
     }
 
@@ -46,13 +45,10 @@ public class ParallelArrayShortStream200Test extends TestBase {
         largeArray = Array.rangeClosed((short) 1, (short) 1000);
         smallArray = new short[] { 1, 2, 3, 4, 5 };
 
-        // Initialize a parallel stream with default settings
         parallelStream = createShortStream(largeArray);
         parallelStream2 = createShortStream(largeArray);
 
-        // Initialize an empty parallel stream
         emptyParallelStream = createShortStream(new short[] {});
-        // A small stream that will likely fall back to sequential execution
         smallParallelStream = createShortStream(smallArray);
     }
 
@@ -68,7 +64,6 @@ public class ParallelArrayShortStream200Test extends TestBase {
     public void testSequential() {
         ShortStream sequentialStream = parallelStream.sequential();
         assertFalse(sequentialStream.isParallel());
-        // Verify that it produces the same result
         assertArrayEquals(largeArray, sequentialStream.toArray());
     }
 
@@ -169,7 +164,6 @@ public class ParallelArrayShortStream200Test extends TestBase {
 
         @Test
         public void testReduceWithIdentity() {
-            // Use splitor = ARRAY to test that logic path
             ShortStream stream = createShortStream(largeArray);
             short sum = stream.reduce((short) 0, (a, b) -> (short) (a + b));
             short expectedSum = (short) N.sum(largeArray);
@@ -178,7 +172,6 @@ public class ParallelArrayShortStream200Test extends TestBase {
 
         @Test
         public void testReduce() {
-            // Use splitor = ITERATOR to test that logic path 
             short sum = parallelStream.reduce((a, b) -> (short) (a + b)).orElse((short) -1);
             short expectedSum = (short) N.sum(largeArray);
             assertEquals(expectedSum, sum);
@@ -218,7 +211,6 @@ public class ParallelArrayShortStream200Test extends TestBase {
 
         @Test
         public void testFindAny() {
-            // The result is non-deterministic, so just check if a valid element is found
             short found = parallelStream.findAny(x -> x > 500).orElse((short) -1);
             assertTrue(found > 500);
         }
@@ -256,17 +248,17 @@ public class ParallelArrayShortStream200Test extends TestBase {
         @Test
         public void testZipWithDefaultValues() {
             short[] shortArr = { 10, 20 };
-            ShortStream s1 = createShortStream(smallArray).parallel(); // 1,2,3,4,5
-            ShortStream s2 = createShortStream(shortArr).parallel(); // 10,20
+            ShortStream s1 = createShortStream(smallArray).parallel();
+            ShortStream s2 = createShortStream(shortArr).parallel();
 
             ShortList result = s1.zipWith(s2, (short) 99, (short) 100, (a, b) -> (short) (a + b)).toShortList();
 
             ShortList expected = new ShortList();
-            expected.add((short) (1 + 10)); // 11
-            expected.add((short) (2 + 20)); // 22
-            expected.add((short) (3 + 100)); // 103
-            expected.add((short) (4 + 100)); // 104
-            expected.add((short) (5 + 100)); // 105
+            expected.add((short) (1 + 10));
+            expected.add((short) (2 + 20));
+            expected.add((short) (3 + 100));
+            expected.add((short) (4 + 100));
+            expected.add((short) (5 + 100));
 
             assertHaveSameElements(expected.boxed(), result.boxed());
         }

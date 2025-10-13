@@ -12,9 +12,11 @@ import java.security.MessageDigest;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class DigestUtil100Test extends TestBase {
 
     private static final String TEST_STRING = "Hello, World!";
@@ -42,7 +44,7 @@ public class DigestUtil100Test extends TestBase {
         File tempFile = File.createTempFile("test", ".txt");
         tempFile.deleteOnExit();
         Files.write(tempFile.toPath(), TEST_BYTES);
-        
+
         MessageDigest md = DigestUtil.getMd5Digest();
         byte[] result = DigestUtil.digest(md, tempFile);
         Assertions.assertNotNull(result);
@@ -62,12 +64,12 @@ public class DigestUtil100Test extends TestBase {
     public void testDigest_Path() throws IOException {
         Path tempPath = Files.createTempFile("test", ".txt");
         Files.write(tempPath, TEST_BYTES);
-        
+
         MessageDigest md = DigestUtil.getMd5Digest();
         byte[] result = DigestUtil.digest(md, tempPath, StandardOpenOption.READ);
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.length > 0);
-        
+
         Files.delete(tempPath);
     }
 
@@ -76,7 +78,7 @@ public class DigestUtil100Test extends TestBase {
         File tempFile = File.createTempFile("test", ".txt");
         tempFile.deleteOnExit();
         Files.write(tempFile.toPath(), TEST_BYTES);
-        
+
         try (RandomAccessFile raf = new RandomAccessFile(tempFile, "r")) {
             MessageDigest md = DigestUtil.getMd5Digest();
             byte[] result = DigestUtil.digest(md, raf);
@@ -105,7 +107,7 @@ public class DigestUtil100Test extends TestBase {
         MessageDigest md = DigestUtil.getDigest("SHA-256", defaultMd);
         Assertions.assertNotNull(md);
         Assertions.assertEquals("SHA-256", md.getAlgorithm());
-        
+
         MessageDigest fallback = DigestUtil.getDigest("INVALID", defaultMd);
         Assertions.assertSame(defaultMd, fallback);
     }
@@ -166,7 +168,6 @@ public class DigestUtil100Test extends TestBase {
         Assertions.assertFalse(DigestUtil.isAvailable("INVALID_ALGORITHM"));
     }
 
-    // Test MD2 methods
     @Test
     public void testMd2_ByteArray() {
         byte[] result = DigestUtil.md2(TEST_BYTES);
@@ -211,7 +212,6 @@ public class DigestUtil100Test extends TestBase {
         Assertions.assertEquals(32, result.length());
     }
 
-    // Test MD5 methods
     @Test
     public void testMd5_ByteArray() {
         byte[] result = DigestUtil.md5(TEST_BYTES);
@@ -256,7 +256,6 @@ public class DigestUtil100Test extends TestBase {
         Assertions.assertEquals(32, result.length());
     }
 
-    // Test SHA deprecated methods
     @Test
     public void testSha_ByteArray() {
         byte[] result = DigestUtil.sha(TEST_BYTES);
@@ -279,7 +278,6 @@ public class DigestUtil100Test extends TestBase {
         Assertions.assertEquals(20, result.length);
     }
 
-    // Test SHA-1 methods
     @Test
     public void testSha1_ByteArray() {
         byte[] result = DigestUtil.sha1(TEST_BYTES);
@@ -324,7 +322,6 @@ public class DigestUtil100Test extends TestBase {
         Assertions.assertEquals(40, result.length());
     }
 
-    // Test SHA-256 methods
     @Test
     public void testSha256_ByteArray() {
         byte[] result = DigestUtil.sha256(TEST_BYTES);
@@ -369,7 +366,6 @@ public class DigestUtil100Test extends TestBase {
         Assertions.assertEquals(64, result.length());
     }
 
-    // Test SHA-384 methods
     @Test
     public void testSha384_ByteArray() {
         byte[] result = DigestUtil.sha384(TEST_BYTES);
@@ -414,7 +410,6 @@ public class DigestUtil100Test extends TestBase {
         Assertions.assertEquals(96, result.length());
     }
 
-    // Test SHA-512 methods
     @Test
     public void testSha512_ByteArray() {
         byte[] result = DigestUtil.sha512(TEST_BYTES);
@@ -459,7 +454,6 @@ public class DigestUtil100Test extends TestBase {
         Assertions.assertEquals(128, result.length());
     }
 
-    // Test SHA Hex deprecated methods
     @Test
     public void testShaHex_ByteArray() {
         String result = DigestUtil.shaHex(TEST_BYTES);
@@ -482,7 +476,6 @@ public class DigestUtil100Test extends TestBase {
         Assertions.assertEquals(40, result.length());
     }
 
-    // Test update digest methods
     @Test
     public void testUpdateDigest_ByteArray() {
         MessageDigest md = DigestUtil.getMd5Digest();
@@ -503,7 +496,7 @@ public class DigestUtil100Test extends TestBase {
         File tempFile = File.createTempFile("test", ".txt");
         tempFile.deleteOnExit();
         Files.write(tempFile.toPath(), TEST_BYTES);
-        
+
         MessageDigest md = DigestUtil.getMd5Digest();
         MessageDigest result = DigestUtil.updateDigest(md, tempFile);
         Assertions.assertSame(md, result);
@@ -521,11 +514,11 @@ public class DigestUtil100Test extends TestBase {
     public void testUpdateDigest_Path() throws IOException {
         Path tempPath = Files.createTempFile("test", ".txt");
         Files.write(tempPath, TEST_BYTES);
-        
+
         MessageDigest md = DigestUtil.getMd5Digest();
         MessageDigest result = DigestUtil.updateDigest(md, tempPath, StandardOpenOption.READ);
         Assertions.assertSame(md, result);
-        
+
         Files.delete(tempPath);
     }
 }

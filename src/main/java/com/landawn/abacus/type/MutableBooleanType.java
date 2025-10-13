@@ -27,6 +27,13 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     /**
      * Returns the Class object representing the MutableBoolean type.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableBooleanType type = new MutableBooleanType();
+     * Class<MutableBoolean> clazz = type.clazz();
+     * // Returns: MutableBoolean.class
+     * }</pre>
+     *
      * @return The Class object for MutableBoolean
      */
     @Override
@@ -38,6 +45,13 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Indicates whether values of this type are comparable.
      * MutableBoolean implements Comparable, so this returns true.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableBooleanType type = new MutableBooleanType();
+     * boolean comparable = type.isComparable();
+     * // Returns: true
+     * }</pre>
+     *
      * @return true, indicating that MutableBoolean values can be compared
      */
     @Override
@@ -48,6 +62,22 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     /**
      * Converts a MutableBoolean object to its string representation.
      * The boolean value is converted to "true" or "false".
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableBooleanType type = new MutableBooleanType();
+     *
+     * MutableBoolean mb = MutableBoolean.of(true);
+     * String result = type.stringOf(mb);
+     * // Returns: "true"
+     *
+     * mb = MutableBoolean.of(false);
+     * result = type.stringOf(mb);
+     * // Returns: "false"
+     *
+     * result = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
      *
      * @param x The MutableBoolean object to convert
      * @return The string representation ("true" or "false"), or null if the input is null
@@ -61,6 +91,23 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Parses a string to create a MutableBoolean object.
      * The string is parsed as a boolean value using standard boolean parsing rules.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableBooleanType type = new MutableBooleanType();
+     *
+     * MutableBoolean result = type.valueOf("true");
+     * // Returns: MutableBoolean with value true
+     *
+     * result = type.valueOf("false");
+     * // Returns: MutableBoolean with value false
+     *
+     * result = type.valueOf(null);
+     * // Returns: null
+     *
+     * result = type.valueOf("");
+     * // Returns: null
+     * }</pre>
+     *
      * @param str The string to parse
      * @return A MutableBoolean containing the parsed value, or null if the input is null or empty
      */
@@ -72,6 +119,20 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     /**
      * Retrieves a MutableBoolean value from a ResultSet at the specified column index.
      * The database boolean value is wrapped in a MutableBoolean object.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableBooleanType type = new MutableBooleanType();
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column contains boolean value true
+     * MutableBoolean mb = type.get(rs, 1);
+     * // Returns: MutableBoolean with value true
+     *
+     * // Column contains boolean value false
+     * mb = type.get(rs, 2);
+     * // Returns: MutableBoolean with value false
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
@@ -87,6 +148,20 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Retrieves a MutableBoolean value from a ResultSet using the specified column label.
      * The database boolean value is wrapped in a MutableBoolean object.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableBooleanType type = new MutableBooleanType();
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column "is_active" contains boolean value true
+     * MutableBoolean mb = type.get(rs, "is_active");
+     * // Returns: MutableBoolean with value true
+     *
+     * // Column "is_deleted" contains boolean value false
+     * mb = type.get(rs, "is_deleted");
+     * // Returns: MutableBoolean with value false
+     * }</pre>
+     *
      * @param rs The ResultSet containing the data
      * @param columnLabel The label of the column to retrieve the value from
      * @return A MutableBoolean containing the retrieved value
@@ -100,6 +175,20 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     /**
      * Sets a MutableBoolean parameter in a PreparedStatement at the specified position.
      * If the MutableBoolean is null, {@code false} is stored. Otherwise, the wrapped boolean value is stored.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableBooleanType type = new MutableBooleanType();
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO users (id, is_active) VALUES (?, ?)");
+     *
+     * MutableBoolean mb = MutableBoolean.of(true);
+     * type.set(stmt, 2, mb);
+     * // Sets parameter to true
+     *
+     * type.set(stmt, 2, null);
+     * // Sets parameter to false
+     * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
@@ -115,6 +204,19 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Sets a MutableBoolean parameter in a CallableStatement using the specified parameter name.
      * If the MutableBoolean is null, {@code false} is stored. Otherwise, the wrapped boolean value is stored.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableBooleanType type = new MutableBooleanType();
+     * CallableStatement stmt = connection.prepareCall("{call update_status(?, ?)}");
+     *
+     * MutableBoolean mb = MutableBoolean.of(true);
+     * type.set(stmt, "p_is_active", mb);
+     * // Sets parameter to true
+     *
+     * type.set(stmt, "p_is_deleted", null);
+     * // Sets parameter to false
+     * }</pre>
+     *
      * @param stmt The CallableStatement to set the parameter on
      * @param parameterName The name of the parameter to set
      * @param x The MutableBoolean value to set
@@ -129,6 +231,25 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Appends the string representation of a MutableBoolean to an Appendable.
      * The value is written as "true", "false", or "null".
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableBooleanType type = new MutableBooleanType();
+     * StringBuilder sb = new StringBuilder();
+     *
+     * MutableBoolean mb = MutableBoolean.of(true);
+     * type.appendTo(sb, mb);
+     * // sb contains: "true"
+     *
+     * sb.setLength(0);
+     * mb = MutableBoolean.of(false);
+     * type.appendTo(sb, mb);
+     * // sb contains: "false"
+     *
+     * sb.setLength(0);
+     * type.appendTo(sb, null);
+     * // sb contains: "null"
+     * }</pre>
+     *
      * @param appendable The Appendable to write to
      * @param x The MutableBoolean to append
      * @throws IOException if an I/O error occurs while appending
@@ -142,6 +263,23 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Writes the character representation of a MutableBoolean to a CharacterWriter.
      * The value is written as the character arrays for "true", "false", or "null".
      * This method is optimized for character-based writing.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MutableBooleanType type = new MutableBooleanType();
+     * CharacterWriter writer = new CharacterWriter();
+     * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
+     *
+     * MutableBoolean mb = MutableBoolean.of(true);
+     * type.writeCharacter(writer, mb, config);
+     * String result = writer.toString();
+     * // result: "true"
+     *
+     * writer.reset();
+     * type.writeCharacter(writer, null, config);
+     * result = writer.toString();
+     * // result: "null"
+     * }</pre>
      *
      * @param writer The CharacterWriter to write to
      * @param x The MutableBoolean to write

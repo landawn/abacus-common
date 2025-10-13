@@ -10,10 +10,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Throwables.Runnable;
 
+@Tag("new-test")
 public class AsyncExecutor100Test extends TestBase {
 
     @Test
@@ -133,9 +135,7 @@ public class AsyncExecutor100Test extends TestBase {
             if (attempts.incrementAndGet() < 3) {
                 throw new RuntimeException("Retry needed");
             }
-        }, 2, // retry times
-                10, // retry interval
-                e -> e instanceof RuntimeException);
+        }, 2, 10, e -> e instanceof RuntimeException);
 
         future.get();
         Assertions.assertEquals(3, attempts.get());
@@ -152,9 +152,7 @@ public class AsyncExecutor100Test extends TestBase {
                 return null;
             }
             return "Success";
-        }, 3, // retry times
-                10, // retry interval
-                (result, exception) -> result == null);
+        }, 3, 10, (result, exception) -> result == null);
 
         String result = future.get();
         Assertions.assertEquals("Success", result);
@@ -174,7 +172,6 @@ public class AsyncExecutor100Test extends TestBase {
     public void testShutdown() {
         AsyncExecutor executor = new AsyncExecutor();
         executor.execute(() -> {
-            // Do nothing
         });
         executor.shutdown();
         Assertions.assertTrue(executor.isTerminated() || !executor.isTerminated());
@@ -187,11 +184,9 @@ public class AsyncExecutor100Test extends TestBase {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                // Ignore
             }
         });
         executor.shutdown(1, TimeUnit.SECONDS);
-        // Should complete within timeout
     }
 
     @Test
@@ -200,7 +195,6 @@ public class AsyncExecutor100Test extends TestBase {
         executor.execute(() -> System.out.println("Running task"));
         Assertions.assertFalse(executor.isTerminated());
         executor.shutdown();
-        // May or may not be terminated immediately after shutdown
         Assertions.assertTrue(executor.isTerminated());
     }
 

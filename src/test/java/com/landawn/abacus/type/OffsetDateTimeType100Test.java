@@ -24,6 +24,7 @@ import java.time.ZoneOffset;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -31,6 +32,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 
+@Tag("new-test")
 public class OffsetDateTimeType100Test extends TestBase {
 
     private OffsetDateTimeType offsetDateTimeType;
@@ -85,13 +87,12 @@ public class OffsetDateTimeType100Test extends TestBase {
     public void testValueOfWithSysTime() {
         OffsetDateTime result = offsetDateTimeType.valueOf("sysTime");
         assertNotNull(result);
-        // Should be close to current time
         assertTrue(Math.abs(result.toEpochSecond() - OffsetDateTime.now().toEpochSecond()) < 5);
     }
 
     @Test
     public void testValueOfWithEpochMillis() {
-        long epochMillis = 1684150000000L; // Some arbitrary epoch time
+        long epochMillis = 1684150000000L;
         OffsetDateTime result = offsetDateTimeType.valueOf(String.valueOf(epochMillis));
         assertNotNull(result);
         assertEquals(epochMillis, result.toInstant().toEpochMilli());

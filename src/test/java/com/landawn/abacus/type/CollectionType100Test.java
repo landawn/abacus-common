@@ -20,11 +20,13 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class CollectionType100Test extends TestBase {
 
     private CollectionType<String, List<String>> listType;
@@ -34,7 +36,6 @@ public class CollectionType100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Initialize different collection types
         listType = (CollectionType<String, List<String>>) createType("List<String>");
         setType = (CollectionType<Integer, Set<Integer>>) createType("Set<Integer>");
         queueType = (CollectionType<Object, Queue<Object>>) createType("Queue<Object>");
@@ -45,7 +46,6 @@ public class CollectionType100Test extends TestBase {
     public void testDeclaringName() {
         String result = listType.declaringName();
         Assertions.assertNotNull(result);
-        // Should be something like "List<String>"
         Assertions.assertTrue(result.contains("List"));
         Assertions.assertTrue(result.contains("String"));
     }
@@ -99,15 +99,12 @@ public class CollectionType100Test extends TestBase {
 
     @Test
     public void testIsSerializable() {
-        // Depends on element type
         boolean result = listType.isSerializable();
-        // String is serializable, so should return true
         Assertions.assertTrue(result);
     }
 
     @Test
     public void testGetSerializationType() {
-        // For serializable elements
         CollectionType.SerializationType result = listType.getSerializationType();
         Assertions.assertNotNull(result);
     }
@@ -225,8 +222,6 @@ public class CollectionType100Test extends TestBase {
         List<String> list = Arrays.asList("test");
         listType.appendTo(mockWriter, list);
 
-        // Verify interactions with writer
-        // verify(mockWriter, atLeastOnce()).write(anyString());
     }
 
     @Test

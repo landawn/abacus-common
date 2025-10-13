@@ -20,6 +20,7 @@ import java.util.GregorianCalendar;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -28,6 +29,7 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
+@Tag("new-test")
 public class AbstractCalendarType100Test extends TestBase {
     private Type<Calendar> type;
     private CharacterWriter characterWriter;
@@ -73,7 +75,6 @@ public class AbstractCalendarType100Test extends TestBase {
         Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15, 10, 30, 45);
         String result = type.stringOf(calendar);
         assertNotNull(result);
-        // The exact format depends on Dates.format implementation
     }
 
     @Test
@@ -121,14 +122,12 @@ public class AbstractCalendarType100Test extends TestBase {
     @Test
     public void testWriteCharacter_Null() throws IOException {
         type.writeCharacter(characterWriter, null, null);
-        // Verify writer.write(NULL_CHAR_ARRAY) was called
     }
 
     @Test
     public void testWriteCharacter_ValidCalendar_NoConfig() throws IOException {
         Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
         type.writeCharacter(characterWriter, calendar, null);
-        // Verify appropriate write method was called
     }
 
     @Test
@@ -138,7 +137,6 @@ public class AbstractCalendarType100Test extends TestBase {
         when(config.getDateTimeFormat()).thenReturn(null);
 
         type.writeCharacter(characterWriter, calendar, config);
-        // Verify quotation marks were written
     }
 
     @Test
@@ -148,7 +146,6 @@ public class AbstractCalendarType100Test extends TestBase {
         when(config.getStringQuotation()).thenReturn((char) '"');
 
         type.writeCharacter(characterWriter, calendar, config);
-        // Verify writer.write(calendar.getTimeInMillis()) was called
     }
 
     @Test
@@ -158,7 +155,6 @@ public class AbstractCalendarType100Test extends TestBase {
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         type.writeCharacter(characterWriter, calendar, config);
-        // Verify ISO 8601 date-time format was written
     }
 
     @Test
@@ -168,18 +164,7 @@ public class AbstractCalendarType100Test extends TestBase {
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         type.writeCharacter(characterWriter, calendar, config);
-        // Verify ISO 8601 timestamp format was written
     }
-
-    //    @Test
-    //    public void testWriteCharacter_ValidCalendar_UnsupportedFormat() throws IOException {
-    //        Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
-    //        // Create a mock DateTimeFormat that isn't one of the supported ones
-    //        DateTimeFormat unsupportedFormat = mock(DateTimeFormat.class);
-    //        when(config.getDateTimeFormat()).thenReturn(unsupportedFormat);
-    //
-    //        assertThrows(RuntimeException.class, () -> type.writeCharacter(characterWriter, calendar, config));
-    //    }
 
     @Test
     public void testWriteCharacter_ValidCalendar_QuotationWithLongFormat() throws IOException {
@@ -188,6 +173,5 @@ public class AbstractCalendarType100Test extends TestBase {
         when(config.getStringQuotation()).thenReturn((char) '"');
 
         type.writeCharacter(characterWriter, calendar, config);
-        // Verify no quotation marks were written (LONG format doesn't use quotes)
     }
 }

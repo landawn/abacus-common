@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToIntFunction;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Builder.BooleanListBuilder;
@@ -34,9 +35,7 @@ import com.landawn.abacus.util.Builder.MultimapBuilder;
 import com.landawn.abacus.util.Builder.MultisetBuilder;
 import com.landawn.abacus.util.Builder.ShortListBuilder;
 
-/**
- * Unit tests for the Builder class and its inner classes.
- */
+@Tag("new-test")
 public class Builder200Test extends TestBase {
 
     @Test
@@ -181,8 +180,6 @@ public class Builder200Test extends TestBase {
         builder.accept(s -> counter.incrementAndGet());
         assertEquals(1, counter.get());
     }
-
-    // Inner Class Tests
 
     @Test
     public void testBooleanListBuilder() {

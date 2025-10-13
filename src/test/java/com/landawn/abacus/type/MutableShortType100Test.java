@@ -12,12 +12,14 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableShort;
 
+@Tag("new-test")
 public class MutableShortType100Test extends TestBase {
 
     private MutableShortType mutableShortType;
@@ -137,12 +139,10 @@ public class MutableShortType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithNull() throws IOException {
         mutableShortType.writeCharacter(characterWriter, null, null);
-        // Verify null array was written
     }
 
     @Test
     public void testWriteCharacterWithNonNull() throws IOException {
         mutableShortType.writeCharacter(characterWriter, MutableShort.of((short) 123), null);
-        // Verify short value was written
     }
 }

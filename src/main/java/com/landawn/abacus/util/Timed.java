@@ -137,16 +137,27 @@ public final class Timed<T> implements Immutable {
 
     /**
      * Returns a hash code value for this timed instance.
-     * The hash code is computed based on both the timestamp and the value.
-     * 
-     * <p>The hash code is calculated as: {@code (int)(timestamp * 31 + valueHashCode)}
-     * where valueHashCode is 0 if the value is null, otherwise it's the value's hash code.
+     * The hash code is computed based on both the timestamp and the value,
+     * following the standard hash code contract for consistent behavior.
+     *
+     * <p>The hash code is calculated by combining the timestamp's hash code
+     * (computed using XOR of its upper and lower 32 bits) with the value's hash code
+     * using the standard multiplier of 31. If the value is null, its hash code is 0.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * Timed<String> t1 = Timed.of("data", 1000L);
+     * Timed<String> t2 = Timed.of("data", 1000L);
+     * // t1.hashCode() == t2.hashCode() (equal objects have equal hash codes)
+     * }</pre>
      *
      * @return a hash code value for this object
      */
     @Override
     public int hashCode() {
-        return (int) (timeInMillis * 31 + (value == null ? 0 : value.hashCode()));
+        int result = (int) (timeInMillis ^ (timeInMillis >>> 32));
+        result = 31 * result + (value == null ? 0 : value.hashCode());
+        return result;
     }
 
     /**

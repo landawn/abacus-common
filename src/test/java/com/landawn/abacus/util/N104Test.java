@@ -57,6 +57,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -69,12 +70,12 @@ import com.landawn.abacus.util.Tuple.Tuple4;
 import com.landawn.abacus.util.Tuple.Tuple5;
 import com.landawn.abacus.util.u.Nullable;
 
+@Tag("new-test")
 public class N104Test extends TestBase {
 
     @TempDir
     File tempDir;
 
-    // Test data
     private static final String TEST_JSON = "{\"name\":\"John\",\"age\":30}";
     private static final String TEST_XML = "<person><name>John</name><age>30</age></person>";
     private static final String TEST_JSON_ARRAY = "[1,2,3,4,5]";
@@ -122,8 +123,6 @@ public class N104Test extends TestBase {
             return Objects.hash(name, age);
         }
     }
-
-    // JSON Serialization/Deserialization Tests
 
     @Test
     public void testToJson() {
@@ -246,9 +245,6 @@ public class N104Test extends TestBase {
 
     @Test
     public void testStreamJson() {
-        //    Stream<Integer> stream = N.streamJson(TEST_JSON_ARRAY, Integer.class);
-        //    List<Integer> list = stream.toList();
-        //    assertEquals(Arrays.asList(1, 2, 3, 4, 5), list);
         assertThrows(IllegalArgumentException.class, () -> N.streamJson(TEST_JSON_ARRAY, Type.of(Integer.class)));
     }
 
@@ -258,8 +254,6 @@ public class N104Test extends TestBase {
         String formatted = N.formatJson(compactJson);
         assertTrue(formatted.contains("\n"));
     }
-
-    // XML Serialization/Deserialization Tests
 
     @Test
     public void testToXml() {
@@ -307,13 +301,11 @@ public class N104Test extends TestBase {
         assertTrue(xml.contains("John"));
     }
 
-    // forEach Tests
-
     @Test
     public void testForEachIntRange() {
         AtomicInteger sum = new AtomicInteger(0);
         N.forEach(1, 5, sum::addAndGet);
-        assertEquals(10, sum.get()); // 1+2+3+4
+        assertEquals(10, sum.get());
     }
 
     @Test
@@ -452,8 +444,6 @@ public class N104Test extends TestBase {
         assertEquals(Arrays.asList("a", "b", "c"), result);
     }
 
-    // Execution Tests
-
     @Test
     public void testExecute() {
         AtomicInteger counter = new AtomicInteger(0);
@@ -549,7 +539,7 @@ public class N104Test extends TestBase {
         Integer[] array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         List<Integer> sums = new ArrayList<>();
         N.runByBatch(array, 3, batch -> sums.add(batch.stream().mapToInt(Integer::intValue).sum()));
-        assertEquals(Arrays.asList(6, 15, 24, 10), sums); // [1,2,3], [4,5,6], [7,8,9], [10]
+        assertEquals(Arrays.asList(6, 15, 24, 10), sums);
     }
 
     @Test
@@ -577,8 +567,6 @@ public class N104Test extends TestBase {
         });
         assertEquals("success", result);
     }
-
-    // Utility Method Tests
 
     @Test
     public void testTryOrEmptyIfExceptionOccurred() {
@@ -690,7 +678,7 @@ public class N104Test extends TestBase {
         assertEquals("value", lazy.get());
         assertEquals(1, counter.get());
         assertEquals("value", lazy.get());
-        assertEquals(1, counter.get()); // Should not increment again
+        assertEquals(1, counter.get());
     }
 
     @Test
@@ -707,7 +695,6 @@ public class N104Test extends TestBase {
 
     @Test
     public void testPrintln() {
-        // Capture System.out
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream originalOut = System.out;
         System.setOut(new PrintStream(baos));
@@ -745,7 +732,6 @@ public class N104Test extends TestBase {
 
     @Test
     public void testFprintln() {
-        // Capture System.out
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream originalOut = System.out;
         System.setOut(new PrintStream(baos));
@@ -758,8 +744,6 @@ public class N104Test extends TestBase {
             System.setOut(originalOut);
         }
     }
-
-    // Edge Cases and Error Conditions
 
     @Test
     public void testForEachWithNullArray() {
@@ -975,11 +959,9 @@ public class N104Test extends TestBase {
         List<String> list = Arrays.asList("a", "b", "c", "d", "e");
         List<String> result = new ArrayList<>();
 
-        // Forward iteration
         N.forEach(list, 1, 4, result::add);
         assertEquals(Arrays.asList("b", "c", "d"), result);
 
-        // Backward iteration
         result.clear();
         N.forEach(list, 3, 1, result::add);
         assertEquals(Arrays.asList("d", "c"), result);
@@ -994,7 +976,7 @@ public class N104Test extends TestBase {
         N.runByBatch(array, 2, (idx, element) -> processedElements.add(element), batchCount::incrementAndGet);
 
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), processedElements);
-        assertEquals(3, batchCount.get()); // 3 batches: [1,2], [3,4], [5]
+        assertEquals(3, batchCount.get());
     }
 
     @Test
@@ -1030,20 +1012,17 @@ public class N104Test extends TestBase {
     @Test
     public void testCallInParallelMultiple() {
         for (int i = 0; i < 100; i++) {
-            // Test with 3 callables
             Tuple3<String, Integer, Boolean> result3 = N.callInParallel(() -> "hello", () -> 42, () -> true);
             assertEquals("hello", result3._1);
             assertEquals(42, result3._2);
             assertEquals(true, result3._3);
 
-            // Test with 4 callables
             Tuple4<String, Integer, Boolean, Double> result4 = N.callInParallel(() -> "hello", () -> 42, () -> true, () -> 3.14);
             assertEquals("hello", result4._1);
             assertEquals(42, result4._2);
             assertEquals(true, result4._3);
             assertEquals(3.14, result4._4);
 
-            // Test with 5 callables
             Tuple5<String, Integer, Boolean, Double, Character> result5 = N.callInParallel(() -> "hello", () -> 42, () -> true, () -> 3.14, () -> 'x');
             assertEquals("hello", result5._1);
             assertEquals(42, result5._2);
@@ -1061,31 +1040,26 @@ public class N104Test extends TestBase {
         AtomicInteger c4 = new AtomicInteger(0);
         AtomicInteger c5 = new AtomicInteger(0);
 
-        // Test with 3 runnables
         N.runInParallel(c1::incrementAndGet, c2::incrementAndGet, c3::incrementAndGet);
         assertEquals(1, c1.get());
         assertEquals(1, c2.get());
         assertEquals(1, c3.get());
 
-        // Reset counters
         c1.set(0);
         c2.set(0);
         c3.set(0);
 
-        // Test with 4 runnables
         N.runInParallel(c1::incrementAndGet, c2::incrementAndGet, c3::incrementAndGet, c4::incrementAndGet);
         assertEquals(1, c1.get());
         assertEquals(1, c2.get());
         assertEquals(1, c3.get());
         assertEquals(1, c4.get());
 
-        // Reset counters
         c1.set(0);
         c2.set(0);
         c3.set(0);
         c4.set(0);
 
-        // Test with 5 runnables
         N.runInParallel(c1::incrementAndGet, c2::incrementAndGet, c3::incrementAndGet, c4::incrementAndGet, c5::incrementAndGet);
         assertEquals(1, c1.get());
         assertEquals(1, c2.get());
@@ -1100,7 +1074,6 @@ public class N104Test extends TestBase {
             AtomicInteger c1 = new AtomicInteger(0);
             AtomicInteger c2 = new AtomicInteger(0);
 
-            // Test with 5 runnables
             assertThrows(RuntimeException.class, () -> N.runInParallel(() -> {
                 throw new RuntimeException("");
             }, c2::incrementAndGet));
@@ -1113,14 +1086,11 @@ public class N104Test extends TestBase {
             AtomicInteger c2 = new AtomicInteger(0);
             AtomicInteger c3 = new AtomicInteger(0);
 
-            // Test with 5 runnables
             assertThrows(RuntimeException.class, () -> N.runInParallel(() -> {
                 throw new RuntimeException("");
             }, c2::incrementAndGet, c3::incrementAndGet));
 
             assertEquals(0, c1.get());
-            // assertEquals(1, c2.get());
-            // assertEquals(1, c3.get());
         }
         {
             AtomicInteger c1 = new AtomicInteger(0);
@@ -1128,15 +1098,11 @@ public class N104Test extends TestBase {
             AtomicInteger c3 = new AtomicInteger(0);
             AtomicInteger c4 = new AtomicInteger(0);
 
-            // Test with 5 runnables
             assertThrows(RuntimeException.class, () -> N.runInParallel(() -> {
                 throw new RuntimeException("");
             }, c2::incrementAndGet, c3::incrementAndGet, c4::incrementAndGet));
 
             assertEquals(0, c1.get());
-            // assertEquals(1, c2.get());
-            // assertEquals(1, c3.get());
-            // assertEquals(1, c4.get());
         }
         {
             AtomicInteger c1 = new AtomicInteger(0);
@@ -1145,16 +1111,11 @@ public class N104Test extends TestBase {
             AtomicInteger c4 = new AtomicInteger(0);
             AtomicInteger c5 = new AtomicInteger(0);
 
-            // Test with 5 runnables
             assertThrows(RuntimeException.class, () -> N.runInParallel(() -> {
                 throw new RuntimeException("");
             }, c2::incrementAndGet, c3::incrementAndGet, c4::incrementAndGet, c5::incrementAndGet));
 
             assertEquals(0, c1.get());
-            //  assertEquals(1, c2.get());
-            // assertEquals(1, c3.get());
-            // assertEquals(1, c4.get());
-            // assertEquals(1, c5.get());
         }
     }
 
@@ -1164,27 +1125,22 @@ public class N104Test extends TestBase {
             AtomicInteger c1 = new AtomicInteger(0);
             AtomicInteger c2 = new AtomicInteger(0);
 
-            // Test with 5 runnables
             assertThrows(RuntimeException.class, () -> N.callInParallel(() -> {
                 throw new RuntimeException("");
             }, c2::incrementAndGet));
 
             assertEquals(0, c1.get());
-            // assertEquals(1, c2.get());
         }
         {
             AtomicInteger c1 = new AtomicInteger(0);
             AtomicInteger c2 = new AtomicInteger(0);
             AtomicInteger c3 = new AtomicInteger(0);
 
-            // Test with 5 runnables
             assertThrows(RuntimeException.class, () -> N.callInParallel(() -> {
                 throw new RuntimeException("");
             }, c2::incrementAndGet, c3::incrementAndGet));
 
             assertEquals(0, c1.get());
-            // assertEquals(0, c2.get());
-            // assertEquals(0, c3.get());
         }
         {
             AtomicInteger c1 = new AtomicInteger(0);
@@ -1192,15 +1148,11 @@ public class N104Test extends TestBase {
             AtomicInteger c3 = new AtomicInteger(0);
             AtomicInteger c4 = new AtomicInteger(0);
 
-            // Test with 5 runnables
             assertThrows(RuntimeException.class, () -> N.callInParallel(() -> {
                 throw new RuntimeException("");
             }, c2::incrementAndGet, c3::incrementAndGet, c4::incrementAndGet));
 
             assertEquals(0, c1.get());
-            // assertEquals(0, c2.get());
-            // assertEquals(0, c3.get());
-            // assertEquals(0, c4.get());
         }
         {
             AtomicInteger c1 = new AtomicInteger(0);
@@ -1209,16 +1161,11 @@ public class N104Test extends TestBase {
             AtomicInteger c4 = new AtomicInteger(0);
             AtomicInteger c5 = new AtomicInteger(0);
 
-            // Test with 5 runnables
             assertThrows(RuntimeException.class, () -> N.callInParallel(() -> {
                 throw new RuntimeException("");
             }, c2::incrementAndGet, c3::incrementAndGet, c4::incrementAndGet, c5::incrementAndGet));
 
             assertEquals(0, c1.get());
-            // assertEquals(1, c2.get());
-            // assertEquals(1, c3.get());
-            // assertEquals(1, c4.get());
-            // assertEquals(1, c5.get());
         }
     }
 
@@ -1230,23 +1177,23 @@ public class N104Test extends TestBase {
 
             String result2 = N.tryOrDefaultIfExceptionOccurred(() -> {
                 throw new RuntimeException();
-            },  Fn.s(() -> "default"));
+            }, Fn.s(() -> "default"));
             assertEquals("default", result2);
         }
         {
 
             AtomicInteger supplierCalls = new AtomicInteger(0);
 
-            String result1 = N.tryOrDefaultIfExceptionOccurred(() -> "Success",  Fn.s(() -> {
+            String result1 = N.tryOrDefaultIfExceptionOccurred(() -> "Success", Fn.s(() -> {
                 supplierCalls.incrementAndGet();
                 return "Supplied Default";
             }));
             assertEquals("Success", result1);
-            assertEquals(0, supplierCalls.get()); // Supplier not called on success
+            assertEquals(0, supplierCalls.get());
 
             String result2 = N.tryOrDefaultIfExceptionOccurred(() -> {
                 throw new RuntimeException();
-            },  Fn.s(() -> {
+            }, Fn.s(() -> {
                 supplierCalls.incrementAndGet();
                 return "Supplied Default";
             }));
@@ -1288,7 +1235,7 @@ public class N104Test extends TestBase {
                 c -> c != null ? Arrays.asList(c.toString().toUpperCase(), c.toString().toLowerCase()) : null,
                 (original, ch, str) -> result.add(original + ":" + ch + ":" + str));
 
-        assertEquals(12, result.size()); // 3 non-null strings * 2 chars * 2 case variations
+        assertEquals(12, result.size());
         assertTrue(result.contains("ab:a:A"));
         assertTrue(result.contains("ab:a:a"));
     }
@@ -1302,7 +1249,7 @@ public class N104Test extends TestBase {
 
         assertTrue(outputFile.exists());
         String content = new String(java.nio.file.Files.readAllBytes(outputFile.toPath()));
-        assertTrue(content.contains("\n")); // Pretty formatted
+        assertTrue(content.contains("\n"));
         assertTrue(content.contains("John"));
 
         IOUtil.deleteIfExists(outputFile);
@@ -1316,7 +1263,7 @@ public class N104Test extends TestBase {
         N.toJson(person, config, baos);
 
         String json = baos.toString();
-        assertTrue(json.contains("\n")); // Pretty formatted
+        assertTrue(json.contains("\n"));
         assertTrue(json.contains("John"));
     }
 
@@ -1328,7 +1275,7 @@ public class N104Test extends TestBase {
         N.toJson(person, config, writer);
 
         String json = writer.toString();
-        assertTrue(json.contains("\n")); // Pretty formatted
+        assertTrue(json.contains("\n"));
         assertTrue(json.contains("John"));
     }
 
@@ -1353,8 +1300,6 @@ public class N104Test extends TestBase {
         assertTrue(formatted.contains("\n"));
         assertTrue(formatted.contains("John"));
     }
-
-    // Additional forEach Tests
 
     @Test
     public void testForEachWithStepLargerThanRange() {
@@ -1430,7 +1375,7 @@ public class N104Test extends TestBase {
         List<String> result = new ArrayList<>();
         N.forEach(level1, s1 -> Arrays.asList(s1 + "1", s1 + "2"), s2 -> Arrays.asList(s2 + "a", s2 + "b"),
                 (original, mid, end) -> result.add(original + "-" + mid + "-" + end));
-        assertEquals(8, result.size()); // 2 * 2 * 2
+        assertEquals(8, result.size());
         assertTrue(result.contains("A-A1-A1a"));
         assertTrue(result.contains("B-B2-B2b"));
     }
@@ -1698,8 +1643,6 @@ public class N104Test extends TestBase {
         assertEquals(Arrays.asList("1a", "2b", "3c"), result);
     }
 
-    // Additional asyncExecute Tests
-
     @Test
     public void testAsyncExecuteWithCancellation() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
@@ -1798,11 +1741,9 @@ public class N104Test extends TestBase {
 
         ObjIterator<Void> iter = N.asynRun(commands);
 
-        // First task should complete
         assertTrue(iter.hasNext());
         iter.next();
 
-        // Second task should throw exception
         assertThrows(RuntimeException.class, () -> {
             while (iter.hasNext()) {
                 iter.next();
@@ -1829,14 +1770,11 @@ public class N104Test extends TestBase {
             results.add(iter.next());
         }
 
-        // Results should be in completion order, not submission order
         assertEquals(3, results.size());
         assertTrue(results.contains("slow"));
         assertTrue(results.contains("fast"));
         assertTrue(results.contains("medium"));
     }
-
-    // Additional runInParallel Tests
 
     @Test
     public void testRunInParallelWithExceptionInFirstTask() {
@@ -1846,7 +1784,6 @@ public class N104Test extends TestBase {
                 throw new RuntimeException("First task failed");
             }, counter::incrementAndGet);
         });
-        // Second task might or might not execute depending on timing
     }
 
     @Test
@@ -1864,7 +1801,7 @@ public class N104Test extends TestBase {
     @Test
     public void testRunInParallelWithEmptyCollection() {
         List<Throwables.Runnable<Exception>> emptyTasks = Collections.emptyList();
-        N.runInParallel(emptyTasks); // Should not throw
+        N.runInParallel(emptyTasks);
     }
 
     @Test
@@ -1881,16 +1818,6 @@ public class N104Test extends TestBase {
         }
     }
 
-    //    @Test
-    //    public void testCallInParallelWithTimeout() throws Exception {
-    //        assertThrows(RuntimeException.class, () -> {
-    //            N.callInParallel(() -> "fast", () -> {
-    //                Thread.sleep(5000);
-    //                return "slow";
-    //            });
-    //        });
-    //    }
-
     @Test
     public void testCallInParallelWithNullResults() {
         Tuple3<String, Integer, Object> result = N.callInParallel(() -> "text", () -> 42, () -> null);
@@ -1899,8 +1826,6 @@ public class N104Test extends TestBase {
         assertEquals(42, result._2);
         assertNull(result._3);
     }
-
-    // Additional batch processing tests
 
     @Test
     public void testRunByBatchWithExactMultiple() {
@@ -1915,7 +1840,7 @@ public class N104Test extends TestBase {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7);
         List<Integer> sums = new ArrayList<>();
         N.runByBatch(list.iterator(), 2, batch -> sums.add(batch.stream().mapToInt(Integer::intValue).sum()));
-        assertEquals(Arrays.asList(3, 7, 11, 7), sums); // [1,2], [3,4], [5,6], [7]
+        assertEquals(Arrays.asList(3, 7, 11, 7), sums);
     }
 
     @Test
@@ -1944,14 +1869,11 @@ public class N104Test extends TestBase {
         });
     }
 
-    // Additional uninterruptible execution tests
-
     @Test
     public void testRunUninterruptiblyWithInterruption() {
         Thread currentThread = Thread.currentThread();
         AtomicBoolean wasInterrupted = new AtomicBoolean(false);
 
-        // Schedule an interruption
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         scheduler.schedule(() -> currentThread.interrupt(), 50, TimeUnit.MILLISECONDS);
 
@@ -1961,7 +1883,6 @@ public class N104Test extends TestBase {
                 wasInterrupted.set(Thread.currentThread().isInterrupted());
             });
 
-            // Thread should be interrupted after completion
             assertTrue(Thread.interrupted());
         } finally {
             scheduler.shutdown();
@@ -1973,7 +1894,6 @@ public class N104Test extends TestBase {
         Thread currentThread = Thread.currentThread();
 
         MutableBoolean interrupted = MutableBoolean.of(false);
-        // Schedule an interruption
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
         scheduler.schedule(() -> {
             currentThread.interrupt();
@@ -1983,19 +1903,14 @@ public class N104Test extends TestBase {
         try {
             String result = N.callUninterruptibly((remainingNanos, unit) -> {
                 unit.sleep(100);
-                // assertTrue(interrupted.value());
                 return "completed";
             }, 200, TimeUnit.MILLISECONDS);
 
             assertEquals("completed", result);
-            // Thread should be interrupted after completion
-            // assertTrue(Thread.interrupted());
         } finally {
             scheduler.shutdown();
         }
     }
-
-    // Additional edge cases
 
     @Test
     public void testForEachWithVeryLargeStep() {
@@ -2024,7 +1939,7 @@ public class N104Test extends TestBase {
             future.get();
         });
 
-        assertEquals(4, attemptCount.get()); // Initial + 3 retries
+        assertEquals(4, attemptCount.get());
     }
 
     @Test
@@ -2139,8 +2054,6 @@ public class N104Test extends TestBase {
         }
     }
 
-    // Performance and Concurrency Tests
-
     @Test
     public void testForEachParallelPerformance() throws Exception {
         int size = 1000;
@@ -2153,7 +2066,6 @@ public class N104Test extends TestBase {
         long start = System.currentTimeMillis();
 
         N.forEach(list, i -> {
-            // Simulate some work
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
@@ -2164,9 +2076,8 @@ public class N104Test extends TestBase {
 
         long duration = System.currentTimeMillis() - start;
 
-        // Parallel execution should be faster than sequential
-        assertTrue(duration < size); // Should take less than 1ms per item
-        assertEquals(size * (size - 1) / 2, sum.get()); // Sum formula validation
+        assertTrue(duration < size);
+        assertEquals(size * (size - 1) / 2, sum.get());
     }
 
     @Test
@@ -2211,15 +2122,13 @@ public class N104Test extends TestBase {
                     task2Completed.set(true);
                 });
             } catch (Exception e) {
-                // Expected
             }
         });
 
         executionThread.start();
-        Thread.sleep(50); // Let tasks start
+        Thread.sleep(50);
         assertTrue(task2Started.get());
 
-        // Interrupt the execution
         executionThread.interrupt();
         latch1.countDown();
         latch2.countDown();
@@ -2235,7 +2144,7 @@ public class N104Test extends TestBase {
         assertThrows(ConcurrentModificationException.class, () -> {
             N.forEach(list, i -> {
                 if (i == 3) {
-                    list.add(6); // Modify during iteration
+                    list.add(6);
                 }
             });
         });
@@ -2243,7 +2152,6 @@ public class N104Test extends TestBase {
 
     @Test
     public void testAsyncExecuteMemoryLeak() throws Exception {
-        // Test that completed futures are properly cleaned up
         List<ContinuableFuture<Integer>> futures = new ArrayList<>();
 
         for (int i = 0; i < 1000; i++) {
@@ -2251,22 +2159,17 @@ public class N104Test extends TestBase {
             futures.add(N.asyncExecute(() -> value));
         }
 
-        // Get all results
         for (ContinuableFuture<Integer> future : futures) {
             future.get();
         }
 
-        // Force garbage collection
         System.gc();
         Thread.sleep(100);
 
-        // All futures should be completed and eligible for GC
         for (ContinuableFuture<Integer> future : futures) {
             assertTrue(future.isDone());
         }
     }
-
-    // Complex Nested Operations Tests
 
     @Test
     public void testNestedForEachOperations() {
@@ -2282,7 +2185,7 @@ public class N104Test extends TestBase {
             });
         });
 
-        assertEquals(12, results.size()); // A: 0,0-1,0-2 B: 0,0-1,0-2
+        assertEquals(12, results.size());
     }
 
     @Test
@@ -2293,7 +2196,6 @@ public class N104Test extends TestBase {
         }
 
         List<String> results = N.callByBatch(data, 10, batch -> {
-            // Complex processing per batch
             int sum = batch.stream().mapToInt(Integer::intValue).sum();
             int min = batch.stream().min(Integer::compareTo).orElse(0);
             int max = batch.stream().max(Integer::compareTo).orElse(0);
@@ -2310,7 +2212,6 @@ public class N104Test extends TestBase {
         AtomicInteger counter = new AtomicInteger(0);
         List<Integer> syncResults = new ArrayList<>();
 
-        // Mix of sync and async operations
         ContinuableFuture<Void> async1 = N.asyncExecute(() -> {
             Thread.sleep(50);
             counter.addAndGet(10);
@@ -2325,7 +2226,6 @@ public class N104Test extends TestBase {
 
         N.forEach(Arrays.asList(4, 5, 6), syncResults::add);
 
-        // Wait for async operations
         async1.get();
         int async2Result = async2.get();
 
@@ -2333,8 +2233,6 @@ public class N104Test extends TestBase {
         assertEquals(30, counter.get());
         assertEquals(20, async2Result);
     }
-
-    // Stress Tests
 
     @Test
     public void testHighConcurrencyForEach() throws Exception {
@@ -2378,7 +2276,6 @@ public class N104Test extends TestBase {
             largeList.add(i);
         }
 
-        // Test various forEach operations on large collection
         AtomicInteger sum = new AtomicInteger(0);
         N.forEach(largeList, 1000, 9000, sum::addAndGet);
 
@@ -2388,8 +2285,6 @@ public class N104Test extends TestBase {
         }
         assertEquals(expectedSum, sum.get());
     }
-
-    // JSON/XML Advanced Tests
 
     @Test
     public void testJsonSerializationOfComplexObjects() {
@@ -2409,8 +2304,6 @@ public class N104Test extends TestBase {
         assertEquals("value", ((Map) deserialized.get("nested")).get("key"));
         assertNull(deserialized.get("null"));
     }
-
-    // Error Recovery Tests
 
     @Test
     public void testExecuteWithRetryRecovery() {
@@ -2445,8 +2338,6 @@ public class N104Test extends TestBase {
 
         assertEquals(Arrays.asList(1, 2, 3), processed);
     }
-
-    // Special Cases Tests
 
     @Test
     public void testForEachWithRandomAccess() {
@@ -2487,7 +2378,7 @@ public class N104Test extends TestBase {
         com.landawn.abacus.util.function.Supplier<String> lazy = N.lazyInit(() -> {
             counter.incrementAndGet();
             try {
-                Thread.sleep(50); // Simulate expensive initialization
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -2515,7 +2406,6 @@ public class N104Test extends TestBase {
         startLatch.countDown();
         assertTrue(doneLatch.await(5, TimeUnit.SECONDS));
 
-        // Should initialize only once despite concurrent access
         assertEquals(1, counter.get());
         assertEquals(threadCount, results.size());
         for (String result : results) {
@@ -2534,7 +2424,7 @@ public class N104Test extends TestBase {
         N.forEach(departments, dept -> employees.get(dept), emp -> Arrays.asList(emp.toLowerCase(), emp.toUpperCase()),
                 (dept, emp, formatted) -> result.add(dept + ":" + emp + ":" + formatted));
 
-        assertEquals(10, result.size()); // 2 + 3 employees, each with 2 formats
+        assertEquals(10, result.size());
         assertTrue(result.contains("Engineering:Alice:alice"));
         assertTrue(result.contains("Sales:Eve:EVE"));
     }
@@ -2593,7 +2483,7 @@ public class N104Test extends TestBase {
 
         assertEquals(items, processedItems);
         assertEquals(Arrays.asList(0, 1, 2, 3, 4, 5, 6), processedIndices);
-        assertEquals(3, batchExecutions.get()); // 3 batches: [a,b,c], [d,e,f], [g]
+        assertEquals(3, batchExecutions.get());
     }
 
     @Test
@@ -2619,8 +2509,6 @@ public class N104Test extends TestBase {
         });
         assertEquals(1, batchCount.get());
     }
-
-    // Additional callByBatch Tests
 
     @Test
     public void testCallByBatchWithTransformation() {
@@ -2654,11 +2542,11 @@ public class N104Test extends TestBase {
 
         List<Integer> results = N.callByBatch(items, 2, (idx, item) -> sum.addAndGet(item), () -> {
             int currentSum = sum.get();
-            sum.set(0); // Reset for next batch
+            sum.set(0);
             return currentSum;
         });
 
-        assertEquals(Arrays.asList(3, 7, 11), results); // [1+2], [3+4], [5+6]
+        assertEquals(Arrays.asList(3, 7, 11), results);
     }
 
     @Test
@@ -2666,10 +2554,8 @@ public class N104Test extends TestBase {
         Iterator<String> iter = Arrays.asList("a", "bb", "ccc", "dddd", "eeeee").iterator();
         List<Integer> results = N.callByBatch(iter, 2, batch -> batch.stream().mapToInt(String::length).sum());
 
-        assertEquals(Arrays.asList(3, 7, 5), results); // [1+2], [3+4], [5]
+        assertEquals(Arrays.asList(3, 7, 5), results);
     }
-
-    // Additional runUninterruptibly Tests
 
     @Test
     public void testRunUninterruptiblyWithImmediateSuccess() {
@@ -2686,7 +2572,6 @@ public class N104Test extends TestBase {
         AtomicInteger attempts = new AtomicInteger(0);
         Thread currentThread = Thread.currentThread();
 
-        // Schedule multiple interruptions
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         scheduler.schedule(() -> currentThread.interrupt(), 20, TimeUnit.MILLISECONDS);
         scheduler.schedule(() -> currentThread.interrupt(), 40, TimeUnit.MILLISECONDS);
@@ -2697,8 +2582,8 @@ public class N104Test extends TestBase {
                 Thread.sleep(100);
             });
 
-            assertEquals(3, attempts.get()); // Should complete despite interruptions
-            assertTrue(Thread.interrupted()); // Thread should be interrupted after completion
+            assertEquals(3, attempts.get());
+            assertTrue(Thread.interrupted());
         } finally {
             scheduler.shutdown();
         }
@@ -2716,7 +2601,6 @@ public class N104Test extends TestBase {
                     completed.set(true);
                 }
             } catch (InterruptedException e) {
-                // Will retry with updated remaining time
                 throw e;
             }
         }, 100);
@@ -2739,8 +2623,6 @@ public class N104Test extends TestBase {
 
         assertEquals(1, executionCount.get());
     }
-
-    // Additional callUninterruptibly Tests
 
     @Test
     public void testCallUninterruptiblyWithResult() {
@@ -2806,8 +2688,6 @@ public class N104Test extends TestBase {
         assertTrue(receivedTime.get() > 0);
     }
 
-    // Additional tryOrEmptyIfExceptionOccurred Tests
-
     @Test
     public void testTryOrEmptyWithSuccessfulExecution() {
         Nullable<String> result = N.tryOrEmptyIfExceptionOccurred(() -> "Success");
@@ -2863,21 +2743,16 @@ public class N104Test extends TestBase {
         assertFalse(result2.isPresent());
     }
 
-    // Additional tryOrDefaultIfExceptionOccurred Tests
-
     @Test
     public void testTryOrDefaultWithVariousScenarios() {
-        // Successful execution
         String result1 = N.tryOrDefaultIfExceptionOccurred(() -> "Success", "Default");
         assertEquals("Success", result1);
 
-        // With exception
         String result2 = N.tryOrDefaultIfExceptionOccurred(() -> {
             throw new RuntimeException();
         }, "Default");
         assertEquals("Default", result2);
 
-        // With null result
         String result3 = N.tryOrDefaultIfExceptionOccurred(() -> null, "Default");
         assertNull(result3);
     }
@@ -2894,8 +2769,6 @@ public class N104Test extends TestBase {
         }, -1);
         assertEquals(-1, result2);
     }
-
-    // Additional ifNotEmpty Tests
 
     @Test
     public void testIfNotEmptyWithCharSequence() {
@@ -2926,26 +2799,22 @@ public class N104Test extends TestBase {
 
         StringBuilder sb2 = new StringBuilder();
         N.ifNotEmpty(sb2, s -> counter.incrementAndGet());
-        assertEquals(1, counter.get()); // Not incremented
+        assertEquals(1, counter.get());
     }
 
     @Test
     public void testIfNotEmptyWithCollections() {
         List<String> executed = new ArrayList<>();
 
-        // ArrayList
         ArrayList<String> arrayList = new ArrayList<>(Arrays.asList("a", "b"));
         N.ifNotEmpty(arrayList, list -> executed.add("ArrayList: " + list.size()));
 
-        // LinkedList
         LinkedList<Integer> linkedList = new LinkedList<>(Arrays.asList(1, 2, 3));
         N.ifNotEmpty(linkedList, list -> executed.add("LinkedList: " + list.size()));
 
-        // HashSet
         HashSet<String> hashSet = new HashSet<>(Arrays.asList("x", "y"));
         N.ifNotEmpty(hashSet, set -> executed.add("HashSet: " + set.size()));
 
-        // Empty collection
         Vector<String> emptyVector = new Vector<>();
         N.ifNotEmpty(emptyVector, v -> executed.add("Should not execute"));
 
@@ -2959,18 +2828,15 @@ public class N104Test extends TestBase {
     public void testIfNotEmptyWithMaps() {
         List<String> executed = new ArrayList<>();
 
-        // HashMap
         HashMap<String, Integer> hashMap = new HashMap<>();
         hashMap.put("a", 1);
         hashMap.put("b", 2);
         N.ifNotEmpty(hashMap, map -> executed.add("HashMap: " + map.size()));
 
-        // TreeMap
         TreeMap<String, String> treeMap = new TreeMap<>();
         treeMap.put("x", "X");
         N.ifNotEmpty(treeMap, map -> executed.add("TreeMap: " + map.size()));
 
-        // Empty map
         LinkedHashMap<String, String> emptyMap = new LinkedHashMap<>();
         N.ifNotEmpty(emptyMap, map -> executed.add("Should not execute"));
 
@@ -2998,8 +2864,6 @@ public class N104Test extends TestBase {
         assertEquals(2, map.get("b"));
     }
 
-    // Additional ifOrEmpty Tests
-
     @Test
     public void testIfOrEmptyBasicCases() {
         Nullable<String> result1 = N.ifOrEmpty(true, () -> "Present");
@@ -3025,7 +2889,6 @@ public class N104Test extends TestBase {
             });
         });
 
-        // Exception not thrown when condition is false
         Nullable<String> result = N.ifOrEmpty(false, () -> {
             throw new RuntimeException("Should not execute");
         });
@@ -3045,8 +2908,6 @@ public class N104Test extends TestBase {
         assertEquals("Bob", topScorer.get());
     }
 
-    // Additional ifNotNull Tests
-
     @Test
     public void testIfNotNullBasicCases() {
         AtomicInteger counter = new AtomicInteger(0);
@@ -3055,7 +2916,7 @@ public class N104Test extends TestBase {
         assertEquals(1, counter.get());
 
         N.ifNotNull(null, v -> counter.incrementAndGet());
-        assertEquals(1, counter.get()); // Not incremented
+        assertEquals(1, counter.get());
 
         N.ifNotNull(42, v -> counter.addAndGet(v));
         assertEquals(43, counter.get());
@@ -3087,8 +2948,6 @@ public class N104Test extends TestBase {
         assertEquals(31, person.getAge());
     }
 
-    // Complex Integration Tests
-
     @Test
     public void testCombiningBatchAndParallelProcessing() throws Exception {
         List<Integer> data = new ArrayList<>();
@@ -3103,7 +2962,7 @@ public class N104Test extends TestBase {
             totalSum += future.get();
         }
 
-        assertEquals(5050, totalSum); // Sum of 1 to 100
+        assertEquals(5050, totalSum);
     }
 
     @Test
@@ -3161,8 +3020,6 @@ public class N104Test extends TestBase {
         assertEquals(55, results.stream().mapToInt(Integer::intValue).sum());
     }
 
-    // Edge Cases and Error Scenarios
-
     @Test
     public void testRunByBatchWithNegativeBatchSize() {
         assertThrows(IllegalArgumentException.class, () -> {
@@ -3194,13 +3051,11 @@ public class N104Test extends TestBase {
 
     @Test
     public void testIfNotEmptyWithCustomCollectionTypes() {
-        // Test with Queue
         Queue<String> queue = new LinkedList<>(Arrays.asList("a", "b", "c"));
         AtomicInteger queueProcessed = new AtomicInteger(0);
         N.ifNotEmpty(queue, q -> queueProcessed.set(q.size()));
         assertEquals(3, queueProcessed.get());
 
-        // Test with Deque
         Deque<Integer> deque = new ArrayDeque<>(Arrays.asList(1, 2, 3, 4));
         AtomicInteger dequeProcessed = new AtomicInteger(0);
         N.ifNotEmpty(deque, d -> dequeProcessed.set(d.size()));
@@ -3223,8 +3078,6 @@ public class N104Test extends TestBase {
         assertEquals(Arrays.asList("c", "d"), batchMap.get(1));
         assertEquals(Arrays.asList("e", "f"), batchMap.get(2));
     }
-
-    // Additional println and fprintln Tests
 
     @Test
     public void testPrintlnWithNullValue() {
@@ -3251,7 +3104,6 @@ public class N104Test extends TestBase {
             int[] intArray = { 1, 2, 3 };
             int[] result = N.println(intArray);
             assertSame(intArray, result);
-            // Note: primitive arrays won't use the custom formatting
 
             baos.reset();
             Object[] objArray = { 1, "two", 3.0 };
@@ -3302,8 +3154,6 @@ public class N104Test extends TestBase {
         }
     }
 
-    // Additional execute with retry Tests
-
     @Test
     public void testExecuteWithNoRetries() {
         AtomicInteger attempts = new AtomicInteger(0);
@@ -3344,8 +3194,6 @@ public class N104Test extends TestBase {
         assertEquals(2, attempts.get());
     }
 
-    // Additional lazyInit Tests
-
     @Test
     public void testLazyInitWithException() {
         AtomicInteger attempts = new AtomicInteger(0);
@@ -3357,9 +3205,8 @@ public class N104Test extends TestBase {
         assertThrows(RuntimeException.class, lazy::get);
         assertEquals(1, attempts.get());
 
-        // Subsequent calls should throw the same exception without retrying
         assertThrows(RuntimeException.class, lazy::get);
-        assertEquals(2, attempts.get()); // No additional attempts
+        assertEquals(2, attempts.get());
     }
 
     @Test
@@ -3376,13 +3223,9 @@ public class N104Test extends TestBase {
         assertThrows(IOException.class, lazy::get);
         assertEquals(1, attempts.get());
 
-        // Exception is cached
-        //  assertThrows(IOException.class, lazy::get);
         assertEquals("Success", lazy.get());
         assertEquals(2, attempts.get());
     }
-
-    // Thread safety stress tests
 
     @Test
     public void testRunByBatchThreadSafety() throws Exception {
@@ -3403,7 +3246,6 @@ public class N104Test extends TestBase {
                     }
 
                     N.runByBatch(items, 10, batch -> {
-                        // Simulate processing
                         Thread.sleep(1);
                         allProcessed.addAll(batch);
                     });
@@ -3438,22 +3280,19 @@ public class N104Test extends TestBase {
             });
         });
 
-        assertEquals(6, result.get()); // 2 + 4
+        assertEquals(6, result.get());
     }
 
     @Test
     public void testRunUninterruptiblyEdgeCases() {
-        // Test with immediate return
         AtomicBoolean executed = new AtomicBoolean(false);
         N.runUninterruptibly(() -> executed.set(true));
         assertTrue(executed.get());
 
-        // Test with zero timeout
         executed.set(false);
         N.runUninterruptibly(millis -> executed.set(true), 0);
         assertTrue(executed.get());
 
-        // Test with negative timeout (should be treated as zero)
         executed.set(false);
         N.runUninterruptibly(millis -> executed.set(true), -100);
         assertTrue(executed.get());
@@ -3461,22 +3300,18 @@ public class N104Test extends TestBase {
 
     @Test
     public void testCallUninterruptiblyEdgeCases() {
-        // Test with immediate return
         String result1 = N.callUninterruptibly(() -> "immediate");
         assertEquals("immediate", result1);
 
-        // Test with zero timeout
         String result2 = N.callUninterruptibly(millis -> "zero timeout", 0);
         assertEquals("zero timeout", result2);
 
-        // Test with negative timeout
         String result3 = N.callUninterruptibly(millis -> "negative timeout", -100);
         assertEquals("negative timeout", result3);
     }
 
     @Test
     public void testBatchProcessingWithEmptyBatches() {
-        // This shouldn't happen in normal usage, but test edge case
         List<Integer> items = Arrays.asList(1, 2, 3, 4, 5);
         AtomicInteger batchCount = new AtomicInteger(0);
 
@@ -3490,11 +3325,10 @@ public class N104Test extends TestBase {
 
     @Test
     public void testTryOrDefaultWithExceptionInDefault() {
-        // Even if the default supplier throws, we should get an exception
         assertThrows(RuntimeException.class, () -> {
             N.tryOrDefaultIfExceptionOccurred(() -> {
                 throw new IOException("Primary failed");
-            },  Fn.s(() -> {
+            }, Fn.s(() -> {
                 throw new RuntimeException("Default also failed");
             }));
         });
@@ -3521,7 +3355,7 @@ public class N104Test extends TestBase {
 
         assertEquals(10, results.size());
         int totalSum = results.values().stream().mapToInt(Integer::intValue).sum();
-        assertEquals(1225, totalSum); // Sum of 0 to 49
+        assertEquals(1225, totalSum);
     }
 
     @Test
@@ -3537,7 +3371,6 @@ public class N104Test extends TestBase {
         assertEquals(1, trueCount.get());
         assertEquals(1, falseCount.get());
 
-        // Test with null actions
         N.ifOrElse(true, null, falseCount::incrementAndGet);
         assertEquals(1, falseCount.get());
 
@@ -3553,7 +3386,7 @@ public class N104Test extends TestBase {
 
         try {
             assertThrows(RuntimeException.class, () -> N.sleep(200));
-            assertTrue(Thread.interrupted()); // Clear interrupt flag
+            assertTrue(Thread.interrupted());
         } finally {
             scheduler.shutdown();
         }
@@ -3570,7 +3403,6 @@ public class N104Test extends TestBase {
 
     @Test
     public void testForEachIntegrationScenarios() {
-        // Complex scenario combining multiple forEach variants
         Map<String, List<Integer>> departmentScores = new HashMap<>();
         departmentScores.put("Sales", Arrays.asList(85, 92, 78));
         departmentScores.put("Engineering", Arrays.asList(95, 88, 91, 87));
@@ -3605,7 +3437,6 @@ public class N104Test extends TestBase {
 
     @Test
     public void testMemoryEfficientBatchProcessing() {
-        // Test that batch processing doesn't hold references to all batches
         int totalItems = 1000;
         AtomicInteger processedCount = new AtomicInteger(0);
         AtomicInteger maxBatchesInMemory = new AtomicInteger(0);
@@ -3631,7 +3462,6 @@ public class N104Test extends TestBase {
             processedCount.addAndGet(batch.size());
             batchRefs.add(new WeakReference<>(batch));
 
-            // Force GC to potentially collect old batches
             if (batchRefs.size() % 5 == 0) {
                 System.gc();
 
@@ -3641,7 +3471,6 @@ public class N104Test extends TestBase {
         });
 
         assertEquals(totalItems, processedCount.get());
-        // Most batches should be eligible for GC during processing
         assertTrue(maxBatchesInMemory.get() < 10);
     }
 }

@@ -68,7 +68,6 @@ import jakarta.xml.bind.Unmarshaller;
  * Person restored = parser.deserialize(xml, null, Person.class);
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 0.8
  * @see AbstractXMLParser
  * @see jakarta.xml.bind.JAXB

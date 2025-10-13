@@ -31,6 +31,13 @@ public class RefType extends AbstractType<Ref> {
     /**
      * Returns the Class object representing the SQL Ref type.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * RefType type = new RefType();
+     * Class<Ref> clazz = type.clazz();
+     * System.out.println(clazz.getName()); // Output: java.sql.Ref
+     * }</pre>
+     *
      * @return the Class object for java.sql.Ref.class
      */
     @Override
@@ -42,6 +49,13 @@ public class RefType extends AbstractType<Ref> {
      * Indicates whether this type is serializable.
      * SQL Ref types are not serializable as they represent database references.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * RefType type = new RefType();
+     * boolean serializable = type.isSerializable();
+     * System.out.println(serializable); // Output: false
+     * }</pre>
+     *
      * @return false, indicating this type is not serializable
      */
     @Override
@@ -51,7 +65,19 @@ public class RefType extends AbstractType<Ref> {
 
     /**
      * Converts a Ref object to its string representation.
-     * This operation is not supported for SQL Ref types.
+     * This operation is not supported for SQL Ref types as they represent
+     * database-specific references that cannot be meaningfully serialized to string.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * RefType type = new RefType();
+     * Ref ref = ...; // some SQL Ref from database
+     * try {
+     *     String str = type.stringOf(ref);
+     * } catch (UnsupportedOperationException e) {
+     *     System.out.println("Cannot convert Ref to string"); // This will execute
+     * }
+     * }</pre>
      *
      * @param x the Ref object to convert
      * @return never returns normally
@@ -64,7 +90,18 @@ public class RefType extends AbstractType<Ref> {
 
     /**
      * Creates a Ref object from a string representation.
-     * This operation is not supported for SQL Ref types.
+     * This operation is not supported for SQL Ref types as they represent
+     * database-specific references that cannot be created from string.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * RefType type = new RefType();
+     * try {
+     *     Ref ref = type.valueOf("some_string");
+     * } catch (UnsupportedOperationException e) {
+     *     System.out.println("Cannot create Ref from string"); // This will execute
+     * }
+     * }</pre>
      *
      * @param str the string to convert
      * @return never returns normally
@@ -78,6 +115,17 @@ public class RefType extends AbstractType<Ref> {
     /**
      * Retrieves a SQL REF value from the specified column in the ResultSet.
      * A REF value represents a reference to an SQL structured type value in the database.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * RefType type = new RefType();
+     * // Assuming rs is a ResultSet with a REF value in column 1
+     * Ref ref = type.get(rs, 1);
+     * if (ref != null) {
+     *     String baseTypeName = ref.getBaseTypeName();
+     *     System.out.println("Referenced type: " + baseTypeName);
+     * }
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
@@ -93,6 +141,17 @@ public class RefType extends AbstractType<Ref> {
      * Retrieves a SQL REF value from the specified column in the ResultSet.
      * A REF value represents a reference to an SQL structured type value in the database.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * RefType type = new RefType();
+     * // Assuming rs is a ResultSet with a REF value in column "object_ref"
+     * Ref ref = type.get(rs, "object_ref");
+     * if (ref != null) {
+     *     Object referencedObject = ref.getObject();
+     *     System.out.println("Referenced object: " + referencedObject);
+     * }
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to retrieve (column name or alias)
      * @return the Ref value from the specified column, or null if the column value is SQL NULL
@@ -106,6 +165,16 @@ public class RefType extends AbstractType<Ref> {
     /**
      * Sets a Ref parameter in a PreparedStatement.
      * The Ref represents a reference to an SQL structured type value in the database.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * RefType type = new RefType();
+     * PreparedStatement stmt = connection.prepareStatement("UPDATE table SET object_ref = ? WHERE id = ?");
+     * Ref ref = ...; // obtained from database or created
+     * type.set(stmt, 1, ref);
+     * stmt.setInt(2, 123);
+     * stmt.executeUpdate();
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
@@ -121,6 +190,16 @@ public class RefType extends AbstractType<Ref> {
      * Sets a Ref parameter in a CallableStatement.
      * The Ref represents a reference to an SQL structured type value in the database.
      * Note: This method uses setObject instead of setRef as CallableStatement may not support setRef with parameter names.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * RefType type = new RefType();
+     * CallableStatement stmt = connection.prepareCall("{call update_ref(?, ?)}");
+     * Ref ref = ...; // obtained from database or created
+     * type.set(stmt, "ref_param", ref);
+     * stmt.setInt("id_param", 123);
+     * stmt.execute();
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

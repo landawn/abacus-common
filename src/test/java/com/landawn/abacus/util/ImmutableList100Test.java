@@ -8,9 +8,11 @@ import java.util.function.UnaryOperator;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class ImmutableList100Test extends TestBase {
 
     @Test
@@ -102,7 +104,7 @@ public class ImmutableList100Test extends TestBase {
 
     @Test
     public void testOf_VarArgs() {
-        String[] array = {"one", "two", "three"};
+        String[] array = { "one", "two", "three" };
         ImmutableList<String> list = ImmutableList.of(array);
         Assertions.assertEquals(3, list.size());
         Assertions.assertEquals("one", list.get(0));
@@ -125,11 +127,10 @@ public class ImmutableList100Test extends TestBase {
     public void testCopyOf() {
         List<String> mutable = new ArrayList<>(Arrays.asList("a", "b", "c"));
         ImmutableList<String> immutable = ImmutableList.copyOf(mutable);
-        
+
         Assertions.assertEquals(3, immutable.size());
         Assertions.assertEquals("a", immutable.get(0));
-        
-        // Verify defensive copy
+
         mutable.add("d");
         Assertions.assertEquals(3, immutable.size());
     }
@@ -157,10 +158,9 @@ public class ImmutableList100Test extends TestBase {
     public void testWrap() {
         List<String> mutable = new ArrayList<>(Arrays.asList("a", "b"));
         ImmutableList<String> wrapped = ImmutableList.wrap(mutable);
-        
+
         Assertions.assertEquals(2, wrapped.size());
-        
-        // Changes are reflected
+
         mutable.add("c");
         Assertions.assertEquals(3, wrapped.size());
         Assertions.assertEquals("c", wrapped.get(2));
@@ -192,7 +192,7 @@ public class ImmutableList100Test extends TestBase {
         Assertions.assertEquals("a", list.get(0));
         Assertions.assertEquals("b", list.get(1));
         Assertions.assertEquals("c", list.get(2));
-        
+
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> list.get(3));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> list.get(-1));
     }
@@ -201,7 +201,7 @@ public class ImmutableList100Test extends TestBase {
     public void testIndexOf() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c", "b");
         Assertions.assertEquals(0, list.indexOf("a"));
-        Assertions.assertEquals(1, list.indexOf("b")); // First occurrence
+        Assertions.assertEquals(1, list.indexOf("b"));
         Assertions.assertEquals(2, list.indexOf("c"));
         Assertions.assertEquals(-1, list.indexOf("d"));
         Assertions.assertEquals(-1, list.indexOf(null));
@@ -211,7 +211,7 @@ public class ImmutableList100Test extends TestBase {
     public void testLastIndexOf() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c", "b");
         Assertions.assertEquals(0, list.lastIndexOf("a"));
-        Assertions.assertEquals(3, list.lastIndexOf("b")); // Last occurrence
+        Assertions.assertEquals(3, list.lastIndexOf("b"));
         Assertions.assertEquals(2, list.lastIndexOf("c"));
         Assertions.assertEquals(-1, list.lastIndexOf("d"));
     }
@@ -220,7 +220,7 @@ public class ImmutableList100Test extends TestBase {
     public void testListIterator() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c");
         ImmutableListIterator<String> iter = list.listIterator();
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals("a", iter.next());
         Assertions.assertEquals("b", iter.next());
@@ -232,7 +232,7 @@ public class ImmutableList100Test extends TestBase {
     public void testListIterator_WithIndex() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d");
         ImmutableListIterator<String> iter = list.listIterator(2);
-        
+
         Assertions.assertEquals("c", iter.next());
         Assertions.assertEquals("c", iter.previous());
         Assertions.assertEquals("b", iter.previous());
@@ -242,7 +242,7 @@ public class ImmutableList100Test extends TestBase {
     public void testSubList() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
         ImmutableList<String> sub = list.subList(1, 4);
-        
+
         Assertions.assertEquals(3, sub.size());
         Assertions.assertEquals("b", sub.get(0));
         Assertions.assertEquals("c", sub.get(1));
@@ -268,13 +268,12 @@ public class ImmutableList100Test extends TestBase {
     public void testReverse() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c");
         ImmutableList<String> reversed = list.reverse();
-        
+
         Assertions.assertEquals(3, reversed.size());
         Assertions.assertEquals("c", reversed.get(0));
         Assertions.assertEquals("b", reversed.get(1));
         Assertions.assertEquals("a", reversed.get(2));
-        
-        // Double reverse
+
         ImmutableList<String> doubleReversed = reversed.reverse();
         Assertions.assertSame(list, doubleReversed);
     }
@@ -297,19 +296,15 @@ public class ImmutableList100Test extends TestBase {
     public void testReverse_Operations() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
         ImmutableList<String> reversed = list.reverse();
-        
-        // Test contains
+
         Assertions.assertTrue(reversed.contains("c"));
-        
-        // Test indexOf
+
         Assertions.assertEquals(0, reversed.indexOf("e"));
         Assertions.assertEquals(4, reversed.indexOf("a"));
-        
-        // Test lastIndexOf
+
         Assertions.assertEquals(0, reversed.lastIndexOf("e"));
         Assertions.assertEquals(4, reversed.lastIndexOf("a"));
-        
-        // Test subList
+
         ImmutableList<String> sub = reversed.subList(1, 3);
         Assertions.assertEquals("d", sub.get(0));
         Assertions.assertEquals("c", sub.get(1));
@@ -317,12 +312,8 @@ public class ImmutableList100Test extends TestBase {
 
     @Test
     public void testBuilder() {
-        ImmutableList<String> list = ImmutableList.<String>builder()
-                .add("one")
-                .add("two", "three")
-                .addAll(Arrays.asList("four", "five"))
-                .build();
-        
+        ImmutableList<String> list = ImmutableList.<String> builder().add("one").add("two", "three").addAll(Arrays.asList("four", "five")).build();
+
         Assertions.assertEquals(5, list.size());
         Assertions.assertEquals("one", list.get(0));
         Assertions.assertEquals("five", list.get(4));
@@ -331,21 +322,16 @@ public class ImmutableList100Test extends TestBase {
     @Test
     public void testBuilder_WithIterator() {
         List<String> source = Arrays.asList("a", "b", "c");
-        ImmutableList<String> list = ImmutableList.<String>builder()
-                .addAll(source.iterator())
-                .build();
-        
+        ImmutableList<String> list = ImmutableList.<String> builder().addAll(source.iterator()).build();
+
         Assertions.assertEquals(3, list.size());
     }
 
     @Test
     public void testBuilder_WithBackingList() {
         List<String> backing = new ArrayList<>();
-        ImmutableList<String> list = ImmutableList.builder(backing)
-                .add("a")
-                .add("b")
-                .build();
-        
+        ImmutableList<String> list = ImmutableList.builder(backing).add("a").add("b").build();
+
         Assertions.assertEquals(2, list.size());
         Assertions.assertEquals(2, backing.size());
     }
@@ -353,7 +339,7 @@ public class ImmutableList100Test extends TestBase {
     @Test
     public void testMutationMethods_ThrowUnsupported() {
         ImmutableList<String> list = ImmutableList.of("a", "b");
-        
+
         Assertions.assertThrows(UnsupportedOperationException.class, () -> list.add("c"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> list.add(0, "c"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> list.addAll(Arrays.asList("c")));
@@ -373,19 +359,19 @@ public class ImmutableList100Test extends TestBase {
     public void testIterator() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c");
         ObjIterator<String> iter = list.iterator();
-        
+
         List<String> collected = new ArrayList<>();
         while (iter.hasNext()) {
             collected.add(iter.next());
         }
-        
+
         Assertions.assertEquals(Arrays.asList("a", "b", "c"), collected);
     }
 
     @Test
     public void testContains() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        
+
         Assertions.assertTrue(list.contains("a"));
         Assertions.assertTrue(list.contains("b"));
         Assertions.assertTrue(list.contains("c"));
@@ -399,7 +385,7 @@ public class ImmutableList100Test extends TestBase {
         withNull.add("a");
         withNull.add(null);
         withNull.add("c");
-        
+
         ImmutableList<String> list = ImmutableList.copyOf(withNull);
         Assertions.assertEquals(3, list.size());
         Assertions.assertNull(list.get(1));

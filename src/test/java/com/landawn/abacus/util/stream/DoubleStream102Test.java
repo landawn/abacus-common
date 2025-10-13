@@ -19,6 +19,7 @@ import java.util.function.DoubleUnaryOperator;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DoubleIterator;
@@ -27,11 +28,9 @@ import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.DoubleBiFunction;
 import com.landawn.abacus.util.function.DoubleTernaryOperator;
 
+@Tag("new-test")
 public class DoubleStream102Test extends TestBase {
 
-    // This method needs to be implemented by a concrete test class to provide a DoubleStream instance.
-    // For example, in ArrayDoubleStreamTest, it would return new ArrayDoubleStream(a);
-    // In IteratorDoubleStreamTest, it would return new IteratorDoubleStream(DoubleIterator.of(a));
     protected DoubleStream createDoubleStream(double... a) {
         return DoubleStream.of(a).map(e -> e + 0d);
     }
@@ -80,10 +79,10 @@ public class DoubleStream102Test extends TestBase {
         };
 
         DoubleStream stream = DoubleStream.defer(supplier);
-        assertEquals(0, counter.get()); // Supplier not called yet
+        assertEquals(0, counter.get());
 
         double[] result = stream.toArray();
-        assertEquals(1, counter.get()); // Supplier called once
+        assertEquals(1, counter.get());
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.0001);
     }
 
@@ -93,7 +92,6 @@ public class DoubleStream102Test extends TestBase {
         DoubleStream stream = DoubleStream.from(jdkStream);
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, stream.toArray(), 0.0001);
 
-        // Test with null
         DoubleStream emptyStream = DoubleStream.from(null);
         assertEquals(0, emptyStream.count());
     }
@@ -113,11 +111,9 @@ public class DoubleStream102Test extends TestBase {
         DoubleStream stream = createDoubleStream(array);
         assertArrayEquals(array, stream.toArray(), 0.0001);
 
-        // Test empty array
         DoubleStream emptyStream = createDoubleStream(new double[0]);
         assertEquals(0, emptyStream.count());
 
-        // Test with range
         DoubleStream rangeStream = createDoubleStream(array, 1, 4);
         assertArrayEquals(new double[] { 2.0, 3.0, 4.0 }, rangeStream.toArray(), 0.0001);
     }
@@ -128,7 +124,6 @@ public class DoubleStream102Test extends TestBase {
         DoubleStream stream = createDoubleStream(array);
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
 
-        // Test with range
         DoubleStream rangeStream = createDoubleStream(array, 1, 4);
         assertArrayEquals(new double[] { 2.0, 3.0, 4.0 }, rangeStream.toArray(), 0.0001);
     }
@@ -146,7 +141,6 @@ public class DoubleStream102Test extends TestBase {
         DoubleStream stream = createDoubleStream(iter);
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, stream.toArray(), 0.0001);
 
-        // Test with null
         DoubleStream emptyStream = createDoubleStream((DoubleIterator) null);
         assertEquals(0, emptyStream.count());
     }
@@ -160,7 +154,6 @@ public class DoubleStream102Test extends TestBase {
         DoubleStream stream = createDoubleStream(buffer);
         assertArrayEquals(new double[] { 2.0, 3.0, 4.0 }, stream.toArray(), 0.0001);
 
-        // Test with null
         DoubleStream emptyStream = createDoubleStream((DoubleBuffer) null);
         assertEquals(0, emptyStream.count());
     }
@@ -175,7 +168,6 @@ public class DoubleStream102Test extends TestBase {
         DoubleStream emptyStream = createDoubleStream(empty);
         assertEquals(0, emptyStream.count());
 
-        // Test with null
         DoubleStream nullStream = createDoubleStream((OptionalDouble) null);
         assertEquals(0, nullStream.count());
     }
@@ -197,11 +189,9 @@ public class DoubleStream102Test extends TestBase {
         DoubleStream stream = DoubleStream.flatten(array);
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
 
-        // Test vertical flatten
         DoubleStream verticalStream = DoubleStream.flatten(array, true);
         assertArrayEquals(new double[] { 1.0, 3.0, 5.0, 2.0, 4.0 }, verticalStream.toArray(), 0.0001);
 
-        // Test with alignment value
         double[][] jaggedArray = { { 1.0, 2.0 }, { 3.0 }, { 4.0, 5.0, 6.0 } };
         DoubleStream alignedStream = DoubleStream.flatten(jaggedArray, 0.0, false);
         assertArrayEquals(new double[] { 1.0, 2.0, 0.0, 3.0, 0.0, 0.0, 4.0, 5.0, 6.0 }, alignedStream.toArray(), 0.0001);
@@ -219,11 +209,9 @@ public class DoubleStream102Test extends TestBase {
         DoubleStream stream = DoubleStream.repeat(7.5, 3);
         assertArrayEquals(new double[] { 7.5, 7.5, 7.5 }, stream.toArray(), 0.0001);
 
-        // Test with 0 repetitions
         DoubleStream emptyStream = DoubleStream.repeat(7.5, 0);
         assertEquals(0, emptyStream.count());
 
-        // Test with large repetitions
         DoubleStream largeStream = DoubleStream.repeat(1.0, 100);
         assertEquals(100, largeStream.count());
     }
@@ -234,7 +222,6 @@ public class DoubleStream102Test extends TestBase {
         double[] values = stream.limit(5).toArray();
         assertEquals(5, values.length);
 
-        // All values should be between 0.0 and 1.0
         for (double value : values) {
             assertTrue(value >= 0.0 && value < 1.0);
         }
@@ -298,7 +285,6 @@ public class DoubleStream102Test extends TestBase {
         DoubleStream stream = DoubleStream.concat(a1, a2, a3);
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
 
-        // Test empty
         DoubleStream emptyStream = DoubleStream.concat(new double[0][0]);
         assertEquals(0, emptyStream.count());
     }
@@ -347,7 +333,6 @@ public class DoubleStream102Test extends TestBase {
         DoubleStream stream = DoubleStream.zip(a, b, zipFunction);
         assertArrayEquals(new double[] { 5.0, 7.0, 9.0 }, stream.toArray(), 0.0001);
 
-        // Test with different lengths
         double[] c = { 1.0, 2.0 };
         double[] d = { 3.0, 4.0, 5.0 };
         DoubleStream stream2 = DoubleStream.zip(c, d, zipFunction);

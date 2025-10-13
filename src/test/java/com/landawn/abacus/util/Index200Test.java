@@ -11,10 +11,12 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalInt;
 
+@Tag("new-test")
 public class Index200Test extends TestBase {
 
     @Test
@@ -85,7 +87,7 @@ public class Index200Test extends TestBase {
         double[] array = { 1.0, 2.0, 3.0, 1.0 };
         assertEquals(OptionalInt.of(0), Index.of(array, 1.0));
         assertEquals(OptionalInt.of(1), Index.of(array, 2.0));
-        assertEquals(OptionalInt.of(3), Index.of(array, 1, 1.0));
+        assertEquals(OptionalInt.of(3), Index.of(array, 1.0, 1));
         assertEquals(OptionalInt.empty(), Index.of(array, 4.0));
     }
 
@@ -191,7 +193,6 @@ public class Index200Test extends TestBase {
 
     @Test
     public void testOf_withNullAndEmptyInputs() {
-        // Primitive arrays
         assertEquals(OptionalInt.empty(), Index.of((boolean[]) null, true));
         assertEquals(OptionalInt.empty(), Index.of(new boolean[0], true));
         assertEquals(OptionalInt.empty(), Index.of((char[]) null, 'a'));
@@ -209,19 +210,15 @@ public class Index200Test extends TestBase {
         assertEquals(OptionalInt.empty(), Index.of((double[]) null, 1.0));
         assertEquals(OptionalInt.empty(), Index.of(new double[0], 1.0));
 
-        // Object array
         assertEquals(OptionalInt.empty(), Index.of((Object[]) null, "a"));
         assertEquals(OptionalInt.empty(), Index.of(new Object[0], "a"));
 
-        // Collection
         assertEquals(OptionalInt.empty(), Index.of((List<String>) null, "a"));
         assertEquals(OptionalInt.empty(), Index.of(Collections.emptyList(), "a"));
 
-        // Iterator
         assertEquals(OptionalInt.empty(), Index.of((Iterator<String>) null, "a"));
         assertEquals(OptionalInt.empty(), Index.of(Collections.emptyIterator(), "a"));
 
-        // String
         assertEquals(OptionalInt.empty(), Index.of((String) null, 'a'));
         assertEquals(OptionalInt.empty(), Index.of("", 'a'));
         assertEquals(OptionalInt.empty(), Index.of((String) null, "a"));
@@ -245,67 +242,49 @@ public class Index200Test extends TestBase {
         assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0.04999));
         assertEquals(OptionalInt.empty(), Index.of(array, 0.9, 0.05));
     }
-    //</editor-fold>
-
-    //<editor-fold desc="ofSubArray/ofSubList Tests">
 
     @Test
     public void testOfSubArray_EdgeCases() {
         int[] source = { 1, 2, 3, 4 };
-        // Empty target
         assertEquals(OptionalInt.of(0), Index.ofSubArray(source, new int[0]));
         assertEquals(OptionalInt.of(2), Index.ofSubArray(source, 2, new int[0]));
-        assertEquals(OptionalInt.of(4), Index.ofSubArray(source, 5, new int[0])); // Clamped to source length
-        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, -1, new int[0])); // Clamped to 0
+        assertEquals(OptionalInt.of(4), Index.ofSubArray(source, 5, new int[0]));
+        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, -1, new int[0]));
 
-        // Target longer than source
         assertEquals(OptionalInt.empty(), Index.ofSubArray(source, new int[] { 1, 2, 3, 4, 5 }));
 
-        // Null inputs
         assertEquals(OptionalInt.empty(), Index.ofSubArray((int[]) null, new int[] { 1 }));
         assertEquals(OptionalInt.empty(), Index.ofSubArray(source, null));
         assertEquals(OptionalInt.empty(), Index.ofSubArray((int[]) null, null));
         assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 2, null));
 
-        // No match
         assertEquals(OptionalInt.empty(), Index.ofSubArray(source, new int[] { 5, 6 }));
     }
 
     @Test
     public void testOfSubList_EdgeCases() {
         List<Integer> source = Arrays.asList(1, 2, 3, 4);
-        // Empty target
         assertEquals(OptionalInt.of(0), Index.ofSubList(source, Collections.emptyList()));
         assertEquals(OptionalInt.of(2), Index.ofSubList(source, 2, Collections.emptyList()));
 
-        // Target longer than source
         assertEquals(OptionalInt.empty(), Index.ofSubList(source, Arrays.asList(1, 2, 3, 4, 5)));
 
-        // Null inputs
         assertEquals(OptionalInt.empty(), Index.ofSubList(null, Arrays.asList(1)));
         assertEquals(OptionalInt.empty(), Index.ofSubList(source, null));
         assertEquals(OptionalInt.empty(), Index.ofSubList(null, null));
     }
-    //</editor-fold>
-
-    //<editor-fold desc="last Tests">
 
     @Test
     public void testLast_withNullAndEmptyInputs() {
-        // Primitives
         assertEquals(OptionalInt.empty(), Index.last((boolean[]) null, true));
         assertEquals(OptionalInt.empty(), Index.last(new boolean[0], true));
-        // ... (similar tests for other primitive types)
 
-        // Objects
         assertEquals(OptionalInt.empty(), Index.last((Object[]) null, "a"));
         assertEquals(OptionalInt.empty(), Index.last(new Object[0], "a"));
 
-        // Collections
         assertEquals(OptionalInt.empty(), Index.last((List<String>) null, "a"));
         assertEquals(OptionalInt.empty(), Index.last(Collections.emptyList(), "a"));
 
-        // String
         assertEquals(OptionalInt.empty(), Index.last((String) null, 'a'));
         assertEquals(OptionalInt.empty(), Index.last("", 'a'));
         assertEquals(OptionalInt.empty(), Index.last((String) null, "a"));
@@ -319,26 +298,19 @@ public class Index200Test extends TestBase {
         assertEquals(OptionalInt.of(0), Index.lastOfIgnoreCase(str, "ABC", 5));
         assertEquals(OptionalInt.empty(), Index.lastOfIgnoreCase(str, "XYZ"));
     }
-    //</editor-fold>
-
-    //<editor-fold desc="lastOfSubArray/lastOfSubList Tests">
 
     @Test
     public void testLastOfSubArray_EdgeCases() {
         int[] source = { 1, 2, 3, 1, 2, 3, 4 };
-        // Empty target
         assertEquals(OptionalInt.of(7), Index.lastOfSubArray(source, new int[0]));
         assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, 5, new int[0]));
         assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, -1, new int[0]));
 
-        // Target longer than source
         assertEquals(OptionalInt.empty(), Index.lastOfSubArray(new int[] { 1, 2 }, new int[] { 1, 2, 3 }));
 
-        // Null inputs
         assertEquals(OptionalInt.empty(), Index.lastOfSubArray(null, new int[] { 1 }));
         assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, null));
 
-        // No match
         assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, new int[] { 5, 6 }));
     }
 
@@ -350,25 +322,18 @@ public class Index200Test extends TestBase {
         assertEquals(OptionalInt.of(3), Index.lastOfSubList(source, 3, target));
         assertEquals(OptionalInt.of(0), Index.lastOfSubList(source, 2, target));
     }
-    //</editor-fold>
-
-    //<editor-fold desc="allOf Tests">
 
     @Test
     public void testAllOf_withNullAndEmpty() {
-        // Primitives
         assertTrue(Index.allOf((int[]) null, 1).isEmpty());
         assertTrue(Index.allOf(new int[0], 1).isEmpty());
 
-        // Objects
         assertTrue(Index.allOf((Object[]) null, "a").isEmpty());
         assertTrue(Index.allOf(new Object[0], "a").isEmpty());
 
-        // Collections
         assertTrue(Index.allOf((List<String>) null, "a").isEmpty());
         assertTrue(Index.allOf(Collections.emptyList(), "a").isEmpty());
 
-        // Predicate based
         Predicate<String> p = s -> s.length() > 0;
         assertTrue(Index.allOf((String[]) null, p).isEmpty());
         assertTrue(Index.allOf(new String[0], p).isEmpty());

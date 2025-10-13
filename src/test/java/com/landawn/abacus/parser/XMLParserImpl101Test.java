@@ -20,6 +20,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -35,6 +36,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
 
+@Tag("new-test")
 public class XMLParserImpl101Test extends TestBase {
 
     private XMLParserImpl staxParser;
@@ -53,7 +55,6 @@ public class XMLParserImpl101Test extends TestBase {
         deserializationConfig = new XMLDeserializationConfig();
     }
 
-    // Test classes for serialization/deserialization
     public static class TestBean {
         private String name;
         private int age;
@@ -77,7 +78,6 @@ public class XMLParserImpl101Test extends TestBase {
             this.age = age;
         }
 
-        // Getters and setters
         public String getName() {
             return name;
         }
@@ -173,7 +173,6 @@ public class XMLParserImpl101Test extends TestBase {
     }
 
     public static class EmptyBean {
-        // No properties
     }
 
     public static class PrimitiveBean {
@@ -186,7 +185,6 @@ public class XMLParserImpl101Test extends TestBase {
         private boolean booleanVal;
         private char charVal;
 
-        // Getters and setters for all primitives
         public byte getByteVal() {
             return byteVal;
         }
@@ -252,7 +250,6 @@ public class XMLParserImpl101Test extends TestBase {
         }
     }
 
-    // Constructor tests
     @Test
     public void testConstructorWithParserType() {
         XMLParserImpl parser = new XMLParserImpl(XMLParserType.StAX);
@@ -274,7 +271,6 @@ public class XMLParserImpl101Test extends TestBase {
         Assertions.assertNotNull(parser);
     }
 
-    // Serialize to String tests
     @Test
     public void testSerializeNull() {
         String result = staxParser.serialize(null);
@@ -340,12 +336,10 @@ public class XMLParserImpl101Test extends TestBase {
         bean1.setReference(bean2);
         bean2.setReference(bean1);
 
-        // Without circular reference support, should throw exception
         Assertions.assertThrows(StackOverflowError.class, () -> {
             staxParser.serialize(bean1);
         });
 
-        // With circular reference support
         XMLSerializationConfig config = new XMLSerializationConfig();
         config.supportCircularReference(true);
         String xml = staxParser.serialize(bean1, config);
@@ -463,12 +457,10 @@ public class XMLParserImpl101Test extends TestBase {
     public void testSerializeEmptyBean() {
         EmptyBean bean = new EmptyBean();
 
-        // Should throw exception with failOnEmptyBean = true (default)
         Assertions.assertThrows(ParseException.class, () -> {
             staxParser.serialize(bean);
         });
 
-        // Should not throw with failOnEmptyBean = false
         XMLSerializationConfig config = new XMLSerializationConfig();
         config.failOnEmptyBean(false);
         String xml = staxParser.serialize(bean, config);
@@ -499,7 +491,6 @@ public class XMLParserImpl101Test extends TestBase {
         Assertions.assertTrue(xml.contains("A"));
     }
 
-    // Serialize to File tests
     @Test
     public void testSerializeToFile() throws IOException {
         TestBean bean = new TestBean("FileTest", 25);
@@ -523,7 +514,6 @@ public class XMLParserImpl101Test extends TestBase {
         Assertions.assertTrue(file.exists());
     }
 
-    // Serialize to OutputStream tests
     @Test
     public void testSerializeToOutputStream() throws IOException {
         TestBean bean = new TestBean("StreamTest", 30);
@@ -536,7 +526,6 @@ public class XMLParserImpl101Test extends TestBase {
         Assertions.assertTrue(xml.contains("30"));
     }
 
-    // Serialize to Writer tests
     @Test
     public void testSerializeToWriter() throws IOException {
         TestBean bean = new TestBean("WriterTest", 35);
@@ -564,7 +553,6 @@ public class XMLParserImpl101Test extends TestBase {
         }
     }
 
-    // Deserialize from String tests
     @Test
     public void testDeserializeEmptyString() {
         TestBean result = staxParser.deserialize("", null, TestBean.class);
@@ -679,12 +667,10 @@ public class XMLParserImpl101Test extends TestBase {
     public void testDeserializeWithIgnoreUnmatchedProperty() {
         String xml = "<TestBean><name>John</name><age>30</age><unknownProp>value</unknownProp></TestBean>";
 
-        // Should throw without ignoreUnmatchedProperty
         Assertions.assertThrows(ParseException.class, () -> {
             staxParser.deserialize(xml, XDC.create().ignoreUnmatchedProperty(false), TestBean.class);
         });
 
-        // Should work with ignoreUnmatchedProperty 
         XMLDeserializationConfig config = XDC.create().ignoreUnmatchedProperty(true);
         TestBean result = staxParser.deserialize(xml, config, TestBean.class);
         Assertions.assertNotNull(result);
@@ -710,7 +696,6 @@ public class XMLParserImpl101Test extends TestBase {
         Assertions.assertEquals('A', result.getCharVal());
     }
 
-    // Deserialize from File tests
     @Test
     public void testDeserializeFromFile() throws IOException {
         File file = tempDir.resolve("input.xml").toFile();
@@ -728,7 +713,6 @@ public class XMLParserImpl101Test extends TestBase {
         Assertions.assertEquals(25, result.getAge());
     }
 
-    // Deserialize from InputStream tests
     @Test
     public void testDeserializeFromInputStream() throws IOException {
         String xml = "<TestBean><name>StreamTest</name><age>30</age></TestBean>";
@@ -746,7 +730,6 @@ public class XMLParserImpl101Test extends TestBase {
         Assertions.assertEquals(30, result.getAge());
     }
 
-    // Deserialize from Reader tests
     @Test
     public void testDeserializeFromReader() throws IOException {
         String xml = "<TestBean><name>ReaderTest</name><age>35</age></TestBean>";
@@ -764,7 +747,6 @@ public class XMLParserImpl101Test extends TestBase {
         Assertions.assertEquals(35, result.getAge());
     }
 
-    // Deserialize from Node tests
     @Test
     public void testDeserializeFromNode() throws Exception {
         String xml = "<TestBean><name>NodeTest</name><age>40</age></TestBean>";
@@ -784,7 +766,6 @@ public class XMLParserImpl101Test extends TestBase {
         Assertions.assertEquals(40, result.getAge());
     }
 
-    // Deserialize with node classes tests
     @Test
     public void testDeserializeWithNodeClasses() throws IOException {
         String xml = "<bean><name>Test</name><age>25</age></bean>";
@@ -797,7 +778,6 @@ public class XMLParserImpl101Test extends TestBase {
         Assertions.assertEquals("Test", result.getName());
         Assertions.assertEquals(25, result.getAge());
 
-        // Test with Reader
         StringReader reader = new StringReader(xml);
         result = staxParser.deserialize(reader, null, nodeClasses);
         Assertions.assertNotNull(result);
@@ -845,7 +825,6 @@ public class XMLParserImpl101Test extends TestBase {
         });
     }
 
-    // Protected method tests via reflection or inheritance
     @Test
     public void testWriteBean() throws IOException {
         TestBean bean = new TestBean("WriteTest", 50);
@@ -934,35 +913,28 @@ public class XMLParserImpl101Test extends TestBase {
 
     @Test
     public void testIsSerializableByJSONArray() {
-        // Test with serializable component type
         Integer[] intArray = { 1, 2, 3 };
         Assertions.assertTrue(staxParser.isSerializableByJSON(intArray));
 
-        // Test with non-serializable component type but serializable elements
         Object[] objArray = { "string", 123, true };
         Assertions.assertTrue(staxParser.isSerializableByJSON(objArray));
 
-        // Test with all non-serializable elements
         Object[] beanArray = { new TestBean(), new TestBean() };
         Assertions.assertFalse(staxParser.isSerializableByJSON(beanArray));
     }
 
     @Test
     public void testIsSerializableByJSONCollection() {
-        // Test with serializable elements
         List<String> stringList = Arrays.asList("a", "b", "c");
         Assertions.assertTrue(staxParser.isSerializableByJSON(stringList));
 
-        // Test with non-serializable elements
         List<TestBean> beanList = Arrays.asList(new TestBean(), new TestBean());
         Assertions.assertFalse(staxParser.isSerializableByJSON(beanList));
 
-        // Test with mixed elements
         List<Object> mixedList = Arrays.asList("string", new TestBean());
         Assertions.assertTrue(staxParser.isSerializableByJSON(mixedList));
     }
 
-    // Exception tests
     @Test
     public void testDeserializeInvalidXML() {
         String invalidXml = "<TestBean><name>Unclosed";
@@ -985,7 +957,6 @@ public class XMLParserImpl101Test extends TestBase {
         });
     }
 
-    // Special cases
     @Test
     public void testSerializeNullProperties() {
         TestBean bean = new TestBean();
@@ -996,7 +967,6 @@ public class XMLParserImpl101Test extends TestBase {
         String xml = staxParser.serialize(bean);
         Assertions.assertNotNull(xml);
 
-        // Test with exclusion
         XMLSerializationConfig config = new XMLSerializationConfig();
         config.setExclusion(Exclusion.NONE);
         xml = staxParser.serialize(bean, config);
@@ -1025,13 +995,10 @@ public class XMLParserImpl101Test extends TestBase {
         attrs.put("key", "value");
         original.setAttributes(attrs);
 
-        // Serialize
         String xml = staxParser.serialize(original);
 
-        // Deserialize
         TestBean restored = staxParser.deserialize(xml, null, TestBean.class);
 
-        // Verify
         Assertions.assertNotNull(restored);
         Assertions.assertEquals(original.getName(), restored.getName());
         Assertions.assertEquals(original.getAge(), restored.getAge());
@@ -1045,13 +1012,10 @@ public class XMLParserImpl101Test extends TestBase {
         TestBean original = new TestBean("DOMTest", 55);
         original.setActive(false);
 
-        // Serialize
         String xml = domParser.serialize(original);
 
-        // Deserialize
         TestBean restored = domParser.deserialize(xml, null, TestBean.class);
 
-        // Verify
         Assertions.assertNotNull(restored);
         Assertions.assertEquals(original.getName(), restored.getName());
         Assertions.assertEquals(original.getAge(), restored.getAge());
@@ -1060,7 +1024,6 @@ public class XMLParserImpl101Test extends TestBase {
 
     @Test
     public void testLargeDataSerialization() {
-        // Create a bean with large collections
         TestBean bean = new TestBean("LargeData", 100);
         List<String> largeTags = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
@@ -1074,12 +1037,10 @@ public class XMLParserImpl101Test extends TestBase {
         }
         bean.setAttributes(largeAttrs);
 
-        // Test serialization doesn't throw
         String xml = staxParser.serialize(bean);
         Assertions.assertNotNull(xml);
         Assertions.assertTrue(xml.length() > 10000);
 
-        // Test deserialization
         TestBean restored = staxParser.deserialize(xml, null, TestBean.class);
         Assertions.assertNotNull(restored);
         Assertions.assertEquals(1000, restored.getTags().size());

@@ -36,12 +36,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class CommonUtil104Test extends TestBase {
 
-    // Helper classes
     private static TestBean createBean(String name, int value) {
         TestBean bean = new TestBean();
         bean.setName(name);
@@ -97,7 +98,6 @@ public class CommonUtil104Test extends TestBase {
         List<Boolean> list = N.toList(array);
         assertEquals(Arrays.asList(true, false, true), list);
 
-        // Empty array
         assertEquals(new ArrayList<>(), N.toList(new boolean[0]));
         assertEquals(new ArrayList<>(), N.toList((boolean[]) null));
     }
@@ -108,7 +108,6 @@ public class CommonUtil104Test extends TestBase {
         List<Boolean> list = N.toList(array, 1, 4);
         assertEquals(Arrays.asList(false, true, false), list);
 
-        // Empty range
         assertEquals(new ArrayList<>(), N.toList(array, 2, 2));
 
         assertThrows(IndexOutOfBoundsException.class, () -> N.toList(array, -1, 2));
@@ -121,7 +120,6 @@ public class CommonUtil104Test extends TestBase {
         List<Character> list = N.toList(array);
         assertEquals(Arrays.asList('a', 'b', 'c'), list);
 
-        // Empty array
         assertEquals(new ArrayList<>(), N.toList(new char[0]));
         assertEquals(new ArrayList<>(), N.toList((char[]) null));
     }
@@ -139,7 +137,6 @@ public class CommonUtil104Test extends TestBase {
         List<Byte> list = N.toList(array);
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), list);
 
-        // Empty array
         assertEquals(new ArrayList<>(), N.toList(new byte[0]));
         assertEquals(new ArrayList<>(), N.toList((byte[]) null));
     }
@@ -157,7 +154,6 @@ public class CommonUtil104Test extends TestBase {
         List<Short> list = N.toList(array);
         assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), list);
 
-        // Empty array
         assertEquals(new ArrayList<>(), N.toList(new short[0]));
         assertEquals(new ArrayList<>(), N.toList((short[]) null));
     }
@@ -175,7 +171,6 @@ public class CommonUtil104Test extends TestBase {
         List<Integer> list = N.toList(array);
         assertEquals(Arrays.asList(1, 2, 3), list);
 
-        // Empty array
         assertEquals(new ArrayList<>(), N.toList(new int[0]));
         assertEquals(new ArrayList<>(), N.toList((int[]) null));
     }
@@ -193,7 +188,6 @@ public class CommonUtil104Test extends TestBase {
         List<Long> list = N.toList(array);
         assertEquals(Arrays.asList(1L, 2L, 3L), list);
 
-        // Empty array
         assertEquals(new ArrayList<>(), N.toList(new long[0]));
         assertEquals(new ArrayList<>(), N.toList((long[]) null));
     }
@@ -211,7 +205,6 @@ public class CommonUtil104Test extends TestBase {
         List<Float> list = N.toList(array);
         assertEquals(Arrays.asList(1.0f, 2.0f, 3.0f), list);
 
-        // Empty array
         assertEquals(new ArrayList<>(), N.toList(new float[0]));
         assertEquals(new ArrayList<>(), N.toList((float[]) null));
     }
@@ -229,7 +222,6 @@ public class CommonUtil104Test extends TestBase {
         List<Double> list = N.toList(array);
         assertEquals(Arrays.asList(1.0, 2.0, 3.0), list);
 
-        // Empty array
         assertEquals(new ArrayList<>(), N.toList(new double[0]));
         assertEquals(new ArrayList<>(), N.toList((double[]) null));
     }
@@ -247,7 +239,6 @@ public class CommonUtil104Test extends TestBase {
         List<String> list = N.toList(array);
         assertEquals(Arrays.asList("a", "b", "c"), list);
 
-        // Empty array
         assertEquals(new ArrayList<>(), N.toList(new String[0]));
         assertEquals(new ArrayList<>(), N.toList((String[]) null));
     }
@@ -258,11 +249,9 @@ public class CommonUtil104Test extends TestBase {
         List<String> list = N.toList(array, 1, 4);
         assertEquals(Arrays.asList("b", "c", "d"), list);
 
-        // Full range
         List<String> fullList = N.toList(array, 0, array.length);
         assertEquals(Arrays.asList("a", "b", "c", "d", "e"), fullList);
 
-        // Empty range
         assertEquals(new ArrayList<>(), N.toList(array, 2, 2));
     }
 
@@ -272,7 +261,6 @@ public class CommonUtil104Test extends TestBase {
         List<String> list = N.toList(iter);
         assertEquals(Arrays.asList("a", "b", "c"), list);
 
-        // Null iterator
         List<String> nullList = N.toList((Iterator<String>) null);
         assertEquals(new ArrayList<>(), nullList);
     }
@@ -285,7 +273,6 @@ public class CommonUtil104Test extends TestBase {
         assertTrue(set.contains(true));
         assertTrue(set.contains(false));
 
-        // Empty array
         assertEquals(new HashSet<>(), N.toSet(new boolean[0]));
         assertEquals(new HashSet<>(), N.toSet((boolean[]) null));
     }
@@ -448,7 +435,6 @@ public class CommonUtil104Test extends TestBase {
         assertTrue(set.contains("b"));
         assertTrue(set.contains("c"));
 
-        // Empty array
         assertEquals(new HashSet<>(), N.toSet(new String[0]));
         assertEquals(new HashSet<>(), N.toSet((String[]) null));
     }
@@ -472,7 +458,6 @@ public class CommonUtil104Test extends TestBase {
         assertTrue(set.contains("b"));
         assertTrue(set.contains("c"));
 
-        // Null iterator
         Set<String> nullSet = N.toSet((Iterator<String>) null);
         assertEquals(new HashSet<>(), nullSet);
     }
@@ -598,7 +583,6 @@ public class CommonUtil104Test extends TestBase {
         List<String> list = N.toCollection(array, size -> new ArrayList<>(size));
         assertEquals(Arrays.asList("a", "b", "c"), list);
 
-        // Empty array
         List<String> emptyList = N.toCollection(new String[0], size -> new ArrayList<>(size));
         assertEquals(new ArrayList<>(), emptyList);
     }
@@ -620,7 +604,6 @@ public class CommonUtil104Test extends TestBase {
             assertTrue(set.contains("b"));
             assertTrue(set.contains("c"));
 
-            // Empty iterable
             Set<String> emptySet = N.toCollection(new ArrayList<String>(), size -> new HashSet<>(size));
             assertTrue(emptySet.isEmpty());
         }
@@ -641,7 +624,6 @@ public class CommonUtil104Test extends TestBase {
         List<String> list = N.toCollection(iter, () -> new ArrayList<>());
         assertEquals(Arrays.asList("a", "b", "c"), list);
 
-        // Null iterator
         List<String> nullList = N.toCollection((Iterator<String>) null, () -> new ArrayList<>());
         assertTrue(nullList.isEmpty());
     }
@@ -656,7 +638,6 @@ public class CommonUtil104Test extends TestBase {
         assertEquals(2, map.get("bean2").getValue());
         assertEquals(3, map.get("bean3").getValue());
 
-        // Empty iterable
         Map<String, TestBean> emptyMap = N.toMap(new ArrayList<TestBean>(), TestBean::getName);
         assertTrue(emptyMap.isEmpty());
     }
@@ -686,10 +667,9 @@ public class CommonUtil104Test extends TestBase {
     public void testToMap_IterableWithMergeFunction() {
         List<TestBean> beans = Arrays.asList(createBean("group1", 1), createBean("group1", 2), createBean("group2", 3));
 
-        Map<String, Integer> map = N.toMap(beans, TestBean::getName, TestBean::getValue, (v1, v2) -> v1 + v2, // Sum values for duplicate keys
-                size -> new HashMap<>());
+        Map<String, Integer> map = N.toMap(beans, TestBean::getName, TestBean::getValue, (v1, v2) -> v1 + v2, size -> new HashMap<>());
         assertEquals(2, map.size());
-        assertEquals(3, map.get("group1").intValue()); // 1 + 2
+        assertEquals(3, map.get("group1").intValue());
         assertEquals(3, map.get("group2").intValue());
     }
 
@@ -702,7 +682,6 @@ public class CommonUtil104Test extends TestBase {
         assertEquals(1, map.get("bean1").getValue());
         assertEquals(2, map.get("bean2").getValue());
 
-        // Null iterator
         Map<String, TestBean> nullMap = N.toMap((Iterator<TestBean>) null, TestBean::getName);
         assertTrue(nullMap.isEmpty());
     }
@@ -783,11 +762,9 @@ public class CommonUtil104Test extends TestBase {
         assertEquals(2, map.get("key2").intValue());
         assertEquals(3, map.get("key3").intValue());
 
-        // Empty varargs
         Map<String, Object> emptyMap = N.asMap();
         assertTrue(emptyMap.isEmpty());
 
-        // With another map
         Map<String, String> sourceMap = new HashMap<>();
         sourceMap.put("a", "1");
         sourceMap.put("b", "2");
@@ -796,13 +773,11 @@ public class CommonUtil104Test extends TestBase {
         assertEquals("1", resultMap.get("a"));
         assertEquals("2", resultMap.get("b"));
 
-        // With bean object
         TestBean bean = createBean("test", 123);
         Map<String, Object> beanMap = N.asMap(bean);
         assertEquals("test", beanMap.get("name"));
         assertEquals(123, beanMap.get("value"));
 
-        // Wrong number of arguments
         assertThrows(IllegalArgumentException.class, () -> N.asMap("key1", 1, "key2"));
     }
 
@@ -830,7 +805,6 @@ public class CommonUtil104Test extends TestBase {
         map = N.asLinkedHashMap("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7);
         assertEquals(7, map.size());
 
-        // Check order is preserved
         Iterator<String> iter = map.keySet().iterator();
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
@@ -843,7 +817,6 @@ public class CommonUtil104Test extends TestBase {
         assertTrue(map instanceof LinkedHashMap);
         assertEquals(2, map.size());
 
-        // Empty varargs
         Map<String, Object> emptyMap = N.asLinkedHashMap();
         assertTrue(emptyMap instanceof LinkedHashMap);
         assertTrue(emptyMap.isEmpty());
@@ -873,7 +846,6 @@ public class CommonUtil104Test extends TestBase {
         Map<String, Object> props = N.asProps("key1", 1, "key2", 2);
         assertEquals(2, props.size());
 
-        // Empty varargs
         Map<String, Object> emptyProps = N.asProps();
         assertTrue(emptyProps.isEmpty());
     }
@@ -918,11 +890,9 @@ public class CommonUtil104Test extends TestBase {
         assertEquals("b", list.get(1));
         assertEquals("c", list.get(2));
 
-        // Empty array
         List<String> emptyList = N.asList();
         assertTrue(emptyList.isEmpty());
 
-        // Null array
         List<String> nullList = N.asList((String[]) null);
         assertTrue(nullList.isEmpty());
     }
@@ -958,7 +928,6 @@ public class CommonUtil104Test extends TestBase {
         LinkedList<String> list = N.asLinkedList(array);
         assertEquals(3, list.size());
 
-        // Empty array
         LinkedList<String> emptyList = N.asLinkedList();
         assertTrue(emptyList.isEmpty());
     }
@@ -993,7 +962,6 @@ public class CommonUtil104Test extends TestBase {
         set = N.asSet("a", "b", "c", "d", "e", "f", "g", "h", "i");
         assertEquals(9, set.size());
 
-        // Test duplicates
         set = N.asSet("a", "b", "a");
         assertEquals(2, set.size());
     }
@@ -1004,7 +972,6 @@ public class CommonUtil104Test extends TestBase {
         Set<String> set = N.asSet(array);
         assertEquals(3, set.size());
 
-        // Empty array
         Set<String> emptySet = N.asSet();
         assertTrue(emptySet.isEmpty());
     }
@@ -1033,7 +1000,6 @@ public class CommonUtil104Test extends TestBase {
         set = N.asLinkedHashSet("a", "b", "c", "d", "e", "f", "g");
         assertEquals(7, set.size());
 
-        // Check order is preserved
         Iterator<String> iter = set.iterator();
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
@@ -1054,7 +1020,6 @@ public class CommonUtil104Test extends TestBase {
         assertEquals("a", set.first());
         assertEquals("c", set.last());
 
-        // Empty array
         SortedSet<String> emptySet = N.asSortedSet();
         assertTrue(emptySet.isEmpty());
     }
@@ -1068,7 +1033,6 @@ public class CommonUtil104Test extends TestBase {
         assertEquals("b", set.higher("a"));
         assertEquals("b", set.lower("c"));
 
-        // Empty array
         NavigableSet<String> emptySet = N.asNavigableSet();
         assertTrue(emptySet.isEmpty());
     }
@@ -1088,7 +1052,6 @@ public class CommonUtil104Test extends TestBase {
         assertEquals(3, queue.size());
         assertTrue(queue instanceof ArrayBlockingQueue);
 
-        // Empty array
         ArrayBlockingQueue<String> emptyQueue = N.asArrayBlockingQueue();
         assertTrue(emptyQueue.isEmpty());
     }
@@ -1221,13 +1184,11 @@ public class CommonUtil104Test extends TestBase {
 
     @Test
     public void testNewMapWithDifferentMapImplementations() {
-        // Test with LinkedHashMap
         Map<String, String> linkedMap = new LinkedHashMap<>();
         Map<String, String> result1 = N.newMap(linkedMap, "a", "1", "b", "2");
         assertTrue(result1 instanceof LinkedHashMap);
         assertEquals(2, result1.size());
 
-        // Test with TreeMap
         Map<String, String> treeMap = new TreeMap<>();
         Map<String, String> result2 = N.newMap(treeMap, "x", "10", "y", "20");
         assertTrue(result2 instanceof TreeMap);
@@ -1243,7 +1204,6 @@ public class CommonUtil104Test extends TestBase {
         assertEquals(1, list.size());
         assertEquals("test", list.get(0));
 
-        // Test immutability
         assertThrows(UnsupportedOperationException.class, () -> {
             list.add("another");
         });
@@ -1279,7 +1239,6 @@ public class CommonUtil104Test extends TestBase {
         assertEquals(1, set.size());
         assertTrue(set.contains("test"));
 
-        // Test immutability
         assertThrows(UnsupportedOperationException.class, () -> {
             set.add("another");
         });
@@ -1312,7 +1271,6 @@ public class CommonUtil104Test extends TestBase {
         assertEquals(42, map.get("key"));
         assertTrue(map.containsKey("key"));
 
-        // Test immutability
         assertThrows(UnsupportedOperationException.class, () -> {
             map.put("anotherKey", 100);
         });
@@ -1356,7 +1314,6 @@ public class CommonUtil104Test extends TestBase {
         assertTrue(list.isEmpty());
         assertEquals(0, list.size());
 
-        // Test immutability
         assertThrows(UnsupportedOperationException.class, () -> {
             list.add("element");
         });
@@ -1367,7 +1324,6 @@ public class CommonUtil104Test extends TestBase {
         List<String> list1 = N.emptyList();
         List<Integer> list2 = N.emptyList();
 
-        // Should return the same instance due to type erasure
         assertSame(list1, list2);
     }
 
@@ -1379,7 +1335,6 @@ public class CommonUtil104Test extends TestBase {
         assertTrue(set.isEmpty());
         assertEquals(0, set.size());
 
-        // Test immutability
         assertThrows(UnsupportedOperationException.class, () -> {
             set.add("element");
         });
@@ -1390,7 +1345,6 @@ public class CommonUtil104Test extends TestBase {
         Set<String> set1 = N.emptySet();
         Set<Integer> set2 = N.emptySet();
 
-        // Should return the same instance due to type erasure
         assertSame(set1, set2);
     }
 
@@ -1402,7 +1356,6 @@ public class CommonUtil104Test extends TestBase {
         assertTrue(set.isEmpty());
         assertEquals(0, set.size());
 
-        // Test immutability
         assertThrows(UnsupportedOperationException.class, () -> {
             set.add("element");
         });
@@ -1413,7 +1366,6 @@ public class CommonUtil104Test extends TestBase {
         SortedSet<String> set1 = N.emptySortedSet();
         SortedSet<Integer> set2 = N.emptySortedSet();
 
-        // Should return the same instance due to type erasure
         assertSame(set1, set2);
     }
 
@@ -1425,7 +1377,6 @@ public class CommonUtil104Test extends TestBase {
         assertTrue(set.isEmpty());
         assertEquals(0, set.size());
 
-        // Test immutability
         assertThrows(UnsupportedOperationException.class, () -> {
             set.add("element");
         });
@@ -1436,7 +1387,6 @@ public class CommonUtil104Test extends TestBase {
         NavigableSet<String> set1 = N.emptyNavigableSet();
         NavigableSet<Integer> set2 = N.emptyNavigableSet();
 
-        // Should return the same instance due to type erasure
         assertSame(set1, set2);
     }
 }

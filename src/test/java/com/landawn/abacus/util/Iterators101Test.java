@@ -20,11 +20,13 @@ import java.util.function.BiFunction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 
+@Tag("new-test")
 public class Iterators101Test extends TestBase {
 
     private List<String> testList;
@@ -46,21 +48,16 @@ public class Iterators101Test extends TestBase {
     public void testGet() {
         Iterator<String> iter = Arrays.asList("a", "b", "c").iterator();
 
-        // Test valid index
         assertEquals("a", Iterators.get(iter, 0).get());
 
-        // Test another iterator for different index
         iter = Arrays.asList("a", "b", "c").iterator();
         assertEquals("b", Iterators.get(iter, 1).get());
 
-        // Test index out of bounds
         iter = Arrays.asList("a", "b", "c").iterator();
         assertFalse(Iterators.get(iter, 5).isPresent());
 
-        // Test null iterator
         assertTrue(Iterators.get(null, 0).isEmpty());
 
-        // Test empty iterator
         assertTrue(Iterators.get(Collections.emptyIterator(), 0).isEmpty());
     }
 
@@ -77,11 +74,9 @@ public class Iterators101Test extends TestBase {
         iter = Arrays.asList("a", "b", "c").iterator();
         assertEquals(0, Iterators.occurrencesOf(iter, "x"));
 
-        // Test null value
         iter = Arrays.asList("a", null, "b", null).iterator();
         assertEquals(2, Iterators.occurrencesOf(iter, null));
 
-        // Test null iterator
         assertEquals(0, Iterators.occurrencesOf(null, "a"));
     }
 
@@ -151,7 +146,6 @@ public class Iterators101Test extends TestBase {
         assertEquals("hello", iter.next());
         assertFalse(iter.hasNext());
 
-        // Test zero repetitions
         iter = Iterators.repeat("hello", 0);
         assertFalse(iter.hasNext());
     }
@@ -181,7 +175,6 @@ public class Iterators101Test extends TestBase {
         assertEquals("b", iter.next());
         assertFalse(iter.hasNext());
 
-        // Test empty collection
         iter = Iterators.repeatElements(Collections.emptyList(), 3);
         assertFalse(iter.hasNext());
     }
@@ -205,9 +198,9 @@ public class Iterators101Test extends TestBase {
 
         assertEquals("a", iter.next());
         assertEquals("a", iter.next());
-        assertEquals("a", iter.next()); // a repeated 3 times (5/2 + 1)
+        assertEquals("a", iter.next());
         assertEquals("b", iter.next());
-        assertEquals("b", iter.next()); // b repeated 2 times (5/2)
+        assertEquals("b", iter.next());
         assertFalse(iter.hasNext());
     }
 
@@ -228,14 +221,12 @@ public class Iterators101Test extends TestBase {
     public void testCycleArray() {
         ObjIterator<String> iter = Iterators.cycle("a", "b");
 
-        // Test infinite cycling
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
-        assertTrue(iter.hasNext()); // Should always have next
+        assertTrue(iter.hasNext());
 
-        // Test empty array
         iter = Iterators.cycle();
         assertFalse(iter.hasNext());
     }
@@ -250,7 +241,6 @@ public class Iterators101Test extends TestBase {
         assertEquals("a", iter.next());
         assertTrue(iter.hasNext());
 
-        // Test empty iterable
         iter = Iterators.cycle(Collections.emptyList());
         assertFalse(iter.hasNext());
     }
@@ -266,7 +256,6 @@ public class Iterators101Test extends TestBase {
         assertEquals("b", iter.next());
         assertFalse(iter.hasNext());
 
-        // Test zero rounds
         iter = Iterators.cycle(iterable, 0);
         assertFalse(iter.hasNext());
     }
@@ -400,7 +389,6 @@ public class Iterators101Test extends TestBase {
         assertEquals(Integer.valueOf(1), result.next());
         assertEquals(Integer.valueOf(2), result.next());
         assertEquals(Integer.valueOf(3), result.next());
-        // Order may vary for subsequent elements
         assertTrue(result.hasNext());
     }
 
@@ -540,58 +528,58 @@ public class Iterators101Test extends TestBase {
     @Test
     public void testZipWithDefaultValues() {
         Iterator<String> iter1 = Arrays.asList("a", "b", "c").iterator();
-        Iterator<Integer> iter2 = Arrays.asList(1, 2).iterator(); // Shorter
+        Iterator<Integer> iter2 = Arrays.asList(1, 2).iterator();
 
         BiFunction<String, Integer, String> zipFunction = (s, i) -> s + i;
         ObjIterator<String> result = Iterators.zip(iter1, iter2, "default", -1, zipFunction);
 
         assertEquals("a1", result.next());
         assertEquals("b2", result.next());
-        assertEquals("c-1", result.next()); // Uses default for second iterator
+        assertEquals("c-1", result.next());
         assertFalse(result.hasNext());
     }
 
     @Test
     public void testZipIterablesWithDefaultValues() {
         Iterable<String> iter1 = Arrays.asList("a", "b", "c");
-        Iterable<Integer> iter2 = Arrays.asList(1, 2); // Shorter
+        Iterable<Integer> iter2 = Arrays.asList(1, 2);
 
         BiFunction<String, Integer, String> zipFunction = (s, i) -> s + i;
         ObjIterator<String> result = Iterators.zip(iter1, iter2, "default", -1, zipFunction);
 
         assertEquals("a1", result.next());
         assertEquals("b2", result.next());
-        assertEquals("c-1", result.next()); // Uses default for second iterator
+        assertEquals("c-1", result.next());
         assertFalse(result.hasNext());
     }
 
     @Test
     public void testZipThreeWithDefaultValues() {
         Iterator<String> iter1 = Arrays.asList("a", "b", "c").iterator();
-        Iterator<Integer> iter2 = Arrays.asList(1, 2).iterator(); // Shorter
-        Iterator<Boolean> iter3 = Arrays.asList(true).iterator(); // Even shorter
+        Iterator<Integer> iter2 = Arrays.asList(1, 2).iterator();
+        Iterator<Boolean> iter3 = Arrays.asList(true).iterator();
 
         TriFunction<String, Integer, Boolean, String> zipFunction = (s, i, b) -> s + i + b;
         ObjIterator<String> result = Iterators.zip(iter1, iter2, iter3, "default", -1, false, zipFunction);
 
         assertEquals("a1true", result.next());
-        assertEquals("b2false", result.next()); // Uses default for third iterator
-        assertEquals("c-1false", result.next()); // Uses defaults for second and third
+        assertEquals("b2false", result.next());
+        assertEquals("c-1false", result.next());
         assertFalse(result.hasNext());
     }
 
     @Test
     public void testZipThreeIterablesWithDefaultValues() {
         Iterable<String> iter1 = Arrays.asList("a", "b", "c");
-        Iterable<Integer> iter2 = Arrays.asList(1, 2); // Shorter
-        Iterable<Boolean> iter3 = Arrays.asList(true); // Even shorter
+        Iterable<Integer> iter2 = Arrays.asList(1, 2);
+        Iterable<Boolean> iter3 = Arrays.asList(true);
 
         TriFunction<String, Integer, Boolean, String> zipFunction = (s, i, b) -> s + i + b;
         ObjIterator<String> result = Iterators.zip(iter1, iter2, iter3, "default", -1, false, zipFunction);
 
         assertEquals("a1true", result.next());
-        assertEquals("b2false", result.next()); // Uses default for second and third
-        assertEquals("c-1false", result.next()); // Uses defaults for second and third
+        assertEquals("b2false", result.next());
+        assertEquals("c-1false", result.next());
         assertFalse(result.hasNext());
     }
 
@@ -641,12 +629,11 @@ public class Iterators101Test extends TestBase {
 
         long advanced = Iterators.advance(iter, 3);
         assertEquals(3, advanced);
-        assertEquals("d", iter.next()); // Should be at 4th element
+        assertEquals("d", iter.next());
 
-        // Test advancing more than available
         iter = Arrays.asList("a", "b").iterator();
         advanced = Iterators.advance(iter, 5);
-        assertEquals(2, advanced); // Only 2 elements were available
+        assertEquals(2, advanced);
         assertFalse(iter.hasNext());
     }
 
@@ -665,12 +652,10 @@ public class Iterators101Test extends TestBase {
         assertEquals("e", result.next());
         assertFalse(result.hasNext());
 
-        // Test skipping more than available
         iter = Arrays.asList("a", "b").iterator();
         result = Iterators.skip(iter, 5);
         assertFalse(result.hasNext());
 
-        // Test null iterator
         result = Iterators.skip(null, 2);
         assertFalse(result.hasNext());
     }
@@ -685,18 +670,15 @@ public class Iterators101Test extends TestBase {
         assertEquals("c", result.next());
         assertFalse(result.hasNext());
 
-        // Test limit larger than available
         iter = Arrays.asList("a", "b").iterator();
         result = Iterators.limit(iter, 5);
         assertEquals("a", result.next());
         assertEquals("b", result.next());
         assertFalse(result.hasNext());
 
-        // Test null iterator
         result = Iterators.limit(null, 3);
         assertFalse(result.hasNext());
 
-        // Test zero limit
         result = Iterators.limit(testIterator, 0);
         assertFalse(result.hasNext());
     }
@@ -711,7 +693,6 @@ public class Iterators101Test extends TestBase {
         assertEquals("d", result.next());
         assertFalse(result.hasNext());
 
-        // Test with iterable
         Iterable<String> iterable = Arrays.asList("a", "b", "c", "d", "e");
         result = Iterators.skipAndLimit(iterable, 2, 2);
 

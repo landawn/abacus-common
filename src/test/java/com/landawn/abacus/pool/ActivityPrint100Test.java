@@ -12,15 +12,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class ActivityPrint100Test extends TestBase {
 
     private ActivityPrint activityPrint;
-    private static final long LIVE_TIME = 10000; // 10 seconds
-    private static final long MAX_IDLE_TIME = 5000; // 5 seconds
+    private static final long LIVE_TIME = 10000;
+    private static final long MAX_IDLE_TIME = 5000;
 
     @BeforeEach
     public void setUp() {
@@ -66,7 +67,7 @@ public class ActivityPrint100Test extends TestBase {
     public void testSetLiveTime() {
         long newLiveTime = 20000;
         ActivityPrint result = activityPrint.setLiveTime(newLiveTime);
-        assertSame(activityPrint, result); // Check method chaining
+        assertSame(activityPrint, result);
         assertEquals(newLiveTime, activityPrint.getLiveTime());
     }
 
@@ -84,7 +85,7 @@ public class ActivityPrint100Test extends TestBase {
     public void testSetMaxIdleTime() {
         long newMaxIdleTime = 8000;
         ActivityPrint result = activityPrint.setMaxIdleTime(newMaxIdleTime);
-        assertSame(activityPrint, result); // Check method chaining
+        assertSame(activityPrint, result);
         assertEquals(newMaxIdleTime, activityPrint.getMaxIdleTime());
     }
 
@@ -109,7 +110,7 @@ public class ActivityPrint100Test extends TestBase {
     @Test
     public void testUpdateLastAccessTime() throws InterruptedException {
         long initialLastAccessTime = activityPrint.getLastAccessTime();
-        Thread.sleep(10); // Ensure time difference
+        Thread.sleep(10);
         activityPrint.updateLastAccessTime();
         long updatedLastAccessTime = activityPrint.getLastAccessTime();
         assertTrue(updatedLastAccessTime > initialLastAccessTime);
@@ -137,7 +138,6 @@ public class ActivityPrint100Test extends TestBase {
 
     @Test
     public void testGetExpirationTimeWithOverflow() {
-        // Test edge case where expiration time would overflow
         activityPrint.setCreatedTime(Long.MAX_VALUE - 1000);
         activityPrint.setLiveTime(2000);
         assertEquals(Long.MAX_VALUE, activityPrint.getExpirationTime());
@@ -168,11 +168,11 @@ public class ActivityPrint100Test extends TestBase {
     public void testClone() {
         activityPrint.updateAccessCount();
         activityPrint.updateAccessCount();
-        
+
         Object cloned = activityPrint.clone();
         assertNotNull(cloned);
         assertInstanceOf(ActivityPrint.class, cloned);
-        
+
         ActivityPrint clonedPrint = (ActivityPrint) cloned;
         assertNotSame(activityPrint, clonedPrint);
         assertEquals(activityPrint.getLiveTime(), clonedPrint.getLiveTime());
@@ -186,9 +186,7 @@ public class ActivityPrint100Test extends TestBase {
     public void testHashCode() {
         ActivityPrint ap1 = new ActivityPrint(LIVE_TIME, MAX_IDLE_TIME);
         ActivityPrint ap2 = new ActivityPrint(LIVE_TIME, MAX_IDLE_TIME);
-        
-        // Hash codes might be different due to different creation times
-        // But should be consistent for the same object
+
         int hash1 = activityPrint.hashCode();
         int hash2 = activityPrint.hashCode();
         assertEquals(hash1, hash2);
@@ -198,21 +196,15 @@ public class ActivityPrint100Test extends TestBase {
     public void testEquals() {
         ActivityPrint ap1 = new ActivityPrint(LIVE_TIME, MAX_IDLE_TIME);
         ActivityPrint ap2 = new ActivityPrint(LIVE_TIME, MAX_IDLE_TIME);
-        
-        // Test reflexivity
+
         assertEquals(ap1, ap1);
-        
-        // Test null
+
         assertNotEquals(ap1, null);
-        
-        // Test different type
+
         assertNotEquals(ap1, "not an ActivityPrint");
-        
-        // Test different instances with potentially different creation times
-        // They won't be equal unless all fields match
+
         assertEquals(ap1, ap2);
-        
-        // Test cloned object
+
         ActivityPrint cloned = (ActivityPrint) ap1.clone();
         assertEquals(ap1, cloned);
     }
@@ -222,7 +214,7 @@ public class ActivityPrint100Test extends TestBase {
         ActivityPrint ap1 = new ActivityPrint(LIVE_TIME, MAX_IDLE_TIME);
         ActivityPrint ap2 = new ActivityPrint(LIVE_TIME + 1000, MAX_IDLE_TIME);
         assertNotEquals(ap1, ap2);
-        
+
         ap2 = new ActivityPrint(LIVE_TIME, MAX_IDLE_TIME + 1000);
         assertNotEquals(ap1, ap2);
     }

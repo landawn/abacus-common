@@ -408,6 +408,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Renames multiple columns in the Dataset using a function to determine the new names.
      * <br />
+     * 
      * <p>Example:</p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("first_name", "last_name"), data);
@@ -1601,11 +1602,11 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Updates the values in a specified column of the Dataset.
      * <br />
-     * The update is performed by applying a function to each value in the column. The function takes the current value and returns the new value.
+     * The update is performed by applying a function to each value in the column one by one. The function takes the current value and returns the new value.
      *
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("name", "age"), data);
-     * dataset.updateColumn("name", v -> ((String) v).toUpperCase());
+     * dataset.updateColumn("name", v -> ((String) v).toUpperCase()); // v is the current value in the "name" column
      * }</pre>
      *
      * @param columnName The name of the column to be updated. It should be a name that exists in the Dataset.
@@ -1618,19 +1619,19 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Updates the values in multiple specified columns of the Dataset.
      * <br />
-     * The update is performed by applying a function to each value in the specified columns. The function takes the column name and current value, and returns the new value.
+     * The update is performed by applying a function to each value in the specified columns. The function takes the row index, column name, and current value, and returns the new value.
      *
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("firstName", "lastName"), data);
-     * dataset.updateColumns(Arrays.asList("firstName", "lastName"), (c, v) -> ((String) v).trim());
+     * dataset.updateColumns(Arrays.asList("firstName", "lastName"), (i, c, v) -> ((String) v).trim());
      * }</pre>
      *
      * @param columnNames A collection containing the names of the columns to be updated. These should be names that exist in the Dataset.
-     * @param func The function to be applied to each value in the columns. It takes the column name and current value, and returns the new value.
+     * @param func The function to be applied to each value in the columns. It takes the row index, column name, and current value, and returns the new value.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset.
      */
-    void updateColumns(Collection<String> columnNames, BiFunction<String, ?, ?> func) throws IllegalStateException, IllegalArgumentException;
+    void updateColumns(Collection<String> columnNames, IntBiObjFunction<String, ?, ?> func) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Converts the values in a specified column of the Dataset to a specified target type.
@@ -1676,7 +1677,7 @@ public sealed interface Dataset permits RowDataset {
      * Combines multiple columns into a new column in the Dataset using a default combining strategy.
      * <br />
      * The new column is created by merging the values of the specified columns into the new column for each row.
-     * The new column's type must be Object[], Collection, Map, or Bean class.
+     * The new column's type must be Object[], Collection, Map, or Bean class. It can't be string or other types.
      * <br />
      * The new column is added at the position of the smallest index among the specified columns.
      * <br />
@@ -1721,7 +1722,7 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset, 
      *                                  or {@code columnNames} is empty, 
      *                                  or the new column name already exists in the Dataset,
-     *                                  or the specified column type is not Object[], Collection, Map, or a Bean class.
+     *                                  or the specified column type is not Object[], Collection, Map, or a Bean class. It can't be string or other types.
      * @see #combineColumns(Collection, String, Function)
      * @see #addColumn(String, Collection, Function)
      * @see #addColumn(int, String, Collection, Function)
@@ -2111,11 +2112,11 @@ public sealed interface Dataset permits RowDataset {
      * dataset.removeRows(new int[] {0, 2});
      * }</pre>
      *
-     * @param rowIndexesToRemove The indices of the rows to be removed. Each index should be a valid index within the current row range.
+     * @param rowIndexesToRemove an array of indices of the rows to be removed.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if any of the specified indices is out of bounds.
      */
-    void removeRows(int... rowIndexesToRemove) throws IllegalStateException, IndexOutOfBoundsException;
+    void removeMultiRows(int... rowIndexesToRemove) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
      * Removes a range of rows from the Dataset.
@@ -2133,7 +2134,7 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if the specified {@code inclusiveFromRowIndex} is less than zero, or the specified {@code exclusiveToRowIndex} is bigger than row size, or {@code inclusiveFromRowIndex} is bigger than {@code exclusiveToRowIndex}.
      */
-    void removeRowRange(int inclusiveFromRowIndex, int exclusiveToRowIndex) throws IllegalStateException, IndexOutOfBoundsException;
+    void removeRows(int inclusiveFromRowIndex, int exclusiveToRowIndex) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
      * Removes duplicate rows from the Dataset based on values in the specified key column.
@@ -2266,7 +2267,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Updates a specific row in the Dataset.
      * <br />
-     * The update is performed by applying a function to each value in the specified row. The function takes the current value and returns the new value.
+     * The update is performed by applying a function to each value in the specified row one by one. The function takes the current value and returns the new value.
      *
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("name", "status"), data);
@@ -2283,7 +2284,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Updates the values in the specified rows of the Dataset.
      * <br />
-     * The update is performed by applying a function to each value in the specified rows. The function takes the row index and current value, and returns the new value.
+     * The update is performed by applying a function to each value in the specified rows. The function takes the row index, column name, and current value, and returns the new value.
      *
      * <p><strong>Usage example:</strong></p>
      * <pre>{@code
@@ -2292,11 +2293,11 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param rowIndexesToUpdate An array of integers representing the indices of the rows to be updated. Each index should be a valid index within the current row range.
-     * @param func The function to be applied to each value in the specified rows. It takes the row index and current value, and returns the new value.
+     * @param func The function to be applied to each value in the specified rows. It takes the row index, column name, and current value, and returns the new value.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if any of the specified indices is out of bounds.
      */
-    void updateRows(int[] rowIndexesToUpdate, IntObjFunction<?, ?> func) throws IllegalStateException, IndexOutOfBoundsException;
+    void updateRows(int[] rowIndexesToUpdate, IntBiObjFunction<String, ?, ?> func) throws IllegalStateException, IndexOutOfBoundsException;
 
     // TODO should the method name be "replaceAll"? If change the method name to replaceAll, what about updateColumn/updateRow?
 
@@ -10694,7 +10695,7 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNameA The name of the first column to iterate over.
      * @param columnNameB The name of the second column to iterate over.
      * @return A BiIterator over pairs of elements from the specified columns.
-     * @throws IllegalArgumentException if the specified any of column names are not found in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     <A, B> BiIterator<A, B> iterator(String columnNameA, String columnNameB) throws IllegalArgumentException;
 
@@ -10718,7 +10719,7 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNameB The name of the second column to iterate over.
      * @return A BiIterator over pairs of elements from the specified columns.
      * @throws IndexOutOfBoundsException if either fromRowIndex or toRowIndex is out of the Dataset's row bounds.
-     * @throws IllegalArgumentException if the specified any of column names are not found in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     <A, B> BiIterator<A, B> iterator(int fromRowIndex, int toRowIndex, String columnNameA, String columnNameB)
             throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -10741,7 +10742,7 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNameB The name of the second column to iterate over.
      * @param columnNameC The name of the third column to iterate over.
      * @return A TriIterator over triplets of elements from the specified columns.
-     * @throws IllegalArgumentException if the specified any of column names are not found in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     <A, B, C> TriIterator<A, B, C> iterator(String columnNameA, String columnNameB, String columnNameC) throws IllegalArgumentException;
 
@@ -10767,7 +10768,7 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNameC The name of the third column to iterate over.
      * @return A TriIterator over triplets of elements from the specified columns.
      * @throws IndexOutOfBoundsException if either fromRowIndex or toRowIndex is out of the Dataset's row bounds.
-     * @throws IllegalArgumentException if the specified any of column names are not found in the Dataset.s
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.s
      */
     <A, B, C> TriIterator<A, B, C> iterator(int fromRowIndex, int toRowIndex, String columnNameA, String columnNameB, String columnNameC)
             throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -11420,9 +11421,10 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param properties A Map containing the properties to set on the Dataset.
+     * @throws IllegalStateException if the Dataset is frozen and cannot be modified.
      */
     @Beta
-    void setProperties(final Map<String, ?> properties);
+    void setProperties(final Map<String, ?> properties) throws IllegalStateException;
 
     /**
      * Prints the content of the Dataset to the standard output.

@@ -1609,12 +1609,35 @@ public final class CSVUtil {
 
     /**
      * Streams CSV data from a File source with the specified target type.
+     * This method provides lazy evaluation of CSV data, reading rows on-demand rather than
+     * loading the entire file into memory. The stream will automatically close the underlying
+     * file reader when the stream is closed.
+     *
+     * <p>The target type can be:
+     * <ul>
+     *   <li>A bean class - rows are converted to bean instances</li>
+     *   <li>Map - rows are converted to Map&lt;String, Object&gt;</li>
+     *   <li>Collection - rows are converted to collections of column values</li>
+     *   <li>Object[] - rows are converted to object arrays</li>
+     *   <li>A single-column primitive type - when only one column is selected</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Stream as bean objects
+     * try (Stream<Person> stream = CSVUtil.stream(new File("people.csv"), Person.class)) {
+     *     stream.filter(p -> p.getAge() > 18)
+     *           .forEach(System.out::println);
+     * }
+     * }</pre>
      *
      * @param <T> the type of the elements in the stream
      * @param source the File source to load CSV data from
      * @param targetType the Class of the target type
      * @return a Stream of the specified target type containing the loaded CSV data
      * @throws IllegalArgumentException if the target type is {@code null} or not supported
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @see #stream(File, Collection, Class)
      */
     public static <T> Stream<T> stream(final File source, final Class<? extends T> targetType) {
         return stream(source, null, targetType);
@@ -1622,30 +1645,76 @@ public final class CSVUtil {
 
     /**
      * Streams CSV data from a File source with specified column names and target type.
+     * This method provides lazy evaluation with column selection - only specified columns
+     * are included in the streamed objects.
+     *
+     * <p>The stream automatically closes the underlying file reader when closed.
+     * For bean types, only properties matching the selected column names are populated.
+     * Non-selected columns are ignored during processing.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Stream only name and age columns as Person beans
+     * try (Stream<Person> stream = CSVUtil.stream(
+     *         new File("people.csv"),
+     *         Arrays.asList("name", "age"),
+     *         Person.class)) {
+     *     List<Person> adults = stream.filter(p -> p.getAge() >= 18)
+     *                                 .collect(Collectors.toList());
+     * }
+     * }</pre>
      *
      * @param <T> the type of the elements in the stream
      * @param source the File source to load CSV data from
-     * @param selectColumnNames a Collection of column names to select
+     * @param selectColumnNames a Collection of column names to select, null to include all columns
      * @param targetType the Class of the target type
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the target type is {@code null} or not supported
+     * @throws IllegalArgumentException if the target type is {@code null} or not supported, or if selected columns are not found in CSV
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @see #stream(File, Collection, long, long, Predicate, Class)
      */
     public static <T> Stream<T> stream(final File source, final Collection<String> selectColumnNames, final Class<? extends T> targetType) {
         return stream(source, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue(), targetType);
     }
 
     /**
-     * Streams CSV data from a File source with specified column names, offset, count, row filter, and target type.
+     * Streams CSV data from a File source with full control over column selection, pagination, and filtering.
+     * This is the most comprehensive streaming method providing lazy evaluation with all configuration options.
+     *
+     * <p>The stream automatically closes the underlying file reader when closed. This method supports:
+     * <ul>
+     *   <li>Column selection - include only specified columns</li>
+     *   <li>Pagination - skip initial rows and limit total rows processed</li>
+     *   <li>Row filtering - include only rows matching the predicate</li>
+     *   <li>Type conversion - convert to beans, maps, collections, or arrays</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Stream active employees over 30, skip first 100, limit to 500
+     * Predicate<String[]> activeFilter = row -> "ACTIVE".equals(row[3]);
+     * try (Stream<Employee> stream = CSVUtil.stream(
+     *         new File("employees.csv"),
+     *         Arrays.asList("id", "name", "age", "status"),
+     *         100, 500,
+     *         activeFilter,
+     *         Employee.class)) {
+     *     stream.filter(e -> e.getAge() > 30)
+     *           .forEach(System.out::println);
+     * }
+     * }</pre>
      *
      * @param <T> the type of the elements in the stream
      * @param source the File source to load CSV data from
-     * @param selectColumnNames a Collection of column names to select
-     * @param offset the number of lines to skip from the beginning
-     * @param count the maximum number of lines to read
-     * @param rowFilter a Predicate to filter the lines
+     * @param selectColumnNames a Collection of column names to select, null to include all columns
+     * @param offset the number of data rows to skip from the beginning (after header)
+     * @param count the maximum number of rows to process
+     * @param rowFilter a Predicate to filter rows, only matching rows are included
      * @param targetType the Class of the target type
      * @return a Stream of the specified target type containing the loaded CSV data
      * @throws IllegalArgumentException if offset or count are negative, or if the target type is {@code null} or not supported
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @see #stream(Reader, Collection, long, long, Predicate, Class, boolean)
      */
     public static <T> Stream<T> stream(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter, final Class<? extends T> targetType) {
@@ -1666,28 +1735,67 @@ public final class CSVUtil {
 
     /**
      * Streams CSV data from a Reader source with the specified target type.
+     * This method provides lazy evaluation of CSV data from a Reader, with control over
+     * whether the reader should be closed when the stream terminates.
+     *
+     * <p>This method is useful when you have an existing Reader (e.g., from a network stream,
+     * compressed file, or other source) and want to stream its CSV content. Set
+     * {@code closeReaderWhenStreamIsClosed} to true if the stream should own the reader
+     * lifecycle, or false if you'll manage the reader externally.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Stream from a StringReader
+     * String csvData = "name,age\nJohn,30\nJane,25";
+     * Reader reader = new StringReader(csvData);
+     * try (Stream<Person> stream = CSVUtil.stream(reader, Person.class, true)) {
+     *     stream.forEach(System.out::println);
+     * } // reader is closed automatically
+     * }</pre>
      *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from
      * @param targetType the Class of the target type
-     * @param closeReaderWhenStreamIsClosed a boolean indicating whether to close the Reader when the stream is closed
+     * @param closeReaderWhenStreamIsClosed true to close the reader when the stream is closed, false otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
      * @throws IllegalArgumentException if the target type is {@code null} or not supported
+     * @throws UncheckedIOException if an I/O error occurs while reading
+     * @see #stream(Reader, Collection, Class, boolean)
      */
     public static <T> Stream<T> stream(final Reader source, final Class<? extends T> targetType, final boolean closeReaderWhenStreamIsClosed) {
         return stream(source, null, targetType, closeReaderWhenStreamIsClosed);
     }
 
     /**
-     * Streams CSV data from a Reader source with specified column names, offset, count, row filter, and target type.
+     * Streams CSV data from a Reader source with specified column names and target type.
+     * This method provides lazy evaluation with column selection from a Reader source.
+     *
+     * <p>Only the specified columns are included in the streamed objects. For bean types,
+     * only properties matching the selected column names are populated. The reader lifecycle
+     * can be controlled via the {@code closeReaderWhenStreamIsClosed} parameter.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Stream selected columns from a Reader
+     * try (Reader reader = new FileReader("employees.csv");
+     *      Stream<Map<String, Object>> stream = CSVUtil.stream(
+     *          reader,
+     *          Arrays.asList("name", "department"),
+     *          Map.class,
+     *          true)) {
+     *     stream.limit(10).forEach(System.out::println);
+     * }
+     * }</pre>
      *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from
-     * @param selectColumnNames a Collection of column names to select
+     * @param selectColumnNames a Collection of column names to select, null to include all columns
      * @param targetType the Class of the target type
-     * @param closeReaderWhenStreamIsClosed a boolean indicating whether to close the Reader when the stream is closed
+     * @param closeReaderWhenStreamIsClosed true to close the reader when the stream is closed, false otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if offset or count are negative, or if the target type is {@code null} or not supported
+     * @throws IllegalArgumentException if the target type is {@code null} or not supported, or if selected columns are not found
+     * @throws UncheckedIOException if an I/O error occurs while reading
+     * @see #stream(Reader, Collection, long, long, Predicate, Class, boolean)
      */
     public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final Class<? extends T> targetType,
             final boolean closeReaderWhenStreamIsClosed) {
@@ -1695,18 +1803,47 @@ public final class CSVUtil {
     }
 
     /**
-     * Streams CSV data from a Reader source with specified offset, count, row filter, and target type.
+     * Streams CSV data from a Reader source with complete control over all streaming parameters.
+     * This is the most comprehensive Reader-based streaming method providing lazy evaluation with
+     * full configuration options including pagination, filtering, and column selection.
+     *
+     * <p>This method supports:
+     * <ul>
+     *   <li>Column selection - include only specified columns</li>
+     *   <li>Pagination - skip initial rows and limit total rows processed</li>
+     *   <li>Row filtering - include only rows matching the predicate</li>
+     *   <li>Type conversion - convert to beans, maps, collections, or arrays</li>
+     *   <li>Reader lifecycle management - optionally close reader with stream</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Stream with all options
+     * try (Reader reader = new FileReader("sales.csv")) {
+     *     Predicate<String[]> highValueFilter = row -> Double.parseDouble(row[2]) > 1000;
+     *     try (Stream<Sale> stream = CSVUtil.stream(
+     *             reader,
+     *             Arrays.asList("date", "product", "amount"),
+     *             100, 500,  // skip 100, take 500
+     *             highValueFilter,
+     *             Sale.class,
+     *             true)) {
+     *         stream.forEach(System.out::println);
+     *     }
+     * }
+     * }</pre>
      *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from
-     * @param selectColumnNames a Collection of column names to select
-     * @param offset the number of lines to skip from the beginning
-     * @param count the maximum number of lines to read
-     * @param rowFilter a Predicate to filter the lines
+     * @param selectColumnNames a Collection of column names to select, null to include all columns
+     * @param offset the number of data rows to skip from the beginning (after header)
+     * @param count the maximum number of rows to process
+     * @param rowFilter a Predicate to filter rows, only matching rows are included
      * @param targetType the Class of the target type
      * @param closeReaderWhenStreamIsClosed whether to close the Reader when the stream is closed
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if offset or count are negative, of if the target type is {@code null} or not supported.
+     * @throws IllegalArgumentException if offset or count are negative, or if the target type is {@code null} or not supported.
+     * @throws UncheckedIOException if an I/O error occurs while reading
      */
     public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter, final Class<? extends T> targetType, final boolean closeReaderWhenStreamIsClosed)
@@ -1890,14 +2027,43 @@ public final class CSVUtil {
     }
 
     /**
-     * Streams CSV data from a File source with the specified target type.
+     * Streams CSV data from a File source with custom row mapping logic.
+     * This method provides lazy evaluation with a custom row mapper function that receives
+     * column names and row data, allowing complete control over how rows are converted.
+     *
+     * <p>The row mapper receives:
+     * <ul>
+     *   <li>Column names as an immutable List&lt;String&gt;</li>
+     *   <li>Row data as a DisposableArray&lt;String&gt; (reused for efficiency)</li>
+     * </ul>
+     *
+     * <p>The stream automatically closes the underlying file reader when closed.
+     * The DisposableArray is reused across rows for performance, so extract all needed
+     * data within the mapper function.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Custom row mapping to create DTOs
+     * try (Stream<PersonDTO> stream = CSVUtil.stream(
+     *         new File("people.csv"),
+     *         (columns, row) -> {
+     *             PersonDTO dto = new PersonDTO();
+     *             dto.setFullName(row.get(0) + " " + row.get(1)); // Combine first and last
+     *             dto.setAge(Integer.parseInt(row.get(2)));
+     *             return dto;
+     *         })) {
+     *     stream.forEach(System.out::println);
+     * }
+     * }</pre>
      *
      * @param <T> the type of the elements in the stream
      * @param source the File source to load CSV data from
-     * @param rowMapper converts the row data to the target type
-     *      The first parameter is the column names, the second parameter is the row data. 
+     * @param rowMapper converts the row data to the target type.
+     *                  First parameter is the column names, second parameter is the row data.
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the target type is {@code null} or not supported
+     * @throws IllegalArgumentException if the rowMapper is null
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @see #stream(File, Collection, BiFunction)
      */
     public static <T> Stream<T> stream(final File source,
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper) {
@@ -1905,15 +2071,43 @@ public final class CSVUtil {
     }
 
     /**
-     * Streams CSV data from a File source with specified column names and target type.
+     * Streams CSV data from a File source with column selection and custom row mapping.
+     * This method provides lazy evaluation with both column filtering and custom conversion logic.
+     *
+     * <p>Only the specified columns are passed to the row mapper. The mapper receives:
+     * <ul>
+     *   <li>Selected column names as an immutable List&lt;String&gt;</li>
+     *   <li>Selected column values as a DisposableArray&lt;String&gt; (reused for efficiency)</li>
+     * </ul>
+     *
+     * <p>The stream automatically closes the underlying file reader when closed.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Map selected columns with custom logic
+     * try (Stream<Summary> stream = CSVUtil.stream(
+     *         new File("sales.csv"),
+     *         Arrays.asList("product", "revenue", "quantity"),
+     *         (columns, row) -> {
+     *             Summary s = new Summary();
+     *             s.setProduct(row.get(0));
+     *             s.setRevenue(Double.parseDouble(row.get(1)));
+     *             s.setQuantity(Integer.parseInt(row.get(2)));
+     *             return s;
+     *         })) {
+     *     stream.forEach(System.out::println);
+     * }
+     * }</pre>
      *
      * @param <T> the type of the elements in the stream
      * @param source the File source to load CSV data from
-     * @param selectColumnNames a Collection of column names to select
-     * @param rowMapper converts the row data to the target type
-     *      The first parameter is the column names, the second parameter is the row data. 
+     * @param selectColumnNames a Collection of column names to select, null to include all columns
+     * @param rowMapper converts the row data to the target type.
+     *                  First parameter is the column names, second parameter is the row data.
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the target type is {@code null} or not supported
+     * @throws IllegalArgumentException if the rowMapper is null or selected columns are not found
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @see #stream(File, Collection, long, long, Predicate, BiFunction)
      */
     public static <T> Stream<T> stream(final File source, final Collection<String> selectColumnNames,
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper) {
@@ -1921,18 +2115,46 @@ public final class CSVUtil {
     }
 
     /**
-     * Streams CSV data from a File source with specified column names, offset, count, row filter, and target type.
+     * Streams CSV data from a File source with full control including custom row mapping.
+     * This is the most comprehensive File-based streaming method with custom mapping, providing
+     * lazy evaluation with pagination, filtering, column selection, and custom conversion logic.
+     *
+     * <p>This method supports:
+     * <ul>
+     *   <li>Column selection - include only specified columns</li>
+     *   <li>Pagination - skip initial rows and limit total rows processed</li>
+     *   <li>Row filtering - include only rows matching the predicate</li>
+     *   <li>Custom mapping - complete control over row-to-object conversion</li>
+     * </ul>
+     *
+     * <p>The stream automatically closes the underlying file reader when closed.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Stream with custom mapper, filtering, and pagination
+     * Predicate<String[]> validFilter = row -> !row[0].isEmpty();
+     * try (Stream<CustomDTO> stream = CSVUtil.stream(
+     *         new File("data.csv"),
+     *         Arrays.asList("id", "name", "value"),
+     *         100, 500,  // skip 100, take 500
+     *         validFilter,
+     *         (columns, row) -> new CustomDTO(row.get(0), row.get(1), row.get(2)))) {
+     *     stream.forEach(System.out::println);
+     * }
+     * }</pre>
      *
      * @param <T> the type of the elements in the stream
      * @param source the File source to load CSV data from
-     * @param selectColumnNames a Collection of column names to select
-     * @param offset the number of lines to skip from the beginning
-     * @param count the maximum number of lines to read
-     * @param rowFilter a Predicate to filter the lines
-     * @param rowMapper converts the row data to the target type
-     *      The first parameter is the column names, the second parameter is the row data. 
+     * @param selectColumnNames a Collection of column names to select, null to include all columns
+     * @param offset the number of data rows to skip from the beginning (after header)
+     * @param count the maximum number of rows to process
+     * @param rowFilter a Predicate to filter rows, only matching rows are included
+     * @param rowMapper converts the row data to the target type.
+     *                  First parameter is the column names, second parameter is the row data.
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if offset or count are negative, or if the target type is {@code null} or not supported
+     * @throws IllegalArgumentException if offset or count are negative, or if the rowMapper is null
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @see #stream(Reader, Collection, long, long, Predicate, BiFunction, boolean)
      */
     public static <T> Stream<T> stream(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter,
@@ -1953,14 +2175,40 @@ public final class CSVUtil {
     }
 
     /**
-     * Streams CSV data from a Reader source with the specified target type.
+     * Streams CSV data from a Reader source with custom row mapping logic.
+     * This method provides lazy evaluation with a custom row mapper and control over
+     * the reader lifecycle.
+     *
+     * <p>The row mapper receives:
+     * <ul>
+     *   <li>Column names as an immutable List&lt;String&gt;</li>
+     *   <li>Row data as a DisposableArray&lt;String&gt; (reused for efficiency)</li>
+     * </ul>
+     *
+     * <p>The DisposableArray is reused across rows for performance, so extract all needed
+     * data within the mapper function.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String csvData = "name,age,city\nJohn,30,NYC\nJane,25,LA";
+     * try (Reader reader = new StringReader(csvData);
+     *      Stream<Person> stream = CSVUtil.stream(
+     *          reader,
+     *          (columns, row) -> new Person(row.get(0), Integer.parseInt(row.get(1)), row.get(2)),
+     *          true)) {
+     *     stream.forEach(System.out::println);
+     * }
+     * }</pre>
      *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from
-     * @param rowMapper converts the row data to the target type
-     *      The first parameter is the column names, the second parameter is the row data. 
-     * @param closeReaderWhenStreamIsClosed a boolean indicating whether to close the Reader when the stream is closed
-     * @throws IllegalArgumentException if the target type is {@code null} or not supported
+     * @param rowMapper converts the row data to the target type.
+     *                  First parameter is the column names, second parameter is the row data.
+     * @param closeReaderWhenStreamIsClosed true to close the reader when the stream is closed, false otherwise
+     * @return a Stream of the specified target type containing the loaded CSV data
+     * @throws IllegalArgumentException if the rowMapper is null
+     * @throws UncheckedIOException if an I/O error occurs while reading
+     * @see #stream(Reader, Collection, BiFunction, boolean)
      */
     public static <T> Stream<T> stream(final Reader source,
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
@@ -1969,16 +2217,41 @@ public final class CSVUtil {
     }
 
     /**
-     * Streams CSV data from a Reader source with specified column names, offset, count, row filter, and target type.
+     * Streams CSV data from a Reader source with column selection and custom row mapping.
+     * This method provides lazy evaluation with both column filtering and custom conversion logic
+     * from a Reader source.
+     *
+     * <p>Only the specified columns are passed to the row mapper. The mapper receives:
+     * <ul>
+     *   <li>Selected column names as an immutable List&lt;String&gt;</li>
+     *   <li>Selected column values as a DisposableArray&lt;String&gt; (reused for efficiency)</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * try (Reader reader = new FileReader("products.csv");
+     *      Stream<Product> stream = CSVUtil.stream(
+     *          reader,
+     *          Arrays.asList("id", "name", "price"),
+     *          (columns, row) -> new Product(
+     *              Long.parseLong(row.get(0)),
+     *              row.get(1),
+     *              new BigDecimal(row.get(2))),
+     *          true)) {
+     *     stream.forEach(System.out::println);
+     * }
+     * }</pre>
      *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from
-     * @param selectColumnNames a Collection of column names to select
-     * @param rowMapper converts the row data to the target type
-     *      The first parameter is the column names, the second parameter is the row data. 
-     * @param closeReaderWhenStreamIsClosed a boolean indicating whether to close the Reader when the stream is closed
+     * @param selectColumnNames a Collection of column names to select, null to include all columns
+     * @param rowMapper converts the row data to the target type.
+     *                  First parameter is the column names, second parameter is the row data.
+     * @param closeReaderWhenStreamIsClosed true to close the reader when the stream is closed, false otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if offset or count are negative, or if the target type is {@code null} or not supported
+     * @throws IllegalArgumentException if the rowMapper is null or selected columns are not found
+     * @throws UncheckedIOException if an I/O error occurs while reading
+     * @see #stream(Reader, Collection, long, long, Predicate, BiFunction, boolean)
      */
     public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames,
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
@@ -1987,19 +2260,54 @@ public final class CSVUtil {
     }
 
     /**
-     * Streams CSV data from a Reader source with specified offset, count, row filter, and target type.
+     * Streams CSV data from a Reader source with complete control including custom row mapping.
+     * This is the most comprehensive Reader-based streaming method with custom mapping, providing
+     * lazy evaluation with all configuration options: pagination, filtering, column selection,
+     * custom conversion, and reader lifecycle management.
+     *
+     * <p>This method supports:
+     * <ul>
+     *   <li>Column selection - include only specified columns</li>
+     *   <li>Pagination - skip initial rows and limit total rows processed</li>
+     *   <li>Row filtering - include only rows matching the predicate</li>
+     *   <li>Custom mapping - complete control over row-to-object conversion</li>
+     *   <li>Reader lifecycle management - optionally close reader with stream</li>
+     * </ul>
+     *
+     * <p>The DisposableArray is reused across rows for performance, so extract all needed
+     * data within the mapper function.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * try (Reader reader = new FileReader("transactions.csv")) {
+     *     Predicate<String[]> validFilter = row -> row[0] != null && !row[0].isEmpty();
+     *     try (Stream<Transaction> stream = CSVUtil.stream(
+     *             reader,
+     *             Arrays.asList("id", "amount", "date"),
+     *             100, 1000,  // skip 100, take 1000
+     *             validFilter,
+     *             (columns, row) -> new Transaction(
+     *                 UUID.fromString(row.get(0)),
+     *                 new BigDecimal(row.get(1)),
+     *                 LocalDate.parse(row.get(2))),
+     *             true)) {
+     *         stream.forEach(System.out::println);
+     *     }
+     * }
+     * }</pre>
      *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from
-     * @param selectColumnNames a Collection of column names to select
-     * @param offset the number of lines to skip from the beginning
-     * @param count the maximum number of lines to read
-     * @param rowFilter a Predicate to filter the lines
-     * @param rowMapper converts the row data to the target type
-     *      The first parameter is the column names, the second parameter is the row data. 
+     * @param selectColumnNames a Collection of column names to select, null to include all columns
+     * @param offset the number of data rows to skip from the beginning (after header)
+     * @param count the maximum number of rows to process
+     * @param rowFilter a Predicate to filter rows, only matching rows are included
+     * @param rowMapper converts the row data to the target type.
+     *                  First parameter is the column names, second parameter is the row data.
      * @param closeReaderWhenStreamIsClosed whether to close the Reader when the stream is closed
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if offset or count are negative, of if the target type is {@code null} or not supported.
+     * @throws IllegalArgumentException if offset or count are negative, or if the rowMapper is null
+     * @throws UncheckedIOException if an I/O error occurs while reading
      */
     public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter,

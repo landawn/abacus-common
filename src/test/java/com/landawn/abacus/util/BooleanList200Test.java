@@ -14,10 +14,12 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalBoolean;
 
+@Tag("new-test")
 public class BooleanList200Test extends TestBase {
 
     @Test
@@ -55,7 +57,6 @@ public class BooleanList200Test extends TestBase {
         BooleanList list = BooleanList.copyOf(original);
         assertEquals(3, list.size());
         assertArrayEquals(original, list.toArray());
-        // Ensure it's a copy, not a reference
         original[0] = false;
         assertTrue(list.get(0));
     }
@@ -145,7 +146,7 @@ public class BooleanList200Test extends TestBase {
         assertTrue(list.remove(true));
         assertEquals(2, list.size());
         assertEquals("[false, true]", list.toString());
-        assertTrue(list.remove(true)); // Second 'true' is not removed
+        assertTrue(list.remove(true));
     }
 
     @Test
@@ -222,13 +223,11 @@ public class BooleanList200Test extends TestBase {
         BooleanList list2 = BooleanList.of(true, false);
         BooleanList list3 = BooleanList.of(false, true);
 
-        // Test equals
         assertEquals(list1, list2);
         assertNotEquals(list1, list3);
         assertNotEquals(list1, null);
         assertNotEquals(list1, new Object());
 
-        // Test hashCode
         assertEquals(list1.hashCode(), list2.hashCode());
         assertNotEquals(list1.hashCode(), list3.hashCode());
     }
@@ -255,7 +254,6 @@ public class BooleanList200Test extends TestBase {
     @DisplayName("Test 'removeIf' method with a predicate")
     public void testRemoveIf() {
         BooleanList list = BooleanList.of(true, false, true, false);
-        // Remove all 'true' values
         list.removeIf(val -> val);
         assertEquals(2, list.size());
         assertArrayEquals(new boolean[] { false, false }, list.toArray());
@@ -297,7 +295,6 @@ public class BooleanList200Test extends TestBase {
         BooleanList list1 = BooleanList.of(true, true, false);
         BooleanList list2 = BooleanList.of(true, false, false);
         BooleanList intersection = list1.intersection(list2);
-        // The intersection should contain one 'true' and one 'false'
         assertEquals(2, intersection.size());
         assertTrue(intersection.contains(true));
         assertTrue(intersection.contains(false));
@@ -309,7 +306,6 @@ public class BooleanList200Test extends TestBase {
         BooleanList list1 = BooleanList.of(true, true, false);
         BooleanList list2 = BooleanList.of(true, false, false);
         BooleanList difference = list1.difference(list2);
-        // The difference should be the elements in list1 not in list2, which is one 'true'
         assertEquals(1, difference.size());
         assertTrue(difference.get(0));
     }
@@ -320,8 +316,7 @@ public class BooleanList200Test extends TestBase {
         BooleanList list1 = BooleanList.of(true, true, false);
         BooleanList list2 = BooleanList.of(true, false, false);
         BooleanList symmDiff = list1.symmetricDifference(list2);
-        // Should contain elements that are in either list but not both (one 'true', one 'false')
-        symmDiff.sort(); // Sort for predictable order
+        symmDiff.sort();
         assertArrayEquals(new boolean[] { false, true }, symmDiff.toArray());
     }
 
@@ -330,7 +325,6 @@ public class BooleanList200Test extends TestBase {
     public void testRemoveDuplicates() {
         BooleanList list = BooleanList.of(true, false, true, true, false);
         list.removeDuplicates();
-        // The implementation is peculiar, it keeps the first two unique elements found
         assertArrayEquals(new boolean[] { true, false }, list.toArray());
 
         BooleanList allSame = BooleanList.of(true, true, true);
@@ -355,7 +349,6 @@ public class BooleanList200Test extends TestBase {
         assertNotSame(original, copied);
         assertEquals(original, copied);
 
-        // Modify original and ensure copy is not affected
         original.add(true);
         assertNotEquals(original, copied);
     }
@@ -367,7 +360,6 @@ public class BooleanList200Test extends TestBase {
         BooleanList list = new BooleanList(data, 3);
         assertEquals(3, list.size());
         assertArrayEquals(new boolean[] { true, false, true }, list.toArray());
-        // Test that it's a wrapper, not a copy
         data[0] = false;
         assertFalse(list.get(0), "Internal array modification should be reflected in the list");
     }
@@ -376,9 +368,9 @@ public class BooleanList200Test extends TestBase {
     @DisplayName("Test 'addFirst' and 'addLast' methods")
     public void testAddFirstLast() {
         BooleanList list = new BooleanList();
-        list.addLast(true); // [true]
-        list.addFirst(false); // [false, true]
-        list.addLast(false); // [false, true, false]
+        list.addLast(true);
+        list.addFirst(false);
+        list.addLast(false);
         assertArrayEquals(new boolean[] { false, true, false }, list.toArray());
     }
 
@@ -547,10 +539,7 @@ public class BooleanList200Test extends TestBase {
         BooleanList list1 = BooleanList.of(true, false, true, false, true, false);
         BooleanList list2 = list1.copy();
         list1.shuffle();
-        // After shuffle, size and elements must be the same, but order might differ.
         assertEquals(list1.size(), list2.size());
-        // The probability of them being equal after a shuffle is low for a non-trivial list.
-        // assertFalse(Arrays.equals(list1.toArray(), list2.toArray()) && list1.size() > 2);
         assertTrue(N.isEqualCollection(list1.toList(), list2.toList()), "Both lists should contain the same elements after shuffle");
     }
 
@@ -559,7 +548,7 @@ public class BooleanList200Test extends TestBase {
     public void testSwap() {
         BooleanList list = BooleanList.of(true, false, true);
         list.swap(0, 2);
-        assertArrayEquals(new boolean[] { true, false, true }, list.toArray()); // Swapping same values
+        assertArrayEquals(new boolean[] { true, false, true }, list.toArray());
         list.swap(0, 1);
         assertArrayEquals(new boolean[] { false, true, true }, list.toArray());
     }

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -32,7 +33,7 @@ import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 
-
+@Tag("new-test")
 public class AbstractDoubleStream100Test extends TestBase {
 
     private DoubleStream stream;
@@ -40,7 +41,6 @@ public class AbstractDoubleStream100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Initialize with default test data
         stream = createDoubleStream(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 });
         stream2 = createDoubleStream(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 });
     }
@@ -74,7 +74,7 @@ public class AbstractDoubleStream100Test extends TestBase {
         long endTime = System.currentTimeMillis();
 
         assertArrayEquals(new double[] { 1.0, 2.0 }, result, 0.001);
-        assertTrue(endTime - startTime >= 20); // At least 2 delays
+        assertTrue(endTime - startTime >= 20);
     }
 
     @Test
@@ -313,8 +313,6 @@ public class AbstractDoubleStream100Test extends TestBase {
 
         double[] result = stream.symmetricDifference(Arrays.asList(2.0, 3.0, 6.0, 7.0)).toArray();
 
-        // Elements in stream but not in collection: 1.0, 4.0, 5.0
-        // Elements in collection but not in stream: 6.0, 7.0
         double[] expected = { 1.0, 4.0, 5.0, 6.0, 7.0 };
         Arrays.sort(result);
         Arrays.sort(expected);
@@ -351,11 +349,10 @@ public class AbstractDoubleStream100Test extends TestBase {
     @Test
     public void testShuffled() {
         stream = createDoubleStream(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 });
-        Random rnd = new Random(12345); // Fixed seed for deterministic test
+        Random rnd = new Random(12345);
 
         double[] result = stream.shuffled(rnd).toArray();
 
-        // Verify all elements are present
         Arrays.sort(result);
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.001);
     }
@@ -763,7 +760,6 @@ public class AbstractDoubleStream100Test extends TestBase {
         assertTrue(result.isPresent());
         Map<Percentage, Double> percentiles = result.get();
 
-        // Check some common percentiles
         assertTrue(percentiles.containsKey(Percentage._20));
         assertTrue(percentiles.containsKey(Percentage._50));
         assertTrue(percentiles.containsKey(Percentage._70));

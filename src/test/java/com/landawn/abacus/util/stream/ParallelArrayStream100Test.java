@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -54,11 +55,12 @@ import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("ParallelArrayStream Tests")
+@Tag("new-test")
 public class ParallelArrayStream100Test extends TestBase {
 
     private static final Integer[] TEST_INTEGER_ARRAY = new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     private static final String[] TEST_STRING_ARRAY = new String[] { "apple", "banana", "cherry", "date", "elderberry" };
-    private static final int testMaxThreadNum = 4; // Use a fixed small number of threads for predictable testing  
+    private static final int testMaxThreadNum = 4;
     private Stream<Integer> stream;
     private Stream<String> stringStream;
 
@@ -147,7 +149,7 @@ public class ParallelArrayStream100Test extends TestBase {
             List<Integer> result = stream.slidingMap(1, false, sum).sorted().toList();
 
             assertFalse(result.isEmpty());
-            assertEquals(Integer.valueOf(3), result.get(0)); // 1 + 2
+            assertEquals(Integer.valueOf(3), result.get(0));
         }
 
         @Test
@@ -158,7 +160,7 @@ public class ParallelArrayStream100Test extends TestBase {
             List<Integer> result = stream.slidingMap(1, false, sum).sorted().toList();
 
             assertFalse(result.isEmpty());
-            assertEquals(Integer.valueOf(6), result.get(0)); // 1 + 2 + 3
+            assertEquals(Integer.valueOf(6), result.get(0));
         }
 
         @Test
@@ -170,7 +172,6 @@ public class ParallelArrayStream100Test extends TestBase {
             List<String> result = stream.mapFirstOrElse(firstMapper, elseMapper).toList();
 
             assertEquals("FIRST:1", result.get(0));
-            // assertEquals("OTHER:2", result.get(1));
         }
 
         @Test
@@ -181,20 +182,18 @@ public class ParallelArrayStream100Test extends TestBase {
 
             List<String> result = stream.mapLastOrElse(lastMapper, elseMapper).toList();
 
-            // assertEquals("OTHER:1", result.get(0));
             assertEquals("LAST:10", result.get(result.size() - 1));
         }
 
         @Test
         @DisplayName("mapToChar() should convert to CharStream")
         public void testMapToChar() {
-            ToCharFunction<Integer> toChar = x -> (char) (x + 64); // A=65, B=66, etc.
+            ToCharFunction<Integer> toChar = x -> (char) (x + 64);
 
             char[] result = stream.limit(3).mapToChar(toChar).toArray();
 
             assertEquals(3, result.length);
             assertTrue(N.isEqualCollection(List.of('A', 'B', 'C'), N.toList(result)));
-            // assertEquals('A', result[0]); // 1 + 64 = 65 = 'A'
         }
 
         @Test
@@ -206,7 +205,6 @@ public class ParallelArrayStream100Test extends TestBase {
 
             assertEquals(3, result.length);
             assertTrue(N.isEqualCollection(List.of((byte) 1, (byte) 2, (byte) 3), N.toList(result)));
-            // assertEquals((byte) 1, result[0]);
         }
 
         @Test
@@ -218,7 +216,6 @@ public class ParallelArrayStream100Test extends TestBase {
 
             assertEquals(3, result.length);
             assertTrue(N.isEqualCollection(List.of((short) 1, (short) 2, (short) 3), N.toList(result)));
-            // assertEquals((short) 1, result[0]);
         }
 
         @Test
@@ -230,7 +227,6 @@ public class ParallelArrayStream100Test extends TestBase {
 
             assertEquals(3, result.length);
             assertTrue(N.isEqualCollection(List.of(1, 2, 3), N.toList(result)));
-            // assertEquals(1, result[0]);
         }
 
         @Test
@@ -242,7 +238,6 @@ public class ParallelArrayStream100Test extends TestBase {
 
             assertEquals(3, result.length);
             assertTrue(N.isEqualCollection(List.of(1L, 2L, 3L), N.toList(result)));
-            // assertEquals(1L, result[0]);
         }
 
         @Test
@@ -386,7 +381,7 @@ public class ParallelArrayStream100Test extends TestBase {
             List<Integer> result = stream.limit(5).onEach(addToSum).toList();
 
             assertTrue(N.isEqualCollection(Arrays.asList(1, 2, 3, 4, 5), result));
-            assertEquals(15, sum.get()); // 1+2+3+4+5 = 15
+            assertEquals(15, sum.get());
         }
 
         @Test
@@ -406,7 +401,7 @@ public class ParallelArrayStream100Test extends TestBase {
             List<String> results = new ArrayList<>();
 
             stringStream.limit(2).sorted().forEach(str -> Arrays.asList(str.charAt(0), str.charAt(1)), (str, ch) -> {
-                synchronized (results) { // Ensure thread-safe addition to results
+                synchronized (results) {
                     results.add(str + ":" + ch);
                 }
             });
@@ -434,7 +429,7 @@ public class ParallelArrayStream100Test extends TestBase {
             List<String> pairs = new ArrayList<>();
 
             stream.limit(5).sorted().forEachPair(1, (a, b) -> {
-                synchronized (pairs) { // Ensure thread-safe addition to pairs
+                synchronized (pairs) {
                     pairs.add(a + "," + b);
                 }
             });
@@ -506,7 +501,7 @@ public class ParallelArrayStream100Test extends TestBase {
             assertTrue(result.containsKey("even"));
             assertTrue(result.containsKey("odd"));
             assertTrue(result.containsKey("number"));
-            assertEquals(4, result.get("number").size()); // All numbers
+            assertEquals(4, result.get("number").size());
         }
 
         @Test
@@ -534,7 +529,7 @@ public class ParallelArrayStream100Test extends TestBase {
             Optional<Integer> result = stream.limit(5).reduce(sum);
 
             assertTrue(result.isPresent());
-            assertEquals(Integer.valueOf(15), result.get()); // 1+2+3+4+5
+            assertEquals(Integer.valueOf(15), result.get());
         }
 
         @Test
@@ -724,7 +719,7 @@ public class ParallelArrayStream100Test extends TestBase {
         @Test
         @DisplayName("max() should return empty for empty stream")
         public void testMaxEmpty() {
-            Stream<Integer> emptyStream = Stream.of(new Integer[0]).parallel(PS.create(Splitor.ARRAY)); // Empty stream 
+            Stream<Integer> emptyStream = Stream.of(new Integer[0]).parallel(PS.create(Splitor.ARRAY));
 
             Optional<Integer> result = emptyStream.max(Integer::compareTo);
 
@@ -803,7 +798,7 @@ public class ParallelArrayStream100Test extends TestBase {
 
             boolean result = stream.nMatch(3, 7, even);
 
-            assertTrue(result); // 5 even numbers (2,4,6,8,10) is between 3 and 7
+            assertTrue(result);
         }
 
         @Test
@@ -813,7 +808,7 @@ public class ParallelArrayStream100Test extends TestBase {
 
             boolean result = stream.nMatch(1, 3, even);
 
-            assertFalse(result); // 5 even numbers is not between 1 and 3
+            assertFalse(result);
         }
     }
 
@@ -1095,7 +1090,7 @@ public class ParallelArrayStream100Test extends TestBase {
         @Test
         @DisplayName("should handle subrange of array")
         public void testSubrange() {
-            Stream<Integer> subStream = Stream.of(TEST_INTEGER_ARRAY, 2, 5).parallel(PS.create(Splitor.ARRAY)); // Subrange from index 2 to 5
+            Stream<Integer> subStream = Stream.of(TEST_INTEGER_ARRAY, 2, 5).parallel(PS.create(Splitor.ARRAY));
 
             List<Integer> result = subStream.toList();
 
@@ -1140,7 +1135,7 @@ public class ParallelArrayStream100Test extends TestBase {
 
             long sum = largeStream.mapToLong(Integer::longValue).sum();
 
-            assertEquals(500500L, sum); // Sum of 1 to 1000
+            assertEquals(500500L, sum);
         }
 
         @Test
@@ -1162,7 +1157,7 @@ public class ParallelArrayStream100Test extends TestBase {
             assertDoesNotThrow(() -> {
                 stream.forEach(x -> {
                     results.add(x * 2);
-                    Thread.yield(); // Allow other threads to run
+                    Thread.yield();
                 }, () -> {
                 });
             });

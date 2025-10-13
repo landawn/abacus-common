@@ -32,6 +32,7 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.BooleanPredicate;
@@ -50,9 +51,9 @@ import com.landawn.abacus.util.function.IntToShortFunction;
 import com.landawn.abacus.util.function.ShortPredicate;
 import com.landawn.abacus.util.function.ShortUnaryOperator;
 
+@Tag("new-test")
 public class N201Test extends TestBase {
 
-    // Helper for comparing float arrays due to potential precision issues if directly using assertArrayEquals
     public void assertFloatArrayEquals(float[] expected, float[] actual, float delta) {
         assertEquals(expected.length, actual.length, "Array lengths differ");
         for (int i = 0; i < expected.length; i++) {
@@ -60,7 +61,6 @@ public class N201Test extends TestBase {
         }
     }
 
-    // Helper for comparing double arrays due to potential precision issues
     public void assertDoubleArrayEquals(double[] expected, double[] actual, double delta) {
         assertEquals(expected.length, actual.length, "Array lengths differ");
         for (int i = 0; i < expected.length; i++) {
@@ -68,17 +68,16 @@ public class N201Test extends TestBase {
         }
     }
 
-    // region replaceIf tests
     @Test
     public void testReplaceIfBooleanArray() {
         boolean[] arr = { true, false, true, false };
-        BooleanPredicate predicate = b -> b; // replace true values
+        BooleanPredicate predicate = b -> b;
         int replacements = N.replaceIf(arr, predicate, false);
         assertArrayEquals(new boolean[] { false, false, false, false }, arr);
         assertEquals(2, replacements);
 
         arr = new boolean[] { true, false, true, false };
-        BooleanPredicate predicateFalse = b -> !b; // replace false values
+        BooleanPredicate predicateFalse = b -> !b;
         replacements = N.replaceIf(arr, predicateFalse, true);
         assertArrayEquals(new boolean[] { true, true, true, true }, arr);
         assertEquals(2, replacements);
@@ -197,7 +196,7 @@ public class N201Test extends TestBase {
         assertEquals(Arrays.asList("orange", "banana", "orange", "cherry"), list);
         assertEquals(2, replacements);
 
-        List<Integer> intList = new LinkedList<>(Arrays.asList(1, null, 1, 3)); // Test non-RandomAccess
+        List<Integer> intList = new LinkedList<>(Arrays.asList(1, null, 1, 3));
         Predicate<Integer> nullPredicate = Objects::isNull;
         replacements = N.replaceIf(intList, nullPredicate, 0);
         assertEquals(Arrays.asList(1, 0, 1, 3), intList);
@@ -206,9 +205,7 @@ public class N201Test extends TestBase {
         assertEquals(0, N.replaceIf((List<String>) null, predicate, "x"));
         assertEquals(0, N.replaceIf(new ArrayList<String>(), predicate, "x"));
     }
-    // endregion
 
-    // region replaceAll (oldVal, newVal) tests
     @Test
     public void testReplaceAllBooleanArray() {
         boolean[] arr = { true, false, true, true };
@@ -282,7 +279,7 @@ public class N201Test extends TestBase {
         assertFloatArrayEquals(new float[] { 5.0f, 2.0f, 5.0f, 5.0f, Float.NaN, Float.NaN }, arr, 0.001f);
         assertEquals(3, replacements);
 
-        replacements = N.replaceAll(arr, Float.NaN, 7.0f); // NaN comparison uses Float.compare
+        replacements = N.replaceAll(arr, Float.NaN, 7.0f);
         assertFloatArrayEquals(new float[] { 5.0f, 2.0f, 5.0f, 5.0f, 7.0f, 7.0f }, arr, 0.001f);
         assertEquals(2, replacements);
 
@@ -297,7 +294,7 @@ public class N201Test extends TestBase {
         assertDoubleArrayEquals(new double[] { 5.0, 2.0, 5.0, 5.0, Double.NaN, Double.NaN }, arr, 0.001);
         assertEquals(3, replacements);
 
-        replacements = N.replaceAll(arr, Double.NaN, 7.0); // NaN comparison uses Double.compare
+        replacements = N.replaceAll(arr, Double.NaN, 7.0);
         assertDoubleArrayEquals(new double[] { 5.0, 2.0, 5.0, 5.0, 7.0, 7.0 }, arr, 0.001);
         assertEquals(2, replacements);
 
@@ -331,7 +328,6 @@ public class N201Test extends TestBase {
         assertEquals(Arrays.asList("orange", "banana", "orange", "orange", "grape"), list);
         assertEquals(1, replacements);
 
-        // Test with LinkedList (non-RandomAccess)
         List<Integer> linkedList = new LinkedList<>(Arrays.asList(1, 2, 1, 1, null));
         replacements = N.replaceAll(linkedList, 1, 5);
         assertEquals(Arrays.asList(5, 2, 5, 5, null), linkedList);
@@ -344,9 +340,7 @@ public class N201Test extends TestBase {
         assertEquals(0, N.replaceAll((List<String>) null, "a", "x"));
         assertEquals(0, N.replaceAll(new ArrayList<String>(), "a", "x"));
     }
-    // endregion
 
-    // region replaceAll (UnaryOperator) tests
     @Test
     public void testReplaceAllBooleanArrayWithOperator() {
         boolean[] arr = { true, false, true };
@@ -354,8 +348,8 @@ public class N201Test extends TestBase {
         N.replaceAll(arr, operator);
         assertArrayEquals(new boolean[] { false, true, false }, arr);
 
-        N.replaceAll((boolean[]) null, operator); // Should not throw
-        N.replaceAll(new boolean[0], operator); // Should not throw
+        N.replaceAll((boolean[]) null, operator);
+        N.replaceAll(new boolean[0], operator);
     }
 
     @Test
@@ -453,7 +447,7 @@ public class N201Test extends TestBase {
         N.replaceAll(list, operator);
         assertEquals(Arrays.asList("A", "B", "C"), list);
 
-        List<Integer> linkedList = new LinkedList<>(Arrays.asList(1, 2, 3)); // Test non-RandomAccess
+        List<Integer> linkedList = new LinkedList<>(Arrays.asList(1, 2, 3));
         UnaryOperator<Integer> intOp = i -> i * 2;
         N.replaceAll(linkedList, intOp);
         assertEquals(Arrays.asList(2, 4, 6), linkedList);
@@ -461,9 +455,7 @@ public class N201Test extends TestBase {
         N.replaceAll((List<String>) null, operator);
         N.replaceAll(new ArrayList<String>(), operator);
     }
-    // endregion
 
-    // region updateAll (Throwables.UnaryOperator) tests
     @Test
     public void testUpdateAllArray() throws IOException {
         String[] arr = { "a", "b" };
@@ -474,7 +466,6 @@ public class N201Test extends TestBase {
         };
 
         assertThrows(IOException.class, () -> N.updateAll(arr, operator));
-        // arr[0] would be "A", arr[1] would be "b" (original due to exception)
         assertEquals("A", arr[0]);
         assertEquals("b", arr[1]);
 
@@ -500,7 +491,7 @@ public class N201Test extends TestBase {
         assertEquals("A", list.get(0));
         assertEquals("b", list.get(1));
 
-        List<String> list2 = new LinkedList<>(Arrays.asList("c", "d")); // Non-RandomAccess
+        List<String> list2 = new LinkedList<>(Arrays.asList("c", "d"));
         Throwables.UnaryOperator<String, IOException> noExceptionOp = String::toUpperCase;
         N.updateAll(list2, noExceptionOp);
         assertEquals(Arrays.asList("C", "D"), list2);
@@ -508,9 +499,7 @@ public class N201Test extends TestBase {
         N.updateAll((List<String>) null, noExceptionOp);
         N.updateAll(new ArrayList<String>(), noExceptionOp);
     }
-    // endregion
 
-    // region Deprecated update methods
     @Test
     public void testUpdateAllUsingReplaceAllInstead() {
         assertThrows(UnsupportedOperationException.class, N::updateAllUsingReplaceAllInstead);
@@ -520,9 +509,7 @@ public class N201Test extends TestBase {
     public void testUpdateIfUsingReplaceIfInstead() {
         assertThrows(UnsupportedOperationException.class, N::updateIfUsingReplaceIfInstead);
     }
-    // endregion
 
-    // region setAll (generator) tests
     @Test
     public void testSetAllBooleanArray() {
         boolean[] arr = new boolean[3];
@@ -570,7 +557,7 @@ public class N201Test extends TestBase {
     @Test
     public void testSetAllIntArray() {
         int[] arr = new int[3];
-        IntUnaryOperator generator = i -> (i + 1) * 100; // N.setAll delegates to Arrays.setAll
+        IntUnaryOperator generator = i -> (i + 1) * 100;
         N.setAll(arr, generator);
         assertArrayEquals(new int[] { 100, 200, 300 }, arr);
 
@@ -581,7 +568,7 @@ public class N201Test extends TestBase {
     @Test
     public void testSetAllLongArray() {
         long[] arr = new long[3];
-        IntToLongFunction generator = i -> (i + 1) * 1000L; // N.setAll delegates to Arrays.setAll
+        IntToLongFunction generator = i -> (i + 1) * 1000L;
         N.setAll(arr, generator);
         assertArrayEquals(new long[] { 1000L, 2000L, 3000L }, arr);
 
@@ -603,7 +590,7 @@ public class N201Test extends TestBase {
     @Test
     public void testSetAllDoubleArray() {
         double[] arr = new double[3];
-        IntToDoubleFunction generator = i -> (i + 1) * 1.1; // N.setAll delegates to Arrays.setAll
+        IntToDoubleFunction generator = i -> (i + 1) * 1.1;
         N.setAll(arr, generator);
         assertDoubleArrayEquals(new double[] { 1.1, 2.2, 3.3 }, arr, 0.001);
 
@@ -614,7 +601,7 @@ public class N201Test extends TestBase {
     @Test
     public void testSetAllGenericArray() {
         String[] arr = new String[3];
-        IntFunction<String> generator = i -> "Val" + i; // N.setAll delegates to Arrays.setAll
+        IntFunction<String> generator = i -> "Val" + i;
         N.setAll(arr, generator);
         assertArrayEquals(new String[] { "Val0", "Val1", "Val2" }, arr);
 
@@ -629,7 +616,7 @@ public class N201Test extends TestBase {
         N.setAll(list, generator);
         assertEquals(Arrays.asList("Item0", "Item1", "Item2"), list);
 
-        List<Integer> linkedList = new LinkedList<>(Arrays.asList(0, 0, 0)); // Non-RandomAccess
+        List<Integer> linkedList = new LinkedList<>(Arrays.asList(0, 0, 0));
         IntFunction<Integer> intGen = i -> i * 10;
         N.setAll(linkedList, intGen);
         assertEquals(Arrays.asList(0, 10, 20), linkedList);
@@ -647,9 +634,9 @@ public class N201Test extends TestBase {
             return val.toUpperCase() + idx;
         };
         assertThrows(IOException.class, () -> N.setAll(arr, converter));
-        assertEquals("A0", arr[0]); // "a" becomes "A0"
-        assertEquals("b", arr[1]); // "b" causes exception, remains "b"
-        assertEquals("c", arr[2]); // "c" is not processed
+        assertEquals("A0", arr[0]);
+        assertEquals("b", arr[1]);
+        assertEquals("c", arr[2]);
 
         String[] arr2 = { "x", "y" };
         Throwables.IntObjFunction<String, String, IOException> noExConverter = (idx, val) -> val.toUpperCase() + idx;
@@ -673,7 +660,7 @@ public class N201Test extends TestBase {
         assertEquals("b", list.get(1));
         assertEquals("c", list.get(2));
 
-        List<String> list2 = new LinkedList<>(Arrays.asList("x", "y")); // Non-RandomAccess
+        List<String> list2 = new LinkedList<>(Arrays.asList("x", "y"));
         Throwables.IntObjFunction<String, String, IOException> noExConverter = (idx, val) -> val.toUpperCase() + idx;
         N.setAll(list2, noExConverter);
         assertEquals(Arrays.asList("X0", "Y1"), list2);
@@ -681,13 +668,11 @@ public class N201Test extends TestBase {
         N.setAll((List<String>) null, noExConverter);
         N.setAll(new ArrayList<String>(), noExConverter);
     }
-    // endregion
 
-    // region copyThenSetAll tests
     @Test
     public void testCopyThenSetAllArrayWithGenerator() {
         String[] original = { "a", "b", "c" };
-        String[] originalCopy = Arrays.copyOf(original, original.length); // To check original is unchanged
+        String[] originalCopy = Arrays.copyOf(original, original.length);
         IntFunction<String> generator = i -> "New" + i;
 
         String[] result = N.copyThenSetAll(original, generator);
@@ -718,9 +703,7 @@ public class N201Test extends TestBase {
         assertNull(N.copyThenSetAll((String[]) null, converter));
         assertArrayEquals(new String[0], N.copyThenSetAll(new String[0], converter));
     }
-    // endregion
 
-    // region copyThenReplaceAll tests
     @Test
     public void testCopyThenReplaceAllArray() {
         String[] original = { "a", "b", "a" };
@@ -734,9 +717,7 @@ public class N201Test extends TestBase {
         assertNull(N.copyThenReplaceAll(null, operator));
         assertArrayEquals(new String[0], N.copyThenReplaceAll(new String[0], operator));
     }
-    // endregion
 
-    // region copyThenUpdateAll tests
     @Test
     public void testCopyThenUpdateAllArray() throws IOException {
         String[] original = { "a", "b", "c" };
@@ -757,14 +738,12 @@ public class N201Test extends TestBase {
         assertNull(N.copyThenUpdateAll(null, operator));
         assertArrayEquals(new String[0], N.copyThenUpdateAll(new String[0], operator));
     }
-    // endregion
 
-    // region add (single element) tests
     @Test
     public void testAddBoolean() {
         assertArrayEquals(new boolean[] { true }, N.add(new boolean[0], true));
         assertArrayEquals(new boolean[] { false, true }, N.add(new boolean[] { false }, true));
-        assertArrayEquals(new boolean[] { true }, N.add((boolean[]) null, true)); // Based on isEmpty behavior
+        assertArrayEquals(new boolean[] { true }, N.add((boolean[]) null, true));
     }
 
     @Test
@@ -827,16 +806,14 @@ public class N201Test extends TestBase {
     public void testAddGenericArray() {
         assertArrayEquals(new Integer[] { 1 }, N.add(new Integer[0], 1));
         assertArrayEquals(new Integer[] { 5, 1 }, N.add(new Integer[] { 5 }, 1));
-        assertThrows(IllegalArgumentException.class, () -> N.add((Integer[]) null, 1)); // @NotNull
+        assertThrows(IllegalArgumentException.class, () -> N.add((Integer[]) null, 1));
     }
-    // endregion
 
-    // region addAll (varargs/Iterable/Iterator) tests
     @Test
     public void testAddAllBooleanArray() {
         assertArrayEquals(new boolean[] { true, false }, N.addAll(new boolean[0], true, false));
         assertArrayEquals(new boolean[] { true, true, false }, N.addAll(new boolean[] { true }, true, false));
-        assertArrayEquals(new boolean[] { true }, N.addAll(new boolean[] { true })); // empty elementsToAdd
+        assertArrayEquals(new boolean[] { true }, N.addAll(new boolean[] { true }));
         assertArrayEquals(new boolean[0], N.addAll(new boolean[0]));
         assertArrayEquals(new boolean[] { true, false }, N.addAll((boolean[]) null, true, false));
     }
@@ -850,7 +827,6 @@ public class N201Test extends TestBase {
         assertArrayEquals(new char[] { 'a', 'b' }, N.addAll((char[]) null, 'a', 'b'));
     }
 
-    // Similar tests for byte, short, int, long, float, double, String arrays
     @Test
     public void testAddAllIntArray() {
         assertArrayEquals(new int[] { 1, 2 }, N.addAll(new int[0], 1, 2));
@@ -865,12 +841,12 @@ public class N201Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> N.addAll((Integer[]) null, 1, 2));
 
         Integer[] arr = { 1 };
-        Integer[] result = N.addAll(arr, (Integer[]) null); // elementsToAdd is null
-        assertArrayEquals(new Integer[] { 1 }, result); // based on how `copy` handles null src
+        Integer[] result = N.addAll(arr, (Integer[]) null);
+        assertArrayEquals(new Integer[] { 1 }, result);
 
         Integer[] arr2 = {};
         Integer[] result2 = N.addAll(arr2, (Integer[]) null);
-        assertArrayEquals(new Integer[] {}, result2); //
+        assertArrayEquals(new Integer[] {}, result2);
     }
 
     @Test
@@ -878,7 +854,7 @@ public class N201Test extends TestBase {
         Collection<String> coll = new ArrayList<>(Arrays.asList("a"));
         assertTrue(N.addAll(coll, "b", "c"));
         assertEquals(Arrays.asList("a", "b", "c"), coll);
-        assertFalse(N.addAll(coll)); // no elements to add
+        assertFalse(N.addAll(coll));
         assertThrows(IllegalArgumentException.class, () -> N.addAll((Collection<String>) null, "a"));
     }
 
@@ -901,9 +877,7 @@ public class N201Test extends TestBase {
         assertFalse(N.addAll(coll, new ArrayList<String>().iterator()));
         assertThrows(IllegalArgumentException.class, () -> N.addAll((Collection<String>) null, Arrays.asList("a").iterator()));
     }
-    // endregion
 
-    // region insert tests
     @Test
     public void testInsertBoolean() {
         assertArrayEquals(new boolean[] { true }, N.insert(new boolean[0], 0, true));
@@ -914,7 +888,6 @@ public class N201Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> N.insert(new boolean[] { true }, -1, false));
     }
 
-    // Similar for char, byte, short, int, long, float, double, String arrays
     @Test
     public void testInsertInt() {
         assertArrayEquals(new int[] { 5, 1, 2 }, N.insert(new int[] { 1, 2 }, 0, 5));
@@ -935,13 +908,11 @@ public class N201Test extends TestBase {
         assertEquals("ba", N.insert("b", 1, "a"));
         assertEquals("hello world", N.insert("helloworld", 5, " "));
         assertEquals("test", N.insert("test", 0, ""));
-        assertEquals("test", N.insert("test", 4, null)); // nullToEmpty for strToInsert
+        assertEquals("test", N.insert("test", 4, null));
         assertEquals("abc", N.insert("", 0, "abc"));
         assertThrows(IndexOutOfBoundsException.class, () -> N.insert("abc", 4, "d"));
     }
-    // endregion
 
-    // region insertAll tests
     @Test
     public void testInsertAllBooleanArray() {
         assertArrayEquals(new boolean[] { true, false, true, false }, N.insertAll(new boolean[] { true, false }, 0, true, false));
@@ -950,7 +921,6 @@ public class N201Test extends TestBase {
         assertArrayEquals(new boolean[] { true, false }, N.insertAll(new boolean[0], 0, true, false));
     }
 
-    // Similar for other primitive types and String
     @Test
     public void testInsertAllIntArray() {
         assertArrayEquals(new int[] { 5, 6, 1, 2, 3 }, N.insertAll(new int[] { 1, 2, 3 }, 0, 5, 6));
@@ -968,7 +938,7 @@ public class N201Test extends TestBase {
         List<String> list = new ArrayList<>(Arrays.asList("a", "d"));
         assertTrue(N.insertAll(list, 1, "b", "c"));
         assertEquals(Arrays.asList("a", "b", "c", "d"), list);
-        assertFalse(N.insertAll(list, 1)); // empty elements to insert
+        assertFalse(N.insertAll(list, 1));
         assertThrows(IllegalArgumentException.class, () -> N.insertAll((List<String>) null, 0, "a"));
         assertThrows(IndexOutOfBoundsException.class, () -> N.insertAll(list, 10, "x"));
     }
@@ -982,9 +952,7 @@ public class N201Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> N.insertAll((List<String>) null, 0, Arrays.asList("a")));
         assertThrows(IndexOutOfBoundsException.class, () -> N.insertAll(list, 10, Arrays.asList("x")));
     }
-    // endregion
 
-    // region deleteByIndex tests
     @Test
     public void testDeleteByIndexBoolean() {
         assertArrayEquals(new boolean[] { false }, N.deleteByIndex(new boolean[] { true, false }, 0));
@@ -994,7 +962,6 @@ public class N201Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> N.deleteByIndex(new boolean[0], 0));
     }
 
-    // Similar for other primitive types and String
     @Test
     public void testDeleteByIndexInt() {
         assertArrayEquals(new int[] { 2, 3 }, N.deleteByIndex(new int[] { 1, 2, 3 }, 0));
@@ -1005,38 +972,31 @@ public class N201Test extends TestBase {
     @Test
     public void testDeleteByIndexGeneric() {
         assertArrayEquals(new String[] { "b", "c" }, N.deleteByIndex(new String[] { "a", "b", "c" }, 0));
-        // The original code has `// checkArgNotNull(a, cs.a);` commented out for primitive arrays.
-        // For generic arrays, it's not explicitly checked in deleteByIndex if `a` is null, but `len(a)` would fail.
-        // Assuming len(a) or other helpers would throw NPE or IAE if `a` is null.
-        // If `a` is non-null but empty, `len(a)` is 0, `checkElementIndex` will throw.
         String[] emptyArr = {};
         assertThrows(IndexOutOfBoundsException.class, () -> N.deleteByIndex(emptyArr, 0));
         String[] nullArr = null;
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteByIndex(nullArr, 0)); // Due to len(a) internally
+        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteByIndex(nullArr, 0));
 
     }
-    // endregion
 
-    // region deleteAllByIndices tests
     @Test
     public void testDeleteAllByIndicesBoolean() {
         assertArrayEquals(new boolean[] { true, true }, N.deleteAllByIndices(new boolean[] { true, false, true }, 1));
         assertArrayEquals(new boolean[] { false }, N.deleteAllByIndices(new boolean[] { true, false, true }, 0, 2));
-        assertArrayEquals(new boolean[] { true, false, true }, N.deleteAllByIndices(new boolean[] { true, false, true })); // no indices
+        assertArrayEquals(new boolean[] { true, false, true }, N.deleteAllByIndices(new boolean[] { true, false, true }));
         assertArrayEquals(new boolean[0], N.deleteAllByIndices(new boolean[] { true, false, true }, 0, 1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteAllByIndices(new boolean[0], 0, 1, 2)); // empty array, indices out of bound
-        assertArrayEquals(new boolean[0], N.deleteAllByIndices(new boolean[0])); // empty array, no indices
+        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteAllByIndices(new boolean[0], 0, 1, 2));
+        assertArrayEquals(new boolean[0], N.deleteAllByIndices(new boolean[0]));
 
         boolean[] arrToClone = { true, false };
         boolean[] cloned = N.deleteAllByIndices(arrToClone);
-        assertNotSame(arrToClone, cloned); // Should be a clone
+        assertNotSame(arrToClone, cloned);
         assertArrayEquals(arrToClone, cloned);
 
         assertThrows(IndexOutOfBoundsException.class, () -> N.deleteAllByIndices(new boolean[] { true }, 1));
         assertThrows(IndexOutOfBoundsException.class, () -> N.deleteAllByIndices(new boolean[] { true }, -1));
     }
 
-    // Similar for other primitive types and String
     @Test
     public void testDeleteAllByIndicesInt() {
         assertArrayEquals(new int[] { 1, 4 }, N.deleteAllByIndices(new int[] { 1, 2, 3, 4 }, 1, 2));
@@ -1049,45 +1009,38 @@ public class N201Test extends TestBase {
     public void testDeleteAllByIndicesGeneric() {
         assertArrayEquals(new String[] { "a", "d" }, N.deleteAllByIndices(new String[] { "a", "b", "c", "d" }, 1, 2));
         String[] arrNull = null;
-        // Depending on how N.isEmpty(indices) and N.len(a) behave with null.
-        // If indices is empty, it clones 'a'. N.clone(null) might be an issue or specific behavior.
-        // The code uses `a == null ? EMPTY_..._ARRAY : a.clone();` for primitives
-        // For generic: `isEmpty(a) ? a : a.clone();` if indices are empty
         assertThrows(NullPointerException.class, () -> N.deleteAllByIndices(arrNull, 1, 2));
     }
 
     @Test
     public void testDeleteAllByIndicesList() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        assertTrue(N.deleteAllByIndices(list, 1, 3)); // delete "b", "d"
+        assertTrue(N.deleteAllByIndices(list, 1, 3));
         assertEquals(Arrays.asList("a", "c", "e"), list);
 
-        List<String> list2 = new LinkedList<>(Arrays.asList("a", "b", "c", "d", "e")); // Test LinkedList
-        assertTrue(N.deleteAllByIndices(list2, 0, 4)); // delete "a", "e"
+        List<String> list2 = new LinkedList<>(Arrays.asList("a", "b", "c", "d", "e"));
+        assertTrue(N.deleteAllByIndices(list2, 0, 4));
         assertEquals(Arrays.asList("b", "c", "d"), list2);
 
-        assertFalse(N.deleteAllByIndices(list, new int[0])); // no indices
+        assertFalse(N.deleteAllByIndices(list, new int[0]));
         assertThrows(IllegalArgumentException.class, () -> N.deleteAllByIndices((List<String>) null, 0));
         assertThrows(IndexOutOfBoundsException.class, () -> N.deleteAllByIndices(list, 10));
 
         List<Integer> intList = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
-        N.deleteAllByIndices(intList, 0, 0, 1); // Duplicate indices
+        N.deleteAllByIndices(intList, 0, 0, 1);
         assertEquals(Arrays.asList(3, 4, 5), intList);
 
     }
-    // endregion
 
-    // region remove (single value, first occurrence) tests
     @Test
     public void testRemoveBoolean() {
         assertArrayEquals(new boolean[] { false }, N.remove(new boolean[] { true, false }, true));
         assertArrayEquals(new boolean[] { true, true }, N.remove(new boolean[] { true, false, true }, false));
-        assertArrayEquals(new boolean[] { true }, N.remove(new boolean[] { true }, false)); // value not found
+        assertArrayEquals(new boolean[] { true }, N.remove(new boolean[] { true }, false));
         assertArrayEquals(new boolean[0], N.remove(new boolean[0], true));
         assertArrayEquals(new boolean[0], N.remove(null, true));
     }
 
-    // Similar for other primitive types and String
     @Test
     public void testRemoveInt() {
         assertArrayEquals(new int[] { 2, 3, 1 }, N.remove(new int[] { 1, 2, 3, 1 }, 1));
@@ -1097,9 +1050,9 @@ public class N201Test extends TestBase {
     @Test
     public void testRemoveGenericArray() {
         assertArrayEquals(new String[] { "b", "c", "a" }, N.remove(new String[] { "a", "b", "c", "a" }, "a"));
-        assertArrayEquals(new String[] { "a", "b" }, N.remove(new String[] { "a", "b" }, "c")); // not found
+        assertArrayEquals(new String[] { "a", "b" }, N.remove(new String[] { "a", "b" }, "c"));
         String[] arrNull = null;
-        assertArrayEquals(N.EMPTY_STRING_ARRAY, N.remove(arrNull, "a")); // returns a if empty or null
+        assertArrayEquals(N.EMPTY_STRING_ARRAY, N.remove(arrNull, "a"));
         String[] emptyArr = {};
         assertArrayEquals(N.EMPTY_STRING_ARRAY, N.remove(emptyArr, "a"));
     }
@@ -1109,27 +1062,24 @@ public class N201Test extends TestBase {
         Collection<String> coll = new ArrayList<>(Arrays.asList("a", "b", "a", "c"));
         assertTrue(N.remove(coll, "a"));
         assertEquals(Arrays.asList("b", "a", "c"), coll);
-        assertFalse(N.remove(coll, "d")); // not found
+        assertFalse(N.remove(coll, "d"));
         assertFalse(N.remove(new ArrayList<String>(), "a"));
         assertFalse(N.remove((Collection<String>) null, "a"));
     }
-    // endregion
 
-    // region removeAll (multiple values, all occurrences) tests
     @Test
     public void testRemoveAllBooleanArray() {
-        assertArrayEquals(new boolean[] { false }, N.removeAll(new boolean[] { true, false, true }, true)); // single value to remove
+        assertArrayEquals(new boolean[] { false }, N.removeAll(new boolean[] { true, false, true }, true));
         assertArrayEquals(new boolean[0], N.removeAll(new boolean[] { true, false, true }, true, false));
-        assertArrayEquals(new boolean[] { true, false }, N.removeAll(new boolean[] { true, false }, new boolean[0])); // no values to remove
+        assertArrayEquals(new boolean[] { true, false }, N.removeAll(new boolean[] { true, false }, new boolean[0]));
         assertArrayEquals(new boolean[0], N.removeAll(new boolean[0], true));
         assertArrayEquals(new boolean[0], N.removeAll((boolean[]) null, true));
     }
 
-    // Similar for other primitive types and String
     @Test
     public void testRemoveAllIntArray() {
         assertArrayEquals(new int[] { 3 }, N.removeAll(new int[] { 1, 2, 1, 3, 2 }, 1, 2));
-        assertArrayEquals(new int[] { 1, 2, 3 }, N.removeAll(new int[] { 1, 2, 3 }, 4, 5)); // none to remove
+        assertArrayEquals(new int[] { 1, 2, 3 }, N.removeAll(new int[] { 1, 2, 3 }, 4, 5));
     }
 
     @Test
@@ -1137,7 +1087,7 @@ public class N201Test extends TestBase {
         assertArrayEquals(new String[] { "c" }, N.removeAll(new String[] { "a", "b", "a", "c", "b" }, "a", "b"));
         String[] arr = { "a", "b" };
         String[] result = N.removeAll(arr, "x", "y");
-        assertNotSame(arr, result); // Should be a clone if no removal
+        assertNotSame(arr, result);
         assertArrayEquals(arr, result);
 
         String[] arrNull = null;
@@ -1151,9 +1101,9 @@ public class N201Test extends TestBase {
         Collection<String> coll = new ArrayList<>(Arrays.asList("a", "b", "a", "c", "b", "d"));
         assertTrue(N.removeAll(coll, "a", "b"));
         assertEquals(Arrays.asList("c", "d"), coll);
-        assertFalse(N.removeAll(coll, "x", "y")); // none to remove
+        assertFalse(N.removeAll(coll, "x", "y"));
         assertFalse(N.removeAll(new ArrayList<String>(), "a"));
-        assertFalse(N.removeAll(coll)); // no varargs
+        assertFalse(N.removeAll(coll));
     }
 
     @Test
@@ -1164,9 +1114,8 @@ public class N201Test extends TestBase {
         assertFalse(N.removeAll(coll, Arrays.asList("x", "y")));
         assertFalse(N.removeAll(coll, (Iterable<String>) null));
 
-        // Test with HashSet for specific path
         Collection<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
-        assertTrue(N.removeAll(set, Arrays.asList("a", "x"))); // remove "a", "x" is not there
+        assertTrue(N.removeAll(set, Arrays.asList("a", "x")));
         assertEquals(new HashSet<>(Arrays.asList("b", "c")), set);
     }
 
@@ -1178,14 +1127,11 @@ public class N201Test extends TestBase {
         assertFalse(N.removeAll(coll, Arrays.asList("x", "y").iterator()));
         assertFalse(N.removeAll(coll, (Iterator<String>) null));
 
-        // Test with Set for specific path
         Collection<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
         assertTrue(N.removeAll(set, Arrays.asList("a", "x").iterator()));
         assertEquals(new HashSet<>(Arrays.asList("b", "c")), set);
     }
-    // endregion
 
-    // region removeAllOccurrences (single value, all its occurrences)
     @Test
     public void testRemoveAllOccurrencesBoolean() {
         assertArrayEquals(new boolean[] { false }, N.removeAllOccurrences(new boolean[] { true, false, true }, true));
@@ -1194,7 +1140,6 @@ public class N201Test extends TestBase {
         assertArrayEquals(new boolean[0], N.removeAllOccurrences(null, true));
     }
 
-    // Similar for other primitives and String
     @Test
     public void testRemoveAllOccurrencesInt() {
         assertArrayEquals(new int[] { 2, 3 }, N.removeAllOccurrences(new int[] { 1, 2, 1, 3, 1 }, 1));
@@ -1215,9 +1160,7 @@ public class N201Test extends TestBase {
         assertFalse(N.removeAllOccurrences(coll, "d"));
         assertFalse(N.removeAllOccurrences(new ArrayList<String>(), "a"));
     }
-    // endregion
 
-    // region removeDuplicates tests
     @Test
     public void testRemoveDuplicatesBooleanArrayDeprecated() {
         assertArrayEquals(new boolean[] { true, false }, N.removeDuplicates(new boolean[] { true, false, true }));
@@ -1228,8 +1171,8 @@ public class N201Test extends TestBase {
 
     @Test
     public void testRemoveDuplicatesCharArray() {
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, N.removeDuplicates(new char[] { 'a', 'b', 'a', 'c', 'b' })); // unsorted
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, N.removeDuplicates(new char[] { 'a', 'a', 'b', 'c', 'c' }, true)); // sorted
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, N.removeDuplicates(new char[] { 'a', 'b', 'a', 'c', 'b' }));
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, N.removeDuplicates(new char[] { 'a', 'a', 'b', 'c', 'c' }, true));
         assertArrayEquals(new char[] { 'a' }, N.removeDuplicates(new char[] { 'a', 'a', 'a' }));
         assertArrayEquals(new char[0], N.removeDuplicates(new char[0]));
         assertArrayEquals(new char[0], N.removeDuplicates((char[]) null));
@@ -1243,18 +1186,16 @@ public class N201Test extends TestBase {
 
     @Test
     public void testRemoveDuplicatesCharArrayRangeIsSorted() {
-        assertArrayEquals(new char[] { 'b', 'a' }, N.removeDuplicates(new char[] { 'x', 'b', 'b', 'a', 'y' }, 1, 4, false)); // b,b,a -> b,a
-        assertArrayEquals(new char[] { 'a', 'b' }, N.removeDuplicates(new char[] { 'x', 'a', 'a', 'b', 'y' }, 1, 4, true)); // a,a,b -> a,b
+        assertArrayEquals(new char[] { 'b', 'a' }, N.removeDuplicates(new char[] { 'x', 'b', 'b', 'a', 'y' }, 1, 4, false));
+        assertArrayEquals(new char[] { 'a', 'b' }, N.removeDuplicates(new char[] { 'x', 'a', 'a', 'b', 'y' }, 1, 4, true));
         assertArrayEquals(new char[0], N.removeDuplicates(new char[] { 'a', 'b' }, 1, 1, true));
         assertArrayEquals(new char[] { 'b' }, N.removeDuplicates(new char[] { 'a', 'b', 'c' }, 1, 2, false));
     }
 
-    // Similar tests for byte, short, int, long, float, double arrays.
-    // Only showing one example for brevity:
     @Test
     public void testRemoveDuplicatesIntArray() {
-        assertArrayEquals(new int[] { 1, 2, 3 }, N.removeDuplicates(new int[] { 1, 2, 1, 3, 2 })); // unsorted
-        assertArrayEquals(new int[] { 1, 2, 3 }, N.removeDuplicates(new int[] { 1, 1, 2, 3, 3 }, true)); // sorted
+        assertArrayEquals(new int[] { 1, 2, 3 }, N.removeDuplicates(new int[] { 1, 2, 1, 3, 2 }));
+        assertArrayEquals(new int[] { 1, 2, 3 }, N.removeDuplicates(new int[] { 1, 1, 2, 3, 3 }, true));
     }
 
     @Test
@@ -1283,8 +1224,7 @@ public class N201Test extends TestBase {
     public void testRemoveDuplicatesCollection() {
         Collection<String> coll = new ArrayList<>(Arrays.asList("a", "b", "a", "c", "b"));
         assertTrue(N.removeDuplicates(coll));
-        // Order is preserved due to ArrayList -> distinct -> clear/addAll
-        assertEquals(new HashSet<>(Arrays.asList("a", "b", "c")), new HashSet<>(coll)); // Check content
+        assertEquals(new HashSet<>(Arrays.asList("a", "b", "c")), new HashSet<>(coll));
         assertEquals(3, coll.size());
 
         Collection<String> noDups = new ArrayList<>(Arrays.asList("a", "b", "c"));
@@ -1295,17 +1235,16 @@ public class N201Test extends TestBase {
         assertFalse(N.removeDuplicates(emptyColl));
 
         Collection<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
-        assertFalse(N.removeDuplicates(set)); // Set already has no duplicates
+        assertFalse(N.removeDuplicates(set));
 
-        Collection<Integer> sortedList = new LinkedList<>(Arrays.asList(1, 1, 2, 3, 3, 3, 4)); // LinkedList
+        Collection<Integer> sortedList = new LinkedList<>(Arrays.asList(1, 1, 2, 3, 3, 3, 4));
         assertTrue(N.removeDuplicates(sortedList, true));
         assertEquals(Arrays.asList(1, 2, 3, 4), sortedList);
 
         Collection<Integer> unsortedList = new LinkedList<>(Arrays.asList(3, 1, 2, 1, 3));
         assertTrue(N.removeDuplicates(unsortedList, false));
-        assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), new HashSet<>(unsortedList)); // Content check for unsorted
+        assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), new HashSet<>(unsortedList));
         assertEquals(3, unsortedList.size());
 
     }
-    // endregion
 }

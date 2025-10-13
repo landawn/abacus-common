@@ -4,9 +4,11 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class ReflectASM100Test extends TestBase {
 
     public static class TestPerson {
@@ -15,7 +17,6 @@ public class ReflectASM100Test extends TestBase {
         public boolean active;
 
         public TestPerson() {
-            // Default constructor required for ReflectASM
         }
 
         public TestPerson(String name, int age) {
@@ -50,7 +51,6 @@ public class ReflectASM100Test extends TestBase {
         ReflectASM<TestPerson> reflect = ReflectASM.on("com.landawn.abacus.util.ReflectASM100Test$TestPerson");
         Assertions.assertNotNull(reflect);
 
-        // Test creating instance
         reflect._new();
     }
 
@@ -68,7 +68,6 @@ public class ReflectASM100Test extends TestBase {
         ReflectASM<TestPerson> reflect = ReflectASM.on(person);
         Assertions.assertNotNull(reflect);
 
-        // Verify we can access fields
         String name = reflect.get("name");
         Assertions.assertEquals("John", name);
     }
@@ -137,7 +136,6 @@ public class ReflectASM100Test extends TestBase {
         Integer birthYear = reflect.invoke("calculateBirthYear", 2024);
         Assertions.assertEquals(1994, birthYear);
 
-        // Test method with multiple args
         reflect.invoke("setDetails", "Frank", 45);
         Assertions.assertEquals("Frank", person.name);
         Assertions.assertEquals(45, person.age);
@@ -176,7 +174,6 @@ public class ReflectASM100Test extends TestBase {
 
     @Test
     public void testComplexScenario() {
-        // Test creating instance and chaining operations
         TestPerson person = new TestPerson();
         ReflectASM.on(person).set("name", "Ivy").set("age", 22).call("doSomething");
 
@@ -185,7 +182,6 @@ public class ReflectASM100Test extends TestBase {
         Assertions.assertEquals(22, person.age);
         Assertions.assertTrue(person.active);
 
-        // Test getting values after creation
         ReflectASM<TestPerson> reflect = ReflectASM.on(person);
         String info = reflect.invoke("getInfo");
         Assertions.assertEquals("Ivy is 22 years old", info);
@@ -193,7 +189,6 @@ public class ReflectASM100Test extends TestBase {
 
     @Test
     public void testWithList() {
-        // Test that ReflectASM works with standard Java classes
         ReflectASM<ArrayList> listReflect = ReflectASM.on(ArrayList.class);
         listReflect._new();
     }

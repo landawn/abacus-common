@@ -11,11 +11,13 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class DoubleType100Test extends TestBase {
 
     private DoubleType doubleType;
@@ -41,7 +43,6 @@ public class DoubleType100Test extends TestBase {
 
     @Test
     public void testGetByColumnIndex() throws SQLException {
-        // Test with Double object
         Double expectedDouble = 3.14;
         when(resultSet.getObject(1)).thenReturn(expectedDouble);
 
@@ -49,11 +50,9 @@ public class DoubleType100Test extends TestBase {
         assertEquals(expectedDouble, result);
         verify(resultSet).getObject(1);
 
-        // Test with null
         when(resultSet.getObject(2)).thenReturn(null);
         assertNull(doubleType.get(resultSet, 2));
 
-        // Test with other Number type
         when(resultSet.getObject(3)).thenReturn(42);
         result = doubleType.get(resultSet, 3);
         assertEquals(42.0, result);
@@ -61,7 +60,6 @@ public class DoubleType100Test extends TestBase {
 
     @Test
     public void testGetByColumnLabel() throws SQLException {
-        // Test with Double object
         Double expectedDouble = 3.14;
         when(resultSet.getObject("doubleColumn")).thenReturn(expectedDouble);
 
@@ -69,11 +67,9 @@ public class DoubleType100Test extends TestBase {
         assertEquals(expectedDouble, result);
         verify(resultSet).getObject("doubleColumn");
 
-        // Test with null
         when(resultSet.getObject("nullColumn")).thenReturn(null);
         assertNull(doubleType.get(resultSet, "nullColumn"));
 
-        // Test with other Number type
         when(resultSet.getObject("intColumn")).thenReturn(42);
         result = doubleType.get(resultSet, "intColumn");
         assertEquals(42.0, result);

@@ -316,7 +316,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     public BooleanIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
-        if (n <= 0) {
+        if (n == 0) {
             return this;
         }
 
@@ -588,9 +588,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      */
     @Beta
     public ObjIterator<IndexedBoolean> indexed(final long startIndex) {
-        if (startIndex < 0) {
-            throw new IllegalArgumentException("Invalid start index: " + startIndex);
-        }
+        N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final BooleanIterator iter = this;
 
@@ -665,6 +663,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         int idx = 0;
 
         while (hasNext()) {
+            if (idx < 0) {
+                throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
+            }
             action.accept(idx++, nextBoolean());
         }
     }

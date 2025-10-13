@@ -59,7 +59,8 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.junit.jupiter.api.Disabled; // For tests that might be environment-specific
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -67,18 +68,17 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.guava.Files.MoreFiles;
 
+@Tag("new-test")
 public class IOUtil200Test extends TestBase {
     private static final SecureRandom random = new SecureRandom();
     @TempDir
     Path tempDir;
 
-    // Helper method to create a temporary file with specific string content
     private File createTempFileWithContent(String prefix, String suffix, String content) throws IOException {
         return createTempFileWithContent(prefix, suffix, content, StandardCharsets.UTF_8);
     }
 
     private File createTempFileWithContent(String prefix, String suffix, String content, Charset charset) throws IOException {
-        // File tempFile = Files.createTempFile(tempDir, prefix, suffix).toFile();
 
         long n = random.nextLong();
         String s = tempDir.resolve(prefix).toString() + Long.toUnsignedString(n) + Strings.nullToEmpty(suffix);
@@ -91,9 +91,7 @@ public class IOUtil200Test extends TestBase {
         return tempFile;
     }
 
-    // Helper method to create a temporary file with specific byte content
     private File createTempFileWithContent(String prefix, String suffix, byte[] content) throws IOException {
-        // File tempFile = Files.createTempFile(tempDir, prefix, suffix).toFile();
         long n = random.nextLong();
         String s = tempDir.resolve(prefix).toString() + Long.toUnsignedString(n) + Strings.nullToEmpty(suffix);
         File tempFile = tempDir.getFileSystem().getPath(s).toFile();
@@ -115,14 +113,12 @@ public class IOUtil200Test extends TestBase {
 
     @Test
     public void testConstants() {
-        // Basic size constants
         assertEquals(1024, IOUtil.ONE_KB);
         assertEquals(1024 * 1024, IOUtil.ONE_MB);
         assertEquals(1024 * 1024 * 1024, IOUtil.ONE_GB);
         assertTrue(IOUtil.MAX_MEMORY_IN_MB > 0);
         assertTrue(IOUtil.CPU_CORES > 0);
 
-        // System properties based constants (check for non-nullness)
         assertNotNull(IOUtil.OS_NAME);
         assertNotNull(IOUtil.OS_ARCH);
         assertNotNull(IOUtil.OS_VERSION);
@@ -144,18 +140,15 @@ public class IOUtil200Test extends TestBase {
         String hostName = IOUtil.getHostName();
         assertNotNull(hostName);
         assertFalse(hostName.isEmpty());
-        // Further assertion depends on knowing the actual hostname or if it's "UNKNOWN_HOST_NAME"
     }
 
     @Test
     @Disabled("Depends on FileSystemUtil and external environment, hard to unit test reliably")
     public void testFreeDiskSpaceKb() {
-        // These methods rely on FileSystemUtil which might involve platform-specific commands.
-        // A simple call to ensure no exceptions for the current path.
-        assertTrue(IOUtil.freeDiskSpaceKb() >= 0); // Should be non-negative
+        assertTrue(IOUtil.freeDiskSpaceKb() >= 0);
         File currentDir = new File(".");
         assertTrue(IOUtil.freeDiskSpaceKb(currentDir.getAbsolutePath()) >= 0);
-        assertTrue(IOUtil.freeDiskSpaceKb(currentDir.getAbsolutePath(), 5000) >= 0); // with timeout
+        assertTrue(IOUtil.freeDiskSpaceKb(currentDir.getAbsolutePath(), 5000) >= 0);
     }
 
     @Test
@@ -170,11 +163,10 @@ public class IOUtil200Test extends TestBase {
         char[] convertedCharsUtf8 = IOUtil.bytes2Chars(utf8Bytes, StandardCharsets.UTF_8);
         assertArrayEquals(testChars, convertedCharsUtf8);
 
-        byte[] defaultCharsetBytes = IOUtil.chars2Bytes(testChars); // Uses default charset
-        char[] convertedCharsDefault = IOUtil.bytes2Chars(defaultCharsetBytes); // Uses default charset
+        byte[] defaultCharsetBytes = IOUtil.chars2Bytes(testChars);
+        char[] convertedCharsDefault = IOUtil.bytes2Chars(defaultCharsetBytes);
         assertArrayEquals(testChars, convertedCharsDefault);
 
-        // Test with offset and count
         char[] subChars = { 'W', 'o', 'r' };
         byte[] subBytesUtf8 = IOUtil.chars2Bytes(testChars, 6, 3, StandardCharsets.UTF_8);
         assertArrayEquals(IOUtil.chars2Bytes(subChars, StandardCharsets.UTF_8), subBytesUtf8);
@@ -182,7 +174,6 @@ public class IOUtil200Test extends TestBase {
         char[] convertedSubChars = IOUtil.bytes2Chars(subBytesUtf8, 0, subBytesUtf8.length, StandardCharsets.UTF_8);
         assertArrayEquals(subChars, convertedSubChars);
 
-        // Test null charset (should use default)
         byte[] bytesNullCharset = IOUtil.chars2Bytes(testChars, null);
         assertArrayEquals(defaultCharsetBytes, bytesNullCharset);
         char[] charsNullCharset = IOUtil.bytes2Chars(bytesNullCharset, null);
@@ -190,10 +181,9 @@ public class IOUtil200Test extends TestBase {
     }
 
     @Test
-    public void testStringConversions() {
+    public void testStringConversions() throws IOException {
         String testStr = "Hello Gemini";
 
-        // string2InputStream
         InputStream isDefault = IOUtil.string2InputStream(testStr);
         assertNotNull(isDefault);
         assertEquals(testStr, assertDoesNotThrow(() -> IOUtil.readAllToString(isDefault)));
@@ -202,17 +192,17 @@ public class IOUtil200Test extends TestBase {
         assertNotNull(isUtf8);
         assertEquals(testStr, assertDoesNotThrow(() -> IOUtil.readAllToString(isUtf8, StandardCharsets.UTF_8)));
 
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.string2InputStream(null));
+        InputStream is = IOUtil.string2InputStream(null);
 
-        // string2Reader
+        assertEquals(0, IOUtil.readBytes(is).length);
+
         Reader reader = IOUtil.string2Reader(testStr);
         assertNotNull(reader);
         assertEquals(testStr, assertDoesNotThrow(() -> IOUtil.readAllToString(reader)));
 
-        Reader readerNull = IOUtil.string2Reader(null); // Should be empty reader
+        Reader readerNull = IOUtil.string2Reader(null);
         assertEquals("", assertDoesNotThrow(() -> IOUtil.readAllToString(readerNull)));
 
-        // stringBuilder2Writer
         StringBuilder sb = new StringBuilder("Test SB");
         Writer writer = IOUtil.stringBuilder2Writer(sb);
         assertNotNull(writer);
@@ -230,7 +220,6 @@ public class IOUtil200Test extends TestBase {
         byte[] readContent = IOUtil.readAllBytes(testFile);
         assertArrayEquals(content, readContent);
 
-        // Test with empty file
         File emptyFile = createTempFileWithContent("emptyBytes", ".txt", new byte[0]);
         byte[] readEmptyContent = IOUtil.readAllBytes(emptyFile);
         assertArrayEquals(new byte[0], readEmptyContent);
@@ -253,24 +242,19 @@ public class IOUtil200Test extends TestBase {
         byte[] fullContent = "This is a test file for reading bytes.".getBytes(StandardCharsets.UTF_8);
         File testFile = createTempFileWithContent("readBytesOffset", ".txt", fullContent);
 
-        // Read all (using readBytes variant)
         byte[] readAll = IOUtil.readBytes(testFile);
         assertArrayEquals(fullContent, readAll);
 
-        // Read with offset and maxLen
         byte[] expectedPart = "is a test".getBytes(StandardCharsets.UTF_8);
         byte[] readPart = IOUtil.readBytes(testFile, 5, 9);
         assertArrayEquals(expectedPart, readPart);
 
-        // Read beyond file length
         byte[] readBeyond = IOUtil.readBytes(testFile, 0, (int) (fullContent.length + 10));
         assertArrayEquals(fullContent, readBeyond);
 
-        // Read from offset beyond file length
         byte[] readFromFarOffset = IOUtil.readBytes(testFile, fullContent.length + 5, 10);
         assertArrayEquals(N.EMPTY_BYTE_ARRAY, readFromFarOffset);
 
-        // Read zero length
         byte[] readZero = IOUtil.readBytes(testFile, 5, 0);
         assertArrayEquals(N.EMPTY_BYTE_ARRAY, readZero);
     }
@@ -279,28 +263,23 @@ public class IOUtil200Test extends TestBase {
     public void testReadBytesFromInputStream() throws IOException {
         byte[] fullContent = "Input stream for byte reading test.".getBytes(StandardCharsets.UTF_8);
 
-        // Read all (using readBytes variant)
         InputStream isReadAll = new ByteArrayInputStream(fullContent);
         byte[] readAll = IOUtil.readBytes(isReadAll);
         assertArrayEquals(fullContent, readAll);
 
-        // Read with offset and maxLen
         InputStream isReadPart = new ByteArrayInputStream(fullContent);
         byte[] expectedPart = "stream for".getBytes(StandardCharsets.UTF_8);
         byte[] readPart = IOUtil.readBytes(isReadPart, 6, 10);
         assertArrayEquals(expectedPart, readPart);
 
-        // Read beyond stream length
         InputStream isReadBeyond = new ByteArrayInputStream(fullContent);
         byte[] readBeyond = IOUtil.readBytes(isReadBeyond, 0, fullContent.length + 10);
         assertArrayEquals(fullContent, readBeyond);
 
-        // Read from offset beyond stream length
         InputStream isReadFromFarOffset = new ByteArrayInputStream(fullContent);
         byte[] readFromFarOffset = IOUtil.readBytes(isReadFromFarOffset, fullContent.length + 5, 10);
         assertArrayEquals(N.EMPTY_BYTE_ARRAY, readFromFarOffset);
 
-        // Read zero length
         InputStream isReadZero = new ByteArrayInputStream(fullContent);
         byte[] readZero = IOUtil.readBytes(isReadZero, 5, 0);
         assertArrayEquals(N.EMPTY_BYTE_ARRAY, readZero);
@@ -327,7 +306,7 @@ public class IOUtil200Test extends TestBase {
         String contentStr = "Stream content for chars. With € symbol.";
 
         InputStream isDefault = new ByteArrayInputStream(contentStr.getBytes(Charsets.DEFAULT));
-        char[] readContentDefault = IOUtil.readAllChars(isDefault); // Uses default charset
+        char[] readContentDefault = IOUtil.readAllChars(isDefault);
         assertArrayEquals(contentStr.toCharArray(), readContentDefault);
 
         InputStream isUtf8 = new ByteArrayInputStream(contentStr.getBytes(StandardCharsets.UTF_8));
@@ -356,24 +335,19 @@ public class IOUtil200Test extends TestBase {
         String fullContentStr = "This is a test file for reading characters.";
         File testFile = createTempFileWithContent("readCharsOffset", ".txt", fullContentStr, StandardCharsets.UTF_8);
 
-        // Read all (using readChars variant)
         char[] readAll = IOUtil.readChars(testFile, StandardCharsets.UTF_8);
         assertArrayEquals(fullContentStr.toCharArray(), readAll);
 
-        // Read with offset and maxLen
         String expectedPartStr = "is a test";
         char[] readPart = IOUtil.readChars(testFile, StandardCharsets.UTF_8, 5, 9);
         assertArrayEquals(expectedPartStr.toCharArray(), readPart);
 
-        // Read beyond file length
         char[] readBeyond = IOUtil.readChars(testFile, StandardCharsets.UTF_8, 0, fullContentStr.length() + 10);
         assertArrayEquals(fullContentStr.toCharArray(), readBeyond);
 
-        // Read from offset beyond file length
         char[] readFromFarOffset = IOUtil.readChars(testFile, StandardCharsets.UTF_8, fullContentStr.length() + 5, 10);
         assertArrayEquals(N.EMPTY_CHAR_ARRAY, readFromFarOffset);
 
-        // Read zero length
         char[] readZero = IOUtil.readChars(testFile, StandardCharsets.UTF_8, 5, 0);
         assertArrayEquals(N.EMPTY_CHAR_ARRAY, readZero);
     }
@@ -382,28 +356,23 @@ public class IOUtil200Test extends TestBase {
     public void testReadCharsFromInputStream() throws IOException {
         String fullContentStr = "Input stream for character reading test.";
 
-        // Read all (using readChars variant)
         InputStream isReadAll = new ByteArrayInputStream(fullContentStr.getBytes(StandardCharsets.UTF_8));
         char[] readAll = IOUtil.readChars(isReadAll, StandardCharsets.UTF_8);
         assertArrayEquals(fullContentStr.toCharArray(), readAll);
 
-        // Read with offset and maxLen
         InputStream isReadPart = new ByteArrayInputStream(fullContentStr.getBytes(StandardCharsets.UTF_8));
         String expectedPartStr = "stream for";
         char[] readPart = IOUtil.readChars(isReadPart, StandardCharsets.UTF_8, 6, 10);
         assertArrayEquals(expectedPartStr.toCharArray(), readPart);
 
-        // Read beyond stream length
         InputStream isReadBeyond = new ByteArrayInputStream(fullContentStr.getBytes(StandardCharsets.UTF_8));
         char[] readBeyond = IOUtil.readChars(isReadBeyond, StandardCharsets.UTF_8, 0, fullContentStr.length() + 10);
         assertArrayEquals(fullContentStr.toCharArray(), readBeyond);
 
-        // Read from offset beyond file length
         InputStream isReadFromFarOffset = new ByteArrayInputStream(fullContentStr.getBytes(StandardCharsets.UTF_8));
         char[] readFromFarOffset = IOUtil.readChars(isReadFromFarOffset, StandardCharsets.UTF_8, fullContentStr.length() + 5, 10);
         assertArrayEquals(N.EMPTY_CHAR_ARRAY, readFromFarOffset);
 
-        // Read zero length
         InputStream isReadZero = new ByteArrayInputStream(fullContentStr.getBytes(StandardCharsets.UTF_8));
         char[] readZero = IOUtil.readChars(isReadZero, StandardCharsets.UTF_8, 5, 0);
         assertArrayEquals(N.EMPTY_CHAR_ARRAY, readZero);
@@ -413,28 +382,23 @@ public class IOUtil200Test extends TestBase {
     public void testReadCharsFromReader() throws IOException {
         String fullContentStr = "Reader for character reading test.";
 
-        // Read all (using readChars variant)
         Reader rReadAll = new StringReader(fullContentStr);
         char[] readAll = IOUtil.readChars(rReadAll);
         assertArrayEquals(fullContentStr.toCharArray(), readAll);
 
-        // Read with offset and maxLen
         Reader rReadPart = new StringReader(fullContentStr);
         String expectedPartStr = "character";
         char[] readPart = IOUtil.readChars(rReadPart, 11, 9);
         assertArrayEquals(expectedPartStr.toCharArray(), readPart);
 
-        // Read beyond reader length
         Reader rReadBeyond = new StringReader(fullContentStr);
         char[] readBeyond = IOUtil.readChars(rReadBeyond, 0, fullContentStr.length() + 10);
         assertArrayEquals(fullContentStr.toCharArray(), readBeyond);
 
-        // Read from offset beyond reader length
         Reader rReadFromFarOffset = new StringReader(fullContentStr);
         char[] readFromFarOffset = IOUtil.readChars(rReadFromFarOffset, fullContentStr.length() + 5, 10);
         assertArrayEquals(N.EMPTY_CHAR_ARRAY, readFromFarOffset);
 
-        // Read zero length
         Reader rReadZero = new StringReader(fullContentStr);
         char[] readZero = IOUtil.readChars(rReadZero, 5, 0);
         assertArrayEquals(N.EMPTY_CHAR_ARRAY, readZero);
@@ -589,12 +553,12 @@ public class IOUtil200Test extends TestBase {
         assertEquals(expected1, IOUtil.readLines(testFile, StandardCharsets.UTF_8, 1, 2));
 
         List<String> expected2 = Arrays.asList("Line 3", "Line 4");
-        assertEquals(expected2, IOUtil.readLines(testFile, StandardCharsets.UTF_8, 3, 5)); // count > available
+        assertEquals(expected2, IOUtil.readLines(testFile, StandardCharsets.UTF_8, 3, 5));
 
         List<String> expected3 = Collections.emptyList();
-        assertEquals(expected3, IOUtil.readLines(testFile, StandardCharsets.UTF_8, 5, 2)); // offset > available
+        assertEquals(expected3, IOUtil.readLines(testFile, StandardCharsets.UTF_8, 5, 2));
 
-        assertEquals(expected3, IOUtil.readLines(testFile, StandardCharsets.UTF_8, 1, 0)); // count is 0
+        assertEquals(expected3, IOUtil.readLines(testFile, StandardCharsets.UTF_8, 1, 0));
     }
 
     @Test
@@ -640,69 +604,6 @@ public class IOUtil200Test extends TestBase {
     }
 
     @Test
-    public void testReadFirstLine() throws IOException {
-        String line1 = "First Line Text";
-        String line2 = "Second Line Text";
-        String content = line1 + IOUtil.LINE_SEPARATOR + line2;
-        File testFile = createTempFileWithContent("firstLine", ".txt", content, StandardCharsets.UTF_8);
-
-        assertEquals(line1, IOUtil.readFirstLine(testFile, StandardCharsets.UTF_8));
-
-        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-        assertEquals(line1, IOUtil.readFirstLine(is, StandardCharsets.UTF_8));
-
-        Reader reader = new StringReader(content);
-        assertEquals(line1, IOUtil.readFirstLine(reader));
-
-        File emptyFile = createTempFileWithContent("emptyFirst", ".txt", "");
-        assertNull(IOUtil.readFirstLine(emptyFile)); // readLine returns null for EOF
-
-        File singleLineFile = createTempFileWithContent("singleFirst", ".txt", "Only one line");
-        assertEquals("Only one line", IOUtil.readFirstLine(singleLineFile));
-    }
-
-    @Test
-    public void testReadLastLine() throws IOException {
-        String line1 = "Not last line";
-        String line2 = "Last Line Text with €";
-        String content = line1 + IOUtil.LINE_SEPARATOR + line2;
-        File testFile = createTempFileWithContent("lastLine", ".txt", content, StandardCharsets.UTF_8);
-        assertEquals(line2, IOUtil.readLastLine(testFile, StandardCharsets.UTF_8));
-
-        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-        assertEquals(line2, IOUtil.readLastLine(is, StandardCharsets.UTF_8));
-
-        Reader reader = new StringReader(content);
-        assertEquals(line2, IOUtil.readLastLine(reader));
-
-        File emptyFile = createTempFileWithContent("emptyLast", ".txt", "");
-        assertNull(IOUtil.readLastLine(emptyFile));
-
-        File singleLineFile = createTempFileWithContent("singleLast", ".txt", "Only one line");
-        assertEquals("Only one line", IOUtil.readLastLine(singleLineFile));
-    }
-
-    @Test
-    public void testReadLineByIndex() throws IOException {
-        String[] lines = { "Idx 0", "Idx 1 (Ümlaut)", "Idx 2 (€)", "Idx 3" };
-        String content = String.join(IOUtil.LINE_SEPARATOR, lines);
-        File testFile = createTempFileWithContent("idxLine", ".txt", content, StandardCharsets.UTF_8);
-
-        assertEquals("Idx 1 (Ümlaut)", IOUtil.readLine(testFile, StandardCharsets.UTF_8, 1));
-
-        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-        assertEquals("Idx 2 (€)", IOUtil.readLine(is, StandardCharsets.UTF_8, 2));
-
-        Reader reader = new StringReader(content);
-        assertEquals("Idx 0", IOUtil.readLine(reader, 0));
-
-        assertNull(IOUtil.readLine(testFile, 4)); // Index out of bounds
-        assertNull(IOUtil.readLine(testFile, 100)); // Index way out of bounds
-
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.readLine(testFile, -1));
-    }
-
-    @Test
     public void testReadIntoBuffer() throws IOException {
         byte[] contentBytes = "Buffer read test.".getBytes(StandardCharsets.UTF_8);
         File testFileBytes = createTempFileWithContent("readBufferBytes", ".txt", contentBytes);
@@ -712,9 +613,7 @@ public class IOUtil200Test extends TestBase {
         assertEquals(10, bytesRead);
         assertArrayEquals(Arrays.copyOfRange(contentBytes, 0, 10), bufferBytes);
 
-        bytesRead = IOUtil.read(testFileBytes, bufferBytes, 2, 5); // Read 5 bytes into offset 2
-        // This re-opens the file, so it reads from the beginning again.
-        // To test sequential reads, we'd need an InputStream version
+        bytesRead = IOUtil.read(testFileBytes, bufferBytes, 2, 5);
         InputStream isForBytes = IOUtil.newFileInputStream(testFileBytes);
         byte[] seqBufferBytes = new byte[contentBytes.length];
         bytesRead = IOUtil.read(isForBytes, seqBufferBytes);
@@ -740,59 +639,6 @@ public class IOUtil200Test extends TestBase {
     }
 
     @Test
-    public void testWriteLine() throws IOException {
-        File testFile = createTempFile("writeLine", ".txt");
-        Object obj = "Test single line with Ümlaut €";
-
-        IOUtil.writeLine(obj, testFile);
-        String expectedContent = N.toString(obj) + IOUtil.LINE_SEPARATOR;
-        assertEquals(expectedContent, IOUtil.readAllToString(testFile));
-
-        // Test with OutputStream
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        IOUtil.writeLine(obj, baos, true); // flush true
-        assertEquals(expectedContent, baos.toString(Charsets.DEFAULT.name()));
-
-        baos.reset();
-        IOUtil.writeLine(obj, baos); // flush false (default for this overload)
-        // Note: IOUtil.newOutputStreamWriter(output) is used internally, so need to check if it flushes by default or not.
-        // For this test, let's assume it doesn't strictly need flush for ByteArrayOutputStream to get content.
-        // Better to test with Writer directly for flush control.
-
-        // Test with Writer
-        StringWriter sw = new StringWriter();
-        IOUtil.writeLine(obj, sw, true);
-        assertEquals(expectedContent, sw.toString());
-
-        sw = new StringWriter();
-        IOUtil.writeLine(obj, sw); // flush false
-        assertEquals(expectedContent, sw.toString()); // StringWriter often updates its internal buffer without explicit flush
-    }
-
-    @Test
-    public void testWriteLinesIterable() throws IOException {
-        List<String> lines = Arrays.asList("Line 1", "Line 2 with Ümlaut", "Line 3 with €");
-        File testFile = createTempFile("writeLinesIterable", ".txt");
-
-        IOUtil.writeLines(lines, testFile);
-        StringBuilder expectedSb = new StringBuilder();
-        for (String line : lines) {
-            expectedSb.append(line).append(IOUtil.LINE_SEPARATOR);
-        }
-        assertEquals(expectedSb.toString(), IOUtil.readAllToString(testFile));
-
-        // Test with OutputStream
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        IOUtil.writeLines(lines, baos, true);
-        assertEquals(expectedSb.toString(), baos.toString(Charsets.DEFAULT.name()));
-
-        // Test with Writer
-        StringWriter sw = new StringWriter();
-        IOUtil.writeLines(lines, sw, true);
-        assertEquals(expectedSb.toString(), sw.toString());
-    }
-
-    @Test
     public void testWriteLinesIterator() throws IOException {
         List<String> lines = Arrays.asList("Iter Line 1", "Iter Line 2", null, "Iter Line 4");
         Iterator<?> iterator = lines.iterator();
@@ -803,7 +649,7 @@ public class IOUtil200Test extends TestBase {
         StringBuilder expectedSb = new StringBuilder();
         expectedSb.append("Iter Line 1").append(IOUtil.LINE_SEPARATOR);
         expectedSb.append("Iter Line 2").append(IOUtil.LINE_SEPARATOR);
-        expectedSb.append(Strings.NULL.toCharArray()).append(IOUtil.LINE_SEPARATOR); // N.toString(null) is "null"
+        expectedSb.append(Strings.NULL.toCharArray()).append(IOUtil.LINE_SEPARATOR);
         expectedSb.append("Iter Line 4").append(IOUtil.LINE_SEPARATOR);
         assertEquals(expectedSb.toString(), IOUtil.readAllToString(testFile));
     }
@@ -836,19 +682,19 @@ public class IOUtil200Test extends TestBase {
         sw.getBuffer().setLength(0);
 
         IOUtil.write(1.5f, sw);
-        assertEquals(String.valueOf(1.5f), sw.toString()); // Use String.valueOf for precise float/double string rep
+        assertEquals(String.valueOf(1.5f), sw.toString());
         sw.getBuffer().setLength(0);
 
         IOUtil.write(2.5d, sw);
         assertEquals(String.valueOf(2.5d), sw.toString());
         sw.getBuffer().setLength(0);
 
-        Object obj = new Date(0); // Example object
+        Object obj = new Date(0);
         IOUtil.write(obj, sw);
         assertEquals(N.toString(obj), sw.toString());
         sw.getBuffer().setLength(0);
 
-        IOUtil.write((Object) null, sw); // Test null object
+        IOUtil.write((Object) null, sw);
         assertArrayEquals(Strings.NULL.toCharArray(), sw.toString().toCharArray());
     }
 
@@ -857,26 +703,21 @@ public class IOUtil200Test extends TestBase {
         CharSequence cs = "CharSequence test with Ümlaut €";
         File testFile = createTempFile("writeCS", ".txt");
 
-        // To File (default charset)
         IOUtil.write(cs, testFile);
         assertEquals(cs.toString(), IOUtil.readAllToString(testFile));
 
-        // To File (specific charset)
         File testFileUtf8 = createTempFile("writeCSUtf8", ".txt");
         IOUtil.write(cs, StandardCharsets.UTF_8, testFileUtf8);
         assertEquals(cs.toString(), IOUtil.readAllToString(testFileUtf8, StandardCharsets.UTF_8));
 
-        // To OutputStream (default charset)
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtil.write(cs, baos, true);
         assertEquals(cs.toString(), baos.toString(Charsets.DEFAULT.name()));
 
-        // To OutputStream (specific charset)
         baos.reset();
         IOUtil.write(cs, StandardCharsets.UTF_8, baos, true);
         assertEquals(cs.toString(), baos.toString(StandardCharsets.UTF_8.name()));
 
-        // To Writer
         StringWriter sw = new StringWriter();
         IOUtil.write(cs, sw, true);
         assertEquals(cs.toString(), sw.toString());
@@ -887,37 +728,30 @@ public class IOUtil200Test extends TestBase {
         char[] chars = "char array test with Ümlaut €".toCharArray();
         File testFile = createTempFile("writeCharsArr", ".txt");
 
-        // To File (default charset)
         IOUtil.write(chars, testFile);
         assertArrayEquals(chars, IOUtil.readAllChars(testFile));
 
-        // To File (specific charset)
         File testFileUtf8 = createTempFile("writeCharsArrUtf8", ".txt");
         IOUtil.write(chars, StandardCharsets.UTF_8, testFileUtf8);
         assertArrayEquals(chars, IOUtil.readAllChars(testFileUtf8, StandardCharsets.UTF_8));
 
-        // To File (offset, count)
         File testFileOffset = createTempFile("writeCharsArrOffset", ".txt");
         char[] subChars = Arrays.copyOfRange(chars, 5, 10);
         IOUtil.write(chars, 5, 5, StandardCharsets.UTF_8, testFileOffset);
         assertArrayEquals(subChars, IOUtil.readAllChars(testFileOffset, StandardCharsets.UTF_8));
 
-        // To OutputStream (default charset)
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtil.write(chars, baos, true);
         assertArrayEquals(chars, IOUtil.bytes2Chars(baos.toByteArray(), Charsets.DEFAULT));
 
-        // To OutputStream (specific charset, offset, count)
         baos.reset();
         IOUtil.write(chars, 5, 5, StandardCharsets.UTF_8, baos, true);
         assertArrayEquals(subChars, IOUtil.bytes2Chars(baos.toByteArray(), StandardCharsets.UTF_8));
 
-        // To Writer
         StringWriter sw = new StringWriter();
         IOUtil.write(chars, sw, true);
         assertArrayEquals(chars, sw.toString().toCharArray());
 
-        // To Writer (offset, count)
         sw = new StringWriter();
         IOUtil.write(chars, 5, 5, sw, true);
         assertArrayEquals(subChars, sw.toString().toCharArray());
@@ -928,22 +762,18 @@ public class IOUtil200Test extends TestBase {
         byte[] bytes = "byte array test with some data".getBytes(StandardCharsets.UTF_8);
         File testFile = createTempFile("writeBytesArr", ".bin");
 
-        // To File
         IOUtil.write(bytes, testFile);
         assertArrayEquals(bytes, IOUtil.readAllBytes(testFile));
 
-        // To File (offset, count)
         File testFileOffset = createTempFile("writeBytesArrOffset", ".bin");
         byte[] subBytes = Arrays.copyOfRange(bytes, 5, 10);
         IOUtil.write(bytes, 5, 5, testFileOffset);
         assertArrayEquals(subBytes, IOUtil.readAllBytes(testFileOffset));
 
-        // To OutputStream
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtil.write(bytes, baos, true);
         assertArrayEquals(bytes, baos.toByteArray());
 
-        // To OutputStream (offset, count)
         baos.reset();
         IOUtil.write(bytes, 5, 5, baos, true);
         assertArrayEquals(subBytes, baos.toByteArray());
@@ -954,16 +784,15 @@ public class IOUtil200Test extends TestBase {
         String content = "Source file content for writing from file to file.";
         File sourceFile = createTempFileWithContent("sourceWrite", ".txt", content);
         File destFile = createTempFile("destWrite", ".txt");
-        destFile.delete(); // ensure it doesn't exist for initial write
+        destFile.delete();
 
         long bytesWritten = IOUtil.write(sourceFile, destFile);
         assertTrue(bytesWritten > 0);
         assertEquals(content, IOUtil.readAllToString(destFile));
 
-        // With offset and count
         File destFileOffset = createTempFile("destWriteOffset", ".txt");
         destFileOffset.delete();
-        String expectedPart = content.substring(7, 17); // "file cont"
+        String expectedPart = content.substring(7, 17);
         bytesWritten = IOUtil.write(sourceFile, 7, 10, destFileOffset);
         assertEquals(10, bytesWritten);
         assertEquals(expectedPart, IOUtil.readAllToString(destFileOffset));
@@ -979,9 +808,8 @@ public class IOUtil200Test extends TestBase {
         assertTrue(bytesWritten > 0);
         assertEquals(content, baos.toString(Charsets.DEFAULT.name()));
 
-        // With offset and count
         baos.reset();
-        String expectedPart = content.substring(7, 17); // "file cont"
+        String expectedPart = content.substring(7, 17);
         bytesWritten = IOUtil.write(sourceFile, 7, 10, baos, true);
         assertEquals(10, bytesWritten);
         assertEquals(expectedPart, baos.toString(Charsets.DEFAULT.name()));
@@ -997,13 +825,12 @@ public class IOUtil200Test extends TestBase {
         long bytesWritten = IOUtil.write(is, destFile);
         assertTrue(bytesWritten > 0);
         assertEquals(content, IOUtil.readAllToString(destFile, StandardCharsets.UTF_8));
-        is.close(); // close original stream
+        is.close();
 
-        // With offset and count
         is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
         File destFileOffset = createTempFile("destWriteISOffset", ".txt");
         destFileOffset.delete();
-        String expectedPart = content.substring(6, 16); // "ream conte"
+        String expectedPart = content.substring(6, 16);
         bytesWritten = IOUtil.write(is, 6, 10, destFileOffset);
         assertEquals(10, bytesWritten);
         assertEquals(expectedPart, IOUtil.readAllToString(destFileOffset, StandardCharsets.UTF_8));
@@ -1021,10 +848,9 @@ public class IOUtil200Test extends TestBase {
         assertEquals(content, baos.toString(StandardCharsets.UTF_8.name()));
         is.close();
 
-        // With offset and count
         is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
         baos.reset();
-        String expectedPart = content.substring(6, 16); // "ream conte"
+        String expectedPart = content.substring(6, 16);
         bytesWritten = IOUtil.write(is, 6, 10, baos, true);
         assertEquals(10, bytesWritten);
         assertEquals(expectedPart, baos.toString(StandardCharsets.UTF_8.name()));
@@ -1043,11 +869,10 @@ public class IOUtil200Test extends TestBase {
         assertEquals(content, IOUtil.readAllToString(destFile, StandardCharsets.UTF_8));
         reader.close();
 
-        // With offset and count
         reader = new StringReader(content);
         File destFileOffset = createTempFile("destWriteReaderOffset", ".txt");
         destFileOffset.delete();
-        String expectedPart = content.substring(7, 17); // "ntent for "
+        String expectedPart = content.substring(7, 17);
         charsWritten = IOUtil.write(reader, 7, 10, StandardCharsets.UTF_8, destFileOffset);
         assertEquals(10, charsWritten);
         assertEquals(expectedPart, IOUtil.readAllToString(destFileOffset, StandardCharsets.UTF_8));
@@ -1065,10 +890,9 @@ public class IOUtil200Test extends TestBase {
         assertEquals(content, sw.toString());
         reader.close();
 
-        // With offset and count
         reader = new StringReader(content);
         sw = new StringWriter();
-        String expectedPart = content.substring(7, 17); // "ntent for "
+        String expectedPart = content.substring(7, 17);
         charsWritten = IOUtil.write(reader, 7, 10, sw, true);
         assertEquals(10, charsWritten);
         assertEquals(expectedPart, sw.toString());
@@ -1087,11 +911,10 @@ public class IOUtil200Test extends TestBase {
         byte[] expected = (new String(initialBytes, StandardCharsets.UTF_8) + new String(toAppend, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
         assertArrayEquals(expected, IOUtil.readAllBytes(testFile));
 
-        // Append with offset
         File testFileOffset = createTempFile("appendBytesOffset", ".bin");
         IOUtil.write(initialBytes, testFileOffset);
         byte[] fullAppend = "Full Appended String".getBytes(StandardCharsets.UTF_8);
-        byte[] partToAppend = Arrays.copyOfRange(fullAppend, 5, 13); // "Appended"
+        byte[] partToAppend = Arrays.copyOfRange(fullAppend, 5, 13);
         IOUtil.append(fullAppend, 5, 8, testFileOffset);
 
         expected = (new String(initialBytes, StandardCharsets.UTF_8) + new String(partToAppend, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
@@ -1110,11 +933,10 @@ public class IOUtil200Test extends TestBase {
         char[] expected = (new String(initialChars) + new String(toAppend)).toCharArray();
         assertArrayEquals(expected, IOUtil.readAllChars(testFile, StandardCharsets.UTF_8));
 
-        // Append with offset
         File testFileOffset = createTempFile("appendCharsOffset", ".txt");
         IOUtil.write(initialChars, StandardCharsets.UTF_8, testFileOffset);
         char[] fullAppend = "Full Appended String Chars".toCharArray();
-        char[] partToAppend = Arrays.copyOfRange(fullAppend, 5, 13); // "Appended"
+        char[] partToAppend = Arrays.copyOfRange(fullAppend, 5, 13);
         IOUtil.append(fullAppend, 5, 8, StandardCharsets.UTF_8, testFileOffset);
 
         expected = (new String(initialChars) + new String(partToAppend)).toCharArray();
@@ -1125,7 +947,7 @@ public class IOUtil200Test extends TestBase {
     public void testAppendCharSequence() throws IOException {
         File testFile = createTempFile("appendCS", ".txt");
         CharSequence initialCS = "Initial CS.";
-        IOUtil.write(initialCS.toString().getBytes(StandardCharsets.UTF_8), testFile); // write initial content
+        IOUtil.write(initialCS.toString().getBytes(StandardCharsets.UTF_8), testFile);
 
         CharSequence toAppend = " Appended CS with Ümlaut €.";
         IOUtil.append(toAppend, StandardCharsets.UTF_8, testFile);
@@ -1148,17 +970,12 @@ public class IOUtil200Test extends TestBase {
         String expected = initialTargetContent + "Source content to append.";
         assertEquals(expected, IOUtil.readAllToString(targetFile, StandardCharsets.UTF_8));
 
-        // Append with offset and count
         File targetFileOffset = createTempFile("targetAppendOffset", ".txt");
         IOUtil.write(initialTargetContent, StandardCharsets.UTF_8, targetFileOffset);
         File sourceFileOffset = createTempFileWithContent("sourceAppendOffset", ".txt", "This is the full source for offset append.");
-        // Append "is the"
         long bytesAppendedOffset = IOUtil.append(sourceFileOffset, 5, 7, targetFileOffset);
         assertEquals(7, bytesAppendedOffset);
-        expected = initialTargetContent + "is the "; // Note: sourceFile content "is the " (7 chars)
-        // Careful with exact substring for comparison if file content involves spaces.
-        // The expected string should match exactly what's appended.
-        // The substring "is the" is 7 chars.
+        expected = initialTargetContent + "is the ";
         assertEquals(initialTargetContent + "is the ", IOUtil.readAllToString(targetFileOffset, StandardCharsets.UTF_8));
     }
 
@@ -1178,12 +995,10 @@ public class IOUtil200Test extends TestBase {
         String expected = initialTargetContent + sourceContent;
         assertEquals(expected, IOUtil.readAllToString(targetFile, StandardCharsets.UTF_8));
 
-        // Append with offset and count
         File targetFileOffset = createTempFile("targetAppendISOffset", ".txt");
         IOUtil.write(initialTargetContent, StandardCharsets.UTF_8, targetFileOffset);
         String fullSourceContent = "This is the full IS source for offset append.";
         InputStream sourceISOffset = new ByteArrayInputStream(fullSourceContent.getBytes(StandardCharsets.UTF_8));
-        // Append "is the"
         long bytesAppendedOffset = IOUtil.append(sourceISOffset, 5, 7, targetFileOffset);
         assertEquals(7, bytesAppendedOffset);
         sourceISOffset.close();
@@ -1208,12 +1023,10 @@ public class IOUtil200Test extends TestBase {
         String expected = initialTargetContent + sourceContent;
         assertEquals(expected, IOUtil.readAllToString(targetFile, StandardCharsets.UTF_8));
 
-        // Append with offset and count
         File targetFileOffset = createTempFile("targetAppendReaderOffset", ".txt");
         IOUtil.write(initialTargetContent, StandardCharsets.UTF_8, targetFileOffset);
         String fullSourceContent = "This is the full Reader source for offset append.";
         Reader sourceReaderOffset = new StringReader(fullSourceContent);
-        // Append "is the"
         long charsAppendedOffset = IOUtil.append(sourceReaderOffset, 5, 7, StandardCharsets.UTF_8, targetFileOffset);
         assertEquals(7, charsAppendedOffset);
         sourceReaderOffset.close();
@@ -1275,11 +1088,11 @@ public class IOUtil200Test extends TestBase {
         InputStream is = new ByteArrayInputStream(data);
         long skipped = IOUtil.skip(is, 10);
         assertEquals(10, skipped);
-        assertEquals(10, is.read()); // Next byte should be 10
+        assertEquals(10, is.read());
 
-        skipped = IOUtil.skip(is, 200); // Skip more than available
-        assertEquals(100 - 11, skipped); // 10 already read, 1 more (is.read())
-        assertEquals(-1, is.read()); // EOF
+        skipped = IOUtil.skip(is, 200);
+        assertEquals(100 - 11, skipped);
+        assertEquals(-1, is.read());
         is.close();
 
         String strData = "0123456789abcdef";
@@ -1303,7 +1116,7 @@ public class IOUtil200Test extends TestBase {
 
         is = new ByteArrayInputStream(data);
         final InputStream finalIs = is;
-        assertThrows(IOException.class, () -> IOUtil.skipFully(finalIs, 60)); // Skip more than available
+        assertThrows(IOException.class, () -> IOUtil.skipFully(finalIs, 60));
         is.close();
 
         String strData = "TestSkipFullyReader";
@@ -1329,21 +1142,15 @@ public class IOUtil200Test extends TestBase {
         assertEquals(content.length(), bufferRO.limit());
         byte[] readBytes = new byte[content.length()];
         bufferRO.get(readBytes);
-        assertArrayEquals(content.getBytes(Charsets.DEFAULT), readBytes); // map uses default charset implicitly if string based
+        assertArrayEquals(content.getBytes(Charsets.DEFAULT), readBytes);
 
-        // Test with mode and size
         MappedByteBuffer bufferRW = IOUtil.map(testFile, FileChannel.MapMode.READ_WRITE, 0, testFile.length());
         assertEquals(content.length(), bufferRW.limit());
-        bufferRW.put(0, (byte) 'X'); // Modify
-        bufferRW.force(); // Persist change (though not strictly needed for this test of map itself)
+        bufferRW.put(0, (byte) 'X');
+        bufferRW.force();
 
-        // Re-read to check modification (optional, map itself is the focus)
-        // byte[] modifiedContent = IOUtil.readAllBytes(testFile);
-        // assertEquals('X', modifiedContent[0]);
-
-        // Test non-existent file map (should fail unless READ_WRITE creates it, which IOUtil.map does not guarantee for all cases)
         File nonExistent = new File(tempDir.toFile(), "nonExistentMap.txt");
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.map(nonExistent)); // because file.exists() is checked
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.map(nonExistent));
 
         unmap(bufferRO);
         unmap(bufferRW);
@@ -1376,14 +1183,10 @@ public class IOUtil200Test extends TestBase {
         assertEquals("", IOUtil.getFileExtension("file."));
         assertNull(IOUtil.getFileExtension((String) null));
 
-        File fTxt = new File("test.txt"); // Doesn't need to exist for this util
+        File fTxt = new File("test.txt");
         assertEquals("txt", IOUtil.getFileExtension(fTxt));
         File fNoExt = new File("test");
         assertEquals("", IOUtil.getFileExtension(fNoExt));
-        // IOUtil.getFileExtension(File) returns null if file is null or !exists.
-        // This is different from FilenameUtils.getExtension(String)
-        // The test above uses a non-existent file to test the string parsing part.
-        // For existing file behavior:
         assertNull(IOUtil.getFileExtension((File) null));
         File nonExistentFile = new File(tempDir.toFile(), "non.existent");
         assertEquals("existent", IOUtil.getFileExtension(nonExistentFile));
@@ -1422,18 +1225,7 @@ public class IOUtil200Test extends TestBase {
         assertTrue(IOUtil.newOutputStreamWriter(os, StandardCharsets.UTF_8) instanceof OutputStreamWriter);
         os.close();
 
-        //        // Buffered versions
-        //        assertTrue(IOUtil.newBufferedInputStream(testFile) instanceof BufferedInputStream);
-        //        assertTrue(IOUtil.newBufferedOutputStream(testFile) instanceof BufferedOutputStream);
-        //        assertTrue(IOUtil.newBufferedReader(testFile) instanceof BufferedReader);
-        //        assertTrue(IOUtil.newBufferedWriter(testFile) instanceof BufferedWriter);
-        //
-        //        // Path based
-        //        assertTrue(IOUtil.newBufferedReader(testFile.toPath()) instanceof BufferedReader);
-        //        assertTrue(IOUtil.newBufferedReader(testFile.toPath(), StandardCharsets.UTF_8) instanceof BufferedReader);
-
-        // Compression/Decompression stream factories (just check type)
-        is = new ByteArrayInputStream(new byte[] { 31, -117, 8, 0, 0, 0, 0, 0, 0, 0 }); // Minimal GZIP header
+        is = new ByteArrayInputStream(new byte[] { 31, -117, 8, 0, 0, 0, 0, 0, 0, 0 });
         assertTrue(IOUtil.newGZIPInputStream(is) instanceof GZIPInputStream);
         is.close();
 
@@ -1441,38 +1233,25 @@ public class IOUtil200Test extends TestBase {
         assertTrue(IOUtil.newGZIPOutputStream(os) instanceof GZIPOutputStream);
         os.close();
 
-        is = new ByteArrayInputStream(new byte[0]); // Dummy for Zip
-        // ZipInputStream often needs actual zip data to not throw errors on nextEntry()
-        // For now, just check instance
-        // For a more robust test, provide a minimal valid zip byte stream
-        // assertTrue(IOUtil.newZipInputStream(is) instanceof ZipInputStream); // This might fail if not a valid zip
+        is = new ByteArrayInputStream(new byte[0]);
         is.close();
 
         os = new ByteArrayOutputStream();
         assertTrue(IOUtil.newZipOutputStream(os) instanceof ZipOutputStream);
         os.close();
 
-        // LZ4, Snappy, Brotli would need their respective libraries on classpath to be fully tested.
-        // Assuming they are available, we can check instance types.
-        // These are just illustrative as they might throw NoClassDefFoundError if libs are missing.
-        // is = new ByteArrayInputStream(new byte[0]);
-        // assertTrue(IOUtil.newLZ4BlockInputStream(is) instanceof com.landawn.abacus.util.LZ4BlockInputStream); is.close();
-        // assertTrue(IOUtil.newSnappyInputStream(is) instanceof org.xerial.snappy.SnappyInputStream); is.close();
-        // assertTrue(IOUtil.newBrotliInputStream(is) instanceof com.nixxcode.jvmbrotli.dec.BrotliInputStream); is.close();
     }
 
     @Test
     public void testCloseOperations() {
-        // Test close(AutoCloseable)
         MockCloseable mc = new MockCloseable();
         IOUtil.close(mc);
         assertTrue(mc.isClosed());
 
         final MockCloseable mcThrows = new MockCloseable(true);
         assertThrows(RuntimeException.class, () -> IOUtil.close(mcThrows));
-        assertTrue(mcThrows.isClosed()); // Should still be closed
+        assertTrue(mcThrows.isClosed());
 
-        // Test close(AutoCloseable, Consumer)
         mc = new MockCloseable();
         AtomicInteger exceptionCount = new AtomicInteger(0);
         IOUtil.close(mc, e -> exceptionCount.incrementAndGet());
@@ -1484,7 +1263,6 @@ public class IOUtil200Test extends TestBase {
         assertTrue(mcThrows2.isClosed());
         assertEquals(1, exceptionCount.get());
 
-        // Test closeQuietly(AutoCloseable)
         mc = new MockCloseable();
         IOUtil.closeQuietly(mc);
         assertTrue(mc.isClosed());
@@ -1493,7 +1271,6 @@ public class IOUtil200Test extends TestBase {
         assertDoesNotThrow(() -> IOUtil.closeQuietly(mcThrows3));
         assertTrue(mcThrows3.isClosed());
 
-        // Test closeAll
         MockCloseable mc1 = new MockCloseable();
         MockCloseable mc2 = new MockCloseable();
         IOUtil.closeAll(mc1, mc2, null);
@@ -1505,26 +1282,21 @@ public class IOUtil200Test extends TestBase {
         RuntimeException ex = assertThrows(RuntimeException.class, () -> IOUtil.closeAll(mc3Throws, mc4));
         assertTrue(mc3Throws.isClosed());
         assertTrue(mc4.isClosed());
-        assertEquals(1, ex.getSuppressed().length + (ex.getCause() == null ? 0 : 1)); // One primary, possibly suppressed
+        assertEquals(1, ex.getSuppressed().length + (ex.getCause() == null ? 0 : 1));
 
-        // Test closeAllQuietly
         MockCloseable mc11 = new MockCloseable();
-        MockCloseable mc22 = new MockCloseable(true); // one throws
+        MockCloseable mc22 = new MockCloseable(true);
         assertDoesNotThrow(() -> IOUtil.closeAllQuietly(mc11, mc22, null));
         assertTrue(mc11.isClosed());
         assertTrue(mc22.isClosed());
 
-        // Test close(URLConnection)
-        // Difficult to mock HttpURLConnection fully. Test with a non-HttpURLConnection first.
         URLConnection mockConn = new URLConnection(null) {
             @Override
             public void connect() throws IOException {
             }
         };
-        IOUtil.close(mockConn); // Should do nothing
+        IOUtil.close(mockConn);
 
-        // A real HttpURLConnection would require a network call or a complex mock.
-        // For a unit test, this is often skipped or tested at an integration level.
     }
 
     private static class MockCloseable implements AutoCloseable {
@@ -1568,15 +1340,11 @@ public class IOUtil200Test extends TestBase {
         assertTrue(copiedFile.exists());
         assertEquals("Source content.", IOUtil.readAllToString(copiedFile));
 
-        // Test with preserveFileDate (hard to assert precisely without controlling time)
-        // Just ensure it runs
         File srcFile2 = createTempFileWithContent("srcCopyDate", ".txt", "Date test.");
         File destDir2 = createTempDirectory("destCopyDirDate");
         IOUtil.copyToDirectory(srcFile2, destDir2, true);
         assertTrue(new File(destDir2, srcFile2.getName()).exists());
-        // Ideally, check lastModified, but it can be finicky in tests.
 
-        // Test with directory copy
         File srcDir = createTempDirectory("srcDirToCopy");
         File tempFile1 = createTempFileWithContent(srcDir.toPath().resolve("file1.txt").toString(), null, "File 1 in dir");
         File tempFile2 = createTempFileWithContent(srcDir.toPath().resolve("file2.txt").toString(), null, "File 2 in dir");
@@ -1587,11 +1355,10 @@ public class IOUtil200Test extends TestBase {
         File destDir3 = createTempDirectory("destDirForDirCopy");
         IOUtil.copyToDirectory(srcDir, destDir3);
 
-        assertTrue(new File(destDir3, srcDir.getName() + "/" + tempFile1.getName()).exists()); // copyToDirectory copies the srcDir *into* destDir
+        assertTrue(new File(destDir3, srcDir.getName() + "/" + tempFile1.getName()).exists());
         assertTrue(new File(destDir3, srcDir.getName() + "/" + tempFile2.getName()).exists());
         assertTrue(new File(destDir3, srcDir.getName() + "/subdir/" + tempFile3.getName()).exists());
 
-        // Test with filter
         File srcDirFiltered = createTempDirectory("srcDirFiltered");
         File fileA = new File(srcDirFiltered, "copyA.txt");
         IOUtil.write("AAA", fileA);
@@ -1617,14 +1384,11 @@ public class IOUtil200Test extends TestBase {
         assertTrue(destFile.exists());
         assertEquals("Content for copyFile.", IOUtil.readAllToString(destFile));
 
-        // Test with preserveFileDate
         File srcFileDate = createTempFileWithContent("srcCopyFileDate", ".txt", "Date content.");
         File destFileDate = new File(tempDir.toFile(), "destCopyFileDate.txt");
         IOUtil.copyFile(srcFileDate, destFileDate, true);
         assertTrue(destFileDate.exists());
-        // Check lastModified if possible/reliable in test env.
 
-        // Test with CopyOption (REPLACE_EXISTING)
         File destFileOverwrite = new File(tempDir.toFile(), "destCopyFileOverwrite.txt");
         IOUtil.write("Old content", destFileOverwrite);
         IOUtil.copyFile(srcFile, destFileOverwrite, StandardCopyOption.REPLACE_EXISTING);
@@ -1643,8 +1407,6 @@ public class IOUtil200Test extends TestBase {
     @Test
     @Disabled("Requires network or local HTTP server setup")
     public void testCopyURLToFile() throws IOException {
-        // This test is hard to make reliable without a mock HTTP server or a known stable local URL.
-        // Example with a file URL (less common use case for this method but testable)
         File tempSource = createTempFileWithContent("urlSource", ".txt", "URL source content.");
         URL fileUrl = tempSource.toURI().toURL();
         File destFile = new File(tempDir.toFile(), "destFromUrl.txt");
@@ -1653,8 +1415,6 @@ public class IOUtil200Test extends TestBase {
         assertTrue(destFile.exists());
         assertEquals("URL source content.", IOUtil.readAllToString(destFile));
 
-        // Test with timeouts (would need a server that can simulate delays)
-        // IOUtil.copyURLToFile(fileUrl, destFile, 1000, 1000);
     }
 
     @Test
@@ -1662,12 +1422,10 @@ public class IOUtil200Test extends TestBase {
         Path srcPath = createTempFileWithContent("nioSrc", ".txt", "NIO copy source.").toPath();
         Path destPath = tempDir.resolve("nioDest.txt");
 
-        // Path to Path
         IOUtil.copy(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
         assertTrue(Files.exists(destPath));
         assertEquals("NIO copy source.", Files.readString(destPath));
 
-        // InputStream to Path
         Path destFromISPath = tempDir.resolve("nioDestFromIS.txt");
         InputStream is = new ByteArrayInputStream("NIO IS copy.".getBytes(StandardCharsets.UTF_8));
         IOUtil.copy(is, destFromISPath, StandardCopyOption.REPLACE_EXISTING);
@@ -1675,7 +1433,6 @@ public class IOUtil200Test extends TestBase {
         assertEquals("NIO IS copy.", Files.readString(destFromISPath));
         is.close();
 
-        // Path to OutputStream
         Path srcForOSPath = createTempFileWithContent("nioSrcForOS", ".txt", "NIO copy to OS.").toPath();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtil.copy(srcForOSPath, baos);
@@ -1690,7 +1447,7 @@ public class IOUtil200Test extends TestBase {
         IOUtil.move(srcFile, destDir);
 
         File movedFile = new File(destDir, srcFile.getName());
-        assertFalse(srcFile.exists()); // Source should be gone
+        assertFalse(srcFile.exists());
         assertTrue(movedFile.exists());
         assertEquals("File to move.", IOUtil.readAllToString(movedFile));
     }
@@ -1725,21 +1482,18 @@ public class IOUtil200Test extends TestBase {
         File toDelete = createTempFileWithContent("toDelete", ".txt", "content");
         assertTrue(IOUtil.deleteIfExists(toDelete));
         assertFalse(toDelete.exists());
-        assertFalse(IOUtil.deleteIfExists(toDelete)); // Already deleted
+        assertFalse(IOUtil.deleteIfExists(toDelete));
 
         File toDeleteQuietly = createTempFileWithContent("toDeleteQuietly", ".txt", "content");
         assertTrue(IOUtil.deleteQuietly(toDeleteQuietly));
         assertFalse(toDeleteQuietly.exists());
-        // Test deleteQuietly on non-existent file (should not throw)
         File nonExistent = new File(tempDir.toFile(), "nonexist.del");
         assertFalse(IOUtil.deleteQuietly(nonExistent));
 
-        // deleteAllIfExists (file)
         File toDeleteAllFile = createTempFileWithContent("delAllFile", ".txt", "data");
         assertTrue(IOUtil.deleteAllIfExists(toDeleteAllFile));
         assertFalse(toDeleteAllFile.exists());
 
-        // deleteAllIfExists (directory)
         File dirToDelete = createTempDirectory("dirDelAll");
         createTempFileWithContent(dirToDelete.toPath().resolve("f1.txt").toString(), null, "d1");
         File subDir = new File(dirToDelete, "subDel");
@@ -1749,7 +1503,6 @@ public class IOUtil200Test extends TestBase {
         assertTrue(IOUtil.deleteAllIfExists(dirToDelete));
         assertFalse(dirToDelete.exists());
 
-        // cleanDirectory / deleteFilesFromDirectory
         File dirToClean = createTempDirectory("dirClean");
         File fInClean1 = new File(dirToClean, "clean1.txt");
         IOUtil.write("c1", fInClean1);
@@ -1761,10 +1514,9 @@ public class IOUtil200Test extends TestBase {
         IOUtil.write("sc", fInSubClean);
 
         assertTrue(IOUtil.cleanDirectory(dirToClean));
-        assertTrue(dirToClean.exists()); // Directory itself remains
-        assertEquals(0, dirToClean.listFiles().length); // Should be empty
+        assertTrue(dirToClean.exists());
+        assertEquals(0, dirToClean.listFiles().length);
 
-        // Test deleteFilesFromDirectory with filter
         File dirToCleanFiltered = createTempDirectory("dirCleanFilter");
         File copyF = new File(dirToCleanFiltered, "copy.txt");
         IOUtil.write("copy", copyF);
@@ -1782,7 +1534,7 @@ public class IOUtil200Test extends TestBase {
         assertFalse(newFile.exists());
         assertTrue(IOUtil.createFileIfNotExists(newFile));
         assertTrue(newFile.exists());
-        assertFalse(IOUtil.createFileIfNotExists(newFile)); // Already exists
+        assertFalse(IOUtil.createFileIfNotExists(newFile));
     }
 
     @Test
@@ -1791,7 +1543,7 @@ public class IOUtil200Test extends TestBase {
         assertFalse(newDir.exists());
         assertTrue(IOUtil.mkdirIfNotExists(newDir));
         assertTrue(newDir.exists() && newDir.isDirectory());
-        assertFalse(IOUtil.mkdirIfNotExists(newDir)); // Already exists
+        assertFalse(IOUtil.mkdirIfNotExists(newDir));
     }
 
     @Test
@@ -1800,7 +1552,7 @@ public class IOUtil200Test extends TestBase {
         assertFalse(deepDir.exists());
         assertTrue(IOUtil.mkdirsIfNotExists(deepDir));
         assertTrue(deepDir.exists() && deepDir.isDirectory());
-        assertFalse(IOUtil.mkdirsIfNotExists(deepDir)); // Already exists
+        assertFalse(IOUtil.mkdirsIfNotExists(deepDir));
     }
 
     @Test
@@ -1814,7 +1566,7 @@ public class IOUtil200Test extends TestBase {
     @Test
     public void testIsFileNewerOlder() throws IOException, InterruptedException {
         File file1 = createTempFileWithContent("fileDate1", ".txt", "f1");
-        Thread.sleep(10); // Ensure modification time difference
+        Thread.sleep(10);
         File file2 = createTempFileWithContent("fileDate2", ".txt", "f2");
         Thread.sleep(10);
         Date dateInBetween = new Date(file1.lastModified() + (file2.lastModified() - file1.lastModified()) / 2);
@@ -1845,10 +1597,9 @@ public class IOUtil200Test extends TestBase {
         assertFalse(IOUtil.isDirectory(testFile));
         assertFalse(IOUtil.isDirectory(null));
 
-        // With LinkOptions (assuming no symlinks created in test by default)
         assertTrue(IOUtil.isDirectory(testDir, LinkOption.NOFOLLOW_LINKS));
         assertTrue(IOUtil.isRegularFile(testFile, LinkOption.NOFOLLOW_LINKS));
-        assertFalse(IOUtil.isSymbolicLink(testFile)); // Assuming not a symlink
+        assertFalse(IOUtil.isSymbolicLink(testFile));
     }
 
     @Test
@@ -1861,14 +1612,14 @@ public class IOUtil200Test extends TestBase {
         assertEquals(123, IOUtil.sizeOf(sizedFile));
 
         File dir = createTempDirectory("sizeDir");
-        assertEquals(0, IOUtil.sizeOfDirectory(dir)); // Empty directory
+        assertEquals(0, IOUtil.sizeOfDirectory(dir));
 
         File fileInDir1 = new File(dir, "f1.bin");
         IOUtil.write(new byte[50], fileInDir1);
         File fileInDir2 = new File(dir, "f2.bin");
         IOUtil.write(new byte[70], fileInDir2);
         assertEquals(120, IOUtil.sizeOfDirectory(dir));
-        assertEquals(120, IOUtil.sizeOf(dir)); // sizeOf on dir calls sizeOfDirectory
+        assertEquals(120, IOUtil.sizeOf(dir));
 
         File subDir = new File(dir, "sub");
         subDir.mkdir();
@@ -1876,7 +1627,6 @@ public class IOUtil200Test extends TestBase {
         IOUtil.write(new byte[30], fileInSubDir);
         assertEquals(150, IOUtil.sizeOfDirectory(dir));
 
-        // Test considerNonExistingFileAsEmpty
         File nonExistent = new File(tempDir.toFile(), "nonExistentSize.txt");
         assertEquals(0, IOUtil.sizeOf(nonExistent, true));
         assertThrows(FileNotFoundException.class, () -> IOUtil.sizeOf(nonExistent, false));
@@ -1926,10 +1676,9 @@ public class IOUtil200Test extends TestBase {
         assertEquals(1, files.length);
         assertEquals(testFile.getCanonicalPath(), files[0].getCanonicalPath());
 
-        // Test URL with spaces (needs decoding)
         File spaceFile = new File(tempDir.toFile(), "file with spaces.txt");
         IOUtil.write("space test", spaceFile);
-        URL spaceUrl = spaceFile.toURI().toURL(); // URI handles encoding
+        URL spaceUrl = spaceFile.toURI().toURL();
         File decodedFile = IOUtil.toFile(spaceUrl);
         assertEquals(spaceFile.getCanonicalPath(), decodedFile.getCanonicalPath());
     }
@@ -1938,7 +1687,7 @@ public class IOUtil200Test extends TestBase {
     public void testTouch() throws IOException, InterruptedException {
         File testFile = createTempFileWithContent("touchTest", ".txt", "content");
         long originalTime = testFile.lastModified();
-        Thread.sleep(10); // Ensure time difference
+        Thread.sleep(10);
         assertTrue(IOUtil.touch(testFile));
         assertTrue(testFile.lastModified() > originalTime);
 
@@ -1959,10 +1708,9 @@ public class IOUtil200Test extends TestBase {
         assertTrue(IOUtil.contentEquals(empty1, empty2));
         assertFalse(IOUtil.contentEquals(file1a, empty1));
 
-        // Non-existent files
         File nonExistent1 = new File(tempDir.toFile(), "nonEx1.txt");
         File nonExistent2 = new File(tempDir.toFile(), "nonEx2.txt");
-        assertTrue(IOUtil.contentEquals(nonExistent1, nonExistent2)); // Both don't exist
+        assertTrue(IOUtil.contentEquals(nonExistent1, nonExistent2));
         assertFalse(IOUtil.contentEquals(file1a, nonExistent1));
     }
 
@@ -1970,7 +1718,7 @@ public class IOUtil200Test extends TestBase {
     public void testContentEqualsIgnoreEOLFile() throws IOException {
         String contentUnix = "Line1\nLine2\n";
         String contentWindows = "Line1\r\nLine2\r\n";
-        String contentMac = "Line1\rLine2\r"; // Old Mac, less common now
+        String contentMac = "Line1\rLine2\r";
         String contentMixed = "Line1\nLine2\r\n";
         String differentContent = "Line1\nOtherLine\n";
 
@@ -1980,7 +1728,7 @@ public class IOUtil200Test extends TestBase {
         File fileMixed = createTempFileWithContent("ceEOLMix", ".txt", contentMixed);
         File fileDiff = createTempFileWithContent("ceEOLDiff", ".txt", differentContent);
 
-        assertTrue(IOUtil.contentEqualsIgnoreEOL(fileUnix, fileWindows, null)); // Default charset
+        assertTrue(IOUtil.contentEqualsIgnoreEOL(fileUnix, fileWindows, null));
         assertTrue(IOUtil.contentEqualsIgnoreEOL(fileUnix, fileMac, StandardCharsets.UTF_8.name()));
         assertTrue(IOUtil.contentEqualsIgnoreEOL(fileWindows, fileMixed, StandardCharsets.ISO_8859_1.name()));
         assertFalse(IOUtil.contentEqualsIgnoreEOL(fileUnix, fileDiff, null));
@@ -2031,13 +1779,13 @@ public class IOUtil200Test extends TestBase {
         IOUtil.write(new byte[] { 1, 2, 3, 4, 5 }, file2);
 
         File zipFile = new File(tempDir.toFile(), "testArchive.zip");
-        IOUtil.zip(dirToZip, zipFile); // Zips the directory itself
+        IOUtil.zip(dirToZip, zipFile);
         assertTrue(zipFile.exists() && zipFile.length() > 0);
 
         File unzipDir = createTempDirectory("unzipTestDir");
         IOUtil.unzip(zipFile, unzipDir);
 
-        File unzippedDir = new File(unzipDir, dirToZip.getName()); // The original dir name is part of path
+        File unzippedDir = new File(unzipDir, dirToZip.getName());
         assertTrue(unzippedDir.exists() && unzippedDir.isDirectory());
 
         File unzippedFile1 = new File(unzippedDir, "file1.txt");
@@ -2050,17 +1798,12 @@ public class IOUtil200Test extends TestBase {
         assertTrue(unzippedFile2.exists());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, IOUtil.readAllBytes(unzippedFile2));
 
-        // Test zip Collection<File>
         File zipFileCollection = new File(tempDir.toFile(), "testArchiveCol.zip");
-        IOUtil.zip(Arrays.asList(file1, file2), zipFileCollection); // Pass individual files
+        IOUtil.zip(Arrays.asList(file1, file2), zipFileCollection);
         assertTrue(zipFileCollection.exists() && zipFileCollection.length() > 0);
 
         File unzipDirCol = createTempDirectory("unzipTestDirCol");
         IOUtil.unzip(zipFileCollection, unzipDirCol);
-        // The paths inside zip will be relative to how they were added if sourceDir wasn't set,
-        // or just the file names if they were top-level.
-        // The zipFile helper in IOUtil uses sourceDir to create relative paths.
-        // For zip(Collection<File>), paths are file.getName() if sourceDir=null
         assertTrue(new File(unzipDirCol, "file1.txt").exists());
         assertTrue(new File(unzipDirCol, "file2.dat").exists());
     }
@@ -2073,7 +1816,7 @@ public class IOUtil200Test extends TestBase {
         File sourceFile = createTempFileWithContent("splitSource", ".dat", content);
         File destDir = createTempDirectory("splitDest");
 
-        IOUtil.splitBySize(sourceFile, 30, destDir); // Should create 4 parts (30,30,30,10)
+        IOUtil.splitBySize(sourceFile, 30, destDir);
 
         File part1 = new File(destDir, sourceFile.getName() + "_0001");
         File part2 = new File(destDir, sourceFile.getName() + "_0002");
@@ -2093,16 +1836,13 @@ public class IOUtil200Test extends TestBase {
 
     @Test
     public void testSplitByCount() throws IOException {
-        byte[] content = new byte[105]; // 105 bytes
+        byte[] content = new byte[105];
         for (int i = 0; i < 105; i++)
             content[i] = (byte) i;
         File sourceFile = createTempFileWithContent("splitCountSource", ".dat", content);
         File destDir = createTempDirectory("splitCountDest");
 
-        IOUtil.split(sourceFile, 4, destDir); // sizeOfPart = (105/4)+1 = 26+1 = 27 (actually (105%4 == 1) ? 26+1:26 ) = 27
-                                              // IOUtil logic: (len % count == 0) ? (len/count) : (len/count)+1
-                                              // 105 % 4 != 0 -> 105/4 + 1 = 26 + 1 = 27
-                                              // So parts will be 27, 27, 27, 24
+        IOUtil.split(sourceFile, 4, destDir);
 
         File part1 = new File(destDir, sourceFile.getName() + "_0001");
         File part2 = new File(destDir, sourceFile.getName() + "_0002");
@@ -2112,7 +1852,7 @@ public class IOUtil200Test extends TestBase {
         assertTrue(part1.exists() && part1.length() == 27);
         assertTrue(part2.exists() && part2.length() == 27);
         assertTrue(part3.exists() && part3.length() == 27);
-        assertTrue(part4.exists() && part4.length() == 24); // 105 - 3*27 = 105 - 81 = 24
+        assertTrue(part4.exists() && part4.length() == 24);
     }
 
     @Test
@@ -2132,7 +1872,6 @@ public class IOUtil200Test extends TestBase {
         assertEquals(expectedContent.getBytes(StandardCharsets.UTF_8).length, totalBytes);
         assertEquals(expectedContent, IOUtil.readAllToString(destFile, StandardCharsets.UTF_8));
 
-        // Test merge without delimiter
         File destFileNoDelim = new File(tempDir.toFile(), "mergedFileNoDelim.txt");
         IOUtil.merge(sourceFiles, destFileNoDelim);
         String expectedNoDelim = "Content1Content2ÜContent3€";
@@ -2153,13 +1892,12 @@ public class IOUtil200Test extends TestBase {
         File f3InD2 = new File(d2InD1, "file3.txt");
         IOUtil.write("f3", f3InD2);
 
-        // list (names)
         List<String> namesNonRecursive = IOUtil.walk(baseDir).map(File::getAbsolutePath).toList();
         assertTrue(namesNonRecursive.contains(f1.getAbsolutePath()));
         assertTrue(namesNonRecursive.contains(d1.getAbsolutePath()));
         assertEquals(2, namesNonRecursive.size());
 
-        List<String> namesRecursive = IOUtil.walk(baseDir, true, false).map(File::getAbsolutePath).toList(); // recursive, include dirs
+        List<String> namesRecursive = IOUtil.walk(baseDir, true, false).map(File::getAbsolutePath).toList();
         assertTrue(namesRecursive.contains(f1.getAbsolutePath()));
         assertTrue(namesRecursive.contains(d1.getAbsolutePath()));
         assertTrue(namesRecursive.contains(f2InD1.getAbsolutePath()));
@@ -2167,7 +1905,7 @@ public class IOUtil200Test extends TestBase {
         assertTrue(namesRecursive.contains(f3InD2.getAbsolutePath()));
         assertEquals(5, namesRecursive.size());
 
-        List<String> namesRecursiveExcludeDirs = IOUtil.walk(baseDir, true, true).map(File::getAbsolutePath).toList(); // recursive, exclude dirs
+        List<String> namesRecursiveExcludeDirs = IOUtil.walk(baseDir, true, true).map(File::getAbsolutePath).toList();
         assertTrue(namesRecursiveExcludeDirs.contains(f1.getAbsolutePath()));
         assertFalse(namesRecursiveExcludeDirs.contains(d1.getAbsolutePath()));
         assertTrue(namesRecursiveExcludeDirs.contains(f2InD1.getAbsolutePath()));
@@ -2175,7 +1913,6 @@ public class IOUtil200Test extends TestBase {
         assertTrue(namesRecursiveExcludeDirs.contains(f3InD2.getAbsolutePath()));
         assertEquals(3, namesRecursiveExcludeDirs.size());
 
-        // listFiles (File objects)
         List<File> filesNonRecursive = IOUtil.listFiles(baseDir);
         assertTrue(filesNonRecursive.stream().anyMatch(f -> f.equals(f1)));
         assertTrue(filesNonRecursive.stream().anyMatch(f -> f.equals(d1)));
@@ -2204,10 +1941,9 @@ public class IOUtil200Test extends TestBase {
         assertEquals(3, lineCount.get());
         assertEquals(Arrays.asList("Line1", "Line2", "Line3"), collectedLines);
 
-        // Test with offset and count
         lineCount.set(0);
         collectedLines.clear();
-        IOUtil.forLines(testFile, 1, 1, line -> { // Read 1 line starting from offset 1 (second line)
+        IOUtil.forLines(testFile, 1, 1, line -> {
             collectedLines.add(line);
             lineCount.incrementAndGet();
         });
@@ -2232,13 +1968,10 @@ public class IOUtil200Test extends TestBase {
         Reader reader = new StringReader(content);
         List<String> linesUpper = new ArrayList<>();
 
-        IOUtil.forLines(reader, 0, Long.MAX_VALUE, 0, 0, // offset, count, threads, queue
-                line -> linesUpper.add(line.toUpperCase()), () -> System.out.println("Reader forLines complete"));
+        IOUtil.forLines(reader, 0, Long.MAX_VALUE, 0, 0, line -> linesUpper.add(line.toUpperCase()), () -> System.out.println("Reader forLines complete"));
         assertEquals(Arrays.asList("READERX", "READERY"), linesUpper);
         reader.close();
     }
-
-    // [Tests from the previous response would be here]
 
     @Test
     public void testCopyToDirectory_destinationIsFile() throws IOException {
@@ -2262,19 +1995,15 @@ public class IOUtil200Test extends TestBase {
         File destDir = new File(destDirParent, "actualDest");
         destDir.mkdirs();
 
-        if (destDir.setWritable(false)) { // Try to make it non-writable
-            // This might not work on all OS or for privileged users.
-            // If it works, the copy should fail. If not, this specific assertion path is not tested.
+        if (destDir.setWritable(false)) {
             if (!destDir.canWrite()) {
                 assertThrows(IOException.class, () -> IOUtil.copyToDirectory(srcFile, destDir));
             } else {
                 System.err.println("Warning: Could not make test directory non-writable for testCopyToDirectory_cannotWrite: " + destDir.getAbsolutePath());
-                // If we can't make it non-writable, we can't test this specific IO failure scenario easily.
-                // We can still try to copy and it should succeed if writable.
                 IOUtil.copyToDirectory(srcFile, destDir);
                 assertTrue(new File(destDir, srcFile.getName()).exists());
             }
-            destDir.setWritable(true); // Clean up
+            destDir.setWritable(true);
         } else {
             System.err.println("Warning: setWritable(false) returned false for testCopyToDirectory_cannotWrite: " + destDir.getAbsolutePath());
         }
@@ -2291,13 +2020,6 @@ public class IOUtil200Test extends TestBase {
     public void testCopyFile_destinationIsDirectory() throws IOException {
         File srcFile = createTempFileWithContent("srcCopyDestIsDir", ".txt", "content");
         File destDir = createTempDirectory("destIsDir");
-        // Files.copy (which IOUtil.copyFile uses) would throw FileAlreadyExistsException if dest is a dir and src is a file,
-        // or other IOExceptions depending on NIO's behavior.
-        // IOUtil.copyFile internally calls checkFileExists which expects destFile to be a file if it exists.
-        // If destFile is a directory, it won't throw checkFileExists, but Files.copy might.
-        // Let's test the behavior with IOUtil's specific checks.
-        // IOUtil.copyFile creates parent directories for destFile.
-        // If destFile *is* an existing directory, Files.copy will likely fail. 
         assertThrows(IllegalArgumentException.class, () -> IOUtil.copyFile(srcFile, destDir));
     }
 
@@ -2323,18 +2045,17 @@ public class IOUtil200Test extends TestBase {
 
     @Test
     public void testDeleteAllIfExists_symlink() throws IOException {
-        // This test might be platform-dependent (symlink creation)
         File targetFile = createTempFileWithContent("symlinkTarget", ".txt", "target");
         Path linkPath = tempDir.resolve("symlink.txt");
         try {
             Files.createSymbolicLink(linkPath, targetFile.toPath());
             File linkFile = linkPath.toFile();
-            assertTrue(linkFile.exists()); // Symlink itself exists
+            assertTrue(linkFile.exists());
             assertTrue(IOUtil.isSymbolicLink(linkFile));
 
-            assertTrue(IOUtil.deleteAllIfExists(linkFile)); // Should delete the symlink, not the target
+            assertTrue(IOUtil.deleteAllIfExists(linkFile));
             assertFalse(linkFile.exists());
-            assertTrue(targetFile.exists()); // Target should remain
+            assertTrue(targetFile.exists());
 
         } catch (UnsupportedOperationException | FileSystemException | SecurityException e) {
             System.err.println("Skipping deleteAllIfExists_symlink test: Symlink creation not supported or permission denied. " + e.getMessage());
@@ -2344,13 +2065,13 @@ public class IOUtil200Test extends TestBase {
     @Test
     public void testCleanDirectory_nonExistentDir() {
         File nonExistentDir = new File(tempDir.toFile(), "nonExistentCleanDir");
-        assertFalse(IOUtil.cleanDirectory(nonExistentDir)); // Should return false as per IOUtil.deleteFilesFromDirectory
+        assertFalse(IOUtil.cleanDirectory(nonExistentDir));
     }
 
     @Test
     public void testCleanDirectory_fileInsteadOfDir() throws IOException {
         File fileAsDir = createTempFileWithContent("fileAsCleanDir", ".txt", "content");
-        assertFalse(IOUtil.cleanDirectory(fileAsDir)); // Should return false
+        assertFalse(IOUtil.cleanDirectory(fileAsDir));
     }
 
     @Test
@@ -2364,14 +2085,11 @@ public class IOUtil200Test extends TestBase {
             File linkFile = linkPath.toFile();
             assertTrue(IOUtil.isSymbolicLink(linkFile));
 
-            // sizeOfDirectory0 and sizeOfAsBigInteger0 explicitly check !isSymbolicLink(file)
-            // So symlinks themselves should not contribute to size, nor their targets (unless target is also listed directly)
-            assertEquals(100, IOUtil.sizeOfDirectory(dir)); // Only realFile contributes
+            assertEquals(100, IOUtil.sizeOfDirectory(dir));
             assertEquals(100, IOUtil.sizeOfDirectoryAsBigInteger(dir).longValue());
 
         } catch (UnsupportedOperationException | FileSystemException | SecurityException e) {
             System.err.println("Skipping testSizeOf_symlinkInDirectory test: Symlink creation not supported or permission denied. " + e.getMessage());
-            // Fallback: if symlink cannot be created, the directory only contains realFile
             assertEquals(100, IOUtil.sizeOfDirectory(dir));
         }
     }
@@ -2383,7 +2101,6 @@ public class IOUtil200Test extends TestBase {
         IOUtil.zip(emptyDirToZip, zipFile);
         assertTrue(zipFile.exists());
 
-        // Unzip and check (it might contain just the directory entry)
         File unzipDir = createTempDirectory("unzipEmptyDir");
         IOUtil.unzip(zipFile, unzipDir);
         File unzippedOriginalDir = new File(unzipDir, emptyDirToZip.getName());
@@ -2400,9 +2117,7 @@ public class IOUtil200Test extends TestBase {
         File file2 = createTempFileWithContent(subDir.toPath().resolve("file2.txt").toString(), null, "content2");
 
         File zipFile = new File(tempDir.toFile(), "collectionWithDir.zip");
-        // IOUtil.zip(Collection<File>) processes each file/dir individually.
-        // If a directory is in the collection, its contents are zipped.
-        IOUtil.zip(Arrays.asList(dirToZip), zipFile); // Zipping the top-level directory
+        IOUtil.zip(Arrays.asList(dirToZip), zipFile);
 
         File unzipDir = createTempDirectory("unzipCollDir");
         IOUtil.unzip(zipFile, unzipDir);
@@ -2420,9 +2135,7 @@ public class IOUtil200Test extends TestBase {
         File file2 = createTempFileWithContent(subDir.toPath().resolve("file2.txt").toString(), null, "content2");
 
         File zipFile = new File(tempDir.toFile(), "collectionWithDir.zip");
-        // IOUtil.zip(Collection<File>) processes each file/dir individually.
-        // If a directory is in the collection, its contents are zipped.
-        IOUtil.zip(Arrays.asList(file1, subDir), zipFile); // Zipping the top-level directory
+        IOUtil.zip(Arrays.asList(file1, subDir), zipFile);
 
         File unzipDir = createTempDirectory("unzipCollDir");
         IOUtil.unzip(zipFile, unzipDir);
@@ -2443,7 +2156,7 @@ public class IOUtil200Test extends TestBase {
         File destFile = new File(tempDir.toFile(), "mergedEmpty.txt");
         long bytesMerged = IOUtil.merge(Collections.emptyList(), destFile);
         assertEquals(0, bytesMerged);
-        assertTrue(destFile.exists()); // Destination file might be created empty
+        assertTrue(destFile.exists());
         assertEquals(0, destFile.length());
     }
 
@@ -2467,7 +2180,6 @@ public class IOUtil200Test extends TestBase {
     @Test
     public void testToURL_fileDoesNotExist() {
         File nonExistentFile = new File(tempDir.toFile(), "nonExistentForUrl.txt");
-        // File.toURI().toURL() works even if file doesn't exist, as URI is just a representation
         assertDoesNotThrow(() -> IOUtil.toURL(nonExistentFile));
         URL url = IOUtil.toURL(nonExistentFile);
         assertTrue(url.toString().startsWith("file:/"));
@@ -2484,7 +2196,6 @@ public class IOUtil200Test extends TestBase {
 
     @Test
     public void testForLines_withThreading() throws Exception {
-        // This is a basic test to ensure it runs with threads, not to test concurrency deeply.
         StringBuilder content = new StringBuilder();
         List<String> expectedLines = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -2498,18 +2209,15 @@ public class IOUtil200Test extends TestBase {
         AtomicInteger actionCount = new AtomicInteger(0);
         AtomicInteger onCompleteCount = new AtomicInteger(0);
 
-        // Using 1 read thread, 2 process threads for this basic test
-        IOUtil.forLines(testFile, 0, Long.MAX_VALUE, 1, 2, 10, // offset, count, readThreads, processThreads, queueSize
-                line -> {
-                    collectedLines.add(line);
-                    actionCount.incrementAndGet();
-                }, () -> {
-                    onCompleteCount.incrementAndGet();
-                });
+        IOUtil.forLines(testFile, 0, Long.MAX_VALUE, 1, 2, 10, line -> {
+            collectedLines.add(line);
+            actionCount.incrementAndGet();
+        }, () -> {
+            onCompleteCount.incrementAndGet();
+        });
 
         assertEquals(100, actionCount.get());
         assertEquals(1, onCompleteCount.get());
-        // Order is not guaranteed with threads, so check for presence and size
         assertEquals(expectedLines.size(), collectedLines.size());
         assertTrue(collectedLines.containsAll(expectedLines));
         assertTrue(expectedLines.containsAll(collectedLines));
@@ -2576,15 +2284,13 @@ public class IOUtil200Test extends TestBase {
         File gzippedFile = new File(tempDir.toFile(), "gzipped.txt.gz");
         File unGzippedFile = new File(tempDir.toFile(), "unGzippedFromGz.txt");
 
-        // Gzip it
         try (InputStream in = IOUtil.newBufferedInputStream(originalFile);
                 OutputStream out = IOUtil.newGZIPOutputStream(IOUtil.newBufferedOutputStream(gzippedFile))) {
             IOUtil.write(in, out);
         }
         assertTrue(gzippedFile.exists());
-        assertTrue(gzippedFile.length() < originalFile.length()); // সাধারণত compressed file is smaller
+        assertTrue(gzippedFile.length() < originalFile.length());
 
-        // UnGzip it
         try (InputStream in = IOUtil.newGZIPInputStream(IOUtil.newBufferedInputStream(gzippedFile));
                 OutputStream out = IOUtil.newBufferedOutputStream(unGzippedFile)) {
             IOUtil.write(in, out);
@@ -2592,11 +2298,6 @@ public class IOUtil200Test extends TestBase {
         assertTrue(unGzippedFile.exists());
         assertEquals(originalText, IOUtil.readAllToString(unGzippedFile, StandardCharsets.UTF_8));
     }
-
-    // This class might have internal helper methods like openFile, toByteArray.
-    // Those are tested indirectly through the public methods that use them.
-    // For example, readAllBytes(File) uses openFile. If readAllBytes works for .gz and .zip files,
-    // then openFile is working correctly for those cases.
 
     @Test
     public void testReadAllBytesFromFile_GZ() throws IOException {
@@ -2630,7 +2331,6 @@ public class IOUtil200Test extends TestBase {
         }
         assertTrue(zippedFile.exists());
 
-        // IOUtil.readAllBytes(File) for zip will read the first entry.
         byte[] readBytes = IOUtil.readAllBytes(zippedFile);
         assertEquals(originalContent, new String(readBytes, StandardCharsets.UTF_8));
     }
@@ -2641,13 +2341,9 @@ public class IOUtil200Test extends TestBase {
 
     @Test
     public void testCheckCharset_nullInput() {
-        // Charsets.DEFAULT is package-private in abacus-common, so we can't directly compare.
-        // We can check that it doesn't return null and is a valid Charset.
-        Charset defaultCharset = Charset.defaultCharset(); // Standard Java default
+        Charset defaultCharset = Charset.defaultCharset();
         Charset result = checkCharset(null);
         assertNotNull(result);
-        // IOUtil.DEFAULT_CHARSET is Charsets.DEFAULT from the library.
-        // We can test by encoding/decoding with it.
         String test = "test";
         assertArrayEquals(test.getBytes(result), test.getBytes(checkCharset(null)));
 
@@ -2655,31 +2351,18 @@ public class IOUtil200Test extends TestBase {
         assertEquals(utf8, checkCharset(utf8));
     }
 
-    // [Previous JUnit 5 test class setup, imports, and helper methods remain the same]
-    // ... (assume all previous imports and helper methods are here)
-    // public class IOUtilTest {
-    //
-    //     @TempDir
-    //     Path tempDir;
-    //
-    //     // [Helper methods like createTempFileWithContent, createTempFile, createTempDirectory from previous response]
-    //     // ...
-    //
-    //     // [Tests from the previous responses would be here]
-
     @Test
     public void testNewFileOutputStream_appendMode() throws IOException {
         File testFile = createTempFile("fosAppend", ".txt");
         IOUtil.write("Initial", StandardCharsets.UTF_8, testFile);
 
-        try (FileOutputStream fosAppend = IOUtil.newFileOutputStream(testFile, true); // append = true
+        try (FileOutputStream fosAppend = IOUtil.newFileOutputStream(testFile, true);
                 OutputStreamWriter osw = new OutputStreamWriter(fosAppend, StandardCharsets.UTF_8)) {
             osw.write("-Appended");
         }
         assertEquals("Initial-Appended", IOUtil.readAllToString(testFile, StandardCharsets.UTF_8));
 
-        // Overwrite mode (append = false implicitly or explicitly)
-        try (FileOutputStream fosOverwrite = IOUtil.newFileOutputStream(testFile); // append = false (default)
+        try (FileOutputStream fosOverwrite = IOUtil.newFileOutputStream(testFile);
                 OutputStreamWriter osw = new OutputStreamWriter(fosOverwrite, StandardCharsets.UTF_8)) {
             osw.write("Overwritten");
         }
@@ -2691,13 +2374,12 @@ public class IOUtil200Test extends TestBase {
         File testFile = createTempFile("fwAppend", ".txt");
         IOUtil.write("FirstPart", StandardCharsets.UTF_8, testFile);
 
-        try (FileWriter fwAppend = IOUtil.newFileWriter(testFile, StandardCharsets.UTF_8, true)) { // append = true
+        try (FileWriter fwAppend = IOUtil.newFileWriter(testFile, StandardCharsets.UTF_8, true)) {
             fwAppend.write("-SecondPart");
         }
         assertEquals("FirstPart-SecondPart", IOUtil.readAllToString(testFile, StandardCharsets.UTF_8));
 
-        // Overwrite mode
-        try (FileWriter fwOverwrite = IOUtil.newFileWriter(testFile, StandardCharsets.UTF_8, false)) { // append = false
+        try (FileWriter fwOverwrite = IOUtil.newFileWriter(testFile, StandardCharsets.UTF_8, false)) {
             fwOverwrite.write("NewContent");
         }
         assertEquals("NewContent", IOUtil.readAllToString(testFile, StandardCharsets.UTF_8));
@@ -2706,12 +2388,10 @@ public class IOUtil200Test extends TestBase {
     @Test
     public void testNewBufferedStreams_withSize() throws IOException {
         File testFile = createTempFileWithContent("bufferedSize", ".txt", "some data");
-        int customBufferSize = 16; // Small buffer for testing
+        int customBufferSize = 16;
 
         try (BufferedInputStream bis = IOUtil.newBufferedInputStream(testFile, customBufferSize)) {
             assertNotNull(bis);
-            // Further testing would involve reflection to check buffer size or specific read patterns
-            // For now, just ensure it doesn't throw and reads correctly
             byte[] readData = IOUtil.readBytes(bis, 0, 4);
             assertArrayEquals("some".getBytes(StandardCharsets.UTF_8), readData);
         }
@@ -2745,9 +2425,9 @@ public class IOUtil200Test extends TestBase {
 
     @Test
     public void testCloseAll_multipleExceptions() {
-        MockCloseable mc1 = new MockCloseable(true, "E1"); // Throws
+        MockCloseable mc1 = new MockCloseable(true, "E1");
         MockCloseable mc2 = new MockCloseable(false, "OK2");
-        MockCloseable mc3 = new MockCloseable(true, "E3"); // Throws
+        MockCloseable mc3 = new MockCloseable(true, "E3");
         MockCloseable mc4 = new MockCloseable(false, "OK4");
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> IOUtil.closeAll(mc1, mc2, mc3, mc4));
@@ -2756,10 +2436,9 @@ public class IOUtil200Test extends TestBase {
         assertTrue(mc3.isClosed());
         assertTrue(mc4.isClosed());
 
-        // Check primary exception and suppressed exceptions
-        assertEquals("java.io.IOException: Mock close exception: E1", ex.getMessage()); // Or ex.getCause().getMessage() if wrapped
+        assertEquals("java.io.IOException: Mock close exception: E1", ex.getMessage());
         Throwable[] suppressed = ex.getSuppressed();
-        assertEquals(1, suppressed.length); // E3 should be suppressed
+        assertEquals(1, suppressed.length);
         assertTrue(suppressed[0] instanceof IOException);
         assertTrue(suppressed[0].getMessage().contains("E3"));
     }
@@ -2782,12 +2461,6 @@ public class IOUtil200Test extends TestBase {
             return true;
         };
 
-        // When copying a single file to a directory, the filter is applied to the srcFile itself.
-        // The internal doCopyDirectory applies filter to children, doCopyFile doesn't use filter directly.
-        // IOUtil.copyToDirectory for a file directly calls doCopyFile if the destDir logic passes.
-        // The filter in copyToDirectory's signature appears to be for the doCopyDirectory part.
-        // Let's test copying a directory with a filter that throws.
-
         File srcDir = createTempDirectory("srcDirForFilterEx");
         File child1 = new File(srcDir, "child1.txt");
         IOUtil.write("c1", child1);
@@ -2802,7 +2475,6 @@ public class IOUtil200Test extends TestBase {
         };
 
         assertThrows(MyCustomException.class, () -> IOUtil.copyToDirectory(srcDir, destDir, true, dirFilter));
-        // Check if child1 was copied before the exception
         assertTrue(new File(new File(destDir, srcDir.getName()), "child1.txt").exists());
         assertFalse(new File(new File(destDir, srcDir.getName()), "child2throws.txt").exists());
     }
@@ -2817,21 +2489,11 @@ public class IOUtil200Test extends TestBase {
             Files.createSymbolicLink(linkPath, targetFile.toPath());
             File linkFile = linkPath.toFile();
 
-            // Copy with NOFOLLOW_LINKS: should copy the link itself if the FS supports it,
-            // or behave like a regular file copy if not directly copying link-as-link.
-            // java.nio.Files.copy with NOFOLLOW_LINKS and a symlink source will copy the *target*
-            // unless the target path for copy is also a symlink and REPLACE_EXISTING is used.
-            // IOUtil.copyFile ultimately uses Files.copy.
-            // The behavior of copying a symlink *as a symlink* is complex and platform-dependent.
-            // Files.copy(link, dest, LinkOption.NOFOLLOW_LINKS) copies the target of the link to dest.
-            // If we want to create a new symlink at dest, we'd need Files.createSymbolicLink(dest, Files.readSymbolicLink(link))
-
-            // Standard behavior of Files.copy(link, newPath, NOFOLLOW_LINKS) is to copy the target.
             IOUtil.copyFile(linkFile, destFile, true, LinkOption.NOFOLLOW_LINKS, StandardCopyOption.REPLACE_EXISTING);
             assertTrue(destFile.exists());
-            assertFalse(IOUtil.isSymbolicLink(destFile)); // It copies the target's content
+            assertFalse(IOUtil.isSymbolicLink(destFile));
             assertEquals("target data", IOUtil.readAllToString(destFile));
-            assertTrue(IOUtil.isSymbolicLink(linkFile)); // Original link remains
+            assertTrue(IOUtil.isSymbolicLink(linkFile));
 
         } catch (UnsupportedOperationException | FileSystemException | SecurityException e) {
             System.err.println("Skipping testCopyFile_withNoFollowLinks: Symlink creation not supported. " + e.getMessage());
@@ -2843,19 +2505,15 @@ public class IOUtil200Test extends TestBase {
         File file1 = createTempFileWithContent("fileDateRef1", ".txt", "f1");
         File nonExistentRef = new File(tempDir.toFile(), "nonExistentRef.txt");
 
-        // Javadoc of File.lastModified() for non-existent file returns 0L.
-        // IOUtil doesn't explicitly check if reference exists for isFileNewer/Older(File, File).
-        // It relies on file.lastModified().
-        long nonExistentTime = nonExistentRef.lastModified(); // Should be 0L
+        long nonExistentTime = nonExistentRef.lastModified();
         assertEquals(0L, nonExistentTime);
 
-        // If file1.lastModified() > 0, then it's newer than nonExistentRef (time 0)
         if (file1.lastModified() > 0) {
             assertTrue(IOUtil.isFileNewer(file1, nonExistentRef));
             assertFalse(IOUtil.isFileOlder(file1, nonExistentRef));
-        } else { // Edge case if file1 also has lastModified 0 (e.g., if just created and OS sets it late)
+        } else {
             assertFalse(IOUtil.isFileNewer(file1, nonExistentRef));
-            assertFalse(IOUtil.isFileOlder(file1, nonExistentRef)); // Not older if times are equal
+            assertFalse(IOUtil.isFileOlder(file1, nonExistentRef));
         }
     }
 
@@ -2879,11 +2537,11 @@ public class IOUtil200Test extends TestBase {
     public void testZip_emptyCollection() throws IOException {
         File zipFile = new File(tempDir.toFile(), "emptyCollectionArchive.zip");
         IOUtil.zip(Collections.emptyList(), zipFile);
-        assertTrue(zipFile.exists()); // Zip file is created, but will be empty (standard zip format for empty archive)
+        assertTrue(zipFile.exists());
 
         File unzipDir = createTempDirectory("unzipEmptyCollection");
         IOUtil.unzip(zipFile, unzipDir);
-        assertEquals(0, unzipDir.listFiles().length); // Should be empty
+        assertEquals(0, unzipDir.listFiles().length);
     }
 
     @Test
@@ -2891,7 +2549,6 @@ public class IOUtil200Test extends TestBase {
         File corruptedZip = createTempFileWithContent("corrupted", ".zip", "This is not a valid zip file content".getBytes());
         File unzipDir = createTempDirectory("unzipCorrupted");
 
-        // ZipException (IOException subclass) should be wrapped in UncheckedIOException
         assertThrows(UncheckedIOException.class, () -> IOUtil.unzip(corruptedZip, unzipDir));
     }
 
@@ -2899,9 +2556,9 @@ public class IOUtil200Test extends TestBase {
     public void testSplit_destDirCreation() throws IOException {
         File sourceFile = createTempFileWithContent("splitDestCreate", ".dat", new byte[100]);
         File parentDestDir = createTempDirectory("splitParentDest");
-        File destDir = new File(parentDestDir, "actualSplitDest"); // Does not exist yet
+        File destDir = new File(parentDestDir, "actualSplitDest");
 
-        IOUtil.split(sourceFile, 3, destDir); // Should create destDir
+        IOUtil.split(sourceFile, 3, destDir);
         assertTrue(destDir.exists() && destDir.isDirectory());
         assertTrue(new File(destDir, sourceFile.getName() + "_0001").exists());
     }
@@ -2922,7 +2579,7 @@ public class IOUtil200Test extends TestBase {
         File destFile = createTempFileWithContent("mergeDestExists", ".txt", "Old Content");
 
         IOUtil.merge(Collections.singletonList(file1), destFile);
-        assertEquals("New1", IOUtil.readAllToString(destFile)); // Should overwrite
+        assertEquals("New1", IOUtil.readAllToString(destFile));
     }
 
     @Test
@@ -2930,33 +2587,27 @@ public class IOUtil200Test extends TestBase {
         File nonExistentFile = new File(tempDir.toFile(), "mapRWNonExistent.dat");
         long sizeToCreate = 1024;
 
-        // IOUtil.map uses RandomAccessFile("rw",...), which creates the file if it doesn't exist.
-        // Then FileChannel.map is called.
         MappedByteBuffer buffer = null;
         try {
             buffer = IOUtil.map(nonExistentFile, FileChannel.MapMode.READ_WRITE, 0, sizeToCreate);
             assertTrue(nonExistentFile.exists());
-            assertEquals(sizeToCreate, nonExistentFile.length()); // FileChannel.map extends the file if mode is RW/PRIVATE
+            assertEquals(sizeToCreate, nonExistentFile.length());
             assertEquals(sizeToCreate, buffer.capacity());
 
-            // Write something
             buffer.put(0, (byte) 'X');
             buffer.put((int) (sizeToCreate - 1), (byte) 'Y');
-            buffer.force(); // Ensure written to underlying file for subsequent check
+            buffer.force();
         } finally {
             if (buffer != null) {
-                // How to unmap? MappedByteBuffer has no close/unmap. Relies on GC.
-                // For testing, can try to clear it or make it eligible for GC.
             }
         }
-        // Verify by re-reading
         try (RandomAccessFile raf = new RandomAccessFile(nonExistentFile, "r")) {
             assertEquals('X', raf.readByte());
             raf.seek(sizeToCreate - 1);
             assertEquals('Y', raf.readByte());
         }
 
-        unmap(buffer); // Assuming TestUtil has a method to unmap MappedByteBuffer if needed
+        unmap(buffer);
     }
 
     @Test
@@ -2964,22 +2615,18 @@ public class IOUtil200Test extends TestBase {
         File testFile = createTempFileWithContent("readZeroLen", ".txt", "data");
         byte[] buffer = new byte[10];
 
-        // Test read(File, byte[], off, len)
         int bytesRead = IOUtil.read(testFile, buffer, 0, 0);
         assertEquals(0, bytesRead);
 
-        // Test read(InputStream, byte[], off, len)
         try (InputStream is = IOUtil.newFileInputStream(testFile)) {
             bytesRead = IOUtil.read(is, buffer, 0, 0);
             assertEquals(0, bytesRead);
         }
 
-        // Test read(File, char[], off, len)
         char[] charBuffer = new char[10];
         int charsRead = IOUtil.read(testFile, StandardCharsets.UTF_8, charBuffer, 0, 0);
         assertEquals(0, charsRead);
 
-        // Test read(Reader, char[], off, len)
         try (Reader reader = IOUtil.newFileReader(testFile, StandardCharsets.UTF_8)) {
             charsRead = IOUtil.read(reader, charBuffer, 0, 0);
             assertEquals(0, charsRead);
@@ -2993,42 +2640,9 @@ public class IOUtil200Test extends TestBase {
         if (destFile.exists())
             destFile.delete();
 
-        // Write "source data" (11 chars) from offset 8
         long bytesWritten = IOUtil.write(srcFile, 8, 11, destFile);
         assertEquals(11, bytesWritten);
         assertEquals("source data", IOUtil.readAllToString(destFile, StandardCharsets.UTF_8));
     }
-
-    // Test for newLZ4BlockInputStream, newLZ4BlockOutputStream,
-    // newSnappyInputStream, newSnappyOutputStream, newBrotliInputStream
-    // would require the respective libraries (lz4-java, snappy-java, brotli-dec/enc)
-    // on the classpath. They would typically test if an instance is created
-    // and if basic compression/decompression works.
-    // Example for one, assuming library is present:
-    /*
-    @Test
-    @Disabled("Requires LZ4 library")
-    public void testLz4Streams() throws IOException {
-        String originalText = "Some text for LZ4 compression testing.";
-        byte[] originalBytes = originalText.getBytes(StandardCharsets.UTF_8);
-        ByteArrayOutputStream compressedBaos = new ByteArrayOutputStream();
-    
-        try (LZ4BlockOutputStream lz4os = IOUtil.newLZ4BlockOutputStream(compressedBaos)) {
-            lz4os.write(originalBytes);
-        }
-        byte[] compressedBytes = compressedBaos.toByteArray();
-        assertTrue(compressedBytes.length < originalBytes.length || originalBytes.length == 0);
-    
-        ByteArrayOutputStream decompressedBaos = new ByteArrayOutputStream();
-        try (LZ4BlockInputStream lz4is = IOUtil.newLZ4BlockInputStream(new ByteArrayInputStream(compressedBytes))) {
-            IOUtil.write(lz4is, decompressedBaos);
-        }
-        assertArrayEquals(originalBytes, decompressedBaos.toByteArray());
-        assertEquals(originalText, new String(decompressedBaos.toByteArray(), StandardCharsets.UTF_8));
-    }
-    */
-
-    // Note: `splitByLine` is package-private, so it's not directly tested here as per "public methods" request.
-    // Its functionality would be indirectly covered if used by a public method.
 
 }

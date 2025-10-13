@@ -501,15 +501,6 @@ public final class Triple<L, M, R> implements Mutable {
         return false;
     }
 
-    //    /**
-    //     * Swaps the left and right values. They must be the same type.
-    //     */
-    //    public void reverse() {
-    //        Object tmp = left;
-    //        this.left = (L) right;
-    //        this.right = (R) tmp;
-    //    }
-
     /**
      * Creates and returns a new Triple with the left and right elements swapped,
      * while keeping the middle element in the same position.

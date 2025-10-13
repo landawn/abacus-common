@@ -28,11 +28,11 @@ import java.util.Map;
  * <p>Example usage:</p>
  * <pre>{@code
  * Calendar cal = Calendar.getInstance();
- * 
+ *
  * // Using CalendarField enum
- * cal.add(CalendarField.DAY.value(), 5); // Add 5 days
- * cal.set(CalendarField.HOUR.value(), 14); // Set hour to 14 (2 PM)
- * 
+ * cal.add(CalendarField.DAY_OF_MONTH.value(), 5); // Add 5 days
+ * cal.set(CalendarField.HOUR_OF_DAY.value(), 14); // Set hour to 14 (2 PM)
+ *
  * // Converting from int to CalendarField
  * CalendarField field = CalendarField.of(Calendar.MONTH);
  * System.out.println(field); // MONTH
@@ -84,43 +84,43 @@ public enum CalendarField {
     /**
      * Field for hour of the day in 24-hour format (0-23).
      * Has the same int value as {@link Calendar#HOUR_OF_DAY}.
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
-     * calendar.set(CalendarField.HOUR.value(), 15); // Set to 3 PM
+     * calendar.set(CalendarField.HOUR_OF_DAY.value(), 15); // Set to 3 PM
      * }</pre>
      *
      * @see Calendar#HOUR_OF_DAY
      */
-    HOUR(Calendar.HOUR_OF_DAY),
+    HOUR_OF_DAY(Calendar.HOUR_OF_DAY),
 
     /**
      * Field for day of the month (1-31).
      * Has the same int value (5) as {@link Calendar#DATE} and {@link Calendar#DAY_OF_MONTH}.
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
-     * calendar.add(CalendarField.DAY.value(), 7); // Add one week
-     * int dayOfMonth = calendar.get(CalendarField.DAY.value());
+     * calendar.add(CalendarField.DAY_OF_MONTH.value(), 7); // Add one week
+     * int dayOfMonth = calendar.get(CalendarField.DAY_OF_MONTH.value());
      * }</pre>
      *
      * @see Calendar#DAY_OF_MONTH
      */
-    DAY(Calendar.DAY_OF_MONTH),
+    DAY_OF_MONTH(Calendar.DAY_OF_MONTH),
 
     /**
      * Field for week of the year (1-53).
      * Has the same int value as {@link Calendar#WEEK_OF_YEAR}.
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
-     * int weekNumber = calendar.get(CalendarField.WEEK.value());
-     * calendar.add(CalendarField.WEEK.value(), 2); // Add 2 weeks
+     * int weekNumber = calendar.get(CalendarField.WEEK_OF_YEAR.value());
+     * calendar.add(CalendarField.WEEK_OF_YEAR.value(), 2); // Add 2 weeks
      * }</pre>
      *
      * @see Calendar#WEEK_OF_YEAR
      */
-    WEEK(Calendar.WEEK_OF_YEAR),
+    WEEK_OF_YEAR(Calendar.WEEK_OF_YEAR),
 
     /**
      * Field for month of the year (0-11, where 0 is January).
@@ -171,28 +171,54 @@ public enum CalendarField {
 
     /**
      * Returns the CalendarField enum constant corresponding to the given Calendar field value.
-     * 
+     *
      * <p>This method provides a way to convert from Calendar field constants to
-     * the corresponding CalendarField enum values.</p>
-     * 
-     * <p>Example:</p>
+     * the corresponding CalendarField enum values. It uses an internal lookup map
+     * for efficient conversion.</p>
+     *
+     * <p>Supported field values include:
+     * <ul>
+     *   <li>{@link Calendar#MILLISECOND} (14) - maps to {@link #MILLISECOND}</li>
+     *   <li>{@link Calendar#SECOND} (13) - maps to {@link #SECOND}</li>
+     *   <li>{@link Calendar#MINUTE} (12) - maps to {@link #MINUTE}</li>
+     *   <li>{@link Calendar#HOUR_OF_DAY} (11) - maps to {@link #HOUR_OF_DAY}</li>
+     *   <li>{@link Calendar#DAY_OF_MONTH} (5) - maps to {@link #DAY_OF_MONTH}</li>
+     *   <li>{@link Calendar#WEEK_OF_YEAR} (3) - maps to {@link #WEEK_OF_YEAR}</li>
+     *   <li>{@link Calendar#MONTH} (2) - maps to {@link #MONTH}</li>
+     *   <li>{@link Calendar#YEAR} (1) - maps to {@link #YEAR}</li>
+     * </ul>
+     * </p>
+     *
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
+     * // Convert Calendar constant to CalendarField
      * CalendarField field = CalendarField.of(Calendar.MONTH);
-     * System.out.println(field); // MONTH
-     * 
-     * CalendarField dayField = CalendarField.of(5); // Calendar.DAY_OF_MONTH
-     * System.out.println(dayField); // DAY
+     * System.out.println(field); // Output: MONTH
+     *
+     * // Using numeric value directly
+     * CalendarField dayField = CalendarField.of(5); // Calendar.DAY_OF_MONTH = 5
+     * System.out.println(dayField); // Output: DAY_OF_MONTH
+     *
+     * // Dynamic conversion
+     * Calendar cal = Calendar.getInstance();
+     * int fieldConstant = Calendar.YEAR;
+     * CalendarField yearField = CalendarField.of(fieldConstant);
      * }</pre>
      *
-     * @param intValue the Calendar field constant value
-     * @return the corresponding CalendarField enum constant
+     * @param intValue the Calendar field constant value to convert
+     * @return the corresponding CalendarField enum constant, never {@code null}
      * @throws IllegalArgumentException if no CalendarField maps to the given value
+     *         (e.g., unsupported Calendar constants like {@link Calendar#HOUR},
+     *         {@link Calendar#AM_PM}, {@link Calendar#DAY_OF_WEEK}, etc.)
+     * @see Calendar
+     * @see #value()
+     * @see #valueOf(int)
      */
     public static CalendarField of(final int intValue) {
         final CalendarField result = m.get(intValue);
 
         if (result == null) {
-            throw new IllegalArgumentException("No defined CalendarUnit mapping to value: " + intValue);
+            throw new IllegalArgumentException("No defined CalendarField mapping to value: " + intValue);
         }
 
         return result;
@@ -200,11 +226,25 @@ public enum CalendarField {
 
     /**
      * Returns the CalendarField enum constant corresponding to the given Calendar field value.
-     * 
-     * @param intValue the Calendar field constant value
-     * @return the corresponding CalendarField enum constant
+     *
+     * <p>This method is deprecated in favor of {@link #of(int)}, which follows
+     * the standard factory method naming convention. The behavior is identical
+     * to {@code of(int)}.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * // Deprecated way
+     * CalendarField field = CalendarField.valueOf(Calendar.MONTH);
+     *
+     * // Preferred way
+     * CalendarField field = CalendarField.of(Calendar.MONTH);
+     * }</pre>
+     *
+     * @param intValue the Calendar field constant value to convert
+     * @return the corresponding CalendarField enum constant, never {@code null}
      * @throws IllegalArgumentException if no CalendarField maps to the given value
-     * @deprecated Use {@link #of(int)} instead
+     * @deprecated Use {@link #of(int)} instead for better naming consistency
+     * @see #of(int)
      */
     @Deprecated
     public static CalendarField valueOf(final int intValue) {
@@ -213,24 +253,49 @@ public enum CalendarField {
 
     /**
      * Returns the Calendar field constant value for this CalendarField.
-     * 
-     * <p>The returned value can be used directly with Calendar methods that
-     * expect field constants.</p>
-     * 
-     * <p>Example:</p>
+     *
+     * <p>The returned value can be used directly with {@link Calendar} methods that
+     * expect field constants, such as {@link Calendar#get(int)}, {@link Calendar#set(int, int)},
+     * {@link Calendar#add(int, int)}, and {@link Calendar#roll(int, int)}.</p>
+     *
+     * <p>Each CalendarField enum constant maps to exactly one Calendar field constant:
+     * <ul>
+     *   <li>{@link #MILLISECOND}.value() returns {@link Calendar#MILLISECOND} (14)</li>
+     *   <li>{@link #SECOND}.value() returns {@link Calendar#SECOND} (13)</li>
+     *   <li>{@link #MINUTE}.value() returns {@link Calendar#MINUTE} (12)</li>
+     *   <li>{@link #HOUR_OF_DAY}.value() returns {@link Calendar#HOUR_OF_DAY} (11)</li>
+     *   <li>{@link #DAY_OF_MONTH}.value() returns {@link Calendar#DAY_OF_MONTH} (5)</li>
+     *   <li>{@link #WEEK_OF_YEAR}.value() returns {@link Calendar#WEEK_OF_YEAR} (3)</li>
+     *   <li>{@link #MONTH}.value() returns {@link Calendar#MONTH} (2)</li>
+     *   <li>{@link #YEAR}.value() returns {@link Calendar#YEAR} (1)</li>
+     * </ul>
+     * </p>
+     *
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Calendar cal = Calendar.getInstance();
      * CalendarField monthField = CalendarField.MONTH;
-     * 
-     * // These are equivalent:
-     * cal.set(monthField.value(), 5);
-     * cal.set(Calendar.MONTH, 5);
-     * 
-     * // Getting current month
+     *
+     * // Setting values - these are equivalent:
+     * cal.set(monthField.value(), 5);        // Using CalendarField
+     * cal.set(Calendar.MONTH, 5);            // Using Calendar constant directly
+     *
+     * // Getting values
      * int currentMonth = cal.get(CalendarField.MONTH.value());
+     *
+     * // Adding values
+     * cal.add(CalendarField.DAY_OF_MONTH.value(), 7); // Add 7 days
+     *
+     * // Rolling values (wraps without changing larger fields)
+     * cal.roll(CalendarField.HOUR_OF_DAY.value(), 3); // Add 3 hours (wraps at 24)
      * }</pre>
-     * 
-     * @return the Calendar field constant value
+     *
+     * @return the Calendar field constant value (an integer between 1 and 14)
+     * @see Calendar#get(int)
+     * @see Calendar#set(int, int)
+     * @see Calendar#add(int, int)
+     * @see Calendar#roll(int, int)
+     * @see #of(int)
      */
     public int value() {
         return value;

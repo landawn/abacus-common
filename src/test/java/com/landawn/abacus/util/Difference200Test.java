@@ -13,17 +13,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Difference.BeanDifference;
 import com.landawn.abacus.util.Difference.MapDifference;
 
-/**
- * Unit tests for the Difference class and its inner classes.
- */
+@Tag("new-test")
 public class Difference200Test extends TestBase {
 
-    // Test cases for the base Difference class
     @Test
     public void testOf_booleanArrays() {
         Difference<BooleanList, BooleanList> diff = Difference.of(new boolean[] { true, false, true }, new boolean[] { true, true, false, false });
@@ -147,7 +145,6 @@ public class Difference200Test extends TestBase {
         assertEquals(expected, diff.toString());
     }
 
-    // Test cases for MapDifference
     @Test
     public void testMapDifference_of() {
         Map<String, Integer> map1 = N.asMap("a", 1, "b", 2, "c", 3);
@@ -230,9 +227,6 @@ public class Difference200Test extends TestBase {
         assertEquals(expected, diff.toString());
     }
 
-    // Test cases for BeanDifference
-
-    // Helper bean classes for testing
     public static class SimpleBean {
         private int id;
         private String name;
@@ -250,7 +244,6 @@ public class Difference200Test extends TestBase {
             return name;
         }
 
-        // For stable hashcode in tests
         @Override
         public int hashCode() {
             return id;
@@ -348,7 +341,6 @@ public class Difference200Test extends TestBase {
         SimpleBean bean2 = new SimpleBean(1, "B");
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(bean1, bean2);
         String expected = "{areEqual=false, inCommon={id=1}, onLeftOnly={}, onRightOnly={}, withDifferentValues={name=(A, B)}}";
-        // Note: property order in toString might not be guaranteed for beans, this check is a bit fragile.
         assertTrue(diff.toString().contains("areEqual=false"));
         assertTrue(diff.toString().contains("inCommon={id=1}"));
         assertTrue(diff.toString().contains("onLeftOnly={}"));

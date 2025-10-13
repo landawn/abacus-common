@@ -4,9 +4,11 @@ import static org.junit.Assert.assertThrows;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class ImmutableBiMap100Test extends TestBase {
 
     @Test
@@ -96,12 +98,11 @@ public class ImmutableBiMap100Test extends TestBase {
         BiMap<String, Integer> biMap = new BiMap<>();
         biMap.put("one", 1);
         biMap.put("two", 2);
-        
+
         ImmutableBiMap<String, Integer> immutableBiMap = ImmutableBiMap.copyOf(biMap);
         Assertions.assertEquals(2, immutableBiMap.size());
         Assertions.assertEquals("one", immutableBiMap.getByValue(1));
-        
-        // Test that it's a defensive copy
+
         biMap.put("three", 3);
         Assertions.assertEquals(2, immutableBiMap.size());
     }
@@ -131,11 +132,10 @@ public class ImmutableBiMap100Test extends TestBase {
         BiMap<String, Integer> biMap = new BiMap<>();
         biMap.put("one", 1);
         biMap.put("two", 2);
-        
+
         ImmutableBiMap<String, Integer> wrapped = ImmutableBiMap.wrap(biMap);
         Assertions.assertEquals(2, wrapped.size());
-        
-        // Test that changes are reflected
+
         biMap.put("three", 3);
         Assertions.assertEquals(3, wrapped.size());
         Assertions.assertEquals("three", wrapped.getByValue(3));
@@ -163,7 +163,7 @@ public class ImmutableBiMap100Test extends TestBase {
     @Test
     public void testGetByValue() {
         ImmutableBiMap<String, Integer> map = ImmutableBiMap.of("one", 1, "two", 2, "three", 3);
-        
+
         Assertions.assertEquals("one", map.getByValue(1));
         Assertions.assertEquals("two", map.getByValue(2));
         Assertions.assertEquals("three", map.getByValue(3));
@@ -174,12 +174,6 @@ public class ImmutableBiMap100Test extends TestBase {
     @Test
     public void testGetByValue_WithNull() {
         BiMap<String, Integer> biMap = new BiMap<>();
-        // biMap.put("null", null);
         Assertions.assertThrows(IllegalArgumentException.class, () -> biMap.put("null", null));
-        //        biMap.put(null, 0);
-        //        
-        //        ImmutableBiMap<String, Integer> map = ImmutableBiMap.copyOf(biMap);
-        //        Assertions.assertEquals("null", map.getByValue(null));
-        //        Assertions.assertNull(map.getByValue(0));
     }
 }

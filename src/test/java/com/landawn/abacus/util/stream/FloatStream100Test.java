@@ -16,6 +16,7 @@ import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.FloatIterator;
@@ -26,11 +27,9 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalFloat;
 
+@Tag("new-test")
 public class FloatStream100Test extends TestBase {
 
-    // This method needs to be implemented by a concrete test class to provide a FloatStream instance.
-    // For example, in ArrayFloatStreamTest, it would return new ArrayFloatStream(a);
-    // In IteratorFloatStreamTest, it would return new IteratorFloatStream(FloatIterator.of(a));
     protected FloatStream createFloatStream(float... a) {
         return FloatStream.of(a);
     }
@@ -401,19 +400,19 @@ public class FloatStream100Test extends TestBase {
             {
                 FloatStream stream = createFloatStream(1.0f, 2.0f, 2.0f, 3.0f, 1.0f);
                 float[] result = stream.distinct().toArray();
-                Arrays.sort(result); // Order might not be preserved
+                Arrays.sort(result);
                 assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, result);
             }
             {
                 FloatStream stream = createFloatStream(1.0f, 2.0f, 2.0f, 3.0f, 1.0f);
                 float[] result = stream.sorted().distinct().toArray();
-                Arrays.sort(result); // Order might not be preserved
+                Arrays.sort(result);
                 assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, result);
             }
             {
                 FloatStream stream = createFloatStream(1.0f, 2.0f, 2.0f, 3.0f, 1.0f);
                 float[] result = stream.sorted().filter(e -> true).distinct().toArray();
-                Arrays.sort(result); // Order might not be preserved
+                Arrays.sort(result);
                 assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, result);
             }
         }
@@ -493,7 +492,6 @@ public class FloatStream100Test extends TestBase {
             FloatStream stream = createFloatStream(1.0f, 2.0f, 3.0f, 4.0f);
             float[] result = stream.shuffled().toArray();
             assertEquals(4, result.length);
-            // Cannot test exact order due to randomness, but check all elements present
             Arrays.sort(result);
             assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f }, result);
         }
@@ -912,7 +910,7 @@ public class FloatStream100Test extends TestBase {
         @DisplayName("IllegalStateException should be thrown on closed stream")
         public void testClosedStream() {
             FloatStream stream = createFloatStream(1.0f, 2.0f, 3.0f);
-            stream.toArray(); // This should close the stream
+            stream.toArray();
             assertThrows(IllegalStateException.class, () -> stream.count());
         }
     }

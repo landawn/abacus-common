@@ -27,6 +27,7 @@ import java.util.function.ToLongFunction;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Nullable;
@@ -39,6 +40,7 @@ import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
+@Tag("new-test")
 public class Iterables100Test extends TestBase {
 
     private List<Integer> intList;
@@ -58,7 +60,6 @@ public class Iterables100Test extends TestBase {
         bigDecimalList = Arrays.asList(BigDecimal.valueOf(10.5), BigDecimal.valueOf(20.5), BigDecimal.valueOf(30.5));
     }
 
-    // Tests for min methods with primitive arrays
     @Test
     public void testMinCharArray() {
         char[] arr = { 'd', 'a', 'c', 'b' };
@@ -66,11 +67,9 @@ public class Iterables100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals('a', result.get());
 
-        // Test with null array
         OptionalChar emptyResult = Iterables.min((char[]) null);
         assertFalse(emptyResult.isPresent());
 
-        // Test with empty array
         OptionalChar emptyArrResult = Iterables.min(new char[0]);
         assertFalse(emptyArrResult.isPresent());
     }
@@ -82,7 +81,6 @@ public class Iterables100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals((byte) 1, result.get());
 
-        // Test with null/empty
         assertFalse(Iterables.min((byte[]) null).isPresent());
         assertFalse(Iterables.min(new byte[0]).isPresent());
     }
@@ -142,7 +140,6 @@ public class Iterables100Test extends TestBase {
         assertFalse(Iterables.min(new double[0]).isPresent());
     }
 
-    // Tests for min methods with object arrays and collections
     @Test
     public void testMinObjectArray() {
         Integer[] arr = { 3, 1, 4, 1, 5, 9 };
@@ -199,12 +196,10 @@ public class Iterables100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals("cat", result.get());
 
-        // Test with collection
         Nullable<String> collResult = Iterables.minBy(Arrays.asList(arr), lengthExtractor);
         assertTrue(collResult.isPresent());
         assertEquals("cat", collResult.get());
 
-        // Test with iterator
         Nullable<String> iterResult = Iterables.minBy(Arrays.asList(arr).iterator(), lengthExtractor);
         assertTrue(iterResult.isPresent());
         assertEquals("cat", iterResult.get());
@@ -219,15 +214,12 @@ public class Iterables100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(2, result.getAsInt());
 
-        // Test with empty array
         assertFalse(Iterables.minInt(new String[0], lengthFunction).isPresent());
 
-        // Test with collection
         OptionalInt collResult = Iterables.minInt(Arrays.asList(arr), lengthFunction);
         assertTrue(collResult.isPresent());
         assertEquals(2, collResult.getAsInt());
 
-        // Test with iterator
         OptionalInt iterResult = Iterables.minInt(Arrays.asList(arr).iterator(), lengthFunction);
         assertTrue(iterResult.isPresent());
         assertEquals(2, iterResult.getAsInt());
@@ -261,7 +253,6 @@ public class Iterables100Test extends TestBase {
         assertFalse(Iterables.minDouble(new Integer[0], toDouble).isPresent());
     }
 
-    // Tests for max methods (similar structure to min tests)
     @Test
     public void testMaxIntArray() {
         int[] arr = { 3, 1, 4, 1, 5, 9 };
@@ -301,7 +292,6 @@ public class Iterables100Test extends TestBase {
         assertEquals(5, result.getAsInt());
     }
 
-    // Tests for minMax
     @Test
     public void testMinMax() {
         Integer[] arr = { 3, 1, 4, 1, 5, 9 };
@@ -323,7 +313,6 @@ public class Iterables100Test extends TestBase {
         assertEquals("banana", result.get().right());
     }
 
-    // Tests for median
     @Test
     public void testMedian() {
         Integer[] arr = { 1, 2, 3, 4, 5 };
@@ -342,7 +331,6 @@ public class Iterables100Test extends TestBase {
         assertEquals(Integer.valueOf(3), result.get());
     }
 
-    // Tests for kthLargest
     @Test
     public void testKthLargest() {
         Integer[] arr = { 3, 1, 4, 1, 5, 9 };
@@ -354,7 +342,6 @@ public class Iterables100Test extends TestBase {
         assertTrue(Iterables.kthLargest(new Integer[0], 1).isEmpty());
     }
 
-    // Tests for sum methods
     @Test
     public void testSumInt() {
         List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
@@ -371,7 +358,7 @@ public class Iterables100Test extends TestBase {
         ToIntFunction<String> lengthFunction = String::length;
         OptionalInt result = Iterables.sumInt(stringList, lengthFunction);
         assertTrue(result.isPresent());
-        assertEquals(21, result.getAsInt()); // 5 + 6 + 6 + 4
+        assertEquals(21, result.getAsInt());
     }
 
     @Test
@@ -413,7 +400,6 @@ public class Iterables100Test extends TestBase {
         assertEquals(BigDecimal.valueOf(61.5), result.get());
     }
 
-    // Tests for average methods
     @Test
     public void testAverageInt() {
         Integer[] arr = { 2, 4, 6, 8 };
@@ -440,7 +426,7 @@ public class Iterables100Test extends TestBase {
         String[] arr = { "hi", "hello", "world" };
         OptionalDouble result = Iterables.averageInt(arr, lengthFunction);
         assertTrue(result.isPresent());
-        assertEquals(4.0, result.getAsDouble(), 0.001); // (2 + 5 + 5) / 3
+        assertEquals(4.0, result.getAsDouble(), 0.001);
     }
 
     @Test
@@ -473,7 +459,6 @@ public class Iterables100Test extends TestBase {
         assertEquals(new BigDecimal("20.5"), result.get());
     }
 
-    // Tests for indexOf and lastIndexOf
     @Test
     public void testIndexOf() {
         Integer[] arr = { 1, 2, 3, 2, 4 };
@@ -501,7 +486,6 @@ public class Iterables100Test extends TestBase {
         assertEquals(3, result.getAsInt());
     }
 
-    // Tests for find methods
     @Test
     public void testFindFirstOrLast() {
         Integer[] arr = { 1, 2, 3, 4, 5 };
@@ -512,7 +496,6 @@ public class Iterables100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(2), result.get());
 
-        // When first predicate doesn't match
         Predicate<Integer> isGreaterThan10 = n -> n > 10;
         result = Iterables.findFirstOrLast(arr, isGreaterThan10, isOdd);
         assertTrue(result.isPresent());
@@ -554,7 +537,6 @@ public class Iterables100Test extends TestBase {
         assertEquals(3, result.right().getAsInt());
     }
 
-    // Tests for fill methods
     @Test
     public void testFillArray() {
         String[] arr = new String[5];
@@ -607,7 +589,6 @@ public class Iterables100Test extends TestBase {
         assertEquals("e", list.get(4));
     }
 
-    // Tests for copy methods
     @Test
     public void testCopyLists() {
         List<String> src = Arrays.asList("a", "b", "c");
@@ -636,7 +617,6 @@ public class Iterables100Test extends TestBase {
         assertEquals("6", dest.get(5));
     }
 
-    // Tests for reverse
     @Test
     public void testReverse() {
         List<Integer> original = Arrays.asList(1, 2, 3, 4, 5);
@@ -649,14 +629,12 @@ public class Iterables100Test extends TestBase {
         assertEquals(Integer.valueOf(2), reversed.get(3));
         assertEquals(Integer.valueOf(1), reversed.get(4));
 
-        // Test that it's a view
         original = new ArrayList<>(original);
         original.set(0, 10);
         reversed = Iterables.reverse(original);
         assertEquals(Integer.valueOf(10), reversed.get(4));
     }
 
-    // Tests for set operations
     @Test
     public void testUnion() {
         Set<Integer> set1 = new HashSet<>(Arrays.asList(1, 2, 3));
@@ -671,7 +649,6 @@ public class Iterables100Test extends TestBase {
         assertTrue(union.contains(4));
         assertTrue(union.contains(5));
 
-        // Test copyInto
         Set<Integer> target = new HashSet<>();
         union.copyInto(target);
         assertEquals(5, target.size());
@@ -735,16 +712,14 @@ public class Iterables100Test extends TestBase {
         assertFalse(subset.contains(2));
     }
 
-    // Tests for powerSet
     @Test
     public void testPowerSet() {
         Set<Integer> input = new HashSet<>(Arrays.asList(1, 2, 3));
         Set<Set<Integer>> powerSet = Iterables.powerSet(input);
 
-        assertEquals(8, powerSet.size()); // 2^3 = 8
+        assertEquals(8, powerSet.size());
 
-        // Check some specific subsets
-        assertTrue(powerSet.contains(new HashSet<>())); // empty set
+        assertTrue(powerSet.contains(new HashSet<>()));
         assertTrue(powerSet.contains(new HashSet<>(Arrays.asList(1))));
         assertTrue(powerSet.contains(new HashSet<>(Arrays.asList(2))));
         assertTrue(powerSet.contains(new HashSet<>(Arrays.asList(3))));
@@ -773,7 +748,6 @@ public class Iterables100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Iterables.powerSet(input));
     }
 
-    // Tests for rollup
     @Test
     public void testRollup() {
         List<String> input = Arrays.asList("a", "b", "c");
@@ -795,15 +769,13 @@ public class Iterables100Test extends TestBase {
         assertEquals(Arrays.asList(), rollup.get(0));
     }
 
-    // Tests for permutations
     @Test
     public void testPermutations() {
         List<Integer> input = Arrays.asList(1, 2, 3);
         Collection<List<Integer>> perms = Iterables.permutations(input);
 
-        assertEquals(6, perms.size()); // 3! = 6
+        assertEquals(6, perms.size());
 
-        // Check that all permutations are different
         Set<List<Integer>> uniquePerms = new HashSet<>(perms);
         assertEquals(6, uniquePerms.size());
     }
@@ -822,11 +794,9 @@ public class Iterables100Test extends TestBase {
         List<Integer> input = Arrays.asList(1, 1, 2);
         Collection<List<Integer>> perms = Iterables.permutations(input);
 
-        // Should still generate 6 permutations, but some will be equal
         assertEquals(6, perms.size());
     }
 
-    // Tests for orderedPermutations
     @Test
     public void testOrderedPermutations() {
         List<Integer> input = Arrays.asList(1, 2, 3);
@@ -835,9 +805,7 @@ public class Iterables100Test extends TestBase {
         List<List<Integer>> permList = new ArrayList<>(perms);
         assertEquals(6, permList.size());
 
-        // First should be in ascending order
         assertEquals(Arrays.asList(1, 2, 3), permList.get(0));
-        // Last should be in descending order
         assertEquals(Arrays.asList(3, 2, 1), permList.get(permList.size() - 1));
     }
 
@@ -850,7 +818,6 @@ public class Iterables100Test extends TestBase {
         List<List<String>> permList = new ArrayList<>(perms);
         assertEquals(6, permList.size());
 
-        // With reverse comparator, first should be c, b, a
         assertEquals(Arrays.asList("c", "b", "a"), permList.get(0));
     }
 
@@ -859,19 +826,16 @@ public class Iterables100Test extends TestBase {
         List<Integer> input = Arrays.asList(1, 1, 2);
         Collection<List<Integer>> perms = Iterables.orderedPermutations(input);
 
-        // With duplicates, there should be fewer unique permutations
         Set<List<Integer>> uniquePerms = new HashSet<>(perms);
-        assertEquals(3, uniquePerms.size()); // [1,1,2], [1,2,1], [2,1,1]
+        assertEquals(3, uniquePerms.size());
     }
 
-    // Tests for cartesianProduct
     @Test
     public void testCartesianProduct() {
         List<List<Integer>> product = Iterables.cartesianProduct(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6));
 
-        assertEquals(8, product.size()); // 2 * 2 * 2 = 8
+        assertEquals(8, product.size());
 
-        // Check first and last elements
         assertEquals(Arrays.asList(1, 3, 5), product.get(0));
         assertEquals(Arrays.asList(2, 4, 6), product.get(7));
     }
@@ -901,10 +865,8 @@ public class Iterables100Test extends TestBase {
         assertEquals(Arrays.asList(3), product.get(2));
     }
 
-    // Edge cases and error conditions
     @Test
     public void testNullInputHandling() {
-        // Test that methods handle null inputs appropriately
         assertTrue(Iterables.min((Iterable<Integer>) null).isEmpty());
         assertTrue(Iterables.max((Iterable<Integer>) null).isEmpty());
         assertFalse(Iterables.sumInt((Iterable<Integer>) null).isPresent());
@@ -933,16 +895,13 @@ public class Iterables100Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(arr, 3, 2));
     }
 
-    // Performance-related tests (using larger datasets)
     @Test
     public void testLargeDatasetOperations() {
-        // Create a large list
         List<Integer> largeList = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
             largeList.add(i);
         }
 
-        // Test operations still work correctly
         Nullable<Integer> min = Iterables.min(largeList);
         assertTrue(min.isPresent());
         assertEquals(Integer.valueOf(0), min.get());
@@ -956,12 +915,10 @@ public class Iterables100Test extends TestBase {
         assertEquals(4999.5, avg.getAsDouble(), 0.001);
     }
 
-    // Tests for special comparator behavior
     @Test
     public void testNullHandlingInComparators() {
         Integer[] arrWithNulls = { 3, null, 1, 4, null, 2 };
 
-        // Natural ordering should handle nulls
         Nullable<Integer> min = Iterables.min(arrWithNulls);
         assertTrue(min.isPresent());
         assertEquals(Integer.valueOf(1), min.get());
@@ -971,7 +928,6 @@ public class Iterables100Test extends TestBase {
         assertEquals(Integer.valueOf(4), max.get());
     }
 
-    // Tests for number type conversions
     @Test
     public void testNumberTypeConversions() {
         List<Number> mixedNumbers = Arrays.asList((byte) 1, (short) 2, 3, 4L, 5.0f, 6.0);

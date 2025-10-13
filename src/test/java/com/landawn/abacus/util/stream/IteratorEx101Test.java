@@ -7,9 +7,11 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class IteratorEx101Test extends TestBase {
 
     private static class TestIteratorEx<T> implements IteratorEx<T> {
@@ -45,7 +47,6 @@ public class IteratorEx101Test extends TestBase {
         iter.advance(1);
         Assertions.assertEquals("e", iter.next());
         
-        // Advance beyond end
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
@@ -63,7 +64,6 @@ public class IteratorEx101Test extends TestBase {
     public void testAdvanceNegative() {
         List<String> list = Arrays.asList("a", "b", "c");
         IteratorEx<String> iter = new TestIteratorEx<>(list);
-        // Assertions.assertThrows(IllegalArgumentException.class, () -> iter.advance(-1));
         iter.advance(-1);
     }
 
@@ -81,11 +81,9 @@ public class IteratorEx101Test extends TestBase {
         List<String> list = Arrays.asList("a", "b", "c", "d", "e");
         IteratorEx<String> iter = new TestIteratorEx<>(list);
         
-        // Consume first two elements
         iter.next();
         iter.next();
         
-        // Count should return remaining elements
         Assertions.assertEquals(3, iter.count());
         Assertions.assertFalse(iter.hasNext());
     }
@@ -104,10 +102,8 @@ public class IteratorEx101Test extends TestBase {
         List<String> list = Arrays.asList("a", "b", "c");
         IteratorEx<String> iter = new TestIteratorEx<>(list);
         
-        // Default close() should do nothing and not throw
         iter.close();
         
-        // Iterator should still work after close
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals("a", iter.next());
     }
@@ -117,7 +113,6 @@ public class IteratorEx101Test extends TestBase {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
         IteratorEx<Integer> iter = new TestIteratorEx<>(list);
         
-        // Test that IteratorEx can be used as a regular Iterator
         List<Integer> result = new ArrayList<>();
         while (iter.hasNext()) {
             result.add(iter.next());
@@ -130,11 +125,10 @@ public class IteratorEx101Test extends TestBase {
     public void testIteratorExAsAutoCloseable() throws Exception {
         List<String> list = Arrays.asList("a", "b", "c");
         
-        // Test that IteratorEx can be used in try-with-resources
         try (IteratorEx<String> iter = new TestIteratorEx<>(list)) {
             Assertions.assertTrue(iter.hasNext());
             Assertions.assertEquals("a", iter.next());
-        } // close() will be called automatically
+        }
     }
 
     @Test
@@ -142,15 +136,12 @@ public class IteratorEx101Test extends TestBase {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         IteratorEx<Integer> iter = new TestIteratorEx<>(list);
         
-        // Advance by 2
         iter.advance(2);
         Assertions.assertEquals(3, iter.next().intValue());
         
-        // Advance by 3 more
         iter.advance(3);
         Assertions.assertEquals(7, iter.next().intValue());
         
-        // Count remaining elements
         Assertions.assertEquals(3, iter.count());
         Assertions.assertFalse(iter.hasNext());
     }

@@ -15,14 +15,13 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.DoubleStream;
 
-/**
- * Extended test suite for DoubleList covering additional edge cases and scenarios
- */
+@Tag("new-test")
 public class DoubleList101Test extends TestBase {
 
     private DoubleList list;
@@ -33,7 +32,6 @@ public class DoubleList101Test extends TestBase {
         list = new DoubleList();
     }
 
-    // Additional Constructor Tests
     @Test
     public void testConstructorWithNullArrayAndSize() {
         assertThrows(NullPointerException.class, () -> new DoubleList(null, 0));
@@ -41,7 +39,6 @@ public class DoubleList101Test extends TestBase {
 
     @Test
     public void testConstructorWithNegativeCapacity() {
-        // Should not throw exception, will be handled internally
         assertThrows(IllegalArgumentException.class, () -> new DoubleList(-1));
     }
 
@@ -52,7 +49,6 @@ public class DoubleList101Test extends TestBase {
         assertTrue(list.isEmpty());
     }
 
-    // Additional Static Factory Tests
     @Test
     public void testOfWithNullAndSize() {
         assertThrows(IndexOutOfBoundsException.class, () -> DoubleList.of(null, 5));
@@ -87,7 +83,6 @@ public class DoubleList101Test extends TestBase {
         }
     }
 
-    // Additional Add Tests
     @Test
     public void testAddAtBeginning() {
         list.addAll(new double[] { 2.2, 3.3, 4.4 });
@@ -124,7 +119,6 @@ public class DoubleList101Test extends TestBase {
 
     @Test
     public void testAddToEnsureCapacityGrowth() {
-        // Test capacity growth
         for (int i = 0; i < 100; i++) {
             list.add(i * 0.1);
         }
@@ -134,7 +128,6 @@ public class DoubleList101Test extends TestBase {
         }
     }
 
-    // Additional Remove Tests with Double-specific cases
     @Test
     public void testRemoveNaN() {
         list.addAll(new double[] { 1.1, Double.NaN, 2.2 });
@@ -210,7 +203,6 @@ public class DoubleList101Test extends TestBase {
         list.addAll(new double[] { 1.1, Double.NaN, Double.NaN, 2.2 });
         assertTrue(list.removeDuplicates());
         assertEquals(3, list.size());
-        // NaN should be treated as duplicates
     }
 
     @Test
@@ -234,12 +226,10 @@ public class DoubleList101Test extends TestBase {
     public void testDeleteAtBoundaries() {
         list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
 
-        // Delete first
         assertEquals(1.1, list.delete(0), DELTA);
         assertEquals(4, list.size());
         assertEquals(2.2, list.get(0), DELTA);
 
-        // Delete last
         assertEquals(5.5, list.delete(list.size() - 1), DELTA);
         assertEquals(3, list.size());
         assertEquals(4.4, list.get(list.size() - 1), DELTA);
@@ -278,7 +268,6 @@ public class DoubleList101Test extends TestBase {
         assertTrue(list.isEmpty());
     }
 
-    // Additional Move and Replace Tests
     @Test
     public void testMoveRangeToBeginning() {
         list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
@@ -355,7 +344,6 @@ public class DoubleList101Test extends TestBase {
         assertEquals(0.0, list.get(3), DELTA);
     }
 
-    // Additional Fill Tests
     @Test
     public void testFillEmptyList() {
         list.fill(10.0);
@@ -377,7 +365,6 @@ public class DoubleList101Test extends TestBase {
         }
     }
 
-    // Additional Contains Tests
     @Test
     public void testContainsEmptyList() {
         assertFalse(list.contains(1.1));
@@ -414,7 +401,6 @@ public class DoubleList101Test extends TestBase {
         assertFalse(list.disjoint(list));
     }
 
-    // Additional Set Operations Tests
     @Test
     public void testIntersectionWithEmpty() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
@@ -459,7 +445,6 @@ public class DoubleList101Test extends TestBase {
         assertEquals(3, result.size());
     }
 
-    // Additional Index Tests
     @Test
     public void testIndexOfFromIndexBeyondSize() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
@@ -497,7 +482,6 @@ public class DoubleList101Test extends TestBase {
         assertEquals(0, list.lastIndexOf(Double.NaN, 1));
     }
 
-    // Additional Min/Max/Median Tests
     @Test
     public void testMinMaxMedianSingleElement() {
         list.add(5.5);
@@ -529,7 +513,6 @@ public class DoubleList101Test extends TestBase {
         list.addAll(new double[] { 1.0, 2.0, 3.0, 4.0 });
         OptionalDouble median = list.median();
         assertTrue(median.isPresent());
-        // Median of [1,2,3,4] should be 2.5
         assertEquals(2.0, median.getAsDouble(), DELTA);
     }
 
@@ -559,7 +542,6 @@ public class DoubleList101Test extends TestBase {
         assertEquals(Double.POSITIVE_INFINITY, max.getAsDouble(), DELTA);
     }
 
-    // Additional forEach Tests
     @Test
     public void testForEachEmptyList() {
         List<Double> result = new ArrayList<>();
@@ -593,7 +575,6 @@ public class DoubleList101Test extends TestBase {
         assertEquals(1.1, result.get(2), DELTA);
     }
 
-    // Additional Distinct Tests
     @Test
     public void testDistinctEmptyRange() {
         list.addAll(new double[] { 1.1, 2.2, 2.2, 3.3 });
@@ -614,10 +595,8 @@ public class DoubleList101Test extends TestBase {
         list.addAll(new double[] { 1.1, Double.NaN, Double.NaN, 2.2 });
         DoubleList result = list.distinct(0, list.size());
         assertEquals(3, result.size());
-        // NaN values should be considered distinct from each other
     }
 
-    // Additional Sort Tests
     @Test
     public void testSortEmptyList() {
         list.sort();
@@ -636,7 +615,6 @@ public class DoubleList101Test extends TestBase {
     public void testSortWithNaN() {
         list.addAll(new double[] { 2.2, Double.NaN, 1.1, Double.NaN, 3.3 });
         list.sort();
-        // NaN values should be at the end after sorting
         assertEquals(1.1, list.get(0), DELTA);
         assertEquals(2.2, list.get(1), DELTA);
         assertEquals(3.3, list.get(2), DELTA);
@@ -665,13 +643,10 @@ public class DoubleList101Test extends TestBase {
     @Test
     public void testBinarySearchUnsorted() {
         list.addAll(new double[] { 3.3, 1.1, 4.4, 1.1, 5.5 });
-        // Binary search on unsorted list - result is undefined but should not throw
         int result = list.binarySearch(3.3);
-        // Just verify it doesn't throw exception
         assertNotNull(result);
     }
 
-    // Additional Reverse Tests
     @Test
     public void testReverseEmptyList() {
         list.reverse();
@@ -695,7 +670,6 @@ public class DoubleList101Test extends TestBase {
         assertEquals(3.3, list.get(2), DELTA);
     }
 
-    // Additional Rotate Tests
     @Test
     public void testRotateEmptyList() {
         list.rotate(5);
@@ -721,7 +695,6 @@ public class DoubleList101Test extends TestBase {
         assertEquals(2.2, list.get(4), DELTA);
     }
 
-    // Additional Shuffle Tests
     @Test
     public void testShuffleEmptyList() {
         list.shuffle();
@@ -736,7 +709,6 @@ public class DoubleList101Test extends TestBase {
         assertEquals(5.5, list.get(0), DELTA);
     }
 
-    // Additional Swap Tests
     @Test
     public void testSwapSameIndex() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
@@ -751,7 +723,6 @@ public class DoubleList101Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> list.swap(-1, 0));
     }
 
-    // Additional Copy Tests
     @Test
     public void testCopyEmptyList() {
         DoubleList copy = list.copy();
@@ -787,7 +758,6 @@ public class DoubleList101Test extends TestBase {
         assertEquals(4.4, copy.get(1), DELTA);
     }
 
-    // Additional Split Tests
     @Test
     public void testSplitEmptyList() {
         List<DoubleList> chunks = list.split(0, 0, 2);
@@ -812,7 +782,6 @@ public class DoubleList101Test extends TestBase {
         assertEquals(1, chunks.get(2).size());
     }
 
-    // Additional Boxed Tests
     @Test
     public void testBoxedEmptyList() {
         List<Double> boxed = list.boxed();
@@ -834,7 +803,6 @@ public class DoubleList101Test extends TestBase {
         assertEquals(Double.NEGATIVE_INFINITY, boxed.get(2));
     }
 
-    // Additional Iterator Tests
     @Test
     public void testIteratorEmptyList() {
         DoubleIterator iter = list.iterator();
@@ -842,7 +810,6 @@ public class DoubleList101Test extends TestBase {
         assertThrows(NoSuchElementException.class, () -> iter.nextDouble());
     }
 
-    // Additional Stream Tests
     @Test
     public void testStreamEmptyList() {
         DoubleStream stream = list.stream();
@@ -856,7 +823,6 @@ public class DoubleList101Test extends TestBase {
         assertEquals(0, stream.count());
     }
 
-    // Additional First/Last Tests
     @Test
     public void testGetFirstGetLastSingleElement() {
         list.add(5.5);
@@ -875,37 +841,29 @@ public class DoubleList101Test extends TestBase {
         assertTrue(list.isEmpty());
     }
 
-    // Boundary Tests
     @Test
     public void testMaxArraySize() {
-        // Test handling of large capacity requests
         try {
             DoubleList largeList = new DoubleList(Integer.MAX_VALUE - 8);
-            // If it doesn't throw, just verify it's empty
             assertTrue(largeList.isEmpty());
         } catch (OutOfMemoryError e) {
-            // Expected for large allocations
             assertTrue(true);
         }
     }
 
     @Test
     public void testEnsureCapacityOverflow() {
-        // Test capacity overflow handling
         list.add(1.1);
         try {
-            // Try to trigger capacity overflow
             for (int i = 0; i < 100; i++) {
                 list.add(i * 0.1);
             }
             assertTrue(list.size() > 1);
         } catch (OutOfMemoryError e) {
-            // Expected if memory is limited
             assertTrue(true);
         }
     }
 
-    // toString Tests  
     @Test
     public void testToStringWithSpecialValues() {
         list.add(Double.NaN);
@@ -920,40 +878,33 @@ public class DoubleList101Test extends TestBase {
         assertTrue(str.contains("-Infinity"));
     }
 
-    // Array method edge cases
     @Test
     public void testArrayModification() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
         double[] array = list.array();
 
-        // Verify modification affects the list
         array[1] = 20.5;
         assertEquals(20.5, list.get(1), DELTA);
 
-        // Clear and verify array is different
         list.clear();
         double[] newArray = list.array();
         assertSame(array, newArray);
     }
 
-    // Performance/Stress Tests
     @Test
     public void testAddRemovePerformance() {
-        // Add and remove many elements
         int count = 1000;
         for (int i = 0; i < count; i++) {
             list.add(i * 0.1);
         }
         assertEquals(count, list.size());
 
-        // Remove every other element
         list.removeIf(x -> ((int) (x * 10)) % 2 == 0);
         assertEquals(count / 2, list.size());
     }
 
     @Test
     public void testBatchOperationsLargeData() {
-        // Create large lists for batch operations
         int size = 1000;
         DoubleList list1 = new DoubleList();
         DoubleList list2 = new DoubleList();
@@ -966,45 +917,36 @@ public class DoubleList101Test extends TestBase {
             list2.add(i * 0.1);
         }
 
-        // Test intersection
         DoubleList intersection = list1.intersection(list2);
         assertEquals(size / 2, intersection.size());
 
-        // Test difference
         DoubleList difference = list1.difference(list2);
         assertEquals(size / 2, difference.size());
 
-        // Test symmetric difference
         DoubleList symDiff = list1.symmetricDifference(list2);
         assertEquals(size, symDiff.size());
     }
 
-    // Thread Safety Test (DoubleList is not thread-safe, but test behavior)
     @Test
     public void testConcurrentModification() {
         list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
 
-        // This should not throw ConcurrentModificationException since DoubleList
-        // doesn't have modification tracking like ArrayList
         DoubleIterator iter = list.iterator();
         list.add(6.6);
 
-        // Iterator might give unexpected results but shouldn't throw
         assertTrue(iter.hasNext());
         iter.nextDouble();
     }
 
-    // Double-specific Precision Tests
     @Test
     public void testDoublePrecisionComparison() {
         double a = 0.1;
         double b = 0.2;
-        double c = a + b; // This might not be exactly 0.3
+        double c = a + b;
 
         list.add(c);
         list.add(0.3);
 
-        // Test that contains works with double precision
         assertTrue(list.contains(c));
         assertTrue(list.contains(0.3));
     }
@@ -1026,7 +968,6 @@ public class DoubleList101Test extends TestBase {
 
     @Test
     public void testSubnormalNumbers() {
-        // Test subnormal (denormalized) numbers
         double subnormal = Double.MIN_VALUE / 2;
         list.add(subnormal);
         list.add(0.0);
@@ -1039,8 +980,7 @@ public class DoubleList101Test extends TestBase {
 
     @Test
     public void testLargePrecisionEdge() {
-        // Test precision at the edge of double's capability
-        double edge = Math.pow(2, 53) - 1; // Largest integer that can be represented exactly
+        double edge = Math.pow(2, 53) - 1;
         double edgePlus = edge + 1;
         double edgePlus2 = edge + 2;
 
@@ -1050,7 +990,6 @@ public class DoubleList101Test extends TestBase {
 
         assertEquals(edge, list.get(0), DELTA);
         assertEquals(edgePlus, list.get(1), DELTA);
-        // edgePlus2 might not be exactly representable
         assertEquals(edgePlus2, list.get(2), DELTA);
     }
 
@@ -1061,11 +1000,7 @@ public class DoubleList101Test extends TestBase {
         DoubleList other = new DoubleList();
         other.add(0.3);
 
-        // Even though 0.1 + 0.2 might not exactly equal 0.3,
-        // equals should handle this appropriately
-        // This test documents the actual behavior
         boolean equalsResult = list.equals(other);
-        // The result depends on the exact double representation
         assertNotNull(equalsResult);
     }
 
@@ -1084,7 +1019,6 @@ public class DoubleList101Test extends TestBase {
 
     @Test
     public void testUlpComparison() {
-        // Test values that differ by 1 ULP (Unit in the Last Place)
         double base = 1.0;
         double nextUp = Math.nextUp(base);
         double nextDown = Math.nextDown(base);
@@ -1097,7 +1031,6 @@ public class DoubleList101Test extends TestBase {
         assertNotEquals(base, nextUp);
         assertNotEquals(base, nextDown);
 
-        // But they should all be found
         assertTrue(list.contains(base));
         assertTrue(list.contains(nextUp));
         assertTrue(list.contains(nextDown));

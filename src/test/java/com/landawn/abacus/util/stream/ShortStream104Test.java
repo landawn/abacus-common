@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Duration;
@@ -35,11 +36,9 @@ import com.landawn.abacus.util.u.OptionalShort;
 import com.landawn.abacus.util.function.ShortNFunction;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
 
+@Tag("new-test")
 public class ShortStream104Test extends TestBase {
 
-    // This method needs to be implemented by a concrete test class to provide a ShortStream instance.
-    // For example, in ArrayShortStreamTest, it would return new ArrayShortStream(a);
-    // In IteratorShortStreamTest, it would return new IteratorShortStream(ShortIterator.of(a));
     protected ShortStream createShortStream(short... a) {
         return ShortStream.of(a).map(e -> (short) (e + 0));
     }
@@ -138,8 +137,6 @@ public class ShortStream104Test extends TestBase {
         assertArrayEquals(new short[] { 1, 2, 3, 4 }, stream.toArray());
     }
 
-    // Test zip with 3 arrays/iterators/streams
-
     @Test
     public void testZipThreeArrays() {
         short[] a = { 1, 2 };
@@ -235,8 +232,6 @@ public class ShortStream104Test extends TestBase {
         assertArrayEquals(new short[] { 111, 22, 3 }, result.toArray());
     }
 
-    // Test merge with 3 arrays/iterators/streams
-
     @Test
     public void testMergeThreeArrays() {
         short[] a = { 1, 5 };
@@ -275,8 +270,6 @@ public class ShortStream104Test extends TestBase {
         ShortStream result = ShortStream.merge(streams, (x, y) -> x < y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertArrayEquals(new short[] { 1, 2, 3, 4, 5, 6 }, result.toArray());
     }
-
-    // Test additional instance methods
 
     @Test
     public void testFlatMapToObj() {
@@ -323,11 +316,9 @@ public class ShortStream104Test extends TestBase {
 
     @Test
     public void testScanWithInitAndIncluded() {
-        // Test with init included
         ShortStream stream1 = createShortStream((short) 1, (short) 2, (short) 3).scan((short) 10, true, (a, b) -> (short) (a + b));
         assertArrayEquals(new short[] { 10, 11, 13, 16 }, stream1.toArray());
 
-        // Test with init not included
         ShortStream stream2 = createShortStream((short) 1, (short) 2, (short) 3).scan((short) 10, false, (a, b) -> (short) (a + b));
         assertArrayEquals(new short[] { 11, 13, 16 }, stream2.toArray());
     }
@@ -364,18 +355,15 @@ public class ShortStream104Test extends TestBase {
 
     @Test
     public void testAppendIfEmpty() {
-        // Test with non-empty stream
         ShortStream stream1 = createShortStream((short) 1, (short) 2).appendIfEmpty((short) 10, (short) 20);
         assertArrayEquals(new short[] { 1, 2 }, stream1.toArray());
 
-        // Test with empty stream
         ShortStream stream2 = ShortStream.empty().appendIfEmpty((short) 10, (short) 20);
         assertArrayEquals(new short[] { 10, 20 }, stream2.toArray());
     }
 
     @Test
     public void testAppendIfEmptySupplier() {
-        // Test with empty stream
         ShortStream stream = ShortStream.empty().appendIfEmpty(() -> createShortStream((short) 10, (short) 20));
         assertArrayEquals(new short[] { 10, 20 }, stream.toArray());
     }
@@ -561,8 +549,6 @@ public class ShortStream104Test extends TestBase {
 
     @Test
     public void testPrintln() {
-        // This test just ensures println() doesn't throw an exception
-        // The actual output goes to System.out
         createShortStream((short) 1, (short) 2, (short) 3).println();
     }
 
@@ -598,13 +584,12 @@ public class ShortStream104Test extends TestBase {
 
     @Test
     public void testRateLimited() throws InterruptedException {
-        RateLimiter rateLimiter = RateLimiter.create(10); // 10 permits per second
+        RateLimiter rateLimiter = RateLimiter.create(10);
         long startTime = System.currentTimeMillis();
 
         createShortStream((short) 1, (short) 2, (short) 3).rateLimited(rateLimiter).toArray();
 
         long elapsedTime = System.currentTimeMillis() - startTime;
-        // Should take at least 200ms for 3 elements with 10 permits/second
         assertTrue(elapsedTime >= 200);
     }
 
@@ -612,11 +597,10 @@ public class ShortStream104Test extends TestBase {
     public void testRateLimitedWithPermitsPerSecond() throws InterruptedException {
         long startTime = System.currentTimeMillis();
 
-        createShortStream((short) 1, (short) 2, (short) 3).rateLimited(10.0) // 10 permits per second
+        createShortStream((short) 1, (short) 2, (short) 3).rateLimited(10.0)
                 .toArray();
 
         long elapsedTime = System.currentTimeMillis() - startTime;
-        // Should take at least 200ms for 3 elements with 10 permits/second
         assertTrue(elapsedTime >= 200);
     }
 
@@ -627,7 +611,6 @@ public class ShortStream104Test extends TestBase {
         createShortStream((short) 1, (short) 2, (short) 3).delay(Duration.ofMillis(50)).toArray();
 
         long elapsedTime = System.currentTimeMillis() - startTime;
-        // Should take at least 100ms for 3 elements with 50ms delay each
         assertTrue(elapsedTime >= 100);
     }
 
@@ -694,7 +677,6 @@ public class ShortStream104Test extends TestBase {
 
         assertTrue(actionExecuted[0]);
 
-        // Test with empty stream
         actionExecuted[0] = false;
         ShortStream.empty().acceptIfNotEmpty(s -> actionExecuted[0] = true).orElse(() -> actionExecuted[0] = true);
 
@@ -748,7 +730,6 @@ public class ShortStream104Test extends TestBase {
 
     @Test
     public void testSps() {
-        // Sequential-Parallel-Sequential
         short[] result = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).sps(s -> s.map(n -> (short) (n * 2))).toArray();
 
         Arrays.sort(result);
@@ -779,7 +760,6 @@ public class ShortStream104Test extends TestBase {
 
     @Test
     public void testPsp() {
-        // Parallel-Sequential-Parallel
         short[] result = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).parallel()
                 .psp(s -> s.map(n -> (short) (n * 2)))
                 .sequential()

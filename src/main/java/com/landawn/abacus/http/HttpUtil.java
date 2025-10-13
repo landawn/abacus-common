@@ -81,7 +81,6 @@ import com.landawn.abacus.util.Strings;
  *   <li>SSL/TLS utilities</li>
  * </ul>
  * 
- * @author HaiYang Li
  * @see HttpClient
  * @see HttpRequest
  * @see HttpResponse
@@ -704,15 +703,15 @@ public final class HttpUtil {
      * Determines the ContentFormat from content type and encoding strings.
      * This method matches the content type and encoding to find the appropriate ContentFormat.
      *
-     * @param contentType The content type (e.g., "application/json")
-     * @param contentEncoding The content encoding (e.g., "gzip")
-     * @return The matching ContentFormat, or ContentFormat.NONE if no match is found
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * ContentFormat format = HttpUtil.getContentFormat("application/json", "gzip");
      * // Returns ContentFormat.JSON_GZIP
      * }</pre>
+     *
+     * @param contentType The content type (e.g., "application/json")
+     * @param contentEncoding The content encoding (e.g., "gzip")
+     * @return The matching ContentFormat, or ContentFormat.NONE if no match is found
      */
     public static ContentFormat getContentFormat(String contentType, String contentEncoding) {
         if (contentType == null) {
@@ -1146,14 +1145,15 @@ public final class HttpUtil {
         /**
          * Parses an HTTP date string into a Date object.
          * Supports multiple date formats for compatibility.
-         * 
-         * @param value The date string to parse
-         * @return The parsed Date, or null if the value couldn't be parsed
-         * 
+         *
          * <p>Example:</p>
          * <pre>{@code
          * Date date = HttpDate.parse("Wed, 21 Oct 2015 07:28:00 GMT");
          * }</pre>
+         *
+         * @param value The date string to parse
+         * @return The parsed Date, or null if the value couldn't be parsed
+         * 
          */
         public static Date parse(final String value) {
             if (value.isEmpty()) {
@@ -1195,15 +1195,16 @@ public final class HttpUtil {
         /**
          * Formats a Date into an HTTP date string.
          * Uses the standard RFC 7231 format.
-         * 
-         * @param value The date to format
-         * @return The formatted date string
-         * 
+         *
          * <p>Example:</p>
          * <pre>{@code
          * String dateStr = HttpDate.format(new Date());
          * // Returns something like "Wed, 21 Oct 2015 07:28:00 GMT"
          * }</pre>
+         *
+         * @param value The date to format
+         * @return The formatted date string
+         * 
          */
         public static String format(final Date value) {
             return STANDARD_DATE_FORMAT.get().format(value);

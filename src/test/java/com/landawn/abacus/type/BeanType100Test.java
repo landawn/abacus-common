@@ -9,10 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type.SerializationType;
 
+@Tag("new-test")
 public class BeanType100Test extends TestBase {
 
     private Type<TestBean> beanType;
@@ -69,7 +71,6 @@ public class BeanType100Test extends TestBase {
         assertEquals(456, bean.getId());
         assertEquals("Example", bean.getName());
 
-        // Test invalid JSON
         assertThrows(Exception.class, () -> beanType.valueOf("{invalid json}"));
     }
 
@@ -87,7 +88,6 @@ public class BeanType100Test extends TestBase {
         assertEquals(original.getName(), decoded.getName());
     }
 
-    // Test bean class
     public static class TestBean {
         private int id;
         private String name;

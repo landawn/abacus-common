@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -61,6 +62,7 @@ import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 
+@Tag("new-test")
 public class AbstractStream103Test extends TestBase {
 
     private Stream<Integer> stream;
@@ -69,10 +71,8 @@ public class AbstractStream103Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Will be implemented to create concrete stream instances
     }
 
-    // Helper method to be implemented
     protected <T> Stream<T> createStream(T... elements) {
         return Stream.of(elements).map(e -> e);
     }
@@ -710,8 +710,8 @@ public class AbstractStream103Test extends TestBase {
         stream = createStream(1, 2, 3, 4, 5, 6);
         Stream<Map.Entry<Integer, Integer>> result = stream.groupBy(i -> i % 2, Fn.identity(), Integer::sum);
         Map<Integer, Integer> map = result.toMap(Map.Entry::getKey, Map.Entry::getValue);
-        assertEquals(12, map.get(0)); // 2 + 4 + 6
-        assertEquals(9, map.get(1)); // 1 + 3 + 5
+        assertEquals(12, map.get(0));
+        assertEquals(9, map.get(1));
     }
 
     @Test
@@ -1046,12 +1046,12 @@ public class AbstractStream103Test extends TestBase {
 
     @Test
     public void testRateLimited() {
-        RateLimiter rateLimiter = RateLimiter.create(2); // 2 permits per second
+        RateLimiter rateLimiter = RateLimiter.create(2);
         stream = createStream(1, 2, 3, 4);
         long start = System.currentTimeMillis();
         stream.rateLimited(rateLimiter).toList();
         long duration = System.currentTimeMillis() - start;
-        assertTrue(duration >= 1000); // Should take at least 1 second
+        assertTrue(duration >= 1000);
     }
 
     @Test
@@ -1060,7 +1060,7 @@ public class AbstractStream103Test extends TestBase {
         long start = System.currentTimeMillis();
         stream.delay(Duration.ofMillis(100)).toList();
         long duration = System.currentTimeMillis() - start;
-        assertTrue(duration >= 300); // 3 elements * 100ms
+        assertTrue(duration >= 300);
     }
 
     @Test
@@ -1276,7 +1276,7 @@ public class AbstractStream103Test extends TestBase {
         stream = createStream(1, 2, 3);
         Stream<List<Integer>> result = stream.combinations();
         List<List<Integer>> lists = result.toList();
-        assertEquals(8, lists.size()); // 2^3 = 8 combinations including empty
+        assertEquals(8, lists.size());
     }
 
     @Test
@@ -1284,7 +1284,7 @@ public class AbstractStream103Test extends TestBase {
         stream = createStream(1, 2, 3, 4);
         Stream<List<Integer>> result = stream.combinations(2);
         List<List<Integer>> lists = result.toList();
-        assertEquals(6, lists.size()); // C(4,2) = 6
+        assertEquals(6, lists.size());
         assertTrue(lists.contains(Arrays.asList(1, 2)));
         assertTrue(lists.contains(Arrays.asList(3, 4)));
     }
@@ -1294,7 +1294,7 @@ public class AbstractStream103Test extends TestBase {
         stream = createStream(1, 2);
         Stream<List<Integer>> result = stream.combinations(2, true);
         List<List<Integer>> lists = result.toList();
-        assertEquals(4, lists.size()); // [1,1], [1,2], [2,1], [2,2]
+        assertEquals(4, lists.size());
     }
 
     @Test
@@ -1302,7 +1302,7 @@ public class AbstractStream103Test extends TestBase {
         stream = createStream(1, 2, 3);
         Stream<List<Integer>> result = stream.permutations();
         List<List<Integer>> lists = result.toList();
-        assertEquals(6, lists.size()); // 3! = 6
+        assertEquals(6, lists.size());
     }
 
     @Test
@@ -1326,7 +1326,7 @@ public class AbstractStream103Test extends TestBase {
         stream = createStream(1, 2);
         Stream<List<Integer>> result = stream.cartesianProduct(Arrays.asList(Arrays.asList(3, 4), Arrays.asList(5, 6)));
         List<List<Integer>> lists = result.toList();
-        assertEquals(8, lists.size()); // 2 * 2 * 2 = 8
+        assertEquals(8, lists.size());
     }
 
     @Test
@@ -1802,7 +1802,7 @@ public class AbstractStream103Test extends TestBase {
 
         assertEquals(2, count);
         List<String> lines = Files.readAllLines(tempFile);
-        assertTrue(lines.size() >= 3); // header + 2 data rows
+        assertTrue(lines.size() >= 3);
     }
 
     @Test
@@ -1942,9 +1942,9 @@ public class AbstractStream103Test extends TestBase {
     @Test
     public void testInnerJoinWithPredicate() {
         stream = createStream(1, 2, 3);
-        Stream<Pair<Integer, String>> result = stream.innerJoin(Arrays.asList("a", "b", "c"), (i, s) -> true // join all
+        Stream<Pair<Integer, String>> result = stream.innerJoin(Arrays.asList("a", "b", "c"), (i, s) -> true
         );
-        assertEquals(9, result.toList().size()); // 3 * 3
+        assertEquals(9, result.toList().size());
     }
 
     @Test
@@ -2050,8 +2050,8 @@ public class AbstractStream103Test extends TestBase {
         stream = createStream(1, 2, 3);
         Stream<Pair<Integer, Integer>> result = stream.groupJoin(Arrays.asList(1, 1, 2, 2, 2), Fn.identity(), Fn.identity(), Integer::sum);
         Map<Integer, Integer> map = result.toMap(Pair::getLeft, Pair::getRight);
-        assertEquals(2, (int) map.get(1)); // 1 + 1
-        assertEquals(6, (int) map.get(2)); // 2 + 2 + 2
+        assertEquals(2, (int) map.get(1));
+        assertEquals(6, (int) map.get(2));
     }
 
     @Test
@@ -2097,7 +2097,6 @@ public class AbstractStream103Test extends TestBase {
         assertTrue(list.contains("unjoined:11"));
     }
 
-    // Helper class for testing
     public static class TestBean {
         private String name;
         private int age;

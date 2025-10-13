@@ -28,8 +28,6 @@ import com.landawn.abacus.logging.LoggerFactory;
  * The class is parameterized by the type {@code T} which is the type of the result of the operation to be retried.
  *
  * @param <T> The type of the result of the operation to be retried.
- *
- * @param <T>
  */
 @SuppressWarnings("java:S1192")
 public final class Retry<T> {
@@ -54,47 +52,98 @@ public final class Retry<T> {
     }
 
     /**
-     * Creates a new instance of Retry<Void> with the specified retry times, retry interval, and retry condition.
+     * Creates a new instance of {@code Retry<Void>} with the specified retry times, retry interval, and exception-based retry condition.
      *
-     * @param retryTimes The number of times to retry the operation if it fails. Must be non-negative.
-     * @param retryIntervalInMillis The interval in milliseconds between retries. Must be non-negative.
-     * @param retryCondition The condition to test the exceptions thrown. If the condition returns {@code true}, the operation is retried.
-     * @return A new instance of Retry<Void> with the specified retry times, retry interval, and retry condition.
-     * @throws IllegalArgumentException if the provided {@code retryTimes} or {@code retryIntervalInMillis} is negative, or {@code retryCondition} is {@code null}.
+     * <p>This factory method is designed for operations that do not return a value (void operations). The retry logic
+     * will be triggered only when an exception is thrown and the {@code retryCondition} predicate evaluates to {@code true}
+     * for that exception.</p>
+     *
+     * <p>Between retry attempts, the thread will sleep for the specified interval. If {@code retryIntervalInMillis} is 0,
+     * retries will be executed immediately without delay.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Retry<Void> retry = Retry.of(3, 1000, e -> e instanceof IOException || e instanceof TimeoutException);
+     * retry.run(() -> sendNotification());
+     * }</pre>
+     *
+     * @param retryTimes The maximum number of times to retry the operation if it fails. Must be non-negative. A value of 0 means no retries.
+     * @param retryIntervalInMillis The interval in milliseconds to wait between retries. Must be non-negative. A value of 0 means no delay between retries.
+     * @param retryCondition A predicate that tests the thrown exception. If it returns {@code true}, the operation will be retried. Must not be {@code null}.
+     * @return A new {@code Retry<Void>} instance configured with the specified parameters.
+     * @throws IllegalArgumentException if {@code retryTimes} is negative, {@code retryIntervalInMillis} is negative, or {@code retryCondition} is {@code null}.
      */
     public static Retry<Void> of(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition)
             throws IllegalArgumentException {
-        N.checkArgNotNegative(retryTimes, cs.retryTimes);
-        N.checkArgNotNegative(retryIntervalInMillis, cs.retryIntervalInMillis);
-        N.checkArgNotNull(retryCondition);
+        N.checkArgNotNegative(retryTimes, "retryTimes");
+        N.checkArgNotNegative(retryIntervalInMillis, "retryIntervalInMillis");
+        N.checkArgNotNull(retryCondition, "retryCondition");
 
         return new Retry<>(retryTimes, retryIntervalInMillis, retryCondition, null);
     }
 
     /**
-     * Creates a new instance of Retry<T> with the specified retry times, retry interval, and retry condition.
+     * Creates a new instance of {@code Retry<T>} with the specified retry times, retry interval, and result/exception-based retry condition.
      *
-     * @param <T> The type of the result of the operation to be retried.
-     * @param retryTimes The number of times to retry the operation if it fails. Must be non-negative.
-     * @param retryIntervalInMillis The interval in milliseconds between retries. Must be non-negative.
-     * @param retryCondition The condition to test the result and the exceptions thrown. If the condition returns {@code true}, the operation is retried.
-     * @return A new instance of Retry<T> with the specified retry times, retry interval, and retry condition.
-     * @throws IllegalArgumentException if the provided {@code retryTimes} or {@code retryIntervalInMillis} is negative, or {@code retryCondition} is {@code null}.
+     * <p>This factory method is designed for operations that return a value of type {@code T}. The retry logic
+     * will be triggered when:
+     * <ul>
+     *   <li>An exception is thrown and the {@code retryCondition} bi-predicate evaluates to {@code true} for {@code null} result and the exception.</li>
+     *   <li>A result is returned but the {@code retryCondition} bi-predicate evaluates to {@code true} for the result and {@code null} exception.</li>
+     * </ul>
+     * This allows retrying based on both exceptional outcomes and unsatisfactory results.</p>
+     *
+     * <p>Between retry attempts, the thread will sleep for the specified interval. If {@code retryIntervalInMillis} is 0,
+     * retries will be executed immediately without delay.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Retry<Response> retry = Retry.of(3, 500, (result, ex) ->
+     *     (result != null && result.getStatusCode() == 503) || ex instanceof SocketTimeoutException);
+     * Response response = retry.call(() -> httpClient.get(url));
+     * }</pre>
+     *
+     * @param <T> The type of the result returned by the operation to be retried.
+     * @param retryTimes The maximum number of times to retry the operation if it fails or returns an unsatisfactory result. Must be non-negative. A value of 0 means no retries.
+     * @param retryIntervalInMillis The interval in milliseconds to wait between retries. Must be non-negative. A value of 0 means no delay between retries.
+     * @param retryCondition A bi-predicate that tests both the result and the exception. The first parameter is the result (or {@code null} if an exception occurred),
+     *                       and the second parameter is the exception (or {@code null} if no exception occurred). If it returns {@code true}, the operation will be retried.
+     *                       Must not be {@code null}.
+     * @return A new {@code Retry<T>} instance configured with the specified parameters.
+     * @throws IllegalArgumentException if {@code retryTimes} is negative, {@code retryIntervalInMillis} is negative, or {@code retryCondition} is {@code null}.
      */
     public static <T> Retry<T> of(final int retryTimes, final long retryIntervalInMillis, final BiPredicate<? super T, ? super Exception> retryCondition)
             throws IllegalArgumentException {
-        N.checkArgNotNegative(retryTimes, cs.retryTimes);
-        N.checkArgNotNegative(retryIntervalInMillis, cs.retryIntervalInMillis);
-        N.checkArgNotNull(retryCondition);
+        N.checkArgNotNegative(retryTimes, "retryTimes");
+        N.checkArgNotNegative(retryIntervalInMillis, "retryIntervalInMillis");
+        N.checkArgNotNull(retryCondition, "retryCondition");
 
         return new Retry<>(retryTimes, retryIntervalInMillis, null, retryCondition);
     }
 
     /**
-     * Executes the specified operation and retries it if it fails.
+     * Executes the specified runnable operation and retries it if it fails according to the configured retry conditions.
      *
-     * @param cmd
-     * @throws Exception the exception
+     * <p>This method will execute the provided {@code cmd} and retry it up to {@code retryTimes} times if an exception
+     * is thrown and the retry condition is satisfied. Between retries, the thread will sleep for {@code retryIntervalInMillis}
+     * milliseconds if configured. If all retry attempts fail, the last exception thrown will be propagated.</p>
+     *
+     * <p>The retry logic is controlled by the retry conditions specified during construction:
+     * <ul>
+     *   <li>If {@code retryCondition} is set, the operation is retried when the predicate returns {@code true} for the thrown exception.</li>
+     *   <li>If {@code retryCondition2} is set, the operation is retried when the bi-predicate returns {@code true} for {@code null} result and the thrown exception.</li>
+     * </ul>
+     * </p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Retry<Void> retry = Retry.of(3, 1000, e -> e instanceof IOException);
+     * retry.run(() -> performNetworkOperation());
+     * }</pre>
+     *
+     * @param cmd The runnable operation to execute, which may throw an exception.
+     * @throws Exception If the operation fails and either no retry condition is met, or all retry attempts are exhausted.
+     *                   The exception thrown will be the last exception encountered during execution.
      */
     public void run(final Throwables.Runnable<? extends Exception> cmd) throws Exception {
         if (retryTimes > 0) {
@@ -135,11 +184,33 @@ public final class Retry<T> {
     }
 
     /**
-     * Executes the specified operation and retries it if it fails.
+     * Executes the specified callable operation and retries it if it fails or returns an unsatisfactory result according to the configured retry conditions.
      *
-     * @param callable
-     * @return
-     * @throws Exception the exception
+     * <p>This method will execute the provided {@code callable} and retry it up to {@code retryTimes} times if:
+     * <ul>
+     *   <li>An exception is thrown and the retry condition (based on the exception) is satisfied.</li>
+     *   <li>The result is returned but {@code retryCondition2} evaluates to {@code true} for the result.</li>
+     * </ul>
+     * Between retries, the thread will sleep for {@code retryIntervalInMillis} milliseconds if configured.</p>
+     *
+     * <p>The retry logic is controlled by the retry conditions specified during construction:
+     * <ul>
+     *   <li>If {@code retryCondition} is set, the operation is retried when the predicate returns {@code true} for the thrown exception.</li>
+     *   <li>If {@code retryCondition2} is set, the operation is retried when the bi-predicate returns {@code true} for the result and/or exception.</li>
+     * </ul>
+     * </p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Retry<String> retry = Retry.of(3, 1000, (result, ex) -> result == null || ex instanceof TimeoutException);
+     * String result = retry.call(() -> fetchDataFromServer());
+     * }</pre>
+     *
+     * @param callable The callable operation to execute, which may throw an exception or return a result.
+     * @return The result of the successful execution of {@code callable}.
+     * @throws Exception If the operation fails and either no retry condition is met, or all retry attempts are exhausted.
+     *                   The exception thrown will be the last exception encountered during execution.
+     * @throws RuntimeException If all retry attempts are exhausted and the result still does not satisfy {@code retryCondition2}.
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
     public T call(final java.util.concurrent.Callable<T> callable) throws Exception {
@@ -219,311 +290,4 @@ public final class Retry<T> {
         }
     }
 
-    //    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
-    //    public static final class R<T> {
-    //    
-    //        private static final Logger logger = LoggerFactory.getLogger(R.class);
-    //    
-    //        private final int retryTimes;
-    //    
-    //        private final long retryIntervalInMillis;
-    //    
-    //        private final Predicate<? super RuntimeException> retryCondition;
-    //    
-    //        private final BiPredicate<? super T, ? super RuntimeException> retryCondition2;
-    //    
-    //        R(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super RuntimeException> retryCondition,
-    //                final BiPredicate<? super T, ? super RuntimeException> retryCondition2) {
-    //    
-    //            this.retryTimes = retryTimes;
-    //            this.retryIntervalInMillis = retryIntervalInMillis;
-    //            this.retryCondition = retryCondition;
-    //            this.retryCondition2 = retryCondition2;
-    //        }
-    //    
-    //        /**
-    //         *
-    //         * @param retryTimes
-    //         * @param retryIntervalInMillis
-    //         * @param retryCondition
-    //         * @return
-    //         * @throws IllegalArgumentException
-    //         */
-    //        public static R<Void> of(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super RuntimeException> retryCondition)
-    //                throws IllegalArgumentException {
-    //            N.checkArgNotNegative(retryTimes, cs.retryTimes);
-    //            N.checkArgNotNegative(retryIntervalInMillis, cs.retryIntervalInMillis);
-    //            N.checkArgNotNull(retryCondition);
-    //    
-    //            return new R<>(retryTimes, retryIntervalInMillis, retryCondition, null);
-    //        }
-    //    
-    //        /**
-    //         *
-    //         * @param <T>
-    //         * @param retryTimes
-    //         * @param retryIntervalInMillis
-    //         * @param retryCondition
-    //         * @return
-    //         * @throws IllegalArgumentException
-    //         */
-    //        public static <T> R<T> of(final int retryTimes, final long retryIntervalInMillis, final BiPredicate<? super T, ? super RuntimeException> retryCondition)
-    //                throws IllegalArgumentException {
-    //            N.checkArgNotNegative(retryTimes, cs.retryTimes);
-    //            N.checkArgNotNegative(retryIntervalInMillis, cs.retryIntervalInMillis);
-    //            N.checkArgNotNull(retryCondition);
-    //    
-    //            return new R<>(retryTimes, retryIntervalInMillis, null, retryCondition);
-    //        }
-    //    
-    //        /**
-    //         * Executes the specified operation and retries it if it fails.
-    //         *
-    //         * @param cmd The runnable task that might throw a runtime exception.
-    //         * @throws RuntimeException if an exception occurs during the execution of the {@code cmd} and the retry conditions are not met.
-    //         */
-    //        public void run(final Runnable cmd) {
-    //            if (retryTimes > 0) {
-    //                try {
-    //                    cmd.run();
-    //                } catch (final RuntimeException e) {
-    //                    logger.error("Failed to run", e);
-    //    
-    //                    int retriedTimes = 0;
-    //                    RuntimeException ex = e;
-    //    
-    //                    while (retriedTimes < retryTimes
-    //                            && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
-    //    
-    //                        retriedTimes++;
-    //    
-    //                        try {
-    //                            if (retryIntervalInMillis > 0) {
-    //                                N.sleepUninterruptibly(retryIntervalInMillis);
-    //                            }
-    //    
-    //                            logger.info("Start " + retriedTimes + " retry");
-    //    
-    //                            cmd.run();
-    //                            return;
-    //                        } catch (final RuntimeException e2) {
-    //                            logger.error("Retried: " + retriedTimes, e2);
-    //    
-    //                            ex = e2;
-    //                        }
-    //                    }
-    //    
-    //                    throw ex;
-    //                }
-    //            } else {
-    //                cmd.run();
-    //            }
-    //        }
-    //    
-    //        /**
-    //         * Executes the specified callable operation and retries it if it fails.
-    //         *
-    //         * @param callable The callable task that might throw a runtime exception.
-    //         * @return The result of the {@code callable}.
-    //         * @throws RuntimeException if an exception occurs during the execution of the {@code callable} and the retry conditions are not met.
-    //         */
-    //        public T call(final Throwables.Callable<T, RuntimeException> callable) {
-    //            if (retryTimes > 0) {
-    //                T result = null;
-    //                int retriedTimes = 0;
-    //    
-    //                try {
-    //                    result = callable.call();
-    //    
-    //                    if (retryCondition2 == null || !retryCondition2.test(result, null)) {
-    //                        return result;
-    //                    }
-    //    
-    //                    while (retriedTimes < retryTimes) {
-    //                        retriedTimes++;
-    //    
-    //                        if (retryIntervalInMillis > 0) {
-    //                            N.sleepUninterruptibly(retryIntervalInMillis);
-    //                        }
-    //    
-    //                        logger.info("Start " + retriedTimes + " retry");
-    //    
-    //                        result = callable.call();
-    //    
-    //                        //noinspection ConstantValue
-    //                        if (retryCondition2 == null || !retryCondition2.test(result, null)) {
-    //                            return result;
-    //                        }
-    //                    }
-    //                } catch (final RuntimeException e) {
-    //                    logger.error("Failed to call", e);
-    //    
-    //                    RuntimeException ex = e;
-    //    
-    //                    if (!((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
-    //                        throw ex;
-    //                    }
-    //    
-    //                    while (retriedTimes < retryTimes) {
-    //                        retriedTimes++;
-    //    
-    //                        try {
-    //                            if (retryIntervalInMillis > 0) {
-    //                                N.sleepUninterruptibly(retryIntervalInMillis);
-    //                            }
-    //    
-    //                            logger.info("Start " + retriedTimes + " retry");
-    //    
-    //                            result = callable.call();
-    //    
-    //                            if (retryCondition2 == null || !retryCondition2.test(result, null)) {
-    //                                return result;
-    //                            }
-    //                        } catch (final RuntimeException e2) {
-    //                            logger.error("Retried: " + retriedTimes, e2);
-    //    
-    //                            ex = e2;
-    //    
-    //                            if (!((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
-    //                                throw ex;
-    //                            }
-    //                        }
-    //                    }
-    //    
-    //                    throw ex;
-    //                }
-    //    
-    //                //noinspection ConstantValue
-    //                if (retryTimes > 0 && (retryCondition2 != null && retryCondition2.test(result, null))) {
-    //                    throw new RuntimeException("Still failed after retried " + retryTimes + " times for result: " + N.toString(result));
-    //                }
-    //    
-    //                return result;
-    //            } else {
-    //                return callable.call();
-    //            }
-    //        }
-    //    
-    //        /**
-    //         * Creates an iterator that retries the specified iterator's operations if they fail.
-    //         *
-    //         * @param <E> The type of elements returned by the iterator.
-    //         * @param iter The iterator whose operations might throw a runtime exception.
-    //         * @param totalRetryTimes The total number of times to retry the iterator's operations if they fail.
-    //         * @return An iterator that retries the specified iterator's operations if they fail.
-    //         * @throws IllegalArgumentException if the provided {@code totalRetryTimes} is not positive.
-    //         */
-    //        public <E> Iterator<E> iterate(final Iterator<E> iter, final int totalRetryTimes) throws IllegalArgumentException {
-    //            N.checkArgPositive(totalRetryTimes, cs.totalRetryTimes);
-    //    
-    //            return new Iterator<>() {
-    //                private int totalRetriedTimes = 0;
-    //    
-    //                @Override
-    //                public boolean hasNext() {
-    //                    try {
-    //                        return iter.hasNext();
-    //                    } catch (final RuntimeException e) {
-    //                        logger.error("Failed to hasNext()", e);
-    //    
-    //                        int retriedTimes = 0;
-    //                        RuntimeException ex = e;
-    //    
-    //                        while (totalRetriedTimes < totalRetryTimes && retriedTimes < retryTimes
-    //                                && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
-    //    
-    //                            totalRetriedTimes++;
-    //                            retriedTimes++;
-    //    
-    //                            try {
-    //                                if (retryIntervalInMillis > 0) {
-    //                                    N.sleepUninterruptibly(retryIntervalInMillis);
-    //                                }
-    //    
-    //                                logger.info("Start " + retriedTimes + " retry in hasNext()");
-    //    
-    //                                return iter.hasNext();
-    //                            } catch (final RuntimeException e2) {
-    //                                logger.error("Retried: " + retriedTimes + " in hasNext()", e2);
-    //    
-    //                                ex = e2;
-    //                            }
-    //                        }
-    //    
-    //                        throw ex;
-    //                    }
-    //                }
-    //    
-    //                @Override
-    //                public E next() {
-    //                    try {
-    //                        return iter.next();
-    //                    } catch (final RuntimeException e) {
-    //                        logger.error("Failed to next()", e);
-    //    
-    //                        int retriedTimes = 0;
-    //                        RuntimeException ex = e;
-    //    
-    //                        while (totalRetriedTimes < totalRetryTimes && retriedTimes < retryTimes
-    //                                && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
-    //    
-    //                            totalRetriedTimes++;
-    //                            retriedTimes++;
-    //    
-    //                            try {
-    //                                if (retryIntervalInMillis > 0) {
-    //                                    N.sleepUninterruptibly(retryIntervalInMillis);
-    //                                }
-    //    
-    //                                logger.info("Start " + retriedTimes + " retry in next()");
-    //    
-    //                                return iter.next();
-    //                            } catch (final RuntimeException e2) {
-    //                                logger.error("Retried: " + retriedTimes + " in next()", e2);
-    //    
-    //                                ex = e2;
-    //                            }
-    //                        }
-    //    
-    //                        throw ex;
-    //                    }
-    //                }
-    //    
-    //                @Override
-    //                public void remove() {
-    //                    try {
-    //                        iter.remove();
-    //                    } catch (final RuntimeException e) {
-    //                        logger.error("Failed to remove()", e);
-    //    
-    //                        int retriedTimes = 0;
-    //                        RuntimeException ex = e;
-    //    
-    //                        while (totalRetriedTimes < totalRetryTimes && retriedTimes < retryTimes
-    //                                && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
-    //    
-    //                            totalRetriedTimes++;
-    //                            retriedTimes++;
-    //    
-    //                            try {
-    //                                if (retryIntervalInMillis > 0) {
-    //                                    N.sleepUninterruptibly(retryIntervalInMillis);
-    //                                }
-    //    
-    //                                logger.info("Start " + retriedTimes + " retry in remove()");
-    //    
-    //                                iter.remove();
-    //                            } catch (final RuntimeException e2) {
-    //                                logger.error("Retried: " + retriedTimes + " in remove()", e2);
-    //    
-    //                                ex = e2;
-    //                            }
-    //                        }
-    //    
-    //                        throw ex;
-    //                    }
-    //                }
-    //            };
-    //        }
-    //    }
 }

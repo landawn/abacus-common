@@ -582,13 +582,13 @@ final class JSONParserImpl extends AbstractJSONParser {
 
     /**
      *
-     * @param obj
-     * @param config
-     * @param serializedObjects
-     * @param type TODO
-     * @param bw
-     * @param flush
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param obj the object to serialize to JSON
+     * @param config the JSON serialization configuration settings
+     * @param serializedObjects set of already serialized objects to detect circular references
+     * @param type the Type information for the object being serialized
+     * @param bw the buffered JSON writer to write the serialized output to
+     * @param flush whether to flush the writer after writing
+     * @throws IOException if an I/O error occurs during writing
      */
     protected void write(final Object obj, final JSONSerializationConfig config, final IdentityHashSet<Object> serializedObjects, final Type<Object> type,
             final BufferedJSONWriter bw, final boolean flush) throws IOException {
@@ -609,15 +609,15 @@ final class JSONParserImpl extends AbstractJSONParser {
 
     /**
      *
-     * @param obj
-     * @param config
-     * @param isFirstCall
-     * @param indentation
-     * @param serializedObjects
-     * @param type TODO
-     * @param bw
-     * @param flush
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param obj the object to serialize to JSON
+     * @param config the JSON serialization configuration settings
+     * @param isFirstCall whether this is the first call in the serialization process
+     * @param indentation the indentation string for formatting the JSON output
+     * @param serializedObjects set of already serialized objects to detect circular references
+     * @param type the Type information for the object being serialized
+     * @param bw the buffered JSON writer to write the serialized output to
+     * @param flush whether to flush the writer after writing
+     * @throws IOException if an I/O error occurs during writing
      */
     @SuppressWarnings("unused")
     protected void write(final Object obj, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
@@ -3035,16 +3035,16 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * Read data set.
-     * @param jr
-     * @param lastToken TODO
-     * @param config
-     * @param isFirstCall
-     * @param targetClass
+     * Reads a data set from JSON input.
      *
-     * @param <T>
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param <T> the type of the target class
+     * @param jr the JSON reader to read from
+     * @param lastToken the last token read from the JSON input, used for context
+     * @param config the JSON deserialization configuration settings
+     * @param isFirstCall whether this is the first call in the deserialization process
+     * @param targetClass the class type to deserialize the data set into
+     * @return the deserialized data set of type T
+     * @throws IOException if an I/O error occurs during reading
      */
     @SuppressWarnings("unused")
     protected <T> T readDataset(final JSONReader jr, final int lastToken, final JSONDeserializationConfig config, final boolean isFirstCall,
@@ -3512,16 +3512,16 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * Read data set.
-     * @param jr
-     * @param lastToken TODO
-     * @param config
-     * @param isFirstCall
-     * @param targetClass
+     * Reads a data set from JSON input.
      *
-     * @param <T>
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param <T> the type of the target class
+     * @param jr the JSON reader to read from
+     * @param lastToken the last token read from the JSON input, used for context
+     * @param config the JSON deserialization configuration settings
+     * @param isFirstCall whether this is the first call in the deserialization process
+     * @param targetClass the class type to deserialize the data set into
+     * @return the deserialized data set of type T
+     * @throws IOException if an I/O error occurs during reading
      */
     @SuppressWarnings({ "unused", "rawtypes" })
     protected <T> T readSheet(final JSONReader jr, final int lastToken, final JSONDeserializationConfig config, final boolean isFirstCall,

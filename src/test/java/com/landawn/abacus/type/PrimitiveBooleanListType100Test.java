@@ -15,12 +15,14 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.BooleanList;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class PrimitiveBooleanListType100Test extends TestBase {
 
     private PrimitiveBooleanListType booleanListType;
@@ -108,12 +110,12 @@ public class PrimitiveBooleanListType100Test extends TestBase {
         BooleanList result = booleanListType.valueOf("[TRUE, FALSE, 1, 0, yes, no]");
         assertNotNull(result);
         assertEquals(6, result.size());
-        assertTrue(result.get(0)); // TRUE
-        assertFalse(result.get(1)); // FALSE
-        assertTrue(result.get(2)); // 1
-        assertFalse(result.get(3)); // 0
-        assertFalse(result.get(4)); // yes
-        assertFalse(result.get(5)); // no
+        assertTrue(result.get(0));
+        assertFalse(result.get(1));
+        assertTrue(result.get(2));
+        assertFalse(result.get(3));
+        assertFalse(result.get(4));
+        assertFalse(result.get(5));
     }
 
     @Test

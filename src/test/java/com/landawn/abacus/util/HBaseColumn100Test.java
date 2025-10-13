@@ -9,9 +9,11 @@ import java.util.SortedSet;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class HBaseColumn100Test extends TestBase {
 
     @Test
@@ -199,7 +201,6 @@ public class HBaseColumn100Test extends TestBase {
         HBaseColumn<String> notNullCol = new HBaseColumn<>("test", 12345L);
         Assertions.assertFalse(notNullCol.isNull());
 
-        // Test empty columns
         Assertions.assertTrue(HBaseColumn.EMPTY_INT_COLUMN.isNull());
     }
 

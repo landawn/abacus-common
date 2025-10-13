@@ -201,7 +201,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
                 return ZERO; // normalize zero.
             }
             // simplify fraction.
-            final int gcd = greatestCommandDivisor(numerator, denominator);
+            final int gcd = greatestCommonDivisor(numerator, denominator);
             numerator /= gcd;
             denominator /= gcd;
         }
@@ -689,7 +689,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         if (numerator == 0) {
             return equals(ZERO) ? this : ZERO;
         }
-        final int gcd = greatestCommandDivisor(Math.abs(numerator), denominator);
+        final int gcd = greatestCommonDivisor(Math.abs(numerator), denominator);
         if (gcd == 1) {
             return this;
         }
@@ -824,18 +824,20 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * <p>
-     * Gets the greatest common divisor of the absolute value of two numbers, using the "binary gcd" method which avoids
-     * division and modulo operations. See Knuth 4.5.2 algorithm B. This algorithm is due to Josef Stein (1961).
-     * </p>
+     * Gets the greatest common divisor (GCD) of the absolute value of two numbers,
+     * using the "binary GCD" method which avoids division and modulo operations.
+     * This implementation follows Knuth 4.5.2 algorithm B, also known as Stein's algorithm (1961).
      *
-     * @param u
-     *            a non-zero number
-     * @param v
-     *            a non-zero number
-     * @return
+     * <p>The binary GCD algorithm is more efficient than Euclid's algorithm on modern
+     * processors because it uses simple bitwise operations and subtraction instead of
+     * division and modulo operations.</p>
+     *
+     * @param u a number (can be zero)
+     * @param v a number (can be zero)
+     * @return the greatest common divisor of the absolute values of u and v
+     * @throws ArithmeticException if the GCD is 2^31 (overflow condition)
      */
-    private static int greatestCommandDivisor(int u, int v) {
+    private static int greatestCommonDivisor(int u, int v) {
         // From Commons Math:
         if (u == 0 || v == 0) {
             if (u == Integer.MIN_VALUE || v == Integer.MIN_VALUE) {
@@ -896,34 +898,31 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     //-------------------------------------------------------------------
 
     /**
-     * Multiply two integers, checking for overflow.
+     * Multiplies two integers, checking for overflow.
+     * Performs the multiplication using long arithmetic to detect overflow conditions.
      *
-     * @param x
-     *            a factor
-     * @param y
-     *            a factor
-     * @return
-     * @throws ArithmeticException
-     *             if the result cannot be represented as an int
+     * @param x the first factor
+     * @param y the second factor
+     * @return the product of x and y
+     * @throws ArithmeticException if the result cannot be represented as an {@code int}
      */
     private static int mulAndCheck(final int x, final int y) {
         final long m = (long) x * (long) y;
         if (m < Integer.MIN_VALUE || m > Integer.MAX_VALUE) {
-            throw new ArithmeticException("overflow: mul");
+            throw new ArithmeticException("overflow: mul(" + m + ")");
         }
         return (int) m;
     }
 
     /**
-     * Multiply two non-negative integers, checking for overflow.
+     * Multiplies two non-negative integers, checking for overflow.
+     * This method assumes both inputs are non-negative and only checks for overflow
+     * against {@code Integer.MAX_VALUE}.
      *
-     * @param x
-     *            a non-negative factor
-     * @param y
-     *            a non-negative factor
-     * @return
-     * @throws ArithmeticException
-     *             if the result cannot be represented as an int
+     * @param x a non-negative factor
+     * @param y a non-negative factor
+     * @return the product of x and y
+     * @throws ArithmeticException if the result cannot be represented as an {@code int}
      */
     private static int mulPosAndCheck(final int x, final int y) {
         /* assert x>=0 && y>=0; */
@@ -935,15 +934,13 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * Add two integers, checking for overflow.
+     * Adds two integers, checking for overflow.
+     * Performs the addition using long arithmetic to detect overflow conditions.
      *
-     * @param x
-     *            an addend
-     * @param y
-     *            an addend
-     * @return
-     * @throws ArithmeticException
-     *             if the result cannot be represented as an int
+     * @param x the first addend
+     * @param y the second addend
+     * @return the sum of x and y
+     * @throws ArithmeticException if the result cannot be represented as an {@code int}
      */
     private static int addAndCheck(final int x, final int y) {
         final long s = (long) x + (long) y;
@@ -954,20 +951,18 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * Subtract two integers, checking for overflow.
+     * Subtracts two integers, checking for overflow.
+     * Performs the subtraction using long arithmetic to detect overflow conditions.
      *
-     * @param x
-     *            the minuend
-     * @param y
-     *            the subtrahend
-     * @return
-     * @throws ArithmeticException
-     *             if the result cannot be represented as an int
+     * @param x the minuend
+     * @param y the subtrahend
+     * @return the difference of x minus y
+     * @throws ArithmeticException if the result cannot be represented as an {@code int}
      */
     private static int subAndCheck(final int x, final int y) {
         final long s = (long) x - (long) y;
         if (s < Integer.MIN_VALUE || s > Integer.MAX_VALUE) {
-            throw new ArithmeticException("overflow: add");
+            throw new ArithmeticException("overflow: subtract");
         }
         return (int) s;
     }
@@ -1045,7 +1040,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         }
         // if denominators are randomly distributed, d1 will be 1 about 61%
         // of the time.
-        final int d1 = greatestCommandDivisor(denominator, fraction.denominator);
+        final int d1 = greatestCommonDivisor(denominator, fraction.denominator);
         if (d1 == 1) {
             // result is ( (u*v' +/- u'v) / u'v')
             final int uvp = mulAndCheck(numerator, fraction.denominator);
@@ -1061,7 +1056,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         // but d2 doesn't need extra precision because
         // d2 = gcd(t,d1) = gcd(t mod d1, d1)
         final int tmodd1 = t.mod(BigInteger.valueOf(d1)).intValue();
-        final int d2 = tmodd1 == 0 ? d1 : greatestCommandDivisor(tmodd1, d1);
+        final int d2 = tmodd1 == 0 ? d1 : greatestCommonDivisor(tmodd1, d1);
 
         // result is (t/d2) / (u'/d1)(v'/d2)
         final BigInteger w = t.divide(BigInteger.valueOf(d2));
@@ -1099,8 +1094,8 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         }
         // knuth 4.5.1
         // make sure we don't overflow unless the result *must* overflow.
-        final int d1 = greatestCommandDivisor(numerator, fraction.denominator);
-        final int d2 = greatestCommandDivisor(fraction.numerator, denominator);
+        final int d1 = greatestCommonDivisor(numerator, fraction.denominator);
+        final int d2 = greatestCommonDivisor(fraction.numerator, denominator);
         return of(mulAndCheck(numerator / d1, fraction.numerator / d2), mulPosAndCheck(denominator / d2, fraction.denominator / d1), true);
     }
 

@@ -20,10 +20,12 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
 
+@Tag("new-test")
 public class BiIterator200Test extends TestBase {
 
     @Test
@@ -101,7 +103,7 @@ public class BiIterator200Test extends TestBase {
         String[] a = { "a", "b", "c" };
         Integer[] b = { 1, 2 };
         BiIterator<String, Integer> zipped = BiIterator.zip(a, b);
-        assertEquals(2, zipped.toList().size()); // Truncates to shorter
+        assertEquals(2, zipped.toList().size());
     }
 
     @Test

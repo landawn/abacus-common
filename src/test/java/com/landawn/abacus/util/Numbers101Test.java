@@ -1,4 +1,3 @@
-
 package com.landawn.abacus.util;
 
 import static com.landawn.abacus.util.Numbers.acosh;
@@ -75,6 +74,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -84,6 +84,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import com.landawn.abacus.TestBase;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Tag("new-test")
 public class Numbers101Test extends TestBase {
 
     @Nested
@@ -115,15 +116,12 @@ public class Numbers101Test extends TestBase {
         @Test
         @DisplayName("Convert with overflow should throw ArithmeticException")
         public void testConvertOverflow() {
-            // Test byte overflow
             assertThrows(ArithmeticException.class, () -> convert(128, byte.class));
             assertThrows(ArithmeticException.class, () -> convert(-129, byte.class));
 
-            // Test short overflow
             assertThrows(ArithmeticException.class, () -> convert(32768, short.class));
             assertThrows(ArithmeticException.class, () -> convert(-32769, short.class));
 
-            // Test int overflow from long
             assertThrows(ArithmeticException.class, () -> convert(Long.MAX_VALUE, int.class));
         }
 
@@ -149,7 +147,6 @@ public class Numbers101Test extends TestBase {
             BigDecimal bigDec = BigDecimal.valueOf(1000.5);
             assertEquals(Integer.valueOf(1000), convert(bigDec, int.class));
 
-            // Test overflow with BigInteger
             BigInteger tooBig = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
             assertThrows(ArithmeticException.class, () -> convert(tooBig, long.class));
         }
@@ -174,7 +171,7 @@ public class Numbers101Test extends TestBase {
         @DisplayName("toByte with invalid input should throw NumberFormatException")
         public void testToByteInvalid() {
             assertThrows(NumberFormatException.class, () -> toByte("abc"));
-            assertThrows(NumberFormatException.class, () -> toByte("128")); // overflow
+            assertThrows(NumberFormatException.class, () -> toByte("128"));
         }
 
         @ParameterizedTest
@@ -187,7 +184,6 @@ public class Numbers101Test extends TestBase {
         @Test
         @DisplayName("toInt with cached values")
         public void testToIntCached() {
-            // Test small values that should be cached
             assertEquals(1, toInt("1"));
             assertEquals(-1, toInt("-1"));
             assertEquals(100, toInt("100"));
@@ -201,9 +197,7 @@ public class Numbers101Test extends TestBase {
         }
 
         @ParameterizedTest
-        @CsvSource({ "42.5, 42.5", "-42.5, -42.5", "1.7976931348623157E308, 1.7976931348623157E308", // Double.MAX_VALUE
-                "4.9E-324, 4.9E-324" // Double.MIN_VALUE
-        })
+        @CsvSource({ "42.5, 42.5", "-42.5, -42.5", "1.7976931348623157E308, 1.7976931348623157E308", "4.9E-324, 4.9E-324" })
         @DisplayName("toDouble with valid inputs")
         public void testToDouble(String input, double expected) {
             assertEquals(expected, toDouble(input), 1e-10);
@@ -290,8 +284,8 @@ public class Numbers101Test extends TestBase {
         @DisplayName("createInteger with various formats")
         public void testCreateInteger() {
             assertEquals(Integer.valueOf(42), createInteger("42"));
-            assertEquals(Integer.valueOf(255), createInteger("0xFF")); // hex
-            assertEquals(Integer.valueOf(8), createInteger("010")); // octal
+            assertEquals(Integer.valueOf(255), createInteger("0xFF"));
+            assertEquals(Integer.valueOf(8), createInteger("010"));
             assertNull(createInteger(null));
         }
 
@@ -343,16 +337,12 @@ public class Numbers101Test extends TestBase {
         @Test
         @DisplayName("createNumber should return appropriate type for size")
         public void testCreateNumberAutoType() {
-            // Small integers should be Integer
             assertTrue(createNumber("42") instanceof Integer);
 
-            // Large integers should be Long
             assertTrue(createNumber("999999999999") instanceof Long);
 
-            // Very large integers should be BigInteger
             assertTrue(createNumber("99999999999999999999999999999999") instanceof BigInteger);
 
-            // Decimals should be Double
             assertTrue(createNumber("42.5") instanceof Double);
         }
     }
@@ -459,13 +449,6 @@ public class Numbers101Test extends TestBase {
             assertEquals(expected, gcd(a, b));
         }
 
-        //    @Test
-        //    @DisplayName("gcd should handle negative inputs")
-        //    public void testGcdNegative() {
-        //        assertThrows(IllegalArgumentException.class, () -> gcd(-1, 5));
-        //        assertThrows(IllegalArgumentException.class, () -> gcd(5, -1));
-        //    }
-
         @ParameterizedTest
         @CsvSource({ "4, 6, 12", "3, 7, 21", "12, 8, 24", "0, 5, 0", "5, 0, 0", "10, -2, 10" })
         @DisplayName("lcm should compute least common multiple")
@@ -520,7 +503,7 @@ public class Numbers101Test extends TestBase {
         @DisplayName("powExact should detect overflow")
         public void testPowExact() {
             assertEquals(8, powExact(2, 3));
-            assertThrows(ArithmeticException.class, () -> powExact(2, 31)); // overflow
+            assertThrows(ArithmeticException.class, () -> powExact(2, 31));
         }
     }
 
@@ -692,7 +675,7 @@ public class Numbers101Test extends TestBase {
         @Test
         @DisplayName("factorial should handle large values")
         public void testFactorialLarge() {
-            assertEquals(Integer.MAX_VALUE, factorial(20)); // overflow case
+            assertEquals(Integer.MAX_VALUE, factorial(20));
             assertThrows(IllegalArgumentException.class, () -> factorial(-1));
         }
 
@@ -718,7 +701,6 @@ public class Numbers101Test extends TestBase {
             assertEquals(BigInteger.ONE, factorialToBigInteger(0));
             assertEquals(BigInteger.valueOf(120), factorialToBigInteger(5));
 
-            // Test large factorial
             BigInteger result = factorialToBigInteger(100);
             assertNotNull(result);
             assertTrue(result.compareTo(BigInteger.ZERO) > 0);
@@ -921,7 +903,6 @@ public class Numbers101Test extends TestBase {
             assertEquals(0.0, asinh(0.0), 1e-10);
             assertEquals(-asinh(1.0), asinh(-1.0), 1e-10);
 
-            // Test specific values
             double x = 1.0;
             double result = asinh(x);
             assertEquals(x, Math.sinh(result), 1e-10);
@@ -932,7 +913,6 @@ public class Numbers101Test extends TestBase {
         public void testAcosh() {
             assertEquals(0.0, acosh(1.0), 1e-10);
 
-            // Test specific values
             double x = 2.0;
             double result = acosh(x);
             assertEquals(x, Math.cosh(result), 1e-10);
@@ -944,7 +924,6 @@ public class Numbers101Test extends TestBase {
             assertEquals(0.0, atanh(0.0), 1e-10);
             assertEquals(-atanh(0.5), atanh(-0.5), 1e-10);
 
-            // Test specific values
             double x = 0.5;
             double result = atanh(x);
             assertEquals(x, Math.tanh(result), 1e-10);
@@ -953,14 +932,11 @@ public class Numbers101Test extends TestBase {
         @Test
         @DisplayName("hyperbolic functions should handle edge cases")
         public void testHyperbolicEdgeCases() {
-            // asinh handles all real numbers
             assertNotEquals(Double.NaN, asinh(Double.MAX_VALUE));
             assertNotEquals(Double.NaN, asinh(-Double.MAX_VALUE));
 
-            // acosh domain is [1, infinity)
             assertTrue(Double.isNaN(acosh(0.5)));
 
-            // atanh domain is (-1, 1)
             assertEquals(Double.POSITIVE_INFINITY, atanh(1.0), 1e-10);
             assertEquals(Double.NEGATIVE_INFINITY, atanh(-1.0), 1e-10);
             assertTrue(Double.isNaN(atanh(1.5)));
@@ -1006,14 +982,12 @@ public class Numbers101Test extends TestBase {
         @Test
         @DisplayName("should handle null inputs appropriately")
         public void testNullInputs() {
-            // Methods that should return defaults for null
             assertEquals(0, toByte((String) null));
             assertEquals(0, toInt((String) null));
             assertEquals(0L, toLong((String) null));
             assertEquals(0.0f, toFloat((String) null), 1e-10f);
             assertEquals(0.0, toDouble((String) null), 1e-10);
 
-            // Methods that should return null for null
             assertNull(createInteger(null));
             assertNull(createLong(null));
             assertNull(createFloat(null));
@@ -1039,17 +1013,14 @@ public class Numbers101Test extends TestBase {
         @Test
         @DisplayName("should handle special floating point values")
         public void testSpecialFloatingPointValues() {
-            // Test NaN
             assertTrue(Float.isNaN(toFloat("NaN")));
             assertTrue(Double.isNaN(toDouble("NaN")));
 
-            // Test Infinity
             assertEquals(Float.POSITIVE_INFINITY, toFloat("Infinity"));
             assertEquals(Float.NEGATIVE_INFINITY, toFloat("-Infinity"));
             assertEquals(Double.POSITIVE_INFINITY, toDouble("Infinity"));
             assertEquals(Double.NEGATIVE_INFINITY, toDouble("-Infinity"));
 
-            // Test formatting special values
             assertEquals("NaN", Numbers.format(Float.NaN, "#.##"));
             assertEquals("∞", Numbers.format(Float.POSITIVE_INFINITY, "#.##"));
         }
@@ -1057,44 +1028,36 @@ public class Numbers101Test extends TestBase {
         @Test
         @DisplayName("should validate argument ranges")
         public void testArgumentValidation() {
-            // Negative arguments where not allowed
             assertThrows(IllegalArgumentException.class, () -> factorial(-1));
             assertThrows(IllegalArgumentException.class, () -> pow(2, -1));
             assertThrows(IllegalArgumentException.class, () -> round(1.5, -1));
             assertThrows(IllegalArgumentException.class, () -> fuzzyEquals(1.0, 2.0, -0.1));
 
-            // Invalid combinations
-            assertThrows(IllegalArgumentException.class, () -> binomial(3, 5)); // k > n
-            assertThrows(ArithmeticException.class, () -> gcd(0, Integer.MIN_VALUE)); // negative gcd
-            assertThrows(ArithmeticException.class, () -> gcd(Long.MIN_VALUE, 0)); // negative gcd
+            assertThrows(IllegalArgumentException.class, () -> binomial(3, 5));
+            assertThrows(ArithmeticException.class, () -> gcd(0, Integer.MIN_VALUE));
+            assertThrows(ArithmeticException.class, () -> gcd(Long.MIN_VALUE, 0));
         }
 
         @Test
         @DisplayName("should handle very large numbers")
         public void testVeryLargeNumbers() {
-            // Test BigInteger operations
             BigInteger veryLarge = new BigInteger("123456789012345678901234567890");
             assertNotNull(sqrt(veryLarge, RoundingMode.DOWN));
 
-            // Test overflow in exact operations
             assertThrows(ArithmeticException.class, () -> multiplyExact(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
-            // Test saturated operations don't throw
             assertDoesNotThrow(() -> saturatedMultiply(Integer.MAX_VALUE, Integer.MAX_VALUE));
         }
 
         @Test
         @DisplayName("should handle precision edge cases")
         public void testPrecisionEdgeCases() {
-            // Test conversion precision
             double verySmall = 1e-100;
             assertEquals(0.0f, convert(verySmall, float.class), 1e-10f);
 
-            // Test rounding precision
             double almostHalf = 0.4999999999999999;
             assertEquals(0, roundToInt(almostHalf, RoundingMode.HALF_UP));
 
-            // Test fuzzy comparison with very small tolerance
             assertTrue(fuzzyEquals(1.0, 1.0 + 1e-16, 1e-15));
             assertFalse(fuzzyEquals(1.0, 1.0 + 1e-14, 1e-15));
         }
@@ -1107,7 +1070,6 @@ public class Numbers101Test extends TestBase {
         @Test
         @DisplayName("string to int conversion should use cache for small values")
         public void testStringIntCache() {
-            // Test that small string values are handled efficiently
             long start = System.nanoTime();
             for (int i = 0; i < 1000; i++) {
                 toInt("42");
@@ -1117,14 +1079,12 @@ public class Numbers101Test extends TestBase {
             }
             long elapsed = System.nanoTime() - start;
 
-            // This should be very fast due to caching
             Assertions.assertTrue(elapsed < 10_000_000, "String to int conversion too slow: " + elapsed + "ns");
         }
 
         @Test
         @DisplayName("prime testing should be efficient for known ranges")
         public void testPrimePerformance() {
-            // Test performance on a range of numbers
             long start = System.nanoTime();
             int primeCount = 0;
             for (int i = 2; i < 10000; i++) {
@@ -1134,21 +1094,19 @@ public class Numbers101Test extends TestBase {
             }
             long elapsed = System.nanoTime() - start;
 
-            assertEquals(1229, primeCount); // Known number of primes < 10000
+            assertEquals(1229, primeCount);
             Assertions.assertTrue(elapsed < 100_000_000, "Prime testing too slow: " + elapsed + "ns");
         }
 
         @Test
         @DisplayName("factorial computation should handle large inputs efficiently")
         public void testFactorialPerformance() {
-            // Test that factorial computation doesn't hang on large inputs
             assertTimeout(java.time.Duration.ofSeconds(1), () -> {
                 factorialToBigInteger(1000);
             });
         }
     }
 
-    // Helper methods for parameterized tests
     static Stream<Arguments> provideNumberFormats() {
         return Stream.of(Arguments.of(12.345, "#.##", "12.35"), Arguments.of(12.345, "0.00", "12.35"), Arguments.of(0.123, "#.##%", "12.3%"),
                 Arguments.of(12345, "#,###", "12,345"), Arguments.of(0.0, "#.##", "0"), Arguments.of(-12.345, "#.##", "-12.35"));
@@ -1162,7 +1120,6 @@ public class Numbers101Test extends TestBase {
 
     static Stream<Arguments> providePrimeNumbers() {
         return Stream.of(Arguments.of(2L, true), Arguments.of(3L, true), Arguments.of(4L, false), Arguments.of(17L, true), Arguments.of(25L, false),
-                Arguments.of(97L, true), Arguments.of(982451653L, true), // Large known prime
-                Arguments.of(982451654L, false));
+                Arguments.of(97L, true), Arguments.of(982451653L, true), Arguments.of(982451654L, false));
     }
 }

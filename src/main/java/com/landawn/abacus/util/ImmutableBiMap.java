@@ -102,7 +102,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     /**
      * Returns an ImmutableBiMap containing a single key-value mapping.
      * The returned BiMap is immutable and will have a size of 1.
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * ImmutableBiMap<String, Integer> single = ImmutableBiMap.of("one", 1);
@@ -115,7 +115,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @param k1 the key to be included in the ImmutableBiMap
      * @param v1 the value to be associated with the key
      * @return an ImmutableBiMap containing the provided key-value pair
-     * @throws IllegalArgumentException if the key or value is null and the underlying implementation doesn't support nulls
+     * @throws IllegalArgumentException if the key or value is null
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1);
@@ -125,8 +125,8 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     /**
      * Returns an ImmutableBiMap containing exactly two key-value mappings.
      * Both keys and values must be unique. If duplicate keys or values are provided,
-     * an exception may be thrown.
-     * 
+     * an exception will be thrown.
+     *
      * <p>Example:
      * <pre>{@code
      * ImmutableBiMap<String, Integer> biMap = ImmutableBiMap.of(
@@ -142,7 +142,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @param k2 the second key to be included in the ImmutableBiMap
      * @param v2 the value to be associated with the second key
      * @return an ImmutableBiMap containing the provided key-value pairs
-     * @throws IllegalArgumentException if duplicate keys or values are provided
+     * @throws IllegalArgumentException if any key or value is null, or if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2);
@@ -152,7 +152,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     /**
      * Returns an ImmutableBiMap containing exactly three key-value mappings.
      * All keys and values must be unique. If duplicate keys or values are provided,
-     * an exception may be thrown.
+     * an exception will be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
@@ -163,7 +163,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @param k3 the third key to be included in the ImmutableBiMap
      * @param v3 the value to be associated with the third key
      * @return an ImmutableBiMap containing the provided key-value pairs
-     * @throws IllegalArgumentException if duplicate keys or values are provided
+     * @throws IllegalArgumentException if any key or value is null, or if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3);
@@ -173,14 +173,20 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     /**
      * Returns an ImmutableBiMap containing exactly four key-value mappings.
      * All keys and values must be unique. If duplicate keys or values are provided,
-     * an exception may be thrown.
+     * an exception will be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
-     * @param k1 to k4 the keys to be included in the ImmutableBiMap
-     * @param v1 to v4 the values to be included in the ImmutableBiMap
+     * @param k1 the first key to be included in the ImmutableBiMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableBiMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableBiMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableBiMap
+     * @param v4 the value to be associated with the fourth key
      * @return an ImmutableBiMap containing the provided key-value pairs
-     * @throws IllegalArgumentException if duplicate keys or values are provided
+     * @throws IllegalArgumentException if any key or value is null, or if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3, k4, v4);
@@ -190,14 +196,22 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     /**
      * Returns an ImmutableBiMap containing exactly five key-value mappings.
      * All keys and values must be unique. If duplicate keys or values are provided,
-     * an exception may be thrown.
+     * an exception will be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
-     * @param k1 to k5 the keys to be included in the ImmutableBiMap
-     * @param v1 to v5 the values to be included in the ImmutableBiMap
+     * @param k1 the first key to be included in the ImmutableBiMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableBiMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableBiMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableBiMap
+     * @param v4 the value to be associated with the fourth key
+     * @param k5 the fifth key to be included in the ImmutableBiMap
+     * @param v5 the value to be associated with the fifth key
      * @return an ImmutableBiMap containing the provided key-value pairs
-     * @throws IllegalArgumentException if duplicate keys or values are provided
+     * @throws IllegalArgumentException if any key or value is null, or if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -208,14 +222,24 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     /**
      * Returns an ImmutableBiMap containing exactly six key-value mappings.
      * All keys and values must be unique. If duplicate keys or values are provided,
-     * an exception may be thrown.
+     * an exception will be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
-     * @param k1 to k6 the keys to be included in the ImmutableBiMap
-     * @param v1 to v6 the values to be included in the ImmutableBiMap
+     * @param k1 the first key to be included in the ImmutableBiMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableBiMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableBiMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableBiMap
+     * @param v4 the value to be associated with the fourth key
+     * @param k5 the fifth key to be included in the ImmutableBiMap
+     * @param v5 the value to be associated with the fifth key
+     * @param k6 the sixth key to be included in the ImmutableBiMap
+     * @param v6 the value to be associated with the sixth key
      * @return an ImmutableBiMap containing the provided key-value pairs
-     * @throws IllegalArgumentException if duplicate keys or values are provided
+     * @throws IllegalArgumentException if any key or value is null, or if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
@@ -226,14 +250,26 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     /**
      * Returns an ImmutableBiMap containing exactly seven key-value mappings.
      * All keys and values must be unique. If duplicate keys or values are provided,
-     * an exception may be thrown.
+     * an exception will be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
-     * @param k1 to k7 the keys to be included in the ImmutableBiMap
-     * @param v1 to v7 the values to be included in the ImmutableBiMap
+     * @param k1 the first key to be included in the ImmutableBiMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableBiMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableBiMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableBiMap
+     * @param v4 the value to be associated with the fourth key
+     * @param k5 the fifth key to be included in the ImmutableBiMap
+     * @param v5 the value to be associated with the fifth key
+     * @param k6 the sixth key to be included in the ImmutableBiMap
+     * @param v6 the value to be associated with the sixth key
+     * @param k7 the seventh key to be included in the ImmutableBiMap
+     * @param v7 the value to be associated with the seventh key
      * @return an ImmutableBiMap containing the provided key-value pairs
-     * @throws IllegalArgumentException if duplicate keys or values are provided
+     * @throws IllegalArgumentException if any key or value is null, or if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
@@ -244,14 +280,28 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     /**
      * Returns an ImmutableBiMap containing exactly eight key-value mappings.
      * All keys and values must be unique. If duplicate keys or values are provided,
-     * an exception may be thrown.
+     * an exception will be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
-     * @param k1 to k8 the keys to be included in the ImmutableBiMap
-     * @param v1 to v8 the values to be included in the ImmutableBiMap
+     * @param k1 the first key to be included in the ImmutableBiMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableBiMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableBiMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableBiMap
+     * @param v4 the value to be associated with the fourth key
+     * @param k5 the fifth key to be included in the ImmutableBiMap
+     * @param v5 the value to be associated with the fifth key
+     * @param k6 the sixth key to be included in the ImmutableBiMap
+     * @param v6 the value to be associated with the sixth key
+     * @param k7 the seventh key to be included in the ImmutableBiMap
+     * @param v7 the value to be associated with the seventh key
+     * @param k8 the eighth key to be included in the ImmutableBiMap
+     * @param v8 the value to be associated with the eighth key
      * @return an ImmutableBiMap containing the provided key-value pairs
-     * @throws IllegalArgumentException if duplicate keys or values are provided
+     * @throws IllegalArgumentException if any key or value is null, or if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -262,14 +312,30 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     /**
      * Returns an ImmutableBiMap containing exactly nine key-value mappings.
      * All keys and values must be unique. If duplicate keys or values are provided,
-     * an exception may be thrown.
+     * an exception will be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
-     * @param k1 to k9 the keys to be included in the ImmutableBiMap
-     * @param v1 to v9 the values to be included in the ImmutableBiMap
+     * @param k1 the first key to be included in the ImmutableBiMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableBiMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableBiMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableBiMap
+     * @param v4 the value to be associated with the fourth key
+     * @param k5 the fifth key to be included in the ImmutableBiMap
+     * @param v5 the value to be associated with the fifth key
+     * @param k6 the sixth key to be included in the ImmutableBiMap
+     * @param v6 the value to be associated with the sixth key
+     * @param k7 the seventh key to be included in the ImmutableBiMap
+     * @param v7 the value to be associated with the seventh key
+     * @param k8 the eighth key to be included in the ImmutableBiMap
+     * @param v8 the value to be associated with the eighth key
+     * @param k9 the ninth key to be included in the ImmutableBiMap
+     * @param v9 the value to be associated with the ninth key
      * @return an ImmutableBiMap containing the provided key-value pairs
-     * @throws IllegalArgumentException if duplicate keys or values are provided
+     * @throws IllegalArgumentException if any key or value is null, or if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
@@ -280,14 +346,32 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     /**
      * Returns an ImmutableBiMap containing exactly ten key-value mappings.
      * All keys and values must be unique. If duplicate keys or values are provided,
-     * an exception may be thrown.
+     * an exception will be thrown.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
-     * @param k1 to k10 the keys to be included in the ImmutableBiMap
-     * @param v1 to v10 the values to be included in the ImmutableBiMap
+     * @param k1 the first key to be included in the ImmutableBiMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableBiMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableBiMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableBiMap
+     * @param v4 the value to be associated with the fourth key
+     * @param k5 the fifth key to be included in the ImmutableBiMap
+     * @param v5 the value to be associated with the fifth key
+     * @param k6 the sixth key to be included in the ImmutableBiMap
+     * @param v6 the value to be associated with the sixth key
+     * @param k7 the seventh key to be included in the ImmutableBiMap
+     * @param v7 the value to be associated with the seventh key
+     * @param k8 the eighth key to be included in the ImmutableBiMap
+     * @param v8 the value to be associated with the eighth key
+     * @param k9 the ninth key to be included in the ImmutableBiMap
+     * @param v9 the value to be associated with the ninth key
+     * @param k10 the tenth key to be included in the ImmutableBiMap
+     * @param v10 the value to be associated with the tenth key
      * @return an ImmutableBiMap containing the provided key-value pairs
-     * @throws IllegalArgumentException if duplicate keys or values are provided
+     * @throws IllegalArgumentException if any key or value is null, or if duplicate keys or values are provided
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {

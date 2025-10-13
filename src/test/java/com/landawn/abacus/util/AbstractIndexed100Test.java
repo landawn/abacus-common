@@ -1,14 +1,16 @@
 package com.landawn.abacus.util;
 
+import static org.junit.Assert.assertThrows;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class AbstractIndexed100Test extends TestBase {
 
-    // Create a concrete implementation for testing
     private static class ConcreteIndexed extends AbstractIndexed {
         public ConcreteIndexed(long index) {
             super(index);
@@ -24,8 +26,7 @@ public class AbstractIndexed100Test extends TestBase {
     @Test
     public void testIndexWithLargeValue() {
         ConcreteIndexed indexed = new ConcreteIndexed(Integer.MAX_VALUE + 1L);
-        // This will overflow when converting to int
-        Assertions.assertEquals(Integer.MIN_VALUE, indexed.index());
+        assertThrows(ArithmeticException.class, () -> indexed.index());
     }
 
     @Test

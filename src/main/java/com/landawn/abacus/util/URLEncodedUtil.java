@@ -27,6 +27,8 @@
 package com.landawn.abacus.util;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -49,7 +51,8 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  * </p>
  *
  * A collection of utilities for encoding URLs.
- *
+ * @see URLEncoder
+ * @see URLDecoder
  */
 public final class URLEncodedUtil {
     /**
@@ -196,37 +199,86 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Decodes a URL query string into a Map using the default charset.
-     * The keys and values in the Map are the parameter names and values from the URL query string.
+     * Decodes a URL-encoded query string into a {@code Map<String, String>} using the default charset (UTF-8).
+     * <p>
+     * This method parses a URL query string (e.g., "name=value&amp;foo=bar") and converts it into a map
+     * where keys are parameter names and values are parameter values. Both '+' characters and '%XX' sequences
+     * are decoded. Parameter names and values are trimmed of whitespace. If a parameter appears multiple times,
+     * only the last occurrence is retained (use {@link #decodeToMultimap(String)} to preserve all values).
+     * </p>
+     * <p>
+     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * </p>
      *
-     * @param urlQuery The URL query string to decode.
-     * @return A Map containing parameter names as keys and parameter values as values.
+     * <pre>
+     * Map&lt;String, String&gt; params = URLEncodedUtil.decode("name=John+Doe&amp;age=30");
+     * // params: {name=John Doe, age=30}
+     * </pre>
+     *
+     * @param urlQuery the URL query string to decode (e.g., "key1=value1&amp;key2=value2"), may be {@code null} or empty
+     * @return a {@code LinkedHashMap} containing parameter names as keys and decoded parameter values as values;
+     *         returns an empty map if {@code urlQuery} is {@code null} or empty
+     * @see #decode(String, Charset)
+     * @see #decodeToMultimap(String)
+     * @see URLDecoder#decode(String)
      */
     public static Map<String, String> decode(final String urlQuery) {
         return decode(urlQuery, Charsets.DEFAULT);
     }
 
     /**
-     * Decodes a URL query string into a Map using the provided charset.
-     * The keys and values in the Map are the parameter names and values from the URL query string.
+     * Decodes a URL-encoded query string into a {@code Map<String, String>} using the specified charset.
+     * <p>
+     * This method parses a URL query string and converts it into a map where keys are parameter names
+     * and values are parameter values. Both '+' characters and '%XX' sequences are decoded using the
+     * specified charset. Parameter names and values are trimmed of whitespace. If a parameter appears
+     * multiple times, only the last occurrence is retained.
+     * </p>
+     * <p>
+     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * </p>
      *
-     * @param urlQuery The URL query string to decode.
-     * @param charset The charset to use for decoding the URL query string.
-     * @return A Map containing parameter names as keys and parameter values as values.
+     * <pre>
+     * Map&lt;String, String&gt; params = URLEncodedUtil.decode("name=%E4%B8%AD%E6%96%87", StandardCharsets.UTF_8);
+     * // params: {name=中文}
+     * </pre>
+     *
+     * @param urlQuery the URL query string to decode, may be {@code null} or empty
+     * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8
+     * @return a {@code LinkedHashMap} containing parameter names as keys and decoded parameter values as values;
+     *         returns an empty map if {@code urlQuery} is {@code null} or empty
+     * @see #decode(String)
+     * @see #decode(String, Charset, Supplier)
+     * @see URLDecoder#decode(String, Charset)
      */
     public static Map<String, String> decode(final String urlQuery, final Charset charset) {
         return decode(urlQuery, charset, Suppliers.of(LinkedHashMap::new));
     }
 
     /**
-     * Decodes a URL query string into a Map using the provided charset and a custom map supplier.
-     * The keys and values in the Map are the parameter names and values from the URL query string.
+     * Decodes a URL-encoded query string into a custom {@code Map} implementation using the specified charset and map supplier.
+     * <p>
+     * This method provides flexibility in choosing the Map implementation (e.g., {@code TreeMap}, {@code HashMap}, etc.)
+     * by accepting a custom supplier. Both '+' characters and '%XX' sequences are decoded using the specified charset.
+     * Parameter names and values are trimmed of whitespace. If a parameter appears multiple times, only the last
+     * occurrence is retained.
+     * </p>
+     * <p>
+     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * </p>
      *
-     * @param <M> The type of the Map to return.
-     * @param urlQuery The URL query string to decode.
-     * @param charset The charset to use for decoding the URL query string.
-     * @param mapSupplier A supplier that provides an instance of the Map to return.
-     * @return A Map containing parameter names as keys and parameter values as values.
+     * <pre>
+     * TreeMap&lt;String, String&gt; params = URLEncodedUtil.decode("b=2&amp;a=1", StandardCharsets.UTF_8, TreeMap::new);
+     * // params: {a=1, b=2} (sorted by key)
+     * </pre>
+     *
+     * @param <M> the type of the Map to return, must extend {@code Map<String, String>}
+     * @param urlQuery the URL query string to decode, may be {@code null} or empty
+     * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8
+     * @param mapSupplier a supplier that provides an instance of the desired Map implementation
+     * @return a Map of type M containing parameter names as keys and decoded parameter values as values;
+     *         returns an empty map (from supplier) if {@code urlQuery} is {@code null} or empty
+     * @see #decode(String, Charset)
      */
     public static <M extends Map<String, String>> M decode(final String urlQuery, final Charset charset, final Supplier<M> mapSupplier) {
         final M result = mapSupplier.get();
@@ -261,25 +313,55 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Decodes a URL query string into a ListMultimap using the default charset.
-     * The keys and values in the ListMultimap are the parameter names and values from the URL query string.
-     * If a parameter name appears multiple times in the query string, all its values will be stored in the ListMultimap.
+     * Decodes a URL-encoded query string into a {@code ListMultimap<String, String>} using the default charset (UTF-8).
+     * <p>
+     * This method parses a URL query string and converts it into a multimap where keys are parameter names
+     * and values are lists of parameter values. Unlike {@link #decode(String)}, this method preserves all
+     * values when a parameter appears multiple times in the query string. Both '+' characters and '%XX'
+     * sequences are decoded. Parameter names and values are trimmed of whitespace.
+     * </p>
+     * <p>
+     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * </p>
      *
-     * @param urlQuery The URL query string to decode.
-     * @return A ListMultimap containing parameter names as keys and parameter values as values.
+     * <pre>
+     * ListMultimap&lt;String, String&gt; params = URLEncodedUtil.decodeToMultimap("color=red&amp;color=blue&amp;size=L");
+     * // params: {color=[red, blue], size=[L]}
+     * </pre>
+     *
+     * @param urlQuery the URL query string to decode (e.g., "color=red&amp;color=blue&amp;size=L"), may be {@code null} or empty
+     * @return a {@code ListMultimap} containing parameter names as keys and lists of decoded parameter values;
+     *         returns an empty multimap if {@code urlQuery} is {@code null} or empty
+     * @see #decodeToMultimap(String, Charset)
+     * @see #decode(String)
      */
     public static ListMultimap<String, String> decodeToMultimap(final String urlQuery) {
         return decodeToMultimap(urlQuery, Charsets.DEFAULT);
     }
 
     /**
-     * Decodes a URL query string into a ListMultimap using the provided charset.
-     * The keys and values in the ListMultimap are the parameter names and values from the URL query string.
-     * If a parameter name appears multiple times in the query string, all its values will be stored in the ListMultimap.
+     * Decodes a URL-encoded query string into a {@code ListMultimap<String, String>} using the specified charset.
+     * <p>
+     * This method parses a URL query string and converts it into a multimap where keys are parameter names
+     * and values are lists of parameter values. Unlike {@link #decode(String, Charset)}, this method preserves
+     * all values when a parameter appears multiple times in the query string. Both '+' characters and '%XX'
+     * sequences are decoded using the specified charset. Parameter names and values are trimmed of whitespace.
+     * </p>
+     * <p>
+     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * </p>
      *
-     * @param urlQuery The URL query string to decode.
-     * @param charset The charset to use for decoding the URL query string.
-     * @return A ListMultimap containing parameter names as keys and parameter values as values.
+     * <pre>
+     * ListMultimap&lt;String, String&gt; params = URLEncodedUtil.decodeToMultimap("tag=java&amp;tag=url", StandardCharsets.UTF_8);
+     * // params: {tag=[java, url]}
+     * </pre>
+     *
+     * @param urlQuery the URL query string to decode, may be {@code null} or empty
+     * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8
+     * @return a {@code ListMultimap} containing parameter names as keys and lists of decoded parameter values;
+     *         returns an empty multimap if {@code urlQuery} is {@code null} or empty
+     * @see #decodeToMultimap(String)
+     * @see #decode(String, Charset)
      */
     public static ListMultimap<String, String> decodeToMultimap(final String urlQuery, final Charset charset) {
         final ListMultimap<String, String> result = N.newLinkedListMultimap();
@@ -314,27 +396,63 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Decodes a URL query string into a bean of the specified type using the default charset.
-     * The keys and values in the object are the parameter names and values from the URL query string.
+     * Decodes a URL-encoded query string into a bean or Map of the specified type using the default charset (UTF-8).
+     * <p>
+     * This method parses a URL query string and populates a JavaBean or Map instance with the decoded parameters.
+     * Parameter names are matched to bean property names (case-sensitive). Values are automatically converted
+     * to the appropriate property types using the bean's property information. Both '+' characters and '%XX'
+     * sequences are decoded. Parameter names and values are trimmed of whitespace.
+     * </p>
+     * <p>
+     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * </p>
      *
-     * @param <T> The type of the object to decode into.
-     * @param urlQuery The URL query string to decode.
-     * @param targetType The bean class of the object to decode into.
-     * @return An object of type T containing parameter names as keys and parameter values as values.
+     * <pre>
+     * class User { String name; int age; }
+     * User user = URLEncodedUtil.decode("name=John&amp;age=30", User.class);
+     * // user: {name="John", age=30}
+     * </pre>
+     *
+     * @param <T> the type of the object to decode into (JavaBean or Map)
+     * @param urlQuery the URL query string to decode, may be {@code null} or empty
+     * @param targetType the class of the bean or Map to create and populate
+     * @return an instance of type T populated with the decoded parameter values;
+     *         returns an empty instance if {@code urlQuery} is {@code null} or empty
+     * @see #decode(String, Charset, Class)
      */
     public static <T> T decode(final String urlQuery, final Class<? extends T> targetType) {
         return decode(urlQuery, Charsets.DEFAULT, targetType);
     }
 
     /**
-     * Decodes a URL query string into a bean of the specified type using the provided charset.
-     * The keys and values in the object are the parameter names and values from the URL query string.
+     * Decodes a URL-encoded query string into a bean or Map of the specified type using the specified charset.
+     * <p>
+     * This method parses a URL query string and populates a JavaBean or Map instance with the decoded parameters.
+     * Parameter names are matched to bean property names (case-sensitive). Values are automatically converted
+     * to the appropriate property types using the bean's property information. Both '+' characters and '%XX'
+     * sequences are decoded using the specified charset. Parameter names and values are trimmed of whitespace.
+     * </p>
+     * <p>
+     * If {@code targetType} is a Map class, this method delegates to {@link #decode(String, Charset, Supplier)}.
+     * Otherwise, it creates and populates a bean instance.
+     * </p>
+     * <p>
+     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * </p>
      *
-     * @param <T> The type of the object to decode into.
-     * @param urlQuery The URL query string to decode.
-     * @param charset The charset to use for decoding the URL query string.
-     * @param targetType The bean class of the object to decode into.
-     * @return An object of type T containing parameter names as keys and parameter values as values.
+     * <pre>
+     * class Product { String name; double price; }
+     * Product p = URLEncodedUtil.decode("name=Laptop&amp;price=999.99", StandardCharsets.UTF_8, Product.class);
+     * // p: {name="Laptop", price=999.99}
+     * </pre>
+     *
+     * @param <T> the type of the object to decode into (JavaBean or Map)
+     * @param urlQuery the URL query string to decode, may be {@code null} or empty
+     * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8
+     * @param targetType the class of the bean or Map to create and populate
+     * @return an instance of type T populated with the decoded parameter values;
+     *         returns an empty instance if {@code urlQuery} is {@code null} or empty
+     * @see #decode(String, Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) {
@@ -387,15 +505,33 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Converts a Map of parameters into a bean of the specified type.
-     * The keys in the Map should correspond to the property names of the bean.
-     * The values in the Map should be String arrays, where each String in the array is a value for the corresponding property in the bean.
-     * If a property in the bean corresponds to multiple values in the Map, the property in the bean should be an array or a collection.
+     * Converts a parameter map (with String array values) into a bean of the specified type.
+     * <p>
+     * This method is typically used to convert HTTP servlet request parameters into a JavaBean.
+     * The keys in the map should correspond to bean property names (case-sensitive). Values are String arrays,
+     * where each array contains one or more values for the corresponding property. If a property has multiple
+     * values and the target property type is {@code String[]}, all values are set. Otherwise, values are joined
+     * with ", " and converted to the property type.
+     * </p>
+     * <p>
+     * If a parameter value is {@code null}, empty, or contains only a single empty string, the property is set
+     * to its default value (as determined by the property type).
+     * </p>
      *
-     * @param <T> The type of the bean to create.
-     * @param parameters The Map of parameters to convert into a bean.
-     * @param targetType The class of the bean to create.
-     * @return A bean of type T with its properties set to the values from the Map.
+     * <pre>
+     * Map&lt;String, String[]&gt; params = new HashMap&lt;&gt;();
+     * params.put("name", new String[]{"Alice"});
+     * params.put("tags", new String[]{"java", "coding"});
+     * User user = URLEncodedUtil.parameters2Bean(params, User.class);
+     * // user: {name="Alice", tags="java, coding"}
+     * </pre>
+     *
+     * @param <T> the type of the bean to create
+     * @param parameters the map of parameters to convert, where keys are property names and values are String arrays;
+     *                   may be {@code null} or empty
+     * @param targetType the class of the bean to create and populate
+     * @return an instance of type T with properties populated from the parameter map;
+     *         returns an empty instance if {@code parameters} is {@code null} or empty
      */
     public static <T> T parameters2Bean(final Map<String, String[]> parameters, final Class<? extends T> targetType) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
@@ -430,36 +566,90 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encodes the provided parameters into a URL query string using the default charset.
-     * The parameters can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
+     * Encodes the provided parameters into a URL-encoded query string using the default charset (UTF-8).
+     * <p>
+     * This method accepts various parameter formats:
+     * <ul>
+     * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs</li>
+     * <li>JavaBean: Bean properties are encoded using lowerCamelCase naming</li>
+     * <li>{@code Object[]}: Pairs of name-value elements (must have even length)</li>
+     * <li>{@code String}: If contains "=", treated as encoded parameters; otherwise encoded as-is</li>
+     * </ul>
+     * Characters are percent-encoded according to application/x-www-form-urlencoded rules, where spaces become '+'.
+     * </p>
      *
-     * @param parameters The parameters to be encoded.
-     * @return A URL query string with the encoded parameters.
+     * <pre>
+     * Map&lt;String, Object&gt; params = Map.of("name", "John Doe", "age", 30);
+     * String query = URLEncodedUtil.encode(params);
+     * // query: "name=John+Doe&amp;age=30"
+     * </pre>
+     *
+     * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}
+     * @return a URL-encoded query string (e.g., "name=John+Doe&amp;age=30"); returns empty string if {@code parameters} is {@code null}
+     * @see #encode(Object, Charset)
+     * @see #encode(Object, Charset, NamingPolicy)
+     * @see URLEncoder#encode(String, String)
      */
     public static String encode(final Object parameters) {
         return encode(parameters, Charsets.DEFAULT);
     }
 
     /**
-     * Encodes the provided parameters into a URL query string using the specified charset.
-     * The parameters can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
+     * Encodes the provided parameters into a URL-encoded query string using the specified charset.
+     * <p>
+     * This method accepts various parameter formats:
+     * <ul>
+     * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs</li>
+     * <li>JavaBean: Bean properties are encoded using lowerCamelCase naming (default)</li>
+     * <li>{@code Object[]}: Pairs of name-value elements (must have even length)</li>
+     * <li>{@code String}: If contains "=", treated as encoded parameters; otherwise encoded as-is</li>
+     * </ul>
+     * Characters are percent-encoded using the specified charset according to application/x-www-form-urlencoded rules.
+     * </p>
      *
-     * @param parameters The parameters to be encoded.
-     * @param charset The charset to use for encoding.
-     * @return A URL query string with the encoded parameters.
+     * <pre>
+     * Map&lt;String, Object&gt; params = Map.of("name", "中文");
+     * String query = URLEncodedUtil.encode(params, StandardCharsets.UTF_8);
+     * // query: "name=%E4%B8%AD%E6%96%87"
+     * </pre>
+     *
+     * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}
+     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8
+     * @return a URL-encoded query string; returns empty string if {@code parameters} is {@code null}
+     * @see #encode(Object)
+     * @see #encode(Object, Charset, NamingPolicy)
+     * @see URLEncoder#encode(String, Charset)
      */
     public static String encode(final Object parameters, final Charset charset) {
         return encode(parameters, charset, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Encodes the provided parameters into a URL query string using the specified charset and naming policy.
-     * The parameters can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
+     * Encodes the provided parameters into a URL-encoded query string using the specified charset and naming policy.
+     * <p>
+     * This method accepts various parameter formats:
+     * <ul>
+     * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs (keys transformed by naming policy)</li>
+     * <li>JavaBean: Bean properties are encoded with names transformed according to the naming policy</li>
+     * <li>{@code Object[]}: Pairs of name-value elements (must have even length; names transformed by naming policy)</li>
+     * <li>{@code String}: If contains "=", treated as encoded parameters; otherwise encoded as-is</li>
+     * </ul>
+     * Characters are percent-encoded using the specified charset according to application/x-www-form-urlencoded rules.
+     * </p>
      *
-     * @param parameters The parameters to be encoded.
-     * @param charset The charset to use for encoding.
-     * @param namingPolicy The naming policy to be used for property names during encoding.
-     * @return A URL query string with the encoded parameters.
+     * <pre>
+     * class User { String firstName; int userAge; }
+     * User user = new User("John", 30);
+     * String query = URLEncodedUtil.encode(user, StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+     * // query: "first_name=John&amp;user_age=30"
+     * </pre>
+     *
+     * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}
+     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8
+     * @param namingPolicy the naming policy to transform property/key names (e.g., LOWER_CAMEL_CASE, UPPER_CASE_WITH_UNDERSCORE);
+     *                     if {@code null} or NO_CHANGE, names are not transformed
+     * @return a URL-encoded query string; returns empty string if {@code parameters} is {@code null}
+     * @see #encode(Object, Charset)
      */
     public static String encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
         if (parameters == null) {
@@ -478,39 +668,80 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encodes the provided parameters into a URL query string using the default charset.
-     * The parameters can be a String URL and an Object which can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
+     * Encodes parameters and appends them to a URL as a query string using the default charset (UTF-8).
+     * <p>
+     * This method takes a base URL and parameters, encodes the parameters according to
+     * application/x-www-form-urlencoded rules, and appends them to the URL with a '?' separator.
+     * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
+     * </p>
      *
-     * @param url The URL to which the encoded parameters will be appended.
-     * @param parameters The parameters to be encoded.
-     * @return A URL query string with the encoded parameters appended to the provided URL.
+     * <pre>
+     * Map&lt;String, Object&gt; params = Map.of("q", "java url encoding", "page", 1);
+     * String fullUrl = URLEncodedUtil.encode("http://search.example.com", params);
+     * // fullUrl: "http://search.example.com?q=java+url+encoding&amp;page=1"
+     * </pre>
+     *
+     * @param url the base URL to which the query string will be appended (e.g., "http://example.com/path")
+     * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}
+     * @return the URL with the encoded query string appended (e.g., "http://example.com/path?name=value");
+     *         returns the original URL if {@code parameters} is {@code null} or empty
+     * @see #encode(String, Object, Charset)
+     * @see #encode(Object)
      */
     public static String encode(final String url, final Object parameters) {
         return encode(url, parameters, Charsets.DEFAULT);
     }
 
     /**
-     * Encodes the provided parameters into a URL query string using the specified charset.
-     * The parameters can be a String URL and an Object which can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
+     * Encodes parameters and appends them to a URL as a query string using the specified charset.
+     * <p>
+     * This method takes a base URL and parameters, encodes the parameters using the specified charset
+     * according to application/x-www-form-urlencoded rules, and appends them to the URL with a '?'
+     * separator. If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
+     * </p>
      *
-     * @param url The URL to which the encoded parameters will be appended.
-     * @param parameters The parameters to be encoded.
-     * @param charset The charset to use for encoding.
-     * @return A URL query string with the encoded parameters appended to the provided URL.
+     * <pre>
+     * Map&lt;String, Object&gt; params = Map.of("name", "中文");
+     * String fullUrl = URLEncodedUtil.encode("http://example.com", params, StandardCharsets.UTF_8);
+     * // fullUrl: "http://example.com?name=%E4%B8%AD%E6%96%87"
+     * </pre>
+     *
+     * @param url the base URL to which the query string will be appended
+     * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}
+     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8
+     * @return the URL with the encoded query string appended;
+     *         returns the original URL if {@code parameters} is {@code null} or empty
+     * @see #encode(String, Object)
+     * @see #encode(String, Object, Charset, NamingPolicy)
      */
     public static String encode(final String url, final Object parameters, final Charset charset) {
         return encode(url, parameters, charset, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Encodes the provided parameters into a URL query string using the specified charset and naming policy.
-     * The parameters can be a String URL and an Object which can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
+     * Encodes parameters and appends them to a URL as a query string using the specified charset and naming policy.
+     * <p>
+     * This method takes a base URL and parameters, encodes the parameters using the specified charset and
+     * naming policy according to application/x-www-form-urlencoded rules, and appends them to the URL with
+     * a '?' separator. Property/key names are transformed according to the naming policy before encoding.
+     * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
+     * </p>
      *
-     * @param url The URL to which the encoded parameters will be appended.
-     * @param parameters The parameters to be encoded.
-     * @param charset The charset to use for encoding.
-     * @param namingPolicy The naming policy to be used for property names during encoding.
-     * @return A URL query string with the encoded parameters appended to the provided URL.
+     * <pre>
+     * class User { String firstName; }
+     * String url = URLEncodedUtil.encode("http://api.com/users", new User("John"),
+     *                                     StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+     * // url: "http://api.com/users?first_name=John"
+     * </pre>
+     *
+     * @param url the base URL to which the query string will be appended
+     * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}
+     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8
+     * @param namingPolicy the naming policy to transform property/key names (e.g., LOWER_CAMEL_CASE, UPPER_CASE_WITH_UNDERSCORE);
+     *                     if {@code null} or NO_CHANGE, names are not transformed
+     * @return the URL with the encoded query string appended;
+     *         returns the original URL if {@code parameters} is {@code null} or empty
+     * @see #encode(String, Object, Charset)
      */
     @SuppressWarnings("rawtypes")
     public static String encode(final String url, final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
@@ -532,39 +763,85 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encodes the provided parameters into a URL query string using the default charset.
-     * The parameters can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
-     * The encoded URL query string is appended to the provided Appendable.
+     * Encodes the provided parameters into a URL-encoded query string and appends the result to an {@code Appendable} using the default charset (UTF-8).
+     * <p>
+     * This method is useful for streaming or building query strings without creating intermediate String objects.
+     * The parameters are encoded according to application/x-www-form-urlencoded rules and directly appended
+     * to the provided output.
+     * </p>
      *
-     * @param parameters The parameters to be encoded.
-     * @param output The Appendable where the encoded URL query string will be appended.
+     * <pre>
+     * StringBuilder sb = new StringBuilder("http://example.com?");
+     * URLEncodedUtil.encode(Map.of("key", "value"), sb);
+     * // sb: "http://example.com?key=value"
+     * </pre>
+     *
+     * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}
+     * @param output the {@code Appendable} (e.g., {@code StringBuilder}, {@code Writer}) to which the encoded query string will be appended
+     * @throws UncheckedIOException if an I/O error occurs while appending to the output
+     * @see #encode(Object, Charset, Appendable)
      */
     public static void encode(final Object parameters, final Appendable output) {
         encode(parameters, Charsets.DEFAULT, output);
     }
 
     /**
-     * Encodes the provided parameters into a URL query string using the specified charset.
-     * The parameters can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
-     * The encoded URL query string is appended to the provided Appendable.
+     * Encodes the provided parameters into a URL-encoded query string and appends the result to an {@code Appendable} using the specified charset.
+     * <p>
+     * This method is useful for streaming or building query strings without creating intermediate String objects.
+     * The parameters are encoded using the specified charset according to application/x-www-form-urlencoded rules
+     * and directly appended to the provided output.
+     * </p>
      *
-     * @param parameters The parameters to be encoded.
-     * @param charset The charset to use for encoding.
-     * @param output The Appendable where the encoded URL query string will be appended.
+     * <pre>
+     * Writer writer = new FileWriter("query.txt");
+     * URLEncodedUtil.encode(Map.of("name", "中文"), StandardCharsets.UTF_8, writer);
+     * // writer content: "name=%E4%B8%AD%E6%96%87"
+     * </pre>
+     *
+     * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}
+     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8
+     * @param output the {@code Appendable} to which the encoded query string will be appended
+     * @throws UncheckedIOException if an I/O error occurs while appending to the output
+     * @see #encode(Object, Charset, NamingPolicy, Appendable)
      */
     public static void encode(final Object parameters, final Charset charset, final Appendable output) {
         encode(parameters, charset, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
-     * Encodes the provided parameters into a URL query string using the specified charset and naming policy.
-     * The parameters can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
-     * The encoded URL query string is appended to the provided Appendable.
+     * Encodes the provided parameters into a URL-encoded query string and appends the result to an {@code Appendable}
+     * using the specified charset and naming policy.
+     * <p>
+     * This method is useful for streaming or building query strings without creating intermediate String objects.
+     * Property/key names are transformed according to the naming policy before being percent-encoded using the
+     * specified charset according to application/x-www-form-urlencoded rules.
+     * </p>
+     * <p>
+     * The method accepts various parameter formats:
+     * <ul>
+     * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs</li>
+     * <li>JavaBean: Bean properties are encoded with names transformed by the naming policy</li>
+     * <li>{@code Object[]}: Pairs of name-value elements (must have even length)</li>
+     * <li>{@code String}: If contains "=", treated as pre-encoded parameters; otherwise encoded as-is</li>
+     * </ul>
+     * </p>
      *
-     * @param parameters The parameters to be encoded.
-     * @param charset The charset to be used for encoding.
-     * @param namingPolicy The naming policy to be used for property names during encoding.
-     * @param output The Appendable where the encoded URL query string will be appended.
+     * <pre>
+     * class User { String firstName; int age; }
+     * StringBuilder sb = new StringBuilder();
+     * URLEncodedUtil.encode(new User("John", 30), StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, sb);
+     * // sb: "first_name=John&amp;age=30"
+     * </pre>
+     *
+     * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}
+     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8
+     * @param namingPolicy the naming policy to transform property/key names (e.g., LOWER_CAMEL_CASE, UPPER_CASE_WITH_UNDERSCORE);
+     *                     if {@code null} or NO_CHANGE, names are not transformed
+     * @param output the {@code Appendable} to which the encoded query string will be appended
+     * @throws UncheckedIOException if an I/O error occurs while appending to the output
+     * @throws IllegalArgumentException if parameters is an Object array with odd length
+     * @see #encode(Object, Charset, Appendable)
      */
     @SuppressWarnings("rawtypes")
     public static void encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy, final Appendable output)
@@ -602,7 +879,7 @@ public final class URLEncodedUtil {
                             "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");
                 }
 
-                for (int i = 0, len = a.length; i < len; i++) {
+                for (int i = 0, len = a.length; i < len; i += 2) {
                     if (i > 0) {
                         output.append(QP_SEP_A);
                     }
@@ -615,7 +892,7 @@ public final class URLEncodedUtil {
 
                     output.append(NAME_VALUE_SEPARATOR);
 
-                    encodeFormFields(N.stringOf(a[++i]), charset, output);
+                    encodeFormFields(N.stringOf(a[i + 1]), charset, output);
                 }
             } else if (parameters instanceof CharSequence source) {
                 final String str = source.toString();

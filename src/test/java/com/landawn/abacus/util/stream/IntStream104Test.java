@@ -13,6 +13,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.IndexedInt;
@@ -22,6 +23,7 @@ import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.u.OptionalInt;
 
+@Tag("new-test")
 public class IntStream104Test extends TestBase {
     @Test
     public void testStreamCreatedAfterFilter() {
@@ -246,10 +248,8 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterShuffled() {
-        // Testing count and skip operations (shuffle doesn't affect count)
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).shuffled().count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).shuffled().skip(1).count());
-        // Testing toArray and toList (elements should be same, just order different)
         int[] shuffledArray = IntStream.of(1, 2, 3, 4, 5).shuffled().toArray();
         assertEquals(5, shuffledArray.length);
         assertHaveSameElements(N.toList(shuffledArray), N.asList(1, 2, 3, 4, 5));
@@ -258,7 +258,6 @@ public class IntStream104Test extends TestBase {
         assertEquals(5, shuffledList.size());
         assertHaveSameElements(shuffledList, N.asList(1, 2, 3, 4, 5));
 
-        // Testing with map
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().skip(1).count());
     }
@@ -266,11 +265,9 @@ public class IntStream104Test extends TestBase {
     @Test
     public void testStreamCreatedAfterShuffledWithRandom() {
         Random rnd = new Random(42);
-        // Testing count and skip operations (shuffle doesn't affect count)
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).shuffled(rnd).count());
         rnd = new Random(42);
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).shuffled(rnd).skip(1).count());
-        // Testing toArray and toList (elements should be same, just order different)
         rnd = new Random(42);
         int[] shuffledArray = IntStream.of(1, 2, 3, 4, 5).shuffled(rnd).toArray();
         assertEquals(5, shuffledArray.length);
@@ -281,7 +278,6 @@ public class IntStream104Test extends TestBase {
         assertEquals(5, shuffledList.size());
         assertHaveSameElements(shuffledList, N.asList(1, 2, 3, 4, 5));
 
-        // Testing with map
         rnd = new Random(42);
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(rnd).count());
         rnd = new Random(42);
@@ -354,7 +350,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterIndexed() {
-        // indexed() returns Stream<IndexedInt>, not IntStream, so we need to test differently
         Stream<IndexedInt> indexedStream = IntStream.of(1, 2, 3, 4, 5).indexed();
         assertEquals(5, indexedStream.count());
 
@@ -375,7 +370,6 @@ public class IntStream104Test extends TestBase {
         assertEquals(0, indexedList.get(0).index());
         assertEquals(1, indexedList.get(0).value());
 
-        // Test with map
         indexedStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).indexed();
         assertEquals(5, indexedStream.count());
 
@@ -416,7 +410,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterMapToChar() {
-        // mapToChar returns CharStream, so we need to test CharStream operations
         CharStream charStream = IntStream.of(65, 66, 67, 68, 69).mapToChar(i -> (char) i);
         assertEquals(5, charStream.count());
 
@@ -435,7 +428,6 @@ public class IntStream104Test extends TestBase {
         charStream = IntStream.of(65, 66, 67, 68, 69).mapToChar(i -> (char) i);
         assertEquals(N.asList('B', 'C', 'D', 'E'), charStream.skip(1).toList());
 
-        // Test with map
         charStream = IntStream.of(65, 66, 67, 68, 69).map(e -> e).mapToChar(i -> (char) i);
         assertEquals(5, charStream.count());
 
@@ -445,7 +437,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterMapToByte() {
-        // mapToByte returns ByteStream, so we need to test ByteStream operations
         ByteStream byteStream = IntStream.of(1, 2, 3, 4, 5).mapToByte(i -> (byte) i);
         assertEquals(5, byteStream.count());
 
@@ -464,7 +455,6 @@ public class IntStream104Test extends TestBase {
         byteStream = IntStream.of(1, 2, 3, 4, 5).mapToByte(i -> (byte) i);
         assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), byteStream.skip(1).toList());
 
-        // Test with map
         byteStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToByte(i -> (byte) i);
         assertEquals(5, byteStream.count());
 
@@ -474,7 +464,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterMapToShort() {
-        // mapToShort returns ShortStream, so we need to test ShortStream operations
         ShortStream shortStream = IntStream.of(1, 2, 3, 4, 5).mapToShort(i -> (short) i);
         assertEquals(5, shortStream.count());
 
@@ -493,7 +482,6 @@ public class IntStream104Test extends TestBase {
         shortStream = IntStream.of(1, 2, 3, 4, 5).mapToShort(i -> (short) i);
         assertEquals(N.asList((short) 2, (short) 3, (short) 4, (short) 5), shortStream.skip(1).toList());
 
-        // Test with map
         shortStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToShort(i -> (short) i);
         assertEquals(5, shortStream.count());
 
@@ -503,7 +491,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterMapToLong() {
-        // mapToLong returns LongStream, so we need to test LongStream operations
         LongStream longStream = IntStream.of(1, 2, 3, 4, 5).mapToLong(i -> (long) i);
         assertEquals(5, longStream.count());
 
@@ -522,7 +509,6 @@ public class IntStream104Test extends TestBase {
         longStream = IntStream.of(1, 2, 3, 4, 5).mapToLong(i -> (long) i);
         assertEquals(N.asList(2L, 3L, 4L, 5L), longStream.skip(1).toList());
 
-        // Test with map
         longStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToLong(i -> (long) i);
         assertEquals(5, longStream.count());
 
@@ -532,7 +518,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterMapToFloat() {
-        // mapToFloat returns FloatStream, so we need to test FloatStream operations
         FloatStream floatStream = IntStream.of(1, 2, 3, 4, 5).mapToFloat(i -> (float) i);
         assertEquals(5, floatStream.count());
 
@@ -551,7 +536,6 @@ public class IntStream104Test extends TestBase {
         floatStream = IntStream.of(1, 2, 3, 4, 5).mapToFloat(i -> (float) i);
         assertEquals(N.asList(2f, 3f, 4f, 5f), floatStream.skip(1).toList());
 
-        // Test with map
         floatStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToFloat(i -> (float) i);
         assertEquals(5, floatStream.count());
 
@@ -561,7 +545,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterMapToDouble() {
-        // mapToDouble returns DoubleStream, so we need to test DoubleStream operations
         DoubleStream doubleStream = IntStream.of(1, 2, 3, 4, 5).mapToDouble(i -> (double) i);
         assertEquals(5, doubleStream.count());
 
@@ -580,7 +563,6 @@ public class IntStream104Test extends TestBase {
         doubleStream = IntStream.of(1, 2, 3, 4, 5).mapToDouble(i -> (double) i);
         assertEquals(N.asList(2.0, 3.0, 4.0, 5.0), doubleStream.skip(1).toList());
 
-        // Test with map
         doubleStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToDouble(i -> (double) i);
         assertEquals(5, doubleStream.count());
 
@@ -590,7 +572,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterMapToObj() {
-        // mapToObj returns Stream<T>, so we need to test Stream operations
         Stream<String> stringStream = IntStream.of(1, 2, 3, 4, 5).mapToObj(i -> "Item" + i);
         assertEquals(5, stringStream.count());
 
@@ -609,7 +590,6 @@ public class IntStream104Test extends TestBase {
         stringStream = IntStream.of(1, 2, 3, 4, 5).mapToObj(i -> "Item" + i);
         assertEquals(N.asList("Item2", "Item3", "Item4", "Item5"), stringStream.skip(1).toList());
 
-        // Test with map
         stringStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToObj(i -> "Item" + i);
         assertEquals(5, stringStream.count());
 
@@ -683,7 +663,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatMapToChar() {
-        // flatMapToChar returns CharStream
         CharStream charStream = IntStream.of(1, 2, 3).flatMapToChar(i -> CharStream.of((char) ('A' + i - 1), (char) ('a' + i - 1)));
         assertEquals(6, charStream.count());
 
@@ -702,7 +681,6 @@ public class IntStream104Test extends TestBase {
         charStream = IntStream.of(1, 2, 3).flatMapToChar(i -> CharStream.of((char) ('A' + i - 1), (char) ('a' + i - 1)));
         assertEquals(N.asList('a', 'B', 'b', 'C', 'c'), charStream.skip(1).toList());
 
-        // Test with map
         charStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToChar(i -> CharStream.of((char) ('A' + i - 1), (char) ('a' + i - 1)));
         assertEquals(6, charStream.count());
 
@@ -712,7 +690,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatMapToByte() {
-        // flatMapToByte returns ByteStream
         ByteStream byteStream = IntStream.of(1, 2, 3).flatMapToByte(i -> ByteStream.of((byte) i, (byte) (i * 10)));
         assertEquals(6, byteStream.count());
 
@@ -731,7 +708,6 @@ public class IntStream104Test extends TestBase {
         byteStream = IntStream.of(1, 2, 3).flatMapToByte(i -> ByteStream.of((byte) i, (byte) (i * 10)));
         assertEquals(N.asList((byte) 10, (byte) 2, (byte) 20, (byte) 3, (byte) 30), byteStream.skip(1).toList());
 
-        // Test with map
         byteStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToByte(i -> ByteStream.of((byte) i, (byte) (i * 10)));
         assertEquals(6, byteStream.count());
 
@@ -741,7 +717,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatMapToShort() {
-        // flatMapToShort returns ShortStream
         ShortStream shortStream = IntStream.of(1, 2, 3).flatMapToShort(i -> ShortStream.of((short) i, (short) (i * 10)));
         assertEquals(6, shortStream.count());
 
@@ -760,7 +735,6 @@ public class IntStream104Test extends TestBase {
         shortStream = IntStream.of(1, 2, 3).flatMapToShort(i -> ShortStream.of((short) i, (short) (i * 10)));
         assertEquals(N.asList((short) 10, (short) 2, (short) 20, (short) 3, (short) 30), shortStream.skip(1).toList());
 
-        // Test with map
         shortStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToShort(i -> ShortStream.of((short) i, (short) (i * 10)));
         assertEquals(6, shortStream.count());
 
@@ -770,7 +744,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatMapToLong() {
-        // flatMapToLong returns LongStream
         LongStream longStream = IntStream.of(1, 2, 3).flatMapToLong(i -> LongStream.of((long) i, (long) (i * 10)));
         assertEquals(6, longStream.count());
 
@@ -789,7 +762,6 @@ public class IntStream104Test extends TestBase {
         longStream = IntStream.of(1, 2, 3).flatMapToLong(i -> LongStream.of((long) i, (long) (i * 10)));
         assertEquals(N.asList(10L, 2L, 20L, 3L, 30L), longStream.skip(1).toList());
 
-        // Test with map
         longStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToLong(i -> LongStream.of((long) i, (long) (i * 10)));
         assertEquals(6, longStream.count());
 
@@ -799,7 +771,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatMapToFloat() {
-        // flatMapToFloat returns FloatStream
         FloatStream floatStream = IntStream.of(1, 2, 3).flatMapToFloat(i -> FloatStream.of((float) i, (float) (i * 10)));
         assertEquals(6, floatStream.count());
 
@@ -818,7 +789,6 @@ public class IntStream104Test extends TestBase {
         floatStream = IntStream.of(1, 2, 3).flatMapToFloat(i -> FloatStream.of((float) i, (float) (i * 10)));
         assertEquals(N.asList(10f, 2f, 20f, 3f, 30f), floatStream.skip(1).toList());
 
-        // Test with map
         floatStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToFloat(i -> FloatStream.of((float) i, (float) (i * 10)));
         assertEquals(6, floatStream.count());
 
@@ -828,7 +798,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatMapToDouble() {
-        // flatMapToDouble returns DoubleStream
         DoubleStream doubleStream = IntStream.of(1, 2, 3).flatMapToDouble(i -> DoubleStream.of((double) i, (double) (i * 10)));
         assertEquals(6, doubleStream.count());
 
@@ -847,7 +816,6 @@ public class IntStream104Test extends TestBase {
         doubleStream = IntStream.of(1, 2, 3).flatMapToDouble(i -> DoubleStream.of((double) i, (double) (i * 10)));
         assertEquals(N.asList(10.0, 2.0, 20.0, 3.0, 30.0), doubleStream.skip(1).toList());
 
-        // Test with map
         doubleStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToDouble(i -> DoubleStream.of((double) i, (double) (i * 10)));
         assertEquals(6, doubleStream.count());
 
@@ -857,7 +825,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatMapToObj() {
-        // flatMapToObj returns Stream<T>
         Stream<String> stringStream = IntStream.of(1, 2, 3).flatMapToObj(i -> Stream.of("A" + i, "B" + i));
         assertEquals(6, stringStream.count());
 
@@ -876,7 +843,6 @@ public class IntStream104Test extends TestBase {
         stringStream = IntStream.of(1, 2, 3).flatMapToObj(i -> Stream.of("A" + i, "B" + i));
         assertEquals(N.asList("B1", "A2", "B2", "A3", "B3"), stringStream.skip(1).toList());
 
-        // Test with map
         stringStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToObj(i -> Stream.of("A" + i, "B" + i));
         assertEquals(6, stringStream.count());
 
@@ -886,7 +852,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatmapToObj() {
-        // flatmapToObj returns Stream<T>
         Stream<String> stringStream = IntStream.of(1, 2, 3).flatmapToObj(i -> Arrays.asList("A" + i, "B" + i));
         assertEquals(6, stringStream.count());
 
@@ -905,7 +870,6 @@ public class IntStream104Test extends TestBase {
         stringStream = IntStream.of(1, 2, 3).flatmapToObj(i -> Arrays.asList("A" + i, "B" + i));
         assertEquals(N.asList("B1", "A2", "B2", "A3", "B3"), stringStream.skip(1).toList());
 
-        // Test with map
         stringStream = IntStream.of(1, 2, 3).map(e -> e).flatmapToObj(i -> Arrays.asList("A" + i, "B" + i));
         assertEquals(6, stringStream.count());
 
@@ -915,7 +879,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlattmapToObj() {
-        // flattmapToObj returns Stream<T>
         Stream<String> stringStream = IntStream.of(1, 2, 3).flattmapToObj(i -> new String[] { "A" + i, "B" + i });
         assertEquals(6, stringStream.count());
 
@@ -934,7 +897,6 @@ public class IntStream104Test extends TestBase {
         stringStream = IntStream.of(1, 2, 3).flattmapToObj(i -> new String[] { "A" + i, "B" + i });
         assertEquals(N.asList("B1", "A2", "B2", "A3", "B3"), stringStream.skip(1).toList());
 
-        // Test with map
         stringStream = IntStream.of(1, 2, 3).map(e -> e).flattmapToObj(i -> new String[] { "A" + i, "B" + i });
         assertEquals(6, stringStream.count());
 
@@ -1109,7 +1071,6 @@ public class IntStream104Test extends TestBase {
         stringStream = IntStream.of(1, 2, 4, 5, 8).rangeMapToObj((first, next) -> next - first <= 1, (first, last) -> first + "-" + last);
         assertEquals(N.asList("4-5", "8-8"), stringStream.skip(1).toList());
 
-        // Test with map
         stringStream = IntStream.of(1, 2, 4, 5, 8).map(e -> e).rangeMapToObj((first, next) -> next - first <= 1, (first, last) -> first + "-" + last);
         assertEquals(3, stringStream.count());
 
@@ -1132,7 +1093,6 @@ public class IntStream104Test extends TestBase {
         assertEquals(IntList.of(5, 6), result.get(1));
         assertEquals(IntList.of(8), result.get(2));
 
-        // Test with map
         listStream = IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((last, next) -> next - last <= 1);
         assertEquals(3, listStream.count());
     }
@@ -1258,7 +1218,6 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterAppendIfEmpty() {
-        // Test with empty stream
         assertEquals(3, IntStream.empty().appendIfEmpty(1, 2, 3).count());
         assertEquals(2, IntStream.empty().appendIfEmpty(1, 2, 3).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3 }, IntStream.empty().appendIfEmpty(1, 2, 3).toArray());
@@ -1266,7 +1225,6 @@ public class IntStream104Test extends TestBase {
         assertEquals(N.asList(1, 2, 3), IntStream.empty().appendIfEmpty(1, 2, 3).toList());
         assertEquals(N.asList(2, 3), IntStream.empty().appendIfEmpty(1, 2, 3).skip(1).toList());
 
-        // Test with non-empty stream
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).appendIfEmpty(6, 7, 8).count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).appendIfEmpty(6, 7, 8).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).appendIfEmpty(6, 7, 8).toArray());
@@ -1332,7 +1290,6 @@ public class IntStream104Test extends TestBase {
         assertEquals(N.asList(2, 3, 4, 5, 6),
                 IntStream.of(1, 3, 5).mergeWith(streamB, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).skip(1).toList());
 
-        // Test with map
         streamB = IntStream.of(2, 4, 6);
         assertEquals(6, IntStream.of(1, 3, 5).map(e -> e).mergeWith(streamB, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).count());
 
@@ -1361,7 +1318,6 @@ public class IntStream104Test extends TestBase {
         streamB = IntStream.of(10, 20, 30);
         assertEquals(N.asList(22, 33), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, (a, b) -> a + b).skip(1).toList());
 
-        // Test with map
         streamB = IntStream.of(10, 20, 30);
         assertEquals(3, IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, (a, b) -> a + b).count());
 
@@ -1395,7 +1351,6 @@ public class IntStream104Test extends TestBase {
         streamC = IntStream.of(100, 200, 300);
         assertEquals(N.asList(222, 333), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, streamC, (a, b, c) -> a + b + c).skip(1).toList());
 
-        // Test with map
         streamB = IntStream.of(10, 20, 30);
         streamC = IntStream.of(100, 200, 300);
         assertEquals(3, IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, streamC, (a, b, c) -> a + b + c).count());
@@ -1425,7 +1380,6 @@ public class IntStream104Test extends TestBase {
         streamB = IntStream.of(10, 20);
         assertEquals(N.asList(22, 103, 104, 105), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, 0, 100, (a, b) -> a + b).skip(1).toList());
 
-        // Test with map
         streamB = IntStream.of(10, 20);
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, 0, 100, (a, b) -> a + b).count());
 
@@ -1461,7 +1415,6 @@ public class IntStream104Test extends TestBase {
         streamC = IntStream.of(100);
         assertEquals(N.asList(522, 553, 554, 555), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, streamC, 0, 50, 500, (a, b, c) -> a + b + c).skip(1).toList());
 
-        // Test with map
         streamB = IntStream.of(10, 20);
         streamC = IntStream.of(100);
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, streamC, 0, 50, 500, (a, b, c) -> a + b + c).count());
@@ -1492,7 +1445,6 @@ public class IntStream104Test extends TestBase {
         longStream = IntStream.of(1, 2, 3, 4, 5).asLongStream();
         assertEquals(N.asList(2L, 3L, 4L, 5L), longStream.skip(1).toList());
 
-        // Test with map
         longStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).asLongStream();
         assertEquals(5, longStream.count());
 
@@ -1520,7 +1472,6 @@ public class IntStream104Test extends TestBase {
         floatStream = IntStream.of(1, 2, 3, 4, 5).asFloatStream();
         assertEquals(N.asList(2f, 3f, 4f, 5f), floatStream.skip(1).toList());
 
-        // Test with map
         floatStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).asFloatStream();
         assertEquals(5, floatStream.count());
 
@@ -1548,7 +1499,6 @@ public class IntStream104Test extends TestBase {
         doubleStream = IntStream.of(1, 2, 3, 4, 5).asDoubleStream();
         assertEquals(N.asList(2.0, 3.0, 4.0, 5.0), doubleStream.skip(1).toList());
 
-        // Test with map
         doubleStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).asDoubleStream();
         assertEquals(5, doubleStream.count());
 
@@ -1576,7 +1526,6 @@ public class IntStream104Test extends TestBase {
         boxedStream = IntStream.of(1, 2, 3, 4, 5).boxed();
         assertEquals(Arrays.asList(2, 3, 4, 5), boxedStream.skip(1).toList());
 
-        // Test with map
         boxedStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).boxed();
         assertEquals(5, boxedStream.count());
 
@@ -1604,7 +1553,6 @@ public class IntStream104Test extends TestBase {
         jdkStream = IntStream.of(1, 2, 3, 4, 5).toJdkStream();
         assertEquals(Arrays.asList(2, 3, 4, 5), jdkStream.skip(1).boxed().collect(java.util.stream.Collectors.toList()));
 
-        // Test with map
         jdkStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).toJdkStream();
         assertEquals(5, jdkStream.count());
 
@@ -1643,8 +1591,6 @@ public class IntStream104Test extends TestBase {
         assertEquals(N.asList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).toList());
         assertEquals(N.asList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).skip(1).toList());
     }
-
-    // Tests for static methods
 
     @Test
     public void testStreamCreatedFromEmpty() {
@@ -1732,7 +1678,6 @@ public class IntStream104Test extends TestBase {
         assertEquals(N.asList(5), IntStream.ofNullable(5).map(e -> e).toList());
         assertEquals(N.asList(), IntStream.ofNullable(5).map(e -> e).skip(1).toList());
 
-        // Test with null
         assertEquals(0, IntStream.ofNullable(null).count());
         assertEquals(0, IntStream.ofNullable(null).skip(1).count());
         assertArrayEquals(new int[] {}, IntStream.ofNullable(null).toArray());
@@ -1880,7 +1825,6 @@ public class IntStream104Test extends TestBase {
         assertEquals(N.asList(5), IntStream.of(op).map(e -> e).toList());
         assertEquals(N.asList(), IntStream.of(op).map(e -> e).skip(1).toList());
 
-        // Test with empty optional
         op = OptionalInt.empty();
         assertEquals(0, IntStream.of(op).count());
         assertEquals(0, IntStream.of(op).skip(1).count());
@@ -1906,7 +1850,6 @@ public class IntStream104Test extends TestBase {
         assertEquals(N.asList(5), IntStream.of(op).map(e -> e).toList());
         assertEquals(N.asList(), IntStream.of(op).map(e -> e).skip(1).toList());
 
-        // Test with empty optional
         op = java.util.OptionalInt.empty();
         assertEquals(0, IntStream.of(op).count());
         assertEquals(0, IntStream.of(op).skip(1).count());
@@ -1971,8 +1914,6 @@ public class IntStream104Test extends TestBase {
         assertEquals(N.asList(72, 101, 108, 108, 111), IntStream.ofCodePoints(str).map(e -> e).toList());
         assertEquals(N.asList(101, 108, 108, 111), IntStream.ofCodePoints(str).map(e -> e).skip(1).toList());
     }
-
-    // Tests for remaining static methods (splitByChunkCount through merge)
 
     @Test
     public void testStreamCreatedFromSplitByChunkCount() {

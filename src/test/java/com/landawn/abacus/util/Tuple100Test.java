@@ -9,37 +9,34 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
 
+@Tag("new-test")
 public class Tuple100Test extends TestBase {
 
     @Test
     public void testOf() {
-        // Test Tuple1
         Tuple.Tuple1<String> t1 = Tuple.of("a");
         Assertions.assertEquals("a", t1._1);
 
-        // Test Tuple2
         Tuple.Tuple2<String, Integer> t2 = Tuple.of("a", 1);
         Assertions.assertEquals("a", t2._1);
         Assertions.assertEquals(1, t2._2);
 
-        // Test Tuple3
         Tuple.Tuple3<String, Integer, Boolean> t3 = Tuple.of("a", 1, true);
         Assertions.assertEquals("a", t3._1);
         Assertions.assertEquals(1, t3._2);
         Assertions.assertEquals(true, t3._3);
 
-        // Test Tuple4
         Tuple.Tuple4<String, Integer, Boolean, Double> t4 = Tuple.of("a", 1, true, 2.0);
         Assertions.assertEquals("a", t4._1);
         Assertions.assertEquals(1, t4._2);
         Assertions.assertEquals(true, t4._3);
         Assertions.assertEquals(2.0, t4._4);
 
-        // Test Tuple5
         Tuple.Tuple5<String, Integer, Boolean, Double, Long> t5 = Tuple.of("a", 1, true, 2.0, 3L);
         Assertions.assertEquals("a", t5._1);
         Assertions.assertEquals(1, t5._2);
@@ -47,7 +44,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(2.0, t5._4);
         Assertions.assertEquals(3L, t5._5);
 
-        // Test Tuple6
         Tuple.Tuple6<String, Integer, Boolean, Double, Long, Character> t6 = Tuple.of("a", 1, true, 2.0, 3L, 'x');
         Assertions.assertEquals("a", t6._1);
         Assertions.assertEquals(1, t6._2);
@@ -56,7 +52,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(3L, t6._5);
         Assertions.assertEquals('x', t6._6);
 
-        // Test Tuple7
         Tuple.Tuple7<String, Integer, Boolean, Double, Long, Character, Float> t7 = Tuple.of("a", 1, true, 2.0, 3L, 'x', 4.0f);
         Assertions.assertEquals("a", t7._1);
         Assertions.assertEquals(1, t7._2);
@@ -66,7 +61,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals('x', t7._6);
         Assertions.assertEquals(4.0f, t7._7);
 
-        // Test Tuple8
         Tuple.Tuple8<String, Integer, Boolean, Double, Long, Character, Float, Byte> t8 = Tuple.of("a", 1, true, 2.0, 3L, 'x', 4.0f, (byte) 5);
         Assertions.assertEquals("a", t8._1);
         Assertions.assertEquals(1, t8._2);
@@ -77,7 +71,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(4.0f, t8._7);
         Assertions.assertEquals((byte) 5, t8._8);
 
-        // Test Tuple9
         Tuple.Tuple9<String, Integer, Boolean, Double, Long, Character, Float, Byte, Short> t9 = Tuple.of("a", 1, true, 2.0, 3L, 'x', 4.0f, (byte) 5,
                 (short) 6);
         Assertions.assertEquals("a", t9._1);
@@ -102,34 +95,28 @@ public class Tuple100Test extends TestBase {
 
     @Test
     public void testCreateFromArray() {
-        // Test empty array
         Object[] emptyArray = new Object[0];
         Tuple<?> t0 = Tuple.create(emptyArray);
         Assertions.assertEquals(0, t0.arity());
 
-        // Test null array
         Tuple<?> tNull = Tuple.create((Object[]) null);
         Assertions.assertEquals(0, tNull.arity());
 
-        // Test array with 1 element
         Object[] array1 = { "a" };
         Tuple.Tuple1<Object> t1 = Tuple.create(array1);
         Assertions.assertEquals("a", t1._1);
 
-        // Test array with 2 elements
         Object[] array2 = { "a", 1 };
         Tuple.Tuple2<Object, Object> t2 = Tuple.create(array2);
         Assertions.assertEquals("a", t2._1);
         Assertions.assertEquals(1, t2._2);
 
-        // Test array with 3 elements
         Object[] array3 = { "a", 1, true };
         Tuple.Tuple3<Object, Object, Object> t3 = Tuple.create(array3);
         Assertions.assertEquals("a", t3._1);
         Assertions.assertEquals(1, t3._2);
         Assertions.assertEquals(true, t3._3);
 
-        // Test array with 4 elements
         Object[] array4 = { "a", 1, true, 2.0 };
         Tuple.Tuple4<Object, Object, Object, Object> t4 = Tuple.create(array4);
         Assertions.assertEquals("a", t4._1);
@@ -137,7 +124,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(true, t4._3);
         Assertions.assertEquals(2.0, t4._4);
 
-        // Test array with 5 elements
         Object[] array5 = { "a", 1, true, 2.0, 3L };
         Tuple.Tuple5<Object, Object, Object, Object, Object> t5 = Tuple.create(array5);
         Assertions.assertEquals("a", t5._1);
@@ -146,7 +132,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(2.0, t5._4);
         Assertions.assertEquals(3L, t5._5);
 
-        // Test array with 6 elements
         Object[] array6 = { "a", 1, true, 2.0, 3L, 'x' };
         Tuple.Tuple6<Object, Object, Object, Object, Object, Object> t6 = Tuple.create(array6);
         Assertions.assertEquals("a", t6._1);
@@ -156,7 +141,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(3L, t6._5);
         Assertions.assertEquals('x', t6._6);
 
-        // Test array with 7 elements
         Object[] array7 = { "a", 1, true, 2.0, 3L, 'x', 4.0f };
         Tuple.Tuple7<Object, Object, Object, Object, Object, Object, Object> t7 = Tuple.create(array7);
         Assertions.assertEquals("a", t7._1);
@@ -167,7 +151,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals('x', t7._6);
         Assertions.assertEquals(4.0f, t7._7);
 
-        // Test array with 8 elements
         Object[] array8 = { "a", 1, true, 2.0, 3L, 'x', 4.0f, (byte) 5 };
         Tuple.Tuple8<Object, Object, Object, Object, Object, Object, Object, Object> t8 = Tuple.create(array8);
         Assertions.assertEquals("a", t8._1);
@@ -179,7 +162,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(4.0f, t8._7);
         Assertions.assertEquals((byte) 5, t8._8);
 
-        // Test array with 9 elements
         Object[] array9 = { "a", 1, true, 2.0, 3L, 'x', 4.0f, (byte) 5, (short) 6 };
         Tuple.Tuple9<Object, Object, Object, Object, Object, Object, Object, Object, Object> t9 = Tuple.create(array9);
         Assertions.assertEquals("a", t9._1);
@@ -192,41 +174,34 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals((byte) 5, t9._8);
         Assertions.assertEquals((short) 6, t9._9);
 
-        // Test array with too many elements
         Object[] arrayTooMany = new Object[10];
         Assertions.assertThrows(IllegalArgumentException.class, () -> Tuple.create(arrayTooMany));
     }
 
     @Test
     public void testCreateFromCollection() {
-        // Test empty collection
         List<Object> emptyList = new ArrayList<>();
         Tuple<?> t0 = Tuple.create(emptyList);
         Assertions.assertEquals(0, t0.arity());
 
-        // Test null collection
         Tuple<?> tNull = Tuple.create((List<Object>) null);
         Assertions.assertEquals(0, tNull.arity());
 
-        // Test collection with 1 element
         List<Object> list1 = Arrays.asList("a");
         Tuple.Tuple1<Object> t1 = Tuple.create(list1);
         Assertions.assertEquals("a", t1._1);
 
-        // Test collection with 2 elements
         List<Object> list2 = Arrays.asList("a", 1);
         Tuple.Tuple2<Object, Object> t2 = Tuple.create(list2);
         Assertions.assertEquals("a", t2._1);
         Assertions.assertEquals(1, t2._2);
 
-        // Test collection with 3 elements
         List<Object> list3 = Arrays.asList("a", 1, true);
         Tuple.Tuple3<Object, Object, Object> t3 = Tuple.create(list3);
         Assertions.assertEquals("a", t3._1);
         Assertions.assertEquals(1, t3._2);
         Assertions.assertEquals(true, t3._3);
 
-        // Test collection with 4 elements
         List<Object> list4 = Arrays.asList("a", 1, true, 2.0);
         Tuple.Tuple4<Object, Object, Object, Object> t4 = Tuple.create(list4);
         Assertions.assertEquals("a", t4._1);
@@ -234,7 +209,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(true, t4._3);
         Assertions.assertEquals(2.0, t4._4);
 
-        // Test collection with 5 elements
         List<Object> list5 = Arrays.asList("a", 1, true, 2.0, 3L);
         Tuple.Tuple5<Object, Object, Object, Object, Object> t5 = Tuple.create(list5);
         Assertions.assertEquals("a", t5._1);
@@ -243,7 +217,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(2.0, t5._4);
         Assertions.assertEquals(3L, t5._5);
 
-        // Test collection with 6 elements
         List<Object> list6 = Arrays.asList("a", 1, true, 2.0, 3L, 'x');
         Tuple.Tuple6<Object, Object, Object, Object, Object, Object> t6 = Tuple.create(list6);
         Assertions.assertEquals("a", t6._1);
@@ -253,7 +226,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(3L, t6._5);
         Assertions.assertEquals('x', t6._6);
 
-        // Test collection with 7 elements
         List<Object> list7 = Arrays.asList("a", 1, true, 2.0, 3L, 'x', 4.0f);
         Tuple.Tuple7<Object, Object, Object, Object, Object, Object, Object> t7 = Tuple.create(list7);
         Assertions.assertEquals("a", t7._1);
@@ -264,7 +236,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals('x', t7._6);
         Assertions.assertEquals(4.0f, t7._7);
 
-        // Test collection with 8 elements
         List<Object> list8 = Arrays.asList("a", 1, true, 2.0, 3L, 'x', 4.0f, (byte) 5);
         Tuple.Tuple8<Object, Object, Object, Object, Object, Object, Object, Object> t8 = Tuple.create(list8);
         Assertions.assertEquals("a", t8._1);
@@ -276,7 +247,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(4.0f, t8._7);
         Assertions.assertEquals((byte) 5, t8._8);
 
-        // Test collection with 9 elements
         List<Object> list9 = Arrays.asList("a", 1, true, 2.0, 3L, 'x', 4.0f, (byte) 5, (short) 6);
         Tuple.Tuple9<Object, Object, Object, Object, Object, Object, Object, Object, Object> t9 = Tuple.create(list9);
         Assertions.assertEquals("a", t9._1);
@@ -289,27 +259,23 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals((byte) 5, t9._8);
         Assertions.assertEquals((short) 6, t9._9);
 
-        // Test collection with too many elements
         List<Object> listTooMany = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         Assertions.assertThrows(IllegalArgumentException.class, () -> Tuple.create(listTooMany));
     }
 
     @Test
     public void testToList() {
-        // Test Tuple1
         Tuple.Tuple1<String> t1 = Tuple.of("a");
         List<String> list1 = Tuple.toList(t1);
         Assertions.assertEquals(1, list1.size());
         Assertions.assertEquals("a", list1.get(0));
 
-        // Test Tuple2
         Tuple.Tuple2<String, String> t2 = Tuple.of("a", "b");
         List<String> list2 = Tuple.toList(t2);
         Assertions.assertEquals(2, list2.size());
         Assertions.assertEquals("a", list2.get(0));
         Assertions.assertEquals("b", list2.get(1));
 
-        // Test Tuple3
         Tuple.Tuple3<String, String, String> t3 = Tuple.of("a", "b", "c");
         List<String> list3 = Tuple.toList(t3);
         Assertions.assertEquals(3, list3.size());
@@ -317,7 +283,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals("b", list3.get(1));
         Assertions.assertEquals("c", list3.get(2));
 
-        // Test Tuple4
         Tuple.Tuple4<String, String, String, String> t4 = Tuple.of("a", "b", "c", "d");
         List<String> list4 = Tuple.toList(t4);
         Assertions.assertEquals(4, list4.size());
@@ -326,7 +291,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals("c", list4.get(2));
         Assertions.assertEquals("d", list4.get(3));
 
-        // Test Tuple5
         Tuple.Tuple5<String, String, String, String, String> t5 = Tuple.of("a", "b", "c", "d", "e");
         List<String> list5 = Tuple.toList(t5);
         Assertions.assertEquals(5, list5.size());
@@ -336,7 +300,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals("d", list5.get(3));
         Assertions.assertEquals("e", list5.get(4));
 
-        // Test Tuple6
         Tuple.Tuple6<String, String, String, String, String, String> t6 = Tuple.of("a", "b", "c", "d", "e", "f");
         List<String> list6 = Tuple.toList(t6);
         Assertions.assertEquals(6, list6.size());
@@ -347,7 +310,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals("e", list6.get(4));
         Assertions.assertEquals("f", list6.get(5));
 
-        // Test Tuple7
         Tuple.Tuple7<String, String, String, String, String, String, String> t7 = Tuple.of("a", "b", "c", "d", "e", "f", "g");
         List<String> list7 = Tuple.toList(t7);
         Assertions.assertEquals(7, list7.size());
@@ -359,7 +321,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals("f", list7.get(5));
         Assertions.assertEquals("g", list7.get(6));
 
-        // Test Tuple8
         Tuple.Tuple8<String, String, String, String, String, String, String, String> t8 = Tuple.of("a", "b", "c", "d", "e", "f", "g", "h");
         List<String> list8 = Tuple.toList(t8);
         Assertions.assertEquals(8, list8.size());
@@ -372,7 +333,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals("g", list8.get(6));
         Assertions.assertEquals("h", list8.get(7));
 
-        // Test Tuple9
         Tuple.Tuple9<String, String, String, String, String, String, String, String, String> t9 = Tuple.of("a", "b", "c", "d", "e", "f", "g", "h", "i");
         List<String> list9 = Tuple.toList(t9);
         Assertions.assertEquals(9, list9.size());
@@ -389,7 +349,6 @@ public class Tuple100Test extends TestBase {
 
     @Test
     public void testFlatten() {
-        // Test flatten Tuple2<Tuple2<T1, T2>, T3> to Tuple3<T1, T2, T3>
         Tuple.Tuple2<String, Integer> inner2 = Tuple.of("a", 1);
         Tuple.Tuple2<Tuple.Tuple2<String, Integer>, Boolean> nested2 = Tuple.of(inner2, true);
         Tuple.Tuple3<String, Integer, Boolean> flattened3 = Tuple.flatten(nested2);
@@ -398,7 +357,6 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(1, flattened3._2);
         Assertions.assertEquals(true, flattened3._3);
 
-        // Test flatten Tuple3<Tuple3<T1, T2, T3>, T4, T5> to Tuple5<T1, T2, T3, T4, T5>
         Tuple.Tuple3<String, Integer, Boolean> inner3 = Tuple.of("a", 1, true);
         Tuple.Tuple3<Tuple.Tuple3<String, Integer, Boolean>, Double, Long> nested3 = Tuple.of(inner3, 2.0, 3L);
         Tuple.Tuple5<String, Integer, Boolean, Double, Long> flattened5 = Tuple.flatten(nested3);
@@ -570,19 +528,16 @@ public class Tuple100Test extends TestBase {
         public void testToArrayWithParameter() {
             Tuple.Tuple1<String> t1 = Tuple.of("test");
 
-            // Test with smaller array
             String[] smallArray = new String[0];
             String[] result1 = t1.toArray(smallArray);
             Assertions.assertEquals(1, result1.length);
             Assertions.assertEquals("test", result1[0]);
 
-            // Test with exact size array
             String[] exactArray = new String[1];
             String[] result2 = t1.toArray(exactArray);
             Assertions.assertSame(exactArray, result2);
             Assertions.assertEquals("test", result2[0]);
 
-            // Test with larger array
             String[] largeArray = new String[3];
             largeArray[1] = "existing";
             largeArray[2] = "values";
@@ -618,9 +573,8 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(t1a.hashCode(), t1b.hashCode());
             Assertions.assertNotEquals(t1a.hashCode(), t1c.hashCode());
 
-            // Test null value
             int nullHash = t1Null.hashCode();
-            Assertions.assertTrue(nullHash >= 0 || nullHash < 0); // Just ensure it doesn't throw
+            Assertions.assertTrue(nullHash >= 0 || nullHash < 0);
         }
 
         @Test
@@ -631,22 +585,17 @@ public class Tuple100Test extends TestBase {
             Tuple.Tuple1<String> t1Null1 = Tuple.of(null);
             Tuple.Tuple1<String> t1Null2 = Tuple.of(null);
 
-            // Test same instance
             Assertions.assertTrue(t1a.equals(t1a));
 
-            // Test equal values
             Assertions.assertTrue(t1a.equals(t1b));
             Assertions.assertTrue(t1b.equals(t1a));
 
-            // Test different values
             Assertions.assertFalse(t1a.equals(t1c));
             Assertions.assertFalse(t1c.equals(t1a));
 
-            // Test null values
             Assertions.assertTrue(t1Null1.equals(t1Null2));
             Assertions.assertFalse(t1a.equals(t1Null1));
 
-            // Test different types
             Assertions.assertFalse(t1a.equals("test"));
             Assertions.assertFalse(t1a.equals(null));
             Assertions.assertFalse(t1a.equals(Tuple.of("test", "test")));
@@ -743,21 +692,18 @@ public class Tuple100Test extends TestBase {
         public void testToArrayWithParameter() {
             Tuple.Tuple2<String, Integer> t2 = Tuple.of("test", 123);
 
-            // Test with smaller array
             Object[] smallArray = new Object[1];
             Object[] result1 = t2.toArray(smallArray);
             Assertions.assertEquals(2, result1.length);
             Assertions.assertEquals("test", result1[0]);
             Assertions.assertEquals(123, result1[1]);
 
-            // Test with exact size array
             Object[] exactArray = new Object[2];
             Object[] result2 = t2.toArray(exactArray);
             Assertions.assertSame(exactArray, result2);
             Assertions.assertEquals("test", result2[0]);
             Assertions.assertEquals(123, result2[1]);
 
-            // Test with larger array
             Object[] largeArray = new Object[4];
             largeArray[2] = "existing";
             largeArray[3] = "values";
@@ -866,22 +812,17 @@ public class Tuple100Test extends TestBase {
             Tuple.Tuple2<String, Integer> t2d = Tuple.of("test", 456);
             Tuple.Tuple2<String, Integer> t2Null = Tuple.of(null, null);
 
-            // Test same instance
             Assertions.assertTrue(t2a.equals(t2a));
 
-            // Test equal values
             Assertions.assertTrue(t2a.equals(t2b));
             Assertions.assertTrue(t2b.equals(t2a));
 
-            // Test different values
             Assertions.assertFalse(t2a.equals(t2c));
             Assertions.assertFalse(t2a.equals(t2d));
 
-            // Test null values
             Assertions.assertTrue(t2Null.equals(Tuple.of(null, null)));
             Assertions.assertFalse(t2a.equals(t2Null));
 
-            // Test different types
             Assertions.assertFalse(t2a.equals("test"));
             Assertions.assertFalse(t2a.equals(null));
             Assertions.assertFalse(t2a.equals(Tuple.of("test")));
@@ -987,7 +928,6 @@ public class Tuple100Test extends TestBase {
         public void testToArrayWithParameter() {
             Tuple.Tuple3<String, Integer, Boolean> t3 = Tuple.of("test", 123, true);
 
-            // Test with smaller array
             Object[] smallArray = new Object[2];
             Object[] result1 = t3.toArray(smallArray);
             Assertions.assertEquals(3, result1.length);
@@ -995,7 +935,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(123, result1[1]);
             Assertions.assertEquals(true, result1[2]);
 
-            // Test with exact size array
             Object[] exactArray = new Object[3];
             Object[] result2 = t3.toArray(exactArray);
             Assertions.assertSame(exactArray, result2);
@@ -1003,7 +942,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(123, result2[1]);
             Assertions.assertEquals(true, result2[2]);
 
-            // Test with larger array
             Object[] largeArray = new Object[5];
             largeArray[3] = "existing";
             largeArray[4] = "values";
@@ -1112,23 +1050,18 @@ public class Tuple100Test extends TestBase {
             Tuple.Tuple3<String, Integer, Boolean> t3e = Tuple.of("test", 123, false);
             Tuple.Tuple3<String, Integer, Boolean> t3Null = Tuple.of(null, null, null);
 
-            // Test same instance
             Assertions.assertTrue(t3a.equals(t3a));
 
-            // Test equal values
             Assertions.assertTrue(t3a.equals(t3b));
             Assertions.assertTrue(t3b.equals(t3a));
 
-            // Test different values
             Assertions.assertFalse(t3a.equals(t3c));
             Assertions.assertFalse(t3a.equals(t3d));
             Assertions.assertFalse(t3a.equals(t3e));
 
-            // Test null values
             Assertions.assertTrue(t3Null.equals(Tuple.of(null, null, null)));
             Assertions.assertFalse(t3a.equals(t3Null));
 
-            // Test different types
             Assertions.assertFalse(t3a.equals("test"));
             Assertions.assertFalse(t3a.equals(null));
             Assertions.assertFalse(t3a.equals(Tuple.of("test", 123)));
@@ -1246,7 +1179,6 @@ public class Tuple100Test extends TestBase {
         public void testToArrayWithParameter() {
             Tuple.Tuple4<String, Integer, Boolean, Double> t4 = Tuple.of("test", 123, true, 3.14);
 
-            // Test with smaller array
             Object[] smallArray = new Object[2];
             Object[] result1 = t4.toArray(smallArray);
             Assertions.assertEquals(4, result1.length);
@@ -1255,7 +1187,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(true, result1[2]);
             Assertions.assertEquals(3.14, result1[3]);
 
-            // Test with exact size array
             Object[] exactArray = new Object[4];
             Object[] result2 = t4.toArray(exactArray);
             Assertions.assertSame(exactArray, result2);
@@ -1264,7 +1195,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(true, result2[2]);
             Assertions.assertEquals(3.14, result2[3]);
 
-            // Test with larger array
             Object[] largeArray = new Object[6];
             largeArray[4] = "existing";
             largeArray[5] = "values";
@@ -1333,24 +1263,19 @@ public class Tuple100Test extends TestBase {
             Tuple.Tuple4<String, Integer, Boolean, Double> t4f = Tuple.of("test", 123, true, 2.71);
             Tuple.Tuple4<String, Integer, Boolean, Double> t4Null = Tuple.of(null, null, null, null);
 
-            // Test same instance
             Assertions.assertTrue(t4a.equals(t4a));
 
-            // Test equal values
             Assertions.assertTrue(t4a.equals(t4b));
             Assertions.assertTrue(t4b.equals(t4a));
 
-            // Test different values
             Assertions.assertFalse(t4a.equals(t4c));
             Assertions.assertFalse(t4a.equals(t4d));
             Assertions.assertFalse(t4a.equals(t4e));
             Assertions.assertFalse(t4a.equals(t4f));
 
-            // Test null values
             Assertions.assertTrue(t4Null.equals(Tuple.of(null, null, null, null)));
             Assertions.assertFalse(t4a.equals(t4Null));
 
-            // Test different types
             Assertions.assertFalse(t4a.equals("test"));
             Assertions.assertFalse(t4a.equals(null));
             Assertions.assertFalse(t4a.equals(Tuple.of("test", 123, true)));
@@ -1480,7 +1405,6 @@ public class Tuple100Test extends TestBase {
         public void testToArrayWithParameter() {
             Tuple.Tuple5<String, Integer, Boolean, Double, Long> t5 = Tuple.of("test", 123, true, 3.14, 999L);
 
-            // Test with smaller array
             Object[] smallArray = new Object[3];
             Object[] result1 = t5.toArray(smallArray);
             Assertions.assertEquals(5, result1.length);
@@ -1490,7 +1414,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(3.14, result1[3]);
             Assertions.assertEquals(999L, result1[4]);
 
-            // Test with exact size array
             Object[] exactArray = new Object[5];
             Object[] result2 = t5.toArray(exactArray);
             Assertions.assertSame(exactArray, result2);
@@ -1500,7 +1423,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(3.14, result2[3]);
             Assertions.assertEquals(999L, result2[4]);
 
-            // Test with larger array
             Object[] largeArray = new Object[7];
             largeArray[5] = "existing";
             largeArray[6] = "values";
@@ -1575,25 +1497,20 @@ public class Tuple100Test extends TestBase {
             Tuple.Tuple5<String, Integer, Boolean, Double, Long> t5g = Tuple.of("test", 123, true, 3.14, 777L);
             Tuple.Tuple5<String, Integer, Boolean, Double, Long> t5Null = Tuple.of(null, null, null, null, null);
 
-            // Test same instance
             Assertions.assertTrue(t5a.equals(t5a));
 
-            // Test equal values
             Assertions.assertTrue(t5a.equals(t5b));
             Assertions.assertTrue(t5b.equals(t5a));
 
-            // Test different values
             Assertions.assertFalse(t5a.equals(t5c));
             Assertions.assertFalse(t5a.equals(t5d));
             Assertions.assertFalse(t5a.equals(t5e));
             Assertions.assertFalse(t5a.equals(t5f));
             Assertions.assertFalse(t5a.equals(t5g));
 
-            // Test null values
             Assertions.assertTrue(t5Null.equals(Tuple.of(null, null, null, null, null)));
             Assertions.assertFalse(t5a.equals(t5Null));
 
-            // Test different types
             Assertions.assertFalse(t5a.equals("test"));
             Assertions.assertFalse(t5a.equals(null));
             Assertions.assertFalse(t5a.equals(Tuple.of("test", 123, true, 3.14)));
@@ -1720,7 +1637,6 @@ public class Tuple100Test extends TestBase {
         public void testToArrayWithParameter() {
             Tuple.Tuple6<String, Integer, Boolean, Double, Long, Character> t6 = Tuple.of("test", 123, true, 3.14, 999L, 'x');
 
-            // Test with smaller array
             Object[] smallArray = new Object[3];
             Object[] result1 = t6.toArray(smallArray);
             Assertions.assertEquals(6, result1.length);
@@ -1731,7 +1647,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(999L, result1[4]);
             Assertions.assertEquals('x', result1[5]);
 
-            // Test with exact size array
             Object[] exactArray = new Object[6];
             Object[] result2 = t6.toArray(exactArray);
             Assertions.assertSame(exactArray, result2);
@@ -1742,7 +1657,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(999L, result2[4]);
             Assertions.assertEquals('x', result2[5]);
 
-            // Test with larger array
             Object[] largeArray = new Object[8];
             largeArray[6] = "existing";
             largeArray[7] = "values";
@@ -1808,21 +1722,16 @@ public class Tuple100Test extends TestBase {
             Tuple.Tuple6<String, Integer, Boolean, Double, Long, Character> t6c = Tuple.of("other", 123, true, 3.14, 999L, 'x');
             Tuple.Tuple6<String, Integer, Boolean, Double, Long, Character> t6Null = Tuple.of(null, null, null, null, null, null);
 
-            // Test same instance
             Assertions.assertTrue(t6a.equals(t6a));
 
-            // Test equal values
             Assertions.assertTrue(t6a.equals(t6b));
             Assertions.assertTrue(t6b.equals(t6a));
 
-            // Test different values
             Assertions.assertFalse(t6a.equals(t6c));
 
-            // Test null values
             Assertions.assertTrue(t6Null.equals(Tuple.of(null, null, null, null, null, null)));
             Assertions.assertFalse(t6a.equals(t6Null));
 
-            // Test different types
             Assertions.assertFalse(t6a.equals("test"));
             Assertions.assertFalse(t6a.equals(null));
             Assertions.assertFalse(t6a.equals(Tuple.of("test", 123, true, 3.14, 999L)));
@@ -1958,7 +1867,6 @@ public class Tuple100Test extends TestBase {
         public void testToArrayWithParameter() {
             Tuple.Tuple7<String, Integer, Boolean, Double, Long, Character, Float> t7 = Tuple.of("test", 123, true, 3.14, 999L, 'x', 2.5f);
 
-            // Test with smaller array
             Object[] smallArray = new Object[4];
             Object[] result1 = t7.toArray(smallArray);
             Assertions.assertEquals(7, result1.length);
@@ -1970,7 +1878,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals('x', result1[5]);
             Assertions.assertEquals(2.5f, result1[6]);
 
-            // Test with exact size array
             Object[] exactArray = new Object[7];
             Object[] result2 = t7.toArray(exactArray);
             Assertions.assertSame(exactArray, result2);
@@ -1982,7 +1889,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals('x', result2[5]);
             Assertions.assertEquals(2.5f, result2[6]);
 
-            // Test with larger array
             Object[] largeArray = new Object[9];
             largeArray[7] = "existing";
             largeArray[8] = "values";
@@ -2069,14 +1975,11 @@ public class Tuple100Test extends TestBase {
             Tuple.Tuple7<String, Integer, Boolean, Double, Long, Character, Float> t7i = Tuple.of("test", 123, true, 3.14, 999L, 'x', 3.5f);
             Tuple.Tuple7<String, Integer, Boolean, Double, Long, Character, Float> t7Null = Tuple.of(null, null, null, null, null, null, null);
 
-            // Test same instance
             Assertions.assertTrue(t7a.equals(t7a));
 
-            // Test equal values
             Assertions.assertTrue(t7a.equals(t7b));
             Assertions.assertTrue(t7b.equals(t7a));
 
-            // Test different values
             Assertions.assertFalse(t7a.equals(t7c));
             Assertions.assertFalse(t7a.equals(t7d));
             Assertions.assertFalse(t7a.equals(t7e));
@@ -2085,11 +1988,9 @@ public class Tuple100Test extends TestBase {
             Assertions.assertFalse(t7a.equals(t7h));
             Assertions.assertFalse(t7a.equals(t7i));
 
-            // Test null values
             Assertions.assertTrue(t7Null.equals(Tuple.of(null, null, null, null, null, null, null)));
             Assertions.assertFalse(t7a.equals(t7Null));
 
-            // Test different types
             Assertions.assertFalse(t7a.equals("test"));
             Assertions.assertFalse(t7a.equals(null));
             Assertions.assertFalse(t7a.equals(Tuple.of("test", 123, true, 3.14, 999L, 'x')));
@@ -2243,7 +2144,6 @@ public class Tuple100Test extends TestBase {
         public void testToArrayWithParameter() {
             Tuple.Tuple8<String, Integer, Boolean, Double, Long, Character, Float, Byte> t8 = Tuple.of("test", 123, true, 3.14, 999L, 'x', 2.5f, (byte) 42);
 
-            // Test with smaller array
             Object[] smallArray = new Object[5];
             Object[] result1 = t8.toArray(smallArray);
             Assertions.assertEquals(8, result1.length);
@@ -2256,7 +2156,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(2.5f, result1[6]);
             Assertions.assertEquals((byte) 42, result1[7]);
 
-            // Test with exact size array
             Object[] exactArray = new Object[8];
             Object[] result2 = t8.toArray(exactArray);
             Assertions.assertSame(exactArray, result2);
@@ -2269,7 +2168,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(2.5f, result2[6]);
             Assertions.assertEquals((byte) 42, result2[7]);
 
-            // Test with larger array
             Object[] largeArray = new Object[10];
             largeArray[8] = "existing";
             largeArray[9] = "values";
@@ -2333,10 +2231,9 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(t8a.hashCode(), t8b.hashCode());
             Assertions.assertNotEquals(t8a.hashCode(), t8c.hashCode());
 
-            // Test with null value
             Tuple.Tuple8<String, Integer, Boolean, Double, Long, Character, Float, Byte> t8Null = Tuple.of(null, null, null, null, null, null, null, null);
             int nullHash = t8Null.hashCode();
-            Assertions.assertTrue(nullHash >= 0 || nullHash < 0); // Just ensure it doesn't throw
+            Assertions.assertTrue(nullHash >= 0 || nullHash < 0);
         }
 
         @Test
@@ -2353,14 +2250,11 @@ public class Tuple100Test extends TestBase {
             Tuple.Tuple8<String, Integer, Boolean, Double, Long, Character, Float, Byte> t8j = Tuple.of("test", 123, true, 3.14, 999L, 'x', 2.5f, (byte) 99);
             Tuple.Tuple8<String, Integer, Boolean, Double, Long, Character, Float, Byte> t8Null = Tuple.of(null, null, null, null, null, null, null, null);
 
-            // Test same instance
             Assertions.assertTrue(t8a.equals(t8a));
 
-            // Test equal values
             Assertions.assertTrue(t8a.equals(t8b));
             Assertions.assertTrue(t8b.equals(t8a));
 
-            // Test different values
             Assertions.assertFalse(t8a.equals(t8c));
             Assertions.assertFalse(t8a.equals(t8d));
             Assertions.assertFalse(t8a.equals(t8e));
@@ -2370,11 +2264,9 @@ public class Tuple100Test extends TestBase {
             Assertions.assertFalse(t8a.equals(t8i));
             Assertions.assertFalse(t8a.equals(t8j));
 
-            // Test null values
             Assertions.assertTrue(t8Null.equals(Tuple.of(null, null, null, null, null, null, null, null)));
             Assertions.assertFalse(t8a.equals(t8Null));
 
-            // Test different types
             Assertions.assertFalse(t8a.equals("test"));
             Assertions.assertFalse(t8a.equals(null));
             Assertions.assertFalse(t8a.equals(Tuple.of("test", 123, true, 3.14, 999L, 'x', 2.5f)));
@@ -2549,7 +2441,6 @@ public class Tuple100Test extends TestBase {
             Tuple.Tuple9<String, Integer, Boolean, Double, Long, Character, Float, Byte, Short> t9 = Tuple.of("test", 123, true, 3.14, 999L, 'x', 2.5f,
                     (byte) 42, (short) 256);
 
-            // Test with smaller array
             Object[] smallArray = new Object[5];
             Object[] result1 = t9.toArray(smallArray);
             Assertions.assertEquals(9, result1.length);
@@ -2563,7 +2454,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals((byte) 42, result1[7]);
             Assertions.assertEquals((short) 256, result1[8]);
 
-            // Test with exact size array
             Object[] exactArray = new Object[9];
             Object[] result2 = t9.toArray(exactArray);
             Assertions.assertSame(exactArray, result2);
@@ -2577,7 +2467,6 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals((byte) 42, result2[7]);
             Assertions.assertEquals((short) 256, result2[8]);
 
-            // Test with larger array
             Object[] largeArray = new Object[11];
             largeArray[9] = "existing";
             largeArray[10] = "values";
@@ -2649,11 +2538,10 @@ public class Tuple100Test extends TestBase {
             Assertions.assertEquals(t9a.hashCode(), t9b.hashCode());
             Assertions.assertNotEquals(t9a.hashCode(), t9c.hashCode());
 
-            // Test with null value
             Tuple.Tuple9<String, Integer, Boolean, Double, Long, Character, Float, Byte, Short> t9Null = Tuple.of(null, null, null, null, null, null, null,
                     null, null);
             int nullHash = t9Null.hashCode();
-            Assertions.assertTrue(nullHash >= 0 || nullHash < 0); // Just ensure it doesn't throw
+            Assertions.assertTrue(nullHash >= 0 || nullHash < 0);
         }
 
         @Test
@@ -2683,14 +2571,11 @@ public class Tuple100Test extends TestBase {
             Tuple.Tuple9<String, Integer, Boolean, Double, Long, Character, Float, Byte, Short> t9Null = Tuple.of(null, null, null, null, null, null, null,
                     null, null);
 
-            // Test same instance
             Assertions.assertTrue(t9a.equals(t9a));
 
-            // Test equal values
             Assertions.assertTrue(t9a.equals(t9b));
             Assertions.assertTrue(t9b.equals(t9a));
 
-            // Test different values
             Assertions.assertFalse(t9a.equals(t9c));
             Assertions.assertFalse(t9a.equals(t9d));
             Assertions.assertFalse(t9a.equals(t9e));
@@ -2701,11 +2586,9 @@ public class Tuple100Test extends TestBase {
             Assertions.assertFalse(t9a.equals(t9j));
             Assertions.assertFalse(t9a.equals(t9k));
 
-            // Test null values
             Assertions.assertTrue(t9Null.equals(Tuple.of(null, null, null, null, null, null, null, null, null)));
             Assertions.assertFalse(t9a.equals(t9Null));
 
-            // Test different types
             Assertions.assertFalse(t9a.equals("test"));
             Assertions.assertFalse(t9a.equals(null));
             Assertions.assertFalse(t9a.equals(Tuple.of("test", 123, true, 3.14, 999L, 'x', 2.5f, (byte) 42)));

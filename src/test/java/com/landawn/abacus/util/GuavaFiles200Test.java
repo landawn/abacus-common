@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
@@ -50,8 +51,9 @@ import com.google.common.io.FileWriteMode;
 import com.google.common.io.InsecureRecursiveDeleteException;
 import com.google.common.io.RecursiveDeleteOption;
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.guava.Files; // The class to be tested
+import com.landawn.abacus.guava.Files;
 
+@Tag("new-test")
 public class GuavaFiles200Test extends TestBase {
 
     @TempDir
@@ -108,7 +110,6 @@ public class GuavaFiles200Test extends TestBase {
         }
         assertEquals(content, IOUtil.readAllToString(file, StandardCharsets.UTF_8));
 
-        // Test on a path that is a directory (should fail to open as a file for writing)
         File dir = createTempDir("writerDirTest");
         assertThrows(FileNotFoundException.class, () -> Files.newWriter(dir, StandardCharsets.UTF_8));
     }
@@ -132,7 +133,7 @@ public class GuavaFiles200Test extends TestBase {
         ByteSource byteSource = Files.asByteSource(path, StandardOpenOption.READ);
         assertArrayEquals(data, byteSource.read());
 
-        ByteSource byteSourceNoOptions = Files.asByteSource(path); // Default is READ
+        ByteSource byteSourceNoOptions = Files.asByteSource(path);
         assertArrayEquals(data, byteSourceNoOptions.read());
     }
 
@@ -141,7 +142,7 @@ public class GuavaFiles200Test extends TestBase {
         File file = createTempFile("byteSink", ".bin");
         byte[] data = { 5, 6, 7, 8 };
 
-        ByteSink byteSink = Files.asByteSink(file); // Default mode: TRUNCATE
+        ByteSink byteSink = Files.asByteSink(file);
         byteSink.write(data);
         assertArrayEquals(data, java.nio.file.Files.readAllBytes(file.toPath()));
 
@@ -157,13 +158,11 @@ public class GuavaFiles200Test extends TestBase {
         Path path = createTempPath("byteSinkPath", ".bin");
         byte[] data = { 15, 16, 17 };
 
-        // Default options: CREATE, TRUNCATE_EXISTING, WRITE
         ByteSink byteSink = Files.asByteSink(path);
         byteSink.write(data);
         assertArrayEquals(data, java.nio.file.Files.readAllBytes(path));
 
         byte[] appendData = { 18, 19 };
-        // Explicit append
         ByteSink byteSinkAppend = Files.asByteSink(path, StandardOpenOption.APPEND, StandardOpenOption.WRITE);
         byteSinkAppend.write(appendData);
         byte[] combinedData = { 15, 16, 17, 18, 19 };
@@ -187,7 +186,7 @@ public class GuavaFiles200Test extends TestBase {
         CharSource charSource = Files.asCharSource(path, StandardCharsets.ISO_8859_1, StandardOpenOption.READ);
         assertEquals(content, charSource.read());
 
-        CharSource charSourceNoOptions = Files.asCharSource(path, StandardCharsets.ISO_8859_1); // Default is READ
+        CharSource charSourceNoOptions = Files.asCharSource(path, StandardCharsets.ISO_8859_1);
         assertEquals(content, charSourceNoOptions.read());
     }
 
@@ -196,7 +195,7 @@ public class GuavaFiles200Test extends TestBase {
         File file = createTempFile("charSink", ".txt");
         String content = "Writing CharSink content.";
 
-        CharSink charSink = Files.asCharSink(file, StandardCharsets.UTF_8); // Default mode: TRUNCATE
+        CharSink charSink = Files.asCharSink(file, StandardCharsets.UTF_8);
         charSink.write(content);
         assertEquals(content, IOUtil.readAllToString(file, StandardCharsets.UTF_8));
 
@@ -211,7 +210,6 @@ public class GuavaFiles200Test extends TestBase {
         Path path = createTempPath("charSinkPath", ".txt");
         String content = "CharSink Path Content.";
 
-        // Default options: CREATE, TRUNCATE_EXISTING, WRITE
         CharSink charSink = Files.asCharSink(path, StandardCharsets.UTF_8);
         charSink.write(content);
         assertEquals(content, IOUtil.readAllToString(path.toFile(), StandardCharsets.UTF_8));
@@ -243,7 +241,6 @@ public class GuavaFiles200Test extends TestBase {
         Files.write(data, file);
         assertArrayEquals(data, java.nio.file.Files.readAllBytes(file.toPath()));
 
-        // Test overwrite
         byte[] newData = { 4, 5, 6 };
         Files.write(newData, file);
         assertArrayEquals(newData, java.nio.file.Files.readAllBytes(file.toPath()));
@@ -263,12 +260,10 @@ public class GuavaFiles200Test extends TestBase {
         assertTrue(Files.equal(empty1, empty2));
         assertFalse(Files.equal(file1, empty1));
 
-        // File vs Dir
-        assertThrows(FileNotFoundException.class, () -> Files.equal(file1, dir1)); // Guava throws FNFE if one is not a regular file
+        assertThrows(FileNotFoundException.class, () -> Files.equal(file1, dir1));
 
         File nonExistent1 = new File(tempDir.toFile(), "nonExistentEq1.txt");
         File nonExistent2 = new File(tempDir.toFile(), "nonExistentEq2.txt");
-        // Guava Files.equal throws FNFE if files don't exist
         assertThrows(FileNotFoundException.class, () -> Files.equal(nonExistent1, nonExistent2));
         assertThrows(FileNotFoundException.class, () -> Files.equal(file1, nonExistent1));
     }
@@ -283,11 +278,9 @@ public class GuavaFiles200Test extends TestBase {
         assertTrue(Files.equal(path1, path2));
         assertFalse(Files.equal(path1, path3));
 
-        // Path vs Dir
-        assertThrows(IOException.class, () -> Files.equal(path1, dirPath)); // MoreFiles.equal checks isRegularFile
+        assertThrows(IOException.class, () -> Files.equal(path1, dirPath));
 
         Path nonExistentPath = tempDir.resolve("nonExistentEqPath.txt");
-        // MoreFiles.equal throws NoSuchFileException if files don't exist
         assertThrows(NoSuchFileException.class, () -> Files.equal(path1, nonExistentPath));
     }
 
@@ -297,10 +290,10 @@ public class GuavaFiles200Test extends TestBase {
         long time1 = file.lastModified();
         assertTrue(time1 > 0);
 
-        Thread.sleep(10); // Ensure time advances for lastModified to change
+        Thread.sleep(10);
         Files.touch(file);
         long time2 = file.lastModified();
-        assertTrue(time2 >= time1); // Should be strictly > on most systems if sleep worked
+        assertTrue(time2 >= time1);
 
         File newFile = new File(tempDir.toFile(), "newTouch.tmp");
         assertFalse(newFile.exists());
@@ -334,7 +327,6 @@ public class GuavaFiles200Test extends TestBase {
         assertTrue(tempDir.exists());
         assertTrue(tempDir.isDirectory());
         assertTrue(tempDir.getAbsolutePath().startsWith(System.getProperty("java.io.tmpdir")));
-        // Attempt to clean up
         assertTrue(tempDir.delete());
     }
 
@@ -348,7 +340,6 @@ public class GuavaFiles200Test extends TestBase {
         assertTrue(child.getParentFile().exists());
         assertTrue(child.getParentFile().isDirectory());
 
-        // Call again, should not fail
         Files.createParentDirs(child);
     }
 
@@ -362,10 +353,9 @@ public class GuavaFiles200Test extends TestBase {
         assertTrue(java.nio.file.Files.exists(childPath.getParent()));
         assertTrue(java.nio.file.Files.isDirectory(childPath.getParent()));
 
-        // With attributes (hard to verify specific attributes without POSIX OS)
         Path childPathAttrs = parent.resolve("pathSubAttrs/file.txt");
         if (System.getProperty("os.name").toLowerCase().contains("win")) {
-            Files.createParentDirectories(childPathAttrs); // Windows doesn't use PosixFilePermissions easily for default provider
+            Files.createParentDirectories(childPathAttrs);
         } else {
             FileAttribute<?> dirPerms = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---"));
             Files.createParentDirectories(childPathAttrs, dirPerms);
@@ -397,13 +387,11 @@ public class GuavaFiles200Test extends TestBase {
         Files.copy(fromFile, toFile);
         assertEquals(content, IOUtil.readAllToString(toFile, StandardCharsets.UTF_8));
 
-        // Test overwrite
         String newContent = "New data overriding.";
         java.nio.file.Files.write(fromFile.toPath(), newContent.getBytes(StandardCharsets.UTF_8));
-        Files.copy(fromFile, toFile); // Should overwrite
+        Files.copy(fromFile, toFile);
         assertEquals(newContent, IOUtil.readAllToString(toFile, StandardCharsets.UTF_8));
 
-        // Test copy to self - Guava Files.copy disallows this
         assertThrows(IllegalArgumentException.class, () -> Files.copy(fromFile, fromFile));
     }
 
@@ -413,14 +401,13 @@ public class GuavaFiles200Test extends TestBase {
         String content = "Data to move.";
         java.nio.file.Files.write(fromFile.toPath(), content.getBytes(StandardCharsets.UTF_8));
 
-        File toFile = new File(tempDir.toFile(), "moveTo.txt"); // Destination should not exist for simple move
+        File toFile = new File(tempDir.toFile(), "moveTo.txt");
         Files.move(fromFile, toFile);
 
         assertFalse(fromFile.exists());
         assertTrue(toFile.exists());
         assertEquals(content, IOUtil.readAllToString(toFile, StandardCharsets.UTF_8));
 
-        // Test move to self - Guava Files.move disallows this
         File selfMoveFile = createTempFileWithContent("selfmove", StandardCharsets.UTF_8);
         assertThrows(IllegalArgumentException.class, () -> Files.move(selfMoveFile, selfMoveFile));
     }
@@ -449,40 +436,37 @@ public class GuavaFiles200Test extends TestBase {
         byte[] data = "0123456789".getBytes(StandardCharsets.US_ASCII);
         java.nio.file.Files.write(file.toPath(), data);
 
-        // Read-only map
         MappedByteBuffer mbbRO = Files.map(file);
         assertEquals(data.length, mbbRO.remaining());
         byte[] readData = new byte[data.length];
         mbbRO.get(readData);
         assertArrayEquals(data, readData);
-        unmap(mbbRO); // Unmap to release resources)
+        unmap(mbbRO);
 
-        // Read-write map
         MappedByteBuffer mbbRW = Files.map(file, MapMode.READ_WRITE);
         assertEquals(data.length, mbbRW.remaining());
         mbbRW.put(0, (byte) 'X');
-        mbbRW.force(); // For visibility if we re-read via filesystem
-        unmap(mbbRW); // Unmap to release resources)
+        mbbRW.force();
+        unmap(mbbRW);
 
         byte[] changedData = java.nio.file.Files.readAllBytes(file.toPath());
         assertEquals((byte) 'X', changedData[0]);
 
-        // Map with specific size (can extend or truncate for RW, create for RW)
         File sizedMapFile = new File(tempDir.toFile(), "sizedMap.dat");
         long mapSize = 20;
         MappedByteBuffer mbbSized = Files.map(sizedMapFile, MapMode.READ_WRITE, mapSize);
         assertTrue(sizedMapFile.exists());
         assertEquals(mapSize, sizedMapFile.length());
         assertEquals(mapSize, mbbSized.capacity());
-        mbbSized.put((byte) 'A').put((int) (mapSize - 1), (byte) 'Z'); // MappedByteBuffer positions might be tricky
+        mbbSized.put((byte) 'A').put((int) (mapSize - 1), (byte) 'Z');
 
         File nonExistentMapRO = new File(tempDir.toFile(), "nonExistentMapRO.dat");
         assertThrows(FileNotFoundException.class, () -> Files.map(nonExistentMapRO));
         assertThrows(FileNotFoundException.class, () -> Files.map(nonExistentMapRO, MapMode.READ_ONLY));
 
-        unmap(mbbSized); // Unmap to release resources)
+        unmap(mbbSized);
 
-        Files.deleteRecursively(tempDir, RecursiveDeleteOption.ALLOW_INSECURE); // Cleanup temp dir after tests);
+        Files.deleteRecursively(tempDir, RecursiveDeleteOption.ALLOW_INSECURE);
     }
 
     @Test
@@ -515,7 +499,7 @@ public class GuavaFiles200Test extends TestBase {
         assertEquals("txt", Files.getFileExtension("file.txt"));
         assertEquals("gz", Files.getFileExtension("archive.tar.gz"));
         assertEquals("", Files.getFileExtension("nodots"));
-        assertEquals("", Files.getFileExtension("file.")); // Guava behavior
+        assertEquals("", Files.getFileExtension("file."));
     }
 
     @Test
@@ -540,7 +524,6 @@ public class GuavaFiles200Test extends TestBase {
 
         Traverser<File> traverser = Files.fileTraverser();
         List<String> visitedNames = new ArrayList<>();
-        // Sort for predictable order in assertion
         List<File> traversedFiles = StreamSupport.stream(traverser.depthFirstPreOrder(base).spliterator(), false)
                 .sorted(Comparator.comparing(File::getAbsolutePath))
                 .collect(Collectors.toList());
@@ -550,10 +533,6 @@ public class GuavaFiles200Test extends TestBase {
         }
 
         List<String> expectedNames = Arrays.asList(base.getName(), "d1", "f1.txt", "f2.txt").stream().sorted().collect(Collectors.toList());
-        // The order from traverser might not be lexicographical always, adjust assertion
-        // For depthFirstPreOrder: base, d1, f2, f1 (if d1 processed before f1 alphabetically)
-        // The exact order depends on listFiles() order which is platform dependent.
-        // So, checking for presence and count is more robust.
 
         assertTrue(N.isEqualCollection(expectedNames, visitedNames));
         assertEquals(4, visitedNames.size());
@@ -562,11 +541,10 @@ public class GuavaFiles200Test extends TestBase {
         assertTrue(visitedNames.contains("f1.txt"));
         assertTrue(visitedNames.contains("f2.txt"));
 
-        // Test traversing a single file
         Iterable<File> singleFileIterable = traverser.depthFirstPreOrder(f1);
         Iterator<File> iterator = singleFileIterable.iterator();
         assertEquals(f1, iterator.next());
-        assertFalse(iterator.hasNext()); // Should only contain itself
+        assertFalse(iterator.hasNext());
     }
 
     @Test
@@ -597,14 +575,11 @@ public class GuavaFiles200Test extends TestBase {
         assertTrue(listed.contains(f1));
         assertTrue(listed.contains(d1));
 
-        // Test empty dir
         Path emptyDir = createTempDirPath("emptyListPathDir");
         assertTrue(Files.listFiles(emptyDir).isEmpty());
 
-        // Test on a file
         assertThrows(NotDirectoryException.class, () -> Files.listFiles(f1));
 
-        // Test on non-existent path
         Path nonExistent = dir.resolve("noSuchDir");
         assertThrows(NoSuchFileException.class, () -> Files.listFiles(nonExistent));
     }
@@ -619,40 +594,26 @@ public class GuavaFiles200Test extends TestBase {
         Files.deleteRecursively(base, RecursiveDeleteOption.ALLOW_INSECURE);
         assertFalse(java.nio.file.Files.exists(base));
 
-        // Test on non-existent path
         Path nonExistent = tempDir.resolve("delRecNonExistent");
         assertThrows(NoSuchFileException.class, () -> Files.deleteRecursively(nonExistent, RecursiveDeleteOption.ALLOW_INSECURE));
 
-        // Test deleting a single file
         Path singleFile = createTempPath("delRecSingle", ".txt");
         Files.deleteRecursively(singleFile, RecursiveDeleteOption.ALLOW_INSECURE);
         assertFalse(java.nio.file.Files.exists(singleFile));
     }
 
     @Test
-    @DisabledOnOs(OS.WINDOWS) // SecureDirectoryStream and InsecureRecursiveDeleteException are more relevant on POSIX
+    @DisabledOnOs(OS.WINDOWS)
     public void testDeleteRecursively_insecure() throws IOException {
-        // This test is hard to make truly insecure in a unit test.
-        // Guava's MoreFiles.deleteRecursively throws InsecureRecursiveDeleteException
-        // if it cannot use SecureDirectoryStream (e.g. older Java or specific FS).
-        // We assume default options (no ALLOW_INSECURE).
-        // If the test environment *is* secure, it won't throw InsecureRecursiveDeleteException.
-        // This test is more about the ALLOW_INSECURE option if the condition arises.
 
         Path base = createTempDirPath("delRecInsecureBase");
         java.nio.file.Files.createFile(base.resolve("f1.txt"));
 
-        // If the underlying com.google.common.io.MoreFiles.deleteRecursively
-        // determines the environment is insecure and no ALLOW_INSECURE is passed,
-        // it would throw InsecureRecursiveDeleteException.
-        // Otherwise, it will just delete.
         try {
-            Files.deleteRecursively(base); // No options
+            Files.deleteRecursively(base);
             assertFalse(java.nio.file.Files.exists(base));
         } catch (InsecureRecursiveDeleteException e) {
-            // This is the path we'd ideally hit if we could simulate insecurity.
-            // Since we can't easily, we re-create and delete with ALLOW_INSECURE
-            java.nio.file.Files.createDirectories(base); // Recreate
+            java.nio.file.Files.createDirectories(base);
             java.nio.file.Files.createFile(base.resolve("f1.txt"));
             Files.deleteRecursively(base, RecursiveDeleteOption.ALLOW_INSECURE);
             assertFalse(java.nio.file.Files.exists(base));
@@ -667,19 +628,16 @@ public class GuavaFiles200Test extends TestBase {
         java.nio.file.Files.createFile(d1.resolve("f2.txt"));
 
         Files.deleteDirectoryContents(base, RecursiveDeleteOption.ALLOW_INSECURE);
-        assertTrue(java.nio.file.Files.exists(base)); // Base directory itself remains
-        assertEquals(0, java.nio.file.Files.list(base).count()); // Should be empty
+        assertTrue(java.nio.file.Files.exists(base));
+        assertEquals(0, java.nio.file.Files.list(base).count());
 
-        // Test on empty directory
         Path emptyDir = createTempDirPath("delContEmpty");
         Files.deleteDirectoryContents(emptyDir, RecursiveDeleteOption.ALLOW_INSECURE);
         assertTrue(java.nio.file.Files.exists(emptyDir));
 
-        // Test on non-existent path
         Path nonExistent = tempDir.resolve("delContNonExistent");
         assertThrows(NoSuchFileException.class, () -> Files.deleteDirectoryContents(nonExistent));
 
-        // Test on a file
         Path fileAsDir = createTempPath("delContFileAsDir", ".txt");
         assertThrows(NotDirectoryException.class, () -> Files.deleteDirectoryContents(fileAsDir));
     }
@@ -693,13 +651,11 @@ public class GuavaFiles200Test extends TestBase {
         assertTrue(isDir.apply(dir));
         assertFalse(isDir.apply(file));
 
-        // Test with NO_FOLLOW_LINKS (assuming no symlinks for basic test)
         Predicate<Path> isDirNoFollow = Files.isDirectory(LinkOption.NOFOLLOW_LINKS);
         assertTrue(isDirNoFollow.apply(dir));
 
-        // Test on non-existent path
         Path nonExistent = dir.resolve("no_such_thing");
-        assertFalse(isDir.apply(nonExistent)); // Files.isDirectory(nonExistent) is false
+        assertFalse(isDir.apply(nonExistent));
     }
 
     @Test
@@ -715,7 +671,7 @@ public class GuavaFiles200Test extends TestBase {
         assertTrue(isRegNoFollow.apply(file));
 
         Path nonExistent = dir.resolve("no_such_file.txt");
-        assertFalse(isReg.apply(nonExistent)); // Files.isRegularFile(nonExistent) is false
+        assertFalse(isReg.apply(nonExistent));
     }
 
 }

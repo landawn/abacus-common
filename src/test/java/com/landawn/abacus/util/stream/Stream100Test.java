@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -79,6 +80,7 @@ import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.UnaryOperator;
 
 @ExtendWith(MockitoExtension.class)
+@Tag("new-test")
 public class Stream100Test extends TestBase {
 
     private Stream<Integer> stream;
@@ -198,17 +200,16 @@ public class Stream100Test extends TestBase {
     }
 
     protected <T> Stream<T> createStream(final Optional<T> op) {
-        return op == null || op.isEmpty() ? Stream.empty() : Stream.of(op.get()); //NOSONAR
+        return op == null || op.isEmpty() ? Stream.empty() : Stream.of(op.get());
     }
 
     protected <T> Stream<T> createStream(final java.util.Optional<T> op) {
-        return op == null || op.isEmpty() ? Stream.empty() : Stream.of(op.get()); //NOSONAR
+        return op == null || op.isEmpty() ? Stream.empty() : Stream.of(op.get());
     }
 
     protected <T> Stream<T> createStream(final Enumeration<? extends T> enumeration) {
         return Stream.of(enumeration);
     }
-    // ===== Factory Methods Tests =====
 
     @Test
     public void test_lazyEvalation() throws Exception {
@@ -476,42 +477,34 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testOfPrimitiveArrays() {
-        // boolean array
         boolean[] boolArray = { true, false, true };
         Stream<Boolean> boolStream = createStream(boolArray);
         assertEquals(Arrays.asList(true, false, true), boolStream.toList());
 
-        // char array
         char[] charArray = { 'a', 'b', 'c' };
         Stream<Character> charStream = createStream(charArray);
         assertEquals(Arrays.asList('a', 'b', 'c'), charStream.toList());
 
-        // byte array
         byte[] byteArray = { 1, 2, 3 };
         Stream<Byte> byteStream = createStream(byteArray);
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), byteStream.toList());
 
-        // short array
         short[] shortArray = { 1, 2, 3 };
         Stream<Short> shortStream = createStream(shortArray);
         assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), shortStream.toList());
 
-        // int array
         int[] intArray = { 1, 2, 3 };
         Stream<Integer> intStream = createStream(intArray);
         assertEquals(Arrays.asList(1, 2, 3), intStream.toList());
 
-        // long array
         long[] longArray = { 1L, 2L, 3L };
         Stream<Long> longStream = createStream(longArray);
         assertEquals(Arrays.asList(1L, 2L, 3L), longStream.toList());
 
-        // float array
         float[] floatArray = { 1.0f, 2.0f, 3.0f };
         Stream<Float> floatStream = createStream(floatArray);
         assertEquals(Arrays.asList(1.0f, 2.0f, 3.0f), floatStream.toList());
 
-        // double array
         double[] doubleArray = { 1.0, 2.0, 3.0 };
         Stream<Double> doubleStream = createStream(doubleArray);
         assertEquals(Arrays.asList(1.0, 2.0, 3.0), doubleStream.toList());
@@ -527,11 +520,9 @@ public class Stream100Test extends TestBase {
         Stream<String> keyStream = Stream.ofKeys(map);
         assertEquals(3, keyStream.count());
 
-        // Test with value filter
         Stream<String> filteredKeyStream = Stream.ofKeys(map, v -> v > 1);
         assertEquals(new HashSet<>(Arrays.asList("b", "c")), filteredKeyStream.toSet());
 
-        // Test with bi-predicate filter
         Stream<String> biFilteredKeyStream = Stream.ofKeys(map, (k, v) -> k.equals("a") || v > 2);
         assertEquals(new HashSet<>(Arrays.asList("a", "c")), biFilteredKeyStream.toSet());
     }
@@ -546,11 +537,9 @@ public class Stream100Test extends TestBase {
         Stream<Integer> valueStream = Stream.ofValues(map);
         assertEquals(3, valueStream.count());
 
-        // Test with key filter
         Stream<Integer> filteredValueStream = Stream.ofValues(map, k -> k.compareTo("b") >= 0);
         assertEquals(new HashSet<>(Arrays.asList(2, 3)), filteredValueStream.toSet());
 
-        // Test with bi-predicate filter
         Stream<Integer> biFilteredValueStream = Stream.ofValues(map, (k, v) -> k.equals("a") || v > 2);
         assertEquals(new HashSet<>(Arrays.asList(1, 3)), biFilteredValueStream.toSet());
     }
@@ -612,7 +601,6 @@ public class Stream100Test extends TestBase {
         Stream<String> lines = Stream.splitToLines(str);
         assertEquals(Arrays.asList("line1", "line2", "line3", "line4"), lines.toList());
 
-        // Test with trim and omit empty lines
         String str2 = "  line1  \n\n  line2  \n";
         Stream<String> trimmedLines = Stream.splitToLines(str2, true, true);
         assertEquals(Arrays.asList("line1", "line2"), trimmedLines.toList());
@@ -635,7 +623,6 @@ public class Stream100Test extends TestBase {
         assertEquals(Arrays.asList(4, 5, 6), result.get(1));
         assertEquals(Arrays.asList(7, 8, 9), result.get(2));
 
-        // Test with sizeSmallerFirst
         Stream<List<Integer>> smallerFirstChunks = Stream.splitByChunkCount(10, 3, true, mapper);
         List<List<Integer>> smallerFirstResult = smallerFirstChunks.toList();
         assertEquals(3, smallerFirstResult.size());
@@ -646,21 +633,17 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testFlatten() {
-        // Test flatten collection
         List<List<Integer>> nestedList = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6));
         Stream<Integer> flattened = Stream.flatten(nestedList);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), flattened.toList());
 
-        // Test flatten 2D array
         Integer[][] array2D = { { 1, 2 }, { 3, 4 }, { 5, 6 } };
         Stream<Integer> flattenedArray = Stream.flatten(array2D);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), flattenedArray.toList());
 
-        // Test flatten 2D array vertically
         Stream<Integer> flattenedVertical = Stream.flatten(array2D, true);
         assertEquals(Arrays.asList(1, 3, 5, 2, 4, 6), flattenedVertical.toList());
 
-        // Test flatten 3D array
         Integer[][][] array3D = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
         Stream<Integer> flattened3D = Stream.flatten(array3D);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), flattened3D.toList());
@@ -677,18 +660,15 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testIterate() {
-        // Test with hasNext and next suppliers
         AtomicInteger counter = new AtomicInteger(0);
         BooleanSupplier hasNext = () -> counter.get() < 5;
         Supplier<Integer> next = counter::getAndIncrement;
         Stream<Integer> iterateStream = Stream.iterate(hasNext, next);
         assertEquals(Arrays.asList(0, 1, 2, 3, 4), iterateStream.toList());
 
-        // Test with initial value and unary operator
         Stream<Integer> iterateStream2 = Stream.iterate(1, n -> n <= 5, n -> n + 1);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), iterateStream2.toList());
 
-        // Test infinite iteration
         Stream<Integer> infiniteStream = Stream.iterate(0, n -> n + 1);
         assertEquals(Arrays.asList(0, 1, 2, 3, 4), infiniteStream.limit(5).toList());
     }
@@ -702,38 +682,31 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testConcat() {
-        // Test concat arrays
         Integer[] arr1 = { 1, 2 };
         Integer[] arr2 = { 3, 4 };
         Integer[] arr3 = { 5, 6 };
         Stream<Integer> concatArrays = Stream.concat(arr1, arr2, arr3);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), concatArrays.toList());
 
-        // Test concat iterables
         List<Integer> list1 = Arrays.asList(1, 2);
         List<Integer> list2 = Arrays.asList(3, 4);
         Stream<Integer> concatIterables = Stream.concat(list1, list2);
         assertEquals(Arrays.asList(1, 2, 3, 4), concatIterables.toList());
 
-        // Test concat iterators
         Iterator<Integer> iter1 = Arrays.asList(1, 2).iterator();
         Iterator<Integer> iter2 = Arrays.asList(3, 4).iterator();
         Stream<Integer> concatIterators = Stream.concat(iter1, iter2);
         assertEquals(Arrays.asList(1, 2, 3, 4), concatIterators.toList());
 
-        // Test concat streams
         Stream<Integer> stream1 = createStream(1, 2);
         Stream<Integer> stream2 = createStream(3, 4);
         Stream<Integer> concatStreams = Stream.concat(stream1, stream2);
         assertEquals(Arrays.asList(1, 2, 3, 4), concatStreams.toList());
 
-        // Test concat collection of streams
         List<Stream<Integer>> streams = Arrays.asList(createStream(1, 2), createStream(3, 4), createStream(5, 6));
         Stream<Integer> concatCollection = Stream.concat(streams);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), concatCollection.toList());
     }
-
-    // ===== Intermediate Operations Tests =====
 
     @Test
     public void testFilter() {
@@ -780,7 +753,7 @@ public class Stream100Test extends TestBase {
         List<Integer> collected = new ArrayList<>();
         Stream<Integer> onEachStream = stream.onEach(collected::add);
         onEachStream.forEach(e -> {
-        }); // Trigger terminal operation
+        });
         assertEquals(testList, collected);
     }
 
@@ -789,7 +762,7 @@ public class Stream100Test extends TestBase {
         List<Integer> peeked = new ArrayList<>();
         Stream<Integer> peekStream = stream.peek(peeked::add);
         peekStream.forEach(e -> {
-        }); // Trigger terminal operation
+        });
         assertEquals(testList, peeked);
     }
 
@@ -824,15 +797,12 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testSlidingMap() {
-        // Test sliding map with BiFunction
         Stream<Integer> sumOfPairs = stream.slidingMap((a, b) -> a + (b == null ? 0 : b));
         assertEquals(Arrays.asList(3, 5, 7, 9), sumOfPairs.toList());
 
-        // Test with increment
         Stream<Integer> sumWithIncrement = createStream(1, 2, 3, 4, 5).slidingMap(2, (a, b) -> a + N.defaultIfNull(b, 0));
         assertEquals(Arrays.asList(3, 7, 5), sumWithIncrement.toList());
 
-        // Test with TriFunction
         Stream<Integer> sumOfTriples = createStream(1, 2, 3, 4, 5).slidingMap((a, b, c) -> a + b + c);
         assertEquals(Arrays.asList(6, 9, 12), sumOfTriples.toList());
     }
@@ -869,38 +839,31 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testMapToPrimitiveStreams() {
-        // Test mapToChar
         CharStream charStream = createStream01("a", "b", "c").mapToChar(s -> s.charAt(0));
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, charStream.toArray());
 
-        // Test mapToByte
         ByteStream byteStream = stream.mapToByte(n -> n.byteValue());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, byteStream.toArray());
     }
 
     @Test
     public void testMapToPrimitiveStreams2() {
-        // Test mapToChar
         CharStream charStream = createStream01("a", "b", "c").mapToChar(s -> s.charAt(0));
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, charStream.toArray());
-        // Test mapToLong
         LongStream longStream = stream.mapToLong(n -> n.longValue());
         assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L }, longStream.toArray());
     }
 
     @Test
     public void testMapToPrimitiveStreams3() {
-        // Test mapToChar
         CharStream charStream = createStream01("a", "b", "c").mapToChar(s -> s.charAt(0));
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, charStream.toArray());
-        // Test mapToDouble
         DoubleStream doubleStream = stream.mapToDouble(n -> n.doubleValue());
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, doubleStream.toArray(), 0.001);
     }
 
     @Test
     public void testMapToEntry() {
-        // Test with Entry mapper
         EntryStream<String, Integer> entryStream1 = stream.mapToEntry(n -> new AbstractMap.SimpleEntry<>("key" + n, n));
         Map<String, Integer> map1 = entryStream1.toMap();
         assertEquals(5, map1.size());
@@ -909,7 +872,6 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testMapToEntry2() {
-        // Test with key and value mappers
         EntryStream<String, Integer> entryStream2 = stream.mapToEntry(n -> "key" + n, n -> n * 10);
         Map<String, Integer> map2 = entryStream2.toMap();
         assertEquals(5, map2.size());
@@ -936,15 +898,12 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testFlatMapToPrimitiveStreams() {
-        // Test flatMapToChar
         CharStream charStream = createStream01("hello", "world").flatMapToChar(s -> CharStream.of(s.toCharArray()));
         assertEquals("helloworld", new String(charStream.toArray()));
 
-        // Test flatmapToChar
         CharStream charStream2 = createStream01("hello", "world").flatmapToChar(String::toCharArray);
         assertEquals("helloworld", new String(charStream2.toArray()));
 
-        // Similar tests can be written for other primitive types
     }
 
     @Test
@@ -972,20 +931,17 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testGroupBy() {
-        // Test basic groupBy
         Stream<Map.Entry<Integer, List<String>>> grouped = createStream01("a", "bb", "ccc", "dd", "e").groupBy(String::length);
         Map<Integer, List<String>> groupMap = grouped.toMap(Fn.key(), Fn.value());
         assertEquals(Arrays.asList("a", "e"), groupMap.get(1));
         assertEquals(Arrays.asList("bb", "dd"), groupMap.get(2));
         assertEquals(Arrays.asList("ccc"), groupMap.get(3));
 
-        // Test groupBy with value mapper
         Stream<Map.Entry<Integer, List<String>>> groupedWithValue = createStream01("a", "bb", "ccc").groupBy(String::length, String::toUpperCase);
         Map<Integer, List<String>> groupMapWithValue = groupedWithValue.toMap(Fn.key(), Fn.value());
         assertEquals(Arrays.asList("A"), groupMapWithValue.get(1));
         assertEquals(Arrays.asList("BB"), groupMapWithValue.get(2));
 
-        // Test groupBy with collector
         Stream<Map.Entry<Integer, Long>> groupedWithCollector = createStream01("a", "bb", "ccc", "dd", "e").groupBy(String::length, Collectors.counting());
         Map<Integer, Long> countMap = groupedWithCollector.toMap(Fn.key(), Fn.value());
         assertEquals(Long.valueOf(2), countMap.get(1));
@@ -1038,38 +994,31 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testCollapse() {
-        // Test collapse with BiPredicate
         Stream<List<Integer>> collapsed = createStream(1, 2, 3, 3, 2, 1).collapse((a, b) -> a < b);
         List<List<Integer>> result = collapsed.toList();
         assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(3), Arrays.asList(2), Arrays.asList(1)), result);
 
-        // Test collapse with merge function
         Stream<Integer> collapsedWithMerge = createStream(1, 2, 3, 3, 2, 1).collapse((a, b) -> a < b, (a, b) -> a + b);
         assertEquals(Arrays.asList(6, 3, 2, 1), collapsedWithMerge.toList());
 
-        // Test collapse with collector
         Stream<Integer> collapsedWithCollector = createStream(1, 2, 3, 3, 2, 1).collapse((a, b) -> a < b, Collectors.summingInt(Integer::intValue));
         assertEquals(Arrays.asList(6, 3, 2, 1), collapsedWithCollector.toList());
     }
 
     @Test
     public void testScan() {
-        // Test scan with accumulator
         Stream<Integer> scanned = createStream(1, 2, 3, 4, 5).scan((a, b) -> a + b);
         assertEquals(Arrays.asList(1, 3, 6, 10, 15), scanned.toList());
 
-        // Test scan with init value
         Stream<Integer> scannedWithInit = createStream(1, 2, 3, 4, 5).scan(10, (a, b) -> a + b);
         assertEquals(Arrays.asList(11, 13, 16, 20, 25), scannedWithInit.toList());
 
-        // Test scan with init value and initIncluded
         Stream<Integer> scannedWithInitIncluded = createStream(1, 2, 3).scan(10, true, (a, b) -> a + b);
         assertEquals(Arrays.asList(10, 11, 13, 16), scannedWithInitIncluded.toList());
     }
 
     @Test
     public void testSplit2() {
-        // Test split by chunk size
         Stream<List<Integer>> splitBySize = createStream(1, 2, 3, 4, 5, 6, 7).split(3);
         List<List<Integer>> chunks = splitBySize.toList();
         assertEquals(3, chunks.size());
@@ -1077,26 +1026,22 @@ public class Stream100Test extends TestBase {
         assertEquals(Arrays.asList(4, 5, 6), chunks.get(1));
         assertEquals(Arrays.asList(7), chunks.get(2));
 
-        // Test split by predicate
         Stream<List<Integer>> splitByPredicate = Stream.range(0, 7).split(n -> n % 3 == 0);
         List<List<Integer>> predicateChunks = splitByPredicate.toList();
         assertEquals(Arrays.asList(Arrays.asList(0), Arrays.asList(1, 2), Arrays.asList(3), Arrays.asList(4, 5), Arrays.asList(6)), predicateChunks);
 
-        // Test split with collector
         Stream<Integer> splitWithCollector = createStream(1, 2, 3, 4, 5, 6).split(2, Collectors.summingInt(Integer::intValue));
         assertEquals(Arrays.asList(3, 7, 11), splitWithCollector.toList());
     }
 
     @Test
     public void testSplitAt() {
-        // Test splitAt by index
         Stream<Stream<Integer>> splitAtIndex = createStream(1, 2, 3, 4, 5).splitAt(3);
         List<List<Integer>> splitResult = splitAtIndex.map(s -> s.toList()).toList();
         assertEquals(2, splitResult.size());
         assertEquals(Arrays.asList(1, 2, 3), splitResult.get(0));
         assertEquals(Arrays.asList(4, 5), splitResult.get(1));
 
-        // Test splitAt by predicate
         Stream<Stream<Integer>> splitAtPredicate = Stream.range(0, 7).splitAt(n -> n == 4);
         List<List<Integer>> predicateSplitResult = splitAtPredicate.map(s -> s.toList()).toList();
         assertEquals(2, predicateSplitResult.size());
@@ -1106,7 +1051,6 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testSliding() {
-        // Test sliding with window size
         Stream<List<Integer>> sliding = createStream(1, 2, 3, 4, 5).sliding(3);
         List<List<Integer>> windows = sliding.toList();
         assertEquals(3, windows.size());
@@ -1114,7 +1058,6 @@ public class Stream100Test extends TestBase {
         assertEquals(Arrays.asList(2, 3, 4), windows.get(1));
         assertEquals(Arrays.asList(3, 4, 5), windows.get(2));
 
-        // Test sliding with window size and increment
         Stream<List<Integer>> slidingWithIncrement = createStream(1, 2, 3, 4, 5).sliding(3, 2);
         List<List<Integer>> incrementWindows = slidingWithIncrement.toList();
         assertEquals(2, incrementWindows.size());
@@ -1136,7 +1079,6 @@ public class Stream100Test extends TestBase {
         Stream<Integer> withDuplicates = createStream(1, 2, 2, 3, 3, 3, 4, 5, 5);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), withDuplicates.distinct().toList());
 
-        // Test distinct with merge function
         Stream<String> withDuplicateStrings = createStream01("a", "b", "b", "c");
         Stream<String> distinctMerged = withDuplicateStrings.distinct((a, b) -> a + b);
         assertEquals(Arrays.asList("a", "bb", "c"), distinctMerged.toList());
@@ -1149,7 +1091,6 @@ public class Stream100Test extends TestBase {
             Stream<String> strings = createStream01("a", "bb", "ccc", "dd", "e");
             Stream<String> distinctByLength = strings.distinctBy(String::length);
             assertEquals(Arrays.asList("a", "bb", "ccc"), distinctByLength.toList());
-            // Test distinctBy with merge function
             Stream<String> stringsForMerge = createStream01("a", "bb", "ccc", "dd", "e");
             Stream<String> distinctByLengthMerged = stringsForMerge.distinctBy(String::length, (a, b) -> a + "+" + b);
             assertEquals(Arrays.asList("a+e", "bb+dd", "ccc"), distinctByLengthMerged.toList());
@@ -1159,13 +1100,10 @@ public class Stream100Test extends TestBase {
             Stream<String> strings = createStream01("a", "bb", "ccc", "dd", "e");
             List<String> distinctByLength = strings.parallel().distinctBy(String::length).toList();
 
-            // assertHaveSameElements(Arrays.asList("a", "bb", "ccc"), distinctByLength.toList());
             assertTrue(N.haveSameElements(Arrays.asList("a", "bb", "ccc"), distinctByLength)
                     || N.haveSameElements(Arrays.asList("a", "dd", "ccc"), distinctByLength));
-            // Test distinctBy with merge function
             Stream<String> stringsForMerge = createStream01("a", "bb", "ccc", "dd", "e");
             List<String> distinctByLengthMerged = stringsForMerge.parallel().distinctBy(String::length, (a, b) -> Stream.of(a, b).sorted().join("+")).toList();
-            // assertHaveSameElements(Arrays.asList("a+e", "bb+dd", "ccc"), distinctByLengthMerged.toList());
             assertTrue(N.haveSameElements(Arrays.asList("a+e", "bb+dd", "ccc"), distinctByLengthMerged)
                     || N.haveSameElements(Arrays.asList("a+e", "dd+bb", "ccc"), distinctByLengthMerged));
         }
@@ -1362,7 +1300,6 @@ public class Stream100Test extends TestBase {
         });
         assertEquals(Arrays.asList(2, 4), evenNumbers);
 
-        // Test with BiPredicate
         List<Integer> collected = new ArrayList<>();
         createStream(1, 2, 3, 4, 5).peekIf((n, count) -> count <= 3, collected::add).forEach(e -> {
         });
@@ -1430,11 +1367,9 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testMergeWith() {
-        // Test merge with collection
         Stream<Integer> merged = createStream(1, 3, 5).mergeWith(Arrays.asList(2, 4, 6), (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), merged.toList());
 
-        // Test merge with stream
         Stream<Integer> stream1 = createStream(1, 3, 5);
         Stream<Integer> stream2 = createStream(2, 4, 6);
         Stream<Integer> mergedStreams = stream1.mergeWith(stream2, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
@@ -1443,21 +1378,17 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testZipWith() {
-        // Test zip with collection
         Stream<String> zipped = stream.zipWith(Arrays.asList("a", "b", "c"), (n, s) -> n + s);
         assertEquals(Arrays.asList("1a", "2b", "3c"), zipped.toList());
 
-        // Test zip with collection and default values
         Stream<String> zippedWithDefaults = createStream(1, 2, 3).zipWith(Arrays.asList("a"), 0, "z", (n, s) -> n + s);
         assertEquals(Arrays.asList("1a", "2z", "3z"), zippedWithDefaults.toList());
 
-        // Test zip with stream
         Stream<Integer> stream1 = createStream(1, 2, 3);
         Stream<Integer> stream2 = createStream(10, 20, 30);
         Stream<Integer> zippedStreams = stream1.zipWith(stream2, (a, b) -> a + b);
         assertEquals(Arrays.asList(11, 22, 33), zippedStreams.toList());
 
-        // Test zip with three collections
         Stream<String> zipped3 = createStream(1, 2, 3).zipWith(Arrays.asList("a", "b", "c"), Arrays.asList("x", "y", "z"), (n, s1, s2) -> n + s1 + s2);
         assertEquals(Arrays.asList("1ax", "2by", "3cz"), zipped3.toList());
     }
@@ -1473,12 +1404,9 @@ public class Stream100Test extends TestBase {
         Stream<String> transformed = stream.transformB(jdkStream -> jdkStream.map(n -> "num" + n));
         assertEquals(Arrays.asList("num1", "num2", "num3", "num4", "num5"), transformed.toList());
 
-        // Test deferred transformation
         Stream<String> deferredTransform = createStream(1, 2, 3).transformB(jdkStream -> jdkStream.map(n -> "num" + n), true);
         assertEquals(Arrays.asList("num1", "num2", "num3"), deferredTransform.toList());
     }
-
-    // ===== Terminal Operations Tests =====
 
     @Test
     public void testForEach() {
@@ -1498,7 +1426,6 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testForEachUntil() {
-        // Test with BiConsumer
         List<Integer> collected = new ArrayList<>();
         stream.forEachUntil((value, flag) -> {
             collected.add(value);
@@ -1508,7 +1435,6 @@ public class Stream100Test extends TestBase {
         });
         assertEquals(Arrays.asList(1, 2, 3), collected);
 
-        // Test with MutableBoolean
         List<Integer> collected2 = new ArrayList<>();
         MutableBoolean flag = MutableBoolean.of(false);
         createStream(1, 2, 3, 4, 5).forEachUntil(flag, value -> {
@@ -1559,28 +1485,25 @@ public class Stream100Test extends TestBase {
     @Test
     public void testAllMatch() {
         assertTrue(stream.allMatch(n -> n > 0));
-        // assertFalse(stream.allMatch(n -> n > 3));
-        assertTrue(Stream.<Integer> empty().allMatch(n -> n > 0)); // Empty stream returns true
+        assertTrue(Stream.<Integer> empty().allMatch(n -> n > 0));
     }
 
     @Test
     public void testNoneMatch() {
         assertTrue(stream.noneMatch(n -> n > 10));
-        assertTrue(Stream.<Integer> empty().noneMatch(n -> n > 0)); // Empty stream returns true
+        assertTrue(Stream.<Integer> empty().noneMatch(n -> n > 0));
     }
 
     @Test
     public void testNMatch() {
-        assertTrue(stream.nMatch(2, 3, n -> n > 2)); // Exactly 3 elements > 2 
+        assertTrue(stream.nMatch(2, 3, n -> n > 2));
     }
 
     @Test
     public void testOfLines_File() throws IOException {
-        // Create test file
         File testFile = Files.createTempFile(tempFolder, "test", ".txt").toFile();
         Files.write(testFile.toPath(), Arrays.asList("line1", "line2", "line3"));
 
-        // Test reading lines
         List<String> lines = Stream.ofLines(testFile).toList();
         assertEquals(3, lines.size());
         assertEquals("line1", lines.get(0));
@@ -1590,12 +1513,10 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testOfLines_FileWithCharset() throws IOException {
-        // Create test file
         File testFile = Files.createTempFile(tempFolder, "test-charset", ".txt").toFile();
         String content = "Hello\nWorld\n你好";
         Files.write(testFile.toPath(), content.getBytes("UTF-8"));
 
-        // Test reading lines with charset
         List<String> lines = Stream.ofLines(testFile, Charsets.UTF_8).toList();
         assertEquals(3, lines.size());
         assertEquals("Hello", lines.get(0));
@@ -1605,11 +1526,9 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testOfLines_Path() throws IOException {
-        // Create test file
         Path testPath = Files.createTempFile(tempFolder, "test-path", ".txt").toFile().toPath();
         Files.write(testPath, Arrays.asList("path1", "path2", "path3"));
 
-        // Test reading lines from path
         List<String> lines = Stream.ofLines(testPath).toList();
         assertEquals(3, lines.size());
         assertEquals("path1", lines.get(0));
@@ -1619,11 +1538,9 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testOfLines_PathWithCharset() throws IOException {
-        // Create test file
         Path testPath = Files.createTempFile(tempFolder, "test-path-charset", ".txt").toFile().toPath();
         Files.write(testPath, Arrays.asList("line1", "line2"), Charsets.UTF_8);
 
-        // Test reading lines from path with charset
         List<String> lines = Stream.ofLines(testPath, Charsets.UTF_8).toList();
         assertEquals(2, lines.size());
         assertEquals("line1", lines.get(0));
@@ -1632,14 +1549,12 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testListFiles_SingleDirectory() throws IOException {
-        // Create test directory structure
         File parentDir = Files.createTempDirectory(tempFolder, "parent").toFile();
         File file1 = new File(parentDir, "file1.txt");
         File file2 = new File(parentDir, "file2.txt");
         file1.createNewFile();
         file2.createNewFile();
 
-        // Test listing files
         List<File> files = Stream.listFiles(parentDir).toList();
         assertEquals(2, files.size());
         assertTrue(files.contains(file1));
@@ -1655,7 +1570,6 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testListFiles_Recursive() throws IOException {
-        // Create nested directory structure
         File parentDir = Files.createTempDirectory(tempFolder, "parent").toFile();
         File subDir = new File(parentDir, "subdir");
         subDir.mkdir();
@@ -1664,9 +1578,8 @@ public class Stream100Test extends TestBase {
         file1.createNewFile();
         file2.createNewFile();
 
-        // Test recursive listing
         List<File> files = Stream.listFiles(parentDir, true).toList();
-        assertEquals(3, files.size()); // subdir, file1, file2
+        assertEquals(3, files.size());
         assertTrue(files.contains(subDir));
         assertTrue(files.contains(file1));
         assertTrue(files.contains(file2));
@@ -1674,7 +1587,6 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testListFiles_RecursiveExcludeDirectory() throws IOException {
-        // Create nested directory structure
         File parentDir = Files.createTempDirectory(tempFolder, "parent").toFile();
         File subDir = new File(parentDir, "subdir");
         subDir.mkdir();
@@ -1683,9 +1595,8 @@ public class Stream100Test extends TestBase {
         file1.createNewFile();
         file2.createNewFile();
 
-        // Test recursive listing excluding directories
         List<File> files = Stream.listFiles(parentDir, true, true).toList();
-        assertEquals(2, files.size()); // Only files, not directories
+        assertEquals(2, files.size());
         assertTrue(files.contains(file1));
         assertTrue(files.contains(file2));
         assertFalse(files.contains(subDir));
@@ -1700,7 +1611,6 @@ public class Stream100Test extends TestBase {
 
         assertEquals(3, timestamps.size());
 
-        // Check intervals (with some tolerance)
         for (int i = 1; i < timestamps.size(); i++) {
             long interval = timestamps.get(i) - timestamps.get(i - 1);
             assertTrue(interval >= 40 && interval <= 70, "Interval should be around 50ms");
@@ -1724,7 +1634,6 @@ public class Stream100Test extends TestBase {
 
         assertEquals(3, values.size());
 
-        // Each value should be a timestamp
         for (Long value : values) {
             assertTrue(value > 0);
         }
@@ -1747,7 +1656,6 @@ public class Stream100Test extends TestBase {
         BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
         BooleanSupplier hasMore = () -> true;
 
-        // Add items in background
         CompletableFuture.runAsync(() -> {
             try {
                 Thread.sleep(50);
@@ -1847,8 +1755,6 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testStreamEx_Inheritance() {
-        // StreamEx is abstract, so we can't instantiate it directly
-        // Test that it properly extends Stream
         assertTrue(Stream.StreamEx.class.getSuperclass().equals(Stream.class));
     }
 
@@ -1870,7 +1776,6 @@ public class Stream100Test extends TestBase {
 
         Stream<Integer> deferred = Stream.defer(supplier);
 
-        // Supplier should not be called until stream is consumed
         assertEquals(0, counter[0]);
 
         List<Integer> result = deferred.toList();
@@ -1929,11 +1834,9 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testOfNullable() {
-        // Non-null element
         Stream<String> stream1 = Stream.ofNullable("test");
         assertEquals(Arrays.asList("test"), stream1.toList());
 
-        // Null element
         Stream<String> stream2 = Stream.ofNullable(null);
         assertTrue(stream2.toList().isEmpty());
     }
@@ -1968,7 +1871,7 @@ public class Stream100Test extends TestBase {
     @Test
     public void testOf_ArrayWithInvalidRange() {
         Integer[] array = { 1, 2, 3 };
-        assertThrows(IndexOutOfBoundsException.class, () -> createStream(array, 1, 5)); // Should throw
+        assertThrows(IndexOutOfBoundsException.class, () -> createStream(array, 1, 5));
     }
 
     @Test
@@ -2105,29 +2008,24 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testOf_Optional() {
-        // Present optional
         Optional<String> present = Optional.of("value");
         Stream<String> stream1 = createStream(present);
         assertEquals(Arrays.asList("value"), stream1.toList());
 
-        // Empty optional
         Optional<String> empty = Optional.empty();
         Stream<String> stream2 = createStream(empty);
         assertTrue(stream2.toList().isEmpty());
 
-        // Null optional
         Stream<String> stream3 = createStream((Optional<String>) null);
         assertTrue(stream3.toList().isEmpty());
     }
 
     @Test
     public void testOf_JavaUtilOptional() {
-        // Present optional
         java.util.Optional<Integer> present = java.util.Optional.of(42);
         Stream<Integer> stream1 = createStream(present);
         assertEquals(Arrays.asList(42), stream1.toList());
 
-        // Empty optional
         java.util.Optional<Integer> empty = java.util.Optional.empty();
         Stream<Integer> stream2 = createStream(empty);
         assertTrue(stream2.toList().isEmpty());
@@ -2322,19 +2220,15 @@ public class Stream100Test extends TestBase {
     public void testSplitToLines_WithOptions() {
         String str = "  line1  \n\n  line2  \n  \n  line3  ";
 
-        // Test trim and omit empty lines
         List<String> lines1 = Stream.splitToLines(str, true, true).toList();
         assertEquals(Arrays.asList("line1", "line2", "line3"), lines1);
 
-        // Test trim only
         List<String> lines2 = Stream.splitToLines(str, true, false).toList();
         assertEquals(Arrays.asList("line1", "", "line2", "", "line3"), lines2);
 
-        // Test omit empty lines only
         List<String> lines3 = Stream.splitToLines(str, false, true).toList();
         assertEquals(Arrays.asList("  line1  ", "  line2  ", "  ", "  line3  "), lines3);
 
-        // Test neither trim nor omit
         List<String> lines4 = Stream.splitToLines(str, false, false).toList();
         assertEquals(Arrays.asList("  line1  ", "", "  line2  ", "  ", "  line3  "), lines4);
     }
@@ -2503,16 +2397,13 @@ public class Stream100Test extends TestBase {
         String content = "a\nb\nc";
         StringReader reader = new StringReader(content);
 
-        // Test with closeReaderWhenStreamIsClosed = true
         try (Stream<String> stream = Stream.ofLines(reader, true)) {
             assertEquals(Arrays.asList("a", "b", "c"), stream.toList());
         }
 
-        // Test with closeReaderWhenStreamIsClosed = false
         StringReader reader2 = new StringReader(content);
         Stream<String> stream2 = Stream.ofLines(reader2, false);
         assertEquals(Arrays.asList("a", "b", "c"), stream2.toList());
-        // Reader should still be open
     }
 
     @Test
@@ -2520,10 +2411,8 @@ public class Stream100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Stream.ofLines((Reader) null));
     }
 
-    // Integration tests
     @Test
     public void testComplexStreamOperations() {
-        // Test chaining multiple operations
         List<String> result = Stream.range(1, 10).filter(x -> x % 2 == 0).map(x -> "Number: " + x).toList();
 
         assertEquals(Arrays.asList("Number: 2", "Number: 4", "Number: 6", "Number: 8"), result);
@@ -2553,7 +2442,6 @@ public class Stream100Test extends TestBase {
             try {
                 stream.close();
             } catch (Exception e) {
-                // Ignore
             }
         }
         streamsToClose.clear();
@@ -2563,8 +2451,6 @@ public class Stream100Test extends TestBase {
         streamsToClose.add(stream);
         return stream;
     }
-
-    // Test for static helper methods and edge cases
 
     @Test
     public void testOfLines_EmptyFile() throws IOException {
@@ -2601,7 +2487,6 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testListFiles_DeepRecursion() throws IOException {
-        // Create deep directory structure
         File root = Files.createTempDirectory(tempFolder, "deep").toFile();
         File current = root;
         for (int i = 0; i < 5; i++) {
@@ -2614,7 +2499,6 @@ public class Stream100Test extends TestBase {
 
         List<File> files = Stream.listFiles(root, true).toList();
 
-        // Should have 5 directories and 5 files
         assertEquals(10, files.size());
     }
 
@@ -2622,24 +2506,20 @@ public class Stream100Test extends TestBase {
     public void testListFiles_MixedContent() throws IOException {
         File dir = Files.createTempDirectory(tempFolder, "mixed").toFile();
 
-        // Create files with different extensions
         new File(dir, "test.txt").createNewFile();
         new File(dir, "test.java").createNewFile();
         new File(dir, "test.xml").createNewFile();
         new File(dir, ".hidden").createNewFile();
 
-        // Create subdirectory
         File subDir = new File(dir, "subdir");
         subDir.mkdir();
         new File(subDir, "nested.txt").createNewFile();
 
-        // Non-recursive
         List<File> nonRecursive = Stream.listFiles(dir, false).toList();
-        assertEquals(5, nonRecursive.size()); // 4 files + 1 directory
+        assertEquals(5, nonRecursive.size());
 
-        // Recursive excluding directories
         List<File> recursiveFiles = Stream.listFiles(dir, true, true).toList();
-        assertEquals(5, recursiveFiles.size()); // All files, no directories
+        assertEquals(5, recursiveFiles.size());
     }
 
     @Test
@@ -2648,14 +2528,12 @@ public class Stream100Test extends TestBase {
 
         Stream<Integer> intervalStream = trackStream(Stream.interval(10, () -> counter.incrementAndGet()));
 
-        // Take only first 3 elements
         List<Integer> results = intervalStream.limit(3).toList();
 
         assertEquals(Arrays.asList(1, 2, 3), results);
 
-        // Give some time to ensure no more elements are generated
         Thread.sleep(50);
-        assertTrue(counter.get() <= 4); // May have generated one extra
+        assertTrue(counter.get() <= 4);
     }
 
     @Test
@@ -2671,14 +2549,13 @@ public class Stream100Test extends TestBase {
     public void testObserve_QueueWithTimeout() throws InterruptedException {
         BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
 
-        // Add elements with delay
         CompletableFuture.runAsync(() -> {
             try {
                 Thread.sleep(30);
                 queue.add(1);
                 Thread.sleep(30);
                 queue.add(2);
-                Thread.sleep(100); // This will exceed the duration
+                Thread.sleep(100);
                 queue.add(3);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -2687,7 +2564,6 @@ public class Stream100Test extends TestBase {
 
         List<Integer> results = Stream.observe(queue, Duration.ofMillis(100)).toList();
 
-        // Should get only first 2 elements
         assertEquals(2, results.size());
         assertTrue(results.contains(1));
         assertTrue(results.contains(2));
@@ -2735,28 +2611,23 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testFlatten_EmptyArrays() {
-        // Empty 2D array
         Integer[][] empty2D = new Integer[0][];
         assertTrue(Stream.flatten(empty2D).toList().isEmpty());
 
-        // 2D array with empty inner arrays
         Integer[][] withEmpty = { {}, { 1, 2 }, {}, { 3 } };
         assertEquals(Arrays.asList(1, 2, 3), Stream.flatten(withEmpty).toList());
 
-        // Empty 3D array
         Integer[][][] empty3D = new Integer[0][][];
         assertTrue(Stream.flatten(empty3D).toList().isEmpty());
     }
 
     @Test
     public void testFlatten_IrregularArrays() {
-        // Irregular 2D array
         Integer[][] irregular = { { 1 }, { 2, 3, 4 }, null, { 5, 6 } };
 
         List<Integer> flattened = Stream.flatten(irregular).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), flattened);
 
-        // Vertically with irregular arrays
         List<Integer> vertical = Stream.flatten(irregular, true).toList();
         assertEquals(Arrays.asList(1, 2, 5, 3, 6, 4), vertical);
     }
@@ -2772,14 +2643,12 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testIterate_StopConditions() {
-        // Test with hasNext returning false immediately
         BooleanSupplier alwaysFalse = () -> false;
         Supplier<String> supplier = () -> "should not be called";
 
         List<String> result1 = Stream.iterate(alwaysFalse, supplier).toList();
         assertTrue(result1.isEmpty());
 
-        // Test with predicate returning false for initial value
         Predicate<Integer> negative = x -> x < 0;
         List<Integer> result2 = Stream.iterate(1, negative, x -> x + 1).toList();
         assertTrue(result2.isEmpty());
@@ -2787,12 +2656,11 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testGenerate_RandomNumbers() {
-        Random random = new Random(12345); // Fixed seed for reproducibility
+        Random random = new Random(12345);
 
         List<Integer> randomNumbers = Stream.generate(() -> random.nextInt(100)).limit(10).toList();
 
         assertEquals(10, randomNumbers.size());
-        // All should be between 0 and 99
         for (Integer num : randomNumbers) {
             assertTrue(num >= 0 && num < 100);
         }
@@ -2800,44 +2668,35 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testOf_PrimitiveArraysWithRange() {
-        // Test all primitive array types with ranges
 
-        // boolean array
         boolean[] boolArray = { true, false, true, false, true };
         List<Boolean> boolResult = createStream(boolArray, 1, 4).toList();
         assertEquals(Arrays.asList(false, true, false), boolResult);
 
-        // char array
         char[] charArray = { 'a', 'b', 'c', 'd', 'e' };
         List<Character> charResult = createStream(charArray, 2, 5).toList();
         assertEquals(Arrays.asList('c', 'd', 'e'), charResult);
 
-        // byte array
         byte[] byteArray = { 10, 20, 30, 40, 50 };
         List<Byte> byteResult = createStream(byteArray, 0, 3).toList();
         assertEquals(Arrays.asList((byte) 10, (byte) 20, (byte) 30), byteResult);
 
-        // short array
         short[] shortArray = { 100, 200, 300, 400 };
         List<Short> shortResult = createStream(shortArray, 1, 3).toList();
         assertEquals(Arrays.asList((short) 200, (short) 300), shortResult);
 
-        // int array
         int[] intArray = { 1, 2, 3, 4, 5, 6 };
         List<Integer> intResult = createStream(intArray, 2, 5).toList();
         assertEquals(Arrays.asList(3, 4, 5), intResult);
 
-        // long array
         long[] longArray = { 10L, 20L, 30L, 40L };
         List<Long> longResult = createStream(longArray, 1, 4).toList();
         assertEquals(Arrays.asList(20L, 30L, 40L), longResult);
 
-        // float array
         float[] floatArray = { 1.1f, 2.2f, 3.3f, 4.4f };
         List<Float> floatResult = createStream(floatArray, 0, 2).toList();
         assertEquals(Arrays.asList(1.1f, 2.2f), floatResult);
 
-        // double array
         double[] doubleArray = { 1.5, 2.5, 3.5, 4.5, 5.5 };
         List<Double> doubleResult = createStream(doubleArray, 2, 4).toList();
         assertEquals(Arrays.asList(3.5, 4.5), doubleResult);
@@ -2863,40 +2722,32 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testRange_NegativeSteps() {
-        // Int range with negative step
         List<Integer> intRange = Stream.range(10, 0, -2).toList();
         assertEquals(Arrays.asList(10, 8, 6, 4, 2), intRange);
 
-        // Long range with negative step
         List<Long> longRange = Stream.range(20L, 10L, -3L).toList();
         assertEquals(Arrays.asList(20L, 17L, 14L, 11L), longRange);
     }
 
     @Test
     public void testRangeClosed_NegativeSteps() {
-        // Int range closed with negative step
         List<Integer> intRange = Stream.rangeClosed(10, 0, -2).toList();
         assertEquals(Arrays.asList(10, 8, 6, 4, 2, 0), intRange);
 
-        // Long range closed with negative step
         List<Long> longRange = Stream.rangeClosed(15L, 5L, -5L).toList();
         assertEquals(Arrays.asList(15L, 10L, 5L), longRange);
     }
 
     @Test
     public void testSplit_EdgeCases() {
-        // Empty string
         assertEquals("", Stream.split("", ',').onlyOne().orElseThrow());
 
-        // String without delimiter
         assertEquals(Arrays.asList("hello"), Stream.split("hello", ',').toList());
 
-        // String with only delimiters
         List<String> onlyDelimiters = Stream.split("::::", ":").toList();
         assertEquals(5, onlyDelimiters.size());
         assertTrue(onlyDelimiters.stream().allMatch(String::isEmpty));
 
-        // String ending with delimiter
         assertEquals(Arrays.asList("a", "b", ""), Stream.split("a,b,", ',').toList());
     }
 
@@ -2907,12 +2758,10 @@ public class Stream100Test extends TestBase {
 
         Stream<String> stream = Stream.from(javaStream);
 
-        // Should still work with closed stream if iterator hasn't been created
         try {
             stream.toList();
             fail("Expected exception from closed java stream");
         } catch (IllegalStateException e) {
-            // Expected
         }
     }
 
@@ -2936,6 +2785,10 @@ public class Stream100Test extends TestBase {
 
             @Override
             public void advance(long n) {
+                if (n <= 0) {
+                    return;
+                }
+
                 current = Math.min(current + (int) n, 10);
             }
         };
@@ -2954,7 +2807,6 @@ public class Stream100Test extends TestBase {
 
         Stream<Map.Entry<String, Integer>> stream = createStream(map);
 
-        // Modify map after creating stream
         map.put("c", 3);
 
         assertThrows(ConcurrentModificationException.class, () -> stream.toList());
@@ -2962,7 +2814,6 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testComplexNestedOperations() {
-        // Test complex combination of operations
         List<String> result = createStream(Arrays.asList(1, 2, 3, 4, 5)).flatMap(n -> createStream(n, n * 10))
                 .filter(n -> n % 2 == 0)
                 .map(n -> "Value: " + n)
@@ -2975,17 +2826,14 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testMemoryEfficientOperations() {
-        // Test that operations don't load everything into memory unnecessarily
         AtomicInteger generatedCount = new AtomicInteger(0);
 
         Stream<Integer> infiniteStream = Stream.generate(() -> generatedCount.incrementAndGet());
 
-        // Take only first 5 elements
         List<Integer> result = infiniteStream.limit(5).toList();
 
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
 
-        // Should not have generated many more than needed
         assertTrue(generatedCount.get() <= 10);
     }
 
@@ -3020,10 +2868,8 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testThreadSafety() throws InterruptedException {
-        // Test concurrent access to stream operations
         BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1000);
 
-        // Producer thread
         Thread producer = new Thread(() -> {
             for (int i = 0; i < 100; i++) {
                 try {
@@ -3038,19 +2884,16 @@ public class Stream100Test extends TestBase {
 
         producer.start();
 
-        // Consumer using Stream.observe
         List<Integer> consumed = Stream.observe(queue, Duration.ofMillis(500)).filter(n -> n % 2 == 0).toList();
 
         producer.join();
 
-        // Should have consumed even numbers
         assertTrue(consumed.size() > 0);
         assertTrue(consumed.stream().allMatch(n -> n % 2 == 0));
     }
 
     @Test
     public void testResourceManagement() throws IOException {
-        // Test that resources are properly closed
         File testFile = Files.createTempFile(tempFolder, "resource-test", ".txt").toFile();
         Files.write(testFile.toPath(), Arrays.asList("line1", "line2", "line3"));
 
@@ -3065,29 +2908,23 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testLargeDataHandling() {
-        // Test handling of large data sets
         int size = 100000;
 
         long sum = Stream.range(0, size).mapToLong(i -> i).sum();
 
-        // Sum of 0 to 99999 = (n * (n-1)) / 2
         long expectedSum = ((long) size * (size - 1)) / 2;
         assertEquals(expectedSum, sum);
     }
 
     @Test
     public void testNullSafety() {
-        // Test various operations with null elements
         List<String> withNulls = Arrays.asList("a", null, "b", null, "c");
 
-        // Count including nulls
         assertEquals(5, createStream(withNulls).count());
 
-        // Filter out nulls
         List<String> nonNulls = createStream(withNulls).filter(Objects::nonNull).toList();
         assertEquals(Arrays.asList("a", "b", "c"), nonNulls);
 
-        // Map with null-safe operation
         List<Integer> lengths = createStream(withNulls).map(s -> s == null ? -1 : s.length()).toList();
         assertEquals(Arrays.asList(1, -1, 1, -1, 1), lengths);
     }
@@ -3095,21 +2932,8 @@ public class Stream100Test extends TestBase {
     @TempDir
     Path tempFolder;
 
-    //    @Test
-    //    public void testOf_IteratorWithRange_NegativeStart() {
-    //        Iterator<Integer> iter = Arrays.asList(1, 2, 3).iterator();
-    //        createStream(iter, -1, 2));
-    //    }
-
-    //    @Test
-    //    public void testOf_IteratorWithRange_InvalidRange() {
-    //        Iterator<Integer> iter = Arrays.asList(1, 2, 3).iterator());
-    //        createStream(iter, 2, 1); // endIndex < startIndex
-    //    }
-
     @Test
     public void testOf_PrimitiveArrays_EmptyArrays() {
-        // Test all primitive array types with empty arrays
 
         assertTrue(createStream(new boolean[0]).toList().isEmpty());
         assertTrue(createStream(new char[0]).toList().isEmpty());
@@ -3123,12 +2947,10 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testOf_PrimitiveArrays_CountAndAdvance() {
-        // Test count() optimization for primitive arrays
         int[] intArray = { 1, 2, 3, 4, 5 };
         Stream<Integer> intStream = createStream(intArray, 1, 4);
         assertEquals(3, intStream.count());
 
-        // Test advance() for primitive arrays
         double[] doubleArray = { 1.0, 2.0, 3.0, 4.0, 5.0 };
         Stream<Double> doubleStream = createStream(doubleArray);
         assertEquals(Arrays.asList(3.0, 4.0, 5.0), doubleStream.skip(2).toList());
@@ -3136,19 +2958,15 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testOf_PrimitiveArrays_ToArray() {
-        // Test toArray(A[]) for primitive arrays
 
-        // Boolean array
         boolean[] boolArray = { true, false, true };
         Boolean[] boolResult = createStream(boolArray).toArray(Boolean[]::new);
         assertArrayEquals(new Boolean[] { true, false, true }, boolResult);
 
-        // Char array
         char[] charArray = { 'x', 'y', 'z' };
         Character[] charResult = createStream(charArray).toArray(Character[]::new);
         assertArrayEquals(new Character[] { 'x', 'y', 'z' }, charResult);
 
-        // Integer array
         int[] intArray = { 10, 20, 30 };
         Integer[] intResult = createStream(intArray).toArray(Integer[]::new);
         assertArrayEquals(new Integer[] { 10, 20, 30 }, intResult);
@@ -3162,7 +2980,6 @@ public class Stream100Test extends TestBase {
             Stream.ofLines(nonExistentFile).toList();
             fail("Expected exception for non-existent file");
         } catch (UncheckedIOException e) {
-            // Expected
             assertTrue(e.getCause() instanceof FileNotFoundException);
         }
     }
@@ -3175,33 +2992,28 @@ public class Stream100Test extends TestBase {
             Stream.ofLines(nonExistentPath).toList();
             fail("Expected exception for non-existent path");
         } catch (UncheckedIOException e) {
-            // Expected
             assertTrue(e.getCause() instanceof IOException);
         }
     }
 
     @Test
     public void testOfLines_DifferentCharsets() throws IOException {
-        // Test with different character encodings
         File utf8File = Files.createTempFile(tempFolder, "utf8", ".txt").toFile();
         String content = "Hello\nWorld\n你好\n世界";
         Files.write(utf8File.toPath(), content.getBytes("UTF-8"));
 
-        // Read with UTF-8
         List<String> utf8Lines = Stream.ofLines(utf8File, Charsets.UTF_8).toList();
         assertEquals(4, utf8Lines.size());
         assertEquals("你好", utf8Lines.get(2));
         assertEquals("世界", utf8Lines.get(3));
 
-        // Test with ISO-8859-1 (will not read Chinese characters correctly)
         List<String> isoLines = Stream.ofLines(utf8File, Charset.forName("ISO-8859-1")).toList();
         assertEquals(4, isoLines.size());
-        assertNotEquals("你好", isoLines.get(2)); // Characters will be garbled
+        assertNotEquals("你好", isoLines.get(2));
     }
 
     @Test
     public void testOfLines_LargeFile() throws IOException {
-        // Test with a file containing many lines
         File largeFile = Files.createTempFile(tempFolder, "large", ".txt").toFile();
         List<String> lines = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
@@ -3209,11 +3021,9 @@ public class Stream100Test extends TestBase {
         }
         Files.write(largeFile.toPath(), lines);
 
-        // Stream should handle large files efficiently
         long count = Stream.ofLines(largeFile).count();
         assertEquals(10000, count);
 
-        // Test filtering on large file
         long evenCount = Stream.ofLines(largeFile)
                 .filter(line -> line.contains("0") || line.contains("2") || line.contains("4") || line.contains("6") || line.contains("8"))
                 .count();
@@ -3232,12 +3042,10 @@ public class Stream100Test extends TestBase {
 
         assertEquals(3, lines.size());
 
-        // Try to read again - should fail as reader is closed
         try {
             reader.read();
             fail("Reader should be closed");
         } catch (IOException e) {
-            // Expected - reader is closed
         }
     }
 
@@ -3250,20 +3058,17 @@ public class Stream100Test extends TestBase {
 
         assertEquals(3, lines.size());
 
-        // BufferedReader should still be open
-        bufferedReader.close(); // Should not throw
+        bufferedReader.close();
     }
 
     @Test
     public void testListFiles_SymbolicLinks() throws IOException {
-        // Test behavior with symbolic links (if supported by the OS)
         File targetDir = Files.createTempDirectory(tempFolder, "target").toFile();
         File targetFile = new File(targetDir, "target.txt");
         targetFile.createNewFile();
 
         File linkDir = Files.createTempDirectory(tempFolder, "links").toFile();
 
-        // Note: Creating symbolic links may not work on all systems
         try {
             Path link = new File(linkDir, "link.txt").toPath();
             Files.createSymbolicLink(link, targetFile.toPath());
@@ -3272,7 +3077,6 @@ public class Stream100Test extends TestBase {
             assertEquals(1, files.size());
             assertEquals("link.txt", files.get(0).getName());
         } catch (UnsupportedOperationException | IOException e) {
-            // Symbolic links not supported - skip this test
         }
     }
 
@@ -3280,25 +3084,20 @@ public class Stream100Test extends TestBase {
     public void testListFiles_HiddenFiles() throws IOException {
         File dir = Files.createTempDirectory(tempFolder, "hidden").toFile();
 
-        // Create regular file
         File regularFile = new File(dir, "regular.txt");
         regularFile.createNewFile();
 
-        // Create hidden file (Unix-style)
         File hiddenFile = new File(dir, ".hidden");
         hiddenFile.createNewFile();
 
-        // On Windows, set hidden attribute
         if (System.getProperty("os.name").toLowerCase().contains("win")) {
             try {
                 Files.setAttribute(hiddenFile.toPath(), "dos:hidden", true);
             } catch (IOException e) {
-                // Ignore if setting hidden attribute fails
             }
         }
 
         List<File> allFiles = Stream.listFiles(dir).toList();
-        // Should include hidden files
         assertTrue(allFiles.size() >= 2);
     }
 
@@ -3308,17 +3107,13 @@ public class Stream100Test extends TestBase {
         File file = new File(dir, "file.txt");
         file.createNewFile();
 
-        // Try to remove read permission (may not work on all systems)
         boolean permissionChanged = dir.setReadable(false);
 
         if (permissionChanged) {
             try {
                 List<File> files = Stream.listFiles(dir).toList();
-                // Behavior depends on OS - might return empty or throw exception
             } catch (Exception e) {
-                // Expected on some systems
             } finally {
-                // Restore permissions
                 dir.setReadable(true);
             }
         }
@@ -3336,7 +3131,6 @@ public class Stream100Test extends TestBase {
             assertEquals(Arrays.asList("a", "b", "c", "d"), concatenated.toList());
         }
 
-        // Both streams should be closed
         assertTrue(stream1Closed.get());
         assertTrue(stream2Closed.get());
     }
@@ -3358,7 +3152,6 @@ public class Stream100Test extends TestBase {
             assertEquals(Arrays.asList(0, 1, 10, 11, 20, 21), result);
         }
 
-        // All streams should be closed
         for (AtomicBoolean flag : closedFlags) {
             assertTrue(flag.get());
         }
@@ -3366,7 +3159,6 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testFrom_JavaStreamOperations() {
-        // Test various operations after converting from Java stream
         java.util.stream.Stream<String> javaStream = java.util.stream.Stream.of("apple", "banana", "cherry", "date").filter(s -> s.length() > 4);
 
         Stream<String> stream = Stream.from(javaStream);
@@ -3382,7 +3174,6 @@ public class Stream100Test extends TestBase {
 
         Stream<Integer> stream = Stream.from(javaStream);
 
-        // Test count optimization
         assertEquals(5, stream.count());
     }
 
@@ -3392,7 +3183,6 @@ public class Stream100Test extends TestBase {
 
         Stream<Integer> stream = Stream.from(javaStream);
 
-        // Skip should use advance if available
         List<Integer> result = stream.skip(2).toList();
         assertEquals(Arrays.asList(3, 4, 5), result);
     }
@@ -3403,11 +3193,9 @@ public class Stream100Test extends TestBase {
 
         Stream<String> stream = Stream.from(javaStream);
 
-        // Test toArray optimizations
         Object[] objArray = stream.toArray();
         assertArrayEquals(new Object[] { "a", "b", "c" }, objArray);
 
-        // Test typed array
         java.util.stream.Stream<String> javaStream2 = java.util.stream.Stream.of("x", "y", "z");
         Stream<String> stream2 = Stream.from(javaStream2);
         String[] stringArray = stream2.toArray(String[]::new);
@@ -3416,16 +3204,12 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testStreamEx_AbstractClass() {
-        // Verify StreamEx is abstract and cannot be instantiated directly
         try {
-            // This should not compile, but let's verify the class structure
             Class<?> streamExClass = Stream.StreamEx.class;
             assertTrue(java.lang.reflect.Modifier.isAbstract(streamExClass.getModifiers()));
 
-            // Verify it extends Stream
             assertEquals(Stream.class, streamExClass.getSuperclass());
 
-            // Verify constructor is private/protected
             assertEquals(0, streamExClass.getConstructors().length);
         } catch (Exception e) {
             fail("Failed to verify StreamEx class structure: " + e.getMessage());
@@ -3434,7 +3218,6 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testComplexScenarios_MemoryLeak() {
-        // Test that streams don't cause memory leaks with large data
         List<Stream<?>> streams = new ArrayList<>();
 
         for (int i = 0; i < 100; i++) {
@@ -3442,18 +3225,15 @@ public class Stream100Test extends TestBase {
             streams.add(stream);
         }
 
-        // Close all streams
         for (Stream<?> stream : streams) {
             stream.close();
         }
 
-        // If we get here without OutOfMemoryError, the test passes
         assertTrue(true);
     }
 
     @Test
     public void testComplexScenarios_NestedParallelism() {
-        // Test nested parallel operations
         List<Integer> result = Stream.range(0, 10)
                 .parallel()
                 .flatMap(i -> Stream.range(i * 10, (i + 1) * 10).parallel())
@@ -3461,7 +3241,6 @@ public class Stream100Test extends TestBase {
                 .sorted()
                 .toList();
 
-        // Verify we got all multiples of 3 from 0 to 99
         List<Integer> expected = new ArrayList<>();
         for (int i = 0; i < 100; i += 3) {
             expected.add(i);
@@ -3471,7 +3250,6 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testPerformance_LargeConcat() {
-        // Test concatenating many streams
         List<Stream<Integer>> manyStreams = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             final int base = i * 10;
@@ -3484,13 +3262,10 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testEdgeCases_VeryLargeRepeat() {
-        // Test repeat with very large count
         long veryLarge = Long.MAX_VALUE / 2;
 
-        // Don't actually consume all elements, just verify it works
         Stream<String> repeated = Stream.repeat("X", veryLarge);
 
-        // Take only first few elements
         List<String> first10 = repeated.limit(10).toList();
         assertEquals(10, first10.size());
         assertTrue(first10.stream().allMatch("X"::equals));
@@ -3498,37 +3273,27 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testIntegration_AllFactoryMethods() {
-        // Test that all factory methods produce valid streams
 
-        // empty()
         assertEquals(0, Stream.empty().count());
 
-        // just()
         assertEquals(1, Stream.just("test").count());
 
-        // ofNullable()
         assertEquals(0, Stream.ofNullable(null).count());
         assertEquals(1, Stream.ofNullable("test").count());
 
-        // defer()
         assertEquals(3, Stream.defer(() -> createStream(1, 2, 3)).count());
 
-        // Various of() methods work correctly
         assertEquals(3, createStream01(new Integer[] { 1, 2, 3 }).count());
         assertEquals(3, createStream(Arrays.asList(1, 2, 3)).count());
         assertEquals(3, createStream(Arrays.asList(1, 2, 3).iterator()).count());
 
-        // range methods
         assertEquals(5, Stream.range(0, 5).count());
         assertEquals(6, Stream.rangeClosed(0, 5).count());
 
-        // repeat
         assertEquals(10, Stream.repeat("X", 10).count());
 
-        // generate
         assertEquals(5, Stream.generate(() -> "Y").limit(5).count());
 
-        // iterate
         assertEquals(5, Stream.iterate(1, x -> x + 1).limit(5).count());
     }
 

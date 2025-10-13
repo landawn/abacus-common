@@ -33,6 +33,13 @@ public class MapEntityType extends AbstractType<MapEntity> {
     /**
      * Returns the Class object representing the MapEntity type.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MapEntityType type = new MapEntityType();
+     * Class<MapEntity> clazz = type.clazz();
+     * // Returns: MapEntity.class
+     * }</pre>
+     *
      * @return The Class object for MapEntity
      */
     @Override
@@ -43,6 +50,13 @@ public class MapEntityType extends AbstractType<MapEntity> {
     /**
      * Indicates whether this type represents a MapEntity.
      * For MapEntityType, this always returns true.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MapEntityType type = new MapEntityType();
+     * boolean isMapEntity = type.isMapEntity();
+     * // Returns: true
+     * }</pre>
      *
      * @return true, indicating that this type represents a MapEntity
      */
@@ -55,6 +69,13 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * Indicates whether instances of this type can be serialized.
      * MapEntity objects are not directly serializable through this type handler.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MapEntityType type = new MapEntityType();
+     * boolean serializable = type.isSerializable();
+     * // Returns: false
+     * }</pre>
+     *
      * @return false, indicating that MapEntity is not serializable through this type
      */
     @Override
@@ -65,6 +86,13 @@ public class MapEntityType extends AbstractType<MapEntity> {
     /**
      * Gets the serialization type category for MapEntity.
      * This indicates how the MapEntity should be treated during serialization processes.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MapEntityType type = new MapEntityType();
+     * SerializationType serType = type.getSerializationType();
+     * // Returns: SerializationType.MAP_ENTITY
+     * }</pre>
      *
      * @return SerializationType.MAP_ENTITY
      */
@@ -77,6 +105,18 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * Converts a MapEntity object to its JSON string representation.
      * The MapEntity is serialized using the configured JSON parser with default settings.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MapEntityType type = new MapEntityType();
+     * MapEntity entity = MapEntity.of("name", "John", "age", 30);
+     *
+     * String json = type.stringOf(entity);
+     * // Returns: "{\"name\":\"John\",\"age\":30}"
+     *
+     * json = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x The MapEntity object to convert
      * @return The JSON string representation of the MapEntity, or null if the input is null
      */
@@ -88,6 +128,20 @@ public class MapEntityType extends AbstractType<MapEntity> {
     /**
      * Parses a JSON string to create a MapEntity object.
      * The string should be a valid JSON object representation that can be deserialized into a MapEntity.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * MapEntityType type = new MapEntityType();
+     *
+     * MapEntity entity = type.valueOf("{\"name\":\"John\",\"age\":30}");
+     * // Returns: MapEntity with name="John" and age=30
+     *
+     * entity = type.valueOf(null);
+     * // Returns: null
+     *
+     * entity = type.valueOf("");
+     * // Returns: null
+     * }</pre>
      *
      * @param str The JSON string to parse
      * @return The parsed MapEntity object, or null if the input is null or empty

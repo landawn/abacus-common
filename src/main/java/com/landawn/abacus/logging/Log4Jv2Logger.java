@@ -40,7 +40,6 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
  * logger.error("Database connection failed", sqlException);
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 1.0
  */
 class Log4Jv2Logger extends AbstractLogger {

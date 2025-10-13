@@ -14,11 +14,13 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class DateType100Test extends TestBase {
 
     private DateType dateType;
@@ -45,46 +47,36 @@ public class DateType100Test extends TestBase {
 
     @Test
     public void testValueOfObject() {
-        // Test with Number
         long timestamp = System.currentTimeMillis();
         Date date = dateType.valueOf((Object) timestamp);
         assertNotNull(date);
         assertEquals(timestamp, date.getTime());
 
-        // Test with java.util.Date
         java.util.Date utilDate = new java.util.Date();
         Date sqlDate = dateType.valueOf((Object) utilDate);
         assertNotNull(sqlDate);
         assertEquals(utilDate.getTime(), sqlDate.getTime());
 
-        // Test with null
         assertNull(dateType.valueOf((Object) null));
     }
 
     @Test
     public void testValueOfString() {
-        // Test with null and empty string
         assertNull(dateType.valueOf((String) null));
         assertNull(dateType.valueOf(""));
 
-        // Test with "sysTime" would require mocking Dates.currentDate()
-        // Test with date string would require mocking Dates.parseDate()
     }
 
     @Test
     public void testValueOfCharArray() {
-        // Test with null
         assertNull(dateType.valueOf(null, 0, 0));
 
-        // Test with empty length
         char[] chars = new char[10];
         assertNull(dateType.valueOf(chars, 0, 0));
 
-        // Test with numeric string
         String timestampStr = "1234567890123";
         char[] timestampChars = timestampStr.toCharArray();
         Date date = dateType.valueOf(timestampChars, 0, timestampChars.length);
-        // Result depends on Dates.createDate() implementation
     }
 
     @Test

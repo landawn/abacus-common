@@ -34,7 +34,6 @@ import java.util.function.Supplier;
  * }</pre>
  * 
  * @param <T> the type of the lazily initialized object
- * @author Haiyang Li
  * @since 1.0
  */
 final class LazyInitializer<T> implements com.landawn.abacus.util.function.Supplier<T> {
@@ -101,11 +100,10 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
         if (!initialized) {
             synchronized (this) {
                 if (!initialized) {
-                    value = supplier.get();
-
+                    final T temp = supplier.get();
+                    value = temp;
                     initialized = true;
                 }
-
             }
         }
 

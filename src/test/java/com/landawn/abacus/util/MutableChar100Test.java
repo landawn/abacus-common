@@ -1,10 +1,12 @@
 package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class MutableChar100Test extends TestBase {
 
     @Test
@@ -51,13 +53,11 @@ public class MutableChar100Test extends TestBase {
     @Test
     public void testSetIf() throws Exception {
         MutableChar mutableChar = MutableChar.of('A');
-        
-        // Test when predicate returns true
+
         boolean updated = mutableChar.setIf('Z', c -> c < 'M');
         Assertions.assertTrue(updated);
         Assertions.assertEquals('Z', mutableChar.value());
-        
-        // Test when predicate returns false
+
         updated = mutableChar.setIf('A', c -> c < 'M');
         Assertions.assertFalse(updated);
         Assertions.assertEquals('Z', mutableChar.value());
@@ -68,7 +68,7 @@ public class MutableChar100Test extends TestBase {
         MutableChar mutableChar = MutableChar.of('A');
         mutableChar.increment();
         Assertions.assertEquals('B', mutableChar.value());
-        
+
         mutableChar.setValue('9');
         mutableChar.increment();
         Assertions.assertEquals(':', mutableChar.value());
@@ -79,32 +79,10 @@ public class MutableChar100Test extends TestBase {
         MutableChar mutableChar = MutableChar.of('B');
         mutableChar.decrement();
         Assertions.assertEquals('A', mutableChar.value());
-        
+
         mutableChar.setValue('1');
         mutableChar.decrement();
         Assertions.assertEquals('0', mutableChar.value());
-    }
-
-    @Test
-    public void testAdd() {
-        MutableChar mutableChar = MutableChar.of('A');
-        mutableChar.add((char) 3);
-        Assertions.assertEquals('D', mutableChar.value());
-        
-        mutableChar.setValue('0');
-        mutableChar.add((char) 5);
-        Assertions.assertEquals('5', mutableChar.value());
-    }
-
-    @Test
-    public void testSubtract() {
-        MutableChar mutableChar = MutableChar.of('D');
-        mutableChar.subtract((char) 3);
-        Assertions.assertEquals('A', mutableChar.value());
-        
-        mutableChar.setValue('5');
-        mutableChar.subtract((char) 2);
-        Assertions.assertEquals('3', mutableChar.value());
     }
 
     @Test
@@ -140,27 +118,11 @@ public class MutableChar100Test extends TestBase {
     }
 
     @Test
-    public void testGetAndAdd() {
-        MutableChar mutableChar = MutableChar.of('A');
-        char oldValue = mutableChar.getAndAdd((char) 5);
-        Assertions.assertEquals('A', oldValue);
-        Assertions.assertEquals('F', mutableChar.value());
-    }
-
-    @Test
-    public void testAddAndGet() {
-        MutableChar mutableChar = MutableChar.of('A');
-        char newValue = mutableChar.addAndGet((char) 5);
-        Assertions.assertEquals('F', newValue);
-        Assertions.assertEquals('F', mutableChar.value());
-    }
-
-    @Test
     public void testCompareTo() {
         MutableChar a = MutableChar.of('A');
         MutableChar b = MutableChar.of('B');
         MutableChar c = MutableChar.of('A');
-        
+
         Assertions.assertTrue(a.compareTo(b) < 0);
         Assertions.assertTrue(b.compareTo(a) > 0);
         Assertions.assertEquals(0, a.compareTo(c));
@@ -171,7 +133,7 @@ public class MutableChar100Test extends TestBase {
         MutableChar a = MutableChar.of('X');
         MutableChar b = MutableChar.of('X');
         MutableChar c = MutableChar.of('Y');
-        
+
         Assertions.assertTrue(a.equals(b));
         Assertions.assertFalse(a.equals(c));
         Assertions.assertFalse(a.equals(null));
@@ -183,7 +145,7 @@ public class MutableChar100Test extends TestBase {
         MutableChar a = MutableChar.of('X');
         MutableChar b = MutableChar.of('X');
         MutableChar c = MutableChar.of('Y');
-        
+
         Assertions.assertEquals(a.hashCode(), b.hashCode());
         Assertions.assertNotEquals(a.hashCode(), c.hashCode());
         Assertions.assertEquals('X', a.hashCode());
@@ -193,10 +155,10 @@ public class MutableChar100Test extends TestBase {
     public void testToString() {
         MutableChar mutableChar = MutableChar.of('A');
         Assertions.assertEquals("A", mutableChar.toString());
-        
+
         mutableChar.setValue('9');
         Assertions.assertEquals("9", mutableChar.toString());
-        
+
         mutableChar.setValue('\n');
         Assertions.assertEquals("\n", mutableChar.toString());
     }
@@ -205,20 +167,20 @@ public class MutableChar100Test extends TestBase {
     public void testSpecialCharacters() {
         MutableChar mutableChar = MutableChar.of('\0');
         Assertions.assertEquals('\0', mutableChar.value());
-        
+
         mutableChar.setValue('\t');
         Assertions.assertEquals('\t', mutableChar.value());
-        
+
         mutableChar.setValue('\\');
         Assertions.assertEquals('\\', mutableChar.value());
     }
 
     @Test
     public void testUnicodeCharacters() {
-        MutableChar mutableChar = MutableChar.of('\u0041'); // 'A'
+        MutableChar mutableChar = MutableChar.of('\u0041');
         Assertions.assertEquals('A', mutableChar.value());
-        
-        mutableChar.setValue('\u03B1'); // Greek alpha
+
+        mutableChar.setValue('\u03B1');
         Assertions.assertEquals('\u03B1', mutableChar.value());
     }
 }

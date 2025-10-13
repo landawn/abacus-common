@@ -1,11 +1,12 @@
 package com.landawn.abacus.util;
 
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class FloatSummaryStatistics100Test extends TestBase {
 
     @Test

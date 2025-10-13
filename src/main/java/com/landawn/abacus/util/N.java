@@ -122,24 +122,71 @@ import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * <p>
- * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
- * The methods copied from other libraries/frameworks/projects may be modified in this class.
- * </p>
- * Class {@code N} is a general java utility class. It provides the most daily used operations for Object/primitive types/String/Array/Collection/Map/Bean...:
+ * A comprehensive utility class providing commonly used operations for primitive types, Objects, Strings,
+ * Arrays, Collections, Maps, and JavaBeans. This class serves as the primary entry point for the Abacus
+ * utility library.
  *
- * <br />
- * <br />
- * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. For example, if
- * user tries to reverse a {@code null} or empty String. The input String will be
- * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
- * <br />
- * <br />
- * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
- * <br />
- * There are only {@code fromIndex/startIndex} and {toIndex/endIndex} parameters in the methods defined in class {@code CommonUtil/N}, no {@code offset/count} parameters.
- * <br />
+ * <h2>Core Functional Areas</h2>
+ * <ul>
+ *   <li><b>Array Operations:</b> occurrencesOf, contains, indexOf, concat, split, add, remove, reverse, rotate, shuffle, sort, etc.</li>
+ *   <li><b>Collection Operations:</b> groupBy, partition, toMap, intersection, union, difference, etc.</li>
+ *   <li><b>String Operations:</b> String manipulation, parsing, and formatting utilities</li>
+ *   <li><b>Math Operations:</b> min, max, sum, average, median, percentiles for arrays and collections</li>
+ *   <li><b>Functional Operations:</b> forEach, map, filter, reduce operations with exception handling support</li>
+ *   <li><b>Null-Safe Operations:</b> Comprehensive null-safe methods for common operations</li>
+ *   <li><b>Type Conversion:</b> Safe conversion between primitive types and objects</li>
+ *   <li><b>Async Operations:</b> sleep, async execution utilities</li>
+ * </ul>
+ *
+ * <h2>Design Philosophy</h2>
+ * <ul>
+ *   <li><b>Null Safety:</b> Methods are designed to handle {@code null} inputs gracefully. Operations on
+ *       {@code null} or empty inputs typically return {@code null}, empty collections, or default values
+ *       rather than throwing exceptions.</li>
+ *   <li><b>Empty over Null:</b> Methods prefer returning empty String/Array/Collection/Map/Iterator/Iterable
+ *       over {@code null} when appropriate.</li>
+ *   <li><b>Exception Philosophy:</b> Exceptions are thrown only when the method contract is violated
+ *       (e.g., adding to a {@code null} array). Safe operations (e.g., reversing a {@code null} String)
+ *       return the input unchanged.</li>
+ *   <li><b>Index Conventions:</b> Methods use {@code fromIndex/startIndex} and {@code toIndex/endIndex}
+ *       parameters (half-open ranges [fromIndex, toIndex)), NOT {@code offset/count} parameters.</li>
+ * </ul>
+ *
+ * <h2>Thread Safety</h2>
+ * All static methods in this class are thread-safe unless explicitly documented otherwise. However,
+ * mutable objects passed to methods must be handled carefully in concurrent contexts.
+ *
+ * <h2>Usage Examples</h2>
+ * <pre>{@code
+ * // Array operations
+ * int[] numbers = {1, 2, 3, 4, 5};
+ * int count = N.occurrencesOf(numbers, 3);  // Returns 1
+ * boolean hasThree = N.contains(numbers, 3); // Returns true
+ *
+ * // Collection operations
+ * List<String> list = Arrays.asList("apple", "banana", "apple");
+ * Map<String, Integer> freq = N.occurrencesMap(list); // {apple=2, banana=1}
+ *
+ * // Null-safe operations
+ * String result = N.reverse(null); // Returns null, not exception
+ *
+ * // Functional operations with exception handling
+ * N.forEach(list, item -> processItem(item)); // Supports checked exceptions
+ * }</pre>
+ *
+ * <h2>Related Classes</h2>
+ * <ul>
+ *   <li>{@link Array} - Advanced array manipulation operations</li>
+ *   <li>{@link Strings} - String-specific utilities</li>
+ *   <li>{@link Numbers} - Number-specific operations and conversions</li>
+ *   <li>{@link Maps} - Map-specific utilities</li>
+ *   <li>{@link Iterables} - Iterable/Iterator utilities</li>
+ *   <li>{@link Stream} - Stream processing utilities</li>
+ * </ul>
+ *
+ * <p><b>Note:</b> This class includes code copied from Apache Commons Lang, Google Guava, and other
+ * open source projects under the Apache License 2.0. Methods from these libraries may have been
+ * modified for consistency with this API.</p>
  *
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.Fn
@@ -160,7 +207,6 @@ import com.landawn.abacus.util.stream.Stream;
  * @see java.util.Collections
  *
  * @version $Revision: 0.8 $ 07/03/10
- *
  */
 @SuppressWarnings({ "java:S1192", "java:S6539" })
 public final class N extends CommonUtil { // public final class N extends π implements ℕ, ℂ, ℚ, ℝ, ℤ { //  Error while storing the mojo status in Maven
@@ -1788,14 +1834,37 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a read-only slice of the input array from the specified start index to the end index.
+     * Returns a read-only immutable slice (view) of the input array from the specified range.
+     * This method extracts a portion of the array defined by the half-open range [fromIndex, toIndex)
+     * and wraps it in an immutable list that prevents modifications.
      *
-     * @param <T> The type of the elements in the array.
-     * @param a The input array to be sliced.
-     * @param fromIndex The start index for the slice, inclusive.
-     * @param toIndex The end index for the slice, exclusive.
-     * @return An ImmutableList containing the slice of the input array.
-     * @throws IndexOutOfBoundsException if the fromIndex is negative, toIndex is larger than the length of the array, or fromIndex is larger than toIndex.
+     * <p>The returned slice is backed by the original array data (via List.subList), so changes to
+     * the original array may be reflected in the slice. However, the ImmutableList wrapper prevents
+     * any modifications through the returned reference.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[] words = {"apple", "banana", "cherry", "date", "elderberry"};
+     * ImmutableList<String> slice = N.slice(words, 1, 4);
+     * // Result: ["banana", "cherry", "date"] - immutable view
+     *
+     * Integer[] numbers = {1, 2, 3, 4, 5};
+     * ImmutableList<Integer> firstThree = N.slice(numbers, 0, 3);  // [1, 2, 3]
+     *
+     * // Edge cases
+     * String[] empty = {};
+     * ImmutableList<String> emptySlice = N.slice(empty, 0, 0);  // Returns ImmutableList.empty()
+     * }</pre>
+     *
+     * @param <T> the type of elements in the array
+     * @param a the input array to be sliced, may be null or empty
+     * @param fromIndex the start index for the slice (inclusive), must be >= 0
+     * @param toIndex the end index for the slice (exclusive), must be >= fromIndex and <= array length
+     * @return an ImmutableList containing the slice of the input array,
+     *         or ImmutableList.empty() if the array is null or empty
+     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > array length, or fromIndex > toIndex
+     * @see #slice(List, int, int)
+     * @see ImmutableList
      */
     public static <T> ImmutableList<T> slice(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -1808,14 +1877,44 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a read-only slice of the input list from the specified start index to the end index.
+     * Returns a read-only immutable slice (view) of the input list from the specified range.
+     * This method extracts a portion of the list defined by the half-open range [fromIndex, toIndex)
+     * and wraps it in an immutable list that prevents modifications.
      *
-     * @param <T> The type of the elements in the list.
-     * @param c The input list to be sliced.
-     * @param fromIndex The start index for the slice, inclusive.
-     * @param toIndex The end index for the slice, exclusive.
-     * @return An ImmutableList containing the slice of the input list.
-     * @throws IndexOutOfBoundsException if the fromIndex is negative, toIndex is larger than the length of the list, or fromIndex is larger than toIndex.
+     * <p>The returned slice is backed by the original list (via List.subList), so changes to
+     * the original list may be reflected in the slice. However, the ImmutableList wrapper prevents
+     * any modifications through the returned reference.</p>
+     *
+     * <p>Performance: This method uses List.subList() which typically provides O(1) view creation
+     * without copying elements. For the full list, it simply wraps the original.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("apple", "banana", "cherry", "date", "elderberry");
+     * ImmutableList<String> slice = N.slice(words, 1, 4);
+     * // Result: ["banana", "cherry", "date"] - immutable view
+     *
+     * List<Integer> numbers = Arrays.asList(0, 10, 20, 30, 40);
+     * ImmutableList<Integer> middle = N.slice(numbers, 1, 4);  // [10, 20, 30]
+     *
+     * // Full list optimization
+     * ImmutableList<String> full = N.slice(words, 0, words.size());
+     * // Wraps the entire list without creating subList
+     *
+     * // Edge cases
+     * List<String> empty = Collections.emptyList();
+     * ImmutableList<String> emptySlice = N.slice(empty, 0, 0);  // Returns ImmutableList.empty()
+     * }</pre>
+     *
+     * @param <T> the type of elements in the list
+     * @param c the input list to be sliced, may be null or empty
+     * @param fromIndex the start index for the slice (inclusive), must be >= 0
+     * @param toIndex the end index for the slice (exclusive), must be >= fromIndex and <= list size
+     * @return an ImmutableList containing the slice of the input list,
+     *         or ImmutableList.empty() if the list is null or empty
+     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > list size, or fromIndex > toIndex
+     * @see List#subList(int, int)
+     * @see ImmutableList
      */
     public static <T> ImmutableList<T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -1830,14 +1929,45 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a read-only slice of the input collection from the specified start index to the end index.
+     * Returns a read-only immutable slice (view) of the input collection from the specified range.
+     * This method extracts a portion of the collection defined by the half-open range [fromIndex, toIndex)
+     * and wraps it in an immutable collection that prevents modifications.
      *
-     * @param <T> The type of the elements in the collection.
-     * @param c The input collection to be sliced.
-     * @param fromIndex The start index for the slice, inclusive.
-     * @param toIndex The end index for the slice, exclusive.
-     * @return An ImmutableCollection containing the slice of the input collection.
-     * @throws IndexOutOfBoundsException if the fromIndex is negative, toIndex is larger than the size of the collection, or fromIndex is larger than toIndex.
+     * <p>Performance characteristics:</p>
+     * <ul>
+     *   <li>For List collections: Uses List.subList() for O(1) view creation</li>
+     *   <li>For other collections: Creates a Slice iterator that skips to fromIndex - O(fromIndex) initialization</li>
+     * </ul>
+     *
+     * <p>The returned slice behavior depends on the collection type. For Lists, changes to the original
+     * list may be reflected in the slice. For other collections, a separate iteration view is created.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // List-based slicing (efficient O(1) view)
+     * List<String> list = Arrays.asList("a", "b", "c", "d", "e");
+     * ImmutableCollection<String> slice = N.slice(list, 1, 4);
+     * // Result: ["b", "c", "d"]
+     *
+     * // Set-based slicing (requires iteration)
+     * Set<Integer> set = new LinkedHashSet<>(Arrays.asList(1, 2, 3, 4, 5));
+     * ImmutableCollection<Integer> setSlice = N.slice(set, 1, 3);
+     * // Result depends on iteration order
+     *
+     * // Edge cases
+     * Collection<String> empty = Collections.emptyList();
+     * ImmutableCollection<String> emptySlice = N.slice(empty, 0, 0);  // Returns ImmutableList.empty()
+     * }</pre>
+     *
+     * @param <T> the type of elements in the collection
+     * @param c the input collection to be sliced, may be null or empty
+     * @param fromIndex the start index for the slice (inclusive), must be >= 0
+     * @param toIndex the end index for the slice (exclusive), must be >= fromIndex and <= collection size
+     * @return an ImmutableCollection containing the slice of the input collection,
+     *         or ImmutableList.empty() if the collection is null or empty
+     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > collection size, or fromIndex > toIndex
+     * @see #slice(List, int, int)
+     * @see Iterables.Slice
      */
     public static <T> ImmutableCollection<T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -1854,14 +1984,41 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a read-only slice of the input iterator from the specified start index to the end index.
+     * Returns a read-only slice of the input iterator from the specified range.
+     * This method skips elements until fromIndex, then limits the result to (toIndex - fromIndex) elements.
+     * <b>Warning:</b> This method consumes elements from the iterator up to toIndex.
      *
-     * @param <T> The type of the elements in the iterator.
-     * @param iter The input iterator to be sliced.
-     * @param fromIndex The start index for the slice, inclusive.
-     * @param toIndex The end index for the slice, exclusive.
-     * @return An ObjIterator containing the slice of the input iterator.
-     * @throws IllegalArgumentException if the fromIndex is negative, or fromIndex is larger than toIndex.
+     * <p>The iterator is consumed as follows:</p>
+     * <ul>
+     *   <li>Elements from [0, fromIndex) are skipped and discarded</li>
+     *   <li>Elements from [fromIndex, toIndex) are included in the result</li>
+     *   <li>Elements from [toIndex, end) remain in the iterator (if not consumed)</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Stream slicing
+     * Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+     * ObjIterator<Integer> slice = N.slice(stream.iterator(), 2, 7);
+     * // Result: [3, 4, 5, 6, 7] - elements at indices 2-6
+     *
+     * // Database cursor example
+     * Iterator<String> cursor = resultSet.iterator();
+     * ObjIterator<String> page = N.slice(cursor, 10, 20);  // Get items 10-19
+     *
+     * // Edge cases
+     * Iterator<String> iter = Arrays.asList("a", "b", "c").iterator();
+     * ObjIterator<String> empty = N.slice(iter, 2, 2);     // Returns empty iterator
+     * ObjIterator<String> nullSafe = N.slice(null, 0, 5);  // Returns empty iterator
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterator
+     * @param iter the input iterator to be sliced, may be null
+     * @param fromIndex the start index for the slice (inclusive), must be >= 0
+     * @param toIndex the end index for the slice (exclusive), must be >= fromIndex
+     * @return an ObjIterator containing the slice of the input iterator,
+     *         or empty iterator if iter is null or fromIndex equals toIndex
+     * @throws IllegalArgumentException if fromIndex < 0 or fromIndex > toIndex
      * @see Iterators#skipAndLimit(Iterator, long, long)
      */
     public static <T> ObjIterator<T> slice(final Iterator<? extends T> iter, final int fromIndex, final int toIndex) {
@@ -1877,12 +2034,33 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input boolean array into subarrays of the specified size. The last subarray may be smaller if the total array length is not a multiple of chunkSize.
+     * Splits the input boolean array into subarrays (chunks) of the specified size.
+     * This method divides the array into smaller arrays of equal size, with the last chunk
+     * potentially being smaller if the array length is not evenly divisible by chunkSize.
      *
-     * @param a The input boolean array to be split.
-     * @param chunkSize The desired size of each subarray.
-     * @return A list of boolean subarrays, each of size chunkSize (except possibly for the last one).
-     * @throws IllegalArgumentException if chunkSize is not a positive integer.
+     * <p>Each chunk is a new array containing a copy of the elements, not a view.
+     * Modifications to the returned chunks do not affect the original array.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean[] flags = {true, false, true, false, true, false, true};
+     * List<boolean[]> chunks = N.split(flags, 3);
+     * // Result: [[true, false, true], [false, true, false], [true]]
+     *
+     * boolean[] small = {true, false};
+     * List<boolean[]> smallChunks = N.split(small, 5);
+     * // Result: [[true, false]] - single chunk smaller than chunkSize
+     *
+     * boolean[] empty = {};
+     * List<boolean[]> emptyChunks = N.split(empty, 3);  // Returns empty list
+     * }</pre>
+     *
+     * @param a the input boolean array to be split, may be null or empty
+     * @param chunkSize the desired size of each subarray, must be positive
+     * @return a List of boolean subarrays, each of size chunkSize (except possibly the last one),
+     *         or an empty list if the array is null or empty
+     * @throws IllegalArgumentException if chunkSize <= 0
+     * @see #split(boolean[], int, int, int)
      */
     public static List<boolean[]> split(final boolean[] a, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize"); //NOSONAR
@@ -1902,16 +2080,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input boolean array into subarrays of the specified size. The last subarray may be smaller if the length of specified range is not a multiple of chunkSize.
-     * The subarrays are created from the specified range in the input array.
+     * Splits a specified range of the input boolean array into subarrays (chunks) of the specified size.
+     * This method divides a portion of the array [fromIndex, toIndex) into smaller arrays of equal size,
+     * with the last chunk potentially being smaller if the range length is not evenly divisible by chunkSize.
      *
-     * @param a The input boolean array to be split.
-     * @param fromIndex The start index for the slice of the array to be split, inclusive.
-     * @param toIndex The end index for the slice of the array to be split, exclusive.
-     * @param chunkSize The desired size of each subarray.
-     * @return A list of boolean subarrays, each of size chunkSize (except possibly for the last one).
-     * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
+     * <p>Each chunk is a new array containing a copy of the elements from the specified range.
+     * The original array is not modified.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean[] flags = {true, false, true, false, true, false, true, false};
+     * List<boolean[]> chunks = N.split(flags, 1, 7, 2);
+     * // Splits elements at indices 1-6: [[false, true], [false, true], [false, true]]
+     *
+     * boolean[] data = {true, true, false, false, true};
+     * List<boolean[]> middle = N.split(data, 1, 4, 2);
+     * // Splits indices 1-3: [[true, false], [false]]
+     *
+     * // Edge case: fromIndex equals toIndex
+     * List<boolean[]> empty = N.split(flags, 3, 3, 2);  // Returns empty list
+     * }</pre>
+     *
+     * @param a the input boolean array to be split, may be null or empty
+     * @param fromIndex the start index of the range to split (inclusive), must be >= 0
+     * @param toIndex the end index of the range to split (exclusive), must be >= fromIndex and <= array length
+     * @param chunkSize the desired size of each subarray, must be positive
+     * @return a List of boolean subarrays from the specified range, each of size chunkSize
+     *         (except possibly the last one), or an empty list if the array is null/empty or fromIndex == toIndex
+     * @throws IllegalArgumentException if chunkSize <= 0
+     * @throws IndexOutOfBoundsException if fromIndex < 0, fromIndex > toIndex, or toIndex > array length
+     * @see #split(boolean[], int)
      */
     public static List<boolean[]> split(final boolean[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -1933,12 +2131,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input char array into subarrays of the specified size. The last subarray may be smaller if the total array length is not a multiple of chunkSize.
+     * Splits the input char array into subarrays (chunks) of the specified size.
+     * Each chunk is a new array containing a copy of the elements from the original array.
+     * The last chunk may be smaller than chunkSize if the array length is not evenly divisible.
      *
-     * @param a The input char array to be split.
-     * @param chunkSize The desired size of each subarray.
-     * @return A list of char subarrays, each of size chunkSize (except possibly for the last one).
-     * @throws IllegalArgumentException if chunkSize is not a positive integer.
+     * <p>Example: {@code N.split(new char[]{'a','b','c','d','e'}, 2) => [['a','b'], ['c','d'], ['e']]}</p>
+     *
+     * @param a the input char array to be split, may be null or empty
+     * @param chunkSize the desired size of each subarray, must be positive
+     * @return a List of char subarrays, each of size chunkSize (except possibly the last one),
+     *         returns an empty list if the array is null or empty
+     * @throws IllegalArgumentException if chunkSize <= 0
+     * @see #split(char[], int, int, int)
      */
     public static List<char[]> split(final char[] a, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, cs.chunkSize);
@@ -1958,16 +2162,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input char array into subarrays of the specified size. The last subarray may be smaller if the length of specified range is not a multiple of chunkSize.
-     * The subarrays are created from the specified range in the input array.
+     * Splits a specified range of the input char array into subarrays (chunks) of the specified size.
+     * Each chunk is a new array containing a copy of the elements from the specified range.
+     * The last chunk may be smaller than chunkSize if the range length is not evenly divisible.
      *
-     * @param a The input char array to be split.
-     * @param fromIndex The start index for the slice of the array to be split, inclusive.
-     * @param toIndex The end index for the slice of the array to be split, exclusive.
-     * @param chunkSize The desired size of each subarray.
-     * @return A list of char subarrays, each of size chunkSize (except possibly for the last one).
-     * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
+     * <p>Example: {@code N.split(new char[]{'a','b','c','d','e'}, 1, 4, 2) => [['b','c'], ['d']]}</p>
+     *
+     * @param a the input char array to be split, may be null or empty
+     * @param fromIndex the start index of the range to split (inclusive)
+     * @param toIndex the end index of the range to split (exclusive)
+     * @param chunkSize the desired size of each subarray, must be positive
+     * @return a List of char subarrays from the specified range, each of size chunkSize (except possibly the last one),
+     *         returns an empty list if the array is null/empty or fromIndex equals toIndex
+     * @throws IllegalArgumentException if chunkSize <= 0
+     * @throws IndexOutOfBoundsException if fromIndex < 0 or fromIndex > toIndex or toIndex > array length
+     * @see #split(char[], int)
      */
     public static List<char[]> split(final char[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -2382,13 +2591,42 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input collection into sub-collections of the specified size. The last sub-collection may be smaller if the total collection size is not a multiple of chunkSize.
+     * Splits the input collection into sub-collections (chunks) of the specified size.
+     * This method divides the collection into smaller lists of equal size, with the last chunk
+     * potentially being smaller if the collection size is not evenly divisible by chunkSize.
      *
-     * @param <T> The type of the elements in the collection.
-     * @param c The input collection to be split.
-     * @param chunkSize The desired size of each sub-collection.
-     * @return A list of sub-collections, each of size chunkSize (except possibly for the last one).
-     * @throws IllegalArgumentException if chunkSize is not a positive integer.
+     * <p>Performance and behavior characteristics:</p>
+     * <ul>
+     *   <li>For List collections: Returns views (subLists) - O(1) per chunk, no copying</li>
+     *   <li>For other collections: Creates new ArrayList instances - O(n) with copying</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
+     * List<List<Integer>> chunks = N.split(numbers, 3);
+     * // Result: [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+     *
+     * List<String> words = Arrays.asList("a", "b", "c", "d", "e");
+     * List<List<String>> pairs = N.split(words, 2);
+     * // Result: [["a", "b"], ["c", "d"], ["e"]]
+     *
+     * Set<Integer> set = new LinkedHashSet<>(Arrays.asList(10, 20, 30, 40));
+     * List<List<Integer>> setPairs = N.split(set, 2);
+     * // Result: [[10, 20], [30, 40]]
+     *
+     * // Edge cases
+     * List<String> empty = Collections.emptyList();
+     * List<List<String>> emptyChunks = N.split(empty, 5);  // Returns empty list
+     * }</pre>
+     *
+     * @param <T> the type of elements in the collection
+     * @param c the input collection to be split, may be null or empty
+     * @param chunkSize the desired size of each sub-collection, must be positive
+     * @return a List of sub-collections (Lists), each of size chunkSize (except possibly the last one),
+     *         or an empty list if the collection is null or empty
+     * @throws IllegalArgumentException if chunkSize <= 0
+     * @see #split(Collection, int, int, int)
      */
     public static <T> List<List<T>> split(final Collection<? extends T> c, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, cs.chunkSize);
@@ -2401,17 +2639,44 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input collection into sub-collections of the specified size. The last sub-collection may be smaller if the length of specified range is not a multiple of chunkSize.
-     * The sub-collections are created from the specified range in the input collection.
+     * Splits a specified range of the input collection into sub-collections (chunks) of the specified size.
+     * This method divides a portion of the collection [fromIndex, toIndex) into smaller lists of equal size,
+     * with the last chunk potentially being smaller if the range length is not evenly divisible by chunkSize.
      *
-     * @param <T> The type of the elements in the collection.
-     * @param c The input collection to be split.
-     * @param fromIndex The start index for the slice of the collection to be split, inclusive.
-     * @param toIndex The end index for the slice of the collection to be split, exclusive.
-     * @param chunkSize The desired size of each sub-collection.
-     * @return A list of sub-collections, each of size chunkSize (except possibly for the last one).
-     * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is greater than the size of collection.
+     * <p>Performance and behavior characteristics:</p>
+     * <ul>
+     *   <li>For List collections: Returns views (subLists of subList) - efficient, no copying</li>
+     *   <li>For other collections: Iterates to fromIndex then creates new ArrayLists - O(fromIndex + range)</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+     * List<List<Integer>> chunks = N.split(numbers, 2, 8, 2);
+     * // Splits elements at indices 2-7: [[3, 4], [5, 6], [7, 8]]
+     *
+     * List<String> words = Arrays.asList("a", "b", "c", "d", "e", "f");
+     * List<List<String>> middle = N.split(words, 1, 5, 2);
+     * // Splits indices 1-4: [["b", "c"], ["d", "e"]]
+     *
+     * Set<Integer> set = new LinkedHashSet<>(Arrays.asList(10, 20, 30, 40, 50, 60));
+     * List<List<Integer>> setPairs = N.split(set, 1, 5, 2);
+     * // Splits elements at positions 1-4: [[20, 30], [40, 50]]
+     *
+     * // Edge case: fromIndex equals toIndex
+     * List<List<Integer>> empty = N.split(numbers, 3, 3, 2);  // Returns empty list
+     * }</pre>
+     *
+     * @param <T> the type of elements in the collection
+     * @param c the input collection to be split, may be null or empty
+     * @param fromIndex the start index of the range to split (inclusive), must be >= 0
+     * @param toIndex the end index of the range to split (exclusive), must be >= fromIndex and <= collection size
+     * @param chunkSize the desired size of each sub-collection, must be positive
+     * @return a List of sub-collections from the specified range, each of size chunkSize
+     *         (except possibly the last one), or an empty list if the collection is null/empty or fromIndex == toIndex
+     * @throws IllegalArgumentException if chunkSize <= 0
+     * @throws IndexOutOfBoundsException if fromIndex < 0, fromIndex > toIndex, or toIndex > collection size
+     * @see #split(Collection, int)
      */
     public static <T> List<List<T>> split(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -2455,13 +2720,44 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input iterable into sub-collections of the specified size. The last sub-collection may be smaller if the total iterable size is not a multiple of chunkSize.
+     * Splits the input iterable into sub-collections (chunks) of the specified size.
+     * This method divides any iterable into smaller lists of equal size, with the last chunk
+     * potentially being smaller if the total size is not evenly divisible by chunkSize.
      *
-     * @param <T> The type of the elements in the iterable.
-     * @param c The input iterable to be split.
-     * @param chunkSize The desired size of each sub-collection.
-     * @return A list of sub-collections, each of size chunkSize (except possibly for the last one).
-     * @throws IllegalArgumentException if chunkSize is not a positive integer.
+     * <p>This method works with any Iterable, including custom implementations. For Collections,
+     * it delegates to the more efficient {@link #split(Collection, int)} method.</p>
+     *
+     * <p>Performance characteristics:</p>
+     * <ul>
+     *   <li>Collection instances: Delegates to split(Collection, int) for optimal performance</li>
+     *   <li>Other Iterables: Creates iterator and builds ArrayList chunks - O(n)</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Works with any Iterable
+     * Iterable<Integer> custom = () -> Arrays.asList(1, 2, 3, 4, 5, 6, 7).iterator();
+     * List<List<Integer>> chunks = N.split(custom, 3);
+     * // Result: [[1, 2, 3], [4, 5, 6], [7]]
+     *
+     * // Stream-based iterable
+     * Iterable<String> streamIterable = () -> Stream.of("a", "b", "c", "d", "e").iterator();
+     * List<List<String>> pairs = N.split(streamIterable, 2);
+     * // Result: [["a", "b"], ["c", "d"], ["e"]]
+     *
+     * // Empty iterable
+     * Iterable<Integer> empty = Collections::emptyIterator;
+     * List<List<Integer>> emptyChunks = N.split(empty, 5);  // Returns empty list
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterable
+     * @param c the input iterable to be split, may be null or empty
+     * @param chunkSize the desired size of each sub-collection, must be positive
+     * @return a List of sub-collections (Lists), each of size chunkSize (except possibly the last one),
+     *         or an empty list if the iterable is null or empty
+     * @throws IllegalArgumentException if chunkSize <= 0
+     * @see #split(Collection, int)
+     * @see #split(Iterator, int)
      */
     public static <T> List<List<T>> split(final Iterable<? extends T> c, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, cs.chunkSize);
@@ -2478,13 +2774,51 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits the input iterator into sub-collections of the specified size. The last sub-collection may be smaller if the total iterator size is not a multiple of chunkSize.
+     * Splits the input iterator into sub-collections (chunks) of the specified size.
+     * This method returns an iterator that lazily produces lists of elements from the input iterator,
+     * with each list containing up to chunkSize elements. The last list may be smaller if the
+     * total number of elements is not evenly divisible by chunkSize.
      *
-     * @param <T> The type of the elements in the iterator.
-     * @param iter The input iterator to be split.
-     * @param chunkSize The desired size of each sub-collection.
-     * @return An iterator of sub-collections, each of size chunkSize (except possibly for the last one).
-     * @throws IllegalArgumentException if chunkSize is not a positive integer.
+     * <p><b>Important:</b> This method returns a lazy iterator that consumes the input iterator
+     * as you iterate through the chunks. The input iterator is consumed progressively, not all at once.</p>
+     *
+     * <p>Lazy evaluation benefits:</p>
+     * <ul>
+     *   <li>Memory efficient: Only one chunk is held in memory at a time</li>
+     *   <li>Works with infinite iterators (until you stop consuming chunks)</li>
+     *   <li>No upfront computation cost</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Basic usage
+     * Iterator<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9).iterator();
+     * ObjIterator<List<Integer>> chunks = N.split(numbers, 3);
+     * chunks.next();  // [1, 2, 3]
+     * chunks.next();  // [4, 5, 6]
+     * chunks.next();  // [7, 8, 9]
+     *
+     * // Stream iterator splitting
+     * Stream<String> stream = Stream.of("a", "b", "c", "d", "e", "f");
+     * ObjIterator<List<String>> pairs = N.split(stream.iterator(), 2);
+     * while (pairs.hasNext()) {
+     *     System.out.println(pairs.next());  // ["a", "b"], ["c", "d"], ["e", "f"]
+     * }
+     *
+     * // Convert to list if needed
+     * Iterator<Integer> iter = IntStream.range(1, 11).iterator();
+     * List<List<Integer>> allChunks = N.toList(N.split(iter, 4));
+     * // Result: [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10]]
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterator
+     * @param iter the input iterator to be split, may be null
+     * @param chunkSize the desired size of each sub-collection, must be positive
+     * @return an ObjIterator that produces Lists, each of size chunkSize (except possibly the last one),
+     *         or an empty iterator if the input iterator is null
+     * @throws IllegalArgumentException if chunkSize <= 0
+     * @see #split(Iterable, int)
+     * @see #toList(Iterator)
      */
     public static <T> ObjIterator<List<T>> split(final Iterator<? extends T> iter, final int chunkSize) throws IllegalArgumentException {
         checkArgument(chunkSize > 0, "'chunkSize' must be greater than 0, can't be: %s", chunkSize);
@@ -2519,13 +2853,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns consecutive substring of the specified string, each of the same length (the final list may be smaller),
-     * or an empty array if the specified string is {@code null} or empty.
+     * Splits the input string into consecutive substrings of the specified size (chunks).
+     * Each substring will have the specified chunkSize, except the last one which may be smaller
+     * if the string length is not evenly divisible by chunkSize.
      *
-     * @param str
-     * @param chunkSize the desired size of each sub String (the last may be smaller).
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This method creates new String objects for each chunk, not views.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String text = "HelloWorld";
+     * List<String> chunks = N.split(text, 3);
+     * // Result: ["Hel", "loW", "orl", "d"]
+     *
+     * String numbers = "12345678";
+     * List<String> pairs = N.split(numbers, 2);
+     * // Result: ["12", "34", "56", "78"]
+     *
+     * String short = "Hi";
+     * List<String> oversized = N.split(short, 5);
+     * // Result: ["Hi"] - single chunk smaller than chunkSize
+     *
+     * String empty = "";
+     * List<String> emptyChunks = N.split(empty, 3);  // Returns empty list
+     * }</pre>
+     *
+     * @param str the input string to be split, may be null or empty
+     * @param chunkSize the desired size of each substring, must be positive
+     * @return a List of String chunks, each of size chunkSize (except possibly the last one),
+     *         or an empty list if the string is null or empty
+     * @throws IllegalArgumentException if chunkSize <= 0
+     * @see #split(CharSequence, int, int, int)
      */
     public static List<String> split(final CharSequence str, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, cs.chunkSize);
@@ -2538,16 +2895,39 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns consecutive substring of the specified string, each of the same length (the final list may be smaller),
-     * or an empty array if the specified string is {@code null} or empty.
+     * Splits a specified range of the input string into consecutive substrings of the specified size (chunks).
+     * This method divides the portion of the string from [fromIndex, toIndex) into chunks of the specified size,
+     * with the last chunk potentially being smaller if the range length is not evenly divisible by chunkSize.
      *
-     * @param str
-     * @param fromIndex
-     * @param toIndex
-     * @param chunkSize the desired size of each sub String (the last may be smaller).
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * <p>This method creates new String objects for each chunk, not views.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String text = "HelloWorldJava";
+     * List<String> chunks = N.split(text, 5, 14, 3);
+     * // Splits characters 5-13 ("WorldJava"): ["Wor", "ldJ", "ava"]
+     *
+     * String numbers = "0123456789";
+     * List<String> middle = N.split(numbers, 2, 8, 2);
+     * // Splits characters 2-7 ("234567"): ["23", "45", "67"]
+     *
+     * String data = "ABCDEFGH";
+     * List<String> partial = N.split(data, 1, 6, 2);
+     * // Splits characters 1-5 ("BCDEF"): ["BC", "DE", "F"]
+     *
+     * // Edge case: fromIndex equals toIndex
+     * List<String> empty = N.split(text, 5, 5, 3);  // Returns empty list
+     * }</pre>
+     *
+     * @param str the input string to be split, may be null or empty
+     * @param fromIndex the start index of the range to split (inclusive), must be >= 0
+     * @param toIndex the end index of the range to split (exclusive), must be >= fromIndex and <= string length
+     * @param chunkSize the desired size of each substring, must be positive
+     * @return a List of String chunks from the specified range, each of size chunkSize
+     *         (except possibly the last one), or an empty list if the string is null/empty
+     * @throws IllegalArgumentException if chunkSize <= 0
+     * @throws IndexOutOfBoundsException if fromIndex < 0, fromIndex > toIndex, or toIndex > string length
+     * @see #split(CharSequence, int)
      */
     public static List<String> split(final CharSequence str, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -2977,12 +3357,27 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Concatenates two int arrays into a new array.
      *
-     * @param a The first int array.
-     * @param b The second int array.
-     * @return A new int array that contains the elements of <i>a</i> followed by the elements of <i>b</i>.
-     *         If both <i>a</i> and <i>b</i> are empty or {@code null}, an empty array is returned.
-     *         If <i>a</i> is empty or {@code null}, a clone of <i>b</i> is returned.
-     *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned.
+     * <p>This method creates a new array containing all elements from the first array followed by all elements
+     * from the second array. The original arrays are not modified.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int[] a = {1, 2, 3};
+     * int[] b = {4, 5};
+     * int[] result = N.concat(a, b);  // Returns {1, 2, 3, 4, 5}
+     *
+     * // Handles null arrays gracefully
+     * int[] withNull = N.concat(a, null);  // Returns {1, 2, 3}
+     * int[] bothNull = N.concat(null, null);  // Returns empty array
+     * }</pre>
+     *
+     * @param a the first int array, may be null or empty
+     * @param b the second int array, may be null or empty
+     * @return a new int array that contains the elements of {@code a} followed by the elements of {@code b}.
+     *         If both {@code a} and {@code b} are empty or {@code null}, an empty array is returned.
+     *         If {@code a} is empty or {@code null}, a clone of {@code b} is returned.
+     *         If {@code b} is empty or {@code null}, a clone of {@code a} is returned.
+     * @throws IllegalArgumentException if the combined array length would exceed {@code Integer.MAX_VALUE}
      */
     public static int[] concat(final int[] a, final int[] b) {
         if (isEmpty(a)) {
@@ -3006,10 +3401,32 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Concatenates multiple int arrays into a new array.
      *
-     * @param aa The int arrays to be concatenated.
-     * @return A new int array that contains the elements of each array in {@code 'aa'} in the same order.
-     *         If {@code 'aa'} is empty or {@code null}, an empty array is returned.
-     *         If {@code 'aa'} contains only one array, a clone of this array is returned.
+     * <p>This method creates a new array containing all elements from the input arrays in order.
+     * Null arrays within the input are skipped. The original arrays are not modified.</p>
+     *
+     * <p><b>Performance:</b> Time complexity is O(n) where n is the total number of elements across all arrays.
+     * Space complexity is O(n) for the result array.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int[] a1 = {1, 2, 3};
+     * int[] a2 = {4, 5};
+     * int[] a3 = {6, 7, 8, 9};
+     * int[] result = N.concat(a1, a2, a3);  // Returns {1, 2, 3, 4, 5, 6, 7, 8, 9}
+     *
+     * // Handles null arrays gracefully
+     * int[] withNull = N.concat(a1, null, a2);  // Returns {1, 2, 3, 4, 5}
+     *
+     * // Empty input
+     * int[] empty = N.concat();  // Returns empty array
+     * }</pre>
+     *
+     * @param aa the int arrays to be concatenated, may be null or contain null elements
+     * @return a new int array that contains the elements of each non-null array in {@code aa} in the same order.
+     *         If {@code aa} is empty or {@code null}, an empty array is returned.
+     *         If {@code aa} contains only one non-null array, a clone of that array is returned.
+     * @throws IllegalArgumentException if the combined array length would exceed {@code Integer.MAX_VALUE}
+     * @see #concat(int[], int[])
      */
     public static int[] concat(final int[]... aa) {
         if (isEmpty(aa)) {
@@ -3261,15 +3678,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The first array.
      * @param b The second array.
      * @return A new array that contains the elements of <i>a</i> followed by the elements of <i>b</i>.
-     *         If both <i>a</i> and <i>b</i> are empty or {@code null}, <i>a</i> is returned.
+     *         If both <i>a</i> and <i>b</i> are {@code null}, {@code null} is returned.
      *         If <i>a</i> is empty or {@code null}, a clone of <i>b</i> is returned.
      *         If <i>b</i> is empty or {@code null}, a clone of <i>a</i> is returned.
      *
      * @see #merge(Object[], Object[], BiFunction)
      */
+    @MayReturnNull
     public static <T> T[] concat(final T[] a, final T[] b) {
         if (isEmpty(a)) {
-            return isEmpty(b) ? a : b.clone();
+            return isEmpty(b) ? (a == null ? null : a.clone()) : b.clone();
         } else if (isEmpty(b)) {
             return a.clone();
         }
@@ -3710,6 +4128,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> The type of the elements in the array.
      * @param a The two-dimensional array to be flattened.
      * @return A one-dimensional array containing all elements in the input array. Returns {@code null} if the input array is {@code null}.
+     * @see #flatten(Object[][], Class)
      */
     @MayReturnNull
     public static <T> T[] flatten(final T[][] a) {
@@ -3725,9 +4144,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> The type of the elements in the array.
      * @param a The two-dimensional array to be flattened.
-     * @param componentType The class object representing the component type of the new array.
+     * @param componentType The class object representing the component type of the new array; must not be {@code null}
      * @return A one-dimensional array containing all elements in the input array.
      *         Returns an empty array if the input array is {@code null}.
+     * @throws NullPointerException if {@code componentType} is {@code null}
+     * @see #flatten(Object[][])
      */
     public static <T> T[] flatten(final T[][] a, final Class<T> componentType) {
         if (isEmpty(a)) {
@@ -7411,8 +7832,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the original boolean array
      * @param index the position in the array where the new element should be inserted
-     * @param elementToInsert the char value to be inserted into the array
-     * @return a new char array with the original elements and the inserted element
+     * @param elementToInsert the boolean value to be inserted into the array
+     * @return a new boolean array with the original elements and the inserted element
      * @throws IndexOutOfBoundsException if the specified index is out of range
      */
     public static boolean[] insert(final boolean[] a, final int index, final boolean elementToInsert) throws IndexOutOfBoundsException {
@@ -7444,8 +7865,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the original char array
      * @param index the position in the array where the new element should be inserted
-     * @param elementToInsert the boolean value to be inserted into the array
-     * @return a new boolean array with the original elements and the inserted element
+     * @param elementToInsert the char value to be inserted into the array
+     * @return a new char array with the original elements and the inserted element
      * @throws IndexOutOfBoundsException if the specified index is out of range
      */
     public static char[] insert(final char[] a, final int index, final char elementToInsert) throws IndexOutOfBoundsException {
@@ -7640,6 +8061,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.0, 4.0, 5.0};
+     * double[] result = N.insert(arr, 2, 3.0);
+     * // Returns: [1.0, 2.0, 3.0, 4.0, 5.0]
+     * }</pre>
+     *
      * @param a the original double array
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the double value to be inserted into the array
@@ -7706,6 +8134,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Bob", "David"};
+     * String[] result = N.insert(names, 2, "Charlie");
+     * // Returns: ["Alice", "Bob", "Charlie", "David"]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the original array
      * @param index the position in the array where the new element should be inserted
@@ -7751,6 +8186,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a new String with chars copied from the specified String and the specified String inserted at the specified index.
      * <br />
      * The original String remains unchanged.
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * String text = "Hello World";
+     * String result = N.insert(text, 6, "Beautiful ");
+     * // Returns: "Hello Beautiful World"
+     * }</pre>
      *
      * @param str the original string
      * @param index the position in the string where the new string should be inserted
@@ -8094,6 +8536,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * String[] names = {"Alice", "David", "Eve"};
+     * String[] result = N.insertAll(names, 1, "Bob", "Charlie");
+     * // Returns: ["Alice", "Bob", "Charlie", "David", "Eve"]
+     * }</pre>
+     *
+     * @param <T> the type of the elements in the array
      * @param a the original array
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
@@ -8499,16 +8949,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
-        int diff = 1;
+        int countToDelete = 1;
         for (int i = 1; i < countOfIndex; i++) {
             if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
-            diff++;
+            countToDelete++;
         }
 
-        final boolean[] result = new boolean[arrayLen - diff];
+        final boolean[] result = new boolean[arrayLen - countToDelete];
         int dest = 0;
         int len = 0;
         for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
@@ -8556,16 +9006,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
-        int diff = 1;
+        int countToDelete = 1;
         for (int i = 1; i < countOfIndex; i++) {
             if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
-            diff++;
+            countToDelete++;
         }
 
-        final char[] result = new char[arrayLen - diff];
+        final char[] result = new char[arrayLen - countToDelete];
         int dest = 0;
         int len = 0;
         for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
@@ -8613,16 +9063,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
-        int diff = 1;
+        int countToDelete = 1;
         for (int i = 1; i < countOfIndex; i++) {
             if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
-            diff++;
+            countToDelete++;
         }
 
-        final byte[] result = new byte[arrayLen - diff];
+        final byte[] result = new byte[arrayLen - countToDelete];
         int dest = 0;
         int len = 0;
         for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
@@ -8670,16 +9120,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
-        int diff = 1;
+        int countToDelete = 1;
         for (int i = 1; i < countOfIndex; i++) {
             if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
-            diff++;
+            countToDelete++;
         }
 
-        final short[] result = new short[arrayLen - diff];
+        final short[] result = new short[arrayLen - countToDelete];
         int dest = 0;
         int len = 0;
         for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
@@ -8727,16 +9177,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
-        int diff = 1;
+        int countToDelete = 1;
         for (int i = 1; i < countOfIndex; i++) {
             if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
-            diff++;
+            countToDelete++;
         }
 
-        final int[] result = new int[arrayLen - diff];
+        final int[] result = new int[arrayLen - countToDelete];
         int dest = 0;
         int len = 0;
         for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
@@ -8784,16 +9234,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
-        int diff = 1;
+        int countToDelete = 1;
         for (int i = 1; i < countOfIndex; i++) {
             if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
-            diff++;
+            countToDelete++;
         }
 
-        final long[] result = new long[arrayLen - diff];
+        final long[] result = new long[arrayLen - countToDelete];
         int dest = 0;
         int len = 0;
         for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
@@ -8841,16 +9291,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
-        int diff = 1;
+        int countToDelete = 1;
         for (int i = 1; i < countOfIndex; i++) {
             if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
-            diff++;
+            countToDelete++;
         }
 
-        final float[] result = new float[arrayLen - diff];
+        final float[] result = new float[arrayLen - countToDelete];
         int dest = 0;
         int len = 0;
         for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
@@ -8898,16 +9348,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
-        int diff = 1;
+        int countToDelete = 1;
         for (int i = 1; i < countOfIndex; i++) {
             if (indexes[i] == indexes[i - 1]) {
                 continue;
             }
 
-            diff++;
+            countToDelete++;
         }
 
-        final double[] result = new double[arrayLen - diff];
+        final double[] result = new double[arrayLen - countToDelete];
         int dest = 0;
         int len = 0;
         for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indexes[i], i++) {
@@ -8954,6 +9404,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * String[] arr = {"A", "B", "C", "D", "E"};
+     * String[] result = N.deleteAllByIndices(arr, 1, 3);
+     * // Returns: ["A", "C", "E"] - removed elements at indices 1 and 3
+     * }</pre>
+     *
      * @param <T> the type of elements in the input array
      * @param a the input array from which elements are to be removed
      * @param indices the positions of the elements to be removed
@@ -8985,16 +9442,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + lastIndex);
         }
 
-        int diff = 1;
+        int countToDelete = 1;
         for (int i = 1; i < countOfIndex; i++) {
             if (indices[i] == indices[i - 1]) {
                 continue;
             }
 
-            diff++;
+            countToDelete++;
         }
 
-        final T[] result = newArray(a.getClass().getComponentType(), arrayLen - diff);
+        final T[] result = newArray(a.getClass().getComponentType(), arrayLen - countToDelete);
         int dest = 0;
         int len = 0;
         for (int i = 0, preIndex = -1; i < countOfIndex; preIndex = indices[i], i++) {
@@ -9972,7 +10429,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a The array from which duplicates should be removed.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
-     * @deprecated Use {@link #distinct(char[])} instead.
+     * @deprecated Use {@link #distinct(char[])} instead for clearer naming that follows Java Stream API conventions.
+     *             This method will be maintained for backward compatibility but new code should use the distinct variant.
      */
     @Deprecated
     public static char[] removeDuplicates(final char[] a) {
@@ -10001,16 +10459,40 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with distinct elements within the specified range.
+     * Returns a new array with distinct elements within the specified range, preserving the order of first occurrence.
      * <br />
      * The original array remains unchanged.
      *
-     * @param a The array from which duplicates should be removed.
-     * @param fromIndex The initial index of the range to be considered for duplicate removal.
-     * @param toIndex The final index of the range to be considered for duplicate removal.
-     * @param isSorted A boolean flag indicating whether the input array within the specified range is sorted. If {@code true}, the algorithm will be faster.
-     * @return A new array with distinct elements within the specified range.
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds.
+     * <p><b>Algorithm:</b></p>
+     * <ul>
+     *   <li>If {@code isSorted} is true: Uses optimized sequential comparison - O(n) time, O(n) space</li>
+     *   <li>If {@code isSorted} is false: Uses LinkedHashSet to maintain order - O(n) time, O(n) space with additional set overhead</li>
+     * </ul>
+     *
+     * <p><b>Performance Tip:</b> If your array is sorted (or you can sort it first), pass {@code isSorted=true}
+     * for better performance with improved cache locality.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * char[] sorted = {'a', 'a', 'b', 'b', 'c', 'd', 'd'};
+     * char[] distinct1 = N.removeDuplicates(sorted, 0, sorted.length, true);
+     * // Result: {'a', 'b', 'c', 'd'} - faster algorithm
+     *
+     * char[] unsorted = {'d', 'a', 'd', 'b', 'a', 'c'};
+     * char[] distinct2 = N.removeDuplicates(unsorted, 0, unsorted.length, false);
+     * // Result: {'d', 'a', 'b', 'c'} - preserves first occurrence order
+     * }</pre>
+     *
+     * @param a the array from which duplicates should be removed, may be null or empty
+     * @param fromIndex the initial index of the range to be considered for duplicate removal, inclusive
+     * @param toIndex the final index of the range to be considered for duplicate removal, exclusive
+     * @param isSorted {@code true} if the input array within the specified range is sorted (enables faster algorithm),
+     *                 {@code false} otherwise
+     * @return a new array with distinct elements within the specified range, preserving order of first occurrence.
+     *         Returns an empty array if the input is null or empty.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @see #distinct(char[])
+     * @see #removeDuplicates(char[], boolean)
      */
     public static char[] removeDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -11128,6 +11610,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * String[] arr = {"A", "B", "C", "D", "E"};
+     * String[] result = N.deleteRange(arr, 1, 3);
+     * // Returns: ["A", "D", "E"] - removed indices 1 and 2
+     * }</pre>
+     *
+     * @param <T> the type of elements in the array
      * @param a the input array from which a range of elements are to be deleted
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
@@ -11642,337 +12132,345 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
-     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * The new position specified by {@code newPositionAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
-     * @param fromIndex the initial index of the range to be moved, inclusive
-     * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the array
      */
-    public static void moveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
-            throws IndexOutOfBoundsException {
+    public static void moveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
+        if (fromIndex == toIndex || fromIndex == newPositionAfterMove) {
             return;
         }
 
         final boolean[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndexAfterMove < fromIndex) {
-            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
+        if (newPositionAfterMove < fromIndex) {
+            copy(a, newPositionAfterMove, a, toIndex - (fromIndex - newPositionAfterMove), fromIndex - newPositionAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
-     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * The new position specified by {@code newPositionAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
-     * @param fromIndex the initial index of the range to be moved, inclusive
-     * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the array
      */
-    public static void moveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
-            throws IndexOutOfBoundsException {
+    public static void moveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
+        if (fromIndex == toIndex || fromIndex == newPositionAfterMove) {
             return;
         }
 
         final char[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndexAfterMove < fromIndex) {
-            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
+        if (newPositionAfterMove < fromIndex) {
+            copy(a, newPositionAfterMove, a, toIndex - (fromIndex - newPositionAfterMove), fromIndex - newPositionAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
-     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * The new position specified by {@code newPositionAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
-     * @param fromIndex the initial index of the range to be moved, inclusive
-     * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the array
      */
-    public static void moveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
-            throws IndexOutOfBoundsException {
+    public static void moveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
+        if (fromIndex == toIndex || fromIndex == newPositionAfterMove) {
             return;
         }
 
         final byte[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndexAfterMove < fromIndex) {
-            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
+        if (newPositionAfterMove < fromIndex) {
+            copy(a, newPositionAfterMove, a, toIndex - (fromIndex - newPositionAfterMove), fromIndex - newPositionAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
-     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * The new position specified by {@code newPositionAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
-     * @param fromIndex the initial index of the range to be moved, inclusive
-     * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the array
      */
-    public static void moveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
-            throws IndexOutOfBoundsException {
+    public static void moveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
+        if (fromIndex == toIndex || fromIndex == newPositionAfterMove) {
             return;
         }
 
         final short[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndexAfterMove < fromIndex) {
-            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
+        if (newPositionAfterMove < fromIndex) {
+            copy(a, newPositionAfterMove, a, toIndex - (fromIndex - newPositionAfterMove), fromIndex - newPositionAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
-     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * The new position specified by {@code newPositionAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
-     * @param fromIndex the initial index of the range to be moved, inclusive
-     * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the array
      */
-    public static void moveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
-            throws IndexOutOfBoundsException {
+    public static void moveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
+        if (fromIndex == toIndex || fromIndex == newPositionAfterMove) {
             return;
         }
 
         final int[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndexAfterMove < fromIndex) {
-            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
+        if (newPositionAfterMove < fromIndex) {
+            copy(a, newPositionAfterMove, a, toIndex - (fromIndex - newPositionAfterMove), fromIndex - newPositionAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
-     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * The new position specified by {@code newPositionAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
-     * @param fromIndex the initial index of the range to be moved, inclusive
-     * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the array
      */
-    public static void moveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
-            throws IndexOutOfBoundsException {
+    public static void moveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
+        if (fromIndex == toIndex || fromIndex == newPositionAfterMove) {
             return;
         }
 
         final long[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndexAfterMove < fromIndex) {
-            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
+        if (newPositionAfterMove < fromIndex) {
+            copy(a, newPositionAfterMove, a, toIndex - (fromIndex - newPositionAfterMove), fromIndex - newPositionAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
-     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * The new position specified by {@code newPositionAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
-     * @param fromIndex the initial index of the range to be moved, inclusive
-     * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the array
      */
-    public static void moveRange(final float[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
-            throws IndexOutOfBoundsException {
+    public static void moveRange(final float[] a, final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
+        if (fromIndex == toIndex || fromIndex == newPositionAfterMove) {
             return;
         }
 
         final float[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndexAfterMove < fromIndex) {
-            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
+        if (newPositionAfterMove < fromIndex) {
+            copy(a, newPositionAfterMove, a, toIndex - (fromIndex - newPositionAfterMove), fromIndex - newPositionAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
-     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * The new position specified by {@code newPositionAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
      * @param a the original array to be modified
-     * @param fromIndex the initial index of the range to be moved, inclusive
-     * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the array
      */
-    public static void moveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
-            throws IndexOutOfBoundsException {
+    public static void moveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
+        if (fromIndex == toIndex || fromIndex == newPositionAfterMove) {
             return;
         }
 
         final double[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndexAfterMove < fromIndex) {
-            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
+        if (newPositionAfterMove < fromIndex) {
+            copy(a, newPositionAfterMove, a, toIndex - (fromIndex - newPositionAfterMove), fromIndex - newPositionAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given array to a new position within the array.
-     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * The new position specified by {@code newPositionAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original array maintains its size.
      *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * String[] arr = {"A", "B", "C", "D", "E"};
+     * N.moveRange(arr, 1, 3, 3);  // Move "B","C" to position 3
+     * // Result: ["A", "D", "B", "C", "E"]
+     * }</pre>
+     *
+     * @param <T> the type of elements in the array
      * @param a the original array to be modified
-     * @param fromIndex the initial index of the range to be moved, inclusive
-     * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds or newPositionStartIndexAfterMove is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the array
      */
-    public static <T> void moveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
-            throws IndexOutOfBoundsException {
+    public static <T> void moveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, len);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
+        if (fromIndex == toIndex || fromIndex == newPositionAfterMove) {
             return;
         }
 
         final T[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
 
         // move ahead
-        if (newPositionStartIndexAfterMove < fromIndex) {
-            copy(a, newPositionStartIndexAfterMove, a, toIndex - (fromIndex - newPositionStartIndexAfterMove), fromIndex - newPositionStartIndexAfterMove);
+        if (newPositionAfterMove < fromIndex) {
+            copy(a, newPositionAfterMove, a, toIndex - (fromIndex - newPositionAfterMove), fromIndex - newPositionAfterMove);
         } else {
-            copy(a, toIndex, a, fromIndex, newPositionStartIndexAfterMove - fromIndex);
+            copy(a, toIndex, a, fromIndex, newPositionAfterMove - fromIndex);
         }
 
-        copy(rangeTmp, 0, a, newPositionStartIndexAfterMove, rangeTmp.length);
+        copy(rangeTmp, 0, a, newPositionAfterMove, rangeTmp.length);
     }
 
     /**
      * Moves a range of elements in the given list to a new position within the list.
-     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
+     * The new position specified by {@code newPositionAfterMove} is the start index of the specified range after the move operation, not before the move operation.
      * <br />
      * No elements are deleted in the process, the original list maintains its size.
      *
      * @param <T> the type of elements in the list
      * @param c the original list to be modified
-     * @param fromIndex the initial index of the range to be moved, inclusive
-     * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @return {@code true} if the list was modified as a result of this operation
-     * @throws IndexOutOfBoundsException if the range is out of the list bounds or newPositionStartIndexAfterMove is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and sizeOfList - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the list
      */
-    public static <T> boolean moveRange(final List<T> c, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
+    public static <T> boolean moveRange(final List<T> c, final int fromIndex, final int toIndex, final int newPositionAfterMove)
             throws IndexOutOfBoundsException {
         final int size = size(c);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, size);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
 
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndexAfterMove) {
+        if (fromIndex == toIndex || fromIndex == newPositionAfterMove) {
             return false;
         }
 
         final T[] tmp = (T[]) c.toArray();
 
-        moveRange(tmp, fromIndex, toIndex, newPositionStartIndexAfterMove);
+        moveRange(tmp, fromIndex, toIndex, newPositionAfterMove);
         c.clear();
         c.addAll(Arrays.asList(tmp));
 
@@ -11980,513 +12478,53 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Moves a range of elements in the given array to a new position within the array.
-     * The new position specified by {@code newPositionStartIndexAfterMove} is the start index of the specified range after the move operation, not before the move operation.
-     * <br />
-     * The original String remains unchanged.
+     * Moves a specified range of characters within a string to a new position.
+     *
+     * <p>This method extracts a substring from the range [fromIndex, toIndex) and moves it to the specified
+     * new position. The newPositionAfterMove parameter indicates where the start of the moved range
+     * should be positioned in the resulting string. The original string remains unchanged, and a new string
+     * with the rearranged characters is returned.</p>
+     *
+     * <p>The method returns an empty string for null or empty input.</p>
+     *
+     * <p>Example:
+     * <pre>{@code
+     * // Moving a range of characters
+     * moveRange("ABCDEFGH", 2, 5, 0);      // returns "CDEABFGH" (moves "CDE" to position 0)
+     * moveRange("ABCDEFGH", 2, 5, 5);      // returns "ABFGHCDE" (moves "CDE" to position 6)
+     * moveRange("Hello World", 0, 5, 5);   // returns " WorldHello" (moves "Hello" after "World")
+     *
+     * // Edge cases
+     * moveRange(null, 0, 0, 0);            // returns ""
+     * moveRange("", 0, 0, 0);              // returns ""
+     * moveRange("ABC", 1, 1, 2);           // returns "ABC" (no change when fromIndex == toIndex)
+     * moveRange("ABC", 0, 2, 0);           // returns "ABC" (no change when already at position)
+     * }</pre>
      *
      * @param str the original string to be modified
-     * @param fromIndex the initial index of the range to be moved, inclusive
-     * @param toIndex the final index of the range to be moved, exclusive
-     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @return a new string with the specified range moved to the new position
-     * @throws IndexOutOfBoundsException if the range is out of the string bounds or newPositionStartIndexAfterMove is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and lengthOfString - lengthOfRange, inclusive.
+     * @return a new string with the specified range moved to the new position. An empty String is returned if the specified String is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the string
      * @see Strings#moveRange(String, int, int, int)
      */
-    public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove)
-            throws IndexOutOfBoundsException {
-        return Strings.moveRange(str, fromIndex, toIndex, newPositionStartIndexAfterMove);
+    public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
+        return Strings.moveRange(str, fromIndex, toIndex, newPositionAfterMove);
     }
 
-    static void checkIndexAndStartPositionForMoveRange(final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove, final int len) {
+    static void checkIndexAndStartPositionForMoveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove, final int len) {
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (newPositionStartIndexAfterMove < 0 || newPositionStartIndexAfterMove > (len - (toIndex - fromIndex))) {
-            throw new IndexOutOfBoundsException("newPositionStartIndexAfterMove " + newPositionStartIndexAfterMove + " is out-of-bounds: [0, "
-                    + (len - (toIndex - fromIndex)) + "=(array.length - (toIndex - fromIndex))]");
+        if (newPositionAfterMove < 0 || newPositionAfterMove > (len - (toIndex - fromIndex))) {
+            throw new IndexOutOfBoundsException("newPositionAfterMove " + newPositionAfterMove + " is out-of-bounds: [0, " + (len - (toIndex - fromIndex))
+                    + "=(array.length - (toIndex - fromIndex))]");
         }
     }
 
     //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final boolean[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final char[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final byte[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final short[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final int[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final long[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final double[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final T[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final boolean[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final char[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final byte[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final short[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final int[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final long[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final double[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final T[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final boolean[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final char[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final byte[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final short[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final int[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final long[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final double[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Returns a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndexAfterMove the start index of the specified range after the move operation, not before the move operation. 
-    //     *          It must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndexAfterMove, len(a)); // NOSONAR
-    //
-    //        final T[] copy = isEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndexAfterMove);
-    //
-    //        return copy;
-    //    }
 
     /**
      * Returns a new array with the specified range skipped.
@@ -13100,7 +13138,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given array has duplicate elements.
      *
-     * @param <T>
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * String[] arr1 = {"A", "B", "C"};
+     * boolean result1 = N.hasDuplicates(arr1);  // Returns: false
+     *
+     * String[] arr2 = {"A", "B", "A"};
+     * boolean result2 = N.hasDuplicates(arr2);  // Returns: true
+     * }</pre>
+     *
+     * @param <T> the type of elements in the array
      * @param a the array to be checked for duplicates
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates, {@code false} otherwise
@@ -13850,6 +13897,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Sums all elements in the given array using the provided function to convert each element to an integer.
+     *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Bob", "Charlie"};
+     * int totalLength = N.sumInt(names, String::length);
+     * // Returns: 15 (5 + 3 + 7)
+     * }</pre>
      *
      * @param <T> The type of the elements in the array.
      * @param a The array of elements to be summed.
@@ -14780,6 +14834,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Calculates the average of the elements in the given array using the provided function to convert each element to a double.
      *
+     * <p><b>Example:</b></p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Bob", "Charlie"};
+     * double avgLength = N.averageDouble(names, String::length);
+     * // Returns: 5.0 ((5 + 3 + 7) / 3)
+     * }</pre>
+     *
      * @param <T> The type of the elements in the array
      * @param a The array to calculate the average.
      * @param func The function to convert each element to a double.
@@ -14920,7 +14981,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
         }
 
-        //noinspection BigDecimalMethodWithoutRoundingCalled
         return cnt == 0 ? BigDecimal.ZERO : new BigDecimal(sum).divide(BigDecimal.valueOf(cnt));
     }
 
@@ -14963,7 +15023,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
         }
 
-        //noinspection BigDecimalMethodWithoutRoundingCalled
         return cnt == 0 ? BigDecimal.ZERO : sum.divide(BigDecimal.valueOf(cnt));
     }
 
@@ -15201,10 +15260,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static char min(final char... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty"); //NOSONAR
-
-        if (isEmpty(a)) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
 
         return min(a, 0, a.length);
     }
@@ -15712,11 +15767,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the minimum element from the provided array according to the key extracted by the {@code keyExtractor} function.
      * If there are more than one smallest elements, the first one will be returned.
+     * Null values are considered to be maximum (will be placed last when comparing).
      *
-     * @param <T>
-     * @param a
-     * @param keyExtractor
-     * @return
+     * <p>Example:</p>
+     * <pre>{@code
+     * String[] words = {"apple", "pie", "zoo"};
+     * String shortest = N.minBy(words, String::length); // returns "pie"
+     * }</pre>
+     *
+     * @param <T> the type of elements in the array
+     * @param a the array to find the minimum element from
+     * @param keyExtractor the function to extract the comparable key from each element
+     * @return the minimum element based on the extracted key
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see Comparators#nullsLastBy(Function)
      * @see Iterables#minBy(Object[], Function)
@@ -15729,10 +15791,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the minimum element from the provided iterable according to the key extracted by the {@code keyExtractor} function.
      * If there are more than one smallest elements, the first one will be returned.
-     * @param <T>
-     * @param c
-     * @param keyExtractor
-     * @return
+     * Null values are considered to be maximum (will be placed last when comparing).
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("apple", "pie", "zoo");
+     * String shortest = N.minBy(words, String::length); // returns "pie"
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterable
+     * @param c the iterable to find the minimum element from
+     * @param keyExtractor the function to extract the comparable key from each element
+     * @return the minimum element based on the extracted key
      * @throws IllegalArgumentException if the specified iterable is {@code null} or empty.
      * @see Comparators#nullsLastBy(Function)
      * @see Iterables#minBy(Iterable, Function)
@@ -15745,10 +15815,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the minimum element from the provided iterator according to the key extracted by the {@code keyExtractor} function.
      * If there are more than one smallest elements, the first one will be returned.
-     * @param <T>
-     * @param iter
-     * @param keyExtractor
-     * @return
+     * Null values are considered to be maximum (will be placed last when comparing).
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * Iterator<String> words = Arrays.asList("apple", "pie", "zoo").iterator();
+     * String shortest = N.minBy(words, String::length); // returns "pie"
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterator
+     * @param iter the iterator to find the minimum element from
+     * @param keyExtractor the function to extract the comparable key from each element
+     * @return the minimum element based on the extracted key
      * @throws IllegalArgumentException if the specified iterator is {@code null} or empty.
      * @see Comparators#nullsLastBy(Function)
      * @see Iterables#minBy(Iterator, Function)
@@ -15880,6 +15958,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the minimum value extracted from the specified array or a default value if the array is {@code null} or empty. Null values are considered to be maximum here.
      *
+     * <p><b>Note:</b> This method is marked as {@code @Beta} and its API may change in future versions.</p>
+     *
      * @param <T> the type of elements in the input array.
      * @param <R> the type of the extracted value, which must be comparable.
      * @param a the array to extract the minimum value from.
@@ -15959,6 +16039,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the minimum integer value extracted from the array or a default value if the array is {@code null} or empty.
+     *
+     * <p><b>Note:</b> This method is marked as {@code @Beta} and its API may change in future versions.</p>
      *
      * @param <T> the type of elements in the input array.
      * @param a the array to extract the minimum integer from.
@@ -19149,6 +19231,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified array.
      * If there are less than <i>n</i> elements in the array, a copy of the input array is returned.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to find the top <i>n</i> elements in
      * @param n the number of top elements to return
@@ -19163,6 +19246,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified array according to the provided comparator.
      * If there are less than <i>n</i> elements in the array, a copy of the input array is returned.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to find the top <i>n</i> elements in
      * @param n the number of top elements to return
@@ -19178,6 +19262,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from a specified range in the input array.
      * If there are less than <i>n</i> elements within the specified range, all the elements from the range will be included in the returned array.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to select the top elements from.
      * @param fromIndex The start index (inclusive) of the range.
@@ -19195,6 +19280,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from a specified range in the input array according to the provided comparator.
      * If there are less than <i>n</i> elements within the specified range, all the elements from the range will be included in the returned array.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to select the top elements from.
      * @param fromIndex The start index (inclusive) of the range.
@@ -19245,6 +19331,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified array.
      * If there are less than <i>n</i> elements in the array, a copy of the input array is returned.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to find the top <i>n</i> elements in
      * @param n the number of top elements to return
@@ -19258,6 +19345,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified array according to the provided comparator.
      * If there are less than <i>n</i> elements in the array, a copy of the input array is returned.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to find the top <i>n</i> elements in
      * @param n the number of top elements to return
@@ -19272,6 +19360,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from a specified range in the input array.
      * If there are less than <i>n</i> elements within the specified range, all the elements from the range will be included in the returned array.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to select the top elements from.
      * @param fromIndex The start index (inclusive) of the range.
@@ -19289,16 +19378,44 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from a specified range in the input array according to the provided comparator.
      * If there are less than <i>n</i> elements within the specified range, all the elements from the range will be included in the returned array.
+     * There is no guarantee on the order of the returned elements.
      *
-     * @param a the array to select the top elements from.
-     * @param fromIndex The start index (inclusive) of the range.
-     * @param toIndex The end index (exclusive) of the range.
-     * @param n the number of top elements to select.
-     * @param cmp the comparator to determine the order of the array.
-     * @return a array containing the top <i>n</i> elements from the specified range in the input array.
-     * @throws IllegalArgumentException if the specified <i>n</i> is negative.
-     * @throws IndexOutOfBoundsException if the specified range is out of the array's bounds.
+     * <p><b>Algorithm:</b> Uses a min-heap (PriorityQueue) of size <i>n</i> to efficiently select the top elements.
+     * The heap maintains the smallest <i>n</i> elements seen so far, replacing the minimum when a larger element is found.</p>
+     *
+     * <p><b>Performance:</b></p>
+     * <ul>
+     *   <li>Time Complexity: O(m * log n) where m = toIndex - fromIndex is the range size and n is the number of top elements</li>
+     *   <li>Space Complexity: O(n) for the heap</li>
+     *   <li>Best used when n is much smaller than m (e.g., top 10 from 1 million elements)</li>
+     *   <li>For n close to m, consider sorting the entire range instead</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int[] numbers = {5, 2, 8, 1, 9, 3, 7, 4, 6};
+     *
+     * // Get top 3 largest elements
+     * int[] top3 = N.top(numbers, 0, numbers.length, 3, null);
+     * // Result contains: {9, 8, 7} (order not guaranteed)
+     *
+     * // Get top 3 smallest elements using reverse comparator
+     * int[] bottom3 = N.top(numbers, 0, numbers.length, 3, Collections.reverseOrder());
+     * // Result contains: {1, 2, 3} (order not guaranteed)
+     * }</pre>
+     *
+     * @param a the array to select the top elements from, may be null or empty
+     * @param fromIndex the start index (inclusive) of the range
+     * @param toIndex the end index (exclusive) of the range
+     * @param n the number of top elements to select
+     * @param cmp the comparator to determine the order of the array. Use {@code null} for natural ordering.
+     *            Null elements are considered as the smallest.
+     * @return an array containing the top <i>n</i> elements from the specified range in the input array.
+     *         The order of elements in the result is not guaranteed.
+     * @throws IllegalArgumentException if the specified <i>n</i> is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of the array's bounds
      * @see #top(int[], int)
+     * @see #top(int[], int, Comparator)
      */
     public static int[] top(final int[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Integer> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -19339,6 +19456,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified array.
      * If there are less than <i>n</i> elements in the array, a copy of the input array is returned.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to find the top <i>n</i> elements in
      * @param n the number of top elements to return
@@ -19353,6 +19471,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified array according to the provided comparator.
      * If there are less than <i>n</i> elements in the array, a copy of the input array is returned.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to find the top <i>n</i> elements in
      * @param n the number of top elements to return
@@ -19368,6 +19487,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from a specified range in the input array.
      * If there are less than <i>n</i> elements within the specified range, all the elements from the range will be included in the returned array.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to select the top elements from.
      * @param fromIndex The start index (inclusive) of the range.
@@ -19385,6 +19505,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from a specified range in the input array according to the provided comparator.
      * If there are less than <i>n</i> elements within the specified range, all the elements from the range will be included in the returned array.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to select the top elements from.
      * @param fromIndex The start index (inclusive) of the range.
@@ -19435,6 +19556,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified array.
      * If there are less than <i>n</i> elements in the array, a copy of the input array is returned.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to find the top <i>n</i> elements in
      * @param n the number of top elements to return
@@ -19449,6 +19571,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified array according to the provided comparator.
      * If there are less than <i>n</i> elements in the array, a copy of the input array is returned.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to find the top <i>n</i> elements in
      * @param n the number of top elements to return
@@ -19464,6 +19587,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from a specified range in the input array.
      * If there are less than <i>n</i> elements within the specified range, all the elements from the range will be included in the returned array.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to select the top elements from.
      * @param fromIndex The start index (inclusive) of the range.
@@ -19481,6 +19605,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from a specified range in the input array according to the provided comparator.
      * If there are less than <i>n</i> elements within the specified range, all the elements from the range will be included in the returned array.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to select the top elements from.
      * @param fromIndex The start index (inclusive) of the range.
@@ -19531,6 +19656,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified array.
      * If there are less than <i>n</i> elements in the array, a copy of the input array is returned.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to find the top <i>n</i> elements in
      * @param n the number of top elements to return
@@ -19545,6 +19671,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified array according to the provided comparator.
      * If there are less than <i>n</i> elements in the array, a copy of the input array is returned.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to find the top <i>n</i> elements in
      * @param n the number of top elements to return
@@ -19560,6 +19687,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from a specified range in the input array.
      * If there are less than <i>n</i> elements within the specified range, all the elements from the range will be included in the returned array.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to select the top elements from.
      * @param fromIndex The start index (inclusive) of the range.
@@ -19578,6 +19706,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from a specified range in the input array according to the provided comparator.
      * If there are less than <i>n</i> elements within the specified range, all the elements from the range will be included in the returned array.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param a the array to select the top elements from.
      * @param fromIndex The start index (inclusive) of the range.
@@ -19628,6 +19757,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified array based on their natural ordering. Null values are considered as the smallest elements here.
      * If there are less than <i>n</i> elements in the array, all the elements will be included to returned list.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param <T> The type of the elements in the array. It must be a type that implements Comparable.
      * @param a The array from which to find the top <i>n</i> elements.
@@ -19643,6 +19773,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified array according to the provided comparator.
      * If there are less than <i>n</i> elements in the array, all the elements will be included to returned list.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param <T> The type of the elements in the array.
      * @param a The array from which to find the top <i>n</i> elements.
@@ -19659,6 +19790,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified range in the input array based on their natural ordering. Null values are considered as the smallest elements here.
      * If there are less than <i>n</i> elements in the range specified by {@code fromIndex} and {@code toIndex}, all the elements from that range will be included to returned list.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param <T> The type of the elements in the array. It must be a type that implements Comparable.
      * @param a The array from which to find the top <i>n</i> elements.
@@ -19678,6 +19810,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified range in the input array according to the provided comparator.
      * If there are less than <i>n</i> elements in the range, all the elements from that range will be included in the returned list.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param <T> The type of the elements in the array.
      * @param a The array from which to find the top <i>n</i> elements.
@@ -19707,6 +19840,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified collection based on their natural ordering. Null values are considered as the smallest elements here.
      * If there are less than <i>n</i> elements in the collection, all the elements will be included to returned list.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param <T> The type of the elements in the collection. It must be a type that implements Comparable.
      * @param c the collection from which to find the top <i>n</i> elements.
@@ -19722,6 +19856,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified collection according to the provided comparator.
      * If there are less than <i>n</i> elements in the collection, all the elements will be included to returned list.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param <T> The type of the elements in the collection.
      * @param c the collection from which to find the top <i>n</i> elements.
@@ -19738,6 +19873,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified range in the input collection based on their natural ordering. Null values are considered as the smallest elements here.
      * If there are less than <i>n</i> elements in the range specified by {@code fromIndex} and {@code toIndex}, all the elements from that range will be included to returned list.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param <T> The type of the elements in the collection. It must be a type that implements Comparable.
      * @param c the collection from which to find the top <i>n</i> elements.
@@ -19757,6 +19893,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the top <i>n</i> elements from the specified range in the input collection according to the provided comparator.
      * If there are less than <i>n</i> elements in the range, all the elements from that range will be included in the returned list.
+     * There is no guarantee on the order of the returned elements.
      *
      * @param <T> The type of the elements in the collection.
      * @param c the collection from which to find the top <i>n</i> elements.
@@ -25006,9 +25143,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Counts the number of elements in the input byte array that match the given predicate.
+     * Counts the number of elements in the input char array that match the given predicate.
      *
-     * @param a the input byte array
+     * @param a the input char array
      * @param filter the predicate to test if an element should be counted or not.
      * @return the number of elements that match the predicate. 0 is returned if the input array is {@code null} or empty
      */
@@ -25021,13 +25158,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Counts the number of elements within the specified range in the input byte array that match the given predicate.
+     * Counts the number of elements within the specified range in the input char array that match the given predicate.
      *
-     * @param a the input byte array
+     * @param a the input char array
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @param filter the predicate to test if an element should be counted or not.
-     * @return the number of elements within the specified range in the input byte array that match the given predicate. 0 is returned if the input array/range is {@code null} or empty
+     * @return the number of elements within the specified range in the input char array that match the given predicate. 0 is returned if the input array/range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static int count(final char[] a, final int fromIndex, final int toIndex, final CharPredicate filter) throws IndexOutOfBoundsException {
@@ -31019,20 +31156,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(command, delayInMillis, TimeUnit.MILLISECONDS));
     }
 
-    //    /**
-    //     *
-    //     * @param commands
-    //     * @return
-    //     * @see Futures
-    //     * @see Fn#jr(Runnable)
-    //     * @see Fn#jc(Callable)
-    //     */
-    //    @SuppressWarnings("deprecation")
-    //    @SafeVarargs
-    //    public static List<ContinuableFuture<Void>> asyncExecute(final Throwables.Runnable<? extends Exception>... commands) {
-    //        return ASYNC_EXECUTOR.execute(commands);
-    //    }
-
     /**
      * Executes the provided command asynchronously with the specified retry logic in case of failure.
      *
@@ -32565,30 +32688,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
     }
 
-    //    /**
-    //     *
-    //     * @param e
-    //     * @param type
-    //     * @return
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     */
-    //    @Beta
-    //    public static boolean hasCause(final Throwable e, final Class<? extends Throwable> type) {
-    //        return ExceptionUtil.hasCause(e, type);
-    //    }
-    //
-    //    /**
-    //     * Returns the specified {@code Throwable e} if there is no cause found in it ({@code e.getCause() == null}).
-    //     *
-    //     * @param e
-    //     * @return
-    //     * @see ExceptionUtil#firstCause(Throwable)
-    //     */
-    //    @Beta
-    //    public static Throwable firstCause(final Throwable e) {
-    //        return ExceptionUtil.firstCause(e);
-    //    }
-
     /**
      * Executes the given {@code Callable} and returns a {@code Nullable} containing the result.
      * If an exception occurs during the execution, an empty {@code Nullable} is returned.
@@ -33326,44 +33425,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     //    /**
-    //     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked exception,
-    //     * or throws it if it's an {@code Error}, based on the provided flag.
-    //     *
-    //     * @param e the throwable to be converted to a runtime exception or thrown if it's an error
-    //     * @param throwIfItIsError a flag indicating whether to throw the throwable if it's an error
-    //     * @return a RuntimeException that represents the provided throwable
-    //     * @throws Error if the throwable is an error and the flag is set to true
-    //     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
-    //     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
-    //     */
-    //    @Beta
-    //    public static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
-    //        return ExceptionUtil.toRuntimeException(e, true, throwIfItIsError);
-    //    }
-
-    //    /**
-    //     *
-    //     * @param e
-    //     * @param type
-    //     * @return
-    //     * @see ExceptionUtil#hasCause(Throwable, Class)
-    //     */
-    //    @Beta
-    //    public static boolean hasCause(final Throwable e, final Class<? extends Throwable> type) {
-    //        return ExceptionUtil.hasCause(e, type);
-    //    }
-    //
-    //    /**
-    //     * Returns the specified {@code Throwable e} if there is no cause found in it ({@code e.getCause() == null}).
-    //     *
-    //     * @param e
-    //     * @return
-    //     * @see ExceptionUtil#firstCause(Throwable)
-    //     */
-    //    @Beta
-    //    public static Throwable firstCause(final Throwable e) {
-    //        return ExceptionUtil.firstCause(e);
-    //    }
 
     /**
      * Prints the given object's string representation to the standard output stream (System.out) and returns the object.
@@ -33428,38 +33489,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         return obj;
     }
-
-    //    public static void printlnForEach(final Object[] a) {
-    //        if (a == null) {
-    //            println("null");
-    //        } else if (a.length == 0) {
-    //            println("[]");
-    //        } else {
-    //            for (Object e : a) {
-    //                println(e);
-    //            }
-    //        }
-    //    }
-    //
-    //    public static void printlnForEach(final Iterable<?> iter) {
-    //        if (iter == null) {
-    //            println("null");
-    //        } else {
-    //            printlnForEach(iter.iterator());
-    //        }
-    //    }
-    //
-    //    public static void printlnForEach(final Iterator<?> iter) {
-    //        if (iter == null) {
-    //            println("null");
-    //        } else if (!iter.hasNext()) {
-    //            println("[]");
-    //        } else {
-    //            while (iter.hasNext()) {
-    //                println(iter.next());
-    //            }
-    //        }
-    //    }
 
     /**
      * Prints a formatted string to the standard output stream (System.out) followed by a newline.

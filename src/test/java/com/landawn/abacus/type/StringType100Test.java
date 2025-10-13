@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class StringType100Test extends TestBase {
 
     private StringType stringType;
@@ -18,8 +20,6 @@ public class StringType100Test extends TestBase {
 
     @Test
     public void testType() {
-        // StringType extends AbstractStringType which has all the implementations
-        // Just verify it can be created
         assertNotNull(stringType);
     }
 }

@@ -20,9 +20,11 @@ import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class LocalDateTimeType100Test extends TestBase {
 
     private LocalDateTimeType localDateTimeType;

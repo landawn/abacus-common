@@ -6,11 +6,13 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
 
+@Tag("new-test")
 public class Result100Test extends TestBase {
 
     @Test
@@ -24,12 +26,10 @@ public class Result100Test extends TestBase {
         Assertions.assertFalse(failureResult.isSuccess());
         Assertions.assertTrue(failureResult.isFailure());
 
-        // Both null - considered success
         Result<String, Exception> bothNull = Result.of(null, null);
         Assertions.assertTrue(bothNull.isSuccess());
         Assertions.assertFalse(bothNull.isFailure());
 
-        // Both non-null - considered failure
         Result<String, Exception> bothNonNull = Result.of("value", new Exception());
         Assertions.assertFalse(bothNonNull.isSuccess());
         Assertions.assertTrue(bothNonNull.isFailure());
@@ -69,7 +69,6 @@ public class Result100Test extends TestBase {
         Assertions.assertTrue(called.get());
         Assertions.assertSame(ex, capturedEx.get());
 
-        // Test with success - should not call action
         called.set(false);
         Result<String, Exception> success = Result.of("value", null);
         success.ifFailure(e -> called.set(true));
@@ -80,7 +79,6 @@ public class Result100Test extends TestBase {
     public void testIfFailureOrElse() {
         AtomicReference<String> result = new AtomicReference<>();
 
-        // Test failure case
         Exception ex = new Exception("error");
         Result<String, Exception> failure = Result.of("ignored", ex);
 
@@ -88,7 +86,6 @@ public class Result100Test extends TestBase {
 
         Assertions.assertEquals("failure: error", result.get());
 
-        // Test success case
         Result<String, Exception> success = Result.of("value", null);
 
         success.ifFailureOrElse(e -> result.set("failure"), v -> result.set("success: " + v));
@@ -111,7 +108,6 @@ public class Result100Test extends TestBase {
         Assertions.assertTrue(called.get());
         Assertions.assertEquals("test value", capturedValue.get());
 
-        // Test with failure - should not call action
         called.set(false);
         Result<String, Exception> failure = Result.of(null, new Exception());
         failure.ifSuccess(v -> called.set(true));
@@ -122,14 +118,12 @@ public class Result100Test extends TestBase {
     public void testIfSuccessOrElse() {
         AtomicReference<String> result = new AtomicReference<>();
 
-        // Test success case
         Result<String, Exception> success = Result.of("value", null);
 
         success.ifSuccessOrElse(v -> result.set("success: " + v), e -> result.set("failure: " + e.getMessage()));
 
         Assertions.assertEquals("success: value", result.get());
 
-        // Test failure case
         Exception ex = new Exception("error");
         Result<String, Exception> failure = Result.of(null, ex);
 
@@ -146,7 +140,6 @@ public class Result100Test extends TestBase {
         Result<String, Exception> failure = Result.of(null, new Exception());
         Assertions.assertEquals("default", failure.orElseIfFailure("default"));
 
-        // Test with null default
         Assertions.assertNull(failure.orElseIfFailure(null));
     }
 
@@ -158,7 +151,6 @@ public class Result100Test extends TestBase {
         Result<String, Exception> failure = Result.of(null, new Exception());
         Assertions.assertEquals("default", failure.orElseGetIfFailure(() -> "default"));
 
-        // Verify supplier is not called for success
         AtomicBoolean supplierCalled = new AtomicBoolean(false);
         success.orElseGetIfFailure(() -> {
             supplierCalled.set(true);
@@ -211,8 +203,8 @@ public class Result100Test extends TestBase {
 
         Result<String, Exception> failure = Result.of(null, new Exception("original"));
 
-        RuntimeException thrown = Assertions.assertThrows(RuntimeException.class, () -> failure.orElseThrow(
-                (Supplier<? extends RuntimeException>) () -> new RuntimeException("custom error")));
+        RuntimeException thrown = Assertions.assertThrows(RuntimeException.class,
+                () -> failure.orElseThrow((Supplier<? extends RuntimeException>) () -> new RuntimeException("custom error")));
         Assertions.assertEquals("custom error", thrown.getMessage());
     }
 
@@ -291,7 +283,6 @@ public class Result100Test extends TestBase {
         Result<String, Exception> failure2 = Result.of(null, ex);
         Assertions.assertEquals(failure1.hashCode(), failure2.hashCode());
 
-        // Different values should have different hash codes (usually)
         Result<String, Exception> different = Result.of("different", null);
         Assertions.assertNotEquals(result1.hashCode(), different.hashCode());
     }
@@ -302,17 +293,13 @@ public class Result100Test extends TestBase {
         Result<String, Exception> result2 = Result.of("value", null);
         Result<String, Exception> result3 = Result.of("different", null);
 
-        // Reflexive
         Assertions.assertEquals(result1, result1);
 
-        // Symmetric
         Assertions.assertEquals(result1, result2);
         Assertions.assertEquals(result2, result1);
 
-        // Different values
         Assertions.assertNotEquals(result1, result3);
 
-        // With exceptions
         Exception ex1 = new Exception("error");
         Exception ex2 = new Exception("error");
         Result<String, Exception> failure1 = Result.of(null, ex1);
@@ -322,11 +309,9 @@ public class Result100Test extends TestBase {
         Assertions.assertEquals(failure1, failure2);
         Assertions.assertNotEquals(failure1, failure3);
 
-        // Null and other types
         Assertions.assertNotEquals(result1, null);
         Assertions.assertNotEquals(result1, "not a result");
 
-        // Both value and exception
         Result<String, Exception> both = Result.of("value", ex1);
         Result<String, Exception> both2 = Result.of("value", ex1);
         Assertions.assertEquals(both, both2);
@@ -348,7 +333,6 @@ public class Result100Test extends TestBase {
 
     @Test
     public void testRR() {
-        // Test RR (RuntimeException specialization)
         Result.RR<String> success = Result.RR.of("value", null);
         Assertions.assertTrue(success.isSuccess());
         Assertions.assertEquals("value", success.orElseThrow());
@@ -380,7 +364,6 @@ public class Result100Test extends TestBase {
 
     @Test
     public void testWithNullValue() throws Exception {
-        // Test that null values are handled correctly
         Result<String, Exception> nullSuccess = Result.of(null, null);
         Assertions.assertTrue(nullSuccess.isSuccess());
         Assertions.assertNull(nullSuccess.orElseIfFailure("default"));

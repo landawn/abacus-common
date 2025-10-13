@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -53,6 +54,7 @@ import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.Supplier;
 
+@Tag("new-test")
 public class Fn202Test extends TestBase {
 
     public static class MyCloseable implements AutoCloseable {
@@ -218,7 +220,7 @@ public class Fn202Test extends TestBase {
         assertFalse(mockService.isShutdown());
         shutdown.run();
         assertTrue(mockService.isShutdown());
-        shutdown.run(); // Should not throw error
+        shutdown.run();
     }
 
     @Test
@@ -234,7 +236,7 @@ public class Fn202Test extends TestBase {
     @Test
     public void testEmptyConsumer() {
         assertDoesNotThrow(() -> Fn.emptyConsumer().accept("test"));
-        assertDoesNotThrow(() -> Fn.doNothing().accept("test")); // Deprecated
+        assertDoesNotThrow(() -> Fn.doNothing().accept("test"));
     }
 
     @Test
@@ -437,7 +439,6 @@ public class Fn202Test extends TestBase {
         assertEquals("fixed", entry.getKey());
         assertEquals(123, entry.getValue());
 
-        // Deprecated version
         entry = Fn.<String, Integer> entry("fixed").apply(123);
         assertEquals("fixed", entry.getKey());
         assertEquals(123, entry.getValue());
@@ -450,7 +451,6 @@ public class Fn202Test extends TestBase {
         assertEquals("key123", entry.getKey());
         assertEquals(123, entry.getValue());
 
-        // Deprecated version
         func = Fn.entry(i -> "key" + i);
         entry = func.apply(123);
         assertEquals("key123", entry.getKey());
@@ -662,7 +662,7 @@ public class Fn202Test extends TestBase {
         assertTrue(Fn.gtAndLe(5, 10).test(10));
         assertFalse(Fn.gtAndLe(5, 10).test(5));
 
-        assertTrue(Fn.between(5, 10).test(7)); // Deprecated
+        assertTrue(Fn.between(5, 10).test(7));
     }
 
     @Test
@@ -844,11 +844,9 @@ public class Fn202Test extends TestBase {
     public void testLimitThenFilter() {
         Predicate<Integer> p = Fn.limitThenFilter(3, i -> i % 2 == 0);
         long count = IntStream.range(0, 10).filter(p::test).count();
-        assertEquals(2, count); // 0, 2 pass. 4 is the 3rd element, so it is tested and passes, but then the counter is 0. Ah, the provided impl is `getAndDecrement > 0`, so 0, 2 are tested, then 4 is tested but the counter becomes 0. So it should be the first 3 elements that match the filter. No, the first three *elements* that are tested.
-        // Let's trace: 0->true, 1->false, 2->true, 3->false (counter is 0 now).
-        // Let's re-test my understanding.
+        assertEquals(2, count);
         Predicate<Integer> p2 = Fn.limitThenFilter(3, i -> i > 0);
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).filter(p2).count()); // 1, 2 pass. 3 is the 3rd element, counter becomes 0, so 3 passes. Next one fails.
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).filter(p2).count());
     }
 
     @Test
@@ -900,7 +898,6 @@ public class Fn202Test extends TestBase {
             assertTrue(Suppliers.ofList().get() instanceof ArrayList);
             assertTrue(Suppliers.ofSet().get() instanceof HashSet);
             assertTrue(Suppliers.ofMap().get() instanceof HashMap);
-            // ... and so on for all collection suppliers
             assertTrue(Suppliers.ofCollection(LinkedList.class).get() instanceof LinkedList);
             assertTrue(Suppliers.ofMap(TreeMap.class).get() instanceof TreeMap);
         }
@@ -910,11 +907,6 @@ public class Fn202Test extends TestBase {
             assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForCollection(ArrayList.class, ArrayList::new));
             assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForMap(HashMap.class, HashMap::new));
 
-            //        class MyList<E> extends ArrayList<E> {
-            //        }
-            //        assertTrue(Suppliers.registerForCollection(MyList.class, MyList::new));
-            //        assertFalse(Suppliers.registerForCollection(MyList.class, MyList::new)); // Already registered
-            //        assertTrue(Suppliers.ofCollection(MyList.class).get() instanceof MyList);
         }
     }
 
@@ -928,10 +920,9 @@ public class Fn202Test extends TestBase {
 
         @Test
         public void testCollectionFactories() {
-            assertEquals(0, ((ArrayList<?>) IntFunctions.ofList().apply(10)).size()); // ArrayList pre-allocates
+            assertEquals(0, ((ArrayList<?>) IntFunctions.ofList().apply(10)).size());
             assertTrue(IntFunctions.ofSet().apply(10) instanceof HashSet);
             assertTrue(IntFunctions.ofMap().apply(10) instanceof HashMap);
-            // ... and so on
         }
     }
 
@@ -940,9 +931,9 @@ public class Fn202Test extends TestBase {
         @Test
         public void testIndexed() {
             Predicate<String> p = Predicates.indexed((idx, s) -> idx % 2 == 0);
-            assertTrue(p.test("a")); // idx 0
-            assertFalse(p.test("b")); // idx 1
-            assertTrue(p.test("c")); // idx 2
+            assertTrue(p.test("a"));
+            assertFalse(p.test("b"));
+            assertTrue(p.test("c"));
         }
 
         @Test
@@ -957,10 +948,10 @@ public class Fn202Test extends TestBase {
         @Test
         public void testDistinctBy() {
             Predicate<String> p = Predicates.distinctBy(String::length);
-            assertTrue(p.test("a")); // length 1
-            assertTrue(p.test("bb")); // length 2
-            assertFalse(p.test("c")); // length 1 again
-            assertTrue(p.test("ddd")); // length 3
+            assertTrue(p.test("a"));
+            assertTrue(p.test("bb"));
+            assertFalse(p.test("c"));
+            assertTrue(p.test("ddd"));
         }
 
         @Test
@@ -993,8 +984,8 @@ public class Fn202Test extends TestBase {
         @Test
         public void testIndexed() {
             BiPredicate<String, String> p = BiPredicates.indexed((idx, s1, s2) -> idx == 1);
-            assertFalse(p.test("a", "b")); // idx 0
-            assertTrue(p.test("c", "d")); // idx 1
+            assertFalse(p.test("a", "b"));
+            assertTrue(p.test("c", "d"));
         }
     }
 
@@ -1111,10 +1102,6 @@ public class Fn202Test extends TestBase {
         }
     }
 
-    // ... Additional tests for other nested classes like TriPredicates, Consumers, etc.
-    // The pattern is similar: create tests for each public method, considering normal cases, edge cases, and exceptions.
-    // Due to the large number of methods, a full test suite would be very extensive.
-    // The provided tests cover a representative sample of the different kinds of methods in Fn.java.
     @Nested
     public class BinaryOperatorsTest {
         @Test
@@ -1224,8 +1211,6 @@ public class Fn202Test extends TestBase {
         }
     }
 
-    // Similar tests would be created for FC, FB, FS, FF, FD following the pattern of FI and FL.
-    // They are omitted for brevity but would follow the same structure.
     @Test
     public void testGetAsPrimitives() {
         assertEquals(true, Fn.GET_AS_BOOLEAN.applyAsBoolean(com.landawn.abacus.util.u.OptionalBoolean.of(true)));

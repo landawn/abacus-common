@@ -20,14 +20,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Throwables;
 
-/**
- * Unit tests for the custom functional interfaces in com.landawn.abacus.util.function.
- * These tests are generated to ensure the functionality of the interfaces by Gemini.
- */
+@Tag("new-test")
 public class FunctionAPI100Test extends TestBase {
 
     @Nested
@@ -50,11 +48,9 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testToThrowable() {
             BiConsumer<String, Integer> consumer = (s, i) -> {
-                // No-op
             };
             Throwables.BiConsumer<String, Integer, ?> throwableConsumer = consumer.toThrowable();
             assertNotNull(throwableConsumer);
-            // Verify it can be cast back
             BiConsumer<String, Integer> original = (BiConsumer<String, Integer>) throwableConsumer;
             assertNotNull(original);
         }
@@ -76,7 +72,7 @@ public class FunctionAPI100Test extends TestBase {
             java.util.function.Function<String, Integer> afterFunction = String::length;
 
             BiFunction<String, Integer, Integer> chainedFunction = biFunction.andThen(afterFunction);
-            Integer finalResult = chainedFunction.apply("value", 10); // "value:10" -> length 8
+            Integer finalResult = chainedFunction.apply("value", 10);
 
             assertEquals(8, finalResult);
         }
@@ -133,7 +129,7 @@ public class FunctionAPI100Test extends TestBase {
             java.util.function.Function<String, Integer> afterFunction = String::length;
 
             BiIntObjFunction<String, Integer> chainedFunction = function.andThen(afterFunction);
-            Integer result = chainedFunction.apply(5, 10, "Sum="); // "Sum=15" -> length 6
+            Integer result = chainedFunction.apply(5, 10, "Sum=");
             assertEquals(6, result);
         }
     }
@@ -159,19 +155,19 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testAnd() {
             BiIntObjPredicate<String> combined = isSumEven.and(isStringLong);
-            assertTrue(combined.test(2, 2, "long string")); // 4 is even, length > 5
-            assertFalse(combined.test(2, 3, "long string")); // 5 is odd, length > 5
-            assertFalse(combined.test(2, 2, "short")); // 4 is even, length <= 5
-            assertFalse(combined.test(2, 3, "short")); // 5 is odd, length <= 5
+            assertTrue(combined.test(2, 2, "long string"));
+            assertFalse(combined.test(2, 3, "long string"));
+            assertFalse(combined.test(2, 2, "short"));
+            assertFalse(combined.test(2, 3, "short"));
         }
 
         @Test
         public void testOr() {
             BiIntObjPredicate<String> combined = isSumEven.or(isStringLong);
-            assertTrue(combined.test(2, 2, "long string")); // 4 is even, length > 5
-            assertTrue(combined.test(2, 3, "long string")); // 5 is odd, but length > 5
-            assertTrue(combined.test(2, 2, "short")); // 4 is even, though length <= 5
-            assertFalse(combined.test(2, 3, "short")); // 5 is odd, and length <= 5
+            assertTrue(combined.test(2, 2, "long string"));
+            assertTrue(combined.test(2, 3, "long string"));
+            assertTrue(combined.test(2, 2, "short"));
+            assertFalse(combined.test(2, 3, "short"));
         }
     }
 
@@ -200,7 +196,7 @@ public class FunctionAPI100Test extends TestBase {
         public void testAccept() {
             AtomicInteger result = new AtomicInteger();
             BiObjIntConsumer<String, String> consumer = (s1, s2, i) -> result.set(s1.length() + s2.length() + i);
-            consumer.accept("abc", "de", 10); // 3 + 2 + 10
+            consumer.accept("abc", "de", 10);
             assertEquals(15, result.get());
         }
 
@@ -211,11 +207,11 @@ public class FunctionAPI100Test extends TestBase {
             BiObjIntConsumer<String, Integer> consumer2 = (s, i1, i2) -> results.add(s.length() * i1 * i2);
 
             BiObjIntConsumer<String, Integer> chainedConsumer = consumer1.andThen(consumer2);
-            chainedConsumer.accept("test", 5, 10); // test length is 4
+            chainedConsumer.accept("test", 5, 10);
 
             assertEquals(2, results.size());
-            assertEquals(19, results.get(0)); // 4 + 5 + 10
-            assertEquals(200, results.get(1)); // 4 * 5 * 10
+            assertEquals(19, results.get(0));
+            assertEquals(200, results.get(1));
         }
     }
 
@@ -235,7 +231,7 @@ public class FunctionAPI100Test extends TestBase {
             java.util.function.Function<String, Integer> afterFunction = String::length;
 
             BiObjIntFunction<String, String, Integer> chainedFunction = function.andThen(afterFunction);
-            Integer result = chainedFunction.apply("a", "b", 100); // "ab100" -> length 5
+            Integer result = chainedFunction.apply("a", "b", 100);
 
             assertEquals(5, result);
         }
@@ -248,38 +244,38 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testTest() {
-            assertTrue(isSumOfLengthsEqualToInt.test("test", 123, 7)); // 4 + 3 = 7
+            assertTrue(isSumOfLengthsEqualToInt.test("test", 123, 7));
             assertFalse(isSumOfLengthsEqualToInt.test("test", 123, 8));
         }
 
         @Test
         public void testNegate() {
             BiObjIntPredicate<String, String> isConcatLengthOdd = isConcatLengthEven.negate();
-            assertFalse(isConcatLengthOdd.test("a", "b", 2)); // 1+1+2=4 (even), negated is false
-            assertTrue(isConcatLengthOdd.test("a", "b", 1)); // 1+1+1=3 (odd), negated is true
+            assertFalse(isConcatLengthOdd.test("a", "b", 2));
+            assertTrue(isConcatLengthOdd.test("a", "b", 1));
         }
 
         @Test
         public void testAnd() {
-            BiObjIntPredicate<String, Integer> first = (s, i1, i2) -> s.length() > i2; // length > int
-            BiObjIntPredicate<String, Integer> second = (s, i1, i2) -> i1 > i2; // int1 > int2
+            BiObjIntPredicate<String, Integer> first = (s, i1, i2) -> s.length() > i2;
+            BiObjIntPredicate<String, Integer> second = (s, i1, i2) -> i1 > i2;
             BiObjIntPredicate<String, Integer> combined = first.and(second);
 
-            assertTrue(combined.test("hello", 20, 4)); // 5 > 4 AND 20 > 4
-            assertFalse(combined.test("hello", 3, 4)); // 5 > 4 BUT 3 not > 4
-            assertFalse(combined.test("hi", 20, 4)); // 2 not > 4
+            assertTrue(combined.test("hello", 20, 4));
+            assertFalse(combined.test("hello", 3, 4));
+            assertFalse(combined.test("hi", 20, 4));
         }
 
         @Test
         public void testOr() {
-            BiObjIntPredicate<String, Integer> first = (s, i1, i2) -> s.length() > i2; // length > int
-            BiObjIntPredicate<String, Integer> second = (s, i1, i2) -> i1 > i2; // int1 > int2
+            BiObjIntPredicate<String, Integer> first = (s, i1, i2) -> s.length() > i2;
+            BiObjIntPredicate<String, Integer> second = (s, i1, i2) -> i1 > i2;
             BiObjIntPredicate<String, Integer> combined = first.or(second);
 
-            assertTrue(combined.test("hello", 20, 4)); // 5 > 4 is true
-            assertTrue(combined.test("hello", 3, 4)); // 5 > 4 is true
-            assertTrue(combined.test("hi", 20, 4)); // 20 > 4 is true
-            assertFalse(combined.test("hi", 3, 4)); // both are false
+            assertTrue(combined.test("hello", 20, 4));
+            assertTrue(combined.test("hello", 3, 4));
+            assertTrue(combined.test("hi", 20, 4));
+            assertFalse(combined.test("hi", 3, 4));
         }
     }
 
@@ -305,18 +301,18 @@ public class FunctionAPI100Test extends TestBase {
         public void testAnd() {
             BiPredicate<String, String> combined = isLengthEqual.and(startsWithSameChar);
             assertTrue(combined.test("apple", "apply"));
-            assertFalse(combined.test("apple", "orange")); // length not equal
-            assertFalse(combined.test("apple", "apricot")); // length not equal
-            assertFalse(combined.test("banana", "orange")); // same length, different start char
+            assertFalse(combined.test("apple", "orange"));
+            assertFalse(combined.test("apple", "apricot"));
+            assertFalse(combined.test("banana", "orange"));
         }
 
         @Test
         public void testOr() {
             BiPredicate<String, String> combined = isLengthEqual.or(startsWithSameChar);
-            assertTrue(combined.test("apple", "apply")); // both true
-            assertTrue(combined.test("apple", "apricot")); // starts with same char is true
-            assertTrue(combined.test("banana", "orange")); // same length is true
-            assertFalse(combined.test("red", "blue")); // both false
+            assertTrue(combined.test("apple", "apply"));
+            assertTrue(combined.test("apple", "apricot"));
+            assertTrue(combined.test("banana", "orange"));
+            assertFalse(combined.test("red", "blue"));
         }
 
         @Test
@@ -328,10 +324,6 @@ public class FunctionAPI100Test extends TestBase {
             assertNotNull(original);
         }
     }
-
-    // NOTE: The previous tests from the initial request are omitted for brevity,
-    // but would be included in a real-world combined test file.
-    // This response focuses on generating tests for the new set of files.
 
     @Nested
     public class BooleanBiConsumerTest {
@@ -368,11 +360,11 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testAndThen() {
-            BooleanBiFunction<String> initial = (t, u) -> t + "," + u; // "true,false"
+            BooleanBiFunction<String> initial = (t, u) -> t + "," + u;
             java.util.function.Function<String, Integer> after = String::length;
 
             BooleanBiFunction<Integer> chained = initial.andThen(after);
-            assertEquals(10, chained.apply(true, false)); // length of "true,false"
+            assertEquals(10, chained.apply(true, false));
         }
     }
 
@@ -380,7 +372,7 @@ public class FunctionAPI100Test extends TestBase {
     public class BooleanBinaryOperatorTest {
         @Test
         public void testApplyAsBoolean() {
-            BooleanBinaryOperator logicalAnd = (left, right) -> left && right; //
+            BooleanBinaryOperator logicalAnd = (left, right) -> left && right;
             assertTrue(logicalAnd.applyAsBoolean(true, true));
             assertFalse(logicalAnd.applyAsBoolean(true, false));
             assertFalse(logicalAnd.applyAsBoolean(false, true));
@@ -392,20 +384,20 @@ public class FunctionAPI100Test extends TestBase {
     public class BooleanBiPredicateTest {
         @Test
         public void testStaticFields() {
-            assertTrue(BooleanBiPredicate.ALWAYS_TRUE.test(true, false)); //
-            assertFalse(BooleanBiPredicate.ALWAYS_FALSE.test(true, false)); //
+            assertTrue(BooleanBiPredicate.ALWAYS_TRUE.test(true, false));
+            assertFalse(BooleanBiPredicate.ALWAYS_FALSE.test(true, false));
 
-            assertTrue(BooleanBiPredicate.BOTH_TRUE.test(true, true)); //
-            assertFalse(BooleanBiPredicate.BOTH_TRUE.test(true, false)); //
+            assertTrue(BooleanBiPredicate.BOTH_TRUE.test(true, true));
+            assertFalse(BooleanBiPredicate.BOTH_TRUE.test(true, false));
 
-            assertTrue(BooleanBiPredicate.BOTH_FALSE.test(false, false)); //
-            assertFalse(BooleanBiPredicate.BOTH_FALSE.test(true, false)); //
+            assertTrue(BooleanBiPredicate.BOTH_FALSE.test(false, false));
+            assertFalse(BooleanBiPredicate.BOTH_FALSE.test(true, false));
 
-            assertTrue(BooleanBiPredicate.EQUAL.test(true, true)); //
-            assertFalse(BooleanBiPredicate.EQUAL.test(true, false)); //
+            assertTrue(BooleanBiPredicate.EQUAL.test(true, true));
+            assertFalse(BooleanBiPredicate.EQUAL.test(true, false));
 
-            assertTrue(BooleanBiPredicate.NOT_EQUAL.test(true, false)); //
-            assertFalse(BooleanBiPredicate.NOT_EQUAL.test(true, true)); //
+            assertTrue(BooleanBiPredicate.NOT_EQUAL.test(true, false));
+            assertFalse(BooleanBiPredicate.NOT_EQUAL.test(true, true));
         }
 
         @Test
@@ -418,7 +410,7 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testNegate() {
             BooleanBiPredicate isFirstTrue = (t, u) -> t;
-            BooleanBiPredicate isFirstFalse = isFirstTrue.negate(); //
+            BooleanBiPredicate isFirstFalse = isFirstTrue.negate();
             assertFalse(isFirstFalse.test(true, false));
             assertTrue(isFirstFalse.test(false, true));
         }
@@ -427,7 +419,7 @@ public class FunctionAPI100Test extends TestBase {
         public void testAnd() {
             BooleanBiPredicate isFirstTrue = (t, u) -> t;
             BooleanBiPredicate isSecondTrue = (t, u) -> u;
-            BooleanBiPredicate bothTrue = isFirstTrue.and(isSecondTrue); //
+            BooleanBiPredicate bothTrue = isFirstTrue.and(isSecondTrue);
 
             assertTrue(bothTrue.test(true, true));
             assertFalse(bothTrue.test(true, false));
@@ -439,7 +431,7 @@ public class FunctionAPI100Test extends TestBase {
         public void testOr() {
             BooleanBiPredicate isFirstTrue = (t, u) -> t;
             BooleanBiPredicate isSecondTrue = (t, u) -> u;
-            BooleanBiPredicate eitherTrue = isFirstTrue.or(isSecondTrue); //
+            BooleanBiPredicate eitherTrue = isFirstTrue.or(isSecondTrue);
 
             assertTrue(eitherTrue.test(true, true));
             assertTrue(eitherTrue.test(true, false));
@@ -453,8 +445,8 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testAccept() {
             AtomicBoolean result = new AtomicBoolean(false);
-            BooleanConsumer consumer = result::set; //
-            consumer.accept(true); //
+            BooleanConsumer consumer = result::set;
+            consumer.accept(true);
             assertTrue(result.get());
         }
 
@@ -463,7 +455,7 @@ public class FunctionAPI100Test extends TestBase {
             List<Boolean> results = new ArrayList<>();
             BooleanConsumer first = results::add;
             BooleanConsumer second = b -> results.add(!b);
-            BooleanConsumer chained = first.andThen(second); //
+            BooleanConsumer chained = first.andThen(second);
             chained.accept(true);
 
             assertEquals(2, results.size());
@@ -476,20 +468,20 @@ public class FunctionAPI100Test extends TestBase {
     public class BooleanFunctionTest {
         @Test
         public void testStaticBox() {
-            assertEquals(Boolean.TRUE, BooleanFunction.BOX.apply(true)); //
-            assertEquals(Boolean.FALSE, BooleanFunction.BOX.apply(false)); //
+            assertEquals(Boolean.TRUE, BooleanFunction.BOX.apply(true));
+            assertEquals(Boolean.FALSE, BooleanFunction.BOX.apply(false));
         }
 
         @Test
         public void testStaticIdentity() {
-            BooleanFunction<Boolean> identity = BooleanFunction.identity(); //
+            BooleanFunction<Boolean> identity = BooleanFunction.identity();
             assertTrue(identity.apply(true));
             assertFalse(identity.apply(false));
         }
 
         @Test
         public void testApply() {
-            BooleanFunction<String> function = val -> val ? "Yes" : "No"; //
+            BooleanFunction<String> function = val -> val ? "Yes" : "No";
             assertEquals("Yes", function.apply(true));
             assertEquals("No", function.apply(false));
         }
@@ -498,10 +490,10 @@ public class FunctionAPI100Test extends TestBase {
         public void testAndThen() {
             BooleanFunction<String> initial = val -> val ? "true" : "false";
             java.util.function.Function<String, Integer> after = String::length;
-            BooleanFunction<Integer> chained = initial.andThen(after); //
+            BooleanFunction<Integer> chained = initial.andThen(after);
 
-            assertEquals(4, chained.apply(true)); // "true"
-            assertEquals(5, chained.apply(false)); // "false"
+            assertEquals(4, chained.apply(true));
+            assertEquals(5, chained.apply(false));
         }
     }
 
@@ -514,8 +506,8 @@ public class FunctionAPI100Test extends TestBase {
                 for (boolean b : args)
                     if (b)
                         trueCount.incrementAndGet();
-            }; //
-            consumer.accept(true, false, true, true); //
+            };
+            consumer.accept(true, false, true, true);
             assertEquals(3, trueCount.get());
         }
 
@@ -524,7 +516,7 @@ public class FunctionAPI100Test extends TestBase {
             List<String> order = new ArrayList<>();
             BooleanNConsumer first = args -> order.add("first:" + Arrays.toString(args));
             BooleanNConsumer second = args -> order.add("second:" + Arrays.toString(args));
-            BooleanNConsumer chained = first.andThen(second); //
+            BooleanNConsumer chained = first.andThen(second);
             chained.accept(true, false);
 
             assertEquals(2, order.size());
@@ -537,14 +529,14 @@ public class FunctionAPI100Test extends TestBase {
     public class BooleanNFunctionTest {
         @Test
         public void testApply() {
-            BooleanNFunction<Integer> countTrues = args -> { //
+            BooleanNFunction<Integer> countTrues = args -> {
                 int count = 0;
                 for (boolean b : args)
                     if (b)
                         count++;
                 return count;
             };
-            assertEquals(2, countTrues.apply(true, false, true)); //
+            assertEquals(2, countTrues.apply(true, false, true));
             assertEquals(0, countTrues.apply(false, false));
         }
 
@@ -558,7 +550,7 @@ public class FunctionAPI100Test extends TestBase {
                 return count;
             };
             java.util.function.Function<Integer, String> after = count -> "Count is " + count;
-            BooleanNFunction<String> chained = countTrues.andThen(after); //
+            BooleanNFunction<String> chained = countTrues.andThen(after);
 
             assertEquals("Count is 3", chained.apply(true, true, false, true));
         }
@@ -568,34 +560,33 @@ public class FunctionAPI100Test extends TestBase {
     public class BooleanPredicateTest {
         @Test
         public void testStaticFields() {
-            assertTrue(BooleanPredicate.ALWAYS_TRUE.test(false)); //
-            assertFalse(BooleanPredicate.ALWAYS_FALSE.test(true)); //
-            assertTrue(BooleanPredicate.IS_TRUE.test(true)); //
-            assertFalse(BooleanPredicate.IS_TRUE.test(false)); //
-            assertTrue(BooleanPredicate.IS_FALSE.test(false)); //
-            assertFalse(BooleanPredicate.IS_FALSE.test(true)); //
+            assertTrue(BooleanPredicate.ALWAYS_TRUE.test(false));
+            assertFalse(BooleanPredicate.ALWAYS_FALSE.test(true));
+            assertTrue(BooleanPredicate.IS_TRUE.test(true));
+            assertFalse(BooleanPredicate.IS_TRUE.test(false));
+            assertTrue(BooleanPredicate.IS_FALSE.test(false));
+            assertFalse(BooleanPredicate.IS_FALSE.test(true));
         }
 
         @Test
         public void testStaticOf() {
             BooleanPredicate pred = val -> val;
-            assertSame(pred, BooleanPredicate.of(pred)); //
+            assertSame(pred, BooleanPredicate.of(pred));
         }
 
         @Test
         public void testNegate() {
             BooleanPredicate isTrue = BooleanPredicate.IS_TRUE;
-            BooleanPredicate isFalse = isTrue.negate(); //
+            BooleanPredicate isFalse = isTrue.negate();
             assertTrue(isFalse.test(false));
             assertFalse(isFalse.test(true));
         }
 
         @Test
         public void testAnd() {
-            // This is a trivial case, as there's only one input, but we test the composition.
             BooleanPredicate alwaysTrue = BooleanPredicate.ALWAYS_TRUE;
             BooleanPredicate isTrue = BooleanPredicate.IS_TRUE;
-            BooleanPredicate combined = alwaysTrue.and(isTrue); //
+            BooleanPredicate combined = alwaysTrue.and(isTrue);
 
             assertTrue(combined.test(true));
             assertFalse(combined.test(false));
@@ -605,7 +596,7 @@ public class FunctionAPI100Test extends TestBase {
         public void testOr() {
             BooleanPredicate alwaysFalse = BooleanPredicate.ALWAYS_FALSE;
             BooleanPredicate isTrue = BooleanPredicate.IS_TRUE;
-            BooleanPredicate combined = alwaysFalse.or(isTrue); //
+            BooleanPredicate combined = alwaysFalse.or(isTrue);
 
             assertTrue(combined.test(true));
             assertFalse(combined.test(false));
@@ -616,32 +607,26 @@ public class FunctionAPI100Test extends TestBase {
     public class BooleanSupplierTest {
         @Test
         public void testStaticFields() {
-            assertTrue(BooleanSupplier.TRUE.getAsBoolean()); //
-            assertFalse(BooleanSupplier.FALSE.getAsBoolean()); //
+            assertTrue(BooleanSupplier.TRUE.getAsBoolean());
+            assertFalse(BooleanSupplier.FALSE.getAsBoolean());
 
-            // Test RANDOM supplier - we can't know the result, but we can verify it runs and returns a boolean
-            BooleanSupplier randomSupplier = BooleanSupplier.RANDOM; //
+            BooleanSupplier randomSupplier = BooleanSupplier.RANDOM;
             boolean result = randomSupplier.getAsBoolean();
-            assertTrue(result || !result); // A simple tautology to check it's a valid boolean
+            assertTrue(result || !result);
         }
 
         @Test
         public void testGetAsBoolean() {
             final boolean value = true;
             BooleanSupplier supplier = () -> value;
-            assertTrue(supplier.getAsBoolean()); //
+            assertTrue(supplier.getAsBoolean());
         }
     }
-
-    // NOTE: The tests from previous requests are omitted for brevity,
-    // but would be included in a real-world combined test file.
-    // This response focuses on generating tests for the new set of files.
 
     @Nested
     public class BooleanTernaryOperatorTest {
         @Test
         public void testApplyAsBoolean() {
-            // Majority wins operator
             BooleanTernaryOperator majority = (a, b, c) -> (a && b) || (b && c) || (a && c);
             assertTrue(majority.applyAsBoolean(true, true, false));
             assertTrue(majority.applyAsBoolean(true, false, true));
@@ -775,18 +760,18 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testAnd() {
             BooleanTriPredicate combined = atLeastTwoTrue.and(allSame);
-            assertTrue(combined.test(true, true, true)); // atLeastTwoTrue is true AND allSame is true
-            assertFalse(combined.test(true, true, false)); // atLeastTwoTrue is true BUT allSame is false
-            assertFalse(combined.test(false, false, false)); // atLeastTwoTrue is false AND allSame is true
+            assertTrue(combined.test(true, true, true));
+            assertFalse(combined.test(true, true, false));
+            assertFalse(combined.test(false, false, false));
         }
 
         @Test
         public void testOr() {
             BooleanTriPredicate combined = atLeastTwoTrue.or(allSame);
-            assertTrue(combined.test(true, true, true)); // atLeastTwoTrue is true OR allSame is true
-            assertTrue(combined.test(true, true, false)); // atLeastTwoTrue is true OR allSame is false
-            assertTrue(combined.test(false, false, false)); // atLeastTwoTrue is false OR allSame is true
-            assertFalse(combined.test(true, false, false)); // atLeastTwoTrue is false AND allSame is false
+            assertTrue(combined.test(true, true, true));
+            assertTrue(combined.test(true, true, false));
+            assertTrue(combined.test(false, false, false));
+            assertFalse(combined.test(true, false, false));
         }
     }
 
@@ -813,11 +798,11 @@ public class FunctionAPI100Test extends TestBase {
             BooleanUnaryOperator composedNot = identity.compose(not);
             BooleanUnaryOperator composedIdentity = not.compose(not);
 
-            assertTrue(composedNot.applyAsBoolean(false)); // not(v) -> true
-            assertFalse(composedNot.applyAsBoolean(true)); // not(v) -> false
+            assertTrue(composedNot.applyAsBoolean(false));
+            assertFalse(composedNot.applyAsBoolean(true));
 
-            assertTrue(composedIdentity.applyAsBoolean(true)); // not(not(v)) -> true
-            assertFalse(composedIdentity.applyAsBoolean(false)); // not(not(v)) -> false
+            assertTrue(composedIdentity.applyAsBoolean(true));
+            assertFalse(composedIdentity.applyAsBoolean(false));
         }
 
         @Test
@@ -826,17 +811,13 @@ public class FunctionAPI100Test extends TestBase {
             BooleanUnaryOperator chainedNot = not.andThen(identity);
             BooleanUnaryOperator chainedIdentity = not.andThen(not);
 
-            assertTrue(chainedNot.applyAsBoolean(false)); // identity(not(v)) -> true
-            assertFalse(chainedNot.applyAsBoolean(true)); // identity(not(v)) -> false
+            assertTrue(chainedNot.applyAsBoolean(false));
+            assertFalse(chainedNot.applyAsBoolean(true));
 
-            assertTrue(chainedIdentity.applyAsBoolean(true)); // not(not(v)) -> true
-            assertFalse(chainedIdentity.applyAsBoolean(false)); // not(not(v)) -> false
+            assertTrue(chainedIdentity.applyAsBoolean(true));
+            assertFalse(chainedIdentity.applyAsBoolean(false));
         }
     }
-
-    // NOTE: The tests from previous requests are omitted for brevity,
-    // but would be included in a real-world combined test file.
-    // This response focuses on generating tests for the new set of files.
 
     @Nested
     public class ByteBiConsumerTest {
@@ -920,17 +901,17 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testAnd() {
             ByteBiPredicate combined = ByteBiPredicate.GREATER_THAN.and((t, u) -> (t + u) > 20);
-            assertTrue(combined.test((byte) 15, (byte) 10)); // 15 > 10 AND 15 + 10 > 20
-            assertFalse(combined.test((byte) 15, (byte) 4)); // 15 > 4 BUT 15 + 4 is not > 20
-            assertFalse(combined.test((byte) 10, (byte) 15)); // 10 is not > 15
+            assertTrue(combined.test((byte) 15, (byte) 10));
+            assertFalse(combined.test((byte) 15, (byte) 4));
+            assertFalse(combined.test((byte) 10, (byte) 15));
         }
 
         @Test
         public void testOr() {
             ByteBiPredicate combined = ByteBiPredicate.LESS_THAN.or(ByteBiPredicate.EQUAL);
-            assertTrue(combined.test((byte) 4, (byte) 5)); // 4 < 5
-            assertTrue(combined.test((byte) 5, (byte) 5)); // 5 == 5
-            assertFalse(combined.test((byte) 6, (byte) 5)); // 6 is not < 5 and not == 5
+            assertTrue(combined.test((byte) 4, (byte) 5));
+            assertTrue(combined.test((byte) 5, (byte) 5));
+            assertFalse(combined.test((byte) 6, (byte) 5));
         }
     }
 
@@ -977,8 +958,8 @@ public class FunctionAPI100Test extends TestBase {
             java.util.function.Function<String, Integer> after = String::length;
             ByteFunction<Integer> chained = initial.andThen(after);
 
-            assertEquals(7, chained.apply((byte) 10)); // "Byte:10" -> length 7
-            assertEquals(8, chained.apply((byte) 100)); // "Byte:100" -> length 8
+            assertEquals(7, chained.apply((byte) 10));
+            assertEquals(8, chained.apply((byte) 100));
         }
     }
 
@@ -1103,7 +1084,6 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testStaticFields() {
             assertEquals((byte) 0, ByteSupplier.ZERO.getAsByte());
-            // Can't test for a specific value, but can test it runs and returns a byte.
             byte randomByte = ByteSupplier.RANDOM.getAsByte();
             assertTrue(randomByte >= Byte.MIN_VALUE && randomByte <= Byte.MAX_VALUE);
         }
@@ -1115,15 +1095,10 @@ public class FunctionAPI100Test extends TestBase {
         }
     }
 
-    // NOTE: The tests from previous requests are omitted for brevity,
-    // but would be included in a real-world combined test file.
-    // This response focuses on generating tests for the new set of files.
-
     @Nested
     public class ByteTernaryOperatorTest {
         @Test
         public void testApplyAsByte() {
-            // Conditional operator: if a > 0, return b, else return c
             ByteTernaryOperator conditional = (a, b, c) -> a > 0 ? b : c;
             assertEquals((byte) 20, conditional.applyAsByte((byte) 10, (byte) 20, (byte) 30));
             assertEquals((byte) 30, conditional.applyAsByte((byte) -10, (byte) 20, (byte) 30));
@@ -1142,7 +1117,6 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testApplyAsBoolean() {
-            // Custom: true if even
             ByteToBooleanFunction isEven = value -> value % 2 == 0;
             assertTrue(isEven.applyAsBoolean((byte) 10));
             assertFalse(isEven.applyAsBoolean((byte) 11));
@@ -1160,7 +1134,6 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testApplyAsInt() {
-            // Custom: square the value
             ByteToIntFunction square = value -> value * value;
             assertEquals(100, square.applyAsInt((byte) 10));
             assertEquals(25, square.applyAsInt((byte) -5));
@@ -1219,7 +1192,6 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testTest() {
-            // Test if a + b == c
             ByteTriPredicate sumEquals = (a, b, c) -> (a + b) == c;
             assertTrue(sumEquals.test((byte) 5, (byte) 10, (byte) 15));
             assertFalse(sumEquals.test((byte) 5, (byte) 10, (byte) 16));
@@ -1240,8 +1212,8 @@ public class FunctionAPI100Test extends TestBase {
             ByteTriPredicate combined = sumIsPositive.and(allArePositive);
 
             assertTrue(combined.test((byte) 1, (byte) 2, (byte) 3));
-            assertFalse(combined.test((byte) 10, (byte) 20, (byte) -5)); // sum is positive, but not all are positive
-            assertFalse(combined.test((byte) -10, (byte) -20, (byte) 5)); // sum is negative
+            assertFalse(combined.test((byte) 10, (byte) 20, (byte) -5));
+            assertFalse(combined.test((byte) -10, (byte) -20, (byte) 5));
         }
 
         @Test
@@ -1250,9 +1222,9 @@ public class FunctionAPI100Test extends TestBase {
             ByteTriPredicate allAreSame = (a, b, c) -> a == b && b == c;
             ByteTriPredicate combined = anyIsZero.or(allAreSame);
 
-            assertTrue(combined.test((byte) 1, (byte) 0, (byte) 3)); // any is zero
-            assertTrue(combined.test((byte) 5, (byte) 5, (byte) 5)); // all are same
-            assertFalse(combined.test((byte) 1, (byte) 2, (byte) 3)); // neither condition met
+            assertTrue(combined.test((byte) 1, (byte) 0, (byte) 3));
+            assertTrue(combined.test((byte) 5, (byte) 5, (byte) 5));
+            assertFalse(combined.test((byte) 1, (byte) 2, (byte) 3));
         }
     }
 
@@ -1274,22 +1246,20 @@ public class FunctionAPI100Test extends TestBase {
         public void testCompose() {
             ByteUnaryOperator increment = op -> (byte) (op + 1);
             ByteUnaryOperator doubleIt = op -> (byte) (op * 2);
-            ByteUnaryOperator composed = doubleIt.compose(increment); // double(increment(x)) -> (x+1)*2
+            ByteUnaryOperator composed = doubleIt.compose(increment);
 
-            assertEquals((byte) 22, composed.applyAsByte((byte) 10)); // (10+1)*2
+            assertEquals((byte) 22, composed.applyAsByte((byte) 10));
         }
 
         @Test
         public void testAndThen() {
             ByteUnaryOperator increment = op -> (byte) (op + 1);
             ByteUnaryOperator doubleIt = op -> (byte) (op * 2);
-            ByteUnaryOperator chained = increment.andThen(doubleIt); // double(increment(x)) -> (x*2)+1
+            ByteUnaryOperator chained = increment.andThen(doubleIt);
 
-            assertEquals((byte) 22, chained.applyAsByte((byte) 10)); // (10+1)+2
+            assertEquals((byte) 22, chained.applyAsByte((byte) 10));
         }
-    }// NOTE: The tests from previous requests are omitted for brevity,
-     // but would be included in a real-world combined test file.
-     // This response focuses on generating tests for the new set of files.
+    }
 
     @Nested
     public class CallableTest {
@@ -1374,7 +1344,6 @@ public class FunctionAPI100Test extends TestBase {
     public class CharBinaryOperatorTest {
         @Test
         public void testApplyAsChar() {
-            // Returns the char with the higher value
             CharBinaryOperator maxChar = (left, right) -> left > right ? left : right;
             assertEquals('z', maxChar.applyAsChar('a', 'z'));
             assertEquals('c', maxChar.applyAsChar('c', 'a'));
@@ -1538,18 +1507,14 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(isNotLetterOrDigit.test('.'));
             assertFalse(isNotLetterOrDigit.test('a'));
         }
-    }// NOTE: The tests from previous requests are omitted for brevity,
-     // but would be included in a real-world combined test file.
-     // This response focuses on generating tests for the new set of files.
+    }
 
     @Nested
     public class CharSupplierTest {
         @Test
         public void testStaticFields() {
             assertEquals('\0', CharSupplier.ZERO.getAsChar());
-            // Can't test for a specific value, but can test it runs and returns a char.
             char randomChar = CharSupplier.RANDOM.getAsChar();
-            // A simple check to ensure it's a valid character.
             assertTrue(Character.isDefined(randomChar));
         }
 
@@ -1564,7 +1529,6 @@ public class FunctionAPI100Test extends TestBase {
     public class CharTernaryOperatorTest {
         @Test
         public void testApplyAsChar() {
-            // Conditional operator: if a is a digit, return b, else return c
             CharTernaryOperator conditional = (a, b, c) -> Character.isDigit(a) ? b : c;
             assertEquals('Y', conditional.applyAsChar('1', 'Y', 'N'));
             assertEquals('N', conditional.applyAsChar('a', 'Y', 'N'));
@@ -1585,7 +1549,6 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testApplyAsBoolean() {
-            // Custom: true if whitespace
             CharToBooleanFunction isWhitespace = Character::isWhitespace;
             assertTrue(isWhitespace.applyAsBoolean(' '));
             assertTrue(isWhitespace.applyAsBoolean('\t'));
@@ -1603,11 +1566,10 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testApplyAsInt() {
-            // Custom: return numeric value for digits '0'-'9'
             CharToIntFunction numericValue = Character::getNumericValue;
             assertEquals(5, numericValue.applyAsInt('5'));
             assertEquals(9, numericValue.applyAsInt('9'));
-            assertEquals(10, numericValue.applyAsInt('a')); // As per Character.getNumericValue spec
+            assertEquals(10, numericValue.applyAsInt('a'));
         }
     }
 
@@ -1663,7 +1625,6 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testTest() {
-            // Test if chars are in alphabetical order
             CharTriPredicate alphabetical = (a, b, c) -> a <= b && b <= c;
             assertTrue(alphabetical.test('a', 'b', 'c'));
             assertTrue(alphabetical.test('a', 'a', 'c'));
@@ -1685,8 +1646,8 @@ public class FunctionAPI100Test extends TestBase {
             CharTriPredicate combined = alphabetical.and(allDifferent);
 
             assertTrue(combined.test('a', 'b', 'c'));
-            assertFalse(combined.test('a', 'a', 'c')); // Not all different
-            assertFalse(combined.test('c', 'b', 'a')); // Not alphabetical
+            assertFalse(combined.test('a', 'a', 'c'));
+            assertFalse(combined.test('c', 'b', 'a'));
         }
 
         @Test
@@ -1695,9 +1656,9 @@ public class FunctionAPI100Test extends TestBase {
             CharTriPredicate allSame = (a, b, c) -> a == b && b == c;
             CharTriPredicate combined = alphabetical.or(allSame);
 
-            assertTrue(combined.test('a', 'b', 'c')); // Alphabetical is true
-            assertTrue(combined.test('x', 'x', 'x')); // All same is true
-            assertFalse(combined.test('c', 'b', 'a')); // Both false
+            assertTrue(combined.test('a', 'b', 'c'));
+            assertTrue(combined.test('x', 'x', 'x'));
+            assertFalse(combined.test('c', 'b', 'a'));
         }
     }
 
@@ -1718,18 +1679,18 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testCompose() {
-            CharUnaryOperator nextChar = op -> (char) (op + 1); // 'a' -> 'b'
-            CharUnaryOperator toUpper = Character::toUpperCase; // 'b' -> 'B'
-            CharUnaryOperator composed = toUpper.compose(nextChar); // toUpper(nextChar(op))
+            CharUnaryOperator nextChar = op -> (char) (op + 1);
+            CharUnaryOperator toUpper = Character::toUpperCase;
+            CharUnaryOperator composed = toUpper.compose(nextChar);
 
             assertEquals('B', composed.applyAsChar('a'));
         }
 
         @Test
         public void testAndThen() {
-            CharUnaryOperator toUpper = Character::toUpperCase; // 'a' -> 'A'
-            CharUnaryOperator nextChar = op -> (char) (op + 1); // 'A' -> 'B'
-            CharUnaryOperator chained = toUpper.andThen(nextChar); // nextChar(toUpper(op))
+            CharUnaryOperator toUpper = Character::toUpperCase;
+            CharUnaryOperator nextChar = op -> (char) (op + 1);
+            CharUnaryOperator chained = toUpper.andThen(nextChar);
 
             assertEquals('B', chained.applyAsChar('a'));
         }
@@ -1765,13 +1726,10 @@ public class FunctionAPI100Test extends TestBase {
             };
             Throwables.Consumer<String, ?> throwableConsumer = consumer.toThrowable();
             assertNotNull(throwableConsumer);
-            // Verify it can be cast back
             Consumer<String> original = (Consumer<String>) throwableConsumer;
             assertNotNull(original);
         }
-    }// NOTE: The tests from previous requests are omitted for brevity,
-     // but would be included in a real-world combined test file.
-     // This response focuses on generating tests for the new set of files.
+    }
 
     private static final double DELTA = 1e-9;
 
@@ -1833,11 +1791,10 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(DoubleBiPredicate.ALWAYS_TRUE.test(1.0, 2.0));
             assertFalse(DoubleBiPredicate.ALWAYS_FALSE.test(1.0, 2.0));
 
-            // Test with Double.compare logic
             assertTrue(DoubleBiPredicate.EQUAL.test(1.0, 1.0));
             assertTrue(DoubleBiPredicate.EQUAL.test(Double.NaN, Double.NaN));
             assertFalse(DoubleBiPredicate.EQUAL.test(1.0, 2.0));
-            assertFalse(DoubleBiPredicate.EQUAL.test(0.0, -0.0)); // Double.compare sees these as different
+            assertFalse(DoubleBiPredicate.EQUAL.test(0.0, -0.0));
 
             assertTrue(DoubleBiPredicate.NOT_EQUAL.test(1.0, 2.0));
             assertFalse(DoubleBiPredicate.NOT_EQUAL.test(Double.NaN, Double.NaN));
@@ -1862,9 +1819,9 @@ public class FunctionAPI100Test extends TestBase {
             assertFalse(isFar.test(1.0, 1.05));
 
             DoubleBiPredicate combined = isClose.or(bothPositive);
-            assertTrue(combined.test(1.0, 1.05)); // isClose is true
-            assertTrue(combined.test(5.0, 10.0)); // bothPositive is true
-            assertFalse(combined.test(-1.0, -2.0)); // both false
+            assertTrue(combined.test(1.0, 1.05));
+            assertTrue(combined.test(5.0, 10.0));
+            assertFalse(combined.test(-1.0, -2.0));
         }
     }
 
@@ -1897,7 +1854,6 @@ public class FunctionAPI100Test extends TestBase {
             DoubleFunction<String> toString = String::valueOf;
             java.util.function.Function<String, Integer> length = String::length;
             DoubleFunction<Integer> chained = toString.andThen(length);
-            // Length of "3.14" is 4
             assertEquals(4, chained.apply(3.14));
         }
     }
@@ -1907,7 +1863,6 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testAccept() {
             List<Double> results = new ArrayList<>();
-            // A consumer that produces the value and its negative
             DoubleMapMultiConsumer multiConsumer = (value, downstream) -> {
                 downstream.accept(value);
                 downstream.accept(-value);
@@ -1954,7 +1909,6 @@ public class FunctionAPI100Test extends TestBase {
     public class DoubleNFunctionTest {
         @Test
         public void testApply() {
-            // Calculates the product
             DoubleNFunction<Double> productFunction = args -> {
                 double product = 1.0;
                 for (double d : args)
@@ -1966,7 +1920,6 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testAndThen() {
-            // Calculates the sum
             DoubleNFunction<Double> sumFunction = args -> {
                 double sum = 0;
                 for (double d : args)
@@ -2018,7 +1971,7 @@ public class FunctionAPI100Test extends TestBase {
             java.util.function.Function<String, Integer> after = String::length;
             DoubleObjFunction<Integer, Integer> chained = initial.andThen(after);
 
-            assertEquals(7, chained.apply(1.234, 5)); // "1.234:5" -> length 7
+            assertEquals(7, chained.apply(1.234, 5));
         }
     }
 
@@ -2041,13 +1994,13 @@ public class FunctionAPI100Test extends TestBase {
             assertFalse(lengthIsLessThanOrEqual.test(4.9, "hello"));
 
             DoubleObjPredicate<String> orCombined = lengthIsGreaterThan.or(containsE);
-            assertTrue(orCombined.test(10.0, "hello")); // containsE is true
-            assertTrue(orCombined.test(4.0, "world")); // lengthIsGreaterThan is true
+            assertTrue(orCombined.test(10.0, "hello"));
+            assertTrue(orCombined.test(4.0, "world"));
 
             DoubleObjPredicate<String> andCombined = lengthIsGreaterThan.and(containsE);
-            assertTrue(andCombined.test(4.0, "hello")); // both are true
-            assertFalse(andCombined.test(10.0, "hello")); // lengthIsGreaterThan is false
-            assertFalse(andCombined.test(4.0, "world")); // containsE is false
+            assertTrue(andCombined.test(4.0, "hello"));
+            assertFalse(andCombined.test(10.0, "hello"));
+            assertFalse(andCombined.test(4.0, "world"));
         }
     }
 
@@ -2100,7 +2053,6 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testStaticFields() {
             assertEquals(0.0, DoubleSupplier.ZERO.getAsDouble(), DELTA);
-            // Can't test for a specific value, but can test it runs and returns a double.
             double randomDouble = DoubleSupplier.RANDOM.getAsDouble();
             assertTrue(randomDouble >= 0.0 && randomDouble < 1.0);
         }
@@ -2116,7 +2068,6 @@ public class FunctionAPI100Test extends TestBase {
     public class DoubleTernaryOperatorTest {
         @Test
         public void testApplyAsDouble() {
-            // Returns b if a is positive, c if a is negative, and 0 if a is zero.
             DoubleTernaryOperator operator = (a, b, c) -> a > 0 ? b : (a < 0 ? c : 0);
             assertEquals(10.0, operator.applyAsDouble(1.0, 10.0, 20.0), DELTA);
             assertEquals(20.0, operator.applyAsDouble(-1.0, 10.0, 20.0), DELTA);
@@ -2168,9 +2119,7 @@ public class FunctionAPI100Test extends TestBase {
             assertEquals(123L, floor.applyAsLong(123.99d));
             assertEquals(-124L, floor.applyAsLong(-123.01d));
         }
-    }// NOTE: The tests from previous requests are omitted for brevity,
-     // but would be included in a real-world combined test file.
-     // This response focuses on generating tests for the new set of files.
+    }
 
     private static final double DOUBLE_DELTA = 1e-9;
     private static final float FLOAT_DELTA = 1e-6f;
@@ -2253,10 +2202,10 @@ public class FunctionAPI100Test extends TestBase {
             DoubleUnaryOperator addOne = d -> d + 1;
             java.util.function.DoubleUnaryOperator timesTwo = d -> d * 2;
 
-            DoubleUnaryOperator composed = addOne.compose(timesTwo); // addOne(timesTwo(d)) -> (d*2)+1
+            DoubleUnaryOperator composed = addOne.compose(timesTwo);
             assertEquals(21.0, composed.applyAsDouble(10.0), DOUBLE_DELTA);
 
-            DoubleUnaryOperator chained = addOne.andThen(timesTwo); // timesTwo(addOne(d)) -> (d+1)*2
+            DoubleUnaryOperator chained = addOne.andThen(timesTwo);
             assertEquals(22.0, chained.applyAsDouble(10.0), DOUBLE_DELTA);
         }
     }
@@ -2371,7 +2320,7 @@ public class FunctionAPI100Test extends TestBase {
             FloatFunction<String> toString = String::valueOf;
             java.util.function.Function<String, Integer> length = String::length;
             FloatFunction<Integer> chained = toString.andThen(length);
-            assertEquals(4, chained.apply(3.14f)); // "3.14" -> length 4
+            assertEquals(4, chained.apply(3.14f));
         }
     }
 
@@ -2586,7 +2535,6 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testTest() {
-            // Check if a + b > c
             FloatTriPredicate predicate = (a, b, c) -> a + b > c;
             assertTrue(predicate.test(3.0f, 4.0f, 5.0f));
             assertFalse(predicate.test(1.0f, 2.0f, 4.0f));
@@ -2621,10 +2569,10 @@ public class FunctionAPI100Test extends TestBase {
             FloatUnaryOperator addOne = d -> d + 1;
             FloatUnaryOperator timesTwo = d -> d * 2;
 
-            FloatUnaryOperator composed = addOne.compose(timesTwo); // addOne(timesTwo(d)) -> (d*2)+1
+            FloatUnaryOperator composed = addOne.compose(timesTwo);
             assertEquals(21.0f, composed.applyAsFloat(10.0f), FLOAT_DELTA);
 
-            FloatUnaryOperator chained = addOne.andThen(timesTwo); // timesTwo(addOne(d)) -> (d+1)*2
+            FloatUnaryOperator chained = addOne.andThen(timesTwo);
             assertEquals(22.0f, chained.applyAsFloat(10.0f), FLOAT_DELTA);
         }
     }
@@ -2642,7 +2590,7 @@ public class FunctionAPI100Test extends TestBase {
         public void testCompose() {
             Function<String, Integer> toLength = String::length;
             Function<Integer, String> toString = Object::toString;
-            Function<String, String> composed = toString.compose(toLength); // toString(toLength(s))
+            Function<String, String> composed = toString.compose(toLength);
             assertEquals("5", composed.apply("hello"));
         }
 
@@ -2650,7 +2598,7 @@ public class FunctionAPI100Test extends TestBase {
         public void testAndThen() {
             Function<String, Integer> toLength = String::length;
             Function<Integer, String> toString = Object::toString;
-            Function<String, String> chained = toLength.andThen(toString); // toString(toLength(s))
+            Function<String, String> chained = toLength.andThen(toString);
             assertEquals("5", chained.apply("hello"));
         }
 
@@ -2721,7 +2669,6 @@ public class FunctionAPI100Test extends TestBase {
             java.util.function.Function<String, Integer> after = String::length;
             IntBiObjFunction<String, Integer, Integer> chained = func.andThen(after);
 
-            // "a" + 10 + 5 -> "a105" -> length 4
             assertEquals(4, chained.apply(10, "a", 5));
         }
     }
@@ -2733,18 +2680,15 @@ public class FunctionAPI100Test extends TestBase {
             IntBiObjPredicate<String, String> pred1 = (i, t, u) -> i > t.length();
             IntBiObjPredicate<String, String> pred2 = (i, t, u) -> i > u.length();
 
-            // OR
             IntBiObjPredicate<String, String> orPred = pred1.or(pred2);
-            assertTrue(orPred.test(5, "abc", "abcdef")); // 5 > 3
-            assertTrue(orPred.test(5, "abcdef", "abc")); // 5 > 3
-            assertFalse(orPred.test(2, "abc", "abc")); // 2 is not > 3
+            assertTrue(orPred.test(5, "abc", "abcdef"));
+            assertTrue(orPred.test(5, "abcdef", "abc"));
+            assertFalse(orPred.test(2, "abc", "abc"));
 
-            // AND
             IntBiObjPredicate<String, String> andPred = pred1.and(pred2);
-            assertTrue(andPred.test(10, "abc", "abcdef")); // 10 > 3 and 10 > 6
-            assertFalse(andPred.test(5, "abc", "abcdef")); // 5 is not > 6
+            assertTrue(andPred.test(10, "abc", "abcdef"));
+            assertFalse(andPred.test(5, "abc", "abcdef"));
 
-            // NEGATE
             IntBiObjPredicate<String, String> negated = andPred.negate();
             assertTrue(negated.test(5, "abc", "abcdef"));
         }
@@ -2774,12 +2718,10 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(isNotDivisible.test(10, 3));
 
             IntBiPredicate combined = isDivisible.and(bothEven);
-            assertTrue(combined.test(10, 2)); // 10%2==0 and both are even
-            assertFalse(combined.test(10, 5)); // 10%5==0 but 5 is not even
+            assertTrue(combined.test(10, 2));
+            assertFalse(combined.test(10, 5));
         }
-    }// NOTE: The tests from previous requests are omitted for brevity,
-     // but would be included in a real-world combined test file.
-     // This response focuses on generating tests for the new set of files.
+    }
 
     @Nested
     public class IntConsumerTest {
@@ -2819,7 +2761,6 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testAccept() {
             List<Integer> results = new ArrayList<>();
-            // A consumer that produces the value, its double, and its triple
             IntMapMultiConsumer multiConsumer = (value, downstream) -> {
                 downstream.accept(value);
                 downstream.accept(value * 2);
@@ -2910,7 +2851,7 @@ public class FunctionAPI100Test extends TestBase {
             java.util.function.Function<String, Integer> after = String::length;
             IntObjFunction<String, Integer> chained = func.andThen(after);
 
-            assertEquals(6, chained.apply(3, "ab")); // "ababab" -> length 6
+            assertEquals(6, chained.apply(3, "ab"));
         }
     }
 
@@ -2936,9 +2877,9 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(lengthNotEquals.test(4, "abc"));
 
             IntObjPredicate<String> combined = lengthEquals.or(startsWithA);
-            assertTrue(combined.test(5, "apple")); // startsWithA is true
-            assertTrue(combined.test(3, "xyz")); // lengthEquals is true
-            assertFalse(combined.test(4, "xyz")); // both are false
+            assertTrue(combined.test(5, "apple"));
+            assertTrue(combined.test(3, "xyz"));
+            assertFalse(combined.test(4, "xyz"));
         }
     }
 
@@ -2980,9 +2921,7 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testStaticFields() {
             assertEquals(0, IntSupplier.ZERO.getAsInt());
-            // Can't test for a specific value, but can test it runs and returns an int.
             int randomInt = IntSupplier.RANDOM.getAsInt();
-            // A simple check to ensure it's a valid integer.
             assertNotNull(randomInt);
         }
 
@@ -2997,7 +2936,6 @@ public class FunctionAPI100Test extends TestBase {
     public class IntTernaryOperatorTest {
         @Test
         public void testApplyAsInt() {
-            // Returns b if a is positive, c if a is negative, and 0 if a is zero.
             IntTernaryOperator operator = (a, b, c) -> a > 0 ? b : (a < 0 ? c : 0);
             assertEquals(10, operator.applyAsInt(1, 10, 20));
             assertEquals(20, operator.applyAsInt(-1, 10, 20));
@@ -3017,7 +2955,6 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testApplyAsBoolean() {
-            // Custom: true if even
             IntToBooleanFunction isEven = value -> value % 2 == 0;
             assertTrue(isEven.applyAsBoolean(10));
             assertFalse(isEven.applyAsBoolean(11));
@@ -3030,7 +2967,6 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testDefault() {
             assertEquals((byte) 123, IntToByteFunction.DEFAULT.applyAsByte(123));
-            // Test casting overflow
             assertEquals((byte) 1, IntToByteFunction.DEFAULT.applyAsByte(257));
         }
 
@@ -3046,7 +2982,6 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testDefault() {
             assertEquals('A', IntToCharFunction.DEFAULT.applyAsChar(65));
-            // Test casting
             assertEquals((char) 65601, IntToCharFunction.DEFAULT.applyAsChar(65601));
         }
 
@@ -3105,7 +3040,6 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testDefault() {
             assertEquals((short) 123, IntToShortFunction.DEFAULT.applyAsShort(123));
-            // Test casting overflow
             assertEquals((short) -32768, IntToShortFunction.DEFAULT.applyAsShort(32768));
         }
 
@@ -3115,9 +3049,6 @@ public class FunctionAPI100Test extends TestBase {
             assertEquals((short) 5, custom.applyAsShort(10));
         }
     }
-    // NOTE: The tests from previous requests are omitted for brevity,
-    // but would be included in a real-world combined test file.
-    // This response focuses on generating tests for the new set of files.
 
     @Nested
     public class IntTriConsumerTest {
@@ -3170,7 +3101,6 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testTest() {
-            // Check if a + b == c
             IntTriPredicate predicate = (a, b, c) -> a + b == c;
             assertTrue(predicate.test(3, 4, 7));
             assertFalse(predicate.test(1, 2, 4));
@@ -3204,10 +3134,10 @@ public class FunctionAPI100Test extends TestBase {
             IntUnaryOperator addOne = i -> i + 1;
             java.util.function.IntUnaryOperator timesTwo = i -> i * 2;
 
-            IntUnaryOperator composed = addOne.compose(timesTwo); // addOne(timesTwo(i)) -> (i*2)+1
+            IntUnaryOperator composed = addOne.compose(timesTwo);
             assertEquals(21, composed.applyAsInt(10));
 
-            IntUnaryOperator chained = addOne.andThen(timesTwo); // timesTwo(addOne(i)) -> (i+1)*2
+            IntUnaryOperator chained = addOne.andThen(timesTwo);
             assertEquals(22, chained.applyAsInt(10));
         }
     }
@@ -3315,7 +3245,6 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testAccept() {
             List<Long> results = new ArrayList<>();
-            // A consumer that produces the value and its successor
             LongMapMultiConsumer multiConsumer = (value, downstream) -> {
                 downstream.accept(value);
                 downstream.accept(value + 1);
@@ -3404,7 +3333,7 @@ public class FunctionAPI100Test extends TestBase {
             java.util.function.Function<String, Integer> after = String::length;
             LongObjFunction<String, Integer> chained = func.andThen(after);
 
-            assertEquals(6, chained.apply(3L, "ab")); // "ababab" -> length 6
+            assertEquals(6, chained.apply(3L, "ab"));
         }
     }
 
@@ -3421,9 +3350,9 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(lengthNotEquals.test(4L, "abc"));
 
             LongObjPredicate<String> combined = lengthEquals.or(startsWithA);
-            assertTrue(combined.test(5L, "apple")); // startsWithA is true
-            assertTrue(combined.test(3L, "xyz")); // lengthEquals is true
-            assertFalse(combined.test(4L, "xyz")); // both are false
+            assertTrue(combined.test(5L, "apple"));
+            assertTrue(combined.test(3L, "xyz"));
+            assertFalse(combined.test(4L, "xyz"));
         }
     }
 
@@ -3465,7 +3394,6 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testStaticFields() {
             assertEquals(0L, LongSupplier.ZERO.getAsLong());
-            // Can't test for a specific value, but can test it runs and returns a long.
             long randomLong = LongSupplier.RANDOM.getAsLong();
             assertNotNull(randomLong);
         }
@@ -3481,7 +3409,6 @@ public class FunctionAPI100Test extends TestBase {
     public class LongTernaryOperatorTest {
         @Test
         public void testApplyAsLong() {
-            // Returns b if a is positive, c if a is negative, and 0 if a is zero.
             LongTernaryOperator operator = (a, b, c) -> a > 0 ? b : (a < 0 ? c : 0);
             assertEquals(10L, operator.applyAsLong(1L, 10L, 20L));
             assertEquals(20L, operator.applyAsLong(-1L, 10L, 20L));
@@ -3522,7 +3449,6 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testDefault() {
             assertEquals(123, LongToIntFunction.DEFAULT.applyAsInt(123L));
-            // Test casting overflow
             assertEquals(-1, LongToIntFunction.DEFAULT.applyAsInt(Long.MAX_VALUE));
         }
 
@@ -3610,10 +3536,10 @@ public class FunctionAPI100Test extends TestBase {
             LongUnaryOperator addOne = l -> l + 1;
             java.util.function.LongUnaryOperator timesTwo = l -> l * 2;
 
-            LongUnaryOperator composed = addOne.compose(timesTwo); // addOne(timesTwo(l)) -> (l*2)+1
+            LongUnaryOperator composed = addOne.compose(timesTwo);
             assertEquals(21L, composed.applyAsLong(10L));
 
-            LongUnaryOperator chained = addOne.andThen(timesTwo); // timesTwo(addOne(l)) -> (l+1)*2
+            LongUnaryOperator chained = addOne.andThen(timesTwo);
             assertEquals(22L, chained.applyAsLong(10L));
         }
     }
@@ -3682,13 +3608,13 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(noDuplicates.test("a", "b", "c"));
 
             NPredicate<String> combinedOr = hasDuplicates.or(hasEmptyString);
-            assertTrue(combinedOr.test("a", "b", "a")); // has duplicates
-            assertTrue(combinedOr.test("a", "b", "")); // has empty string
-            assertFalse(combinedOr.test("a", "b", "c")); // neither
+            assertTrue(combinedOr.test("a", "b", "a"));
+            assertTrue(combinedOr.test("a", "b", ""));
+            assertFalse(combinedOr.test("a", "b", "c"));
 
             NPredicate<String> combinedAnd = hasDuplicates.and(hasEmptyString);
-            assertTrue(combinedAnd.test("a", "", "a")); // has duplicates and empty string
-            assertFalse(combinedAnd.test("a", "b", "a"));// has duplicates but no empty
+            assertTrue(combinedAnd.test("a", "", "a"));
+            assertFalse(combinedAnd.test("a", "b", "a"));
         }
     }
 
@@ -3730,7 +3656,7 @@ public class FunctionAPI100Test extends TestBase {
             java.util.function.Function<String, Integer> after = String::length;
             ObjBiIntFunction<String, Integer> chained = initial.andThen(after);
 
-            assertEquals(6, chained.apply("Sum=", 10, 5)); // "Sum=15" -> length 6
+            assertEquals(6, chained.apply("Sum=", 10, 5));
         }
     }
 
@@ -3750,8 +3676,8 @@ public class FunctionAPI100Test extends TestBase {
             ObjBiIntPredicate<String> iIsEven = (t, i, j) -> i % 2 == 0;
 
             assertTrue(lengthNotEqualsSum.test("hello", 2, 2));
-            assertTrue(lengthEqualsSum.and(iIsEven).test("hello", 2, 3)); // iIsEven is true, but lengthEqualsSum is false
-            assertTrue(lengthEqualsSum.or(iIsEven).test("hello", 2, 4)); // iIsEven is true
+            assertTrue(lengthEqualsSum.and(iIsEven).test("hello", 2, 3));
+            assertTrue(lengthEqualsSum.or(iIsEven).test("hello", 2, 4));
         }
     }
 
@@ -3823,7 +3749,7 @@ public class FunctionAPI100Test extends TestBase {
             java.util.function.Function<String, Integer> after = String::length;
             ObjDoubleFunction<String, Integer> chained = initial.andThen(after);
 
-            assertEquals(10, chained.apply("Value=", 99.9)); // "Value=99.9" -> length 10
+            assertEquals(10, chained.apply("Value=", 99.9));
         }
     }
 
@@ -3843,8 +3769,8 @@ public class FunctionAPI100Test extends TestBase {
             ObjDoublePredicate<String> isInteger = (t, u) -> u == Math.floor(u);
 
             assertTrue(isLessThanOrEqualLength.test("four", 4.0));
-            assertTrue(isGreaterThanLength.or(isInteger).test("four", 4.0)); // isInteger is true
-            assertFalse(isGreaterThanLength.and(isInteger).test("four", 4.1)); // isInteger is false
+            assertTrue(isGreaterThanLength.or(isInteger).test("four", 4.0));
+            assertFalse(isGreaterThanLength.and(isInteger).test("four", 4.1));
         }
     }
 
@@ -3858,10 +3784,6 @@ public class FunctionAPI100Test extends TestBase {
             assertEquals("Result:123.45", result.get());
         }
     }
-
-    // NOTE: The tests from previous requests are omitted for brevity,
-    // but would be included in a real-world combined test file.
-    // This response focuses on generating tests for the new set of files.
 
     @Nested
     public class ObjIntConsumerTest {
@@ -3897,7 +3819,7 @@ public class FunctionAPI100Test extends TestBase {
             ObjIntFunction<String, String> initial = (t, u) -> t + u;
             java.util.function.Function<String, Integer> after = String::length;
             ObjIntFunction<String, Integer> chained = initial.andThen(after);
-            assertEquals(8, chained.apply("Value=", 99)); // "Value=99" -> length 8
+            assertEquals(8, chained.apply("Value=", 99));
         }
     }
 
@@ -3917,8 +3839,8 @@ public class FunctionAPI100Test extends TestBase {
             ObjIntPredicate<String> isEven = (t, u) -> u % 2 == 0;
 
             assertTrue(lengthNotEquals.test("hello", 4));
-            assertTrue(lengthEquals.or(isEven).test("hello", 4)); // isEven is true
-            assertFalse(lengthEquals.and(isEven).test("hello", 5)); // isEven is false
+            assertTrue(lengthEquals.or(isEven).test("hello", 4));
+            assertFalse(lengthEquals.and(isEven).test("hello", 5));
         }
     }
 
@@ -3955,8 +3877,8 @@ public class FunctionAPI100Test extends TestBase {
             ObjLongPredicate<String> isPositive = (t, u) -> u > 0;
 
             assertTrue(lengthNotEquals.test("hello", 4L));
-            assertTrue(lengthEquals.or(isPositive).test("hello", 4L)); // isPositive is true
-            assertFalse(lengthEquals.and(isPositive).test("hello", -5L)); // isPositive is false
+            assertTrue(lengthEquals.or(isPositive).test("hello", 4L));
+            assertFalse(lengthEquals.and(isPositive).test("hello", -5L));
         }
     }
 
@@ -4044,11 +3966,9 @@ public class FunctionAPI100Test extends TestBase {
             QuadFunction<String, Integer, Long, Boolean, String> initial = (a, b, c, d) -> a + ":" + b + ":" + c + ":" + d;
             java.util.function.Function<String, Integer> after = String::length;
             QuadFunction<String, Integer, Long, Boolean, Integer> chained = initial.andThen(after);
-            assertEquals(10, chained.apply("A", 1, 2L, true)); // "A:1:2:true" -> length 10
+            assertEquals(10, chained.apply("A", 1, 2L, true));
         }
-    }// NOTE: The tests from previous requests are omitted for brevity,
-     // but would be included in a real-world combined test file.
-     // This response focuses on generating tests for the new set of files.
+    }
 
     @Nested
     public class QuadPredicateTest {
@@ -4100,7 +4020,6 @@ public class FunctionAPI100Test extends TestBase {
             };
             Throwables.Runnable<?> throwableRunnable = runnable.toThrowable();
             assertNotNull(throwableRunnable);
-            // It can be run without throwing an exception
             assertDoesNotThrow(throwableRunnable::run);
         }
     }
@@ -4277,7 +4196,6 @@ public class FunctionAPI100Test extends TestBase {
         @Test
         public void testStaticFields() {
             assertEquals((short) 0, ShortSupplier.ZERO.getAsShort());
-            // Can't test for a specific value, but can test it runs and returns a short.
             short randomShort = ShortSupplier.RANDOM.getAsShort();
             assertNotNull(randomShort);
         }
@@ -4385,10 +4303,10 @@ public class FunctionAPI100Test extends TestBase {
             ShortUnaryOperator addOne = s -> (short) (s + 1);
             ShortUnaryOperator timesTwo = s -> (short) (s * 2);
 
-            ShortUnaryOperator composed = addOne.compose(timesTwo); // (s*2)+1
+            ShortUnaryOperator composed = addOne.compose(timesTwo);
             assertEquals((short) 21, composed.applyAsShort((short) 10));
 
-            ShortUnaryOperator chained = addOne.andThen(timesTwo); // (s+1)*2
+            ShortUnaryOperator chained = addOne.andThen(timesTwo);
             assertEquals((short) 22, chained.applyAsShort((short) 10));
         }
     }
@@ -4718,7 +4636,7 @@ public class FunctionAPI100Test extends TestBase {
             TriFunction<String, Integer, Long, String> initial = (a, b, c) -> a + ":" + b + ":" + c;
             Function<String, Integer> after = String::length;
             TriFunction<String, Integer, Long, Integer> chained = initial.andThen(after);
-            assertEquals(5, chained.apply("A", 1, 2L)); // "A:1:2" -> length 5
+            assertEquals(5, chained.apply("A", 1, 2L));
         }
 
         @Test
@@ -4772,7 +4690,7 @@ public class FunctionAPI100Test extends TestBase {
         public void testCompose() {
             UnaryOperator<String> toUpper = String::toUpperCase;
             java.util.function.UnaryOperator<String> addWorld = s -> s + " world";
-            UnaryOperator<String> composed = toUpper.compose(addWorld); // toUpper(addWorld(s))
+            UnaryOperator<String> composed = toUpper.compose(addWorld);
             assertEquals("HELLO WORLD", composed.apply("hello"));
         }
 
@@ -4780,7 +4698,7 @@ public class FunctionAPI100Test extends TestBase {
         public void testAndThen() {
             UnaryOperator<String> toUpper = String::toUpperCase;
             java.util.function.UnaryOperator<String> addWorld = s -> s + " world";
-            UnaryOperator<String> chained = toUpper.andThen(addWorld); // addWorld(toUpper(s))
+            UnaryOperator<String> chained = toUpper.andThen(addWorld);
             assertEquals("HELLO world", chained.apply("hello"));
         }
 
@@ -4797,9 +4715,6 @@ public class FunctionAPI100Test extends TestBase {
     public class UtilClassTest {
         @Test
         public void testRandomInstancesNotNull() {
-            // This test just ensures the static random instances in the Util class are initialized.
-            // There's no behavior to test, but we can check they are not null.
-            // Using a dummy class to access the package-private Util class.
             Object randomBoolean = com.landawn.abacus.util.function.BooleanSupplier.RANDOM;
             assertNotNull(randomBoolean);
         }

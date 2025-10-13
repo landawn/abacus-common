@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -29,6 +30,7 @@ import com.landawn.abacus.type.Type.SerializationType;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 
+@Tag("new-test")
 public class AbstractType101Test extends TestBase {
 
     private Type<String> testType;
@@ -123,10 +125,8 @@ public class AbstractType101Test extends TestBase {
 
     @Test
     public void testCompare() {
-        // Test non-comparable type 
 
         assertEquals(-1, testType.compare("a", "b"));
-        // Test comparable type
         Type<Integer> intType = createType("Integer");
         assertEquals(0, intType.compare(null, null));
         assertEquals(-1, intType.compare(null, 5));
@@ -201,15 +201,12 @@ public class AbstractType101Test extends TestBase {
 
     @Test
     public void testWriteCharacter() throws IOException {
-        // Test null value
         testType.writeCharacter(writer, null, null);
         verify(writer).write(any(char[].class));
 
-        // Test with value and no quotation
         testType.writeCharacter(writer, "test", null);
         verify(writer).writeCharacter("test");
 
-        // Test with string quotation
         when(config.getStringQuotation()).thenReturn('\'');
         testType.writeCharacter(writer, "test", config);
         verify(writer, times(2)).write('\'');

@@ -357,8 +357,15 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
 
     /**
      * Returns the value of this MutableInt as an int.
-     * 
-     * @return the int value
+     * This method is part of the Number interface implementation.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableInt num = MutableInt.of(42);
+     * int value = num.intValue(); // returns 42
+     * }</pre>
+     *
+     * @return the int value represented by this object
      */
     @Override
     public int intValue() {
@@ -367,8 +374,16 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
 
     /**
      * Returns the value of this MutableInt as a long.
-     * 
-     * @return the value as a long
+     * This method is part of the Number interface implementation.
+     * The int value is widened to a long.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableInt num = MutableInt.of(42);
+     * long value = num.longValue(); // returns 42L
+     * }</pre>
+     *
+     * @return the value represented by this object after conversion to type long
      */
     @Override
     public long longValue() {
@@ -377,8 +392,17 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
 
     /**
      * Returns the value of this MutableInt as a float.
-     * 
-     * @return the value as a float
+     * This method is part of the Number interface implementation.
+     * The int value is widened to a float. Note that this conversion may lose precision
+     * for very large integer values.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableInt num = MutableInt.of(42);
+     * float value = num.floatValue(); // returns 42.0f
+     * }</pre>
+     *
+     * @return the value represented by this object after conversion to type float
      */
     @Override
     public float floatValue() {
@@ -387,8 +411,16 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
 
     /**
      * Returns the value of this MutableInt as a double.
-     * 
-     * @return the value as a double
+     * This method is part of the Number interface implementation.
+     * The int value is widened to a double without loss of precision.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableInt num = MutableInt.of(42);
+     * double value = num.doubleValue(); // returns 42.0
+     * }</pre>
+     *
+     * @return the value represented by this object after conversion to type double
      */
     @Override
     public double doubleValue() {

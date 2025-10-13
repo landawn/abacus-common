@@ -12,13 +12,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.u.OptionalDouble;
 
-
+@Tag("new-test")
 public class DoubleStream200Test extends TestBase {
 
     @Test

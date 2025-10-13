@@ -1,11 +1,12 @@
 package com.landawn.abacus.util;
 
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class KahanSummation100Test extends TestBase {
 
     @Test
@@ -86,7 +87,6 @@ public class KahanSummation100Test extends TestBase {
         sum.add(0.2);
         sum.add(0.3);
 
-        // Should be exactly 0.6 with Kahan summation
         Assertions.assertEquals(0.6, sum.sum(), 1e-15);
     }
 
@@ -96,7 +96,6 @@ public class KahanSummation100Test extends TestBase {
         sum.add(Double.POSITIVE_INFINITY);
         sum.add(1.0);
 
-        // Should return infinity
         Assertions.assertEquals(Double.POSITIVE_INFINITY, sum.sum());
     }
 

@@ -63,9 +63,22 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     /**
      * Constructs an iterator of the lines for a {@code Reader}.
      * <p>
-     * The reader will be wrapped in a BufferedReader if it's not already one.
-     * 
-     * @param reader the {@code Reader} to read from, not null
+     * The reader will be wrapped in a {@link BufferedReader} if it's not already one.
+     * This constructor does not close the reader automatically; it is the caller's
+     * responsibility to close the reader or call {@link #close()} on this iterator
+     * to release resources.
+     * <p>
+     * <h3>Example:</h3>
+     * <pre>
+     * Reader reader = new FileReader("data.txt");
+     * try (LineIterator it = new LineIterator(reader)) {
+     *     while (it.hasNext()) {
+     *         System.out.println(it.next());
+     *     }
+     * }
+     * </pre>
+     *
+     * @param reader the {@code Reader} to read from, must not be null
      * @throws IllegalArgumentException if the reader is null
      */
     public LineIterator(final Reader reader) throws IllegalArgumentException {
@@ -83,40 +96,27 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     /**
      * Returns an Iterator for the lines in a {@code File} using the default encoding for the VM.
      * <p>
-     * This method opens an {@code InputStream} for the file.
-     * When you have finished with the iterator, you should close the stream
-     * to free internal resources. This can be done by calling the
-     * {@link LineIterator#close()} or
-     * {@link IOUtil#closeQuietly(AutoCloseable)} method.
+     * This method opens an {@code InputStream} for the file and wraps it in a {@code Reader}
+     * using the platform's default character encoding. When you have finished with the iterator,
+     * you should close it to free internal resources. This can be done by calling the
+     * {@link #close()} method or by using try-with-resources.
      * <p>
-     * The recommended usage pattern is:
+     * The recommended usage pattern with try-with-resources:
      * <pre>
-     * LineIterator it = FileUtils.lineIterator(file, "UTF-8");
-     * try {
-     *   while (it.hasNext()) {
-     *     String line = it.nextLine();
-     *     /// do something with line
-     *   }
-     * } finally {
-     *   closeQuietly(iterator);
+     * try (LineIterator it = LineIterator.of(new File("data.txt"))) {
+     *     while (it.hasNext()) {
+     *         String line = it.next();
+     *         // do something with line
+     *     }
      * }
      * </pre>
      * <p>
-     * If an exception occurs during the creation of the iterator, the
-     * underlying stream is closed.
-     * <p>
-     * <h3>Example:</h3>
-     * <pre>
-     * LineIterator lines = LineIterator.of(new File("data.txt"));
-     * while (lines.hasNext()) {
-     *     System.out.println(lines.next());
-     * }
-     * lines.close();
-     * </pre>
+     * If an exception occurs during the creation of the iterator, the underlying stream
+     * is automatically closed.
      *
      * @param file the file to open for input, must not be {@code null}
      * @return an Iterator of the lines in the file, never {@code null}
-     * @throws UncheckedIOException in case of an I/O error (file closed)
+     * @throws UncheckedIOException in case of an I/O error (e.g., file not found or cannot be read)
      * @see #of(File, Charset)
      */
     public static LineIterator of(final File file) {
@@ -124,43 +124,34 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
-     * Returns an Iterator for the lines in a {@code File}.
+     * Returns an Iterator for the lines in a {@code File} using the specified character encoding.
      * <p>
-     * This method opens an {@code InputStream} for the file.
-     * When you have finished with the iterator, you should close the stream
-     * to free internal resources. This can be done by calling the
-     * {@link LineIterator#close()} or
-     * {@link IOUtil#closeQuietly(AutoCloseable)} method.
+     * This method opens an {@code InputStream} for the file and wraps it in a {@code Reader}
+     * using the specified character encoding. When you have finished with the iterator,
+     * you should close it to free internal resources. This can be done by calling the
+     * {@link #close()} method or by using try-with-resources.
      * <p>
-     * The recommended usage pattern is:
+     * The recommended usage pattern with try-with-resources:
      * <pre>
-     * LineIterator it = FileUtils.lineIterator(file, "UTF-8");
-     * try {
-     *   while (it.hasNext()) {
-     *     String line = it.nextLine();
-     *     /// do something with line
-     *   }
-     * } finally {
-     *   closeQuietly(iterator);
+     * try (LineIterator it = LineIterator.of(new File("data.txt"), StandardCharsets.UTF_8)) {
+     *     it.forEachRemaining(line -> processLine(line));
      * }
      * </pre>
      * <p>
-     * If an exception occurs during the creation of the iterator, the
-     * underlying stream is closed.
-     * <p>
-     * <h3>Example:</h3>
-     * <pre>
-     * LineIterator lines = LineIterator.of(new File("data.txt"), StandardCharsets.UTF_8);
-     * lines.forEach(line -> process(line));
-     * lines.close();
-     * </pre>
+     * If an exception occurs during the creation of the iterator, the underlying stream
+     * is automatically closed to prevent resource leaks.
      *
-     * @param file the file to open for input, must not be {@code null}
-     * @param encoding the encoding to use, {@code null} means platform default
+     * @param file the file to open for input; must not be {@code null}
+     * @param encoding the character encoding to use; if {@code null}, the platform default encoding is used
      * @return an Iterator of the lines in the file, never {@code null}
-     * @throws UncheckedIOException in case of an I/O error (file closed)
+     * @throws IllegalArgumentException if {@code file} is {@code null} or if {@code encoding} is {@code null}
+     * @throws UncheckedIOException in case of an I/O error (e.g., file not found or cannot be read)
+     * @see #of(File)
      */
     public static LineIterator of(final File file, final Charset encoding) {
+        N.checkArgNotNull(file, cs.file);
+        N.checkArgNotNull(encoding, cs.encoding);
+
         Reader reader = null;
         boolean noException = false;
 
@@ -180,14 +171,13 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
-     * Returns an Iterator for the lines in an {@code InputStream}, using
-     * the default character encoding.
+     * Returns an Iterator for the lines in an {@code InputStream}, using the platform's
+     * default character encoding.
      * <p>
-     * {@code LineIterator} holds a reference to the open
-     * {@code InputStream} specified here. When you have finished with
-     * the iterator, you should close the stream to free internal resources.
-     * This can be done by closing the stream directly, or by calling
-     * {@link LineIterator#close()} or {@link IOUtil#closeQuietly(AutoCloseable)}.
+     * {@code LineIterator} holds a reference to the open {@code InputStream} specified here.
+     * When you have finished with the iterator, you should close it to free internal resources.
+     * This can be done by calling {@link #close()} or by using try-with-resources.
+     * Note that closing the iterator will also close the underlying input stream.
      * <p>
      * <h3>Example:</h3>
      * <pre>
@@ -198,55 +188,52 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * }
      * </pre>
      *
-     * @param input the {@code InputStream} to read from, not null
-     * @return an Iterator of the lines in the reader, never null
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param input the {@code InputStream} to read from, must not be null
+     * @return an Iterator of the lines in the input stream, never null
+     * @throws UncheckedIOException if an I/O error occurs while reading from the input stream
+     * @see #of(InputStream, Charset)
      */
     public static LineIterator of(final InputStream input) {
         return of(input, Charsets.DEFAULT);
     }
 
     /**
-     * Returns an Iterator for the lines in an {@code InputStream}, using
-     * the character encoding specified (or default encoding if null).
+     * Returns an Iterator for the lines in an {@code InputStream}, using the specified
+     * character encoding.
      * <p>
-     * {@code LineIterator} holds a reference to the open
-     * {@code InputStream} specified here. When you have finished with
-     * the iterator, you should close the stream to free internal resources.
-     * This can be done by closing the stream directly, or by calling
-     * {@link LineIterator#close()} or {@link IOUtil#closeQuietly(AutoCloseable)}.
+     * {@code LineIterator} holds a reference to the open {@code InputStream} specified here.
+     * When you have finished with the iterator, you should close it to free internal resources.
+     * This can be done by calling {@link #close()} or by using try-with-resources.
+     * Note that closing the iterator will also close the underlying input stream.
      * <p>
-     * The recommended usage pattern is:
+     * The recommended usage pattern with try-with-resources:
      * <pre>
-     * try {
-     *   LineIterator it = lineIterator(stream, charset);
-     *   while (it.hasNext()) {
-     *     String line = it.nextLine();
-     *     /// do something with line
-     *   }
-     * } finally {
-     *   closeQuietly(stream);
+     * try (LineIterator it = LineIterator.of(inputStream, StandardCharsets.UTF_8)) {
+     *     it.stream().forEach(line -> processLine(line));
      * }
      * </pre>
      *
-     * @param input the {@code InputStream} to read from, not null
-     * @param encoding the encoding to use, {@code null} means platform default
-     * @return an Iterator of the lines in the reader, never null
-     * @throws UncheckedIOException if an I/O error occurs, such as if the encoding is invalid
-     * @throws IllegalArgumentException if the input is null
+     * @param input the {@code InputStream} to read from; must not be {@code null}
+     * @param encoding the character encoding to use; if {@code null}, the platform default encoding is used
+     * @return an Iterator of the lines in the input stream, never {@code null}
+     * @throws IllegalArgumentException if {@code input} is {@code null} or if {@code encoding} is {@code null}
+     * @throws UncheckedIOException if an I/O error occurs while reading from the input stream
+     * @see #of(InputStream)
      */
     public static LineIterator of(final InputStream input, final Charset encoding) throws UncheckedIOException {
+        N.checkArgNotNull(input, cs.inputStream);
+        N.checkArgNotNull(encoding, cs.encoding);
+
         return new LineIterator(IOUtil.createReader(input, encoding));
     }
 
     /**
      * Returns an Iterator for the lines in a {@code Reader}.
      * <p>
-     * {@code LineIterator} holds a reference to the open
-     * {@code Reader} specified here. When you have finished with
-     * the iterator, you should close the reader to free internal resources.
-     * This can be done by closing the reader directly, or by calling
-     * {@link LineIterator#close()} or {@link IOUtil#closeQuietly(AutoCloseable)}.
+     * {@code LineIterator} holds a reference to the open {@code Reader} specified here.
+     * When you have finished with the iterator, you should close it to free internal resources.
+     * This can be done by calling {@link #close()} or by using try-with-resources.
+     * Note that closing the iterator will also close the underlying reader.
      * <p>
      * <h3>Example:</h3>
      * <pre>
@@ -256,8 +243,10 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * }
      * </pre>
      *
-     * @param reader the {@code Reader} to read from, not null
+     * @param reader the {@code Reader} to read from, must not be null
      * @return an Iterator of the lines in the reader, never null
+     * @throws IllegalArgumentException if the reader is null
+     * @see #LineIterator(Reader)
      */
     public static LineIterator of(final Reader reader) {
         return new LineIterator(reader);
@@ -266,9 +255,15 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     //-----------------------------------------------------------------------
 
     /**
-     * Indicates whether the {@code Reader} has more lines.
-     * If there is an {@code IOException} then {@link #close()} will
-     * be called on this instance.
+     * Indicates whether the {@code Reader} has more lines available to read.
+     * <p>
+     * This method checks if there are more lines in the underlying reader by attempting
+     * to read the next line and caching it. If an {@code IOException} occurs during this
+     * operation, {@link #close()} will be automatically called on this instance to release
+     * resources, and the exception will be wrapped in an {@link UncheckedIOException}.
+     * <p>
+     * Once this method returns {@code false}, subsequent calls will continue to return
+     * {@code false}, and calls to {@link #next()} will throw {@link NoSuchElementException}.
      * <p>
      * <h3>Example:</h3>
      * <pre>
@@ -279,8 +274,8 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * }
      * </pre>
      *
-     * @return {@code true} if the Reader has more lines
-     * @throws IllegalStateException if an IO exception occurs
+     * @return {@code true} if the reader has more lines, {@code false} if end of stream is reached
+     * @throws UncheckedIOException if an I/O error occurs while reading from the underlying reader
      */
     @Override
     public boolean hasNext() {
@@ -308,6 +303,15 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     /**
      * Returns the next line in the wrapped {@code Reader}.
      * <p>
+     * This method retrieves the next line from the underlying reader. It returns the line
+     * that was previously cached by {@link #hasNext()}, or attempts to read a new line if
+     * {@code hasNext()} hasn't been called. The returned line does not include any
+     * line-termination characters (such as '\n' or '\r\n').
+     * <p>
+     * You must call {@link #hasNext()} before calling this method to check if a line is
+     * available, or ensure you handle the {@link NoSuchElementException} that will be thrown
+     * if no more lines are available.
+     * <p>
      * <h3>Example:</h3>
      * <pre>
      * LineIterator it = LineIterator.of(file);
@@ -317,12 +321,11 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * }
      * </pre>
      *
-     * @return the next line from the input
-     * @throws IllegalArgumentException if called when there are no more lines
-     * @throws NoSuchElementException if there is no line to return
+     * @return the next line from the input, never null (empty lines are returned as empty strings)
+     * @throws NoSuchElementException if there is no line to return (end of stream reached)
      */
     @Override
-    public String next() throws IllegalArgumentException {
+    public String next() {
         if (!hasNext()) {
             throw new NoSuchElementException("No more lines");
         }
@@ -332,11 +335,19 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
-     * Closes the underlying {@code Reader} quietly.
-     * This method is useful if you only want to process the first few
-     * lines of a larger file. If you do not close the iterator
-     * then the {@code Reader} remains open.
-     * This method can safely be called multiple times.
+     * Closes the underlying {@code Reader} and releases all associated resources.
+     * <p>
+     * This method closes the {@link BufferedReader} that wraps the underlying reader,
+     * which in turn closes the original reader and any associated input streams or files.
+     * After calling this method, the iterator becomes unusable - {@link #hasNext()} will
+     * return {@code false} and {@link #next()} will throw {@link NoSuchElementException}.
+     * <p>
+     * This method is useful if you only want to process the first few lines of a larger
+     * file and want to release resources early. If you do not close the iterator explicitly,
+     * the {@code Reader} remains open, potentially causing resource leaks.
+     * <p>
+     * This method can safely be called multiple times; subsequent calls have no effect.
+     * The method is synchronized to ensure thread safety.
      * <p>
      * <h3>Example:</h3>
      * <pre>
@@ -347,7 +358,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      *         processLine(it.next());
      *     }
      * } finally {
-     *     it.close(); // Important to close for large files
+     *     it.close(); // Important to close to release resources
      * }
      * </pre>
      */

@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
@@ -28,6 +29,7 @@ import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("new-test")
 public class TriIterator100Test extends TestBase {
 
     @Test
@@ -40,7 +42,6 @@ public class TriIterator100Test extends TestBase {
             iter.next();
             fail("Should throw NoSuchElementException");
         } catch (NoSuchElementException e) {
-            // Expected
         }
     }
 
@@ -54,7 +55,6 @@ public class TriIterator100Test extends TestBase {
 
         TriIterator<Integer, String, Double> iter = TriIterator.generate(output);
 
-        // Test first few elements
         assertTrue(iter.hasNext());
         Triple<Integer, String, Double> first = iter.next();
         assertEquals(Integer.valueOf(0), first.left());
@@ -139,7 +139,7 @@ public class TriIterator100Test extends TestBase {
         TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3);
 
         List<Triple<String, Integer, Double>> result = iter.toList();
-        assertEquals(2, result.size()); // Shortest array length
+        assertEquals(2, result.size());
     }
 
     @Test
@@ -151,7 +151,7 @@ public class TriIterator100Test extends TestBase {
         TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3, "default", -1, -1.0);
 
         List<Triple<String, Integer, Double>> result = iter.toList();
-        assertEquals(3, result.size()); // Longest array length
+        assertEquals(3, result.size());
 
         assertEquals("a", result.get(0).left());
         assertEquals(Integer.valueOf(1), result.get(0).middle());
@@ -171,13 +171,12 @@ public class TriIterator100Test extends TestBase {
         TriIterator<String, Integer, Boolean> iter = TriIterator.zip(list1, set2, list3);
 
         assertTrue(iter.hasNext());
-        // Note: Set iteration order may vary, so we just check that elements exist
         int count = 0;
         while (iter.hasNext()) {
             iter.next();
             count++;
         }
-        assertTrue(count <= 3); // Limited by shortest collection
+        assertTrue(count <= 3);
     }
 
     @Test
@@ -190,7 +189,7 @@ public class TriIterator100Test extends TestBase {
             TriIterator<String, Integer, Double> triIter = TriIterator.zip(iter1, iter2, iter3);
 
             List<Triple<String, Integer, Double>> result = triIter.toList();
-            assertEquals(2, result.size()); // Limited by shortest iterator
+            assertEquals(2, result.size());
         }
         {
             Iterator<String> iter1 = Arrays.asList("a", "b", "c").iterator();
@@ -304,12 +303,12 @@ public class TriIterator100Test extends TestBase {
     public void testUnzipIterable() {
         List<String> source = Arrays.asList("a:1:x", "b:2:y", "c:3:z");
 
-        BiConsumer<String, Triple<String, Integer, String>> unzipFunc = (str, triple) -> {
+        BiConsumer<String, Triple<String, Integer, String>> unzipFunction = (str, triple) -> {
             String[] parts = str.split(":");
             triple.set(parts[0], Integer.parseInt(parts[1]), parts[2]);
         };
 
-        TriIterator<String, Integer, String> iter = TriIterator.unzip(source, unzipFunc);
+        TriIterator<String, Integer, String> iter = TriIterator.unzip(source, unzipFunction);
 
         List<Triple<String, Integer, String>> result = iter.toList();
         assertEquals(3, result.size());
@@ -787,7 +786,7 @@ public class TriIterator100Test extends TestBase {
 
         Triple<Set<String>, Set<Integer>, Set<Double>> multiSet = iter.toMultiSet(HashSet::new);
 
-        assertEquals(3, multiSet.left().size()); // "a" appears twice, but set contains unique values
+        assertEquals(3, multiSet.left().size());
         assertTrue(multiSet.left().contains("a"));
         assertTrue(multiSet.left().contains("b"));
         assertTrue(multiSet.left().contains("c"));
@@ -798,18 +797,13 @@ public class TriIterator100Test extends TestBase {
 
     @Test
     public void testCombinedOperations() {
-        // Test chaining multiple operations
         String[] arr1 = { "a", "b", "c", "d", "e", "f" };
         Integer[] arr2 = { 1, 2, 3, 4, 5, 6 };
         Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5, 6.6 };
 
         TriPredicate<String, Integer, Double> predicate = (s, i, d) -> i % 2 == 0;
 
-        List<Triple<String, Integer, Double>> result = TriIterator.zip(arr1, arr2, arr3)
-                .skip(1) // Skip first element
-                .limit(4) // Take next 4 elements
-                .filter(predicate) // Keep only even integers
-                .toList();
+        List<Triple<String, Integer, Double>> result = TriIterator.zip(arr1, arr2, arr3).skip(1).limit(4).filter(predicate).toList();
 
         assertEquals(2, result.size());
         assertEquals("b", result.get(0).left());
@@ -832,6 +826,6 @@ public class TriIterator100Test extends TestBase {
     public void testGenerateInvalidIndexRange() {
         IntObjConsumer<Triple<String, Integer, Boolean>> output = (index, triple) -> {
         };
-        assertThrows(IndexOutOfBoundsException.class, () -> TriIterator.generate(5, 2, output)); // fromIndex > toIndex
+        assertThrows(IndexOutOfBoundsException.class, () -> TriIterator.generate(5, 2, output));
     }
 }

@@ -8,11 +8,13 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ImmutableSet;
 
+@Tag("new-test")
 public class ImmutableSetType100Test extends TestBase {
 
     private ImmutableSetType<String> immutableSetType;
@@ -67,9 +69,7 @@ public class ImmutableSetType100Test extends TestBase {
 
     @Test
     public void testIsSerializable() {
-        // Result depends on underlying setType.isSerializable()
         boolean result = immutableSetType.isSerializable();
-        // Just verify it returns a boolean
         assertTrue(result || !result);
     }
 
@@ -77,43 +77,32 @@ public class ImmutableSetType100Test extends TestBase {
     public void testGetSerializationType() {
         Type.SerializationType serType = immutableSetType.getSerializationType();
         assertNotNull(serType);
-        // Should be either SERIALIZABLE or COLLECTION
         assertTrue(serType == Type.SerializationType.SERIALIZABLE || serType == Type.SerializationType.COLLECTION);
     }
 
     @Test
     public void testStringOf() {
-        // Test would require mocking setType.stringOf()
-        // Result depends on delegation to setType
     }
 
     @Test
     public void testValueOf() {
-        // Test would require mocking setType.valueOf()
-        // and ImmutableSet.wrap()
     }
 
     @Test
     public void testAppendTo() throws IOException {
-        // Test would require mocking setType.appendTo()
-        // Actual test depends on delegation to setType
     }
 
     @Test
     public void testWriteCharacter() throws IOException {
-        // Test would require mocking setType.writeCharacter()
-        // Actual test depends on delegation to setType
     }
 
     @Test
     public void testGetTypeName() {
-        // Test static method with declaring name
         String typeName = ImmutableSetType.getTypeName(ImmutableSet.class, "String", true);
         assertNotNull(typeName);
         assertTrue(typeName.contains("ImmutableSet"));
         assertTrue(typeName.contains("String"));
 
-        // Test static method without declaring name
         typeName = ImmutableSetType.getTypeName(ImmutableSet.class, "String", false);
         assertNotNull(typeName);
         assertTrue(typeName.contains("ImmutableSet"));

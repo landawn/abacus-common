@@ -367,6 +367,12 @@ public abstract class Tuple<TP> implements Immutable {
     /**
      * Creates a Tuple5 containing the specified elements in order.
      *
+     * <p>Example:</p>
+     * <pre>{@code
+     * Tuple5<String, Integer, Boolean, Double, LocalDate> data =
+     *     Tuple.of("Product", 100, true, 99.99, LocalDate.now());
+     * }</pre>
+     *
      * @param <T1> the type of the first element
      * @param <T2> the type of the second element
      * @param <T3> the type of the third element
@@ -385,6 +391,12 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Creates a Tuple6 containing the specified elements in order.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * Tuple6<String, String, Integer, String, String, String> address =
+     *     Tuple.of("John", "Doe", 123, "Main St", "Boston", "MA");
+     * }</pre>
      *
      * @param <T1> the type of the first element
      * @param <T2> the type of the second element
@@ -909,42 +921,111 @@ public abstract class Tuple<TP> implements Immutable {
         Tuple0() {
         }
 
+        /**
+         * Returns the arity (number of elements) of this tuple.
+         *
+         * <p>For Tuple0, this always returns 0 as it contains no elements.</p>
+         *
+         * @return 0, as this is an empty tuple
+         */
         @Override
         public int arity() {
             return 0;
         }
 
+        /**
+         * Checks if any element in this tuple is null.
+         *
+         * <p>For Tuple0, this always returns {@code false} since there are no elements to be null.</p>
+         *
+         * @return {@code false}, as an empty tuple has no null elements
+         */
         @Override
         public boolean anyNull() {
             return false;
         }
 
+        /**
+         * Checks if all elements in this tuple are null.
+         *
+         * <p>For Tuple0, this returns {@code true} following the mathematical convention
+         * that "all elements" of an empty set satisfy any predicate (vacuous truth).</p>
+         *
+         * @return {@code true}, following the vacuous truth principle
+         */
         @Override
         public boolean allNull() {
             return true;
         }
 
+        /**
+         * Checks if this tuple contains the specified value.
+         *
+         * <p>For Tuple0, this always returns {@code false} since there are no elements to contain.</p>
+         *
+         * @param valueToFind the value to search for
+         * @return {@code false}, as an empty tuple contains no elements
+         */
         @Override
         public boolean contains(final Object valueToFind) {
             return false;
         }
 
+        /**
+         * Returns an empty array.
+         *
+         * <p>For Tuple0, this always returns an empty Object array.</p>
+         *
+         * @return an empty Object array
+         */
         @Override
         public Object[] toArray() {
             return N.EMPTY_OBJECT_ARRAY;
         }
 
+        /**
+         * Returns the specified array with a null terminator if it has space.
+         *
+         * <p>For Tuple0 (empty tuple), if the provided array has length > 0,
+         * element at index 0 is set to null to mark the end of tuple elements,
+         * following Java Collection contract.</p>
+         *
+         * @param <A> the component type of the array
+         * @param a the array to use or a template for creating a new array
+         * @return the same array, potentially with a[0] set to null if a.length > 0
+         */
         @Override
         public <A> A[] toArray(final A[] a) {
+            if (a.length > 0) {
+                a[0] = null;
+            }
             return a;
         }
 
+        /**
+         * Performs the given action for each element of this tuple.
+         *
+         * <p>For Tuple0, this method validates the consumer but performs no action
+         * since there are no elements to iterate over.</p>
+         *
+         * @param <E> the type of exception that may be thrown
+         * @param consumer the action to be performed for each element
+         * @throws IllegalArgumentException if consumer is null
+         * @throws E if the consumer throws an exception (won't happen for Tuple0)
+         */
         @Override
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
             // do nothing.
         }
 
+        /**
+         * Returns a string representation of this tuple.
+         *
+         * <p>For Tuple0, this always returns "()" representing an empty tuple.</p>
+         *
+         * @return "()"
+         */
         @Override
         public String toString() {
             return "()";
@@ -994,16 +1075,37 @@ public abstract class Tuple<TP> implements Immutable {
             this._1 = _1;
         }
 
+        /**
+         * Returns the arity (number of elements) of this tuple.
+         *
+         * <p>For Tuple1, this always returns 1 as it contains exactly one element.</p>
+         *
+         * @return 1, the number of elements in this tuple
+         */
         @Override
         public int arity() {
             return 1;
         }
 
+        /**
+         * Checks if any element in this tuple is null.
+         *
+         * <p>For Tuple1, this returns {@code true} if and only if the single element is null.</p>
+         *
+         * @return {@code true} if the element is null, {@code false} otherwise
+         */
         @Override
         public boolean anyNull() {
             return _1 == null;
         }
 
+        /**
+         * Checks if all elements in this tuple are null.
+         *
+         * <p>For Tuple1, this returns {@code true} if and only if the single element is null.</p>
+         *
+         * @return {@code true} if the element is null, {@code false} otherwise
+         */
         @Override
         public boolean allNull() {
             return _1 == null;
@@ -1023,6 +1125,11 @@ public abstract class Tuple<TP> implements Immutable {
             return N.equals(_1, valueToFind);
         }
 
+        /**
+         * Returns an array containing the single element of this tuple.
+         *
+         * @return a new Object array of length 1 containing the element
+         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1 };
@@ -1060,6 +1167,13 @@ public abstract class Tuple<TP> implements Immutable {
             objConsumer.accept(_1);
         }
 
+        /**
+         * Returns a hash code value for this tuple.
+         *
+         * <p>The hash code is computed based on the element value.</p>
+         *
+         * @return a hash code value for this tuple
+         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1090,6 +1204,13 @@ public abstract class Tuple<TP> implements Immutable {
             return false;
         }
 
+        /**
+         * Returns a string representation of this tuple.
+         *
+         * <p>The format is: ({@code _1})</p>
+         *
+         * @return a string representation of this tuple
+         */
         @Override
         public String toString() {
             return "(" + N.toString(_1) + ")";
@@ -1156,16 +1277,37 @@ public abstract class Tuple<TP> implements Immutable {
             this._2 = _2;
         }
 
+        /**
+         * Returns the arity (number of elements) of this tuple.
+         *
+         * <p>For Tuple2, this always returns 2 as it contains exactly two elements.</p>
+         *
+         * @return 2, the number of elements in this tuple
+         */
         @Override
         public int arity() {
             return 2;
         }
 
+        /**
+         * Checks if any element in this tuple is null.
+         *
+         * <p>For Tuple2, this returns {@code true} if either element is null.</p>
+         *
+         * @return {@code true} if at least one element is null, {@code false} otherwise
+         */
         @Override
         public boolean anyNull() {
             return _1 == null || _2 == null;
         }
 
+        /**
+         * Checks if all elements in this tuple are null.
+         *
+         * <p>For Tuple2, this returns {@code true} if both elements are null.</p>
+         *
+         * @return {@code true} if both elements are null, {@code false} otherwise
+         */
         @Override
         public boolean allNull() {
             return _1 == null && _2 == null;
@@ -1184,6 +1326,11 @@ public abstract class Tuple<TP> implements Immutable {
             return N.equals(_1, valueToFind) || N.equals(_2, valueToFind);
         }
 
+        /**
+         * Returns an array containing the two elements of this tuple in order.
+         *
+         * @return a new Object array of length 2 containing the elements
+         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2 };
@@ -1352,6 +1499,13 @@ public abstract class Tuple<TP> implements Immutable {
             return predicate.test(_1, _2) ? Optional.of(this) : Optional.empty();
         }
 
+        /**
+         * Returns a hash code value for this tuple.
+         *
+         * <p>The hash code is computed based on the values of both elements.</p>
+         *
+         * @return a hash code value for this tuple
+         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1383,6 +1537,13 @@ public abstract class Tuple<TP> implements Immutable {
             return false;
         }
 
+        /**
+         * Returns a string representation of this tuple.
+         *
+         * <p>The format is: ({@code _1}, {@code _2})</p>
+         *
+         * @return a string representation of this tuple
+         */
         @Override
         public String toString() {
             return "(" + N.toString(_1) + ", " + N.toString(_2) + ")";

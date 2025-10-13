@@ -77,7 +77,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
     private final int indexMask;
 
-    private int _size = 0; //NOSONAR
+    private volatile int _size = 0; //NOSONAR
 
     private boolean isWarningLoggedForCapacity;
 
@@ -200,7 +200,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         _values = null;
         _entrySet = null;
 
-        _size++;
+        updateSize(1);
 
         return null;
     }
@@ -270,7 +270,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
                     _values = null;
                     _entrySet = null;
 
-                    _size--;
+                    updateSize(-1);
 
                     return e.value;
                 }
@@ -443,6 +443,10 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         }
 
         return tmp;
+    }
+
+    private synchronized void updateSize(final int delta) {
+        _size += delta;
     }
 
     /**

@@ -381,10 +381,17 @@ public class Builder<T> {
     }
 
     /**
-     * Applies the given function to the wrapped value and returns the result.
+     * Applies the given function to the wrapped value and returns the result directly.
+     * Unlike {@link #map(Function)}, this method returns the function result directly
+     * instead of wrapping it in a new Builder.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = Builder.of(list).apply(List::size);
+     * }</pre>
      *
      * @param <R> the type of the result of the function
-     * @param func the function to apply to the wrapped value
+     * @param func the function to apply to the wrapped value, must not be {@code null}
      * @return the result of applying the function to the wrapped value
      */
     public <R> R apply(final Function<? super T, ? extends R> func) {
@@ -392,116 +399,21 @@ public class Builder<T> {
     }
 
     /**
-     * Creates a Stream containing only the wrapped value.
+     * Creates a Stream containing only the wrapped value as a single element.
      *
-     * @return a Stream containing the wrapped value
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Builder.of(myObject)
+     *     .stream()
+     *     .map(Object::toString)
+     *     .forEach(System.out::println);
+     * }</pre>
+     *
+     * @return a Stream containing the wrapped value as its only element
      */
     public Stream<T> stream() {
         return Stream.of(val);
     }
-
-    //    /**
-    //    * Returns an empty <code>Nullable</code> if {@code val()} is {@code null} while {@code targetType} is primitive or can't be assigned to {@code targetType}.
-    //    * Please be aware that {@code null} can be assigned to any {@code Object} type except primitive types: {@code boolean/char/byte/short/int/long/double}.
-    //    *
-    //    * @param val
-    //    * @param targetType
-    //    * @return
-    //    */
-    //    @SuppressWarnings("unchecked")
-    //    public <TT> Nullable<TT> castIfAssignable(final Class<TT> targetType) {
-    //        if (N.isPrimitive(targetType)) {
-    //            return val != null && N.wrapperOf(targetType).isAssignableFrom(val.getClass()) ? Nullable.of((TT) val) : Nullable.<TT> empty();
-    //        }
-    //
-    //        return val == null || targetType.isAssignableFrom(val.getClass()) ? Nullable.of((TT) val) : Nullable.<TT> empty();
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param b
-    //     * @param actionForTrue does nothing if it's {@code null} even {@code b} is true.
-    //     * @param actionForFalse does nothing if it's {@code null} even {@code b} is false.
-    //     * @throws E1
-    //     * @throws E2
-    //     */
-    //    public <E1 extends Exception, E2 extends Exception> void ifOrElse(final boolean b, final Try.Consumer<? super T, E1> actionForTrue,
-    //            final Try.Consumer<? super T, E2> actionForFalse) throws E1, E2 {
-    //        if (b) {
-    //            if (actionForTrue != null) {
-    //                actionForTrue.accept(val);
-    //            }
-    //        } else {
-    //            if (actionForFalse != null) {
-    //                actionForFalse.accept(val);
-    //            }
-    //        }
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param predicate
-    //     * @param actionForTrue does nothing if it's {@code null} even {@code b} is true.
-    //     * @param actionForFalse does nothing if it's {@code null} even {@code b} is false.
-    //     * @throws E0
-    //     * @throws E1
-    //     * @throws E2
-    //     */
-    //    public <E0 extends Exception, E1 extends Exception, E2 extends Exception> void ifOrElse(final Try.Predicate<? super T, E0> predicate,
-    //            final Try.Consumer<? super T, E1> actionForTrue, final Try.Consumer<? super T, E2> actionForFalse) throws E0, E1, E2 {
-    //        if (predicate.test(val)) {
-    //            if (actionForTrue != null) {
-    //                actionForTrue.accept(val);
-    //            }
-    //        } else {
-    //            if (actionForFalse != null) {
-    //                actionForFalse.accept(val);
-    //            }
-    //        }
-    //    }
-    //
-    //    /**
-    //     * Returns an empty {@code Optional} if {@code cmd} is executed successfully, otherwise a {@code Optional} with the exception threw.
-    //     *
-    //     * @param cmd
-    //     * @return
-    //     */
-    //    public Optional<Exception> run(final Try.Consumer<? super T, ? extends Exception> cmd) {
-    //        try {
-    //            cmd.accept(val);
-    //            return Optional.empty();
-    //        } catch (Exception e) {
-    //            return Optional.of(e);
-    //        }
-    //    }
-    //
-    //    /**
-    //     * Returns a {@code Pair} with {@code left=returnedValue, right=null} if {@code cmd} is executed successfully, otherwise a {@code Pair} with {@code left=null, right=exception}.
-    //     *
-    //     * @param cmd
-    //     * @return
-    //     */
-    //    public <R> Pair<R, Exception> call(final Try.Function<? super T, R, ? extends Exception> cmd) {
-    //        try {
-    //            return Pair.of(cmd.apply(val), null);
-    //        } catch (Exception e) {
-    //            return Pair.of(null, e);
-    //        }
-    //    }
-    //
-    //    /**
-    //     * Returns a {@code Nullable} with the value returned by {@code action} or an empty {@code Nullable} if exception happens.
-    //     *
-    //     * @param cmd
-    //     * @return
-    //     */
-    //    public <R> Nullable<R> tryOrEmpty(final Try.Function<? super T, R, ? extends Exception> cmd) {
-    //        try {
-    //            return Nullable.of(cmd.apply(val));
-    //        } catch (Exception e) {
-    //            return Nullable.<R> empty();
-    //        }
-    //    }
 
     /**
      * Specialized builder for BooleanList that provides fluent methods for adding, removing,
@@ -512,7 +424,7 @@ public class Builder<T> {
         /**
          * Instantiates a new boolean list builder.
          *
-         * @param val
+         * @param val the BooleanList to wrap in this builder
          */
         BooleanListBuilder(final BooleanList val) {
             super(val);
@@ -597,12 +509,6 @@ public class Builder<T> {
             return this;
         }
 
-        //        public BooleanListBuilder removeAllOccurrences(double e) {
-        //            value.removeAllOccurrences(e);
-        //
-        //            return this;
-        //        }
-
         /**
          * Removes from this list all of its elements that are contained in the specified BooleanList.
          *
@@ -625,7 +531,7 @@ public class Builder<T> {
         /**
          * Instantiates a new char list builder.
          *
-         * @param val
+         * @param val the CharList to wrap in this builder
          */
         CharListBuilder(final CharList val) {
             super(val);
@@ -710,12 +616,6 @@ public class Builder<T> {
             return this;
         }
 
-        //        public CharListBuilder removeAllOccurrences(double e) {
-        //            value.removeAllOccurrences(e);
-        //
-        //            return this;
-        //        }
-
         /**
          * Removes from this list all of its elements that are contained in the specified CharList.
          *
@@ -738,7 +638,7 @@ public class Builder<T> {
         /**
          * Instantiates a new byte list builder.
          *
-         * @param val
+         * @param val the ByteList to wrap in this builder
          */
         ByteListBuilder(final ByteList val) {
             super(val);
@@ -823,12 +723,6 @@ public class Builder<T> {
             return this;
         }
 
-        //        public ByteListBuilder removeAllOccurrences(double e) {
-        //            value.removeAllOccurrences(e);
-        //
-        //            return this;
-        //        }
-
         /**
          * Removes from this list all of its elements that are contained in the specified ByteList.
          *
@@ -851,7 +745,7 @@ public class Builder<T> {
         /**
          * Instantiates a new short list builder.
          *
-         * @param val
+         * @param val the ShortList to wrap in this builder
          */
         ShortListBuilder(final ShortList val) {
             super(val);
@@ -936,12 +830,6 @@ public class Builder<T> {
             return this;
         }
 
-        //        public ShortListBuilder removeAllOccurrences(double e) {
-        //            value.removeAllOccurrences(e);
-        //
-        //            return this;
-        //        }
-
         /**
          * Removes from this list all of its elements that are contained in the specified ShortList.
          *
@@ -964,7 +852,7 @@ public class Builder<T> {
         /**
          * Instantiates a new int list builder.
          *
-         * @param val
+         * @param val the IntList to wrap in this builder
          */
         IntListBuilder(final IntList val) {
             super(val);
@@ -1049,12 +937,6 @@ public class Builder<T> {
             return this;
         }
 
-        //        public IntListBuilder removeAllOccurrences(double e) {
-        //            value.removeAllOccurrences(e);
-        //
-        //            return this;
-        //        }
-
         /**
          * Removes from this list all of its elements that are contained in the specified IntList.
          *
@@ -1077,7 +959,7 @@ public class Builder<T> {
         /**
          * Instantiates a new long list builder.
          *
-         * @param val
+         * @param val the LongList to wrap in this builder
          */
         LongListBuilder(final LongList val) {
             super(val);
@@ -1162,12 +1044,6 @@ public class Builder<T> {
             return this;
         }
 
-        //        public LongListBuilder removeAllOccurrences(double e) {
-        //            value.removeAllOccurrences(e);
-        //
-        //            return this;
-        //        }
-
         /**
          * Removes from this list all of its elements that are contained in the specified LongList.
          *
@@ -1190,7 +1066,7 @@ public class Builder<T> {
         /**
          * Instantiates a new float list builder.
          *
-         * @param val
+         * @param val the FloatList to wrap in this builder
          */
         FloatListBuilder(final FloatList val) {
             super(val);
@@ -1275,12 +1151,6 @@ public class Builder<T> {
             return this;
         }
 
-        //        public FloatListBuilder removeAllOccurrences(double e) {
-        //            value.removeAllOccurrences(e);
-        //
-        //            return this;
-        //        }
-
         /**
          * Removes from this list all of its elements that are contained in the specified FloatList.
          *
@@ -1303,7 +1173,7 @@ public class Builder<T> {
         /**
          * Instantiates a new double list builder.
          *
-         * @param val
+         * @param val the DoubleList to wrap in this builder
          */
         DoubleListBuilder(final DoubleList val) {
             super(val);
@@ -1388,12 +1258,6 @@ public class Builder<T> {
             return this;
         }
 
-        //        public DoubleListBuilder removeAllOccurrences(double e) {
-        //            value.removeAllOccurrences(e);
-        //
-        //            return this;
-        //        }
-
         /**
          * Removes from this list all of its elements that are contained in the specified DoubleList.
          *
@@ -1420,12 +1284,18 @@ public class Builder<T> {
         /**
          * Instantiates a new list builder.
          *
-         * @param c
+         * @param c the List to wrap in this builder
          */
         ListBuilder(final L c) {
             super(c);
         }
 
+        /**
+         * Appends the specified element to the end of the list.
+         *
+         * @param e the element to be appended to the list
+         * @return this builder instance for method chaining
+         */
         @Override
         public ListBuilder<T, L> add(final T e) {
             val.add(e);
@@ -1433,6 +1303,14 @@ public class Builder<T> {
             return this;
         }
 
+        /**
+         * Appends all of the elements in the specified collection to the end of the list,
+         * in the order that they are returned by the specified collection's iterator.
+         * Does nothing if the collection is {@code null} or empty.
+         *
+         * @param c the collection containing elements to be added to the list
+         * @return this builder instance for method chaining
+         */
         @Override
         public ListBuilder<T, L> addAll(final Collection<? extends T> c) {
             if (N.notEmpty(c)) {
@@ -1442,6 +1320,14 @@ public class Builder<T> {
             return this;
         }
 
+        /**
+         * Appends all of the elements in the specified array to the end of the list,
+         * in the order that they appear in the array. Does nothing if the array is
+         * {@code null} or empty.
+         *
+         * @param a the array containing elements to be added to the list
+         * @return this builder instance for method chaining
+         */
         @SafeVarargs
         @Override
         public final ListBuilder<T, L> addAll(final T... a) {
@@ -1452,6 +1338,13 @@ public class Builder<T> {
             return this;
         }
 
+        /**
+         * Removes the first occurrence of the specified element from the list, if it is present.
+         * If the list does not contain the element, it is unchanged.
+         *
+         * @param e the element to be removed from the list, if present
+         * @return this builder instance for method chaining
+         */
         @Override
         public ListBuilder<T, L> remove(final Object e) {
             //noinspection SuspiciousMethodCalls
@@ -1460,6 +1353,13 @@ public class Builder<T> {
             return this;
         }
 
+        /**
+         * Removes from the list all of its elements that are contained in the specified collection.
+         * Does nothing if the collection is {@code null} or empty.
+         *
+         * @param c the collection containing elements to be removed from the list
+         * @return this builder instance for method chaining
+         */
         @Override
         public ListBuilder<T, L> removeAll(final Collection<?> c) {
             if (N.notEmpty(c)) {
@@ -1470,6 +1370,13 @@ public class Builder<T> {
             return this;
         }
 
+        /**
+         * Removes from the list all of its elements that are contained in the specified array.
+         * Does nothing if the array is {@code null} or empty.
+         *
+         * @param a the array containing elements to be removed from the list
+         * @return this builder instance for method chaining
+         */
         @SafeVarargs
         @Override
         public final ListBuilder<T, L> removeAll(final T... a) {
@@ -1506,8 +1413,6 @@ public class Builder<T> {
          * @throws IndexOutOfBoundsException if the index is out of range
          */
         public ListBuilder<T, L> addAll(final int index, final Collection<? extends T> c) throws IndexOutOfBoundsException {
-            N.checkElementIndex(index, val.size());
-
             if (N.notEmpty(c)) {
                 val.addAll(index, c);
             }
@@ -1541,7 +1446,7 @@ public class Builder<T> {
         /**
          * Instantiates a new collection builder.
          *
-         * @param c
+         * @param c the Collection to wrap in this builder
          */
         CollectionBuilder(final C c) {
             super(c);
@@ -1648,7 +1553,7 @@ public class Builder<T> {
         /**
          * Instantiates a new multiset builder.
          *
-         * @param c
+         * @param c the Multiset to wrap in this builder
          */
         MultisetBuilder(final Multiset<T> c) {
             super(c);
@@ -1772,7 +1677,7 @@ public class Builder<T> {
         /**
          * Instantiates a new map builder.
          *
-         * @param m
+         * @param m the Map to wrap in this builder
          */
         MapBuilder(final M m) {
             super(m);
@@ -2184,18 +2089,6 @@ public class Builder<T> {
             return this;
         }
 
-        //        /**
-        //         *
-        //         * @param columnName
-        //         * @param func
-        //         * @return
-        //         */
-        //        public DatasetBuilder renameColumn(String columnName, Function<? super String, String> func) {
-        //            val.renameColumn(columnName, func);
-        //
-        //            return this;
-        //        }
-
         /**
          * Renames specified columns using a function that transforms column names.
          * The function is applied to each column name in the collection.
@@ -2493,19 +2386,6 @@ public class Builder<T> {
             return this;
         }
 
-        //        /**
-        //         *
-        //         * @param filter
-        //         * @return
-        //         * @deprecated replaced by {@code removeColumns}.
-        //         */
-        //        @Deprecated
-        //        public DatasetBuilder removeColumnsIf(Predicate<? super String> filter) {
-        //            val.removeColumnsIf(filter);
-        //
-        //            return this;
-        //        }
-
         /**
          * Updates all values in a column by applying a transformation function.
          * Each value in the column is replaced with the result of the function.
@@ -2530,15 +2410,15 @@ public class Builder<T> {
          * 
          * <p>Example:</p>
          * <pre>{@code
-         * datasetBuilder.updateColumns(Arrays.asList("price", "cost"), 
-         *                             (String c, Double v) -> v * 1.1);
+         * datasetBuilder.updateColumns(Arrays.asList("price", "cost"), (i, c, v) -> v * 1.1);
          * }</pre>
          *
          * @param columnNames the names of columns to update
          * @param func the function to transform values in the specified columns
          * @return this builder instance for method chaining
+         * @see Dataset#updateColumns(Collection, IntBiObjFunction)
          */
-        public DatasetBuilder updateColumns(final Collection<String> columnNames, final BiFunction<String, ?, ?> func) {
+        public DatasetBuilder updateColumns(final Collection<String> columnNames, final IntBiObjFunction<String, ?, ?> func) {
             val.updateColumns(columnNames, func);
 
             return this;
@@ -2826,7 +2706,6 @@ public class Builder<T> {
             return this;
         }
 
-
         /**
          * Replaces values in the Dataset that satisfy a specified condition with a new value.
          * <br />
@@ -2888,131 +2767,6 @@ public class Builder<T> {
             return this;
         }
 
-        //    /**
-        //     *
-        //     * @param columnName
-        //     * @return
-        //     */
-        //    public DatasetBuilder sortBy(final String columnName) {
-        //        val.sortBy(columnName);
-        //
-        //        return this;
-        //    }
-        //
-        //    /**
-        //     *
-        //     * @param <T>
-        //     * @param columnName
-        //     * @param cmp
-        //     * @return
-        //     */
-        //    public DatasetBuilder sortBy(final String columnName, final Comparator<?> cmp) {
-        //        val.sortBy(columnName, cmp);
-        //
-        //        return this;
-        //    }
-        //
-        //    /**
-        //     *
-        //     * @param columnNames
-        //     * @return
-        //     */
-        //    public DatasetBuilder sortBy(final Collection<String> columnNames) {
-        //        val.sortBy(columnNames);
-        //
-        //        return this;
-        //    }
-        //
-        //    /**
-        //     *
-        //     * @param columnNames
-        //     * @param cmp
-        //     * @return
-        //     */
-        //    public DatasetBuilder sortBy(final Collection<String> columnNames, final Comparator<? super Object[]> cmp) {
-        //        val.sortBy(columnNames, cmp);
-        //
-        //        return this;
-        //    }
-        //
-        //    /**
-        //     *
-        //     * @param columnNames
-        //     * @param keyExtractor
-        //     * @return
-        //     */
-        //    @SuppressWarnings("rawtypes")
-        //    public DatasetBuilder sortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
-        //        val.sortBy(columnNames, keyExtractor);
-        //
-        //        return this;
-        //    }
-        //
-        //    /**
-        //     * Parallel sort by.
-        //     *
-        //     * @param columnName
-        //     * @return
-        //     */
-        //    public DatasetBuilder parallelSortBy(final String columnName) {
-        //        val.parallelSortBy(columnName);
-        //
-        //        return this;
-        //    }
-        //
-        //    /**
-        //     * Parallel sort by.
-        //     *
-        //     * @param <T>
-        //     * @param columnName
-        //     * @param cmp
-        //     * @return
-        //     */
-        //    public DatasetBuilder parallelSortBy(final String columnName, final Comparator<?> cmp) {
-        //        val.parallelSortBy(columnName, cmp);
-        //
-        //        return this;
-        //    }
-        //
-        //    /**
-        //     * Parallel sort by.
-        //     *
-        //     * @param columnNames
-        //     * @return
-        //     */
-        //    public DatasetBuilder parallelSortBy(final Collection<String> columnNames) {
-        //        val.parallelSortBy(columnNames);
-        //
-        //        return this;
-        //    }
-        //
-        //    /**
-        //     * Parallel sort by.
-        //     *
-        //     * @param columnNames
-        //     * @param cmp
-        //     * @return
-        //     */
-        //    public DatasetBuilder parallelSortBy(final Collection<String> columnNames, final Comparator<? super Object[]> cmp) {
-        //        val.parallelSortBy(columnNames, cmp);
-        //
-        //        return this;
-        //    }
-        //
-        //    /**
-        //     * Parallel sort by.
-        //     *
-        //     * @param columnNames
-        //     * @param keyExtractor
-        //     * @return
-        //     */
-        //    @SuppressWarnings("rawtypes")
-        //    public DatasetBuilder parallelSortBy(final Collection<String> columnNames,
-        //            final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
-        //        val.parallelSortBy(columnNames, keyExtractor);
-        //
-        //        return this;
-        //    }
     }
 
     /**
@@ -4907,37 +4661,4 @@ public class Builder<T> {
         }
     }
 
-    //    /**
-    //     * An experimental extension of the Builder class marked with the {@code @Beta} annotation.
-    //     * This class provides the same functionality as Builder but indicates that it may be
-    //     * subject to change in future versions.
-    //     * 
-    //     * <p><strong>WARNING:</strong> This class is marked as {@code @Beta} and should be used
-    //     * with caution in production code as its API may change without notice.</p>
-    //     * 
-    //     * <p><strong>Example usage:</strong></p>
-    //     * <pre>{@code
-    //     * List<String> result = X.of(new ArrayList<String>())
-    //     *     .add("Hello")
-    //     *     .add("World")
-    //     *     .val();
-    //     * }</pre>
-    //     *
-    //     * @param <T> The type of the value this X builder holds
-    //     * @author HaiYang Li
-    //     * @since 0.8
-    //     */
-    //    @Beta
-    //    public static final class X<T> extends Builder<T> {
-    //
-    //        /**
-    //         * Instantiates a new X builder with the specified value.
-    //         * This constructor is private to enforce the use of factory methods.
-    //         *
-    //         * @param val the initial value to wrap in this builder
-    //         */
-    //        private X(final T val) { //NOSONAR
-    //            super(val);
-    //        }
-    //    }
 }

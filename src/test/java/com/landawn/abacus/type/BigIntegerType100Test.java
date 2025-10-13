@@ -15,9 +15,11 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class BigIntegerType100Test extends TestBase {
 
     private Type<BigInteger> bigIntegerType;
@@ -41,7 +43,6 @@ public class BigIntegerType100Test extends TestBase {
         assertEquals("1", bigIntegerType.stringOf(BigInteger.ONE));
         assertEquals("10", bigIntegerType.stringOf(BigInteger.TEN));
 
-        // Test large numbers
         String largeNumber = "12345678901234567890123456789012345678901234567890";
         assertEquals(largeNumber, bigIntegerType.stringOf(new BigInteger(largeNumber)));
     }
@@ -57,7 +58,6 @@ public class BigIntegerType100Test extends TestBase {
         assertEquals(BigInteger.ONE, bigIntegerType.valueOf("1"));
         assertEquals(BigInteger.TEN, bigIntegerType.valueOf("10"));
 
-        // Test large numbers
         String largeNumber = "98765432109876543210987654321098765432109876543210";
         assertEquals(new BigInteger(largeNumber), bigIntegerType.valueOf(largeNumber));
 

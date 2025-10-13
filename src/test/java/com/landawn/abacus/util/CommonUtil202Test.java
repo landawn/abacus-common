@@ -15,16 +15,13 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-// Assuming N.java and its dependencies (com.landawn.abacus.*, etc.) are in the classpath.
-// Specifically, constants like Strings.NULL, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, etc.,
-// and helper methods like N.typeOf(), N.CLASS_TYPE_ENUM, N.checkArgNotEmpty(), etc.,
-// are assumed to be available and function as expected.
+@Tag("new-test")
 public class CommonUtil202Test extends TestBase {
 
-    // Helper Bean for property-based comparisons
     public static class TestBean {
         private String name;
         private int age;
@@ -97,10 +94,7 @@ public class CommonUtil202Test extends TestBase {
             this.attributes = attributes;
         }
 
-        // Mocking ClassUtil behavior for tests.
-        // In a real scenario, ClassUtil would provide these.
         public static List<String> getPropNames() {
-            // In a real test, this would come from a mocked Beans.getPropNameList(TestBean.class)
             return Arrays.asList("name", "age", "salary", "active", "nestedBean", "tags", "attributes");
         }
 
@@ -144,42 +138,32 @@ public class CommonUtil202Test extends TestBase {
 
         @Override
         public String toString() {
-            // A more reflective toString might be used by N.toString(Object)
             return "TestBean@" + Integer.toHexString(System.identityHashCode(this));
         }
     }
 
-    // Simplified mock for N.compareByProps for testing N.equalsByProps.
-    // The actual N.compareByProps in com.landawn.abacus.util.N might be more complex
-    // and use reflection or specific property accessors.
-    // This mock assumes that N.equals is used for property value comparison.
     private static int mockCompareByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) {
         if (bean1 == bean2)
             return 0;
         if (bean1 == null || bean2 == null)
             return bean1 == null ? -1 : 1;
         if (!bean1.getClass().equals(bean2.getClass()) || !(bean1 instanceof TestBean)) {
-            return 1; // Not equal for simplicity if types differ or not TestBean
+            return 1;
         }
 
         TestBean b1 = (TestBean) bean1;
         TestBean b2 = (TestBean) bean2;
 
         for (String propName : propNamesToCompare) {
-            Object val1 = b1.getPropValue(propName); // Simplified property access
-            Object val2 = b2.getPropValue(propName); // Simplified property access
+            Object val1 = b1.getPropValue(propName);
+            Object val2 = b2.getPropValue(propName);
             if (!N.equals(val1, val2)) {
-                // This doesn't provide a true comparison value (-1, 0, 1) but indicates inequality.
-                // A real compareByProps would provide a consistent ordering.
                 return (val1 == null) ? -1 : ((val2 == null) ? 1 : String.valueOf(val1).compareTo(String.valueOf(val2)));
             }
         }
-        return 0; // All specified properties are equal
+        return 0;
     }
 
-    // ================================ Tests for N.java (Part 1: length/size, isEmpty/isBlank...) =================================
-
-    //region len/size tests
     @Test
     public void testLen_CharSequence() {
         assertEquals(0, N.len((CharSequence) null));
@@ -269,20 +253,9 @@ public class CommonUtil202Test extends TestBase {
 
     @Test
     public void testSize_PrimitiveList() {
-        // Assuming PrimitiveList is a mockable or instantiable type for testing
-        // For now, we'll test with null as PrimitiveList might be an interface/abstract class
-        // from com.landawn.abacus.util that's not fully defined here.
         assertEquals(0, N.size((PrimitiveList) null));
-        // PrimitiveList mockList = mock(PrimitiveList.class);
-        // when(mockList.size()).thenReturn(2);
-        // assertEquals(2, N.size(mockList));
-        // when(mockList.size()).thenReturn(0);
-        // assertEquals(0, N.size(mockList));
     }
 
-    //endregion
-
-    //region isEmpty tests
     @Test
     public void testIsEmpty_CharSequence() {
         assertTrue(N.isEmpty((CharSequence) null));
@@ -364,10 +337,9 @@ public class CommonUtil202Test extends TestBase {
     @Test
     public void testIsEmpty_Iterable() {
         assertTrue(N.isEmpty((Iterable<?>) null));
-        assertTrue(N.isEmpty(Collections.emptyList())); // Test with a Collection
+        assertTrue(N.isEmpty(Collections.emptyList()));
         assertFalse(N.isEmpty(Arrays.asList(1)));
 
-        // Test with a non-Collection Iterable (e.g., custom Iterable)
         Iterable<Integer> emptyIterable = () -> Collections.<Integer> emptyIterator();
         assertTrue(N.isEmpty(emptyIterable));
 
@@ -394,50 +366,23 @@ public class CommonUtil202Test extends TestBase {
     @Test
     public void testIsEmpty_PrimitiveList() {
         assertTrue(N.isEmpty((PrimitiveList) null));
-        // PrimitiveList emptyList = mock(PrimitiveList.class);
-        // when(emptyList.isEmpty()).thenReturn(true);
-        // assertTrue(N.isEmpty(emptyList));
-        // PrimitiveList nonEmptyList = mock(PrimitiveList.class);
-        // when(nonEmptyList.isEmpty()).thenReturn(false);
-        // assertFalse(N.isEmpty(nonEmptyList));
     }
 
     @Test
     public void testIsEmpty_Multiset() {
         assertTrue(N.isEmpty((Multiset<?>) null));
-        // Multiset emptySet = mock(Multiset.class);
-        // when(emptySet.isEmpty()).thenReturn(true);
-        // assertTrue(N.isEmpty(emptySet));
-        // Multiset nonEmptySet = mock(Multiset.class);
-        // when(nonEmptySet.isEmpty()).thenReturn(false);
-        // assertFalse(N.isEmpty(nonEmptySet));
     }
 
     @Test
     public void testIsEmpty_Multimap() {
         assertTrue(N.isEmpty((Multimap<?, ?, ?>) null));
-        // Multimap emptyMap = mock(Multimap.class);
-        // when(emptyMap.isEmpty()).thenReturn(true);
-        // assertTrue(N.isEmpty(emptyMap));
-        // Multimap nonEmptyMap = mock(Multimap.class);
-        // when(nonEmptyMap.isEmpty()).thenReturn(false);
-        // assertFalse(N.isEmpty(nonEmptyMap));
     }
 
     @Test
     public void testIsEmpty_Dataset() {
         assertTrue(N.isEmpty((Dataset) null));
-        // Dataset emptyDs = mock(Dataset.class);
-        // when(emptyDs.isEmpty()).thenReturn(true);
-        // assertTrue(N.isEmpty(emptyDs));
-        // Dataset nonEmptyDs = mock(Dataset.class);
-        // when(nonEmptyDs.isEmpty()).thenReturn(false);
-        // assertFalse(N.isEmpty(nonEmptyDs));
     }
 
-    //endregion
-
-    //region isBlank, isTrue, isFalse, isNotTrue, isNotFalse tests
     @Test
     public void testIsBlank() {
         assertTrue(N.isBlank(null));
@@ -476,9 +421,7 @@ public class CommonUtil202Test extends TestBase {
         assertTrue(N.isNotFalse(Boolean.TRUE));
         assertFalse(N.isNotFalse(Boolean.FALSE));
     }
-    //endregion
 
-    //region notEmpty tests
     @Test
     public void testNotEmpty_CharSequence() {
         assertFalse(N.notEmpty((String) null));
@@ -487,7 +430,6 @@ public class CommonUtil202Test extends TestBase {
         assertTrue(N.notEmpty(" "));
     }
 
-    // Similar notEmpty tests for all array types, Collection, Iterable, Iterator, Map, etc.
     @Test
     public void testNotEmpty_ObjectArray() {
         assertFalse(N.notEmpty((Object[]) null));
@@ -505,7 +447,7 @@ public class CommonUtil202Test extends TestBase {
     @Test
     public void testNotEmpty_Iterable() {
         assertFalse(N.notEmpty((Iterable<?>) null));
-        assertFalse(N.notEmpty(Collections.emptyList())); // Test with a Collection
+        assertFalse(N.notEmpty(Collections.emptyList()));
         assertTrue(N.notEmpty(Arrays.asList(1)));
 
         Iterable<Integer> emptyIterable = () -> Collections.<Integer> emptyIterator();
@@ -531,9 +473,6 @@ public class CommonUtil202Test extends TestBase {
         assertTrue(N.notEmpty(map));
     }
 
-    //endregion
-
-    //region notBlank tests
     @Test
     public void testNotBlank() {
         assertFalse(N.notBlank(null));
@@ -542,9 +481,7 @@ public class CommonUtil202Test extends TestBase {
         assertTrue(N.notBlank("abc"));
         assertTrue(N.notBlank(" a "));
     }
-    //endregion
 
-    //region anyNull tests
     @Test
     public void testAnyNull_TwoObjects() {
         assertTrue(N.anyNull(null, "a"));
@@ -564,22 +501,15 @@ public class CommonUtil202Test extends TestBase {
 
     @Test
     public void testAnyNull_VarArgs() {
-        assertFalse(N.anyNull()); // Empty varargs
+        assertFalse(N.anyNull());
         assertFalse(N.anyNull("a", "b", "c"));
         assertTrue(N.anyNull("a", null, "c"));
-        assertFalse(N.anyNull((Object[]) null)); // This is tricky: is the array itself null, or an array containing nulls?
-                                                 // N.anyNull((Object[])null) -> isEmpty checks if array is null, returns false.
-                                                 // This behavior might be unexpected for some.
-                                                 // If you pass a literal null, it becomes Object[] {null}
-                                                 // N.anyNull((Object)null) -> this would be one element which is null -> true
+        assertFalse(N.anyNull((Object[]) null));
         assertTrue(N.anyNull(new Object[] { null }));
     }
 
     @Test
     public void testAnyNull_VarArgs_explicitNullArray() {
-        // This path is specific: if the varargs array itself is null.
-        // The implementation of isEmpty(Object[]) will return true for a null array,
-        // so anyNull((Object[]) null) -> isEmpty returns true, so loop is skipped, returns false.
         assertFalse(N.anyNull((Object[]) null));
     }
 
@@ -594,9 +524,7 @@ public class CommonUtil202Test extends TestBase {
         assertTrue(N.anyNull(listWithNull));
 
     }
-    //endregion
 
-    //region anyEmpty tests (CharSequence, Array, Collection, Map)
     @Test
     public void testAnyEmpty_TwoCharSequences() {
         assertTrue(N.anyEmpty(null, "a"));
@@ -616,23 +544,21 @@ public class CommonUtil202Test extends TestBase {
 
     @Test
     public void testAnyEmpty_CharSequenceVarArgs() {
-        // This delegates to Strings.isAnyEmpty
         assertTrue(N.anyEmpty((String) null));
-        assertFalse(N.anyEmpty((String[]) null)); // Strings.isAnyEmpty behavior
+        assertFalse(N.anyEmpty((String[]) null));
         assertTrue(N.anyEmpty(null, "foo"));
         assertTrue(N.anyEmpty("", "bar"));
         assertFalse(N.anyEmpty("foo", "bar"));
-        assertFalse(N.anyEmpty(new String[] {})); // Strings.isAnyEmpty behavior
+        assertFalse(N.anyEmpty(new String[] {}));
         assertTrue(N.anyEmpty(new String[] { "" }));
     }
 
     @Test
     public void testAnyEmpty_CharSequenceIterable() {
-        // This delegates to Strings.isAnyEmpty
         assertTrue(N.anyEmpty(Arrays.asList(null, "a")));
         assertTrue(N.anyEmpty(Arrays.asList("", "a")));
         assertFalse(N.anyEmpty(Arrays.asList("a", "b")));
-        assertFalse(N.anyEmpty(Collections.<CharSequence> emptyList())); // Strings.isAnyEmpty behavior
+        assertFalse(N.anyEmpty(Collections.<CharSequence> emptyList()));
     }
 
     @Test
@@ -686,9 +612,6 @@ public class CommonUtil202Test extends TestBase {
         assertFalse(N.anyEmpty(nonEmptyMap, nonEmptyMap, nonEmptyMap));
     }
 
-    //endregion
-
-    //region anyBlank tests
     @Test
     public void testAnyBlank_TwoCharSequences() {
         assertTrue(N.anyBlank(null, "a"));
@@ -708,8 +631,8 @@ public class CommonUtil202Test extends TestBase {
 
     @Test
     public void testAnyBlank_CharSequenceVarArgs() {
-        assertFalse(N.anyBlank((CharSequence[]) null)); // N.isEmpty on null array is true, then returns false
-        assertFalse(N.anyBlank()); // N.isEmpty on empty array is true, then returns false
+        assertFalse(N.anyBlank((CharSequence[]) null));
+        assertFalse(N.anyBlank());
         assertTrue(N.anyBlank((CharSequence) null));
         assertTrue(N.anyBlank(" "));
         assertTrue(N.anyBlank("a", " "));
@@ -724,9 +647,7 @@ public class CommonUtil202Test extends TestBase {
         assertTrue(N.anyBlank(Arrays.asList(" ", "a")));
         assertFalse(N.anyBlank(Arrays.asList("a", "b")));
     }
-    //endregion
 
-    //region allNull tests
     @Test
     public void testAllNull_TwoObjects() {
         assertFalse(N.allNull(null, "a"));
@@ -744,12 +665,12 @@ public class CommonUtil202Test extends TestBase {
 
     @Test
     public void testAllNull_VarArgs() {
-        assertTrue(N.allNull()); // Empty varargs
+        assertTrue(N.allNull());
         assertTrue(N.allNull((Object) null));
         assertTrue(N.allNull(null, null, null));
         assertFalse(N.allNull("a", null, null));
         assertFalse(N.allNull("a", "b", "c"));
-        assertTrue(N.allNull((Object[]) null)); // N.isEmpty on null array is true, returns true
+        assertTrue(N.allNull((Object[]) null));
     }
 
     @Test
@@ -764,9 +685,7 @@ public class CommonUtil202Test extends TestBase {
         listWithNulls.add(null);
         assertTrue(N.allNull(listWithNulls));
     }
-    //endregion
 
-    //region allEmpty tests
     @Test
     public void testAllEmpty_TwoCharSequences() {
         assertFalse(N.allEmpty(null, "a"));
@@ -785,8 +704,8 @@ public class CommonUtil202Test extends TestBase {
 
     @Test
     public void testAllEmpty_CharSequenceVarArgs() {
-        assertTrue(N.allEmpty((CharSequence[]) null)); // isEmpty is true for null array.
-        assertTrue(N.allEmpty()); // isEmpty is true for empty array.
+        assertTrue(N.allEmpty((CharSequence[]) null));
+        assertTrue(N.allEmpty());
         assertTrue(N.allEmpty((CharSequence) null));
         assertTrue(N.allEmpty(""));
         assertTrue(N.allEmpty(null, ""));
@@ -853,9 +772,6 @@ public class CommonUtil202Test extends TestBase {
         assertFalse(N.allEmpty(nonEmptyMap, Collections.emptyMap(), null));
     }
 
-    //endregion
-
-    //region allBlank tests
     @Test
     public void testAllBlank_TwoCharSequences() {
         assertFalse(N.allBlank(null, "a"));
@@ -874,8 +790,8 @@ public class CommonUtil202Test extends TestBase {
 
     @Test
     public void testAllBlank_CharSequenceVarArgs() {
-        assertTrue(N.allBlank((CharSequence[]) null)); // isEmpty true
-        assertTrue(N.allBlank()); // isEmpty true
+        assertTrue(N.allBlank((CharSequence[]) null));
+        assertTrue(N.allBlank());
         assertTrue(N.allBlank((CharSequence) null));
         assertTrue(N.allBlank(" "));
         assertTrue(N.allBlank(null, " ", "\t"));
@@ -889,10 +805,5 @@ public class CommonUtil202Test extends TestBase {
         assertTrue(N.allBlank(Arrays.asList(null, " ", "\t")));
         assertFalse(N.allBlank(Arrays.asList(null, "a")));
     }
-    //endregion
-
-    // ================================ Tests for N.java (Part 2: equals/hashCode/toString...) =================================
-
-    // ... Similar tests for byte[], short[], int[], long[], float[], double[] (full and range)
 
 }

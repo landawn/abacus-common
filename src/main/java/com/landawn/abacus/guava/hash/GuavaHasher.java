@@ -35,7 +35,6 @@ import com.landawn.abacus.util.N;
  * <p><b>Implementation Note:</b> This class is not intended for direct use by clients.
  * Hasher instances should be obtained from {@link HashFunction#newHasher()} methods.
  * 
- * @author Haiyang Li
  * @see Hasher
  * @see HashFunction
  */

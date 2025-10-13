@@ -90,8 +90,6 @@ public class HttpResponse {
      * Returns {@code true} if the code is in [200..300), which means the request was successfully received,
      * understood, and accepted.
      *
-     * @return {@code true} if the response indicates success, {@code false} otherwise
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * HttpResponse response = client.get(HttpResponse.class);
@@ -101,6 +99,8 @@ public class HttpResponse {
      *     // Handle error
      * }
      * }</pre>
+     *
+     * @return {@code true} if the response indicates success, {@code false} otherwise
      */
     public boolean isSuccessful() {
         return HttpUtil.isSuccessfulResponseCode(statusCode);
@@ -133,17 +133,6 @@ public class HttpResponse {
         return responseReceivedAtMillis;
     }
 
-    //    /**
-    //     *
-    //     * @return
-    //     * @deprecated replaced with {@code status}
-    //     * @see #status()
-    //     */
-    //    @Deprecated
-    //    public int code() {
-    //        return status;
-    //    }
-
     /**
      * Gets the HTTP status code of the response.
      * Common status codes include:
@@ -155,8 +144,6 @@ public class HttpResponse {
      *   <li>500 - Internal Server Error</li>
      * </ul>
      *
-     * @return The HTTP status code
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * int status = response.statusCode();
@@ -164,6 +151,8 @@ public class HttpResponse {
      *     // Handle not found
      * }
      * }</pre>
+     *
+     * @return The HTTP status code
      */
     public int statusCode() {
         return statusCode;
@@ -183,13 +172,13 @@ public class HttpResponse {
      * Gets all response headers as a map.
      * Each header name maps to a list of values, as headers can have multiple values.
      *
-     * @return An unmodifiable map of header names to their values
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * Map<String, List<String>> headers = response.headers();
      * List<String> contentType = headers.get("Content-Type");
      * }</pre>
+     *
+     * @return An unmodifiable map of header names to their values
      */
     public Map<String, List<String>> headers() {
         return headers;
@@ -199,13 +188,13 @@ public class HttpResponse {
      * Gets the raw response body as a byte array.
      * This method returns the original bytes received from the server.
      *
-     * @return The response body as a byte array, never null (may be empty)
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * byte[] rawData = response.body();
      * // Process raw bytes
      * }</pre>
+     *
+     * @return The response body as a byte array, never null (may be empty)
      */
     public byte[] body() {
         return body;
@@ -221,11 +210,6 @@ public class HttpResponse {
      *   <li>Any other class - Deserializes based on content type (JSON, XML, etc.)</li>
      * </ul>
      *
-     * @param <T> The type to deserialize to
-     * @param resultClass The class of the desired result type
-     * @return The deserialized response body
-     * @throws IllegalArgumentException if resultClass is null
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * // Get as string
@@ -237,6 +221,11 @@ public class HttpResponse {
      * // Get as raw bytes
      * byte[] data = response.body(byte[].class);
      * }</pre>
+     *
+     * @param <T> The type to deserialize to
+     * @param resultClass The class of the desired result type
+     * @return The deserialized response body
+     * @throws IllegalArgumentException if resultClass is null
      */
     public <T> T body(final Class<T> resultClass) throws IllegalArgumentException {
         N.checkArgNotNull(resultClass, cs.resultClass);
@@ -260,11 +249,6 @@ public class HttpResponse {
      * Deserializes the response body to the specified parameterized type.
      * This method is useful for deserializing to generic types like List&lt;User&gt; or Map&lt;String, Object&gt;.
      *
-     * @param <T> The type to deserialize to
-     * @param resultType The type information including generic parameters
-     * @return The deserialized response body
-     * @throws IllegalArgumentException if resultType is null
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * // Deserialize to a list of users
@@ -275,6 +259,11 @@ public class HttpResponse {
      * Type<Map<String, Object>> mapType = new TypeReference<Map<String, Object>>() {};
      * Map<String, Object> data = response.body(mapType);
      * }</pre>
+     *
+     * @param <T> The type to deserialize to
+     * @param resultType The type information including generic parameters
+     * @return The deserialized response body
+     * @throws IllegalArgumentException if resultType is null
      */
     public <T> T body(final Type<T> resultType) throws IllegalArgumentException {
         N.checkArgNotNull(resultType, cs.resultType);
@@ -343,12 +332,13 @@ public class HttpResponse {
      * Returns a string representation of this HttpResponse.
      * The string includes the status code, message, request URL, and elapsed time.
      *
-     * @return A string representation of this object
-     * 
-     * <p>Example output:</p>
      * <pre>{@code
      * HttpResponse{statusCode=200, message=OK, url=https://api.example.com/users, elapsedTime=123}
      * }</pre>
+     *
+     * @return A string representation of this object
+     * 
+     * <p>Example output:</p>
      */
     @Override
     public String toString() {

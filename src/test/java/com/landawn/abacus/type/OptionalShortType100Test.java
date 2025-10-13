@@ -19,12 +19,14 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalShort;
 
+@Tag("new-test")
 public class OptionalShortType100Test extends TestBase {
 
     private OptionalShortType optionalShortType;
@@ -117,7 +119,7 @@ public class OptionalShortType100Test extends TestBase {
     @Test
     public void testValueOfWithInvalidString() {
         assertThrows(NumberFormatException.class, () -> optionalShortType.valueOf("not-a-number"));
-        assertThrows(NumberFormatException.class, () -> optionalShortType.valueOf("40000")); // Out of short range
+        assertThrows(NumberFormatException.class, () -> optionalShortType.valueOf("40000"));
     }
 
     @Test
@@ -144,7 +146,7 @@ public class OptionalShortType100Test extends TestBase {
     @Test
     public void testGetFromResultSetByIndexWithNonShort() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        when(rs.getObject(1)).thenReturn(100); // Integer
+        when(rs.getObject(1)).thenReturn(100);
 
         OptionalShort result = optionalShortType.get(rs, 1);
         assertNotNull(result);

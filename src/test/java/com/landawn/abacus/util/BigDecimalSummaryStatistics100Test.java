@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class BigDecimalSummaryStatistics100Test extends TestBase {
 
     @Test

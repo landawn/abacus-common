@@ -12,11 +12,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
 import lombok.Data;
 
+@Tag("new-test")
 public class EntityId100Test extends TestBase {
 
     @Test

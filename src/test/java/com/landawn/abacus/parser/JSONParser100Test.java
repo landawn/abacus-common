@@ -13,31 +13,32 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("new-test")
 public class JSONParser100Test extends TestBase {
-    
+
     private JSONParser parser;
-    
+
     @BeforeEach
     public void setUp() {
         parser = ParserFactory.createJSONParser();
     }
-    
+
     @Test
     public void testReadStringWithClass() {
         String json = "\"test\"";
         String result = parser.readString(json, String.class);
         Assertions.assertEquals("\"test\"", result);
-        
-        // Test with null
+
         String nullResult = parser.readString(null, String.class);
         Assertions.assertNull(nullResult);
     }
-    
+
     @Test
     public void testReadStringWithConfigAndClass() {
         String json = "{\"name\":\"John\",\"age\":30}";
@@ -45,7 +46,7 @@ public class JSONParser100Test extends TestBase {
         Assertions.assertEquals("John", result.get("name"));
         Assertions.assertEquals(30, result.get("age"));
     }
-    
+
     @Test
     public void testReadStringToArray() {
         String json = "[1,2,3]";
@@ -55,7 +56,7 @@ public class JSONParser100Test extends TestBase {
         Assertions.assertEquals(2, array[1]);
         Assertions.assertEquals(3, array[2]);
     }
-    
+
     @Test
     public void testReadStringToArrayWithConfig() {
         String json = "[\"a\",\"b\",\"c\"]";
@@ -65,7 +66,7 @@ public class JSONParser100Test extends TestBase {
         Assertions.assertEquals("b", array[1]);
         Assertions.assertEquals("c", array[2]);
     }
-    
+
     @Test
     public void testReadStringToCollection() {
         String json = "[1,2,3]";
@@ -76,7 +77,7 @@ public class JSONParser100Test extends TestBase {
         Assertions.assertEquals(2, list.get(1));
         Assertions.assertEquals(3, list.get(2));
     }
-    
+
     @Test
     public void testReadStringToCollectionWithConfig() {
         String json = "[\"x\",\"y\",\"z\"]";
@@ -87,7 +88,7 @@ public class JSONParser100Test extends TestBase {
         Assertions.assertEquals("y", list.get(1));
         Assertions.assertEquals("z", list.get(2));
     }
-    
+
     @Test
     public void testReadStringToMap() {
         String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
@@ -96,7 +97,7 @@ public class JSONParser100Test extends TestBase {
         Assertions.assertEquals("value1", map.get("key1"));
         Assertions.assertEquals("value2", map.get("key2"));
     }
-    
+
     @Test
     public void testReadStringToMapWithConfig() {
         String json = "{\"a\":1,\"b\":2}";
@@ -105,14 +106,14 @@ public class JSONParser100Test extends TestBase {
         Assertions.assertEquals(1, map.get("a"));
         Assertions.assertEquals(2, map.get("b"));
     }
-    
+
     @Test
     public void testDeserializeSubstring() {
         String json = "prefix{\"value\":123}suffix";
         Map<String, Object> result = parser.deserialize(json, 6, 19, Map.class);
         Assertions.assertEquals(123, result.get("value"));
     }
-    
+
     @Test
     public void testDeserializeSubstringWithConfig() {
         String json = "xxx[1,2,3]yyy";
@@ -122,7 +123,7 @@ public class JSONParser100Test extends TestBase {
         Assertions.assertEquals(2, result.get(1));
         Assertions.assertEquals(3, result.get(2));
     }
-    
+
     @Test
     public void testStreamFromString() {
         String json = "[{\"id\":1},{\"id\":2},{\"id\":3}]";
@@ -134,7 +135,7 @@ public class JSONParser100Test extends TestBase {
             Assertions.assertEquals(3, list.get(2).get("id"));
         }
     }
-    
+
     @Test
     @Disabled("This test is disabled due to the element type is not supported type: array/collection/map/bean.")
     public void testStreamFromStringWithConfig() {
@@ -147,7 +148,7 @@ public class JSONParser100Test extends TestBase {
             Assertions.assertEquals("c", list.get(2));
         }
     }
-    
+
     @Test
     @Disabled("This test is disabled due to the element type is not supported type: array/collection/map/bean.")
     public void testStreamFromInputStream() {
@@ -161,7 +162,7 @@ public class JSONParser100Test extends TestBase {
             Assertions.assertEquals(3, list.get(2));
         }
     }
-    
+
     @Test
     public void testStreamFromInputStreamWithConfig() {
         String json = "[{\"x\":1},{\"x\":2}]";
@@ -173,7 +174,7 @@ public class JSONParser100Test extends TestBase {
             Assertions.assertEquals(2, list.get(1).get("x"));
         }
     }
-    
+
     @Test
     @Disabled("This test is disabled due to the element type is not supported type: array/collection/map/bean.")
     public void testStreamFromReader() {
@@ -186,7 +187,7 @@ public class JSONParser100Test extends TestBase {
             Assertions.assertEquals("world", list.get(1));
         }
     }
-    
+
     @Test
     public void testStreamFromReaderWithConfig() {
         String json = "[{\"n\":100},{\"n\":200}]";

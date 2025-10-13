@@ -19,11 +19,13 @@ import org.apache.avro.generic.GenericRecord;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.AvroDeserializationConfig.ADC;
 import com.landawn.abacus.parser.AvroSerializationConfig.ASC;
 
+@Tag("new-test")
 public class AvroParser100Test extends TestBase {
 
     private AvroParser parser;
@@ -47,7 +49,6 @@ public class AvroParser100Test extends TestBase {
 
         Assertions.assertNotNull(result);
         Assertions.assertFalse(result.isEmpty());
-        // Result should be Base64 encoded
     }
 
     @Test
@@ -93,7 +94,6 @@ public class AvroParser100Test extends TestBase {
 
     @Test
     public void testDeserializeFromString() {
-        // First serialize to get Base64 string
         Map<String, Object> data = new HashMap<>();
         data.put("name", "Test");
         data.put("age", 35);
@@ -101,7 +101,6 @@ public class AvroParser100Test extends TestBase {
         AvroSerializationConfig serConfig = ASC.create().setSchema(schema);
         String base64 = parser.serialize(data, serConfig);
 
-        // Then deserialize
         AvroDeserializationConfig desConfig = ADC.create().setSchema(schema);
         GenericRecord result = parser.deserialize(base64, desConfig, GenericRecord.class);
 
@@ -112,17 +111,14 @@ public class AvroParser100Test extends TestBase {
 
     @Test
     public void testDeserializeFromInputStream() {
-        // Create test data
         Map<String, Object> data = new HashMap<>();
         data.put("name", "Stream Test");
         data.put("age", 40);
 
-        // Serialize to bytes
         AvroSerializationConfig serConfig = ASC.create().setSchema(schema);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         parser.serialize(data, serConfig, os);
 
-        // Deserialize from input stream
         ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
         AvroDeserializationConfig desConfig = ADC.create().setSchema(schema);
         GenericRecord result = parser.deserialize(is, desConfig, GenericRecord.class);
@@ -173,7 +169,6 @@ public class AvroParser100Test extends TestBase {
 
     @Test
     public void testDeserializeToMap() {
-        // Create and serialize data
         GenericRecord record = new GenericData.Record(schema);
         record.put("name", "MapTest");
         record.put("age", 50);
@@ -182,7 +177,6 @@ public class AvroParser100Test extends TestBase {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         parser.serialize(record, serConfig, os);
 
-        // Deserialize to Map
         ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
         AvroDeserializationConfig desConfig = ADC.create().setSchema(schema);
         Map<String, Object> result = parser.deserialize(is, desConfig, Map.class);

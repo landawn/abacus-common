@@ -1039,15 +1039,19 @@ public final class Median {
     }
 
     /**
-     * Finds the median value(s) from an array of characters using natural ordering.
-     * 
-     * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
-     * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that avoids full sorting.</p>
-     * 
+     * Finds the median value(s) from a collection of Comparable objects using their natural ordering.
+     *
+     * <p>The median represents the middle value(s) when the collection elements are arranged in sorted order
+     * according to their natural comparison method (compareTo). The input collection does not need to be sorted.
+     * This method uses an efficient priority queue-based algorithm that iterates through the collection once
+     * while maintaining a bounded heap of size (size/2 + 1), avoiding the need for full sorting.</p>
+     *
+     * <p>For collections with an odd number of elements, returns the single median value in the {@code left}
+     * component of the pair, with the {@code right} component empty.</p>
+     *
      * <p>For collections with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p>Usage example:</p>
      * <pre>
      * List&lt;Integer&gt; numbers = Arrays.asList(10, 5, 20, 15, 25);

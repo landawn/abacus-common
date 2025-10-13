@@ -18,6 +18,7 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
@@ -27,6 +28,7 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 
+@Tag("new-test")
 public class RowDataset100Test extends TestBase {
 
     private RowDataset dataset;
@@ -37,10 +39,10 @@ public class RowDataset100Test extends TestBase {
     public void setUp() {
         columnNames = N.asList("id", "name", "age", "score");
         columns = new ArrayList<>();
-        columns.add(N.asList(1, 2, 3)); // id column
-        columns.add(N.asList("John", "Jane", "Bob")); // name column
-        columns.add(N.asList(25, 30, 35)); // age column
-        columns.add(N.asList(85.5, 90.0, 88.5)); // score column
+        columns.add(N.asList(1, 2, 3));
+        columns.add(N.asList("John", "Jane", "Bob"));
+        columns.add(N.asList(25, 30, 35));
+        columns.add(N.asList(85.5, 90.0, 88.5));
         dataset = new RowDataset(columnNames, columns);
     }
 
@@ -295,20 +297,6 @@ public class RowDataset100Test extends TestBase {
         });
     }
 
-    //    @Test
-    //    public void testMoveColumns() {
-    //        Map<String, Integer> columnPositions = new LinkedHashMap<>();
-    //        columnPositions.put("score", 0);
-    //        columnPositions.put("id", 3);
-    //
-    //        dataset.moveColumns(columnPositions);
-    //        List<String> names = dataset.columnNameList();
-    //        Assertions.assertEquals("score", names.get(0));
-    //        Assertions.assertEquals("name", names.get(1));
-    //        Assertions.assertEquals("age", names.get(2));
-    //        Assertions.assertEquals("id", names.get(3));
-    //    }
-
     @Test
     public void testSwapColumnPosition() {
         dataset.swapColumnPosition("id", "score");
@@ -516,7 +504,6 @@ public class RowDataset100Test extends TestBase {
         Assertions.assertEquals("Jane", copiedColumn.get(1));
         Assertions.assertEquals("Bob", copiedColumn.get(2));
 
-        // Verify it's a copy
         copiedColumn.set(0, "Modified");
         Assertions.assertEquals("John", dataset.get(0, 1));
     }
@@ -647,7 +634,7 @@ public class RowDataset100Test extends TestBase {
 
     @Test
     public void testUpdateColumns() {
-        dataset.updateColumns(Arrays.asList("id", "age"), (c, v) -> (Integer) v * 10);
+        dataset.updateColumns(Arrays.asList("id", "age"), (i, c, v) -> (Integer) v * 10);
         Assertions.assertEquals(10, (Integer) dataset.get(0, 0));
         Assertions.assertEquals(250, (Integer) dataset.get(0, 2));
     }
@@ -667,13 +654,6 @@ public class RowDataset100Test extends TestBase {
         Assertions.assertEquals(3, dataset.columnCount());
         Assertions.assertEquals("John:25", dataset.get(0, dataset.getColumnIndex("info")));
     }
-
-    //    @Test
-    //    public void testCombineColumnsWithPredicate() {
-    //        dataset.combineColumns(col -> col.equals("id") || col.equals("age"), "combined", Object[].class);
-    //        Assertions.assertEquals(3, dataset.columnCount());
-    //        Assertions.assertTrue(dataset.containsColumn("combined"));
-    //    }
 
     @Test
     public void testCombineColumnsWithTuple2() {
@@ -757,7 +737,7 @@ public class RowDataset100Test extends TestBase {
         Assertions.assertEquals(4, dataset.size());
         Assertions.assertEquals(99, (Integer) dataset.get(1, 0));
         Assertions.assertEquals("Insert", dataset.get(1, 1));
-        Assertions.assertEquals("Jane", dataset.get(2, 1)); // Original row 1 moved to 2
+        Assertions.assertEquals("Jane", dataset.get(2, 1));
     }
 
     @Test
@@ -803,14 +783,14 @@ public class RowDataset100Test extends TestBase {
 
     @Test
     public void testRemoveRows() {
-        dataset.removeRows(0, 2);
+        dataset.removeMultiRows(0, 2);
         Assertions.assertEquals(1, dataset.size());
         Assertions.assertEquals("Jane", dataset.get(0, 1));
     }
 
     @Test
     public void testRemoveRowRange() {
-        dataset.removeRowRange(0, 2);
+        dataset.removeRows(0, 2);
         Assertions.assertEquals(1, dataset.size());
         Assertions.assertEquals("Bob", dataset.get(0, 1));
     }
@@ -824,10 +804,10 @@ public class RowDataset100Test extends TestBase {
 
     @Test
     public void testUpdateRows() {
-        dataset.updateRows(new int[] { 0, 2 }, (i, v) -> v instanceof Integer ? (Integer) v * 2 : v);
+        dataset.updateRows(new int[] { 0, 2 }, (i, c, v) -> v instanceof Integer ? (Integer) v * 2 : v);
         Assertions.assertEquals(2, (Integer) dataset.get(0, 0));
         Assertions.assertEquals(50, (Integer) dataset.get(0, 2));
-        Assertions.assertEquals(2, (Integer) dataset.get(1, 0)); // Unchanged
+        Assertions.assertEquals(2, (Integer) dataset.get(1, 0));
         Assertions.assertEquals(6, (Integer) dataset.get(2, 0));
         Assertions.assertEquals(70, (Integer) dataset.get(2, 2));
     }
@@ -845,8 +825,8 @@ public class RowDataset100Test extends TestBase {
     public void testReplaceIf() {
         dataset.replaceIf((Predicate<Object>) val -> val instanceof Integer && (Integer) val > 25, 999);
         Assertions.assertEquals(1, (Integer) dataset.get(0, 0));
-        Assertions.assertEquals(999, (Integer) dataset.get(1, 2)); // age 30 > 25
-        Assertions.assertEquals(999, (Integer) dataset.get(2, 2)); // age 35 > 25
+        Assertions.assertEquals(999, (Integer) dataset.get(1, 2));
+        Assertions.assertEquals(999, (Integer) dataset.get(2, 2));
     }
 
     @Test
@@ -863,7 +843,7 @@ public class RowDataset100Test extends TestBase {
         Assertions.assertEquals(5, dataset.size());
         Assertions.assertEquals(10, (Integer) dataset.get(0, 0));
         Assertions.assertEquals("PrependA", dataset.get(0, 1));
-        Assertions.assertEquals(1, (Integer) dataset.get(2, 0)); // Original first row
+        Assertions.assertEquals(1, (Integer) dataset.get(2, 0));
     }
 
     @Test
@@ -878,7 +858,7 @@ public class RowDataset100Test extends TestBase {
         dataset.append(otherDataset);
 
         Assertions.assertEquals(5, dataset.size());
-        Assertions.assertEquals(1, (Integer) dataset.get(0, 0)); // Original first row
+        Assertions.assertEquals(1, (Integer) dataset.get(0, 0));
         Assertions.assertEquals(10, (Integer) dataset.get(3, 0));
         Assertions.assertEquals("AppendA", dataset.get(3, 1));
     }
@@ -1141,7 +1121,6 @@ public class RowDataset100Test extends TestBase {
     public void testToListWithFilters() {
         List<TestBean> list = dataset.toList(col -> col.equals("name") || col.equals("age"), col -> col.toUpperCase(), TestBean.class);
         Assertions.assertEquals(3, list.size());
-        // Note: The beans will have properties based on uppercase names
     }
 
     @Test
@@ -1161,12 +1140,11 @@ public class RowDataset100Test extends TestBase {
 
     @Test
     public void testToMergedEntities() {
-        // Create a dataset with duplicate ids
         List<List<Object>> mergeColumns = new ArrayList<>();
-        mergeColumns.add(Arrays.asList(1, 1, 2)); // id
-        mergeColumns.add(Arrays.asList("John", "John", "Jane")); // name
-        mergeColumns.add(Arrays.asList(25, 25, 30)); // age
-        mergeColumns.add(Arrays.asList(85.5, 90.0, 88.5)); // score
+        mergeColumns.add(Arrays.asList(1, 1, 2));
+        mergeColumns.add(Arrays.asList("John", "John", "Jane"));
+        mergeColumns.add(Arrays.asList(25, 25, 30));
+        mergeColumns.add(Arrays.asList(85.5, 90.0, 88.5));
 
         RowDataset mergeDataset = new RowDataset(columnNames, mergeColumns);
         List<TestBean> merged = mergeDataset.toMergedEntities("id", TestBean.class);
@@ -1219,10 +1197,9 @@ public class RowDataset100Test extends TestBase {
 
     @Test
     public void testToMultimap() {
-        // Create dataset with duplicate keys
         List<List<Object>> dupColumns = new ArrayList<>();
-        dupColumns.add(Arrays.asList(1, 1, 2)); // id
-        dupColumns.add(Arrays.asList("A", "B", "C")); // value
+        dupColumns.add(Arrays.asList(1, 1, 2));
+        dupColumns.add(Arrays.asList("A", "B", "C"));
 
         RowDataset dupDataset = new RowDataset(Arrays.asList("id", "value"), dupColumns);
         ListMultimap<Integer, String> multimap = dupDataset.toMultimap("id", "value");
@@ -1289,7 +1266,6 @@ public class RowDataset100Test extends TestBase {
         Assertions.assertTrue(json.contains("\"name\":\"John\""));
     }
 
-    // Test bean class for testing
     public static class TestBean {
         public int id;
         public String name;

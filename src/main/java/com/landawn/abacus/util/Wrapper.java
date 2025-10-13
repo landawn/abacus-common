@@ -58,7 +58,6 @@ import java.util.function.ToIntFunction;
  * }</pre>
  *
  * @param <T> The type of the object that this wrapper will hold
- * @author Haiyang Li
  * @since 0.8
  * @see Keyed
  * @see IndexedKeyed
@@ -200,8 +199,24 @@ public abstract class Wrapper<T> implements Immutable {
     /**
      * Returns the hash code of the wrapped value.
      * The implementation depends on how the wrapper was created:
-     * - For arrays: uses deep hash code computation
-     * - For custom wrappers: uses the provided hash function
+     * <ul>
+     *   <li>For arrays: uses deep hash code computation via {@link N#deepHashCode(Object)}</li>
+     *   <li>For custom wrappers: uses the provided hash function</li>
+     * </ul>
+     *
+     * <p>This method ensures consistent hash codes for wrapped objects, making them
+     * suitable for use in hash-based collections. For arrays, the hash code is computed
+     * based on the contents rather than the array reference.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int[] arr1 = {1, 2, 3};
+     * int[] arr2 = {1, 2, 3};
+     * Wrapper<int[]> w1 = Wrapper.of(arr1);
+     * Wrapper<int[]> w2 = Wrapper.of(arr2);
+     * // Both wrappers will have the same hash code
+     * assert w1.hashCode() == w2.hashCode();
+     * }</pre>
      *
      * @return the hash code of the wrapped value
      */
@@ -211,8 +226,24 @@ public abstract class Wrapper<T> implements Immutable {
     /**
      * Compares this wrapper with another object for equality.
      * Two wrappers are equal if they wrap equal values according to:
-     * - For arrays: deep equality comparison
-     * - For custom wrappers: the provided equals function
+     * <ul>
+     *   <li>For arrays: deep equality comparison via {@link N#deepEquals(Object, Object)}</li>
+     *   <li>For custom wrappers: the provided equals function</li>
+     * </ul>
+     *
+     * <p>This method provides value-based equality instead of reference equality,
+     * making wrapped objects behave correctly in collections. For arrays, the comparison
+     * is performed element-by-element, including nested arrays.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int[] arr1 = {1, 2, 3};
+     * int[] arr2 = {1, 2, 3};
+     * Wrapper<int[]> w1 = Wrapper.of(arr1);
+     * Wrapper<int[]> w2 = Wrapper.of(arr2);
+     * // Returns true despite different array references
+     * assert w1.equals(w2);
+     * }</pre>
      *
      * @param obj the object to compare with
      * @return {@code true} if the objects are equal, {@code false} otherwise
@@ -253,7 +284,7 @@ public abstract class Wrapper<T> implements Immutable {
 
         @Override
         public boolean equals(final Object obj) {
-            return (obj == this) || (obj instanceof Wrapper && equalsFunction.test(((Wrapper<T>) obj).value, value));
+            return (obj == this) || (obj instanceof Wrapper && equalsFunction.test(value, ((Wrapper<T>) obj).value));
         }
 
         @Override
@@ -285,7 +316,7 @@ public abstract class Wrapper<T> implements Immutable {
 
         @Override
         public boolean equals(final Object obj) {
-            return (obj == this) || (obj instanceof Wrapper && arrayEqualsFunction.test(((Wrapper<Object[]>) obj).value, value));
+            return (obj == this) || (obj instanceof Wrapper && arrayEqualsFunction.test(value, ((Wrapper<T>) obj).value));
         }
 
         @Override

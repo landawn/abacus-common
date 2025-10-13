@@ -49,6 +49,8 @@ public final class Throwables {
      */
     @Beta
     public static void run(final Throwables.Runnable<? extends Throwable> cmd) {
+        N.checkArgNotNull(cmd, "cmd");
+
         try {
             cmd.run();
         } catch (final Throwable e) {
@@ -67,6 +69,9 @@ public final class Throwables {
      */
     @Beta
     public static void run(final Throwables.Runnable<? extends Throwable> cmd, final java.util.function.Consumer<? super Throwable> actionOnError) {
+        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(actionOnError, "actionOnError");
+
         try {
             cmd.run();
         } catch (final Throwable e) {
@@ -87,6 +92,8 @@ public final class Throwables {
      */
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd) {
+        N.checkArgNotNull(cmd, "cmd");
+
         try {
             return cmd.call();
         } catch (final Throwable e) {
@@ -109,6 +116,9 @@ public final class Throwables {
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd,
             final java.util.function.Function<? super Throwable, ? extends R> actionOnError) {
+        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(actionOnError, "actionOnError");
+
         try {
             return cmd.call();
         } catch (final Throwable e) {
@@ -119,6 +129,15 @@ public final class Throwables {
     /**
      * Executes the specified callable command that may throw a checked exception and returns its result.
      * If the command throws an exception, the result from the specified supplier will be returned instead.
+     * This method provides a safe way to handle exceptions by providing a fallback value supplier.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * String result = Throwables.call(
+     *     () -> riskyOperation(),
+     *     () -> "default value"
+     * );
+     * }</pre>
      *
      * @param <R> the type of the result returned by the callable or the supplier
      * @param cmd the callable command to execute that may throw a checked exception
@@ -129,7 +148,8 @@ public final class Throwables {
      */
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Supplier<R> supplier) {
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(supplier, "supplier");
 
         try {
             return cmd.call();
@@ -152,6 +172,8 @@ public final class Throwables {
     @Beta
     // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
     public static <R extends Comparable<? super R>> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final R defaultValue) {
+        N.checkArgNotNull(cmd, "cmd");
+
         try {
             return cmd.call();
         } catch (final Throwable e) {
@@ -177,7 +199,9 @@ public final class Throwables {
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
             final java.util.function.Supplier<R> supplier) {
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(supplier, "supplier");
 
         try {
             return cmd.call();
@@ -209,6 +233,9 @@ public final class Throwables {
     // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
     public static <R extends Comparable<? super R>> R call(final Throwables.Callable<R, ? extends Throwable> cmd,
             final java.util.function.Predicate<? super Throwable> predicate, final R defaultValue) {
+        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(predicate, "predicate");
+
         try {
             return cmd.call();
         } catch (final Throwable e) {
@@ -334,11 +361,15 @@ public final class Throwables {
 
                 @Override
                 public void advance(final long n) throws E {
-                    N.checkArgNotNegative(n, cs.n);
+                    if (n <= 0) {
+                        return;
+                    }
 
-                    if (n > toIndex - cursor) {
+                    final long remaining = toIndex - cursor;
+                    if (n >= remaining) {
                         cursor = toIndex;
                     } else {
+                        // Safe cast since n < remaining and remaining fits in int
                         cursor += (int) n;
                     }
                 }
@@ -409,6 +440,18 @@ public final class Throwables {
         /**
          * Returns a Throwables.Iterator instance that is created lazily using the provided Supplier.
          * The Supplier is responsible for producing the Iterator instance when the Iterator's methods are first called.
+         * This is useful for deferring expensive operations until the iterator is actually used.
+         *
+         * <p>The iterator is initialized on the first call to {@code hasNext()}, {@code next()}, {@code advance()}, or {@code count()}.
+         * The underlying iterator is only closed if it has been initialized when {@code close()} is called.
+         *
+         * <p>Example usage:
+         * <pre>{@code
+         * Iterator<String, IOException> iter = Iterator.defer(() ->
+         *     Iterator.ofLines(new FileReader("large-file.txt"))
+         * );
+         * // File is not opened until iter.hasNext() or iter.next() is called
+         * }</pre>
          *
          * @param <T> The type of the elements in the Iterator.
          * @param <E> The type of the exception that may be thrown.
@@ -465,11 +508,8 @@ public final class Throwables {
 
                 @Override
                 protected void closeResource() {
-                    if (!isInitialized) {
-                        init();
-                    }
-
-                    if (iter != null) {
+                    // Only close if already initialized - don't initialize just to close
+                    if (isInitialized && iter != null) {
                         iter.close();
                     }
                 }
@@ -538,7 +578,20 @@ public final class Throwables {
 
         /**
          * Returns an iterator that reads lines from the specified Reader.
-         * The caller is responsible for closing the Reader.
+         * The iterator wraps the reader in a BufferedReader if it isn't one already.
+         *
+         * <p><b>Resource Management:</b> This iterator implements AutoCloseable. When {@code close()} is called,
+         * it will close the underlying BufferedReader (and thus the original Reader). It is recommended to use
+         * this iterator in a try-with-resources statement to ensure proper resource cleanup.
+         *
+         * <p>Example usage:
+         * <pre>{@code
+         * try (Iterator<String, IOException> lines = Iterator.ofLines(new FileReader("file.txt"))) {
+         *     while (lines.hasNext()) {
+         *         System.out.println(lines.next());
+         *     }
+         * }
+         * }</pre>
          *
          * @param reader the Reader to read lines from
          * @return an iterator over the lines in the reader, or an empty iterator if the reader is null
@@ -576,12 +629,21 @@ public final class Throwables {
                 @Override
                 public String next() throws IOException {
                     if (!hasNext()) {
-                        throw new NoSuchElementException("No more lines");
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     final String res = cachedLine;
                     cachedLine = null;
                     return res;
+                }
+
+                @Override
+                protected void closeResource() {
+                    try {
+                        br.close();
+                    } catch (final IOException e) {
+                        // Suppress exception during close - closeResource doesn't throw checked exceptions
+                    }
                 }
             };
         }
@@ -876,6 +938,9 @@ public final class Throwables {
             int idx = 0;
 
             while (hasNext()) {
+                if (idx < 0) {
+                    throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
+                }
                 action.accept(idx++, next());
             }
         }
@@ -5565,7 +5630,20 @@ public final class Throwables {
 
         /**
          * Creates a new LazyInitializer with the specified supplier.
-         * If the supplier is already a LazyInitializer, it is returned as-is.
+         * If the supplier is already a LazyInitializer, it is returned as-is to avoid double-wrapping.
+         *
+         * <p>The returned LazyInitializer will call the supplier exactly once on the first invocation of {@code get()},
+         * and cache the result for all subsequent calls. The initialization is thread-safe using double-checked locking.
+         *
+         * <p>Example usage:
+         * <pre>{@code
+         * LazyInitializer<Database, SQLException> dbInit = LazyInitializer.of(() ->
+         *     createExpensiveDatabase()
+         * );
+         * // Database is not created until first call to dbInit.get()
+         * Database db = dbInit.get(); // Initializes once
+         * Database sameDb = dbInit.get(); // Returns cached instance
+         * }</pre>
          *
          * @param <T> the type of the value to be lazily initialized
          * @param <E> the type of exception that may be thrown during initialization
@@ -5595,11 +5673,10 @@ public final class Throwables {
             if (!initialized) {
                 synchronized (this) {
                     if (!initialized) {
-                        value = supplier.get();
-
+                        final T temp = supplier.get();
+                        value = temp;
                         initialized = true;
                     }
-
                 }
             }
 

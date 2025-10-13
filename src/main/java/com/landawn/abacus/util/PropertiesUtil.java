@@ -157,7 +157,7 @@ public final class PropertiesUtil {
             }
         };
 
-        scheduledExecutor.scheduleWithFixedDelay(refreshTask, 1000, 1000, TimeUnit.MICROSECONDS);
+        scheduledExecutor.scheduleWithFixedDelay(refreshTask, 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
     private PropertiesUtil() {
@@ -500,16 +500,26 @@ public final class PropertiesUtil {
     /**
      * Loads properties from the specified XML file into the target properties class with an option for auto-refresh.
      * When auto-refresh is enabled, the properties will be automatically updated when the file is modified.
-     * There is a background thread to check the file last modification time every second.
+     * A background thread checks the file's last modification time every second.
      *
-     * @param <T> The type of the target properties class.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * public class DatabaseConfig extends Properties<String, Object> {
+     *     // Custom config class
+     * }
+     * DatabaseConfig config = PropertiesUtil.loadFromXml(
+     *     new File("db-config.xml"), true, DatabaseConfig.class);
+     * // Config auto-refreshes when file changes
+     * }</pre>
+     *
+     * @param <T> The type of the target properties class, must extend Properties&lt;String, Object&gt;.
      * @param source The XML file from which to load the properties.
      * @param autoRefresh If {@code true}, the properties will be automatically refreshed when the file is modified.
-     *                    There is a background thread to check the file last modification time every second.
+     *                    A background thread checks the file last modification time every second.
      * @param targetClass The class of the target properties.
      * @return An instance of the target properties class containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs
-     * @throws ParseException if the XML cannot be parsed
+     * @throws UncheckedIOException if an I/O error occurs reading the file
+     * @throws ParseException if the XML cannot be parsed or has invalid structure
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final File source, final boolean autoRefresh, final Class<? extends T> targetClass) {
         T properties = null;
@@ -543,13 +553,21 @@ public final class PropertiesUtil {
 
     /**
      * Loads properties from the specified XML InputStream into the target properties class.
+     * This method parses the XML structure and creates an instance of the target class with the loaded properties.
      *
-     * @param <T> The type of the target properties class.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("config.xml")) {
+     *     MyConfig config = PropertiesUtil.loadFromXml(is, MyConfig.class);
+     * }
+     * }</pre>
+     *
+     * @param <T> The type of the target properties class, must extend Properties&lt;String, Object&gt;.
      * @param source The InputStream from which to load the properties.
      * @param targetClass The class of the target properties.
      * @return An instance of the target properties class containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs
-     * @throws ParseException if the XML cannot be parsed
+     * @throws UncheckedIOException if an I/O error occurs reading the stream
+     * @throws ParseException if the XML cannot be parsed or has invalid structure
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final InputStream source, final Class<? extends T> targetClass) {
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
@@ -570,13 +588,21 @@ public final class PropertiesUtil {
 
     /**
      * Loads properties from the specified XML Reader into the target properties class.
+     * This method parses the XML structure and creates an instance of the target class with the loaded properties.
      *
-     * @param <T> The type of the target properties class.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * try (Reader reader = new FileReader("config.xml")) {
+     *     AppConfig config = PropertiesUtil.loadFromXml(reader, AppConfig.class);
+     * }
+     * }</pre>
+     *
+     * @param <T> The type of the target properties class, must extend Properties&lt;String, Object&gt;.
      * @param source The Reader from which to load the properties.
      * @param targetClass The class of the target properties.
      * @return An instance of the target properties class containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs
-     * @throws ParseException if the XML cannot be parsed
+     * @throws UncheckedIOException if an I/O error occurs reading from the reader
+     * @throws ParseException if the XML cannot be parsed or has invalid structure
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final Reader source, final Class<? extends T> targetClass) {
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
@@ -881,14 +907,15 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Stores the specified properties to the given XML OutputStream.
+     * Stores the specified properties to the given XML Writer.
+     * This is an internal method used recursively for nested properties.
      *
      * @param properties The properties to store.
      * @param rootElementName The name of the root element in the XML.
-     * @param writeTypeInfo Whether to write type information.
-     * @param isFirstCall If {@code true}, this is the first call to the method.
-     * @param output The OutputStream to which the properties will be stored.
-     * @throws UncheckedIOException Signals that an I/O exception has occurred.
+     * @param writeTypeInfo If {@code true}, type information will be written as attributes in the XML.
+     * @param isFirstCall If {@code true}, this is the first call (writes XML declaration).
+     * @param output The Writer to which the properties will be stored.
+     * @throws UncheckedIOException if an I/O error occurs while writing
      */
     private static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final boolean isFirstCall,
             final Writer output) throws UncheckedIOException {
@@ -1042,13 +1069,22 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Generate Java code from the specified XML InputStream.
+     * Generates Java code from the specified XML InputStream.
+     * This method analyzes the XML structure and creates a Java class hierarchy that mirrors it,
+     * with typed getters and setters for each property.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("schema.xml")) {
+     *     PropertiesUtil.xml2Java(is, "src/main/java", "com.example", "Schema", false);
+     * }
+     * }</pre>
      *
      * @param xml The InputStream from which to generate Java code.
-     * @param srcPath The source path where the generated Java code will be saved.
+     * @param srcPath The source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName The package name for the generated Java classes.
      * @param className The name of the generated Java class.
-     * @param isPublicField If {@code true}, the fields in the generated Java class will be public.
+     * @param isPublicField If {@code true}, the fields in the generated Java class will be public; otherwise private.
      * @throws RuntimeException if XML parsing fails or file I/O error occurs
      */
     public static void xml2Java(final InputStream xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
@@ -1056,16 +1092,32 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Generate Java code from the specified XML Reader.
+     * Generates Java code from the specified XML Reader.
      * This method parses the XML and generates a Java class hierarchy that mirrors the XML structure,
-     * with typed getters and setters for each property.
+     * with typed getters and setters for each property. The generated class extends Properties&lt;String, Object&gt;.
+     *
+     * <p>The generated code includes:</p>
+     * <ul>
+     *   <li>Nested static classes for complex properties</li>
+     *   <li>Type-safe getter and setter methods</li>
+     *   <li>Automatic handling of property types based on XML type attributes</li>
+     *   <li>Support for nested and list properties</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * try (Reader reader = new FileReader("schema.xml")) {
+     *     PropertiesUtil.xml2Java(reader, "src/main/java", "com.example.config", null, false);
+     *     // Generates a Java class using the XML root element name
+     * }
+     * }</pre>
      *
      * @param xml The Reader from which to generate Java code.
-     * @param srcPath The source path where the generated Java code will be saved.
+     * @param srcPath The source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName The package name for the generated Java classes.
-     * @param className The name of the generated Java class. If null, uses the root element name.
-     * @param isPublicField If {@code true}, the fields in the generated Java class will be public.
-     * @throws RuntimeException if XML parsing fails or file I/O error occurs
+     * @param className The name of the generated Java class. If {@code null}, uses the root element name from XML.
+     * @param isPublicField If {@code true}, the fields in the generated Java class will be public; otherwise private.
+     * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public static void xml2Java(final Reader xml, final String srcPath, final String packageName, String className, final boolean isPublicField) {

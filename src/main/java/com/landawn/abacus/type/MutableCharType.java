@@ -27,6 +27,14 @@ public class MutableCharType extends AbstractType<MutableChar> {
     /**
      * Returns the Class object representing the MutableChar type.
      *
+     * <pre>
+     * <code>
+     * MutableCharType type = new MutableCharType();
+     * Class&lt;MutableChar&gt; clazz = type.clazz();
+     * // clazz equals MutableChar.class
+     * </code>
+     * </pre>
+     *
      * @return The Class object for MutableChar
      */
     @Override
@@ -37,6 +45,18 @@ public class MutableCharType extends AbstractType<MutableChar> {
     /**
      * Converts a MutableChar object to its string representation.
      * The character value is converted to a single-character string.
+     *
+     * <pre>
+     * <code>
+     * MutableCharType type = new MutableCharType();
+     * MutableChar mc = MutableChar.of('A');
+     * String str = type.stringOf(mc);
+     * // str equals "A"
+     *
+     * String nullStr = type.stringOf(null);
+     * // nullStr equals null
+     * </code>
+     * </pre>
      *
      * @param x The MutableChar object to convert
      * @return The string representation of the character, or null if the input is null
@@ -50,6 +70,20 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * Parses a string to create a MutableChar object.
      * The string is parsed to extract the first character.
      *
+     * <pre>
+     * <code>
+     * MutableCharType type = new MutableCharType();
+     * MutableChar mc = type.valueOf("A");
+     * // mc.value() equals 'A'
+     *
+     * MutableChar nullMc = type.valueOf(null);
+     * // nullMc equals null
+     *
+     * MutableChar emptyMc = type.valueOf("");
+     * // emptyMc equals null
+     * </code>
+     * </pre>
+     *
      * @param str The string to parse
      * @return A MutableChar containing the parsed character, or null if the input is null or empty
      */
@@ -61,6 +95,17 @@ public class MutableCharType extends AbstractType<MutableChar> {
     /**
      * Retrieves a MutableChar value from a ResultSet at the specified column index.
      * The database integer value is cast to char and wrapped in a MutableChar object.
+     *
+     * <pre>
+     * <code>
+     * MutableCharType type = new MutableCharType();
+     * ResultSet rs = statement.executeQuery("SELECT char_column FROM table");
+     * if (rs.next()) {
+     *     MutableChar mc = type.get(rs, 1);
+     *     // mc contains the character value from the first column
+     * }
+     * </code>
+     * </pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
@@ -76,6 +121,17 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * Retrieves a MutableChar value from a ResultSet using the specified column label.
      * The database integer value is cast to char and wrapped in a MutableChar object.
      *
+     * <pre>
+     * <code>
+     * MutableCharType type = new MutableCharType();
+     * ResultSet rs = statement.executeQuery("SELECT char_col FROM table");
+     * if (rs.next()) {
+     *     MutableChar mc = type.get(rs, "char_col");
+     *     // mc contains the character value from the named column
+     * }
+     * </code>
+     * </pre>
+     *
      * @param rs The ResultSet containing the data
      * @param columnLabel The label of the column to retrieve the value from
      * @return A MutableChar containing the retrieved character value
@@ -89,6 +145,20 @@ public class MutableCharType extends AbstractType<MutableChar> {
     /**
      * Sets a MutableChar parameter in a PreparedStatement at the specified position.
      * The character is stored as an integer value. If the MutableChar is null, 0 is stored.
+     *
+     * <pre>
+     * <code>
+     * MutableCharType type = new MutableCharType();
+     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO table (char_col) VALUES (?)");
+     * MutableChar mc = MutableChar.of('A');
+     * type.set(stmt, 1, mc);
+     * stmt.executeUpdate();
+     *
+     * // For null value
+     * type.set(stmt, 1, null);
+     * // This sets the parameter to 0 (character '\0')
+     * </code>
+     * </pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
@@ -104,6 +174,20 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * Sets a MutableChar parameter in a CallableStatement using the specified parameter name.
      * The character is stored as an integer value. If the MutableChar is null, 0 is stored.
      *
+     * <pre>
+     * <code>
+     * MutableCharType type = new MutableCharType();
+     * CallableStatement stmt = conn.prepareCall("{call proc_name(?, ?)}");
+     * MutableChar mc = MutableChar.of('B');
+     * type.set(stmt, "charParam", mc);
+     * stmt.execute();
+     *
+     * // For null value
+     * type.set(stmt, "charParam", null);
+     * // This sets the parameter to 0 (character '\0')
+     * </code>
+     * </pre>
+     *
      * @param stmt The CallableStatement to set the parameter on
      * @param parameterName The name of the parameter to set
      * @param x The MutableChar value to set
@@ -117,6 +201,20 @@ public class MutableCharType extends AbstractType<MutableChar> {
     /**
      * Appends the string representation of a MutableChar to an Appendable.
      * The character is written directly or "null" if the value is null.
+     *
+     * <pre>
+     * <code>
+     * MutableCharType type = new MutableCharType();
+     * StringBuilder sb = new StringBuilder();
+     * MutableChar mc = MutableChar.of('C');
+     * type.appendTo(sb, mc);
+     * // sb.toString() equals "C"
+     *
+     * StringBuilder sb2 = new StringBuilder();
+     * type.appendTo(sb2, null);
+     * // sb2.toString() equals "null"
+     * </code>
+     * </pre>
      *
      * @param appendable The Appendable to write to
      * @param x The MutableChar to append
@@ -134,6 +232,28 @@ public class MutableCharType extends AbstractType<MutableChar> {
     /**
      * Writes the character representation of a MutableChar to a CharacterWriter.
      * The character may be quoted based on the configuration. If null, writes the null character array.
+     *
+     * <pre>
+     * <code>
+     * MutableCharType type = new MutableCharType();
+     * CharacterWriter writer = new CharacterWriter();
+     * MutableChar mc = MutableChar.of('D');
+     *
+     * // Without quotation
+     * type.writeCharacter(writer, mc, null);
+     * // Writes: D
+     *
+     * // With quotation configured
+     * JSONXMLSerializationConfig config = new JSONXMLSerializationConfig();
+     * config.setCharQuotation('\'');
+     * type.writeCharacter(writer, mc, config);
+     * // Writes: 'D'
+     *
+     * // For null value
+     * type.writeCharacter(writer, null, null);
+     * // Writes: null
+     * </code>
+     * </pre>
      *
      * @param writer The CharacterWriter to write to
      * @param x The MutableChar to write

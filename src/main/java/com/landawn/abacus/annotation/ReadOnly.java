@@ -78,7 +78,6 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  * 
- * @author HaiYang Li
  * @since 2018
  * @see Transient
  * @see NonUpdatable

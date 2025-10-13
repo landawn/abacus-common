@@ -13,6 +13,7 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
@@ -20,14 +21,13 @@ import com.google.common.hash.PrimitiveSink;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class HashFunction100Test extends TestBase {
 
     private HashFunction hashFunction;
     
     @BeforeEach
     public void setUp() {
-        // Use a concrete implementation for testing
         hashFunction = Hashing.sha256();
     }
 
@@ -38,9 +38,8 @@ public class HashFunction100Test extends TestBase {
         
         assertNotNull(hasher1);
         assertNotNull(hasher2);
-        assertNotSame(hasher1, hasher2); // Different instances
+        assertNotSame(hasher1, hasher2);
         
-        // Test that hashers produce same result for same input
         byte[] data = "test data".getBytes();
         HashCode hash1 = hasher1.put(data).hash();
         HashCode hash2 = hasher2.put(data).hash();
@@ -55,7 +54,6 @@ public class HashFunction100Test extends TestBase {
         assertNotNull(hasher1);
         assertNotNull(hasher2);
         
-        // Both should work correctly regardless of hint
         byte[] smallData = "small".getBytes();
         byte[] largeData = new byte[1000];
         Arrays.fill(largeData, (byte) 42);
@@ -64,7 +62,6 @@ public class HashFunction100Test extends TestBase {
         HashCode hash2 = hasher2.put(smallData).hash();
         assertEquals(hash1, hash2);
         
-        // Test negative size throws exception
         assertThrows(IllegalArgumentException.class, () -> hashFunction.newHasher(-1));
     }
 
@@ -77,7 +74,6 @@ public class HashFunction100Test extends TestBase {
         assertEquals(hash1, hash2);
         assertNotEquals(hash1, hash3);
         
-        // Test edge cases
         HashCode hashMin = hashFunction.hash(Integer.MIN_VALUE);
         HashCode hashMax = hashFunction.hash(Integer.MAX_VALUE);
         HashCode hashZero = hashFunction.hash(0);
@@ -97,7 +93,6 @@ public class HashFunction100Test extends TestBase {
         assertEquals(hash1, hash2);
         assertNotEquals(hash1, hash3);
         
-        // Test edge cases
         HashCode hashMin = hashFunction.hash(Long.MIN_VALUE);
         HashCode hashMax = hashFunction.hash(Long.MAX_VALUE);
         HashCode hashZero = hashFunction.hash(0L);
@@ -120,11 +115,9 @@ public class HashFunction100Test extends TestBase {
         assertEquals(hash1, hash2);
         assertNotEquals(hash1, hash3);
         
-        // Test empty array
         HashCode hashEmpty = hashFunction.hash(new byte[0]);
         assertNotNull(hashEmpty);
         
-        // Test null throws exception
         assertThrows(NullPointerException.class, () -> hashFunction.hash((byte[]) null));
     }
 
@@ -132,25 +125,22 @@ public class HashFunction100Test extends TestBase {
     public void testHashByteArrayWithOffsetAndLength() {
         byte[] buffer = "Hello, World!".getBytes();
         
-        HashCode hash1 = hashFunction.hash(buffer, 0, 5); // "Hello"
-        HashCode hash2 = hashFunction.hash(buffer, 7, 5); // "World"
-        HashCode hash3 = hashFunction.hash(buffer, 0, buffer.length); // Full array
+        HashCode hash1 = hashFunction.hash(buffer, 0, 5);
+        HashCode hash2 = hashFunction.hash(buffer, 7, 5);
+        HashCode hash3 = hashFunction.hash(buffer, 0, buffer.length);
         
         assertNotNull(hash1);
         assertNotNull(hash2);
         assertNotNull(hash3);
         assertNotEquals(hash1, hash2);
         
-        // Test same content produces same hash
         byte[] hello = "Hello".getBytes();
         HashCode hash4 = hashFunction.hash(hello);
         assertEquals(hash1, hash4);
         
-        // Test boundary conditions
         HashCode hashEmpty = hashFunction.hash(buffer, 0, 0);
         assertNotNull(hashEmpty);
         
-        // Test exceptions
         assertThrows(IndexOutOfBoundsException.class, () -> hashFunction.hash(buffer, -1, 5));
         assertThrows(IndexOutOfBoundsException.class, () -> hashFunction.hash(buffer, 0, -1));
         assertThrows(IndexOutOfBoundsException.class, () -> hashFunction.hash(buffer, 0, buffer.length + 1));
@@ -171,11 +161,9 @@ public class HashFunction100Test extends TestBase {
         assertEquals(hash1, hash2);
         assertNotEquals(hash1, hash3);
         
-        // Test empty string
         HashCode hashEmpty = hashFunction.hash("");
         assertNotNull(hashEmpty);
         
-        // Test null throws exception
         assertThrows(NullPointerException.class, () -> hashFunction.hash((CharSequence) null));
     }
 
@@ -190,13 +178,11 @@ public class HashFunction100Test extends TestBase {
         assertNotNull(hashUtf8);
         assertNotNull(hashUtf16);
         assertNotNull(hashAscii);
-        assertNotEquals(hashUtf8, hashUtf16); // Different encodings
+        assertNotEquals(hashUtf8, hashUtf16);
         
-        // Test consistency
         HashCode hashUtf8_2 = hashFunction.hash(text, StandardCharsets.UTF_8);
         assertEquals(hashUtf8, hashUtf8_2);
         
-        // Test null throws exception
         assertThrows(NullPointerException.class, () -> hashFunction.hash(text, (Charset) null));
         assertThrows(NullPointerException.class, () -> hashFunction.hash(null, StandardCharsets.UTF_8));
     }
@@ -223,16 +209,14 @@ public class HashFunction100Test extends TestBase {
         assertEquals(hash1, hash2);
         assertNotEquals(hash1, hash3);
         
-        // Test null throws exception
         assertThrows(NullPointerException.class, () -> hashFunction.hash(person1, null));
         assertThrows(NullPointerException.class, () -> hashFunction.hash(null, personFunnel));
     }
 
     @Test
     public void testBits() {
-        assertEquals(256, hashFunction.bits()); // SHA-256
+        assertEquals(256, hashFunction.bits());
         
-        // Test different hash functions have correct bit counts
         assertEquals(32, Hashing.murmur3_32().bits());
         assertEquals(128, Hashing.murmur3_128().bits());
         assertEquals(128, Hashing.md5().bits());
@@ -244,39 +228,32 @@ public class HashFunction100Test extends TestBase {
         assertEquals(32, Hashing.adler32().bits());
         assertEquals(64, Hashing.farmHashFingerprint64().bits());
         
-        // Test that bits() is always positive
         assertTrue(Hashing.goodFastHash(1).bits() > 0);
         assertTrue(Hashing.goodFastHash(256).bits() > 0);
     }
 
     @Test
     public void testComparisonBetweenHashMethods() {
-        // Test that convenience methods produce same results as using Hasher
         byte[] data = "test data".getBytes();
         
-        // Compare hash(byte[]) with newHasher().putBytes()
         HashCode hash1 = hashFunction.hash(data);
         HashCode hash2 = hashFunction.newHasher().put(data).hash();
         assertEquals(hash1, hash2);
         
-        // Compare hash(int) with newHasher().putInt()
         HashCode hash3 = hashFunction.hash(42);
         HashCode hash4 = hashFunction.newHasher().put(42).hash();
         assertEquals(hash3, hash4);
         
-        // Compare hash(CharSequence) with newHasher().putUnencodedChars()
         CharSequence text = "hello";
         HashCode hash5 = hashFunction.hash(text);
         HashCode hash6 = hashFunction.newHasher().put(text).hash();
         assertEquals(hash5, hash6);
         
-        // Compare hash(CharSequence, Charset) with newHasher().putString()
         HashCode hash7 = hashFunction.hash(text, StandardCharsets.UTF_8);
         HashCode hash8 = hashFunction.newHasher().put(text, StandardCharsets.UTF_8).hash();
         assertEquals(hash7, hash8);
     }
 
-    // Helper class for testing
     private static class Person {
         final String name;
         final int age;

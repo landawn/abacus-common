@@ -12,11 +12,13 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class NumberType100Test extends TestBase {
 
     private NumberType<Integer> intNumberType;
@@ -140,7 +142,6 @@ public class NumberType100Test extends TestBase {
 
     @Test
     public void testSpecialNumberTypes() {
-        // Test with different Number subclasses
         NumberType<Float> floatType = (NumberType<Float>) createType(Float.class);
         assertEquals(Float.valueOf(3.14f), floatType.valueOf("3.14"));
         assertEquals("3.14", floatType.stringOf(3.14f));

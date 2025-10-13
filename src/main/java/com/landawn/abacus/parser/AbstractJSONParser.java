@@ -74,11 +74,18 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Deserializes a JSON string into an object of the specified target class using default deserialization configuration.
+     * This method provides a convenient way to parse JSON without specifying custom configuration options.
      *
-     * @param <T>
-     * @param source
-     * @param targetClass
-     * @return
+     * <pre>{@code
+     * User user = parser.readString("{\"name\":\"John\",\"age\":30}", User.class);
+     * List<String> names = parser.readString("[\"Alice\",\"Bob\"]", List.class);
+     * }</pre>
+     *
+     * @param <T> the type of the target class
+     * @param source the JSON string to deserialize
+     * @param targetClass the class of the target object to deserialize into
+     * @return an instance of the target class populated with data from the JSON string
      */
     @Override
     public <T> T readString(final String source, final Class<? extends T> targetClass) {
@@ -86,13 +93,20 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Deserializes a JSON string into an object of the specified target class using custom deserialization configuration.
+     * This method allows fine-grained control over the deserialization process through configuration options.
      *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
-     * @throws UnsupportedOperationException
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     * User user = parser.readString("{\"name\":\"John\"}", config, User.class);
+     * }</pre>
+     *
+     * @param <T> the type of the target class
+     * @param source the JSON string to deserialize
+     * @param config the deserialization configuration to use, or null to use default configuration
+     * @param targetClass the class of the target object to deserialize into
+     * @return an instance of the target class populated with data from the JSON string
+     * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
     @Override
     public <T> T readString(final String source, final JSONDeserializationConfig config, final Class<? extends T> targetClass)
@@ -101,9 +115,16 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Deserializes a JSON array string and populates the provided object array with the deserialized elements.
+     * This method uses default deserialization configuration and directly populates the output array.
      *
-     * @param source
-     * @param output
+     * <pre>{@code
+     * Object[] output = new Object[3];
+     * parser.readString("[\"Alice\",\"Bob\",\"Charlie\"]", output);
+     * }</pre>
+     *
+     * @param source the JSON array string to deserialize
+     * @param output the array to populate with deserialized elements
      */
     @Override
     public void readString(final String source, final Object[] output) {
@@ -111,11 +132,19 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Deserializes a JSON array string and populates the provided object array using custom deserialization configuration.
+     * This method allows fine-grained control over how array elements are deserialized.
      *
-     * @param source
-     * @param config
-     * @param output
-     * @throws UnsupportedOperationException
+     * <pre>{@code
+     * Object[] output = new Object[3];
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     * parser.readString("[\"Alice\",\"Bob\",\"Charlie\"]", config, output);
+     * }</pre>
+     *
+     * @param source the JSON array string to deserialize
+     * @param config the deserialization configuration to use, or null to use default configuration
+     * @param output the array to populate with deserialized elements
+     * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
     @Override
     public void readString(final String source, final JSONDeserializationConfig config, final Object[] output) throws UnsupportedOperationException {
@@ -123,9 +152,16 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Deserializes a JSON array string and populates the provided collection with the deserialized elements.
+     * This method uses default deserialization configuration and adds elements to the output collection.
      *
-     * @param source
-     * @param output
+     * <pre>{@code
+     * List<String> output = new ArrayList<>();
+     * parser.readString("[\"Alice\",\"Bob\"]", output);
+     * }</pre>
+     *
+     * @param source the JSON array string to deserialize
+     * @param output the collection to populate with deserialized elements
      */
     @Override
     public void readString(final String source, final Collection<?> output) {
@@ -133,11 +169,19 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Deserializes a JSON array string and populates the provided collection using custom deserialization configuration.
+     * This method allows fine-grained control over how collection elements are deserialized.
      *
-     * @param source
-     * @param config
-     * @param output
-     * @throws UnsupportedOperationException
+     * <pre>{@code
+     * List<String> output = new ArrayList<>();
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     * parser.readString("[\"Alice\",\"Bob\"]", config, output);
+     * }</pre>
+     *
+     * @param source the JSON array string to deserialize
+     * @param config the deserialization configuration to use, or null to use default configuration
+     * @param output the collection to populate with deserialized elements
+     * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
     @Override
     public void readString(final String source, final JSONDeserializationConfig config, final Collection<?> output) throws UnsupportedOperationException {
@@ -145,9 +189,16 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Deserializes a JSON object string and populates the provided map with the deserialized key-value pairs.
+     * This method uses default deserialization configuration and adds entries to the output map.
      *
-     * @param source
-     * @param output
+     * <pre>{@code
+     * Map<String, Object> output = new HashMap<>();
+     * parser.readString("{\"name\":\"John\",\"age\":30}", output);
+     * }</pre>
+     *
+     * @param source the JSON object string to deserialize
+     * @param output the map to populate with deserialized key-value pairs
      */
     @Override
     public void readString(final String source, final Map<?, ?> output) {
@@ -155,11 +206,19 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Deserializes a JSON object string and populates the provided map using custom deserialization configuration.
+     * This method allows fine-grained control over how map entries are deserialized.
      *
-     * @param source
-     * @param config
-     * @param output
-     * @throws UnsupportedOperationException
+     * <pre>{@code
+     * Map<String, Object> output = new HashMap<>();
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     * parser.readString("{\"name\":\"John\",\"age\":30}", config, output);
+     * }</pre>
+     *
+     * @param source the JSON object string to deserialize
+     * @param config the deserialization configuration to use, or null to use default configuration
+     * @param output the map to populate with deserialized key-value pairs
+     * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
     @Override
     public void readString(final String source, final JSONDeserializationConfig config, final Map<?, ?> output) throws UnsupportedOperationException {
@@ -167,13 +226,20 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Deserializes a substring of a JSON string into an object of the specified target class using default configuration.
+     * This method is useful when parsing a portion of a larger JSON string without creating a substring copy.
      *
-     * @param <T>
-     * @param source
-     * @param fromIndex
-     * @param toIndex
-     * @param targetClass
-     * @return
+     * <pre>{@code
+     * String json = "{\"users\":[{\"name\":\"John\"}]}";
+     * User user = parser.deserialize(json, 10, 25, User.class);
+     * }</pre>
+     *
+     * @param <T> the type of the target class
+     * @param source the JSON string containing the substring to deserialize
+     * @param fromIndex the beginning index of the substring, inclusive
+     * @param toIndex the ending index of the substring, exclusive
+     * @param targetClass the class of the target object to deserialize into
+     * @return an instance of the target class populated with data from the JSON substring
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final Class<? extends T> targetClass) {
@@ -181,14 +247,22 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Deserializes a substring of a JSON string into an object using custom deserialization configuration.
+     * This method allows fine-grained control over the deserialization process for a specific portion of the input.
      *
-     * @param <T>
-     * @param source
-     * @param fromIndex
-     * @param toIndex
-     * @param config
-     * @param targetClass
-     * @return
+     * <pre>{@code
+     * String json = "{\"users\":[{\"name\":\"John\"}]}";
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     * User user = parser.deserialize(json, 10, 25, config, User.class);
+     * }</pre>
+     *
+     * @param <T> the type of the target class
+     * @param source the JSON string containing the substring to deserialize
+     * @param fromIndex the beginning index of the substring, inclusive
+     * @param toIndex the ending index of the substring, exclusive
+     * @param config the deserialization configuration to use, or null to use default configuration
+     * @param targetClass the class of the target object to deserialize into
+     * @return an instance of the target class populated with data from the JSON substring
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
@@ -197,11 +271,18 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Creates a stream that lazily deserializes elements from a JSON array string.
+     * This method provides efficient streaming of large JSON arrays without loading all elements into memory at once.
      *
-     * @param <T>
-     * @param source
-     * @param elementType
-     * @return
+     * <pre>{@code
+     * Stream<User> userStream = parser.stream("[{\"name\":\"John\"},{\"name\":\"Jane\"}]", Type.of(User.class));
+     * userStream.forEach(System.out::println);
+     * }</pre>
+     *
+     * @param <T> the type of elements in the stream
+     * @param source the JSON array string to stream
+     * @param elementType the type of elements to deserialize
+     * @return a Stream of deserialized elements
      */
     @Override
     public <T> Stream<T> stream(final String source, final Type<? extends T> elementType) {
@@ -209,11 +290,18 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Creates a stream that lazily deserializes elements from a JSON array file.
+     * This method provides efficient streaming of large JSON files without loading the entire file into memory.
      *
-     * @param <T>
-     * @param source
-     * @param elementType
-     * @return
+     * <pre>{@code
+     * File jsonFile = new File("users.json");
+     * Stream<User> userStream = parser.stream(jsonFile, Type.of(User.class));
+     * }</pre>
+     *
+     * @param <T> the type of elements in the stream
+     * @param source the file containing the JSON array to stream
+     * @param elementType the type of elements to deserialize
+     * @return a Stream of deserialized elements
      */
     @Override
     public <T> Stream<T> stream(final File source, final Type<? extends T> elementType) {
@@ -221,12 +309,19 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Creates a stream that lazily deserializes elements from a JSON array input stream.
+     * This method provides efficient streaming from input streams with optional automatic resource management.
      *
-     * @param <T>
-     * @param source
-     * @param closeInputStreamWhenStreamIsClosed
-     * @param elementType
-     * @return
+     * <pre>{@code
+     * InputStream is = new FileInputStream("users.json");
+     * Stream<User> userStream = parser.stream(is, true, Type.of(User.class));
+     * }</pre>
+     *
+     * @param <T> the type of elements in the stream
+     * @param source the input stream containing the JSON array to stream
+     * @param closeInputStreamWhenStreamIsClosed whether to close the input stream when the stream is closed
+     * @param elementType the type of elements to deserialize
+     * @return a Stream of deserialized elements
      */
     @Override
     public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final Type<? extends T> elementType) {
@@ -234,12 +329,19 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * Creates a stream that lazily deserializes elements from a JSON array reader.
+     * This method provides efficient streaming from readers with optional automatic resource management.
      *
-     * @param <T>
-     * @param reader
-     * @param closeReaderWhenStreamIsClosed
-     * @param elementType
-     * @return
+     * <pre>{@code
+     * Reader reader = new FileReader("users.json");
+     * Stream<User> userStream = parser.stream(reader, true, Type.of(User.class));
+     * }</pre>
+     *
+     * @param <T> the type of elements in the stream
+     * @param reader the reader containing the JSON array to stream
+     * @param closeReaderWhenStreamIsClosed whether to close the reader when the stream is closed
+     * @param elementType the type of elements to deserialize
+     * @return a Stream of deserialized elements
      */
     @Override
     public <T> Stream<T> stream(final Reader reader, final boolean closeReaderWhenStreamIsClosed, final Type<? extends T> elementType) {

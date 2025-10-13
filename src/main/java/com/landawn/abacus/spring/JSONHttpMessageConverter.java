@@ -67,7 +67,6 @@ import com.landawn.abacus.util.N;
  *   <li>Thread-safe implementation suitable for singleton usage</li>
  * </ul>
  * 
- * @author HaiYang Li
  * @since 1.0
  * @see AbstractJsonHttpMessageConverter
  * @see N#fromJson(Reader, com.landawn.abacus.type.Type)
@@ -78,18 +77,33 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
     /**
      * Constructs a new JSONHttpMessageConverter with default configuration.
      * The converter will handle "application/json" and related JSON media types by default.
-     * 
+     *
      * <p>This constructor initializes the converter with standard JSON media type support
      * inherited from {@link AbstractJsonHttpMessageConverter}, including:</p>
      * <ul>
      *   <li>application/json</li>
      *   <li>application/*+json</li>
      * </ul>
-     * 
-     * <p><b>Example usage:</b></p>
+     *
+     * <p>The converter is thread-safe and can be safely used as a singleton in Spring applications.
+     * It automatically integrates with Spring's content negotiation mechanism to handle JSON
+     * serialization and deserialization for REST endpoints.</p>
+     *
+     * <p><b>Example usage in Spring MVC:</b></p>
      * <pre>{@code
-     * JSONHttpMessageConverter converter = new JSONHttpMessageConverter();
-     * // The converter is now ready to be added to Spring's message converters
+     * @Configuration
+     * public class WebConfig implements WebMvcConfigurer {
+     *     @Override
+     *     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+     *         converters.add(new JSONHttpMessageConverter());
+     *     }
+     * }
+     * }</pre>
+     *
+     * <p><b>Example usage with RestTemplate:</b></p>
+     * <pre>{@code
+     * RestTemplate restTemplate = new RestTemplate();
+     * restTemplate.getMessageConverters().add(0, new JSONHttpMessageConverter());
      * }</pre>
      */
     public JSONHttpMessageConverter() { //NOSONAR
@@ -98,34 +112,49 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
     /**
      * Reads JSON content from the provided Reader and deserializes it into an object of the specified type.
      * This method is called by Spring's HTTP message conversion framework when processing incoming JSON requests.
-     * 
+     *
      * <p>The method uses Abacus's JSON deserialization capabilities through {@link N#fromJson(Reader, com.landawn.abacus.type.Type)}
      * to convert the JSON content into the appropriate Java object. The TypeFactory is used to handle complex
-     * generic types properly.</p>
-     * 
-     * <p><b>Implementation Details:</b></p>
+     * generic types properly, ensuring that parameterized types (such as {@code List<User>} or {@code Map<String, Object>})
+     * are correctly deserialized with their full type information preserved.</p>
+     *
+     * <p><b>Supported Types:</b></p>
      * <ul>
-     *   <li>Delegates to Abacus's N.fromJson() method for actual deserialization</li>
-     *   <li>Uses TypeFactory to properly handle generic type information</li>
-     *   <li>Supports all types that Abacus JSON can deserialize</li>
-     *   <li>The Reader is not closed by this method (handled by the framework)</li>
+     *   <li>All primitive types and their wrappers (int, Integer, boolean, Boolean, etc.)</li>
+     *   <li>Standard Java types (String, Date, BigDecimal, etc.)</li>
+     *   <li>Collections (List, Set, Map) with generic type preservation</li>
+     *   <li>Custom POJOs with public fields or JavaBean properties</li>
+     *   <li>Arrays and nested complex types</li>
      * </ul>
-     * 
-     * <p><b>Example JSON input:</b></p>
+     *
+     * <p><b>Example usage in Spring Controller:</b></p>
+     * <pre>{@code
+     * @PostMapping("/users")
+     * public ResponseEntity<User> createUser(@RequestBody User user) {
+     *     // The user object is automatically deserialized by this method
+     *     return ResponseEntity.ok(user);
+     * }
+     * }</pre>
+     *
+     * <p><b>Example JSON input for User type:</b></p>
      * <pre>{@code
      * {
      *   "id": 123,
      *   "name": "John Doe",
-     *   "active": true
+     *   "email": "john@example.com",
+     *   "active": true,
+     *   "roles": ["admin", "user"]
      * }
      * }</pre>
-     * 
-     * <p>Would be deserialized to an object of the type specified by resolvedType parameter.</p>
-     * 
-     * @param resolvedType the target type to deserialize the JSON into, including generic type information
-     * @param reader the Reader containing the JSON content to be deserialized
-     * @return the deserialized object of the specified type
-     * @throws RuntimeException if JSON parsing fails or the content cannot be mapped to the target type
+     *
+     * @param resolvedType the target type to deserialize the JSON into, including generic type information.
+     *                     This is the actual runtime type resolved from the method signature or type parameter.
+     * @param reader the Reader containing the JSON content to be deserialized. The Reader is managed by
+     *               Spring's framework and will be closed automatically after this method returns.
+     * @return the deserialized object of the specified type, never null unless the JSON content is "null"
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while reading from the Reader
+     * @throws IllegalArgumentException if the JSON content cannot be mapped to the target type due to type mismatch
+     * @throws RuntimeException if JSON parsing fails due to malformed JSON or other parsing errors
      */
     @Override
     protected Object readInternal(final Type resolvedType, final Reader reader) {
@@ -135,38 +164,61 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
     /**
      * Serializes the given object to JSON and writes it to the provided Writer.
      * This method is called by Spring's HTTP message conversion framework when producing JSON responses.
-     * 
+     *
      * <p>The method uses Abacus's JSON serialization capabilities through {@link N#toJson(Object, Writer)}
-     * to convert Java objects into JSON format. The type parameter is available for potential future use
-     * but is currently not utilized as Abacus can infer types from the object itself.</p>
-     * 
-     * <p><b>Implementation Details:</b></p>
+     * to convert Java objects into JSON format. The serialization process automatically handles circular
+     * references, custom date formats, and complex nested object graphs. The type parameter is available
+     * for potential future use but is currently not utilized as Abacus can infer types from the object itself.</p>
+     *
+     * <p><b>Serialization Features:</b></p>
      * <ul>
-     *   <li>Delegates to Abacus's N.toJson() method for actual serialization</li>
-     *   <li>Handles null objects appropriately (serializes to "null")</li>
-     *   <li>Supports all types that Abacus JSON can serialize</li>
-     *   <li>The Writer is not closed by this method (handled by the framework)</li>
-     *   <li>The type parameter is currently unused but provided for future extensibility</li>
+     *   <li>Automatic conversion of JavaBean properties to JSON fields</li>
+     *   <li>Null value handling (by default, null fields are included as "null")</li>
+     *   <li>Support for collections, maps, and arrays</li>
+     *   <li>Automatic date/time formatting to ISO-8601 or custom formats</li>
+     *   <li>Handling of enums (serialized as their name by default)</li>
+     *   <li>Support for nested and complex object graphs</li>
      * </ul>
-     * 
-     * <p><b>Example object:</b></p>
+     *
+     * <p><b>Example usage in Spring Controller:</b></p>
      * <pre>{@code
-     * User user = new User(123, "John Doe", true);
+     * @GetMapping("/users/{id}")
+     * public User getUser(@PathVariable Long id) {
+     *     User user = userService.findById(id);
+     *     return user; // Automatically serialized to JSON by this method
+     * }
      * }</pre>
-     * 
-     * <p>Would be serialized to JSON like:</p>
+     *
+     * <p><b>Example User object:</b></p>
+     * <pre>{@code
+     * User user = User.builder()
+     *     .id(123L)
+     *     .name("John Doe")
+     *     .email("john@example.com")
+     *     .active(true)
+     *     .roles(Arrays.asList("admin", "user"))
+     *     .build();
+     * }</pre>
+     *
+     * <p><b>Produces JSON output:</b></p>
      * <pre>{@code
      * {
      *   "id": 123,
      *   "name": "John Doe",
-     *   "active": true
+     *   "email": "john@example.com",
+     *   "active": true,
+     *   "roles": ["admin", "user"]
      * }
      * }</pre>
-     * 
-     * @param obj the object to serialize to JSON (can be null)
-     * @param type the type information for the object (currently unused, provided for future compatibility)
-     * @param writer the Writer to write the JSON output to
-     * @throws RuntimeException if JSON serialization fails
+     *
+     * @param obj the object to serialize to JSON. Can be null, in which case the JSON output will be "null".
+     *            Can be any Java object including primitives, collections, maps, POJOs, or complex nested structures.
+     * @param type the type information for the object. This parameter is currently unused but provided for
+     *             future compatibility with Spring's type system. May be null.
+     * @param writer the Writer to write the JSON output to. The Writer is managed by Spring's framework
+     *               and will be flushed and closed automatically after this method returns.
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while writing to the Writer
+     * @throws RuntimeException if JSON serialization fails due to unsupported types or serialization errors
      */
     @Override
     protected void writeInternal(final Object obj, final @Nullable Type type, final Writer writer) {

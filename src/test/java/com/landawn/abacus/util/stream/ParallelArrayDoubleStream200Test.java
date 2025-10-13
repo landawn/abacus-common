@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
@@ -33,16 +34,14 @@ import com.landawn.abacus.util.function.DoubleUnaryOperator;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
+@Tag("new-test")
 public class ParallelArrayDoubleStream200Test extends TestBase {
 
-    private static final int testMaxThreadNum = 4; // Use a fixed small number of threads for predictable testing   
+    private static final int testMaxThreadNum = 4;
     private static final double[] TEST_ARRAY = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0,
             21.0, 22.0, 23.0, 24.0, 25.0, 26.0 };
 
-    // Empty method to be implemented by the user for initializing DoubleStream
     protected DoubleStream createDoubleStream(double... elements) {
-        // Using default values for maxThreadNum, executorNumForVirtualThread, splitor, cancelUncompletedThreads
-        // For testing, we might want to vary these parameters.
         return DoubleStream.of(elements).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
     }
 
@@ -88,7 +87,7 @@ public class ParallelArrayDoubleStream200Test extends TestBase {
         DoubleUnaryOperator mapper = d -> d + 1.0;
         List<Double> result = stream.map(mapper).toList();
         assertEquals(TEST_ARRAY.length, result.size());
-        assertTrue(result.contains(2.0)); // 1.0 maps to 2.0
+        assertTrue(result.contains(2.0));
         assertFalse(result.contains(1.0));
     }
 
@@ -166,9 +165,9 @@ public class ParallelArrayDoubleStream200Test extends TestBase {
         List<Integer> result = stream.flatMapToInt(mapper).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains(1));
-        assertTrue(result.contains(3)); // 1.5 * 2 = 3.0 -> 3
+        assertTrue(result.contains(3));
         assertTrue(result.contains(2));
-        assertTrue(result.contains(5)); // 2.8 * 2 = 5.6 -> 5
+        assertTrue(result.contains(5));
     }
 
     @Test
@@ -229,12 +228,12 @@ public class ParallelArrayDoubleStream200Test extends TestBase {
         DoubleStream stream = createDoubleStream(TEST_ARRAY);
         List<Double> consumed = new ArrayList<>();
         DoubleConsumer action = it -> {
-            synchronized (consumed) { // Ensure thread safety
+            synchronized (consumed) {
                 consumed.add(it);
             }
         };
         stream.onEach(action).forEach(d -> {
-        }); // Trigger the onEach action
+        });
         assertEquals(TEST_ARRAY.length, consumed.size());
 
         assertHaveSameElements(N.toList(TEST_ARRAY), consumed);
@@ -245,7 +244,7 @@ public class ParallelArrayDoubleStream200Test extends TestBase {
         DoubleStream stream = createDoubleStream(TEST_ARRAY);
         List<Double> consumed = new ArrayList<>();
         DoubleConsumer action = it -> {
-            synchronized (consumed) { // Ensure thread safety
+            synchronized (consumed) {
                 consumed.add(it);
             }
         };
@@ -413,8 +412,8 @@ public class ParallelArrayDoubleStream200Test extends TestBase {
     public void testZipWithBinaryOperatorWithNoneValues() {
         DoubleStream streamA = createDoubleStream(new double[] { 1.0, 2.0 });
         DoubleStream streamB = DoubleStream.of(10.0, 20.0, 30.0);
-        double valA = 0.0; // Assuming 0.0 as 'none' for double
-        double valB = -1.0; // Assuming -1.0 as 'none' for double
+        double valA = 0.0;
+        double valB = -1.0;
         DoubleBinaryOperator zipper = (d1, d2) -> {
             if (d1 == valA)
                 return d2;
@@ -424,9 +423,9 @@ public class ParallelArrayDoubleStream200Test extends TestBase {
         };
         List<Double> result = streamA.zipWith(streamB, valA, valB, zipper).sorted().toList();
         assertEquals(3, result.size());
-        assertEquals(11.0, result.get(0), 0.0001); // 1.0 + 10.0
-        assertEquals(22.0, result.get(1), 0.0001); // 2.0 + 20.0
-        assertEquals(30.0, result.get(2), 0.0001); // 0.0 (valA) + 30.0 -> 30.0
+        assertEquals(11.0, result.get(0), 0.0001);
+        assertEquals(22.0, result.get(1), 0.0001);
+        assertEquals(30.0, result.get(2), 0.0001);
     }
 
     @Test
@@ -443,8 +442,8 @@ public class ParallelArrayDoubleStream200Test extends TestBase {
         List<Double> result = streamA.zipWith(streamB, streamC, valA, valB, valC, zipper).sorted().toList();
         assertEquals(3, result.size());
         assertEquals(1.0 + 10.0 + 100.0, result.get(1), 0.0001);
-        assertEquals(0.0 + 20.0 + 101.0, result.get(2), 0.0001); // valA (0.0) + 20.0 + 101.0
-        assertEquals(0.0 + -1.0 + 102.0, result.get(0), 0.0001); // valA (0.0) + valB (-1.0) + 102.0
+        assertEquals(0.0 + 20.0 + 101.0, result.get(2), 0.0001);
+        assertEquals(0.0 + -1.0 + 102.0, result.get(0), 0.0001);
     }
 
     @Test
@@ -469,28 +468,14 @@ public class ParallelArrayDoubleStream200Test extends TestBase {
 
     @Test
     public void testMaxThreadNum() throws IllegalAccessException, NoSuchFieldException {
-        // Since maxThreadNum() is protected in the superclass,
-        // and its value is used internally, we can't directly call it from here.
-        // However, we can assert its behavior indirectly or via reflection if necessary.
-        // For this test, we'll assume the constructor correctly sets it and other tests
-        // indirectly verify its usage.
-        // If it was a public method of ParallelArrayDoubleStream, we would test it directly.
-        // DoubleStream stream = createDoubleStream(doubleArray);
-        //assertTrue(stream.maxThreadNum() > 0); // This line would work if maxThreadNum() was public in DoubleStream
     }
 
     @Test
     public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        // Similar to maxThreadNum, splitor() is protected.
-        // DoubleStream stream = createDoubleStream(doubleArray);
-        //assertNotNull(stream.splitor());
     }
 
     @Test
     public void testAsyncExecutor() throws IllegalAccessException, NoSuchFieldException {
-        // Similar to maxThreadNum, asyncExecutor() is protected.
-        // DoubleStream stream = createDoubleStream(doubleArray);
-        //assertNotNull(stream.asyncExecutor());
     }
 
     @Test
@@ -500,9 +485,9 @@ public class ParallelArrayDoubleStream200Test extends TestBase {
         Runnable closeHandler = () -> closedFlag.set(true);
 
         DoubleStream newStream = stream.onClose(closeHandler);
-        assertFalse(closedFlag.get()); // Not closed yet
-        newStream.close(); // Close the stream, which should trigger the handler
-        assertTrue(closedFlag.get()); // Now it should be closed
+        assertFalse(closedFlag.get());
+        newStream.close();
+        assertTrue(closedFlag.get());
     }
 
     @Test
@@ -522,7 +507,7 @@ public class ParallelArrayDoubleStream200Test extends TestBase {
     public void testOnCloseEmptyHandler() {
         DoubleStream stream = createDoubleStream(TEST_ARRAY);
         DoubleStream newStream = stream.onClose(null);
-        assertSame(stream, newStream); // Should return the same instance if handler is null
-        newStream.close(); // Should not throw
+        assertSame(stream, newStream);
+        newStream.close();
     }
 }

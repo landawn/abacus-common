@@ -11,11 +11,13 @@ import java.util.function.Function;
 
 import org.apache.logging.log4j.util.Strings;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONParser;
 import com.landawn.abacus.util.N;
 
+@Tag("new-test")
 public class TypeFactory100Test extends TestBase {
 
     @Test
@@ -76,7 +78,6 @@ public class TypeFactory100Test extends TestBase {
         };
 
         TypeFactory.registerType(CustomClass.class, toStringFunc, fromStringFunc);
-        // Test passes if no exception is thrown
     }
 
     @Test
@@ -93,7 +94,6 @@ public class TypeFactory100Test extends TestBase {
         };
 
         TypeFactory.registerType(CustomClass2.class, toStringFunc, fromStringFunc);
-        // Test passes if no exception is thrown
     }
 
     @Test
@@ -408,7 +408,6 @@ public class TypeFactory100Test extends TestBase {
         };
 
         TypeFactory.registerType(CustomClass3.class, customType);
-        // Test passes if no exception is thrown
     }
 
     @Test
@@ -425,7 +424,6 @@ public class TypeFactory100Test extends TestBase {
         };
 
         TypeFactory.registerType("CustomType4", CustomClass4.class, toStringFunc, fromStringFunc);
-        // Test passes if no exception is thrown
     }
 
     @Test
@@ -442,15 +440,7 @@ public class TypeFactory100Test extends TestBase {
         };
 
         TypeFactory.registerType("CustomType5", CustomClass5.class, toStringFunc, fromStringFunc);
-        // Test passes if no exception is thrown
     }
-
-    //    @Test
-    //    public void testRegisterTypeWithStringAndType() {
-    //        Type<?> customType = createType("String");
-    //        TypeFactory.registerType("UniqueTypeName123", customType);
-    //        // Test passes if no exception is thrown
-    //    }
 
     @Test
     public void testRegisterType() {
@@ -768,6 +758,5 @@ public class TypeFactory100Test extends TestBase {
         };
 
         TypeFactory.registerType(customType);
-        // Test passes if no exception is thrown
     }
 }

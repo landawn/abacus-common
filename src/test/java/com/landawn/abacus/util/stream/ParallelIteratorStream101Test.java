@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -27,6 +28,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
 
 @ExtendWith(MockitoExtension.class)
+@Tag("new-test")
 public class ParallelIteratorStream101Test extends TestBase {
 
     private List<Integer> testData;
@@ -51,7 +53,6 @@ public class ParallelIteratorStream101Test extends TestBase {
         return Stream.of(data.iterator()).parallel();
     }
 
-    // Test constructor with Stream parameter
     @Test
     public void testConstructorWithStream() {
         Stream<Integer> sourceStream = Stream.of(1, 2, 3, 4, 5);
@@ -70,7 +71,6 @@ public class ParallelIteratorStream101Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
     }
 
-    // Test complex chained operations
     @Test
     public void testComplexChainedOperations() {
         List<String> result = stream.filter(n -> n % 2 == 0)
@@ -84,7 +84,6 @@ public class ParallelIteratorStream101Test extends TestBase {
         assertTrue(result.stream().allMatch(s -> s.contains("2")));
     }
 
-    // Test with null elements
     @Test
     public void testWithNullElements() {
         List<String> dataWithNulls = Arrays.asList("a", null, "b", null, "c");
@@ -95,7 +94,6 @@ public class ParallelIteratorStream101Test extends TestBase {
         }
     }
 
-    // Test exception propagation in parallel operations
     @Test
     public void testExceptionPropagation() {
         try {
@@ -112,26 +110,21 @@ public class ParallelIteratorStream101Test extends TestBase {
         }
     }
 
-    // Test operations with primitive streams
     @Test
     public void testPrimitiveStreamOperations() {
-        // Test flatMapToInt with multiple values
         int[] intResult = stream.limit(3).flatMapToInt(n -> IntStream.range(n, n + 3)).sorted().toArray();
 
         assertEquals(9, intResult.length);
         assertEquals(1, intResult[0]);
         assertEquals(5, intResult[8]);
 
-        // Test flatMapToDouble with calculations
         double sum = stream2.flatMapToDouble(n -> DoubleStream.of(n * 0.1, n * 0.2)).sum();
 
         assertTrue(sum > 0);
     }
 
-    // Test grouping operations with parallel execution
     @Test
     public void testParallelGroupingOperations() throws Exception {
-        // Test groupTo with value mapper
         Map<String, List<String>> grouped = stream.groupTo(n -> n % 2 == 0 ? "even" : "odd", n -> "Value:" + n);
 
         assertEquals(2, grouped.size());
@@ -139,10 +132,8 @@ public class ParallelIteratorStream101Test extends TestBase {
         assertEquals(5, grouped.get("odd").size());
     }
 
-    // Test grouping operations with parallel execution
     @Test
     public void testParallelGroupingOperations2() throws Exception {
-        // Test flatGroupTo
         Map<Integer, List<Integer>> flatGrouped = stream.limit(3).flatGroupTo(n -> Arrays.asList(n, n + 10), (k, v) -> v * 100);
 
         assertTrue(flatGrouped.containsKey(1));
@@ -150,30 +141,24 @@ public class ParallelIteratorStream101Test extends TestBase {
         assertEquals(Arrays.asList(100), flatGrouped.get(1));
     }
 
-    // Test collect operations with different collectors
     @Test
     public void testParallelCollectOperations() {
-        // Test with concurrent collector
         Set<Integer> concurrentSet = stream.collect(Collectors.toConcurrentMap(n -> n, n -> n * 2, (a, b) -> a, ConcurrentHashMap::new)).keySet();
 
         assertEquals(10, concurrentSet.size());
     }
 
-    // Test collect operations with different collectors
     @Test
     public void testParallelCollectOperations2() {
 
-        // Test with custom collector
         String joined = stream.map(String::valueOf).collect(Collectors.joining(","));
 
         String[] parts = joined.split(",");
         assertEquals(10, parts.length);
     }
 
-    // Test operations that should maintain order
     @Test
     public void testOrderPreservation() {
-        // Even in parallel, certain operations should maintain encounter order
         List<Integer> sortedData = Arrays.asList(1, 2, 3, 4, 5);
         try (Stream<Integer> sortedStream = Stream.of(sortedData.toArray(new Integer[0])).parallel().sorted()) {
 
@@ -182,10 +167,8 @@ public class ParallelIteratorStream101Test extends TestBase {
         }
     }
 
-    // Test memory efficiency with large operations
     @Test
     public void testMemoryEfficientOperations() {
-        // Generate a large stream and process it
         Iterator<Integer> largeIterator = new Iterator<Integer>() {
             private int current = 0;
             private final int max = 10000;
@@ -203,14 +186,12 @@ public class ParallelIteratorStream101Test extends TestBase {
 
         try (Stream<Integer> largeStream = Stream.of(N.toList(largeIterator).toArray(Integer[]::new)).parallel()) {
 
-            // Process in chunks to avoid memory issues
             long sum = largeStream.filter(n -> n % 2 == 0).mapToLong(Integer::longValue).sum();
 
-            assertEquals(24995000L, sum); // Sum of even numbers from 0 to 9998
+            assertEquals(24995000L, sum);
         }
     }
 
-    // Test thread-local behavior
     @Test
     public void testThreadLocalBehavior() {
         ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
@@ -225,11 +206,9 @@ public class ParallelIteratorStream101Test extends TestBase {
         }).toList();
 
         assertEquals(10, result.size());
-        // Should have multiple thread IDs if truly parallel
         assertTrue(threadIds.size() >= 1);
     }
 
-    // Test edge cases with single element
     @Test
     public void testSingleElementStream() {
         try (Stream<Integer> singleStream = createStream(Collections.singletonList(42))) {
@@ -246,7 +225,6 @@ public class ParallelIteratorStream101Test extends TestBase {
         }
     }
 
-    // Test interruptibility of parallel operations
     @Test
     public void testInterruptibility() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
@@ -258,7 +236,7 @@ public class ParallelIteratorStream101Test extends TestBase {
                 latch.countDown();
                 interruptibleStream.forEach(n -> {
                     try {
-                        Thread.sleep(1000); // Long operation
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         wasInterrupted.set(true);
                         Thread.currentThread().interrupt();
@@ -269,19 +247,17 @@ public class ParallelIteratorStream101Test extends TestBase {
 
         thread.start();
         latch.await();
-        Thread.sleep(100); // Let operation start
+        Thread.sleep(100);
         thread.interrupt();
-        thread.join(2000); // Wait max 2 seconds
+        thread.join(2000);
 
         assertTrue(wasInterrupted.get() || !thread.isAlive());
     }
 
-    // Test performance characteristics
     @Test
     public void testPerformanceCharacteristics() {
         long startTime = System.currentTimeMillis();
 
-        // Simulate CPU-intensive operation
         List<Double> result = stream.map(n -> {
             double sum = 0;
             for (int i = 0; i < 1000; i++) {
@@ -293,7 +269,6 @@ public class ParallelIteratorStream101Test extends TestBase {
         long duration = System.currentTimeMillis() - startTime;
 
         assertEquals(10, result.size());
-        // Parallel execution should complete reasonably fast
         assertTrue(duration < 5000, "Operation took too long: " + duration + "ms");
     }
 }

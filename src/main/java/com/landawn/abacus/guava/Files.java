@@ -385,14 +385,22 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#write(java.nio.file.Path, byte[], java.nio.file.OpenOption...)}.
      *
-     * <p>Example usage:
+     * <p>Examples:</p>
      * <pre>{@code
      * byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
-     * Files.write(data, new File("output.txt"));
+     * File target = new File("backup/output.txt");
+     *
+     * // This will FAIL if "backup" directory doesn't exist
+     * Files.write(data, target);  // FileNotFoundException!
+     *
+     * // Correct approach - create parent first
+     * Files.createParentDirs(target);
+     * Files.write(data, target);  // Works
      * }</pre>
      *
      * @param from the bytes to write
      * @param to the destination file
+     * @throws FileNotFoundException if the parent directory of {@code to} doesn't exist
      * @throws IOException if an I/O error occurs while writing to the file
      */
     public static void write(final byte[] from, final File to) throws IOException {
@@ -1283,19 +1291,18 @@ public abstract class Files { //NOSONAR
      *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
-     * 
-    * <p>
-    * Example usage:
-    * <pre>{@code
-    * // Read all lines using a specific charset
-    * List<String> lines = Files.readAllLines(new File("data.csv"), StandardCharsets.ISO_8859_1);
-    * 
-    * // Process each line
-    * for (String line : lines) {
-    *     String[] fields = line.split(",");
-    *     // Process fields
-    * }
-    * }</pre>
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * // Read all lines using a specific charset
+     * List<String> lines = Files.readAllLines(new File("data.csv"), StandardCharsets.ISO_8859_1);
+     *
+     * // Process each line
+     * for (String line : lines) {
+     *     String[] fields = line.split(",");
+     *     // Process fields
+     * }
+     * }</pre>
      *
      * @param file the file to read from
      * @param cs the character set used to decode the input stream; see {@link StandardCharsets} for
@@ -1303,6 +1310,8 @@ public abstract class Files { //NOSONAR
      * @return a mutable {@link List} containing all the lines
      * @throws IOException if an I/O error occurs
      * @throws SecurityException In the case of the default provider, and a security manager is
+     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked
+     *         to check read access to the file
      * @see java.nio.file.Files#readAllLines(Path, Charset)
      * @see IOUtil#readAllLines(File, Charset)
      */

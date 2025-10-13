@@ -24,13 +24,13 @@ import java.util.NoSuchElementException;
 import java.util.SortedMap;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
 
+@Tag("new-test")
 public class CommonUtil105Test extends TestBase {
-
-    // Test empty collection methods
 
     @Test
     public void testEmptyMap() {
@@ -40,7 +40,6 @@ public class CommonUtil105Test extends TestBase {
         assertTrue(map.isEmpty());
         assertEquals(0, map.size());
 
-        // Test immutability
         assertThrows(UnsupportedOperationException.class, () -> {
             map.put("key", 1);
         });
@@ -51,7 +50,6 @@ public class CommonUtil105Test extends TestBase {
         Map<String, String> map1 = N.emptyMap();
         Map<Integer, Integer> map2 = N.emptyMap();
 
-        // Should return the same instance due to type erasure
         assertSame(map1, map2);
     }
 
@@ -104,7 +102,6 @@ public class CommonUtil105Test extends TestBase {
         assertTrue(ds.isEmpty());
     }
 
-    // Test compare methods for primitive types
     @Test
     public void testCompareBoolean() {
         assertEquals(0, N.compare(true, true));
@@ -192,7 +189,6 @@ public class CommonUtil105Test extends TestBase {
         assertEquals(1, N.compare(Double.NaN, 1.0));
     }
 
-    // Test compare methods for objects
     @Test
     public void testCompareComparable() {
         assertEquals(0, N.compare("abc", "abc"));
@@ -210,7 +206,6 @@ public class CommonUtil105Test extends TestBase {
         assertTrue(N.compare("abc", "def", comp) < 0);
         assertTrue(N.compare("def", "abc", comp) > 0);
 
-        // Test with null comparator
         assertEquals(0, N.compare("abc", "abc", null));
     }
 
@@ -260,7 +255,6 @@ public class CommonUtil105Test extends TestBase {
         assertEquals(1, N.compare("a", "a", 1, 1, 5L, 5L, 1.0, 1.0, "x", "x", true, true, 'z', 'y'));
     }
 
-    // Test array comparison methods
     @Test
     public void testCompareBooleanArrays() {
         boolean[] a1 = { true, false, true };
@@ -525,11 +519,8 @@ public class CommonUtil105Test extends TestBase {
     @Test
     @SuppressWarnings("deprecation")
     public void testCompareByProps() {
-        // This test would require proper bean classes with properties
-        // Skipping for now as it requires external dependencies
     }
 
-    // Test comparison utility methods
     @Test
     public void testLessThan() {
         assertTrue(N.lessThan(1, 2));
@@ -623,7 +614,6 @@ public class CommonUtil105Test extends TestBase {
         assertTrue(N.isBetween("z", "a", "z", String.CASE_INSENSITIVE_ORDER));
     }
 
-    // Test get element methods
     @Test
     public void testGetElementFromIterable() {
         List<String> list = Arrays.asList("a", "b", "c");
@@ -749,7 +739,6 @@ public class CommonUtil105Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> N.lastElements(list.iterator(), -1));
     }
 
-    // Test firstNonNull methods
     @Test
     public void testFirstNonNull2() {
         assertEquals("a", N.firstNonNull("a", "b").get());
@@ -789,7 +778,6 @@ public class CommonUtil105Test extends TestBase {
         assertFalse(N.firstNonNull((Iterator<String>) null).isPresent());
     }
 
-    // Test lastNonNull methods
     @Test
     public void testLastNonNull2() {
         assertEquals("b", N.lastNonNull("a", "b").get());
@@ -829,7 +817,6 @@ public class CommonUtil105Test extends TestBase {
         assertFalse(N.lastNonNull((Iterator<String>) null).isPresent());
     }
 
-    // Test firstNonEmpty methods
     @Test
     public void testFirstNonEmptyArrays() {
         String[] a1 = { "a", "b" };
@@ -909,7 +896,6 @@ public class CommonUtil105Test extends TestBase {
         assertFalse(N.firstNonEmpty(Arrays.asList("", null, "")).isPresent());
     }
 
-    // Test firstNonBlank methods
     @Test
     public void testFirstNonBlank2() {
         assertEquals("abc", N.firstNonBlank("abc", "def").get());
@@ -945,7 +931,6 @@ public class CommonUtil105Test extends TestBase {
         assertFalse(N.firstNonBlank(Arrays.asList("  ", null, "  ")).isPresent());
     }
 
-    // Test map entry methods
     @Test
     public void testFirstEntry() {
         Map<String, Integer> map = new LinkedHashMap<>();
@@ -975,7 +960,6 @@ public class CommonUtil105Test extends TestBase {
         assertFalse(N.lastEntry(null).isPresent());
     }
 
-    // Test firstOrNullIfEmpty methods
     @Test
     public void testFirstOrNullIfEmptyArray() {
         String[] arr = { "a", "b", "c" };
@@ -1000,7 +984,6 @@ public class CommonUtil105Test extends TestBase {
         assertNull(N.firstOrNullIfEmpty((Iterator<String>) null));
     }
 
-    // Test firstOrDefaultIfEmpty methods
     @Test
     public void testFirstOrDefaultIfEmptyArray() {
         String[] arr = { "a", "b", "c" };
@@ -1025,7 +1008,6 @@ public class CommonUtil105Test extends TestBase {
         assertEquals("default", N.firstOrDefaultIfEmpty((Iterator<String>) null, "default"));
     }
 
-    // Test lastOrNullIfEmpty methods
     @Test
     public void testLastOrNullIfEmptyArray() {
         String[] arr = { "a", "b", "c" };
@@ -1050,7 +1032,6 @@ public class CommonUtil105Test extends TestBase {
         assertNull(N.lastOrNullIfEmpty((Iterator<String>) null));
     }
 
-    // Test lastOrDefaultIfEmpty methods
     @Test
     public void testLastOrDefaultIfEmptyArray() {
         String[] arr = { "a", "b", "c" };
@@ -1075,7 +1056,6 @@ public class CommonUtil105Test extends TestBase {
         assertEquals("default", N.lastOrDefaultIfEmpty((Iterator<String>) null, "default"));
     }
 
-    // Test find methods
     @Test
     public void testFindFirstArray() {
         String[] arr = { "a", "b", "c", "d" };

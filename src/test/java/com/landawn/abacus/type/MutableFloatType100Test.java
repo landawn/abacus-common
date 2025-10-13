@@ -12,12 +12,14 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableFloat;
 
+@Tag("new-test")
 public class MutableFloatType100Test extends TestBase {
 
     private MutableFloatType mutableFloatType;
@@ -137,12 +139,10 @@ public class MutableFloatType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithNull() throws IOException {
         mutableFloatType.writeCharacter(characterWriter, null, null);
-        // Verify null array was written
     }
 
     @Test
     public void testWriteCharacterWithNonNull() throws IOException {
         mutableFloatType.writeCharacter(characterWriter, MutableFloat.of(3.0f), null);
-        // Verify float value was written
     }
 }

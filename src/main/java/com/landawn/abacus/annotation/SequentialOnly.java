@@ -38,7 +38,6 @@ import java.lang.annotation.Target;
  * </ul>
  * 
  * @see ParallelSupported
- * @author HaiYang Li
  * @since 2018
  */
 @Documented

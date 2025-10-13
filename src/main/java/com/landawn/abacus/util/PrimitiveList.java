@@ -257,30 +257,26 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract void deleteRange(int fromIndex, int toIndex);
 
     /**
-     * Moves a range of elements in this list to a new position within the list.
+     * Moves a range of elements within this list to a new position.
      * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
-     * so that the element originally at fromIndex will be at newPositionStartIndexAfterMove.
+     * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
      * 
-     * <p>No elements are deleted in the process; this list maintains its size.
-     * The operation is performed in-place with optimal element movement.</p>
-     * 
-     * <p>Example:
+     * <p>Example: 
      * <pre>
      * IntList list = IntList.of(0, 1, 2, 3, 4, 5);
-     * list.moveRange(1, 3, 4);  // Moves elements [1, 2] to position starting at index 4
+     * list.moveRange(1, 3, 3);  // Moves elements [1, 2] to position starting at index 3
      * // Result: [0, 3, 4, 1, 2, 5]
-     * </pre></p>
+     * </pre>
      *
-     * @param fromIndex the starting index (inclusive) of the range to be moved.
-     *                  Must be non-negative and less than size().
-     * @param toIndex the ending index (exclusive) of the range to be moved.
-     *                Must be greater than fromIndex and <= size().
-     * @param newPositionStartIndexAfterMove the start index where the range should be positioned after the move.
-     *                                      Must be in the range [0, size() - (toIndex - fromIndex)].
-     * @throws IndexOutOfBoundsException if the range is out of the list bounds or newPositionStartIndexAfterMove is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and size() - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the list
      */
-    public abstract void moveRange(int fromIndex, int toIndex, int newPositionStartIndexAfterMove);
+    public abstract void moveRange(int fromIndex, int toIndex, int newPositionAfterMove);
 
     /**
      * Replaces each element in the specified range of this list with elements from
@@ -1421,6 +1417,19 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
+     * Validates that the specified index is within the bounds of this list.
+     * This method checks that index is non-negative and less than size().
+     * 
+     * @param index the index to validate
+     * @throws IndexOutOfBoundsException if index < 0 or index >= size()
+     */
+    protected void rangeCheck(final int index) {
+        if (index < 0 || index >= size()) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
+        }
+    }
+
+    /**
      * Calculates a new capacity for the internal array when it needs to grow.
      * The new capacity is typically 1.75 times the current length, but is capped at MAX_ARRAY_SIZE.
      * If the calculated capacity is less than the minimum required capacity, the minimum is used.
@@ -1439,6 +1448,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
         if (newCapacity < minCapacity) {
             newCapacity = minCapacity;
         }
+
         return newCapacity;
     }
 

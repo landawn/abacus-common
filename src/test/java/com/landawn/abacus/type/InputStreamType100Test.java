@@ -18,6 +18,7 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -25,6 +26,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class InputStreamType100Test extends TestBase {
 
     private InputStreamType inputStreamType;
@@ -64,28 +66,20 @@ public class InputStreamType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with null
         assertNull(inputStreamType.stringOf(null));
 
-        // Test with InputStream would require mocking IOUtil.readAllBytes()
-        // and Strings.base64Encode()
     }
 
     @Test
     public void testValueOfString() {
-        // Test with null
         assertNull(inputStreamType.valueOf((String) null));
 
-        // Test with base64 string would require mocking Strings.base64Decode()
-        // Result should be ByteArrayInputStream since no constructors are set
     }
 
     @Test
     public void testValueOfObject() throws SQLException {
-        // Test with null
         assertNull(inputStreamType.valueOf((Object) null));
 
-        // Test with Blob
         InputStream expectedStream = new ByteArrayInputStream(new byte[0]);
         when(blob.getBinaryStream()).thenReturn(expectedStream);
 
@@ -93,7 +87,6 @@ public class InputStreamType100Test extends TestBase {
         assertEquals(expectedStream, result);
         verify(blob).getBinaryStream();
 
-        // Test with other object would require mocking N.typeOf()
     }
 
     @Test
@@ -154,23 +147,18 @@ public class InputStreamType100Test extends TestBase {
     public void testAppendTo() throws IOException {
         StringWriter writer = new StringWriter();
 
-        // Test with null
         inputStreamType.appendTo(writer, null);
         assertEquals("null", writer.toString());
 
-        // Test with InputStream would require mocking IOUtil methods
     }
 
     @Test
     public void testWriteCharacter() throws IOException {
-        // Test with null
         inputStreamType.writeCharacter(characterWriter, null, null);
 
-        // Test with InputStream and no config
         InputStream stream = new ByteArrayInputStream(new byte[0]);
         inputStreamType.writeCharacter(characterWriter, stream, null);
 
-        // Test with config and quotation
         when(config.getStringQuotation()).thenReturn('"');
         stream = new ByteArrayInputStream(new byte[0]);
         inputStreamType.writeCharacter(characterWriter, stream, config);

@@ -2903,17 +2903,6 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
-    //    /**
-    //     *
-    //     *
-    //     * @param rowKeysToSort
-    //     * @param cmp
-    //     * @deprecated Use {@link #sortByRows(Collection<R>,Comparator<? super Object[]>)} instead
-    //     */
-    //    public void sortByRow(Collection<R> rowKeysToSort, Comparator<? super Object[]> cmp) {
-    //        sortByRows(rowKeysToSort, cmp);
-    //    }
-
     /**
      * Sorts the columns in the Sheet based on the values in the specified rows.
      * <p>
@@ -3182,24 +3171,38 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
-    //    /**
-    //     *
-    //     *
-    //     * @param columnKeysToSort
-    //     * @param cmp
-    //     * @deprecated Use {@link #sortByColumns(Collection<C>,Comparator<? super Object[]>)} instead
-    //     */
-    //    public void sortByColumn(Collection<C> columnKeysToSort, Comparator<? super Object[]> cmp) {
-    //        sortByColumns(columnKeysToSort, cmp);
-    //    }
-
     /**
-     * Sorts the columns in the sheet based on the values in the specified columns using the provided comparator.
-     * The comparator takes two arrays of objects as input, each array representing a column in the sheet, and returns a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+     * Sorts the rows in the Sheet based on the values in the specified columns.
+     * <p>
+     * Reorders the rows according to the combined values from multiple columns using the provided comparator.
+     * Each row is represented as an array of values from the specified columns for comparison.
+     * </p>
      *
-     * @param columnKeysToSort The keys of the columns based on whose values the columns will be sorted.
-     * @param cmp The comparator to determine the order of the columns. It takes two arrays of objects, each representing a column in the sheet, as input and returns a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
-     * @throws IllegalStateException if the sheet is frozen (read-only).
+     * <pre>{@code
+     * Sheet<String, String, Integer> sheet = Sheet.rows(
+     *     List.of("row1", "row2", "row3"),
+     *     List.of("priority", "secondary", "data"),
+     *     new Integer[][] {
+     *         {2, 5, 10},    // row1: priority=2, secondary=5, data=10
+     *         {1, 3, 20},    // row2: priority=1, secondary=3, data=20
+     *         {1, 4, 30}     // row3: priority=1, secondary=4, data=30
+     *     }
+     * );
+     *
+     * // Sort rows by priority first, then secondary
+     * sheet.sortByColumns(List.of("priority", "secondary"),
+     *     (a, b) -> {
+     *         int result = Integer.compare((Integer)a[0], (Integer)b[0]);
+     *         return result != 0 ? result : Integer.compare((Integer)a[1], (Integer)b[1]);
+     *     });
+     * }</pre>
+     *
+     * @param columnKeysToSort the keys of columns whose values will determine row ordering
+     * @param cmp the comparator applied to arrays of values from the specified columns
+     * @throws IllegalStateException if the Sheet is frozen
+     * @throws IllegalArgumentException if any column key doesn't exist
+     * @see #sortByColumn(Object, Comparator)
+     * @see #sortByRows(Collection, Comparator)
      */
     public void sortByColumns(final Collection<C> columnKeysToSort, final Comparator<? super Object[]> cmp) throws IllegalStateException {
         checkFrozen();
@@ -3743,17 +3746,6 @@ public final class Sheet<R, C, V> implements Cloneable {
     public boolean isEmpty() {
         return _rowKeySet.isEmpty() || _columnKeySet.isEmpty();
     }
-
-    // This should not be a public method. It's an implementation detail.
-    //    /**
-    //     * Checks if the Sheet has been initialized.
-    //     * A Sheet is considered initialized if it has been populated with data.
-    //     *
-    //     * @return {@code true} if the Sheet is initialized, {@code false} otherwise.
-    //     */
-    //    public boolean isInitialized() {
-    //        return _isInitialized;
-    //    }
 
     /**
      * Performs the given action for each cell in the Sheet in horizontal order (row by row).
@@ -4582,7 +4574,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return A Stream of Stream of Point objects representing the points in the Sheet, ordered by columns.
      */
     public Stream<Stream<Point>> pointsC() {
-        return pointsR(0, columnLength());
+        return pointsC(0, columnLength());
     }
 
     /**
@@ -5499,7 +5491,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                 final C columnKey = _columnKeyIndexMap.getByValue(cursor);
 
                 if (_isInitialized) {
-                    _columnList.toArray(columnData);
+                    _columnList.get(cursor).toArray(columnData);
                 }
 
                 return Pair.of(columnKey, columnMapper.apply(cursor++, columnArray));
@@ -6319,7 +6311,8 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         final Sheet<R, C, V> other = (Sheet<R, C, V>) obj;
 
-        return N.equals(other._rowKeySet, _rowKeySet) && N.equals(other._columnKeySet, _columnKeySet) && N.equals(other._columnList, _columnList);
+        return N.equals(other._rowKeySet, _rowKeySet) && N.equals(other._columnKeySet, _columnKeySet) && (_isInitialized == other._isInitialized)
+                && (!_isInitialized || N.equals(other._columnList, _columnList));
     }
 
     /**
@@ -6463,7 +6456,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     private void checkRowFromToIndex(final int fromRowIndex, final int toRowIndex, final int len) throws IndexOutOfBoundsException {
         if (fromRowIndex < 0 || fromRowIndex > toRowIndex || toRowIndex > len) {
-            throw new IndexOutOfBoundsException("Row index range [" + fromRowIndex + ", " + toRowIndex + "] is out-of-bounds for row size" + len);
+            throw new IndexOutOfBoundsException("Row index range [" + fromRowIndex + ", " + toRowIndex + "] is out-of-bounds for row size " + len);
         }
     }
 
@@ -6492,7 +6485,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     private void checkColumnFromToIndex(final int fromColumnIndex, final int toColumnIndex, final int len) throws IndexOutOfBoundsException {
         if (fromColumnIndex < 0 || fromColumnIndex > toColumnIndex || toColumnIndex > len) {
-            throw new IndexOutOfBoundsException("Column index range [" + fromColumnIndex + ", " + toColumnIndex + "] is out-of-bounds for column size" + len);
+            throw new IndexOutOfBoundsException("Column index range [" + fromColumnIndex + ", " + toColumnIndex + "] is out-of-bounds for column size " + len);
         }
     }
 
@@ -6609,7 +6602,7 @@ public final class Sheet<R, C, V> implements Cloneable {
          * @return a new Point with the specified row index and column index
          */
         public static Point of(final int rowIndex, final int columnIndex) {
-            if (rowIndex < MAX_CACHE_SIZE && columnIndex < MAX_CACHE_SIZE) {
+            if (rowIndex >= 0 && rowIndex < MAX_CACHE_SIZE && columnIndex >= 0 && columnIndex < MAX_CACHE_SIZE) {
                 return CACHE[rowIndex][columnIndex];
             }
 

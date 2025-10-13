@@ -16,10 +16,11 @@ import java.util.TimeZone;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class ISOUtil100Test extends TestBase {
 
     private Date testDate;
@@ -29,7 +30,6 @@ public class ISOUtil100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Create a test date: January 15, 2024, 14:30:45.123 UTC
         Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         cal.set(2024, Calendar.JANUARY, 15, 14, 30, 45);
         cal.set(Calendar.MILLISECOND, 123);
@@ -47,7 +47,7 @@ public class ISOUtil100Test extends TestBase {
         assertNotNull(result);
         assertTrue(result.contains("2024-01-15"));
         assertTrue(result.endsWith("Z"));
-        assertFalse(result.contains(".")); // No milliseconds by default
+        assertFalse(result.contains("."));
     }
 
     @Test
@@ -197,7 +197,7 @@ public class ISOUtil100Test extends TestBase {
         ParsePosition pos = new ParsePosition(0);
         Date result = ISO8601Util.parse(dateString, pos);
         assertNotNull(result);
-        assertEquals(20, pos.getIndex()); // Should stop after 'Z'
+        assertEquals(20, pos.getIndex());
     }
 
     @Test
@@ -208,7 +208,7 @@ public class ISOUtil100Test extends TestBase {
 
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(result);
-        assertEquals(59, cal.get(Calendar.SECOND)); // Leap second truncated to 59
+        assertEquals(59, cal.get(Calendar.SECOND));
     }
 
     @Test
@@ -219,7 +219,7 @@ public class ISOUtil100Test extends TestBase {
 
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(result);
-        assertEquals(100, cal.get(Calendar.MILLISECOND)); // .1 = 100ms
+        assertEquals(100, cal.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -230,7 +230,7 @@ public class ISOUtil100Test extends TestBase {
 
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(result);
-        assertEquals(120, cal.get(Calendar.MILLISECOND)); // .12 = 120ms
+        assertEquals(120, cal.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -315,7 +315,6 @@ public class ISOUtil100Test extends TestBase {
     @Test
     @DisplayName("Test parse with very long fractional seconds")
     public void testParseVeryLongFractionalSeconds() {
-        // Should only parse first 3 digits
         Date result = ISO8601Util.parse("2024-01-15T14:30:45.123456789Z");
         assertNotNull(result);
 

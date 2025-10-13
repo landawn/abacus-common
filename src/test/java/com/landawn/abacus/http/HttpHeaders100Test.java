@@ -17,10 +17,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class HttpHeaders100Test extends TestBase {
 
     @Test
@@ -57,9 +58,7 @@ public class HttpHeaders100Test extends TestBase {
 
     @Test
     public void testOfWithThreeHeaders() {
-        HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json", 
-                                           "Accept", "text/plain",
-                                           "Authorization", "Bearer token");
+        HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json", "Accept", "text/plain", "Authorization", "Bearer token");
         assertEquals("application/json", headers.get("Content-Type"));
         assertEquals("text/plain", headers.get("Accept"));
         assertEquals("Bearer token", headers.get("Authorization"));
@@ -98,7 +97,6 @@ public class HttpHeaders100Test extends TestBase {
         assertEquals("application/json", headers.get("Content-Type"));
         assertEquals("text/plain", headers.get("Accept"));
 
-        // Verify it's a copy
         map.put("New-Header", "value");
         assertNull(headers.get("New-Header"));
     }
@@ -372,7 +370,6 @@ public class HttpHeaders100Test extends TestBase {
         assertEquals("value1", copy.get("Header1"));
         assertEquals("value2", copy.get("Header2"));
 
-        // Verify it's a copy
         headers.set("Header3", "value3");
         assertNull(copy.get("Header3"));
     }
@@ -420,7 +417,6 @@ public class HttpHeaders100Test extends TestBase {
 
     @Test
     public void testNamesConstants() {
-        // Test a few important constants
         assertEquals("Content-Type", HttpHeaders.Names.CONTENT_TYPE);
         assertEquals("Content-Length", HttpHeaders.Names.CONTENT_LENGTH);
         assertEquals("Accept", HttpHeaders.Names.ACCEPT);

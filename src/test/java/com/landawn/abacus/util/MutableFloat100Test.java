@@ -2,9 +2,11 @@ package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class MutableFloat100Test extends TestBase {
 
     @Test
@@ -80,7 +82,7 @@ public class MutableFloat100Test extends TestBase {
     public void testIsNaN() {
         MutableFloat mf1 = MutableFloat.of(Float.NaN);
         Assertions.assertTrue(mf1.isNaN());
-        
+
         MutableFloat mf2 = MutableFloat.of(10.5f);
         Assertions.assertFalse(mf2.isNaN());
     }
@@ -89,10 +91,10 @@ public class MutableFloat100Test extends TestBase {
     public void testIsInfinite() {
         MutableFloat mf1 = MutableFloat.of(Float.POSITIVE_INFINITY);
         Assertions.assertTrue(mf1.isInfinite());
-        
+
         MutableFloat mf2 = MutableFloat.of(Float.NEGATIVE_INFINITY);
         Assertions.assertTrue(mf2.isInfinite());
-        
+
         MutableFloat mf3 = MutableFloat.of(10.5f);
         Assertions.assertFalse(mf3.isInfinite());
     }
@@ -202,7 +204,7 @@ public class MutableFloat100Test extends TestBase {
         MutableFloat mf1 = MutableFloat.of(10.5f);
         MutableFloat mf2 = MutableFloat.of(20.5f);
         MutableFloat mf3 = MutableFloat.of(10.5f);
-        
+
         Assertions.assertTrue(mf1.compareTo(mf2) < 0);
         Assertions.assertTrue(mf2.compareTo(mf1) > 0);
         Assertions.assertEquals(0, mf1.compareTo(mf3));
@@ -212,7 +214,7 @@ public class MutableFloat100Test extends TestBase {
     public void testCompareToWithNaN() {
         MutableFloat mf1 = MutableFloat.of(Float.NaN);
         MutableFloat mf2 = MutableFloat.of(10.5f);
-        
+
         Assertions.assertTrue(mf1.compareTo(mf2) > 0);
         Assertions.assertTrue(mf2.compareTo(mf1) < 0);
     }
@@ -222,7 +224,7 @@ public class MutableFloat100Test extends TestBase {
         MutableFloat mf1 = MutableFloat.of(10.5f);
         MutableFloat mf2 = MutableFloat.of(10.5f);
         MutableFloat mf3 = MutableFloat.of(20.5f);
-        
+
         Assertions.assertTrue(mf1.equals(mf2));
         Assertions.assertFalse(mf1.equals(mf3));
         Assertions.assertFalse(mf1.equals(null));
@@ -233,7 +235,7 @@ public class MutableFloat100Test extends TestBase {
     public void testEqualsWithNaN() {
         MutableFloat mf1 = MutableFloat.of(Float.NaN);
         MutableFloat mf2 = MutableFloat.of(Float.NaN);
-        
+
         Assertions.assertTrue(mf1.equals(mf2));
     }
 
@@ -241,7 +243,7 @@ public class MutableFloat100Test extends TestBase {
     public void testEqualsWithZeros() {
         MutableFloat mf1 = MutableFloat.of(0.0f);
         MutableFloat mf2 = MutableFloat.of(-0.0f);
-        
+
         Assertions.assertFalse(mf1.equals(mf2));
     }
 
@@ -250,7 +252,7 @@ public class MutableFloat100Test extends TestBase {
         MutableFloat mf1 = MutableFloat.of(10.5f);
         MutableFloat mf2 = MutableFloat.of(10.5f);
         MutableFloat mf3 = MutableFloat.of(20.5f);
-        
+
         Assertions.assertEquals(mf1.hashCode(), mf2.hashCode());
         Assertions.assertNotEquals(mf1.hashCode(), mf3.hashCode());
     }

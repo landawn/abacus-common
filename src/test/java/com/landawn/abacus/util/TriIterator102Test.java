@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
@@ -24,6 +25,7 @@ import com.landawn.abacus.util.function.IntObjConsumer;
 import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("new-test")
 public class TriIterator102Test extends TestBase {
 
     @Test
@@ -33,12 +35,10 @@ public class TriIterator102Test extends TestBase {
         assertFalse(iter.hasNext());
         assertThrows(NoSuchElementException.class, () -> iter.next());
 
-        // Test forEachRemaining with empty iterator
         List<String> results = new ArrayList<>();
         iter.forEachRemaining((a, b, c) -> results.add(a + "," + b + "," + c));
         assertTrue(results.isEmpty());
 
-        // Test map with empty iterator
         ObjIterator<String> mapped = iter.map((a, b, c) -> a + b + c);
         assertFalse(mapped.hasNext());
     }
@@ -52,7 +52,6 @@ public class TriIterator102Test extends TestBase {
 
         TriIterator<Integer, String, Double> iter = TriIterator.generate(output);
 
-        // Test first few elements
         for (int i = 0; i < 5; i++) {
             assertTrue(iter.hasNext());
             Triple<Integer, String, Double> triple = iter.next();
@@ -74,7 +73,6 @@ public class TriIterator102Test extends TestBase {
 
         TriIterator<Integer, String, Boolean> iter = TriIterator.generate(hasNext, output);
 
-        // Test all elements
         List<Triple<Integer, String, Boolean>> results = new ArrayList<>();
         while (iter.hasNext()) {
             results.add(iter.next());
@@ -88,7 +86,6 @@ public class TriIterator102Test extends TestBase {
         assertEquals("value1", results.get(1).middle());
         assertFalse(results.get(1).right());
 
-        // Test hasNext when exhausted
         assertFalse(iter.hasNext());
         assertThrows(NoSuchElementException.class, () -> iter.next());
     }
@@ -151,7 +148,7 @@ public class TriIterator102Test extends TestBase {
         TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3);
 
         List<Triple<String, Integer, Double>> results = iter.toList();
-        assertEquals(2, results.size()); // Should stop at shortest array
+        assertEquals(2, results.size());
     }
 
     @Test
@@ -163,7 +160,7 @@ public class TriIterator102Test extends TestBase {
         TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3, "default", -1, 0.0);
 
         List<Triple<String, Integer, Double>> results = iter.toList();
-        assertEquals(4, results.size()); // Should continue to longest array
+        assertEquals(4, results.size());
         assertEquals("default", results.get(2).left());
         assertEquals(3, results.get(2).middle());
         assertEquals(0.0, results.get(2).right());
@@ -211,7 +208,6 @@ public class TriIterator102Test extends TestBase {
         assertEquals(100, first.middle());
         assertEquals('A', first.right());
 
-        // Test map
         ObjIterator<String> mapped = triIter.map((a, b, c) -> a + b + c);
         assertEquals("q200B", mapped.next());
         assertEquals("r300C", mapped.next());
@@ -265,7 +261,6 @@ public class TriIterator102Test extends TestBase {
         assertEquals(5, first.middle());
         assertEquals("HELLO", first.right());
 
-        // Test remaining elements
         List<Triple<Character, Integer, String>> remaining = new ArrayList<>();
         iter.forEachRemaining((a, b, c) -> remaining.add(Triple.of(a, b, c)));
         assertEquals(2, remaining.size());
@@ -284,7 +279,6 @@ public class TriIterator102Test extends TestBase {
         assertEquals("str3", first.middle());
         assertEquals(1.5, first.right());
 
-        // Test skip with 0
         TriIterator<Integer, String, Double> iter2 = TriIterator.generate(0, 5, (i, triple) -> {
             triple.set(i, "s" + i, i * 1.0);
         });
@@ -336,7 +330,7 @@ public class TriIterator102Test extends TestBase {
         TriIterator<Integer, String, Double> filtered = iter.filter(predicate);
 
         List<Triple<Integer, String, Double>> results = filtered.toList();
-        assertEquals(3, results.size()); // 4, 6, 8
+        assertEquals(3, results.size());
         assertEquals(4, results.get(0).left());
         assertEquals(6.0, results.get(0).right());
         assertEquals(8, results.get(2).left());
@@ -373,7 +367,6 @@ public class TriIterator102Test extends TestBase {
         assertEquals(0, first.get().middle());
         assertEquals(0.0, first.get().right());
 
-        // Empty iterator
         TriIterator<String, Integer, Double> emptyIter = TriIterator.empty();
         assertFalse(emptyIter.first().isPresent());
     }
@@ -390,7 +383,6 @@ public class TriIterator102Test extends TestBase {
         assertEquals(6, last.get().middle());
         assertEquals('D', last.get().right());
 
-        // Empty iterator
         TriIterator<String, Integer, Character> emptyIter = TriIterator.empty();
         assertFalse(emptyIter.last().isPresent());
     }
@@ -466,9 +458,9 @@ public class TriIterator102Test extends TestBase {
 
         Triple<Set<String>, Set<Integer>, Set<Double>> multiSet = iter.toMultiSet(HashSet::new);
 
-        assertEquals(2, multiSet.left().size()); // "set0", "set1"
-        assertEquals(3, multiSet.middle().size()); // 0, 1, 2
-        assertEquals(2, multiSet.right().size()); // 0.0, 1.5
+        assertEquals(2, multiSet.left().size());
+        assertEquals(3, multiSet.middle().size());
+        assertEquals(2, multiSet.right().size());
 
         assertTrue(multiSet.left().contains("set0"));
         assertTrue(multiSet.left().contains("set1"));
@@ -483,7 +475,6 @@ public class TriIterator102Test extends TestBase {
             triple.set(i, "for" + i, i % 2 == 1);
         });
 
-        // Skip first two
         iter.next();
         iter.next();
 
@@ -502,7 +493,6 @@ public class TriIterator102Test extends TestBase {
             triple.set("each" + i, i * 2, i * 0.25);
         });
 
-        // Skip first one
         iter.next();
 
         List<Triple<String, Integer, Double>> results = new ArrayList<>();
@@ -516,14 +506,13 @@ public class TriIterator102Test extends TestBase {
 
     @Test
     public void testComplexChaining() {
-        // Test chaining multiple operations
         TriIterator<Integer, String, Double> iter = TriIterator.generate(0, 20, (i, triple) -> {
             triple.set(i, "val" + i, i * 0.5);
         });
 
         List<String> results = iter.skip(2).limit(10).filter((a, b, c) -> a % 3 == 0).map((a, b, c) -> b + "=" + c).toList();
 
-        assertEquals(3, results.size()); // 3, 6, 9 after skip(2)
+        assertEquals(3, results.size());
         assertEquals("val3=1.5", results.get(0));
         assertEquals("val6=3.0", results.get(1));
         assertEquals("val9=4.5", results.get(2));
@@ -531,7 +520,6 @@ public class TriIterator102Test extends TestBase {
 
     @Test
     public void testNullHandling() {
-        // Test with null values in zip
         String[] arr1 = { "a", null, "c" };
         Integer[] arr2 = { 1, 2, null };
         Double[] arr3 = { null, 2.2, 3.3 };
@@ -547,13 +535,11 @@ public class TriIterator102Test extends TestBase {
 
     @Test
     public void testArgumentValidation() {
-        // Test null arguments
         assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null, (Consumer<Triple<String, Integer, Double>>) null));
         assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null));
         assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().skip(-1));
         assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().limit(-1));
 
-        // Test invalid index range
         assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(2, 5, (IntObjConsumer<Triple<String, Integer, Double>>) null));
     }
 }

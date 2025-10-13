@@ -12,16 +12,18 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class ImmutableCollection100Test extends TestBase {
 
     @Test
     public void testWrap() {
         Collection<String> collection = Arrays.asList("a", "b", "c");
         ImmutableCollection<String> wrapped = ImmutableCollection.wrap(collection);
-        
+
         Assertions.assertEquals(3, wrapped.size());
         Assertions.assertTrue(wrapped.contains("a"));
         Assertions.assertTrue(wrapped.contains("b"));
@@ -46,9 +48,9 @@ public class ImmutableCollection100Test extends TestBase {
     public void testWrap_ReflectsChanges() {
         List<String> mutable = new ArrayList<>(Arrays.asList("a", "b"));
         ImmutableCollection<String> wrapped = ImmutableCollection.wrap(mutable);
-        
+
         Assertions.assertEquals(2, wrapped.size());
-        
+
         mutable.add("c");
         Assertions.assertEquals(3, wrapped.size());
         Assertions.assertTrue(wrapped.contains("c"));
@@ -99,7 +101,7 @@ public class ImmutableCollection100Test extends TestBase {
     @Test
     public void testContains() {
         ImmutableCollection<String> collection = ImmutableCollection.wrap(Arrays.asList("a", "b", "c"));
-        
+
         Assertions.assertTrue(collection.contains("a"));
         Assertions.assertTrue(collection.contains("b"));
         Assertions.assertTrue(collection.contains("c"));
@@ -111,7 +113,7 @@ public class ImmutableCollection100Test extends TestBase {
     public void testContains_WithNull() {
         List<String> listWithNull = Arrays.asList("a", null, "c");
         ImmutableCollection<String> collection = ImmutableCollection.wrap(listWithNull);
-        
+
         Assertions.assertTrue(collection.contains(null));
         Assertions.assertTrue(collection.contains("a"));
         Assertions.assertFalse(collection.contains("b"));
@@ -121,12 +123,12 @@ public class ImmutableCollection100Test extends TestBase {
     public void testIterator() {
         ImmutableCollection<String> collection = ImmutableCollection.wrap(Arrays.asList("x", "y", "z"));
         ObjIterator<String> iter = collection.iterator();
-        
+
         List<String> collected = new ArrayList<>();
         while (iter.hasNext()) {
             collected.add(iter.next());
         }
-        
+
         Assertions.assertEquals(Arrays.asList("x", "y", "z"), collected);
     }
 
@@ -134,7 +136,7 @@ public class ImmutableCollection100Test extends TestBase {
     public void testIterator_Remove_ThrowsUnsupported() {
         ImmutableCollection<String> collection = ImmutableCollection.wrap(Arrays.asList("a", "b"));
         ObjIterator<String> iter = collection.iterator();
-        
+
         iter.next();
         Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.remove());
     }
@@ -156,7 +158,7 @@ public class ImmutableCollection100Test extends TestBase {
     public void testToArray() {
         ImmutableCollection<String> collection = ImmutableCollection.wrap(Arrays.asList("a", "b", "c"));
         Object[] array = collection.toArray();
-        
+
         Assertions.assertEquals(3, array.length);
         Assertions.assertEquals("a", array[0]);
         Assertions.assertEquals("b", array[1]);
@@ -167,7 +169,7 @@ public class ImmutableCollection100Test extends TestBase {
     public void testToArray_WithType() {
         ImmutableCollection<String> collection = ImmutableCollection.wrap(Arrays.asList("a", "b", "c"));
         String[] array = collection.toArray(new String[0]);
-        
+
         Assertions.assertEquals(3, array.length);
         Assertions.assertEquals("a", array[0]);
         Assertions.assertEquals("b", array[1]);
@@ -179,11 +181,11 @@ public class ImmutableCollection100Test extends TestBase {
         ImmutableCollection<String> collection = ImmutableCollection.wrap(Arrays.asList("a", "b"));
         String[] array = new String[5];
         String[] result = collection.toArray(array);
-        
+
         Assertions.assertSame(array, result);
         Assertions.assertEquals("a", result[0]);
         Assertions.assertEquals("b", result[1]);
-        Assertions.assertNull(result[2]); // Set to null as per Collection contract
+        Assertions.assertNull(result[2]);
     }
 
     @Test
@@ -191,20 +193,17 @@ public class ImmutableCollection100Test extends TestBase {
         List<String> list1 = Arrays.asList("a", "b", "c");
         List<String> list2 = Arrays.asList("a", "b", "c");
         List<String> list3 = Arrays.asList("a", "b", "d");
-        
+
         ImmutableCollection<String> immutable1 = ImmutableCollection.wrap(list1);
         ImmutableCollection<String> immutable2 = ImmutableCollection.wrap(list2);
         ImmutableCollection<String> immutable3 = ImmutableCollection.wrap(list3);
-        
-        // Equals with same content
-        Assertions.assertEquals(immutable1, list1);
-        Assertions.assertEquals(immutable1, list2);
-        
-        // Not equals with different content
+
+        Assertions.assertEquals(immutable1, immutable2);
+        Assertions.assertNotEquals(immutable1, list2);
+
         Assertions.assertNotEquals(immutable1, immutable3);
         Assertions.assertNotEquals(immutable1, list3);
-        
-        // Not equals with non-collection
+
         Assertions.assertNotEquals(immutable1, "not a collection");
         Assertions.assertNotEquals(immutable1, null);
     }
@@ -213,7 +212,7 @@ public class ImmutableCollection100Test extends TestBase {
     public void testHashCode() {
         List<String> list = Arrays.asList("a", "b", "c");
         ImmutableCollection<String> immutable = ImmutableCollection.wrap(list);
-        
+
         Assertions.assertEquals(list.hashCode(), immutable.hashCode());
     }
 
@@ -221,18 +220,16 @@ public class ImmutableCollection100Test extends TestBase {
     public void testToString() {
         List<String> list = Arrays.asList("a", "b", "c");
         ImmutableCollection<String> immutable = ImmutableCollection.wrap(list);
-        
+
         Assertions.assertEquals(list.toString(), immutable.toString());
     }
 
     @Test
     public void testWithDifferentCollectionTypes() {
-        // Test with Set
         Set<Integer> set = new HashSet<>(Arrays.asList(1, 2, 3));
         ImmutableCollection<Integer> immutableSet = ImmutableCollection.wrap(set);
         Assertions.assertEquals(3, immutableSet.size());
-        
-        // Test with Queue
+
         Queue<String> queue = new LinkedList<>(Arrays.asList("first", "second"));
         ImmutableCollection<String> immutableQueue = ImmutableCollection.wrap(queue);
         Assertions.assertEquals(2, immutableQueue.size());

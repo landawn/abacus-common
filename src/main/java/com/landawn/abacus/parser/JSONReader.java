@@ -41,7 +41,6 @@ import com.landawn.abacus.type.Type;
  * 
  * <p>This is an internal interface and should not be used directly by application code.</p>
  * 
- * @author HaiYang Li
  * @since 0.8
  */
 interface JSONReader {

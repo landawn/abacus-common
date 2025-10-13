@@ -10,11 +10,13 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.Predicate;
 
+@Tag("new-test")
 public class Fn201Test extends TestBase {
 
     @Test
@@ -48,8 +50,6 @@ public class Fn201Test extends TestBase {
 
     @Test
     public void acceptByKey() {
-        // This method is a consumer, so we can't directly assert on its output.
-        // We can verify that it doesn't throw an exception.
         Fn.<String, Integer> acceptByKey(System.out::println).accept(Fn.<String, Integer> entry().apply("abc", 1));
     }
 

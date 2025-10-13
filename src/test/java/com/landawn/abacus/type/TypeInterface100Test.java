@@ -46,6 +46,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -55,6 +56,7 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.TypeReference;
 
+@Tag("new-test")
 public class TypeInterface100Test extends TestBase {
 
     private Type<String> stringType;
@@ -78,8 +80,6 @@ public class TypeInterface100Test extends TestBase {
     @AfterEach
     public void tearDown() {
     }
-
-    // Tests for static factory methods
 
     @Test
     @DisplayName("Test Type.of(java.lang.reflect.Type)")
@@ -353,8 +353,6 @@ public class TypeInterface100Test extends TestBase {
         Type<SetMultimap<String, Integer>> type = Type.ofSetMultimap(String.class, Integer.class);
         assertNotNull(type);
     }
-
-    // Tests for instance methods
 
     @Test
     @DisplayName("Test name()")
@@ -780,13 +778,10 @@ public class TypeInterface100Test extends TestBase {
         CharacterWriter writer = createCharacterWriter();
         JSONXMLSerializationConfig<?> config = null;
 
-        // Test without config
         stringType.writeCharacter(writer, "test", config);
 
-        // Test with null value
         stringType.writeCharacter(writer, null, config);
 
-        // Test with config (mocked)
         config = mock(JSONXMLSerializationConfig.class);
         when(config.getStringQuotation()).thenReturn('"');
         stringType.writeCharacter(writer, "test", config);
@@ -801,7 +796,6 @@ public class TypeInterface100Test extends TestBase {
         assertNotNull(array);
         assertEquals(3, array.length);
 
-        // Test unsupported operation for non-array types
         assertThrows(UnsupportedOperationException.class, () -> {
             stringType.collection2Array(collection);
         });
@@ -816,7 +810,6 @@ public class TypeInterface100Test extends TestBase {
         assertNotNull(collection);
         assertEquals(3, collection.size());
 
-        // Test unsupported operation for non-array types
         assertThrows(UnsupportedOperationException.class, () -> {
             stringType.array2Collection("test", ArrayList.class);
         });
@@ -831,7 +824,6 @@ public class TypeInterface100Test extends TestBase {
         arrayType.array2Collection(array, output);
         assertEquals(3, output.size());
 
-        // Test unsupported operation for non-array types
         assertThrows(UnsupportedOperationException.class, () -> {
             List<String> out = new ArrayList<>();
             stringType.array2Collection("test", out);

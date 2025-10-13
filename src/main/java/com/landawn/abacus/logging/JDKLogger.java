@@ -39,7 +39,6 @@ import java.util.logging.LogRecord;
  * logger.error("Failed to connect", exception);
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 1.0
  */
 class JDKLogger extends AbstractLogger {

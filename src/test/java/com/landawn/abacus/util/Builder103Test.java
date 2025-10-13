@@ -14,21 +14,23 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Builder.DatasetBuilder;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
+import com.landawn.abacus.util.function.IntBiObjFunction;
 import com.landawn.abacus.util.function.TriFunction;
 
+@Tag("new-test")
 public class Builder103Test extends TestBase {
     private Dataset dataset;
     private DatasetBuilder builder;
 
     @BeforeEach
     public void setUp() {
-        // Create a sample Dataset with test data
         List<String> columnNames = Arrays.asList("name", "age", "salary", "department");
         List<List<Object>> data = new ArrayList<>();
         data.add(Arrays.asList("John", 30, 50000.0, "IT"));
@@ -41,7 +43,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testRenameColumn() {
-        // Test renaming a single column
         DatasetBuilder result = builder.renameColumn("name", "employee_name");
 
         Assertions.assertSame(builder, result);
@@ -51,7 +52,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testRenameColumnsWithMap() {
-        // Test renaming multiple columns with a map
         Map<String, String> oldNewNames = new HashMap<>();
         oldNewNames.put("name", "employee_name");
         oldNewNames.put("age", "employee_age");
@@ -67,7 +67,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testRenameColumnsWithCollectionAndFunction() {
-        // Test renaming specified columns with a function
         Collection<String> columnNames = Arrays.asList("name", "department");
         Function<String, String> func = name -> name.toUpperCase();
 
@@ -76,13 +75,12 @@ public class Builder103Test extends TestBase {
         Assertions.assertSame(builder, result);
         Assertions.assertTrue(dataset.columnNameList().contains("NAME"));
         Assertions.assertTrue(dataset.columnNameList().contains("DEPARTMENT"));
-        Assertions.assertTrue(dataset.columnNameList().contains("age")); // unchanged
-        Assertions.assertTrue(dataset.columnNameList().contains("salary")); // unchanged
+        Assertions.assertTrue(dataset.columnNameList().contains("age"));
+        Assertions.assertTrue(dataset.columnNameList().contains("salary"));
     }
 
     @Test
     public void testRenameColumnsWithFunction() {
-        // Test renaming all columns with a function
         Function<String, String> func = name -> "prefix_" + name;
 
         DatasetBuilder result = builder.renameColumns(func);
@@ -96,7 +94,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testAddColumnWithList() {
-        // Test adding a column at the end
         List<String> cities = Arrays.asList("New York", "Boston", "Chicago");
 
         DatasetBuilder result = builder.addColumn("city", cities);
@@ -109,7 +106,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testAddColumnAtIndex() {
-        // Test adding a column at a specific index
         List<String> cities = Arrays.asList("New York", "Boston", "Chicago");
 
         DatasetBuilder result = builder.addColumn(1, "city", cities);
@@ -122,7 +118,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testAddColumnWithFunctionFromSingleColumn() {
-        // Test adding a column by transforming another column
         Function<Integer, Integer> func = age -> age * 2;
 
         DatasetBuilder result = builder.addColumn("double_age", "age", func);
@@ -135,7 +130,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testAddColumnAtIndexWithFunctionFromSingleColumn() {
-        // Test adding a column at index by transforming another column
         Function<Double, Double> func = salary -> salary * 1.1;
 
         DatasetBuilder result = builder.addColumn(2, "new_salary", "salary", func);
@@ -148,7 +142,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testAddColumnWithFunctionFromMultipleColumns() {
-        // Test adding a column by combining multiple columns
         Collection<String> fromColumns = Arrays.asList("name", "department");
         Function<DisposableObjArray, String> func = arr -> arr.get(0) + " - " + arr.get(1);
 
@@ -161,7 +154,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testAddColumnAtIndexWithFunctionFromMultipleColumns() {
-        // Test adding a column at index by combining multiple columns
         Collection<String> fromColumns = Arrays.asList("age", "salary");
         Function<DisposableObjArray, Double> func = arr -> ((Integer) arr.get(0)) * ((Double) arr.get(1)) / 1000;
 
@@ -174,7 +166,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testAddColumnWithBiFunction() {
-        // Test adding a column using BiFunction with two columns
         Tuple2<String, String> fromColumns = Tuple.of("name", "department");
         BiFunction<String, String, String> func = (name, dept) -> name + "@" + dept;
 
@@ -187,7 +178,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testAddColumnAtIndexWithBiFunction() {
-        // Test adding a column at index using BiFunction
         Tuple2<String, String> fromColumns = Tuple.of("age", "salary");
         BiFunction<Integer, Double, Double> func = (age, salary) -> salary / age;
 
@@ -200,8 +190,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testAddColumnWithTriFunction() {
-        // Test adding a column using TriFunction with three columns
-        // First add a test column
         builder.addColumn("bonus", Arrays.asList(5000.0, 3000.0, 7000.0));
 
         Tuple3<String, String, String> fromColumns = Tuple.of("name", "salary", "bonus");
@@ -216,7 +204,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testAddColumnAtIndexWithTriFunction() {
-        // Test adding a column at index using TriFunction
         builder.addColumn("bonus", Arrays.asList(5000.0, 3000.0, 7000.0));
 
         Tuple3<String, String, String> fromColumns = Tuple.of("age", "salary", "bonus");
@@ -231,7 +218,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testRemoveColumn() {
-        // Test removing a single column
         DatasetBuilder result = builder.removeColumn("department");
 
         Assertions.assertSame(builder, result);
@@ -241,7 +227,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testRemoveColumns() {
-        // Test removing multiple columns
         Collection<String> columnsToRemove = Arrays.asList("age", "department");
 
         DatasetBuilder result = builder.removeColumns(columnsToRemove);
@@ -254,7 +239,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testRemoveColumnsWithPredicate() {
-        // Test removing columns that match a predicate
         Predicate<String> filter = name -> name.length() > 4;
 
         DatasetBuilder result = builder.removeColumns(filter);
@@ -268,7 +252,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testUpdateColumn() {
-        // Test updating values in a column
         Function<Integer, Integer> func = age -> age + 5;
 
         DatasetBuilder result = builder.updateColumn("age", func);
@@ -281,15 +264,14 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testUpdateColumns() {
-        // Test updating values in multiple columns
         Collection<String> columnsToUpdate = Arrays.asList("age", "salary");
-        BiFunction<String, Number, Number> func = (c, num) -> {
-            if (num instanceof Integer) {
-                return ((Integer) num) * 2;
-            } else if (num instanceof Double) {
-                return ((Double) num) * 1.5;
+        IntBiObjFunction<String, Number, Number> func = (i, c, v) -> {
+            if (v instanceof Integer) {
+                return ((Integer) v) * 2;
+            } else if (v instanceof Double) {
+                return ((Double) v) * 1.5;
             }
-            return num;
+            return v;
         };
 
         DatasetBuilder result = builder.updateColumns(columnsToUpdate, func);
@@ -301,7 +283,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testConvertColumn() {
-        // Test converting column type
         DatasetBuilder result = builder.convertColumn("age", String.class);
 
         Assertions.assertSame(builder, result);
@@ -311,7 +292,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testConvertColumns() {
-        // Test converting multiple columns
         Map<String, Class<?>> columnTargetTypes = new HashMap<>();
         columnTargetTypes.put("age", String.class);
         columnTargetTypes.put("salary", String.class);
@@ -325,7 +305,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testCombineColumnsWithClass() {
-        // Test combining columns into a new column of specified type
         Collection<String> columnsToCombine = Arrays.asList("name", "department");
 
         DatasetBuilder result = builder.combineColumns(columnsToCombine, "combined", a -> a.join(", "));
@@ -338,7 +317,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testCombineColumnsWithFunction() {
-        // Test combining columns with custom function
         Collection<String> columnsToCombine = Arrays.asList("name", "age");
         Function<DisposableObjArray, String> combineFunc = arr -> arr.get(0) + " (age: " + arr.get(1) + ")";
 
@@ -351,7 +329,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testCombineColumnsWithBiFunction() {
-        // Test combining two columns with BiFunction
         Tuple2<String, String> columnsToCombine = Tuple.of("name", "department");
         BiFunction<String, String, String> combineFunc = (name, dept) -> name + " in " + dept;
 
@@ -364,7 +341,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testCombineColumnsWithTriFunction() {
-        // Test combining three columns with TriFunction
         builder.addColumn("bonus", Arrays.asList(5000.0, 3000.0, 7000.0));
 
         Tuple3<String, String, String> columnsToCombine = Tuple.of("name", "salary", "bonus");
@@ -377,47 +353,8 @@ public class Builder103Test extends TestBase {
         Assertions.assertEquals("John: $55000.0", dataset.getColumn("total_comp").get(0));
     }
 
-    //    @Test
-    //    public void testCombineColumnsWithPredicateAndClass() {
-    //        // Test combining columns matching predicate
-    //        builder.addColumn("score1", Arrays.asList(85, 90, 88));
-    //        builder.addColumn("score2", Arrays.asList(92, 87, 95));
-    //
-    //        Predicate<String> columnFilter = name -> name.startsWith("score");
-    //
-    //        DatasetBuilder result = builder.combineColumns(columnFilter, "total_score", a -> a.join(" + "));
-    //
-    //        Assertions.assertSame(builder, result);
-    //        Assertions.assertTrue(dataset.columnNameList().contains("total_score"));
-    //        Assertions.assertFalse(dataset.columnNameList().contains("score1"));
-    //        Assertions.assertFalse(dataset.columnNameList().contains("score2"));
-    //    }
-
-    //    @Test
-    //    public void testCombineColumnsWithPredicateAndFunction() {
-    //        // Test combining columns matching predicate with function
-    //        builder.addColumn("metric1", Arrays.asList(10.5, 20.3, 15.7));
-    //        builder.addColumn("metric2", Arrays.asList(5.2, 8.1, 6.9));
-    //
-    //        Predicate<String> columnFilter = name -> name.startsWith("metric");
-    //        Function<DisposableObjArray, Double> combineFunc = arr -> {
-    //            double sum = 0;
-    //            for (int i = 0; i < arr.length(); i++) {
-    //                sum += (Double) arr.get(i);
-    //            }
-    //            return sum;
-    //        };
-    //
-    //        DatasetBuilder result = builder.combineColumns(columnFilter, "total_metric", combineFunc);
-    //
-    //        Assertions.assertSame(builder, result);
-    //        Assertions.assertTrue(dataset.columnNameList().contains("total_metric"));
-    //        Assertions.assertEquals(15.7, dataset.getColumn("total_metric").get(0));
-    //    }
-
     @Test
     public void testDivideColumnWithFunction() {
-        // Test dividing a column with function returning list
         builder.addColumn("full_name", Arrays.asList("John Doe", "Jane Smith", "Bob Johnson"));
 
         Collection<String> newColumns = Arrays.asList("first_name", "last_name");
@@ -435,7 +372,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testDivideColumnWithBiConsumer() {
-        // Test dividing a column with BiConsumer
         builder.addColumn("coordinates", Arrays.asList("10.5,20.3", "15.7,25.1", "30.2,40.8"));
 
         Collection<String> newColumns = Arrays.asList("x", "y");
@@ -456,7 +392,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testDivideColumnIntoPair() {
-        // Test dividing a column into pair
         builder.addColumn("key_value", Arrays.asList("name:John", "age:30", "city:NYC"));
 
         Tuple2<String, String> newColumns = Tuple.of("key", "value");
@@ -477,7 +412,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testDivideColumnIntoTriple() {
-        // Test dividing a column into triple
         builder.addColumn("rgb", Arrays.asList("255,0,0", "0,255,0", "0,0,255"));
 
         Tuple3<String, String, String> newColumns = Tuple.of("red", "green", "blue");
@@ -501,7 +435,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testUpdateAll() {
-        // Test updating all values in dataset
         Function<Object, Object> func = value -> {
             if (value == null)
                 return "N/A";
@@ -515,14 +448,11 @@ public class Builder103Test extends TestBase {
         Assertions.assertSame(builder, result);
         Assertions.assertEquals("JOHN", dataset.getColumn("name").get(0));
         Assertions.assertEquals("IT", dataset.getColumn("department").get(0));
-        // Numbers remain unchanged
         Assertions.assertEquals(30, dataset.getColumn("age").get(0));
     }
 
     @Test
     public void testReplaceIf() {
-        // Test replacing values based on predicate
-        // First, add some null values
         List<String> columnWithNulls = Arrays.asList("Active", null, "Active");
         builder.addColumn("status", columnWithNulls);
 
@@ -538,7 +468,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testPrepend() {
-        // Test prepending another dataset
         List<String> columnNames = Arrays.asList("name", "age", "salary", "department");
         List<List<Object>> newData = new ArrayList<>();
         newData.add(Arrays.asList("Alice", 28, 55000.0, "Finance"));
@@ -555,7 +484,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testAppend() {
-        // Test appending another dataset
         List<String> columnNames = Arrays.asList("name", "age", "salary", "department");
         List<List<Object>> newData = new ArrayList<>();
         newData.add(Arrays.asList("Charlie", 40, 70000.0, "Sales"));
@@ -572,7 +500,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testMethodChaining() {
-        // Test that methods can be chained together
         DatasetBuilder result = builder.renameColumn("name", "employee")
                 .addColumn("bonus", Arrays.asList(5000.0, 3000.0, 7000.0))
                 .updateColumn("age", (Integer age) -> age + 1)
@@ -587,7 +514,6 @@ public class Builder103Test extends TestBase {
 
     @Test
     public void testComplexScenario() {
-        // Test a complex scenario with multiple operations
         builder.addColumn("full_name", Arrays.asList("name", "department"), arr -> arr.get(0) + " from " + arr.get(1))
                 .removeColumns(Arrays.asList("name", "department"))
                 .updateColumn("salary", (Double s) -> s * 1.15)

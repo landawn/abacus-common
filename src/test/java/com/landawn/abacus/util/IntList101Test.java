@@ -14,14 +14,13 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.stream.IntStream;
 
-/**
- * Extended test suite for IntList covering additional edge cases and scenarios
- */
+@Tag("new-test")
 public class IntList101Test extends TestBase {
 
     private IntList list;
@@ -31,7 +30,6 @@ public class IntList101Test extends TestBase {
         list = new IntList();
     }
 
-    // Additional Constructor Tests
     @Test
     public void testConstructorWithNullArray() {
         assertThrows(NullPointerException.class, () -> new IntList(null));
@@ -44,11 +42,9 @@ public class IntList101Test extends TestBase {
 
     @Test
     public void testConstructorWithNegativeCapacity() {
-        // Should not throw exception, will be handled internally
         assertThrows(IllegalArgumentException.class, () -> new IntList(-1));
     }
 
-    // Additional Static Factory Tests
     @Test
     public void testOfWithNull() {
         IntList list = IntList.of((int[]) null);
@@ -93,7 +89,6 @@ public class IntList101Test extends TestBase {
 
     @Test
     public void testRandomWithLargeRange() {
-        // Test with range larger than Integer.MAX_VALUE
         IntList list = IntList.random(Integer.MIN_VALUE, Integer.MAX_VALUE, 100);
         assertEquals(100, list.size());
         for (int i = 0; i < 100; i++) {
@@ -102,7 +97,6 @@ public class IntList101Test extends TestBase {
         }
     }
 
-    // Additional Add Tests
     @Test
     public void testAddAtBeginning() {
         list.addAll(new int[] { 2, 3, 4 });
@@ -139,7 +133,6 @@ public class IntList101Test extends TestBase {
 
     @Test
     public void testAddToEnsureCapacityGrowth() {
-        // Test capacity growth
         for (int i = 0; i < 100; i++) {
             list.add(i);
         }
@@ -149,7 +142,6 @@ public class IntList101Test extends TestBase {
         }
     }
 
-    // Additional Remove Tests
     @Test
     public void testRemoveAllOccurrencesEmptyList() {
         assertFalse(list.removeAllOccurrences(5));
@@ -214,12 +206,10 @@ public class IntList101Test extends TestBase {
     public void testDeleteAtBoundaries() {
         list.addAll(new int[] { 1, 2, 3, 4, 5 });
 
-        // Delete first
         assertEquals(1, list.delete(0));
         assertEquals(4, list.size());
         assertEquals(2, list.get(0));
 
-        // Delete last
         assertEquals(5, list.delete(list.size() - 1));
         assertEquals(3, list.size());
         assertEquals(4, list.get(list.size() - 1));
@@ -258,7 +248,6 @@ public class IntList101Test extends TestBase {
         assertTrue(list.isEmpty());
     }
 
-    // Additional Move and Replace Tests
     @Test
     public void testMoveRangeToBeginning() {
         list.addAll(new int[] { 1, 2, 3, 4, 5 });
@@ -317,7 +306,6 @@ public class IntList101Test extends TestBase {
         assertFalse(result);
     }
 
-    // Additional Fill Tests
     @Test
     public void testFillEmptyList() {
         list.fill(10);
@@ -330,7 +318,6 @@ public class IntList101Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> list.fill(2, 1, 10));
     }
 
-    // Additional Contains Tests
     @Test
     public void testContainsEmptyList() {
         assertFalse(list.contains(1));
@@ -354,7 +341,6 @@ public class IntList101Test extends TestBase {
         assertFalse(list.disjoint(list));
     }
 
-    // Additional Set Operations Tests
     @Test
     public void testIntersectionWithEmpty() {
         list.addAll(new int[] { 1, 2, 3 });
@@ -399,7 +385,6 @@ public class IntList101Test extends TestBase {
         assertEquals(3, result.size());
     }
 
-    // Additional Index Tests
     @Test
     public void testIndexOfFromIndexBeyondSize() {
         list.addAll(new int[] { 1, 2, 3 });
@@ -423,7 +408,6 @@ public class IntList101Test extends TestBase {
         assertEquals(-1, list.lastIndexOf(1, -1));
     }
 
-    // Additional Min/Max/Median Tests
     @Test
     public void testMinMaxMedianSingleElement() {
         list.add(5);
@@ -455,11 +439,9 @@ public class IntList101Test extends TestBase {
         list.addAll(new int[] { 1, 2, 3, 4 });
         OptionalInt median = list.median();
         assertTrue(median.isPresent());
-        // Median of [1,2,3,4] should be 2 (lower middle element)
         assertEquals(2, median.getAsInt());
     }
 
-    // Additional forEach Tests
     @Test
     public void testForEachEmptyList() {
         List<Integer> result = new ArrayList<>();
@@ -493,7 +475,6 @@ public class IntList101Test extends TestBase {
         assertEquals(1, result.get(2));
     }
 
-    // Additional Distinct Tests
     @Test
     public void testDistinctEmptyRange() {
         list.addAll(new int[] { 1, 2, 2, 3 });
@@ -509,7 +490,6 @@ public class IntList101Test extends TestBase {
         assertEquals(1, result.get(0));
     }
 
-    // Additional Sort Tests
     @Test
     public void testSortEmptyList() {
         list.sort();
@@ -534,13 +514,10 @@ public class IntList101Test extends TestBase {
     @Test
     public void testBinarySearchUnsorted() {
         list.addAll(new int[] { 3, 1, 4, 1, 5 });
-        // Binary search on unsorted list - result is undefined but should not throw
         int result = list.binarySearch(3);
-        // Just verify it doesn't throw exception
         assertNotNull(result);
     }
 
-    // Additional Reverse Tests
     @Test
     public void testReverseEmptyList() {
         list.reverse();
@@ -564,7 +541,6 @@ public class IntList101Test extends TestBase {
         assertEquals(3, list.get(2));
     }
 
-    // Additional Rotate Tests
     @Test
     public void testRotateEmptyList() {
         list.rotate(5);
@@ -590,7 +566,6 @@ public class IntList101Test extends TestBase {
         assertEquals(2, list.get(4));
     }
 
-    // Additional Shuffle Tests
     @Test
     public void testShuffleEmptyList() {
         list.shuffle();
@@ -605,7 +580,6 @@ public class IntList101Test extends TestBase {
         assertEquals(5, list.get(0));
     }
 
-    // Additional Swap Tests
     @Test
     public void testSwapSameIndex() {
         list.addAll(new int[] { 1, 2, 3 });
@@ -620,7 +594,6 @@ public class IntList101Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> list.swap(-1, 0));
     }
 
-    // Additional Copy Tests
     @Test
     public void testCopyEmptyList() {
         IntList copy = list.copy();
@@ -656,7 +629,6 @@ public class IntList101Test extends TestBase {
         assertEquals(4, copy.get(1));
     }
 
-    // Additional Split Tests
     @Test
     public void testSplitEmptyList() {
         List<IntList> chunks = list.split(0, 0, 2);
@@ -681,7 +653,6 @@ public class IntList101Test extends TestBase {
         assertEquals(1, chunks.get(2).size());
     }
 
-    // Additional Boxed Tests
     @Test
     public void testBoxedEmptyList() {
         List<Integer> boxed = list.boxed();
@@ -694,7 +665,6 @@ public class IntList101Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> list.boxed(2, 1));
     }
 
-    // Additional Iterator Tests
     @Test
     public void testIteratorEmptyList() {
         IntIterator iter = list.iterator();
@@ -702,7 +672,6 @@ public class IntList101Test extends TestBase {
         assertThrows(NoSuchElementException.class, () -> iter.nextInt());
     }
 
-    // Additional Stream Tests
     @Test
     public void testStreamEmptyList() {
         IntStream stream = list.stream();
@@ -716,7 +685,6 @@ public class IntList101Test extends TestBase {
         assertEquals(0, stream.count());
     }
 
-    // Additional First/Last Tests
     @Test
     public void testGetFirstGetLastSingleElement() {
         list.add(5);
@@ -735,37 +703,29 @@ public class IntList101Test extends TestBase {
         assertTrue(list.isEmpty());
     }
 
-    // Boundary Tests
     @Test
     public void testMaxArraySize() {
-        // Test handling of large capacity requests
         try {
             IntList largeList = new IntList(Integer.MAX_VALUE - 8);
-            // If it doesn't throw, just verify it's empty
             assertTrue(largeList.isEmpty());
         } catch (OutOfMemoryError e) {
-            // Expected for large allocations
             assertTrue(true);
         }
     }
 
     @Test
     public void testEnsureCapacityOverflow() {
-        // Test capacity overflow handling
         list.add(1);
         try {
-            // Try to trigger capacity overflow
             for (int i = 0; i < 100; i++) {
                 list.add(i);
             }
             assertTrue(list.size() > 1);
         } catch (OutOfMemoryError e) {
-            // Expected if memory is limited
             assertTrue(true);
         }
     }
 
-    // toString Tests  
     @Test
     public void testToStringWithSpecialValues() {
         list.add(Integer.MIN_VALUE);
@@ -777,37 +737,30 @@ public class IntList101Test extends TestBase {
         assertTrue(str.contains(String.valueOf(Integer.MAX_VALUE)));
     }
 
-    // Array method edge cases
     @Test
     public void testArrayModification() {
         list.addAll(new int[] { 1, 2, 3 });
         int[] array = list.array();
 
-        // Verify modification affects the list
         array[1] = 20;
         assertEquals(20, list.get(1));
 
-        // Clear and verify array is different
         list.clear();
         int[] newArray = list.array();
         assertSame(array, newArray);
     }
 
-    // Performance/Stress Tests
     @Test
     public void testAddRemovePerformance() {
-        // Add and remove many elements
         int count = 1000;
         for (int i = 0; i < count; i++) {
             list.add(i);
         }
         assertEquals(count, list.size());
 
-        // Remove every other element
         list.removeIf(x -> x % 2 == 0);
         assertEquals(count / 2, list.size());
 
-        // Verify remaining elements
         for (int i = 0; i < list.size(); i++) {
             assertEquals(i * 2 + 1, list.get(i));
         }
@@ -815,46 +768,36 @@ public class IntList101Test extends TestBase {
 
     @Test
     public void testBatchOperationsLargeData() {
-        // Create large lists for batch operations
         int size = 1000;
         IntList list1 = IntList.range(0, size);
         IntList list2 = IntList.range(size / 2, size + size / 2);
 
-        // Test intersection
         IntList intersection = list1.intersection(list2);
         assertEquals(size / 2, intersection.size());
 
-        // Test difference
         IntList difference = list1.difference(list2);
         assertEquals(size / 2, difference.size());
 
-        // Test symmetric difference
         IntList symDiff = list1.symmetricDifference(list2);
         assertEquals(size, symDiff.size());
     }
 
-    // Thread Safety Test (IntList is not thread-safe, but test behavior)
     @Test
     public void testConcurrentModification() {
         list.addAll(new int[] { 1, 2, 3, 4, 5 });
 
-        // This should not throw ConcurrentModificationException since IntList
-        // doesn't have modification tracking like ArrayList
         IntIterator iter = list.iterator();
         list.add(6);
 
-        // Iterator might give unexpected results but shouldn't throw
         assertTrue(iter.hasNext());
         iter.nextInt();
     }
 
-    // Edge Cases for Primitive Type
     @Test
     public void testIntegerOverflow() {
         list.add(Integer.MAX_VALUE);
         list.add(Integer.MAX_VALUE);
 
-        // Test operations that might cause overflow
         list.replaceAll(x -> x + 1);
         assertEquals(Integer.MIN_VALUE, list.get(0));
         assertEquals(Integer.MIN_VALUE, list.get(1));
@@ -864,7 +807,6 @@ public class IntList101Test extends TestBase {
     public void testNegativeValues() {
         list.addAll(new int[] { -5, -3, -1, 0, 1, 3, 5 });
 
-        // Test operations with negative values
         OptionalInt min = list.min();
         assertTrue(min.isPresent());
         assertEquals(-5, min.getAsInt());

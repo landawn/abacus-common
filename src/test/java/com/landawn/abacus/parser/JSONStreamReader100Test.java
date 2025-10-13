@@ -10,11 +10,13 @@ import java.io.StringReader;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 
+@Tag("new-test")
 public class JSONStreamReader100Test extends TestBase {
 
     private char[] rbuf;
@@ -38,7 +40,6 @@ public class JSONStreamReader100Test extends TestBase {
 
     @Test
     public void testReadLargeJson() throws IOException {
-        // Create a large JSON that spans multiple buffer reads
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < 100; i++) {
             if (i > 0)
@@ -52,16 +53,14 @@ public class JSONStreamReader100Test extends TestBase {
 
         assertEquals(JSONReader.START_BRACKET, reader.nextToken());
 
-        // Read first object
         assertEquals(JSONReader.START_BRACE, reader.nextToken());
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("id", reader.getText());
         assertEquals(JSONReader.COLON, reader.nextToken());
         reader.nextToken();
         assertEquals("0", reader.getText());
 
-        // Verify we can read through the entire structure
         int objectCount = 1;
         int token;
         while ((token = reader.nextToken()) != JSONReader.EOF) {
@@ -105,18 +104,18 @@ public class JSONStreamReader100Test extends TestBase {
 
         assertEquals(JSONReader.START_BRACKET, reader.nextToken());
 
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("first", reader.getText());
 
         assertEquals(JSONReader.COMMA, reader.nextToken());
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("second with spaces", reader.getText());
 
         assertEquals(JSONReader.COMMA, reader.nextToken());
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("third\nwith\nnewlines", reader.getText());
 
         assertEquals(JSONReader.END_BRACKET, reader.nextToken());
@@ -161,7 +160,7 @@ public class JSONStreamReader100Test extends TestBase {
         assertNull(reader.readValue(stringType));
 
         assertEquals(JSONReader.START_QUOTATION_D, reader.nextToken());
-        reader.nextToken(); // " 
+        reader.nextToken();
         assertEquals("not null", reader.readValue(stringType));
 
         assertEquals(JSONReader.COMMA, reader.nextToken());
@@ -173,7 +172,6 @@ public class JSONStreamReader100Test extends TestBase {
 
     @Test
     public void testReadVeryLongString() throws IOException {
-        // Create a string longer than buffer size
         StringBuilder sb = new StringBuilder("\"");
         for (int i = 0; i < 500; i++) {
             sb.append("abcdefghij");
@@ -190,7 +188,7 @@ public class JSONStreamReader100Test extends TestBase {
 
     @Test
     public void testReadUnicodeEscapes() throws IOException {
-        String json = "\"\\u0048\\u0065\\u006C\\u006C\\u006F \\u4E16\\u754C\""; // "Hello 世界"
+        String json = "\"\\u0048\\u0065\\u006C\\u006C\\u006F \\u4E16\\u754C\"";
         StringReader stringReader = new StringReader(json);
         JSONReader reader = JSONStreamReader.parse(stringReader, rbuf, cbuf);
 
@@ -203,12 +201,11 @@ public class JSONStreamReader100Test extends TestBase {
     public void testReadStreamWithSmallBuffer() throws IOException {
         String json = "{\"a\":1,\"b\":2,\"c\":3}";
         StringReader stringReader = new StringReader(json);
-        // Use very small buffers to test buffer refill logic
         JSONReader reader = JSONStreamReader.parse(stringReader, new char[4], new char[4]);
 
         assertEquals(JSONReader.START_BRACE, reader.nextToken());
-        reader.nextToken(); // "
-        reader.nextToken(); // "
+        reader.nextToken();
+        reader.nextToken();
         assertEquals("a", reader.getText());
 
         assertEquals(JSONReader.COLON, reader.nextToken());
@@ -216,7 +213,7 @@ public class JSONStreamReader100Test extends TestBase {
         assertEquals("1", reader.getText());
 
         assertEquals(JSONReader.START_QUOTATION_D, reader.nextToken());
-        reader.nextToken(); // " 
+        reader.nextToken();
         assertEquals("b", reader.getText());
 
         assertEquals(JSONReader.COLON, reader.nextToken());
@@ -224,7 +221,7 @@ public class JSONStreamReader100Test extends TestBase {
         assertEquals("2", reader.getText());
 
         assertEquals(JSONReader.START_QUOTATION_D, reader.nextToken());
-        reader.nextToken(); // " 
+        reader.nextToken();
         assertEquals("c", reader.getText());
 
         assertEquals(JSONReader.COLON, reader.nextToken());

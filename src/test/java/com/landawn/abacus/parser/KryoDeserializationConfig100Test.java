@@ -7,10 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.KryoDeserializationConfig.KDC;
 
+@Tag("new-test")
 public class KryoDeserializationConfig100Test extends TestBase {
 
     private KryoDeserializationConfig config;
@@ -30,7 +32,6 @@ public class KryoDeserializationConfig100Test extends TestBase {
 
     @Test
     public void testInheritedMethods() {
-        // Test inherited methods from DeserializationConfig
         config.ignoreUnmatchedProperty(true);
         assertTrue(config.ignoreUnmatchedProperty());
 
@@ -51,7 +52,6 @@ public class KryoDeserializationConfig100Test extends TestBase {
     public void testDefaultValues() {
         KryoDeserializationConfig newConfig = new KryoDeserializationConfig();
 
-        // Default values from parent class
         assertTrue(newConfig.ignoreUnmatchedProperty());
     }
 

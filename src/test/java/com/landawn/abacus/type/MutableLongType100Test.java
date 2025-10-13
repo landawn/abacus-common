@@ -12,12 +12,14 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableLong;
 
+@Tag("new-test")
 public class MutableLongType100Test extends TestBase {
 
     private MutableLongType mutableLongType;
@@ -137,12 +139,10 @@ public class MutableLongType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithNull() throws IOException {
         mutableLongType.writeCharacter(characterWriter, null, null);
-        // Verify null array was written
     }
 
     @Test
     public void testWriteCharacterWithNonNull() throws IOException {
         mutableLongType.writeCharacter(characterWriter, MutableLong.of(123456L), null);
-        // Verify long value was written
     }
 }

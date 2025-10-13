@@ -7,9 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class StringBufferType100Test extends TestBase {
 
     private StringBufferType stringBufferType;
@@ -26,22 +28,18 @@ public class StringBufferType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with StringBuilder
         StringBuffer sb = new StringBuffer("test content");
         assertEquals("test content", stringBufferType.stringOf(sb));
 
-        // Test with null
         assertNull(stringBufferType.stringOf(null));
     }
 
     @Test
     public void testValueOf() {
-        // Test with string
         StringBuffer result = stringBufferType.valueOf("test content");
         assertNotNull(result);
         assertEquals("test content", result.toString());
 
-        // Test with null
         assertNull(stringBufferType.valueOf(null));
     }
 

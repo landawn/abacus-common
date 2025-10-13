@@ -14,13 +14,14 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 
+@Tag("new-test")
 public class NoCachingNoUpdating102Test extends TestBase {
 
-    // Tests for DisposableArray
     @Test
     public void testDisposableArrayCreate() {
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.create(String.class, 5);
@@ -30,7 +31,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableArrayWrap() {
-        String[] original = {"a", "b", "c"};
+        String[] original = { "a", "b", "c" };
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.wrap(original);
         Assertions.assertNotNull(array);
         Assertions.assertEquals(3, array.length());
@@ -41,7 +42,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableArrayGet() {
-        String[] original = {"hello", "world"};
+        String[] original = { "hello", "world" };
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.wrap(original);
         Assertions.assertEquals("hello", array.get(0));
         Assertions.assertEquals("world", array.get(1));
@@ -56,16 +57,14 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableArrayToArray() {
-        String[] original = {"a", "b", "c"};
+        String[] original = { "a", "b", "c" };
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.wrap(original);
-        
-        // Test with smaller target array
+
         String[] small = new String[1];
         String[] result1 = array.toArray(small);
         Assertions.assertEquals(3, result1.length);
         Assertions.assertArrayEquals(original, result1);
-        
-        // Test with larger target array
+
         String[] large = new String[5];
         String[] result2 = array.toArray(large);
         Assertions.assertSame(large, result2);
@@ -74,7 +73,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableArrayCopy() {
-        String[] original = {"x", "y", "z"};
+        String[] original = { "x", "y", "z" };
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.wrap(original);
         String[] copy = array.copy();
         Assertions.assertNotSame(original, copy);
@@ -83,7 +82,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableArrayToList() {
-        Integer[] original = {1, 2, 3};
+        Integer[] original = { 1, 2, 3 };
         DisposableArray<Integer> array = NoCachingNoUpdating.DisposableArray.wrap(original);
         List<Integer> list = array.toList();
         Assertions.assertEquals(Arrays.asList(1, 2, 3), list);
@@ -91,7 +90,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableArrayToSet() {
-        String[] original = {"a", "b", "a", "c"};
+        String[] original = { "a", "b", "a", "c" };
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.wrap(original);
         Set<String> set = array.toSet();
         Assertions.assertEquals(3, set.size());
@@ -102,7 +101,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableArrayToCollection() {
-        String[] original = {"one", "two", "three"};
+        String[] original = { "one", "two", "three" };
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.wrap(original);
         LinkedList<String> linkedList = array.toCollection(IntFunctions.ofLinkedList());
         Assertions.assertEquals(3, linkedList.size());
@@ -113,7 +112,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableArrayForeach() throws Exception {
-        String[] original = {"a", "b", "c"};
+        String[] original = { "a", "b", "c" };
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.wrap(original);
         List<String> collected = new ArrayList<>();
         array.foreach(collected::add);
@@ -122,7 +121,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableArrayApply() throws Exception {
-        Integer[] original = {1, 2, 3};
+        Integer[] original = { 1, 2, 3 };
         DisposableArray<Integer> array = NoCachingNoUpdating.DisposableArray.wrap(original);
         int sum = array.apply(arr -> Arrays.stream(arr).mapToInt(Integer::intValue).sum());
         Assertions.assertEquals(6, sum);
@@ -130,9 +129,9 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableArrayAccept() throws Exception {
-        String[] original = {"test"};
+        String[] original = { "test" };
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         array.accept(arr -> {
             called[0] = true;
             Assertions.assertArrayEquals(original, arr);
@@ -142,21 +141,21 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableArrayJoin() {
-        String[] original = {"a", "b", "c"};
+        String[] original = { "a", "b", "c" };
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.wrap(original);
         Assertions.assertEquals("a, b, c", array.join(", "));
     }
 
     @Test
     public void testDisposableArrayJoinWithPrefixSuffix() {
-        String[] original = {"x", "y", "z"};
+        String[] original = { "x", "y", "z" };
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.wrap(original);
         Assertions.assertEquals("[x, y, z]", array.join(", ", "[", "]"));
     }
 
     @Test
     public void testDisposableArrayIterator() {
-        String[] original = {"1", "2", "3"};
+        String[] original = { "1", "2", "3" };
         DisposableArray<String> array = NoCachingNoUpdating.DisposableArray.wrap(original);
         Iterator<String> iter = array.iterator();
         Assertions.assertTrue(iter.hasNext());
@@ -168,7 +167,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableArrayToString() {
-        Integer[] original = {10, 20, 30};
+        Integer[] original = { 10, 20, 30 };
         DisposableArray<Integer> array = NoCachingNoUpdating.DisposableArray.wrap(original);
         String str = array.toString();
         Assertions.assertNotNull(str);
@@ -177,7 +176,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertTrue(str.contains("30"));
     }
 
-    // Tests for DisposableObjArray
     @Test
     public void testDisposableObjArrayCreate() {
         NoCachingNoUpdating.DisposableObjArray array = NoCachingNoUpdating.DisposableObjArray.create(10);
@@ -187,7 +185,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableObjArrayWrap() {
-        Object[] original = {1, "hello", true};
+        Object[] original = { 1, "hello", true };
         NoCachingNoUpdating.DisposableObjArray array = NoCachingNoUpdating.DisposableObjArray.wrap(original);
         Assertions.assertNotNull(array);
         Assertions.assertEquals(3, array.length());
@@ -198,11 +196,9 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableObjArrayCreateUnsupported() {
-        Assertions.assertThrows(UnsupportedOperationException.class, 
-            () -> NoCachingNoUpdating.DisposableObjArray.create(String.class, 5));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> NoCachingNoUpdating.DisposableObjArray.create(String.class, 5));
     }
 
-    // Tests for DisposableBooleanArray
     @Test
     public void testDisposableBooleanArrayCreate() {
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.create(5);
@@ -212,7 +208,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableBooleanArrayWrap() {
-        boolean[] original = {true, false, true};
+        boolean[] original = { true, false, true };
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.wrap(original);
         Assertions.assertNotNull(array);
         Assertions.assertEquals(3, array.length());
@@ -223,7 +219,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableBooleanArrayGet() {
-        boolean[] original = {true, false};
+        boolean[] original = { true, false };
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.wrap(original);
         Assertions.assertTrue(array.get(0));
         Assertions.assertFalse(array.get(1));
@@ -238,7 +234,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableBooleanArrayCopy() {
-        boolean[] original = {true, true, false};
+        boolean[] original = { true, true, false };
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.wrap(original);
         boolean[] copy = array.copy();
         Assertions.assertNotSame(original, copy);
@@ -247,7 +243,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableBooleanArrayBox() {
-        boolean[] original = {true, false};
+        boolean[] original = { true, false };
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.wrap(original);
         Boolean[] boxed = array.box();
         Assertions.assertEquals(2, boxed.length);
@@ -257,7 +253,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableBooleanArrayToList() {
-        boolean[] original = {false, true, false};
+        boolean[] original = { false, true, false };
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.wrap(original);
         BooleanList list = array.toList();
         Assertions.assertEquals(3, list.size());
@@ -268,7 +264,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableBooleanArrayToCollection() {
-        boolean[] original = {true, false};
+        boolean[] original = { true, false };
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.wrap(original);
         ArrayList<Boolean> list = array.toCollection(ArrayList::new);
         Assertions.assertEquals(2, list.size());
@@ -278,7 +274,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableBooleanArrayForeach() throws Exception {
-        boolean[] original = {true, false, true};
+        boolean[] original = { true, false, true };
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.wrap(original);
         List<Boolean> collected = new ArrayList<>();
         array.foreach(collected::add);
@@ -287,11 +283,13 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableBooleanArrayApply() throws Exception {
-        boolean[] original = {true, true, false};
+        boolean[] original = { true, true, false };
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.wrap(original);
         int count = array.apply(arr -> {
             int c = 0;
-            for (boolean b : arr) if (b) c++;
+            for (boolean b : arr)
+                if (b)
+                    c++;
             return c;
         });
         Assertions.assertEquals(2, count);
@@ -299,9 +297,9 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableBooleanArrayAccept() throws Exception {
-        boolean[] original = {true};
+        boolean[] original = { true };
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         array.accept(arr -> {
             called[0] = true;
             Assertions.assertArrayEquals(original, arr);
@@ -311,21 +309,21 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableBooleanArrayJoin() {
-        boolean[] original = {true, false, true};
+        boolean[] original = { true, false, true };
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.wrap(original);
         Assertions.assertEquals("true, false, true", array.join(", "));
     }
 
     @Test
     public void testDisposableBooleanArrayJoinWithPrefixSuffix() {
-        boolean[] original = {false, true};
+        boolean[] original = { false, true };
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.wrap(original);
         Assertions.assertEquals("[false, true]", array.join(", ", "[", "]"));
     }
 
     @Test
     public void testDisposableBooleanArrayToString() {
-        boolean[] original = {true, false};
+        boolean[] original = { true, false };
         NoCachingNoUpdating.DisposableBooleanArray array = NoCachingNoUpdating.DisposableBooleanArray.wrap(original);
         String str = array.toString();
         Assertions.assertNotNull(str);
@@ -333,7 +331,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertTrue(str.contains("false"));
     }
 
-    // Tests for DisposableCharArray
     @Test
     public void testDisposableCharArrayCreate() {
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.create(5);
@@ -343,7 +340,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableCharArrayWrap() {
-        char[] original = {'a', 'b', 'c'};
+        char[] original = { 'a', 'b', 'c' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         Assertions.assertNotNull(array);
         Assertions.assertEquals(3, array.length());
@@ -354,7 +351,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableCharArrayGet() {
-        char[] original = {'x', 'y'};
+        char[] original = { 'x', 'y' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         Assertions.assertEquals('x', array.get(0));
         Assertions.assertEquals('y', array.get(1));
@@ -369,7 +366,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableCharArrayCopy() {
-        char[] original = {'1', '2', '3'};
+        char[] original = { '1', '2', '3' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         char[] copy = array.copy();
         Assertions.assertNotSame(original, copy);
@@ -378,7 +375,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableCharArrayBox() {
-        char[] original = {'a', 'b'};
+        char[] original = { 'a', 'b' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         Character[] boxed = array.box();
         Assertions.assertEquals(2, boxed.length);
@@ -388,7 +385,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableCharArrayToList() {
-        char[] original = {'x', 'y', 'z'};
+        char[] original = { 'x', 'y', 'z' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         CharList list = array.toList();
         Assertions.assertEquals(3, list.size());
@@ -399,7 +396,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableCharArrayToCollection() {
-        char[] original = {'a', 'b'};
+        char[] original = { 'a', 'b' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         ArrayList<Character> list = array.toCollection(ArrayList::new);
         Assertions.assertEquals(2, list.size());
@@ -409,35 +406,35 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableCharArraySum() {
-        char[] original = {'a', 'b', 'c'};  // 97 + 98 + 99 = 294
+        char[] original = { 'a', 'b', 'c' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         Assertions.assertEquals(294, array.sum());
     }
 
     @Test
     public void testDisposableCharArrayAverage() {
-        char[] original = {'a', 'b', 'c'};  // (97 + 98 + 99) / 3 = 98.0
+        char[] original = { 'a', 'b', 'c' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         Assertions.assertEquals(98.0, array.average(), 0.001);
     }
 
     @Test
     public void testDisposableCharArrayMin() {
-        char[] original = {'z', 'a', 'm'};
+        char[] original = { 'z', 'a', 'm' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         Assertions.assertEquals('a', array.min());
     }
 
     @Test
     public void testDisposableCharArrayMax() {
-        char[] original = {'z', 'a', 'm'};
+        char[] original = { 'z', 'a', 'm' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         Assertions.assertEquals('z', array.max());
     }
 
     @Test
     public void testDisposableCharArrayForeach() throws Exception {
-        char[] original = {'a', 'b', 'c'};
+        char[] original = { 'a', 'b', 'c' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         List<Character> collected = new ArrayList<>();
         array.foreach(collected::add);
@@ -446,7 +443,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableCharArrayApply() throws Exception {
-        char[] original = {'h', 'i'};
+        char[] original = { 'h', 'i' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         String result = array.apply(arr -> new String(arr));
         Assertions.assertEquals("hi", result);
@@ -454,9 +451,9 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableCharArrayAccept() throws Exception {
-        char[] original = {'t', 'e', 's', 't'};
+        char[] original = { 't', 'e', 's', 't' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         array.accept(arr -> {
             called[0] = true;
             Assertions.assertArrayEquals(original, arr);
@@ -466,21 +463,21 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableCharArrayJoin() {
-        char[] original = {'a', 'b', 'c'};
+        char[] original = { 'a', 'b', 'c' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         Assertions.assertEquals("a-b-c", array.join("-"));
     }
 
     @Test
     public void testDisposableCharArrayJoinWithPrefixSuffix() {
-        char[] original = {'x', 'y'};
+        char[] original = { 'x', 'y' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         Assertions.assertEquals("(x:y)", array.join(":", "(", ")"));
     }
 
     @Test
     public void testDisposableCharArrayToString() {
-        char[] original = {'a', 'b'};
+        char[] original = { 'a', 'b' };
         NoCachingNoUpdating.DisposableCharArray array = NoCachingNoUpdating.DisposableCharArray.wrap(original);
         String str = array.toString();
         Assertions.assertNotNull(str);
@@ -488,7 +485,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertTrue(str.contains("b"));
     }
 
-    // Tests for DisposableByteArray
     @Test
     public void testDisposableByteArrayCreate() {
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.create(5);
@@ -498,21 +494,21 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableByteArrayWrap() {
-        byte[] original = {1, 2, 3};
+        byte[] original = { 1, 2, 3 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
         Assertions.assertNotNull(array);
         Assertions.assertEquals(3, array.length());
-        Assertions.assertEquals((byte)1, array.get(0));
-        Assertions.assertEquals((byte)2, array.get(1));
-        Assertions.assertEquals((byte)3, array.get(2));
+        Assertions.assertEquals((byte) 1, array.get(0));
+        Assertions.assertEquals((byte) 2, array.get(1));
+        Assertions.assertEquals((byte) 3, array.get(2));
     }
 
     @Test
     public void testDisposableByteArrayGet() {
-        byte[] original = {10, 20};
+        byte[] original = { 10, 20 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
-        Assertions.assertEquals((byte)10, array.get(0));
-        Assertions.assertEquals((byte)20, array.get(1));
+        Assertions.assertEquals((byte) 10, array.get(0));
+        Assertions.assertEquals((byte) 20, array.get(1));
         Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> array.get(2));
     }
 
@@ -524,7 +520,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableByteArrayCopy() {
-        byte[] original = {5, 6, 7};
+        byte[] original = { 5, 6, 7 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
         byte[] copy = array.copy();
         Assertions.assertNotSame(original, copy);
@@ -533,79 +529,80 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableByteArrayBox() {
-        byte[] original = {1, 2};
+        byte[] original = { 1, 2 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
         Byte[] boxed = array.box();
         Assertions.assertEquals(2, boxed.length);
-        Assertions.assertEquals(Byte.valueOf((byte)1), boxed[0]);
-        Assertions.assertEquals(Byte.valueOf((byte)2), boxed[1]);
+        Assertions.assertEquals(Byte.valueOf((byte) 1), boxed[0]);
+        Assertions.assertEquals(Byte.valueOf((byte) 2), boxed[1]);
     }
 
     @Test
     public void testDisposableByteArrayToList() {
-        byte[] original = {10, 20, 30};
+        byte[] original = { 10, 20, 30 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
         ByteList list = array.toList();
         Assertions.assertEquals(3, list.size());
-        Assertions.assertEquals((byte)10, list.get(0));
-        Assertions.assertEquals((byte)20, list.get(1));
-        Assertions.assertEquals((byte)30, list.get(2));
+        Assertions.assertEquals((byte) 10, list.get(0));
+        Assertions.assertEquals((byte) 20, list.get(1));
+        Assertions.assertEquals((byte) 30, list.get(2));
     }
 
     @Test
     public void testDisposableByteArrayToCollection() {
-        byte[] original = {3, 4};
+        byte[] original = { 3, 4 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
         ArrayList<Byte> list = array.toCollection(ArrayList::new);
         Assertions.assertEquals(2, list.size());
-        Assertions.assertEquals(Byte.valueOf((byte)3), list.get(0));
-        Assertions.assertEquals(Byte.valueOf((byte)4), list.get(1));
+        Assertions.assertEquals(Byte.valueOf((byte) 3), list.get(0));
+        Assertions.assertEquals(Byte.valueOf((byte) 4), list.get(1));
     }
 
     @Test
     public void testDisposableByteArraySum() {
-        byte[] original = {1, 2, 3, 4, 5};
+        byte[] original = { 1, 2, 3, 4, 5 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
         Assertions.assertEquals(15, array.sum());
     }
 
     @Test
     public void testDisposableByteArrayAverage() {
-        byte[] original = {10, 20, 30};
+        byte[] original = { 10, 20, 30 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
         Assertions.assertEquals(20.0, array.average(), 0.001);
     }
 
     @Test
     public void testDisposableByteArrayMin() {
-        byte[] original = {5, 1, 3};
+        byte[] original = { 5, 1, 3 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
-        Assertions.assertEquals((byte)1, array.min());
+        Assertions.assertEquals((byte) 1, array.min());
     }
 
     @Test
     public void testDisposableByteArrayMax() {
-        byte[] original = {5, 10, 3};
+        byte[] original = { 5, 10, 3 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
-        Assertions.assertEquals((byte)10, array.max());
+        Assertions.assertEquals((byte) 10, array.max());
     }
 
     @Test
     public void testDisposableByteArrayForeach() throws Exception {
-        byte[] original = {1, 2, 3};
+        byte[] original = { 1, 2, 3 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
         List<Byte> collected = new ArrayList<>();
         array.foreach(collected::add);
-        Assertions.assertEquals(Arrays.asList((byte)1, (byte)2, (byte)3), collected);
+        Assertions.assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), collected);
     }
 
     @Test
     public void testDisposableByteArrayApply() throws Exception {
-        byte[] original = {1, 2, 3};
+        byte[] original = { 1, 2, 3 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
         int sum = array.apply(arr -> {
             int s = 0;
-            for (byte b : arr) s += b;
+            for (byte b : arr)
+                s += b;
             return s;
         });
         Assertions.assertEquals(6, sum);
@@ -613,9 +610,9 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableByteArrayAccept() throws Exception {
-        byte[] original = {7, 8, 9};
+        byte[] original = { 7, 8, 9 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         array.accept(arr -> {
             called[0] = true;
             Assertions.assertArrayEquals(original, arr);
@@ -625,21 +622,21 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableByteArrayJoin() {
-        byte[] original = {1, 2, 3};
+        byte[] original = { 1, 2, 3 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
         Assertions.assertEquals("1, 2, 3", array.join(", "));
     }
 
     @Test
     public void testDisposableByteArrayJoinWithPrefixSuffix() {
-        byte[] original = {10, 20};
+        byte[] original = { 10, 20 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
         Assertions.assertEquals("{10|20}", array.join("|", "{", "}"));
     }
 
     @Test
     public void testDisposableByteArrayToString() {
-        byte[] original = {1, 2};
+        byte[] original = { 1, 2 };
         NoCachingNoUpdating.DisposableByteArray array = NoCachingNoUpdating.DisposableByteArray.wrap(original);
         String str = array.toString();
         Assertions.assertNotNull(str);
@@ -647,7 +644,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertTrue(str.contains("2"));
     }
 
-    // Tests for DisposableShortArray
     @Test
     public void testDisposableShortArrayCreate() {
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.create(5);
@@ -657,21 +653,21 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableShortArrayWrap() {
-        short[] original = {100, 200, 300};
+        short[] original = { 100, 200, 300 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
         Assertions.assertNotNull(array);
         Assertions.assertEquals(3, array.length());
-        Assertions.assertEquals((short)100, array.get(0));
-        Assertions.assertEquals((short)200, array.get(1));
-        Assertions.assertEquals((short)300, array.get(2));
+        Assertions.assertEquals((short) 100, array.get(0));
+        Assertions.assertEquals((short) 200, array.get(1));
+        Assertions.assertEquals((short) 300, array.get(2));
     }
 
     @Test
     public void testDisposableShortArrayGet() {
-        short[] original = {10, 20};
+        short[] original = { 10, 20 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
-        Assertions.assertEquals((short)10, array.get(0));
-        Assertions.assertEquals((short)20, array.get(1));
+        Assertions.assertEquals((short) 10, array.get(0));
+        Assertions.assertEquals((short) 20, array.get(1));
         Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> array.get(2));
     }
 
@@ -683,7 +679,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableShortArrayCopy() {
-        short[] original = {5, 6, 7};
+        short[] original = { 5, 6, 7 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
         short[] copy = array.copy();
         Assertions.assertNotSame(original, copy);
@@ -692,79 +688,80 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableShortArrayBox() {
-        short[] original = {1, 2};
+        short[] original = { 1, 2 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
         Short[] boxed = array.box();
         Assertions.assertEquals(2, boxed.length);
-        Assertions.assertEquals(Short.valueOf((short)1), boxed[0]);
-        Assertions.assertEquals(Short.valueOf((short)2), boxed[1]);
+        Assertions.assertEquals(Short.valueOf((short) 1), boxed[0]);
+        Assertions.assertEquals(Short.valueOf((short) 2), boxed[1]);
     }
 
     @Test
     public void testDisposableShortArrayToList() {
-        short[] original = {10, 20, 30};
+        short[] original = { 10, 20, 30 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
         ShortList list = array.toList();
         Assertions.assertEquals(3, list.size());
-        Assertions.assertEquals((short)10, list.get(0));
-        Assertions.assertEquals((short)20, list.get(1));
-        Assertions.assertEquals((short)30, list.get(2));
+        Assertions.assertEquals((short) 10, list.get(0));
+        Assertions.assertEquals((short) 20, list.get(1));
+        Assertions.assertEquals((short) 30, list.get(2));
     }
 
     @Test
     public void testDisposableShortArrayToCollection() {
-        short[] original = {3, 4};
+        short[] original = { 3, 4 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
         ArrayList<Short> list = array.toCollection(ArrayList::new);
         Assertions.assertEquals(2, list.size());
-        Assertions.assertEquals(Short.valueOf((short)3), list.get(0));
-        Assertions.assertEquals(Short.valueOf((short)4), list.get(1));
+        Assertions.assertEquals(Short.valueOf((short) 3), list.get(0));
+        Assertions.assertEquals(Short.valueOf((short) 4), list.get(1));
     }
 
     @Test
     public void testDisposableShortArraySum() {
-        short[] original = {100, 200, 300};
+        short[] original = { 100, 200, 300 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
         Assertions.assertEquals(600, array.sum());
     }
 
     @Test
     public void testDisposableShortArrayAverage() {
-        short[] original = {10, 20, 30};
+        short[] original = { 10, 20, 30 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
         Assertions.assertEquals(20.0, array.average(), 0.001);
     }
 
     @Test
     public void testDisposableShortArrayMin() {
-        short[] original = {5, 1, 3};
+        short[] original = { 5, 1, 3 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
-        Assertions.assertEquals((short)1, array.min());
+        Assertions.assertEquals((short) 1, array.min());
     }
 
     @Test
     public void testDisposableShortArrayMax() {
-        short[] original = {5, 10, 3};
+        short[] original = { 5, 10, 3 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
-        Assertions.assertEquals((short)10, array.max());
+        Assertions.assertEquals((short) 10, array.max());
     }
 
     @Test
     public void testDisposableShortArrayForeach() throws Exception {
-        short[] original = {1, 2, 3};
+        short[] original = { 1, 2, 3 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
         List<Short> collected = new ArrayList<>();
         array.foreach(collected::add);
-        Assertions.assertEquals(Arrays.asList((short)1, (short)2, (short)3), collected);
+        Assertions.assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), collected);
     }
 
     @Test
     public void testDisposableShortArrayApply() throws Exception {
-        short[] original = {10, 20, 30};
+        short[] original = { 10, 20, 30 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
         int sum = array.apply(arr -> {
             int s = 0;
-            for (short v : arr) s += v;
+            for (short v : arr)
+                s += v;
             return s;
         });
         Assertions.assertEquals(60, sum);
@@ -772,9 +769,9 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableShortArrayAccept() throws Exception {
-        short[] original = {7, 8, 9};
+        short[] original = { 7, 8, 9 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         array.accept(arr -> {
             called[0] = true;
             Assertions.assertArrayEquals(original, arr);
@@ -784,21 +781,21 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableShortArrayJoin() {
-        short[] original = {1, 2, 3};
+        short[] original = { 1, 2, 3 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
         Assertions.assertEquals("1, 2, 3", array.join(", "));
     }
 
     @Test
     public void testDisposableShortArrayJoinWithPrefixSuffix() {
-        short[] original = {10, 20};
+        short[] original = { 10, 20 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
         Assertions.assertEquals("{10|20}", array.join("|", "{", "}"));
     }
 
     @Test
     public void testDisposableShortArrayToString() {
-        short[] original = {1, 2};
+        short[] original = { 1, 2 };
         NoCachingNoUpdating.DisposableShortArray array = NoCachingNoUpdating.DisposableShortArray.wrap(original);
         String str = array.toString();
         Assertions.assertNotNull(str);
@@ -806,7 +803,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertTrue(str.contains("2"));
     }
 
-    // Tests for DisposableIntArray
     @Test
     public void testDisposableIntArrayCreate() {
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.create(5);
@@ -816,7 +812,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableIntArrayWrap() {
-        int[] original = {10, 20, 30};
+        int[] original = { 10, 20, 30 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         Assertions.assertNotNull(array);
         Assertions.assertEquals(3, array.length());
@@ -827,7 +823,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableIntArrayGet() {
-        int[] original = {100, 200};
+        int[] original = { 100, 200 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         Assertions.assertEquals(100, array.get(0));
         Assertions.assertEquals(200, array.get(1));
@@ -842,7 +838,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableIntArrayCopy() {
-        int[] original = {1, 2, 3};
+        int[] original = { 1, 2, 3 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         int[] copy = array.copy();
         Assertions.assertNotSame(original, copy);
@@ -851,7 +847,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableIntArrayBox() {
-        int[] original = {1, 2};
+        int[] original = { 1, 2 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         Integer[] boxed = array.box();
         Assertions.assertEquals(2, boxed.length);
@@ -861,7 +857,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableIntArrayToList() {
-        int[] original = {10, 20, 30};
+        int[] original = { 10, 20, 30 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         IntList list = array.toList();
         Assertions.assertEquals(3, list.size());
@@ -872,7 +868,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableIntArrayToCollection() {
-        int[] original = {3, 4};
+        int[] original = { 3, 4 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         ArrayList<Integer> list = array.toCollection(ArrayList::new);
         Assertions.assertEquals(2, list.size());
@@ -882,35 +878,35 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableIntArraySum() {
-        int[] original = {10, 20, 30, 40, 50};
+        int[] original = { 10, 20, 30, 40, 50 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         Assertions.assertEquals(150, array.sum());
     }
 
     @Test
     public void testDisposableIntArrayAverage() {
-        int[] original = {10, 20, 30};
+        int[] original = { 10, 20, 30 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         Assertions.assertEquals(20.0, array.average(), 0.001);
     }
 
     @Test
     public void testDisposableIntArrayMin() {
-        int[] original = {5, 1, 3};
+        int[] original = { 5, 1, 3 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         Assertions.assertEquals(1, array.min());
     }
 
     @Test
     public void testDisposableIntArrayMax() {
-        int[] original = {5, 10, 3};
+        int[] original = { 5, 10, 3 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         Assertions.assertEquals(10, array.max());
     }
 
     @Test
     public void testDisposableIntArrayForeach() throws Exception {
-        int[] original = {1, 2, 3};
+        int[] original = { 1, 2, 3 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         List<Integer> collected = new ArrayList<>();
         array.foreach(collected::add);
@@ -919,11 +915,12 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableIntArrayApply() throws Exception {
-        int[] original = {10, 20, 30};
+        int[] original = { 10, 20, 30 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         int sum = array.apply(arr -> {
             int s = 0;
-            for (int v : arr) s += v;
+            for (int v : arr)
+                s += v;
             return s;
         });
         Assertions.assertEquals(60, sum);
@@ -931,9 +928,9 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableIntArrayAccept() throws Exception {
-        int[] original = {7, 8, 9};
+        int[] original = { 7, 8, 9 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         array.accept(arr -> {
             called[0] = true;
             Assertions.assertArrayEquals(original, arr);
@@ -943,21 +940,21 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableIntArrayJoin() {
-        int[] original = {1, 2, 3};
+        int[] original = { 1, 2, 3 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         Assertions.assertEquals("1, 2, 3", array.join(", "));
     }
 
     @Test
     public void testDisposableIntArrayJoinWithPrefixSuffix() {
-        int[] original = {10, 20};
+        int[] original = { 10, 20 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         Assertions.assertEquals("{10|20}", array.join("|", "{", "}"));
     }
 
     @Test
     public void testDisposableIntArrayToString() {
-        int[] original = {1, 2};
+        int[] original = { 1, 2 };
         NoCachingNoUpdating.DisposableIntArray array = NoCachingNoUpdating.DisposableIntArray.wrap(original);
         String str = array.toString();
         Assertions.assertNotNull(str);
@@ -965,7 +962,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertTrue(str.contains("2"));
     }
 
-    // Tests for DisposableLongArray
     @Test
     public void testDisposableLongArrayCreate() {
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.create(5);
@@ -975,7 +971,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableLongArrayWrap() {
-        long[] original = {1000L, 2000L, 3000L};
+        long[] original = { 1000L, 2000L, 3000L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         Assertions.assertNotNull(array);
         Assertions.assertEquals(3, array.length());
@@ -986,7 +982,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableLongArrayGet() {
-        long[] original = {100L, 200L};
+        long[] original = { 100L, 200L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         Assertions.assertEquals(100L, array.get(0));
         Assertions.assertEquals(200L, array.get(1));
@@ -1001,7 +997,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableLongArrayCopy() {
-        long[] original = {1L, 2L, 3L};
+        long[] original = { 1L, 2L, 3L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         long[] copy = array.copy();
         Assertions.assertNotSame(original, copy);
@@ -1010,7 +1006,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableLongArrayBox() {
-        long[] original = {1L, 2L};
+        long[] original = { 1L, 2L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         Long[] boxed = array.box();
         Assertions.assertEquals(2, boxed.length);
@@ -1020,7 +1016,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableLongArrayToList() {
-        long[] original = {10L, 20L, 30L};
+        long[] original = { 10L, 20L, 30L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         LongList list = array.toList();
         Assertions.assertEquals(3, list.size());
@@ -1031,7 +1027,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableLongArrayToCollection() {
-        long[] original = {3L, 4L};
+        long[] original = { 3L, 4L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         ArrayList<Long> list = array.toCollection(ArrayList::new);
         Assertions.assertEquals(2, list.size());
@@ -1041,35 +1037,35 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableLongArraySum() {
-        long[] original = {1000L, 2000L, 3000L};
+        long[] original = { 1000L, 2000L, 3000L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         Assertions.assertEquals(6000L, array.sum());
     }
 
     @Test
     public void testDisposableLongArrayAverage() {
-        long[] original = {10L, 20L, 30L};
+        long[] original = { 10L, 20L, 30L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         Assertions.assertEquals(20.0, array.average(), 0.001);
     }
 
     @Test
     public void testDisposableLongArrayMin() {
-        long[] original = {5L, 1L, 3L};
+        long[] original = { 5L, 1L, 3L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         Assertions.assertEquals(1L, array.min());
     }
 
     @Test
     public void testDisposableLongArrayMax() {
-        long[] original = {5L, 10L, 3L};
+        long[] original = { 5L, 10L, 3L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         Assertions.assertEquals(10L, array.max());
     }
 
     @Test
     public void testDisposableLongArrayForeach() throws Exception {
-        long[] original = {1L, 2L, 3L};
+        long[] original = { 1L, 2L, 3L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         List<Long> collected = new ArrayList<>();
         array.foreach(collected::add);
@@ -1078,11 +1074,12 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableLongArrayApply() throws Exception {
-        long[] original = {10L, 20L, 30L};
+        long[] original = { 10L, 20L, 30L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         long sum = array.apply(arr -> {
             long s = 0;
-            for (long v : arr) s += v;
+            for (long v : arr)
+                s += v;
             return s;
         });
         Assertions.assertEquals(60L, sum);
@@ -1090,9 +1087,9 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableLongArrayAccept() throws Exception {
-        long[] original = {7L, 8L, 9L};
+        long[] original = { 7L, 8L, 9L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         array.accept(arr -> {
             called[0] = true;
             Assertions.assertArrayEquals(original, arr);
@@ -1102,21 +1099,21 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableLongArrayJoin() {
-        long[] original = {1L, 2L, 3L};
+        long[] original = { 1L, 2L, 3L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         Assertions.assertEquals("1, 2, 3", array.join(", "));
     }
 
     @Test
     public void testDisposableLongArrayJoinWithPrefixSuffix() {
-        long[] original = {10L, 20L};
+        long[] original = { 10L, 20L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         Assertions.assertEquals("{10|20}", array.join("|", "{", "}"));
     }
 
     @Test
     public void testDisposableLongArrayToString() {
-        long[] original = {1L, 2L};
+        long[] original = { 1L, 2L };
         NoCachingNoUpdating.DisposableLongArray array = NoCachingNoUpdating.DisposableLongArray.wrap(original);
         String str = array.toString();
         Assertions.assertNotNull(str);
@@ -1124,7 +1121,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertTrue(str.contains("2"));
     }
 
-    // Tests for DisposableFloatArray
     @Test
     public void testDisposableFloatArrayCreate() {
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.create(5);
@@ -1134,7 +1130,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableFloatArrayWrap() {
-        float[] original = {1.5f, 2.5f, 3.5f};
+        float[] original = { 1.5f, 2.5f, 3.5f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         Assertions.assertNotNull(array);
         Assertions.assertEquals(3, array.length());
@@ -1145,7 +1141,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableFloatArrayGet() {
-        float[] original = {1.1f, 2.2f};
+        float[] original = { 1.1f, 2.2f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         Assertions.assertEquals(1.1f, array.get(0));
         Assertions.assertEquals(2.2f, array.get(1));
@@ -1160,7 +1156,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableFloatArrayCopy() {
-        float[] original = {1.0f, 2.0f, 3.0f};
+        float[] original = { 1.0f, 2.0f, 3.0f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         float[] copy = array.copy();
         Assertions.assertNotSame(original, copy);
@@ -1169,7 +1165,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableFloatArrayBox() {
-        float[] original = {1.0f, 2.0f};
+        float[] original = { 1.0f, 2.0f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         Float[] boxed = array.box();
         Assertions.assertEquals(2, boxed.length);
@@ -1179,7 +1175,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableFloatArrayToList() {
-        float[] original = {1.1f, 2.2f, 3.3f};
+        float[] original = { 1.1f, 2.2f, 3.3f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         FloatList list = array.toList();
         Assertions.assertEquals(3, list.size());
@@ -1190,7 +1186,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableFloatArrayToCollection() {
-        float[] original = {3.0f, 4.0f};
+        float[] original = { 3.0f, 4.0f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         ArrayList<Float> list = array.toCollection(ArrayList::new);
         Assertions.assertEquals(2, list.size());
@@ -1200,35 +1196,35 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableFloatArraySum() {
-        float[] original = {1.5f, 2.5f, 3.5f};
+        float[] original = { 1.5f, 2.5f, 3.5f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         Assertions.assertEquals(7.5f, array.sum(), 0.001f);
     }
 
     @Test
     public void testDisposableFloatArrayAverage() {
-        float[] original = {1.0f, 2.0f, 3.0f};
+        float[] original = { 1.0f, 2.0f, 3.0f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         Assertions.assertEquals(2.0, array.average(), 0.001);
     }
 
     @Test
     public void testDisposableFloatArrayMin() {
-        float[] original = {5.0f, 1.0f, 3.0f};
+        float[] original = { 5.0f, 1.0f, 3.0f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         Assertions.assertEquals(1.0f, array.min());
     }
 
     @Test
     public void testDisposableFloatArrayMax() {
-        float[] original = {5.0f, 10.0f, 3.0f};
+        float[] original = { 5.0f, 10.0f, 3.0f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         Assertions.assertEquals(10.0f, array.max());
     }
 
     @Test
     public void testDisposableFloatArrayForeach() throws Exception {
-        float[] original = {1.0f, 2.0f, 3.0f};
+        float[] original = { 1.0f, 2.0f, 3.0f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         List<Float> collected = new ArrayList<>();
         array.foreach(collected::add);
@@ -1237,11 +1233,12 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableFloatArrayApply() throws Exception {
-        float[] original = {1.0f, 2.0f, 3.0f};
+        float[] original = { 1.0f, 2.0f, 3.0f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         float sum = array.apply(arr -> {
             float s = 0;
-            for (float v : arr) s += v;
+            for (float v : arr)
+                s += v;
             return s;
         });
         Assertions.assertEquals(6.0f, sum, 0.001f);
@@ -1249,9 +1246,9 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableFloatArrayAccept() throws Exception {
-        float[] original = {7.0f, 8.0f, 9.0f};
+        float[] original = { 7.0f, 8.0f, 9.0f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         array.accept(arr -> {
             called[0] = true;
             Assertions.assertArrayEquals(original, arr);
@@ -1261,21 +1258,21 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableFloatArrayJoin() {
-        float[] original = {1.1f, 2.2f, 3.3f};
+        float[] original = { 1.1f, 2.2f, 3.3f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         Assertions.assertEquals("1.1, 2.2, 3.3", array.join(", "));
     }
 
     @Test
     public void testDisposableFloatArrayJoinWithPrefixSuffix() {
-        float[] original = {1.0f, 2.0f};
+        float[] original = { 1.0f, 2.0f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         Assertions.assertEquals("{1.0|2.0}", array.join("|", "{", "}"));
     }
 
     @Test
     public void testDisposableFloatArrayToString() {
-        float[] original = {1.0f, 2.0f};
+        float[] original = { 1.0f, 2.0f };
         NoCachingNoUpdating.DisposableFloatArray array = NoCachingNoUpdating.DisposableFloatArray.wrap(original);
         String str = array.toString();
         Assertions.assertNotNull(str);
@@ -1283,7 +1280,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertTrue(str.contains("2.0"));
     }
 
-    // Tests for DisposableDoubleArray
     @Test
     public void testDisposableDoubleArrayCreate() {
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.create(5);
@@ -1293,7 +1289,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableDoubleArrayWrap() {
-        double[] original = {1.1, 2.2, 3.3};
+        double[] original = { 1.1, 2.2, 3.3 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         Assertions.assertNotNull(array);
         Assertions.assertEquals(3, array.length());
@@ -1304,7 +1300,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableDoubleArrayGet() {
-        double[] original = {10.5, 20.5};
+        double[] original = { 10.5, 20.5 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         Assertions.assertEquals(10.5, array.get(0));
         Assertions.assertEquals(20.5, array.get(1));
@@ -1319,7 +1315,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableDoubleArrayCopy() {
-        double[] original = {1.0, 2.0, 3.0};
+        double[] original = { 1.0, 2.0, 3.0 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         double[] copy = array.copy();
         Assertions.assertNotSame(original, copy);
@@ -1328,7 +1324,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableDoubleArrayBox() {
-        double[] original = {1.0, 2.0};
+        double[] original = { 1.0, 2.0 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         Double[] boxed = array.box();
         Assertions.assertEquals(2, boxed.length);
@@ -1338,7 +1334,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableDoubleArrayToList() {
-        double[] original = {1.1, 2.2, 3.3};
+        double[] original = { 1.1, 2.2, 3.3 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         DoubleList list = array.toList();
         Assertions.assertEquals(3, list.size());
@@ -1349,7 +1345,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableDoubleArrayToCollection() {
-        double[] original = {3.0, 4.0};
+        double[] original = { 3.0, 4.0 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         ArrayList<Double> list = array.toCollection(ArrayList::new);
         Assertions.assertEquals(2, list.size());
@@ -1359,35 +1355,35 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableDoubleArraySum() {
-        double[] original = {1.1, 2.2, 3.3, 4.4};
+        double[] original = { 1.1, 2.2, 3.3, 4.4 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         Assertions.assertEquals(11.0, array.sum(), 0.001);
     }
 
     @Test
     public void testDisposableDoubleArrayAverage() {
-        double[] original = {10.0, 20.0, 30.0};
+        double[] original = { 10.0, 20.0, 30.0 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         Assertions.assertEquals(20.0, array.average(), 0.001);
     }
 
     @Test
     public void testDisposableDoubleArrayMin() {
-        double[] original = {5.0, 1.0, 3.0};
+        double[] original = { 5.0, 1.0, 3.0 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         Assertions.assertEquals(1.0, array.min());
     }
 
     @Test
     public void testDisposableDoubleArrayMax() {
-        double[] original = {5.0, 10.0, 3.0};
+        double[] original = { 5.0, 10.0, 3.0 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         Assertions.assertEquals(10.0, array.max());
     }
 
     @Test
     public void testDisposableDoubleArrayForeach() throws Exception {
-        double[] original = {1.0, 2.0, 3.0};
+        double[] original = { 1.0, 2.0, 3.0 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         List<Double> collected = new ArrayList<>();
         array.foreach(collected::add);
@@ -1396,11 +1392,12 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableDoubleArrayApply() throws Exception {
-        double[] original = {1.0, 2.0, 3.0};
+        double[] original = { 1.0, 2.0, 3.0 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         double sum = array.apply(arr -> {
             double s = 0;
-            for (double v : arr) s += v;
+            for (double v : arr)
+                s += v;
             return s;
         });
         Assertions.assertEquals(6.0, sum, 0.001);
@@ -1408,9 +1405,9 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableDoubleArrayAccept() throws Exception {
-        double[] original = {7.0, 8.0, 9.0};
+        double[] original = { 7.0, 8.0, 9.0 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         array.accept(arr -> {
             called[0] = true;
             Assertions.assertArrayEquals(original, arr);
@@ -1420,21 +1417,21 @@ public class NoCachingNoUpdating102Test extends TestBase {
 
     @Test
     public void testDisposableDoubleArrayJoin() {
-        double[] original = {1.1, 2.2, 3.3};
+        double[] original = { 1.1, 2.2, 3.3 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         Assertions.assertEquals("1.1, 2.2, 3.3", array.join(", "));
     }
 
     @Test
     public void testDisposableDoubleArrayJoinWithPrefixSuffix() {
-        double[] original = {1.0, 2.0};
+        double[] original = { 1.0, 2.0 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         Assertions.assertEquals("{1.0|2.0}", array.join("|", "{", "}"));
     }
 
     @Test
     public void testDisposableDoubleArrayToString() {
-        double[] original = {1.0, 2.0};
+        double[] original = { 1.0, 2.0 };
         NoCachingNoUpdating.DisposableDoubleArray array = NoCachingNoUpdating.DisposableDoubleArray.wrap(original);
         String str = array.toString();
         Assertions.assertNotNull(str);
@@ -1442,7 +1439,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertTrue(str.contains("2.0"));
     }
 
-    // Tests for DisposableDeque
     @Test
     public void testDisposableDequeCreate() {
         NoCachingNoUpdating.DisposableDeque<String> deque = NoCachingNoUpdating.DisposableDeque.create(10);
@@ -1509,11 +1505,11 @@ public class NoCachingNoUpdating102Test extends TestBase {
         original.add("b");
         original.add("c");
         NoCachingNoUpdating.DisposableDeque<String> deque = NoCachingNoUpdating.DisposableDeque.wrap(original);
-        
+
         String[] small = new String[1];
         String[] result1 = deque.toArray(small);
         Assertions.assertEquals(3, result1.length);
-        
+
         String[] large = new String[5];
         String[] result2 = deque.toArray(large);
         Assertions.assertSame(large, result2);
@@ -1588,7 +1584,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Deque<String> original = new ArrayDeque<>();
         original.add("test");
         NoCachingNoUpdating.DisposableDeque<String> deque = NoCachingNoUpdating.DisposableDeque.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         deque.accept(d -> {
             called[0] = true;
             Assertions.assertEquals(1, d.size());
@@ -1628,7 +1624,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertTrue(str.contains("20"));
     }
 
-    // Tests for DisposableEntry
     @Test
     public void testDisposableEntryWrap() {
         Map.Entry<String, Integer> original = new AbstractMap.SimpleEntry<>("key", 100);
@@ -1675,7 +1670,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
     public void testDisposableEntryAcceptWithConsumer() throws Exception {
         Map.Entry<String, Integer> original = new AbstractMap.SimpleEntry<>("value", 100);
         NoCachingNoUpdating.DisposableEntry<String, Integer> entry = NoCachingNoUpdating.DisposableEntry.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         entry.accept(e -> {
             called[0] = true;
             Assertions.assertEquals("value", e.getKey());
@@ -1688,7 +1683,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
     public void testDisposableEntryAcceptWithBiConsumer() throws Exception {
         Map.Entry<String, Integer> original = new AbstractMap.SimpleEntry<>("test", 50);
         NoCachingNoUpdating.DisposableEntry<String, Integer> entry = NoCachingNoUpdating.DisposableEntry.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         entry.accept((k, v) -> {
             called[0] = true;
             Assertions.assertEquals("test", k);
@@ -1704,7 +1699,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertEquals("key=123", entry.toString());
     }
 
-    // Tests for DisposablePair
     @Test
     public void testDisposablePairWrap() {
         Pair<String, Integer> original = Pair.of("left", 100);
@@ -1736,7 +1730,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
     public void testDisposablePairAccept() throws Exception {
         Pair<String, Double> original = Pair.of("pi", 3.14);
         NoCachingNoUpdating.DisposablePair<String, Double> pair = NoCachingNoUpdating.DisposablePair.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         pair.accept((l, r) -> {
             called[0] = true;
             Assertions.assertEquals("pi", l);
@@ -1753,7 +1747,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertEquals("[abc, 123]", str);
     }
 
-    // Tests for DisposableTriple
     @Test
     public void testDisposableTripleWrap() {
         Triple<String, Integer, Boolean> original = Triple.of("left", 100, true);
@@ -1787,7 +1780,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
     public void testDisposableTripleAccept() throws Exception {
         Triple<String, String, String> original = Triple.of("x", "y", "z");
         NoCachingNoUpdating.DisposableTriple<String, String, String> triple = NoCachingNoUpdating.DisposableTriple.wrap(original);
-        boolean[] called = {false};
+        boolean[] called = { false };
         triple.accept((l, m, r) -> {
             called[0] = true;
             Assertions.assertEquals("x", l);
@@ -1805,7 +1798,6 @@ public class NoCachingNoUpdating102Test extends TestBase {
         Assertions.assertEquals("[1, 2, 3]", str);
     }
 
-    // Tests for Timed
     @Test
     public void testTimedOf() {
         long timestamp = System.currentTimeMillis();
@@ -1843,7 +1835,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
         NoCachingNoUpdating.Timed<String> timed2 = NoCachingNoUpdating.Timed.of("test", timestamp);
         NoCachingNoUpdating.Timed<String> timed3 = NoCachingNoUpdating.Timed.of("other", timestamp);
         NoCachingNoUpdating.Timed<String> timed4 = NoCachingNoUpdating.Timed.of("test", 2000L);
-        
+
         Assertions.assertEquals(timed1, timed1);
         Assertions.assertEquals(timed1, timed2);
         Assertions.assertNotEquals(timed1, timed3);
@@ -1857,7 +1849,7 @@ public class NoCachingNoUpdating102Test extends TestBase {
         NoCachingNoUpdating.Timed<String> timed1 = NoCachingNoUpdating.Timed.of(null, 1000L);
         NoCachingNoUpdating.Timed<String> timed2 = NoCachingNoUpdating.Timed.of(null, 1000L);
         NoCachingNoUpdating.Timed<String> timed3 = NoCachingNoUpdating.Timed.of("test", 1000L);
-        
+
         Assertions.assertEquals(timed1, timed2);
         Assertions.assertNotEquals(timed1, timed3);
     }

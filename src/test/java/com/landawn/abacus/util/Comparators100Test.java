@@ -26,6 +26,7 @@ import java.util.function.ToLongFunction;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.ToBooleanFunction;
@@ -36,6 +37,7 @@ import com.landawn.abacus.util.function.ToShortFunction;
 
 import lombok.Data;
 
+@Tag("new-test")
 public class Comparators100Test extends TestBase {
 
     @Data
@@ -91,7 +93,6 @@ public class Comparators100Test extends TestBase {
         list.sort(comp);
         assertEquals(Arrays.asList(null, "apple", "banana", "cherry"), list);
 
-        // Test with integers
         List<Integer> intList = new ArrayList<>(Arrays.asList(3, null, 1, 4, 2));
         intList.sort(Comparators.naturalOrder());
         assertEquals(Arrays.asList(null, 1, 2, 3, 4), intList);
@@ -104,7 +105,6 @@ public class Comparators100Test extends TestBase {
         list.sort(comp);
         assertEquals(Arrays.asList(null, null, 1, 2, 3), list);
 
-        // Test that nullsFirst() and naturalOrder() behave the same
         List<String> list2 = new ArrayList<>(Arrays.asList("b", null, "a"));
         list2.sort(Comparators.nullsFirst());
         assertEquals(Arrays.asList(null, "a", "b"), list2);
@@ -119,7 +119,6 @@ public class Comparators100Test extends TestBase {
         list.sort(comp);
         assertEquals(Arrays.asList(null, null, "cherry", "banana", "apple"), list);
 
-        // Test with null comparator
         Comparator<Integer> nullComp = Comparators.nullsFirst(null);
         List<Integer> intList = new ArrayList<>(Arrays.asList(3, null, 1, 2));
         intList.sort(nullComp);
@@ -134,11 +133,11 @@ public class Comparators100Test extends TestBase {
         List<Person> list = new ArrayList<>(personList);
         list.sort(comp);
 
-        assertNull(list.get(0)); // null person first
-        assertEquals(25, list.get(1).age); // Bob or David
-        assertEquals(25, list.get(2).age); // Bob or David
-        assertEquals(30, list.get(3).age); // Alice
-        assertEquals(35, list.get(4).age); // Charlie
+        assertNull(list.get(0));
+        assertEquals(25, list.get(1).age);
+        assertEquals(25, list.get(2).age);
+        assertEquals(30, list.get(3).age);
+        assertEquals(35, list.get(4).age);
 
         assertThrows(IllegalArgumentException.class, () -> Comparators.nullsFirstBy(null));
     }
@@ -150,10 +149,8 @@ public class Comparators100Test extends TestBase {
         List<String> sorted = new ArrayList<>(list);
         sorted.sort(comp);
 
-        // Nulls should be first, non-nulls maintain relative order
         assertNull(sorted.get(0));
         assertNull(sorted.get(1));
-        // Non-null elements should maintain their relative order
         assertEquals("b", sorted.get(2));
         assertEquals("a", sorted.get(3));
         assertEquals("c", sorted.get(4));
@@ -176,7 +173,6 @@ public class Comparators100Test extends TestBase {
         list.sort(comp);
         assertEquals(Arrays.asList(4, 3, 2, 1, null, null), list);
 
-        // Test with null comparator
         Comparator<String> nullComp = Comparators.nullsLast(null);
         List<String> strList = new ArrayList<>(Arrays.asList("b", null, "a"));
         strList.sort(nullComp);
@@ -195,7 +191,7 @@ public class Comparators100Test extends TestBase {
         assertEquals("Bob", list.get(1).name);
         assertEquals("Charlie", list.get(2).name);
         assertEquals("David", list.get(3).name);
-        assertNull(list.get(4)); // null person last
+        assertNull(list.get(4));
 
         assertThrows(IllegalArgumentException.class, () -> Comparators.nullsLastBy(null));
     }
@@ -207,7 +203,6 @@ public class Comparators100Test extends TestBase {
         List<String> sorted = new ArrayList<>(list);
         sorted.sort(comp);
 
-        // Non-nulls should maintain relative order, nulls should be last
         assertEquals("b", sorted.get(0));
         assertEquals("a", sorted.get(1));
         assertEquals("c", sorted.get(2));
@@ -217,7 +212,6 @@ public class Comparators100Test extends TestBase {
 
     @Test
     public void testEmptiesFirst() {
-        // Test with natural ordering
         Comparator<u.Optional<String>> comp = Comparators.emptiesFirst();
         List<u.Optional<String>> list = Arrays.asList(u.Optional.of("b"), u.Optional.empty(), u.Optional.of("a"), null);
         List<u.Optional<String>> sorted = new ArrayList<>(list);
@@ -228,7 +222,6 @@ public class Comparators100Test extends TestBase {
         assertEquals("a", sorted.get(2).get());
         assertEquals("b", sorted.get(3).get());
 
-        // Test with custom comparator
         Comparator<String> lengthComp = Comparator.comparingInt(String::length);
         Comparator<u.Optional<String>> comp2 = Comparators.emptiesFirst(lengthComp);
         List<u.Optional<String>> list2 = Arrays.asList(u.Optional.of("long"), u.Optional.empty(), u.Optional.of("a"));
@@ -242,7 +235,6 @@ public class Comparators100Test extends TestBase {
 
     @Test
     public void testEmptiesLast() {
-        // Test with natural ordering
         Comparator<u.Optional<Integer>> comp = Comparators.emptiesLast();
         List<u.Optional<Integer>> list = Arrays.asList(u.Optional.of(2), u.Optional.empty(), u.Optional.of(1), null);
         List<u.Optional<Integer>> sorted = new ArrayList<>(list);
@@ -253,7 +245,6 @@ public class Comparators100Test extends TestBase {
         assertTrue(sorted.get(2) == null || sorted.get(2).isEmpty());
         assertTrue(sorted.get(3) == null || sorted.get(3).isEmpty());
 
-        // Test with custom comparator
         Comparator<Integer> reverseComp = Comparator.reverseOrder();
         Comparator<u.Optional<Integer>> comp2 = Comparators.emptiesLast(reverseComp);
         List<u.Optional<Integer>> list2 = Arrays.asList(u.Optional.of(1), u.Optional.empty(), u.Optional.of(2));
@@ -288,11 +279,11 @@ public class Comparators100Test extends TestBase {
         List<Person> list = new ArrayList<>(personList);
         list.sort(comp);
 
-        assertNull(list.get(0)); // null person first
-        assertNull(list.get(1).salary); // Bob with null salary
-        assertEquals(45000, list.get(2).salary); // David
-        assertEquals(50000, list.get(3).salary); // Alice
-        assertEquals(60000, list.get(4).salary); // Charlie
+        assertNull(list.get(0));
+        assertNull(list.get(1).salary);
+        assertEquals(45000, list.get(2).salary);
+        assertEquals(50000, list.get(3).salary);
+        assertEquals(60000, list.get(4).salary);
 
         assertThrows(IllegalArgumentException.class, () -> Comparators.comparingByIfNotNullOrElseNullsFirst(null));
     }
@@ -305,11 +296,11 @@ public class Comparators100Test extends TestBase {
         List<Person> list = new ArrayList<>(personList);
         list.sort(comp);
 
-        assertEquals(45000, list.get(0).salary); // David
-        assertEquals(50000, list.get(1).salary); // Alice
-        assertEquals(60000, list.get(2).salary); // Charlie
-        assertNull(list.get(3).salary); // Bob with null salary
-        assertNull(list.get(4)); // null person last
+        assertEquals(45000, list.get(0).salary);
+        assertEquals(50000, list.get(1).salary);
+        assertEquals(60000, list.get(2).salary);
+        assertNull(list.get(3).salary);
+        assertNull(list.get(4));
 
         assertThrows(IllegalArgumentException.class, () -> Comparators.comparingByIfNotNullOrElseNullsLast(null));
     }
@@ -340,10 +331,10 @@ public class Comparators100Test extends TestBase {
         List<Person> list = new ArrayList<>(Arrays.asList(new Person("Alice", 30), null, new Person("Bob", 25), new Person("Charlie", 35)));
         list.sort(comp);
 
-        assertNull(list.get(0)); // null person first
-        assertEquals("Bob", list.get(1).name); // shortest name
+        assertNull(list.get(0));
+        assertEquals("Bob", list.get(1).name);
         assertEquals("Alice", list.get(2).name);
-        assertEquals("Charlie", list.get(3).name); // longest name
+        assertEquals("Charlie", list.get(3).name);
     }
 
     @Test
@@ -355,10 +346,10 @@ public class Comparators100Test extends TestBase {
         List<Person> list = new ArrayList<>(Arrays.asList(new Person("Alice", 30), null, new Person("Bob", 25), new Person("Charlie", 35)));
         list.sort(comp);
 
-        assertEquals("Charlie", list.get(0).name); // reverse order
+        assertEquals("Charlie", list.get(0).name);
         assertEquals("Bob", list.get(1).name);
         assertEquals("Alice", list.get(2).name);
-        assertNull(list.get(3)); // null person last
+        assertNull(list.get(3));
     }
 
     @Test
@@ -505,7 +496,6 @@ public class Comparators100Test extends TestBase {
         assertEquals(4.5f, list.get(1).rating);
         assertEquals(4.9f, list.get(2).rating);
 
-        // Test NaN handling
         Person p4 = new Person("David", 40);
         p4.rating = Float.NaN;
         list.add(p4);
@@ -631,7 +621,6 @@ public class Comparators100Test extends TestBase {
         assertEquals("medium", list.get(3));
         assertEquals("very long string", list.get(4));
 
-        // Test with different CharSequence implementations
         List<CharSequence> mixed = Arrays.asList(new StringBuilder("test"), "hi", new StringBuffer("longer"));
         mixed.sort(comp);
         assertEquals("hi", mixed.get(0).toString());
@@ -708,28 +697,25 @@ public class Comparators100Test extends TestBase {
         List<Object[]> arrays = Arrays.asList(arr2, arr1, arr3);
         arrays.sort(comp);
 
-        assertSame(arr1, arrays.get(0)); // apple, banana < apple, cherry
+        assertSame(arr1, arrays.get(0));
         assertSame(arr3, arrays.get(1));
-        assertSame(arr2, arrays.get(2)); // longer array
+        assertSame(arr2, arrays.get(2));
 
         assertThrows(IllegalArgumentException.class, () -> Comparators.comparingObjArray(null));
     }
 
     @Test
     public void testComparingArray() {
-        // Test with natural order
         Comparator<String[]> comp1 = Comparators.comparingArray();
         String[] arr1 = { "apple", "banana" };
         String[] arr2 = { "apple", "cherry" };
         assertTrue(comp1.compare(arr1, arr2) < 0);
 
-        // Test with custom comparator
         Comparator<Integer[]> comp2 = Comparators.comparingArray(Integer::compare);
         Integer[] intArr1 = { 1, 2, 3 };
         Integer[] intArr2 = { 1, 2, 3, 4 };
         assertTrue(comp2.compare(intArr1, intArr2) < 0);
 
-        // Test with null arrays
         assertTrue(comp2.compare(null, intArr1) < 0);
         assertTrue(comp2.compare(intArr1, null) > 0);
         assertEquals(0, comp2.compare(null, null));
@@ -739,30 +725,26 @@ public class Comparators100Test extends TestBase {
 
     @Test
     public void testComparingCollection() {
-        // Test with natural order
         Comparator<List<Integer>> comp1 = Comparators.comparingCollection();
         List<Integer> list1 = Arrays.asList(1, 2, 3);
         List<Integer> list2 = Arrays.asList(1, 2, 4);
         assertTrue(comp1.compare(list1, list2) < 0);
 
-        // Test with custom comparator
         Comparator<List<String>> comp2 = Comparators.comparingCollection(String.CASE_INSENSITIVE_ORDER);
         List<String> strList1 = Arrays.asList("apple", "BANANA");
         List<String> strList2 = Arrays.asList("APPLE", "banana", "cherry");
-        assertTrue(comp2.compare(strList1, strList2) < 0); // shorter list
+        assertTrue(comp2.compare(strList1, strList2) < 0);
 
         assertThrows(IllegalArgumentException.class, () -> Comparators.comparingCollection(null));
     }
 
     @Test
     public void testComparingIterable() {
-        // Test with natural order
         Comparator<Iterable<String>> comp1 = Comparators.comparingIterable();
         Iterable<String> iter1 = Arrays.asList("apple", "banana");
         Iterable<String> iter2 = Arrays.asList("apple", "cherry");
         assertTrue(comp1.compare(iter1, iter2) < 0);
 
-        // Test with custom comparator
         Comparator<Iterable<Integer>> comp2 = Comparators.comparingIterable(Integer::compare);
         Iterable<Integer> intIter1 = Arrays.asList(1, 2, 3);
         Iterable<Integer> intIter2 = Arrays.asList(1, 2, 3, 4);
@@ -773,28 +755,24 @@ public class Comparators100Test extends TestBase {
 
     @Test
     public void testComparingIterator() {
-        // Test with natural order
         Comparator<Iterator<Integer>> comp1 = Comparators.comparingIterator();
         Iterator<Integer> iter1 = Arrays.asList(1, 2, 3).iterator();
         Iterator<Integer> iter2 = Arrays.asList(1, 2, 4).iterator();
         assertTrue(comp1.compare(iter1, iter2) < 0);
 
-        // Test with custom comparator
         Comparator<Iterator<String>> comp2 = Comparators.comparingIterator(String::compareToIgnoreCase);
         Iterator<String> strIter1 = Arrays.asList("apple", "BANANA").iterator();
         Iterator<String> strIter2 = Arrays.asList("APPLE", "banana", "cherry").iterator();
-        assertEquals(-1, comp2.compare(strIter1, strIter2)); // first two elements are equal
+        assertEquals(-1, comp2.compare(strIter1, strIter2));
 
-        // Note: iterators are consumed after comparison
         assertFalse(strIter1.hasNext());
-        assertTrue(strIter2.hasNext()); // still has "cherry"
+        assertTrue(strIter2.hasNext());
 
         assertThrows(IllegalArgumentException.class, () -> Comparators.comparingIterator(null));
     }
 
     @Test
     public void testComparingMapByKey() {
-        // Test with natural order
         Comparator<Map<String, Integer>> comp1 = Comparators.comparingMapByKey();
 
         Map<String, Integer> map1 = new LinkedHashMap<>();
@@ -807,7 +785,6 @@ public class Comparators100Test extends TestBase {
 
         assertTrue(comp1.compare(map1, map2) < 0);
 
-        // Test with custom comparator
         Comparator<Map<String, Integer>> comp2 = Comparators.comparingMapByKey(String.CASE_INSENSITIVE_ORDER);
 
         Map<String, Integer> map3 = new LinkedHashMap<>();
@@ -821,7 +798,6 @@ public class Comparators100Test extends TestBase {
 
     @Test
     public void testComparingMapByValue() {
-        // Test with natural order
         Comparator<Map<String, Integer>> comp1 = Comparators.comparingMapByValue();
 
         Map<String, Integer> map1 = new LinkedHashMap<>();
@@ -834,7 +810,6 @@ public class Comparators100Test extends TestBase {
 
         assertTrue(comp1.compare(map1, map2) < 0);
 
-        // Test with custom comparator
         Comparator<Map<String, Integer>> comp2 = Comparators.comparingMapByValue(Comparator.reverseOrder());
 
         assertTrue(comp2.compare(map1, map2) > 0);
@@ -844,26 +819,19 @@ public class Comparators100Test extends TestBase {
 
     @Test
     public void testComparingBeanByProps() {
-        // Note: This method is deprecated
         List<String> props = Arrays.asList("age", "name", "non-existed-prop");
         Comparator<Person> comp = Comparators.comparingBeanByProps(props);
-
-        // This would require proper bean properties with getters
-        // Since our Person class doesn't have standard getters, this test
-        // would need modification to work properly
 
         assertThrows(IllegalArgumentException.class, () -> Comparators.comparingBeanByProps(null));
     }
 
     @Test
     public void testReverseOrder() {
-        // Test no-arg version
         Comparator<Integer> comp = Comparators.reverseOrder();
         List<Integer> list = Arrays.asList(3, 1, 4, 1, 5, 9);
         list.sort(comp);
         assertEquals(Arrays.asList(9, 5, 4, 3, 1, 1), list);
 
-        // Test with strings
         List<String> strList = Arrays.asList("apple", "zebra", "banana");
         strList.sort(Comparators.reverseOrder());
         assertEquals(Arrays.asList("zebra", "banana", "apple"), strList);
@@ -871,20 +839,17 @@ public class Comparators100Test extends TestBase {
 
     @Test
     public void testReverseOrderWithComparator() {
-        // Test with null (should return reverse natural order)
         Comparator<String> comp1 = Comparators.reverseOrder(null);
         List<String> list1 = Arrays.asList("b", "a", "c");
         list1.sort(comp1);
         assertEquals(Arrays.asList("c", "b", "a"), list1);
 
-        // Test with custom comparator
         Comparator<String> lengthComp = Comparator.comparingInt(String::length);
         Comparator<String> reversed = Comparators.reverseOrder(lengthComp);
         List<String> list2 = Arrays.asList("short", "a", "medium");
         list2.sort(reversed);
         assertEquals(Arrays.asList("medium", "short", "a"), list2);
 
-        // Test double reversal returns natural order
         Comparator<Integer> natural = Comparators.naturalOrder();
         Comparator<Integer> reversed1 = Comparators.reverseOrder(natural);
         Comparator<Integer> reversed2 = Comparators.reverseOrder(reversed1);
@@ -908,7 +873,7 @@ public class Comparators100Test extends TestBase {
         List<Person> list = Arrays.asList(p1, p2, p3);
         list.sort(comp);
 
-        assertTrue(list.get(0).active); // true comes first in reversed order
+        assertTrue(list.get(0).active);
         assertFalse(list.get(1).active);
         assertFalse(list.get(2).active);
 
@@ -1085,11 +1050,11 @@ public class Comparators100Test extends TestBase {
         List<Person> list = new ArrayList<>(personList);
         list.sort(comp);
 
-        assertNull(list.get(0)); // null person first
-        assertNull(list.get(1).salary); // Bob with null salary
-        assertEquals(60000, list.get(2).salary); // Charlie (highest)
-        assertEquals(50000, list.get(3).salary); // Alice
-        assertEquals(45000, list.get(4).salary); // David (lowest)
+        assertNull(list.get(0));
+        assertNull(list.get(1).salary);
+        assertEquals(60000, list.get(2).salary);
+        assertEquals(50000, list.get(3).salary);
+        assertEquals(45000, list.get(4).salary);
 
         assertThrows(IllegalArgumentException.class, () -> Comparators.reversedComparingByIfNotNullOrElseNullsFirst(null));
     }
@@ -1102,11 +1067,11 @@ public class Comparators100Test extends TestBase {
         List<Person> list = new ArrayList<>(personList);
         list.sort(comp);
 
-        assertEquals(60000, list.get(0).salary); // Charlie (highest)
-        assertEquals(50000, list.get(1).salary); // Alice
-        assertEquals(45000, list.get(2).salary); // David (lowest)
-        assertNull(list.get(3).salary); // Bob with null salary
-        assertNull(list.get(4)); // null person last
+        assertEquals(60000, list.get(0).salary);
+        assertEquals(50000, list.get(1).salary);
+        assertEquals(45000, list.get(2).salary);
+        assertNull(list.get(3).salary);
+        assertNull(list.get(4));
 
         assertThrows(IllegalArgumentException.class, () -> Comparators.reversedComparingByIfNotNullOrElseNullsLast(null));
     }
@@ -1156,16 +1121,15 @@ public class Comparators100Test extends TestBase {
         List<Map.Entry<String, Integer>> entries = Arrays.asList(new SimpleEntry<>("a", -2), new SimpleEntry<>("b", 1), new SimpleEntry<>("c", -3));
         entries.sort(comp);
 
-        assertEquals(-3, entries.get(0).getValue()); // abs(-3) = 3 is largest
-        assertEquals(-2, entries.get(1).getValue()); // abs(-2) = 2
-        assertEquals(1, entries.get(2).getValue()); // abs(1) = 1 is smallest
+        assertEquals(-3, entries.get(0).getValue());
+        assertEquals(-2, entries.get(1).getValue());
+        assertEquals(1, entries.get(2).getValue());
 
         assertThrows(IllegalArgumentException.class, () -> Comparators.reversedComparingByValue(null));
     }
 
     @Test
     public void testArrayComparators() {
-        // Test BOOLEAN_ARRAY_COMPARATOR
         boolean[] boolArr1 = { false, true, false };
         boolean[] boolArr2 = { false, true, true };
         boolean[] boolArr3 = { false, true };
@@ -1173,47 +1137,38 @@ public class Comparators100Test extends TestBase {
         assertTrue(Comparators.BOOLEAN_ARRAY_COMPARATOR.compare(boolArr1, boolArr2) < 0);
         assertTrue(Comparators.BOOLEAN_ARRAY_COMPARATOR.compare(boolArr3, boolArr1) < 0);
 
-        // Test CHAR_ARRAY_COMPARATOR
         char[] charArr1 = { 'a', 'b', 'c' };
         char[] charArr2 = { 'a', 'b', 'd' };
         assertTrue(Comparators.CHAR_ARRAY_COMPARATOR.compare(charArr1, charArr2) < 0);
 
-        // Test BYTE_ARRAY_COMPARATOR
         byte[] byteArr1 = { 1, 2, 3 };
         byte[] byteArr2 = { 1, 2, 4 };
         assertTrue(Comparators.BYTE_ARRAY_COMPARATOR.compare(byteArr1, byteArr2) < 0);
 
-        // Test SHORT_ARRAY_COMPARATOR
         short[] shortArr1 = { 100, 200, 300 };
         short[] shortArr2 = { 100, 200, 400 };
         assertTrue(Comparators.SHORT_ARRAY_COMPARATOR.compare(shortArr1, shortArr2) < 0);
 
-        // Test INT_ARRAY_COMPARATOR
         int[] intArr1 = { 1, 2, 3 };
         int[] intArr2 = { 1, 2, 4 };
         assertTrue(Comparators.INT_ARRAY_COMPARATOR.compare(intArr1, intArr2) < 0);
 
-        // Test LONG_ARRAY_COMPARATOR
         long[] longArr1 = { 1L, 2L, 3L };
         long[] longArr2 = { 1L, 2L, 4L };
         assertTrue(Comparators.LONG_ARRAY_COMPARATOR.compare(longArr1, longArr2) < 0);
 
-        // Test FLOAT_ARRAY_COMPARATOR
         float[] floatArr1 = { 1.0f, 2.0f, 3.0f };
         float[] floatArr2 = { 1.0f, 2.0f, 3.5f };
         assertTrue(Comparators.FLOAT_ARRAY_COMPARATOR.compare(floatArr1, floatArr2) < 0);
 
-        // Test DOUBLE_ARRAY_COMPARATOR
         double[] doubleArr1 = { 1.0, 2.0, 3.0 };
         double[] doubleArr2 = { 1.0, 2.0, 3.5 };
         assertTrue(Comparators.DOUBLE_ARRAY_COMPARATOR.compare(doubleArr1, doubleArr2) < 0);
 
-        // Test OBJECT_ARRAY_COMPARATOR
         Object[] objArr1 = { "a", "b", "c" };
         Object[] objArr2 = { "a", "b", "d" };
         assertTrue(Comparators.OBJECT_ARRAY_COMPARATOR.compare(objArr1, objArr2) < 0);
 
-        // Test COLLECTION_COMPARATOR
         Collection<String> coll1 = Arrays.asList("a", "b", "c");
         Collection<String> coll2 = Arrays.asList("a", "b", "d");
         assertTrue(Comparators.COLLECTION_COMPARATOR.compare(coll1, coll2) < 0);
@@ -1221,12 +1176,10 @@ public class Comparators100Test extends TestBase {
 
     @Test
     public void testNullHandlingInArrayComparators() {
-        // Test null array handling
         assertTrue(Comparators.INT_ARRAY_COMPARATOR.compare(null, new int[] { 1 }) < 0);
         assertTrue(Comparators.INT_ARRAY_COMPARATOR.compare(new int[] { 1 }, null) > 0);
         assertEquals(0, Comparators.INT_ARRAY_COMPARATOR.compare(null, null));
 
-        // Test with empty arrays
         assertEquals(0, Comparators.DOUBLE_ARRAY_COMPARATOR.compare(new double[0], new double[0]));
         assertTrue(Comparators.DOUBLE_ARRAY_COMPARATOR.compare(new double[0], new double[] { 1.0 }) < 0);
     }

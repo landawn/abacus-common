@@ -12,6 +12,7 @@ import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -20,6 +21,7 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
+@Tag("new-test")
 public class AbstractDateType100Test extends TestBase {
     private Type<Date> type;
     private CharacterWriter characterWriter;
@@ -59,7 +61,6 @@ public class AbstractDateType100Test extends TestBase {
         Date date = new Date();
         String result = type.stringOf(date);
         assertNotNull(result);
-        // The exact format depends on Dates.format implementation
     }
 
     @Test
@@ -81,14 +82,12 @@ public class AbstractDateType100Test extends TestBase {
     @Test
     public void testWriteCharacter_Null() throws IOException {
         type.writeCharacter(characterWriter, null, null);
-        // Verify writer.write(NULL_CHAR_ARRAY) was called
     }
 
     @Test
     public void testWriteCharacter_ValidDate_NoConfig() throws IOException {
         Date date = new Date();
         type.writeCharacter(characterWriter, date, null);
-        // Verify appropriate write method was called
     }
 
     @Test
@@ -98,7 +97,6 @@ public class AbstractDateType100Test extends TestBase {
         when(config.getDateTimeFormat()).thenReturn(null);
 
         type.writeCharacter(characterWriter, date, config);
-        // Verify quotation marks were written
     }
 
     @Test
@@ -108,7 +106,6 @@ public class AbstractDateType100Test extends TestBase {
         when(config.getStringQuotation()).thenReturn((char) '"');
 
         type.writeCharacter(characterWriter, date, config);
-        // Verify writer.write(date.getTime()) was called
     }
 
     @Test
@@ -118,7 +115,6 @@ public class AbstractDateType100Test extends TestBase {
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         type.writeCharacter(characterWriter, date, config);
-        // Verify ISO 8601 date-time format was written
     }
 
     @Test
@@ -128,18 +124,7 @@ public class AbstractDateType100Test extends TestBase {
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         type.writeCharacter(characterWriter, date, config);
-        // Verify ISO 8601 timestamp format was written
     }
-
-    //    @Test
-    //    public void testWriteCharacter_ValidDate_UnsupportedFormat() throws IOException {
-    //        Date date = new Date();
-    //        // Create a mock DateTimeFormat that isn't one of the supported ones
-    //        DateTimeFormat unsupportedFormat = mock(DateTimeFormat.class);
-    //        when(config.getDateTimeFormat()).thenReturn(unsupportedFormat);
-    //
-    //        assertThrows(RuntimeException.class, () -> type.writeCharacter(characterWriter, date, config));
-    //    }
 
     @Test
     public void testWriteCharacter_ValidDate_QuotationWithLongFormat() throws IOException {
@@ -148,7 +133,6 @@ public class AbstractDateType100Test extends TestBase {
         when(config.getStringQuotation()).thenReturn((char) '"');
 
         type.writeCharacter(characterWriter, date, config);
-        // Verify no quotation marks were written (LONG format doesn't use quotes)
     }
 
     @Test
@@ -158,7 +142,6 @@ public class AbstractDateType100Test extends TestBase {
         when(config.getStringQuotation()).thenReturn((char) '\'');
 
         type.writeCharacter(characterWriter, date, config);
-        // Verify single quotes were written around the ISO 8601 date
     }
 
     @Test

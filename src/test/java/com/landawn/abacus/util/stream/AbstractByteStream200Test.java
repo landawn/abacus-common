@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ByteList;
@@ -30,7 +31,7 @@ import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalByte;
 
-
+@Tag("new-test")
 public class AbstractByteStream200Test extends TestBase {
 
     private ByteStream stream;
@@ -44,12 +45,12 @@ public class AbstractByteStream200Test extends TestBase {
 
     @Test
     public void rateLimited() {
-        RateLimiter rateLimiter = RateLimiter.create(10); // 10 permits per second
+        RateLimiter rateLimiter = RateLimiter.create(10);
         long startTime = System.currentTimeMillis();
         ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rateLimited(rateLimiter).forEach(it -> {
         });
         long endTime = System.currentTimeMillis();
-        assertTrue(endTime - startTime >= 400); // at least 400ms for 5 elements with 10 permits/sec
+        assertTrue(endTime - startTime >= 400);
     }
 
     @Test

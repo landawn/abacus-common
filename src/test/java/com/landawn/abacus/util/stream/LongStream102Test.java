@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -33,11 +34,9 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalLong;
 
+@Tag("new-test")
 public class LongStream102Test extends TestBase {
 
-    // This method needs to be implemented by a concrete test class to provide a LongStream instance.
-    // For example, in ArrayLongStreamTest, it would return new ArrayLongStream(a);
-    // In IteratorLongStreamTest, it would return new IteratorLongStream(LongIterator.of(a));
     protected LongStream createLongStream(long... a) {
         return LongStream.of(a).map(e -> e + 0);
     }
@@ -86,10 +85,10 @@ public class LongStream102Test extends TestBase {
         };
 
         LongStream stream = LongStream.defer(supplier);
-        assertEquals(0, counter.get()); // Supplier not called yet
+        assertEquals(0, counter.get());
 
         long[] result = stream.toArray();
-        assertEquals(1, counter.get()); // Supplier called once
+        assertEquals(1, counter.get());
         assertArrayEquals(new long[] { 1L, 2L, 3L }, result);
     }
 
@@ -136,7 +135,6 @@ public class LongStream102Test extends TestBase {
         Long[] array = { 1L, 2L, 3L, null, 5L };
         LongStream stream = createLongStream(array);
         long[] result = stream.toArray();
-        // Note: null handling depends on implementation
         assertEquals(5, result.length);
     }
 
@@ -209,7 +207,6 @@ public class LongStream102Test extends TestBase {
     public void testRandom() {
         long[] randoms = LongStream.random().limit(5).toArray();
         assertEquals(5, randoms.length);
-        // All values should be different (with very high probability)
         Set<Long> uniqueValues = new HashSet<>();
         for (long val : randoms) {
             uniqueValues.add(val);
@@ -280,8 +277,6 @@ public class LongStream102Test extends TestBase {
         LongStream merged = LongStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L, 6L }, merged.toArray());
     }
-
-    // Test instance methods (using concrete implementation)
 
     @Test
     public void testMap() {
@@ -570,7 +565,6 @@ public class LongStream102Test extends TestBase {
         long[] original = { 1L, 2L, 3L, 4L, 5L };
         long[] shuffled = createLongStream(original).shuffled().toArray();
 
-        // Should contain same elements
         assertEquals(original.length, shuffled.length);
         Set<Long> originalSet = new HashSet<>();
         Set<Long> shuffledSet = new HashSet<>();
@@ -767,7 +761,6 @@ public class LongStream102Test extends TestBase {
         long endTime = System.currentTimeMillis();
 
         assertEquals(3, timestamps.length);
-        // Should take at least 20ms (for 3 elements with 10ms interval)
         assertTrue(endTime - startTime >= 20);
     }
 
@@ -807,18 +800,12 @@ public class LongStream102Test extends TestBase {
     @Test
     public void testRangeMap() {
         long[] result = createLongStream(1L, 2L, 3L, 5L, 6L, 8L).rangeMap((a, b) -> b - a == 1, (a, b) -> a == b ? a : a * 10 + b).toArray();
-        // Groups consecutive numbers: [1,2,3] -> 13, [5,6] -> 56, [8] -> 8
         assertArrayEquals(new long[] { 12L, 3L, 56L, 8L }, result);
     }
 
     @Test
     public void testPrintln() {
-        // This is mainly for manual verification
-        //  createLongStream(1L, 2L, 3L).println();
-        // Should print: [1, 2, 3]
 
-        // Since println() prints to console, we can't easily test its output
-        // But we can at least verify it doesn't throw an exception
         createLongStream(1L, 2L, 3L).println();
     }
 }

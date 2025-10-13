@@ -37,7 +37,6 @@ import java.lang.annotation.Target;
  * 
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.Stream</a>
  * @see IntermediateOp
- * @author HaiYang Li
  * @since 2018
  */
 @Documented

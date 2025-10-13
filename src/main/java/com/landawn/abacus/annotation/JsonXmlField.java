@@ -56,7 +56,6 @@ import com.landawn.abacus.annotation.Type.EnumBy;
  * }
  * </pre>
  * 
- * @author HaiYang Li
  * @since 2019
  * @see JsonXmlConfig
  * @see JsonXmlCreator

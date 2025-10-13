@@ -239,22 +239,6 @@ public class ByteSummaryStatistics implements ByteConsumer {
         return getCount() > 0 ? (double) getSum() / getCount() : 0.0d;
     }
 
-    //    @Deprecated
-    //    @Beta
-    //    public final int sum() {
-    //        return Numbers.toIntExact(sum);
-    //    }
-    //
-    //    @Deprecated
-    //    @Beta
-    //    public final OptionalDouble average() {
-    //        if (count == 0) {
-    //            return OptionalDouble.empty();
-    //        }
-    //
-    //        return OptionalDouble.of(getAverage());
-    //    }
-
     /**
      * Returns a string representation of this summary, including all statistics.
      * 

@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.IOUtil;
@@ -27,6 +28,7 @@ import okhttp3.ResponseBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
+@Tag("new-test")
 public class CurlInterceptor100Test extends TestBase {
 
     private AtomicReference<String> capturedCurl;

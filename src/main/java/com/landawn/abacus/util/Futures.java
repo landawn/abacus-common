@@ -78,42 +78,9 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  */
 public final class Futures {
 
-    private Futures() throws IllegalArgumentException {
+    private Futures() {
         // singleton.
     }
-
-    // Doesn't work.
-    //    public static <T> CompletableFuture<T> toCompletableFuture(final Future<? extends T> f) {
-    //        N.checkArgNotNull(f, "future");
-    //
-    //        return new CompletableFuture<>() {
-    //            @Override
-    //            public T get() throws InterruptedException, ExecutionException {
-    //                return f.get();
-    //
-    //            }
-    //
-    //            @Override
-    //            public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-    //                return f.get(timeout, unit);
-    //            }
-    //
-    //            @Override
-    //            public boolean isDone() {
-    //                return f.isDone();
-    //            }
-    //
-    //            @Override
-    //            public boolean isCancelled() {
-    //                return f.isCancelled();
-    //            }
-    //
-    //            @Override
-    //            public boolean cancel(boolean mayInterruptIfRunning) {
-    //                return f.cancel(mayInterruptIfRunning);
-    //            }
-    //        };
-    //    }
 
     /**
      * Composes two futures into a new ContinuableFuture by applying a zip function to the Future objects themselves.
@@ -931,10 +898,9 @@ public final class Futures {
     }
 
     /**
-     * Creates a ContinuableFuture that completes when any of the given futures completes.
-     * The returned future completes with the result of the first future to complete successfully.
-     * If all futures complete exceptionally, the returned future completes exceptionally with
-     * the last exception.
+     * Creates a new Future that implements the "any of" semantics by returning the result of the first
+     * future to complete successfully. If all futures complete exceptionally, the returned future completes
+     * exceptionally with a composite exception containing all failures.
      * 
      * <p>This method is useful for scenarios where you have multiple ways to get a result
      * and want to use whichever completes first, such as querying multiple replicas or
@@ -964,9 +930,9 @@ public final class Futures {
     }
 
     /**
-     * Creates a ContinuableFuture that completes when any future in the collection completes.
-     * Similar to the array version but accepts any Collection implementation. Returns the
-     * result of whichever future completes first.
+     * Creates a new Future that implements the "any of" semantics by returning the result of the first
+     * future to complete successfully. If all futures complete exceptionally, the returned future completes
+     * exceptionally with a composite exception containing all failures.
      * 
      * <p>This is particularly useful for implementing timeout patterns, redundancy, or
      * getting the fastest response from multiple sources.
@@ -995,14 +961,58 @@ public final class Futures {
     }
 
     /**
-     * Returns a {@link ContinuableFuture} that is completed when any of the provided futures in the collection are completed.
-     * The returned future allows managing the lifecycle (e.g., cancellation) of the combined set of futures and propagates the result
-     * or exception of the first completed future.
+     * Internal implementation method that creates a ContinuableFuture completing when any of the input futures completes.
+     * <p>
+     * This method creates a new Future that implements the "any of" semantics by returning the result of the first
+     * future to complete successfully. If all futures complete exceptionally, the returned future completes
+     * exceptionally with a composite exception containing all failures.
+     * </p>
      *
-     * @param <T> the type of the result produced by the futures
-     * @param cfs the collection of futures to monitor for completion; cannot be null or empty
-     * @return a continuable future that completes when any of the provided futures completes
-     * @throws IllegalArgumentException if the provided collection of futures is null or empty
+     * <p>The implementation uses an anonymous Future class that provides custom behavior for each Future method:</p>
+     * <ul>
+     *   <li><strong>cancel()</strong> - Attempts to cancel all input futures, aggregating any exceptions</li>
+     *   <li><strong>isCancelled()</strong> - Returns true only if ALL input futures are cancelled</li>
+     *   <li><strong>isDone()</strong> - Returns true as soon as ANY input future is done</li>
+     *   <li><strong>get()</strong> - Returns the first successful result, or throws aggregated exceptions if all fail</li>
+     *   <li><strong>get(timeout, unit)</strong> - Same as get() but with timeout enforcement</li>
+     * </ul>
+     *
+     * <p>Exception handling strategy:</p>
+     * <ul>
+     *   <li>For cancellation: Collects RuntimeExceptions and adds them as suppressed exceptions</li>
+     *   <li>For result retrieval: Uses {@link #iterate(Collection, Function)} to process futures as they complete</li>
+     *   <li>Failed futures have their exceptions converted and accumulated using {@link Exception#addSuppressed(Throwable)}</li>
+     *   <li>If no future succeeds, throws the accumulated exception with all failures</li>
+     * </ul>
+     *
+     * <p>The method leverages the {@code iterate} utility methods to handle completion order and timeout scenarios.
+     * This allows processing results as they become available rather than polling all futures repeatedly.</p>
+     *
+     * <p><strong>Cancellation semantics:</strong></p>
+     * <ul>
+     *   <li>cancel() returns true only if ALL underlying futures were successfully cancelled</li>
+     *   <li>isCancelled() returns true only if ALL underlying futures are cancelled</li>
+     *   <li>Individual future cancellation failures are collected and re-thrown as a composite exception</li>
+     * </ul>
+     *
+     * <p><strong>Completion semantics:</strong></p>
+     * <ul>
+     *   <li>isDone() returns true as soon as any underlying future completes (successfully or exceptionally)</li>
+     *   <li>get() methods return the first successful result encountered</li>
+     *   <li>If all futures fail, the last accumulated exception is thrown</li>
+     * </ul>
+     *
+     * @param <T> the result type returned by the input futures and the resulting ContinuableFuture
+     * @param cfs the collection of input futures to race. Must not be null or empty.
+     * @return a new ContinuableFuture that completes with the first successful result,
+     *         or fails if all input futures fail
+     * @throws IllegalArgumentException if the collection is null or empty
+     *
+     * @see #anyOf(Future[])
+     * @see #anyOf(Collection)
+     * @see #iterate(Collection, Function)
+     * @see ContinuableFuture#wrap(Future)
+     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
      */
     private static <T> ContinuableFuture<T> anyOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notEmpty(cfs), "'cfs' can't be null or empty");
@@ -1058,44 +1068,46 @@ public final class Futures {
             public T get() throws InterruptedException, ExecutionException {
                 final Iterator<Result<T, Exception>> iter = iterate(cfs, Fn.identity());
                 Result<T, Exception> result = null;
+                RuntimeException exception = null;
 
                 while (iter.hasNext()) {
                     result = iter.next();
 
                     if (result.isSuccess()) {
                         return result.orElseIfFailure(null);
-                    }
-                }
-
-                //noinspection DataFlowIssue
-                if (result.isFailure()) {
-                    if (result.getException() instanceof InterruptedException) {
-                        throw ((InterruptedException) result.getException());
-                    } else if (result.getException() instanceof ExecutionException) {
-                        throw ((ExecutionException) result.getException());
                     } else {
-                        throw ExceptionUtil.toRuntimeException(result.getException(), true);
+                        if (exception == null) {
+                            exception = ExceptionUtil.toRuntimeException(result.getException(), false);
+                        } else {
+                            exception.addSuppressed(ExceptionUtil.toRuntimeException(result.getException(), false));
+                        }
                     }
                 }
 
-                return result.orElseIfFailure(null);
+                throw exception;
             }
 
             @Override
             public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
                 final Iterator<Result<T, Exception>> iter = iterate(cfs, timeout, unit, Fn.identity());
                 Result<T, Exception> result = null;
+                RuntimeException exception = null;
 
                 while (iter.hasNext()) {
                     result = iter.next();
 
                     if (result.isSuccess()) {
                         return result.orElseIfFailure(null);
+                    } else {
+                        if (exception == null) {
+                            exception = ExceptionUtil.toRuntimeException(result.getException(), false);
+                        } else {
+                            exception.addSuppressed(ExceptionUtil.toRuntimeException(result.getException(), false));
+                        }
                     }
                 }
 
-                //noinspection DataFlowIssue
-                return handle(result);
+                throw exception;
             }
         });
     }
@@ -1349,14 +1361,16 @@ public final class Futures {
                 }
 
                 while (true) {
-                    for (final Future<? extends T> cf : activeFutures) {
+                    final java.util.Iterator<Future<? extends T>> iterator = activeFutures.iterator();
+                    while (iterator.hasNext()) {
+                        final Future<? extends T> cf = iterator.next();
                         if (cf.isDone()) {
                             try {
                                 return resultHandler.apply(Result.of(cf.get(), null));
                             } catch (final Exception e) {
                                 return resultHandler.apply(Result.of(null, Futures.convertException(e)));
                             } finally {
-                                activeFutures.remove(cf);
+                                iterator.remove();
                             }
                         }
                     }
@@ -1369,22 +1383,6 @@ public final class Futures {
                 }
             }
         };
-    }
-
-    private static <R> R handle(final Result<R, Exception> result) throws InterruptedException, ExecutionException, TimeoutException {
-        if (result.isFailure()) {
-            if (result.getException() instanceof InterruptedException) {
-                throw ((InterruptedException) result.getException());
-            } else if (result.getException() instanceof ExecutionException) {
-                throw ((ExecutionException) result.getException());
-            } else if (result.getException() instanceof TimeoutException) {
-                throw ((TimeoutException) result.getException());
-            } else {
-                throw ExceptionUtil.toRuntimeException(result.getException(), true);
-            }
-        }
-
-        return result.orElseIfFailure(null);
     }
 
     static Exception convertException(final Exception e) {

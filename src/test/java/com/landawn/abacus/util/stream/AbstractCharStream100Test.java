@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -42,14 +43,13 @@ import com.landawn.abacus.util.function.CharPredicate;
 import com.landawn.abacus.util.function.CharTernaryOperator;
 import com.landawn.abacus.util.function.CharTriPredicate;
 
-
+@Tag("new-test")
 public class AbstractCharStream100Test extends TestBase {
 
     private CharStream charStream;
 
     @BeforeEach
     public void setUp() {
-        // Initialize with test data
         charStream = createCharStream(new char[] { 'a', 'b', 'c', 'd', 'e' });
     }
 
@@ -63,7 +63,6 @@ public class AbstractCharStream100Test extends TestBase {
         CharStream result = charStream.rateLimited(rateLimiter);
         assertNotNull(result);
 
-        // Test with null rateLimiter
         assertThrows(IllegalArgumentException.class, () -> {
             charStream.rateLimited(null);
         });
@@ -76,7 +75,6 @@ public class AbstractCharStream100Test extends TestBase {
         assertNotNull(result);
 
         CharStream stream = createCharStream(new char[] { 'a', 'b', 'c', 'd' });
-        // Test with null delay
         assertThrows(IllegalArgumentException.class, () -> stream.delay((Duration) null));
     }
 
@@ -184,7 +182,6 @@ public class AbstractCharStream100Test extends TestBase {
         assertArrayEquals(new char[] { 'c', 'd', 'e' }, result);
         assertEquals(Arrays.asList('a', 'b'), skipped);
 
-        // Test with negative n
         assertThrows(IllegalArgumentException.class, () -> {
             createCharStream(new char[] { 'a' }).skip(-1, action);
         });
@@ -218,12 +215,10 @@ public class AbstractCharStream100Test extends TestBase {
         char[] result = stream.step(2).toArray();
         assertArrayEquals(new char[] { 'a', 'c', 'e' }, result);
 
-        // Test with step = 1
         stream = createCharStream(new char[] { 'a', 'b', 'c' });
         result = stream.step(1).toArray();
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
 
-        // Test with invalid step
         assertThrows(IllegalArgumentException.class, () -> {
             createCharStream(new char[] { 'a' }).step(0);
         });
@@ -252,11 +247,9 @@ public class AbstractCharStream100Test extends TestBase {
         char init = 'z';
         CharBinaryOperator accumulator = (a, b) -> (char) Math.max(a, b);
 
-        // Test with initIncluded = true
         char[] result = stream.scan(init, true, accumulator).toArray();
         assertArrayEquals(new char[] { 'z', 'z', 'z', 'z' }, result);
 
-        // Test with initIncluded = false
         stream = createCharStream(new char[] { 'a', 'b', 'c' });
         result = stream.scan(init, false, accumulator).toArray();
         assertArrayEquals(new char[] { 'z', 'z', 'z' }, result);
@@ -283,8 +276,6 @@ public class AbstractCharStream100Test extends TestBase {
         CharStream stream = createCharStream(new char[] { 'a', 'b', 'c', 'd' });
         List<Character> c = Arrays.asList('b', 'c', 'e');
         char[] result = stream.symmetricDifference(c).toArray();
-        // Elements in stream but not in c: a, d
-        // Elements in c but not in stream: e
         char[] expected = { 'a', 'd', 'e' };
         Arrays.sort(result);
         Arrays.sort(expected);
@@ -302,16 +293,13 @@ public class AbstractCharStream100Test extends TestBase {
     public void testRotated() {
         CharStream stream = createCharStream(new char[] { 'a', 'b', 'c', 'd', 'e' });
 
-        // Test positive rotation
         char[] result = stream.rotated(2).toArray();
         assertArrayEquals(new char[] { 'd', 'e', 'a', 'b', 'c' }, result);
 
-        // Test negative rotation
         stream = createCharStream(new char[] { 'a', 'b', 'c', 'd', 'e' });
         result = stream.rotated(-2).toArray();
         assertArrayEquals(new char[] { 'c', 'd', 'e', 'a', 'b' }, result);
 
-        // Test zero rotation
         stream = createCharStream(new char[] { 'a', 'b', 'c' });
         result = stream.rotated(0).toArray();
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
@@ -325,7 +313,6 @@ public class AbstractCharStream100Test extends TestBase {
         assertNotNull(result);
         assertEquals(5, result.length);
 
-        // Test with null random
         assertThrows(IllegalArgumentException.class, () -> {
             createCharStream(new char[] { 'a' }).shuffled(null);
         });
@@ -356,21 +343,17 @@ public class AbstractCharStream100Test extends TestBase {
     public void testCycledWithRounds() {
         CharStream stream = createCharStream(new char[] { 'a', 'b', 'c' });
 
-        // Test with 2 rounds
         char[] result = stream.cycled(2).toArray();
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'a', 'b', 'c' }, result);
 
-        // Test with 0 rounds
         stream = createCharStream(new char[] { 'a', 'b', 'c' });
         result = stream.cycled(0).toArray();
         assertArrayEquals(new char[] {}, result);
 
-        // Test with 1 round
         stream = createCharStream(new char[] { 'a', 'b', 'c' });
         result = stream.cycled(1).toArray();
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
 
-        // Test with negative rounds
         assertThrows(IllegalArgumentException.class, () -> {
             createCharStream(new char[] { 'a' }).cycled(-1);
         });
@@ -412,11 +395,9 @@ public class AbstractCharStream100Test extends TestBase {
     public void testPrependOptional() {
         CharStream stream = createCharStream(new char[] { 'b', 'c' });
 
-        // Test with present optional
         char[] result = stream.prepend(OptionalChar.of('a')).toArray();
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
 
-        // Test with empty optional
         stream = createCharStream(new char[] { 'b', 'c' });
         result = stream.prepend(OptionalChar.empty()).toArray();
         assertArrayEquals(new char[] { 'b', 'c' }, result);
@@ -441,11 +422,9 @@ public class AbstractCharStream100Test extends TestBase {
     public void testAppendOptional() {
         CharStream stream = createCharStream(new char[] { 'a', 'b' });
 
-        // Test with present optional
         char[] result = stream.append(OptionalChar.of('c')).toArray();
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
 
-        // Test with empty optional
         stream = createCharStream(new char[] { 'a', 'b' });
         result = stream.append(OptionalChar.empty()).toArray();
         assertArrayEquals(new char[] { 'a', 'b' }, result);
@@ -453,12 +432,10 @@ public class AbstractCharStream100Test extends TestBase {
 
     @Test
     public void testAppendIfEmpty() {
-        // Test with empty stream
         CharStream stream = createCharStream(new char[] {});
         char[] result = stream.appendIfEmpty('a', 'b').toArray();
         assertArrayEquals(new char[] { 'a', 'b' }, result);
 
-        // Test with non-empty stream
         stream = createCharStream(new char[] { 'x', 'y' });
         result = stream.appendIfEmpty('a', 'b').toArray();
         assertArrayEquals(new char[] { 'x', 'y' }, result);
@@ -563,13 +540,11 @@ public class AbstractCharStream100Test extends TestBase {
 
     @Test
     public void testFirst() {
-        // Test with non-empty stream
         CharStream stream = createCharStream(new char[] { 'a', 'b', 'c' });
         OptionalChar result = stream.first();
         assertTrue(result.isPresent());
         assertEquals('a', result.get());
 
-        // Test with empty stream
         stream = createCharStream(new char[] {});
         result = stream.first();
         assertFalse(result.isPresent());
@@ -577,13 +552,11 @@ public class AbstractCharStream100Test extends TestBase {
 
     @Test
     public void testLast() {
-        // Test with non-empty stream
         CharStream stream = createCharStream(new char[] { 'a', 'b', 'c' });
         OptionalChar result = stream.last();
         assertTrue(result.isPresent());
         assertEquals('c', result.get());
 
-        // Test with empty stream
         stream = createCharStream(new char[] {});
         result = stream.last();
         assertFalse(result.isPresent());
@@ -591,18 +564,15 @@ public class AbstractCharStream100Test extends TestBase {
 
     @Test
     public void testOnlyOne() {
-        // Test with single element
         CharStream stream = createCharStream(new char[] { 'a' });
         OptionalChar result = stream.onlyOne();
         assertTrue(result.isPresent());
         assertEquals('a', result.get());
 
-        // Test with empty stream
         stream = createCharStream(new char[] {});
         result = stream.onlyOne();
         assertFalse(result.isPresent());
 
-        // Test with multiple elements
         CharStream stream2 = createCharStream(new char[] { 'a', 'b' });
         assertThrows(TooManyElementsException.class, () -> stream2.onlyOne());
     }
@@ -614,7 +584,6 @@ public class AbstractCharStream100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals('c', result.get());
 
-        // Test with no match
         stream = createCharStream(new char[] { 'a', 'b' });
         result = stream.findAny(c -> c > 'z');
         assertFalse(result.isPresent());
@@ -631,7 +600,6 @@ public class AbstractCharStream100Test extends TestBase {
         assertTrue(percentiles.containsKey(Percentage._50));
         assertTrue(percentiles.containsKey(Percentage._99_9999));
 
-        // Test with empty stream
         stream = createCharStream(new char[] {});
         result = stream.percentiles();
         assertFalse(result.isPresent());
@@ -650,7 +618,6 @@ public class AbstractCharStream100Test extends TestBase {
         Optional<Map<Percentage, Character>> percentiles = result.right();
         assertTrue(percentiles.isPresent());
 
-        // Test with empty stream
         stream = createCharStream(new char[] {});
         result = stream.summarizeAndPercentiles();
         stats = result.left();
@@ -664,7 +631,6 @@ public class AbstractCharStream100Test extends TestBase {
         String result = stream.join(", ", "[", "]");
         assertEquals("[a, b, c]", result);
 
-        // Test with empty delimiter
         stream = createCharStream(new char[] { 'a', 'b', 'c' });
         result = stream.join("", "", "");
         assertEquals("abc", result);

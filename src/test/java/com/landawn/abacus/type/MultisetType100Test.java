@@ -5,11 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 
+@Tag("new-test")
 public class MultisetType100Test extends TestBase {
 
     private MultisetType<String> multisetType;

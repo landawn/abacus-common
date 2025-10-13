@@ -16,12 +16,14 @@ import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.CharConsumer;
 import com.landawn.abacus.util.stream.CharStream;
 import com.landawn.abacus.util.stream.Collectors;
 
+@Tag("new-test")
 public class CharList200Test extends TestBase {
 
     private CharList list;
@@ -175,7 +177,7 @@ public class CharList200Test extends TestBase {
     @Test
     public void testRemoveIf() {
         list.addAll(CharList.of('a', 'b', 'c', 'd', 'e'));
-        assertTrue(list.removeIf(c -> c % 2 == 0)); // remove b, d
+        assertTrue(list.removeIf(c -> c % 2 == 0));
         assertArrayEquals(new char[] { 'a', 'c', 'e' }, list.toArray());
     }
 
@@ -277,7 +279,6 @@ public class CharList200Test extends TestBase {
         shuffled.shuffle();
         assertEquals(original.size(), shuffled.size());
         assertTrue(shuffled.containsAll(original));
-        // It's technically possible for the shuffle to result in the original order, but highly unlikely with this many elements.
         assertFalse(Arrays.equals(original.toArray(), shuffled.toArray()));
     }
 
@@ -410,7 +411,6 @@ public class CharList200Test extends TestBase {
         list.addAll(CharList.of('a', 'b', 'c'));
         CharList other = CharList.of('c', 'd', 'e');
         CharList symDifference = list.symmetricDifference(other);
-        // order may vary depending on implementation
         symDifference.sort();
         assertArrayEquals(new char[] { 'a', 'b', 'd', 'e' }, symDifference.toArray());
     }
@@ -423,7 +423,7 @@ public class CharList200Test extends TestBase {
         list.addAll(CharList.of('d', 'a', 'e', 'c', 'b'));
         assertEquals('a', list.min().get());
         assertEquals('e', list.max().get());
-        assertEquals('a', list.min(1, 4).get()); // a, e, c
+        assertEquals('a', list.min(1, 4).get());
     }
 
     @Test
@@ -448,8 +448,6 @@ public class CharList200Test extends TestBase {
         assertFalse(CharList.of('a', 'c', 'b').isSorted());
     }
 
-    // Constructor and Factory Method Tests
-
     @Test
     public void testRangeAndRangeClosed() {
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, CharList.range('a', 'd').toArray());
@@ -460,8 +458,6 @@ public class CharList200Test extends TestBase {
         assertArrayEquals(new char[] { 'a' }, CharList.rangeClosed('a', 'a').toArray());
         assertArrayEquals(new char[] { 'a', 'c', 'e' }, CharList.rangeClosed('a', 'e', 2).toArray());
     }
-
-    // Modification Methods
 
     @Test
     public void testRemoveAll() {
@@ -482,33 +478,26 @@ public class CharList200Test extends TestBase {
     @Test
     public void testMoveRange() {
         list.addAll(CharList.of('a', 'b', 'c', 'd', 'e', 'f'));
-        // Move 'c', 'd' to the beginning
         list.moveRange(2, 4, 0);
         assertArrayEquals(new char[] { 'c', 'd', 'a', 'b', 'e', 'f' }, list.toArray());
 
-        // Reset and move 'a', 'b' to the end
         list = CharList.of('a', 'b', 'c', 'd', 'e', 'f');
-        list.moveRange(0, 2, 4); // target index is where the sublist starts after removal
+        list.moveRange(0, 2, 4);
         assertArrayEquals(new char[] { 'c', 'd', 'e', 'f', 'a', 'b' }, list.toArray());
     }
 
     @Test
     public void testReplaceRange() {
         list.addAll(CharList.of('a', 'b', 'c', 'd', 'e'));
-        // Replace 'c', 'd' with 'x', 'y', 'z' (larger)
         list.replaceRange(2, 4, CharList.of('x', 'y', 'z'));
         assertArrayEquals(new char[] { 'a', 'b', 'x', 'y', 'z', 'e' }, list.toArray());
 
-        // Replace 'b', 'x', 'y' with 'm' (smaller)
         list.replaceRange(1, 4, CharList.of('m'));
         assertArrayEquals(new char[] { 'a', 'm', 'z', 'e' }, list.toArray());
 
-        // Replace with empty list
         list.replaceRange(1, 2, CharList.of());
         assertArrayEquals(new char[] { 'a', 'z', 'e' }, list.toArray());
     }
-
-    // Access and Query Methods
 
     @Test
     public void testDisjoint() {
@@ -566,23 +555,21 @@ public class CharList200Test extends TestBase {
         assertTrue(list.hasDuplicates());
     }
 
-    // Aggregate and Mathematical Methods
-
     @Test
     public void testMinMaxMedian() {
         assertTrue(list.min().isEmpty());
         assertTrue(list.max().isEmpty());
         assertTrue(list.median().isEmpty());
 
-        list.addAll(CharList.of('d', 'a', 'e', 'b', 'c')); // Unsorted
+        list.addAll(CharList.of('d', 'a', 'e', 'b', 'c'));
         assertEquals('a', list.min().get());
         assertEquals('e', list.max().get());
         assertEquals('c', list.median().get());
 
-        assertEquals('a', list.min(1, 4).get()); // a, e, b
-        assertEquals('a', list.min(0, 2).get()); // d, a
-        assertEquals('e', list.max(1, 4).get()); // a, e, b
-        assertEquals('c', list.median(0, 5).get()); // d, a, e, b, c -> sorted: a,b,c,d,e -> c
+        assertEquals('a', list.min(1, 4).get());
+        assertEquals('a', list.min(0, 2).get());
+        assertEquals('e', list.max(1, 4).get());
+        assertEquals('c', list.median(0, 5).get());
     }
 
     @Test
@@ -601,8 +588,6 @@ public class CharList200Test extends TestBase {
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, differenceFromArray.toArray());
     }
 
-    // Iteration and Stream Methods
-
     @Test
     public void testForEach() {
         list.addAll(CharList.of('a', 'b', 'c', 'd'));
@@ -613,11 +598,11 @@ public class CharList200Test extends TestBase {
         assertEquals("abcd", sb.toString());
 
         sb.setLength(0);
-        list.forEach(1, 3, consumer); // For-each on b, c
+        list.forEach(1, 3, consumer);
         assertEquals("bc", sb.toString());
 
         sb.setLength(0);
-        list.forEach(2, -1, consumer); // Reverse for-each from index 2 down to 0
+        list.forEach(2, -1, consumer);
         assertEquals("cba", sb.toString());
     }
 
@@ -639,24 +624,19 @@ public class CharList200Test extends TestBase {
     public void testStreamAndSubStream() {
         list.addAll(CharList.of('a', 'b', 'c', 'd', 'e'));
         long count = list.stream().filter(c -> c > 'b').count();
-        assertEquals(3, count); // c, d, e
+        assertEquals(3, count);
 
-        CharStream subStream = list.stream(1, 4); // b, c, d
+        CharStream subStream = list.stream(1, 4);
         String result = subStream.mapToObj(c -> String.valueOf(c)).collect(Collectors.joining());
         assertEquals("bcd", result);
     }
 
-    // View and Conversion Methods
-
     @Test
     public void testArray() {
         list.addAll(CharList.of('q', 'w', 'e'));
-        // The array() method is documented to return the original backing array.
         char[] internalArray = list.array();
-        assertEquals(3, list.size()); // Size is correct
+        assertEquals(3, list.size());
 
-        // This test is fragile as it depends on internal implementation not changing,
-        // but it verifies the documented behavior of array().
         assertTrue(internalArray.length >= 3);
         assertEquals('q', internalArray[0]);
         assertEquals('w', internalArray[1]);
@@ -700,8 +680,6 @@ public class CharList200Test extends TestBase {
         assertArrayEquals(new int[] { 97, 98, 99 }, intList.toArray());
     }
 
-    // List Manipulation Methods
-
     @Test
     public void testReverseSort() {
         list.addAll(CharList.of('d', 'a', 'c', 'b'));
@@ -711,12 +689,12 @@ public class CharList200Test extends TestBase {
 
     @Test
     public void testBinarySearch() {
-        list.addAll(CharList.of('b', 'd', 'f', 'h', 'j')); // must be sorted
+        list.addAll(CharList.of('b', 'd', 'f', 'h', 'j'));
         assertEquals(2, list.binarySearch('f'));
-        assertTrue(list.binarySearch('e') < 0); // insertion point
+        assertTrue(list.binarySearch('e') < 0);
 
-        assertEquals(2, list.binarySearch(1, 4, 'f')); // Search 'd', 'f', 'h'
-        assertTrue(list.binarySearch(0, 2, 'f') < 0); // Search 'b', 'd'
+        assertEquals(2, list.binarySearch(1, 4, 'f'));
+        assertTrue(list.binarySearch(0, 2, 'f') < 0);
     }
 
     @Test
@@ -725,7 +703,7 @@ public class CharList200Test extends TestBase {
         list.rotate(2);
         assertArrayEquals(new char[] { 'd', 'e', 'a', 'b', 'c' }, list.toArray());
 
-        list.rotate(-3); // Should rotate back to c, d, e, a, b
+        list.rotate(-3);
         assertArrayEquals(new char[] { 'b', 'c', 'd', 'e', 'a' }, list.toArray());
     }
 
@@ -760,13 +738,9 @@ public class CharList200Test extends TestBase {
     public void testTrimToSize() {
         CharList listWithCapacity = new CharList(20);
         listWithCapacity.addAll(CharList.of('a', 'b', 'c'));
-        // Internal array length should be >= 20.
-        // After trim, it should be exactly 3. This is an indirect test.
         listWithCapacity.trimToSize();
-        CharList copy = listWithCapacity.copy(); // Copy will have an exact size array
+        CharList copy = listWithCapacity.copy();
         assertEquals(copy.array().length, listWithCapacity.array().length);
     }
-
-    // Object Methods
 
 }

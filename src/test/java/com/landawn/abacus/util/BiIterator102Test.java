@@ -13,11 +13,13 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.EntryStream;
 
+@Tag("new-test")
 public class BiIterator102Test extends TestBase {
 
     @Test
@@ -153,7 +155,7 @@ public class BiIterator102Test extends TestBase {
         List<Integer> list2 = Arrays.asList(1, 2, 3);
 
         BiIterator<String, Integer> iter = BiIterator.zip(list1.iterator(), list2.iterator());
-        Assertions.assertEquals(2, iter.toList().size()); // Stops at shorter iterator
+        Assertions.assertEquals(2, iter.toList().size());
     }
 
     @Test

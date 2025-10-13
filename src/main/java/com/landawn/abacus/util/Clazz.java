@@ -169,22 +169,32 @@ public final class Clazz {
 
     /**
      * Returns a typed Class reference for the specified class.
-     * This method provides a convenient way to cast a class to a more specific generic type.
-     * 
-     * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information
-     * due to Java's type erasure.</p>
-     * 
-     * <p>Example:
+     * This method provides a convenient way to cast a class to a more specific generic type,
+     * allowing the compiler to infer generic type parameters without requiring explicit casting.
+     *
+     * <p>This method is particularly useful when working with APIs that accept {@code Class<?>}
+     * parameters but you want to maintain type safety at compile time. The method performs
+     * an unchecked cast internally but provides a cleaner API surface.</p>
+     *
+     * <p><b>Warning:</b> The returned Class object does NOT contain actual type parameter information
+     * due to Java's type erasure. At runtime, {@code ArrayList<String>.class} and
+     * {@code ArrayList<Integer>.class} are the same object. This method only provides compile-time
+     * type checking.</p>
+     *
+     * <p>Example usage:
      * <pre>{@code
+     * // Instead of: Class<ArrayList<String>> cls = (Class<ArrayList<String>>) ArrayList.class;
      * Class<ArrayList<String>> arrayListClass = Clazz.of(ArrayList.class);
+     *
+     * // Useful for method parameters
+     * public <T> T deserialize(String json, Class<T> type) { ... }
+     * MyObject obj = deserialize(json, Clazz.of(MyObject.class));
      * }</pre></p>
      *
-     * @param <T> the target type
-     * @param cls the class to cast
-     * @return a typed Class reference
+     * @param <T> the target type parameter
+     * @param cls the class to cast (must not be null)
+     * @return a typed Class reference with generic type information
      * @see TypeReference#type()
-     * @see com.landawn.abacus.type.Type#of(String)
-     * @see com.landawn.abacus.type.Type#of(Class)
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
@@ -218,21 +228,33 @@ public final class Clazz {
     /**
      * Returns a Class reference for {@code List} with the specified element type.
      * The element class parameter is used only for type inference and is not retained at runtime.
-     * 
-     * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
-     * 
-     * <p>Example:
+     *
+     * <p>This method returns the {@code List} interface class, not a concrete implementation.
+     * The actual implementation will be determined by the framework or code that instantiates
+     * the collection. This is useful for APIs that accept a Class parameter to determine the
+     * target collection type for deserialization or conversion operations.</p>
+     *
+     * <p><b>Warning:</b> The returned Class object does NOT contain actual type parameter information
+     * due to Java's type erasure. The {@code eleCls} parameter is only used for compile-time type
+     * inference and is not stored or used at runtime.</p>
+     *
+     * <p>Example usage:
      * <pre>{@code
+     * // For type-safe API calls
      * Class<List<String>> stringListClass = Clazz.ofList(String.class);
      * Class<List<Integer>> intListClass = Clazz.ofList(Integer.class);
+     *
+     * // Common use case with serialization frameworks
+     * List<String> result = deserializer.readValue(json, Clazz.ofList(String.class));
      * }</pre></p>
      *
      * @param <T> the element type of the list
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code List<T>}
+     * @param eleCls the class of elements (used only for type inference, not retained at runtime)
+     * @return the Class object representing the {@code List} interface
+     * @see #ofLinkedList(Class) for a specific List implementation
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
-     * @see com.landawn.abacus.type.Type#of(Class)
+     * @see com.landawn.abacus.type.Type#ofList(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<List<T>> ofList(@SuppressWarnings("unused") final Class<T> eleCls) {
@@ -542,17 +564,37 @@ public final class Clazz {
     /**
      * Returns a Class reference for {@code TreeSet} with the specified element type.
      * The element class parameter is used only for type inference and is not retained at runtime.
-     * 
-     * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
-     * 
-     * <p>Example:
+     *
+     * <p>TreeSet is a {@code NavigableSet} implementation based on a Red-Black tree. Elements are
+     * sorted according to their natural ordering (using {@code Comparable}) or by a {@code Comparator}
+     * provided at set creation time. This implementation provides guaranteed log(n) time cost for
+     * basic operations (add, remove, contains).</p>
+     *
+     * <p><b>Performance:</b> TreeSet provides O(log n) time for add, remove, and contains operations.
+     * This is slower than HashSet (O(1) average), but maintains elements in sorted order.</p>
+     *
+     * <p><b>Note:</b> TreeSet is NOT thread-safe. For concurrent access, wrap with
+     * {@code Collections.synchronizedSortedSet()} or use a concurrent implementation.</p>
+     *
+     * <p><b>Warning:</b> The returned Class object does NOT contain actual type parameter information
+     * due to Java's type erasure. The {@code eleCls} parameter is only used for compile-time type
+     * inference.</p>
+     *
+     * <p>Example usage:
      * <pre>{@code
      * Class<NavigableSet<String>> treeSetClass = Clazz.ofTreeSet(String.class);
+     *
+     * // Elements will be automatically sorted
+     * NavigableSet<Integer> numbers = new TreeSet<>();
+     * numbers.addAll(Arrays.asList(5, 2, 8, 1));
+     * // numbers now contains: [1, 2, 5, 8]
      * }</pre></p>
      *
      * @param <T> the element type of the tree set
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code TreeSet<T>}
+     * @param eleCls the class of elements (used only for type inference, not retained at runtime)
+     * @return the Class object representing the {@code TreeSet} concrete class
+     * @see #ofNavigableSet(Class) for the NavigableSet interface
+     * @see #ofSortedSet(Class) for the SortedSet interface
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -812,17 +854,38 @@ public final class Clazz {
     /**
      * Returns a Class reference for {@code LinkedBlockingQueue} with the specified element type.
      * The element class parameter is used only for type inference and is not retained at runtime.
-     * 
-     * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
-     * 
-     * <p>Example:
+     *
+     * <p>LinkedBlockingQueue is an optionally-bounded blocking queue based on linked nodes.
+     * It implements the {@code BlockingQueue} interface and provides thread-safe FIFO ordering of elements.
+     * The queue can be created with or without a capacity constraint. If no capacity is specified,
+     * it defaults to {@code Integer.MAX_VALUE}.</p>
+     *
+     * <p><b>Thread Safety:</b> This queue is fully thread-safe. All queue operations are atomic and
+     * blocking methods like {@code put()} and {@code take()} will wait until space is available or
+     * an element becomes available, respectively.</p>
+     *
+     * <p><b>Use Cases:</b> Ideal for producer-consumer scenarios where you need to coordinate work
+     * between multiple threads. Commonly used in thread pools, async processing pipelines, and
+     * message passing between threads.</p>
+     *
+     * <p><b>Warning:</b> The returned Class object does NOT contain actual type parameter information
+     * due to Java's type erasure. The {@code eleCls} parameter is only used for compile-time type
+     * inference.</p>
+     *
+     * <p>Example usage:
      * <pre>{@code
      * Class<BlockingQueue<Task>> taskQueueClass = Clazz.ofLinkedBlockingQueue(Task.class);
+     *
+     * // Producer-consumer pattern
+     * BlockingQueue<Task> queue = new LinkedBlockingQueue<>(100); // capacity of 100
+     * queue.put(new Task()); // blocks if queue is full
+     * Task task = queue.take(); // blocks if queue is empty
      * }</pre></p>
      *
      * @param <T> the element type of the blocking queue
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code LinkedBlockingQueue<T>}
+     * @param eleCls the class of elements (used only for type inference, not retained at runtime)
+     * @return the Class object representing the {@code LinkedBlockingQueue} concrete class
+     * @see #ofQueue(Class) for a non-blocking queue
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1197,20 +1260,36 @@ public final class Clazz {
     /**
      * Returns a Class reference for {@code ConcurrentHashMap} with the specified key and value types.
      * The key and value class parameters are used only for type inference and are not retained at runtime.
-     * 
-     * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
-     * 
-     * <p>Example:
+     *
+     * <p>ConcurrentHashMap is a thread-safe implementation that provides high concurrency for both
+     * read and write operations. It uses lock striping to allow multiple threads to update the map
+     * concurrently without blocking each other. Unlike Hashtable or synchronized HashMap, it does
+     * not lock the entire map, making it ideal for high-concurrency scenarios.</p>
+     *
+     * <p><b>Thread Safety:</b> This implementation is fully thread-safe. Retrieval operations do not
+     * block, and updates can be performed concurrently by multiple threads.</p>
+     *
+     * <p><b>Warning:</b> The returned Class object does NOT contain actual type parameter information
+     * due to Java's type erasure. The {@code keyCls} and {@code valueCls} parameters are only used
+     * for compile-time type inference.</p>
+     *
+     * <p>Example usage:
      * <pre>{@code
-     * Class<ConcurrentMap<String, AtomicInteger>> counterMapClass = 
+     * // For thread-safe caching or shared state
+     * Class<ConcurrentMap<String, AtomicInteger>> counterMapClass =
      *     Clazz.ofConcurrentHashMap(String.class, AtomicInteger.class);
+     *
+     * // Common use case
+     * ConcurrentMap<String, User> userCache = new ConcurrentHashMap<>();
+     * Class<ConcurrentMap<String, User>> cacheType = Clazz.ofConcurrentHashMap(String.class, User.class);
      * }</pre></p>
      *
      * @param <K> the key type of the concurrent hash map
      * @param <V> the value type of the concurrent hash map
-     * @param keyCls the class of map keys (used only for type inference)
-     * @param valueCls the class of map values (used only for type inference)
-     * @return the Class object representing {@code ConcurrentHashMap<K, V>}
+     * @param keyCls the class of map keys (used only for type inference, not retained at runtime)
+     * @param valueCls the class of map values (used only for type inference, not retained at runtime)
+     * @return the Class object representing the {@code ConcurrentHashMap} concrete class
+     * @see #ofConcurrentMap(Class, Class) for the ConcurrentMap interface
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1247,19 +1326,43 @@ public final class Clazz {
     /**
      * Returns a Class reference for {@code BiMap} with the specified key and value types.
      * The key and value class parameters are used only for type inference and are not retained at runtime.
-     * 
-     * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
-     * 
-     * <p>Example:
+     *
+     * <p>BiMap (Bidirectional Map) is a specialized map that maintains a one-to-one correspondence
+     * between keys and values. Unlike a regular map, both keys AND values must be unique. BiMap
+     * provides an {@code inverse()} view that treats values as keys and keys as values, enabling
+     * efficient bidirectional lookups.</p>
+     *
+     * <p><b>Uniqueness Constraint:</b> If you attempt to insert a value that already exists,
+     * BiMap will throw an {@code IllegalArgumentException}. Use {@code forcePut()} to replace
+     * both the existing key-value and value-key mappings.</p>
+     *
+     * <p><b>Use Cases:</b> Ideal for scenarios requiring bidirectional lookup, such as:
+     * <ul>
+     *   <li>ID to name mappings (and vice versa)</li>
+     *   <li>Code to description dictionaries</li>
+     *   <li>Two-way translation tables</li>
+     * </ul></p>
+     *
+     * <p><b>Warning:</b> The returned Class object does NOT contain actual type parameter information
+     * due to Java's type erasure. The {@code keyCls} and {@code valueCls} parameters are only used
+     * for compile-time type inference.</p>
+     *
+     * <p>Example usage:
      * <pre>{@code
      * Class<BiMap<String, Integer>> idMapClass = Clazz.ofBiMap(String.class, Integer.class);
+     *
+     * // BiMap enforces uniqueness on both keys and values
+     * BiMap<String, Integer> userIds = BiMap.create();
+     * userIds.put("alice", 101);
+     * userIds.put("bob", 102);
+     * String name = userIds.inverse().get(101); // returns "alice"
      * }</pre></p>
      *
      * @param <K> the key type of the bimap
      * @param <V> the value type of the bimap
-     * @param keyCls the class of map keys (used only for type inference)
-     * @param valueCls the class of map values (used only for type inference)
-     * @return the Class object representing {@code BiMap<K, V>}
+     * @param keyCls the class of map keys (used only for type inference, not retained at runtime)
+     * @param valueCls the class of map values (used only for type inference, not retained at runtime)
+     * @return the Class object representing the {@code BiMap} interface
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1294,17 +1397,47 @@ public final class Clazz {
     /**
      * Returns a Class reference for {@code Multiset} with the specified element type.
      * The element class parameter is used only for type inference and is not retained at runtime.
-     * 
-     * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
-     * 
-     * <p>Example:
+     *
+     * <p>Multiset (also known as a bag) is a collection that supports order-independent equality
+     * like {@code Set}, but may contain duplicate elements. It maintains a count of how many times
+     * each element appears. Unlike {@code List}, the order of elements is not significant, and
+     * unlike {@code Set}, duplicates are allowed and counted.</p>
+     *
+     * <p><b>Key Features:</b>
+     * <ul>
+     *   <li>Tracks element occurrences/counts</li>
+     *   <li>Efficient count queries: {@code count(element)}</li>
+     *   <li>Add/remove operations update occurrence counts</li>
+     *   <li>Order-independent equality</li>
+     * </ul></p>
+     *
+     * <p><b>Use Cases:</b> Ideal for scenarios requiring frequency counting, such as:
+     * <ul>
+     *   <li>Word frequency counting in text analysis</li>
+     *   <li>Histogram data structures</li>
+     *   <li>Statistical aggregation</li>
+     *   <li>Voting/polling systems</li>
+     * </ul></p>
+     *
+     * <p><b>Warning:</b> The returned Class object does NOT contain actual type parameter information
+     * due to Java's type erasure. The {@code eleCls} parameter is only used for compile-time type
+     * inference.</p>
+     *
+     * <p>Example usage:
      * <pre>{@code
      * Class<Multiset<String>> wordCountClass = Clazz.ofMultiset(String.class);
+     *
+     * // Count word occurrences
+     * Multiset<String> words = Multiset.create();
+     * words.add("apple");
+     * words.add("banana");
+     * words.add("apple");
+     * int count = words.count("apple"); // returns 2
      * }</pre></p>
      *
      * @param <T> the element type of the multiset
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code Multiset<T>}
+     * @param eleCls the class of elements (used only for type inference, not retained at runtime)
+     * @return the Class object representing the {@code Multiset} interface
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)

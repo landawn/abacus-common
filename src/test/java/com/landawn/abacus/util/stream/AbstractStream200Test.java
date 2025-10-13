@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Fn;
@@ -39,12 +40,11 @@ import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 
-
+@Tag("new-test")
 public class AbstractStream200Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Setup can be used if there's a common stream initialization needed for all tests.
     }
 
     @Test
@@ -141,7 +141,7 @@ public class AbstractStream200Test extends TestBase {
     public void test_flattMap_array() {
         List<Integer> result = Stream.of("1,2", "3,4")
                 .flattmap(s -> s.split(","))
-                .map(i -> Numbers.toInt(i)) // Just to make it compile with generic type
+                .map(i -> Numbers.toInt(i))
                 .toList();
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }

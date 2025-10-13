@@ -15,23 +15,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Observer100Test extends TestBase {
 
-    // Tests for complete method
     @Test
     public void testComplete() {
         BlockingQueue<String> queue = new LinkedBlockingQueue<>();
         queue.offer("test");
         Observer.complete(queue);
 
-        // The queue should contain the complete flag
         Assertions.assertEquals(2, queue.size());
     }
 
-    // Tests for of methods
     @Test
     public void testOfBlockingQueue() throws InterruptedException {
         BlockingQueue<String> queue = new LinkedBlockingQueue<>();
@@ -100,7 +99,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertEquals(Arrays.asList("a", "b", "c"), results);
     }
 
-    // Tests for timer
     @Test
     public void testTimerMillis() throws InterruptedException {
         Observer<Long> observer = Observer.timer(100);
@@ -148,7 +146,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> Observer.timer(100, null));
     }
 
-    // Tests for interval
     @Test
     public void testIntervalMillis() throws InterruptedException {
         Observer<Long> observer = Observer.interval(100);
@@ -189,7 +186,7 @@ public class Observer100Test extends TestBase {
 
         Assertions.assertTrue(completed);
         Assertions.assertEquals(2, results.size());
-        Assertions.assertTrue(elapsedTime >= 50); // At least initial delay
+        Assertions.assertTrue(elapsedTime >= 50);
     }
 
     @Test
@@ -238,12 +235,11 @@ public class Observer100Test extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> Observer.interval(0, 100, null));
     }
 
-    // Tests for debounce
     @Test
     public void testDebounceMillis() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5));
         Observer<Integer> debounced = observer.debounce(100);
-        Assertions.assertSame(observer, debounced); // Should return same instance
+        Assertions.assertSame(observer, debounced);
 
         List<Integer> results = new ArrayList<>();
         CountDownLatch latch = new CountDownLatch(1);
@@ -252,7 +248,6 @@ public class Observer100Test extends TestBase {
 
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         Assertions.assertTrue(completed);
-        // Due to debouncing, we should get fewer results
         Assertions.assertTrue(results.size() <= 5);
     }
 
@@ -260,7 +255,7 @@ public class Observer100Test extends TestBase {
     public void testDebounceZero() {
         Observer<String> observer = Observer.of(Arrays.asList("a", "b"));
         Observer<String> debounced = observer.debounce(0);
-        Assertions.assertSame(observer, debounced); // Should return same instance without modification
+        Assertions.assertSame(observer, debounced);
     }
 
     @Test
@@ -270,7 +265,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.debounce(100, null));
     }
 
-    // Tests for throttleFirst
     @Test
     public void testThrottleFirstMillis() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5));
@@ -284,7 +278,6 @@ public class Observer100Test extends TestBase {
 
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         Assertions.assertTrue(completed);
-        // Due to throttling, we should get fewer results
         Assertions.assertTrue(results.size() <= 5);
     }
 
@@ -302,7 +295,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.throttleFirst(100, null));
     }
 
-    // Tests for throttleLast
     @Test
     public void testThrottleLastMillis() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5));
@@ -316,7 +308,6 @@ public class Observer100Test extends TestBase {
 
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         Assertions.assertTrue(completed);
-        // Due to throttling, we should get fewer results
         Assertions.assertTrue(results.size() <= 5);
     }
 
@@ -334,7 +325,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.throttleLast(100, null));
     }
 
-    // Tests for delay
     @Test
     public void testDelayMillis() throws InterruptedException {
         Observer<String> observer = Observer.of(Arrays.asList("test"));
@@ -369,7 +359,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.delay(100, null));
     }
 
-    // Tests for timeInterval
     @Test
     public void testTimeInterval() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3));
@@ -385,18 +374,15 @@ public class Observer100Test extends TestBase {
         Assertions.assertTrue(completed);
         Assertions.assertEquals(3, results.size());
 
-        // Check values
         Assertions.assertEquals(Integer.valueOf(1), results.get(0).value());
         Assertions.assertEquals(Integer.valueOf(2), results.get(1).value());
         Assertions.assertEquals(Integer.valueOf(3), results.get(2).value());
 
-        // Check intervals are positive
         for (Timed<Integer> t : results) {
             Assertions.assertTrue(t.timestamp() >= 0);
         }
     }
 
-    // Tests for timestamp
     @Test
     public void testTimestamp() throws InterruptedException {
         Observer<String> observer = Observer.of(Arrays.asList("a", "b"));
@@ -415,18 +401,15 @@ public class Observer100Test extends TestBase {
         Assertions.assertTrue(completed);
         Assertions.assertEquals(2, results.size());
 
-        // Check values
         Assertions.assertEquals("a", results.get(0).value());
         Assertions.assertEquals("b", results.get(1).value());
 
-        // Check timestamps are in range
         for (Timed<String> t : results) {
             Assertions.assertTrue(t.timestamp() >= beforeTime);
             Assertions.assertTrue(t.timestamp() <= afterTime);
         }
     }
 
-    // Tests for skip
     @Test
     public void testSkip() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5));
@@ -464,7 +447,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.skip(-1));
     }
 
-    // Tests for limit
     @Test
     public void testLimit() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5));
@@ -502,7 +484,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.limit(-1));
     }
 
-    // Tests for distinct
     @Test
     public void testDistinct() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 2, 3, 3, 3, 4));
@@ -519,7 +500,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertEquals(Arrays.asList(1, 2, 3, 4), results);
     }
 
-    // Tests for distinctBy
     @Test
     public void testDistinctBy() throws InterruptedException {
         Observer<String> observer = Observer.of(Arrays.asList("a", "bb", "ccc", "dd", "e"));
@@ -536,7 +516,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertEquals(Arrays.asList("a", "bb", "ccc"), results);
     }
 
-    // Tests for filter
     @Test
     public void testFilter() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5));
@@ -553,7 +532,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertEquals(Arrays.asList(2, 4), results);
     }
 
-    // Tests for map
     @Test
     public void testMap() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3));
@@ -570,7 +548,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertEquals(Arrays.asList("value-1", "value-2", "value-3"), results);
     }
 
-    // Tests for flatMap
     @Test
     public void testFlatMap() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3));
@@ -602,7 +579,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertTrue(results.isEmpty());
     }
 
-    // Tests for buffer with time
     @Test
     public void testBufferTime() throws InterruptedException {
         Observer<Long> observer = Observer.interval(50, TimeUnit.MILLISECONDS);
@@ -622,7 +598,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertTrue(completed);
         Assertions.assertEquals(2, results.size());
 
-        // Each buffer should contain multiple items
         for (List<Long> buffer : results) {
             Assertions.assertTrue(buffer.size() > 0);
         }
@@ -642,7 +617,6 @@ public class Observer100Test extends TestBase {
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         Assertions.assertTrue(completed);
 
-        // Should have at least 2 buffers (6 items / 3 count = 2)
         Assertions.assertTrue(results.size() >= 2);
     }
 
@@ -656,7 +630,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.buffer(100, TimeUnit.MILLISECONDS, -1));
     }
 
-    // Tests for buffer with time skip
     @Test
     public void testBufferTimeSkip() throws InterruptedException {
         Observer<Long> observer = Observer.interval(50, TimeUnit.MILLISECONDS);
@@ -692,7 +665,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.buffer(100, 200, TimeUnit.MILLISECONDS, 0));
     }
 
-    // Tests for observe methods
     @Test
     public void testObserveWithAction() throws InterruptedException {
         Observer<String> observer = Observer.of(Arrays.asList("test"));
@@ -751,7 +723,6 @@ public class Observer100Test extends TestBase {
         Assertions.assertEquals(Arrays.asList("a", "b", "c"), results);
     }
 
-    // Test chaining multiple operations
     @Test
     public void testChainedOperations() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));

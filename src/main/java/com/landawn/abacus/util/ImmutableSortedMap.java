@@ -475,10 +475,10 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * Returns a view of the portion of this map whose keys range from {@code fromKey},
      * inclusive, to {@code toKey}, exclusive. The returned map is backed by this map,
      * so it remains immutable.
-     * 
+     *
      * <p>The returned map will throw an {@code IllegalArgumentException} on an attempt to
      * insert a key outside its range.</p>
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * ImmutableSortedMap<Integer, String> map = ImmutableSortedMap.of(
@@ -495,8 +495,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      *         {@code fromKey}, inclusive, to {@code toKey}, exclusive
      * @throws ClassCastException if {@code fromKey} and {@code toKey}
      *         cannot be compared to one another using this map's comparator
-     *         is null and this map uses natural ordering, or its comparator
-     *         does not permit null keys
+     *         (or, if the map has no comparator, using natural ordering)
+     *         and this map uses natural ordering, or its comparator does not permit null keys
      * @throws IllegalArgumentException if {@code fromKey} is greater than
      *         {@code toKey}; or if this map itself has a restricted range,
      *         and {@code fromKey} or {@code toKey} lies outside the bounds of the range
@@ -509,7 +509,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     /**
      * Returns a view of the portion of this map whose keys are strictly less than {@code toKey}.
      * The returned map is backed by this map, so it remains immutable.
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * ImmutableSortedMap<String, Integer> map = ImmutableSortedMap.of(
@@ -523,7 +523,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param toKey high endpoint (exclusive) of the keys in the returned map
      * @return a view of the portion of this map whose keys are strictly less than {@code toKey}
      * @throws ClassCastException if {@code toKey} is not compatible with
-     *         this map's comparator
+     *         this map's comparator (or, if the map has no comparator, using natural ordering)
      *         natural ordering, or its comparator does not permit null keys
      * @throws IllegalArgumentException if this map itself has a restricted range,
      *         and {@code toKey} lies outside the bounds of the range
@@ -536,7 +536,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     /**
      * Returns a view of the portion of this map whose keys are greater than or equal to {@code fromKey}.
      * The returned map is backed by this map, so it remains immutable.
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * ImmutableSortedMap<Integer, String> map = ImmutableSortedMap.of(
@@ -550,7 +550,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param fromKey low endpoint (inclusive) of the keys in the returned map
      * @return a view of the portion of this map whose keys are greater than or equal to {@code fromKey}
      * @throws ClassCastException if {@code fromKey} is not compatible with
-     *         this map's comparator
+     *         this map's comparator (or, if the map has no comparator, using natural ordering)
      *         natural ordering, or its comparator does not permit null keys
      * @throws IllegalArgumentException if this map itself has a restricted range,
      *         and {@code fromKey} lies outside the bounds of the range

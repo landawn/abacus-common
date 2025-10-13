@@ -18,23 +18,19 @@ import java.util.Random;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-/**
- * Comprehensive unit tests for the Strings utility class.
- * Tests all public methods with various edge cases and scenarios.
- */
+@Tag("new-test")
 public class Strings102Test extends TestBase {
-
-    // ========== UUID and GUID Tests ==========
 
     @Test
     public void testGuid() {
         String guid = Strings.guid();
         assertNotNull(guid);
-        assertEquals(32, guid.length()); // UUID without dashes
+        assertEquals(32, guid.length());
         assertFalse(guid.contains("-"));
     }
 
@@ -42,11 +38,9 @@ public class Strings102Test extends TestBase {
     public void testUuid() {
         String uuid = Strings.uuid();
         assertNotNull(uuid);
-        assertEquals(36, uuid.length()); // Standard UUID format
+        assertEquals(36, uuid.length());
         assertTrue(uuid.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
     }
-
-    // ========== valueOf Tests ==========
 
     @Test
     public void testValueOf() {
@@ -54,8 +48,6 @@ public class Strings102Test extends TestBase {
         assertEquals("", Strings.valueOf(new char[0]));
         assertEquals("hello", Strings.valueOf(new char[] { 'h', 'e', 'l', 'l', 'o' }));
     }
-
-    // ========== Validation Tests ==========
 
     @Test
     public void testIsKeyword() {
@@ -105,8 +97,6 @@ public class Strings102Test extends TestBase {
         assertFalse(Strings.isValidHttpUrl("ftp://example.com"));
     }
 
-    // ========== Empty/Blank Check Tests ==========
-
     @Test
     public void testIsEmpty() {
         assertTrue(Strings.isEmpty(null));
@@ -140,8 +130,6 @@ public class Strings102Test extends TestBase {
         assertFalse(Strings.isNotBlank(" "));
         assertTrue(Strings.isNotBlank("test"));
     }
-
-    // ========== All Empty/Blank Tests ==========
 
     @Test
     public void testIsAllEmpty() {
@@ -181,8 +169,6 @@ public class Strings102Test extends TestBase {
         assertTrue(Strings.isAnyBlank("hello", " ", "world"));
     }
 
-    // ========== Wrapped Tests ==========
-
     @Test
     public void testIsWrappedWith() {
         assertTrue(Strings.isWrappedWith("(test)", "(", ")"));
@@ -191,8 +177,6 @@ public class Strings102Test extends TestBase {
         assertFalse(Strings.isWrappedWith(null, "(", ")"));
         assertFalse(Strings.isWrappedWith("(test", "(", ")"));
     }
-
-    // ========== First Non-Empty/Blank Tests ==========
 
     @Test
     public void testFirstNonEmpty() {
@@ -209,8 +193,6 @@ public class Strings102Test extends TestBase {
         assertEquals("", Strings.firstNonBlank("", " ", null));
         assertEquals("", Strings.firstNonBlank());
     }
-
-    // ========== Default Value Tests ==========
 
     @Test
     public void testDefaultIfNull() {
@@ -234,8 +216,6 @@ public class Strings102Test extends TestBase {
         assertEquals("default", Strings.defaultIfBlank(null, "default"));
         assertThrows(IllegalArgumentException.class, () -> Strings.defaultIfBlank("", " "));
     }
-
-    // ========== Null Conversion Tests ==========
 
     @Test
     public void testNullToEmpty() {
@@ -267,8 +247,6 @@ public class Strings102Test extends TestBase {
         assertEquals("test", Strings.blankToNull("test"));
     }
 
-    // ========== Abbreviation Tests ==========
-
     @Test
     public void testAbbreviate() {
         assertEquals("abc...", Strings.abbreviate("abcdefg", 6));
@@ -293,8 +271,6 @@ public class Strings102Test extends TestBase {
         assertNull(Strings.abbreviateMiddle(null, "...", 6));
     }
 
-    // ========== Centering Tests ==========
-
     @Test
     public void testCenter() {
         assertEquals("  ab  ", Strings.center("ab", 6));
@@ -315,8 +291,6 @@ public class Strings102Test extends TestBase {
         assertEquals("-ab--", Strings.center("ab", 5, "-"));
     }
 
-    // ========== Padding Tests ==========
-
     @Test
     public void testPadStart() {
         assertEquals("   abc", Strings.padStart("abc", 6));
@@ -332,8 +306,6 @@ public class Strings102Test extends TestBase {
         assertEquals("hello--", Strings.padEnd("hello", 7, "--"));
         assertEquals("abc", Strings.padEnd("abc", 2));
     }
-
-    // ========== Repeat Tests ==========
 
     @Test
     public void testRepeat() {
@@ -357,8 +329,6 @@ public class Strings102Test extends TestBase {
         assertEquals("[]", Strings.repeat("a", 0, ",", "[", "]"));
     }
 
-    // ========== Byte/Char Array Tests ==========
-
     @Test
     public void testGetBytes() {
         assertNull(Strings.getBytes(null));
@@ -379,8 +349,6 @@ public class Strings102Test extends TestBase {
         assertArrayEquals(new int[0], Strings.toCodePoints(""));
         assertArrayEquals("hello".codePoints().toArray(), Strings.toCodePoints("hello"));
     }
-
-    // ========== Case Conversion Tests ==========
 
     @Test
     public void testToLowerCase() {
@@ -449,8 +417,6 @@ public class Strings102Test extends TestBase {
         assertNull(Strings.uncapitalize(null));
     }
 
-    // ========== Character Type Tests ==========
-
     @Test
     public void testIsLowerCase() {
         assertTrue(Strings.isLowerCase('a'));
@@ -496,8 +462,6 @@ public class Strings102Test extends TestBase {
         assertTrue(Strings.isLetterOrDigit('5'));
         assertFalse(Strings.isLetterOrDigit(' '));
     }
-
-    // ========== ASCII Tests ==========
 
     @Test
     public void testIsAscii() {
@@ -550,8 +514,6 @@ public class Strings102Test extends TestBase {
         assertFalse(Strings.isAsciiAlphanumeric("hello 123"));
         assertFalse(Strings.isAsciiAlphanumeric(""));
     }
-
-    // ========== Character Content Tests ==========
 
     @Test
     public void testIsAlpha() {
@@ -614,8 +576,6 @@ public class Strings102Test extends TestBase {
         assertFalse(Strings.isAsciiDigitalInteger(null));
     }
 
-    // ========== IndexOf Tests ==========
-
     @Test
     public void testIndexOf() {
         assertEquals(1, Strings.indexOf("hello", 'e'));
@@ -663,8 +623,6 @@ public class Strings102Test extends TestBase {
         assertEquals(-1, Strings.indexOfIgnoreCase(null, "ell"));
     }
 
-    // ========== LastIndexOf Tests ==========
-
     @Test
     public void testLastIndexOf() {
         assertEquals(3, Strings.lastIndexOf("hello", 'l'));
@@ -686,8 +644,6 @@ public class Strings102Test extends TestBase {
         assertEquals(4, Strings.lastIndexOfAny("hello", 'o', 'x'));
         assertEquals(-1, Strings.lastIndexOfAny("hello", 'x', 'y'));
     }
-
-    // ========== Contains Tests ==========
 
     @Test
     public void testContains() {
@@ -743,7 +699,7 @@ public class Strings102Test extends TestBase {
     public void testContainsOnly_NullString() {
         assertTrue(Strings.containsOnly(null, 'a', 'b', 'c'));
         assertTrue(Strings.containsOnly(null, 'x'));
-        assertTrue(Strings.containsOnly(null)); // empty varargs
+        assertTrue(Strings.containsOnly(null));
     }
 
     @Test
@@ -751,7 +707,7 @@ public class Strings102Test extends TestBase {
     public void testContainsOnly_EmptyString() {
         assertTrue(Strings.containsOnly("", 'a', 'b', 'c'));
         assertTrue(Strings.containsOnly("", 'x'));
-        assertTrue(Strings.containsOnly("", new char[0])); // empty array
+        assertTrue(Strings.containsOnly("", new char[0]));
     }
 
     @Test
@@ -761,9 +717,6 @@ public class Strings102Test extends TestBase {
         assertFalse(Strings.containsOnly("a", new char[0]));
         assertFalse(Strings.containsOnly(" ", new char[0]));
 
-        // Test with null valuesToFind - this should be handled by checkInputChars
-        // Based on the implementation, this would likely throw an exception
-        // assertThrows(IllegalArgumentException.class, () -> Strings.containsOnly("abc", (char[]) null));
         assertFalse(Strings.containsOnly("abc", (char[]) null));
     }
 
@@ -784,7 +737,7 @@ public class Strings102Test extends TestBase {
         assertFalse(Strings.containsOnly("abcd", 'a', 'b', 'c'));
         assertFalse(Strings.containsOnly("axb", 'a', 'b', 'c'));
         assertFalse(Strings.containsOnly("xyz", 'a', 'b', 'c'));
-        assertFalse(Strings.containsOnly("ab c", 'a', 'b', 'c')); // space not included
+        assertFalse(Strings.containsOnly("ab c", 'a', 'b', 'c'));
         assertFalse(Strings.containsOnly("123", 'a', 'b', 'c'));
     }
 
@@ -805,7 +758,7 @@ public class Strings102Test extends TestBase {
         assertTrue(Strings.containsOnly("!@#", '!', '@', '#'));
         assertTrue(Strings.containsOnly("123", '1', '2', '3'));
 
-        assertFalse(Strings.containsOnly("Hello World", 'H', 'e', 'l', 'o')); // missing space and 'W', 'r', 'd'
+        assertFalse(Strings.containsOnly("Hello World", 'H', 'e', 'l', 'o'));
         assertTrue(Strings.containsOnly("Hello", 'H', 'e', 'l', 'o'));
     }
 
@@ -813,7 +766,6 @@ public class Strings102Test extends TestBase {
     @DisplayName("containsOnly should handle unicode characters")
     public void testContainsOnly_UnicodeCharacters() {
         assertTrue(Strings.containsOnly("αβγ", 'α', 'β', 'γ'));
-        // assertTrue(Strings.containsOnly("😀😃", "😀", "😀"));
         assertFalse(Strings.containsOnly("αβγδ", 'α', 'β', 'γ'));
     }
 
@@ -854,7 +806,7 @@ public class Strings102Test extends TestBase {
         assertTrue(Strings.containsOnly("\n\n", '\n'));
         assertTrue(Strings.containsOnly(" \t\n", ' ', '\t', '\n'));
 
-        assertFalse(Strings.containsOnly("a b", 'a', 'b')); // missing space
+        assertFalse(Strings.containsOnly("a b", 'a', 'b'));
         assertTrue(Strings.containsOnly("a b", 'a', 'b', ' '));
     }
 
@@ -866,14 +818,12 @@ public class Strings102Test extends TestBase {
         assertTrue(Strings.containsOnly("1234567890", '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'));
 
         assertFalse(Strings.containsOnly("123a", '1', '2', '3'));
-        assertFalse(Strings.containsOnly("12.3", '1', '2', '3')); // missing '.'
+        assertFalse(Strings.containsOnly("12.3", '1', '2', '3'));
     }
 
     @Test
     @DisplayName("containsOnly should validate input characters for surrogate pairs")
     public void testContainsOnly_SurrogateValidation() {
-        // Test that high/low surrogate characters in valuesToFind array throw exception
-        // This is based on the checkInputChars method behavior
         char highSurrogate = '\uD800';
         char lowSurrogate = '\uDC00';
 
@@ -887,19 +837,14 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("containsOnly edge cases")
     public void testContainsOnly_EdgeCases() {
-        // Single char in both string and valuesToFind
         assertTrue(Strings.containsOnly("a", 'a'));
 
-        // String longer than valuesToFind
         assertTrue(Strings.containsOnly("aaabbbccc", 'a', 'b', 'c'));
 
-        // valuesToFind longer than string
         assertTrue(Strings.containsOnly("ab", 'a', 'b', 'c', 'd', 'e'));
 
-        // All same character
         assertTrue(Strings.containsOnly("aaaa", 'a'));
 
-        // String with all different chars, each in valuesToFind
         assertTrue(Strings.containsOnly("abcd", 'a', 'b', 'c', 'd'));
     }
 
@@ -1393,7 +1338,6 @@ public class Strings102Test extends TestBase {
         }
     }
 
-    // Test data
     private static final String SAMPLE_TEXT = "Hello World";
     private static final String EMPTY_STRING = "";
     private static final String WHITESPACE_STRING = "   ";
@@ -1401,188 +1345,137 @@ public class Strings102Test extends TestBase {
 
     @Test
     public void testReverse() {
-        // Test null
         assertNull(Strings.reverse(null));
 
-        // Test empty string
         assertEquals("", Strings.reverse(""));
 
-        // Test single character
         assertEquals("a", Strings.reverse("a"));
 
-        // Test normal string
         assertEquals("dlroW olleH", Strings.reverse("Hello World"));
 
-        // Test palindrome
         assertEquals("racecar", Strings.reverse("racecar"));
 
-        // Test with special characters
         assertEquals("!@#$%", Strings.reverse("%$#@!"));
     }
 
     @Test
     public void testReverseDelimitedChar() {
-        // Test null
         assertNull(Strings.reverseDelimited(null, '.'));
 
-        // Test empty string
         assertEquals("", Strings.reverseDelimited("", '.'));
 
-        // Test single character
         assertEquals("a", Strings.reverseDelimited("a", '.'));
 
-        // Test no delimiter
         assertEquals("abc", Strings.reverseDelimited("abc", '.'));
 
-        // Test with delimiter
         assertEquals("c.b.a", Strings.reverseDelimited("a.b.c", '.'));
 
-        // Test multiple delimiters
         assertEquals("d.c.b.a", Strings.reverseDelimited("a.b.c.d", '.'));
 
-        // Test Java package format
         assertEquals("String.lang.java", Strings.reverseDelimited("java.lang.String", '.'));
     }
 
     @Test
     public void testReverseDelimitedString() {
-        // Test null
         assertNull(Strings.reverseDelimited(null, "."));
 
-        // Test empty string
         assertEquals("", Strings.reverseDelimited("", "."));
 
-        // Test single character
         assertEquals("a", Strings.reverseDelimited("a", "."));
 
-        // Test no delimiter
         assertEquals("abc", Strings.reverseDelimited("abc", "."));
 
-        // Test with delimiter
         assertEquals("c.b.a", Strings.reverseDelimited("a.b.c", "."));
 
-        // Test with multi-character delimiter
         assertEquals("c::b::a", Strings.reverseDelimited("a::b::c", "::"));
 
-        // Test with different delimiter
         assertEquals("world|hello", Strings.reverseDelimited("hello|world", "|"));
     }
 
     @Test
     public void testSort() {
-        // Test null
         assertNull(Strings.sort(null));
 
-        // Test empty string
         assertEquals("", Strings.sort(""));
 
-        // Test single character
         assertEquals("a", Strings.sort("a"));
 
-        // Test already sorted
         assertEquals("abc", Strings.sort("abc"));
 
-        // Test reverse order
         assertEquals("abc", Strings.sort("cba"));
 
-        // Test mixed case and characters
         assertEquals("  AHWdellloor", Strings.sort("Hello World A"));
 
-        // Test duplicates
         assertEquals("aabbcc", Strings.sort("abcabc"));
     }
 
     @Test
     public void testRotate() {
-        // Test null
         assertNull(Strings.rotate(null, 2));
 
-        // Test empty string
         assertEquals("", Strings.rotate("", 2));
 
-        // Test single character
         assertEquals("a", Strings.rotate("a", 2));
 
-        // Test zero shift
         assertEquals("abcdefg", Strings.rotate("abcdefg", 0));
 
-        // Test positive shift (right rotation)
         assertEquals("fgabcde", Strings.rotate("abcdefg", 2));
 
-        // Test negative shift (left rotation)
         assertEquals("cdefgab", Strings.rotate("abcdefg", -2));
 
-        // Test shift equal to length
         assertEquals("abcdefg", Strings.rotate("abcdefg", 7));
 
-        // Test negative shift equal to length
         assertEquals("abcdefg", Strings.rotate("abcdefg", -7));
 
-        // Test shift greater than length
         assertEquals("fgabcde", Strings.rotate("abcdefg", 9));
 
-        // Test negative shift greater than length
         assertEquals("cdefgab", Strings.rotate("abcdefg", -9));
     }
 
     @Test
     public void testShuffle() {
-        // Test null
         assertNull(Strings.shuffle(null));
 
-        // Test empty string
         assertEquals("", Strings.shuffle(""));
 
-        // Test single character
         assertEquals("a", Strings.shuffle("a"));
 
-        // Test with known seed for reproducible results
         Random random = new Random(12345);
         String shuffled = Strings.shuffle("abcdef", random);
         assertNotNull(shuffled);
         assertEquals(6, shuffled.length());
 
-        // Verify all characters are present
         for (char c : "abcdef".toCharArray()) {
             assertTrue(shuffled.indexOf(c) >= 0);
         }
 
-        // Test that shuffle actually changes the string (with high probability)
         String original = "abcdefghijklmnopqrstuvwxyz";
         String shuffled2 = Strings.shuffle(original);
         assertEquals(original.length(), shuffled2.length());
-        // With 26 characters, the probability of getting the same order is virtually 0
         assertNotEquals(original, shuffled2);
     }
 
     @Test
     public void testFormatToPercentageWithScale() {
-        // Test with scale 0
         assertEquals("50%", Numbers.format(0.5, "0%"));
 
-        // Test with scale 1
         assertEquals("33.3%", Numbers.format(1.0 / 3.0, "0.0%"));
 
-        // Test with scale 3
         assertEquals("33.333%", Numbers.format(1.0 / 3.0, "0.000%"));
 
-        // Test with scale 4
         assertEquals("12.3457%", Numbers.format(0.123457, "0.0000%"));
 
-        // Test rounding
         assertEquals("66.67%", Numbers.format(2.0 / 3.0, "0.00%"));
     }
 
     @Test
     @DisplayName("Test parseBoolean method")
     public void testParseBoolean() {
-        // Test true values
         assertTrue(Strings.parseBoolean("true"));
         assertTrue(Strings.parseBoolean("TRUE"));
         assertTrue(Strings.parseBoolean("True"));
         assertTrue(Strings.parseBoolean("TrUe"));
 
-        // Test false values
         assertFalse(Strings.parseBoolean("false"));
         assertFalse(Strings.parseBoolean("FALSE"));
         assertFalse(Strings.parseBoolean("False"));
@@ -1592,7 +1485,6 @@ public class Strings102Test extends TestBase {
         assertFalse(Strings.parseBoolean("0"));
         assertFalse(Strings.parseBoolean("1"));
 
-        // Test null and empty
         assertFalse(Strings.parseBoolean(null));
         assertFalse(Strings.parseBoolean(""));
     }
@@ -1600,19 +1492,16 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test parseChar method")
     public void testParseChar() {
-        // Test single character
         assertEquals('a', Strings.parseChar("a"));
         assertEquals('Z', Strings.parseChar("Z"));
         assertEquals('1', Strings.parseChar("1"));
         assertEquals(' ', Strings.parseChar(" "));
         assertEquals('!', Strings.parseChar("!"));
 
-        // Test integer conversion
-        assertEquals((char) 65, Strings.parseChar("65")); // 'A'
-        assertEquals((char) 97, Strings.parseChar("97")); // 'a'
-        assertEquals((char) 48, Strings.parseChar("48")); // '0'
+        assertEquals((char) 65, Strings.parseChar("65"));
+        assertEquals((char) 97, Strings.parseChar("97"));
+        assertEquals((char) 48, Strings.parseChar("48"));
 
-        // Test null and empty
         assertEquals('\0', Strings.parseChar(null));
         assertEquals('\0', Strings.parseChar(""));
     }
@@ -1620,13 +1509,11 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test base64Encode method")
     public void testBase64Encode() {
-        // Test basic encoding
         assertEquals("SGVsbG8=", Strings.base64Encode("Hello".getBytes()));
         assertEquals("V29ybGQ=", Strings.base64Encode("World".getBytes()));
         assertEquals("", Strings.base64Encode(new byte[0]));
         assertEquals("", Strings.base64Encode(null));
 
-        // Test special characters
         assertEquals("SGVsbG8gV29ybGQh", Strings.base64Encode("Hello World!".getBytes()));
         assertEquals("MTIzNDU2Nzg5MA==", Strings.base64Encode("1234567890".getBytes()));
     }
@@ -1634,13 +1521,11 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test base64EncodeString method")
     public void testBase64EncodeString() {
-        // Test basic string encoding
         assertEquals("SGVsbG8=", Strings.base64EncodeString("Hello"));
         assertEquals("V29ybGQ=", Strings.base64EncodeString("World"));
         assertEquals("", Strings.base64EncodeString(""));
         assertEquals("", Strings.base64EncodeString(null));
 
-        // Test special characters
         assertEquals("SGVsbG8gV29ybGQh", Strings.base64EncodeString("Hello World!"));
         assertEquals("MTIzNDU2Nzg5MA==", Strings.base64EncodeString("1234567890"));
     }
@@ -1648,19 +1533,16 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test base64EncodeUtf8String method")
     public void testBase64EncodeUtf8String() {
-        // Test UTF-8 encoding
         assertEquals("SGVsbG8=", Strings.base64EncodeUtf8String("Hello"));
         assertEquals("", Strings.base64EncodeUtf8String(""));
         assertEquals("", Strings.base64EncodeUtf8String(null));
 
-        // Test UTF-8 special characters
         assertEquals("8J+YgA==", Strings.base64EncodeUtf8String("😀"));
     }
 
     @Test
     @DisplayName("Test base64EncodeString with charset")
     public void testBase64EncodeStringWithCharset() {
-        // Test with different charsets
         assertEquals("SGVsbG8=", Strings.base64EncodeString("Hello", StandardCharsets.UTF_8));
         assertEquals("SGVsbG8=", Strings.base64EncodeString("Hello", StandardCharsets.US_ASCII));
         assertEquals("", Strings.base64EncodeString("", StandardCharsets.UTF_8));
@@ -1670,13 +1552,11 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test base64Decode method")
     public void testBase64Decode() {
-        // Test basic decoding
         assertArrayEquals("Hello".getBytes(), Strings.base64Decode("SGVsbG8="));
         assertArrayEquals("World".getBytes(), Strings.base64Decode("V29ybGQ="));
         assertArrayEquals(new byte[0], Strings.base64Decode(""));
         assertArrayEquals(new byte[0], Strings.base64Decode(null));
 
-        // Test special characters
         assertArrayEquals("Hello World!".getBytes(), Strings.base64Decode("SGVsbG8gV29ybGQh"));
         assertArrayEquals("1234567890".getBytes(), Strings.base64Decode("MTIzNDU2Nzg5MA=="));
     }
@@ -1684,13 +1564,11 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test base64DecodeToString method")
     public void testBase64DecodeToString() {
-        // Test basic decoding to string
         assertEquals("Hello", Strings.base64DecodeToString("SGVsbG8="));
         assertEquals("World", Strings.base64DecodeToString("V29ybGQ="));
         assertEquals("", Strings.base64DecodeToString(""));
         assertEquals("", Strings.base64DecodeToString(null));
 
-        // Test special characters
         assertEquals("Hello World!", Strings.base64DecodeToString("SGVsbG8gV29ybGQh"));
         assertEquals("1234567890", Strings.base64DecodeToString("MTIzNDU2Nzg5MA=="));
     }
@@ -1698,19 +1576,16 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test base64DecodeToUtf8String method")
     public void testBase64DecodeToUtf8String() {
-        // Test UTF-8 decoding
         assertEquals("Hello", Strings.base64DecodeToUtf8String("SGVsbG8="));
         assertEquals("", Strings.base64DecodeToUtf8String(""));
         assertEquals("", Strings.base64DecodeToUtf8String(null));
 
-        // Test UTF-8 special characters
         assertEquals("😀", Strings.base64DecodeToUtf8String("8J+YgA=="));
     }
 
     @Test
     @DisplayName("Test base64DecodeToString with charset")
     public void testBase64DecodeToStringWithCharset() {
-        // Test with different charsets
         assertEquals("Hello", Strings.base64DecodeToString("SGVsbG8=", StandardCharsets.UTF_8));
         assertEquals("Hello", Strings.base64DecodeToString("SGVsbG8=", StandardCharsets.US_ASCII));
         assertEquals("", Strings.base64DecodeToString("", StandardCharsets.UTF_8));
@@ -1720,7 +1595,6 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test base64UrlEncode method")
     public void testBase64UrlEncode() {
-        // Test URL-safe encoding
         N.println(Base64.getUrlEncoder().withoutPadding().encodeToString("Hello".getBytes()));
         assertEquals("SGVsbG8", Strings.base64UrlEncode("Hello".getBytes()));
         assertEquals("V29ybGQ", Strings.base64UrlEncode("World".getBytes()));
@@ -1729,7 +1603,6 @@ public class Strings102Test extends TestBase {
         assertEquals("", Strings.base64UrlEncode(new byte[0]));
         assertEquals("", Strings.base64UrlEncode(null));
 
-        // Test data that would contain + or / in standard base64
         byte[] testData = { -1, -2, -3, -4, -5 };
         String encoded = Strings.base64UrlEncode(testData);
         assertFalse(encoded.contains("+"));
@@ -1740,7 +1613,6 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test base64UrlDecode method")
     public void testBase64UrlDecode() {
-        // Test URL-safe decoding
         assertArrayEquals("Hello".getBytes(), Strings.base64UrlDecode("SGVsbG8"));
         assertArrayEquals("World".getBytes(), Strings.base64UrlDecode("V29ybGQ"));
         assertArrayEquals(new byte[0], Strings.base64UrlDecode(""));
@@ -1750,7 +1622,6 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test base64UrlDecodeToString method")
     public void testBase64UrlDecodeToString() {
-        // Test URL-safe decoding to string
         assertEquals("Hello", Strings.base64UrlDecodeToString("SGVsbG8"));
         assertEquals("World", Strings.base64UrlDecodeToString("V29ybGQ"));
         assertEquals("", Strings.base64UrlDecodeToString(""));
@@ -1760,7 +1631,6 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test base64UrlDecodeToUtf8String method")
     public void testBase64UrlDecodeToUtf8String() {
-        // Test UTF-8 URL-safe decoding
         assertEquals("Hello", Strings.base64UrlDecodeToUtf8String("SGVsbG8"));
         assertEquals("", Strings.base64UrlDecodeToUtf8String(""));
         assertEquals("", Strings.base64UrlDecodeToUtf8String(null));
@@ -1769,7 +1639,6 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test base64UrlDecodeToString with charset")
     public void testBase64UrlDecodeToStringWithCharset() {
-        // Test with different charsets
         assertEquals("Hello", Strings.base64UrlDecodeToString("SGVsbG8", StandardCharsets.UTF_8));
         assertEquals("Hello", Strings.base64UrlDecodeToString("SGVsbG8", StandardCharsets.US_ASCII));
         assertEquals("", Strings.base64UrlDecodeToString("", StandardCharsets.UTF_8));
@@ -1779,7 +1648,6 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test isBase64 byte method")
     public void testIsBase64Byte() {
-        // Test valid base64 characters
         assertTrue(Strings.isBase64((byte) 'A'));
         assertTrue(Strings.isBase64((byte) 'Z'));
         assertTrue(Strings.isBase64((byte) 'a'));
@@ -1790,7 +1658,6 @@ public class Strings102Test extends TestBase {
         assertTrue(Strings.isBase64((byte) '/'));
         assertTrue(Strings.isBase64((byte) '='));
 
-        // Test invalid base64 characters
         assertFalse(Strings.isBase64((byte) '@'));
         assertFalse(Strings.isBase64((byte) '['));
         assertFalse(Strings.isBase64((byte) '`'));
@@ -1801,50 +1668,40 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test isBase64 byte array method")
     public void testIsBase64ByteArray() {
-        // Test valid base64 byte arrays
         assertTrue(Strings.isBase64("SGVsbG8=".getBytes()));
         assertTrue(Strings.isBase64("V29ybGQ=".getBytes()));
         assertTrue(Strings.isBase64(new byte[0]));
 
-        // Test invalid base64 byte arrays
         assertFalse(Strings.isBase64("Hello@World".getBytes()));
 
-        // Test with whitespace (should be valid)
         assertTrue(Strings.isBase64("SGVs bG8=".getBytes()));
     }
 
     @Test
     @DisplayName("Test isBase64 string method")
     public void testIsBase64String() {
-        // Test valid base64 strings
         assertTrue(Strings.isBase64("SGVsbG8="));
         assertTrue(Strings.isBase64("V29ybGQ="));
         assertTrue(Strings.isBase64(""));
 
-        // Test invalid base64 strings
         assertFalse(Strings.isBase64("Hello@World"));
 
-        // Test with whitespace (should be valid)
         assertTrue(Strings.isBase64("SGVs bG8="));
     }
 
     @Test
     @DisplayName("Test findFirstEmailAddress method")
     public void testFindFirstEmailAddress() {
-        // Test valid email addresses
         assertEquals("test@example.com", Strings.findFirstEmailAddress("Contact me at test@example.com"));
         assertEquals("user@domain.org", Strings.findFirstEmailAddress("Email: user@domain.org for more info"));
         assertEquals("admin@test.co.uk", Strings.findFirstEmailAddress("Send to admin@test.co.uk"));
 
-        // Test multiple email addresses (should return first)
         assertEquals("first@example.com", Strings.findFirstEmailAddress("first@example.com and second@example.com"));
 
-        // Test no email address
         assertNull(Strings.findFirstEmailAddress("No email here"));
         assertNull(Strings.findFirstEmailAddress(""));
         assertNull(Strings.findFirstEmailAddress(null));
 
-        // Test invalid email formats
         assertNull(Strings.findFirstEmailAddress("invalid@"));
         assertNull(Strings.findFirstEmailAddress("@invalid.com"));
     }
@@ -1852,22 +1709,18 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test findAllEmailAddresses method")
     public void testFindAllEmailAddresses() {
-        // Test multiple email addresses
         List<String> emails = Strings.findAllEmailAddresses("Contact first@example.com or second@test.org");
         assertEquals(2, emails.size());
         assertTrue(emails.contains("first@example.com"));
         assertTrue(emails.contains("second@test.org"));
 
-        // Test single email address
         emails = Strings.findAllEmailAddresses("Send to user@domain.com");
         assertEquals(1, emails.size());
         assertEquals("user@domain.com", emails.get(0));
 
-        // Test no email addresses
         emails = Strings.findAllEmailAddresses("No emails here");
         assertTrue(emails.isEmpty());
 
-        // Test null and empty
         emails = Strings.findAllEmailAddresses(null);
         assertTrue(emails.isEmpty());
 
@@ -1878,26 +1731,22 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test copyThenTrim method")
     public void testCopyThenTrim() {
-        // Test basic trimming
         String[] input = { " hello ", " world ", "  test  " };
         String[] result = Strings.copyThenTrim(input);
 
-        assertNotSame(input, result); // Should be a copy
+        assertNotSame(input, result);
         assertEquals("hello", result[0]);
         assertEquals("world", result[1]);
         assertEquals("test", result[2]);
 
-        // Test with null strings
         String[] inputWithNull = { " hello ", null, "  test  " };
         String[] resultWithNull = Strings.copyThenTrim(inputWithNull);
         assertEquals("hello", resultWithNull[0]);
-        assertEquals(null, resultWithNull[1]); // null becomes empty after trim
+        assertEquals(null, resultWithNull[1]);
         assertEquals("test", resultWithNull[2]);
 
-        // Test null array
         assertNull(Strings.copyThenTrim(null));
 
-        // Test empty array
         String[] emptyArray = new String[0];
         String[] emptyResult = Strings.copyThenTrim(emptyArray);
         assertNotSame(emptyArray, emptyResult);
@@ -1907,26 +1756,22 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test copyThenStrip method")
     public void testCopyThenStrip() {
-        // Test basic stripping
         String[] input = { " hello ", " world ", "  test  " };
         String[] result = Strings.copyThenStrip(input);
 
-        assertNotSame(input, result); // Should be a copy
+        assertNotSame(input, result);
         assertEquals("hello", result[0]);
         assertEquals("world", result[1]);
         assertEquals("test", result[2]);
 
-        // Test with null strings
         String[] inputWithNull = { " hello ", null, "  test  " };
         String[] resultWithNull = Strings.copyThenStrip(inputWithNull);
         assertEquals("hello", resultWithNull[0]);
-        assertEquals(null, resultWithNull[1]); // null becomes empty after strip
+        assertEquals(null, resultWithNull[1]);
         assertEquals("test", resultWithNull[2]);
 
-        // Test null array
         assertNull(Strings.copyThenStrip(null));
 
-        // Test empty array
         String[] emptyArray = new String[0];
         String[] emptyResult = Strings.copyThenStrip(emptyArray);
         assertNotSame(emptyArray, emptyResult);
@@ -1936,20 +1781,17 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test formatToPercentage methods")
     public void testFormatToPercentage() {
-        // Test basic percentage formatting
         assertEquals("50.0%", Numbers.format(0.5, "0.0%"));
         assertEquals("100.0%", Numbers.format(1.0, "0.0%"));
         assertEquals("0.0%", Numbers.format(0.0, "0.0%"));
         assertEquals("25.5%", Numbers.format(0.255, "0.0%"));
 
-        // Test with custom scale
         assertEquals("50%", Numbers.format(0.5, "0%"));
         assertEquals("50.0%", Numbers.format(0.5, "0.0%"));
         assertEquals("51.6%", Numbers.format(0.5156, "0.0%"));
         assertEquals("50.00%", Numbers.format(0.5, "0.00%"));
         assertEquals("33.333%", Numbers.format(1.0 / 3.0, "0.000%"));
 
-        // Test negative values
         assertEquals("-25.0%", Numbers.format(-0.25, "0.0%"));
         assertEquals("-25%", Numbers.format(-0.25, "0%"));
     }
@@ -1957,171 +1799,134 @@ public class Strings102Test extends TestBase {
     @Test
     @DisplayName("Test extractFirstInteger method")
     public void testExtractFirstInteger() {
-        // Test basic integer extraction
         assertEquals("123", Strings.extractFirstInteger("abc123def"));
         assertEquals("456", Strings.extractFirstInteger("test456"));
         assertEquals("789", Strings.extractFirstInteger("789test"));
         assertEquals("0", Strings.extractFirstInteger("value0"));
 
-        // Test negative integers
         assertEquals("-123", Strings.extractFirstInteger("value-123test"));
         assertEquals("-456", Strings.extractFirstInteger("-456abc"));
 
-        // Test no integer found
-        assertEquals("", Strings.extractFirstInteger("no numbers here"));
-        assertEquals("", Strings.extractFirstInteger(""));
-        assertEquals("", Strings.extractFirstInteger(null));
+        assertNull(Strings.extractFirstInteger("no numbers here"));
+        assertNull(Strings.extractFirstInteger(""));
+        assertNull(Strings.extractFirstInteger(null));
 
-        // Test multiple integers (should return first)
         assertEquals("123", Strings.extractFirstInteger("first123second456"));
     }
 
     @Test
     @DisplayName("Test extractFirstDouble method")
     public void testExtractFirstDouble() {
-        // Test basic double extraction
         assertEquals("123.45", Strings.extractFirstDouble("value123.45test"));
         assertEquals("456.0", Strings.extractFirstDouble("test456.0"));
         assertEquals("0.789", Strings.extractFirstDouble("0.789test"));
 
-        // Test integers (should also work)
         assertEquals("123", Strings.extractFirstDouble("abc123def"));
 
-        // Test negative doubles
         assertEquals("-123.45", Strings.extractFirstDouble("value-123.45test"));
 
-        // Test no number found
-        assertEquals("", Strings.extractFirstDouble("no numbers here"));
-        assertEquals("", Strings.extractFirstDouble(""));
-        assertEquals("", Strings.extractFirstDouble(null));
+        assertNull(Strings.extractFirstDouble("no numbers here"));
+        assertNull(Strings.extractFirstDouble(""));
+        assertNull(Strings.extractFirstDouble(null));
 
-        // Test multiple numbers (should return first)
         assertEquals("123.45", Strings.extractFirstDouble("first123.45second678.90"));
     }
 
     @Test
     @DisplayName("Test extractFirstSciNumber method")
     public void testExtractFirstSciNumber() {
-        // Test basic scientific notation extraction
         assertEquals("1.23e10", Strings.extractFirstDouble("value1.23e10test", true));
         assertEquals("4.56E-5", Strings.extractFirstDouble("test4.56E-5", true));
         assertEquals("1e3", Strings.extractFirstDouble("1e3test", true));
 
-        // Test negative scientific notation
         assertEquals("-1.23e10", Strings.extractFirstDouble("value-1.23e10test", true));
 
-        // Test no scientific number found
-        assertEquals("", Strings.extractFirstDouble("no sci numbers here", true));
-        assertEquals("", Strings.extractFirstDouble("", true));
-        assertEquals("", Strings.extractFirstDouble(null, true));
-        assertEquals("123.45", Strings.extractFirstDouble("123.45", true)); // Regular number, not scientific
+        assertNull(Strings.extractFirstDouble("no sci numbers here", true));
+        assertNull(Strings.extractFirstDouble("", true));
+        assertNull(Strings.extractFirstDouble(null, true));
+        assertEquals("123.45", Strings.extractFirstDouble("123.45", true));
 
-        // Test multiple scientific numbers (should return first)
         assertEquals("1.23e10", Strings.extractFirstDouble("first1.23e10second4.56e-5", true));
     }
 
     @Test
     @DisplayName("Test replaceFirstInteger method")
     public void testReplaceFirstInteger() {
-        // Test basic integer replacement
         assertEquals("abcXXXdef", Strings.replaceFirstInteger("abc123def", "XXX"));
         assertEquals("testXXX", Strings.replaceFirstInteger("test456", "XXX"));
         assertEquals("XXXtest", Strings.replaceFirstInteger("789test", "XXX"));
 
-        // Test negative integers
         assertEquals("valueXXXtest", Strings.replaceFirstInteger("value-123test", "XXX"));
 
-        // Test no integer found
         assertEquals("no numbers here", Strings.replaceFirstInteger("no numbers here", "XXX"));
         assertEquals("", Strings.replaceFirstInteger("", "XXX"));
         assertEquals("", Strings.replaceFirstInteger(null, "XXX"));
 
-        // Test multiple integers (should replace only first)
         assertEquals("firstXXXsecond456", Strings.replaceFirstInteger("first123second456", "XXX"));
     }
 
     @Test
     @DisplayName("Test replaceFirstDouble method")
     public void testReplaceFirstDouble() {
-        // Test basic double replacement
         assertEquals("valueXXXtest", Strings.replaceFirstDouble("value123.45test", "XXX"));
         assertEquals("testXXX", Strings.replaceFirstDouble("test456.0", "XXX"));
         assertEquals("XXXtest", Strings.replaceFirstDouble("0.789test", "XXX"));
 
-        // Test integers (should also work)
         assertEquals("abcXXXdef", Strings.replaceFirstDouble("abc123def", "XXX"));
 
-        // Test negative doubles
         assertEquals("valueXXXtest", Strings.replaceFirstDouble("value-123.45test", "XXX"));
 
-        // Test no number found
         assertEquals("no numbers here", Strings.replaceFirstDouble("no numbers here", "XXX"));
         assertEquals("", Strings.replaceFirstDouble("", "XXX"));
         assertEquals("", Strings.replaceFirstDouble(null, "XXX"));
 
-        // Test multiple numbers (should replace only first)
         assertEquals("firstXXXsecond678.90", Strings.replaceFirstDouble("first123.45second678.90", "XXX"));
     }
 
     @Test
     @DisplayName("Test replaceFirstSciNumber method")
     public void testReplaceFirstSciNumber() {
-        // Test basic scientific notation replacement
         assertEquals("valueXXXtest", Strings.replaceFirstDouble("value1.23e10test", "XXX", true));
         assertEquals("testXXX", Strings.replaceFirstDouble("test4.56E-5", "XXX", true));
         assertEquals("XXXtest", Strings.replaceFirstDouble("1e3test", "XXX", true));
 
-        // Test negative scientific notation
         assertEquals("valueXXXtest", Strings.replaceFirstDouble("value-1.23e10test", "XXX", true));
 
-        // Test no scientific number found
         assertEquals("no sci numbers here", Strings.replaceFirstDouble("no sci numbers here", "XXX", true));
         assertEquals("", Strings.replaceFirstDouble("", "XXX", true));
         assertEquals("", Strings.replaceFirstDouble(null, "XXX", true));
-        assertEquals("XXX", Strings.replaceFirstDouble("123.45", "XXX", true)); // Regular number, not scientific
+        assertEquals("XXX", Strings.replaceFirstDouble("123.45", "XXX", true));
 
-        // Test multiple scientific numbers (should replace only first)
         assertEquals("firstXXXsecond4.56e-5", Strings.replaceFirstDouble("first1.23e10second4.56e-5", "XXX", true));
     }
 
     @Test
     @DisplayName("Test urlEncode methods")
     public void testUrlEncode() {
-        // Note: These tests assume URLEncodedUtil exists and works correctly
-        // We're testing that Strings delegates correctly to URLEncodedUtil
 
-        // Test basic URL encoding
         String result = Strings.urlEncode("hello world");
         assertNotNull(result);
 
-        // Test with charset
         String resultWithCharset = Strings.urlEncode("hello world", StandardCharsets.UTF_8);
         assertNotNull(resultWithCharset);
 
-        // Test null input
         String nullResult = Strings.urlEncode(null);
-        assertNotNull(nullResult); // URLEncodedUtil should handle null
+        assertNotNull(nullResult);
     }
 
     @Test
     @DisplayName("Test urlDecode methods")
     public void testUrlDecode() {
-        // Note: These tests assume URLEncodedUtil exists and works correctly
-        // We're testing that Strings delegates correctly to URLEncodedUtil
 
-        // Test basic URL decoding
         Map<String, String> result = Strings.urlDecode("key=value&foo=bar");
         assertNotNull(result);
 
-        // Test with charset
         Map<String, String> resultWithCharset = Strings.urlDecode("key=value", StandardCharsets.UTF_8);
         assertNotNull(resultWithCharset);
 
-        // Test decoding to specific type
         Object objectResult = Strings.urlDecode("id=1", Account.class);
         assertNotNull(objectResult);
 
-        // Test decoding to specific type with charset
         Object objectResultWithCharset = Strings.urlDecode("id=1", StandardCharsets.UTF_8, Account.class);
         assertNotNull(objectResultWithCharset);
     }

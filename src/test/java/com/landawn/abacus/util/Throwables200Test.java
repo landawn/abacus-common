@@ -19,13 +19,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Nullable;
 
+@Tag("new-test")
 public class Throwables200Test extends TestBase {
-
-    //region 'run' methods Tests
 
     @Test
     public void testRun_withoutException() {
@@ -77,9 +77,6 @@ public class Throwables200Test extends TestBase {
 
         assertTrue(errorActionExecuted.get(), "Error action should have been executed.");
     }
-    //endregion
-
-    //region 'call' methods Tests
 
     @Test
     public void testCall_withoutException() {
@@ -102,7 +99,7 @@ public class Throwables200Test extends TestBase {
     public void testCall_withActionOnError() {
         String result = Throwables.call(() -> {
             throw new IOException("Test");
-        },  Fn.s(() -> "handled"));
+        }, Fn.s(() -> "handled"));
         assertEquals("handled", result, "The actionOnError function should provide the return value.");
     }
 
@@ -110,7 +107,7 @@ public class Throwables200Test extends TestBase {
     public void testCall_withSupplier() {
         String result = Throwables.call(() -> {
             throw new Exception("Test");
-        },  Fn.s(() -> "supplied"));
+        }, Fn.s(() -> "supplied"));
         assertEquals("supplied", result, "The supplier should provide the return value on error.");
     }
 
@@ -126,7 +123,7 @@ public class Throwables200Test extends TestBase {
     public void testCall_withPredicateAndSupplier_predicateTrue() {
         String result = Throwables.call(() -> {
             throw new IOException("IO Test");
-        }, e -> e instanceof IOException,  Fn.s(() -> "supplied_on_io"));
+        }, e -> e instanceof IOException, Fn.s(() -> "supplied_on_io"));
         assertEquals("supplied_on_io", result, "Supplier should be used when predicate is true.");
     }
 
@@ -135,7 +132,7 @@ public class Throwables200Test extends TestBase {
         assertThrows(RuntimeException.class, () -> {
             Throwables.call(() -> {
                 throw new IllegalArgumentException("Arg Test");
-            }, e -> e instanceof IOException,  Fn.s(() -> "supplied_on_io"));
+            }, e -> e instanceof IOException, Fn.s(() -> "supplied_on_io"));
         }, "Exception should be rethrown when predicate is false.");
     }
 
@@ -155,9 +152,6 @@ public class Throwables200Test extends TestBase {
             }, e -> e instanceof IOException, "default_on_io");
         }, "Exception should be rethrown when predicate is false.");
     }
-    //endregion
-
-    //region Iterator Tests
 
     @Test
     public void testIterator_empty() throws Throwable {
@@ -185,7 +179,7 @@ public class Throwables200Test extends TestBase {
     @Test
     public void testIterator_ofArraySlice() throws Throwable {
         Integer[] source = { 0, 1, 2, 3, 4, 5 };
-        Throwables.Iterator<Integer, ?> iterator = Throwables.Iterator.of(source, 2, 4); // should contain {2, 3}
+        Throwables.Iterator<Integer, ?> iterator = Throwables.Iterator.of(source, 2, 4);
         assertEquals(Arrays.asList(2, 3), iterator.toList());
     }
 
@@ -304,50 +298,38 @@ public class Throwables200Test extends TestBase {
     public void testIterator_instanceMethods() throws Throwable {
         Throwables.Iterator<Integer, Exception> original = Throwables.Iterator.of(1, 2, 3, 4, 5, null);
 
-        // filter
         Throwables.Iterator<Integer, ?> filtered = original.filter(i -> i != null && i % 2 != 0);
         assertEquals(Arrays.asList(1, 3, 5), filtered.toList());
 
-        // map
         original = Throwables.Iterator.of(1, 2, 3);
         Throwables.Iterator<String, ?> mapped = original.map(i -> "v" + i);
         assertEquals(Arrays.asList("v1", "v2", "v3"), mapped.toList());
 
-        // first
         original = Throwables.Iterator.of(1, 2, 3);
         assertEquals(Nullable.of(1), original.first());
         assertEquals(Nullable.empty(), Throwables.Iterator.empty().first());
 
-        // firstNonNull
         original = Throwables.Iterator.of(null, null, 1, 2);
         assertEquals(com.landawn.abacus.util.u.Optional.of(1), original.firstNonNull());
 
-        // last
         original = Throwables.Iterator.of(1, 2, 3);
         assertEquals(Nullable.of(3), original.last());
 
-        // toArray
         original = Throwables.Iterator.of(1, 2, 3);
         assertArrayEquals(new Object[] { 1, 2, 3 }, original.toArray());
 
-        // toArray(T[])
         original = Throwables.Iterator.of(4, 5, 6);
         assertArrayEquals(new Integer[] { 4, 5, 6 }, original.toArray(new Integer[0]));
 
-        // advance
         original = Throwables.Iterator.of(1, 2, 3, 4, 5);
         original.advance(2);
         assertEquals(3, original.next());
 
-        // foreachIndexed
         Throwables.Iterator<String, Exception> original2 = Throwables.Iterator.of("a", "b");
         final List<String> indexedItems = new ArrayList<>();
         original2.foreachIndexed((idx, item) -> indexedItems.add(idx + ":" + item));
         assertEquals(Arrays.asList("0:a", "1:b"), indexedItems);
     }
-    //endregion
-
-    //region Functional Interfaces Tests
 
     @Test
     public void testRunnable_unchecked() {
@@ -430,10 +412,6 @@ public class Throwables200Test extends TestBase {
         assertEquals("Sum is 10", result);
     }
 
-    //endregion
-
-    //region LazyInitializer Tests
-
     @Test
     public void testLazyInitializer() throws Throwable {
         final AtomicInteger supplierCalls = new AtomicInteger(0);
@@ -461,7 +439,6 @@ public class Throwables200Test extends TestBase {
         final AtomicInteger supplierCalls = new AtomicInteger(0);
         final Throwables.Supplier<String, Exception> supplier = () -> {
             try {
-                // Simulate work
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 fail("Sleep interrupted");
@@ -495,5 +472,4 @@ public class Throwables200Test extends TestBase {
         assertEquals(1, supplierCalls.get(), "Supplier must be called exactly once in a multi-threaded environment.");
     }
 
-    //endregion
 }

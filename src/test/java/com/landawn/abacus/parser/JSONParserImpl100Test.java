@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -41,6 +42,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Tag("new-test")
 public class JSONParserImpl100Test extends TestBase {
 
     private JSONParserImpl parser;
@@ -322,7 +324,6 @@ public class JSONParserImpl100Test extends TestBase {
     public void testSerializationConfig() {
         Person person = new Person("Test", 100);
 
-        // Test pretty format
         JSONSerializationConfig config = JSC.create().prettyFormat(true).setIndentation("  ");
 
         String json = parser.serialize(person, config);
@@ -383,7 +384,7 @@ public class JSONParserImpl100Test extends TestBase {
 
     @Test
     public void testSerializeDataset() {
-        List<String> columnNames = Arrays.asList("col1", "col2");
+        List<String> columnNames = Arrays.asList("col1", "col2", "col3");
         List<List<Object>> columnList = new ArrayList<>();
         columnList.add(Arrays.asList("a", "b", "c"));
         columnList.add(Arrays.asList(1, 2, 3));
@@ -400,7 +401,7 @@ public class JSONParserImpl100Test extends TestBase {
 
     @Test
     public void testSerializeDataset_2() {
-        List<String> columnNames = Arrays.asList("col1", "col2");
+        List<String> columnNames = Arrays.asList("col1", "col2", "col3");
         List<List<Object>> columnList = new ArrayList<>();
         columnList.add(Arrays.asList("a", "b", "c"));
         columnList.add(Arrays.asList(1, 2, 3));
@@ -527,7 +528,6 @@ public class JSONParserImpl100Test extends TestBase {
         XBean2 xBean2 = parser.deserialize(json, null, XBean2.class);
         assertEquals("{\"name\": \"RawBean\", \"age\": 99}", xBean2.getRawJsonBean());
         assertEquals("[\"item1\", \"item2\", \"item3\"]", xBean2.getRawJsonList());
-        // assertEquals(xBean, xBean2);
     }
 
 }

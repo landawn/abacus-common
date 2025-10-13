@@ -1175,8 +1175,5 @@ public class EventBus {
                     + ", isPossibleLambdaSubscriber=" + N.toString(isPossibleLambdaSubscriber) + "}";
         }
 
-        //        public static void main(String[] args) {
-        //            CodeGenerator.printClassMethod(SubIdentifier.class);
-        //        }
     }
 }

@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -35,10 +36,9 @@ import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.function.FloatBiPredicate;
 import com.landawn.abacus.util.function.FloatPredicate;
 
-
+@Tag("new-test")
 public class FloatStream200Test extends TestBase {
 
-    // A small tolerance for float comparisons.
     private static final float DELTA = 1e-5f;
 
     @Nested
@@ -81,7 +81,6 @@ public class FloatStream200Test extends TestBase {
         public void testGenerate() {
             final Random rng = new Random(1);
             float[] expected = { rng.nextFloat(), rng.nextFloat(), rng.nextFloat() };
-            // Re-seed to get same sequence
             final Random rng2 = new Random(1);
             assertArrayEquals(expected, FloatStream.generate(rng2::nextFloat).limit(3).toArray(), DELTA);
         }
@@ -137,8 +136,6 @@ public class FloatStream200Test extends TestBase {
         @Test
         public void testDistinct() {
             float[] result = FloatStream.of(1.1f, 2.2f, 1.1f, 3.3f, 2.2f).distinct().toArray();
-            // Sorting is needed because distinct doesn't guarantee order for parallel streams
-            // although this implementation is sequential. It's good practice.
             Arrays.sort(result);
             assertArrayEquals(new float[] { 1.1f, 2.2f, 3.3f }, result, DELTA);
         }
@@ -344,7 +341,7 @@ public class FloatStream200Test extends TestBase {
         @Test
         public void testStreamIsClosedAfterTerminalOp() {
             FloatStream stream = FloatStream.of(1.0f, 2.0f);
-            stream.count(); // Terminal operation
+            stream.count();
             assertThrows(IllegalStateException.class, stream::count);
         }
 
@@ -396,9 +393,7 @@ public class FloatStream200Test extends TestBase {
                 counter.incrementAndGet();
                 return FloatStream.of(1.1f, 2.2f);
             });
-            // Supplier not called yet
             assertEquals(0, counter.get());
-            // Supplier called upon terminal operation
             assertEquals(2, stream.count());
             assertEquals(1, counter.get());
         }
@@ -406,7 +401,7 @@ public class FloatStream200Test extends TestBase {
         @Test
         public void testOfFloatBuffer() {
             FloatBuffer buffer = FloatBuffer.wrap(new float[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f });
-            buffer.position(1).limit(4); // View of {2.2f, 3.3f, 4.4f}
+            buffer.position(1).limit(4);
             assertArrayEquals(new float[] { 2.2f, 3.3f, 4.4f }, FloatStream.of(buffer).toArray(), DELTA);
         }
     }
@@ -417,17 +412,15 @@ public class FloatStream200Test extends TestBase {
 
         @Test
         public void testMapPartial() {
-            // Map odd numbers, filter out even numbers
             float[] result = FloatStream.of(1f, 2f, 3f, 4f, 5f).mapPartial(f -> f % 2 != 0 ? OptionalFloat.of(f * 10) : OptionalFloat.empty()).toArray();
             assertArrayEquals(new float[] { 10f, 30f, 50f }, result, DELTA);
         }
 
         @Test
         public void testRangeMap() {
-            // Group floats that are close to each other and get their average
             FloatBiPredicate inSameRange = (a, b) -> Math.abs(a - b) < 1.0f;
             float[] data = { 1.1f, 1.5f, 1.9f, 3.5f, 4.4f, 6.0f, 6.2f };
-            float[] expected = { 1.5f, 3.95f, 6.1f }; // (1.1+1.9)/2, (3.5+4.4)/2, (6.0+6.2)/2
+            float[] expected = { 1.5f, 3.95f, 6.1f };
             assertArrayEquals(expected, FloatStream.of(data).rangeMap(inSameRange, (a, b) -> (a + b) / 2).toArray(), DELTA);
         }
 
@@ -452,7 +445,6 @@ public class FloatStream200Test extends TestBase {
 
         @Test
         public void testTransform() {
-            // Example: custom operation to get every other element, then double it.
             FloatStream transformed = FloatStream.of(1f, 2f, 3f, 4f, 5f).transform(s -> s.step(2).map(f -> f * 2));
             assertArrayEquals(new float[] { 2f, 6f, 10f }, transformed.map(f -> f).toArray(), DELTA);
         }
@@ -464,9 +456,7 @@ public class FloatStream200Test extends TestBase {
 
         @Test
         public void testCollectWithCombiner() {
-            // This is more relevant for parallel streams, but shows the mechanics.
             ArrayList<Float> result = FloatStream.of(1.1f, 2.2f, 3.3f).parallel().collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-            // In parallel, order is not guaranteed. Sort for a stable test.
             result.sort(Comparator.naturalOrder());
             assertEquals(Arrays.asList(1.1f, 2.2f, 3.3f), result);
         }
@@ -474,10 +464,10 @@ public class FloatStream200Test extends TestBase {
         @Test
         public void testToMapWithFactoryAndMerge() {
             Map<Integer, Float> map = FloatStream.of(1.1f, 2.9f, 1.8f, 3.5f)
-                    .toMap(f -> (int) Math.floor(f), // Key: the integer part
-                            f -> f, // Value: the float itself
-                            (v1, v2) -> v1 + v2, // Merge: sum values with the same key
-                            HashMap::new // Factory: use a HashMap
+                    .toMap(f -> (int) Math.floor(f),
+                            f -> f,
+                            (v1, v2) -> v1 + v2,
+                            HashMap::new
                     );
 
             assertEquals(1.1f + 1.8f, map.get(1), DELTA);
@@ -513,7 +503,7 @@ public class FloatStream200Test extends TestBase {
             float[] data = { 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f, 11f, 12f, 13f, 14f, 15f, 16f, 17f, 18f, 19f, 20f };
             Map<Percentage, Float> percentiles = FloatStream.of(data).percentiles().get();
 
-            assertEquals(11f, percentiles.get(Percentage._50), DELTA); // Median
+            assertEquals(11f, percentiles.get(Percentage._50), DELTA);
             assertEquals(1f, percentiles.get(Percentage._0_0001), DELTA);
             assertEquals(20f, percentiles.get(Percentage._99_9999), DELTA);
             assertEquals(5f, percentiles.get(Percentage._20), DELTA);
@@ -551,18 +541,13 @@ public class FloatStream200Test extends TestBase {
 
         @Test
         public void testFlattMapToObjWithArray() {
-            // Note the 'tt' in flattMap, which is distinct from flatmap
             String[] result = FloatStream.of(1f, 2f).flattmapToObj(f -> new String[] { "val=" + f }).toArray(String[]::new);
             assertArrayEquals(new String[] { "val=1.0", "val=2.0" }, result);
         }
 
         @Test
         public void testCollapseWithTriPredicate() {
-            // Collapse a sequence as long as it's monotonically increasing from the start of the sequence
             float[] data = { 1.0f, 2.0f, 3.0f, 2.5f, 4.0f, 5.0f };
-            // The first sequence is {1.0, 2.0, 3.0}, sum is 6.0.
-            // the next element 2.5 is not > 3.0, so the sequence breaks.
-            // The next sequence starts with 2.5. {2.5, 4.0, 5.0}, sum is 11.5
             float[] expected = { 6.0f, 11.5f };
             float[] result = FloatStream.of(data).collapse((first, prev, curr) -> curr > prev, (a, b) -> a + b).toArray();
 
@@ -571,7 +556,6 @@ public class FloatStream200Test extends TestBase {
 
         @Test
         public void testRangeMapToObj() {
-            // Group floats that are "close" and represent the range as a string.
             float[] data = { 1.1f, 1.2f, 1.9f, 5.0f, 5.4f, 8.2f };
             String[] expected = { "1.1-1.9", "5.0-5.4", "8.2-8.2" };
             String[] result = FloatStream.of(data)
@@ -589,7 +573,7 @@ public class FloatStream200Test extends TestBase {
         public void testSkipWithAction() {
             final FloatList skippedItems = new FloatList();
             FloatStream.of(1f, 2f, 3f, 4f, 5f).skip(3, skippedItems::add).forEach(f -> {
-            }); // terminal operation to trigger stream processing
+            });
 
             assertArrayEquals(new float[] { 1f, 2f, 3f }, skippedItems.toArray(), DELTA);
         }
@@ -597,8 +581,8 @@ public class FloatStream200Test extends TestBase {
         @Test
         public void testFilterWithActionOnDroppedItem() {
             final FloatList droppedItems = new FloatList();
-            FloatPredicate predicate = f -> f > 3f; // Keep items > 3
-            FloatStream.of(1f, 2f, 3f, 4f, 5f).filter(predicate, droppedItems::add).count(); // terminal operation
+            FloatPredicate predicate = f -> f > 3f;
+            FloatStream.of(1f, 2f, 3f, 4f, 5f).filter(predicate, droppedItems::add).count();
 
             assertArrayEquals(new float[] { 1f, 2f, 3f }, droppedItems.toArray(), DELTA);
         }
@@ -613,7 +597,6 @@ public class FloatStream200Test extends TestBase {
 
         @Test
         public void testTopWithComparator() {
-            // Get the top 3 smallest numbers
             float[] data = { 5.5f, 2.2f, 8.8f, 1.1f, 3.3f };
             float[] expected = { 3.3f, 8.8f, 5.5f };
             float[] result = FloatStream.of(data).top(3, Comparator.naturalOrder()).toArray();
@@ -627,7 +610,6 @@ public class FloatStream200Test extends TestBase {
             FloatStream.of(1f, 2f, 3f).delay(com.landawn.abacus.util.Duration.ofMillis(50)).count();
             long endTime = System.currentTimeMillis();
 
-            // 2 delays of 50ms should occur.
             assertTrue((endTime - startTime) >= 100, "Stream processing should be delayed");
         }
     }

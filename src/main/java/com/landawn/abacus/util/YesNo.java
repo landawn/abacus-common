@@ -37,7 +37,6 @@ package com.landawn.abacus.util;
  * YesNo isActive = YesNo.valueOf(storedValue);
  * }</pre>
  *
- * @author Haiyang Li
  * @since 0.8
  */
 public enum YesNo {

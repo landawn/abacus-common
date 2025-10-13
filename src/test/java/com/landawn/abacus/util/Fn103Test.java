@@ -50,6 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.google.common.collect.ImmutableList;
 import com.landawn.abacus.TestBase;
@@ -95,6 +96,7 @@ import com.landawn.abacus.util.function.ToCharFunction;
 import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.function.UnaryOperator;
 
+@Tag("new-test")
 public class Fn103Test extends TestBase {
 
     @Nested
@@ -109,7 +111,6 @@ public class Fn103Test extends TestBase {
             long time1 = supplier.getAsLong();
             assertTrue(time1 > 0);
 
-            // Sleep a bit to ensure time changes
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -141,7 +142,6 @@ public class Fn103Test extends TestBase {
 
             assertNotNull(supplier);
             assertEquals(5, supplier.get());
-            // Test multiple calls return same result
             assertEquals(5, supplier.get());
         }
 
@@ -151,7 +151,7 @@ public class Fn103Test extends TestBase {
             Supplier<String> supplier = Suppliers.ofInstance(instance);
 
             assertSame(instance, supplier.get());
-            assertSame(instance, supplier.get()); // Multiple calls return same instance
+            assertSame(instance, supplier.get());
         }
 
         @Test
@@ -164,7 +164,7 @@ public class Fn103Test extends TestBase {
 
             assertNotNull(uuid1);
             assertNotNull(uuid2);
-            assertNotEquals(uuid1, uuid2); // Each call generates new UUID
+            assertNotEquals(uuid1, uuid2);
         }
 
         @Test
@@ -177,12 +177,11 @@ public class Fn103Test extends TestBase {
 
             assertNotNull(guid1);
             assertNotNull(guid2);
-            assertNotEquals(guid1, guid2); // Each call generates new GUID
+            assertNotEquals(guid1, guid2);
         }
 
         @Test
         public void testOfEmptyArraySuppliers() {
-            // Test all empty array suppliers
             assertArrayEquals(new boolean[0], Suppliers.ofEmptyBooleanArray().get());
             assertArrayEquals(new char[0], Suppliers.ofEmptyCharArray().get());
             assertArrayEquals(new byte[0], Suppliers.ofEmptyByteArray().get());
@@ -199,7 +198,7 @@ public class Fn103Test extends TestBase {
         public void testOfEmptyString() {
             Supplier<String> supplier = Suppliers.ofEmptyString();
             assertEquals("", supplier.get());
-            assertSame(supplier.get(), supplier.get()); // Should return same instance
+            assertSame(supplier.get(), supplier.get());
         }
 
         @Test
@@ -273,30 +272,24 @@ public class Fn103Test extends TestBase {
 
         @Test
         public void testOfListMultimapVariants() {
-            // Test with map type
             Supplier<ListMultimap<String, Integer>> supplier1 = Suppliers.ofListMultimap(LinkedHashMap.class);
             assertNotNull(supplier1.get());
 
-            // Test with map and list types
             Supplier<ListMultimap<String, Integer>> supplier2 = Suppliers.ofListMultimap(HashMap.class, ArrayList.class);
             assertNotNull(supplier2.get());
 
-            // Test with suppliers
             Supplier<ListMultimap<String, Integer>> supplier3 = Suppliers.ofListMultimap(HashMap::new, ArrayList::new);
             assertNotNull(supplier3.get());
         }
 
         @Test
         public void testOfSetMultimapVariants() {
-            // Test with map type
             Supplier<SetMultimap<String, Integer>> supplier1 = Suppliers.ofSetMultimap(LinkedHashMap.class);
             assertNotNull(supplier1.get());
 
-            // Test with map and set types
             Supplier<SetMultimap<String, Integer>> supplier2 = Suppliers.ofSetMultimap(HashMap.class, HashSet.class);
             assertNotNull(supplier2.get());
 
-            // Test with suppliers
             Supplier<SetMultimap<String, Integer>> supplier3 = Suppliers.ofSetMultimap(HashMap::new, HashSet::new);
             assertNotNull(supplier3.get());
         }
@@ -316,12 +309,11 @@ public class Fn103Test extends TestBase {
 
             assertNotNull(sb1);
             assertNotNull(sb2);
-            assertNotSame(sb1, sb2); // Different instances
+            assertNotSame(sb1, sb2);
         }
 
         @Test
         public void testOfCollection() {
-            // Test various collection types
             assertEquals(ArrayList.class, Suppliers.ofCollection(List.class).get().getClass());
             assertEquals(ArrayList.class, Suppliers.ofCollection(ArrayList.class).get().getClass());
             assertEquals(LinkedList.class, Suppliers.ofCollection(LinkedList.class).get().getClass());
@@ -329,65 +321,18 @@ public class Fn103Test extends TestBase {
             assertEquals(LinkedHashSet.class, Suppliers.ofCollection(LinkedHashSet.class).get().getClass());
             assertTrue(Suppliers.ofCollection(SortedSet.class).get() instanceof TreeSet);
 
-            // Test invalid input
             assertThrows(IllegalArgumentException.class, () -> Suppliers.ofCollection(ImmutableList.class));
         }
 
         @Test
         public void testOfMap() {
-            // Test various map types
             assertEquals(HashMap.class, Suppliers.ofMap(Map.class).get().getClass());
             assertEquals(HashMap.class, Suppliers.ofMap(HashMap.class).get().getClass());
             assertEquals(LinkedHashMap.class, Suppliers.ofMap(LinkedHashMap.class).get().getClass());
             assertTrue(Suppliers.ofMap(SortedMap.class).get() instanceof TreeMap);
 
-            // Test invalid input
             assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMap((Class) String.class));
         }
-
-        //    @Test
-        //    public void testRegisterForCollection() {
-        //        // Create a custom collection class
-        //        class CustomCollection<T> extends ArrayList<T> {
-        //        }
-        //
-        //        // Register it
-        //        boolean registered = Fn.Suppliers.registerForCollection(CustomCollection.class, CustomCollection::new);
-        //        assertTrue(registered);
-        //
-        //        // Try to register again - should return false
-        //        boolean registeredAgain = Fn.Suppliers.registerForCollection(CustomCollection.class, CustomCollection::new);
-        //        assertFalse(registeredAgain);
-        //
-        //        // Test that it works
-        //        Collection<?> collection = Fn.Suppliers.ofCollection(CustomCollection.class).get();
-        //        assertTrue(collection instanceof CustomCollection);
-        //
-        //        // Test registering built-in class throws exception
-        //        assertThrows(IllegalArgumentException.class, () -> Fn.Suppliers.registerForCollection(ArrayList.class, ArrayList::new));
-        //    }
-
-        //    @Test
-        //    public void testRegisterForMap() {
-        //        // Create a custom map class
-        //        class CustomMap<K, V> extends HashMap<K, V> {
-        //        }
-        //
-        //        // Register it
-        //        boolean registered = Fn.Suppliers.registerForMap(CustomMap.class, CustomMap::new);
-        //        assertTrue(registered);
-        //
-        //        // Try to register again - should return false
-        //        boolean registeredAgain = Fn.Suppliers.registerForMap(CustomMap.class, CustomMap::new);
-        //        assertFalse(registeredAgain);
-        //
-        //        // Test that it works
-        //        Map<?, ?> map = Fn.Suppliers.ofMap(CustomMap.class).get();
-        //        assertTrue(map instanceof CustomMap);
-        //
-        //        // Test registering built-in class throws exception
-        //        assertThrows(IllegalArgumentException.class, () -> Fn.Suppliers.registerForMap(HashMap.class, HashMap::new));
-        //    }
 
         @Test
         public void testDeprecatedImmutableMethods() {
@@ -404,7 +349,7 @@ public class Fn103Test extends TestBase {
 
             assertNotNull(e1);
             assertNotNull(e2);
-            assertNotSame(e1, e2); // Different instances
+            assertNotSame(e1, e2);
         }
 
         @Test
@@ -415,7 +360,7 @@ public class Fn103Test extends TestBase {
 
             assertNotNull(e1);
             assertNotNull(e2);
-            assertNotSame(e1, e2); // Different instances
+            assertNotSame(e1, e2);
         }
 
         @Test
@@ -426,7 +371,7 @@ public class Fn103Test extends TestBase {
 
             assertNotNull(e1);
             assertNotNull(e2);
-            assertNotSame(e1, e2); // Different instances
+            assertNotSame(e1, e2);
         }
     }
 
@@ -444,7 +389,6 @@ public class Fn103Test extends TestBase {
 
         @Test
         public void testOfArrayFunctions() {
-            // Test all array creation functions
             assertArrayEquals(new boolean[5], IntFunctions.ofBooleanArray().apply(5));
             assertArrayEquals(new char[5], IntFunctions.ofCharArray().apply(5));
             assertArrayEquals(new byte[5], IntFunctions.ofByteArray().apply(5));
@@ -459,18 +403,15 @@ public class Fn103Test extends TestBase {
 
         @Test
         public void testOfCollectionFunctions() {
-            // Test List functions
             assertTrue(IntFunctions.ofList().apply(10) instanceof ArrayList);
             assertTrue(IntFunctions.ofLinkedList().apply(10) instanceof LinkedList);
 
-            // Test Set functions
             assertTrue(IntFunctions.ofSet().apply(10) instanceof HashSet);
             assertTrue(IntFunctions.ofLinkedHashSet().apply(10) instanceof LinkedHashSet);
             assertTrue(IntFunctions.ofSortedSet().apply(10) instanceof TreeSet);
             assertTrue(IntFunctions.ofNavigableSet().apply(10) instanceof TreeSet);
             assertTrue(IntFunctions.ofTreeSet().apply(10) instanceof TreeSet);
 
-            // Test Queue functions
             assertTrue(IntFunctions.ofQueue().apply(10) instanceof Queue);
             assertTrue(IntFunctions.ofDeque().apply(10) instanceof Deque);
             assertTrue(IntFunctions.ofArrayDeque().apply(10) instanceof ArrayDeque);
@@ -517,7 +458,7 @@ public class Fn103Test extends TestBase {
 
             assertNotNull(array1);
             assertNotNull(array2);
-            assertSame(array1, array2); // Should return same instance (stateful)
+            assertSame(array1, array2);
         }
 
         @Test
@@ -528,12 +469,11 @@ public class Fn103Test extends TestBase {
 
             assertNotNull(array1);
             assertNotNull(array2);
-            assertSame(array1, array2); // Should return same instance (stateful)
+            assertSame(array1, array2);
         }
 
         @Test
         public void testOfCollection() {
-            // Test various collection types
             assertTrue(IntFunctions.ofCollection(List.class).apply(10) instanceof ArrayList);
             assertTrue(IntFunctions.ofCollection(ArrayList.class).apply(10) instanceof ArrayList);
             assertTrue(IntFunctions.ofCollection(LinkedList.class).apply(10) instanceof LinkedList);
@@ -541,71 +481,18 @@ public class Fn103Test extends TestBase {
             assertTrue(IntFunctions.ofCollection(LinkedHashSet.class).apply(10) instanceof LinkedHashSet);
             assertTrue(IntFunctions.ofCollection(SortedSet.class).apply(10) instanceof TreeSet);
 
-            // Test invalid input
             assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofCollection(ImmutableList.class));
         }
 
         @Test
         public void testOfMap() {
-            // Test various map types
             assertTrue(IntFunctions.ofMap(Map.class).apply(10) instanceof HashMap);
             assertTrue(IntFunctions.ofMap(HashMap.class).apply(10) instanceof HashMap);
             assertTrue(IntFunctions.ofMap(LinkedHashMap.class).apply(10) instanceof LinkedHashMap);
             assertTrue(IntFunctions.ofMap(SortedMap.class).apply(10) instanceof TreeMap);
 
-            // Test invalid input
             assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofMap((Class) String.class));
         }
-
-        //    @Test
-        //    public void testRegisterForCollection() {
-        //        // Create a custom collection class with int constructor
-        //        class CustomCollection<T> extends ArrayList<T> {
-        //            public CustomCollection(int initialCapacity) {
-        //                super(initialCapacity);
-        //            }
-        //        }
-        //
-        //        // Register it
-        //        boolean registered = IntFunctions.registerForCollection(CustomCollection.class, CustomCollection::new);
-        //        assertTrue(registered);
-        //
-        //        // Try to register again - should return false
-        //        boolean registeredAgain = IntFunctions.registerForCollection(CustomCollection.class, CustomCollection::new);
-        //        assertFalse(registeredAgain);
-        //
-        //        // Test that it works
-        //        Collection<?> collection = IntFunctions.ofCollection(CustomCollection.class).apply(10);
-        //        assertTrue(collection instanceof CustomCollection);
-        //
-        //        // Test registering built-in class throws exception
-        //        assertThrows(IllegalArgumentException.class, () -> IntFunctions.registerForCollection(ArrayList.class, ArrayList::new));
-        //    }
-
-        //    @Test
-        //    public void testRegisterForMap() {
-        //        // Create a custom map class with int constructor
-        //        class CustomMap<K, V> extends HashMap<K, V> {
-        //            public CustomMap(int initialCapacity) {
-        //                super(initialCapacity);
-        //            }
-        //        }
-        //
-        //        // Register it
-        //        boolean registered = IntFunctions.registerForMap(CustomMap.class, CustomMap::new);
-        //        assertTrue(registered);
-        //
-        //        // Try to register again - should return false
-        //        boolean registeredAgain = IntFunctions.registerForMap(CustomMap.class, CustomMap::new);
-        //        assertFalse(registeredAgain);
-        //
-        //        // Test that it works
-        //        Map<?, ?> map = IntFunctions.ofMap(CustomMap.class).apply(10);
-        //        assertTrue(map instanceof CustomMap);
-        //
-        //        // Test registering built-in class throws exception
-        //        assertThrows(IllegalArgumentException.class, () -> IntFunctions.registerForMap(HashMap.class, HashMap::new));
-        //    }
 
         @Test
         public void testDeprecatedImmutableMethods() {
@@ -621,7 +508,6 @@ public class Fn103Test extends TestBase {
 
         @Test
         public void testFactoryExtendsIntFunctions() {
-            // Factory extends IntFunctions, so all IntFunctions methods should be accessible through Factory
             assertTrue(IntFunctions.ofList().apply(10) instanceof ArrayList);
             assertTrue(IntFunctions.ofSet().apply(10) instanceof HashSet);
             assertTrue(IntFunctions.ofMap().apply(10) instanceof HashMap);
@@ -637,18 +523,17 @@ public class Fn103Test extends TestBase {
             List<String> processed = new ArrayList<>();
             IntObjPredicate<String> indexPredicate = (index, value) -> {
                 processed.add(index + ":" + value);
-                return index % 2 == 0; // Return true for even indices
+                return index % 2 == 0;
             };
 
             Predicate<String> predicate = Fn.Predicates.indexed(indexPredicate);
 
-            assertTrue(predicate.test("a")); // index 0
-            assertFalse(predicate.test("b")); // index 1
-            assertTrue(predicate.test("c")); // index 2
+            assertTrue(predicate.test("a"));
+            assertFalse(predicate.test("b"));
+            assertTrue(predicate.test("c"));
 
             assertEquals(Arrays.asList("0:a", "1:b", "2:c"), processed);
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.Predicates.indexed(null));
         }
 
@@ -658,24 +543,23 @@ public class Fn103Test extends TestBase {
 
             assertTrue(predicate.test("a"));
             assertTrue(predicate.test("b"));
-            assertFalse(predicate.test("a")); // Already seen
+            assertFalse(predicate.test("a"));
             assertTrue(predicate.test("c"));
-            assertFalse(predicate.test("b")); // Already seen
+            assertFalse(predicate.test("b"));
 
-            // Test with null
             assertTrue(predicate.test(null));
-            assertFalse(predicate.test(null)); // Already seen
+            assertFalse(predicate.test(null));
         }
 
         @Test
         public void testDistinctBy() {
             Predicate<String> predicate = Fn.Predicates.distinctBy(String::length);
 
-            assertTrue(predicate.test("a")); // length 1
-            assertTrue(predicate.test("ab")); // length 2
-            assertFalse(predicate.test("c")); // length 1 already seen
-            assertFalse(predicate.test("de")); // length 2 already seen
-            assertTrue(predicate.test("abc")); // length 3
+            assertTrue(predicate.test("a"));
+            assertTrue(predicate.test("ab"));
+            assertFalse(predicate.test("c"));
+            assertFalse(predicate.test("de"));
+            assertTrue(predicate.test("abc"));
         }
 
         @Test
@@ -684,13 +568,9 @@ public class Fn103Test extends TestBase {
 
             assertTrue(predicate.test("a"));
             assertTrue(predicate.test("b"));
-            assertFalse(predicate.test("a")); // Already seen
+            assertFalse(predicate.test("a"));
             assertTrue(predicate.test("c"));
-            assertFalse(predicate.test("b")); // Already seen
-
-            // Test with null
-            // assertTrue(predicate.test(null));
-            // assertFalse(predicate.test(null)); // Already seen
+            assertFalse(predicate.test("b"));
 
             assertThrows(NullPointerException.class, () -> predicate.test(null));
         }
@@ -699,11 +579,11 @@ public class Fn103Test extends TestBase {
         public void testConcurrentDistinctBy() {
             Predicate<String> predicate = Fn.Predicates.concurrentDistinctBy(String::length);
 
-            assertTrue(predicate.test("a")); // length 1
-            assertTrue(predicate.test("ab")); // length 2
-            assertFalse(predicate.test("c")); // length 1 already seen
-            assertFalse(predicate.test("de")); // length 2 already seen
-            assertTrue(predicate.test("abc")); // length 3
+            assertTrue(predicate.test("a"));
+            assertTrue(predicate.test("ab"));
+            assertFalse(predicate.test("c"));
+            assertFalse(predicate.test("de"));
+            assertTrue(predicate.test("abc"));
         }
 
         @Test
@@ -711,14 +591,13 @@ public class Fn103Test extends TestBase {
             Predicate<String> predicate = Fn.Predicates.skipRepeats();
 
             assertTrue(predicate.test("a"));
-            assertFalse(predicate.test("a")); // Same as previous
+            assertFalse(predicate.test("a"));
             assertTrue(predicate.test("b"));
-            assertTrue(predicate.test("a")); // Different from previous
-            assertFalse(predicate.test("a")); // Same as previous
+            assertTrue(predicate.test("a"));
+            assertFalse(predicate.test("a"));
 
-            // Test with null
             assertTrue(predicate.test(null));
-            assertFalse(predicate.test(null)); // Same as previous
+            assertFalse(predicate.test(null));
             assertTrue(predicate.test("c"));
         }
     }
@@ -753,13 +632,12 @@ public class Fn103Test extends TestBase {
 
             BiPredicate<String, Integer> predicate = Fn.BiPredicates.indexed(indexPredicate);
 
-            assertTrue(predicate.test("a", 1)); // index 0
-            assertFalse(predicate.test("b", 2)); // index 1
-            assertTrue(predicate.test("c", 3)); // index 2
+            assertTrue(predicate.test("a", 1));
+            assertFalse(predicate.test("b", 2));
+            assertTrue(predicate.test("c", 3));
 
             assertEquals(Arrays.asList("0:a:1", "1:b:2", "2:c:3"), processed);
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.BiPredicates.indexed(null));
         }
     }
@@ -804,7 +682,6 @@ public class Fn103Test extends TestBase {
 
             assertEquals(Arrays.asList("0:a", "1:b", "2:c"), processed);
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.Consumers.indexed(null));
         }
     }
@@ -816,7 +693,6 @@ public class Fn103Test extends TestBase {
         @Test
         public void testDoNothing() {
             BiConsumer<String, Integer> consumer = Fn.BiConsumers.doNothing();
-            // Should not throw any exception
             consumer.accept("test", 123);
             consumer.accept(null, null);
         }
@@ -982,7 +858,6 @@ public class Fn103Test extends TestBase {
 
             assertEquals(Arrays.asList("0:a:1", "1:b:2", "2:c:3"), processed);
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.BiConsumers.indexed(null));
         }
     }
@@ -990,12 +865,9 @@ public class Fn103Test extends TestBase {
     @Nested
     @DisplayName("TriConsumers Tests")
     public class TriConsumersTest {
-        // TriConsumers class is empty, so no tests needed
-        // But we verify it exists and can be instantiated
 
         @Test
         public void testClassExists() {
-            // This test just verifies the class exists
             assertNotNull(Fn.TriConsumers.class);
         }
     }
@@ -1021,7 +893,6 @@ public class Fn103Test extends TestBase {
 
             assertEquals(Arrays.asList("0:a", "1:b", "2:c"), processed);
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.Functions.indexed(null));
         }
     }
@@ -1222,7 +1093,6 @@ public class Fn103Test extends TestBase {
 
             assertEquals(Arrays.asList("0:a:1", "1:b:2", "2:c:3"), processed);
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.BiFunctions.indexed(null));
         }
     }
@@ -1230,8 +1100,6 @@ public class Fn103Test extends TestBase {
     @Nested
     @DisplayName("TriFunctions Tests")
     public class TriFunctionsTest {
-        // TriFunctions class is empty, so no tests needed
-        // But we verify it exists
 
         @Test
         public void testClassExists() {
@@ -1274,16 +1142,13 @@ public class Fn103Test extends TestBase {
 
             BinaryOperator<List<String>> operator = Fn.BinaryOperators.ofAddAllToBigger();
 
-            // list1 is bigger, should return list1
             List<String> result1 = operator.apply(list1, list2);
             assertSame(list1, result1);
             assertEquals(Arrays.asList("a", "b", "c", "d", "e"), result1);
 
-            // Reset lists
             list1 = new ArrayList<>(Arrays.asList("a"));
             list2 = new ArrayList<>(Arrays.asList("b", "c"));
 
-            // list2 is bigger, should return list2
             List<String> result2 = operator.apply(list1, list2);
             assertSame(list2, result2);
             assertEquals(Arrays.asList("b", "c", "a"), result2);
@@ -1361,12 +1226,10 @@ public class Fn103Test extends TestBase {
 
             BinaryOperator<Map<String, Integer>> operator = Fn.BinaryOperators.ofPutAllToBigger();
 
-            // map1 is bigger, should return map1
             Map<String, Integer> result1 = operator.apply(map1, map2);
             assertSame(map1, result1);
             assertEquals(5, result1.size());
 
-            // Reset maps
             map1 = new HashMap<>();
             map1.put("a", 1);
 
@@ -1374,7 +1237,6 @@ public class Fn103Test extends TestBase {
             map2.put("b", 2);
             map2.put("c", 3);
 
-            // map2 is bigger, should return map2
             Map<String, Integer> result2 = operator.apply(map1, map2);
             assertSame(map2, result2);
             assertEquals(3, result2.size());
@@ -1420,19 +1282,16 @@ public class Fn103Test extends TestBase {
 
             BinaryOperator<Joiner> operator = Fn.BinaryOperators.ofMergeToBigger();
 
-            // joiner1 is bigger, should return joiner1
             Joiner result1 = operator.apply(joiner1, joiner2);
             assertSame(joiner1, result1);
             assertTrue(result1.toString().contains("a,b,c"));
 
-            // Reset joiners
             joiner1 = Joiner.with(",");
             joiner1.append("a");
 
             joiner2 = Joiner.with(",");
             joiner2.append("b").append("c").append("d");
 
-            // joiner2 is bigger, should return joiner2
             Joiner result2 = operator.apply(joiner1, joiner2);
             assertSame(joiner2, result2);
             assertTrue(result2.toString().contains("b,c,d"));
@@ -1469,16 +1328,13 @@ public class Fn103Test extends TestBase {
 
             BinaryOperator<StringBuilder> operator = Fn.BinaryOperators.ofAppendToBigger();
 
-            // sb1 is bigger, should return sb1
             StringBuilder result1 = operator.apply(sb1, sb2);
             assertSame(sb1, result1);
             assertEquals("Hello World!", result1.toString());
 
-            // Reset StringBuilders
             sb1 = new StringBuilder("Hi");
             sb2 = new StringBuilder("Hello World");
 
-            // sb2 is bigger, should return sb2
             StringBuilder result2 = operator.apply(sb1, sb2);
             assertSame(sb2, result2);
             assertEquals("Hello WorldHi", result2.toString());
@@ -1571,7 +1427,6 @@ public class Fn103Test extends TestBase {
             Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 123);
             assertEquals("key:123", function.apply(entry));
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.Entries.f(null));
         }
 
@@ -1586,7 +1441,6 @@ public class Fn103Test extends TestBase {
             assertTrue(predicate.test(entry1));
             assertFalse(predicate.test(entry2));
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.Entries.p(null));
         }
 
@@ -1601,7 +1455,6 @@ public class Fn103Test extends TestBase {
 
             assertEquals(Arrays.asList("key:123"), consumed);
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.Entries.c(null));
         }
 
@@ -1617,7 +1470,6 @@ public class Fn103Test extends TestBase {
                 fail("Should not throw exception");
             }
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.Entries.ef(null));
         }
 
@@ -1636,7 +1488,6 @@ public class Fn103Test extends TestBase {
                 fail("Should not throw exception");
             }
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.Entries.ep(null));
         }
 
@@ -1655,7 +1506,6 @@ public class Fn103Test extends TestBase {
 
             assertEquals(Arrays.asList("key:123"), consumed);
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.Entries.ec(null));
         }
 
@@ -1674,7 +1524,6 @@ public class Fn103Test extends TestBase {
             Map.Entry<String, Integer> entry2 = new AbstractMap.SimpleEntry<>("key", -1);
             assertThrows(RuntimeException.class, () -> function.apply(entry2));
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.Entries.ff(null));
         }
 
@@ -1693,7 +1542,6 @@ public class Fn103Test extends TestBase {
             Map.Entry<String, Integer> entry2 = new AbstractMap.SimpleEntry<>("key", -1);
             assertThrows(RuntimeException.class, () -> predicate.test(entry2));
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.Entries.pp(null));
         }
 
@@ -1714,7 +1562,6 @@ public class Fn103Test extends TestBase {
             Map.Entry<String, Integer> entry2 = new AbstractMap.SimpleEntry<>("key", -1);
             assertThrows(RuntimeException.class, () -> consumer.accept(entry2));
 
-            // Test null argument
             assertThrows(IllegalArgumentException.class, () -> Fn.Entries.cc(null));
         }
     }
@@ -1743,7 +1590,6 @@ public class Fn103Test extends TestBase {
             assertTrue(set1.contains("a"));
             assertTrue(set1.contains("b"));
 
-            // Test with duplicate values
             Pair<String, String> pair2 = Pair.of("x", "x");
             Set<String> set2 = function.apply(pair2);
             assertEquals(1, set2.size());
@@ -1776,7 +1622,6 @@ public class Fn103Test extends TestBase {
             assertTrue(set1.contains("b"));
             assertTrue(set1.contains("c"));
 
-            // Test with duplicate values
             Triple<String, String, String> triple2 = Triple.of("x", "x", "y");
             Set<String> set2 = function.apply(triple2);
             assertEquals(2, set2.size());
@@ -1798,7 +1643,7 @@ public class Fn103Test extends TestBase {
 
             Object[] cloned = function.apply(disposable);
             assertArrayEquals(original, cloned);
-            assertNotSame(original, cloned); // Should be a copy
+            assertNotSame(original, cloned);
         }
 
         @Test
@@ -2186,7 +2031,7 @@ public class Fn103Test extends TestBase {
                 FloatBiPredicate predicate = Fn.FF.equal();
                 assertTrue(predicate.test(1.0f, 1.0f));
                 assertFalse(predicate.test(1.0f, 1.1f));
-                assertTrue(predicate.test(Float.NaN, Float.NaN)); // NaN equals NaN in N.equals
+                assertTrue(predicate.test(Float.NaN, Float.NaN));
             }
 
             @Test
@@ -2235,7 +2080,7 @@ public class Fn103Test extends TestBase {
                 DoubleBiPredicate predicate = Fn.FD.equal();
                 assertTrue(predicate.test(1.0, 1.0));
                 assertFalse(predicate.test(1.0, 1.1));
-                assertTrue(predicate.test(Double.NaN, Double.NaN)); // NaN equals NaN in N.equals
+                assertTrue(predicate.test(Double.NaN, Double.NaN));
             }
 
             @Test
@@ -2282,7 +2127,7 @@ public class Fn103Test extends TestBase {
                     assertEquals("Value-1", result1);
                     assertEquals("Value-1", result2);
                     assertEquals("Value-1", result3);
-                    assertEquals(1, counter.get()); // Should only be called once
+                    assertEquals(1, counter.get());
                 } catch (Exception e) {
                     fail("Should not throw exception");
                 }
@@ -2298,19 +2143,16 @@ public class Fn103Test extends TestBase {
                 String result1 = memoized.get();
                 assertEquals("Value-1", result1);
 
-                // Within expiration time
                 Thread.sleep(50);
                 String result2 = memoized.get();
                 assertEquals("Value-1", result2);
 
-                // After expiration time
                 Thread.sleep(100);
                 String result3 = memoized.get();
                 assertEquals("Value-2", result3);
 
                 assertEquals(2, counter.get());
 
-                // Test invalid arguments
                 assertThrows(IllegalArgumentException.class, () -> Fnn.memoizeWithExpiration(original, -1, TimeUnit.MILLISECONDS));
                 assertThrows(IllegalArgumentException.class, () -> Fnn.memoizeWithExpiration(null, 100, TimeUnit.MILLISECONDS));
             }
@@ -2323,16 +2165,15 @@ public class Fn103Test extends TestBase {
                 Throwables.Function<String, String, Exception> memoized = Fnn.memoize(original);
 
                 assertEquals("A-1", memoized.apply("A"));
-                assertEquals("A-1", memoized.apply("A")); // Cached
+                assertEquals("A-1", memoized.apply("A"));
                 assertEquals("B-2", memoized.apply("B"));
-                assertEquals("B-2", memoized.apply("B")); // Cached
-                assertEquals("A-1", memoized.apply("A")); // Still cached
+                assertEquals("B-2", memoized.apply("B"));
+                assertEquals("A-1", memoized.apply("A"));
 
                 assertEquals(2, counter.get());
 
-                // Test with null
-                assertEquals("null-3", memoized.apply(null)); // Still cached
-                assertEquals("null-3", memoized.apply(null)); // Still cached
+                assertEquals("null-3", memoized.apply(null));
+                assertEquals("null-3", memoized.apply(null));
             }
         }
 
@@ -2478,14 +2319,12 @@ public class Fn103Test extends TestBase {
             @Test
             public void testEmptyAction() throws Exception {
                 Throwables.Runnable<Exception> action = Fnn.emptyAction();
-                // Should not throw any exception
                 action.run();
             }
 
             @Test
             public void testDoNothing() throws Exception {
                 Throwables.Consumer<String, Exception> consumer = Fnn.doNothing();
-                // Should not throw any exception
                 consumer.accept("test");
                 consumer.accept(null);
             }
@@ -2546,15 +2385,15 @@ public class Fn103Test extends TestBase {
 
             @Test
             public void testRateLimiter() throws Exception {
-                Throwables.Consumer<String, Exception> consumer = Fnn.rateLimiter(2.0); // 2 permits per second
+                Throwables.Consumer<String, Exception> consumer = Fnn.rateLimiter(2.0);
 
                 long start = System.currentTimeMillis();
                 consumer.accept("1");
                 consumer.accept("2");
-                consumer.accept("3"); // This should wait
+                consumer.accept("3");
                 long duration = System.currentTimeMillis() - start;
 
-                assertTrue(duration >= 500); // Should take at least 500ms for 3 calls at 2/second
+                assertTrue(duration >= 500);
             }
 
             @Test
@@ -2567,8 +2406,7 @@ public class Fn103Test extends TestBase {
                 consumer.accept(closeable);
                 assertEquals(1, closed.get());
 
-                // Test with null
-                consumer.accept(null); // Should not throw
+                consumer.accept(null);
             }
 
             @Test
@@ -2581,26 +2419,22 @@ public class Fn103Test extends TestBase {
                 consumer.accept(closeable);
                 assertEquals(1, closed.get());
 
-                // Test with exception throwing closeable
                 AutoCloseable throwingCloseable = () -> {
                     throw new IOException("Close failed");
                 };
 
-                // Should not throw
                 assertDoesNotThrow(() -> consumer.accept(throwingCloseable));
             }
 
             @Test
             public void testPrintln() throws Exception {
                 Throwables.Consumer<String, Exception> consumer = Fnn.println();
-                // Just verify it doesn't throw
                 consumer.accept("test");
             }
 
             @Test
             public void testPrintlnWithSeparator() throws Exception {
                 Throwables.BiConsumer<String, Integer, Exception> consumer = Fnn.println(" - ");
-                // Just verify it doesn't throw
                 consumer.accept("test", 123);
             }
         }
@@ -3298,7 +3132,6 @@ public class Fn103Test extends TestBase {
                 Throwables.Function<String, Integer, Exception> function = String::length;
                 Throwables.Consumer<String, Exception> consumer = Fnn.f2c(function);
 
-                // Should not throw, just ignores result
                 consumer.accept("test");
 
                 assertThrows(IllegalArgumentException.class, () -> Fnn.f2c((Throwables.Function<String, Integer, Exception>) null));
@@ -3357,7 +3190,6 @@ public class Fn103Test extends TestBase {
                 Throwables.Callable<String, Exception> callable = () -> "test";
                 Throwables.Runnable<Exception> runnable = Fnn.c2r(callable);
 
-                // Should not throw, just ignores result
                 runnable.run();
 
                 assertThrows(IllegalArgumentException.class, () -> Fnn.c2r(null));
@@ -3403,11 +3235,9 @@ public class Fn103Test extends TestBase {
 
                 java.lang.Runnable javaRunnable = Fnn.r2jr(throwableRunnable);
 
-                // Should wrap checked exception in runtime exception
                 assertThrows(RuntimeException.class, javaRunnable::run);
                 assertEquals(1, counter.get());
 
-                // Test with already java.lang.Runnable
                 Runnable original = () -> {
                 };
                 assertSame(original, Fnn.r2jr(original));
@@ -3434,7 +3264,6 @@ public class Fn103Test extends TestBase {
 
                 assertEquals("test", javaCallable.call());
 
-                // Test with already java.util.concurrent.Callable
                 Callable<String> original = () -> "original";
                 assertSame(original, Fnn.c2jc(original));
 

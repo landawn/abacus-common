@@ -229,16 +229,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     *
-     * @param index
-     */
-    private void rangeCheck(final int index) {
-        if (index >= size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
-        }
-    }
-
-    /**
      * Replaces the element at the specified position in this list with the specified element.
      *
      * @param index the index of the element to replace. Must be between 0 (inclusive) and size (exclusive).
@@ -689,10 +679,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         N.copy(tmp, 0, elementData, 0, tmp.length);
 
         if (size > tmp.length) {
-            N.fill(elementData, tmp.length, size, (char) 0);
+            N.fill(elementData, tmp.length, size, 0f);
         }
 
-        size -= elementData.length - tmp.length;
+        size = size - (elementData.length - tmp.length);
     }
 
     /**
@@ -725,25 +715,28 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Moves a range of elements within this list to a new position. The range to be moved is defined
-     * by fromIndex (inclusive) and toIndex (exclusive). The elements are moved so that the element
-     * originally at fromIndex will be at newPositionStartIndexAfterMove after the operation.
+     * Moves a range of elements within this list to a new position.
+     * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
+     * so that the element originally at fromIndex will be at newPositionAfterMove.
+     * Other elements are shifted as necessary to accommodate the move.
      * 
-     * <p>This is a circular shift operation - elements between the source and destination positions
-     * are shifted to make room. No elements are lost or duplicated in the process.
-     * 
-     * <p>Example: If list contains [A,B,C,D,E,F], moveRange(1,3,4) moves elements [B,C] to start
-     * at position 4, resulting in [A,D,E,B,C,F].
+     * <p>Example: 
+     * <pre>
+     * FloatList list = FloatList.of(0f, 1f, 2f, 3f, 4f, 5f);
+     * list.moveRange(1, 3, 3);  // Moves elements [1, 2] to position starting at index 3
+     * // Result: [0, 3, 4, 1, 2, 5]
+     * </pre>
      *
-     * @param fromIndex the starting index of the range to be moved (inclusive). Must be non-negative.
-     * @param toIndex the ending index of the range to be moved (exclusive). Must be > fromIndex.
-     * @param newPositionStartIndexAfterMove the index where the first element of the range should be placed after the move.
-     *                                      Must be in the range [0, size - (toIndex - fromIndex)].
-     * @throws IndexOutOfBoundsException if any index is out of bounds or if the new position is invalid
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and size() - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndexAfterMove);
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
     /**
@@ -1399,7 +1392,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *         or -1 if this list does not contain the element
      */
     public int lastIndexOf(final float valueToFind) {
-        return lastIndexOf(valueToFind, size);
+        return lastIndexOf(valueToFind, size - 1);
     }
 
     /**
@@ -1687,7 +1680,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *         less than the specified key
      */
     public int binarySearch(final float valueToFind) {
-        return N.binarySearch(elementData, valueToFind);
+        return N.binarySearch(elementData, 0, size(), valueToFind);
     }
 
     /**
@@ -1879,34 +1872,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
         return result;
     }
-
-    //    @Override
-    //    public List<FloatList> split(int fromIndex, int toIndex, FloatPredicate predicate) {
-    //        checkIndex(fromIndex, toIndex);
-    //
-    //        final List<FloatList> result = new ArrayList<>();
-    //        FloatList piece = null;
-    //
-    //        for (int i = fromIndex; i < toIndex;) {
-    //            if (piece == null) {
-    //                piece = FloatList.of(N.EMPTY_FLOAT_ARRAY);
-    //            }
-    //
-    //            if (predicate.test(elementData[i])) {
-    //                piece.add(elementData[i]);
-    //                i++;
-    //            } else {
-    //                result.add(piece);
-    //                piece = null;
-    //            }
-    //        }
-    //
-    //        if (piece != null) {
-    //            result.add(piece);
-    //        }
-    //
-    //        return result;
-    //    }
 
     /**
      * Trims the capacity of this FloatList instance to be the list's current size.
@@ -2170,70 +2135,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         return delete(size - 1);
     }
 
-    //    /**
-    //     * Returns a new FloatList with the elements in reverse order.
-    //     *
-    //     * @return A new FloatList with all elements of the current list in reverse order.
-    //     */
-    //    public FloatList reversed() {
-    //        final float[] a = N.copyOfRange(elementData, 0, size);
-    //
-    //        N.reverse(a);
-    //
-    //        return new FloatList(a);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param <E>
-    //     * @param func
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <R, E extends Exception> R apply(final Throwables.Function<? super FloatList, ? extends R, E> func) throws E {
-    //        return func.apply(this);
-    //    }
-    //
-    //    /**
-    //     * Apply if not empty.
-    //     *
-    //     * @param <R>
-    //     * @param <E>
-    //     * @param func
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super FloatList, ? extends R, E> func) throws E {
-    //        return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <E extends Exception> void accept(final Throwables.Consumer<? super FloatList, E> action) throws E {
-    //        action.accept(this);
-    //    }
-    //
-    //    /**
-    //     * Accept if not empty.
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super FloatList, E> action) throws E {
-    //        return If.is(size > 0).then(this, action);
-    //    }
-
     /**
      * Returns a hash code value for this list.
      * The hash code is computed based on the elements in the list and their order.
@@ -2282,7 +2183,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     private void ensureCapacity(final int minCapacity) {
-        if (minCapacity > MAX_ARRAY_SIZE || minCapacity < 0) {
+        if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
             throw new OutOfMemoryError();
         }
 

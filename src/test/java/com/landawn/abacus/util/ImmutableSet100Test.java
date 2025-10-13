@@ -10,9 +10,11 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class ImmutableSet100Test extends TestBase {
 
     @Test
@@ -125,7 +127,7 @@ public class ImmutableSet100Test extends TestBase {
 
     @Test
     public void testOf_VarArgs_WithDuplicates() {
-        String[] array = {"red", "green", "blue", "red"};
+        String[] array = { "red", "green", "blue", "red" };
         ImmutableSet<String> set = ImmutableSet.of(array);
         Assertions.assertEquals(3, set.size());
         Assertions.assertTrue(set.contains("red"));
@@ -168,7 +170,7 @@ public class ImmutableSet100Test extends TestBase {
         linkedSet.add("first");
         linkedSet.add("second");
         linkedSet.add("third");
-        
+
         ImmutableSet<String> set = ImmutableSet.copyOf(linkedSet);
         Iterator<String> iter = set.iterator();
         Assertions.assertEquals("first", iter.next());
@@ -180,11 +182,10 @@ public class ImmutableSet100Test extends TestBase {
     public void testWrap() {
         Set<String> mutableSet = new HashSet<>();
         mutableSet.add("initial");
-        
+
         ImmutableSet<String> wrapped = ImmutableSet.wrap(mutableSet);
         Assertions.assertEquals(1, wrapped.size());
-        
-        // Changes are reflected
+
         mutableSet.add("added");
         Assertions.assertEquals(2, wrapped.size());
         Assertions.assertTrue(wrapped.contains("added"));
@@ -212,12 +213,8 @@ public class ImmutableSet100Test extends TestBase {
 
     @Test
     public void testBuilder() {
-        ImmutableSet<String> set = ImmutableSet.<String>builder()
-                .add("one")
-                .add("two", "three")
-                .addAll(Arrays.asList("four", "five"))
-                .build();
-        
+        ImmutableSet<String> set = ImmutableSet.<String> builder().add("one").add("two", "three").addAll(Arrays.asList("four", "five")).build();
+
         Assertions.assertEquals(5, set.size());
         Assertions.assertTrue(set.contains("one"));
         Assertions.assertTrue(set.contains("five"));
@@ -225,44 +222,32 @@ public class ImmutableSet100Test extends TestBase {
 
     @Test
     public void testBuilder_WithDuplicates() {
-        ImmutableSet<Integer> set = ImmutableSet.<Integer>builder()
-                .add(1)
-                .add(1)
-                .add(2, 2, 3)
-                .build();
-        
+        ImmutableSet<Integer> set = ImmutableSet.<Integer> builder().add(1).add(1).add(2, 2, 3).build();
+
         Assertions.assertEquals(3, set.size());
     }
 
     @Test
     public void testBuilder_WithIterator() {
         List<String> list = Arrays.asList("a", "b", "c");
-        ImmutableSet<String> set = ImmutableSet.<String>builder()
-                .addAll(list.iterator())
-                .build();
-        
+        ImmutableSet<String> set = ImmutableSet.<String> builder().addAll(list.iterator()).build();
+
         Assertions.assertEquals(3, set.size());
     }
 
     @Test
     public void testBuilder_WithNullIterator() {
-        ImmutableSet<String> set = ImmutableSet.<String>builder()
-                .addAll((Iterator<String>) null)
-                .build();
-        
+        ImmutableSet<String> set = ImmutableSet.<String> builder().addAll((Iterator<String>) null).build();
+
         Assertions.assertTrue(set.isEmpty());
     }
 
     @Test
     public void testBuilder_WithBackingSet() {
         Set<String> backingSet = new LinkedHashSet<>();
-        ImmutableSet<String> set = ImmutableSet.builder(backingSet)
-                .add("a")
-                .add("b")
-                .build();
-        
+        ImmutableSet<String> set = ImmutableSet.builder(backingSet).add("a").add("b").build();
+
         Assertions.assertEquals(2, set.size());
-        // Backing set was modified
         Assertions.assertEquals(2, backingSet.size());
     }
 
@@ -270,12 +255,12 @@ public class ImmutableSet100Test extends TestBase {
     public void testIterator() {
         ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
         ObjIterator<String> iter = set.iterator();
-        
+
         Set<String> collected = new HashSet<>();
         while (iter.hasNext()) {
             collected.add(iter.next());
         }
-        
+
         Assertions.assertEquals(3, collected.size());
         Assertions.assertTrue(collected.contains("a"));
         Assertions.assertTrue(collected.contains("b"));
@@ -285,7 +270,7 @@ public class ImmutableSet100Test extends TestBase {
     @Test
     public void testContains() {
         ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
-        
+
         Assertions.assertTrue(set.contains("a"));
         Assertions.assertFalse(set.contains("d"));
         Assertions.assertFalse(set.contains(null));
@@ -296,7 +281,7 @@ public class ImmutableSet100Test extends TestBase {
         Set<String> setWithNull = new HashSet<>();
         setWithNull.add("a");
         setWithNull.add(null);
-        
+
         ImmutableSet<String> set = ImmutableSet.copyOf(setWithNull);
         Assertions.assertTrue(set.contains(null));
         Assertions.assertTrue(set.contains("a"));
@@ -305,7 +290,7 @@ public class ImmutableSet100Test extends TestBase {
     @Test
     public void testMutationMethods_ThrowUnsupported() {
         ImmutableSet<String> set = ImmutableSet.of("a", "b");
-        
+
         Assertions.assertThrows(UnsupportedOperationException.class, () -> set.add("c"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> set.remove("a"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> set.addAll(Arrays.asList("d", "e")));

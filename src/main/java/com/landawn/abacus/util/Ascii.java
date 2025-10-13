@@ -291,7 +291,7 @@ public final class Ascii {
     /**
      * Escape: A control character intended to provide code extension (supplementary characters) in
      * general information interchange. The Escape character itself is a prefix affecting the
-     * interpretation of a limited number of contiguously the following characters.
+     * interpretation of a limited number of the contiguously following characters.
      *
      */
     public static final byte ESC = 27;

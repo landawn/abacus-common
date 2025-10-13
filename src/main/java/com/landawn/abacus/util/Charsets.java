@@ -15,7 +15,9 @@
 package com.landawn.abacus.util;
 
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Map;
 
 /**
@@ -155,30 +157,47 @@ public final class Charsets {
     }
 
     /**
-     * Returns a charset object for the named charset.
-     * 
-     * <p>This method first checks an internal cache for the charset. If not found
-     * in the cache, it creates a new charset instance using {@link Charset#forName}
-     * and caches it for future use. This provides better performance than calling
-     * {@code Charset.forName} directly when the same charset is used repeatedly.</p>
-     * 
-     * <p>Example:</p>
+     * Returns a charset object for the named charset, utilizing an internal cache for improved performance.
+     *
+     * <p>This method provides efficient access to charset instances by maintaining an internal cache.
+     * The cache is pre-populated with all standard charsets ({@code US-ASCII}, {@code ISO-8859-1},
+     * {@code UTF-8}, {@code UTF-16}, {@code UTF-16BE}, {@code UTF-16LE}). When a charset is requested:</p>
+     * <ol>
+     *   <li>The method first checks the internal cache for an existing instance</li>
+     *   <li>If found, the cached instance is returned immediately</li>
+     *   <li>If not found, a new charset is created via {@link Charset#forName(String)}</li>
+     *   <li>The newly created charset is cached for future requests</li>
+     * </ol>
+     *
+     * <p>This caching mechanism significantly improves performance compared to repeatedly calling
+     * {@code Charset.forName()} directly, especially in scenarios where the same charset is accessed
+     * frequently. The method is thread-safe, ensuring correct behavior in concurrent environments.</p>
+     *
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
+     * // Get charset by canonical name
      * Charset gbk = Charsets.get("GBK");
+     * byte[] bytes = "你好".getBytes(gbk);
+     *
+     * // Get charset by alias
      * Charset utf32 = Charsets.get("UTF-32");
-     * 
-     * // These return the same cached instance
+     *
+     * // Multiple calls return the same cached instance (reference equality)
      * Charset utf8_1 = Charsets.get("UTF-8");
      * Charset utf8_2 = Charsets.get("UTF-8");
-     * assert utf8_1 == utf8_2; // Same instance
+     * assert utf8_1 == utf8_2; // true - same cached instance
      * }</pre>
      *
-     * @param charsetName the name of the requested charset; may be either
-     *        a canonical name or an alias
-     * @return a charset object for the named charset
-     * @throws IllegalArgumentException if the given charset name is illegal
-     * @throws UnsupportedOperationException if no support for the named charset
-     *         is available in this instance of the Java virtual machine
+     * @param charsetName the name of the requested charset; may be either a canonical name
+     *                    (e.g., "UTF-8") or an alias (e.g., "utf8"). Must not be null.
+     * @return a charset object for the named charset, either from cache or newly created
+     * @throws IllegalCharsetNameException if the given charset name is illegal (as defined by
+     *         {@link Charset#forName(String)})
+     * @throws IllegalArgumentException if the charset name is null
+     * @throws UnsupportedCharsetException if no support for the named charset is available
+     *         in this instance of the Java virtual machine
+     * @see Charset#forName(String)
+     * @see StandardCharsets
      */
     public static Charset get(final String charsetName) {
         Charset charset = charsetPool.get(charsetName);

@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -47,17 +48,16 @@ import com.landawn.abacus.util.function.CharPredicate;
 import com.landawn.abacus.util.function.CharTernaryOperator;
 import com.landawn.abacus.util.function.CharTriPredicate;
 
+@Tag("new-test")
 public class AbstractCharStream200Test extends TestBase {
 
     private static final char[] TEST_ARRAY = new char[] { 'a', 'b', 'c', 'd', 'e' };
-    private CharStream stream; // Assuming ConcreteCharStream extends AbstractCharStream
-    private CharStream stream2; // Assuming ConcreteCharStream extends AbstractCharStream
-    private CharStream stream3; // Assuming ConcreteCharStream extends AbstractCharStream
+    private CharStream stream;
+    private CharStream stream2;
+    private CharStream stream3;
 
     @BeforeEach
     public void setUp() {
-        // Initialize with some test data.
-        // This concrete implementation takes a char array directly.
         stream = CharStream.of(TEST_ARRAY);
         stream2 = CharStream.of(TEST_ARRAY);
         stream3 = CharStream.of(TEST_ARRAY);
@@ -65,25 +65,18 @@ public class AbstractCharStream200Test extends TestBase {
 
     @Test
     public void testRateLimited() {
-        // This method modifies the stream's behavior, making direct assertion on output tricky.
-        // We'll test if the RateLimiter's acquire method is called.
         RateLimiter mockRateLimiter = mock(RateLimiter.class);
         when(mockRateLimiter.acquire()).thenReturn(1d);
 
         CharStream rateLimitedStream = stream.rateLimited(mockRateLimiter);
         rateLimitedStream.forEach(c -> {
-        }); // Consume the stream
+        });
 
-        // Verify that acquire was called for each element in the stream
         verify(mockRateLimiter, times(5)).acquire();
     }
 
     @Test
     public void testDelay() {
-        // Similar to rateLimited, this modifies behavior.
-        // We can test if N.sleepUninterruptibly is called.
-        // This requires mocking a static method or using a custom N implementation for testing.
-        // For now, a basic check that it runs without error.
         Duration delay = Duration.ofMillis(10);
         CharStream delayedStream = stream.delay(delay);
         long startTime = System.currentTimeMillis();
@@ -91,8 +84,6 @@ public class AbstractCharStream200Test extends TestBase {
         });
         long endTime = System.currentTimeMillis();
 
-        // With 5 elements and 10ms delay, expected delay is around 50ms.
-        // Allowing for some overhead.
         assertTrue(endTime - startTime >= 5 * 10);
     }
 
@@ -113,8 +104,6 @@ public class AbstractCharStream200Test extends TestBase {
     public void testDistinct() {
         stream = CharStream.of(new char[] { 'a', 'b', 'a', 'c', 'b', 'd' });
         List<Character> result = stream.distinct().boxed().toList();
-        // The order might not be preserved based on the Set implementation.
-        // Convert to a Set for comparison to ignore order.
         assertEquals(N.asSet('a', 'b', 'c', 'd'), N.newHashSet(result));
     }
 
@@ -151,16 +140,13 @@ public class AbstractCharStream200Test extends TestBase {
     @Test
     public void testMapPartial() {
         CharFunction<OptionalChar> mapper = c -> {
-            if (c % 2 == 0) { // Assuming 'b', 'd' are even (their char value)
+            if (c % 2 == 0) {
                 return OptionalChar.of((char) (c + 1));
             }
             return OptionalChar.empty();
         };
-        // For 'a', 'b', 'c', 'd', 'e' (ASCII values: 97, 98, 99, 100, 101)
-        // 'b' (98) -> 'c' (99)
-        // 'd' (100) -> 'e' (101)
         List<Character> result = stream.mapPartial(mapper).boxed().toList();
-        assertEquals(Arrays.asList('c', 'e'), result); // Based on ASCII values of 'b' and 'd'
+        assertEquals(Arrays.asList('c', 'e'), result);
 
         result = CharStream.of(new char[] {}).mapPartial(mapper).boxed().toList();
         assertTrue(result.isEmpty());
@@ -168,12 +154,12 @@ public class AbstractCharStream200Test extends TestBase {
 
     @Test
     public void testRangeMap() {
-        stream = CharStream.of(new char[] { 'a', 'b', 'c', 'x', 'y', 'z', 'k' }); // 97,98,99,120,121,122,107
-        CharBiPredicate sameRange = (c1, c2) -> Math.abs(c1 - c2) <= 1; // Consecutive or same
-        CharBinaryOperator mapper = (c1, c2) -> c1; // Just take the first char of the range
+        stream = CharStream.of(new char[] { 'a', 'b', 'c', 'x', 'y', 'z', 'k' });
+        CharBiPredicate sameRange = (c1, c2) -> Math.abs(c1 - c2) <= 1;
+        CharBinaryOperator mapper = (c1, c2) -> c1;
 
         List<Character> result = stream.rangeMap(sameRange, mapper).boxed().toList();
-        assertEquals(Arrays.asList('a', 'c', 'x', 'z', 'k'), result); // 'a','b','c' -> 'a' | 'x','y','z' -> 'x' | 'k' -> 'k'
+        assertEquals(Arrays.asList('a', 'c', 'x', 'z', 'k'), result);
 
         stream = CharStream.of(new char[] { 'a', 'a', 'a' });
         result = stream.rangeMap(sameRange, mapper).boxed().toList();
@@ -207,18 +193,6 @@ public class AbstractCharStream200Test extends TestBase {
         assertEquals(2, result.size());
         assertEquals(CharList.of('a', 'b', 'c', 'd'), result.get(0));
         assertEquals(CharList.of('f', 'g', 'h'), result.get(1));
-        // assertEquals(CharList.of(), result.get(2)); // 'e' is not present, so new group starts with 'f'
-        // Oh, wait. There is 'e' so the list is not 'f','g','h' but 'f' and 'g','h'. The list has 3 elements instead of 2.
-        // CharStream ['a', 'b', 'c', 'd', 'f', 'g', 'h'] should result in:
-        // Group 1: 'a', 'b', 'c', 'd' -> CharList('a', 'b', 'c', 'd')
-        // Group 2: 'f', 'g', 'h' -> CharList('f', 'g', 'h')
-        // Let's re-evaluate based on the exact char sequence and predicate.
-        // 'a', 'b' -> true
-        // 'b', 'c' -> true
-        // 'c', 'd' -> true
-        // 'd', 'f' -> false (not consecutive)
-        // 'f', 'g' -> true
-        // 'g', 'h' -> true
         assertEquals(Arrays.asList(new CharList(new char[] { 'a', 'b', 'c', 'd' }), new CharList(new char[] { 'f', 'g', 'h' })), result);
 
         result = CharStream.of(new char[] {}).collapse(collapsible).toList();
@@ -229,10 +203,10 @@ public class AbstractCharStream200Test extends TestBase {
     public void testCollapseCharBinaryOperator() {
         stream = CharStream.of(new char[] { 'a', 'b', 'c', 'f', 'g', 'h' });
         CharBiPredicate collapsible = (c1, c2) -> c2 == (char) (c1 + 1);
-        CharBinaryOperator mergeFunction = (c1, c2) -> Character.MAX_VALUE; // Sentinel char for merged
+        CharBinaryOperator mergeFunction = (c1, c2) -> Character.MAX_VALUE;
 
         List<Character> result = stream.collapse(collapsible, mergeFunction).boxed().toList();
-        assertEquals(Arrays.asList(Character.MAX_VALUE, Character.MAX_VALUE), result); // Two groups: abc -> MAX_VALUE, fgh -> MAX_VALUE
+        assertEquals(Arrays.asList(Character.MAX_VALUE, Character.MAX_VALUE), result);
 
         stream = CharStream.of(new char[] { 'a', 'e', 'f' });
         result = stream.collapse(collapsible, mergeFunction).boxed().toList();
@@ -246,16 +220,11 @@ public class AbstractCharStream200Test extends TestBase {
     public void testCollapseCharTriPredicate() {
         stream = CharStream.of(new char[] { 'a', 'b', 'c', 'f', 'g', 'h' });
         CharTriPredicate collapsible = (firstInGroup, current, next) -> {
-            // Example: collapse if all chars are within a certain range from the first char in group
             return (next - firstInGroup) < 3;
         };
-        CharBinaryOperator mergeFunction = (c1, c2) -> (char) (c1 + c2); // Sum of chars
+        CharBinaryOperator mergeFunction = (c1, c2) -> (char) (c1 + c2);
 
         List<Character> result = stream.collapse(collapsible, mergeFunction).boxed().toList();
-        // 'a', 'b', 'c' -> first='a', current='b', next='c'. (c - a) = 2 < 3. merge(merge('a','b'), 'c') = merge('a'+'b', 'c')
-        // 'a' + 'b' + 'c' = 97+98+99 = 294 -> (char)294
-        // 'f', 'g', 'h' -> first='f', current='g', next='h'. (h - f) = 2 < 3. merge(merge('f','g'), 'h') = merge('f'+'g', 'h')
-        // 'f' + 'g' + 'h' = 102+103+104 = 309 -> (char)309
         assertEquals(Arrays.asList((char) 294, (char) 309), result);
 
         result = CharStream.of(new char[] {}).collapse(collapsible, mergeFunction).boxed().toList();
@@ -309,7 +278,7 @@ public class AbstractCharStream200Test extends TestBase {
     public void testDropWhileWithActionOnDroppedItem() {
         CharList dropped = new CharList();
         CharConsumer actionOnDroppedItem = dropped::add;
-        CharPredicate predicate = c -> c != 'c'; // Drop 'a', 'b'
+        CharPredicate predicate = c -> c != 'c';
 
         CharStream newStream = stream.dropWhile(predicate, actionOnDroppedItem);
         List<Character> result = newStream.boxed().toList();
@@ -349,9 +318,6 @@ public class AbstractCharStream200Test extends TestBase {
     public void testScanAccumulator() {
         CharBinaryOperator accumulator = (c1, c2) -> (char) (c1 + c2);
         List<Character> result = CharStream.of(new char[] { 'a', 'b', 'c' }).scan(accumulator).boxed().toList();
-        // 'a' (97)
-        // 'a' + 'b' = 97 + 98 = 195
-        // 'a' + 'b' + 'c' = 195 + 99 = 294
         assertEquals(Arrays.asList('a', (char) 195, (char) 294), result);
 
         result = CharStream.of(new char[] {}).scan(accumulator).boxed().toList();
@@ -362,8 +328,6 @@ public class AbstractCharStream200Test extends TestBase {
     public void testScanInitAccumulator() {
         CharBinaryOperator accumulator = (c1, c2) -> (char) (c1 + c2);
         List<Character> result = CharStream.of(new char[] { 'b', 'c' }).scan('a', accumulator).boxed().toList();
-        // 'a' + 'b' = 195
-        // 'a' + 'b' + 'c' = 195 + 99 = 294
         assertEquals(Arrays.asList((char) 195, (char) 294), result);
 
         result = CharStream.of(new char[] {}).scan('z', accumulator).boxed().toList();
@@ -374,9 +338,6 @@ public class AbstractCharStream200Test extends TestBase {
     public void testScanInitInitIncludedAccumulator() {
         CharBinaryOperator accumulator = (c1, c2) -> (char) (c1 + c2);
         List<Character> result = CharStream.of(new char[] { 'b', 'c' }).scan('a', true, accumulator).boxed().toList();
-        // 'a'
-        // 'a' + 'b' = 195
-        // 'a' + 'b' + 'c' = 195 + 99 = 294
         assertEquals(Arrays.asList('a', (char) 195, (char) 294), result);
 
         result = CharStream.of(new char[] {}).scan('z', true, accumulator).boxed().toList();
@@ -414,12 +375,8 @@ public class AbstractCharStream200Test extends TestBase {
 
     @Test
     public void testSymmetricDifference() {
-        Collection<Character> other = Arrays.asList('c', 'e', 'f', 'g'); // Stream: a,b,c,d,e. Other: c,e,f,g
-        // Elements unique to stream: a, b, d
-        // Elements unique to other: f, g
-        // Symmetric difference: a, b, d, f, g
+        Collection<Character> other = Arrays.asList('c', 'e', 'f', 'g');
         List<Character> result = stream.symmetricDifference(other).boxed().toList();
-        // The order is (elements from stream not in other) then (elements from other not in stream)
         assertEquals(Arrays.asList('a', 'b', 'd', 'f', 'g'), result);
 
         result = CharStream.of(new char[] {}).symmetricDifference(other).boxed().toList();
@@ -462,15 +419,13 @@ public class AbstractCharStream200Test extends TestBase {
 
     @Test
     public void testShuffled() {
-        Random rnd = new Random(123); // Fixed seed for reproducible tests
+        Random rnd = new Random(123);
         List<Character> original = stream.boxed().toList();
         List<Character> shuffled = stream2.shuffled(rnd).boxed().toList();
 
-        // Check if elements are the same, just order is different
         assertEquals(original.size(), shuffled.size());
         assertTrue(original.containsAll(shuffled) && shuffled.containsAll(original));
 
-        // Unlikely to be in the same order unless stream is very small
         assertNotEquals(original, shuffled);
 
         shuffled = CharStream.of(new char[] {}).shuffled(rnd).boxed().toList();
@@ -621,11 +576,11 @@ public class AbstractCharStream200Test extends TestBase {
     public void testAppendIfEmptyCharArray() {
         CharStream newStream = stream.appendIfEmpty('x', 'y');
         List<Character> result = newStream.boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e'), result); // Stream is not empty, so no append
+        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e'), result);
 
         newStream = CharStream.of(new char[] {}).appendIfEmpty('x', 'y');
         result = newStream.boxed().toList();
-        assertEquals(Arrays.asList('x', 'y'), result); // Stream is empty, so append
+        assertEquals(Arrays.asList('x', 'y'), result);
     }
 
     @Test
@@ -645,17 +600,17 @@ public class AbstractCharStream200Test extends TestBase {
 
     @Test
     public void testZipWithBinaryOperator() {
-        CharStream streamA = CharStream.of(new char[] { '1', '2', '3' }); // ASCII 49, 50, 51
-        CharStream streamB = CharStream.of(new char[] { 'a', 'b', 'c' }); // ASCII 97, 98, 99
+        CharStream streamA = CharStream.of(new char[] { '1', '2', '3' });
+        CharStream streamB = CharStream.of(new char[] { 'a', 'b', 'c' });
         CharBinaryOperator zipFunction = (c1, c2) -> (char) (c1 + c2);
 
         List<Character> result = streamA.zipWith(streamB, zipFunction).boxed().toList();
-        assertEquals(Arrays.asList((char) (49 + 97), (char) (50 + 98), (char) (51 + 99)), result); // Sum of ASCII values
+        assertEquals(Arrays.asList((char) (49 + 97), (char) (50 + 98), (char) (51 + 99)), result);
 
         streamA = CharStream.of(new char[] { '1', '2' });
         streamB = CharStream.of(new char[] { 'a', 'b', 'c' });
         result = streamA.zipWith(streamB, zipFunction).boxed().toList();
-        assertEquals(Arrays.asList((char) (49 + 97), (char) (50 + 98)), result); // Shorter stream dictates length
+        assertEquals(Arrays.asList((char) (49 + 97), (char) (50 + 98)), result);
     }
 
     @Test
@@ -672,7 +627,7 @@ public class AbstractCharStream200Test extends TestBase {
         streamB = CharStream.of(new char[] { 'a', 'b' });
         streamC = CharStream.of(new char[] { 'X', 'Y' });
         result = streamA.zipWith(streamB, streamC, zipFunction).boxed().toList();
-        assertEquals(Arrays.asList((char) (49 + 97 + 88)), result); // Shortest stream dictates length
+        assertEquals(Arrays.asList((char) (49 + 97 + 88)), result);
     }
 
     @Test
@@ -719,13 +674,10 @@ public class AbstractCharStream200Test extends TestBase {
             sb.append(c1 == vNA ? "" : c1);
             sb.append(c2 == vNB ? "" : c2);
             sb.append(c3 == vNC ? "" : c3);
-            return sb.toString().charAt(0); // Take first char if concatenated
+            return sb.toString().charAt(0);
         };
 
         List<Character> result = streamA.zipWith(streamB, streamC, vNA, vNB, vNC, zipFunction).boxed().toList();
-        // (1, a, X) -> '1aX' -> '1'
-        // (A, b, Y) -> 'bY'  -> 'b' (A is default for streamA)
-        // (A, B, Z) -> 'Z'   -> 'Z' (A, B defaults for streamA, streamB)
         assertEquals(Arrays.asList('1', 'b', 'Z'), result);
     }
 
@@ -766,7 +718,7 @@ public class AbstractCharStream200Test extends TestBase {
         BinaryOperator<Integer> mergeFunction = (v1, v2) -> v1 + v2;
         Map<String, Integer> map = stream.toMap(c -> String.valueOf(c), c -> (int) c, mergeFunction);
         assertEquals(2, map.size());
-        assertEquals(Integer.valueOf(97 + 97), map.get("a")); // 194
+        assertEquals(Integer.valueOf(97 + 97), map.get("a"));
         assertEquals(Integer.valueOf(98), map.get("b"));
     }
 
@@ -852,7 +804,7 @@ public class AbstractCharStream200Test extends TestBase {
         assertFalse(onlyOne.isPresent());
 
         try {
-            stream.onlyOne(); // 'a', 'b', 'c', 'd', 'e'
+            stream.onlyOne();
             fail("Expected TooManyElementsException");
         } catch (TooManyElementsException e) {
             assertTrue(e.getMessage().contains("at least two elements"));
@@ -874,22 +826,20 @@ public class AbstractCharStream200Test extends TestBase {
 
     @Test
     public void testPercentiles() {
-        stream = CharStream.of(new char[] { 'a', 'e', 'c', 'd', 'b' }); // Sorted: a,b,c,d,e
+        stream = CharStream.of(new char[] { 'a', 'e', 'c', 'd', 'b' });
         Optional<Map<Percentage, Character>> percentiles = stream.percentiles();
         assertTrue(percentiles.isPresent());
         Map<Percentage, Character> percentileMap = percentiles.get();
 
-        // assertEquals(N.asList(97, 98, 99, 100, 101), percentileMap.values().stream().sorted().map(c -> (int) c).collect(Collectors.toList()));
         assertEquals(43, percentileMap.values().size());
 
-        // Test with empty stream
         Optional<Map<Percentage, Character>> emptyPercentiles = CharStream.of(new char[] {}).percentiles();
         assertFalse(emptyPercentiles.isPresent());
     }
 
     @Test
     public void testSummarizeAndPercentiles() {
-        stream = CharStream.of(new char[] { 'a', 'e', 'c', 'd', 'b' }); // Sorted: a,b,c,d,e
+        stream = CharStream.of(new char[] { 'a', 'e', 'c', 'd', 'b' });
         Pair<CharSummaryStatistics, Optional<Map<Percentage, Character>>> summaryPair = stream.summarizeAndPercentiles();
 
         CharSummaryStatistics stats = summaryPair.left();
@@ -902,10 +852,8 @@ public class AbstractCharStream200Test extends TestBase {
         Optional<Map<Percentage, Character>> percentiles = summaryPair.right();
         assertTrue(percentiles.isPresent());
         Map<Percentage, Character> percentileMap = percentiles.get();
-        // assertEquals(N.asList(97, 98, 99, 100, 101), percentileMap.values().stream().sorted().map(c -> (int) c).collect(Collectors.toList()));
         assertEquals(43, percentileMap.size());
 
-        // Test with empty stream
         summaryPair = CharStream.of(new char[] {}).summarizeAndPercentiles();
         stats = summaryPair.left();
         assertEquals(0, stats.getCount());
@@ -958,6 +906,5 @@ public class AbstractCharStream200Test extends TestBase {
         assertEquals('a', iterator.nextChar());
         assertEquals('b', iterator.nextChar());
         assertTrue(iterator.hasNext());
-        // No direct way to assert on logger warning from here without more complex mocking.
     }
 }

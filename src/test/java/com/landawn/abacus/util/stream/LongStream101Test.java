@@ -20,6 +20,7 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Joiner;
@@ -33,6 +34,7 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.LongSupplier;
 
+@Tag("new-test")
 public class LongStream101Test extends TestBase {
 
     protected LongStream createLongStream(long... a) {
@@ -183,8 +185,8 @@ public class LongStream101Test extends TestBase {
     public void testToMapWithMergeFunction() {
         Map<Long, Long> result = createLongStream(1L, 2L, 3L, 1L, 2L).toMap(n -> n, n -> n * 10, (v1, v2) -> v1 + v2);
         assertEquals(3, result.size());
-        assertEquals(Long.valueOf(20L), result.get(1L)); // 10 + 10
-        assertEquals(Long.valueOf(40L), result.get(2L)); // 20 + 20
+        assertEquals(Long.valueOf(20L), result.get(1L));
+        assertEquals(Long.valueOf(40L), result.get(2L));
         assertEquals(Long.valueOf(30L), result.get(3L));
     }
 
@@ -301,7 +303,7 @@ public class LongStream101Test extends TestBase {
         LongStream b = createLongStream(3L, 4L, 5L, 6L);
 
         long[] result = a.zipWith(b, 10L, 20L, (x, y) -> x + y).toArray();
-        assertArrayEquals(new long[] { 4L, 6L, 15L, 16L }, result); // 1+3, 2+4, 10+5, 10+6
+        assertArrayEquals(new long[] { 4L, 6L, 15L, 16L }, result);
     }
 
     @Test
@@ -311,7 +313,7 @@ public class LongStream101Test extends TestBase {
         LongStream c = createLongStream(6L);
 
         long[] result = a.zipWith(b, c, 10L, 20L, 30L, (x, y, z) -> x + y + z).toArray();
-        assertArrayEquals(new long[] { 10L, 36L, 45L }, result); // 1+3+6, 2+4+30, 10+5+30
+        assertArrayEquals(new long[] { 10L, 36L, 45L }, result);
     }
 
     @Test
@@ -414,7 +416,6 @@ public class LongStream101Test extends TestBase {
     public void testFlattenVerticallyWithAlignment() {
         long[][] arrays = { { 1L, 2L }, { 3L }, { 4L, 5L, 6L } };
         long[] result = LongStream.flatten(arrays, 0L, true).toArray();
-        // Vertically: column by column
         assertArrayEquals(new long[] { 1L, 3L, 4L, 2L, 0L, 5L, 0L, 0L, 6L }, result);
     }
 
@@ -467,8 +468,6 @@ public class LongStream101Test extends TestBase {
     @Test
     public void testSymmetricDifference() {
         long[] result = createLongStream(1L, 2L, 3L, 4L).symmetricDifference(Arrays.asList(3L, 4L, 5L, 6L)).toArray();
-        // Elements in first but not second: 1, 2
-        // Elements in second but not first: 5, 6
         assertArrayEquals(new long[] { 1L, 2L, 5L, 6L }, result);
     }
 
@@ -503,11 +502,9 @@ public class LongStream101Test extends TestBase {
     public void testPeekIfEmpty() {
         List<Long> result = new ArrayList<>();
 
-        // Non-empty stream - action should not be called
         createLongStream(1L, 2L, 3L).ifEmpty(() -> result.add(999L)).forEach(result::add);
         assertEquals(Arrays.asList(1L, 2L, 3L), result);
 
-        // Empty stream - action should be called
         result.clear();
         LongStream.empty().ifEmpty(() -> result.add(999L)).forEach(result::add);
         assertEquals(Arrays.asList(999L), result);
@@ -522,7 +519,6 @@ public class LongStream101Test extends TestBase {
 
     @Test
     public void testRangeLargeNumbers() {
-        // Test with large numbers that might cause overflow
         long start = Long.MAX_VALUE - 5;
         long end = Long.MAX_VALUE;
         long[] result = LongStream.range(start, end).toArray();
@@ -597,15 +593,12 @@ public class LongStream101Test extends TestBase {
 
     @Test
     public void testThrowIfEmpty() {
-        // Non-empty stream should work fine
         assertEquals(3, createLongStream(1L, 2L, 3L).throwIfEmpty().count());
 
-        // Empty stream should throw
         try {
             LongStream.empty().throwIfEmpty().count();
             fail("Should have thrown NoSuchElementException");
         } catch (NoSuchElementException e) {
-            // expected
         }
     }
 
@@ -633,7 +626,6 @@ public class LongStream101Test extends TestBase {
         long endTime = System.currentTimeMillis();
 
         assertEquals(3, timestamps.length);
-        // Should take at least 70ms (50ms delay + 2*10ms intervals)
         assertTrue(endTime - startTime >= 70);
     }
 
@@ -644,7 +636,6 @@ public class LongStream101Test extends TestBase {
         long endTime = System.currentTimeMillis();
 
         assertEquals(3, timestamps.length);
-        // Should take at least 70ms
         assertTrue(endTime - startTime >= 70);
     }
 

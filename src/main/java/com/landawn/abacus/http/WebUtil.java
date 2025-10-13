@@ -30,9 +30,21 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.cs;
 
 /**
- * The WebUtil class is a utility class that provides methods for handling HTTP requests and responses.
- * It includes methods for creating HTTP requests, parsing cURL commands, and building cURL commands from HTTP requests.
- * This class is final and cannot be instantiated.
+ * Utility class providing methods for handling HTTP requests, responses, and cURL command conversions.
+ *
+ * <p>This class provides comprehensive functionality for:</p>
+ * <ul>
+ *   <li>Converting cURL commands to Java HTTP client code (HttpRequest and OkHttpRequest)</li>
+ *   <li>Building cURL commands from HTTP request parameters</li>
+ *   <li>Creating OkHttpRequest instances with cURL logging capabilities</li>
+ *   <li>Managing Content-Type headers based on request body types</li>
+ * </ul>
+ *
+ * <p>All methods in this class are static, and the class cannot be instantiated.</p>
+ *
+ * @see HttpRequest
+ * @see OkHttpRequest
+ * @see CurlInterceptor
  */
 public final class WebUtil {
 
@@ -40,18 +52,33 @@ public final class WebUtil {
 
     /**
      * Converts a cURL command string into Java code for creating an HttpRequest.
-     * 
+     *
      * <p>This method parses a cURL command and generates the equivalent Java code
      * using the HttpRequest API. It extracts the URL, HTTP method, headers, and
-     * request body from the cURL command.</p>
-     * 
+     * request body from the cURL command and produces properly formatted, executable
+     * Java code.</p>
+     *
      * <p>Supported cURL options:</p>
      * <ul>
-     *   <li>-X, --request: HTTP method</li>
-     *   <li>-H, --header: HTTP headers</li>
-     *   <li>-d, --data, --data-raw: Request body</li>
+     *   <li>{@code -X, --request}: HTTP method (GET, POST, PUT, DELETE, etc.)</li>
+     *   <li>{@code -H, --header}: HTTP headers (can be specified multiple times)</li>
+     *   <li>{@code -d, --data, --data-raw}: Request body data</li>
+     *   <li>{@code -I}: HEAD request (inferred method)</li>
      * </ul>
-     * 
+     *
+     * <p>HTTP Method Detection:</p>
+     * <ul>
+     *   <li>If {@code -X} is specified, uses that method</li>
+     *   <li>If {@code -d} is present without {@code -X}, defaults to POST</li>
+     *   <li>If {@code -I} is present without {@code -X}, defaults to HEAD</li>
+     *   <li>Otherwise defaults to GET</li>
+     * </ul>
+     *
+     * <p>The generated code properly escapes special characters in strings using
+     * Java escape sequences. Headers are extracted and added individually. If a
+     * request body is present, it's declared as a separate {@code requestBody}
+     * variable for readability.</p>
+     *
      * <p>Example input:</p>
      * <pre>{@code
      * curl -X POST https://api.example.com/users \
@@ -59,20 +86,23 @@ public final class WebUtil {
      *   -H "Authorization: Bearer token123" \
      *   -d '{"name":"John","age":30}'
      * }</pre>
-     * 
+     *
      * <p>Example output:</p>
      * <pre>{@code
      * String requestBody = "{\"name\":\"John\",\"age\":30}";
-     * 
+     *
      * HttpRequest.url("https://api.example.com/users")
      *     .header("Content-Type", "application/json")
      *     .header("Authorization", "Bearer token123")
      *     .post(requestBody);
      * }</pre>
-     * 
-     * @param curl the cURL command string to convert
-     * @return Java code string for creating an equivalent HttpRequest
-     * @throws IllegalArgumentException if the curl parameter is null, empty, or doesn't start with "curl"
+     *
+     * @param curl the cURL command string to convert, must not be null or empty
+     *             and must start with "curl" (case-insensitive)
+     * @return Java code string for creating an equivalent HttpRequest, formatted
+     *         with proper indentation and line separators
+     * @throws IllegalArgumentException if the curl parameter is null, empty, or
+     *                                  doesn't start with "curl"
      */
     public static String curl2HttpRequest(final String curl) {
         final String indent = "\n    ";
@@ -86,20 +116,23 @@ public final class WebUtil {
         for (int i = 0, size = tokens.size(); i < size; i++) {
             token = tokens.get(i);
 
-            if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase())) {
+            if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && i + 1 < size
+                    && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase())) {
                 httpMethod = HttpMethod.valueOf(tokens.get(++i).toUpperCase());
             } else if (Strings.isEmpty(url) && (Strings.startsWithIgnoreCase(token, "https://") || Strings.startsWithIgnoreCase(token, "http://"))) {
                 url = token;
-            } else if (Strings.equals(token, "--header") || Strings.equals(token, "-H")) {
+            } else if ((Strings.equals(token, "--header") || Strings.equals(token, "-H")) && i + 1 < size) {
                 final String header = tokens.get(++i);
                 final int idx = header.indexOf(':');
-                headers.append(indent)
-                        .append(".header(\"")
-                        .append(header.substring(0, idx).trim())
-                        .append("\", \"")
-                        .append(escapeJava(header.substring(idx + 1).trim()))
-                        .append("\")"); //NOSONAR
-            } else if (Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d")) {
+                if (idx > 0) {
+                    headers.append(indent)
+                            .append(".header(\"")
+                            .append(header.substring(0, idx).trim())
+                            .append("\", \"")
+                            .append(escapeJava(header.substring(idx + 1).trim()))
+                            .append("\")"); //NOSONAR
+                }
+            } else if ((Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d")) && i + 1 < size) {
                 body = tokens.get(++i);
             }
         }
@@ -123,7 +156,8 @@ public final class WebUtil {
         }
 
         if (httpMethod == null) {
-            httpMethod = Strings.contains(curl, " -d ") ? HttpMethod.POST : (Strings.contains(curl, " -I ") ? HttpMethod.HEAD : HttpMethod.GET);
+            httpMethod = Strings.contains(curl, " -d ") || Strings.contains(curl, " --data ") || Strings.contains(curl, " --data-raw ") ? HttpMethod.POST
+                    : (Strings.contains(curl, " -I ") ? HttpMethod.HEAD : HttpMethod.GET);
         }
 
         if (httpMethod == HttpMethod.GET) {
@@ -159,31 +193,59 @@ public final class WebUtil {
 
     /**
      * Converts a cURL command string into Java code for creating an OkHttpRequest.
-     * 
+     *
      * <p>This method parses a cURL command and generates the equivalent Java code
      * using the OkHttpRequest API. It handles the same cURL options as
-     * {@link #curl2HttpRequest(String)} but generates code for OkHttp client.</p>
-     * 
+     * {@link #curl2HttpRequest(String)} but generates code specifically for the
+     * OkHttp client library.</p>
+     *
+     * <p>Key differences from {@link #curl2HttpRequest(String)}:</p>
+     * <ul>
+     *   <li>Creates {@code RequestBody} with {@code MediaType} when body is present</li>
+     *   <li>Automatically extracts {@code MediaType} from Content-Type header</li>
+     *   <li>Attaches body using {@code .body(requestBody)} instead of passing to method</li>
+     *   <li>Uses OkHttp-specific method calls ({@code .post()}, {@code .put()}, etc.)</li>
+     * </ul>
+     *
      * <p>The generated code includes:</p>
      * <ul>
-     *   <li>RequestBody creation with appropriate MediaType</li>
-     *   <li>OkHttpRequest builder chain with headers and body</li>
-     *   <li>Appropriate HTTP method call</li>
+     *   <li>{@code RequestBody} creation with appropriate {@code MediaType} extracted from headers</li>
+     *   <li>OkHttpRequest builder chain with URL, headers, and body</li>
+     *   <li>Appropriate HTTP method call ({@code get()}, {@code post()}, {@code put()}, {@code delete()}, or {@code execute()})</li>
      * </ul>
-     * 
+     *
+     * <p>HTTP Method Detection follows the same rules as {@link #curl2HttpRequest(String)}:</p>
+     * <ul>
+     *   <li>If {@code -X} is specified, uses that method</li>
+     *   <li>If {@code -d} is present without {@code -X}, defaults to POST</li>
+     *   <li>If {@code -I} is present without {@code -X}, defaults to HEAD</li>
+     *   <li>Otherwise defaults to GET</li>
+     * </ul>
+     *
+     * <p>Example input:</p>
+     * <pre>{@code
+     * curl -X POST https://api.example.com/users \
+     *   -H "Content-Type: application/json" \
+     *   -d '{"name":"John"}'
+     * }</pre>
+     *
      * <p>Example output:</p>
      * <pre>{@code
      * RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), "{\"name\":\"John\"}");
-     * 
+     *
      * OkHttpRequest.url("https://api.example.com/users")
      *     .header("Content-Type", "application/json")
      *     .body(requestBody)
      *     .post();
      * }</pre>
-     * 
-     * @param curl the cURL command string to convert
-     * @return Java code string for creating an equivalent OkHttpRequest
-     * @throws IllegalArgumentException if the curl parameter is null, empty, or doesn't start with "curl"
+     *
+     * @param curl the cURL command string to convert, must not be null or empty
+     *             and must start with "curl" (case-insensitive)
+     * @return Java code string for creating an equivalent OkHttpRequest, formatted
+     *         with proper indentation and line separators
+     * @throws IllegalArgumentException if the curl parameter is null, empty, or
+     *                                  doesn't start with "curl"
+     * @see #curl2HttpRequest(String)
      */
     public static String curl2OkHttpRequest(final String curl) {
         final String indent = "\n    ";
@@ -198,24 +260,27 @@ public final class WebUtil {
         for (int i = 0, size = tokens.size(); i < size; i++) {
             token = tokens.get(i);
 
-            if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase())) {
+            if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && i + 1 < size
+                    && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase())) {
                 httpMethod = HttpMethod.valueOf(tokens.get(++i).toUpperCase());
             } else if (Strings.isEmpty(url) && (Strings.startsWithIgnoreCase(token, "https://") || Strings.startsWithIgnoreCase(token, "http://"))) {
                 url = token;
-            } else if (Strings.equals(token, "--header") || Strings.equals(token, "-H")) {
+            } else if ((Strings.equals(token, "--header") || Strings.equals(token, "-H")) && i + 1 < size) {
                 final String header = tokens.get(++i);
                 final int idx = header.indexOf(':');
-                headers.append(indent)
-                        .append(".header(\"")
-                        .append(header.substring(0, idx).trim())
-                        .append("\", \"")
-                        .append(escapeJava(header.substring(idx + 1).trim()))
-                        .append("\")"); //NOSONAR
+                if (idx > 0) {
+                    headers.append(indent)
+                            .append(".header(\"")
+                            .append(header.substring(0, idx).trim())
+                            .append("\", \"")
+                            .append(escapeJava(header.substring(idx + 1).trim()))
+                            .append("\")"); //NOSONAR
 
-                if ("Content-Type".equalsIgnoreCase(header.substring(0, idx).trim())) {
-                    mediaType = "MediaType.parse(\"" + header.substring(idx + 1).trim() + "\")";
+                    if ("Content-Type".equalsIgnoreCase(header.substring(0, idx).trim())) {
+                        mediaType = "MediaType.parse(\"" + header.substring(idx + 1).trim() + "\")";
+                    }
                 }
-            } else if (Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d")) {
+            } else if ((Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d")) && i + 1 < size) {
                 body = tokens.get(++i);
             }
         }
@@ -243,7 +308,8 @@ public final class WebUtil {
         }
 
         if (httpMethod == null) {
-            httpMethod = Strings.contains(curl, " -d ") ? HttpMethod.POST : (Strings.contains(curl, " -I ") ? HttpMethod.HEAD : HttpMethod.GET);
+            httpMethod = Strings.contains(curl, " -d ") || Strings.contains(curl, " --data ") || Strings.contains(curl, " --data-raw ") ? HttpMethod.POST
+                    : (Strings.contains(curl, " -I ") ? HttpMethod.HEAD : HttpMethod.GET);
         }
 
         if (httpMethod == HttpMethod.GET) {
@@ -312,7 +378,7 @@ public final class WebUtil {
                 }
 
                 cursor = i + 1;
-            } else if (ch == '/' && i + 1 < len && str.charAt(i + 1) == '/' && str.charAt(i - 1) != ':') {
+            } else if (ch == '/' && i + 1 < len && str.charAt(i + 1) == '/' && (i == 0 || str.charAt(i - 1) != ':')) {
                 if (cursor < i) {
                     tokens.add(str.substring(cursor, i));
                 }
@@ -335,30 +401,52 @@ public final class WebUtil {
     }
 
     /**
-     * Creates an OkHttpRequest configured to log cURL commands for each request.
-     * 
-     * <p>This method creates an OkHttpRequest with an interceptor that generates and logs
-     * the equivalent cURL command for each HTTP request. This is useful for debugging
-     * and sharing reproducible API calls.</p>
-     * 
-     * <p>The generated cURL commands use single quotes (') by default.</p>
-     * 
+     * Creates an OkHttpRequest configured to log cURL commands for each HTTP request.
+     *
+     * <p>This method creates an OkHttpRequest with a {@link CurlInterceptor} that
+     * automatically generates and logs the equivalent cURL command for each HTTP
+     * request made through the returned request object. This is extremely useful for:</p>
+     * <ul>
+     *   <li>Debugging API calls by reproducing them in a shell</li>
+     *   <li>Sharing reproducible API calls with team members or support</li>
+     *   <li>Documenting API usage in development logs</li>
+     *   <li>Testing API calls outside of the application</li>
+     * </ul>
+     *
+     * <p>The generated cURL commands use single quotes (') by default as the quote
+     * character. To use a different quote character, see
+     * {@link #createOkHttpRequestForCurl(String, char, Consumer)}.</p>
+     *
+     * <p>The interceptor is added to a new {@code OkHttpClient} instance specifically
+     * created for this request, ensuring the logging doesn't affect other clients.</p>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
+     * // Create request with cURL logging
      * OkHttpRequest request = WebUtil.createOkHttpRequestForCurl(
      *     "https://api.example.com",
      *     curl -> logger.debug("cURL command: {}", curl)
      * );
-     * 
+     *
      * // When you make a request, it will log the cURL equivalent
      * request.header("Authorization", "Bearer token123")
+     *        .header("Content-Type", "application/json")
      *        .jsonBody(requestData)
      *        .post();
+     *
+     * // The logHandler will receive something like:
+     * // curl -X POST 'https://api.example.com' \
+     * //   -H 'Authorization: Bearer token123' \
+     * //   -H 'Content-Type: application/json' \
+     * //   -d '{"key":"value"}'
      * }</pre>
-     * 
-     * @param url the base URL for the HTTP request
+     *
+     * @param url the base URL for the HTTP request, must not be null
      * @param logHandler consumer that receives the generated cURL command string
-     * @return an OkHttpRequest configured with cURL logging
+     *                   for each request, must not be null
+     * @return an OkHttpRequest configured with cURL logging interceptor
+     * @see #createOkHttpRequestForCurl(String, char, Consumer)
+     * @see CurlInterceptor
      * @see <a href="https://github.com/mrmike/Ok2Curl">Ok2Curl - OkHttp to cURL converter</a>
      */
     public static OkHttpRequest createOkHttpRequestForCurl(final String url, final Consumer<? super String> logHandler) {
@@ -367,25 +455,51 @@ public final class WebUtil {
 
     /**
      * Creates an OkHttpRequest configured to log cURL commands with a custom quote character.
-     * 
-     * <p>This method creates an OkHttpRequest with an interceptor that generates and logs
-     * the equivalent cURL command for each HTTP request. You can specify the quote character
-     * to use in the generated cURL commands (typically ' or ").</p>
-     * 
+     *
+     * <p>This method is similar to {@link #createOkHttpRequestForCurl(String, Consumer)}
+     * but allows you to specify the quote character used in the generated cURL commands.
+     * This is useful when you need to generate cURL commands compatible with specific
+     * shell environments or documentation standards.</p>
+     *
+     * <p>Common quote character choices:</p>
+     * <ul>
+     *   <li>Single quote ('): Recommended for most Unix/Linux shells, prevents variable expansion</li>
+     *   <li>Double quote ("): May be needed for Windows CMD or when variable expansion is desired</li>
+     * </ul>
+     *
+     * <p>The generated cURL commands will use the specified quote character for:</p>
+     * <ul>
+     *   <li>URL</li>
+     *   <li>Header values</li>
+     *   <li>Request body data</li>
+     * </ul>
+     *
      * <p>Example usage:</p>
      * <pre>{@code
-     * // Use double quotes in generated cURL commands
+     * // Use double quotes in generated cURL commands (e.g., for Windows compatibility)
      * OkHttpRequest request = WebUtil.createOkHttpRequestForCurl(
      *     "https://api.example.com",
      *     '"',
-     *     System.out::println
+     *     curl -> System.out.println("cURL: " + curl)
      * );
+     *
+     * request.header("Content-Type", "application/json")
+     *        .post();
+     *
+     * // Generates:
+     * // curl -X POST "https://api.example.com" \
+     * //   -H "Content-Type: application/json"
      * }</pre>
-     * 
-     * @param url the base URL for the HTTP request
-     * @param quoteChar the character to use for quoting in cURL commands (' or ")
+     *
+     * @param url the base URL for the HTTP request, must not be null
+     * @param quoteChar the character to use for quoting in cURL commands,
+     *                  typically single quote (') or double quote (")
      * @param logHandler consumer that receives the generated cURL command string
-     * @return an OkHttpRequest configured with cURL logging
+     *                   for each request, must not be null
+     * @return an OkHttpRequest configured with cURL logging interceptor using the
+     *         specified quote character
+     * @see #createOkHttpRequestForCurl(String, Consumer)
+     * @see CurlInterceptor
      */
     public static OkHttpRequest createOkHttpRequestForCurl(final String url, final char quoteChar, final Consumer<? super String> logHandler) {
         final okhttp3.OkHttpClient client = new okhttp3.OkHttpClient().newBuilder().addInterceptor(new CurlInterceptor(quoteChar, logHandler)).build();
@@ -395,20 +509,47 @@ public final class WebUtil {
 
     /**
      * Builds a cURL command string from HTTP request parameters.
-     * 
-     * <p>This method constructs a complete cURL command that can be executed in a shell
-     * to reproduce the HTTP request. It includes all headers, request body, and proper
-     * escaping for shell execution.</p>
-     * 
+     *
+     * <p>This method constructs a complete, executable cURL command that can be run in a
+     * shell to reproduce the HTTP request. It handles proper quoting and escaping of all
+     * components to ensure the command works correctly when executed.</p>
+     *
      * <p>The generated cURL command includes:</p>
      * <ul>
-     *   <li>HTTP method (-X flag)</li>
-     *   <li>URL (properly quoted)</li>
-     *   <li>Headers (-H flags)</li>
-     *   <li>Request body (-d flag) if present</li>
-     *   <li>Content-Type header if not already present but body type is specified</li>
+     *   <li>HTTP method using the {@code -X} flag</li>
+     *   <li>URL enclosed in the specified quote character</li>
+     *   <li>All headers using {@code -H} flags with proper quoting and escaping</li>
+     *   <li>Request body using {@code -d} flag if body is not empty</li>
+     *   <li>Content-Type header if body is present but Content-Type header is missing</li>
      * </ul>
-     * 
+     *
+     * <p>Special handling:</p>
+     * <ul>
+     *   <li>If {@code body} is not empty but Content-Type header is not present in {@code headers},
+     *       and {@code bodyType} is specified, the Content-Type header is automatically added</li>
+     *   <li>Header values are read using {@link HttpUtil#readHttpHeadValue(Object)} to handle
+     *       various value types (String, List, etc.)</li>
+     *   <li>Quote characters within strings are properly escaped using
+     *       {@link Strings#quoteEscaped(String, char)}</li>
+     *   <li>The command is formatted with line separators at the beginning and end</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Map<String, String> headers = new HashMap<>();
+     * headers.put("Content-Type", "application/json");
+     * headers.put("Authorization", "Bearer token123");
+     *
+     * String curl = WebUtil.buildCurl(
+     *     "POST",
+     *     "https://api.example.com/users",
+     *     headers,
+     *     "{\"name\":\"John\",\"email\":\"john@example.com\"}",
+     *     "application/json",
+     *     '\''
+     * );
+     * }</pre>
+     *
      * <p>Example output:</p>
      * <pre>{@code
      * curl -X POST 'https://api.example.com/users' \
@@ -416,14 +557,19 @@ public final class WebUtil {
      *   -H 'Authorization: Bearer token123' \
      *   -d '{"name":"John","email":"john@example.com"}'
      * }</pre>
-     * 
-     * @param httpMethod the HTTP method (GET, POST, PUT, etc.)
-     * @param url the target URL
-     * @param headers map of HTTP headers (can be null or empty)
-     * @param body the request body string (can be null or empty)
-     * @param bodyType the MIME type of the body (used if Content-Type header is not present)
-     * @param quoteChar the character to use for quoting (' or ")
-     * @return a formatted cURL command string
+     *
+     * @param httpMethod the HTTP method (e.g., "GET", "POST", "PUT", "DELETE"), must not be null
+     * @param url the target URL, must not be null
+     * @param headers map of HTTP headers where values can be String or other types that
+     *                {@link HttpUtil#readHttpHeadValue(Object)} can handle (can be null or empty)
+     * @param body the request body string (can be null or empty for requests without a body)
+     * @param bodyType the MIME type of the body (e.g., "application/json"), used to add
+     *                 Content-Type header if not already present in headers (can be null)
+     * @param quoteChar the character to use for quoting values in the cURL command,
+     *                  typically single quote (') or double quote (")
+     * @return a formatted cURL command string with line separators, ready for execution
+     * @see HttpUtil#readHttpHeadValue(Object)
+     * @see Strings#quoteEscaped(String, char)
      */
     public static String buildCurl(final String httpMethod, final String url, final Map<String, ?> headers, final String body, final String bodyType,
             final char quoteChar) {
@@ -468,23 +614,50 @@ public final class WebUtil {
 
     /**
      * Sets the Content-Type header based on the request body type if not already present.
-     * 
-     * <p>This utility method checks if the Content-Type header is already set in the
-     * provided HttpHeaders. If not present and a bodyType is specified, it sets the
-     * Content-Type header to the bodyType value.</p>
-     * 
-     * <p>This is commonly used when processing HAR files or other scenarios where the
-     * content type needs to be inferred from the request body type.</p>
-     * 
-     * <p>Example:</p>
+     *
+     * <p>This utility method conditionally sets the Content-Type header in the provided
+     * {@link HttpHeaders} object. The header is only set if:</p>
+     * <ul>
+     *   <li>The {@code requestBodyType} parameter is not null or empty</li>
+     *   <li>The {@code httpHeaders} does not already have a Content-Type header</li>
+     * </ul>
+     *
+     * <p>This method is particularly useful when:</p>
+     * <ul>
+     *   <li>Processing HAR (HTTP Archive) files where body type is specified separately</li>
+     *   <li>Building HTTP requests programmatically where content type needs to be inferred</li>
+     *   <li>Importing requests from external sources that specify MIME type separately</li>
+     *   <li>Ensuring a default Content-Type without overriding existing values</li>
+     * </ul>
+     *
+     * <p>If the Content-Type header is already present in {@code httpHeaders}, this method
+     * does nothing, preserving the existing header value. This ensures that explicitly set
+     * Content-Type headers are never overwritten.</p>
+     *
+     * <p>Example usage:</p>
      * <pre>{@code
+     * // Case 1: Setting Content-Type when not present
      * HttpHeaders headers = HttpHeaders.create();
      * WebUtil.setContentTypeByRequestBodyType("application/json", headers);
      * // headers now contains: Content-Type: application/json
+     *
+     * // Case 2: Preserving existing Content-Type
+     * HttpHeaders headers2 = HttpHeaders.create();
+     * headers2.setContentType("text/xml");
+     * WebUtil.setContentTypeByRequestBodyType("application/json", headers2);
+     * // headers2 still contains: Content-Type: text/xml (not changed)
+     *
+     * // Case 3: No-op when requestBodyType is empty
+     * HttpHeaders headers3 = HttpHeaders.create();
+     * WebUtil.setContentTypeByRequestBodyType("", headers3);
+     * // headers3 has no Content-Type header (nothing was set)
      * }</pre>
-     * 
-     * @param requestBodyType the MIME type of the request body (e.g., "application/json")
-     * @param httpHeaders the HttpHeaders object to update
+     *
+     * @param requestBodyType the MIME type of the request body (e.g., "application/json",
+     *                        "text/xml", "application/x-www-form-urlencoded"), can be null or empty
+     * @param httpHeaders the HttpHeaders object to conditionally update, must not be null
+     * @see HttpHeaders#setContentType(String)
+     * @see HttpHeaders#get(String)
      */
     public static void setContentTypeByRequestBodyType(final String requestBodyType, final HttpHeaders httpHeaders) {
         if (Strings.isNotEmpty(requestBodyType) && httpHeaders.get(HttpHeaders.Names.CONTENT_TYPE) == null) {

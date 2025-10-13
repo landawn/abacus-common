@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Range100Test extends TestBase {
 
     @Test
@@ -63,12 +65,10 @@ public class Range100Test extends TestBase {
 
     @Test
     public void testInvalidRanges() {
-        // Test null endpoints
         Assertions.assertThrows(IllegalArgumentException.class, () -> Range.open(null, 5));
         Assertions.assertThrows(IllegalArgumentException.class, () -> Range.open(1, null));
         Assertions.assertThrows(IllegalArgumentException.class, () -> Range.open(null, null));
-        
-        // Test min > max
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> Range.open(5, 1));
         Assertions.assertThrows(IllegalArgumentException.class, () -> Range.closed(10, 5));
     }
@@ -77,7 +77,7 @@ public class Range100Test extends TestBase {
     public void testMap() {
         Range<Integer> intRange = Range.closed(1, 5);
         Range<String> strRange = intRange.map(String::valueOf);
-        
+
         Assertions.assertEquals("1", strRange.lowerEndpoint());
         Assertions.assertEquals("5", strRange.upperEndpoint());
         Assertions.assertEquals(Range.BoundType.CLOSED_CLOSED, strRange.boundType());
@@ -86,11 +86,9 @@ public class Range100Test extends TestBase {
     @Test
     public void testContains() {
         Range<Integer> range = Range.closed(10, 20);
-        
-        // Test null
+
         Assertions.assertFalse(range.contains(null));
-        
-        // Test values
+
         Assertions.assertTrue(range.contains(10));
         Assertions.assertTrue(range.contains(15));
         Assertions.assertTrue(range.contains(20));
@@ -101,22 +99,17 @@ public class Range100Test extends TestBase {
     @Test
     public void testContainsAll() {
         Range<Integer> range = Range.closed(1, 10);
-        
-        // Test with valid collection
+
         List<Integer> valid = Arrays.asList(2, 5, 8);
         Assertions.assertTrue(range.containsAll(valid));
-        
-        // Test with invalid collection
+
         List<Integer> invalid = Arrays.asList(2, 5, 15);
         Assertions.assertFalse(range.containsAll(invalid));
-        
-        // Test with empty collection
+
         Assertions.assertTrue(range.containsAll(Arrays.asList()));
-        
-        // Test with null collection
+
         Assertions.assertTrue(range.containsAll(null));
-        
-        // Test with collection containing endpoints
+
         List<Integer> endpoints = Arrays.asList(1, 10);
         Assertions.assertTrue(range.containsAll(endpoints));
     }
@@ -125,7 +118,7 @@ public class Range100Test extends TestBase {
     public void testIsStartedBy() {
         Range<Integer> closedRange = Range.closed(5, 10);
         Range<Integer> openRange = Range.open(5, 10);
-        
+
         Assertions.assertTrue(closedRange.isStartedBy(5));
         Assertions.assertFalse(openRange.isStartedBy(5));
         Assertions.assertFalse(closedRange.isStartedBy(6));
@@ -136,7 +129,7 @@ public class Range100Test extends TestBase {
     public void testIsEndedBy() {
         Range<Integer> closedRange = Range.closed(5, 10);
         Range<Integer> openClosedRange = Range.openClosed(5, 10);
-        
+
         Assertions.assertTrue(closedRange.isEndedBy(10));
         Assertions.assertTrue(openClosedRange.isEndedBy(10));
         Assertions.assertFalse(closedRange.isEndedBy(9));
@@ -146,7 +139,7 @@ public class Range100Test extends TestBase {
     @Test
     public void testIsAfter() {
         Range<Integer> range = Range.closed(5, 10);
-        
+
         Assertions.assertTrue(range.isAfter(3));
         Assertions.assertTrue(range.isAfter(4));
         Assertions.assertFalse(range.isAfter(5));
@@ -157,7 +150,7 @@ public class Range100Test extends TestBase {
     @Test
     public void testIsBefore() {
         Range<Integer> range = Range.closed(5, 10);
-        
+
         Assertions.assertTrue(range.isBefore(12));
         Assertions.assertTrue(range.isBefore(11));
         Assertions.assertFalse(range.isBefore(10));
@@ -168,11 +161,11 @@ public class Range100Test extends TestBase {
     @Test
     public void testCompareTo() {
         Range<Integer> range = Range.closed(5, 10);
-        
-        Assertions.assertEquals(1, range.compareTo(3));  // range is after 3
-        Assertions.assertEquals(0, range.compareTo(7));  // 7 is within range
-        Assertions.assertEquals(-1, range.compareTo(12)); // range is before 12
-        
+
+        Assertions.assertEquals(1, range.compareTo(3));
+        Assertions.assertEquals(0, range.compareTo(7));
+        Assertions.assertEquals(-1, range.compareTo(12));
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> range.compareTo(null));
     }
 
@@ -182,13 +175,12 @@ public class Range100Test extends TestBase {
         Range<Integer> inner = Range.closed(3, 7);
         Range<Integer> partial = Range.closed(5, 15);
         Range<Integer> disjoint = Range.closed(15, 20);
-        
+
         Assertions.assertTrue(outer.containsRange(inner));
         Assertions.assertFalse(outer.containsRange(partial));
         Assertions.assertFalse(outer.containsRange(disjoint));
         Assertions.assertFalse(outer.containsRange(null));
-        
-        // Test with open bounds
+
         Range<Integer> openInner = Range.open(3, 7);
         Assertions.assertTrue(outer.containsRange(openInner));
     }
@@ -198,9 +190,9 @@ public class Range100Test extends TestBase {
         Range<Integer> range1 = Range.closed(10, 15);
         Range<Integer> range2 = Range.closed(1, 5);
         Range<Integer> range3 = Range.closed(1, 10);
-        
+
         Assertions.assertTrue(range1.isAfterRange(range2));
-        Assertions.assertFalse(range1.isAfterRange(range3)); // ranges touch at 10
+        Assertions.assertFalse(range1.isAfterRange(range3));
         Assertions.assertFalse(range1.isAfterRange(null));
     }
 
@@ -209,9 +201,9 @@ public class Range100Test extends TestBase {
         Range<Integer> range1 = Range.closed(1, 5);
         Range<Integer> range2 = Range.closed(10, 15);
         Range<Integer> range3 = Range.closed(5, 10);
-        
+
         Assertions.assertTrue(range1.isBeforeRange(range2));
-        Assertions.assertFalse(range1.isBeforeRange(range3)); // ranges touch at 5
+        Assertions.assertFalse(range1.isBeforeRange(range3));
         Assertions.assertFalse(range1.isBeforeRange(null));
     }
 
@@ -221,10 +213,10 @@ public class Range100Test extends TestBase {
         Range<Integer> range2 = Range.closed(3, 8);
         Range<Integer> range3 = Range.closed(6, 10);
         Range<Integer> range4 = Range.open(5, 10);
-        
-        Assertions.assertTrue(range1.isOverlappedBy(range2));  // overlap from 3 to 5
-        Assertions.assertFalse(range1.isOverlappedBy(range3)); // no overlap
-        Assertions.assertFalse(range1.isOverlappedBy(range4)); // touch at 5 but not both inclusive
+
+        Assertions.assertTrue(range1.isOverlappedBy(range2));
+        Assertions.assertFalse(range1.isOverlappedBy(range3));
+        Assertions.assertFalse(range1.isOverlappedBy(range4));
         Assertions.assertFalse(range1.isOverlappedBy(null));
     }
 
@@ -232,20 +224,18 @@ public class Range100Test extends TestBase {
     public void testIntersection() {
         Range<Integer> range1 = Range.closed(1, 5);
         Range<Integer> range2 = Range.closed(3, 8);
-        
+
         u.Optional<Range<Integer>> intersection = range1.intersection(range2);
         Assertions.assertTrue(intersection.isPresent());
         Range<Integer> result = intersection.get();
         Assertions.assertEquals(3, result.lowerEndpoint());
         Assertions.assertEquals(5, result.upperEndpoint());
         Assertions.assertEquals(Range.BoundType.CLOSED_CLOSED, result.boundType());
-        
-        // Test no intersection
+
         Range<Integer> range3 = Range.closed(6, 10);
         u.Optional<Range<Integer>> noIntersection = range1.intersection(range3);
         Assertions.assertFalse(noIntersection.isPresent());
-        
-        // Test same range
+
         u.Optional<Range<Integer>> sameRange = range1.intersection(range1);
         Assertions.assertTrue(sameRange.isPresent());
         Assertions.assertEquals(range1, sameRange.get());
@@ -255,13 +245,12 @@ public class Range100Test extends TestBase {
     public void testSpan() {
         Range<Integer> range1 = Range.closed(1, 3);
         Range<Integer> range2 = Range.closed(5, 7);
-        
+
         Range<Integer> span = range1.span(range2);
         Assertions.assertEquals(1, span.lowerEndpoint());
         Assertions.assertEquals(7, span.upperEndpoint());
         Assertions.assertEquals(Range.BoundType.CLOSED_CLOSED, span.boundType());
-        
-        // Test with open bounds
+
         Range<Integer> range3 = Range.open(1, 3);
         Range<Integer> range4 = Range.open(5, 7);
         Range<Integer> span2 = range3.span(range4);
@@ -272,10 +261,10 @@ public class Range100Test extends TestBase {
     public void testIsEmpty() {
         Range<Integer> emptyRange = Range.open(5, 5);
         Assertions.assertTrue(emptyRange.isEmpty());
-        
+
         Range<Integer> pointRange = Range.closed(5, 5);
         Assertions.assertFalse(pointRange.isEmpty());
-        
+
         Range<Integer> normalRange = Range.open(5, 6);
         Assertions.assertFalse(normalRange.isEmpty());
     }
@@ -286,11 +275,11 @@ public class Range100Test extends TestBase {
         Range<Integer> range2 = Range.closed(1, 5);
         Range<Integer> range3 = Range.open(1, 5);
         Range<Integer> range4 = Range.closed(1, 6);
-        
-        Assertions.assertTrue(range1.equals(range1)); // same instance
-        Assertions.assertTrue(range1.equals(range2)); // equal content
-        Assertions.assertFalse(range1.equals(range3)); // different bound types
-        Assertions.assertFalse(range1.equals(range4)); // different endpoints
+
+        Assertions.assertTrue(range1.equals(range1));
+        Assertions.assertTrue(range1.equals(range2));
+        Assertions.assertFalse(range1.equals(range3));
+        Assertions.assertFalse(range1.equals(range4));
         Assertions.assertFalse(range1.equals(null));
         Assertions.assertFalse(range1.equals("not a range"));
     }
@@ -300,7 +289,7 @@ public class Range100Test extends TestBase {
         Range<Integer> range1 = Range.closed(1, 5);
         Range<Integer> range2 = Range.closed(1, 5);
         Range<Integer> range3 = Range.open(1, 5);
-        
+
         Assertions.assertEquals(range1.hashCode(), range2.hashCode());
         Assertions.assertNotEquals(range1.hashCode(), range3.hashCode());
     }
@@ -309,13 +298,13 @@ public class Range100Test extends TestBase {
     public void testToString() {
         Range<Integer> closedRange = Range.closed(1, 5);
         Assertions.assertEquals("[1, 5]", closedRange.toString());
-        
+
         Range<Integer> openRange = Range.open(1, 5);
         Assertions.assertEquals("(1, 5)", openRange.toString());
-        
+
         Range<Integer> openClosedRange = Range.openClosed(1, 5);
         Assertions.assertEquals("(1, 5]", openClosedRange.toString());
-        
+
         Range<Integer> closedOpenRange = Range.closedOpen(1, 5);
         Assertions.assertEquals("[1, 5)", closedOpenRange.toString());
     }
@@ -323,7 +312,7 @@ public class Range100Test extends TestBase {
     @Test
     public void testWithStrings() {
         Range<String> range = Range.closed("apple", "banana");
-        
+
         Assertions.assertTrue(range.contains("apple"));
         Assertions.assertTrue(range.contains("apricot"));
         Assertions.assertTrue(range.contains("banana"));

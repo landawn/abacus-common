@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -53,7 +54,7 @@ import com.landawn.abacus.util.function.ByteTriPredicate;
 import com.landawn.abacus.util.function.ObjByteConsumer;
 import com.landawn.abacus.util.function.Supplier;
 
-
+@Tag("new-test")
 public class AbstractByteStream105Test extends TestBase {
 
     private ByteStream stream;
@@ -71,11 +72,10 @@ public class AbstractByteStream105Test extends TestBase {
 
     @Test
     public void testRateLimited() {
-        RateLimiter rateLimiter = RateLimiter.create(1000); // 1000 permits per second
+        RateLimiter rateLimiter = RateLimiter.create(1000);
         ByteStream result = stream.rateLimited(rateLimiter);
         assertNotNull(result);
 
-        // Test with null rateLimiter
         assertThrows(IllegalArgumentException.class, () -> stream.rateLimited(null));
     }
 
@@ -85,7 +85,6 @@ public class AbstractByteStream105Test extends TestBase {
         ByteStream result = stream.delay(delay);
         assertNotNull(result);
 
-        // Test with null delay
         assertThrows(IllegalArgumentException.class, () -> stream.delay((Duration) null));
     }
 
@@ -95,7 +94,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.skipUntil(predicate).toArray();
         assertArrayEquals(new byte[] { 4, 5 }, result);
 
-        // Test with always false predicate
         stream = createByteStream(new byte[] { 1, 2, 3 });
         result = stream.skipUntil(value -> false).toArray();
         assertArrayEquals(new byte[0], result);
@@ -107,7 +105,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.distinct().toArray();
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, result);
 
-        // Test with no duplicates
         stream = createByteStream(new byte[] { 1, 2, 3 });
         result = stream.distinct().toArray();
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
@@ -119,7 +116,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.flatmap(mapper).toArray();
         assertArrayEquals(new byte[] { 1, 2, 2, 4, 3, 6, 4, 8, 5, 10 }, result);
 
-        // Test with empty arrays
         stream = createByteStream(new byte[] { 1, 2 });
         result = stream.flatmap(value -> new byte[0]).toArray();
         assertArrayEquals(new byte[0], result);
@@ -207,7 +203,6 @@ public class AbstractByteStream105Test extends TestBase {
         assertArrayEquals(new byte[] { 3, 4, 5 }, result);
         assertEquals(Arrays.asList((byte) 1, (byte) 2), skippedElements);
 
-        // Test skip 0
         stream = createByteStream(new byte[] { 1, 2, 3 });
         result = stream.skip(0, action).toArray();
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
@@ -240,13 +235,11 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.step(2).toArray();
         assertArrayEquals(new byte[] { 1, 3, 5 }, result);
 
-        // Test step 1
         stream = createByteStream(new byte[] { 1, 2, 3 });
         result = stream.step(1).toArray();
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
 
         stream = createByteStream(new byte[] { 1, 2, 3 });
-        // Test invalid step
         assertThrows(IllegalArgumentException.class, () -> stream.step(0));
         assertThrows(IllegalArgumentException.class, () -> stream2.step(-1));
     }
@@ -257,7 +250,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.scan(accumulator).toArray();
         assertArrayEquals(new byte[] { 1, 3, 6, 10, 15 }, result);
 
-        // Test empty stream
         stream = createByteStream(new byte[0]);
         result = stream.scan(accumulator).toArray();
         assertArrayEquals(new byte[0], result);
@@ -276,11 +268,9 @@ public class AbstractByteStream105Test extends TestBase {
         byte init = 10;
         ByteBinaryOperator accumulator = (a, b) -> (byte) (a + b);
 
-        // Test with initIncluded = true
         byte[] result = stream.scan(init, true, accumulator).toArray();
         assertArrayEquals(new byte[] { 10, 11, 13, 16, 20, 25 }, result);
 
-        // Test with initIncluded = false
         stream = createByteStream(new byte[] { 1, 2, 3, 4, 5 });
         result = stream.scan(init, false, accumulator).toArray();
         assertArrayEquals(new byte[] { 11, 13, 16, 20, 25 }, result);
@@ -292,7 +282,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.intersection(c).toArray();
         assertArrayEquals(new byte[] { 2, 3 }, result);
 
-        // Test with empty collection
         stream = createByteStream(new byte[] { 1, 2, 3 });
         result = stream.intersection(Collections.emptyList()).toArray();
         assertArrayEquals(new byte[0], result);
@@ -304,7 +293,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.difference(c).toArray();
         assertArrayEquals(new byte[] { 1, 4, 5 }, result);
 
-        // Test with empty collection
         stream = createByteStream(new byte[] { 1, 2, 3 });
         result = stream.difference(Collections.emptyList()).toArray();
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
@@ -322,7 +310,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.reversed().toArray();
         assertArrayEquals(new byte[] { 5, 4, 3, 2, 1 }, result);
 
-        // Test empty stream
         stream = createByteStream(new byte[0]);
         result = stream.reversed().toArray();
         assertArrayEquals(new byte[0], result);
@@ -333,12 +320,10 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.rotated(2).toArray();
         assertArrayEquals(new byte[] { 4, 5, 1, 2, 3 }, result);
 
-        // Test negative rotation
         stream = createByteStream(new byte[] { 1, 2, 3, 4, 5 });
         result = stream.rotated(-2).toArray();
         assertArrayEquals(new byte[] { 3, 4, 5, 1, 2 }, result);
 
-        // Test rotation by 0
         stream = createByteStream(new byte[] { 1, 2, 3 });
         result = stream.rotated(0).toArray();
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
@@ -346,11 +331,10 @@ public class AbstractByteStream105Test extends TestBase {
 
     @Test
     public void testShuffled() {
-        Random rnd = new Random(123); // Fixed seed for reproducibility
+        Random rnd = new Random(123);
         stream = createByteStream(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         byte[] result = stream.shuffled(rnd).toArray();
 
-        // Check that all elements are present
         assertEquals(10, result.length);
         Set<Byte> resultSet = new HashSet<>();
         for (byte b : result) {
@@ -358,7 +342,6 @@ public class AbstractByteStream105Test extends TestBase {
         }
         assertEquals(10, resultSet.size());
 
-        // Test with null random
         assertThrows(IllegalArgumentException.class, () -> stream2.shuffled(null));
     }
 
@@ -368,7 +351,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.sorted().toArray();
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, result);
 
-        // Test already sorted stream
         stream = createByteStream(new byte[] { 1, 2, 3 });
         result = stream.sorted().toArray();
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
@@ -387,7 +369,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.cycled().limit(10).toArray();
         assertArrayEquals(new byte[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 1 }, result);
 
-        // Test empty stream
         stream = createByteStream(new byte[0]);
         result = stream.cycled().limit(5).toArray();
         assertArrayEquals(new byte[0], result);
@@ -397,21 +378,17 @@ public class AbstractByteStream105Test extends TestBase {
     public void testCycledWithRounds() {
         stream = createByteStream(new byte[] { 1, 2, 3 });
 
-        // Test 0 rounds
         byte[] result = stream.cycled(0).toArray();
         assertArrayEquals(new byte[0], result);
 
-        // Test 1 round
         stream = createByteStream(new byte[] { 1, 2, 3 });
         result = stream.cycled(1).toArray();
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
 
-        // Test 3 rounds
         stream = createByteStream(new byte[] { 1, 2 });
         result = stream.cycled(3).toArray();
         assertArrayEquals(new byte[] { 1, 2, 1, 2, 1, 2 }, result);
 
-        // Test negative rounds
         assertThrows(IllegalArgumentException.class, () -> stream2.cycled(-1));
     }
 
@@ -436,7 +413,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.prepend((byte) 10, (byte) 20).toArray();
         assertArrayEquals(new byte[] { 10, 20, 1, 2, 3, 4, 5 }, result);
 
-        // Test with empty array
         stream = createByteStream(new byte[] { 1, 2 });
         result = stream.prepend().toArray();
         assertArrayEquals(new byte[] { 1, 2 }, result);
@@ -455,7 +431,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.prepend(op).toArray();
         assertArrayEquals(new byte[] { 10, 1, 2, 3, 4, 5 }, result);
 
-        // Test with empty optional
         stream = createByteStream(new byte[] { 1, 2, 3 });
         op = OptionalByte.empty();
         result = stream.prepend(op).toArray();
@@ -467,7 +442,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.append((byte) 10, (byte) 20).toArray();
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5, 10, 20 }, result);
 
-        // Test with empty array
         stream = createByteStream(new byte[] { 1, 2 });
         result = stream.append().toArray();
         assertArrayEquals(new byte[] { 1, 2 }, result);
@@ -486,7 +460,6 @@ public class AbstractByteStream105Test extends TestBase {
         byte[] result = stream.append(op).toArray();
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5, 10 }, result);
 
-        // Test with empty optional
         stream = createByteStream(new byte[] { 1, 2, 3 });
         op = OptionalByte.empty();
         result = stream.append(op).toArray();
@@ -495,11 +468,9 @@ public class AbstractByteStream105Test extends TestBase {
 
     @Test
     public void testAppendIfEmpty() {
-        // Test non-empty stream
         byte[] result = stream.appendIfEmpty((byte) 10, (byte) 20).toArray();
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, result);
 
-        // Test empty stream
         stream = createByteStream(new byte[0]);
         result = stream.appendIfEmpty((byte) 10, (byte) 20).toArray();
         assertArrayEquals(new byte[] { 10, 20 }, result);
@@ -590,8 +561,8 @@ public class AbstractByteStream105Test extends TestBase {
 
         Map<String, Integer> result = stream.toMap(keyMapper, valueMapper, mergeFunction);
         assertEquals(3, result.size());
-        assertEquals(2, result.get("key1")); // 1 + 1
-        assertEquals(4, result.get("key2")); // 2 + 2
+        assertEquals(2, result.get("key1"));
+        assertEquals(4, result.get("key2"));
         assertEquals(3, result.get("key3"));
     }
 
@@ -645,7 +616,6 @@ public class AbstractByteStream105Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(1, result.getAsByte());
 
-        // Test empty stream
         stream = createByteStream(new byte[0]);
         result = stream.first();
         assertFalse(result.isPresent());
@@ -657,7 +627,6 @@ public class AbstractByteStream105Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(5, result.getAsByte());
 
-        // Test empty stream
         stream = createByteStream(new byte[0]);
         result = stream.last();
         assertFalse(result.isPresent());
@@ -670,12 +639,10 @@ public class AbstractByteStream105Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(42, result.getAsByte());
 
-        // Test empty stream
         stream = createByteStream(new byte[0]);
         result = stream.onlyOne();
         assertFalse(result.isPresent());
 
-        // Test multiple elements
         stream = createByteStream(new byte[] { 1, 2 });
         assertThrows(TooManyElementsException.class, () -> stream.onlyOne());
     }
@@ -687,7 +654,6 @@ public class AbstractByteStream105Test extends TestBase {
         assertTrue(result.isPresent());
         assertTrue(result.getAsByte() > 3);
 
-        // Test no match
         stream = createByteStream(new byte[] { 1, 2, 3 });
         result = stream.findAny(value -> value > 10);
         assertFalse(result.isPresent());
@@ -700,7 +666,6 @@ public class AbstractByteStream105Test extends TestBase {
         Map<Percentage, Byte> percentiles = result.get();
         assertNotNull(percentiles.get(Percentage._50));
 
-        // Test empty stream
         stream = createByteStream(new byte[0]);
         result = stream.percentiles();
         assertFalse(result.isPresent());
@@ -719,7 +684,6 @@ public class AbstractByteStream105Test extends TestBase {
         assertTrue(result.right().isPresent());
         assertNotNull(result.right().get().get(Percentage._50));
 
-        // Test empty stream
         stream = createByteStream(new byte[0]);
         result = stream.summarizeAndPercentiles();
         assertEquals(0, result.left().getCount());
@@ -731,12 +695,10 @@ public class AbstractByteStream105Test extends TestBase {
         String result = stream.join(", ", "[", "]");
         assertEquals("[1, 2, 3, 4, 5]", result);
 
-        // Test empty stream
         stream = createByteStream(new byte[0]);
         result = stream.join(", ", "[", "]");
         assertEquals("[]", result);
 
-        // Test single element
         stream = createByteStream(new byte[] { 42 });
         result = stream.join(", ", "[", "]");
         assertEquals("[42]", result);
@@ -775,7 +737,6 @@ public class AbstractByteStream105Test extends TestBase {
         assertEquals(1, iter.nextByte());
         assertEquals(2, iter.nextByte());
 
-        // Consume remaining elements
         while (iter.hasNext()) {
             iter.nextByte();
         }

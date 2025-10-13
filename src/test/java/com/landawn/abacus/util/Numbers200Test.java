@@ -13,6 +13,7 @@ import java.text.DecimalFormat;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -20,11 +21,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import com.google.common.math.IntMath;
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Numbers200Test extends TestBase {
 
-    private static final double DELTA = 1e-9; // For float/double comparisons
+    private static final double DELTA = 1e-9;
 
-    // Test Constants
     @Test
     public void testByteConstants() {
         assertEquals((byte) 0, Numbers.BYTE_ZERO);
@@ -68,7 +69,6 @@ public class Numbers200Test extends TestBase {
         assertEquals(-1.0d, Numbers.DOUBLE_MINUS_ONE, 0.0d);
     }
 
-    // Test convert(Number, Class)
     @Test
     public void testConvert_nullValue() {
         assertNull(Numbers.convert(null, Integer.class));
@@ -116,7 +116,7 @@ public class Numbers200Test extends TestBase {
 
     @Test
     public void testConvert_doubleToLong_valid() {
-        assertEquals(123L, Numbers.convert(123.45d, long.class)); // Truncates
+        assertEquals(123L, Numbers.convert(123.45d, long.class));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class Numbers200Test extends TestBase {
 
     @Test
     public void testConvert_bigDecimalToInteger_valid() {
-        assertEquals(123, Numbers.convert(new BigDecimal("123.789"), Integer.class)); // Truncates
+        assertEquals(123, Numbers.convert(new BigDecimal("123.789"), Integer.class));
     }
 
     @Test
@@ -136,17 +136,6 @@ public class Numbers200Test extends TestBase {
 
     @Test
     public void testConvert_floatToInteger_NaN() {
-        // Behavior for NaN/Infinity in 'convert' is complex due to internal fallback string conversion or specific checks.
-        // The provided code for float.class -> int.class implies a direct cast after range check.
-        // Float.NaN.intValue() is 0. The range check might throw before that.
-        // Let's check the float to int conversion path:
-        // temp.put(float.class, it -> {
-        //     if (Float.compare(it.floatValue(), Integer.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Integer.MIN_VALUE) < 0) {
-        //         throw new ArithmeticException("integer overflow");
-        //     }
-        //     return Integer.valueOf(it.intValue());
-        // });
-        // Float.NaN compared to anything is false, so it will pass the check. Float.NaN.intValue() is 0.
         assertThrows(ArithmeticException.class, () -> Numbers.convert(Float.NaN, int.class));
     }
 
@@ -166,7 +155,6 @@ public class Numbers200Test extends TestBase {
         assertThrows(ArithmeticException.class, () -> Numbers.convert(Double.MAX_VALUE, float.class));
     }
 
-    // Test format methods
     static Stream<Arguments> formatIntegerProvider() {
         return Stream.of(Arguments.of(123, "0000", "0123"), Arguments.of(123, "#,##0", "123"), Arguments.of(12345, "#,##0", "12,345"),
                 Arguments.of(-123, "0.00", "-123.00"));
@@ -186,7 +174,7 @@ public class Numbers200Test extends TestBase {
 
     @Test
     public void testFormat_Integer_null() {
-        assertEquals("0", Numbers.format((Integer) null, "#")); // Default behavior as per code
+        assertEquals("0", Numbers.format((Integer) null, "#"));
         assertEquals("0.00", Numbers.format((Integer) null, "0.00"));
     }
 
@@ -212,18 +200,12 @@ public class Numbers200Test extends TestBase {
     }
 
     static Stream<Arguments> formatFloatProvider() {
-        return Stream.of(Arguments.of(123.456f, "0.00", "123.46"), // Default rounding HALF_EVEN from DecimalFormat
-                Arguments.of(0.75f, "#.##%", "75%"), Arguments.of(0.12156f, "#.##%", "12.16%") // Example from doc
-        );
+        return Stream.of(Arguments.of(123.456f, "0.00", "123.46"), Arguments.of(0.75f, "#.##%", "75%"), Arguments.of(0.12156f, "#.##%", "12.16%"));
     }
 
     @ParameterizedTest
     @MethodSource("formatFloatProvider")
     public void testFormat_float(float val, String pattern, String expected) {
-        // DecimalFormat default rounding mode can vary by JDK/locale.
-        // For consistency, one might set it explicitly if tests are too sensitive.
-        // The examples in the JavaDoc imply specific rounding, e.g. HALF_UP or HALF_EVEN
-        // Default for new DecimalFormat() is HALF_EVEN
         DecimalFormat df = new DecimalFormat(pattern);
         assertEquals(df.format(val), Numbers.format(val, pattern));
     }
@@ -241,10 +223,8 @@ public class Numbers200Test extends TestBase {
     }
 
     static Stream<Arguments> formatDoubleProvider() {
-        return Stream.of(Arguments.of(123.4567, "0.00", "123.46"), Arguments.of(0.12156, "#.##%", "12.16%"), // Example from doc
-                Arguments.of(Double.NaN, "0.0", "\uFFFD"), // NaN symbol
-                Arguments.of(Double.POSITIVE_INFINITY, "0.0", "\u221E") // Infinity symbol
-        );
+        return Stream.of(Arguments.of(123.4567, "0.00", "123.46"), Arguments.of(0.12156, "#.##%", "12.16%"), Arguments.of(Double.NaN, "0.0", "\uFFFD"),
+                Arguments.of(Double.POSITIVE_INFINITY, "0.0", "\u221E"));
     }
 
     @ParameterizedTest
@@ -271,7 +251,6 @@ public class Numbers200Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Numbers.format(123, null));
     }
 
-    // Test extraction methods
     @Test
     public void testExtractFirstInt() {
         assertEquals(123, Numbers.extractFirstInt("abc 123 def 456"));
@@ -307,7 +286,7 @@ public class Numbers200Test extends TestBase {
         assertEquals(0.0, Numbers.extractFirstDouble("abc def"), DELTA);
         assertEquals(-0.5, Numbers.extractFirstDouble("neg -0.5 test"), DELTA);
         assertEquals(1.2e3, Numbers.extractFirstDouble("sci 1.2e3 end", true), DELTA);
-        assertEquals(1.2, Numbers.extractFirstDouble("sci 1.2e3 end", false), DELTA); // e3 is not part of number
+        assertEquals(1.2, Numbers.extractFirstDouble("sci 1.2e3 end", false), DELTA);
     }
 
     @Test
@@ -318,7 +297,6 @@ public class Numbers200Test extends TestBase {
         assertEquals(0.000012, Numbers.extractFirstDouble("num 0.000012E0 text", 0.0, true), DELTA);
     }
 
-    // Test toType methods
     @Test
     public void testToByte() {
         assertEquals((byte) 10, Numbers.toByte("10"));
@@ -329,9 +307,9 @@ public class Numbers200Test extends TestBase {
         assertThrows(NumberFormatException.class, () -> Numbers.toByte("abc"));
 
         assertEquals((byte) 10, Numbers.toByte(Byte.valueOf((byte) 10)));
-        assertEquals((byte) 10, Numbers.toByte(10)); // Integer
+        assertEquals((byte) 10, Numbers.toByte(10));
         assertEquals((byte) 0, Numbers.toByte(null, (byte) 0));
-        assertThrows(NumberFormatException.class, () -> Numbers.toByte(300, (byte) 0)); // Integer 300
+        assertThrows(NumberFormatException.class, () -> Numbers.toByte(300, (byte) 0));
     }
 
     @Test
@@ -342,8 +320,8 @@ public class Numbers200Test extends TestBase {
         assertThrows(NumberFormatException.class, () -> Numbers.toShort("32768"));
 
         assertEquals((short) 100, Numbers.toShort(Short.valueOf((short) 100)));
-        assertEquals((short) 100, Numbers.toShort(100)); // Integer
-        assertThrows(NumberFormatException.class, () -> Numbers.toShort(40000, (short) 0)); // Integer 40000
+        assertEquals((short) 100, Numbers.toShort(100));
+        assertThrows(NumberFormatException.class, () -> Numbers.toShort(40000, (short) 0));
     }
 
     @Test
@@ -354,8 +332,8 @@ public class Numbers200Test extends TestBase {
         assertThrows(NumberFormatException.class, () -> Numbers.toInt("2147483648"));
 
         assertEquals(1000, Numbers.toInt(Integer.valueOf(1000)));
-        assertEquals(1000, Numbers.toInt(1000L)); // Long
-        assertThrows(NumberFormatException.class, () -> Numbers.toInt(3000000000L, 0)); // Long
+        assertEquals(1000, Numbers.toInt(1000L));
+        assertThrows(NumberFormatException.class, () -> Numbers.toInt(3000000000L, 0));
     }
 
     @Test
@@ -363,12 +341,12 @@ public class Numbers200Test extends TestBase {
         assertEquals(123456789012L, Numbers.toLong("123456789012"));
         assertEquals(0L, Numbers.toLong(null));
         assertThrows(NumberFormatException.class, () -> Numbers.toLong("test", 88L));
-        assertThrows(NumberFormatException.class, () -> Numbers.toLong("9223372036854775808")); // MaxLong+1
+        assertThrows(NumberFormatException.class, () -> Numbers.toLong("9223372036854775808"));
         assertEquals(123L, Numbers.toLong("123L"));
         assertEquals(123L, Numbers.toLong("123l"));
 
         assertEquals(500L, Numbers.toLong(Long.valueOf(500L)));
-        assertEquals(500L, Numbers.toLong(500)); // Integer
+        assertEquals(500L, Numbers.toLong(500));
         assertEquals(500L, Numbers.toLong(new BigInteger("500")));
         assertThrows(NumberFormatException.class, () -> Numbers.toLong(new BigInteger(Long.MAX_VALUE + "1"), 0L));
     }
@@ -380,7 +358,7 @@ public class Numbers200Test extends TestBase {
         assertThrows(NumberFormatException.class, () -> Numbers.toFloat("invalid"));
 
         assertEquals(12.3f, Numbers.toFloat(Float.valueOf(12.3f)), DELTA);
-        assertEquals(12.3f, Numbers.toFloat(12.3d), DELTA); // Double to float
+        assertEquals(12.3f, Numbers.toFloat(12.3d), DELTA);
     }
 
     @Test
@@ -391,7 +369,7 @@ public class Numbers200Test extends TestBase {
         assertThrows(NumberFormatException.class, () -> Numbers.toDouble("bad"));
 
         assertEquals(45.67, Numbers.toDouble(Double.valueOf(45.67)), DELTA);
-        assertEquals(45.67, Numbers.toDouble(45.67f), DELTA); // Float to double
+        assertEquals(45.67, Numbers.toDouble(45.67f), DELTA);
 
         assertEquals(8.5d, Numbers.toDouble(BigDecimal.valueOf(8.5d)), DELTA);
         assertEquals(0.0d, Numbers.toDouble((BigDecimal) null), DELTA);
@@ -399,10 +377,9 @@ public class Numbers200Test extends TestBase {
 
     }
 
-    // Test toScaledBigDecimal
     @Test
     public void testToScaledBigDecimal_BigDecimal() {
-        assertEquals(new BigDecimal("12.34"), Numbers.toScaledBigDecimal(new BigDecimal("12.345"))); // Default scale 2, HALF_EVEN
+        assertEquals(new BigDecimal("12.34"), Numbers.toScaledBigDecimal(new BigDecimal("12.345")));
         assertEquals(new BigDecimal("12.3"), Numbers.toScaledBigDecimal(new BigDecimal("12.345"), 1, RoundingMode.HALF_DOWN));
         assertEquals(BigDecimal.ZERO, Numbers.toScaledBigDecimal((BigDecimal) null));
     }
@@ -429,7 +406,6 @@ public class Numbers200Test extends TestBase {
         assertThrows(NumberFormatException.class, () -> Numbers.toScaledBigDecimal("not a number"));
     }
 
-    // Test toIntExact
     @Test
     public void testToIntExact() {
         assertEquals(123, Numbers.toIntExact(123L));
@@ -439,15 +415,14 @@ public class Numbers200Test extends TestBase {
         assertThrows(ArithmeticException.class, () -> Numbers.toIntExact(Integer.MIN_VALUE - 1L));
     }
 
-    // Test createType methods
     @Test
     public void testCreateInteger() {
         assertEquals(Integer.valueOf(123), Numbers.createInteger("123"));
-        assertEquals(Integer.valueOf(0xFF), Numbers.createInteger("0xFF")); // Hex
-        assertEquals(Integer.valueOf(077), Numbers.createInteger("077")); // Octal
+        assertEquals(Integer.valueOf(0xFF), Numbers.createInteger("0xFF"));
+        assertEquals(Integer.valueOf(077), Numbers.createInteger("077"));
         assertNull(Numbers.createInteger(null));
         assertThrows(NumberFormatException.class, () -> Numbers.createInteger("abc"));
-        assertThrows(NumberFormatException.class, () -> Numbers.createInteger("")); // decode throws for empty
+        assertThrows(NumberFormatException.class, () -> Numbers.createInteger(""));
     }
 
     @Test
@@ -497,7 +472,7 @@ public class Numbers200Test extends TestBase {
         assertEquals(Long.valueOf(12345678901L), Numbers.createNumber("12345678901L"));
         assertEquals(Float.valueOf(1.23f), Numbers.createNumber("1.23f"));
         assertEquals(Double.valueOf(1.23d), Numbers.createNumber("1.23d"));
-        assertEquals(Double.valueOf(1.23e4), Numbers.createNumber("1.23e4")); // Should be Double
+        assertEquals(Double.valueOf(1.23e4), Numbers.createNumber("1.23e4"));
         assertEquals(new BigInteger("1234567890123456789012345"), Numbers.createNumber("1234567890123456789012345"));
         assertEquals(Double.valueOf("0.1234567890123456789012345"), Numbers.createNumber("0.1234567890123456789012345"));
         assertEquals(Integer.valueOf(0xFF), Numbers.createNumber("0xFF"));
@@ -512,7 +487,6 @@ public class Numbers200Test extends TestBase {
         assertEquals(Long.valueOf("10"), Numbers.createNumber("10L"));
     }
 
-    // Validation Methods
     @Test
     public void testIsDigits() {
         assertTrue(Numbers.isDigits("123"));
@@ -523,7 +497,7 @@ public class Numbers200Test extends TestBase {
     }
 
     @Test
-    public void testIsCreatableAndIsNumber() { // isNumber is an alias
+    public void testIsCreatableAndIsNumber() {
         assertTrue(Numbers.isCreatable("123"));
         assertTrue(Numbers.isNumber("123"));
         assertTrue(Numbers.isCreatable("123.45"));
@@ -539,8 +513,8 @@ public class Numbers200Test extends TestBase {
         assertFalse(Numbers.isCreatable(null));
         assertFalse(Numbers.isCreatable("1.2.3"));
         assertFalse(Numbers.isCreatable("--1"));
-        assertFalse(Numbers.isCreatable("09")); // 9 is not octal
-        assertTrue(Numbers.isCreatable("0.9")); // decimal
+        assertFalse(Numbers.isCreatable("09"));
+        assertTrue(Numbers.isCreatable("0.9"));
     }
 
     @Test
@@ -551,20 +525,19 @@ public class Numbers200Test extends TestBase {
         assertTrue(Numbers.isParsable(".5"));
         assertTrue(Numbers.isParsable("0.5"));
 
-        assertFalse(Numbers.isParsable("1.2e3")); // scientific not parsable by this definition
-        assertFalse(Numbers.isParsable("0xFF")); // hex not parsable
-        assertFalse(Numbers.isParsable("123L")); // suffix not parsable
+        assertFalse(Numbers.isParsable("1.2e3"));
+        assertFalse(Numbers.isParsable("0xFF"));
+        assertFalse(Numbers.isParsable("123L"));
         assertFalse(Numbers.isParsable("abc"));
         assertFalse(Numbers.isParsable(""));
         assertFalse(Numbers.isParsable(null));
         assertFalse(Numbers.isParsable("1.2.3"));
-        assertFalse(Numbers.isParsable("123.")); // ends with .
+        assertFalse(Numbers.isParsable("123."));
         assertFalse(Numbers.isParsable("+"));
         assertFalse(Numbers.isParsable("-"));
 
     }
 
-    // Primality, Power, Square Checks
     @Test
     public void testIsPrime() {
         assertFalse(Numbers.isPrime(0));
@@ -575,7 +548,7 @@ public class Numbers200Test extends TestBase {
         assertTrue(Numbers.isPrime(5));
         assertTrue(Numbers.isPrime(13));
         assertFalse(Numbers.isPrime(15));
-        assertTrue(Numbers.isPrime(97)); // A larger prime
+        assertTrue(Numbers.isPrime(97));
         assertFalse(Numbers.isPrime(100));
         assertThrows(IllegalArgumentException.class, () -> Numbers.isPrime(-1));
     }
@@ -593,7 +566,7 @@ public class Numbers200Test extends TestBase {
 
         assertTrue(Numbers.isPerfectSquare(0L));
         assertTrue(Numbers.isPerfectSquare(1L));
-        assertTrue(Numbers.isPerfectSquare(100000000L * 100000000L)); // Large perfect square
+        assertTrue(Numbers.isPerfectSquare(100000000L * 100000000L));
         assertFalse(Numbers.isPerfectSquare(Long.MAX_VALUE));
     }
 
@@ -613,8 +586,8 @@ public class Numbers200Test extends TestBase {
 
         assertTrue(Numbers.isPowerOfTwo(1.0));
         assertTrue(Numbers.isPowerOfTwo(2.0));
-        assertTrue(Numbers.isPowerOfTwo(0.5)); // 2^-1
-        assertTrue(Numbers.isPowerOfTwo(0.25)); // 2^-2
+        assertTrue(Numbers.isPowerOfTwo(0.5));
+        assertTrue(Numbers.isPowerOfTwo(0.25));
         assertFalse(Numbers.isPowerOfTwo(3.0));
         assertFalse(Numbers.isPowerOfTwo(0.0));
         assertFalse(Numbers.isPowerOfTwo(-2.0));
@@ -625,11 +598,10 @@ public class Numbers200Test extends TestBase {
         assertTrue(Numbers.isPowerOfTwo(new BigInteger("1024")));
         assertFalse(Numbers.isPowerOfTwo(BigInteger.ZERO));
         assertFalse(Numbers.isPowerOfTwo(new BigInteger("3")));
-        assertThrows(IllegalArgumentException.class, () -> Numbers.isPowerOfTwo((BigInteger) null)); // checkArgNotNull
+        assertThrows(IllegalArgumentException.class, () -> Numbers.isPowerOfTwo((BigInteger) null));
         assertFalse(Numbers.isPowerOfTwo(new BigInteger("-2")));
     }
 
-    // Logarithmic Methods
     @Test
     public void testLog() {
         assertEquals(Math.log(10.0), Numbers.log(10.0), DELTA);
@@ -642,11 +614,11 @@ public class Numbers200Test extends TestBase {
         assertEquals(3, Numbers.log2(8, RoundingMode.UNNECESSARY));
         assertEquals(3, Numbers.log2(10, RoundingMode.FLOOR));
         assertEquals(4, Numbers.log2(10, RoundingMode.CEILING));
-        assertEquals(3, Numbers.log2(10, RoundingMode.DOWN)); // 1010 -> log2 is 3.something
+        assertEquals(3, Numbers.log2(10, RoundingMode.DOWN));
         assertEquals(4, Numbers.log2(10, RoundingMode.UP));
-        assertEquals(3, Numbers.log2(11, RoundingMode.HALF_DOWN)); // sqrt(2) * 8 = 11.31... 11 is closer to 8
-        assertEquals(4, IntMath.log2(12, RoundingMode.HALF_DOWN)); // 12 is closer to 8 than 16 
-        assertEquals(4, Numbers.log2(13, RoundingMode.HALF_DOWN)); // 13 is closer to 16
+        assertEquals(3, Numbers.log2(11, RoundingMode.HALF_DOWN));
+        assertEquals(4, IntMath.log2(12, RoundingMode.HALF_DOWN));
+        assertEquals(4, Numbers.log2(13, RoundingMode.HALF_DOWN));
 
         assertThrows(IllegalArgumentException.class, () -> Numbers.log2(0, RoundingMode.FLOOR));
         assertThrows(ArithmeticException.class, () -> Numbers.log2(10, RoundingMode.UNNECESSARY));
@@ -677,7 +649,7 @@ public class Numbers200Test extends TestBase {
     @Test
     public void testLog2_BigInteger() {
         assertEquals(3, Numbers.log2(BigInteger.valueOf(8), RoundingMode.UNNECESSARY));
-        assertEquals(9, Numbers.log2(new BigInteger("1000"), RoundingMode.FLOOR)); // 2^9 = 512, 2^10 = 1024
+        assertEquals(9, Numbers.log2(new BigInteger("1000"), RoundingMode.FLOOR));
         assertEquals(10, Numbers.log2(new BigInteger("1000"), RoundingMode.CEILING));
         assertThrows(IllegalArgumentException.class, () -> Numbers.log2(BigInteger.ZERO, RoundingMode.FLOOR));
     }
@@ -705,11 +677,10 @@ public class Numbers200Test extends TestBase {
     @Test
     public void testLog10_BigInteger() {
         assertEquals(2, Numbers.log10(BigInteger.valueOf(100), RoundingMode.UNNECESSARY));
-        assertEquals(3, Numbers.log10(new BigInteger("1234"), RoundingMode.FLOOR)); // 10^3 = 1000, 10^4 = 10000
+        assertEquals(3, Numbers.log10(new BigInteger("1234"), RoundingMode.FLOOR));
         assertThrows(IllegalArgumentException.class, () -> Numbers.log10(BigInteger.ZERO, RoundingMode.FLOOR));
     }
 
-    // Power Methods
     @Test
     public void testPow_int() {
         assertEquals(8, Numbers.pow(2, 3));
@@ -718,7 +689,7 @@ public class Numbers200Test extends TestBase {
         assertEquals(1, Numbers.pow(0, 0));
         assertEquals(-8, Numbers.pow(-2, 3));
         assertEquals(16, Numbers.pow(-2, 4));
-        assertEquals(0, Numbers.pow(2, 32)); // Overflow as per spec
+        assertEquals(0, Numbers.pow(2, 32));
         assertThrows(IllegalArgumentException.class, () -> Numbers.pow(2, -1));
     }
 
@@ -726,7 +697,7 @@ public class Numbers200Test extends TestBase {
     public void testPow_long() {
         assertEquals(8L, Numbers.pow(2L, 3));
         assertEquals(1L << 60, Numbers.pow(2L, 60));
-        assertEquals(0L, Numbers.pow(2L, 64)); // Overflow as per spec
+        assertEquals(0L, Numbers.pow(2L, 64));
         assertThrows(IllegalArgumentException.class, () -> Numbers.pow(2L, -1));
     }
 
@@ -763,7 +734,6 @@ public class Numbers200Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Numbers.floorPowerOfTwo(BigInteger.ZERO));
     }
 
-    // Square Root Methods
     @Test
     public void testSqrt_int() {
         assertEquals(3, Numbers.sqrt(9, RoundingMode.UNNECESSARY));
@@ -776,7 +746,7 @@ public class Numbers200Test extends TestBase {
     @Test
     public void testSqrt_long() {
         assertEquals(3L, Numbers.sqrt(9L, RoundingMode.UNNECESSARY));
-        assertThrows(IllegalArgumentException.class, () -> Numbers.sqrt((Long.MAX_VALUE / (1L << 15)) * (Long.MAX_VALUE / (1L << 15)), RoundingMode.FLOOR)); // Approx
+        assertThrows(IllegalArgumentException.class, () -> Numbers.sqrt((Long.MAX_VALUE / (1L << 15)) * (Long.MAX_VALUE / (1L << 15)), RoundingMode.FLOOR));
         assertThrows(IllegalArgumentException.class, () -> Numbers.sqrt(-1L, RoundingMode.FLOOR));
     }
 
@@ -787,24 +757,22 @@ public class Numbers200Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Numbers.sqrt(BigInteger.valueOf(-1), RoundingMode.FLOOR));
     }
 
-    // Division and Modulo Methods
     @Test
     public void testDivide_int() {
         assertEquals(3, Numbers.divide(10, 3, RoundingMode.FLOOR));
         assertEquals(4, Numbers.divide(10, 3, RoundingMode.CEILING));
-        assertEquals(3, Numbers.divide(10, 3, RoundingMode.DOWN)); // 3
+        assertEquals(3, Numbers.divide(10, 3, RoundingMode.DOWN));
         assertEquals(3, Numbers.divide(9, 3, RoundingMode.UNNECESSARY));
         assertThrows(ArithmeticException.class, () -> Numbers.divide(10, 0, RoundingMode.FLOOR));
         assertThrows(ArithmeticException.class, () -> Numbers.divide(10, 3, RoundingMode.UNNECESSARY));
         assertEquals(-3, Numbers.divide(-10, 3, RoundingMode.DOWN));
         assertEquals(-4, Numbers.divide(-10, 3, RoundingMode.FLOOR));
         assertEquals(-3, Numbers.divide(-10, 3, RoundingMode.CEILING));
-        assertEquals(3, Numbers.divide(5, 2, RoundingMode.HALF_UP)); // 2.5 -> 3 (mistake here, 5/2 = 2 rem 1. HALF_UP on 2.5 is 3. But java int div is 2)
-        // signum is 1, rem is 1. absRem=1, absQ=2. cmpRemToHalf = 1 - (2-1) = 0. increment=true. div+signum = 2+1 = 3
+        assertEquals(3, Numbers.divide(5, 2, RoundingMode.HALF_UP));
         assertEquals(3, Numbers.divide(5, 2, RoundingMode.HALF_UP));
         assertEquals(2, Numbers.divide(5, 2, RoundingMode.HALF_DOWN));
-        assertEquals(2, Numbers.divide(5, 2, RoundingMode.HALF_EVEN)); // div is 2 (even)
-        assertEquals(4, Numbers.divide(7, 2, RoundingMode.HALF_EVEN)); // div is 3 (odd) -> 4.  7/2 = 3 rem 1. cmpRemToHalf = 0. (div&1)!=0 is true. increment = true. 3+1 =4
+        assertEquals(2, Numbers.divide(5, 2, RoundingMode.HALF_EVEN));
+        assertEquals(4, Numbers.divide(7, 2, RoundingMode.HALF_EVEN));
 
     }
 
@@ -841,7 +809,6 @@ public class Numbers200Test extends TestBase {
         assertEquals(1L, Numbers.mod(-7L, 4L));
     }
 
-    // GCD and LCM
     @Test
     public void testGcd_int() {
         assertEquals(6, Numbers.gcd(54, 24));
@@ -873,20 +840,16 @@ public class Numbers200Test extends TestBase {
         assertEquals(0, Numbers.lcm(5, 0));
         assertEquals(0, Numbers.lcm(0, 0));
         assertEquals(21, Numbers.lcm(-3, 7));
-        // Overflow test
-        assertThrows(ArithmeticException.class, () -> Numbers.lcm(Integer.MAX_VALUE, Integer.MAX_VALUE - 1)); // Likely overflows
-        // assertThrows(ArithmeticException.class, () -> Numbers.lcm(Integer.MIN_VALUE / 2 + 1, 2)); // example of MIN_VALUE related overflow
+        assertThrows(ArithmeticException.class, () -> Numbers.lcm(Integer.MAX_VALUE, Integer.MAX_VALUE - 1));
         assertEquals(2147483646, Numbers.lcm(Integer.MIN_VALUE / 2 + 1, 2));
     }
 
     @Test
     public void testLcm_long() {
         assertEquals(21L, Numbers.lcm(3L, 7L));
-        // Overflow test
         assertThrows(ArithmeticException.class, () -> Numbers.lcm(Long.MAX_VALUE, Long.MAX_VALUE - 1L));
     }
 
-    // Exact Arithmetic
     @Test
     public void testAddExact() {
         assertEquals(5, Numbers.addExact(2, 3));
@@ -925,7 +888,6 @@ public class Numbers200Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Numbers.powExact(2L, -1));
     }
 
-    // Saturated Arithmetic
     @Test
     public void testSaturatedAdd() {
         assertEquals(5, Numbers.saturatedAdd(2, 3));
@@ -980,14 +942,13 @@ public class Numbers200Test extends TestBase {
         assertEquals(Integer.MIN_VALUE, Numbers.saturatedCast(Long.MIN_VALUE));
     }
 
-    // Factorial Methods
     @Test
     public void testFactorial_int() {
         assertEquals(1, Numbers.factorial(0));
         assertEquals(1, Numbers.factorial(1));
         assertEquals(2, Numbers.factorial(2));
         assertEquals(120, Numbers.factorial(5));
-        assertEquals(Integer.MAX_VALUE, Numbers.factorial(13)); // 13! overflows int
+        assertEquals(Integer.MAX_VALUE, Numbers.factorial(13));
         assertThrows(IllegalArgumentException.class, () -> Numbers.factorial(-1));
     }
 
@@ -995,7 +956,7 @@ public class Numbers200Test extends TestBase {
     public void testFactorialToLong() {
         assertEquals(1L, Numbers.factorialToLong(0));
         assertEquals(120L, Numbers.factorialToLong(5));
-        assertEquals(Long.MAX_VALUE, Numbers.factorialToLong(21)); // 21! overflows long
+        assertEquals(Long.MAX_VALUE, Numbers.factorialToLong(21));
         assertThrows(IllegalArgumentException.class, () -> Numbers.factorialToLong(-1));
     }
 
@@ -1003,7 +964,7 @@ public class Numbers200Test extends TestBase {
     public void testFactorialToDouble() {
         assertEquals(1.0, Numbers.factorialToDouble(0), DELTA);
         assertEquals(120.0, Numbers.factorialToDouble(5), DELTA);
-        assertEquals(Double.POSITIVE_INFINITY, Numbers.factorialToDouble(171)); // 171! overflows double
+        assertEquals(Double.POSITIVE_INFINITY, Numbers.factorialToDouble(171));
         assertThrows(IllegalArgumentException.class, () -> Numbers.factorialToDouble(-1));
     }
 
@@ -1011,18 +972,17 @@ public class Numbers200Test extends TestBase {
     public void testFactorialToBigInteger() {
         assertEquals(BigInteger.ONE, Numbers.factorialToBigInteger(0));
         assertEquals(BigInteger.valueOf(120), Numbers.factorialToBigInteger(5));
-        assertEquals(new BigInteger("2432902008176640000"), Numbers.factorialToBigInteger(20)); // 20!
+        assertEquals(new BigInteger("2432902008176640000"), Numbers.factorialToBigInteger(20));
         assertThrows(IllegalArgumentException.class, () -> Numbers.factorialToBigInteger(-1));
     }
 
-    // Binomial Coefficient Methods
     @Test
     public void testBinomial_int() {
         assertEquals(1, Numbers.binomial(5, 0));
         assertEquals(1, Numbers.binomial(5, 5));
         assertEquals(5, Numbers.binomial(5, 1));
-        assertEquals(10, Numbers.binomial(5, 2)); // 5*4 / 2
-        assertEquals(Integer.MAX_VALUE, Numbers.binomial(34, 17)); // overflows int
+        assertEquals(10, Numbers.binomial(5, 2));
+        assertEquals(Integer.MAX_VALUE, Numbers.binomial(34, 17));
         assertThrows(IllegalArgumentException.class, () -> Numbers.binomial(-1, 1));
         assertThrows(IllegalArgumentException.class, () -> Numbers.binomial(5, -1));
         assertThrows(IllegalArgumentException.class, () -> Numbers.binomial(5, 6));
@@ -1031,23 +991,22 @@ public class Numbers200Test extends TestBase {
     @Test
     public void testBinomialToLong() {
         assertEquals(10L, Numbers.binomialToLong(5, 2));
-        assertEquals(98280, Numbers.binomialToLong(28, 5)); // C(28,5)
-        assertEquals(Long.MAX_VALUE, Numbers.binomialToLong(67, 33)); // C(67,33) overflows long
+        assertEquals(98280, Numbers.binomialToLong(28, 5));
+        assertEquals(Long.MAX_VALUE, Numbers.binomialToLong(67, 33));
     }
 
     @Test
     public void testBinomialToBigInteger() {
         assertEquals(BigInteger.valueOf(10), Numbers.binomialToBigInteger(5, 2));
-        BigInteger expected = new BigInteger("61474519"); // C(62,6)
-        assertEquals(expected, Numbers.binomialToBigInteger(62, 6)); // C(62,6)
+        BigInteger expected = new BigInteger("61474519");
+        assertEquals(expected, Numbers.binomialToBigInteger(62, 6));
         BigInteger largeBinomial = Numbers.factorialToBigInteger(100).divide(Numbers.factorialToBigInteger(50).multiply(Numbers.factorialToBigInteger(50)));
         assertEquals(largeBinomial, Numbers.binomialToBigInteger(100, 50));
     }
 
-    // Mean Methods
     @Test
     public void testMean_int_int() {
-        assertEquals(2, Numbers.mean(2, 3)); // (2&3) + ((2^3)>>1) = 2 + (1>>1) = 2
+        assertEquals(2, Numbers.mean(2, 3));
         assertEquals(2, Numbers.mean(3, 2));
         assertEquals(Integer.MAX_VALUE - 1, Numbers.mean(Integer.MAX_VALUE, Integer.MAX_VALUE - 2));
         assertEquals(-3, Numbers.mean(-2, -3));
@@ -1083,18 +1042,17 @@ public class Numbers200Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Numbers.mean(1.0, Double.NaN));
     }
 
-    // Rounding Methods
     @Test
     public void testRound_float_scale() {
         assertEquals(12.35f, Numbers.round(12.345f, 2), DELTA);
-        assertEquals(12.3f, Numbers.round(12.345f, 1), DELTA); // 12.3
+        assertEquals(12.3f, Numbers.round(12.345f, 1), DELTA);
         assertEquals(12.0f, Numbers.round(12.345f, 0), DELTA);
         assertThrows(IllegalArgumentException.class, () -> Numbers.round(12.3f, -1));
     }
 
     @Test
     public void testRound_double_scale() {
-        assertEquals(12.346, Numbers.round(12.3456, 3), DELTA); // Check this with Math.round
+        assertEquals(12.346, Numbers.round(12.3456, 3), DELTA);
         assertEquals(Math.round(12.3456 * 1000.0) / 1000.0, Numbers.round(12.3456, 3), DELTA);
         assertEquals(12.0, Numbers.round(12.3456, 0), DELTA);
         assertThrows(IllegalArgumentException.class, () -> Numbers.round(12.3, -1));
@@ -1116,7 +1074,7 @@ public class Numbers200Test extends TestBase {
     @Test
     public void testRound_float_decimalFormatString() {
         assertEquals(12.35f, Numbers.round(12.345f, "0.00"), DELTA);
-        assertEquals(12.3f, Numbers.round(12.345f, "#.#"), DELTA); // HALF_EVEN for #.#
+        assertEquals(12.3f, Numbers.round(12.345f, "#.#"), DELTA);
     }
 
     @Test
@@ -1161,7 +1119,6 @@ public class Numbers200Test extends TestBase {
         assertThrows(ArithmeticException.class, () -> Numbers.roundToBigInteger(Double.NaN, RoundingMode.FLOOR));
     }
 
-    // Fuzzy Comparison
     @Test
     public void testFuzzyEquals() {
         assertFalse(Numbers.fuzzyEquals(1.0, 1.000000001, 1e-9));
@@ -1169,7 +1126,7 @@ public class Numbers200Test extends TestBase {
         assertTrue(Numbers.fuzzyEquals(Double.NaN, Double.NaN, 0.1));
         assertTrue(Numbers.fuzzyEquals(0.0, -0.0, 0.0));
         assertTrue(Numbers.fuzzyEquals(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.1));
-        assertTrue(Numbers.fuzzyEquals(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY)); // Only to themselves
+        assertTrue(Numbers.fuzzyEquals(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
         assertThrows(IllegalArgumentException.class, () -> Numbers.fuzzyEquals(1.0, 1.0, -0.1));
         assertThrows(IllegalArgumentException.class, () -> Numbers.fuzzyEquals(1.0, 1.0, Double.NaN));
     }
@@ -1179,12 +1136,10 @@ public class Numbers200Test extends TestBase {
         assertEquals(-1, Numbers.fuzzyCompare(1.0, 1.000000001, 1e-9));
         assertEquals(-1, Numbers.fuzzyCompare(1.0, 1.000000001, 1e-10));
         assertEquals(1, Numbers.fuzzyCompare(1.000000001, 1.0, 1e-10));
-        assertEquals(0, Numbers.fuzzyCompare(Double.NaN, Double.NaN, 0.1)); // NaN == NaN
-        // Double.compare(NaN, x) is 1
+        assertEquals(0, Numbers.fuzzyCompare(Double.NaN, Double.NaN, 0.1));
         assertEquals(1, Numbers.fuzzyCompare(Double.NaN, 1.0, 0.1));
     }
 
-    // Mathematical Integer Check
     @Test
     public void testIsMathematicalInteger() {
         assertTrue(Numbers.isMathematicalInteger(5.0));
@@ -1195,24 +1150,21 @@ public class Numbers200Test extends TestBase {
         assertFalse(Numbers.isMathematicalInteger(Double.POSITIVE_INFINITY));
     }
 
-    // Hyperbolic Functions
     @Test
     public void testAsinh() {
         assertEquals(0.0, Numbers.asinh(0.0), DELTA);
-        assertEquals(Numbers.asinh(2.5), Numbers.asinh(2.5), DELTA); // Compare with Math.asinh if available (Java 9+)
-        // For older Java, test with known values or log formula: log(x + sqrt(x^2+1))
-        double x = 0.1; // Uses the series expansion
-        assertEquals(Math.log(x + Math.sqrt(x * x + 1)), Numbers.asinh(x), 1e-7); // Looser delta due to series approx
-        x = 0.01; // Uses deeper series expansion
+        assertEquals(Numbers.asinh(2.5), Numbers.asinh(2.5), DELTA);
+        double x = 0.1;
+        assertEquals(Math.log(x + Math.sqrt(x * x + 1)), Numbers.asinh(x), 1e-7);
+        x = 0.01;
         assertEquals(Math.log(x + Math.sqrt(x * x + 1)), Numbers.asinh(x), 1e-9);
-        x = 2.0; // Uses log formula
+        x = 2.0;
         assertEquals(Math.log(x + Math.sqrt(x * x + 1)), Numbers.asinh(x), DELTA);
     }
 
     @Test
     public void testAcosh() {
         assertEquals(0.0, Numbers.acosh(1.0), DELTA);
-        // log(x + sqrt(x^2-1))
         double x = 2.0;
         assertEquals(Math.log(x + Math.sqrt(x * x - 1)), Numbers.acosh(x), DELTA);
         assertTrue(Double.isNaN(Numbers.acosh(0.5)));
@@ -1221,11 +1173,10 @@ public class Numbers200Test extends TestBase {
     @Test
     public void testAtanh() {
         assertEquals(0.0, Numbers.atanh(0.0), DELTA);
-        // 0.5 * log((1+x)/(1-x))
-        double x = 0.5; // Uses log formula
+        double x = 0.5;
         assertEquals(0.5 * Math.log((1 + x) / (1 - x)), Numbers.atanh(x), DELTA);
-        x = 0.1; // Uses series expansion
-        assertEquals(0.5 * Math.log((1 + x) / (1 - x)), Numbers.atanh(x), 1e-7); // Looser delta for series
+        x = 0.1;
+        assertEquals(0.5 * Math.log((1 + x) / (1 - x)), Numbers.atanh(x), 1e-7);
 
         assertEquals(Double.POSITIVE_INFINITY, Numbers.atanh(1.0));
         assertEquals(Double.NEGATIVE_INFINITY, Numbers.atanh(-1.0));

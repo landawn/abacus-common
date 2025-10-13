@@ -25,6 +25,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -33,6 +34,7 @@ import com.landawn.abacus.util.function.TriConsumer;
 
 import lombok.Data;
 
+@Tag("new-test")
 public class CSVUtil100Test extends TestBase {
 
     @TempDir
@@ -43,17 +45,14 @@ public class CSVUtil100Test extends TestBase {
 
     @BeforeEach
     public void setUp() throws IOException {
-        // Create test CSV content
         testCsvContent = "id,name,age,active\n" + "1,John,25,true\n" + "2,Jane,30,true\n" + "3,Bob,35,false\n" + "4,Alice,28,true\n" + "5,Charlie,40,false\n";
 
-        // Create test CSV file
         testCsvFile = tempDir.resolve("test.csv").toFile();
         Files.writeString(testCsvFile.toPath(), testCsvContent);
     }
 
     @AfterEach
     public void tearDown() {
-        // Reset parsers to default
         CSVUtil.resetHeaderParser();
         CSVUtil.resetLineParser();
         CSVUtil.resetEscapeCharForWrite();
@@ -67,7 +66,6 @@ public class CSVUtil100Test extends TestBase {
         CSVUtil.setHeaderParser(customParser);
         assertSame(customParser, CSVUtil.getCurrentHeaderParser());
 
-        // Test null check
         assertThrows(IllegalArgumentException.class, () -> CSVUtil.setHeaderParser(null));
     }
 
@@ -82,7 +80,6 @@ public class CSVUtil100Test extends TestBase {
         CSVUtil.setLineParser(customParser);
         assertSame(customParser, CSVUtil.getCurrentLineParser());
 
-        // Test null check
         assertThrows(IllegalArgumentException.class, () -> CSVUtil.setLineParser(null));
     }
 
@@ -154,7 +151,7 @@ public class CSVUtil100Test extends TestBase {
         Dataset dataset = CSVUtil.loadCSV(testCsvFile, null, 0, Long.MAX_VALUE, rowFilter);
 
         assertNotNull(dataset);
-        assertEquals(3, dataset.size()); // Only rows with active=true
+        assertEquals(3, dataset.size());
     }
 
     @Test
@@ -205,7 +202,7 @@ public class CSVUtil100Test extends TestBase {
             Dataset dataset = CSVUtil.loadCSV(reader, null, 0, Long.MAX_VALUE, rowFilter);
 
             assertNotNull(dataset);
-            assertEquals(2, dataset.size()); // Only Bob (35) and Charlie (40)
+            assertEquals(2, dataset.size());
         }
     }
 
@@ -217,11 +214,10 @@ public class CSVUtil100Test extends TestBase {
         assertNotNull(dataset);
         assertEquals(4, dataset.columnCount());
 
-        // Check that types are converted properly
-        assertEquals(1, (Integer) dataset.get(0, 0)); // id as Integer
-        assertEquals("John", dataset.get(0, 1)); // name as String
-        assertEquals(25, (Integer) dataset.get(0, 2)); // age as Integer
-        assertEquals(true, dataset.get(0, 3)); // active as Boolean
+        assertEquals(1, (Integer) dataset.get(0, 0));
+        assertEquals("John", dataset.get(0, 1));
+        assertEquals(25, (Integer) dataset.get(0, 2));
+        assertEquals(true, dataset.get(0, 3));
     }
 
     @Test
@@ -235,9 +231,8 @@ public class CSVUtil100Test extends TestBase {
         Dataset dataset = CSVUtil.loadCSV(testCsvFile, columnTypeMap);
 
         assertNotNull(dataset);
-        assertEquals(3, dataset.columnCount()); // Only mapped columns
+        assertEquals(3, dataset.columnCount());
 
-        // Check types
         assertTrue(dataset.get(0, 0) instanceof Integer);
         assertTrue(dataset.get(0, 1) instanceof Integer);
         assertTrue(dataset.get(0, 2) instanceof Boolean);
@@ -263,7 +258,6 @@ public class CSVUtil100Test extends TestBase {
         assertNotNull(dataset);
         assertEquals(4, dataset.columnCount());
 
-        // Check types
         assertTrue(dataset.get(0, 0) instanceof Integer);
         assertTrue(dataset.get(0, 1) instanceof String);
         assertTrue(dataset.get(0, 2) instanceof Integer);
@@ -375,25 +369,21 @@ public class CSVUtil100Test extends TestBase {
     @Test
     @DisplayName("Test edge cases and error conditions")
     public void testEdgeCases() throws IOException {
-        // Test empty file
         File emptyFile = tempDir.resolve("empty.csv").toFile();
         Files.writeString(emptyFile.toPath(), "");
         Dataset emptyDataset = CSVUtil.loadCSV(emptyFile);
         assertTrue(emptyDataset.isEmpty());
 
-        // Test file with only headers
         File headerOnlyFile = tempDir.resolve("headerOnly.csv").toFile();
         Files.writeString(headerOnlyFile.toPath(), "col1,col2,col3\n");
         Dataset headerOnlyDataset = CSVUtil.loadCSV(headerOnlyFile);
         assertEquals(3, headerOnlyDataset.columnCount());
         assertEquals(0, headerOnlyDataset.size());
 
-        // Test invalid column names
         assertThrows(IllegalArgumentException.class, () -> {
             CSVUtil.loadCSV(testCsvFile, List.of("invalid_column"));
         });
 
-        // Test negative offset/count
         assertThrows(IllegalArgumentException.class, () -> {
             CSVUtil.loadCSV(testCsvFile, null, -1, 10);
         });
@@ -402,12 +392,10 @@ public class CSVUtil100Test extends TestBase {
             CSVUtil.loadCSV(testCsvFile, null, 0, -1);
         });
 
-        // Test null bean class
         assertThrows(IllegalArgumentException.class, () -> {
             CSVUtil.loadCSV(testCsvFile, (Class<?>) null);
         });
 
-        // Test empty column type map
         assertThrows(IllegalArgumentException.class, () -> {
             CSVUtil.loadCSV(testCsvFile, new HashMap<String, Type<?>>());
         });
@@ -433,12 +421,10 @@ public class CSVUtil100Test extends TestBase {
     @Test
     @DisplayName("Test custom CSV parsers")
     public void testCustomParsers() throws IOException {
-        // Create semicolon-delimited CSV
         String semicolonCsv = "id;name;age\n1;John;25\n2;Jane;30\n";
         File semicolonFile = tempDir.resolve("semicolon.csv").toFile();
         Files.writeString(semicolonFile.toPath(), semicolonCsv);
 
-        // Set custom parsers
         CSVUtil.setHeaderParser(line -> line.split(";"));
         CSVUtil.setLineParser((line, output) -> {
             String[] parts = line.split(";");
@@ -451,7 +437,6 @@ public class CSVUtil100Test extends TestBase {
         assertEquals(2, dataset.size());
         assertEquals("John", dataset.get(0, 1));
 
-        // Reset parsers
         CSVUtil.resetHeaderParser();
         CSVUtil.resetLineParser();
     }
@@ -506,8 +491,6 @@ public class CSVUtil100Test extends TestBase {
 
         N.println("============================================================");
 
-        // N.println(IOUtil.readAllToString(jsonFile));
-
         {
 
             File testCsvFile = tempDir.resolve("test001.csv").toFile();
@@ -519,7 +502,6 @@ public class CSVUtil100Test extends TestBase {
         }
     }
 
-    // Test bean classes
     @Data
     public static class TestBean {
         public Integer id;

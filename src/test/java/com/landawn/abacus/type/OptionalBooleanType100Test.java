@@ -18,12 +18,14 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalBoolean;
 
+@Tag("new-test")
 public class OptionalBooleanType100Test extends TestBase {
 
     private OptionalBooleanType optionalBooleanType;
@@ -107,7 +109,6 @@ public class OptionalBooleanType100Test extends TestBase {
 
     @Test
     public void testValueOfWithOtherValues() {
-        // Test various boolean string representations
         assertTrue(optionalBooleanType.valueOf("TRUE").get());
         assertTrue(optionalBooleanType.valueOf("True").get());
         assertTrue(optionalBooleanType.valueOf("1").get());

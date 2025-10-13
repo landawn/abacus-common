@@ -14,26 +14,21 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.stream.IntStream;
 
-/**
- * Comprehensive unit tests for the Strings utility class.
- * Tests all public methods with various edge cases and scenarios.
- */
+@Tag("new-test")
 public class Strings100Test extends TestBase {
 
-    // Test Constants
     private static final String EMPTY = "";
     private static final String SPACE = " ";
     private static final String WHITESPACE = "   \t\n\r  ";
     private static final String ABC = "abc";
     private static final String ABC_UPPER = "ABC";
     private static final String HELLO_WORLD = "Hello World";
-
-    // ========== UUID/GUID Tests ==========
 
     @Test
     @DisplayName("Test guid() generates valid GUID without dashes")
@@ -54,8 +49,6 @@ public class Strings100Test extends TestBase {
         assertTrue(uuid.matches("[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"));
     }
 
-    // ========== valueOf Tests ==========
-
     @Test
     @DisplayName("Test valueOf(char[])")
     public void testValueOf() {
@@ -64,15 +57,13 @@ public class Strings100Test extends TestBase {
         assertEquals("abc", Strings.valueOf(new char[] { 'a', 'b', 'c' }));
     }
 
-    // ========== Validation Tests ==========
-
     @Test
     @DisplayName("Test isKeyword()")
     public void testIsKeyword() {
         assertTrue(Strings.isKeyword("class"));
         assertTrue(Strings.isKeyword("public"));
         assertTrue(Strings.isKeyword("if"));
-        assertFalse(Strings.isKeyword("Class")); // case sensitive
+        assertFalse(Strings.isKeyword("Class"));
         assertFalse(Strings.isKeyword("hello"));
         assertFalse(Strings.isKeyword(null));
         assertFalse(Strings.isKeyword(""));
@@ -87,7 +78,7 @@ public class Strings100Test extends TestBase {
         assertTrue(Strings.isValidJavaIdentifier("var123"));
         assertFalse(Strings.isValidJavaIdentifier("123var"));
         assertFalse(Strings.isValidJavaIdentifier("var-name"));
-        assertTrue(Strings.isValidJavaIdentifier("class")); // keyword
+        assertTrue(Strings.isValidJavaIdentifier("class"));
         assertFalse(Strings.isValidJavaIdentifier(null));
         assertFalse(Strings.isValidJavaIdentifier(""));
     }
@@ -127,8 +118,6 @@ public class Strings100Test extends TestBase {
         assertFalse(Strings.isValidHttpUrl(null));
         assertFalse(Strings.isValidHttpUrl(""));
     }
-
-    // ========== Empty/Blank Tests ==========
 
     @Test
     @DisplayName("Test isEmpty()")
@@ -223,8 +212,6 @@ public class Strings100Test extends TestBase {
         assertFalse(Strings.isAnyBlank("foo", "bar"));
     }
 
-    // ========== Wrapped Tests ==========
-
     @Test
     @DisplayName("Test isWrappedWith()")
     public void testIsWrappedWith() {
@@ -245,8 +232,6 @@ public class Strings100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Strings.isWrappedWith("test", "[", ""));
     }
 
-    // ========== First Non-Empty/Blank Tests ==========
-
     @Test
     @DisplayName("Test firstNonEmpty()")
     public void testFirstNonEmpty() {
@@ -263,8 +248,6 @@ public class Strings100Test extends TestBase {
         assertEquals("xyz", Strings.firstNonBlank("  ", "xyz", "abc"));
         assertEquals("", Strings.firstNonBlank(null, "  ", ""));
     }
-
-    // ========== Default Tests ==========
 
     @Test
     @DisplayName("Test defaultIfNull()")
@@ -292,8 +275,6 @@ public class Strings100Test extends TestBase {
         assertEquals("test", Strings.defaultIfBlank("test", "default"));
         assertThrows(IllegalArgumentException.class, () -> Strings.defaultIfBlank("  ", "  "));
     }
-
-    // ========== Null/Empty/Blank Conversion Tests ==========
 
     @Test
     @DisplayName("Test nullToEmpty()")
@@ -330,8 +311,6 @@ public class Strings100Test extends TestBase {
         assertEquals("test", Strings.blankToNull("test"));
     }
 
-    // ========== Abbreviate Tests ==========
-
     @Test
     @DisplayName("Test abbreviate()")
     public void testAbbreviate() {
@@ -351,8 +330,6 @@ public class Strings100Test extends TestBase {
         assertEquals("abc", Strings.abbreviateMiddle("abc", ".", 3));
         assertEquals("ab.f", Strings.abbreviateMiddle("abcdef", ".", 4));
     }
-
-    // ========== Center/Pad Tests ==========
 
     @Test
     @DisplayName("Test center()")
@@ -381,8 +358,6 @@ public class Strings100Test extends TestBase {
         assertEquals("abcXX", Strings.padEnd("abc", 5, 'X'));
     }
 
-    // ========== Repeat Tests ==========
-
     @Test
     @DisplayName("Test repeat(char, int)")
     public void testRepeatChar() {
@@ -402,8 +377,6 @@ public class Strings100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Strings.repeat("abc", -1));
     }
 
-    // ========== GetBytes Tests ==========
-
     @Test
     @DisplayName("Test getBytes()")
     public void testGetBytes() {
@@ -419,8 +392,6 @@ public class Strings100Test extends TestBase {
         assertArrayEquals(new byte[0], Strings.getBytesUtf8(""));
         assertArrayEquals("test".getBytes(StandardCharsets.UTF_8), Strings.getBytesUtf8("test"));
     }
-
-    // ========== ToCharArray Tests ==========
 
     @Test
     @DisplayName("Test toCharArray()")
@@ -438,8 +409,6 @@ public class Strings100Test extends TestBase {
         assertArrayEquals(new int[0], Strings.toCodePoints(""));
         assertArrayEquals(new int[] { 97, 98, 99 }, Strings.toCodePoints("abc"));
     }
-
-    // ========== Case Conversion Tests ==========
 
     @Test
     @DisplayName("Test toLowerCase(char)")
@@ -557,8 +526,6 @@ public class Strings100Test extends TestBase {
         assertEquals("The Dog Has A Bone", Strings.capitalizeFully("the dog has a bone"));
     }
 
-    // ========== Quote Tests ==========
-
     @Test
     @DisplayName("Test quoteEscaped()")
     public void testQuoteEscaped() {
@@ -568,16 +535,12 @@ public class Strings100Test extends TestBase {
         assertEquals("\\\"quoted\\\"", Strings.quoteEscaped("\"quoted\""));
     }
 
-    // ========== Unicode Tests ==========
-
     @Test
     @DisplayName("Test unicodeEscaped()")
     public void testUnicodeEscaped() {
         assertEquals("\\u0020", Strings.unicodeEscaped(' '));
         assertEquals("\\u0041", Strings.unicodeEscaped('A'));
     }
-
-    // ========== Normalize Tests ==========
 
     @Test
     @DisplayName("Test normalizeSpace()")
@@ -587,8 +550,6 @@ public class Strings100Test extends TestBase {
         assertEquals("abc", Strings.normalizeSpace("  abc   "));
         assertEquals("a b c", Strings.normalizeSpace("a   b   c"));
     }
-
-    // ========== Replace Tests ==========
 
     @Test
     @DisplayName("Test replaceAll()")
@@ -630,8 +591,6 @@ public class Strings100Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> Strings.replaceRange("abc", -1, 2, "X"));
     }
 
-    // ========== Remove Tests ==========
-
     @Test
     @DisplayName("Test removeStart()")
     public void testRemoveStart() {
@@ -667,8 +626,6 @@ public class Strings100Test extends TestBase {
         assertEquals("qd", Strings.removeAll("queued", "ue"));
     }
 
-    // ========== Split Tests ==========
-
     @Test
     @DisplayName("Test split(char)")
     public void testSplitChar() {
@@ -701,8 +658,6 @@ public class Strings100Test extends TestBase {
         assertArrayEquals(new String[] { "" }, Strings.splitToLines(""));
         assertArrayEquals(new String[] { "line1", "line2", "line3" }, Strings.splitToLines("line1\nline2\r\nline3"));
     }
-
-    // ========== Trim/Strip Tests ==========
 
     @Test
     @DisplayName("Test trim()")
@@ -768,8 +723,6 @@ public class Strings100Test extends TestBase {
         assertEquals("control", Strings.stripAccents("control"));
     }
 
-    // ========== Chomp/Chop Tests ==========
-
     @Test
     @DisplayName("Test chomp()")
     public void testChomp() {
@@ -790,8 +743,6 @@ public class Strings100Test extends TestBase {
         assertEquals("", Strings.chop("a"));
     }
 
-    // ========== Truncate Tests ==========
-
     @Test
     @DisplayName("Test truncate()")
     public void testTruncate() {
@@ -802,8 +753,6 @@ public class Strings100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Strings.truncate("abcdefg", -1));
     }
 
-    // ========== Delete Tests ==========
-
     @Test
     @DisplayName("Test deleteWhitespace()")
     public void testDeleteWhitespace() {
@@ -811,8 +760,6 @@ public class Strings100Test extends TestBase {
         assertEquals("", Strings.deleteWhitespace(""));
         assertEquals("abc", Strings.deleteWhitespace("   ab  c  "));
     }
-
-    // ========== Append/Prepend Tests ==========
 
     @Test
     @DisplayName("Test appendIfMissing()")
@@ -833,8 +780,6 @@ public class Strings100Test extends TestBase {
         assertEquals("www.domain.com", Strings.prependIfMissing("www.domain.com", "www."));
         assertThrows(IllegalArgumentException.class, () -> Strings.prependIfMissing("domain", ""));
     }
-
-    // ========== Wrap/Unwrap Tests ==========
 
     @Test
     @DisplayName("Test wrapIfMissing()")
@@ -863,8 +808,6 @@ public class Strings100Test extends TestBase {
         assertEquals("test", Strings.unwrap("test", "'"));
         assertThrows(IllegalArgumentException.class, () -> Strings.unwrap("test", ""));
     }
-
-    // ========== Character Type Tests ==========
 
     @Test
     @DisplayName("Test isLowerCase()")
@@ -909,8 +852,6 @@ public class Strings100Test extends TestBase {
         assertFalse(Strings.isMixedCase(""));
         assertFalse(Strings.isMixedCase("a"));
     }
-
-    // ========== ASCII Tests ==========
 
     @Test
     @DisplayName("Test isAscii()")
@@ -964,8 +905,6 @@ public class Strings100Test extends TestBase {
         assertTrue(Strings.isAsciiAlphanumeric("abc123"));
         assertFalse(Strings.isAsciiAlphanumeric("ab-c"));
     }
-
-    // ========== Character Tests ==========
 
     @Test
     @DisplayName("Test isAlpha()")
@@ -1042,8 +981,6 @@ public class Strings100Test extends TestBase {
         assertFalse(Strings.isAsciiDigitalInteger("123.45"));
         assertFalse(Strings.isAsciiDigitalInteger("2e10"));
     }
-
-    // ========== IndexOf Tests ==========
 
     @Test
     @DisplayName("Test indexOf(char)")
@@ -1189,8 +1126,6 @@ public class Strings100Test extends TestBase {
         assertArrayEquals(new int[0], indices.toArray());
     }
 
-    // ========== Count Tests ==========
-
     @Test
     @DisplayName("Test countMatches(char)")
     public void testCountMatchesChar() {
@@ -1208,8 +1143,6 @@ public class Strings100Test extends TestBase {
         assertEquals(2, Strings.countMatches("abcabc", "abc"));
         assertEquals(1, Strings.countMatches("abcdef", "def"));
     }
-
-    // ========== Contains Tests ==========
 
     @Test
     @DisplayName("Test contains(char)")
@@ -1312,8 +1245,6 @@ public class Strings100Test extends TestBase {
         assertFalse(Strings.containsWhitespace("abc"));
     }
 
-    // ========== Starts/Ends With Tests ==========
-
     @Test
     @DisplayName("Test startsWith()")
     public void testStartsWith() {
@@ -1368,8 +1299,6 @@ public class Strings100Test extends TestBase {
         assertFalse(Strings.endsWithAny("abcdef", "ab", "cd"));
     }
 
-    // ========== Equals Tests ==========
-
     @Test
     @DisplayName("Test equals()")
     public void testEquals() {
@@ -1418,8 +1347,6 @@ public class Strings100Test extends TestBase {
         assertTrue(Strings.compareIgnoreCase("abc", "def") < 0);
     }
 
-    // ========== Difference Tests ==========
-
     @Test
     @DisplayName("Test indexOfDifference(String, String)")
     public void testIndexOfDifferenceTwoStrings() {
@@ -1447,8 +1374,6 @@ public class Strings100Test extends TestBase {
         assertEquals(2, Strings.indexOfDifference("ab", "abxyz"));
         assertEquals(7, Strings.indexOfDifference("i am a machine", "i am a robot"));
     }
-
-    // ========== Common Prefix/Suffix Tests ==========
 
     @Test
     @DisplayName("Test lengthOfCommonPrefix()")
@@ -1525,8 +1450,6 @@ public class Strings100Test extends TestBase {
         assertEquals("", Strings.longestCommonSubstring("abc", "xyz"));
     }
 
-    // ========== First/Last Char Tests ==========
-
     @Test
     @DisplayName("Test firstChar()")
     public void testFirstChar() {
@@ -1567,17 +1490,10 @@ public class Strings100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Strings.lastChars("abc", -1));
     }
 
-    // ========== Join Tests ==========
-
     @Test
     @DisplayName("Test join()")
     public void testJoin() {
-        // Note: The join method is not visible in the provided code, 
-        // but it's referenced in other methods. These tests assume it exists.
-        // If it doesn't exist, these tests should be removed or modified.
     }
-
-    // ========== Array Operation Tests ==========
 
     @Test
     @DisplayName("Test nullToEmpty(String[])")
@@ -1586,7 +1502,7 @@ public class Strings100Test extends TestBase {
         Strings.nullToEmpty(strs);
         assertArrayEquals(new String[] { "a", "", "b", "" }, strs);
 
-        Strings.nullToEmpty((String[]) null); // Should not throw
+        Strings.nullToEmpty((String[]) null);
 
         String[] empty = new String[0];
         Strings.nullToEmpty(empty);
@@ -1600,7 +1516,7 @@ public class Strings100Test extends TestBase {
         Strings.emptyToNull(strs);
         assertArrayEquals(new String[] { "a", null, "b", null }, strs);
 
-        Strings.emptyToNull((String[]) null); // Should not throw
+        Strings.emptyToNull((String[]) null);
     }
 
     @Test
@@ -1634,8 +1550,6 @@ public class Strings100Test extends TestBase {
         Strings.strip(strs);
         assertArrayEquals(new String[] { "a", "b", "c" }, strs);
     }
-
-    // ========== Edge Cases and Special Scenarios ==========
 
     @Test
     @DisplayName("Test methods with StringBuilder input")
@@ -1682,25 +1596,18 @@ public class Strings100Test extends TestBase {
         assertEquals(-1, Strings.indexOf("abc", "b", ","));
     }
 
-    // ========== Performance-sensitive Methods ==========
-
     @Test
     @DisplayName("Test performance-optimized methods")
     public void testPerformanceOptimized() {
-        // These test that optimized paths work correctly
         String str = "abc";
 
-        // Methods that have special optimization for short strings
         assertEquals(0, Strings.indexOfIgnoreCase("ABC", "abc"));
-        assertEquals(0, Strings.indexOfIgnoreCase("ABC", "ABC")); // Case-insensitive keyword optimization
+        assertEquals(0, Strings.indexOfIgnoreCase("ABC", "ABC"));
     }
-
-    // ========== Null Safety Tests ==========
 
     @Test
     @DisplayName("Test null safety across all methods")
     public void testNullSafety() {
-        // Methods that should handle null gracefully
         assertDoesNotThrow(() -> {
             Strings.isEmpty(null);
             Strings.isBlank(null);
@@ -1714,12 +1621,9 @@ public class Strings100Test extends TestBase {
         });
     }
 
-    // ========== Parameter Validation Tests ==========
-
     @Test
     @DisplayName("Test parameter validation")
     public void testParameterValidation() {
-        // Methods that should throw IllegalArgumentException for invalid parameters
         assertThrows(IllegalArgumentException.class, () -> Strings.repeat('a', -1));
         assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("test", 2));
         assertThrows(IllegalArgumentException.class, () -> Strings.center("test", -1));
@@ -1730,42 +1634,31 @@ public class Strings100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Strings.wrapIfMissing("test", ""));
     }
 
-    // ========== Integration Tests ==========
-
     @Test
     @DisplayName("Test method combinations")
     public void testMethodCombinations() {
         String input = "  Hello World  ";
 
-        // Trim then capitalize
         String result = Strings.capitalize(Strings.trim(input));
         assertEquals("Hello World", result);
 
-        // Replace then count
         String replaced = Strings.replaceAll("aaabbbccc", "b", "x");
         assertEquals(3, Strings.countMatches(replaced, 'x'));
 
-        // Split then join behavior
         String[] parts = Strings.split("a,b,c", ",");
         assertEquals(3, parts.length);
     }
-
-    // ========== Locale-sensitive Tests ==========
 
     @Test
     @DisplayName("Test locale-sensitive methods")
     public void testLocaleSensitive() {
         Locale defaultLocale = Locale.getDefault();
         try {
-            // Test with Turkish locale where i/I conversion is different
             Locale.setDefault(new Locale("tr", "TR"));
 
-            // In Turkish, lowercase of 'I' is 'ı' (dotless i)
-            // But String.toLowerCase() uses default locale
             String turkishI = "I";
             String lowered = Strings.toLowerCase(turkishI);
 
-            // Test explicit locale
             assertEquals("i", Strings.toLowerCase("I", Locale.ENGLISH));
 
         } finally {

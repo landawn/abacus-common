@@ -73,7 +73,6 @@ import java.lang.annotation.RetentionPolicy;
  * }
  * </pre>
  * 
- * @author HaiYang Li
  * @since 2020
  * @see <a href="https://spotbugs.readthedocs.io/en/stable/">SpotBugs Documentation</a>
  * @see <a href="https://spotbugs.readthedocs.io/en/stable/bugDescriptions.html">Bug Descriptions</a>

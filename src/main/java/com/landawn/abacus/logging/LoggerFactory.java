@@ -14,8 +14,8 @@
 
 package com.landawn.abacus.logging;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
@@ -40,7 +40,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * logger.info("Application started");
  * }</pre>
  * 
- * @author HaiYang Li
  * @since 1.0
  */
 public final class LoggerFactory {
@@ -53,7 +52,7 @@ public final class LoggerFactory {
 
     private static final Logger jdkLogger = new JDKLogger(LoggerFactory.class.getName());
 
-    private static final Map<String, Logger> namedLoggers = new HashMap<>();
+    private static final Map<String, Logger> namedLoggers = new ConcurrentHashMap<>();
 
     private static volatile int logType = 0;
 

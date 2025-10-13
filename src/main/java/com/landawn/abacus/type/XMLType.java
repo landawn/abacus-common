@@ -78,21 +78,6 @@ public class XMLType<T> extends AbstractType<T> {
         return typeClass;
     }
 
-    //    @Override
-    //    public Type<T> getElementType() {
-    //        return elementType;
-    //    }
-    //
-    //    @Override
-    //    public Type<T>[] getParameterTypes() {
-    //        return parameterTypes;
-    //    }
-    //
-    //    @Override
-    //    public boolean isGenericType() {
-    //        return true;
-    //    }
-
     /**
      * Converts an object to its XML string representation.
      * <p>

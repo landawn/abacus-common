@@ -241,16 +241,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     *
-     * @param index
-     */
-    private void rangeCheck(final int index) {
-        if (index >= size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
-        }
-    }
-
-    /**
      * Replaces the element at the specified position in this list with the specified element.
      *
      * @param index the index of the element to replace
@@ -700,10 +690,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         N.copy(tmp, 0, elementData, 0, tmp.length);
 
         if (size > tmp.length) {
-            N.fill(elementData, tmp.length, size, (char) 0);
+            N.fill(elementData, tmp.length, size, 0d);
         }
 
-        size -= elementData.length - tmp.length;
+        size = size - (elementData.length - tmp.length);
     }
 
     /**
@@ -737,23 +727,27 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Moves a range of elements within this list to a new position.
-     * The elements in the range [fromIndex, toIndex) are moved so that the element originally
-     * at fromIndex will be at the position specified by newPositionStartIndexAfterMove.
+     * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
+     * so that the element originally at fromIndex will be at newPositionAfterMove.
+     * Other elements are shifted as necessary to accommodate the move.
      * 
-     * <p>The operation maintains the relative order of elements within the moved range and
-     * adjusts the positions of other elements as necessary. No elements are added or removed
-     * from the list; only their positions change.
+     * <p>Example: 
+     * <pre>
+     * DoubleList list = DoubleList.of(0, 1, 2, 3, 4, 5);
+     * list.moveRange(1, 3, 3);  // Moves elements [1, 2] to position starting at index 3
+     * // Result: [0, 3, 4, 1, 2, 5]
+     * </pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionStartIndexAfterMove the index where the first element of the range should be after the move.
-     *          Must be in the range [0, size() - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if any index is out of bounds or if newPositionStartIndexAfterMove
-     *          would result in elements being moved outside the list bounds
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and size() - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndexAfterMove);
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
     /**
@@ -1407,7 +1401,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return the index of the last occurrence of the specified element, or -1 if not found
      */
     public int lastIndexOf(final double valueToFind) {
-        return lastIndexOf(valueToFind, size);
+        return lastIndexOf(valueToFind, size - 1);
     }
 
     /**
@@ -1730,7 +1724,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *         if all elements in the list are less than the specified key.
      */
     public int binarySearch(final double valueToFind) {
-        return N.binarySearch(elementData, valueToFind);
+        return N.binarySearch(elementData, 0, size(), valueToFind);
     }
 
     /**
@@ -2343,7 +2337,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     private void ensureCapacity(final int minCapacity) {
-        if (minCapacity > MAX_ARRAY_SIZE || minCapacity < 0) {
+        if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
             throw new OutOfMemoryError();
         }
 

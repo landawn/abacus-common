@@ -12,11 +12,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
 
+@Tag("new-test")
 public class Triple100Test extends TestBase {
 
     private Triple<String, Integer, Double> triple;
@@ -40,7 +42,6 @@ public class Triple100Test extends TestBase {
         assertEquals(42, t.middle());
         assertEquals(3.14, t.right());
 
-        // Test with null values
         Triple<String, Integer, Double> nullTriple = Triple.of(null, null, null);
         assertNull(nullTriple.left());
         assertNull(nullTriple.middle());
@@ -53,7 +54,6 @@ public class Triple100Test extends TestBase {
         assertNotNull(emptyArray);
         assertEquals(0, emptyArray.length);
 
-        // Should return the same instance
         assertSame(emptyArray, Triple.emptyArray());
     }
 
@@ -67,7 +67,6 @@ public class Triple100Test extends TestBase {
         assertEquals(123, triple.middle());
         assertEquals(45.67, triple.right());
 
-        // Test direct field access
         assertEquals("hello", triple.left());
         assertEquals(123, triple.middle());
         assertEquals(45.67, triple.right());
@@ -136,64 +135,56 @@ public class Triple100Test extends TestBase {
     public void testSetLeftIf() throws Exception {
         triple.setLeft("original");
 
-        // Test when predicate returns true
         boolean result = triple.setLeftIf("new", (t, newLeft) -> newLeft.length() > 2);
         assertTrue(result);
         assertEquals("new", triple.left());
 
-        // Test when predicate returns false
         result = triple.setLeftIf("a", (t, newLeft) -> newLeft.length() > 2);
         assertFalse(result);
-        assertEquals("new", triple.left()); // Should remain unchanged
+        assertEquals("new", triple.left());
     }
 
     @Test
     public void testSetMiddleIf() throws Exception {
         triple.setMiddle(10);
 
-        // Test when predicate returns true
         boolean result = triple.setMiddleIf(20, (t, newMiddle) -> newMiddle > 15);
         assertTrue(result);
         assertEquals(20, triple.middle());
 
-        // Test when predicate returns false
         result = triple.setMiddleIf(5, (t, newMiddle) -> newMiddle > 15);
         assertFalse(result);
-        assertEquals(20, triple.middle()); // Should remain unchanged
+        assertEquals(20, triple.middle());
     }
 
     @Test
     public void testSetRightIf() throws Exception {
         triple.setRight(1.0);
 
-        // Test when predicate returns true
         boolean result = triple.setRightIf(2.0, (t, newRight) -> newRight > 1.5);
         assertTrue(result);
         assertEquals(2.0, triple.right());
 
-        // Test when predicate returns false
         result = triple.setRightIf(0.5, (t, newRight) -> newRight > 1.5);
         assertFalse(result);
-        assertEquals(2.0, triple.right()); // Should remain unchanged
+        assertEquals(2.0, triple.right());
     }
 
     @Test
     public void testSetIf() throws Exception {
         triple.set("old", 1, 0.1);
 
-        // Test when predicate returns true
         boolean result = triple.setIf("new", 2, 0.2, (t, newLeft, newMiddle, newRight) -> newMiddle > 1);
         assertTrue(result);
         assertEquals("new", triple.left());
         assertEquals(2, triple.middle());
         assertEquals(0.2, triple.right());
 
-        // Test when predicate returns false
         result = triple.setIf("newer", 0, 0.0, (t, newLeft, newMiddle, newRight) -> newMiddle > 1);
         assertFalse(result);
-        assertEquals("new", triple.left()); // Should remain unchanged
-        assertEquals(2, triple.middle()); // Should remain unchanged
-        assertEquals(0.2, triple.right()); // Should remain unchanged
+        assertEquals("new", triple.left());
+        assertEquals(2, triple.middle());
+        assertEquals(0.2, triple.right());
     }
 
     @Test
@@ -205,7 +196,6 @@ public class Triple100Test extends TestBase {
         assertEquals(100, reversed.middle());
         assertEquals("left", reversed.right());
 
-        // Original should remain unchanged
         assertEquals("left", triple.left());
         assertEquals(100, triple.middle());
         assertEquals(99.9, triple.right());
@@ -221,7 +211,6 @@ public class Triple100Test extends TestBase {
         assertEquals(triple.right(), copy.right());
         assertNotSame(triple, copy);
 
-        // Modify copy and ensure original is unchanged
         copy.setLeft("modified");
         assertEquals("original", triple.left());
     }
@@ -241,7 +230,6 @@ public class Triple100Test extends TestBase {
     public void testToArrayWithParameter() {
         triple.set("test", 123, 4.56);
 
-        // Test with array of exact size
         Object[] exactArray = new Object[3];
         Object[] result = triple.toArray(exactArray);
         assertSame(exactArray, result);
@@ -249,7 +237,6 @@ public class Triple100Test extends TestBase {
         assertEquals(123, result[1]);
         assertEquals(4.56, result[2]);
 
-        // Test with smaller array
         Object[] smallArray = new Object[2];
         result = triple.toArray(smallArray);
         assertNotSame(smallArray, result);
@@ -258,7 +245,6 @@ public class Triple100Test extends TestBase {
         assertEquals(123, result[1]);
         assertEquals(4.56, result[2]);
 
-        // Test with larger array
         Object[] largeArray = new Object[5];
         result = triple.toArray(largeArray);
         assertSame(largeArray, result);
@@ -319,12 +305,10 @@ public class Triple100Test extends TestBase {
     public void testFilterTriPredicate() throws Exception {
         triple.set("test", 4, 4.0);
 
-        // Test when filter passes
         Optional<Triple<String, Integer, Double>> result = triple.filter((left, middle, right) -> left.length() == middle && middle.equals(right.intValue()));
         assertTrue(result.isPresent());
         assertSame(triple, result.get());
 
-        // Test when filter fails
         result = triple.filter((left, middle, right) -> left.length() != middle);
         assertFalse(result.isPresent());
     }
@@ -333,12 +317,10 @@ public class Triple100Test extends TestBase {
     public void testFilterPredicate() throws Exception {
         triple.set("test", 4, 1.0);
 
-        // Test when filter passes
         Optional<Triple<String, Integer, Double>> result = triple.filter(t -> t.middle() > 0 && t.right() > 0);
         assertTrue(result.isPresent());
         assertSame(triple, result.get());
 
-        // Test when filter fails
         result = triple.filter(t -> t.middle() < 0);
         assertFalse(result.isPresent());
     }
@@ -366,13 +348,11 @@ public class Triple100Test extends TestBase {
         assertNotEquals(t1.hashCode(), t4.hashCode());
         assertNotEquals(t1.hashCode(), t5.hashCode());
 
-        // Test with null values
         Triple<String, Integer, Double> nullLeft = Triple.of(null, 123, 4.5);
         Triple<String, Integer, Double> nullMiddle = Triple.of("test", null, 4.5);
         Triple<String, Integer, Double> nullRight = Triple.of("test", 123, null);
         Triple<String, Integer, Double> allNull = Triple.of(null, null, null);
 
-        // These should not throw exceptions
         assertDoesNotThrow(() -> nullLeft.hashCode());
         assertDoesNotThrow(() -> nullMiddle.hashCode());
         assertDoesNotThrow(() -> nullRight.hashCode());
@@ -387,23 +367,18 @@ public class Triple100Test extends TestBase {
         Triple<String, Integer, Double> t4 = Triple.of("test", 124, 4.5);
         Triple<String, Integer, Double> t5 = Triple.of("other", 123, 4.5);
 
-        // Test reflexivity
         assertEquals(t1, t1);
 
-        // Test symmetry
         assertEquals(t1, t2);
         assertEquals(t2, t1);
 
-        // Test inequality
         assertNotEquals(t1, t3);
         assertNotEquals(t1, t4);
         assertNotEquals(t1, t5);
 
-        // Test null values
         assertNotEquals(t1, null);
         assertNotEquals(t1, "not a triple");
 
-        // Test with null components
         Triple<String, Integer, Double> nullLeft1 = Triple.of(null, 123, 4.5);
         Triple<String, Integer, Double> nullLeft2 = Triple.of(null, 123, 4.5);
         Triple<String, Integer, Double> nullMiddle1 = Triple.of("test", null, 4.5);
@@ -423,7 +398,6 @@ public class Triple100Test extends TestBase {
         triple.set("hello", 42, 3.14);
         assertEquals("(hello, 42, 3.14)", triple.toString());
 
-        // Test with null values
         triple.set(null, null, null);
         assertEquals("(null, null, null)", triple.toString());
 
@@ -436,7 +410,6 @@ public class Triple100Test extends TestBase {
 
     @Test
     public void testMutableBehavior() {
-        // Test that Triple is mutable
         Triple<String, Integer, Double> t = Triple.of("initial", 1, 1.0);
 
         t.setLeft("modified");
@@ -450,7 +423,6 @@ public class Triple100Test extends TestBase {
 
     @Test
     public void testWithDifferentTypes() {
-        // Test with different type combinations
         Triple<Boolean, Character, Long> boolCharLong = Triple.of(true, 'A', 100L);
         assertEquals(true, boolCharLong.left());
         assertEquals('A', boolCharLong.middle());
@@ -461,7 +433,6 @@ public class Triple100Test extends TestBase {
         assertEquals((short) 2, numericTriple.middle());
         assertEquals(3.0f, numericTriple.right());
 
-        // Test with custom objects
         Triple<StringBuilder, Thread, Exception> customTriple = Triple.of(new StringBuilder("test"), Thread.currentThread(), new RuntimeException("test"));
         assertNotNull(customTriple.left());
         assertNotNull(customTriple.middle());
@@ -472,7 +443,6 @@ public class Triple100Test extends TestBase {
     public void testComplexPredicateScenarios() throws Exception {
         triple.set("abc", 3, 3.0);
 
-        // Test complex predicate for setIf
         boolean result = triple.setIf("defgh", 5, 5.0, (t, newLeft, newMiddle, newRight) -> {
             return newLeft.length() == newMiddle && newMiddle.equals(newRight.intValue()) && newLeft.length() > t.left().length();
         });
@@ -484,19 +454,16 @@ public class Triple100Test extends TestBase {
 
     @Test
     public void testEdgeCases() {
-        // Test with empty string
         Triple<String, Integer, Double> emptyStringTriple = Triple.of("", 0, 0.0);
         assertEquals("", emptyStringTriple.left());
         assertEquals(0, emptyStringTriple.middle());
         assertEquals(0.0, emptyStringTriple.right());
 
-        // Test with negative numbers
         Triple<Integer, Integer, Integer> negativeTriple = Triple.of(-1, -2, -3);
         assertEquals(-1, negativeTriple.left());
         assertEquals(-2, negativeTriple.middle());
         assertEquals(-3, negativeTriple.right());
 
-        // Test with extreme values
         Triple<Long, Double, Float> extremeTriple = Triple.of(Long.MAX_VALUE, Double.MAX_VALUE, Float.MAX_VALUE);
         assertEquals(Long.MAX_VALUE, extremeTriple.left());
         assertEquals(Double.MAX_VALUE, extremeTriple.middle());

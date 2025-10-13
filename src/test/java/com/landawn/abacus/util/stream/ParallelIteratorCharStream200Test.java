@@ -16,28 +16,26 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 
+@Tag("new-test")
 public class ParallelIteratorCharStream200Test extends TestBase {
 
     private static final char[] TEST_ARRAY = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j' };
-    private static final int testMaxThreadNum = 4; // Use a fixed small number of threads for predictable testing 
+    private static final int testMaxThreadNum = 4;
     private CharStream stream;
     private CharStream stream2;
     private CharStream stream3;
 
-    // This method will be used to initialize CharStream instances for tests.
     protected CharStream createCharStream(char[] array) {
-        // By default, create a parallel stream with a small number of threads.
-        // For testing specific parallel behavior, direct instantiation might be needed.
         return CharStream.of(array).map(c -> (char) (c + 0)).parallel(PS.create(Stream.Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
     }
 
-    // Helper to create a parallel stream with specific configuration
     private CharStream createParallelStreamWithConfig(char[] array, int maxThreadNum, Stream.Splitor splitor) {
         final ExecutorService testAsyncExecutor = Executors.newFixedThreadPool(maxThreadNum);
         return CharStream.of(array).map(c -> (char) (c + 0)).parallel(PS.create(splitor).maxThreadNum(maxThreadNum).executor(testAsyncExecutor)).onClose(() -> {
@@ -49,13 +47,11 @@ public class ParallelIteratorCharStream200Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Initialize with some default data for general tests
         stream = createCharStream(TEST_ARRAY);
         stream2 = createCharStream(TEST_ARRAY);
         stream3 = createCharStream(TEST_ARRAY);
     }
 
-    // Helper to shut down the executor after tests
     @AfterEach
     public void tearDown() {
     }
@@ -71,14 +67,13 @@ public class ParallelIteratorCharStream200Test extends TestBase {
         CharStream sequentialStream = stream.sequential();
         assertFalse(sequentialStream.isParallel());
 
-        // Verify that operations on the sequential stream still work correctly
         List<Character> result = sequentialStream.filter(c -> c > 'c').boxed().toList();
         assertEquals(Arrays.asList('d', 'e', 'f', 'g', 'h', 'i', 'j'), result);
     }
 
     @Test
     public void testFilter() {
-        List<Character> result = stream.filter(c -> c % 2 == 0).boxed().toList(); // 'b', 'd', 'f', 'h', 'j'
+        List<Character> result = stream.filter(c -> c % 2 == 0).boxed().toList();
         assertHaveSameElements(Arrays.asList('b', 'd', 'f', 'h', 'j'), result);
 
         result = createCharStream(new char[] {}).filter(c -> true).boxed().toList();
@@ -127,8 +122,6 @@ public class ParallelIteratorCharStream200Test extends TestBase {
         List<Character> result = createCharStream(new char[] { 'a', 'b' }).flatMap(c -> createCharStream(new char[] { c, Character.toUpperCase(c) }))
                 .boxed()
                 .toList();
-        // Parallel flatMap can produce elements in a non-deterministic order for intermediate streams.
-        // We only assert the content is correct, not the order.
         assertEquals(4, result.size());
         assertTrue(result.containsAll(Arrays.asList('a', 'A', 'b', 'B')));
     }
@@ -136,7 +129,6 @@ public class ParallelIteratorCharStream200Test extends TestBase {
     @Test
     public void testFlatmapCharArray() {
         List<Character> result = createCharStream(new char[] { 'a', 'b' }).flatmap(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
-        // Similar to flatMap, order can be non-deterministic due to parallel processing.
         assertEquals(4, result.size());
         assertTrue(result.containsAll(Arrays.asList('a', 'A', 'b', 'B')));
     }
@@ -170,12 +162,10 @@ public class ParallelIteratorCharStream200Test extends TestBase {
     public void testOnEach() {
         StringBuilder sb = new StringBuilder();
         List<Character> result = stream.onEach(e -> {
-            synchronized (sb) { // Ensure thread-safe access to StringBuilder
+            synchronized (sb) {
                 sb.append(e);
             }
         }).boxed().toList();
-        // onEach can be executed on multiple threads, so order is not guaranteed.
-        // However, all elements should be processed.
         assertEquals(10, sb.length());
         assertEquals(10, result.size());
         assertTrue(sb.toString().contains("a"));
@@ -194,7 +184,6 @@ public class ParallelIteratorCharStream200Test extends TestBase {
 
     @Test
     public void testToMap() {
-        // Parallel map operations usually lose order, so only test content correctness.
         Map<String, Integer> result = stream.toMap(c -> String.valueOf(c), c -> (int) c);
         assertEquals(10, result.size());
         assertEquals(97, (int) result.get("a"));
@@ -218,19 +207,15 @@ public class ParallelIteratorCharStream200Test extends TestBase {
     public void testGroupTo() {
         Map<Boolean, List<Character>> result = stream.groupTo(c -> c % 2 == 0, Collectors.toList());
         assertEquals(2, result.size());
-        assertHaveSameElements(Arrays.asList('b', 'd', 'f', 'h', 'j'), result.get(true)); // Even ASCII values
-        assertHaveSameElements(Arrays.asList('a', 'c', 'e', 'g', 'i'), result.get(false)); // Odd ASCII values
+        assertHaveSameElements(Arrays.asList('b', 'd', 'f', 'h', 'j'), result.get(true));
+        assertHaveSameElements(Arrays.asList('a', 'c', 'e', 'g', 'i'), result.get(false));
     }
 
     @Test
     public void testReduceIdentity() {
-        int sum = stream.reduce((char) 0, (c1, c2) -> (char) (c1 + c2)); // Summing numerical char values
-        // This sum is ASCII based, '0' + 'a' + 'b' ...
-        // Need to calculate expected value accurately: '0' + 97 + 98 + ...
-        // Sum of ASCII 'a' through 'j' is 97+98+99+100+101+102+103+104+105+106 = 1015
-        // Initial '0' (ASCII 48). So 48 + 1015 = 1063.
+        int sum = stream.reduce((char) 0, (c1, c2) -> (char) (c1 + c2));
 
-        int sumExpected = N.toList(TEST_ARRAY).stream().mapToInt(c -> (int) c).sum(); // Adding ASCII value of '0'
+        int sumExpected = N.toList(TEST_ARRAY).stream().mapToInt(c -> (int) c).sum();
         assertEquals(sumExpected, sum);
 
         sum = createCharStream(new char[] {}).reduce('Z', (c1, c2) -> c1);
@@ -289,10 +274,9 @@ public class ParallelIteratorCharStream200Test extends TestBase {
 
     @Test
     public void testFindAny() {
-        // FindAny is non-deterministic for parallel streams, so we just check if it's present for a known element.
         OptionalChar any = stream.findAny(c -> c == 'c');
         assertTrue(any.isPresent());
-        assertTrue(stream2.boxed().toList().contains(any.get())); // It should be one of the elements
+        assertTrue(stream2.boxed().toList().contains(any.get()));
     }
 
     @Test
@@ -351,16 +335,13 @@ public class ParallelIteratorCharStream200Test extends TestBase {
     public void testOnClose() {
         AtomicInteger closeCount = new AtomicInteger(0);
         CharStream parallelStream = createCharStream(new char[] { 'a', 'b', 'c' }).onClose(() -> closeCount.incrementAndGet());
-        parallelStream.count(); // Terminal operation
+        parallelStream.count();
         assertEquals(1, closeCount.get());
 
         closeCount.set(0);
         parallelStream = createCharStream(new char[] { 'a', 'b', 'c' }).onClose(() -> closeCount.incrementAndGet()).onClose(() -> closeCount.incrementAndGet());
-        parallelStream.toList(); // Another terminal operation
+        parallelStream.toList();
         assertEquals(2, closeCount.get());
     }
 
-    // Since CharStream does not directly expose static methods that differ from CharStream,
-    // and its constructors are internal/protected, testing of static methods would typically go into CharStreamTest.
-    // The createStream method here already uses CharStream indirectly for convenience.
 }

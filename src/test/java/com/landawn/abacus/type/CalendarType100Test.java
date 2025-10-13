@@ -14,10 +14,12 @@ import java.util.Date;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class CalendarType100Test extends TestBase {
 
     private CalendarType type;
@@ -61,7 +63,7 @@ public class CalendarType100Test extends TestBase {
         Calendar result = type.valueOf(original);
 
         Assertions.assertNotNull(result);
-        Assertions.assertNotSame(original, result); // Should be a copy
+        Assertions.assertNotSame(original, result);
         assertEquals(original.getTimeInMillis(), result.getTimeInMillis());
     }
 
@@ -71,7 +73,6 @@ public class CalendarType100Test extends TestBase {
         Calendar result = type.valueOf((Object) dateString);
 
         Assertions.assertNotNull(result);
-        // Verify the date parts
         assertEquals(2023, result.get(Calendar.YEAR));
         assertEquals(Calendar.JUNE, result.get(Calendar.MONTH));
         assertEquals(15, result.get(Calendar.DAY_OF_MONTH));
@@ -160,7 +161,7 @@ public class CalendarType100Test extends TestBase {
         String fullString = "prefix2023-06-15suffix";
         char[] chars = fullString.toCharArray();
 
-        Calendar result = type.valueOf(chars, 6, 10); // "2023-06-15"
+        Calendar result = type.valueOf(chars, 6, 10);
 
         Assertions.assertNotNull(result);
         assertEquals(2023, result.get(Calendar.YEAR));

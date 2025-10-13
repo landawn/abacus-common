@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.FloatIterator;
@@ -37,11 +38,9 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalFloat;
 
+@Tag("new-test")
 public class FloatStream101Test extends TestBase {
 
-    // This method needs to be implemented by a concrete test class to provide a FloatStream instance.
-    // For example, in ArrayFloatStreamTest, it would return new ArrayFloatStream(a);
-    // In IteratorFloatStreamTest, it would return new IteratorFloatStream(FloatIterator.of(a));
     protected FloatStream createFloatStream(float... a) {
         return FloatStream.of(a);
     }
@@ -318,7 +317,7 @@ public class FloatStream101Test extends TestBase {
         public void testDistinct() {
             FloatStream stream = createFloatStream(1.0f, 2.0f, 2.0f, 3.0f, 1.0f);
             float[] result = stream.distinct().toArray();
-            Arrays.sort(result); // Order might not be preserved
+            Arrays.sort(result);
             assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, result);
         }
 
@@ -397,7 +396,6 @@ public class FloatStream101Test extends TestBase {
             FloatStream stream = createFloatStream(1.0f, 2.0f, 3.0f, 4.0f);
             float[] result = stream.shuffled().toArray();
             assertEquals(4, result.length);
-            // Cannot test exact order due to randomness, but check all elements present
             Arrays.sort(result);
             assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f }, result);
         }
@@ -824,7 +822,7 @@ public class FloatStream101Test extends TestBase {
         @DisplayName("IllegalStateException should be thrown on closed stream")
         public void testClosedStream() {
             FloatStream stream = createFloatStream(1.0f, 2.0f, 3.0f);
-            stream.toArray(); // This should close the stream
+            stream.toArray();
             assertThrows(IllegalStateException.class, () -> stream.count());
         }
     }
@@ -846,7 +844,6 @@ public class FloatStream101Test extends TestBase {
         public void testRangeMap() {
             FloatStream stream = createFloatStream(1.0f, 2.0f, 3.0f, 6.0f, 7.0f);
             float[] result = stream.rangeMap((a, b) -> Math.abs(b - a) <= 1.5f, (start, end) -> end - start).toArray();
-            // Groups: [1,2,3] -> 2.0, [6,7] -> 1.0
             assertEquals(3, result.length);
         }
 
@@ -868,8 +865,8 @@ public class FloatStream101Test extends TestBase {
             Stream<FloatList> result = stream.collapse((a, b) -> Math.abs(b - a) <= 1.5f);
             List<FloatList> groups = result.toList();
             assertEquals(2, groups.size());
-            assertEquals(2, groups.get(0).size()); // [1.0, 2.0]
-            assertEquals(3, groups.get(1).size()); // [5.0, 6.0, 7.0]
+            assertEquals(2, groups.get(0).size());
+            assertEquals(3, groups.get(1).size());
         }
 
         @Test
@@ -878,8 +875,8 @@ public class FloatStream101Test extends TestBase {
             FloatStream stream = createFloatStream(1.0f, 2.0f, 5.0f, 6.0f, 7.0f);
             float[] result = stream.collapse((a, b) -> Math.abs(b - a) <= 1.5f, Float::sum).toArray();
             assertEquals(2, result.length);
-            assertEquals(3.0f, result[0], 0.001); // 1.0 + 2.0
-            assertEquals(18.0f, result[1], 0.001); // 5.0 + 6.0 + 7.0
+            assertEquals(3.0f, result[0], 0.001);
+            assertEquals(18.0f, result[1], 0.001);
         }
 
         @Test
@@ -974,11 +971,11 @@ public class FloatStream101Test extends TestBase {
         @DisplayName("toMap() with merge function should handle duplicate keys")
         public void testToMapWithMerge() {
             FloatStream stream = createFloatStream(1.1f, 1.9f, 2.1f);
-            Map<Integer, Float> result = stream.toMap(f -> (int) f, // Keys: 1, 1, 2
-                    f -> f, Float::sum // Merge duplicates
+            Map<Integer, Float> result = stream.toMap(f -> (int) f,
+                    f -> f, Float::sum
             );
             assertEquals(2, result.size());
-            assertEquals(3.0f, result.get(1), 0.001); // 1.1 + 1.9
+            assertEquals(3.0f, result.get(1), 0.001);
             assertEquals(2.1f, result.get(2), 0.001);
         }
 
@@ -1099,12 +1096,10 @@ public class FloatStream101Test extends TestBase {
         @Test
         @DisplayName("appendIfEmpty() should append only if stream is empty")
         public void testAppendIfEmpty() {
-            // Non-empty stream
             FloatStream stream1 = createFloatStream(1.0f, 2.0f);
             float[] result1 = stream1.appendIfEmpty(99.0f).toArray();
             assertArrayEquals(new float[] { 1.0f, 2.0f }, result1);
 
-            // Empty stream
             FloatStream stream2 = FloatStream.empty();
             float[] result2 = stream2.appendIfEmpty(99.0f).toArray();
             assertArrayEquals(new float[] { 99.0f }, result2);
@@ -1113,11 +1108,9 @@ public class FloatStream101Test extends TestBase {
         @Test
         @DisplayName("throwIfEmpty() should throw exception for empty stream")
         public void testThrowIfEmpty() {
-            // Non-empty stream should not throw
             FloatStream stream1 = createFloatStream(1.0f);
             assertDoesNotThrow(() -> stream1.throwIfEmpty().toArray());
 
-            // Empty stream should throw
             FloatStream stream2 = FloatStream.empty();
             assertThrows(RuntimeException.class, () -> stream2.throwIfEmpty().toArray());
         }
@@ -1127,11 +1120,9 @@ public class FloatStream101Test extends TestBase {
         public void testIfEmpty() {
             List<String> actions = new ArrayList<>();
 
-            // Non-empty stream
             FloatStream stream1 = createFloatStream(1.0f);
             stream1.ifEmpty(() -> actions.add("empty1")).toArray();
 
-            // Empty stream
             FloatStream stream2 = FloatStream.empty();
             stream2.ifEmpty(() -> actions.add("empty2")).toArray();
 
@@ -1177,7 +1168,7 @@ public class FloatStream101Test extends TestBase {
             FloatStream stream1 = createFloatStream(1.0f, 2.0f, 5.0f);
             FloatStream stream2 = createFloatStream(3.0f, 4.0f);
             float[] result = stream1.zipWith(stream2, 0.0f, 10.0f, Float::sum).toArray();
-            assertArrayEquals(new float[] { 4.0f, 6.0f, 15.0f }, result); // 1+3, 2+4, 0+5
+            assertArrayEquals(new float[] { 4.0f, 6.0f, 15.0f }, result);
         }
     }
 
@@ -1237,7 +1228,7 @@ public class FloatStream101Test extends TestBase {
             List<String> closeActions = new ArrayList<>();
             FloatStream stream = createFloatStream(1.0f, 2.0f, 3.0f).onClose(() -> closeActions.add("closed"));
 
-            stream.toArray(); // Should trigger close
+            stream.toArray();
             assertEquals(Arrays.asList("closed"), closeActions);
         }
     }

@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
@@ -35,18 +36,18 @@ import com.landawn.abacus.util.function.ToLongFunction;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.UnaryOperator;
 
+@Tag("new-test")
 public class Fn100Test extends TestBase {
 
     @Test
     public void testMemoize() {
-        // Test memoize with Supplier
         final AtomicInteger counter = new AtomicInteger(0);
         Supplier<Integer> memoized = Fn.memoize(() -> counter.incrementAndGet());
 
         assertEquals(Integer.valueOf(1), memoized.get());
-        assertEquals(Integer.valueOf(1), memoized.get()); // Should return cached value
-        assertEquals(Integer.valueOf(1), memoized.get()); // Should return cached value
-        assertEquals(1, counter.get()); // Counter should only be incremented once
+        assertEquals(Integer.valueOf(1), memoized.get());
+        assertEquals(Integer.valueOf(1), memoized.get());
+        assertEquals(1, counter.get());
     }
 
     @Test
@@ -55,12 +56,12 @@ public class Fn100Test extends TestBase {
         Supplier<Integer> memoized = Fn.memoizeWithExpiration(() -> counter.incrementAndGet(), 100, TimeUnit.MILLISECONDS);
 
         assertEquals(Integer.valueOf(1), memoized.get());
-        assertEquals(Integer.valueOf(1), memoized.get()); // Should return cached value
+        assertEquals(Integer.valueOf(1), memoized.get());
 
-        Thread.sleep(150); // Wait for expiration
+        Thread.sleep(150);
 
-        assertEquals(Integer.valueOf(2), memoized.get()); // Should compute new value
-        assertEquals(Integer.valueOf(2), memoized.get()); // Should return new cached value
+        assertEquals(Integer.valueOf(2), memoized.get());
+        assertEquals(Integer.valueOf(2), memoized.get());
         assertEquals(2, counter.get());
     }
 
@@ -73,14 +74,13 @@ public class Fn100Test extends TestBase {
         });
 
         assertEquals(Integer.valueOf(5), memoized.apply("hello"));
-        assertEquals(Integer.valueOf(5), memoized.apply("hello")); // Cached
-        assertEquals(Integer.valueOf(5), memoized.apply("world")); // Different input
-        assertEquals(Integer.valueOf(5), memoized.apply("world")); // Cached
-        assertEquals(2, counter.get()); // Should be called twice (once per unique input)
+        assertEquals(Integer.valueOf(5), memoized.apply("hello"));
+        assertEquals(Integer.valueOf(5), memoized.apply("world"));
+        assertEquals(Integer.valueOf(5), memoized.apply("world"));
+        assertEquals(2, counter.get());
 
-        // Test with null
         assertEquals(Integer.valueOf(0), memoized.apply(null));
-        assertEquals(Integer.valueOf(0), memoized.apply(null)); // Cached
+        assertEquals(Integer.valueOf(0), memoized.apply(null));
         assertEquals(3, counter.get());
     }
 
@@ -93,7 +93,6 @@ public class Fn100Test extends TestBase {
         closeRunnable.run();
         assertTrue(closeable.isClosed());
 
-        // Should be idempotent
         closeRunnable.run();
         assertTrue(closeable.isClosed());
     }
@@ -117,14 +116,14 @@ public class Fn100Test extends TestBase {
     @Test
     public void testEmptyAction() {
         Runnable empty = Fn.emptyAction();
-        empty.run(); // Should do nothing without throwing
+        empty.run();
     }
 
     @Test
     public void testDoNothing() {
         Consumer<String> doNothing = Fn.emptyConsumer();
-        doNothing.accept("test"); // Should do nothing without throwing
-        doNothing.accept(null); // Should handle null
+        doNothing.accept("test");
+        doNothing.accept(null);
     }
 
     @Test
@@ -160,13 +159,12 @@ public class Fn100Test extends TestBase {
         long duration = System.currentTimeMillis() - start;
 
         assertTrue(duration >= 50);
-        assertTrue(duration < 100); // Should not sleep too long
+        assertTrue(duration < 100);
     }
 
     @Test
     public void testPrintln() {
         Consumer<String> printer = Fn.println();
-        // Just ensure it doesn't throw
         printer.accept("test");
         printer.accept(null);
     }
@@ -801,7 +799,6 @@ public class Fn100Test extends TestBase {
         Function<String, Integer> function = String::length;
         Consumer<String> consumer = Fn.f2c(function);
 
-        // Just ensure it doesn't throw
         consumer.accept("test");
     }
 
@@ -892,7 +889,6 @@ public class Fn100Test extends TestBase {
         assertFalse(isPresent.test(java.util.Optional.<String> empty()));
     }
 
-    // Helper class for testing close operations
     private static class MockAutoCloseable implements AutoCloseable {
         private boolean closed = false;
 

@@ -18,9 +18,11 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class PasswordType100Test extends TestBase {
 
     private PasswordType passwordType;
@@ -29,7 +31,7 @@ public class PasswordType100Test extends TestBase {
     @BeforeEach
     public void setUp() {
         passwordType = (PasswordType) createType("Password");
-        customPasswordType = (PasswordType) createType("Password(MD5)"); // Custom algorithm
+        customPasswordType = (PasswordType) createType("Password(MD5)");
     }
 
     @Test
@@ -89,7 +91,6 @@ public class PasswordType100Test extends TestBase {
 
         passwordType.set(stmt, 1, plainPassword);
 
-        // Verify that setString was called with encrypted password (not the plain text)
         verify(stmt).setString(eq(1), argThat(encrypted -> encrypted != null && !encrypted.equals(plainPassword)));
     }
 
@@ -99,7 +100,6 @@ public class PasswordType100Test extends TestBase {
 
         passwordType.set(stmt, 1, null);
 
-        // Should encrypt null to a value (based on implementation)
         verify(stmt).setString(eq(1), any());
     }
 
@@ -110,7 +110,6 @@ public class PasswordType100Test extends TestBase {
 
         passwordType.set(stmt, "pwd_param", plainPassword);
 
-        // Verify that setString was called with encrypted password (not the plain text)
         verify(stmt).setString(eq("pwd_param"), argThat(encrypted -> encrypted != null && !encrypted.equals(plainPassword)));
     }
 
@@ -120,7 +119,6 @@ public class PasswordType100Test extends TestBase {
 
         passwordType.set(stmt, "pwd_param", null);
 
-        // Should encrypt null to a value (based on implementation)
         verify(stmt).setString(eq("pwd_param"), any());
     }
 
@@ -130,11 +128,9 @@ public class PasswordType100Test extends TestBase {
         PreparedStatement stmt2 = mock(PreparedStatement.class);
         String password = "testPassword";
 
-        // Set the same password twice
         passwordType.set(stmt1, 1, password);
         passwordType.set(stmt2, 1, password);
 
-        // Both should be encrypted to the same value
         verify(stmt1).setString(eq(1), any(String.class));
         verify(stmt2).setString(eq(1), any(String.class));
     }
@@ -148,7 +144,6 @@ public class PasswordType100Test extends TestBase {
         passwordType.set(stmt, 1, password1);
         passwordType.set(stmt, 2, password2);
 
-        // Should encrypt to different values
         verify(stmt).setString(eq(1), argThat(s -> s != null));
         verify(stmt).setString(eq(2), argThat(s -> s != null));
     }

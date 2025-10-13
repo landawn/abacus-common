@@ -18,9 +18,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class GenericKeyedObjectPool100Test extends TestBase {
 
     private GenericKeyedObjectPool<String, TestPoolable> pool;
@@ -133,12 +135,10 @@ public class GenericKeyedObjectPool100Test extends TestBase {
     public void testPutToFullPoolWithoutAutoBalance() {
         GenericKeyedObjectPool<String, TestPoolable> noBalancePool = new GenericKeyedObjectPool<>(3, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
 
-        // Fill the pool
         for (int i = 0; i < 3; i++) {
             assertTrue(noBalancePool.put("key" + i, new TestPoolable("value" + i)));
         }
 
-        // Should fail to add more
         assertFalse(noBalancePool.put("key3", new TestPoolable("value3")));
         assertEquals(3, noBalancePool.size());
 
@@ -149,12 +149,10 @@ public class GenericKeyedObjectPool100Test extends TestBase {
     public void testPutToFullPoolWithAutoBalance() {
         GenericKeyedObjectPool<String, TestPoolable> balancePool = new GenericKeyedObjectPool<>(3, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.4f);
 
-        // Fill the pool
         for (int i = 0; i < 3; i++) {
             assertTrue(balancePool.put("key" + i, new TestPoolable("value" + i)));
         }
 
-        // Should succeed by vacating
         assertTrue(balancePool.put("key3", new TestPoolable("value3")));
         assertEquals(3, balancePool.size());
 
@@ -183,16 +181,15 @@ public class GenericKeyedObjectPool100Test extends TestBase {
         KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
         GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 250, measure);
 
-        assertTrue(memPool.put("k1", new TestPoolable("v1"))); // 2 + 100 = 102
-        assertTrue(memPool.put("k2", new TestPoolable("v2"))); // 2 + 100 = 102, total 204
-        assertFalse(memPool.put("k3", new TestPoolable("v3"))); // Would exceed 250
+        assertTrue(memPool.put("k1", new TestPoolable("v1")));
+        assertTrue(memPool.put("k2", new TestPoolable("v2")));
+        assertFalse(memPool.put("k3", new TestPoolable("v3")));
 
         memPool.close();
     }
 
     @Test
     public void testPutWithAutoDestroy() {
-        // Fill the pool
         for (int i = 0; i < 10; i++) {
             pool.put("key" + i, new TestPoolable("value" + i));
         }
@@ -259,7 +256,7 @@ public class GenericKeyedObjectPool100Test extends TestBase {
         TestPoolable peeked = pool.peek("key1");
         assertNotNull(peeked);
         assertEquals(poolable, peeked);
-        assertEquals(0, peeked.activityPrint().getAccessCount()); // Should not update
+        assertEquals(0, peeked.activityPrint().getAccessCount());
     }
 
     @Test
@@ -296,7 +293,6 @@ public class GenericKeyedObjectPool100Test extends TestBase {
         assertTrue(keys.contains("key2"));
         assertTrue(keys.contains("key3"));
 
-        // Should be a copy
         keys.clear();
         assertEquals(3, pool.size());
     }
@@ -314,7 +310,6 @@ public class GenericKeyedObjectPool100Test extends TestBase {
         assertTrue(values.contains(p1));
         assertTrue(values.contains(p2));
 
-        // Should be a copy
         values.clear();
         assertEquals(2, pool.size());
     }
@@ -339,13 +334,12 @@ public class GenericKeyedObjectPool100Test extends TestBase {
 
     @Test
     public void testVacate() {
-        // Fill the pool
         for (int i = 0; i < 10; i++) {
             pool.put("key" + i, new TestPoolable("value" + i));
         }
 
         pool.vacate();
-        assertEquals(8, pool.size()); // Should remove 20% (2 entries)
+        assertEquals(8, pool.size());
     }
 
     @Test
@@ -357,7 +351,7 @@ public class GenericKeyedObjectPool100Test extends TestBase {
         }
 
         customPool.vacate();
-        assertEquals(5, customPool.size()); // Should remove 50% (5 entries)
+        assertEquals(5, customPool.size());
 
         customPool.close();
     }
@@ -379,14 +373,12 @@ public class GenericKeyedObjectPool100Test extends TestBase {
         assertEquals(Poolable.Caller.CLOSE, p1.getDestroyedByCaller());
         assertEquals(Poolable.Caller.CLOSE, p2.getDestroyedByCaller());
 
-        // Operations should throw after close
         assertThrows(IllegalStateException.class, () -> pool.put("key3", new TestPoolable("value3")));
         assertThrows(IllegalStateException.class, () -> pool.get("key1"));
     }
 
     @Test
     public void testEviction() throws InterruptedException {
-        // Create pool with short eviction delay
         GenericKeyedObjectPool<String, TestPoolable> evictPool = new GenericKeyedObjectPool<>(10, 100, EvictionPolicy.LAST_ACCESS_TIME);
 
         TestPoolable shortLived = new TestPoolable("short", 50, 50);
@@ -397,10 +389,8 @@ public class GenericKeyedObjectPool100Test extends TestBase {
 
         assertEquals(2, evictPool.size());
 
-        // Wait for eviction to run
         Thread.sleep(200);
 
-        // Short-lived should be evicted
         assertEquals(1, evictPool.size());
         assertTrue(evictPool.containsKey("long"));
         assertFalse(evictPool.containsKey("short"));
@@ -425,15 +415,15 @@ public class GenericKeyedObjectPool100Test extends TestBase {
         GenericKeyedObjectPool<String, TestPoolable> pool1 = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
         GenericKeyedObjectPool<String, TestPoolable> pool2 = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
 
-        assertTrue(pool1.equals(pool1)); // Reflexive
-        assertTrue(pool1.equals(pool2)); // Both empty
+        assertTrue(pool1.equals(pool1));
+        assertTrue(pool1.equals(pool2));
 
         TestPoolable p = new TestPoolable("value1");
         pool1.put("key1", p);
-        assertFalse(pool1.equals(pool2)); // Different contents
+        assertFalse(pool1.equals(pool2));
 
         pool2.put("key1", p);
-        assertTrue(pool1.equals(pool2)); // Same contents
+        assertTrue(pool1.equals(pool2));
 
         assertFalse(pool1.equals(null));
         assertFalse(pool1.equals("not a pool"));
@@ -459,11 +449,11 @@ public class GenericKeyedObjectPool100Test extends TestBase {
         assertEquals(1000, stats.maxMemory());
         assertEquals(0, stats.dataSize());
 
-        memPool.put("k1", new TestPoolable("v1")); // 2 + 100 = 102
+        memPool.put("k1", new TestPoolable("v1"));
         stats = memPool.stats();
         assertEquals(102, stats.dataSize());
 
-        memPool.put("key2", new TestPoolable("v2")); // 4 + 100 = 104
+        memPool.put("key2", new TestPoolable("v2"));
         stats = memPool.stats();
         assertEquals(206, stats.dataSize());
 
@@ -501,7 +491,6 @@ public class GenericKeyedObjectPool100Test extends TestBase {
                         }
                     }
                 } catch (InterruptedException e) {
-                    // Ignore
                 } finally {
                     endLatch.countDown();
                 }
@@ -511,7 +500,6 @@ public class GenericKeyedObjectPool100Test extends TestBase {
         startLatch.countDown();
         assertTrue(endLatch.await(5, TimeUnit.SECONDS));
 
-        // Pool should remain consistent
         assertTrue(pool.size() >= 0 && pool.size() <= pool.capacity());
     }
 
@@ -521,7 +509,7 @@ public class GenericKeyedObjectPool100Test extends TestBase {
         pool.put("key2", new TestPoolable("value2"));
         pool.get("key1");
         pool.get("key2");
-        pool.get("key3"); // This should miss
+        pool.get("key3");
 
         PoolStats stats = pool.stats();
         assertEquals(10, stats.capacity());

@@ -672,22 +672,32 @@ public final class If {
          */
         public static final OrElse FALSE = new OrElse(false);
 
-        /** The b. */
+        /**
+         * The boolean state indicating whether the initial If condition was true.
+         * Used to determine whether to execute the then clause or the orElse clause.
+         */
         private final boolean isIfTrue;
 
         /**
-         * Instantiates a new or.
+         * Constructs a new OrElse instance with the given boolean state.
          *
-         * @param b
+         * <p>This constructor is package-private and used internally by the If class
+         * to create OrElse instances representing the state of the conditional chain.</p>
+         *
+         * @param b the boolean state indicating whether the initial If condition was true
          */
         OrElse(final boolean b) {
             isIfTrue = b;
         }
 
         /**
+         * Factory method to create an OrElse instance based on the given boolean value.
          *
-         * @param b
-         * @return
+         * <p>This method uses cached instances (TRUE or FALSE) for performance optimization,
+         * avoiding object creation for repeated conditional evaluations.</p>
+         *
+         * @param b the boolean state indicating whether the initial If condition was true
+         * @return an OrElse instance representing the given state (cached instance)
          */
         static OrElse of(final boolean b) {
             return b ? TRUE : FALSE;

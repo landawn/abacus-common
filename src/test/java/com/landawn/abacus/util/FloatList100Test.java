@@ -16,11 +16,13 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.stream.FloatStream;
 
+@Tag("new-test")
 public class FloatList100Test extends TestBase {
 
     private FloatList list;
@@ -31,7 +33,6 @@ public class FloatList100Test extends TestBase {
         list = new FloatList();
     }
 
-    // Constructor Tests
     @Test
     public void testDefaultConstructor() {
         FloatList list = new FloatList();
@@ -77,7 +78,6 @@ public class FloatList100Test extends TestBase {
         assertThrows(NullPointerException.class, () -> new FloatList(null));
     }
 
-    // Static Factory Method Tests
     @Test
     public void testOf() {
         FloatList list = FloatList.of(1.1f, 2.2f, 3.3f, 4.4f, 5.5f);
@@ -110,9 +110,7 @@ public class FloatList100Test extends TestBase {
         float[] array = { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f };
         FloatList list = FloatList.copyOf(array);
         assertEquals(5, list.size());
-        // Modify original array
         array[0] = 100.0f;
-        // List should not be affected
         assertEquals(1.1f, list.get(0), DELTA);
     }
 
@@ -138,14 +136,12 @@ public class FloatList100Test extends TestBase {
     public void testRandom() {
         FloatList list = FloatList.random(10);
         assertEquals(10, list.size());
-        // Check that all values are between 0.0 and 1.0
         for (int i = 0; i < 10; i++) {
             float value = list.get(i);
             assertTrue(value >= 0.0f && value < 1.0f);
         }
     }
 
-    // Get and Set Tests
     @Test
     public void testGet() {
         list.add(10.5f);
@@ -174,7 +170,6 @@ public class FloatList100Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> list.set(0, 10.5f));
     }
 
-    // Add Tests
     @Test
     public void testAdd() {
         list.add(10.5f);
@@ -267,7 +262,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(3.3f, list.get(2), DELTA);
     }
 
-    // Remove Tests
     @Test
     public void testRemove() {
         list.add(10.5f);
@@ -396,7 +390,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(50.5f, list.get(2), DELTA);
     }
 
-    // Move and Replace Tests
     @Test
     public void testMoveRange() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f });
@@ -472,7 +465,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(0.0f, list.get(4), DELTA);
     }
 
-    // Fill Tests
     @Test
     public void testFill() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f });
@@ -495,7 +487,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(5.5f, list.get(4), DELTA);
     }
 
-    // Contains Tests
     @Test
     public void testContains() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f });
@@ -542,7 +533,6 @@ public class FloatList100Test extends TestBase {
         assertFalse(list.disjoint(other));
     }
 
-    // Set Operations Tests
     @Test
     public void testIntersection() {
         list.addAll(new float[] { 1.1f, 2.2f, 2.2f, 3.3f, 4.4f });
@@ -580,7 +570,6 @@ public class FloatList100Test extends TestBase {
         assertTrue(result.contains(5.5f));
     }
 
-    // Index and Occurrence Tests
     @Test
     public void testOccurrencesOf() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f, 2.2f, 2.2f, 4.4f });
@@ -624,7 +613,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(-1, list.lastIndexOf(5.5f, 3));
     }
 
-    // Min/Max/Median Tests
     @Test
     public void testMin() {
         list.addAll(new float[] { 3.3f, 1.1f, 4.4f, 1.1f, 5.5f });
@@ -667,7 +655,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(3.3f, median.get(), DELTA);
     }
 
-    // forEach Tests
     @Test
     public void testForEach() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
@@ -694,7 +681,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(4.4f, result.get(2), DELTA);
     }
 
-    // First/Last Tests
     @Test
     public void testFirst() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
@@ -780,7 +766,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(2.2f, list.get(1), DELTA);
     }
 
-    // Distinct and Duplicates Tests
     @Test
     public void testDistinct() {
         list.addAll(new float[] { 1.1f, 2.2f, 2.2f, 3.3f, 3.3f, 3.3f });
@@ -801,7 +786,6 @@ public class FloatList100Test extends TestBase {
         assertTrue(list.hasDuplicates());
     }
 
-    // Sort Tests
     @Test
     public void testIsSorted() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f });
@@ -856,7 +840,6 @@ public class FloatList100Test extends TestBase {
         assertTrue(list.binarySearch(1, 3, 4.4f) < 0);
     }
 
-    // Reverse and Rotate Tests
     @Test
     public void testReverse() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f });
@@ -897,7 +880,6 @@ public class FloatList100Test extends TestBase {
         list.shuffle();
         assertEquals(original.size(), list.size());
 
-        // Check all elements are still there
         for (int i = 0; i < original.size(); i++) {
             assertTrue(list.contains(original.get(i)));
         }
@@ -922,7 +904,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(1.1f, list.get(2), DELTA);
     }
 
-    // Copy Tests
     @Test
     public void testCopy() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
@@ -930,9 +911,7 @@ public class FloatList100Test extends TestBase {
         FloatList copy = list.copy();
         assertEquals(list.size(), copy.size());
 
-        // Modify original
         list.set(0, 10.0f);
-        // Copy should not be affected
         assertEquals(1.1f, copy.get(0), DELTA);
     }
 
@@ -957,7 +936,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(5.5f, copy.get(2), DELTA);
     }
 
-    // Split Tests
     @Test
     public void testSplit() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f });
@@ -974,7 +952,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(6.6f, chunks.get(2).get(1), DELTA);
     }
 
-    // Utility Tests
     @Test
     public void testTrimToSize() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
@@ -1010,7 +987,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(2, list.size());
     }
 
-    // Conversion Tests
     @Test
     public void testBoxed() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
@@ -1040,7 +1016,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(1.1f, array[0], DELTA);
         assertEquals(3.3f, array[2], DELTA);
 
-        // Modify array should not affect list
         array[0] = 10.0f;
         assertEquals(1.1f, list.get(0), DELTA);
     }
@@ -1074,7 +1049,6 @@ public class FloatList100Test extends TestBase {
         assertEquals(2, multiset.count(2.2f));
     }
 
-    // Iterator and Stream Tests
     @Test
     public void testIterator() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
@@ -1104,10 +1078,9 @@ public class FloatList100Test extends TestBase {
 
         FloatStream stream = list.stream(1, 4);
         double sum = stream.sum();
-        assertEquals(9.0, sum, 0.0001); // 2 + 3 + 4
+        assertEquals(9.0, sum, 0.0001);
     }
 
-    // Equals and HashCode Tests
     @Test
     public void testEquals() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
@@ -1147,7 +1120,6 @@ public class FloatList100Test extends TestBase {
         assertTrue(str.contains("3.3"));
     }
 
-    // Array method test
     @Test
     public void testArray() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
@@ -1157,12 +1129,10 @@ public class FloatList100Test extends TestBase {
         assertEquals(2.2f, array[1], DELTA);
         assertEquals(3.3f, array[2], DELTA);
 
-        // Modifying the array should affect the list (since it's the internal array)
         array[0] = 10.0f;
         assertEquals(10.0f, list.get(0), DELTA);
     }
 
-    // Edge case tests
     @Test
     public void testLargeList() {
         int size = 10000;
@@ -1177,7 +1147,6 @@ public class FloatList100Test extends TestBase {
 
     @Test
     public void testEmptyOperations() {
-        // Test operations on empty list
         assertFalse(list.remove(1.1f));
         assertFalse(list.removeAllOccurrences(1.1f));
         assertFalse(list.removeIf(x -> true));
@@ -1192,7 +1161,6 @@ public class FloatList100Test extends TestBase {
         assertTrue(list.isEmpty());
     }
 
-    // Float-specific edge cases
     @Test
     public void testNaNHandling() {
         list.add(1.1f);
@@ -1202,10 +1170,8 @@ public class FloatList100Test extends TestBase {
         assertEquals(3, list.size());
         assertTrue(Float.isNaN(list.get(1)));
 
-        // Test contains with NaN
         assertTrue(list.contains(Float.NaN));
 
-        // Test indexOf with NaN
         assertEquals(1, list.indexOf(Float.NaN));
     }
 
@@ -1233,7 +1199,6 @@ public class FloatList100Test extends TestBase {
         list.add(-0.0f);
         list.add(0.0f);
 
-        // Both -0.0f and 0.0f should be considered equal
         assertEquals(0.0f, list.get(0), DELTA);
         assertEquals(0.0f, list.get(1), DELTA);
 
@@ -1249,8 +1214,6 @@ public class FloatList100Test extends TestBase {
         list.add(a);
         list.add(b);
 
-        // These might not be exactly equal due to floating point precision
-        // But replaceAll uses Float.compare which handles this correctly
         int replaced = list.replaceAll(0.3f, 1.0f);
         assertTrue(replaced > 0);
     }

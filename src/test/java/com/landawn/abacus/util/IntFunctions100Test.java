@@ -38,11 +38,13 @@ import java.util.function.IntFunction;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 
+@Tag("new-test")
 public class IntFunctions100Test extends TestBase {
 
     @Test
@@ -718,14 +720,12 @@ public class IntFunctions100Test extends TestBase {
         IntFunction<DisposableObjArray> func = IntFunctions.ofDisposableArray();
         Assertions.assertNotNull(func);
 
-        // Test stateful behavior - should return same instance
         DisposableObjArray array1 = func.apply(10);
         Assertions.assertNotNull(array1);
 
         DisposableObjArray array2 = func.apply(20);
         Assertions.assertSame(array1, array2);
 
-        // Create new function to test independent state
         IntFunction<DisposableObjArray> func2 = IntFunctions.ofDisposableArray();
         DisposableObjArray array3 = func2.apply(15);
         Assertions.assertNotSame(array1, array3);
@@ -736,19 +736,16 @@ public class IntFunctions100Test extends TestBase {
         IntFunction<DisposableArray<String>> func = IntFunctions.ofDisposableArray(String.class);
         Assertions.assertNotNull(func);
 
-        // Test stateful behavior - should return same instance
         DisposableArray<String> array1 = func.apply(10);
         Assertions.assertNotNull(array1);
 
         DisposableArray<String> array2 = func.apply(20);
         Assertions.assertSame(array1, array2);
 
-        // Create new function to test independent state
         IntFunction<DisposableArray<String>> func2 = IntFunctions.ofDisposableArray(String.class);
         DisposableArray<String> array3 = func2.apply(15);
         Assertions.assertNotSame(array1, array3);
 
-        // Test with different component types
         IntFunction<DisposableArray<Integer>> intFunc = IntFunctions.ofDisposableArray(Integer.class);
         DisposableArray<Integer> intArray = intFunc.apply(5);
         Assertions.assertNotNull(intArray);
@@ -877,57 +874,46 @@ public class IntFunctions100Test extends TestBase {
 
     @Test
     public void testOfCollectionWithAbstractClasses() {
-        // Test with Collection interface
         IntFunction<? extends Collection<String>> func1 = IntFunctions.ofCollection(Collection.class);
         Collection<String> coll1 = func1.apply(10);
         Assertions.assertTrue(coll1 instanceof ArrayList);
 
-        // Test with AbstractCollection
         IntFunction<? extends Collection<String>> func2 = IntFunctions.ofCollection(AbstractCollection.class);
         Collection<String> coll2 = func2.apply(10);
         Assertions.assertTrue(coll2 instanceof ArrayList);
 
-        // Test with List interface
         IntFunction<? extends Collection<String>> func3 = IntFunctions.ofCollection(List.class);
         Collection<String> coll3 = func3.apply(10);
         Assertions.assertTrue(coll3 instanceof ArrayList);
 
-        // Test with AbstractList
         IntFunction<? extends Collection<String>> func4 = IntFunctions.ofCollection(AbstractList.class);
         Collection<String> coll4 = func4.apply(10);
         Assertions.assertTrue(coll4 instanceof ArrayList);
 
-        // Test with Set interface
         IntFunction<? extends Collection<String>> func5 = IntFunctions.ofCollection(Set.class);
         Collection<String> coll5 = func5.apply(10);
         Assertions.assertTrue(coll5 instanceof HashSet);
 
-        // Test with AbstractSet
         IntFunction<? extends Collection<String>> func6 = IntFunctions.ofCollection(AbstractSet.class);
         Collection<String> coll6 = func6.apply(10);
         Assertions.assertTrue(coll6 instanceof HashSet);
 
-        // Test with Queue interface
         IntFunction<? extends Collection<String>> func7 = IntFunctions.ofCollection(Queue.class);
         Collection<String> coll7 = func7.apply(10);
         Assertions.assertTrue(coll7 instanceof LinkedList);
 
-        // Test with AbstractQueue
         IntFunction<? extends Collection<String>> func8 = IntFunctions.ofCollection(AbstractQueue.class);
         Collection<String> coll8 = func8.apply(10);
         Assertions.assertTrue(coll8 instanceof LinkedList);
 
-        // Test with Deque interface
         IntFunction<? extends Collection<String>> func9 = IntFunctions.ofCollection(Deque.class);
         Collection<String> coll9 = func9.apply(10);
         Assertions.assertTrue(coll9 instanceof LinkedList);
 
-        // Test with BlockingQueue interface
         IntFunction<? extends Collection<String>> func10 = IntFunctions.ofCollection(BlockingQueue.class);
         Collection<String> coll10 = func10.apply(10);
         Assertions.assertTrue(coll10 instanceof LinkedBlockingQueue);
 
-        // Test with BlockingDeque interface
         IntFunction<? extends Collection<String>> func11 = IntFunctions.ofCollection(BlockingDeque.class);
         Collection<String> coll11 = func11.apply(10);
         Assertions.assertTrue(coll11 instanceof LinkedBlockingDeque);
@@ -957,12 +943,10 @@ public class IntFunctions100Test extends TestBase {
 
     @Test
     public void testOfCollectionWithIllegalArgument() {
-        // Test with non-collection class
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             IntFunctions.ofCollection((Class) String.class);
         });
 
-        // Test with null
         Assertions.assertThrows(NullPointerException.class, () -> {
             IntFunctions.ofCollection(null);
         });
@@ -970,12 +954,10 @@ public class IntFunctions100Test extends TestBase {
 
     @Test
     public void testOfCollectionCaching() {
-        // Test that the same function is returned for the same type (caching)
         IntFunction<? extends Collection<String>> func1 = IntFunctions.ofCollection(ArrayList.class);
         IntFunction<? extends Collection<String>> func2 = IntFunctions.ofCollection(ArrayList.class);
         Assertions.assertSame(func1, func2);
 
-        // Different types should return different functions
         IntFunction<? extends Collection<String>> func3 = IntFunctions.ofCollection(LinkedList.class);
         Assertions.assertNotSame(func1, func3);
     }
@@ -1037,27 +1019,22 @@ public class IntFunctions100Test extends TestBase {
 
     @Test
     public void testOfMapWithAbstractClasses() {
-        // Test with Map interface
         IntFunction<? extends Map<String, Integer>> func1 = IntFunctions.ofMap(Map.class);
         Map<String, Integer> map1 = func1.apply(10);
         Assertions.assertTrue(map1 instanceof HashMap);
 
-        // Test with AbstractMap
         IntFunction<? extends Map<String, Integer>> func2 = IntFunctions.ofMap(AbstractMap.class);
         Map<String, Integer> map2 = func2.apply(10);
         Assertions.assertTrue(map2 instanceof HashMap);
 
-        // Test with SortedMap interface
         IntFunction<? extends Map<String, Integer>> func3 = IntFunctions.ofMap(SortedMap.class);
         Map<String, Integer> map3 = func3.apply(10);
         Assertions.assertTrue(map3 instanceof TreeMap);
 
-        // Test with NavigableMap interface
         IntFunction<? extends Map<String, Integer>> func4 = IntFunctions.ofMap(NavigableMap.class);
         Map<String, Integer> map4 = func4.apply(10);
         Assertions.assertTrue(map4 instanceof TreeMap);
 
-        // Test with ConcurrentMap interface
         IntFunction<? extends Map<String, Integer>> func5 = IntFunctions.ofMap(ConcurrentMap.class);
         Map<String, Integer> map5 = func5.apply(10);
         Assertions.assertTrue(map5 instanceof ConcurrentHashMap);
@@ -1076,12 +1053,10 @@ public class IntFunctions100Test extends TestBase {
 
     @Test
     public void testOfMapWithIllegalArgument() {
-        // Test with non-map class
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             IntFunctions.ofMap((Class) String.class);
         });
 
-        // Test with null
         Assertions.assertThrows(NullPointerException.class, () -> {
             IntFunctions.ofMap(null);
         });
@@ -1089,12 +1064,10 @@ public class IntFunctions100Test extends TestBase {
 
     @Test
     public void testOfMapCaching() {
-        // Test that the same function is returned for the same type (caching)
         IntFunction<? extends Map<String, Integer>> func1 = IntFunctions.ofMap(HashMap.class);
         IntFunction<? extends Map<String, Integer>> func2 = IntFunctions.ofMap(HashMap.class);
         Assertions.assertSame(func1, func2);
 
-        // Different types should return different functions
         IntFunction<? extends Map<String, Integer>> func3 = IntFunctions.ofMap(LinkedHashMap.class);
         Assertions.assertNotSame(func1, func3);
     }

@@ -18,10 +18,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
 
+@Tag("new-test")
 public class U102Test extends TestBase {
 
     @Nested
@@ -479,7 +481,6 @@ public class U102Test extends TestBase {
             assertTrue(optional.isPresent());
             assertEquals('A', optional.get());
 
-            // Test cached values
             u.OptionalChar cached1 = u.OptionalChar.of((char) 0);
             u.OptionalChar cached2 = u.OptionalChar.of((char) 0);
             assertSame(cached1, cached2);
@@ -488,7 +489,6 @@ public class U102Test extends TestBase {
             u.OptionalChar cached4 = u.OptionalChar.of((char) 128);
             assertSame(cached3, cached4);
 
-            // Test non-cached values
             u.OptionalChar nonCached1 = u.OptionalChar.of((char) 129);
             u.OptionalChar nonCached2 = u.OptionalChar.of((char) 129);
             assertNotSame(nonCached1, nonCached2);
@@ -868,7 +868,6 @@ public class U102Test extends TestBase {
             assertTrue(optional.isPresent());
             assertEquals((byte) 42, optional.get());
 
-            // Test cached values
             u.OptionalByte cached1 = u.OptionalByte.of(Byte.MIN_VALUE);
             u.OptionalByte cached2 = u.OptionalByte.of(Byte.MIN_VALUE);
             assertSame(cached1, cached2);
@@ -877,7 +876,6 @@ public class U102Test extends TestBase {
             u.OptionalByte cached4 = u.OptionalByte.of(Byte.MAX_VALUE);
             assertSame(cached3, cached4);
 
-            // All byte values should be cached
             for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
                 byte b = (byte) i;
                 assertSame(u.OptionalByte.of(b), u.OptionalByte.of(b));
@@ -1244,7 +1242,6 @@ public class U102Test extends TestBase {
             assertTrue(optional.isPresent());
             assertEquals((short) 42, optional.get());
 
-            // Test cached values
             u.OptionalShort cached1 = u.OptionalShort.of((short) -128);
             u.OptionalShort cached2 = u.OptionalShort.of((short) -128);
             assertSame(cached1, cached2);
@@ -1253,7 +1250,6 @@ public class U102Test extends TestBase {
             u.OptionalShort cached4 = u.OptionalShort.of((short) 256);
             assertSame(cached3, cached4);
 
-            // Test non-cached values
             u.OptionalShort nonCached1 = u.OptionalShort.of((short) 257);
             u.OptionalShort nonCached2 = u.OptionalShort.of((short) 257);
             assertNotSame(nonCached1, nonCached2);
@@ -1620,7 +1616,6 @@ public class U102Test extends TestBase {
             assertTrue(optional.isPresent());
             assertEquals(42, optional.get());
 
-            // Test cached values
             u.OptionalInt cached1 = u.OptionalInt.of(-256);
             u.OptionalInt cached2 = u.OptionalInt.of(-256);
             assertSame(cached1, cached2);
@@ -1629,7 +1624,6 @@ public class U102Test extends TestBase {
             u.OptionalInt cached4 = u.OptionalInt.of(1024);
             assertSame(cached3, cached4);
 
-            // Test non-cached values
             u.OptionalInt nonCached1 = u.OptionalInt.of(1025);
             u.OptionalInt nonCached2 = u.OptionalInt.of(1025);
             assertNotSame(nonCached1, nonCached2);
@@ -2093,7 +2087,6 @@ public class U102Test extends TestBase {
             assertTrue(optional.isPresent());
             assertEquals(42L, optional.get());
 
-            // Test cached values
             u.OptionalLong cached1 = u.OptionalLong.of(-256L);
             u.OptionalLong cached2 = u.OptionalLong.of(-256L);
             assertSame(cached1, cached2);
@@ -2102,7 +2095,6 @@ public class U102Test extends TestBase {
             u.OptionalLong cached4 = u.OptionalLong.of(1024L);
             assertSame(cached3, cached4);
 
-            // Test non-cached values
             u.OptionalLong nonCached1 = u.OptionalLong.of(1025L);
             u.OptionalLong nonCached2 = u.OptionalLong.of(1025L);
             assertNotSame(nonCached1, nonCached2);
@@ -2527,12 +2519,10 @@ public class U102Test extends TestBase {
             assertTrue(optional.isPresent());
             assertEquals(42.5f, optional.get());
 
-            // Test cached ZERO value
             u.OptionalFloat zero1 = u.OptionalFloat.of(0f);
             u.OptionalFloat zero2 = u.OptionalFloat.of(0f);
             assertSame(zero1, zero2);
 
-            // Test non-cached values
             u.OptionalFloat nonCached1 = u.OptionalFloat.of(42.5f);
             u.OptionalFloat nonCached2 = u.OptionalFloat.of(42.5f);
             assertNotSame(nonCached1, nonCached2);
@@ -2872,7 +2862,6 @@ public class U102Test extends TestBase {
             assertNotEquals(val1, null);
             assertNotEquals(val1, "string");
 
-            // Test NaN handling
             u.OptionalFloat nan1 = u.OptionalFloat.of(Float.NaN);
             u.OptionalFloat nan2 = u.OptionalFloat.of(Float.NaN);
             assertEquals(nan1, nan2);
@@ -2917,12 +2906,10 @@ public class U102Test extends TestBase {
             assertTrue(optional.isPresent());
             assertEquals(42.5, optional.get());
 
-            // Test cached ZERO value
             u.OptionalDouble zero1 = u.OptionalDouble.of(0d);
             u.OptionalDouble zero2 = u.OptionalDouble.of(0d);
             assertSame(zero1, zero2);
 
-            // Test non-cached values
             u.OptionalDouble nonCached1 = u.OptionalDouble.of(42.5);
             u.OptionalDouble nonCached2 = u.OptionalDouble.of(42.5);
             assertNotSame(nonCached1, nonCached2);
@@ -3307,7 +3294,6 @@ public class U102Test extends TestBase {
             assertNotEquals(val1, null);
             assertNotEquals(val1, "string");
 
-            // Test NaN handling
             u.OptionalDouble nan1 = u.OptionalDouble.of(Double.NaN);
             u.OptionalDouble nan2 = u.OptionalDouble.of(Double.NaN);
             assertEquals(nan1, nan2);

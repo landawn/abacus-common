@@ -9,10 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParseException;
 
+@Tag("new-test")
 public class CSVParser100Test extends TestBase {
 
     @Test
@@ -154,7 +156,7 @@ public class CSVParser100Test extends TestBase {
         List<String> result = parser.parseLine("\"a\",\"b\"xxx,\"c\"");
         assertEquals(3, result.size());
         assertEquals("a", result.get(0));
-        assertEquals("b", result.get(1)); // xxx is ignored
+        assertEquals("b", result.get(1));
         assertEquals("c", result.get(2));
     }
 

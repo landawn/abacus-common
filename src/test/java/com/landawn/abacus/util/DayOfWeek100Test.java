@@ -4,16 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class DayOfWeek100Test extends TestBase {
 
     @Test
     public void testEnumValues() {
         DayOfWeek[] values = DayOfWeek.values();
         assertEquals(7, values.length);
-        
+
         assertEquals(DayOfWeek.SUNDAY, values[0]);
         assertEquals(DayOfWeek.MONDAY, values[1]);
         assertEquals(DayOfWeek.TUESDAY, values[2]);
@@ -66,7 +68,7 @@ public class DayOfWeek100Test extends TestBase {
     @Test
     public void testValueOfStringInvalid() {
         assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf("INVALID"));
-        assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf("sunday")); // case sensitive
+        assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf("sunday"));
     }
 
     @Test

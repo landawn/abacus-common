@@ -2,10 +2,11 @@ package com.landawn.abacus.exception;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class TooManyElementsException100Test extends TestBase {
 
     @Test
@@ -60,7 +61,6 @@ public class TooManyElementsException100Test extends TestBase {
 
     @Test
     public void testSerialVersionUID() {
-        // Test that the exception is serializable
         TooManyElementsException exception = new TooManyElementsException("Test");
         Assertions.assertTrue(exception instanceof java.io.Serializable);
     }

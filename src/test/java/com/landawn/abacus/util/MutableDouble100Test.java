@@ -2,9 +2,11 @@ package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class MutableDouble100Test extends TestBase {
 
     @Test
@@ -51,13 +53,11 @@ public class MutableDouble100Test extends TestBase {
     @Test
     public void testSetIf() throws Exception {
         MutableDouble mutableDouble = MutableDouble.of(10.5);
-        
-        // Test when predicate returns true
+
         boolean updated = mutableDouble.setIf(20.5, v -> v < 15.0);
         Assertions.assertTrue(updated);
         Assertions.assertEquals(20.5, mutableDouble.value());
-        
-        // Test when predicate returns false
+
         updated = mutableDouble.setIf(30.5, v -> v < 15.0);
         Assertions.assertFalse(updated);
         Assertions.assertEquals(20.5, mutableDouble.value());
@@ -67,7 +67,7 @@ public class MutableDouble100Test extends TestBase {
     public void testIsNaN() {
         MutableDouble mutableDouble = MutableDouble.of(10.5);
         Assertions.assertFalse(mutableDouble.isNaN());
-        
+
         mutableDouble.setValue(Double.NaN);
         Assertions.assertTrue(mutableDouble.isNaN());
     }
@@ -76,10 +76,10 @@ public class MutableDouble100Test extends TestBase {
     public void testIsInfinite() {
         MutableDouble mutableDouble = MutableDouble.of(10.5);
         Assertions.assertFalse(mutableDouble.isInfinite());
-        
+
         mutableDouble.setValue(Double.POSITIVE_INFINITY);
         Assertions.assertTrue(mutableDouble.isInfinite());
-        
+
         mutableDouble.setValue(Double.NEGATIVE_INFINITY);
         Assertions.assertTrue(mutableDouble.isInfinite());
     }
@@ -103,7 +103,7 @@ public class MutableDouble100Test extends TestBase {
         MutableDouble mutableDouble = MutableDouble.of(10.5);
         mutableDouble.add(5.25);
         Assertions.assertEquals(15.75, mutableDouble.value());
-        
+
         mutableDouble.add(-3.25);
         Assertions.assertEquals(12.5, mutableDouble.value());
     }
@@ -113,7 +113,7 @@ public class MutableDouble100Test extends TestBase {
         MutableDouble mutableDouble = MutableDouble.of(10.5);
         mutableDouble.subtract(3.25);
         Assertions.assertEquals(7.25, mutableDouble.value());
-        
+
         mutableDouble.subtract(-2.25);
         Assertions.assertEquals(9.5, mutableDouble.value());
     }
@@ -170,10 +170,10 @@ public class MutableDouble100Test extends TestBase {
     public void testIntValue() {
         MutableDouble mutableDouble = MutableDouble.of(42.7);
         Assertions.assertEquals(42, mutableDouble.intValue());
-        
+
         mutableDouble.setValue(42.3);
         Assertions.assertEquals(42, mutableDouble.intValue());
-        
+
         mutableDouble.setValue(-42.7);
         Assertions.assertEquals(-42, mutableDouble.intValue());
     }
@@ -201,16 +201,15 @@ public class MutableDouble100Test extends TestBase {
         MutableDouble a = MutableDouble.of(10.5);
         MutableDouble b = MutableDouble.of(20.5);
         MutableDouble c = MutableDouble.of(10.5);
-        
+
         Assertions.assertTrue(a.compareTo(b) < 0);
         Assertions.assertTrue(b.compareTo(a) > 0);
         Assertions.assertEquals(0, a.compareTo(c));
-        
-        // Test with special values
+
         MutableDouble nan = MutableDouble.of(Double.NaN);
         MutableDouble posInf = MutableDouble.of(Double.POSITIVE_INFINITY);
         MutableDouble negInf = MutableDouble.of(Double.NEGATIVE_INFINITY);
-        
+
         Assertions.assertTrue(a.compareTo(posInf) < 0);
         Assertions.assertTrue(negInf.compareTo(a) < 0);
         Assertions.assertEquals(0, nan.compareTo(nan));
@@ -221,17 +220,16 @@ public class MutableDouble100Test extends TestBase {
         MutableDouble a = MutableDouble.of(10.5);
         MutableDouble b = MutableDouble.of(10.5);
         MutableDouble c = MutableDouble.of(20.5);
-        
+
         Assertions.assertTrue(a.equals(b));
         Assertions.assertFalse(a.equals(c));
         Assertions.assertFalse(a.equals(null));
         Assertions.assertFalse(a.equals("10.5"));
-        
-        // Test special values
+
         MutableDouble nan1 = MutableDouble.of(Double.NaN);
         MutableDouble nan2 = MutableDouble.of(Double.NaN);
         Assertions.assertTrue(nan1.equals(nan2));
-        
+
         MutableDouble posZero = MutableDouble.of(0.0);
         MutableDouble negZero = MutableDouble.of(-0.0);
         Assertions.assertFalse(posZero.equals(negZero));
@@ -242,7 +240,7 @@ public class MutableDouble100Test extends TestBase {
         MutableDouble a = MutableDouble.of(10.5);
         MutableDouble b = MutableDouble.of(10.5);
         MutableDouble c = MutableDouble.of(20.5);
-        
+
         Assertions.assertEquals(a.hashCode(), b.hashCode());
         Assertions.assertNotEquals(a.hashCode(), c.hashCode());
         Assertions.assertEquals(Double.hashCode(10.5), a.hashCode());
@@ -252,13 +250,13 @@ public class MutableDouble100Test extends TestBase {
     public void testToString() {
         MutableDouble mutableDouble = MutableDouble.of(42.5);
         Assertions.assertNotNull(mutableDouble.toString());
-        
+
         mutableDouble.setValue(-100.75);
         Assertions.assertNotNull(mutableDouble.toString());
-        
+
         mutableDouble.setValue(Double.NaN);
         Assertions.assertNotNull(mutableDouble.toString());
-        
+
         mutableDouble.setValue(Double.POSITIVE_INFINITY);
         Assertions.assertNotNull(mutableDouble.toString());
     }
@@ -266,24 +264,21 @@ public class MutableDouble100Test extends TestBase {
     @Test
     public void testSpecialValues() {
         MutableDouble mutableDouble = MutableDouble.of(0.0);
-        
-        // Test positive/negative zero
+
         mutableDouble.setValue(0.0);
         Assertions.assertEquals(0.0, mutableDouble.value());
-        Assertions.assertFalse(1.0 / mutableDouble.value() < 0); // positive zero
-        
+        Assertions.assertFalse(1.0 / mutableDouble.value() < 0);
+
         mutableDouble.setValue(-0.0);
         Assertions.assertEquals(-0.0, mutableDouble.value());
-        Assertions.assertTrue(1.0 / mutableDouble.value() < 0); // negative zero
-        
-        // Test infinity
+        Assertions.assertTrue(1.0 / mutableDouble.value() < 0);
+
         mutableDouble.setValue(Double.POSITIVE_INFINITY);
         Assertions.assertEquals(Double.POSITIVE_INFINITY, mutableDouble.value());
-        
+
         mutableDouble.setValue(Double.NEGATIVE_INFINITY);
         Assertions.assertEquals(Double.NEGATIVE_INFINITY, mutableDouble.value());
-        
-        // Test NaN
+
         mutableDouble.setValue(Double.NaN);
         Assertions.assertTrue(Double.isNaN(mutableDouble.value()));
     }

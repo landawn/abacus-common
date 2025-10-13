@@ -1,26 +1,25 @@
 package com.landawn.abacus.util;
 
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class BrotliInputStream100Test extends TestBase {
 
     @Test
     public void testConstructorWithInputStream() throws IOException {
         byte[] data = new byte[] { 1, 2, 3, 4, 5 };
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
-        // This will likely fail with real Brotli data, but we're testing the constructor
         try {
             BrotliInputStream bis = new BrotliInputStream(bais);
             bis.close();
         } catch (Exception e) {
-            // Expected if data is not valid Brotli format
         }
     }
 
@@ -32,23 +31,18 @@ public class BrotliInputStream100Test extends TestBase {
             BrotliInputStream bis = new BrotliInputStream(bais, 1024);
             bis.close();
         } catch (Exception e) {
-            // Expected if data is not valid Brotli format
         }
     }
 
     @Test
     public void testRead() throws IOException {
-        // Note: Testing with actual Brotli compressed data would require proper test data
-        // This is a basic structural test
         byte[] data = new byte[] {};
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         try {
             BrotliInputStream bis = new BrotliInputStream(bais);
             int result = bis.read();
-            // Would return -1 for empty stream or throw if invalid format
             bis.close();
         } catch (Exception e) {
-            // Expected for invalid data
         }
     }
 
@@ -62,7 +56,6 @@ public class BrotliInputStream100Test extends TestBase {
             int result = bis.read(buffer);
             bis.close();
         } catch (Exception e) {
-            // Expected for invalid data
         }
     }
 
@@ -76,7 +69,6 @@ public class BrotliInputStream100Test extends TestBase {
             int result = bis.read(buffer, 0, 5);
             bis.close();
         } catch (Exception e) {
-            // Expected for invalid data
         }
     }
 
@@ -89,7 +81,6 @@ public class BrotliInputStream100Test extends TestBase {
             long skipped = bis.skip(10);
             bis.close();
         } catch (Exception e) {
-            // Expected for invalid data
         }
     }
 
@@ -104,7 +95,6 @@ public class BrotliInputStream100Test extends TestBase {
             });
             bis.close();
         } catch (Exception e) {
-            // Expected for invalid data
         }
     }
 
@@ -117,7 +107,6 @@ public class BrotliInputStream100Test extends TestBase {
             int available = bis.available();
             bis.close();
         } catch (Exception e) {
-            // Expected for invalid data
         }
     }
 
@@ -131,7 +120,6 @@ public class BrotliInputStream100Test extends TestBase {
             bis.reset();
             bis.close();
         } catch (Exception e) {
-            // Expected for invalid data
         }
     }
 
@@ -144,7 +132,6 @@ public class BrotliInputStream100Test extends TestBase {
             boolean supported = bis.markSupported();
             bis.close();
         } catch (Exception e) {
-            // Expected for invalid data
         }
     }
 }

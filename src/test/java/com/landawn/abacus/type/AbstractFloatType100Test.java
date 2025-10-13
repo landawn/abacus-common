@@ -17,10 +17,12 @@ import java.sql.Types;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class AbstractFloatType100Test extends TestBase {
 
     private AbstractFloatType floatType;
@@ -34,14 +36,11 @@ public class AbstractFloatType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test null value
         assertNull(floatType.stringOf(null));
 
-        // Test float value
         Float floatValue = 3.14f;
         assertEquals("3.14", floatType.stringOf(floatValue));
 
-        // Test various Number types
         assertEquals("3.14", floatType.stringOf(Double.valueOf(3.14)));
         assertEquals("42", floatType.stringOf(Integer.valueOf(42)));
         assertEquals("100", floatType.stringOf(Long.valueOf(100L)));
@@ -49,17 +48,14 @@ public class AbstractFloatType100Test extends TestBase {
 
     @Test
     public void testValueOf() {
-        // Test null/empty string
         assertNull(floatType.valueOf(null));
         assertNull(floatType.valueOf(""));
         assertThrows(NumberFormatException.class, () -> assertNull(floatType.valueOf("  ")));
 
-        // Test valid float strings
         assertEquals(Float.valueOf(3.14f), floatType.valueOf("3.14"));
         assertEquals(Float.valueOf(-10.5f), floatType.valueOf("-10.5"));
         assertEquals(Float.valueOf(0.0f), floatType.valueOf("0.0"));
 
-        // Test strings with suffixes
         assertEquals(Float.valueOf(3.14f), floatType.valueOf("3.14f"));
         assertEquals(Float.valueOf(3.14f), floatType.valueOf("3.14F"));
         assertEquals(Float.valueOf(3.14f), floatType.valueOf("3.14d"));
@@ -67,7 +63,6 @@ public class AbstractFloatType100Test extends TestBase {
         assertEquals(Float.valueOf(100f), floatType.valueOf("100l"));
         assertEquals(Float.valueOf(100f), floatType.valueOf("100L"));
 
-        // Test invalid strings
         assertThrows(NumberFormatException.class, () -> floatType.valueOf("abc"));
         assertThrows(NumberFormatException.class, () -> floatType.valueOf("12.34.56"));
         assertThrows(NumberFormatException.class, () -> floatType.valueOf("1a"));
@@ -104,15 +99,12 @@ public class AbstractFloatType100Test extends TestBase {
     public void testSetPreparedStatement() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
 
-        // Test null value
         floatType.set(stmt, 1, null);
         verify(stmt).setNull(1, Types.FLOAT);
 
-        // Test float value
         floatType.set(stmt, 2, 3.14f);
         verify(stmt).setFloat(2, 3.14f);
 
-        // Test other Number types
         floatType.set(stmt, 3, Float.valueOf(2.718f));
         verify(stmt).setFloat(3, 2.718f);
 
@@ -124,15 +116,12 @@ public class AbstractFloatType100Test extends TestBase {
     public void testSetCallableStatement() throws SQLException {
         CallableStatement stmt = mock(CallableStatement.class);
 
-        // Test null value
         floatType.set(stmt, "param1", null);
         verify(stmt).setNull("param1", Types.FLOAT);
 
-        // Test float value
         floatType.set(stmt, "param2", 3.14f);
         verify(stmt).setFloat("param2", 3.14f);
 
-        // Test other Number types
         floatType.set(stmt, "param3", Double.valueOf(2.718));
         verify(stmt).setFloat("param3", 2.718f);
 
@@ -144,58 +133,20 @@ public class AbstractFloatType100Test extends TestBase {
     public void testAppendTo() throws IOException {
         StringBuilder sb = new StringBuilder();
 
-        // Test null value
         floatType.appendTo(sb, null);
         assertEquals("null", sb.toString());
 
-        // Test float value
         sb.setLength(0);
         floatType.appendTo(sb, 3.14f);
         assertEquals("3.14", sb.toString());
 
-        // Test other Number types
         sb.setLength(0);
         floatType.appendTo(sb, Double.valueOf(2.718));
         assertEquals("2.718", sb.toString());
 
-        // Test IOException handling
         Appendable errorAppendable = mock(Appendable.class);
         when(errorAppendable.append(anyString())).thenThrow(new IOException("Test exception"));
         assertThrows(IOException.class, () -> floatType.appendTo(errorAppendable, null));
     }
-
-    //    @Test
-    //    public void testWriteCharacter() throws IOException {
-    //        // Test null value without config
-    //        floatType.writeCharacter(writer, null, null);
-    //        verify(writer).write("null".toCharArray());
-    //
-    //        // Test null value with writeNullNumberAsZero config
-    //        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
-    //        when(config.writeNullNumberAsZero()).thenReturn(true);
-    //        reset(writer);
-    //        floatType.writeCharacter(writer, null, config);
-    //        verify(writer).write(0.0f);
-    //
-    //        // Test float value
-    //        reset(writer);
-    //        floatType.writeCharacter(writer, 3.14f, null);
-    //        verify(writer).write(3.14f);
-    //
-    //        // Test other Number types
-    //        reset(writer);
-    //        floatType.writeCharacter(writer, Double.valueOf(2.718), null);
-    //        verify(writer).write(2.718f);
-    //
-    //        reset(writer);
-    //        floatType.writeCharacter(writer, Integer.valueOf(42), null);
-    //        verify(writer).write(42.0f);
-    //
-    //        // Test with config but writeNullNumberAsZero false
-    //        reset(writer);
-    //        when(config.writeNullNumberAsZero()).thenReturn(false);
-    //        floatType.writeCharacter(writer, null, config);
-    //        verify(writer).write(NULL_CHAR_ARRAY);
-    //    }
 
 }

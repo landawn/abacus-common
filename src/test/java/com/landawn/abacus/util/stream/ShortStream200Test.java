@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
@@ -29,7 +30,7 @@ import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.ShortSummaryStatistics;
 import com.landawn.abacus.util.u.OptionalShort;
 
-
+@Tag("new-test")
 public class ShortStream200Test extends TestBase {
 
     private ShortStream emptyStream;
@@ -43,7 +44,6 @@ public class ShortStream200Test extends TestBase {
     private ShortStream duplicateElementStream;
     private ShortStream sortedStream;
 
-    // This method is a placeholder as requested, but we will use createShortStream() for actual setup.
     ShortStream createShortStream(short... data) {
         return ShortStream.of(data);
     }
@@ -585,7 +585,6 @@ public class ShortStream200Test extends TestBase {
 
         @Test
         public void testShuffled() {
-            // Use a fixed seed for deterministic shuffling
             short[] result = multiElementStream.shuffled(new Random(42)).toArray();
             short[] original = multiElementStream2.toArray();
             Arrays.sort(result);

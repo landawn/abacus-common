@@ -1035,8 +1035,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             return true;
         }
 
-        if (obj != null && obj.getClass().equals(Difference.class)) {
-            final Difference<?, ?> other = (Difference<?, ?>) obj;
+        if (obj instanceof Difference<?, ?> other) {
             return inCommon().equals(other.inCommon()) && onLeftOnly().equals(other.onLeftOnly()) && onRightOnly().equals(other.onRightOnly());
         }
 
@@ -1668,7 +1667,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                         if (val2 == null) {
                             //noinspection SuspiciousMethodCalls
                             if (map2.containsKey(key1)) {
-                                if (entry1.getValue() == null) {
+                                if (val1 == null) {
                                     common.put(key1, val1);
                                 } else {
                                     //noinspection ConstantValue
@@ -1725,7 +1724,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                         if (val2 == null) {
                             //noinspection SuspiciousMethodCalls
                             if (map2.containsKey(key1)) {
-                                if (entry1.getValue() == null) {
+                                if (val1 == null) {
                                     common.put(key1, val1);
                                 } else {
                                     //noinspection ConstantValue
@@ -2460,8 +2459,6 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 throw new IllegalArgumentException(bean2.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
-            N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
-
             final TriPredicate<String, Object, Object> valueEquivalenceToUse = (TriPredicate<String, Object, Object>) valueEquivalence;
             final Map<String, Object> common = new LinkedHashMap<>();
             final Map<String, Object> leftOnly = new LinkedHashMap<>();
@@ -2856,8 +2853,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             N.checkArgNotNull(idExtractor1, cs.idExtractor1);
             N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 
-            final Class<T1> clsA = N.isEmpty(a) ? null : (Class<T1>) N.firstOrNullIfEmpty(a).getClass();
-            final Class<T2> clsB = N.isEmpty(b) ? null : (Class<T2>) N.firstOrNullIfEmpty(b).getClass();
+            final T1 firstA = N.isEmpty(a) ? null : N.firstOrNullIfEmpty(a);
+            final T2 firstB = N.isEmpty(b) ? null : N.firstOrNullIfEmpty(b);
+            final Class<T1> clsA = firstA != null ? (Class<T1>) firstA.getClass() : null;
+            final Class<T2> clsB = firstB != null ? (Class<T2>) firstB.getClass() : null;
 
             if (clsA != null && !Beans.isBeanClass(clsA)) {
                 throw new IllegalArgumentException(clsA.getCanonicalName() + " is not a bean class"); // NOSONAR

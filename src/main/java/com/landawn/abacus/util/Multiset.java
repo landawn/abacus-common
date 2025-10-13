@@ -506,6 +506,21 @@ public final class Multiset<E> implements Collection<E> {
     }
 
     /**
+     * Returns the number of occurrences of an element in this multiset (the <i>count</i> of the
+     * element).
+     * 
+     * <p>Note that for an {@link Object#equals}-based multiset, this gives the same result as
+     * {@link Collections#frequency} (which would presumably perform more poorly).</p>
+     *
+     * @param element the element to count occurrences of
+     * @return the number of occurrences of the element in this multiset; possibly zero but never negative
+     * @deprecated Use {@link #getCount(Object)} instead
+     */
+    public int get(final Object element) {
+        return getCount(element);
+    }
+
+    /**
      * Returns the number of occurrences of an element in this multiset.
      * 
      * <p>For an {@link Object#equals}-based multiset, this gives the same result as
@@ -707,12 +722,13 @@ public final class Multiset<E> implements Collection<E> {
             if (occurrences > 0) {
                 count = MutableInt.of(occurrences);
                 backingMap.put(element, count);
+                return occurrences;
             }
+            return 0;
         } else {
             count.add(occurrences);
+            return count.value();
         }
-
-        return count == null ? occurrences : count.value();
     }
 
     /**
@@ -1344,11 +1360,6 @@ public final class Multiset<E> implements Collection<E> {
         return backingMap.keySet().containsAll(elements);
     }
 
-    // It won't work.
-    //    public Multiset<T> synchronized() {
-    //        return new Multiset<>(Collections.synchronizedMap(valueMap));
-    //    }
-
     // Query Operations
 
     // Comparison and hashing
@@ -1499,12 +1510,6 @@ public final class Multiset<E> implements Collection<E> {
         };
     }
 
-    // TODO
-    //    @Override
-    //    public Spliterator<E> spliterator() {
-    //        return Multisets.spliteratorImpl(this);
-    //    }
-
     /**
      * Returns the total number of all occurrences of all elements in this multiset.
      * This is the sum of counts for all distinct elements.
@@ -1550,7 +1555,15 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Checks if this multiset is empty.
      *
-     * This method returns {@code true} if this multiset contains no elements.
+     * <p>This method returns {@code true} if this multiset contains no elements.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = new Multiset<>();
+     * System.out.println(multiset.isEmpty()); // Prints: true
+     * multiset.add("test");
+     * System.out.println(multiset.isEmpty()); // Prints: false
+     * }</pre>
      *
      * @return {@code true} if the multiset contains no elements, {@code false} otherwise.
      */
@@ -1562,8 +1575,15 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Clears all elements from this multiset.
      *
-     * This method removes all elements from the multiset, effectively making it empty.
-     * The count of all elements in the multiset will be zero after this operation.
+     * <p>This method removes all elements from the multiset, effectively making it empty.
+     * The count of all elements in the multiset will be zero after this operation.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "a", "b");
+     * multiset.clear();
+     * System.out.println(multiset.isEmpty()); // Prints: true
+     * }</pre>
      */
     @Override
     public void clear() {
@@ -1577,11 +1597,18 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Converts the multiset to an array.
      *
-     * This method returns an array containing all the elements in this multiset.
+     * <p>This method returns an array containing all the elements in this multiset.
      * Elements that occur multiple times in the multiset will appear multiple times in the array.
-     * The order of elements in the array is unspecified.
+     * The order of elements in the array is unspecified.</p>
      *
-     * @return An array containing all the elements in this multiset.
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "a", "b");
+     * Object[] array = multiset.toArray();
+     * System.out.println(array.length); // Prints: 3
+     * }</pre>
+     *
+     * @return an array containing all the elements in this multiset
      */
     @Override
     public Object[] toArray() {
@@ -1591,15 +1618,22 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Converts the multiset to an array of a specific type.
      *
-     * This method returns an array containing all the elements in this multiset.
+     * <p>This method returns an array containing all the elements in this multiset.
      * Elements that occur multiple times in the multiset will appear multiple times in the array.
-     * The order of elements in the array is unspecified.
+     * The order of elements in the array is unspecified.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "a", "b");
+     * String[] array = multiset.toArray(new String[0]);
+     * System.out.println(array.length); // Prints: 3
+     * }</pre>
      *
      * @param <T> the runtime type of the array to contain the multiset
      * @param a the array into which the elements of this multiset are to be stored, if it is big enough;
-     *              otherwise, a new array of the same runtime type is allocated for this purpose.
-     * @return An array containing all the elements in this multiset.
-     * @throws IllegalArgumentException if the provided array is {@code null}.
+     *              otherwise, a new array of the same runtime type is allocated for this purpose
+     * @return an array containing all the elements in this multiset
+     * @throws IllegalArgumentException if the provided array is {@code null}
      */
     @Override
     public <T> T[] toArray(final T[] a) throws IllegalArgumentException {
@@ -1621,12 +1655,20 @@ public final class Multiset<E> implements Collection<E> {
     }
 
     /**
-     * Converts the multiset to a map.
+     * Converts the multiset to a map where keys are elements and values are their counts.
      *
-     * This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
-     * Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.
+     * <p>This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
+     * Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.</p>
      *
-     * @return A map with the elements of this multiset as keys and their counts as values.
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "a", "b");
+     * Map<String, Integer> map = multiset.toMap();
+     * System.out.println(map.get("a")); // Prints: 2
+     * System.out.println(map.get("b")); // Prints: 1
+     * }</pre>
+     *
+     * @return a map with the elements of this multiset as keys and their counts as values
      */
     public Map<E, Integer> toMap() {
         final Map<E, Integer> result = Maps.newTargetMap(backingMap);
@@ -1641,13 +1683,19 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Converts the multiset to a map created by the provided supplier function.
      *
-     * This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
+     * <p>This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
      * Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.
-     * The type of the map is determined by the provided supplier function.
+     * The type of the map is determined by the provided supplier function.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "a", "b");
+     * TreeMap<String, Integer> map = multiset.toMap(TreeMap::new);
+     * }</pre>
      *
      * @param <M> the type of the map to be returned
      * @param supplier a function that generates a new instance of the desired map type
-     * @return A map with the elements of this multiset as keys and their counts as values.
+     * @return a map with the elements of this multiset as keys and their counts as values
      */
     public <M extends Map<E, Integer>> M toMap(final IntFunction<? extends M> supplier) {
         final M result = supplier.apply(backingMap.size());
@@ -1660,13 +1708,20 @@ public final class Multiset<E> implements Collection<E> {
     }
 
     /**
-     * Converts the multiset to a map sorted by occurrences.
+     * Converts the multiset to a map sorted by occurrences in ascending order.
      *
-     * This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
+     * <p>This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
      * Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.
-     * The map is sorted in ascending order by the count of the elements.
+     * The map is sorted in ascending order by the count of the elements.</p>
      *
-     * @return A map with the elements of this multiset as keys and their counts as values, sorted by the counts.
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "b", "b", "c", "c", "c");
+     * Map<String, Integer> sorted = multiset.toMapSortedByOccurrences();
+     * // Map entries ordered: a=1, b=2, c=3
+     * }</pre>
+     *
+     * @return a map with the elements of this multiset as keys and their counts as values, sorted by the counts
      */
     @SuppressWarnings("rawtypes")
     public Map<E, Integer> toMapSortedByOccurrences() {
@@ -1676,12 +1731,19 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Converts the multiset to a map sorted by occurrences using a custom comparator.
      *
-     * This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
+     * <p>This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
      * Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.
-     * The map is sorted by the counts of the elements using the provided comparator.
+     * The map is sorted by the counts of the elements using the provided comparator.</p>
      *
-     * @param cmp The comparator to be used for sorting the counts of the elements.
-     * @return A map with the elements of this multiset as keys and their counts as values, sorted by the counts using the provided comparator.
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "b", "b", "c", "c", "c");
+     * Map<String, Integer> sorted = multiset.toMapSortedByOccurrences(Comparator.reverseOrder());
+     * // Map entries ordered: c=3, b=2, a=1 (descending by count)
+     * }</pre>
+     *
+     * @param cmp the comparator to be used for sorting the counts of the elements
+     * @return a map with the elements of this multiset as keys and their counts as values, sorted by the counts using the provided comparator
      */
     public Map<E, Integer> toMapSortedByOccurrences(final Comparator<? super Integer> cmp) {
         return toMapSortedBy((o1, o2) -> cmp.compare(o1.getValue().value(), o2.getValue().value()));
@@ -1690,12 +1752,19 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Converts the multiset to a map sorted by keys.
      *
-     * This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
+     * <p>This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
      * Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.
-     * The map is sorted by the keys of the elements using the provided comparator.
+     * The map is sorted by the keys of the elements using the provided comparator.</p>
      *
-     * @param cmp The comparator to be used for sorting the keys of the elements.
-     * @return A map with the elements of this multiset as keys and their counts as values, sorted by the keys using the provided comparator.
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("c", "a", "b", "a");
+     * Map<String, Integer> sorted = multiset.toMapSortedByKey(Comparator.naturalOrder());
+     * // Map entries ordered: a=2, b=1, c=1
+     * }</pre>
+     *
+     * @param cmp the comparator to be used for sorting the keys of the elements
+     * @return a map with the elements of this multiset as keys and their counts as values, sorted by the keys using the provided comparator
      */
     public Map<E, Integer> toMapSortedByKey(final Comparator<? super E> cmp) {
         return toMapSortedBy(Comparators.comparingByKey(cmp));
@@ -1704,12 +1773,19 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Converts the multiset to a map sorted by a custom comparator.
      *
-     * This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
+     * <p>This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
      * Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.
-     * The map is sorted according to the order induced by the provided comparator.
+     * The map is sorted according to the order induced by the provided comparator.</p>
      *
-     * @param cmp The comparator to be used for sorting the entries of the map. The comparator should compare Map.Entry objects.
-     * @return A map with the elements of this multiset as keys and their counts as values, sorted according to the provided comparator.
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "a", "b");
+     * Map<String, Integer> sorted = multiset.toMapSortedBy(
+     *     Comparator.comparing(e -> e.getValue().value()));
+     * }</pre>
+     *
+     * @param cmp the comparator to be used for sorting the entries of the map. The comparator should compare Map.Entry objects
+     * @return a map with the elements of this multiset as keys and their counts as values, sorted according to the provided comparator
      */
     Map<E, Integer> toMapSortedBy(final Comparator<Map.Entry<E, MutableInt>> cmp) {
         if (N.isEmpty(backingMap)) {
@@ -1732,9 +1808,17 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Returns an unmodifiable map where the keys are the elements in this multiset and the values are their corresponding counts.
-     * Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.
      *
-     * @return An immutable map with the elements of this multiset as keys and their counts as values.
+     * <p>Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "a", "b");
+     * ImmutableMap<String, Integer> immutableMap = multiset.toImmutableMap();
+     * // Cannot be modified - throws UnsupportedOperationException
+     * }</pre>
+     *
+     * @return an immutable map with the elements of this multiset as keys and their counts as values
      */
     public ImmutableMap<E, Integer> toImmutableMap() {
         return ImmutableMap.wrap(toMap());
@@ -1742,20 +1826,23 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Returns an unmodifiable map where the keys are the elements in this multiset and the values are their corresponding counts.
-     * Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.
-     * The type of the map is determined by the provided supplier function.
      *
-     * @param mapSupplier A function that generates a new instance of the desired map type.
-     * @return An immutable map with the elements of this multiset as keys and their counts as values.
+     * <p>Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.
+     * The type of the map is determined by the provided supplier function.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("c", "a", "b", "a");
+     * ImmutableMap<String, Integer> immutableMap =
+     *     multiset.toImmutableMap(size -> new TreeMap<>());
+     * }</pre>
+     *
+     * @param mapSupplier a function that generates a new instance of the desired map type
+     * @return an immutable map with the elements of this multiset as keys and their counts as values
      */
     public ImmutableMap<E, Integer> toImmutableMap(final IntFunction<? extends Map<E, Integer>> mapSupplier) {
         return ImmutableMap.wrap(toMap(mapSupplier));
     }
-
-    // It won't work.
-    //    public Multiset<T> synchronized() {
-    //        return new Multiset<>(Collections.synchronizedMap(valueMap));
-    //    }
 
     // Query Operations
 
@@ -1862,18 +1949,18 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Returns an (unmodifiable) Stream of entries in this multiset.
      *
-     * Each entry in the Stream represents a distinct element in the multiset and its count.
-     * The order of the entries in the Stream is unspecified.
-     * 
+     * <p>Each entry in the Stream represents a distinct element in the multiset and its count.
+     * The order of the entries in the Stream is unspecified.</p>
+     *
      * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
-     * multiset.entries().forEach(entry -> 
+     * multiset.entries().forEach(entry ->
      *     System.out.println(entry.element() + ": " + entry.count()));
      * // Prints: a: 2, b: 1 (order may vary)
      * }</pre>
      *
-     * @return A Stream of entries representing the data of this multiset.
+     * @return a Stream of entries representing the data of this multiset
      */
     @Beta
     public Stream<Multiset.Entry<E>> entries() {
@@ -1882,18 +1969,18 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Applies the provided function to this multiset and returns the result.
-     * 
+     *
      * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "b", "c");
      * int distinctCount = multiset.apply(ms -> ms.countOfDistinctElements()); // 3
      * }</pre>
      *
-     * @param <R> The type of the result returned by the function.
-     * @param <X> The type of the exception that can be thrown by the function.
-     * @param func The function to be applied to this multiset. This can be any instance of Throwables.Function.
-     * @return The result of applying the provided function to this multiset.
-     * @throws X if the provided function throws an exception of type X.
+     * @param <R> the type of the result returned by the function
+     * @param <X> the type of the exception that can be thrown by the function
+     * @param func the function to be applied to this multiset
+     * @return the result of applying the provided function to this multiset
+     * @throws X if the provided function throws an exception of type X
      */
     public <R, X extends Exception> R apply(final Throwables.Function<? super Multiset<E>, ? extends R, X> func) throws X {
         return func.apply(this);
@@ -1902,23 +1989,23 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Applies the provided function to this multiset and returns the result, if the multiset is not empty.
      *
-     * This method applies the provided function to this multiset and returns the result wrapped in an Optional.
-     * If the multiset is empty, it returns an empty Optional.
-     * 
+     * <p>This method applies the provided function to this multiset and returns the result wrapped in an Optional.
+     * If the multiset is empty, it returns an empty Optional.</p>
+     *
      * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
      * Optional<Integer> size = multiset.applyIfNotEmpty(ms -> ms.size()); // Optional.empty()
-     * 
+     *
      * multiset.add("test");
      * size = multiset.applyIfNotEmpty(ms -> ms.size()); // Optional.of(1)
      * }</pre>
      *
-     * @param <R> The type of the result returned by the function.
-     * @param <X> The type of the exception that can be thrown by the function.
-     * @param func The function to be applied to this multiset. This can be any instance of Throwables.Function.
-     * @return An Optional containing the result of applying the provided function to this multiset, or an empty Optional if the multiset is empty.
-     * @throws X if the provided function throws an exception of type X.
+     * @param <R> the type of the result returned by the function
+     * @param <X> the type of the exception that can be thrown by the function
+     * @param func the function to be applied to this multiset
+     * @return an Optional containing the result of applying the provided function to this multiset, or an empty Optional if the multiset is empty
+     * @throws X if the provided function throws an exception of type X
      */
     public <R, X extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Multiset<E>, ? extends R, X> func) throws X {
         return isEmpty() ? Optional.empty() : Optional.ofNullable(func.apply(this));
@@ -1926,16 +2013,16 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Applies the provided consumer function to this multiset.
-     * 
+     *
      * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "b", "c");
      * multiset.accept(ms -> System.out.println("Size: " + ms.size())); // Prints: Size: 3
      * }</pre>
      *
-     * @param <X> The type of the exception that can be thrown by the consumer function.
-     * @param action The consumer function to be applied to this multiset. This can be any instance of Throwables.Consumer.
-     * @throws X if the provided consumer function throws an exception of type X.
+     * @param <X> the type of the exception that can be thrown by the consumer function
+     * @param action the consumer function to be applied to this multiset
+     * @throws X if the provided consumer function throws an exception of type X
      */
     public <X extends Exception> void accept(final Throwables.Consumer<? super Multiset<E>, X> action) throws X {
         action.accept(this);
@@ -1943,22 +2030,22 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Applies the provided consumer function to this multiset if it is not empty.
-     * 
+     *
      * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
      * multiset.acceptIfNotEmpty(ms -> System.out.println("Not empty"))
      *         .orElse(() -> System.out.println("Empty")); // Prints: Empty
-     * 
+     *
      * multiset.add("test");
      * multiset.acceptIfNotEmpty(ms -> System.out.println("Not empty"))
      *         .orElse(() -> System.out.println("Empty")); // Prints: Not empty
      * }</pre>
      *
-     * @param <X> The type of the exception that can be thrown by the consumer function.
-     * @param action The consumer function to be applied to this multiset. This can be any instance of Throwables.Consumer.
-     * @return An instance of OrElse which can be used to perform some other operation if the Multiset is empty.
-     * @throws X if the provided consumer function throws an exception of type X.
+     * @param <X> the type of the exception that can be thrown by the consumer function
+     * @param action the consumer function to be applied to this multiset
+     * @return an instance of OrElse which can be used to perform some other operation if the Multiset is empty
+     * @throws X if the provided consumer function throws an exception of type X
      */
     public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multiset<E>, X> action) throws X {
         return If.is(!backingMap.isEmpty()).then(this, action);
@@ -1966,9 +2053,16 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Returns the hash code value for this multiset.
-     * 
+     *
      * <p>The hash code is computed based on the backing map's hash code,
      * which includes both the elements and their counts.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * Multiset<String> ms1 = Multiset.of("a", "b");
+     * Multiset<String> ms2 = Multiset.of("b", "a");
+     * System.out.println(ms1.hashCode() == ms2.hashCode()); // true
+     * }</pre>
      *
      * @return the hash code value for this multiset
      */

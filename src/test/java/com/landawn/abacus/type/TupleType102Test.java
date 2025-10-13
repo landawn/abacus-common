@@ -15,6 +15,7 @@ import java.io.Writer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -22,6 +23,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple3;
 
+@Tag("new-test")
 public class TupleType102Test extends TestBase {
 
     private Tuple3Type<String, Integer, Boolean> tuple3Type;

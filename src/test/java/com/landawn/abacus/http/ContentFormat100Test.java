@@ -4,10 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class ContentFormat100Test extends TestBase {
 
     @Test
@@ -56,8 +57,7 @@ public class ContentFormat100Test extends TestBase {
     public void testEnumValues() {
         ContentFormat[] values = ContentFormat.values();
         assertEquals(17, values.length);
-        
-        // Test valueOf
+
         assertEquals(ContentFormat.JSON, ContentFormat.valueOf("JSON"));
         assertEquals(ContentFormat.XML_GZIP, ContentFormat.valueOf("XML_GZIP"));
         assertEquals(ContentFormat.FormUrlEncoded, ContentFormat.valueOf("FormUrlEncoded"));

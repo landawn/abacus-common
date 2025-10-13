@@ -18,14 +18,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.function.IntBiFunction;
 
+@Tag("new-test")
 public class N100Test extends TestBase {
-
-    // Test occurrencesOf methods
 
     @Test
     public void testOccurrencesOfBooleanArray() {
@@ -180,8 +180,6 @@ public class N100Test extends TestBase {
         assertEquals(1, N.occurrencesOf("banana", "ana"));
     }
 
-    // Test occurrencesMap methods
-
     @Test
     public void testOccurrencesMapArray() {
         String[] empty = {};
@@ -228,8 +226,6 @@ public class N100Test extends TestBase {
         assertEquals(2, map.get("b").intValue());
         assertEquals(1, map.get("c").intValue());
     }
-
-    // Test contains methods
 
     @Test
     public void testContainsBooleanArray() {
@@ -377,8 +373,6 @@ public class N100Test extends TestBase {
         assertFalse(N.contains(list2.iterator(), "d"));
     }
 
-    // Test containsAll methods
-
     @Test
     public void testContainsAllCollectionCollection() {
         List<String> collection = Arrays.asList("a", "b", "c", "d");
@@ -424,8 +418,6 @@ public class N100Test extends TestBase {
         assertFalse(N.containsAll(list2.iterator(), notAllPresent));
     }
 
-    // Test containsAny methods
-
     @Test
     public void testContainsAnyCollectionCollection() {
         List<String> collection = Arrays.asList("a", "b", "c", "d");
@@ -468,8 +460,6 @@ public class N100Test extends TestBase {
         assertFalse(N.containsAny(list2.iterator(), nonePresent));
     }
 
-    // Test containsNone methods
-
     @Test
     public void testContainsNoneCollectionCollection() {
         List<String> collection = Arrays.asList("a", "b", "c", "d");
@@ -511,8 +501,6 @@ public class N100Test extends TestBase {
         Set<String> somePresent = new HashSet<>(Arrays.asList("a", "x"));
         assertFalse(N.containsNone(list2.iterator(), somePresent));
     }
-
-    // Test slice methods
 
     @Test
     public void testSliceArray() {
@@ -583,8 +571,6 @@ public class N100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> N.slice(Arrays.asList("a", "b").iterator(), -1, 2));
     }
 
-    // Test split methods for boolean arrays
-
     @Test
     public void testSplitBooleanArray() {
         boolean[] array = { true, false, true, false, true };
@@ -615,8 +601,6 @@ public class N100Test extends TestBase {
         assertEquals(2, chunks.get(1).length);
     }
 
-    // Test split methods for char arrays
-
     @Test
     public void testSplitCharArray() {
         char[] array = { 'a', 'b', 'c', 'd', 'e' };
@@ -631,8 +615,6 @@ public class N100Test extends TestBase {
         assertArrayEquals(new char[] { 'e' }, chunks.get(2));
     }
 
-    // Test split methods for byte arrays
-
     @Test
     public void testSplitByteArray() {
         byte[] array = { 1, 2, 3, 4, 5 };
@@ -643,8 +625,6 @@ public class N100Test extends TestBase {
         assertEquals(1, chunks.get(2).length);
     }
 
-    // Test split methods for short arrays
-
     @Test
     public void testSplitShortArray() {
         short[] array = { 1, 2, 3, 4, 5 };
@@ -654,8 +634,6 @@ public class N100Test extends TestBase {
         assertEquals(2, chunks.get(1).length);
         assertEquals(1, chunks.get(2).length);
     }
-
-    // Test split methods for int arrays
 
     @Test
     public void testSplitIntArray() {
@@ -671,8 +649,6 @@ public class N100Test extends TestBase {
         assertArrayEquals(new int[] { 5 }, chunks.get(2));
     }
 
-    // Test split methods for long arrays
-
     @Test
     public void testSplitLongArray() {
         long[] array = { 1L, 2L, 3L, 4L, 5L };
@@ -682,8 +658,6 @@ public class N100Test extends TestBase {
         assertEquals(2, chunks.get(1).length);
         assertEquals(1, chunks.get(2).length);
     }
-
-    // Test split methods for float arrays
 
     @Test
     public void testSplitFloatArray() {
@@ -695,8 +669,6 @@ public class N100Test extends TestBase {
         assertEquals(1, chunks.get(2).length);
     }
 
-    // Test split methods for double arrays
-
     @Test
     public void testSplitDoubleArray() {
         double[] array = { 1.0, 2.0, 3.0, 4.0, 5.0 };
@@ -706,8 +678,6 @@ public class N100Test extends TestBase {
         assertEquals(2, chunks.get(1).length);
         assertEquals(1, chunks.get(2).length);
     }
-
-    // Test split methods for object arrays
 
     @Test
     public void testSplitObjectArray() {
@@ -722,8 +692,6 @@ public class N100Test extends TestBase {
         assertArrayEquals(new String[] { "c", "d" }, chunks.get(1));
         assertArrayEquals(new String[] { "e" }, chunks.get(2));
     }
-
-    // Test split methods for collections
 
     @Test
     public void testSplitCollection() {
@@ -751,8 +719,6 @@ public class N100Test extends TestBase {
         assertEquals(Arrays.asList("d", "e"), chunks.get(1));
     }
 
-    // Test split methods for iterables
-
     @Test
     public void testSplitIterable() {
         List<String> list = Arrays.asList("a", "b", "c", "d", "e");
@@ -763,8 +729,6 @@ public class N100Test extends TestBase {
         List<List<String>> setChunks = N.split((Iterable<String>) set, 2);
         assertEquals(3, setChunks.size());
     }
-
-    // Test split methods for iterators
 
     @Test
     public void testSplitIterator() {
@@ -784,8 +748,6 @@ public class N100Test extends TestBase {
         ObjIterator<List<String>> empty = N.split((Iterator<String>) null, 2);
         assertFalse(empty.hasNext());
     }
-
-    // Test split methods for CharSequence
 
     @Test
     public void testSplitCharSequence() {
@@ -811,8 +773,6 @@ public class N100Test extends TestBase {
         assertEquals("bc", chunks.get(0));
         assertEquals("de", chunks.get(1));
     }
-
-    // Test splitByChunkCount methods
 
     @Test
     public void testSplitByChunkCount() {
@@ -870,8 +830,6 @@ public class N100Test extends TestBase {
         assertEquals(2, chunks.get(4).size());
     }
 
-    // Test concat methods for boolean arrays
-
     @Test
     public void testConcatBooleanArrays() {
         boolean[] a = { true, false };
@@ -900,8 +858,6 @@ public class N100Test extends TestBase {
         assertArrayEquals(new boolean[] {}, N.concat((boolean[][]) null));
     }
 
-    // Test concat methods for char arrays
-
     @Test
     public void testConcatCharArrays() {
         char[] a = { 'a', 'b' };
@@ -918,8 +874,6 @@ public class N100Test extends TestBase {
         char[] result = N.concat(a, b, c);
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, result);
     }
-
-    // Test concat methods for byte arrays
 
     @Test
     public void testConcatByteArrays() {
@@ -938,8 +892,6 @@ public class N100Test extends TestBase {
         assertArrayEquals(new byte[] { 1, 2, 3, 4 }, result);
     }
 
-    // Test concat methods for short arrays
-
     @Test
     public void testConcatShortArrays() {
         short[] a = { 1, 2 };
@@ -956,8 +908,6 @@ public class N100Test extends TestBase {
         short[] result = N.concat(a, b, c);
         assertArrayEquals(new short[] { 1, 2, 3, 4 }, result);
     }
-
-    // Test concat methods for int arrays
 
     @Test
     public void testConcatIntArrays() {
@@ -976,8 +926,6 @@ public class N100Test extends TestBase {
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, result);
     }
 
-    // Test concat methods for long arrays
-
     @Test
     public void testConcatLongArrays() {
         long[] a = { 1L, 2L };
@@ -994,8 +942,6 @@ public class N100Test extends TestBase {
         long[] result = N.concat(a, b, c);
         assertArrayEquals(new long[] { 1L, 2L, 3L, 4L }, result);
     }
-
-    // Test concat methods for float arrays
 
     @Test
     public void testConcatFloatArrays() {
@@ -1014,8 +960,6 @@ public class N100Test extends TestBase {
         assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f }, result, 0.001f);
     }
 
-    // Test concat methods for double arrays
-
     @Test
     public void testConcatDoubleArrays() {
         double[] a = { 1.0, 2.0 };
@@ -1032,8 +976,6 @@ public class N100Test extends TestBase {
         double[] result = N.concat(a, b, c);
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, result, 0.001);
     }
-
-    // Test concat methods for object arrays
 
     @Test
     public void testConcatObjectArrays() {
@@ -1060,8 +1002,6 @@ public class N100Test extends TestBase {
         assertArrayEquals(new String[] {}, N.concat(new String[0][]));
         assertArrayEquals(a.clone(), N.concat(a));
     }
-
-    // Test concat methods for iterables
 
     @Test
     public void testConcatIterables() {
@@ -1107,8 +1047,6 @@ public class N100Test extends TestBase {
         assertEquals(new HashSet<>(Arrays.asList("a", "b", "c", "d")), result);
     }
 
-    // Test concat methods for iterators
-
     @Test
     public void testConcatIterators() {
         List<String> a = Arrays.asList("a", "b");
@@ -1135,8 +1073,6 @@ public class N100Test extends TestBase {
         }
         assertEquals(Arrays.asList("a", "b", "c", "d"), collected);
     }
-
-    // Test flatten methods for 2D arrays
 
     @Test
     public void testFlattenBoolean2DArray() {
@@ -1221,8 +1157,6 @@ public class N100Test extends TestBase {
         assertArrayEquals(new String[] {}, N.flatten((String[][]) null, String.class));
     }
 
-    // Test flatten methods for iterables
-
     @Test
     public void testFlattenIterableOfIterables() {
         List<List<String>> lists = Arrays.asList(Arrays.asList("a", "b"), Arrays.asList("c"), Arrays.asList("d", "e"));
@@ -1242,8 +1176,6 @@ public class N100Test extends TestBase {
         assertEquals(new HashSet<>(Arrays.asList("a", "b", "c", "d", "e")), result);
     }
 
-    // Test flatten methods for iterators
-
     @Test
     public void testFlattenIteratorOfIterators() {
         List<Iterator<String>> iterators = Arrays.asList(Arrays.asList("a", "b").iterator(), Arrays.asList("c").iterator(), Arrays.asList("d", "e").iterator());
@@ -1258,8 +1190,6 @@ public class N100Test extends TestBase {
         ObjIterator<String> empty = N.flatten((Iterator<Iterator<String>>) null);
         assertFalse(empty.hasNext());
     }
-
-    // Test flattenEachElement methods
 
     @Test
     public void testFlattenEachElement() {
@@ -1277,8 +1207,6 @@ public class N100Test extends TestBase {
         Set<String> result = N.flattenEachElement(mixed, HashSet::new);
         assertEquals(new HashSet<>(Arrays.asList("a", "b", "c", "d")), result);
     }
-
-    // Test intersection methods for arrays
 
     @Test
     public void testIntersectionBooleanArrays() {
@@ -1402,8 +1330,6 @@ public class N100Test extends TestBase {
         assertEquals(new ArrayList<>(), N.intersection(withEmpty));
     }
 
-    // Test difference methods for arrays
-
     @Test
     public void testDifferenceBooleanArrays() {
         boolean[] a = { true, false, true, true };
@@ -1510,8 +1436,6 @@ public class N100Test extends TestBase {
         assertEquals(new ArrayList<>(), N.difference(new ArrayList<>(), b));
         assertEquals(new ArrayList<>(a), N.difference(a, new ArrayList<>()));
     }
-
-    // Test symmetricDifference methods for arrays
 
     @Test
     public void testSymmetricDifferenceBooleanArrays() {
@@ -1622,8 +1546,6 @@ public class N100Test extends TestBase {
         assertEquals(new ArrayList<>(a), N.symmetricDifference(a, new ArrayList<>()));
     }
 
-    // Test commonSet methods
-
     @Test
     public void testCommonSet() {
         List<String> a = Arrays.asList("a", "b", "c", "a");
@@ -1657,8 +1579,6 @@ public class N100Test extends TestBase {
         List<Collection<String>> withEmpty = Arrays.asList(a, new ArrayList<>(), c);
         assertEquals(new HashSet<>(), N.commonSet(withEmpty));
     }
-
-    // Test exclude methods
 
     @Test
     public void testExclude() {
@@ -1727,8 +1647,6 @@ public class N100Test extends TestBase {
         assertEquals(3, singleResult.size());
     }
 
-    // Test isSubCollection methods
-
     @Test
     public void testIsSubCollection() {
         List<String> subColl = Arrays.asList("a", "b", "a");
@@ -1757,8 +1675,6 @@ public class N100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> N.isSubCollection(Arrays.asList("a"), null));
     }
 
-    // Test isProperSubCollection methods
-
     @Test
     public void testIsProperSubCollection() {
         List<String> subColl = Arrays.asList("a", "b");
@@ -1783,8 +1699,6 @@ public class N100Test extends TestBase {
     public void testIsProperSubCollectionNullColl() {
         assertThrows(IllegalArgumentException.class, () -> N.isProperSubCollection(Arrays.asList("a"), null));
     }
-
-    // Test isEqualCollection method
 
     @Test
     public void testIsEqualCollection() {

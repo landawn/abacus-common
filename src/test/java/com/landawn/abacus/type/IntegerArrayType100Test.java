@@ -12,11 +12,13 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class IntegerArrayType100Test extends TestBase {
 
     private IntegerArrayType integerArrayType;
@@ -210,7 +212,7 @@ public class IntegerArrayType100Test extends TestBase {
         verify(characterWriter).write('[');
         verify(characterWriter).writeInt(1);
         verify(characterWriter, times(2)).write(", ");
-        verify(characterWriter).write(any(char[].class)); // for null
+        verify(characterWriter).write(any(char[].class));
         verify(characterWriter).writeInt(3);
         verify(characterWriter).write(']');
     }

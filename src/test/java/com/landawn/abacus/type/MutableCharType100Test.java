@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
@@ -19,6 +20,7 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableChar;
 
+@Tag("new-test")
 public class MutableCharType100Test extends TestBase {
 
     private MutableCharType mutableCharType;
@@ -131,7 +133,6 @@ public class MutableCharType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithNull() throws IOException {
         mutableCharType.writeCharacter(characterWriter, null, null);
-        // Verify null array was written
     }
 
     @Test
@@ -139,7 +140,6 @@ public class MutableCharType100Test extends TestBase {
         JSONXMLSerializationConfig<?> config = Mockito.mock(JSONXMLSerializationConfig.class);
         Mockito.when(config.getCharQuotation()).thenReturn((char) 0);
         mutableCharType.writeCharacter(characterWriter, MutableChar.of('R'), config);
-        // Verify character was written without quotes
     }
 
     @Test
@@ -147,6 +147,5 @@ public class MutableCharType100Test extends TestBase {
         JSONXMLSerializationConfig<?> config = Mockito.mock(JSONXMLSerializationConfig.class);
         Mockito.when(config.getCharQuotation()).thenReturn('"');
         mutableCharType.writeCharacter(characterWriter, MutableChar.of('S'), config);
-        // Verify character was written with quotes
     }
 }

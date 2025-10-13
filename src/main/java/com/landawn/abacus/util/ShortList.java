@@ -270,16 +270,6 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     *
-     * @param index
-     */
-    private void rangeCheck(final int index) {
-        if (index >= size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
-        }
-    }
-
-    /**
      * Replaces the element at the specified position in this list with the specified element.
      *
      * @param index the index of the element to replace
@@ -727,7 +717,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             N.fill(elementData, tmp.length, size, (short) 0);
         }
 
-        size -= elementData.length - tmp.length;
+        size = size - (elementData.length - tmp.length);
     }
 
     /**
@@ -761,23 +751,28 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Moves a range of elements within this list to a new position. This is an efficient operation
-     * that rearranges elements without creating a new array. The range to be moved is specified by
-     * [fromIndex, toIndex), and it will be moved to start at newPositionStartIndexAfterMove.
+     * Moves a range of elements within this list to a new position.
+     * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
+     * so that the element originally at fromIndex will be at newPositionAfterMove.
+     * Other elements are shifted as necessary to accommodate the move.
      * 
-     * <p>For example, if you have a list [A,B,C,D,E] and call moveRange(1,3,3), the elements B and C
-     * (at indices 1 and 2) will be moved to start at index 3, resulting in [A,D,B,C,E].</p>
-     *
+     * <p>Example: 
+     * <pre>
+     * ShortList list = ShortList.of((short) 0, (short) 1, (Short) 2, (Short) 3, (Short) 4, (Short) 5);
+     * list.moveRange(1, 3, 3);  // Moves elements [1, 2] to position starting at index 3
+     * // Result: [0, 3, 4, 1, 2, 5]
+     * </pre>
+     * 
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionStartIndexAfterMove the destination index where the moved range will start after the move.
-     *        Must be in the range [0, size - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if any index is out of bounds or if newPositionStartIndexAfterMove
+     * @param newPositionAfterMove the index where the first element of the range
+     *        should be positioned after the move; must be >= 0 and <= {@code size() - lengthOfRange}
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if newPositionAfterMove
      *         would cause elements to be moved outside the list bounds
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndexAfterMove);
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
     /**
@@ -1430,7 +1425,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *         or -1 if this list does not contain the element
      */
     public int lastIndexOf(final short valueToFind) {
-        return lastIndexOf(valueToFind, size);
+        return lastIndexOf(valueToFind, size - 1);
     }
 
     /**
@@ -1692,7 +1687,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *         The insertion point is the point at which the key would be inserted into the list.
      */
     public int binarySearch(final short valueToFind) {
-        return N.binarySearch(elementData, valueToFind);
+        return N.binarySearch(elementData, 0, size(), valueToFind);
     }
 
     /**
@@ -2239,7 +2234,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     private void ensureCapacity(final int minCapacity) {
-        if (minCapacity > MAX_ARRAY_SIZE || minCapacity < 0) {
+        if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
             throw new OutOfMemoryError();
         }
 

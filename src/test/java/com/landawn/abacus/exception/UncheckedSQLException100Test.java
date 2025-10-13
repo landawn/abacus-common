@@ -4,10 +4,11 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class UncheckedSQLException100Test extends TestBase {
 
     @Test
@@ -87,7 +88,7 @@ public class UncheckedSQLException100Test extends TestBase {
         SQLException sqlException = new SQLException("SQL error");
         SQLException suppressed = new SQLException("Suppressed error");
         sqlException.addSuppressed(suppressed);
-        
+
         UncheckedSQLException exception = new UncheckedSQLException(sqlException);
         Throwable[] suppressedExceptions = exception.getSuppressed();
         Assertions.assertNotNull(suppressedExceptions);

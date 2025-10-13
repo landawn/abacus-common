@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ByteIterator;
@@ -27,14 +28,12 @@ import com.landawn.abacus.util.function.ByteBinaryOperator;
 import com.landawn.abacus.util.function.ByteConsumer;
 import com.landawn.abacus.util.function.ByteTriPredicate;
 
+@Tag("new-test")
 public class AbstractByteStream101Test extends TestBase {
 
     private ByteStream stream;
     private byte[] testData;
 
-    // This method needs to be implemented by a concrete test class to provide a ByteStream instance.
-    // For example, in ArrayByteStreamTest, it would return new ArrayByteStream(a);
-    // In IteratorByteStreamTest, it would return new IteratorByteStream(ByteIterator.of(a));
     protected ByteStream createByteStream(byte... a) {
         return ByteStream.of(a);
     }
@@ -81,7 +80,6 @@ public class AbstractByteStream101Test extends TestBase {
         stream = createByteStream(testData);
     }
 
-    // Additional edge cases for skip with action
     @Test
     public void testSkipWithActionZeroElements() {
         List<Byte> skipped = new ArrayList<>();
@@ -111,7 +109,6 @@ public class AbstractByteStream101Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> stream.skip(2, null));
     }
 
-    // Parallel stream scenarios for skip with action
     @Test
     public void testSkipWithActionParallel() {
         List<Byte> skipped = new ArrayList<>();
@@ -122,14 +119,10 @@ public class AbstractByteStream101Test extends TestBase {
         };
         byte[] resultArray = stream.parallel().skip(3, action).sorted().toArray();
 
-        // Results should be consistent even in parallel
         assertEquals(2, resultArray.length);
-        // assertTrue(resultArray[0] == 4 || resultArray[0] == 5);
-        // assertTrue(resultArray[1] == 4 || resultArray[1] == 5);
         assertEquals(3, skipped.size());
     }
 
-    // Edge cases for collapse methods
     @Test
     public void testCollapseEmptyStream() {
         stream = ByteStream.empty();
@@ -174,12 +167,11 @@ public class AbstractByteStream101Test extends TestBase {
         byte[] data = { 1, 2, 4, 8, 16, 17, 32 };
         stream = createByteStream(data);
         ByteTriPredicate collapsible = (first, prev, curr) -> curr == prev * 2 || curr == prev + 1;
-        ByteBinaryOperator mergeFunction = (a, b) -> b; // Take last
+        ByteBinaryOperator mergeFunction = (a, b) -> b;
         ByteStream result = stream.collapse(collapsible, mergeFunction);
         assertArrayEquals(new byte[] { 17, 32 }, result.toArray());
     }
 
-    // Edge cases for scan methods
     @Test
     public void testScanEmptyStream() {
         stream = ByteStream.empty();
@@ -201,11 +193,9 @@ public class AbstractByteStream101Test extends TestBase {
         byte init = 100;
         ByteBinaryOperator accumulator = (a, b) -> (byte) (a - b);
         ByteStream result = stream.scan(init, false, accumulator);
-        // 100-1=99, 99-2=97, 97-3=94, 94-4=90, 90-5=85
         assertArrayEquals(new byte[] { 99, 97, 94, 90, 85 }, result.toArray());
     }
 
-    // Edge cases for step
     @Test
     public void testStepGreaterThanSize() {
         ByteStream result = stream.step(10);
@@ -218,7 +208,6 @@ public class AbstractByteStream101Test extends TestBase {
         assertArrayEquals(new byte[] { 1 }, result.toArray());
     }
 
-    // Edge cases for rotated
     @Test
     public void testRotatedZero() {
         ByteStream result = stream.rotated(0);
@@ -233,7 +222,7 @@ public class AbstractByteStream101Test extends TestBase {
 
     @Test
     public void testRotatedMultipleCycles() {
-        ByteStream result = stream.rotated(12); // 12 % 5 = 2
+        ByteStream result = stream.rotated(12);
         assertArrayEquals(new byte[] { 4, 5, 1, 2, 3 }, result.toArray());
     }
 
@@ -244,7 +233,6 @@ public class AbstractByteStream101Test extends TestBase {
         assertArrayEquals(new byte[] {}, result.toArray());
     }
 
-    // Edge cases for cycled
     @Test
     public void testCycledZeroRounds() {
         ByteStream result = stream.cycled(0);
@@ -269,7 +257,6 @@ public class AbstractByteStream101Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> stream.cycled(-1));
     }
 
-    // Edge cases for intersection/difference/symmetricDifference
     @Test
     public void testIntersectionEmptyCollection() {
         ByteStream result = stream.intersection(new ArrayList<>());
@@ -308,16 +295,13 @@ public class AbstractByteStream101Test extends TestBase {
         assertArrayEquals(new byte[] { 1, 2 }, result.toArray());
     }
 
-    // Test sorted on already sorted stream
     @Test
     public void testSortedAlreadySorted() {
-        // The stream might be marked as sorted internally
         ByteStream sorted1 = stream.sorted();
-        ByteStream sorted2 = sorted1.sorted(); // Should be optimized
+        ByteStream sorted2 = sorted1.sorted();
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, sorted2.toArray());
     }
 
-    // Test parallel scenarios
     @Test
     public void testReversedParallel() {
         ByteStream result = stream.parallel().reversed();
@@ -332,7 +316,6 @@ public class AbstractByteStream101Test extends TestBase {
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, result.toArray());
     }
 
-    // Edge cases for rangeMap
     @Test
     public void testRangeMapEmptyStream() {
         stream = ByteStream.empty();
@@ -348,18 +331,17 @@ public class AbstractByteStream101Test extends TestBase {
         ByteBiPredicate sameRange = (a, b) -> true;
         ByteBinaryOperator mapper = (a, b) -> (byte) (a + b);
         ByteStream result = stream.rangeMap(sameRange, mapper);
-        assertArrayEquals(new byte[] { 84 }, result.toArray()); // 42 + 42
+        assertArrayEquals(new byte[] { 84 }, result.toArray());
     }
 
     @Test
     public void testRangeMapNoMatches() {
-        ByteBiPredicate sameRange = (a, b) -> false; // Never group
+        ByteBiPredicate sameRange = (a, b) -> false;
         ByteBinaryOperator mapper = (a, b) -> a;
         ByteStream result = stream.rangeMap(sameRange, mapper);
-        assertArrayEquals(testData, result.toArray()); // Each element mapped to itself
+        assertArrayEquals(testData, result.toArray());
     }
 
-    // Test advanced collapse scenarios
     @Test
     public void testCollapseAlternating() {
         byte[] data = { 1, 2, 1, 2, 1, 2 };
@@ -367,7 +349,7 @@ public class AbstractByteStream101Test extends TestBase {
         AtomicInteger counter = new AtomicInteger(0);
         ByteBiPredicate collapsible = (a, b) -> {
             counter.incrementAndGet();
-            return b != a; // Collapse when different
+            return b != a;
         };
         Stream<ByteList> result = stream.collapse(collapsible);
         List<ByteList> lists = result.toList();
@@ -375,7 +357,6 @@ public class AbstractByteStream101Test extends TestBase {
         assertArrayEquals(new byte[] { 1, 2, 1, 2, 1, 2 }, lists.get(0).toArray());
     }
 
-    // Test indexed with different stream sizes
     @Test
     public void testIndexedEmptyStream() {
         stream = ByteStream.empty();
@@ -393,7 +374,6 @@ public class AbstractByteStream101Test extends TestBase {
         assertEquals(42, indexed.get(0).value());
     }
 
-    // Test shuffled with empty stream
     @Test
     public void testShuffledEmptyStream() {
         stream = ByteStream.empty();
@@ -406,7 +386,6 @@ public class AbstractByteStream101Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> stream.shuffled(null));
     }
 
-    // Test collect edge cases
     @Test
     public void testCollectWithNullSupplier() {
         try {
@@ -414,7 +393,6 @@ public class AbstractByteStream101Test extends TestBase {
             });
             fail("Should throw exception");
         } catch (Exception e) {
-            // Expected
         }
     }
 
@@ -424,17 +402,15 @@ public class AbstractByteStream101Test extends TestBase {
             stream.collect(ArrayList::new, null);
             fail("Should throw exception");
         } catch (Exception e) {
-            // Expected
         }
     }
 
-    // Test additional combinations
     @Test
     public void testChainedOperations() {
-        ByteStream result = stream.filter(v -> v % 2 == 1) // 1, 3, 5
-                .map(v -> (byte) (v * 2)) // 2, 6, 10
-                .sorted() // 2, 6, 10
-                .reversed(); // 10, 6, 2
+        ByteStream result = stream.filter(v -> v % 2 == 1)
+                .map(v -> (byte) (v * 2))
+                .sorted()
+                .reversed();
         assertArrayEquals(new byte[] { 10, 6, 2 }, result.toArray());
     }
 
@@ -443,10 +419,10 @@ public class AbstractByteStream101Test extends TestBase {
         byte[] data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         stream = createByteStream(data);
 
-        ByteStream result = stream.filter(v -> v % 2 == 0) // 2, 4, 6, 8, 10
-                .step(2) // 2, 6, 10
-                .scan((a, b) -> (byte) (a + b)) // 2, 8, 18
-                .distinct(); // 2, 8, 18
+        ByteStream result = stream.filter(v -> v % 2 == 0)
+                .step(2)
+                .scan((a, b) -> (byte) (a + b))
+                .distinct();
 
         assertArrayEquals(new byte[] { 2, 8, 18 }, result.toArray());
     }

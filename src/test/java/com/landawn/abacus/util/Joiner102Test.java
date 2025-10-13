@@ -12,13 +12,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Joiner102Test extends TestBase {
 
     @Test
@@ -60,7 +61,7 @@ public class Joiner102Test extends TestBase {
     public void testSetEmptyValue() {
         Joiner joiner = Joiner.with(", ").setEmptyValue("NONE");
         Assertions.assertEquals("NONE", joiner.toString());
-        
+
         joiner.append("a");
         Assertions.assertEquals("a", joiner.toString());
     }
@@ -75,14 +76,14 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testSkipNulls() {
         Joiner joiner = Joiner.with(", ").skipNulls();
-        joiner.append("a").append((String)null).append("b");
+        joiner.append("a").append((String) null).append("b");
         Assertions.assertEquals("a, b", joiner.toString());
     }
 
     @Test
     public void testUseForNull() {
         Joiner joiner = Joiner.with(", ").useForNull("N/A");
-        joiner.append("a").append((String)null).append("b");
+        joiner.append("a").append((String) null).append("b");
         Assertions.assertEquals("a, N/A, b", joiner.toString());
     }
 
@@ -193,7 +194,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllBooleanArray() {
         Joiner joiner = Joiner.with(", ");
-        boolean[] arr = {true, false, true};
+        boolean[] arr = { true, false, true };
         joiner.appendAll(arr);
         Assertions.assertEquals("true, false, true", joiner.toString());
     }
@@ -201,7 +202,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllBooleanArrayWithRange() {
         Joiner joiner = Joiner.with(", ");
-        boolean[] arr = {true, false, true, false};
+        boolean[] arr = { true, false, true, false };
         joiner.appendAll(arr, 1, 3);
         Assertions.assertEquals("false, true", joiner.toString());
     }
@@ -209,7 +210,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllCharArray() {
         Joiner joiner = Joiner.with(", ");
-        char[] arr = {'a', 'b', 'c'};
+        char[] arr = { 'a', 'b', 'c' };
         joiner.appendAll(arr);
         Assertions.assertEquals("a, b, c", joiner.toString());
     }
@@ -217,7 +218,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllCharArrayWithRange() {
         Joiner joiner = Joiner.with("-");
-        char[] arr = {'a', 'b', 'c', 'd'};
+        char[] arr = { 'a', 'b', 'c', 'd' };
         joiner.appendAll(arr, 1, 3);
         Assertions.assertEquals("b-c", joiner.toString());
     }
@@ -225,7 +226,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllByteArray() {
         Joiner joiner = Joiner.with(", ");
-        byte[] arr = {1, 2, 3};
+        byte[] arr = { 1, 2, 3 };
         joiner.appendAll(arr);
         Assertions.assertEquals("1, 2, 3", joiner.toString());
     }
@@ -233,7 +234,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllByteArrayWithRange() {
         Joiner joiner = Joiner.with("-");
-        byte[] arr = {1, 2, 3, 4};
+        byte[] arr = { 1, 2, 3, 4 };
         joiner.appendAll(arr, 1, 3);
         Assertions.assertEquals("2-3", joiner.toString());
     }
@@ -241,7 +242,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllShortArray() {
         Joiner joiner = Joiner.with(", ");
-        short[] arr = {10, 20, 30};
+        short[] arr = { 10, 20, 30 };
         joiner.appendAll(arr);
         Assertions.assertEquals("10, 20, 30", joiner.toString());
     }
@@ -249,7 +250,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllShortArrayWithRange() {
         Joiner joiner = Joiner.with(" | ");
-        short[] arr = {10, 20, 30, 40};
+        short[] arr = { 10, 20, 30, 40 };
         joiner.appendAll(arr, 1, 3);
         Assertions.assertEquals("20 | 30", joiner.toString());
     }
@@ -257,7 +258,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllIntArray() {
         Joiner joiner = Joiner.with(", ");
-        int[] arr = {1, 2, 3};
+        int[] arr = { 1, 2, 3 };
         joiner.appendAll(arr);
         Assertions.assertEquals("1, 2, 3", joiner.toString());
     }
@@ -265,7 +266,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllIntArrayWithRange() {
         Joiner joiner = Joiner.with("-");
-        int[] arr = {1, 2, 3, 4, 5};
+        int[] arr = { 1, 2, 3, 4, 5 };
         joiner.appendAll(arr, 1, 4);
         Assertions.assertEquals("2-3-4", joiner.toString());
     }
@@ -273,7 +274,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllLongArray() {
         Joiner joiner = Joiner.with(", ");
-        long[] arr = {100L, 200L, 300L};
+        long[] arr = { 100L, 200L, 300L };
         joiner.appendAll(arr);
         Assertions.assertEquals("100, 200, 300", joiner.toString());
     }
@@ -281,7 +282,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllLongArrayWithRange() {
         Joiner joiner = Joiner.with(" - ");
-        long[] arr = {100L, 200L, 300L, 400L};
+        long[] arr = { 100L, 200L, 300L, 400L };
         joiner.appendAll(arr, 1, 3);
         Assertions.assertEquals("200 - 300", joiner.toString());
     }
@@ -289,7 +290,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllFloatArray() {
         Joiner joiner = Joiner.with(", ");
-        float[] arr = {1.5f, 2.5f, 3.5f};
+        float[] arr = { 1.5f, 2.5f, 3.5f };
         joiner.appendAll(arr);
         Assertions.assertEquals("1.5, 2.5, 3.5", joiner.toString());
     }
@@ -297,7 +298,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllFloatArrayWithRange() {
         Joiner joiner = Joiner.with("; ");
-        float[] arr = {1.1f, 2.2f, 3.3f, 4.4f};
+        float[] arr = { 1.1f, 2.2f, 3.3f, 4.4f };
         joiner.appendAll(arr, 1, 3);
         Assertions.assertEquals("2.2; 3.3", joiner.toString());
     }
@@ -305,7 +306,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllDoubleArray() {
         Joiner joiner = Joiner.with(", ");
-        double[] arr = {1.5, 2.5, 3.5};
+        double[] arr = { 1.5, 2.5, 3.5 };
         joiner.appendAll(arr);
         Assertions.assertEquals("1.5, 2.5, 3.5", joiner.toString());
     }
@@ -313,7 +314,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllDoubleArrayWithRange() {
         Joiner joiner = Joiner.with(" | ");
-        double[] arr = {1.1, 2.2, 3.3, 4.4};
+        double[] arr = { 1.1, 2.2, 3.3, 4.4 };
         joiner.appendAll(arr, 0, 2);
         Assertions.assertEquals("1.1 | 2.2", joiner.toString());
     }
@@ -321,7 +322,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllObjectArray() {
         Joiner joiner = Joiner.with(", ").skipNulls();
-        Object[] arr = {"a", 1, null, "b"};
+        Object[] arr = { "a", 1, null, "b" };
         joiner.appendAll(arr);
         Assertions.assertEquals("a, 1, b", joiner.toString());
     }
@@ -329,7 +330,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllObjectArrayWithRange() {
         Joiner joiner = Joiner.with("-");
-        String[] arr = {"a", "b", "c", "d"};
+        String[] arr = { "a", "b", "c", "d" };
         joiner.appendAll(arr, 1, 3);
         Assertions.assertEquals("b-c", joiner.toString());
     }
@@ -369,7 +370,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllByteList() {
         Joiner joiner = Joiner.with(", ");
-        ByteList list = ByteList.of((byte)1, (byte)2, (byte)3);
+        ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
         joiner.appendAll(list);
         Assertions.assertEquals("1, 2, 3", joiner.toString());
     }
@@ -377,7 +378,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllByteListWithRange() {
         Joiner joiner = Joiner.with("-");
-        ByteList list = ByteList.of((byte)1, (byte)2, (byte)3, (byte)4);
+        ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4);
         joiner.appendAll(list, 1, 3);
         Assertions.assertEquals("2-3", joiner.toString());
     }
@@ -385,7 +386,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllShortList() {
         Joiner joiner = Joiner.with(", ");
-        ShortList list = ShortList.of((short)10, (short)20, (short)30);
+        ShortList list = ShortList.of((short) 10, (short) 20, (short) 30);
         joiner.appendAll(list);
         Assertions.assertEquals("10, 20, 30", joiner.toString());
     }
@@ -393,7 +394,7 @@ public class Joiner102Test extends TestBase {
     @Test
     public void testAppendAllShortListWithRange() {
         Joiner joiner = Joiner.with("-");
-        ShortList list = ShortList.of((short)10, (short)20, (short)30, (short)40);
+        ShortList list = ShortList.of((short) 10, (short) 20, (short) 30, (short) 40);
         joiner.appendAll(list, 1, 3);
         Assertions.assertEquals("20-30", joiner.toString());
     }
@@ -653,13 +654,24 @@ public class Joiner102Test extends TestBase {
         class Person {
             private String name = "John";
             private int age = 30;
-            
-            public String getName() { return name; }
-            public void setName(String name) { this.name = name; }
-            public int getAge() { return age; }
-            public void setAge(int age) { this.age = age; }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public int getAge() {
+                return age;
+            }
+
+            public void setAge(int age) {
+                this.age = age;
+            }
         }
-        
+
         Joiner joiner = Joiner.with(", ");
         Person p = new Person();
         joiner.appendBean(p);
@@ -674,15 +686,32 @@ public class Joiner102Test extends TestBase {
             private String name = "John";
             private int age = 30;
             private String city = "NYC";
-            
-            public String getName() { return name; }
-            public void setName(String name) { this.name = name; }
-            public int getAge() { return age; }
-            public void setAge(int age) { this.age = age; }
-            public String getCity() { return city; }
-            public void setCity(String city) { this.city = city; }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public int getAge() {
+                return age;
+            }
+
+            public void setAge(int age) {
+                this.age = age;
+            }
+
+            public String getCity() {
+                return city;
+            }
+
+            public void setCity(String city) {
+                this.city = city;
+            }
         }
-        
+
         Joiner joiner = Joiner.with(", ");
         Person p = new Person();
         joiner.appendBean(p, Arrays.asList("name", "city"));
@@ -696,17 +725,40 @@ public class Joiner102Test extends TestBase {
             private String name = "Alice";
             private String email = null;
             private String password = "secret";
-            
-            public String getId() { return id; }
-            public void setId(String id) { this.id = id; }
-            public String getName() { return name; }
-            public void setName(String name) { this.name = name; }
-            public String getEmail() { return email; }
-            public void setEmail(String email) { this.email = email; }
-            public String getPassword() { return password; }
-            public void setPassword(String password) { this.password = password; }
+
+            public String getId() {
+                return id;
+            }
+
+            public void setId(String id) {
+                this.id = id;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getEmail() {
+                return email;
+            }
+
+            public void setEmail(String email) {
+                this.email = email;
+            }
+
+            public String getPassword() {
+                return password;
+            }
+
+            public void setPassword(String password) {
+                this.password = password;
+            }
         }
-        
+
         Joiner joiner = Joiner.with(", ");
         User u = new User();
         Set<String> ignored = new HashSet<>(Arrays.asList("password"));
@@ -724,18 +776,35 @@ public class Joiner102Test extends TestBase {
             private String name = "Laptop";
             private double price = 999.99;
             private int stock = 0;
-            
-            public String getName() { return name; }
-            public void setName(String name) { this.name = name; }
-            public double getPrice() { return price; }
-            public void setPrice(double price) { this.price = price; }
-            public int getStock() { return stock; }
-            public void setStock(int stock) { this.stock = stock; }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public double getPrice() {
+                return price;
+            }
+
+            public void setPrice(double price) {
+                this.price = price;
+            }
+
+            public int getStock() {
+                return stock;
+            }
+
+            public void setStock(int stock) {
+                this.stock = stock;
+            }
         }
-        
+
         Joiner joiner = Joiner.with(", ");
         Product p = new Product();
-        joiner.appendBean(p, (prop, val) -> !prop.equals("stock") || (val != null && (Integer)val > 0));
+        joiner.appendBean(p, (prop, val) -> !prop.equals("stock") || (val != null && (Integer) val > 0));
         String result = joiner.toString();
         Assertions.assertTrue(result.contains("name=Laptop"));
         Assertions.assertTrue(result.contains("price=999.99"));
@@ -769,7 +838,7 @@ public class Joiner102Test extends TestBase {
     public void testLength() {
         Joiner j = Joiner.with(", ", "[", "]");
         j.append("a").append("b");
-        Assertions.assertEquals(6, j.length()); // "[a, b]"
+        Assertions.assertEquals(6, j.length());
     }
 
     @Test
@@ -796,34 +865,10 @@ public class Joiner102Test extends TestBase {
     public void testMapIfNotEmpty() {
         u.Optional<Integer> result1 = Joiner.with(", ").mapIfNotEmpty(String::length);
         Assertions.assertFalse(result1.isPresent());
-        
+
         u.Optional<Integer> result2 = Joiner.with(", ").append("hello").mapIfNotEmpty(String::length);
         Assertions.assertTrue(result2.isPresent());
         Assertions.assertEquals(5, result2.get());
-    }
-
-    @Test
-    public void testMapToNonNullIfNotEmpty() {
-        u.Optional<String> result = Joiner.with(", ").append("test").mapToNonNullIfNotEmpty(String::toUpperCase);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals("TEST", result.get());
-    }
-
-    @Test
-    public void testStream() {
-        List<String> result = Joiner.with(", ").append("a").append("b").stream().collect(Collectors.toList());
-        Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals("a, b", result.get(0));
-    }
-
-    @Test
-    public void testStreamIfNotEmpty() {
-        List<String> emptyResult = Joiner.with(", ").streamIfNotEmpty().collect(Collectors.toList());
-        Assertions.assertEquals(0, emptyResult.size());
-        
-        List<String> result = Joiner.with(", ").append("data").streamIfNotEmpty().collect(Collectors.toList());
-        Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals("data", result.get(0));
     }
 
     @Test
@@ -831,7 +876,6 @@ public class Joiner102Test extends TestBase {
         Joiner j = Joiner.with(", ").reuseCachedBuffer();
         j.append("a").append("b");
         j.close();
-        // Should not throw exception on multiple close calls
         j.close();
     }
 
@@ -844,17 +888,14 @@ public class Joiner102Test extends TestBase {
 
     @Test
     public void testNullHandling() {
-        // Test default null handling
         Joiner j1 = Joiner.with(", ");
         j1.append((String) null);
         Assertions.assertEquals("null", j1.toString());
-        
-        // Test with skipNulls
+
         Joiner j2 = Joiner.with(", ").skipNulls();
         j2.append("a").append((Object) null).append("b");
         Assertions.assertEquals("a, b", j2.toString());
-        
-        // Test with custom null text
+
         Joiner j3 = Joiner.with(", ").useForNull("N/A");
         j3.append("a").append((List) null).append("b");
         Assertions.assertEquals("a, N/A, b", j3.toString());
@@ -862,16 +903,14 @@ public class Joiner102Test extends TestBase {
 
     @Test
     public void testComplexScenario() {
-        Joiner joiner = Joiner.with(", ", "=", "{", "}")
-            .trimBeforeAppend()
-            .skipNulls();
-        
+        Joiner joiner = Joiner.with(", ", "=", "{", "}").trimBeforeAppend().skipNulls();
+
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("name", "  John  ");
         data.put("age", 30);
         data.put("city", null);
         data.put("active", true);
-        
+
         joiner.appendEntries(data);
         String result = joiner.toString();
         Assertions.assertEquals("{name=John, age=30, city=null, active=true}", result);
@@ -879,19 +918,14 @@ public class Joiner102Test extends TestBase {
 
     @Test
     public void testEdgeCases() {
-        // Empty joiner
         Assertions.assertEquals("", Joiner.with(", ").toString());
-        
-        // Single element
+
         Assertions.assertEquals("a", Joiner.with(", ").append("a").toString());
-        
-        // Empty array
+
         Assertions.assertEquals("", Joiner.with(", ").appendAll(new int[0]).toString());
-        
-        // Null array
-        Assertions.assertEquals("", Joiner.with(", ").appendAll((int[])null).toString());
-        
-        // Empty collection
+
+        Assertions.assertEquals("", Joiner.with(", ").appendAll((int[]) null).toString());
+
         Assertions.assertEquals("", Joiner.with(", ").appendAll(Collections.emptyList()).toString());
     }
 }

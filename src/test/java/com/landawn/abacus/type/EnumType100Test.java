@@ -15,6 +15,7 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -23,6 +24,7 @@ import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class EnumType100Test extends TestBase {
 
     private enum TestEnum {
@@ -80,19 +82,15 @@ public class EnumType100Test extends TestBase {
 
     @Test
     public void testValueOfString() {
-        // Test by name
         assertEquals(TestEnum.VALUE1, enumTypeByName.valueOf("VALUE1"));
         assertEquals(TestEnum.VALUE2, enumTypeByName.valueOf("VALUE2"));
 
-        // Test with null and empty
         assertNull(enumTypeByName.valueOf((String) null));
         assertNull(enumTypeByName.valueOf(""));
 
-        // Test with ordinal string
         assertEquals(TestEnum.VALUE1, enumTypeByName.valueOf("0"));
         assertEquals(TestEnum.VALUE2, enumTypeByName.valueOf("1"));
 
-        // Test invalid value
         assertThrows(IllegalArgumentException.class, () -> enumTypeByName.valueOf("INVALID"));
     }
 
@@ -102,7 +100,6 @@ public class EnumType100Test extends TestBase {
         assertEquals(TestEnum.VALUE2, enumTypeByName.valueOf(1));
         assertEquals(TestEnum.VALUE3, enumTypeByName.valueOf(2));
 
-        // Test with invalid ordinal
         assertThrows(IllegalArgumentException.class, () -> enumTypeByName.valueOf(99));
 
     }
@@ -173,16 +170,12 @@ public class EnumType100Test extends TestBase {
 
     @Test
     public void testWriteCharacter() throws IOException {
-        // Test with null
         enumTypeByName.writeCharacter(characterWriter, null, config);
 
-        // Test with value (name)
         enumTypeByName.writeCharacter(characterWriter, TestEnum.VALUE1, config);
 
-        // Test with value (ordinal)
         enumTypeByOrdinal.writeCharacter(characterWriter, TestEnum.VALUE2, config);
 
-        // Test with quotation config
         when(config.getStringQuotation()).thenReturn('"');
         enumTypeByName.writeCharacter(characterWriter, TestEnum.VALUE3, config);
     }

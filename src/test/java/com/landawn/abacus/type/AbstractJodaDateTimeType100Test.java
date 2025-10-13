@@ -18,12 +18,14 @@ import java.io.StringWriter;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
+@Tag("new-test")
 public class AbstractJodaDateTimeType100Test extends TestBase {
 
     private JodaDateTimeType jodaDateTimeType;
@@ -102,7 +104,6 @@ public class AbstractJodaDateTimeType100Test extends TestBase {
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         jodaDateTimeType.writeCharacter(writer, dateTime, config);
-        // Verify write was called (can't verify exact content without actual implementation)
         verify(writer, atLeastOnce()).append(anyString());
     }
 
@@ -113,7 +114,6 @@ public class AbstractJodaDateTimeType100Test extends TestBase {
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         jodaDateTimeType.writeCharacter(writer, dateTime, config);
-        // Verify write was called (can't verify exact content without actual implementation)
         verify(writer, atLeastOnce()).append(anyString());
     }
 
@@ -132,19 +132,16 @@ public class AbstractJodaDateTimeType100Test extends TestBase {
         DateTime dateTime = new DateTime(2023, 6, 15, 10, 30, 45, 123);
 
         jodaDateTimeType.writeCharacter(writer, dateTime, null);
-        // Verify write was called (can't verify exact content without actual implementation)
         verify(writer, atLeastOnce()).append(anyString());
     }
 
     @Test
     public void testWriteCharacterWithUnsupportedFormat() throws IOException {
         DateTime dateTime = new DateTime(2023, 6, 15, 10, 30, 45, 123);
-        // Create a mock DateTimeFormat that's not one of the supported values
-        DateTimeFormat unsupportedFormat = mock(DateTimeFormat.class); // LONG is returned by default, and it's supported
+        DateTimeFormat unsupportedFormat = mock(DateTimeFormat.class);
         when(config.getDateTimeFormat()).thenReturn(unsupportedFormat);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        // assertThrows(RuntimeException.class, () -> jodaDateTimeType.writeCharacter(writer, dateTime, config));
         jodaDateTimeType.writeCharacter(writer, dateTime, config);
     }
 }

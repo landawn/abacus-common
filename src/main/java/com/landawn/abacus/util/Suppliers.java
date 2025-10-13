@@ -1370,34 +1370,6 @@ public final class Suppliers {
         throw new UnsupportedOperationException();
     }
 
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <C>
-    //     * @param supplier
-    //     * @return a stateful {@code Supplier}. Don't save or cache for reuse or use it in parallel stream.
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    @SequentialOnly
-    //    @Stateful
-    //    public static <T, C extends Collection<T>> Supplier<? extends C> single(final java.util.function.Supplier<? extends C> supplier) {
-    //        return new Supplier<>() {
-    //            private C c = null;
-    //
-    //            @Override
-    //            public C get() {
-    //                if (c == null) {
-    //                    c = supplier.get();
-    //                } else {
-    //                    c.clear();
-    //                }
-    //
-    //                return c;
-    //            }
-    //        };
-    //    }
-
     private static final Supplier<Exception> EXCEPTION = Exception::new;
 
     /**

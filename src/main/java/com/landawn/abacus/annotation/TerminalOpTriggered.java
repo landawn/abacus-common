@@ -76,7 +76,6 @@ import java.lang.annotation.Target;
  *   <li>Test with large datasets to ensure acceptable memory usage</li>
  * </ul>
  * 
- * @author HaiYang Li
  * @since 2018
  * @see IntermediateOp
  * @see TerminalOp

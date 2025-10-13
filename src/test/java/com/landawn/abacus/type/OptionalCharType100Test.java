@@ -19,12 +19,14 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalChar;
 
+@Tag("new-test")
 public class OptionalCharType100Test extends TestBase {
 
     private OptionalCharType optionalCharType;
@@ -89,7 +91,7 @@ public class OptionalCharType100Test extends TestBase {
 
     @Test
     public void testValueOfWithNumberString() {
-        OptionalChar result = optionalCharType.valueOf("65"); // ASCII for 'A'
+        OptionalChar result = optionalCharType.valueOf("65");
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals('A', result.get());
@@ -119,7 +121,7 @@ public class OptionalCharType100Test extends TestBase {
     @Test
     public void testGetFromResultSetByIndexWithInteger() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        when(rs.getObject(1)).thenReturn(97); // ASCII for 'a'
+        when(rs.getObject(1)).thenReturn(97);
 
         OptionalChar result = optionalCharType.get(rs, 1);
         assertNotNull(result);
@@ -244,7 +246,7 @@ public class OptionalCharType100Test extends TestBase {
         when(config.getCharQuotation()).thenReturn('\'');
         OptionalChar opt = OptionalChar.of('#');
         optionalCharType.writeCharacter(writer, opt, config);
-        verify(writer, times(2)).write('\''); // Opening and closing quotes
+        verify(writer, times(2)).write('\'');
         verify(writer).writeCharacter('#');
     }
 

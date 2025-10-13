@@ -7,10 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.google.common.collect.Multiset;
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class GuavaMultisetType100Test extends TestBase {
 
     private GuavaMultisetType<String, Multiset<String>> multisetType;
@@ -58,31 +60,23 @@ public class GuavaMultisetType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with null
         assertNull(multisetType.stringOf(null));
 
-        // Test with actual Multiset would require creating a multiset instance
-        // and mocking Utils.jsonParser
     }
 
     @Test
     public void testValueOf() {
-        // Test with null and empty string
         assertNull(multisetType.valueOf(null));
         assertNull(multisetType.valueOf(""));
 
-        // Test with JSON string would require mocking Utils.jsonParser
-        // and testing the multiset creation logic
     }
 
     @Test
     public void testGetTypeName() {
-        // Test static method with declaring name
         String typeName = GuavaMultisetType.getTypeName(Multiset.class, "String", true);
         assertNotNull(typeName);
         assertTrue(typeName.contains("Multiset"));
 
-        // Test static method without declaring name
         typeName = GuavaMultisetType.getTypeName(Multiset.class, "String", false);
         assertNotNull(typeName);
         assertTrue(typeName.contains("Multiset"));

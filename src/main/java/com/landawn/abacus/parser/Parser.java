@@ -62,22 +62,27 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
 
     /**
      * Serializes an object to a string representation.
-     * 
-     * <p>This method uses default serialization settings.</p>
-     * 
+     *
+     * <p>This method uses default serialization settings. The object is converted to the
+     * parser's target format (JSON, XML, etc.) and returned as a string.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * String json = parser.serialize(myObject);
      * }</pre>
      *
-     * @param obj the object to serialize
+     * @param obj the object to serialize (may be null depending on implementation)
      * @return the serialized string representation
      */
     String serialize(Object obj);
 
     /**
      * Serializes an object to a string representation using custom configuration.
-     * 
+     *
+     * <p>This method allows fine-grained control over the serialization process through
+     * the configuration parameter, such as formatting options, encoding settings, and
+     * field inclusion/exclusion rules.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MySerConfig config = new MySerConfig()
@@ -86,53 +91,57 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * String json = parser.serialize(myObject, config);
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param config the serialization configuration to use
+     * @param obj the object to serialize (may be null depending on implementation)
+     * @param config the serialization configuration to use (must not be null)
      * @return the serialized string representation
      */
     String serialize(Object obj, SC config);
 
     /**
      * Serializes an object to a file.
-     * 
+     *
      * <p>This method uses default serialization settings. The file will be created
-     * if it doesn't exist, or overwritten if it does.</p>
-     * 
+     * if it doesn't exist, or overwritten if it does. Parent directories must exist
+     * or an exception will be thrown.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * parser.serialize(myObject, new File("output.json"));
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param output the output file to write to
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param obj the object to serialize (may be null depending on implementation)
+     * @param output the output file to write to (must not be null)
+     * @throws UncheckedIOException if an I/O error occurs during file writing
      */
     void serialize(Object obj, File output) throws UncheckedIOException;
 
     /**
      * Serializes an object to a file using custom configuration.
-     * 
-     * <p>The file will be created if it doesn't exist, or overwritten if it does.</p>
-     * 
+     *
+     * <p>The file will be created if it doesn't exist, or overwritten if it does.
+     * Parent directories must exist or an exception will be thrown. The configuration
+     * parameter allows control over serialization behavior and output formatting.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MySerConfig config = new MySerConfig().setPrettyFormat(true);
      * parser.serialize(myObject, config, new File("output.json"));
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param config the serialization configuration to use
-     * @param output the output file to write to
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param obj the object to serialize (may be null depending on implementation)
+     * @param config the serialization configuration to use (must not be null)
+     * @param output the output file to write to (must not be null)
+     * @throws UncheckedIOException if an I/O error occurs during file writing
      */
     void serialize(Object obj, SC config, File output) throws UncheckedIOException;
 
     /**
      * Serializes an object to an output stream.
-     * 
+     *
      * <p>This method uses default serialization settings. The stream is not closed
-     * after writing.</p>
-     * 
+     * after writing, allowing the caller to manage stream lifecycle. The stream will
+     * be flushed after serialization.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * try (FileOutputStream fos = new FileOutputStream("output.json")) {
@@ -140,17 +149,20 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param output the output stream to write to
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param obj the object to serialize (may be null depending on implementation)
+     * @param output the output stream to write to (must not be null)
+     * @throws UncheckedIOException if an I/O error occurs during stream writing
      */
     void serialize(Object obj, OutputStream output) throws UncheckedIOException;
 
     /**
      * Serializes an object to an output stream using custom configuration.
-     * 
-     * <p>The stream is not closed after writing.</p>
-     * 
+     *
+     * <p>The stream is not closed after writing, allowing the caller to manage stream
+     * lifecycle. The stream will be flushed after serialization. The configuration
+     * parameter allows control over serialization behavior, such as character encoding
+     * and formatting options.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MySerConfig config = new MySerConfig().setCharset("UTF-8");
@@ -159,19 +171,20 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param config the serialization configuration to use
-     * @param output the output stream to write to
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param obj the object to serialize (may be null depending on implementation)
+     * @param config the serialization configuration to use (must not be null)
+     * @param output the output stream to write to (must not be null)
+     * @throws UncheckedIOException if an I/O error occurs during stream writing
      */
     void serialize(Object obj, SC config, OutputStream output) throws UncheckedIOException;
 
     /**
      * Serializes an object to a writer.
-     * 
+     *
      * <p>This method uses default serialization settings. The writer is not closed
-     * after writing.</p>
-     * 
+     * after writing, allowing the caller to manage writer lifecycle. The writer will
+     * be flushed after serialization.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * try (FileWriter writer = new FileWriter("output.json")) {
@@ -179,17 +192,20 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param output the writer to write to
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param obj the object to serialize (may be null depending on implementation)
+     * @param output the writer to write to (must not be null)
+     * @throws UncheckedIOException if an I/O error occurs during writing
      */
     void serialize(Object obj, Writer output) throws UncheckedIOException;
 
     /**
      * Serializes an object to a writer using custom configuration.
-     * 
-     * <p>The writer is not closed after writing.</p>
-     * 
+     *
+     * <p>The writer is not closed after writing, allowing the caller to manage writer
+     * lifecycle. The writer will be flushed after serialization. The configuration
+     * parameter allows control over serialization behavior, such as indentation,
+     * formatting, and field filtering.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MySerConfig config = new MySerConfig().setIndent("  ");
@@ -198,18 +214,20 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param config the serialization configuration to use
-     * @param output the writer to write to
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param obj the object to serialize (may be null depending on implementation)
+     * @param config the serialization configuration to use (must not be null)
+     * @param output the writer to write to (must not be null)
+     * @throws UncheckedIOException if an I/O error occurs during writing
      */
     void serialize(Object obj, SC config, Writer output) throws UncheckedIOException;
 
     /**
      * Deserializes an object from a string representation.
-     * 
-     * <p>This method uses default deserialization settings.</p>
-     * 
+     *
+     * <p>This method uses default deserialization settings. The input string is parsed
+     * according to the parser's format (JSON, XML, etc.) and converted to an instance
+     * of the specified target class.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MyClass obj = parser.deserialize(jsonString, MyClass.class);
@@ -217,15 +235,19 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the source string to deserialize from
-     * @param targetClass the class of the object to create
-     * @return the deserialized object
+     * @param source the source string to deserialize from (must not be null)
+     * @param targetClass the class of the object to create (must not be null)
+     * @return the deserialized object instance
      */
     <T> T deserialize(String source, Class<? extends T> targetClass);
 
     /**
      * Deserializes an object from a string representation using custom configuration.
-     * 
+     *
+     * <p>This method allows fine-grained control over the deserialization process through
+     * the configuration parameter, such as handling unknown properties, type information,
+     * custom type converters, and collection element types.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MyDeserConfig config = new MyDeserConfig()
@@ -235,34 +257,40 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the source string to deserialize from
-     * @param config the deserialization configuration to use
-     * @param targetClass the class of the object to create
-     * @return the deserialized object
+     * @param source the source string to deserialize from (must not be null)
+     * @param config the deserialization configuration to use (must not be null)
+     * @param targetClass the class of the object to create (must not be null)
+     * @return the deserialized object instance
      */
     <T> T deserialize(String source, DC config, Class<? extends T> targetClass);
 
     /**
      * Deserializes an object from a file.
-     * 
-     * <p>This method uses default deserialization settings.</p>
-     * 
+     *
+     * <p>This method uses default deserialization settings. The file content is read
+     * and parsed according to the parser's format (JSON, XML, etc.) and converted to
+     * an instance of the specified target class.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MyClass obj = parser.deserialize(new File("input.json"), MyClass.class);
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the source file to read from
-     * @param targetClass the class of the object to create
-     * @return the deserialized object
+     * @param source the source file to read from (must not be null and must exist)
+     * @param targetClass the class of the object to create (must not be null)
+     * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     <T> T deserialize(File source, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
      * Deserializes an object from a file using custom configuration.
-     * 
+     *
+     * <p>This method allows fine-grained control over the deserialization process.
+     * The configuration parameter can specify date formats, type mappings, property
+     * handling, and other parser-specific options.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MyDeserConfig config = new MyDeserConfig()
@@ -271,20 +299,21 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the source file to read from
-     * @param config the deserialization configuration to use
-     * @param targetClass the class of the object to create
-     * @return the deserialized object
+     * @param source the source file to read from (must not be null and must exist)
+     * @param config the deserialization configuration to use (must not be null)
+     * @param targetClass the class of the object to create (must not be null)
+     * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     <T> T deserialize(File source, DC config, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
      * Deserializes an object from an input stream.
-     * 
+     *
      * <p>This method uses default deserialization settings. The stream is not closed
-     * after reading.</p>
-     * 
+     * after reading, allowing the caller to manage stream lifecycle. The stream content
+     * is read and parsed according to the parser's format.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * try (FileInputStream fis = new FileInputStream("input.json")) {
@@ -293,18 +322,20 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the input stream to read from
-     * @param targetClass the class of the object to create
-     * @return the deserialized object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param source the input stream to read from (must not be null)
+     * @param targetClass the class of the object to create (must not be null)
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     <T> T deserialize(InputStream source, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
      * Deserializes an object from an input stream using custom configuration.
-     * 
-     * <p>The stream is not closed after reading.</p>
-     * 
+     *
+     * <p>The stream is not closed after reading, allowing the caller to manage stream
+     * lifecycle. The configuration parameter allows control over deserialization behavior,
+     * such as character encoding, type handling, and parser-specific options.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MyDeserConfig config = new MyDeserConfig().setCharset("UTF-8");
@@ -314,20 +345,21 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the input stream to read from
-     * @param config the deserialization configuration to use
-     * @param targetClass the class of the object to create
-     * @return the deserialized object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param source the input stream to read from (must not be null)
+     * @param config the deserialization configuration to use (must not be null)
+     * @param targetClass the class of the object to create (must not be null)
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     <T> T deserialize(InputStream source, DC config, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
      * Deserializes an object from a reader.
-     * 
+     *
      * <p>This method uses default deserialization settings. The reader is not closed
-     * after reading.</p>
-     * 
+     * after reading, allowing the caller to manage reader lifecycle. The reader content
+     * is read and parsed according to the parser's format.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * try (FileReader reader = new FileReader("input.json")) {
@@ -336,18 +368,21 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the reader to read from
-     * @param targetClass the class of the object to create
-     * @return the deserialized object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param source the reader to read from (must not be null)
+     * @param targetClass the class of the object to create (must not be null)
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs during reading
      */
     <T> T deserialize(Reader source, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
      * Deserializes an object from a reader using custom configuration.
-     * 
-     * <p>The reader is not closed after reading.</p>
-     * 
+     *
+     * <p>The reader is not closed after reading, allowing the caller to manage reader
+     * lifecycle. The configuration parameter allows control over deserialization behavior,
+     * such as type mappings for collections and maps, property handling, and parser-specific
+     * options.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MyDeserConfig config = new MyDeserConfig()
@@ -359,11 +394,11 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the reader to read from
-     * @param config the deserialization configuration to use
-     * @param targetClass the class of the object to create
-     * @return the deserialized object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param source the reader to read from (must not be null)
+     * @param config the deserialization configuration to use (must not be null)
+     * @param targetClass the class of the object to create (must not be null)
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs during reading
      */
     <T> T deserialize(Reader source, DC config, Class<? extends T> targetClass) throws UncheckedIOException;
 }

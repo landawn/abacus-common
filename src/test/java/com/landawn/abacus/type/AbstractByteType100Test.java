@@ -15,6 +15,7 @@ import java.sql.Types;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -22,6 +23,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class AbstractByteType100Test extends TestBase {
     private Type<Byte> type;
     private CharacterWriter characterWriter;
@@ -61,13 +63,13 @@ public class AbstractByteType100Test extends TestBase {
     @Test
     public void testValueOf_String_Null() {
         Byte result = type.valueOf((String) null);
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
     public void testValueOf_String_Empty() {
         Byte result = type.valueOf("");
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
@@ -104,14 +106,14 @@ public class AbstractByteType100Test extends TestBase {
     @Test
     public void testValueOf_CharArray_Null() {
         Byte result = type.valueOf(null, 0, 0);
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
     public void testValueOf_CharArray_Empty() {
         char[] cbuf = new char[0];
         Byte result = type.valueOf(cbuf, 0, 0);
-        assertNull(result); // Should return default value
+        assertNull(result);
     }
 
     @Test
@@ -218,32 +220,27 @@ public class AbstractByteType100Test extends TestBase {
     @Test
     public void testWriteCharacter_Null_NoConfig() throws IOException {
         type.writeCharacter(characterWriter, null, null);
-        // Verify writer.write(NULL_CHAR_ARRAY) was called
     }
 
     @Test
     public void testWriteCharacter_ByteValue_NoConfig() throws IOException {
         type.writeCharacter(characterWriter, (byte) 42, null);
-        // Verify writer.write(42) was called
     }
 
     @Test
     public void testWriteCharacter_Null_WithWriteNullNumberAsZero() throws IOException {
         when(config.writeNullNumberAsZero()).thenReturn(true);
         type.writeCharacter(characterWriter, null, config);
-        // Verify writer.write(0) was called
     }
 
     @Test
     public void testWriteCharacter_Null_WithoutWriteNullNumberAsZero() throws IOException {
         when(config.writeNullNumberAsZero()).thenReturn(false);
         type.writeCharacter(characterWriter, null, config);
-        // Verify writer.write(NULL_CHAR_ARRAY) was called
     }
 
     @Test
     public void testWriteCharacter_NumberValue() throws IOException {
         type.writeCharacter(characterWriter, (byte) 100, config);
-        // Verify writer.write(100) was called
     }
 }

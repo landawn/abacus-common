@@ -39,6 +39,7 @@ import java.util.stream.Collector.Characteristics;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -80,6 +81,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Tag("new-test")
 public class Collectors100Test extends TestBase {
 
     private List<String> stringList;
@@ -121,7 +123,6 @@ public class Collectors100Test extends TestBase {
                 new Person("David", 28, "Sales"), new Person("Eve", 32, "HR"));
     }
 
-    // Test create methods
     @Test
     public void testCreateWithSupplierAccumulatorCombiner() {
         Collector<String, List<String>, List<String>> collector = Collectors.create(ArrayList::new, List::add, (a, b) -> {
@@ -182,7 +183,6 @@ public class Collectors100Test extends TestBase {
         assertTrue(collector.characteristics().contains(Characteristics.UNORDERED));
     }
 
-    // Test toCollection methods
     @Test
     public void testToCollection() {
         Collector<String, ?, LinkedList<String>> collector = Collectors.toCollection(LinkedList::new);
@@ -219,7 +219,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(Arrays.asList("APPLE", "BANANA", "CHERRY", "DATE", "ELDERBERRY"), result);
     }
 
-    // Test list collectors
     @Test
     public void testToList() {
         List<String> result = stringList.stream().collect(Collectors.toList());
@@ -254,7 +253,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(Arrays.asList("apple", "banana", "cherry"), result);
     }
 
-    // Test set collectors
     @Test
     public void testToSet() {
         Set<String> result = stringList.stream().collect(Collectors.toSet());
@@ -288,7 +286,6 @@ public class Collectors100Test extends TestBase {
         assertTrue(result.size() <= 3);
     }
 
-    // Test queue and deque collectors
     @Test
     public void testToQueue() {
         Queue<String> result = stringList.stream().collect(Collectors.toQueue());
@@ -304,7 +301,6 @@ public class Collectors100Test extends TestBase {
         assertEquals("elderberry", result.pollLast());
     }
 
-    // Test multiset collector
     @Test
     public void testToMultiset() {
         Multiset<String> result = Arrays.asList("a", "b", "a", "c", "b", "a").stream().collect(Collectors.toMultiset());
@@ -321,7 +317,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(1, result.count("c"));
     }
 
-    // Test array collectors
     @Test
     public void testToArray() {
         Object[] result = stringList.stream().collect(Collectors.toArray());
@@ -340,7 +335,6 @@ public class Collectors100Test extends TestBase {
         assertArrayEquals(stringList.toArray(new String[0]), result);
     }
 
-    // Test primitive list collectors
     @Test
     public void testToBooleanList() {
         BooleanList result = Arrays.asList(true, false, true).stream().collect(Collectors.toBooleanList());
@@ -448,7 +442,6 @@ public class Collectors100Test extends TestBase {
         assertArrayEquals(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 }, result, 0.01);
     }
 
-    // Test onlyOne collectors
     @Test
     public void testOnlyOne() {
         Optional<String> result = Arrays.asList("apple").stream().collect(Collectors.onlyOne());
@@ -470,7 +463,6 @@ public class Collectors100Test extends TestBase {
         assertThrows(TooManyElementsException.class, () -> stringList.stream().collect(Collectors.onlyOne(s -> s.length() > 4)));
     }
 
-    // Test first and last collectors
     @Test
     public void testFirst() {
         Optional<String> result = stringList.stream().collect(Collectors.first());
@@ -509,7 +501,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(stringList, moreThanSize);
     }
 
-    // Test joining collectors
     @Test
     public void testJoining() {
         String result = stringList.stream().collect(Collectors.joining());
@@ -528,7 +519,6 @@ public class Collectors100Test extends TestBase {
         assertEquals("[apple, banana, cherry, date, elderberry]", result);
     }
 
-    // Test filtering collectors
     @Test
     public void testFiltering() {
         List<String> result = stringList.stream().collect(Collectors.filtering(s -> s.length() > 5, Collectors.toList()));
@@ -541,7 +531,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(Arrays.asList("banana", "cherry", "elderberry"), result);
     }
 
-    // Test mapping collectors
     @Test
     public void testMapping() {
         List<Integer> result = stringList.stream().collect(Collectors.mapping(String::length, Collectors.toList()));
@@ -554,7 +543,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(Arrays.asList(5, 6, 6, 4, 10), result);
     }
 
-    // Test flatMapping collectors
     @Test
     public void testFlatMapping() {
         List<String> words = Arrays.asList("hello world", "java streams");
@@ -583,14 +571,12 @@ public class Collectors100Test extends TestBase {
         assertEquals(Arrays.asList("a", "b", "c", "d"), result);
     }
 
-    // Test collectingAndThen
     @Test
     public void testCollectingAndThen() {
         Integer result = stringList.stream().collect(Collectors.collectingAndThen(Collectors.toList(), List::size));
         assertEquals(5, result);
     }
 
-    // Test collectingOrEmpty, collectingOrElse variants
     @Test
     public void testCollectingOrEmpty() {
         Optional<List<String>> result = stringList.stream().filter(s -> s.length() > 5).collect(Collectors.collectingOrEmpty(Collectors.toList()));
@@ -623,11 +609,10 @@ public class Collectors100Test extends TestBase {
                 () -> stringList.stream().filter(s -> s.length() > 20).collect(Collectors.collectingOrElseThrowIfEmpty(Collectors.toList())));
     }
 
-    // Test distinctBy collectors
     @Test
     public void testDistinctByToList() {
         List<String> result = stringList.stream().collect(Collectors.distinctByToList(String::length));
-        assertEquals(4, result.size()); // 5, 6, 4, 10 lengths
+        assertEquals(4, result.size());
     }
 
     @Test
@@ -642,7 +627,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(4, result);
     }
 
-    // Test counting collectors
     @Test
     public void testCounting() {
         Long result = stringList.stream().collect(Collectors.counting());
@@ -655,7 +639,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(5, result);
     }
 
-    // Test min/max collectors
     @Test
     public void testMin() {
         Optional<Integer> result = integerList.stream().collect(Collectors.min());
@@ -715,7 +698,6 @@ public class Collectors100Test extends TestBase {
         assertEquals("Charlie", result.get().name);
     }
 
-    // Test minAll/maxAll collectors
     @Test
     public void testMinAll() {
         List<Integer> result = Arrays.asList(1, 2, 1, 3, 1).stream().collect(Collectors.minAll());
@@ -740,7 +722,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(2L, count);
     }
 
-    // Test minMax collectors
     @Test
     public void testMinMax() {
         Optional<Pair<Integer, Integer>> result = integerList.stream().collect(Collectors.minMax());
@@ -777,7 +758,6 @@ public class Collectors100Test extends TestBase {
         assertThrows(NoSuchElementException.class, () -> Arrays.<Integer> asList().stream().collect(Collectors.minMaxOrElseThrow()));
     }
 
-    // Test summing collectors
     @Test
     public void testSummingInt() {
         Integer result = integerList.stream().collect(Collectors.summingInt(i -> i));
@@ -818,7 +798,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(new BigDecimal("6.66666666666"), result);
     }
 
-    // Test averaging collectors
     @Test
     public void testAveragingInt() {
         OptionalDouble result = integerList.stream().collect(Collectors.averagingIntOrEmpty(i -> i));
@@ -866,7 +845,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(0, new BigDecimal("2").compareTo(result.get()));
     }
 
-    // Test summarizing collectors
     @Test
     public void testSummarizingChar() {
         CharSummaryStatistics result = Arrays.asList('a', 'b', 'c').stream().collect(Collectors.summarizingChar(c -> c));
@@ -954,7 +932,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(new BigDecimal("6.6"), result.getSum());
     }
 
-    // Test reducing collectors
     @Test
     public void testReducingWithIdentity() {
         Integer result = integerList.stream().collect(Collectors.reducing(0, Integer::sum));
@@ -982,7 +959,7 @@ public class Collectors100Test extends TestBase {
     @Test
     public void testReducingWithMapper() {
         Integer result = stringList.stream().collect(Collectors.reducing(0, String::length, Integer::sum));
-        assertEquals(31, result); // 5+6+6+4+10
+        assertEquals(31, result);
     }
 
     @Test
@@ -991,7 +968,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(31, result);
     }
 
-    // Test common prefix/suffix collectors
     @Test
     public void testCommonPrefix() {
         String result = Arrays.asList("prefix_test", "prefix_demo", "prefix_example").stream().collect(Collectors.commonPrefix());
@@ -1010,7 +986,6 @@ public class Collectors100Test extends TestBase {
         assertEquals("", empty);
     }
 
-    // Test groupingBy collectors
     @Test
     public void testGroupingBy() {
         Map<Integer, List<String>> result = stringList.stream().collect(Collectors.groupingBy(String::length));
@@ -1042,7 +1017,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(3, result.size());
     }
 
-    // Test concurrent groupingBy collectors
     @Test
     public void testGroupingByConcurrent() {
         ConcurrentMap<Integer, List<String>> result = stringList.stream().collect(Collectors.groupingByConcurrent(String::length));
@@ -1065,7 +1039,6 @@ public class Collectors100Test extends TestBase {
         assertTrue(result instanceof ConcurrentMap);
     }
 
-    // Test partitioningBy collectors
     @Test
     public void testPartitioningBy() {
         Map<Boolean, List<String>> result = stringList.stream().collect(Collectors.partitioningBy(s -> s.length() > 5));
@@ -1082,7 +1055,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(2L, result.get(false));
     }
 
-    // Test countingBy collectors
     @Test
     public void testCountingBy() {
         Map<Integer, Long> result = stringList.stream().collect(Collectors.countingBy(String::length));
@@ -1106,7 +1078,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(2, result.get(6));
     }
 
-    // Test Map collectors
     @Test
     public void testToMapFromEntries() {
         Map<String, Integer> source = new HashMap<>();
@@ -1123,7 +1094,7 @@ public class Collectors100Test extends TestBase {
                 new AbstractMap.SimpleEntry<>("a", 3));
 
         Map<String, Integer> result = entries.stream().collect(Collectors.toMap(Integer::sum));
-        assertEquals(4, result.get("a")); // 1 + 3
+        assertEquals(4, result.get("a"));
         assertEquals(2, result.get("b"));
     }
 
@@ -1156,7 +1127,6 @@ public class Collectors100Test extends TestBase {
         assertEquals("banana,cherry", result.get(6));
     }
 
-    // Test ImmutableMap collectors
     @Test
     public void testToImmutableMap() {
         Map<String, Integer> source = new HashMap<>();
@@ -1175,7 +1145,6 @@ public class Collectors100Test extends TestBase {
         assertThrows(UnsupportedOperationException.class, () -> result.put("test", 4));
     }
 
-    // Test UnmodifiableMap collectors
     @Test
     public void testToUnmodifiableMap() {
         Map<String, Integer> result = stringList.stream().collect(Collectors.toUnmodifiableMap(Function.identity(), String::length));
@@ -1190,17 +1159,14 @@ public class Collectors100Test extends TestBase {
         assertThrows(UnsupportedOperationException.class, () -> result.put(7, "test"));
     }
 
-    // Test LinkedHashMap collector
     @Test
     public void testToLinkedHashMap() {
         Map<String, Integer> result = stringList.stream().collect(Collectors.toLinkedHashMap(Function.identity(), String::length));
         assertTrue(result instanceof LinkedHashMap);
         assertEquals(5, result.size());
-        // Check order is preserved
         assertEquals(Arrays.asList("apple", "banana", "cherry", "date", "elderberry"), new ArrayList<>(result.keySet()));
     }
 
-    // Test ConcurrentMap collectors
     @Test
     public void testToConcurrentMap() {
         ConcurrentMap<String, Integer> result = stringList.stream().collect(Collectors.toConcurrentMap(Function.identity(), String::length));
@@ -1223,7 +1189,6 @@ public class Collectors100Test extends TestBase {
         assertEquals("banana,cherry", result.get(6));
     }
 
-    // Test BiMap collectors
     @Test
     public void testToBiMap() {
         BiMap<Integer, String> result = Arrays.asList("a", "bb", "ccc").stream().collect(Collectors.toBiMap(String::length, Function.identity()));
@@ -1240,7 +1205,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(3, result.size());
     }
 
-    // Test Multimap collectors
     @Test
     public void testToMultimap() {
         Map<String, Integer> source = new IdentityHashMap<>();
@@ -1313,7 +1277,6 @@ public class Collectors100Test extends TestBase {
         assertEquals(2, result.get("Java").size());
     }
 
-    // Test teeing collector
     @Test
     public void testTeeing() {
         Pair<Long, Integer> result = integerList.stream()
@@ -1323,22 +1286,21 @@ public class Collectors100Test extends TestBase {
         assertEquals(15, result.right());
     }
 
-    // Test MoreCollectors methods
     @Test
     public void testMoreCollectorsSummingInt2() {
         Tuple2<Integer, Integer> result = personList.stream().collect(MoreCollectors.summingInt(p -> p.getAge(), p -> p.getDepartment().length()));
 
-        assertEquals(150, result._1); // Sum of ages
-        assertTrue(result._2 > 0); // Sum of department name lengths
+        assertEquals(150, result._1);
+        assertTrue(result._2 > 0);
     }
 
     @Test
     public void testMoreCollectorsSummingInt3() {
         Tuple3<Integer, Integer, Integer> result = Arrays.asList(1, 2, 3).stream().collect(MoreCollectors.summingInt(i -> i, i -> i * 2, i -> i * 3));
 
-        assertEquals(6, result._1); // 1+2+3
-        assertEquals(12, result._2); // 2+4+6
-        assertEquals(18, result._3); // 3+6+9
+        assertEquals(6, result._1);
+        assertEquals(12, result._2);
+        assertEquals(18, result._3);
     }
 
     @Test
@@ -1566,12 +1528,10 @@ public class Collectors100Test extends TestBase {
         assertEquals(columnNames, result.columnNameList());
     }
 
-    // Edge case tests
     @Test
     public void testEmptyStreamHandling() {
         List<String> emptyList = Arrays.asList();
 
-        // Test various collectors with empty streams
         assertTrue(emptyList.stream().collect(Collectors.toList()).isEmpty());
         assertTrue(emptyList.stream().collect(Collectors.toSet()).isEmpty());
         assertFalse(emptyList.stream().collect(Collectors.first()).isPresent());
@@ -1585,7 +1545,6 @@ public class Collectors100Test extends TestBase {
     public void testNullHandling() {
         List<String> listWithNulls = Arrays.asList("a", null, "b", null, "c");
 
-        // Test that null elements are handled properly
         List<String> resultList = listWithNulls.stream().collect(Collectors.toList());
         assertEquals(5, resultList.size());
         assertNull(resultList.get(1));
@@ -1594,7 +1553,6 @@ public class Collectors100Test extends TestBase {
 
     @Test
     public void testLargeDataset() {
-        // Test with larger data set to ensure performance
         List<Integer> largeList = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
             largeList.add(i);
@@ -1613,7 +1571,6 @@ public class Collectors100Test extends TestBase {
 
     @Test
     public void testParallelStreamCompatibility() {
-        // Test that collectors work correctly with parallel streams
         Long countSequential = integerList.stream().collect(Collectors.counting());
         Long countParallel = integerList.parallelStream().collect(Collectors.counting());
         assertEquals(countSequential, countParallel);
@@ -1629,7 +1586,6 @@ public class Collectors100Test extends TestBase {
 
     @Test
     public void testCharacteristicsPreservation() {
-        // Test that collector characteristics are properly set
         Collector<String, ?, List<String>> listCollector = Collectors.toList();
         assertFalse(listCollector.characteristics().contains(Characteristics.UNORDERED));
 
@@ -1643,13 +1599,12 @@ public class Collectors100Test extends TestBase {
 
     @Test
     public void testComplexNestedCollectors() {
-        // Test complex nested collector scenarios
         Map<String, Map<Integer, Long>> nestedResult = personList.stream()
-                .collect(Collectors.groupingBy(Person::getDepartment, Collectors.groupingBy(p -> p.getAge() / 10 * 10, // Group by age decade
+                .collect(Collectors.groupingBy(Person::getDepartment, Collectors.groupingBy(p -> p.getAge() / 10 * 10,
                         Collectors.counting())));
 
         assertNotNull(nestedResult);
-        assertEquals(3, nestedResult.size()); // 3 departments
+        assertEquals(3, nestedResult.size());
         assertTrue(nestedResult.containsKey("Engineering"));
         assertTrue(nestedResult.containsKey("Sales"));
         assertTrue(nestedResult.containsKey("HR"));
@@ -1657,7 +1612,6 @@ public class Collectors100Test extends TestBase {
 
     @Test
     public void testCustomCollectorIntegration() {
-        // Test that custom collectors created with create() methods work properly
         Collector<String, StringBuilder, String> customJoiner = Collectors.create(StringBuilder::new, (sb, s) -> {
             if (sb.length() > 0)
                 sb.append("|");
@@ -1675,15 +1629,11 @@ public class Collectors100Test extends TestBase {
 
     @Test
     public void testErrorConditions() {
-        // Test various error conditions
 
-        // Duplicate keys in toMap should throw
         assertThrows(IllegalStateException.class, () -> Arrays.asList("a", "b", "a").stream().collect(Collectors.toMap(Function.identity(), String::length)));
 
-        // Null key in groupingBy should throw
         assertThrows(NullPointerException.class, () -> Arrays.asList("a", null, "b").stream().collect(Collectors.groupingBy(Function.identity())));
 
-        // Using first/last collectors with parallel stream should throw
         assertThrows(UnsupportedOperationException.class, () -> stringList.parallelStream().collect(Collectors.first()));
 
         assertThrows(UnsupportedOperationException.class, () -> stringList.parallelStream().collect(Collectors.last()));

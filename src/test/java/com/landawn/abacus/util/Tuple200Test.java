@@ -18,13 +18,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
 
-/**
- * Unit tests for the Tuple class using standard JUnit 5 assertions.
- */
+@Tag("new-test")
 public class Tuple200Test extends TestBase {
 
     @Test
@@ -50,7 +49,7 @@ public class Tuple200Test extends TestBase {
 
     @Test
     public void testCreateFromObjectArray() {
-        assertTrue(Tuple.create(new Object[0]) instanceof Tuple); // Specifically Tuple0.EMPTY
+        assertTrue(Tuple.create(new Object[0]) instanceof Tuple);
         assertEquals(1, Tuple.create(new Object[] { 1 }).arity());
         assertEquals(2, Tuple.create(new Object[] { 1, 2 }).arity());
         assertEquals(3, Tuple.create(new Object[] { 1, 2, 3 }).arity());
@@ -67,7 +66,7 @@ public class Tuple200Test extends TestBase {
 
     @Test
     public void testCreateFromCollection() {
-        assertTrue(Tuple.create(Collections.emptyList()) instanceof Tuple); // Tuple0.EMPTY
+        assertTrue(Tuple.create(Collections.emptyList()) instanceof Tuple);
         assertEquals(1, Tuple.create(Arrays.asList(1)).arity());
         assertEquals(2, Tuple.create(Arrays.asList(1, 2)).arity());
         assertEquals(3, Tuple.create(Arrays.asList(1, 2, 3)).arity());
@@ -110,16 +109,13 @@ public class Tuple200Test extends TestBase {
     public void testTupleGenericMethods() throws Exception {
         Tuple.Tuple2<String, Integer> t2 = Tuple.of("val", 99);
 
-        // map
         String mapped = t2.map(t -> t._1 + ":" + t._2);
         assertEquals("val:99", mapped);
 
-        // accept
         final AtomicReference<Tuple> acceptedTuple = new AtomicReference<>();
         t2.accept(acceptedTuple::set);
         assertSame(t2, acceptedTuple.get());
 
-        // filter
         Optional<Tuple.Tuple2<String, Integer>> filtered = t2.filter(t -> t._2 > 50);
         assertTrue(filtered.isPresent());
         assertSame(t2, filtered.get());
@@ -132,25 +128,19 @@ public class Tuple200Test extends TestBase {
     public void testTuple2SpecificMethods() throws Exception {
         Tuple.Tuple2<String, Integer> t2 = Tuple.of("a", 1);
 
-        // toPair
         assertEquals(Pair.of("a", 1), t2.toPair());
 
-        // toEntry
         assertEquals(ImmutableEntry.of("a", 1), t2.toEntry());
 
-        // reverse
         assertEquals(Tuple.of(1, "a"), t2.reverse());
 
-        // map (BiFunction)
         String mapped = t2.map((a, b) -> a + b);
         assertEquals("a1", mapped);
 
-        // accept (BiConsumer)
         final AtomicReference<String> accepted = new AtomicReference<>();
         t2.accept((a, b) -> accepted.set(a + b));
         assertEquals("a1", accepted.get());
 
-        // filter (BiPredicate)
         assertTrue(t2.filter((a, b) -> b > 0).isPresent());
         assertFalse(t2.filter((a, b) -> b < 0).isPresent());
     }
@@ -159,22 +149,17 @@ public class Tuple200Test extends TestBase {
     public void testTuple3SpecificMethods() throws Exception {
         Tuple.Tuple3<String, Integer, Boolean> t3 = Tuple.of("a", 1, true);
 
-        // toTriple
         assertEquals(Triple.of("a", 1, true), t3.toTriple());
 
-        // reverse
         assertEquals(Tuple.of(true, 1, "a"), t3.reverse());
 
-        // map (TriFunction)
         String mapped = t3.map((a, b, c) -> a + b + c);
         assertEquals("a1true", mapped);
 
-        // accept (TriConsumer)
         final AtomicReference<String> accepted = new AtomicReference<>();
         t3.accept((a, b, c) -> accepted.set(a + b + c));
         assertEquals("a1true", accepted.get());
 
-        // filter (TriPredicate)
         assertTrue(t3.filter((a, b, c) -> c).isPresent());
         assertFalse(t3.filter((a, b, c) -> !c).isPresent());
     }
@@ -226,12 +211,10 @@ public class Tuple200Test extends TestBase {
         Object[] array = t3.toArray();
         assertArrayEquals(new Object[] { "a", 1, true }, array);
 
-        // Test with pre-sized array
         Object[] preSized = new Object[3];
         t3.toArray(preSized);
         assertArrayEquals(new Object[] { "a", 1, true }, preSized);
 
-        // Test with smaller array
         Object[] smaller = new Object[1];
         Object[] result = t3.toArray(smaller);
         assertNotSame(smaller, result);
@@ -252,28 +235,22 @@ public class Tuple200Test extends TestBase {
 
     @Test
     public void testEqualsAndHashCode() {
-        // Equal Tuples
         Tuple.Tuple2<String, Integer> t1 = Tuple.of("a", 1);
         Tuple.Tuple2<String, Integer> t2 = Tuple.of("a", 1);
         assertEquals(t1, t2);
         assertEquals(t1.hashCode(), t2.hashCode());
 
-        // Different value
         Tuple.Tuple2<String, Integer> t3 = Tuple.of("b", 1);
         assertNotEquals(t1, t3);
 
-        // Different type
         Tuple.Tuple3<String, Integer, Boolean> t4 = Tuple.of("a", 1, false);
         assertNotEquals(t1, t4);
 
-        // Different order
         Tuple.Tuple2<Integer, String> t5 = Tuple.of(1, "a");
         assertNotEquals(t1, t5);
 
-        // Null checks
         assertNotEquals(null, t1);
 
-        // With nulls
         Tuple.Tuple2<String, Integer> t_null1 = Tuple.of(null, 1);
         Tuple.Tuple2<String, Integer> t_null2 = Tuple.of(null, 1);
         assertEquals(t_null1, t_null2);

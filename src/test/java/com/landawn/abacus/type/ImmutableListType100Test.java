@@ -9,11 +9,13 @@ import java.io.StringWriter;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ImmutableList;
 
+@Tag("new-test")
 public class ImmutableListType100Test extends TestBase {
 
     private ImmutableListType<String> immutableListType;
@@ -68,9 +70,7 @@ public class ImmutableListType100Test extends TestBase {
 
     @Test
     public void testIsSerializable() {
-        // Result depends on underlying listType.isSerializable()
         boolean result = immutableListType.isSerializable();
-        // Just verify it returns a boolean
         assertTrue(result || !result);
     }
 
@@ -78,44 +78,33 @@ public class ImmutableListType100Test extends TestBase {
     public void testGetSerializationType() {
         Type.SerializationType serType = immutableListType.getSerializationType();
         assertNotNull(serType);
-        // Should be either SERIALIZABLE or COLLECTION
         assertTrue(serType == Type.SerializationType.SERIALIZABLE || serType == Type.SerializationType.COLLECTION);
     }
 
     @Test
     public void testStringOf() {
-        // Test would require mocking listType.stringOf()
-        // Result depends on delegation to listType
     }
 
     @Test
     public void testValueOf() {
-        // Test would require mocking listType.valueOf()
-        // and ImmutableList.wrap()
     }
 
     @Test
     public void testAppendTo() throws IOException {
-        // Test would require mocking listType.appendTo()
         StringWriter writer = new StringWriter();
-        // Actual test depends on delegation to listType
     }
 
     @Test
     public void testWriteCharacter() throws IOException {
-        // Test would require mocking listType.writeCharacter()
-        // Actual test depends on delegation to listType
     }
 
     @Test
     public void testGetTypeName() {
-        // Test static method with declaring name
         String typeName = ImmutableListType.getTypeName(ImmutableList.class, "String", true);
         assertNotNull(typeName);
         assertTrue(typeName.contains("ImmutableList"));
         assertTrue(typeName.contains("String"));
 
-        // Test static method without declaring name
         typeName = ImmutableListType.getTypeName(ImmutableList.class, "String", false);
         assertNotNull(typeName);
         assertTrue(typeName.contains("ImmutableList"));

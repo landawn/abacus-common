@@ -16,11 +16,13 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.stream.LongStream;
 
+@Tag("new-test")
 public class LongList100Test extends TestBase {
 
     private LongList list;
@@ -30,7 +32,6 @@ public class LongList100Test extends TestBase {
         list = new LongList();
     }
 
-    // Constructor Tests
     @Test
     public void testDefaultConstructor() {
         LongList list = new LongList();
@@ -76,7 +77,6 @@ public class LongList100Test extends TestBase {
         assertThrows(NullPointerException.class, () -> new LongList(null));
     }
 
-    // Static Factory Method Tests
     @Test
     public void testOf() {
         LongList list = LongList.of(1L, 2L, 3L, 4L, 5L);
@@ -109,9 +109,7 @@ public class LongList100Test extends TestBase {
         long[] array = { 1L, 2L, 3L, 4L, 5L };
         LongList list = LongList.copyOf(array);
         assertEquals(5, list.size());
-        // Modify original array
         array[0] = 100L;
-        // List should not be affected
         assertEquals(1L, list.get(0));
     }
 
@@ -179,13 +177,11 @@ public class LongList100Test extends TestBase {
     public void testRandom() {
         LongList list = LongList.random(10);
         assertEquals(10, list.size());
-        // Just check that it contains longs
         for (int i = 0; i < 10; i++) {
             assertNotNull(list.get(i));
         }
     }
 
-    // Get and Set Tests
     @Test
     public void testGet() {
         list.add(10L);
@@ -214,7 +210,6 @@ public class LongList100Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> list.set(0, 10L));
     }
 
-    // Add Tests
     @Test
     public void testAdd() {
         list.add(10L);
@@ -307,7 +302,6 @@ public class LongList100Test extends TestBase {
         assertEquals(3L, list.get(2));
     }
 
-    // Remove Tests
     @Test
     public void testRemove() {
         list.add(10L);
@@ -444,7 +438,6 @@ public class LongList100Test extends TestBase {
         assertEquals(50L, list.get(2));
     }
 
-    // Move and Replace Tests
     @Test
     public void testMoveRange() {
         list.addAll(new long[] { 1L, 2L, 3L, 4L, 5L });
@@ -520,7 +513,6 @@ public class LongList100Test extends TestBase {
         assertEquals(5L, list.get(4));
     }
 
-    // Fill Tests
     @Test
     public void testFill() {
         list.addAll(new long[] { 1L, 2L, 3L, 4L, 5L });
@@ -543,7 +535,6 @@ public class LongList100Test extends TestBase {
         assertEquals(5L, list.get(4));
     }
 
-    // Contains Tests
     @Test
     public void testContains() {
         list.addAll(new long[] { 1L, 2L, 3L, 4L, 5L });
@@ -590,7 +581,6 @@ public class LongList100Test extends TestBase {
         assertFalse(list.disjoint(other));
     }
 
-    // Set Operations Tests
     @Test
     public void testIntersection() {
         list.addAll(new long[] { 1L, 2L, 2L, 3L, 4L });
@@ -628,7 +618,6 @@ public class LongList100Test extends TestBase {
         assertTrue(result.contains(5L));
     }
 
-    // Index and Occurrence Tests
     @Test
     public void testOccurrencesOf() {
         list.addAll(new long[] { 1L, 2L, 3L, 2L, 2L, 4L });
@@ -672,7 +661,6 @@ public class LongList100Test extends TestBase {
         assertEquals(-1, list.lastIndexOf(5L, 3));
     }
 
-    // Min/Max/Median Tests
     @Test
     public void testMin() {
         list.addAll(new long[] { 3L, 1L, 4L, 1L, 5L });
@@ -715,7 +703,6 @@ public class LongList100Test extends TestBase {
         assertEquals(3L, median.getAsLong());
     }
 
-    // forEach Tests
     @Test
     public void testForEach() {
         list.addAll(new long[] { 1L, 2L, 3L });
@@ -742,7 +729,6 @@ public class LongList100Test extends TestBase {
         assertEquals(4L, result.get(2));
     }
 
-    // First/Last Tests
     @Test
     public void testFirst() {
         list.addAll(new long[] { 1L, 2L, 3L });
@@ -828,7 +814,6 @@ public class LongList100Test extends TestBase {
         assertEquals(2L, list.get(1));
     }
 
-    // Distinct and Duplicates Tests
     @Test
     public void testDistinct() {
         list.addAll(new long[] { 1L, 2L, 2L, 3L, 3L, 3L });
@@ -849,7 +834,6 @@ public class LongList100Test extends TestBase {
         assertTrue(list.hasDuplicates());
     }
 
-    // Sort Tests
     @Test
     public void testIsSorted() {
         list.addAll(new long[] { 1L, 2L, 3L, 4L, 5L });
@@ -904,7 +888,6 @@ public class LongList100Test extends TestBase {
         assertTrue(list.binarySearch(1, 3, 4L) < 0);
     }
 
-    // Reverse and Rotate Tests
     @Test
     public void testReverse() {
         list.addAll(new long[] { 1L, 2L, 3L, 4L, 5L });
@@ -945,7 +928,6 @@ public class LongList100Test extends TestBase {
         list.shuffle();
         assertEquals(original.size(), list.size());
 
-        // Check all elements are still there
         for (int i = 0; i < original.size(); i++) {
             assertTrue(list.contains(original.get(i)));
         }
@@ -970,7 +952,6 @@ public class LongList100Test extends TestBase {
         assertEquals(1L, list.get(2));
     }
 
-    // Copy Tests
     @Test
     public void testCopy() {
         list.addAll(new long[] { 1L, 2L, 3L });
@@ -978,9 +959,7 @@ public class LongList100Test extends TestBase {
         LongList copy = list.copy();
         assertEquals(list.size(), copy.size());
 
-        // Modify original
         list.set(0, 10L);
-        // Copy should not be affected
         assertEquals(1L, copy.get(0));
     }
 
@@ -1005,7 +984,6 @@ public class LongList100Test extends TestBase {
         assertEquals(5L, copy.get(2));
     }
 
-    // Split Tests
     @Test
     public void testSplit() {
         list.addAll(new long[] { 1L, 2L, 3L, 4L, 5L, 6L });
@@ -1022,7 +1000,6 @@ public class LongList100Test extends TestBase {
         assertEquals(6L, chunks.get(2).get(1));
     }
 
-    // Utility Tests
     @Test
     public void testTrimToSize() {
         list.addAll(new long[] { 1L, 2L, 3L });
@@ -1058,7 +1035,6 @@ public class LongList100Test extends TestBase {
         assertEquals(2, list.size());
     }
 
-    // Conversion Tests
     @Test
     public void testBoxed() {
         list.addAll(new long[] { 1L, 2L, 3L });
@@ -1088,7 +1064,6 @@ public class LongList100Test extends TestBase {
         assertEquals(1L, array[0]);
         assertEquals(3L, array[2]);
 
-        // Modify array should not affect list
         array[0] = 10L;
         assertEquals(1L, list.get(0));
     }
@@ -1132,7 +1107,6 @@ public class LongList100Test extends TestBase {
         assertEquals(2, multiset.count(2L));
     }
 
-    // Iterator and Stream Tests
     @Test
     public void testIterator() {
         list.addAll(new long[] { 1L, 2L, 3L });
@@ -1162,10 +1136,9 @@ public class LongList100Test extends TestBase {
 
         LongStream stream = list.stream(1, 4);
         long sum = stream.sum();
-        assertEquals(9L, sum); // 2 + 3 + 4
+        assertEquals(9L, sum);
     }
 
-    // Equals and HashCode Tests
     @Test
     public void testEquals() {
         list.addAll(new long[] { 1L, 2L, 3L });
@@ -1204,7 +1177,6 @@ public class LongList100Test extends TestBase {
         assertTrue(list.toString().contains("3"));
     }
 
-    // Array method test
     @Test
     public void testArray() {
         list.addAll(new long[] { 1L, 2L, 3L });
@@ -1214,12 +1186,10 @@ public class LongList100Test extends TestBase {
         assertEquals(2L, array[1]);
         assertEquals(3L, array[2]);
 
-        // Modifying the array should affect the list (since it's the internal array)
         array[0] = 10L;
         assertEquals(10L, list.get(0));
     }
 
-    // Edge case tests
     @Test
     public void testLargeList() {
         int size = 10000;
@@ -1234,7 +1204,6 @@ public class LongList100Test extends TestBase {
 
     @Test
     public void testEmptyOperations() {
-        // Test operations on empty list
         assertFalse(list.remove(1L));
         assertFalse(list.removeAllOccurrences(1L));
         assertFalse(list.removeIf(x -> true));
@@ -1270,7 +1239,6 @@ public class LongList100Test extends TestBase {
 
     @Test
     public void testLargeValues() {
-        // Test with values that would overflow if using int
         long largeValue1 = Integer.MAX_VALUE + 1L;
         long largeValue2 = Integer.MAX_VALUE + 2L;
 

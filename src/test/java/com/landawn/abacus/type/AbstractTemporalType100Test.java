@@ -6,9 +6,11 @@ import java.time.temporal.Temporal;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class AbstractTemporalType100Test extends TestBase {
 
     private Type<Temporal> temporalType;

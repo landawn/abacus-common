@@ -32,6 +32,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -570,7 +571,7 @@ public final class Numbers {
                 return Float.NaN;
             } else if (num.isInfinite()) {
                 return Double.compare(it.doubleValue(), Double.POSITIVE_INFINITY) == 0 ? Float.POSITIVE_INFINITY : Float.NEGATIVE_INFINITY;
-            } else if (Double.compare(it.doubleValue(), Float.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), -Float.MIN_VALUE) < 0) {
+            } else if (Double.compare(it.doubleValue(), Float.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), -Float.MAX_VALUE) < 0) {
                 throw new ArithmeticException("float overflow: " + it);
             } else {
                 // return Float.valueOf(num.floatValue()); // 1.21D May not be 1.21F
@@ -835,6 +836,43 @@ public final class Numbers {
         }
     }
 
+    /**
+     * Converts the given number to the specified target type using the provided Type instance, with a custom default value for null.
+     *
+     * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double),
+     * as well as their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
+     * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Convert a double to an int with a default value for null
+     * Type<Integer> intType = Type.of(Integer.class);
+     * Integer result = Numbers.convert(null, intType, -1);
+     *
+     * // Convert a BigInteger to a long with a custom default
+     * Type<Long> longType = Type.of(Long.class);
+     * Long longValue = Numbers.convert(null, longType, 0L);
+     *
+     * // Convert with overflow checking
+     * try {
+     *     Type<Byte> byteType = Type.of(Byte.class);
+     *     Byte byteValue = Numbers.convert(new BigInteger("1000"), byteType, (byte)0);
+     * } catch (ArithmeticException e) {
+     *     // Handle overflow exception
+     * }
+     * }</pre>
+     *
+     * @param <T> the target type of the conversion (must extend Number)
+     * @param value the number to convert
+     * @param targetType the Type object representing the target type
+     * @param defaultValueForNull the value to return if the input value is null
+     * @return the converted number as an instance of the target type,
+     *         or the specified default value if the input value is null
+     * @throws ArithmeticException if the conversion would result in an overflow
+     * @see #convert(Number, Type)
+     * @see #convert(Number, Class, Number)
+     * @see com.landawn.abacus.type.Type
+     */
     public static <T extends Number> T convert(final Number value, final Type<? extends T> targetType, T defaultValueForNull) throws ArithmeticException {
         if (value == null) {
             return defaultValueForNull;
@@ -844,13 +882,24 @@ public final class Numbers {
     }
 
     /**
-     * Formats the given int value according to the provided decimal format.
-     * 
-     * @param x
-     * @param decimalFormat
-     * @return
-     * @throws IllegalArgumentException
+     * Formats the given int value according to the provided decimal format pattern.
+     *
+     * <p>This method uses {@link java.text.DecimalFormat} to format the integer value. The format should be a valid pattern
+     * for DecimalFormat, such as "0.00" for two decimal places or "#,###" for thousand separators.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Numbers.format(1234, "#,###");      // returns "1,234"
+     * Numbers.format(1234, "0.00");       // returns "1234.00"
+     * Numbers.format(1234, "$#,###.00");  // returns "$1,234.00"
+     * }</pre>
+     *
+     * @param x the int value to be formatted
+     * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
+     * @return a string representation of the int value formatted according to the provided decimal format
+     * @throws IllegalArgumentException if the decimalFormat is {@code null}
      * @see #format(double, String)
+     * @see #format(Integer, String)
      * @see java.text.DecimalFormat#format(long)
      */
     public static String format(final int x, final String decimalFormat) throws IllegalArgumentException {
@@ -866,12 +915,26 @@ public final class Numbers {
     }
 
     /**
-     * Formats the given int value according to the provided decimal format.
-     * 
-     * @param x
-     * @param decimalFormat
-     * @return
-     * @throws IllegalArgumentException
+     * Formats the given Integer value according to the provided decimal format pattern.
+     *
+     * <p>This method uses {@link java.text.DecimalFormat} to format the Integer value. The format should be a valid pattern
+     * for DecimalFormat, such as "0.00" for two decimal places or "#,###" for thousand separators.</p>
+     *
+     * <p>If the Integer value is {@code null}, it will be treated as 0.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Numbers.format(1234, "#,###");      // returns "1,234"
+     * Numbers.format(1234, "0.00");       // returns "1234.00"
+     * Numbers.format(null, "#,###");      // returns "0"
+     * Numbers.format(1234, "$#,###.00");  // returns "$1,234.00"
+     * }</pre>
+     *
+     * @param x the Integer value to be formatted (null will be treated as 0)
+     * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
+     * @return a string representation of the Integer value formatted according to the provided decimal format
+     * @throws IllegalArgumentException if the decimalFormat is {@code null}
+     * @see #format(int, String)
      * @see #format(Double, String)
      * @see java.text.DecimalFormat#format(long)
      */
@@ -892,13 +955,24 @@ public final class Numbers {
     }
 
     /**
-     * Formats the given long value according to the provided decimal format.
-     * 
-     * @param x
-     * @param decimalFormat
-     * @return
-     * @throws IllegalArgumentException
+     * Formats the given long value according to the provided decimal format pattern.
+     *
+     * <p>This method uses {@link java.text.DecimalFormat} to format the long value. The format should be a valid pattern
+     * for DecimalFormat, such as "0.00" for two decimal places or "#,###" for thousand separators.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Numbers.format(123456789L, "#,###");      // returns "123,456,789"
+     * Numbers.format(123456789L, "0.00");       // returns "123456789.00"
+     * Numbers.format(123456789L, "$#,###.00");  // returns "$123,456,789.00"
+     * }</pre>
+     *
+     * @param x the long value to be formatted
+     * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
+     * @return a string representation of the long value formatted according to the provided decimal format
+     * @throws IllegalArgumentException if the decimalFormat is {@code null}
      * @see #format(double, String)
+     * @see #format(Long, String)
      * @see java.text.DecimalFormat#format(long)
      */
     public static String format(final long x, final String decimalFormat) throws IllegalArgumentException {
@@ -914,12 +988,26 @@ public final class Numbers {
     }
 
     /**
-     * Formats the given long value according to the provided decimal format.
-     * 
-     * @param x
-     * @param decimalFormat
-     * @return
-     * @throws IllegalArgumentException
+     * Formats the given Long value according to the provided decimal format pattern.
+     *
+     * <p>This method uses {@link java.text.DecimalFormat} to format the Long value. The format should be a valid pattern
+     * for DecimalFormat, such as "0.00" for two decimal places or "#,###" for thousand separators.</p>
+     *
+     * <p>If the Long value is {@code null}, it will be treated as 0.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Numbers.format(123456789L, "#,###");      // returns "123,456,789"
+     * Numbers.format(123456789L, "0.00");       // returns "123456789.00"
+     * Numbers.format(null, "#,###");            // returns "0"
+     * Numbers.format(123456789L, "$#,###.00");  // returns "$123,456,789.00"
+     * }</pre>
+     *
+     * @param x the Long value to be formatted (null will be treated as 0)
+     * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
+     * @return a string representation of the Long value formatted according to the provided decimal format
+     * @throws IllegalArgumentException if the decimalFormat is {@code null}
+     * @see #format(long, String)
      * @see #format(Double, String)
      * @see java.text.DecimalFormat#format(long)
      */
@@ -1410,6 +1498,10 @@ public final class Numbers {
             final Integer result = N.stringIntCache.get(str);
 
             if (result != null) {
+                if (result < Short.MIN_VALUE || result > Short.MAX_VALUE) {
+                    throw new NumberFormatException("Value out of range. Value:\"" + str + "\" Radix: 10");
+                }
+
                 return result.shortValue();
             }
         }
@@ -2014,11 +2106,20 @@ public final class Numbers {
     }
 
     /**
-     * Returns the value of the {@code long} argument; throwing an exception if the value overflows an {@code int}.
+     * Returns the value of the {@code long} argument as an {@code int}, throwing an exception if the value overflows an {@code int}.
      *
-     * @param value the long value
-     * @return
-     * @throws ArithmeticException if the {@code argument} overflows an int
+     * <p>This method provides overflow checking when converting a long to an int. If the long value is outside
+     * the range of int values (Integer.MIN_VALUE to Integer.MAX_VALUE), an ArithmeticException is thrown.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int result = Numbers.toIntExact(123L);              // returns 123
+     * int overflow = Numbers.toIntExact(Integer.MAX_VALUE + 1L);  // throws ArithmeticException
+     * }</pre>
+     *
+     * @param value the long value to convert to an int
+     * @return the int value represented by the long argument
+     * @throws ArithmeticException if the {@code value} overflows an int (outside range of Integer.MIN_VALUE to Integer.MAX_VALUE)
      * @see Math#toIntExact(long)
      */
     public static int toIntExact(final long value) {
@@ -2032,20 +2133,33 @@ public final class Numbers {
     }
 
     /**
-     * <p>
-     * Convert a {@code String} to a {@code Integer}, handling hex
-     * (0xhhhh) and octal (0dddd) notations. N.B. a leading zero means octal;
-     * spaces are not trimmed.
-     * </p>
+     * Converts a {@code String} to an {@code Integer}, handling hexadecimal (0x or 0X prefix) and octal (0 prefix) notations.
      *
-     * {@code null} is returned if the specified {@code str} is {@code null}.
-     * <br />
-     * <br />
+     * <p>This method uses {@link Integer#decode(String)} to parse the string, which supports:</p>
+     * <ul>
+     * <li>Decimal numbers: "123", "-456"</li>
+     * <li>Hexadecimal numbers: "0xFF", "0x10", "#FF"</li>
+     * <li>Octal numbers: "0777" (leading zero indicates octal)</li>
+     * </ul>
      *
-     * @param str a {@code String} to convert, which may be null
-     * @return
-     * @throws NumberFormatException if the value cannot be converted
+     * <p>Note: Leading zeros indicate octal notation. Spaces are not trimmed from the input string.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Integer decimal = Numbers.createInteger("123");     // returns 123
+     * Integer hex = Numbers.createInteger("0xFF");        // returns 255
+     * Integer octal = Numbers.createInteger("010");       // returns 8
+     * Integer nullValue = Numbers.createInteger(null);    // returns null
+     * Numbers.createInteger("")                           // NumberFormatException!
+     * Numbers.createInteger("   ")                        // NumberFormatException!
+     * Numbers.createInteger("abc")                        // NumberFormatException!
+     * }</pre>
+     *
+     * @param str the string to convert; must not be {@code null} or empty
+     * @return the Integer value represented by the string, or {@code null} if the input string is {@code null}
+     * @throws NumberFormatException if the string is empty or cannot be parsed as a valid integer
      * @see #isCreatable(String)
+     * @see Integer#decode(String)
      */
     @MayReturnNull
     public static Integer createInteger(final String str) throws NumberFormatException {
@@ -2058,20 +2172,36 @@ public final class Numbers {
     }
 
     /**
-     * <p>
-     * Convert a {@code String} to a {@code Long}; since 3.1 it
-     * handles hex (0Xhhhh) and octal (0ddd) notations. N.B. a leading zero
-     * means octal; spaces are not trimmed.
-     * </p>
+     * Converts a {@code String} to a {@code Long}, handling hexadecimal (0x or 0X prefix) and octal (0 prefix) notations.
      *
-     * {@code null} is returned if the specified {@code str} is {@code null}.
-     * <br />
-     * <br />
+     * <p>This method uses {@link Long#decode(String)} to parse the string, which supports:</p>
+     * <ul>
+     * <li>Decimal numbers: "123", "-456"</li>
+     * <li>Hexadecimal numbers: "0xFF", "0x10", "#FF"</li>
+     * <li>Octal numbers: "0777" (leading zero indicates octal)</li>
+     * </ul>
      *
-     * @param str a {@code String} to convert, which may be null
-     * @return
-     * @throws NumberFormatException if the value cannot be converted
+     * <p>The method also handles strings ending with 'l' or 'L' suffix, which will be removed before parsing.</p>
+     *
+     * <p>Note: Leading zeros indicate octal notation. Spaces are not trimmed from the input string.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Long decimal = Numbers.createLong("123");       // returns 123L
+     * Long hex = Numbers.createLong("0xFF");          // returns 255L
+     * Long octal = Numbers.createLong("010");         // returns 8L
+     * Long withSuffix = Numbers.createLong("123L");   // returns 123L
+     * Long nullValue = Numbers.createLong(null);      // returns null
+     * Numbers.createLong("")                          // NumberFormatException!
+     * Numbers.createLong("   ")                       // NumberFormatException!
+     * Numbers.createLong("abc")                       // NumberFormatException!
+     * }</pre>
+     *
+     * @param str the string to convert; must not be {@code null} or empty
+     * @return the Long value represented by the string, or {@code null} if the input string is {@code null}
+     * @throws NumberFormatException if the string is empty or cannot be parsed as a valid long
      * @see #isCreatable(String)
+     * @see Long#decode(String)
      */
     @MayReturnNull
     public static Long createLong(final String str) throws NumberFormatException {
@@ -2093,20 +2223,28 @@ public final class Numbers {
     // -----------------------------------------------------------------------
 
     /**
-     * <p>
-     * Convert a {@code String} to a {@code Float}.
+     * Converts a {@code String} to a {@code Float}.
      *
-     * </p>
+     * <p>This method parses a string representation of a floating-point number and returns a Float object.
+     * The string can contain standard decimal notation or scientific notation (e.g., "1.23e-4").</p>
      *
-     * {@code null} is returned if the specified {@code str} is {@code null}.
-     * <br />
-     * <br />
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Float f1 = Numbers.createFloat("123.45");       // returns 123.45f
+     * Float f2 = Numbers.createFloat("-1.23e4");      // returns -12300.0f
+     * Float f3 = Numbers.createFloat("NaN");          // returns Float.NaN
+     * Float f4 = Numbers.createFloat("Infinity");     // returns Float.POSITIVE_INFINITY
+     * Float nullValue = Numbers.createFloat(null);    // returns null
+     * Numbers.createFloat("")                         // NumberFormatException!
+     * Numbers.createFloat("   ")                      // NumberFormatException!
+     * Numbers.createFloat("abc")                      // NumberFormatException!
+     * }</pre>
      *
-     *
-     * @param str a {@code String} to convert, which may be null
-     * @return
-     * @throws NumberFormatException if the value cannot be converted
+     * @param str the string to convert; must not be {@code null} or empty
+     * @return the Float value represented by the string, or {@code null} if the input string is {@code null}
+     * @throws NumberFormatException if the string is empty or cannot be parsed as a valid float
      * @see #isCreatable(String)
+     * @see Float#valueOf(String)
      */
     @MayReturnNull
     public static Float createFloat(final String str) throws NumberFormatException {
@@ -2118,20 +2256,28 @@ public final class Numbers {
     }
 
     /**
-     * <p>
-     * Convert a {@code String} to a {@code Double}.
+     * Converts a {@code String} to a {@code Double}.
      *
-     * </p>
+     * <p>This method parses a string representation of a floating-point number and returns a Double object.
+     * The string can contain standard decimal notation or scientific notation (e.g., "1.23e-4").</p>
      *
-     * {@code null} is returned if the specified {@code str} is {@code null}.
-     * <br />
-     * <br />
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Double d1 = Numbers.createDouble("123.45");         // returns 123.45
+     * Double d2 = Numbers.createDouble("-1.23e10");       // returns -1.23e10
+     * Double d3 = Numbers.createDouble("NaN");            // returns Double.NaN
+     * Double d4 = Numbers.createDouble("Infinity");       // returns Double.POSITIVE_INFINITY
+     * Double nullValue = Numbers.createDouble(null);      // returns null
+     * Numbers.createDouble("")                            // NumberFormatException!
+     * Numbers.createDouble("   ")                         // NumberFormatException!
+     * Numbers.createDouble("abc")                         // NumberFormatException!
+     * }</pre>
      *
-     *
-     * @param str a {@code String} to convert, which may be null
-     * @return
-     * @throws NumberFormatException if the value cannot be converted
+     * @param str the string to convert; must not be {@code null} or empty
+     * @return the Double value represented by the string, or {@code null} if the input string is {@code null}
+     * @throws NumberFormatException if the string is empty or cannot be parsed as a valid double
      * @see #isCreatable(String)
+     * @see Double#valueOf(String)
      */
     @MayReturnNull
     public static Double createDouble(final String str) throws NumberFormatException {
@@ -2143,20 +2289,35 @@ public final class Numbers {
     }
 
     /**
-     * <p>
-     * Convert a {@code String} to a {@code BigInteger}; since 3.2 it
-     * handles hex (0x or #) and octal (0) notations.
+     * Converts a {@code String} to a {@code BigInteger}, handling hexadecimal (0x, 0X, or # prefix) and octal (0 prefix) notations.
      *
-     * </p>
+     * <p>This method supports multiple number formats:</p>
+     * <ul>
+     * <li>Decimal numbers: "123", "-456"</li>
+     * <li>Hexadecimal numbers: "0xFF", "0x10", "#FF"</li>
+     * <li>Octal numbers: "0777" (leading zero indicates octal)</li>
+     * </ul>
      *
-     * {@code null} is returned if the specified {@code str} is {@code null}.
-     * <br />
-     * <br />
+     * <p>The method automatically detects the radix (base) based on the prefix and parses accordingly.
+     * For hexadecimal, both "0x"/"0X" and "#" prefixes are supported. For octal, a leading zero is required.</p>
      *
-     * @param str a {@code String} to convert, which may be null
-     * @return
-     * @throws NumberFormatException if the value cannot be converted
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BigInteger decimal = Numbers.createBigInteger("123456789012345");  // decimal
+     * BigInteger hex = Numbers.createBigInteger("0xFFFFFFFF");           // returns 4294967295
+     * BigInteger octal = Numbers.createBigInteger("0777");               // returns 511
+     * BigInteger negative = Numbers.createBigInteger("-0xFF");           // returns -255
+     * BigInteger nullValue = Numbers.createBigInteger(null);             // returns null
+     * Numbers.createBigInteger("")                                       // NumberFormatException!
+     * Numbers.createBigInteger("   ")                                    // NumberFormatException!
+     * Numbers.createBigInteger("abc")                                    // NumberFormatException!
+     * }</pre>
+     *
+     * @param str the string to convert; must not be {@code null} or empty
+     * @return the BigInteger value represented by the string, or {@code null} if the input string is {@code null}
+     * @throws NumberFormatException if the string is empty or not a valid BigInteger representation
      * @see #isCreatable(String)
+     * @see BigInteger#BigInteger(String, int)
      */
     @MayReturnNull
     public static BigInteger createBigInteger(final String str) throws NumberFormatException {
@@ -2195,20 +2356,35 @@ public final class Numbers {
     }
 
     /**
-     * <p>
-     * Convert a {@code String} to a {@code BigDecimal}.
+     * Converts a {@code String} to a {@code BigDecimal}.
      *
-     * </p>
+     * <p>This method parses a string representation of a decimal number and returns a BigDecimal object.
+     * BigDecimal provides arbitrary-precision decimal arithmetic, making it suitable for financial calculations
+     * and other scenarios requiring exact decimal representation.</p>
      *
-     * {@code null} is returned if the specified {@code str} is {@code null}.
-     * <br />
-     * <br />
+     * <p>The string can contain:</p>
+     * <ul>
+     * <li>Standard decimal notation: "123.45", "-0.001"</li>
+     * <li>Scientific notation: "1.23E+10", "-4.56e-8"</li>
+     * <li>Leading/trailing zeros: "0.100", "123.000"</li>
+     * </ul>
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BigDecimal bd1 = Numbers.createBigDecimal("123.45");        // exact decimal representation
+     * BigDecimal bd2 = Numbers.createBigDecimal("1.23E+10");      // scientific notation
+     * BigDecimal bd3 = Numbers.createBigDecimal("-0.001");        // negative small number
+     * BigDecimal nullValue = Numbers.createBigDecimal(null);      // returns null
+     * Numbers.createBigDecimal("")                                // NumberFormatException!
+     * Numbers.createBigDecimal("   ")                             // NumberFormatException!
+     * Numbers.createBigDecimal("abc")                             // NumberFormatException!
+     * }</pre>
      *
-     * @param str a {@code String} to convert, which may be null
-     * @return
-     * @throws NumberFormatException if the value cannot be converted
+     * @param str the string to convert; must not be {@code null} or empty
+     * @return the BigDecimal value represented by the string, or {@code null} if the input string is {@code null}
+     * @throws NumberFormatException if the string is empty or not a valid BigDecimal representation
      * @see #isCreatable(String)
+     * @see BigDecimal#BigDecimal(String)
      */
     @MayReturnNull
     public static BigDecimal createBigDecimal(final String str) throws NumberFormatException {
@@ -2257,11 +2433,10 @@ public final class Numbers {
      *
      * {@code null} is returned if the specified {@code str} is {@code null}.
      * <br />
-     * <br />
      *
-     * @param str a String containing a number, which may be null
-     * @return
-     * @throws NumberFormatException if the value cannot be converted
+     * @param str a String containing a number; must not be {@code null} or empty
+     * @return the parsed Number value, or {@code null} if the input string is {@code null}
+     * @throws NumberFormatException if the string is empty or the value cannot be converted
      * @see #isCreatable(String)
      */
     @SuppressFBWarnings({ "SF_SWITCH_FALLTHROUGH", "SF_SWITCH_NO_DEFAULT" })
@@ -2826,54 +3001,32 @@ public final class Numbers {
         return true;
     }
 
-    //-----------------------------------------------------------------------
     //    /**
-    //     * <p>Checks whether the {@code String} contains only
-    //     * digit characters.</p>
-    //     *
-    //     * <p>{@code Null} and empty String will return
-    //     * {@code false}.</p>
-    //     *
-    //     * @param str the {@code String} to check
-    //     * @return {@code true} if str contains only Unicode numeric
-    //     */
-    //    public static boolean isDigits(final String str) {
-    //        return Strings.isNumeric(str);
-    //    }
-
-    //    /**
-    //     * Primality test: tells if the argument is a (provable) prime or not.
-    //     *
-    //     * @param n number to test.
-    //     * @return {@code true} if n is prime. (All numbers &lt; 2 return false).
-    //     */
-    //    public static boolean isPrime(int n) {
-    //        if (n < 2) {
-    //            return false;
-    //        } else if (n < 4) {
-    //            return true;
-    //        }
-    //
-    //        for (int i = 2, to = (int) Math.sqrt(n); i <= to; i++) {
-    //            if (n % i == 0) {
-    //                return false;
-    //            }
-    //        }
-    //
-    //        return true;
-    //    }
 
     /**
-     * Returns {@code true} if {@code n} is a
-     * <a href="http://mathworld.wolfram.com/PrimeNumber.html">prime number</a>: an integer <i>greater
-     * than one</i> that cannot be factored into a product of <i>smaller</i> positive integers.
-     * Returns {@code false} if {@code n} is zero, one, or a composite number (one which <i>can</i> be factored into smaller positive integers).
+     * Returns {@code true} if {@code n} is a <a href="http://mathworld.wolfram.com/PrimeNumber.html">prime number</a>:
+     * an integer <i>greater than one</i> that cannot be factored into a product of <i>smaller</i> positive integers.
      *
-     * <p>To test larger numbers, use {@link BigInteger#isProbablePrime}.
+     * <p>This method uses the Miller-Rabin primality test with deterministic bases for numbers up to {@code Long.MAX_VALUE}.
+     * It provides a fast and accurate primality test for 64-bit integers.</p>
      *
-     * @param n
-     * @return {@code true}, if is prime
+     * <p>Returns {@code false} if {@code n} is zero, one, or a composite number (one which <i>can</i> be factored into smaller positive integers).</p>
+     *
+     * <p>Note: To test larger numbers (beyond long range), use {@link BigInteger#isProbablePrime(int)}.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean b1 = Numbers.isPrime(2);      // returns true (smallest prime)
+     * boolean b2 = Numbers.isPrime(17);     // returns true
+     * boolean b3 = Numbers.isPrime(100);    // returns false (composite)
+     * boolean b4 = Numbers.isPrime(1);      // returns false (not prime by definition)
+     * boolean b5 = Numbers.isPrime(0);      // returns false
+     * }</pre>
+     *
+     * @param n the number to test for primality; must be >= 0
+     * @return {@code true} if n is prime, {@code false} otherwise (including for n < 2)
      * @throws IllegalArgumentException if {@code n} is negative
+     * @see BigInteger#isProbablePrime(int)
      */
     @SuppressWarnings("ConditionCoveredByFurtherCondition")
     public static boolean isPrime(final long n) {
@@ -2907,10 +3060,23 @@ public final class Numbers {
     }
 
     /**
-     * Checks if is perfect square.
+     * Checks if the given integer is a perfect square (i.e., the square of an integer).
      *
-     * @param n
-     * @return {@code true}, if is perfect square
+     * <p>A perfect square is a non-negative integer that can be expressed as n = k * k for some integer k.
+     * This method uses an optimized algorithm that first checks the lower 4 bits as a fast filter,
+     * then performs a square root check for potential candidates.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean b1 = Numbers.isPerfectSquare(16);   // returns true (4*4)
+     * boolean b2 = Numbers.isPerfectSquare(25);   // returns true (5*5)
+     * boolean b3 = Numbers.isPerfectSquare(26);   // returns false
+     * boolean b4 = Numbers.isPerfectSquare(0);    // returns true (0*0)
+     * boolean b5 = Numbers.isPerfectSquare(-4);   // returns false (negative numbers are not perfect squares)
+     * }</pre>
+     *
+     * @param n the integer to check
+     * @return {@code true} if n is a perfect square, {@code false} otherwise (including for negative numbers)
      */
     public static boolean isPerfectSquare(final int n) {
         if (n < 0) {
@@ -2931,10 +3097,23 @@ public final class Numbers {
     }
 
     /**
-     * Checks if is perfect square.
+     * Checks if the given long value is a perfect square (i.e., the square of an integer).
      *
-     * @param n
-     * @return {@code true}, if is perfect square
+     * <p>A perfect square is a non-negative integer that can be expressed as n = k * k for some integer k.
+     * This method uses an optimized algorithm that first checks the lower 4 bits as a fast filter,
+     * then performs a square root check for potential candidates.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean b1 = Numbers.isPerfectSquare(16L);          // returns true (4*4)
+     * boolean b2 = Numbers.isPerfectSquare(100L);         // returns true (10*10)
+     * boolean b3 = Numbers.isPerfectSquare(1000000L);     // returns true (1000*1000)
+     * boolean b4 = Numbers.isPerfectSquare(1000001L);     // returns false
+     * boolean b5 = Numbers.isPerfectSquare(-100L);        // returns false (negative numbers are not perfect squares)
+     * }</pre>
+     *
+     * @param n the long value to check
+     * @return {@code true} if n is a perfect square, {@code false} otherwise (including for negative numbers)
      */
     public static boolean isPerfectSquare(final long n) {
         if (n < 0) {
@@ -2955,30 +3134,71 @@ public final class Numbers {
     }
 
     /**
-     * Checks if is power of two.
+     * Checks if the given integer is a power of two (i.e., 2^k for some non-negative integer k).
      *
-     * @param x
-     * @return {@code true}, if is power of two
+     * <p>A power of two is a positive integer that can be expressed as 2^k where k is a non-negative integer.
+     * This method uses a bitwise trick: a power of two has exactly one bit set in its binary representation.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean b1 = Numbers.isPowerOfTwo(1);      // returns true (2^0)
+     * boolean b2 = Numbers.isPowerOfTwo(16);     // returns true (2^4)
+     * boolean b3 = Numbers.isPowerOfTwo(1024);   // returns true (2^10)
+     * boolean b4 = Numbers.isPowerOfTwo(100);    // returns false
+     * boolean b5 = Numbers.isPowerOfTwo(0);      // returns false
+     * boolean b6 = Numbers.isPowerOfTwo(-8);     // returns false (negative numbers cannot be powers of two)
+     * }</pre>
+     *
+     * @param x the integer to check
+     * @return {@code true} if x is a power of two, {@code false} otherwise
      */
     public static boolean isPowerOfTwo(final int x) {
         return x > 0 && (x & (x - 1)) == 0;
     }
 
     /**
-     * Checks if is power of two.
+     * Checks if the given long value is a power of two (i.e., 2^k for some non-negative integer k).
      *
-     * @param x
-     * @return {@code true}, if is power of two
+     * <p>A power of two is a positive integer that can be expressed as 2^k where k is a non-negative integer.
+     * This method uses a bitwise trick: a power of two has exactly one bit set in its binary representation.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean b1 = Numbers.isPowerOfTwo(1L);             // returns true (2^0)
+     * boolean b2 = Numbers.isPowerOfTwo(1024L);          // returns true (2^10)
+     * boolean b3 = Numbers.isPowerOfTwo(1099511627776L); // returns true (2^40)
+     * boolean b4 = Numbers.isPowerOfTwo(1000L);          // returns false
+     * boolean b5 = Numbers.isPowerOfTwo(0L);             // returns false
+     * }</pre>
+     *
+     * @param x the long value to check
+     * @return {@code true} if x is a power of two, {@code false} otherwise
      */
     public static boolean isPowerOfTwo(final long x) {
         return x > 0 && (x & (x - 1)) == 0;
     }
 
     /**
-     * Checks if is power of two.
+     * Checks if the given double value is a power of two (i.e., 2^k for some integer k).
      *
-     * @param x
-     * @return {@code true}, if is power of two
+     * <p>Unlike the integer versions, this method can handle fractional powers of two (negative exponents)
+     * such as 0.5 (2^-1), 0.25 (2^-2), etc., as well as large powers beyond the long range.</p>
+     *
+     * <p>The method checks that the value is positive, finite (not infinity or NaN), and has a significand
+     * (mantissa) that is itself a power of two.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean b1 = Numbers.isPowerOfTwo(16.0);           // returns true (2^4)
+     * boolean b2 = Numbers.isPowerOfTwo(0.5);            // returns true (2^-1)
+     * boolean b3 = Numbers.isPowerOfTwo(0.25);           // returns true (2^-2)
+     * boolean b4 = Numbers.isPowerOfTwo(3.0);            // returns false
+     * boolean b5 = Numbers.isPowerOfTwo(Double.NaN);     // returns false
+     * boolean b6 = Numbers.isPowerOfTwo(Double.POSITIVE_INFINITY);  // returns false
+     * }</pre>
+     *
+     * @param x the double value to check
+     * @return {@code true} if x is a power of two, {@code false} otherwise
      */
     public static boolean isPowerOfTwo(final double x) {
         return x > 0.0 && isFinite(x) && isPowerOfTwo(getSignificand(x));
@@ -2995,14 +3215,6 @@ public final class Numbers {
         N.checkArgNotNull(x);
         return x.signum() > 0 && x.getLowestSetBit() == x.bitLength() - 1;
     }
-
-    //    public static boolean isPowerOfFour(int n) {
-    //        return (n > 0) && ((n & (n - 1)) == 0) && ((n & 0x55555555) == n);
-    //    }
-    //
-    //    public static boolean isPowerOfFour(long n) {
-    //        return (n > 0) && ((n & (n - 1)) == 0) && ((n & 0x5555555555555555L) == n);
-    //    }
 
     /**
      * Returns the natural logarithm (base e) of a double value.
@@ -3306,9 +3518,32 @@ public final class Numbers {
     }
 
     /**
+     * Returns the base-10 logarithm of the given double value.
      *
-     * @param x
-     * @return
+     * <p>This method is a convenience wrapper around {@link Math#log10(double)}, providing the base-10
+     * logarithm calculation. The result is the power to which 10 must be raised to obtain the value x.</p>
+     *
+     * <p>Special cases:</p>
+     * <ul>
+     * <li>If the argument is NaN or less than zero, the result is NaN.</li>
+     * <li>If the argument is positive infinity, the result is positive infinity.</li>
+     * <li>If the argument is positive zero or negative zero, the result is negative infinity.</li>
+     * <li>If the argument is 10^n for integer n, the result is n.</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * double log1 = Numbers.log10(100.0);     // returns 2.0 (10^2 = 100)
+     * double log2 = Numbers.log10(1000.0);    // returns 3.0 (10^3 = 1000)
+     * double log3 = Numbers.log10(1.0);       // returns 0.0 (10^0 = 1)
+     * double log4 = Numbers.log10(0.1);       // returns -1.0 (10^-1 = 0.1)
+     * }</pre>
+     *
+     * @param x the value whose base-10 logarithm is to be computed
+     * @return the base-10 logarithm of x
+     * @see Math#log10(double)
+     * @see #log10(int, RoundingMode)
+     * @see #log10(long, RoundingMode)
      */
     public static double log10(final double x) {
         return Math.log10(x);
@@ -3415,12 +3650,33 @@ public final class Numbers {
     private static final double LN_2 = Math.log(2);
 
     /**
-     * Computes the power of a base integer raised to an exponent.
+     * Returns {@code b} to the {@code k}th power.
+     *
+     * <p>This method computes integer exponentiation using an efficient O(log k) algorithm.
+     * If the result overflows, the returned value will be equal to the low-order bits of the
+     * true result, following standard Java overflow semantics (similar to multiplication overflow).
+     *
+     * <p>Special cases are optimized for common bases (0, 1, -1, 2, -2).
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.pow(2, 3) = 8
+     * Numbers.pow(3, 4) = 81
+     * Numbers.pow(5, 0) = 1        // any number to power 0 is 1
+     * Numbers.pow(0, 5) = 0        // 0 to any positive power is 0
+     * Numbers.pow(0, 0) = 1        // by convention
+     * Numbers.pow(-2, 3) = -8
+     * Numbers.pow(-2, 4) = 16
+     * Numbers.pow(10, 9) = 1000000000
+     * Numbers.pow(10, 10)          // overflows, returns low-order bits
+     * }</pre>
      *
      * @param b the base integer
-     * @param k the exponent, must be non-negative
-     * @return the result of raising the base to the power of the exponent
-     * @throws IllegalArgumentException if the exponent is negative
+     * @param k the exponent; must be non-negative
+     * @return {@code b} raised to the {@code k}th power; if overflow occurs, returns the low-order bits
+     * @throws IllegalArgumentException if {@code k < 0}
+     * @see #powExact(int, int)
+     * @see #saturatedPow(int, int)
      */
     public static int pow(int b, int k) {
         checkNonNegative("exponent", k);
@@ -3457,14 +3713,34 @@ public final class Numbers {
     }
 
     /**
-     * Returns {@code b} to the {@code k}th power. Even if the result overflows, it will be equal to
-     * {@code BigInteger.valueOf(b).pow(k).longValue()}. This implementation runs in {@code O(log k)}
-     * time.
+     * Returns {@code b} to the {@code k}th power.
      *
-     * @param b
-     * @param k
-     * @return
+     * <p>This method computes long integer exponentiation using an efficient O(log k) algorithm.
+     * If the result overflows, the returned value will be equal to the low-order bits of the
+     * true result, specifically {@code BigInteger.valueOf(b).pow(k).longValue()}, following
+     * standard Java overflow semantics.
+     *
+     * <p>Special cases are optimized for common bases (0, 1, -1, 2, -2).
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.pow(2L, 3) = 8L
+     * Numbers.pow(3L, 4) = 81L
+     * Numbers.pow(5L, 0) = 1L        // any number to power 0 is 1
+     * Numbers.pow(0L, 5) = 0L        // 0 to any positive power is 0
+     * Numbers.pow(0L, 0) = 1L        // by convention
+     * Numbers.pow(-2L, 3) = -8L
+     * Numbers.pow(-2L, 4) = 16L
+     * Numbers.pow(10L, 18) = 1000000000000000000L
+     * Numbers.pow(10L, 19)           // overflows, returns low-order bits
+     * }</pre>
+     *
+     * @param b the base long integer
+     * @param k the exponent; must be non-negative
+     * @return {@code b} raised to the {@code k}th power; if overflow occurs, returns the low-order bits
      * @throws IllegalArgumentException if {@code k < 0}
+     * @see #powExact(long, int)
+     * @see #saturatedPow(long, int)
      */
     public static long pow(long b, int k) {
         checkNonNegative("exponent", k);
@@ -3520,10 +3796,24 @@ public final class Numbers {
     }
 
     /**
-     * Ceiling power of two.
+     * Returns the smallest power of two greater than or equal to the given BigInteger value.
      *
-     * @param x
-     * @return
+     * <p>This method computes the ceiling of x to the nearest power of two. For example, if x is 100,
+     * the result will be 128 (2^7). This is equivalent to 2^(ceiling(log2(x))).</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BigInteger result1 = Numbers.ceilingPowerOfTwo(BigInteger.valueOf(100));  // returns 128
+     * BigInteger result2 = Numbers.ceilingPowerOfTwo(BigInteger.valueOf(128));  // returns 128
+     * BigInteger result3 = Numbers.ceilingPowerOfTwo(BigInteger.valueOf(129));  // returns 256
+     * BigInteger result4 = Numbers.ceilingPowerOfTwo(BigInteger.ONE);           // returns 1
+     * }</pre>
+     *
+     * @param x the BigInteger value (must be positive)
+     * @return the smallest power of two greater than or equal to x
+     * @throws IllegalArgumentException if x is not positive
+     * @see #ceilingPowerOfTwo(long)
+     * @see #floorPowerOfTwo(BigInteger)
      */
     public static BigInteger ceilingPowerOfTwo(final BigInteger x) {
         return BigInteger.ZERO.setBit(log2(x, RoundingMode.CEILING));
@@ -3546,10 +3836,24 @@ public final class Numbers {
     }
 
     /**
-     * Floor power of two.
+     * Returns the largest power of two less than or equal to the given BigInteger value.
      *
-     * @param x
-     * @return
+     * <p>This method computes the floor of x to the nearest power of two. For example, if x is 100,
+     * the result will be 64 (2^6). This is equivalent to 2^(floor(log2(x))).</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * BigInteger result1 = Numbers.floorPowerOfTwo(BigInteger.valueOf(100));  // returns 64
+     * BigInteger result2 = Numbers.floorPowerOfTwo(BigInteger.valueOf(128));  // returns 128
+     * BigInteger result3 = Numbers.floorPowerOfTwo(BigInteger.valueOf(129));  // returns 128
+     * BigInteger result4 = Numbers.floorPowerOfTwo(BigInteger.ONE);           // returns 1
+     * }</pre>
+     *
+     * @param x the BigInteger value (must be positive)
+     * @return the largest power of two less than or equal to x
+     * @throws IllegalArgumentException if x is not positive
+     * @see #floorPowerOfTwo(long)
+     * @see #ceilingPowerOfTwo(BigInteger)
      */
     public static BigInteger floorPowerOfTwo(final BigInteger x) {
         return BigInteger.ZERO.setBit(log2(x, RoundingMode.FLOOR));
@@ -3558,12 +3862,29 @@ public final class Numbers {
     /**
      * Returns the square root of {@code x}, rounded with the specified rounding mode.
      *
-     * @param x
-     * @param mode
-     * @return
+     * <p>This method computes the integer square root of a non-negative integer value,
+     * applying the specified rounding mode to handle non-perfect squares.
+     *
+     * <p>Examples with different rounding modes:
+     * <pre>{@code
+     * Numbers.sqrt(9, RoundingMode.DOWN) = 3        // perfect square
+     * Numbers.sqrt(10, RoundingMode.DOWN) = 3       // rounds toward zero
+     * Numbers.sqrt(10, RoundingMode.UP) = 4         // rounds away from zero
+     * Numbers.sqrt(10, RoundingMode.FLOOR) = 3      // rounds toward negative infinity
+     * Numbers.sqrt(10, RoundingMode.CEILING) = 4    // rounds toward positive infinity
+     * Numbers.sqrt(10, RoundingMode.HALF_UP) = 3    // rounds to nearest, ties away from zero
+     * Numbers.sqrt(11, RoundingMode.HALF_UP) = 3    // 11 is closer to 9 than 16
+     * Numbers.sqrt(16, RoundingMode.UNNECESSARY) = 4  // exact square root required
+     * }</pre>
+     *
+     * @param x the value to compute the square root of; must be non-negative
+     * @param mode the rounding mode to apply
+     * @return the integer square root of {@code x}, rounded according to the specified mode
      * @throws IllegalArgumentException if {@code x < 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
-     *         {@code sqrt(x)} is not an integer
+     *         {@code sqrt(x)} is not an integer (i.e., {@code x} is not a perfect square)
+     * @see RoundingMode
+     * @see #sqrt(long, RoundingMode)
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
@@ -3614,12 +3935,30 @@ public final class Numbers {
     /**
      * Returns the square root of {@code x}, rounded with the specified rounding mode.
      *
-     * @param x
-     * @param mode
-     * @return
+     * <p>This method computes the integer square root of a non-negative long value,
+     * applying the specified rounding mode to handle non-perfect squares.
+     *
+     * <p>Examples with different rounding modes:
+     * <pre>{@code
+     * Numbers.sqrt(9L, RoundingMode.DOWN) = 3L        // perfect square
+     * Numbers.sqrt(10L, RoundingMode.DOWN) = 3L       // rounds toward zero
+     * Numbers.sqrt(10L, RoundingMode.UP) = 4L         // rounds away from zero
+     * Numbers.sqrt(10L, RoundingMode.FLOOR) = 3L      // rounds toward negative infinity
+     * Numbers.sqrt(10L, RoundingMode.CEILING) = 4L    // rounds toward positive infinity
+     * Numbers.sqrt(10L, RoundingMode.HALF_UP) = 3L    // rounds to nearest, ties away from zero
+     * Numbers.sqrt(100000000000L, RoundingMode.DOWN) = 316227L
+     * Numbers.sqrt(100000000000L, RoundingMode.UP) = 316228L
+     * Numbers.sqrt(10000000000L, RoundingMode.UNNECESSARY) = 100000L  // exact square root
+     * }</pre>
+     *
+     * @param x the value to compute the square root of; must be non-negative
+     * @param mode the rounding mode to apply
+     * @return the integer square root of {@code x}, rounded according to the specified mode
      * @throws IllegalArgumentException if {@code x < 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
-     *     {@code sqrt(x)} is not an integer
+     *         {@code sqrt(x)} is not an integer (i.e., {@code x} is not a perfect square)
+     * @see RoundingMode
+     * @see #sqrt(int, RoundingMode)
      */
     public static long sqrt(final long x, final RoundingMode mode) {
         checkNonNegative("x", x);
@@ -3685,13 +4024,37 @@ public final class Numbers {
     }
 
     /**
-     * Returns the square root of a {@code BigInteger}, rounded with the specified rounding mode.
+     * Returns the square root of {@code x}, rounded with the specified rounding mode.
      *
-     * @param x the {@code BigInteger} value to compute the square root of, must be non-negative
+     * <p>This method computes the integer square root of a non-negative BigInteger value,
+     * applying the specified rounding mode to handle non-perfect squares. This method supports
+     * arbitrary-precision arithmetic for very large values.
+     *
+     * <p>Examples with different rounding modes:
+     * <pre>{@code
+     * BigInteger nine = BigInteger.valueOf(9);
+     * BigInteger ten = BigInteger.valueOf(10);
+     * Numbers.sqrt(nine, RoundingMode.DOWN) = 3        // perfect square
+     * Numbers.sqrt(ten, RoundingMode.DOWN) = 3         // rounds toward zero
+     * Numbers.sqrt(ten, RoundingMode.UP) = 4           // rounds away from zero
+     * Numbers.sqrt(ten, RoundingMode.FLOOR) = 3        // rounds toward negative infinity
+     * Numbers.sqrt(ten, RoundingMode.CEILING) = 4      // rounds toward positive infinity
+     * Numbers.sqrt(ten, RoundingMode.HALF_UP) = 3      // rounds to nearest, ties away from zero
+     *
+     * // Large value example
+     * BigInteger large = new BigInteger("123456789012345678901234567890");
+     * Numbers.sqrt(large, RoundingMode.DOWN) // computes sqrt with arbitrary precision
+     * }</pre>
+     *
+     * @param x the value to compute the square root of; must be non-negative
      * @param mode the rounding mode to apply
-     * @return the square root of the specified value, rounded according to the specified rounding mode
+     * @return the integer square root of {@code x}, rounded according to the specified mode
      * @throws IllegalArgumentException if {@code x} is negative
-     * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and the square root is not an integer
+     * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
+     *         {@code sqrt(x)} is not an integer (i.e., {@code x} is not a perfect square)
+     * @see RoundingMode
+     * @see #sqrt(int, RoundingMode)
+     * @see #sqrt(long, RoundingMode)
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
@@ -3787,16 +4150,32 @@ public final class Numbers {
     }
 
     /**
-     * Returns the result of dividing {@code p} by {@code q}, rounding using the specified
-     * {@code RoundingMode}.
+     * Returns the result of dividing {@code p} by {@code q}, rounding using the specified {@code RoundingMode}.
      *
-     * @param p
-     * @param q
-     * @param mode
-     * @return
-     * @throws IllegalArgumentException
-     * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
-     *         is not an integer multiple of {@code b}
+     * <p>This method provides precise control over rounding behavior for integer division, supporting
+     * all standard rounding modes defined in {@link RoundingMode}.
+     *
+     * <p>Examples with different rounding modes:
+     * <pre>{@code
+     * Numbers.divide(7, 3, RoundingMode.DOWN) = 2       // rounds toward zero
+     * Numbers.divide(7, 3, RoundingMode.UP) = 3         // rounds away from zero
+     * Numbers.divide(7, 3, RoundingMode.FLOOR) = 2      // rounds toward negative infinity
+     * Numbers.divide(-7, 3, RoundingMode.FLOOR) = -3    // rounds toward negative infinity
+     * Numbers.divide(7, 3, RoundingMode.CEILING) = 3    // rounds toward positive infinity
+     * Numbers.divide(7, 2, RoundingMode.HALF_UP) = 4    // rounds to nearest, ties away from zero
+     * Numbers.divide(8, 3, RoundingMode.HALF_EVEN) = 3  // rounds to nearest, ties to even
+     * Numbers.divide(9, 3, RoundingMode.UNNECESSARY) = 3  // exact division required
+     * }</pre>
+     *
+     * @param p the dividend
+     * @param q the divisor
+     * @param mode the rounding mode to apply
+     * @return the result of {@code p / q} rounded according to the specified mode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
+     * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code p}
+     *         is not an integer multiple of {@code q}
+     * @see RoundingMode
+     * @see #divide(long, long, RoundingMode)
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int divide(final int p, final int q, final RoundingMode mode) throws IllegalArgumentException {
@@ -3857,16 +4236,32 @@ public final class Numbers {
     }
 
     /**
-     * Returns the result of dividing {@code p} by {@code q}, rounding using the specified
-     * {@code RoundingMode}.
+     * Returns the result of dividing {@code p} by {@code q}, rounding using the specified {@code RoundingMode}.
      *
-     * @param p
-     * @param q
-     * @param mode
-     * @return
-     * @throws IllegalArgumentException
-     * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
-     *     is not an integer multiple of {@code b}
+     * <p>This method provides precise control over rounding behavior for long integer division, supporting
+     * all standard rounding modes defined in {@link RoundingMode}.
+     *
+     * <p>Examples with different rounding modes:
+     * <pre>{@code
+     * Numbers.divide(7L, 3L, RoundingMode.DOWN) = 2L       // rounds toward zero
+     * Numbers.divide(7L, 3L, RoundingMode.UP) = 3L         // rounds away from zero
+     * Numbers.divide(7L, 3L, RoundingMode.FLOOR) = 2L      // rounds toward negative infinity
+     * Numbers.divide(-7L, 3L, RoundingMode.FLOOR) = -3L    // rounds toward negative infinity
+     * Numbers.divide(7L, 3L, RoundingMode.CEILING) = 3L    // rounds toward positive infinity
+     * Numbers.divide(7L, 2L, RoundingMode.HALF_UP) = 4L    // rounds to nearest, ties away from zero
+     * Numbers.divide(8L, 3L, RoundingMode.HALF_EVEN) = 3L  // rounds to nearest, ties to even
+     * Numbers.divide(9L, 3L, RoundingMode.UNNECESSARY) = 3L  // exact division required
+     * }</pre>
+     *
+     * @param p the dividend
+     * @param q the divisor
+     * @param mode the rounding mode to apply
+     * @return the result of {@code p / q} rounded according to the specified mode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
+     * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code p}
+     *         is not an integer multiple of {@code q}
+     * @see RoundingMode
+     * @see #divide(int, int, RoundingMode)
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static long divide(final long p, final long q, final RoundingMode mode) throws IllegalArgumentException {
@@ -3924,16 +4319,32 @@ public final class Numbers {
     }
 
     /**
-     * Divides the given BigInteger values using the specified rounding mode.
+     * Returns the result of dividing {@code p} by {@code q}, rounding using the specified {@code RoundingMode}.
      *
-     * <p>This method performs the division of two BigInteger values - 'p' and 'q'. The division is
-     * rounded using the rounding mode provided. The rounding modes are defined in java.math.RoundingMode.
+     * <p>This method provides precise control over rounding behavior for arbitrary-precision integer division,
+     * supporting all standard rounding modes defined in {@link RoundingMode}.
      *
-     * @param p The dividend BigInteger.
-     * @param q The divisor BigInteger.
-     * @param mode The RoundingMode to be used for the division operation.
-     * @return The result of the division operation as a BigInteger.
-     * @throws ArithmeticException if 'q' is 0, or if the rounding mode is RoundingMode.UNNECESSARY and 'p' is not an integer multiple of 'q'.
+     * <p>Examples with different rounding modes:
+     * <pre>{@code
+     * BigInteger seven = BigInteger.valueOf(7);
+     * BigInteger three = BigInteger.valueOf(3);
+     * Numbers.divide(seven, three, RoundingMode.DOWN) = 2       // rounds toward zero
+     * Numbers.divide(seven, three, RoundingMode.UP) = 3         // rounds away from zero
+     * Numbers.divide(seven, three, RoundingMode.FLOOR) = 2      // rounds toward negative infinity
+     * Numbers.divide(seven, three, RoundingMode.CEILING) = 3    // rounds toward positive infinity
+     * Numbers.divide(seven, BigInteger.valueOf(2), RoundingMode.HALF_UP) = 4    // rounds to nearest
+     * Numbers.divide(BigInteger.valueOf(9), three, RoundingMode.UNNECESSARY) = 3  // exact division
+     * }</pre>
+     *
+     * @param p the dividend
+     * @param q the divisor
+     * @param mode the rounding mode to apply
+     * @return the result of {@code p / q} rounded according to the specified mode as a BigInteger
+     * @throws ArithmeticException if {@code q} is zero, or if {@code mode == UNNECESSARY} and {@code p}
+     *         is not an integer multiple of {@code q}
+     * @see RoundingMode
+     * @see #divide(int, int, RoundingMode)
+     * @see #divide(long, long, RoundingMode)
      */
     public static BigInteger divide(final BigInteger p, final BigInteger q, final RoundingMode mode) throws ArithmeticException {
         final BigDecimal pDec = new BigDecimal(p);
@@ -4024,12 +4435,28 @@ public final class Numbers {
     }
 
     /**
-     * Returns the greatest common divisor of {@code a, b}. Returns {@code 0} if  {@code a == 0 && b == 0}.
+     * Returns the greatest common divisor (GCD) of two integers using the binary GCD algorithm.
+     * The GCD is the largest positive integer that divides both numbers without a remainder.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This implementation uses the binary GCD algorithm (also known as Stein's algorithm),
+     * which is over 40% faster than the Euclidean algorithm. The method handles negative numbers
+     * by taking their absolute values before computing the GCD.
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.gcd(12, 8) = 4
+     * Numbers.gcd(17, 19) = 1  // coprime numbers
+     * Numbers.gcd(0, 5) = 5
+     * Numbers.gcd(0, 0) = 0
+     * Numbers.gcd(-12, 8) = 4  // handles negatives
+     * }</pre>
+     *
+     * @param a the first integer
+     * @param b the second integer
+     * @return the greatest common divisor of {@code a} and {@code b}; returns {@code 0} if both are zero
      * @throws ArithmeticException if {@code (a == 0 && b == Integer.MIN_VALUE) || (b == 0 && a == Integer.MIN_VALUE)}
+     *         because the GCD would be 2^31 which cannot be represented as a positive int
+     * @see #lcm(int, int)
      */
     public static int gcd(int a, int b) throws ArithmeticException {
         //    /*
@@ -4042,6 +4469,14 @@ public final class Numbers {
 
         if ((a == 0 && b == Integer.MIN_VALUE) || (b == 0 && a == Integer.MIN_VALUE)) {
             throw new ArithmeticException("overflow by 2^31");
+        }
+
+        if (a == Integer.MIN_VALUE) {
+            a = Math.abs(a / 2);
+        }
+
+        if (b == Integer.MIN_VALUE) {
+            b = Math.abs(b / 2);
         }
 
         a = abs(a);
@@ -4085,12 +4520,29 @@ public final class Numbers {
     }
 
     /**
-     * Returns the greatest common divisor of {@code a, b}. Returns {@code 0} if {@code a == 0 && b == 0}.
+     * Returns the greatest common divisor (GCD) of two long integers using the binary GCD algorithm.
+     * The GCD is the largest positive integer that divides both numbers without a remainder.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This implementation uses the binary GCD algorithm (also known as Stein's algorithm),
+     * which is over 40% faster than the Euclidean algorithm. The method handles negative numbers
+     * by taking their absolute values before computing the GCD.
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.gcd(12L, 8L) = 4L
+     * Numbers.gcd(17L, 19L) = 1L  // coprime numbers
+     * Numbers.gcd(0L, 5L) = 5L
+     * Numbers.gcd(0L, 0L) = 0L
+     * Numbers.gcd(-12L, 8L) = 4L  // handles negatives
+     * Numbers.gcd(1000000000000L, 500000000000L) = 500000000000L
+     * }</pre>
+     *
+     * @param a the first long integer
+     * @param b the second long integer
+     * @return the greatest common divisor of {@code a} and {@code b}; returns {@code 0} if both are zero
      * @throws ArithmeticException if {@code (a == 0 && b == Long.MIN_VALUE) || (b == 0 && a == Long.MIN_VALUE)}
+     *         because the GCD would be 2^63 which cannot be represented as a positive long
+     * @see #lcm(long, long)
      */
     public static long gcd(long a, long b) throws ArithmeticException {
         //    /*
@@ -4103,6 +4555,14 @@ public final class Numbers {
 
         if ((a == 0 && b == Long.MIN_VALUE) || (b == 0 && a == Long.MIN_VALUE)) {
             throw new ArithmeticException("overflow by 2^63");
+        }
+
+        if (a == Long.MIN_VALUE) {
+            a = Math.abs(a / 2);
+        }
+
+        if (b == Long.MIN_VALUE) {
+            b = Math.abs(b / 2);
         }
 
         a = abs(a);
@@ -4146,25 +4606,37 @@ public final class Numbers {
     }
 
     /**
-     * <p>
-     * Returns the least common multiple of the absolute value of two numbers,
-     * using the formula {@code lcm(a,b) = (a / gcd(a,b)) * b}.
-     * </p>
-     * Special cases:
+     * Returns the least common multiple (LCM) of two integers.
+     * The LCM is the smallest positive integer that is divisible by both numbers.
+     *
+     * <p>This method uses the formula {@code lcm(a,b) = (a / gcd(a,b)) * b}, computing
+     * the LCM from the absolute values of the inputs. The method handles negative numbers
+     * by taking their absolute values before computing the LCM.
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.lcm(4, 6) = 12
+     * Numbers.lcm(3, 7) = 21  // coprime numbers: lcm equals product
+     * Numbers.lcm(0, 5) = 0
+     * Numbers.lcm(12, 18) = 36
+     * Numbers.lcm(-4, 6) = 12  // handles negatives
+     * }</pre>
+     *
+     * <p>Special cases:
      * <ul>
-     * <li>The invocations {@code lcm(Integer.MIN_VALUE, n)} and
-     * {@code lcm(n, Integer.MIN_VALUE)}, where {@code abs(n)} is a
-     * power of 2, throw an {@code ArithmeticException}, because the result
+     * <li>The invocations {@code lcm(Integer.MIN_VALUE, n)} and {@code lcm(n, Integer.MIN_VALUE)},
+     * where {@code abs(n)} is a power of 2, throw an {@code ArithmeticException}, because the result
      * would be 2^31, which is too large for an int value.</li>
-     * <li>The result of {@code lcm(0, x)} and {@code lcm(x, 0)} is
-     * {@code 0} for any {@code x}.
+     * <li>The result of {@code lcm(0, x)} and {@code lcm(x, 0)} is {@code 0} for any {@code x}.</li>
      * </ul>
      *
-     * @param a Number.
-     * @param b Number.
-     * @return
-     * @throws ArithmeticException if the result cannot be represented as
-     * a non-negative {@code int} value.
+     * @param a the first integer
+     * @param b the second integer
+     * @return the least common multiple of the absolute values of {@code a} and {@code b};
+     *         returns {@code 0} if either is zero
+     * @throws ArithmeticException if the result cannot be represented as a non-negative {@code int} value,
+     *         or if the computation would overflow
+     * @see #gcd(int, int)
      */
     public static int lcm(final int a, final int b) throws ArithmeticException {
         if (a == 0 || b == 0) {
@@ -4181,25 +4653,38 @@ public final class Numbers {
     }
 
     /**
-     * <p>
-     * Returns the least common multiple of the absolute value of two numbers,
-     * using the formula {@code lcm(a,b) = (a / gcd(a,b)) * b}.
-     * </p>
-     * Special cases:
+     * Returns the least common multiple (LCM) of two long integers.
+     * The LCM is the smallest positive integer that is divisible by both numbers.
+     *
+     * <p>This method uses the formula {@code lcm(a,b) = (a / gcd(a,b)) * b}, computing
+     * the LCM from the absolute values of the inputs. The method handles negative numbers
+     * by taking their absolute values before computing the LCM.
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.lcm(4L, 6L) = 12L
+     * Numbers.lcm(3L, 7L) = 21L  // coprime numbers: lcm equals product
+     * Numbers.lcm(0L, 5L) = 0L
+     * Numbers.lcm(12L, 18L) = 36L
+     * Numbers.lcm(-4L, 6L) = 12L  // handles negatives
+     * Numbers.lcm(100000000000L, 150000000000L) = 300000000000L
+     * }</pre>
+     *
+     * <p>Special cases:
      * <ul>
-     * <li>The invocations {@code lcm(Long.MIN_VALUE, n)} and
-     * {@code lcm(n, Long.MIN_VALUE)}, where {@code abs(n)} is a
-     * power of 2, throw an {@code ArithmeticException}, because the result
-     * would be 2^63, which is too large for an int value.</li>
-     * <li>The result of {@code lcm(0L, x)} and {@code lcm(x, 0L)} is
-     * {@code 0L} for any {@code x}.
+     * <li>The invocations {@code lcm(Long.MIN_VALUE, n)} and {@code lcm(n, Long.MIN_VALUE)},
+     * where {@code abs(n)} is a power of 2, throw an {@code ArithmeticException}, because the result
+     * would be 2^63, which is too large for a long value.</li>
+     * <li>The result of {@code lcm(0L, x)} and {@code lcm(x, 0L)} is {@code 0L} for any {@code x}.</li>
      * </ul>
      *
-     * @param a Number.
-     * @param b Number.
-     * @return
-     * @throws ArithmeticException if the result cannot be represented
-     * as a non-negative {@code long} value.
+     * @param a the first long integer
+     * @param b the second long integer
+     * @return the least common multiple of the absolute values of {@code a} and {@code b};
+     *         returns {@code 0} if either is zero
+     * @throws ArithmeticException if the result cannot be represented as a non-negative {@code long} value,
+     *         or if the computation would overflow
+     * @see #gcd(long, long)
      */
     public static long lcm(final long a, final long b) throws ArithmeticException {
         if (a == 0 || b == 0) {
@@ -4218,10 +4703,22 @@ public final class Numbers {
     /**
      * Returns the sum of {@code a} and {@code b}, provided it does not overflow.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method performs addition with overflow checking. If the result would exceed the range
+     * of int values, an ArithmeticException is thrown instead of silently wrapping around.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int sum1 = Numbers.addExact(100, 200);                    // returns 300
+     * int sum2 = Numbers.addExact(Integer.MAX_VALUE, 1);        // throws ArithmeticException
+     * int sum3 = Numbers.addExact(Integer.MIN_VALUE, -1);       // throws ArithmeticException
+     * }</pre>
+     *
+     * @param a the first int value to add
+     * @param b the second int value to add
+     * @return the sum of a and b
      * @throws ArithmeticException if {@code a + b} overflows in signed {@code int} arithmetic
+     * @see #addExact(long, long)
+     * @see #saturatedAdd(int, int)
      */
     public static int addExact(final int a, final int b) {
         final long result = (long) a + b;
@@ -4232,10 +4729,22 @@ public final class Numbers {
     /**
      * Returns the sum of {@code a} and {@code b}, provided it does not overflow.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method performs addition with overflow checking. If the result would exceed the range
+     * of long values, an ArithmeticException is thrown instead of silently wrapping around.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * long sum1 = Numbers.addExact(100L, 200L);                 // returns 300L
+     * long sum2 = Numbers.addExact(Long.MAX_VALUE, 1L);         // throws ArithmeticException
+     * long sum3 = Numbers.addExact(Long.MIN_VALUE, -1L);        // throws ArithmeticException
+     * }</pre>
+     *
+     * @param a the first long value to add
+     * @param b the second long value to add
+     * @return the sum of a and b
      * @throws ArithmeticException if {@code a + b} overflows in signed {@code long} arithmetic
+     * @see #addExact(int, int)
+     * @see #saturatedAdd(long, long)
      */
     public static long addExact(final long a, final long b) {
         final long result = a + b;
@@ -4246,10 +4755,22 @@ public final class Numbers {
     /**
      * Returns the difference of {@code a} and {@code b}, provided it does not overflow.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method performs subtraction with overflow checking. If the result would exceed the range
+     * of int values, an ArithmeticException is thrown instead of silently wrapping around.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int diff1 = Numbers.subtractExact(200, 100);              // returns 100
+     * int diff2 = Numbers.subtractExact(Integer.MIN_VALUE, 1);  // throws ArithmeticException
+     * int diff3 = Numbers.subtractExact(Integer.MAX_VALUE, -1); // throws ArithmeticException
+     * }</pre>
+     *
+     * @param a the value to subtract from
+     * @param b the value to subtract
+     * @return the difference of a and b
      * @throws ArithmeticException if {@code a - b} overflows in signed {@code int} arithmetic
+     * @see #subtractExact(long, long)
+     * @see #saturatedSubtract(int, int)
      */
     public static int subtractExact(final int a, final int b) {
         final long result = (long) a - b;
@@ -4260,10 +4781,22 @@ public final class Numbers {
     /**
      * Returns the difference of {@code a} and {@code b}, provided it does not overflow.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method performs subtraction with overflow checking. If the result would exceed the range
+     * of long values, an ArithmeticException is thrown instead of silently wrapping around.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * long diff1 = Numbers.subtractExact(200L, 100L);           // returns 100L
+     * long diff2 = Numbers.subtractExact(Long.MIN_VALUE, 1L);   // throws ArithmeticException
+     * long diff3 = Numbers.subtractExact(Long.MAX_VALUE, -1L);  // throws ArithmeticException
+     * }</pre>
+     *
+     * @param a the value to subtract from
+     * @param b the value to subtract
+     * @return the difference of a and b
      * @throws ArithmeticException if {@code a - b} overflows in signed {@code long} arithmetic
+     * @see #subtractExact(int, int)
+     * @see #saturatedSubtract(long, long)
      */
     public static long subtractExact(final long a, final long b) {
         final long result = a - b;
@@ -4274,10 +4807,22 @@ public final class Numbers {
     /**
      * Returns the product of {@code a} and {@code b}, provided it does not overflow.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method performs multiplication with overflow checking. If the result would exceed the range
+     * of int values, an ArithmeticException is thrown instead of silently wrapping around.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int product1 = Numbers.multiplyExact(100, 200);           // returns 20000
+     * int product2 = Numbers.multiplyExact(Integer.MAX_VALUE, 2);  // throws ArithmeticException
+     * int product3 = Numbers.multiplyExact(100000, 100000);     // throws ArithmeticException
+     * }</pre>
+     *
+     * @param a the first int value to multiply
+     * @param b the second int value to multiply
+     * @return the product of a and b
      * @throws ArithmeticException if {@code a * b} overflows in signed {@code int} arithmetic
+     * @see #multiplyExact(long, long)
+     * @see #saturatedMultiply(int, int)
      */
     public static int multiplyExact(final int a, final int b) {
         final long result = (long) a * b;
@@ -4288,10 +4833,22 @@ public final class Numbers {
     /**
      * Returns the product of {@code a} and {@code b}, provided it does not overflow.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method performs multiplication with overflow checking. If the result would exceed the range
+     * of long values, an ArithmeticException is thrown instead of silently wrapping around.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * long product1 = Numbers.multiplyExact(100L, 200L);        // returns 20000L
+     * long product2 = Numbers.multiplyExact(Long.MAX_VALUE, 2L);   // throws ArithmeticException
+     * long product3 = Numbers.multiplyExact(10000000000L, 10000000000L);  // throws ArithmeticException
+     * }</pre>
+     *
+     * @param a the first long value to multiply
+     * @param b the second long value to multiply
+     * @return the product of a and b
      * @throws ArithmeticException if {@code a * b} overflows in signed {@code long} arithmetic
+     * @see #multiplyExact(int, int)
+     * @see #saturatedMultiply(long, long)
      */
     public static long multiplyExact(final long a, final long b) {
         // Hacker's Delight, Section 2-12
@@ -4317,15 +4874,34 @@ public final class Numbers {
     }
 
     /**
-     * Returns the {@code b} to the {@code k}th power, provided it does not overflow.
+     * Returns {@code b} to the {@code k}th power, throwing an exception if overflow occurs.
      *
-     * <p>{@link #pow} may be faster, but does not check for overflow.
+     * <p>This method computes integer exponentiation with overflow checking. Unlike {@link #pow(int, int)},
+     * which silently allows overflow, this method throws an {@code ArithmeticException} if the result
+     * cannot be represented as an {@code int}.
      *
-     * @param b
-     * @param k
-     * @return
-     * @throws ArithmeticException if {@code b} to the {@code k}th power overflows in signed
-     *         {@code int} arithmetic
+     * <p>Note: {@link #pow(int, int)} may be faster for cases where overflow is acceptable, as it
+     * does not perform overflow checking.
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.powExact(2, 3) = 8
+     * Numbers.powExact(3, 4) = 81
+     * Numbers.powExact(5, 0) = 1
+     * Numbers.powExact(10, 9) = 1000000000
+     * Numbers.powExact(10, 10)       // throws ArithmeticException (overflow)
+     * Numbers.powExact(2, 31)        // throws ArithmeticException (overflow)
+     * Numbers.powExact(-2, 30) = 1073741824
+     * Numbers.powExact(-2, 31)       // throws ArithmeticException (overflow)
+     * }</pre>
+     *
+     * @param b the base integer
+     * @param k the exponent; must be non-negative
+     * @return {@code b} raised to the {@code k}th power
+     * @throws IllegalArgumentException if {@code k < 0}
+     * @throws ArithmeticException if {@code b} to the {@code k}th power overflows in signed {@code int} arithmetic
+     * @see #pow(int, int)
+     * @see #saturatedPow(int, int)
      */
     public static int powExact(int b, int k) {
         checkNonNegative("exponent", k);
@@ -4366,13 +4942,31 @@ public final class Numbers {
     }
 
     /**
-     * Returns the {@code b} to the {@code k}th power, provided it does not overflow.
+     * Returns {@code b} to the {@code k}th power, throwing an exception if overflow occurs.
      *
-     * @param b
-     * @param k
-     * @return
-     * @throws ArithmeticException if {@code b} to the {@code k}th power overflows in signed
-     *     {@code long} arithmetic
+     * <p>This method computes long integer exponentiation with overflow checking. Unlike {@link #pow(long, int)},
+     * which silently allows overflow, this method throws an {@code ArithmeticException} if the result
+     * cannot be represented as a {@code long}.
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.powExact(2L, 3) = 8L
+     * Numbers.powExact(3L, 4) = 81L
+     * Numbers.powExact(5L, 0) = 1L
+     * Numbers.powExact(10L, 18) = 1000000000000000000L
+     * Numbers.powExact(10L, 19)      // throws ArithmeticException (overflow)
+     * Numbers.powExact(2L, 63)       // throws ArithmeticException (overflow)
+     * Numbers.powExact(-2L, 62) = 4611686018427387904L
+     * Numbers.powExact(-2L, 63)      // throws ArithmeticException (overflow)
+     * }</pre>
+     *
+     * @param b the base long integer
+     * @param k the exponent; must be non-negative
+     * @return {@code b} raised to the {@code k}th power
+     * @throws IllegalArgumentException if {@code k < 0}
+     * @throws ArithmeticException if {@code b} to the {@code k}th power overflows in signed {@code long} arithmetic
+     * @see #pow(long, int)
+     * @see #saturatedPow(long, int)
      */
     public static long powExact(long b, int k) {
         checkNonNegative("exponent", k);
@@ -4415,24 +5009,54 @@ public final class Numbers {
     }
 
     /**
-     * Returns the sum of {@code a} and {@code b} unless it would overflow or underflow in which case
-     * {@code Integer.MAX_VALUE} or {@code Integer.MIN_VALUE} is returned, respectively.
+     * Returns the sum of {@code a} and {@code b}, saturating at the integer bounds instead of overflowing.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method performs addition with saturation arithmetic. If the true sum would exceed
+     * {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the true sum
+     * would be less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
+     *
+     * <p>Examples demonstrating saturation:
+     * <pre>{@code
+     * Numbers.saturatedAdd(100, 200) = 300
+     * Numbers.saturatedAdd(Integer.MAX_VALUE, 1) = Integer.MAX_VALUE  // saturates at max
+     * Numbers.saturatedAdd(Integer.MAX_VALUE, 100) = Integer.MAX_VALUE  // saturates at max
+     * Numbers.saturatedAdd(Integer.MIN_VALUE, -1) = Integer.MIN_VALUE  // saturates at min
+     * Numbers.saturatedAdd(Integer.MIN_VALUE, -100) = Integer.MIN_VALUE  // saturates at min
+     * Numbers.saturatedAdd(1000000000, 1000000000) = 2000000000
+     * Numbers.saturatedAdd(2000000000, 2000000000) = Integer.MAX_VALUE  // saturates
+     * }</pre>
+     *
+     * @param a the first integer
+     * @param b the second integer
+     * @return the sum of {@code a} and {@code b}, or the appropriate bound if overflow would occur
+     * @see #saturatedAdd(long, long)
+     * @see #addExact(int, int)
      */
     public static int saturatedAdd(final int a, final int b) {
         return saturatedCast((long) a + b);
     }
 
     /**
-     * Returns the sum of {@code a} and {@code b} unless it would overflow or underflow in which case
-     * {@code Long.MAX_VALUE} or {@code Long.MIN_VALUE} is returned, respectively.
+     * Returns the sum of {@code a} and {@code b}, saturating at the long bounds instead of overflowing.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method performs addition with saturation arithmetic. If the true sum would exceed
+     * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the true sum
+     * would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
+     *
+     * <p>Examples demonstrating saturation:
+     * <pre>{@code
+     * Numbers.saturatedAdd(100L, 200L) = 300L
+     * Numbers.saturatedAdd(Long.MAX_VALUE, 1L) = Long.MAX_VALUE  // saturates at max
+     * Numbers.saturatedAdd(Long.MAX_VALUE, 100L) = Long.MAX_VALUE  // saturates at max
+     * Numbers.saturatedAdd(Long.MIN_VALUE, -1L) = Long.MIN_VALUE  // saturates at min
+     * Numbers.saturatedAdd(Long.MIN_VALUE, -100L) = Long.MIN_VALUE  // saturates at min
+     * }</pre>
+     *
+     * @param a the first long integer
+     * @param b the second long integer
+     * @return the sum of {@code a} and {@code b}, or the appropriate bound if overflow would occur
+     * @see #saturatedAdd(int, int)
+     * @see #addExact(long, long)
      */
     public static long saturatedAdd(final long a, final long b) {
         final long naiveSum = a + b;
@@ -4446,24 +5070,53 @@ public final class Numbers {
     }
 
     /**
-     * Returns the difference of {@code a} and {@code b} unless it would overflow or underflow in
-     * which case {@code Integer.MAX_VALUE} or {@code Integer.MIN_VALUE} is returned, respectively.
+     * Returns the difference of {@code a} and {@code b}, saturating at the integer bounds instead of overflowing.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method performs subtraction with saturation arithmetic. If the true difference would exceed
+     * {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the true difference
+     * would be less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
+     *
+     * <p>Examples demonstrating saturation:
+     * <pre>{@code
+     * Numbers.saturatedSubtract(200, 100) = 100
+     * Numbers.saturatedSubtract(Integer.MAX_VALUE, -1) = Integer.MAX_VALUE  // saturates at max
+     * Numbers.saturatedSubtract(Integer.MAX_VALUE, -100) = Integer.MAX_VALUE  // saturates at max
+     * Numbers.saturatedSubtract(Integer.MIN_VALUE, 1) = Integer.MIN_VALUE  // saturates at min
+     * Numbers.saturatedSubtract(Integer.MIN_VALUE, 100) = Integer.MIN_VALUE  // saturates at min
+     * Numbers.saturatedSubtract(-1000000000, 1500000000) = Integer.MIN_VALUE  // saturates
+     * }</pre>
+     *
+     * @param a the minuend
+     * @param b the subtrahend
+     * @return the difference {@code a - b}, or the appropriate bound if overflow would occur
+     * @see #saturatedSubtract(long, long)
+     * @see #subtractExact(int, int)
      */
     public static int saturatedSubtract(final int a, final int b) {
         return saturatedCast((long) a - b);
     }
 
     /**
-     * Returns the difference of {@code a} and {@code b} unless it would overflow or underflow in
-     * which case {@code Long.MAX_VALUE} or {@code Long.MIN_VALUE} is returned, respectively.
+     * Returns the difference of {@code a} and {@code b}, saturating at the long bounds instead of overflowing.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method performs subtraction with saturation arithmetic. If the true difference would exceed
+     * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the true difference
+     * would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
+     *
+     * <p>Examples demonstrating saturation:
+     * <pre>{@code
+     * Numbers.saturatedSubtract(200L, 100L) = 100L
+     * Numbers.saturatedSubtract(Long.MAX_VALUE, -1L) = Long.MAX_VALUE  // saturates at max
+     * Numbers.saturatedSubtract(Long.MAX_VALUE, -100L) = Long.MAX_VALUE  // saturates at max
+     * Numbers.saturatedSubtract(Long.MIN_VALUE, 1L) = Long.MIN_VALUE  // saturates at min
+     * Numbers.saturatedSubtract(Long.MIN_VALUE, 100L) = Long.MIN_VALUE  // saturates at min
+     * }</pre>
+     *
+     * @param a the minuend
+     * @param b the subtrahend
+     * @return the difference {@code a - b}, or the appropriate bound if overflow would occur
+     * @see #saturatedSubtract(int, int)
+     * @see #subtractExact(long, long)
      */
     public static long saturatedSubtract(final long a, final long b) {
         final long naiveDifference = a - b;
@@ -4477,24 +5130,53 @@ public final class Numbers {
     }
 
     /**
-     * Returns the product of {@code a} and {@code b} unless it would overflow or underflow in which
-     * case {@code Integer.MAX_VALUE} or {@code Integer.MIN_VALUE} is returned, respectively.
+     * Returns the product of {@code a} and {@code b}, saturating at the integer bounds instead of overflowing.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method performs multiplication with saturation arithmetic. If the true product would exceed
+     * {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the true product
+     * would be less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
+     *
+     * <p>Examples demonstrating saturation:
+     * <pre>{@code
+     * Numbers.saturatedMultiply(100, 200) = 20000
+     * Numbers.saturatedMultiply(Integer.MAX_VALUE, 2) = Integer.MAX_VALUE  // saturates at max
+     * Numbers.saturatedMultiply(100000, 100000) = Integer.MAX_VALUE  // saturates at max
+     * Numbers.saturatedMultiply(Integer.MIN_VALUE, 2) = Integer.MIN_VALUE  // saturates at min
+     * Numbers.saturatedMultiply(-100000, 100000) = Integer.MIN_VALUE  // saturates at min
+     * Numbers.saturatedMultiply(Integer.MAX_VALUE, -1) = -Integer.MAX_VALUE
+     * }</pre>
+     *
+     * @param a the first integer
+     * @param b the second integer
+     * @return the product {@code a * b}, or the appropriate bound if overflow would occur
+     * @see #saturatedMultiply(long, long)
+     * @see #multiplyExact(int, int)
      */
     public static int saturatedMultiply(final int a, final int b) {
         return saturatedCast((long) a * b);
     }
 
     /**
-     * Returns the product of {@code a} and {@code b} unless it would overflow or underflow in which
-     * case {@code Long.MAX_VALUE} or {@code Long.MIN_VALUE} is returned, respectively.
+     * Returns the product of {@code a} and {@code b}, saturating at the long bounds instead of overflowing.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method performs multiplication with saturation arithmetic. If the true product would exceed
+     * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the true product
+     * would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
+     *
+     * <p>Examples demonstrating saturation:
+     * <pre>{@code
+     * Numbers.saturatedMultiply(100L, 200L) = 20000L
+     * Numbers.saturatedMultiply(Long.MAX_VALUE, 2L) = Long.MAX_VALUE  // saturates at max
+     * Numbers.saturatedMultiply(10000000000L, 10000000000L) = Long.MAX_VALUE  // saturates at max
+     * Numbers.saturatedMultiply(Long.MIN_VALUE, 2L) = Long.MIN_VALUE  // saturates at min
+     * Numbers.saturatedMultiply(-10000000000L, 10000000000L) = Long.MIN_VALUE  // saturates at min
+     * }</pre>
+     *
+     * @param a the first long integer
+     * @param b the second long integer
+     * @return the product {@code a * b}, or the appropriate bound if overflow would occur
+     * @see #saturatedMultiply(int, int)
+     * @see #multiplyExact(long, long)
      */
     public static long saturatedMultiply(final long a, final long b) {
         // see checkedMultiply for explanation
@@ -4516,12 +5198,33 @@ public final class Numbers {
     }
 
     /**
-     * Returns the {@code b} to the {@code k}th power, unless it would overflow or underflow in which
-     * case {@code Integer.MAX_VALUE} or {@code Integer.MIN_VALUE} is returned, respectively.
+     * Returns {@code b} to the {@code k}th power, saturating at the integer bounds instead of overflowing.
      *
-     * @param b
-     * @param k
-     * @return
+     * <p>This method computes integer exponentiation with saturation arithmetic. If the true result
+     * would exceed {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the
+     * true result would be less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
+     *
+     * <p>This is useful when you want to avoid overflow but don't want to throw exceptions or use
+     * larger data types.
+     *
+     * <p>Examples demonstrating saturation:
+     * <pre>{@code
+     * Numbers.saturatedPow(2, 3) = 8
+     * Numbers.saturatedPow(3, 4) = 81
+     * Numbers.saturatedPow(10, 9) = 1000000000
+     * Numbers.saturatedPow(10, 10) = Integer.MAX_VALUE    // saturates instead of overflowing
+     * Numbers.saturatedPow(2, 31) = Integer.MAX_VALUE     // saturates at max value
+     * Numbers.saturatedPow(2, 100) = Integer.MAX_VALUE    // saturates at max value
+     * Numbers.saturatedPow(-2, 31) = Integer.MIN_VALUE    // saturates at min value (odd exponent)
+     * Numbers.saturatedPow(-2, 32) = Integer.MAX_VALUE    // saturates at max value (even exponent)
+     * }</pre>
+     *
+     * @param b the base integer
+     * @param k the exponent; must be non-negative
+     * @return {@code b} raised to the {@code k}th power, or the appropriate bound if overflow would occur
+     * @throws IllegalArgumentException if {@code k < 0}
+     * @see #pow(int, int)
+     * @see #powExact(int, int)
      */
     public static int saturatedPow(int b, int k) {
         checkNonNegative("exponent", k);
@@ -4547,7 +5250,7 @@ public final class Numbers {
         }
         int accum = 1;
         // if b is negative and k is odd then the limit is MIN otherwise the limit is MAX
-        final int limit = Integer.MAX_VALUE + ((b >>> Integer.SIZE - 1) & (k & 1));
+        final int limit = Integer.MAX_VALUE + ((b >>> (Integer.SIZE - 1)) & (k & 1));
         while (true) {
             switch (k) {
                 case 0:
@@ -4570,12 +5273,33 @@ public final class Numbers {
     }
 
     /**
-     * Returns the {@code b} to the {@code k}th power, unless it would overflow or underflow in which
-     * case {@code Long.MAX_VALUE} or {@code Long.MIN_VALUE} is returned, respectively.
+     * Returns {@code b} to the {@code k}th power, saturating at the long bounds instead of overflowing.
      *
-     * @param b
-     * @param k
-     * @return
+     * <p>This method computes long integer exponentiation with saturation arithmetic. If the true result
+     * would exceed {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the
+     * true result would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
+     *
+     * <p>This is useful when you want to avoid overflow but don't want to throw exceptions or use
+     * larger data types like BigInteger.
+     *
+     * <p>Examples demonstrating saturation:
+     * <pre>{@code
+     * Numbers.saturatedPow(2L, 3) = 8L
+     * Numbers.saturatedPow(3L, 4) = 81L
+     * Numbers.saturatedPow(10L, 18) = 1000000000000000000L
+     * Numbers.saturatedPow(10L, 19) = Long.MAX_VALUE      // saturates instead of overflowing
+     * Numbers.saturatedPow(2L, 63) = Long.MAX_VALUE       // saturates at max value
+     * Numbers.saturatedPow(2L, 100) = Long.MAX_VALUE      // saturates at max value
+     * Numbers.saturatedPow(-2L, 63) = Long.MIN_VALUE      // saturates at min value (odd exponent)
+     * Numbers.saturatedPow(-2L, 64) = Long.MAX_VALUE      // saturates at max value (even exponent)
+     * }</pre>
+     *
+     * @param b the base long integer
+     * @param k the exponent; must be non-negative
+     * @return {@code b} raised to the {@code k}th power, or the appropriate bound if overflow would occur
+     * @throws IllegalArgumentException if {@code k < 0}
+     * @see #pow(long, int)
+     * @see #powExact(long, int)
      */
     public static long saturatedPow(long b, int k) {
         checkNonNegative("exponent", k);
@@ -4626,12 +5350,27 @@ public final class Numbers {
     }
 
     /**
-     * Returns the {@code int} nearest in value to {@code value}.
+     * Returns the {@code int} value nearest to {@code value}, saturating at the integer bounds.
+     *
+     * <p>This method casts a {@code long} value to an {@code int} with saturation. If the value
+     * exceeds {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the value
+     * is less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
+     * Otherwise, the method returns the {@code long} value cast to an {@code int}.
+     *
+     * <p>Examples demonstrating saturation:
+     * <pre>{@code
+     * Numbers.saturatedCast(100L) = 100
+     * Numbers.saturatedCast(2147483647L) = Integer.MAX_VALUE  // exact fit
+     * Numbers.saturatedCast(2147483648L) = Integer.MAX_VALUE  // saturates at max
+     * Numbers.saturatedCast(10000000000L) = Integer.MAX_VALUE  // saturates at max
+     * Numbers.saturatedCast(-2147483648L) = Integer.MIN_VALUE  // exact fit
+     * Numbers.saturatedCast(-2147483649L) = Integer.MIN_VALUE  // saturates at min
+     * Numbers.saturatedCast(-10000000000L) = Integer.MIN_VALUE  // saturates at min
+     * }</pre>
      *
      * @param value any {@code long} value
-     * @return
-     *     {@link Integer#MAX_VALUE} if it is too large, or {@link Integer#MIN_VALUE} if it is too
-     *     small
+     * @return the {@code int} value nearest to {@code value}, or {@code Integer.MAX_VALUE} if {@code value}
+     *         is too large, or {@code Integer.MIN_VALUE} if {@code value} is too small
      */
     public static int saturatedCast(final long value) {
         if (value > Integer.MAX_VALUE) {
@@ -4644,13 +5383,30 @@ public final class Numbers {
     }
 
     /**
-     * Returns {@code n!}, that is, the product of the first {@code n} positive
-     * integers, {@code 1} if {@code n == 0}, or {@link Integer#MAX_VALUE} if the
-     * result does not fit in a {@code int}.
+     * Returns {@code n!} (n factorial), the product of the first {@code n} positive integers.
      *
-     * @param n
-     * @return
+     * <p>The factorial function computes {@code n! = 1 * 2 * 3 * ... * n}. By convention,
+     * {@code 0! = 1}. If the true result would exceed {@code Integer.MAX_VALUE}, this method
+     * returns {@code Integer.MAX_VALUE} instead.
+     *
+     * <p>The largest value of {@code n} for which {@code n!} fits in an {@code int} is 12.
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.factorial(0) = 1
+     * Numbers.factorial(1) = 1
+     * Numbers.factorial(5) = 120
+     * Numbers.factorial(10) = 3628800
+     * Numbers.factorial(12) = 479001600
+     * Numbers.factorial(13) = Integer.MAX_VALUE  // overflow, saturates
+     * Numbers.factorial(100) = Integer.MAX_VALUE  // overflow, saturates
+     * }</pre>
+     *
+     * @param n the non-negative integer to compute the factorial of
+     * @return {@code n!} if it fits in an {@code int}, otherwise {@code Integer.MAX_VALUE}
      * @throws IllegalArgumentException if {@code n < 0}
+     * @see #factorialToLong(int)
+     * @see #factorialToBigInteger(int)
      */
     public static int factorial(final int n) {
         checkNonNegative("n", n);
@@ -4658,12 +5414,31 @@ public final class Numbers {
     }
 
     /**
-     * Returns {@code n!}, that is, the product of the first {@code n} positive integers, {@code 1} if
-     * {@code n == 0}, or {@link Long#MAX_VALUE} if the result does not fit in a {@code long}.
+     * Returns {@code n!} (n factorial) as a {@code long}, the product of the first {@code n} positive integers.
      *
-     * @param n
-     * @return
+     * <p>The factorial function computes {@code n! = 1 * 2 * 3 * ... * n}. By convention,
+     * {@code 0! = 1}. If the true result would exceed {@code Long.MAX_VALUE}, this method
+     * returns {@code Long.MAX_VALUE} instead.
+     *
+     * <p>The largest value of {@code n} for which {@code n!} fits in a {@code long} is 20.
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.factorialToLong(0) = 1L
+     * Numbers.factorialToLong(1) = 1L
+     * Numbers.factorialToLong(5) = 120L
+     * Numbers.factorialToLong(10) = 3628800L
+     * Numbers.factorialToLong(15) = 1307674368000L
+     * Numbers.factorialToLong(20) = 2432902008176640000L
+     * Numbers.factorialToLong(21) = Long.MAX_VALUE  // overflow, saturates
+     * Numbers.factorialToLong(100) = Long.MAX_VALUE  // overflow, saturates
+     * }</pre>
+     *
+     * @param n the non-negative integer to compute the factorial of
+     * @return {@code n!} if it fits in a {@code long}, otherwise {@code Long.MAX_VALUE}
      * @throws IllegalArgumentException if {@code n < 0}
+     * @see #factorial(int)
+     * @see #factorialToBigInteger(int)
      */
     public static long factorialToLong(final int n) {
         checkNonNegative("n", n);
@@ -4697,18 +5472,31 @@ public final class Numbers {
     }
 
     /**
-     * Returns {@code n!}, that is, the product of the first {@code n} positive integers, or {@code 1}
-     * if {@code n == 0}.
+     * Returns {@code n!} (n factorial) as a {@code BigInteger}, the product of the first {@code n} positive integers.
      *
-     * <p><b>Warning:</b> the result takes <i>O(n log n)</i> space, so use cautiously.
+     * <p>The factorial function computes {@code n! = 1 * 2 * 3 * ... * n}. By convention,
+     * {@code 0! = 1}. This method supports arbitrary-precision computation and can handle
+     * very large values of {@code n}.
      *
-     * <p>This uses an efficient binary recursive algorithm to compute the factorial with balanced multiplies.
-     * It also removes all the 2s from the intermediate products (shifting them back in at
-     * the end).
+     * <p><b>Performance Note:</b> This method uses an efficient binary recursive algorithm with
+     * balanced multiplies. It removes all factors of 2 from intermediate products and shifts them
+     * back in at the end. The result takes <i>O(n log n)</i> space, so use cautiously for very
+     * large values of {@code n}.
      *
-     * @param n
-     * @return
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.factorialToBigInteger(0) = 1
+     * Numbers.factorialToBigInteger(5) = 120
+     * Numbers.factorialToBigInteger(20) = 2432902008176640000
+     * Numbers.factorialToBigInteger(100)  // returns a 158-digit number
+     * Numbers.factorialToBigInteger(1000) // returns a 2568-digit number (use cautiously)
+     * }</pre>
+     *
+     * @param n the non-negative integer to compute the factorial of
+     * @return {@code n!} as a {@code BigInteger}
      * @throws IllegalArgumentException if {@code n < 0}
+     * @see #factorial(int)
+     * @see #factorialToLong(int)
      */
     public static BigInteger factorialToBigInteger(final int n) {
         checkNonNegative("n", n);
@@ -4799,13 +5587,29 @@ public final class Numbers {
     }
 
     /**
-     * Returns {@code n} choose {@code k}, also known as the binomial coefficient of {@code n} and
-     * {@code k}, or {@link Integer#MAX_VALUE} if the result does not fit in an {@code int}.
+     * Returns the binomial coefficient "n choose k", denoted as C(n, k) or (n k).
      *
-     * @param n
-     * @param k
-     * @return
-     * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0} or {@code k > n}
+     * <p>The binomial coefficient represents the number of ways to choose {@code k} items from
+     * {@code n} items without regard to order. It is calculated as {@code n! / (k! * (n-k)!)}.
+     * If the result would exceed {@code Integer.MAX_VALUE}, this method returns {@code Integer.MAX_VALUE}.
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.binomial(5, 0) = 1      // only one way to choose nothing
+     * Numbers.binomial(5, 1) = 5      // five ways to choose one item
+     * Numbers.binomial(5, 2) = 10     // C(5,2) = 5!/(2!*3!) = 10
+     * Numbers.binomial(5, 3) = 10     // C(5,3) = C(5,2) by symmetry
+     * Numbers.binomial(10, 5) = 252
+     * Numbers.binomial(52, 5) = 2598960  // poker hands from a deck
+     * Numbers.binomial(100, 50) = Integer.MAX_VALUE  // overflow, saturates
+     * }</pre>
+     *
+     * @param n the total number of items; must be non-negative
+     * @param k the number of items to choose; must be non-negative and at most {@code n}
+     * @return the binomial coefficient C(n, k) if it fits in an {@code int}, otherwise {@code Integer.MAX_VALUE}
+     * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
+     * @see #binomialToLong(int, int)
+     * @see #binomialToBigInteger(int, int)
      */
     public static int binomial(final int n, int k) throws IllegalArgumentException {
         checkNonNegative("n", n);
@@ -4833,13 +5637,29 @@ public final class Numbers {
     }
 
     /**
-     * Returns {@code n} choose {@code k}, also known as the binomial coefficient of {@code n} and
-     * {@code k}, or {@link Long#MAX_VALUE} if the result does not fit in a {@code long}.
+     * Returns the binomial coefficient "n choose k" as a {@code long}, denoted as C(n, k) or (n k).
      *
-     * @param n
-     * @param k
-     * @return
+     * <p>The binomial coefficient represents the number of ways to choose {@code k} items from
+     * {@code n} items without regard to order. It is calculated as {@code n! / (k! * (n-k)!)}.
+     * If the result would exceed {@code Long.MAX_VALUE}, this method returns {@code Long.MAX_VALUE}.
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.binomialToLong(5, 0) = 1L      // only one way to choose nothing
+     * Numbers.binomialToLong(5, 1) = 5L      // five ways to choose one item
+     * Numbers.binomialToLong(5, 2) = 10L     // C(5,2) = 5!/(2!*3!) = 10
+     * Numbers.binomialToLong(10, 5) = 252L
+     * Numbers.binomialToLong(52, 5) = 2598960L  // poker hands from a deck
+     * Numbers.binomialToLong(60, 30) = 118264581564861424L
+     * Numbers.binomialToLong(100, 50) = Long.MAX_VALUE  // overflow, saturates
+     * }</pre>
+     *
+     * @param n the total number of items; must be non-negative
+     * @param k the number of items to choose; must be non-negative and at most {@code n}
+     * @return the binomial coefficient C(n, k) if it fits in a {@code long}, otherwise {@code Long.MAX_VALUE}
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
+     * @see #binomial(int, int)
+     * @see #binomialToBigInteger(int, int)
      */
     public static long binomialToLong(int n, int k) throws IllegalArgumentException {
         checkNonNegative("n", n);
@@ -4902,15 +5722,30 @@ public final class Numbers {
     }
 
     /**
-     * Returns {@code n} choose {@code k}, also known as the binomial coefficient of {@code n} and
-     * {@code k}, that is, {@code n! / (k! (n - k)!)}.
+     * Returns the binomial coefficient "n choose k" as a {@code BigInteger}, denoted as C(n, k) or (n k).
      *
-     * <p><b>Warning:</b> the result can take as much as <i>O(k log n)</i> space.
+     * <p>The binomial coefficient represents the number of ways to choose {@code k} items from
+     * {@code n} items without regard to order. It is calculated as {@code n! / (k! * (n-k)!)}.
+     * This method supports arbitrary-precision computation and can handle very large values.
      *
-     * @param n
-     * @param k
-     * @return
+     * <p><b>Performance Note:</b> The result can take as much as <i>O(k log n)</i> space. Use
+     * cautiously for very large values of {@code k} and {@code n}.
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.binomialToBigInteger(5, 2) = 10
+     * Numbers.binomialToBigInteger(10, 5) = 252
+     * Numbers.binomialToBigInteger(52, 5) = 2598960
+     * Numbers.binomialToBigInteger(100, 50)  // returns exact value (large number)
+     * Numbers.binomialToBigInteger(1000, 500) // computes exact value (very large, use cautiously)
+     * }</pre>
+     *
+     * @param n the total number of items; must be non-negative
+     * @param k the number of items to choose; must be non-negative and at most {@code n}
+     * @return the binomial coefficient C(n, k) as a {@code BigInteger}
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
+     * @see #binomial(int, int)
+     * @see #binomialToLong(int, int)
      */
     public static BigInteger binomialToBigInteger(final int n, int k) throws IllegalArgumentException {
         checkNonNegative("n", n);
@@ -4983,12 +5818,32 @@ public final class Numbers {
     }
 
     /**
-     * Returns the arithmetic mean of {@code x} and {@code y}, rounded toward negative infinity. This
-     * method is resilient to overflow.
+     * Returns the arithmetic mean of {@code x} and {@code y}, rounded towards negative infinity.
+     * This method is resilient to integer overflow.
      *
-     * @param x
-     * @param y
-     * @return
+     * <p>This implementation uses bitwise operations to compute the mean safely:
+     * {@code (x & y) + ((x ^ y) >> 1)} which avoids the overflow issues with
+     * the traditional {@code (x + y) / 2} approach.
+     *
+     * <p>The method correctly handles:
+     * <ul>
+     *   <li>Large values where {@code (x + y)} would overflow</li>
+     *   <li>Negative values where unsigned shift {@code (x + y) >>> 1} would fail</li>
+     * </ul>
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.mean(10L, 20L) = 15L
+     * Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE) = Long.MAX_VALUE  // no overflow
+     * Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE - 1) = Long.MAX_VALUE - 1
+     * Numbers.mean(-10L, 10L) = 0L
+     * Numbers.mean(7L, 8L) = 7L  // rounds toward negative infinity
+     * }</pre>
+     *
+     * @param x the first long value
+     * @param y the second long value
+     * @return the arithmetic mean of {@code x} and {@code y}, rounded towards negative infinity
+     * @see #mean(int, int)
      */
     public static long mean(final long x, final long y) {
         // Efficient method for computing the arithmetic mean.
@@ -4998,10 +5853,23 @@ public final class Numbers {
     }
 
     /**
+     * Returns the arithmetic mean of {@code x} and {@code y}.
      *
-     * @param x
-     * @param y
-     * @return
+     * <p>This implementation divides each value by 2 before adding to avoid overflow
+     * and maintain precision. Both inputs must be finite values.
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.mean(10.0, 20.0) = 15.0
+     * Numbers.mean(1.5, 2.5) = 2.0
+     * Numbers.mean(-10.0, 10.0) = 0.0
+     * Numbers.mean(Double.MAX_VALUE, Double.MAX_VALUE) = Double.MAX_VALUE
+     * }</pre>
+     *
+     * @param x the first double value; must be finite
+     * @param y the second double value; must be finite
+     * @return the arithmetic mean of {@code x} and {@code y}
+     * @throws IllegalArgumentException if either {@code x} or {@code y} is not finite (NaN or infinite)
      */
     public static double mean(final double x, final double y) {
         return checkFinite(x) / 2 + checkFinite(y) / 2;
@@ -5162,7 +6030,7 @@ public final class Numbers {
         N.checkArgNotNegative(scale, cs.scale);
 
         if (scale == 0) {
-            return (long) x;
+            return Math.round(x);
         } else if (scale <= 6) {
             final long factor = pow(10, scale);
             return ((float) Math.round(x * factor)) / factor; //NOSONAR
@@ -5185,7 +6053,7 @@ public final class Numbers {
         N.checkArgNotNegative(scale, cs.scale);
 
         if (scale == 0) {
-            return (long) x;
+            return Math.round(x);
         } else if (scale <= 6) {
             final long factor = pow(10, scale);
             return ((double) Math.round(x * factor)) / factor; //NOSONAR
@@ -5301,7 +6169,11 @@ public final class Numbers {
     public static float round(final float x, final DecimalFormat decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
-        return toFloat(decimalFormat.format(x));
+        try {
+            return decimalFormat.parse(decimalFormat.format(x)).floatValue();
+        } catch (ParseException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**
@@ -5317,7 +6189,11 @@ public final class Numbers {
     public static double round(final double x, final DecimalFormat decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
-        return toDouble(decimalFormat.format(x));
+        try {
+            return decimalFormat.parse(decimalFormat.format(x)).doubleValue();
+        } catch (ParseException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**
@@ -5552,7 +6428,7 @@ public final class Numbers {
      */
     static int lessThanBranchFree(final long x, final long y) {
         // Returns the sign bit of x - y.
-        return (int) (~~(x - y) >>> (Long.SIZE - 1));
+        return (int) ((x - y) >>> (Long.SIZE - 1));
     }
 
     static int log10Floor(final long x) {
@@ -5583,9 +6459,9 @@ public final class Numbers {
         if (x == 1) {
             return numerator / denominator;
         }
-        final long commandivisor = gcd(x, denominator);
-        x /= commandivisor;
-        denominator /= commandivisor; //NOSONAR
+        final long commondivisor = gcd(x, denominator);
+        x /= commondivisor;
+        denominator /= commondivisor; //NOSONAR
         // We know gcd(x, denominator) = 1, and x * numerator / denominator is exact,
         // so denominator must be a divisor of numerator.
         return x * (numerator / denominator); //NOSONAR
@@ -5696,9 +6572,8 @@ public final class Numbers {
     }
 
     static int lessThanBranchFree(final int x, final int y) {
-        // The double negation is optimized away by normal Java, but is necessary for GWT
-        // to make sure bit twiddling works as expected.
-        return ~~(x - y) >>> (Integer.SIZE - 1);
+        // Returns the sign bit of x - y.
+        return (x - y) >>> (Integer.SIZE - 1);
     }
 
     // These values were generated by using checkedMultiply to see when the simple multiply/divide
@@ -5776,10 +6651,35 @@ public final class Numbers {
     }
 
     /**
-     * Compute the inverse hyperbolic sine of a number.
+     * Computes the inverse hyperbolic sine (arcsinh) of a number.
      *
-     * @param a the number on which evaluation is done
-     * @return the inverse hyperbolic sine of a
+     * <p>The inverse hyperbolic sine is defined as: {@code asinh(x) = ln(x + sqrt(x² + 1))}.
+     * This function is the inverse of the hyperbolic sine function {@code sinh}, meaning
+     * {@code sinh(asinh(x)) = x} for all real {@code x}.
+     *
+     * <p>This implementation uses an efficient approximation based on Taylor series expansion
+     * for small values, and the logarithmic formula for larger values.
+     *
+     * <p>Mathematical properties:
+     * <ul>
+     *   <li>{@code asinh(-x) = -asinh(x)} (odd function)</li>
+     *   <li>{@code asinh(0) = 0}</li>
+     *   <li>Domain: all real numbers (-∞, +∞)</li>
+     *   <li>Range: all real numbers (-∞, +∞)</li>
+     * </ul>
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.asinh(0.0) = 0.0
+     * Numbers.asinh(1.0) ≈ 0.88137
+     * Numbers.asinh(-1.0) ≈ -0.88137
+     * Numbers.asinh(10.0) ≈ 2.99822
+     * }</pre>
+     *
+     * @param a the number on which to compute the inverse hyperbolic sine
+     * @return the inverse hyperbolic sine of {@code a}
+     * @see #acosh(double)
+     * @see #atanh(double)
      */
     public static double asinh(double a) {
         boolean negative = false;
@@ -5812,18 +6712,70 @@ public final class Numbers {
     }
 
     /**
-     * Compute the inverse hyperbolic cosine of a number.
-     * @param a number on which evaluation is done
-     * @return inverse hyperbolic cosine of a
+     * Computes the inverse hyperbolic cosine (arccosh) of a number.
+     *
+     * <p>The inverse hyperbolic cosine is defined as: {@code acosh(x) = ln(x + sqrt(x² - 1))}.
+     * This function is the inverse of the hyperbolic cosine function {@code cosh}, meaning
+     * {@code cosh(acosh(x)) = x} for all {@code x >= 1}.
+     *
+     * <p>Mathematical properties:
+     * <ul>
+     *   <li>{@code acosh(1) = 0}</li>
+     *   <li>Domain: [1, +∞) (requires {@code x >= 1})</li>
+     *   <li>Range: [0, +∞)</li>
+     *   <li>For {@code x < 1}, the result is NaN</li>
+     * </ul>
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.acosh(1.0) = 0.0
+     * Numbers.acosh(2.0) ≈ 1.31696
+     * Numbers.acosh(10.0) ≈ 2.99322
+     * Numbers.acosh(0.5)  // NaN (outside domain)
+     * }</pre>
+     *
+     * @param a the number on which to compute the inverse hyperbolic cosine; must be >= 1
+     * @return the inverse hyperbolic cosine of {@code a}, or NaN if {@code a < 1}
+     * @see #asinh(double)
+     * @see #atanh(double)
      */
     public static double acosh(final double a) {
         return Math.log(a + Math.sqrt(a * a - 1));
     }
 
     /**
-     * Compute the inverse hyperbolic tangent of a number.
-     * @param a number on which evaluation is done
-     * @return inverse hyperbolic tangent of a
+     * Computes the inverse hyperbolic tangent (arctanh) of a number.
+     *
+     * <p>The inverse hyperbolic tangent is defined as: {@code atanh(x) = 0.5 * ln((1 + x) / (1 - x))}.
+     * This function is the inverse of the hyperbolic tangent function {@code tanh}, meaning
+     * {@code tanh(atanh(x)) = x} for all {@code -1 < x < 1}.
+     *
+     * <p>This implementation uses an efficient approximation based on Taylor series expansion
+     * for small values, and the logarithmic formula for larger values.
+     *
+     * <p>Mathematical properties:
+     * <ul>
+     *   <li>{@code atanh(-x) = -atanh(x)} (odd function)</li>
+     *   <li>{@code atanh(0) = 0}</li>
+     *   <li>Domain: (-1, 1) (requires {@code -1 < x < 1})</li>
+     *   <li>Range: all real numbers (-∞, +∞)</li>
+     *   <li>For {@code |x| >= 1}, the result is NaN or ±∞</li>
+     * </ul>
+     *
+     * <p>Examples:
+     * <pre>{@code
+     * Numbers.atanh(0.0) = 0.0
+     * Numbers.atanh(0.5) ≈ 0.54931
+     * Numbers.atanh(-0.5) ≈ -0.54931
+     * Numbers.atanh(0.9) ≈ 1.47222
+     * Numbers.atanh(1.0)  // ±∞
+     * Numbers.atanh(1.5)  // NaN (outside domain)
+     * }</pre>
+     *
+     * @param a the number on which to compute the inverse hyperbolic tangent; should be in (-1, 1)
+     * @return the inverse hyperbolic tangent of {@code a}
+     * @see #asinh(double)
+     * @see #acosh(double)
      */
     public static double atanh(double a) {
         boolean negative = false;
@@ -6106,10 +7058,4 @@ public final class Numbers {
         }
     }
 
-    //    public abstract static class NumberUtil extends Numbers {
-    //
-    //        private NumberUtil() {
-    //            // utility class.
-    //        }
-    //    }
 }

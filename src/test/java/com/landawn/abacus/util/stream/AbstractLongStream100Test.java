@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -35,7 +36,7 @@ import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalLong;
 
-
+@Tag("new-test")
 public class AbstractLongStream100Test extends TestBase {
 
     private LongStream stream;
@@ -51,16 +52,15 @@ public class AbstractLongStream100Test extends TestBase {
     @Test
     public void testRateLimited() {
         stream = createLongStream(new long[] { 1, 2, 3, 4, 5 });
-        RateLimiter rateLimiter = RateLimiter.create(2.0); // 2 permits per second
+        RateLimiter rateLimiter = RateLimiter.create(2.0);
 
         long startTime = System.currentTimeMillis();
         long[] result = stream.rateLimited(rateLimiter).toArray();
         long duration = System.currentTimeMillis() - startTime;
 
         assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, result);
-        assertTrue(duration >= 1500); // Should take at least 1.5 seconds for 5 elements at 2/sec
+        assertTrue(duration >= 1500);
 
-        // Test null rateLimiter
         assertThrows(IllegalArgumentException.class, () -> {
             createLongStream(new long[] { 1 }).rateLimited(null);
         });
@@ -76,9 +76,8 @@ public class AbstractLongStream100Test extends TestBase {
         long duration = System.currentTimeMillis() - startTime;
 
         assertArrayEquals(new long[] { 1, 2, 3 }, result);
-        assertTrue(duration >= 300); // Should take at least 300ms for 3 elements
+        assertTrue(duration >= 300);
 
-        // Test null delay
         assertThrows(IllegalArgumentException.class, () -> {
             createLongStream(new long[] { 1 }).delay((Duration) null);
         });
@@ -208,13 +207,11 @@ public class AbstractLongStream100Test extends TestBase {
         assertArrayEquals(new long[] { 3, 4, 5 }, result);
         assertEquals(Arrays.asList(1L, 2L), skipped);
 
-        // Test negative n
         assertThrows(IllegalArgumentException.class, () -> {
             createLongStream(new long[] { 1 }).skip(-1, x -> {
             });
         });
 
-        // Test null action
         assertThrows(IllegalArgumentException.class, () -> {
             createLongStream(new long[] { 1 }).skip(1, null);
         });
@@ -248,7 +245,6 @@ public class AbstractLongStream100Test extends TestBase {
         result = stream.step(1).toArray();
         assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, result);
 
-        // Test invalid step
         assertThrows(IllegalArgumentException.class, () -> {
             createLongStream(new long[] { 1 }).step(0);
         });
@@ -305,7 +301,6 @@ public class AbstractLongStream100Test extends TestBase {
         long[] result = stream.intersection(c).toArray();
         assertArrayEquals(new long[] { 2, 4 }, result);
 
-        // Test with duplicates
         stream = createLongStream(new long[] { 1, 2, 2, 3, 4, 4, 5 });
         c = Arrays.asList(2L, 2L, 4L, 6L);
         result = stream.intersection(c).toArray();
@@ -319,7 +314,6 @@ public class AbstractLongStream100Test extends TestBase {
         long[] result = stream.difference(c).toArray();
         assertArrayEquals(new long[] { 1, 3, 5 }, result);
 
-        // Test with duplicates
         stream = createLongStream(new long[] { 1, 2, 2, 3, 4, 4, 5 });
         c = Arrays.asList(2L, 4L, 6L);
         result = stream.difference(c).toArray();
@@ -366,11 +360,9 @@ public class AbstractLongStream100Test extends TestBase {
         Random rnd = new Random(42);
         long[] result = stream.shuffled(rnd).toArray();
         assertEquals(5, result.length);
-        // Result is shuffled, so we just check that all elements are present
         Arrays.sort(result);
         assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, result);
 
-        // Test null random
         assertThrows(IllegalArgumentException.class, () -> {
             createLongStream(new long[] { 1 }).shuffled(null);
         });
@@ -419,7 +411,6 @@ public class AbstractLongStream100Test extends TestBase {
         result = stream.cycled(1).toArray();
         assertArrayEquals(new long[] { 1, 2, 3 }, result);
 
-        // Test negative rounds
         assertThrows(IllegalArgumentException.class, () -> {
             createLongStream(new long[] { 1 }).cycled(-1);
         });
@@ -531,7 +522,6 @@ public class AbstractLongStream100Test extends TestBase {
         long[] result = stream.zipWith(other, Long::sum).toArray();
         assertArrayEquals(new long[] { 5, 7, 9 }, result);
 
-        // Test different lengths
         stream = createLongStream(new long[] { 1, 2, 3 });
         other = createLongStream(new long[] { 4, 5 });
         result = stream.zipWith(other, Long::sum).toArray();
@@ -628,16 +618,9 @@ public class AbstractLongStream100Test extends TestBase {
         LongList result = stream.collect(LongList::new, LongList::add);
         assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, result.toArray());
 
-        // Test with StringBuilder
         stream = createLongStream(new long[] { 1, 2, 3 });
         StringBuilder sb = stream.collect(StringBuilder::new, (builder, value) -> builder.append(value).append(","));
         assertEquals("1,2,3,", sb.toString());
-
-        //    // Test with unsupported type
-        //    assertThrows(IllegalArgumentException.class, () -> {
-        //        createLongStream(new long[] { 1 }).collect(Object::new, (obj, value) -> {
-        //        });
-        //    });
 
         Object ret = new Object();
 

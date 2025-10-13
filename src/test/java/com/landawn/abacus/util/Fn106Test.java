@@ -33,6 +33,7 @@ import java.util.function.LongSupplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
@@ -41,6 +42,7 @@ import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Supplier;
 
+@Tag("new-test")
 public class Fn106Test extends TestBase {
 
     @Nested
@@ -54,7 +56,6 @@ public class Fn106Test extends TestBase {
             long time1 = supplier.getAsLong();
             Assertions.assertTrue(time1 > 0);
 
-            // Sleep to ensure time difference
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -70,7 +71,6 @@ public class Fn106Test extends TestBase {
             LongSupplier supplier1 = Fn.LongSuppliers.ofCurrentTimeMillis();
             LongSupplier supplier2 = Fn.LongSuppliers.ofCurrentTimeMillis();
 
-            // Should return same instance
             Assertions.assertSame(supplier1, supplier2);
         }
     }
@@ -94,7 +94,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(supplier);
             Assertions.assertEquals(4, supplier.get());
-            Assertions.assertEquals(4, supplier.get()); // Test multiple calls
+            Assertions.assertEquals(4, supplier.get());
         }
 
         @Test
@@ -104,7 +104,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(supplier);
             Assertions.assertSame(instance, supplier.get());
-            Assertions.assertSame(instance, supplier.get()); // Test multiple calls
+            Assertions.assertSame(instance, supplier.get());
         }
 
         @Test
@@ -117,9 +117,8 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(uuid1);
             Assertions.assertNotNull(uuid2);
-            Assertions.assertNotEquals(uuid1, uuid2); // Different UUIDs
+            Assertions.assertNotEquals(uuid1, uuid2);
 
-            // Should return same supplier instance
             Assertions.assertSame(supplier, Suppliers.ofUUID());
         }
 
@@ -133,9 +132,8 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(guid1);
             Assertions.assertNotNull(guid2);
-            Assertions.assertNotEquals(guid1, guid2); // Different GUIDs
+            Assertions.assertNotEquals(guid1, guid2);
 
-            // Should return same supplier instance
             Assertions.assertSame(supplier, Suppliers.ofGUID());
         }
 
@@ -148,7 +146,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(array);
             Assertions.assertEquals(0, array.length);
 
-            // Should return same array instance
             Assertions.assertSame(array, supplier.get());
             Assertions.assertSame(supplier, Suppliers.ofEmptyBooleanArray());
         }
@@ -162,7 +159,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(array);
             Assertions.assertEquals(0, array.length);
 
-            // Should return same array instance
             Assertions.assertSame(array, supplier.get());
             Assertions.assertSame(supplier, Suppliers.ofEmptyCharArray());
         }
@@ -176,7 +172,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(array);
             Assertions.assertEquals(0, array.length);
 
-            // Should return same array instance
             Assertions.assertSame(array, supplier.get());
             Assertions.assertSame(supplier, Suppliers.ofEmptyByteArray());
         }
@@ -190,7 +185,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(array);
             Assertions.assertEquals(0, array.length);
 
-            // Should return same array instance
             Assertions.assertSame(array, supplier.get());
             Assertions.assertSame(supplier, Suppliers.ofEmptyShortArray());
         }
@@ -204,7 +198,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(array);
             Assertions.assertEquals(0, array.length);
 
-            // Should return same array instance
             Assertions.assertSame(array, supplier.get());
             Assertions.assertSame(supplier, Suppliers.ofEmptyIntArray());
         }
@@ -218,7 +211,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(array);
             Assertions.assertEquals(0, array.length);
 
-            // Should return same array instance
             Assertions.assertSame(array, supplier.get());
             Assertions.assertSame(supplier, Suppliers.ofEmptyLongArray());
         }
@@ -232,7 +224,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(array);
             Assertions.assertEquals(0, array.length);
 
-            // Should return same array instance
             Assertions.assertSame(array, supplier.get());
             Assertions.assertSame(supplier, Suppliers.ofEmptyFloatArray());
         }
@@ -246,7 +237,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(array);
             Assertions.assertEquals(0, array.length);
 
-            // Should return same array instance
             Assertions.assertSame(array, supplier.get());
             Assertions.assertSame(supplier, Suppliers.ofEmptyDoubleArray());
         }
@@ -260,7 +250,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(array);
             Assertions.assertEquals(0, array.length);
 
-            // Should return same array instance
             Assertions.assertSame(array, supplier.get());
             Assertions.assertSame(supplier, Suppliers.ofEmptyStringArray());
         }
@@ -274,7 +263,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(array);
             Assertions.assertEquals(0, array.length);
 
-            // Should return same array instance
             Assertions.assertSame(array, supplier.get());
             Assertions.assertSame(supplier, Suppliers.ofEmptyObjectArray());
         }
@@ -289,7 +277,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertEquals("", str);
             Assertions.assertEquals(0, str.length());
 
-            // Should return same string instance
             Assertions.assertSame(str, supplier.get());
             Assertions.assertSame(supplier, Suppliers.ofEmptyString());
         }
@@ -304,7 +291,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
-            Assertions.assertNotSame(list1, list2); // Different instances
+            Assertions.assertNotSame(list1, list2);
             Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofBooleanList());
@@ -320,7 +307,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
-            Assertions.assertNotSame(list1, list2); // Different instances
+            Assertions.assertNotSame(list1, list2);
             Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofCharList());
@@ -336,7 +323,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
-            Assertions.assertNotSame(list1, list2); // Different instances
+            Assertions.assertNotSame(list1, list2);
             Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofByteList());
@@ -352,7 +339,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
-            Assertions.assertNotSame(list1, list2); // Different instances
+            Assertions.assertNotSame(list1, list2);
             Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofShortList());
@@ -368,7 +355,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
-            Assertions.assertNotSame(list1, list2); // Different instances
+            Assertions.assertNotSame(list1, list2);
             Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofIntList());
@@ -384,7 +371,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
-            Assertions.assertNotSame(list1, list2); // Different instances
+            Assertions.assertNotSame(list1, list2);
             Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofLongList());
@@ -400,7 +387,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
-            Assertions.assertNotSame(list1, list2); // Different instances
+            Assertions.assertNotSame(list1, list2);
             Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofFloatList());
@@ -416,7 +403,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
-            Assertions.assertNotSame(list1, list2); // Different instances
+            Assertions.assertNotSame(list1, list2);
             Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofDoubleList());
@@ -432,7 +419,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
-            Assertions.assertNotSame(list1, list2); // Different instances
+            Assertions.assertNotSame(list1, list2);
             Assertions.assertEquals(0, list1.size());
             Assertions.assertTrue(list1 instanceof ArrayList);
 
@@ -449,7 +436,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
-            Assertions.assertNotSame(list1, list2); // Different instances
+            Assertions.assertNotSame(list1, list2);
             Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofLinkedList());
@@ -465,7 +452,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(set1);
             Assertions.assertNotNull(set2);
-            Assertions.assertNotSame(set1, set2); // Different instances
+            Assertions.assertNotSame(set1, set2);
             Assertions.assertEquals(0, set1.size());
             Assertions.assertTrue(set1 instanceof HashSet);
 
@@ -482,7 +469,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(set1);
             Assertions.assertNotNull(set2);
-            Assertions.assertNotSame(set1, set2); // Different instances
+            Assertions.assertNotSame(set1, set2);
             Assertions.assertEquals(0, set1.size());
             Assertions.assertTrue(set1 instanceof LinkedHashSet);
 
@@ -499,7 +486,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(set1);
             Assertions.assertNotNull(set2);
-            Assertions.assertNotSame(set1, set2); // Different instances
+            Assertions.assertNotSame(set1, set2);
             Assertions.assertEquals(0, set1.size());
             Assertions.assertTrue(set1 instanceof TreeSet);
 
@@ -516,7 +503,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(set1);
             Assertions.assertNotNull(set2);
-            Assertions.assertNotSame(set1, set2); // Different instances
+            Assertions.assertNotSame(set1, set2);
             Assertions.assertEquals(0, set1.size());
             Assertions.assertTrue(set1 instanceof TreeSet);
 
@@ -533,7 +520,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(set1);
             Assertions.assertNotNull(set2);
-            Assertions.assertNotSame(set1, set2); // Different instances
+            Assertions.assertNotSame(set1, set2);
             Assertions.assertEquals(0, set1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofTreeSet());
@@ -549,7 +536,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(queue1);
             Assertions.assertNotNull(queue2);
-            Assertions.assertNotSame(queue1, queue2); // Different instances
+            Assertions.assertNotSame(queue1, queue2);
             Assertions.assertEquals(0, queue1.size());
             Assertions.assertTrue(queue1 instanceof LinkedList);
 
@@ -566,7 +553,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(deque1);
             Assertions.assertNotNull(deque2);
-            Assertions.assertNotSame(deque1, deque2); // Different instances
+            Assertions.assertNotSame(deque1, deque2);
             Assertions.assertEquals(0, deque1.size());
             Assertions.assertTrue(deque1 instanceof LinkedList);
 
@@ -583,7 +570,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(deque1);
             Assertions.assertNotNull(deque2);
-            Assertions.assertNotSame(deque1, deque2); // Different instances
+            Assertions.assertNotSame(deque1, deque2);
             Assertions.assertEquals(0, deque1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofArrayDeque());
@@ -599,7 +586,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(queue1);
             Assertions.assertNotNull(queue2);
-            Assertions.assertNotSame(queue1, queue2); // Different instances
+            Assertions.assertNotSame(queue1, queue2);
             Assertions.assertEquals(0, queue1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofLinkedBlockingQueue());
@@ -615,7 +602,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(deque1);
             Assertions.assertNotNull(deque2);
-            Assertions.assertNotSame(deque1, deque2); // Different instances
+            Assertions.assertNotSame(deque1, deque2);
             Assertions.assertEquals(0, deque1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofLinkedBlockingDeque());
@@ -631,7 +618,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(queue1);
             Assertions.assertNotNull(queue2);
-            Assertions.assertNotSame(queue1, queue2); // Different instances
+            Assertions.assertNotSame(queue1, queue2);
             Assertions.assertEquals(0, queue1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofConcurrentLinkedQueue());
@@ -647,7 +634,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(queue1);
             Assertions.assertNotNull(queue2);
-            Assertions.assertNotSame(queue1, queue2); // Different instances
+            Assertions.assertNotSame(queue1, queue2);
             Assertions.assertEquals(0, queue1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofPriorityQueue());
@@ -663,7 +650,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
             Assertions.assertTrue(map1 instanceof HashMap);
 
@@ -680,7 +667,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
             Assertions.assertTrue(map1 instanceof LinkedHashMap);
 
@@ -697,7 +684,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofIdentityHashMap());
@@ -713,7 +700,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
             Assertions.assertTrue(map1 instanceof TreeMap);
 
@@ -730,7 +717,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
             Assertions.assertTrue(map1 instanceof TreeMap);
 
@@ -747,7 +734,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofTreeMap());
@@ -763,7 +750,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
             Assertions.assertTrue(map1 instanceof ConcurrentHashMap);
 
@@ -780,7 +767,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofConcurrentHashMap());
@@ -796,7 +783,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(set1);
             Assertions.assertNotNull(set2);
-            Assertions.assertNotSame(set1, set2); // Different instances
+            Assertions.assertNotSame(set1, set2);
             Assertions.assertEquals(0, set1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofConcurrentHashSet());
@@ -812,7 +799,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofBiMap());
@@ -828,7 +815,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(set1);
             Assertions.assertNotNull(set2);
-            Assertions.assertNotSame(set1, set2); // Different instances
+            Assertions.assertNotSame(set1, set2);
             Assertions.assertEquals(0, set1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofMultiset());
@@ -844,7 +831,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(set1);
             Assertions.assertNotNull(set2);
-            Assertions.assertNotSame(set1, set2); // Different instances
+            Assertions.assertNotSame(set1, set2);
             Assertions.assertEquals(0, set1.size());
         }
 
@@ -859,7 +846,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(set1);
             Assertions.assertNotNull(set2);
-            Assertions.assertNotSame(set1, set2); // Different instances
+            Assertions.assertNotSame(set1, set2);
             Assertions.assertEquals(0, set1.size());
         }
 
@@ -873,7 +860,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofListMultimap());
@@ -889,7 +876,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
         }
 
@@ -903,7 +890,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
         }
 
@@ -919,7 +906,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
         }
 
@@ -933,7 +920,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
 
             Assertions.assertSame(supplier, Suppliers.ofSetMultimap());
@@ -949,7 +936,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
         }
 
@@ -963,7 +950,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
         }
 
@@ -979,7 +966,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
         }
 
@@ -995,7 +982,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
-            Assertions.assertNotSame(map1, map2); // Different instances
+            Assertions.assertNotSame(map1, map2);
             Assertions.assertEquals(0, map1.size());
         }
 
@@ -1009,7 +996,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(sb1);
             Assertions.assertNotNull(sb2);
-            Assertions.assertNotSame(sb1, sb2); // Different instances
+            Assertions.assertNotSame(sb1, sb2);
             Assertions.assertEquals(0, sb1.length());
 
             Assertions.assertSame(supplier, Suppliers.ofStringBuilder());
@@ -1017,28 +1004,23 @@ public class Fn106Test extends TestBase {
 
         @Test
         public void testOfCollection() {
-            // Test with ArrayList
             Supplier<? extends Collection<String>> supplier = Suppliers.<String> ofCollection(ArrayList.class);
             Assertions.assertNotNull(supplier);
             Collection<String> coll = supplier.get();
             Assertions.assertTrue(coll instanceof ArrayList);
 
-            // Test with LinkedList
             supplier = Suppliers.<String> ofCollection(LinkedList.class);
             coll = supplier.get();
             Assertions.assertTrue(coll instanceof LinkedList);
 
-            // Test with HashSet
             supplier = Suppliers.<String> ofCollection(HashSet.class);
             coll = supplier.get();
             Assertions.assertTrue(coll instanceof HashSet);
 
-            // Test with abstract Collection interface
             supplier = Suppliers.<String> ofCollection(Collection.class);
             coll = supplier.get();
             Assertions.assertTrue(coll instanceof ArrayList);
 
-            // Test caching
             Supplier<? extends Collection<String>> supplier2 = Suppliers.ofCollection(ArrayList.class);
             Assertions.assertSame(supplier2, Suppliers.ofCollection(ArrayList.class));
         }
@@ -1052,28 +1034,23 @@ public class Fn106Test extends TestBase {
 
         @Test
         public void testOfMap_Class() {
-            // Test with HashMap
             Supplier<? extends Map<String, Integer>> supplier = Suppliers.ofMap(HashMap.class);
             Assertions.assertNotNull(supplier);
             Map<String, Integer> map = supplier.get();
             Assertions.assertTrue(map instanceof HashMap);
 
-            // Test with LinkedHashMap
             supplier = Suppliers.ofMap(LinkedHashMap.class);
             map = supplier.get();
             Assertions.assertTrue(map instanceof LinkedHashMap);
 
-            // Test with TreeMap
             supplier = Suppliers.ofMap(TreeMap.class);
             map = supplier.get();
             Assertions.assertTrue(map instanceof TreeMap);
 
-            // Test with abstract Map interface
             supplier = Suppliers.ofMap(Map.class);
             map = supplier.get();
             Assertions.assertTrue(map instanceof HashMap);
 
-            // Test caching
             Supplier<? extends Map<String, Integer>> supplier2 = Suppliers.ofMap(HashMap.class);
             Assertions.assertSame(supplier2, Suppliers.ofMap(HashMap.class));
         }
@@ -1087,25 +1064,12 @@ public class Fn106Test extends TestBase {
 
         @Test
         public void testRegisterForCollection() {
-            // Create a custom collection class
             class CustomCollection<T> extends ArrayList<T> {
-                // Custom implementation
             }
 
             java.util.function.Supplier<CustomCollection> customSupplier = CustomCollection::new;
-            // boolean registered = Suppliers.registerForCollection(CustomCollection.class, customSupplier);
 
             Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForCollection(CustomCollection.class, customSupplier));
-            //        Assertions.assertTrue(registered);
-            //
-            //        // Try to register again
-            //        boolean registeredAgain = Suppliers.registerForCollection(CustomCollection.class, customSupplier);
-            //        Assertions.assertFalse(registeredAgain);
-            //
-            //        // Test that it can be used
-            //        Supplier<? extends Collection<String>> supplier = Suppliers.<String> ofCollection(CustomCollection.class);
-            //        Collection<String> coll = supplier.get();
-            //        Assertions.assertTrue(coll instanceof CustomCollection);
         }
 
         @Test
@@ -1117,26 +1081,13 @@ public class Fn106Test extends TestBase {
 
         @Test
         public void testRegisterForMap() {
-            // Create a custom map class
             class CustomMap<K, V> extends HashMap<K, V> {
-                // Custom implementation
             }
 
             java.util.function.Supplier<CustomMap> customSupplier = CustomMap::new;
-            //  boolean registered = Suppliers.registerForMap(CustomMap.class, customSupplier);
 
             Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForMap(CustomMap.class, customSupplier));
 
-            //        Assertions.assertTrue(registered);
-            //
-            //        // Try to register again
-            //        boolean registeredAgain = Suppliers.registerForMap(CustomMap.class, customSupplier);
-            //        Assertions.assertFalse(registeredAgain);
-            //
-            //        // Test that it can be used
-            //        Supplier<? extends Map<String, Integer>> supplier = Suppliers.ofMap(CustomMap.class);
-            //        Map<String, Integer> map = supplier.get();
-            //        Assertions.assertTrue(map instanceof CustomMap);
         }
 
         @Test
@@ -1177,7 +1128,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(ex1);
             Assertions.assertNotNull(ex2);
-            Assertions.assertNotSame(ex1, ex2); // Different instances
+            Assertions.assertNotSame(ex1, ex2);
 
             Assertions.assertSame(supplier, Suppliers.newException());
         }
@@ -1192,7 +1143,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(ex1);
             Assertions.assertNotNull(ex2);
-            Assertions.assertNotSame(ex1, ex2); // Different instances
+            Assertions.assertNotSame(ex1, ex2);
 
             Assertions.assertSame(supplier, Suppliers.newRuntimeException());
         }
@@ -1207,7 +1158,7 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(ex1);
             Assertions.assertNotNull(ex2);
-            Assertions.assertNotSame(ex1, ex2); // Different instances
+            Assertions.assertNotSame(ex1, ex2);
 
             Assertions.assertSame(supplier, Suppliers.newNoSuchElementException());
         }
@@ -1238,12 +1189,10 @@ public class Fn106Test extends TestBase {
             Assertions.assertEquals(10, array2.length);
             Assertions.assertNotSame(array1, array2);
 
-            // Test all elements are false
             for (boolean b : array1) {
                 Assertions.assertFalse(b);
             }
 
-            // Should return same function instance
             Assertions.assertSame(func, IntFunctions.ofBooleanArray());
         }
 
@@ -1261,7 +1210,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertEquals(10, array2.length);
             Assertions.assertNotSame(array1, array2);
 
-            // Test all elements are '\u0000'
             for (char c : array1) {
                 Assertions.assertEquals('\u0000', c);
             }
@@ -1283,7 +1231,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertEquals(10, array2.length);
             Assertions.assertNotSame(array1, array2);
 
-            // Test all elements are 0
             for (byte b : array1) {
                 Assertions.assertEquals((byte) 0, b);
             }
@@ -1305,7 +1252,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertEquals(10, array2.length);
             Assertions.assertNotSame(array1, array2);
 
-            // Test all elements are 0
             for (short s : array1) {
                 Assertions.assertEquals((short) 0, s);
             }
@@ -1327,7 +1273,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertEquals(10, array2.length);
             Assertions.assertNotSame(array1, array2);
 
-            // Test all elements are 0
             for (int i : array1) {
                 Assertions.assertEquals(0, i);
             }
@@ -1349,7 +1294,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertEquals(10, array2.length);
             Assertions.assertNotSame(array1, array2);
 
-            // Test all elements are 0L
             for (long l : array1) {
                 Assertions.assertEquals(0L, l);
             }
@@ -1371,7 +1315,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertEquals(10, array2.length);
             Assertions.assertNotSame(array1, array2);
 
-            // Test all elements are 0.0f
             for (float f : array1) {
                 Assertions.assertEquals(0.0f, f);
             }
@@ -1393,7 +1336,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertEquals(10, array2.length);
             Assertions.assertNotSame(array1, array2);
 
-            // Test all elements are 0.0
             for (double d : array1) {
                 Assertions.assertEquals(0.0, d);
             }
@@ -1415,7 +1357,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertEquals(10, array2.length);
             Assertions.assertNotSame(array1, array2);
 
-            // Test all elements are null
             for (String s : array1) {
                 Assertions.assertNull(s);
             }
@@ -1437,7 +1378,6 @@ public class Fn106Test extends TestBase {
             Assertions.assertEquals(10, array2.length);
             Assertions.assertNotSame(array1, array2);
 
-            // Test all elements are null
             for (Object o : array1) {
                 Assertions.assertNull(o);
             }
@@ -1456,7 +1396,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
             Assertions.assertNotSame(list1, list2);
-            Assertions.assertEquals(0, list1.size()); // Empty list
+            Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(func, IntFunctions.ofBooleanList());
         }
@@ -1472,7 +1412,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
             Assertions.assertNotSame(list1, list2);
-            Assertions.assertEquals(0, list1.size()); // Empty list
+            Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(func, IntFunctions.ofCharList());
         }
@@ -1488,7 +1428,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
             Assertions.assertNotSame(list1, list2);
-            Assertions.assertEquals(0, list1.size()); // Empty list
+            Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(func, IntFunctions.ofByteList());
         }
@@ -1504,7 +1444,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
             Assertions.assertNotSame(list1, list2);
-            Assertions.assertEquals(0, list1.size()); // Empty list
+            Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(func, IntFunctions.ofShortList());
         }
@@ -1520,7 +1460,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
             Assertions.assertNotSame(list1, list2);
-            Assertions.assertEquals(0, list1.size()); // Empty list
+            Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(func, IntFunctions.ofIntList());
         }
@@ -1536,7 +1476,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
             Assertions.assertNotSame(list1, list2);
-            Assertions.assertEquals(0, list1.size()); // Empty list
+            Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(func, IntFunctions.ofLongList());
         }
@@ -1552,7 +1492,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
             Assertions.assertNotSame(list1, list2);
-            Assertions.assertEquals(0, list1.size()); // Empty list
+            Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(func, IntFunctions.ofFloatList());
         }
@@ -1568,7 +1508,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(list1);
             Assertions.assertNotNull(list2);
             Assertions.assertNotSame(list1, list2);
-            Assertions.assertEquals(0, list1.size()); // Empty list
+            Assertions.assertEquals(0, list1.size());
 
             Assertions.assertSame(func, IntFunctions.ofDoubleList());
         }
@@ -2033,7 +1973,6 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(array1);
             Assertions.assertNotNull(array2);
-            // Should return same instance (stateful)
             Assertions.assertSame(array1, array2);
         }
 
@@ -2047,34 +1986,28 @@ public class Fn106Test extends TestBase {
 
             Assertions.assertNotNull(array1);
             Assertions.assertNotNull(array2);
-            // Should return same instance (stateful)
             Assertions.assertSame(array1, array2);
         }
 
         @Test
         public void testOfCollection() {
-            // Test with ArrayList
             IntFunction<? extends Collection<String>> func = IntFunctions.ofCollection(ArrayList.class);
             Assertions.assertNotNull(func);
             Collection<String> coll = func.apply(10);
             Assertions.assertTrue(coll instanceof ArrayList);
 
-            // Test with LinkedList
             func = IntFunctions.ofCollection(LinkedList.class);
             coll = func.apply(10);
             Assertions.assertTrue(coll instanceof LinkedList);
 
-            // Test with HashSet
             func = IntFunctions.ofCollection(HashSet.class);
             coll = func.apply(10);
             Assertions.assertTrue(coll instanceof HashSet);
 
-            // Test with abstract Collection interface
             func = IntFunctions.ofCollection(Collection.class);
             coll = func.apply(10);
             Assertions.assertTrue(coll instanceof ArrayList);
 
-            // Test caching
             IntFunction<? extends Collection<String>> func2 = IntFunctions.ofCollection(ArrayList.class);
             Assertions.assertSame(func2, IntFunctions.ofCollection(ArrayList.class));
         }
@@ -2088,28 +2021,23 @@ public class Fn106Test extends TestBase {
 
         @Test
         public void testOfMap_Class() {
-            // Test with HashMap
             IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(HashMap.class);
             Assertions.assertNotNull(func);
             Map<String, Integer> map = func.apply(10);
             Assertions.assertTrue(map instanceof HashMap);
 
-            // Test with LinkedHashMap
             func = IntFunctions.ofMap(LinkedHashMap.class);
             map = func.apply(10);
             Assertions.assertTrue(map instanceof LinkedHashMap);
 
-            // Test with TreeMap
             func = IntFunctions.ofMap(TreeMap.class);
             map = func.apply(10);
             Assertions.assertTrue(map instanceof TreeMap);
 
-            // Test with abstract Map interface
             func = IntFunctions.ofMap(Map.class);
             map = func.apply(10);
             Assertions.assertTrue(map instanceof HashMap);
 
-            // Test caching
             IntFunction<? extends Map<String, Integer>> func2 = IntFunctions.ofMap(HashMap.class);
             Assertions.assertSame(func2, IntFunctions.ofMap(HashMap.class));
         }
@@ -2123,7 +2051,6 @@ public class Fn106Test extends TestBase {
 
         @Test
         public void testRegisterForCollection() {
-            // Create a custom collection class
             class CustomCollection<T> extends ArrayList<T> {
                 public CustomCollection(int initialCapacity) {
                     super(initialCapacity);
@@ -2131,19 +2058,8 @@ public class Fn106Test extends TestBase {
             }
 
             java.util.function.IntFunction<CustomCollection> customCreator = CustomCollection::new;
-            // boolean registered = IntFunctions.registerForCollection(CustomCollection.class, customCreator);
             Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.registerForCollection(CustomCollection.class, customCreator));
 
-            //        Assertions.assertTrue(registered);
-            //
-            //        // Try to register again
-            //        boolean registeredAgain = IntFunctions.registerForCollection(CustomCollection.class, customCreator);
-            //        Assertions.assertFalse(registeredAgain);
-            //
-            //        // Test that it can be used
-            //        IntFunction<? extends Collection<String>> func = IntFunctions.ofCollection(CustomCollection.class);
-            //        Collection<String> coll = func.apply(10);
-            //        Assertions.assertTrue(coll instanceof CustomCollection);
         }
 
         @Test
@@ -2155,7 +2071,6 @@ public class Fn106Test extends TestBase {
 
         @Test
         public void testRegisterForMap() {
-            // Create a custom map class
             class CustomMap<K, V> extends HashMap<K, V> {
                 public CustomMap(int initialCapacity) {
                     super(initialCapacity);
@@ -2163,21 +2078,10 @@ public class Fn106Test extends TestBase {
             }
 
             java.util.function.IntFunction<CustomMap> customCreator = CustomMap::new;
-            // boolean registered = IntFunctions.registerForMap(CustomMap.class, customCreator);
 
             Assertions.assertThrows(IllegalArgumentException.class, () -> {
                 IntFunctions.registerForMap(CustomMap.class, customCreator);
             });
-            //            Assertions.assertTrue(registered);
-            //
-            //            // Try to register again
-            //            boolean registeredAgain = IntFunctions.registerForMap(CustomMap.class, customCreator);
-            //            Assertions.assertFalse(registeredAgain);
-            //
-            //            // Test that it can be used
-            //            IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(CustomMap.class);
-            //            Map<String, Integer> map = func.apply(10);
-            //            Assertions.assertTrue(map instanceof CustomMap);
         }
 
         @Test

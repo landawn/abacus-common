@@ -26,9 +26,11 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class BiIterator101Test extends TestBase {
 
     @Nested
@@ -96,7 +98,6 @@ public class BiIterator101Test extends TestBase {
         @Test
         @DisplayName("Test generate with stateful output consumer")
         public void testGenerateStateful() {
-            // Fibonacci-like sequence
             MutableInt counter = MutableInt.of(10);
             BiIterator<Integer, Integer> fib = BiIterator.generate(() -> counter.getAndDecrement() > 0, pair -> {
                 if (pair.left() == null || pair.right() == null) {
@@ -128,7 +129,6 @@ public class BiIterator101Test extends TestBase {
         @Test
         @DisplayName("Test generate with index at boundaries")
         public void testGenerateIndexBoundaries() {
-            // Test with Integer.MAX_VALUE - 1 to avoid overflow
             BiIterator<Long, Long> iter = BiIterator.generate(Integer.MAX_VALUE - 5, Integer.MAX_VALUE - 1,
                     (index, pair) -> pair.set((long) index, (long) index));
 
@@ -214,9 +214,7 @@ public class BiIterator101Test extends TestBase {
                 map.put("key" + i, i);
             }
 
-            BiIterator<String, Integer> iter = BiIterator.of(map)
-                    .filter((k, v) -> v % 2 == 0) // Even numbers
-                    .filter((k, v) -> v % 3 == 0); // Divisible by 3
+            BiIterator<String, Integer> iter = BiIterator.of(map).filter((k, v) -> v % 2 == 0).filter((k, v) -> v % 3 == 0);
 
             List<Pair<String, Integer>> results = iter.toList();
             assertTrue(results.stream().allMatch(p -> p.right() % 6 == 0));
@@ -249,10 +247,7 @@ public class BiIterator101Test extends TestBase {
             map.put("three", 3);
             map.put("four", 4);
 
-            List<Integer> doubled = BiIterator.of(map)
-                    .filter((k, v) -> k.length() == 3) // "one" and "two"
-                    .map((k, v) -> v * 2)
-                    .toList();
+            List<Integer> doubled = BiIterator.of(map).filter((k, v) -> k.length() == 3).map((k, v) -> v * 2).toList();
 
             assertEquals(2, doubled.size());
             assertTrue(doubled.contains(2));
@@ -265,7 +260,7 @@ public class BiIterator101Test extends TestBase {
             String[] arr1 = { "a", "b" };
             Integer[] arr2 = { 1, 0 };
 
-            ObjIterator<Integer> iter = BiIterator.zip(arr1, arr2).map((s, i) -> 10 / i); // Will throw on second element
+            ObjIterator<Integer> iter = BiIterator.zip(arr1, arr2).map((s, i) -> 10 / i);
 
             assertEquals(10, iter.next());
             assertThrows(ArithmeticException.class, () -> iter.next());
@@ -348,7 +343,6 @@ public class BiIterator101Test extends TestBase {
         @Test
         @DisplayName("Test skip and limit with exact boundaries")
         public void testSkipLimitExactBoundaries() {
-            // Create iterator with exactly 10 elements
             List<String> list = new ArrayList<>();
             for (int i = 0; i < 10; i++) {
                 list.add("item" + i);
@@ -356,7 +350,6 @@ public class BiIterator101Test extends TestBase {
 
             BiIterator<String, Integer> iter = BiIterator.unzip(list, (s, pair) -> pair.set(s, Integer.parseInt(s.substring(4))));
 
-            // Skip 3, limit 7 - should get exactly 7 elements
             List<Pair<String, Integer>> result = iter.skip(3).limit(7).toList();
 
             assertEquals(7, result.size());
@@ -372,10 +365,7 @@ public class BiIterator101Test extends TestBase {
                 map.put(i, "value" + i);
             }
 
-            List<Pair<Integer, String>> result = BiIterator.of(map)
-                    .limit(10) // First 10 elements
-                    .skip(5) // Skip first 5 of those 10
-                    .toList();
+            List<Pair<Integer, String>> result = BiIterator.of(map).limit(10).skip(5).toList();
 
             assertEquals(5, result.size());
             assertEquals(5, result.get(0).left());
@@ -414,7 +404,6 @@ public class BiIterator101Test extends TestBase {
             assertEquals(3, result.left().size());
             assertEquals(3, result.right().size());
 
-            // TreeSet should be sorted
             assertEquals("a", result.left().iterator().next());
             assertEquals(1, result.right().iterator().next());
         }
@@ -430,8 +419,6 @@ public class BiIterator101Test extends TestBase {
             BiIterator<String, Integer> iter = BiIterator.zip(new String[] { "a" }, new Integer[] { 1 });
 
             assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
-            // assertThrows(IllegalArgumentException.class, () -> iter.map(null));
-            // assertThrows(IllegalArgumentException.class, () -> iter.forEachRemaining((BiConsumer<String, Integer>) null));
         }
 
         @Test
@@ -442,16 +429,13 @@ public class BiIterator101Test extends TestBase {
 
             BiIterator<String, Integer> iter = BiIterator.zip(arr1, arr2);
 
-            // Exhaust iterator
             iter.next();
 
-            // Try various operations
             assertFalse(iter.hasNext());
             assertFalse(iter.first().isPresent());
             assertFalse(iter.last().isPresent());
             assertEquals(0, iter.toList().size());
 
-            // forEachRemaining should do nothing
             AtomicInteger count = new AtomicInteger(0);
             iter.forEachRemaining((a, b) -> count.incrementAndGet());
             assertEquals(0, count.get());
@@ -467,20 +451,14 @@ public class BiIterator101Test extends TestBase {
 
             BiIterator<String, Integer> iter = BiIterator.of(map);
 
-            // Consume one element
             iter.next();
 
-            // Modify underlying map
             map.put("d", 4);
 
-            // This may or may not throw ConcurrentModificationException
-            // depending on the Map implementation
             try {
                 iter.forEachRemaining((k, v) -> {
                 });
-                // If no exception, that's also valid behavior
             } catch (ConcurrentModificationException e) {
-                // Expected in some cases
             }
         }
     }
@@ -508,7 +486,6 @@ public class BiIterator101Test extends TestBase {
         public void testDeepChaining() {
             BiIterator<Integer, Integer> iter = BiIterator.generate(0, 1000, (i, pair) -> pair.set(i, i * 2));
 
-            // Deep chaining
             List<String> result = iter.skip(100)
                     .limit(800)
                     .filter((a, b) -> a % 2 == 0)

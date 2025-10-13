@@ -38,6 +38,7 @@ import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -58,10 +59,9 @@ import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.function.ToIntFunction;
 
-
+@Tag("new-test")
 public class Stream200Test extends TestBase {
 
-    // Helper to get a List from a Stream for assertions
     private <T> List<T> toList(Stream<T> stream) {
         if (stream == null) {
             return Collections.emptyList();
@@ -99,7 +99,6 @@ public class Stream200Test extends TestBase {
         assertEquals(Arrays.asList(1, 2), Stream.of(1, 2, 3, 1, 2).takeWhile(x -> x < 3).toList());
         assertEquals(Collections.emptyList(), Stream.of(3, 1, 2).takeWhile(x -> x < 3).toList());
         assertEquals(Arrays.asList(1, 2, 3), Stream.of(1, 2, 3).takeWhile(x -> x < 5).toList());
-        // Parallel behavior can be complex as per Javadoc, testing simple ordered case.
         List<Integer> resultParallel = Stream.of(1, 2, 3, 4, 5, 0).parallel(2).takeWhile(it -> it < 4).toList();
         assertTrue(resultParallel.containsAll(Arrays.asList(1, 2, 3)) && resultParallel.size() <= 4 && resultParallel.stream().allMatch(i -> i < 4));
     }
@@ -109,9 +108,8 @@ public class Stream200Test extends TestBase {
         assertEquals(Arrays.asList(3, 1, 2), Stream.of(1, 2, 3, 1, 2).dropWhile(x -> x < 3).toList());
         assertEquals(Arrays.asList(3, 1, 2), Stream.of(3, 1, 2).dropWhile(x -> x < 3).toList());
         assertEquals(Collections.emptyList(), Stream.of(1, 2, 3).dropWhile(x -> x < 5).toList());
-        // Parallel behavior can be complex.
         List<Integer> resultParallel = Stream.of(1, 2, 3, 4, 0, 5).parallel(2).dropWhile(it -> it < 3).toList();
-        assertTrue(resultParallel.containsAll(Arrays.asList(3, 4, 0, 5)) || resultParallel.containsAll(Arrays.asList(4, 0, 5))); // Order and exact drop point may vary in parallel
+        assertTrue(resultParallel.containsAll(Arrays.asList(3, 4, 0, 5)) || resultParallel.containsAll(Arrays.asList(4, 0, 5)));
     }
 
     @Test
@@ -178,7 +176,6 @@ public class Stream200Test extends TestBase {
     @Test
     public void testSlidingMapBiFunction() {
         List<String> result = Stream.of(1, 2, 3, 4).slidingMap((a, b) -> (a == null ? "null" : a) + "-" + (b == null ? "null" : b)).toList();
-        // Default increment is 1, and non-paired are included with null
         assertEquals(Arrays.asList("1-2", "2-3", "3-4"), result);
 
         result = Stream.of(1).slidingMap((a, b) -> (a == null ? "null" : a) + "-" + (b == null ? "null" : b)).toList();
@@ -197,10 +194,10 @@ public class Stream200Test extends TestBase {
     @Test
     public void testSlidingMapBiFunctionWithIncrementAndIgnore() {
         List<String> result = Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> (a == null ? "null" : a) + "-" + (b == null ? "null" : b)).toList();
-        assertEquals(Arrays.asList("1-2", "3-4"), result); // 5 is ignored
+        assertEquals(Arrays.asList("1-2", "3-4"), result);
 
         result = Stream.of(1, 2, 3, 4).slidingMap(2, false, (a, b) -> (a == null ? "null" : a) + "-" + (b == null ? "null" : b)).toList();
-        assertEquals(Arrays.asList("1-2", "3-4"), result); // No unpaired at the end with even length
+        assertEquals(Arrays.asList("1-2", "3-4"), result);
     }
 
     @Test
@@ -208,7 +205,6 @@ public class Stream200Test extends TestBase {
         List<String> result = Stream.of(1, 2, 3, 4, 5)
                 .slidingMap((a, b, c) -> (a == null ? "N" : a) + "-" + (b == null ? "N" : b) + "-" + (c == null ? "N" : c))
                 .toList();
-        // Default increment is 1
         assertEquals(Arrays.asList("1-2-3", "2-3-4", "3-4-5"), result);
     }
 
@@ -328,7 +324,7 @@ public class Stream200Test extends TestBase {
     }
 
     @Test
-    public void testFlatmap() { // for Collection
+    public void testFlatmap() {
         List<Integer> result = Stream.of(1, 2).flatmap(x -> Arrays.asList(x, x * 10)).toList();
         assertEquals(Arrays.asList(1, 10, 2, 20), result);
     }
@@ -357,7 +353,6 @@ public class Stream200Test extends TestBase {
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, result);
     }
 
-    // Similar flatMapToPrimitive tests for Byte, Short, Int, Long, Float, Double
     @Test
     public void testFlatMapToInt() {
         int[] result = Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4)).flatMapToInt(list -> IntStream.of(list)).toArray();
@@ -385,7 +380,7 @@ public class Stream200Test extends TestBase {
         Map<String, Integer> map2 = N.asMap("c", 3);
         List<Map.Entry<String, Integer>> result = Stream.of(map1, map2)
                 .flatmapToEntry(Fn.identity())
-                .sortedByKey(Comparator.naturalOrder()) // Sorting for predictable assertion
+                .sortedByKey(Comparator.naturalOrder())
                 .toList();
         assertEquals(Arrays.asList(N.newEntry("a", 1), N.newEntry("b", 2), N.newEntry("c", 3)), result);
     }
@@ -402,14 +397,13 @@ public class Stream200Test extends TestBase {
         expected.add(N.newEntry("b", "b".hashCode()));
         expected.add(N.newEntry("B", "B".hashCode()));
 
-        // Order might not be guaranteed, so check contents
         assertTrue(result.containsAll(expected) && expected.containsAll(result));
     }
 
     @Test
     public void testFlatmapIfNotNullSingleMapper() {
         List<Integer> result = Stream.of(Arrays.asList(1, 2), null, Arrays.asList(3, 4))
-                .flatmapIfNotNull(c -> c) // c is already a Collection
+                .flatmapIfNotNull(c -> c)
                 .toList();
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }
@@ -418,8 +412,8 @@ public class Stream200Test extends TestBase {
     public void testFlatmapIfNotNullTwoMappers() {
         List<String> data = Arrays.asList("1,2", null, "3,4");
         List<Integer> result = Stream.of(data, null, Arrays.asList("5,6"))
-                .flatmapIfNotNull(list -> list, // First mapper: pass through the non-null list
-                        (String str) -> str == null ? null : Stream.of(str.split(",")).map(Integer::parseInt).toList() // Second mapper
+                .flatmapIfNotNull(list -> list,
+                        (String str) -> str == null ? null : Stream.of(str.split(",")).map(Integer::parseInt).toList()
                 )
                 .toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
@@ -446,7 +440,6 @@ public class Stream200Test extends TestBase {
         }).toArray();
         assertArrayEquals(new int[] { 1, 2, 20, 3, 30 }, result);
     }
-    // Similar tests for mapMultiToLong, mapMultiToDouble
 
     @Test
     public void testMapPartial() {
@@ -471,7 +464,6 @@ public class Stream200Test extends TestBase {
         }).toArray();
         assertArrayEquals(new int[] { 1, 3 }, result);
     }
-    // Similar tests for mapPartialToLong, mapPartialToDouble, and Jdk versions
 
     @Test
     public void testGroupBySimple() {
@@ -479,7 +471,7 @@ public class Stream200Test extends TestBase {
 
         Map<Integer, List<String>> resultMap = resultStream.toMap(Map.Entry::getKey, Map.Entry::getValue);
 
-        assertEquals(Set.of(5, 6, 7, 9), resultMap.keySet()); // blueberry is 9
+        assertEquals(Set.of(5, 6, 7, 9), resultMap.keySet());
         assertTrue(resultMap.get(5).containsAll(Arrays.asList("apple")));
         assertTrue(resultMap.get(6).containsAll(Arrays.asList("banana", "cherry")));
         assertTrue(resultMap.get(7).containsAll(Arrays.asList("apricot")));
@@ -499,20 +491,20 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testGroupByWithCollector() {
-        Stream<Map.Entry<Integer, Long>> resultStream = Stream.of("a", "bb", "ccc", "dd", "e").groupBy(String::length, Collectors.counting()); // Standard Java Collectors.counting() returns Long
+        Stream<Map.Entry<Integer, Long>> resultStream = Stream.of("a", "bb", "ccc", "dd", "e").groupBy(String::length, Collectors.counting());
         Map<Integer, Long> resultMap = resultStream.toMap(Map.Entry::getKey, Map.Entry::getValue);
 
-        assertEquals(2L, resultMap.get(1)); // a, e
-        assertEquals(2L, resultMap.get(2)); // bb, dd
-        assertEquals(1L, resultMap.get(3)); // ccc
+        assertEquals(2L, resultMap.get(1));
+        assertEquals(2L, resultMap.get(2));
+        assertEquals(1L, resultMap.get(3));
     }
 
     @Test
     public void testGroupByWithKeyMapperValueMapperAndMergeFunction() {
         Map<Character, String> result = Stream.of("apple", "apricot", "banana", "blueberry", "avocado")
-                .groupBy(s -> s.charAt(0), // keyMapper
-                        s -> s.substring(0, Math.min(s.length(), 3)), // valueMapper (first 3 chars)
-                        (v1, v2) -> v1 + ";" + v2) // mergeFunction
+                .groupBy(s -> s.charAt(0),
+                        s -> s.substring(0, Math.min(s.length(), 3)),
+                        (v1, v2) -> v1 + ";" + v2)
                 .toMap(Map.Entry::getKey, Map.Entry::getValue);
 
         assertEquals("app;apr;avo", result.get('a'));
@@ -531,16 +523,15 @@ public class Stream200Test extends TestBase {
     @Test
     public void testGroupByToEntryWithKeyMapperValueMapperCollectorAndMapFactory() {
         Map<Character, String> result = Stream.of("apple", "apricot", "banana", "blueberry", "avocado")
-                .groupByToEntry(s -> s.charAt(0), // keyMapper
-                        s -> String.valueOf(s.length()), // valueMapper (to Integer)
-                        Collectors.joining(",", "[", "]"), // downstream Collector (String)
-                        TreeMap::new // mapFactory
+                .groupByToEntry(s -> s.charAt(0),
+                        s -> String.valueOf(s.length()),
+                        Collectors.joining(",", "[", "]"),
+                        TreeMap::new
                 )
                 .toMap();
 
-        // assertTrue(result instanceof TreeMap);
-        assertEquals("[5,7,7]", result.get('a')); // lengths of "apple", "apricot", "avocado"
-        assertEquals("[6,9]", result.get('b')); // lengths of "banana", "blueberry"
+        assertEquals("[5,7,7]", result.get('a'));
+        assertEquals("[6,9]", result.get('b'));
     }
 
     @Test
@@ -554,11 +545,11 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testPartitionByWithCollector() {
-        Stream<Map.Entry<Boolean, Long>> resultStream = Stream.of(1, 2, 3, 4, 5, 6).partitionBy(x -> x % 2 == 0, Collectors.counting()); // Standard Java Collectors.counting() returns Long
+        Stream<Map.Entry<Boolean, Long>> resultStream = Stream.of(1, 2, 3, 4, 5, 6).partitionBy(x -> x % 2 == 0, Collectors.counting());
         Map<Boolean, Long> resultMap = resultStream.toMap(Map.Entry::getKey, Map.Entry::getValue);
 
-        assertEquals(3L, resultMap.get(true)); // 2, 4, 6
-        assertEquals(3L, resultMap.get(false)); // 1, 3, 5
+        assertEquals(3L, resultMap.get(true));
+        assertEquals(3L, resultMap.get(false));
     }
 
     @Test
@@ -573,9 +564,9 @@ public class Stream200Test extends TestBase {
     @Test
     public void testCountBy() {
         Map<Integer, Integer> counts = Stream.of("apple", "banana", "apricot", "apple").countBy(String::length).toMap(Map.Entry::getKey, Map.Entry::getValue);
-        assertEquals(2, counts.get(5)); // apple, apple
-        assertEquals(1, counts.get(6)); // banana
-        assertEquals(1, counts.get(7)); // apricot
+        assertEquals(2, counts.get(5));
+        assertEquals(1, counts.get(6));
+        assertEquals(1, counts.get(7));
     }
 
     @Test
@@ -600,37 +591,25 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testCollapseBiPredicateAndMerger() {
-        List<Integer> result = Stream.of(1, 1, 2, 3, 3, 1, 2) // Modified from original for clarity
+        List<Integer> result = Stream.of(1, 1, 2, 3, 3, 1, 2)
                 .collapse((p, c) -> p.equals(c), (r, c) -> r + c)
                 .toList();
-        assertEquals(Arrays.asList(2, 2, 6, 1, 2), result); // (1+1), 2, (3+3), 1, 2
+        assertEquals(Arrays.asList(2, 2, 6, 1, 2), result);
     }
 
     @Test
     public void testCollapseWithCollector() {
         List<Long> result = Stream.of(1, 2, 2, 3, 3, 3, 4)
-                .collapse((prev, curr) -> prev.equals(curr), Collectors.counting()) // Standard Java Collectors.counting() returns Long
+                .collapse((prev, curr) -> prev.equals(curr), Collectors.counting())
                 .toList();
         assertEquals(Arrays.asList(1L, 2L, 3L, 1L), result);
     }
 
     @Test
     public void testCollapseTriPredicate() {
-        // Example: collapse if current number is within +/- 1 of the first number in the current series,
-        // and also within +/-1 of the previous number.
-        // Series: [10, 11, 12], [5, 4], [20]
         List<List<Integer>> result = Stream.of(10, 11, 12, 9, 5, 4, 6, 20)
                 .collapse((first, prev, curr) -> Math.abs(curr - first) <= 2 && Math.abs(curr - prev) <= 1)
                 .toList();
-
-        // 10 -> start [10]
-        // 11 -> abs(11-10)<=2 (T), abs(11-10)<=1 (T) -> [10, 11]
-        // 12 -> abs(12-10)<=2 (T), abs(12-11)<=1 (T) -> [10, 11, 12]
-        // 9  -> abs(9-10)<=2 (T),  abs(9-12)<=1 (F)  -> New group [9]
-        // 5  -> abs(5-9)<=2 (F)                   -> New group [5]
-        // 4  -> abs(4-5)<=2 (T),  abs(4-5)<=1 (T)  -> [5,4]
-        // 6  -> abs(6-5)<=2 (T),  abs(6-4)<=1 (F)  -> New group [6]
-        // 20 -> abs(20-6)<=2 (F)                  -> New group [20]
 
         assertEquals(Arrays.asList(Arrays.asList(10, 11, 12), Collections.singletonList(9), Arrays.asList(5, 4), Collections.singletonList(6),
                 Collections.singletonList(20)), result);
@@ -647,7 +626,7 @@ public class Stream200Test extends TestBase {
     @Test
     public void testScanWithInitialValue() {
         List<Integer> result = Stream.of(1, 2, 3).scan(10, (a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(11, 13, 16), result); // 10+1, 11+2, 13+3
+        assertEquals(Arrays.asList(11, 13, 16), result);
         assertTrue(Stream.<Integer> empty().scan(10, (a, b) -> a + b).toList().isEmpty());
     }
 
@@ -660,7 +639,7 @@ public class Stream200Test extends TestBase {
         assertEquals(Arrays.asList(11, 13, 16), result);
 
         result = Stream.<Integer> empty().scan(10, true, (a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(10), result); // Initial value included if stream empty and initIncluded=true
+        assertEquals(Arrays.asList(10), result);
 
         result = Stream.<Integer> empty().scan(10, false, (a, b) -> a + b).toList();
         assertTrue(result.isEmpty());
@@ -683,18 +662,18 @@ public class Stream200Test extends TestBase {
     @Test
     public void testSplitByChunkSizeAndCollector() {
         List<Long> result = Stream.of(1, 2, 3, 4, 5)
-                .split(2, Collectors.summingInt(x -> x)) // Standard Java Collectors.summingInt
+                .split(2, Collectors.summingInt(x -> x))
                 .map(Integer::longValue)
                 .toList();
-        assertEquals(Arrays.asList(3L, 7L, 5L), result); // (1+2), (3+4), 5
+        assertEquals(Arrays.asList(3L, 7L, 5L), result);
     }
 
     @Test
     public void testSplitByPredicate() {
         List<List<Integer>> result = Stream.of(1, 2, 0, 3, 4, 0, 5)
-                .split(x -> x == 0) // Splits *before* element satisfying predicate
+                .split(x -> x == 0)
                 .toList();
-        assertEquals(Arrays.asList(Arrays.asList(1, 2), Collections.singletonList(0), // Element matching predicate starts a new group
+        assertEquals(Arrays.asList(Arrays.asList(1, 2), Collections.singletonList(0),
                 Arrays.asList(3, 4), Collections.singletonList(0), Collections.singletonList(5)), result);
 
         result = Stream.of(0, 1, 2, 0, 3, 4, 0).split(x -> x == 0).toList();
@@ -709,12 +688,12 @@ public class Stream200Test extends TestBase {
         assertEquals(Arrays.asList(1, 2), resultStreams.get(0).toList());
         assertEquals(Arrays.asList(3, 4, 5), resultStreams.get(1).toList());
 
-        resultStreams = Stream.of(1, 2).splitAt(2).toList(); // Split at end
+        resultStreams = Stream.of(1, 2).splitAt(2).toList();
         assertEquals(2, resultStreams.size());
         assertEquals(Arrays.asList(1, 2), resultStreams.get(0).toList());
         assertTrue(resultStreams.get(1).toList().isEmpty());
 
-        resultStreams = Stream.of(1, 2).splitAt(0).toList(); // Split at start
+        resultStreams = Stream.of(1, 2).splitAt(0).toList();
         assertEquals(2, resultStreams.size());
         assertTrue(resultStreams.get(0).toList().isEmpty());
         assertEquals(Arrays.asList(1, 2), resultStreams.get(1).toList());
@@ -723,10 +702,10 @@ public class Stream200Test extends TestBase {
     @Test
     public void testSplitAtPositionWithCollector() {
         List<Long> result = Stream.of(1, 2, 3, 4, 5)
-                .splitAt(2, Collectors.summingInt(ToIntFunction.UNBOX)) // sums first part
+                .splitAt(2, Collectors.summingInt(ToIntFunction.UNBOX))
                 .map(Integer::longValue)
                 .toList();
-        assertEquals(N.asList(3L, 12L), result); // Sum of [1,2] is 3. Second part is discarded.
+        assertEquals(N.asList(3L, 12L), result);
     }
 
     @Test
@@ -734,14 +713,14 @@ public class Stream200Test extends TestBase {
         List<Stream<Integer>> resultStreams = Stream.of(1, 2, 99, 4, 5).splitAt(x -> x == 99).toList();
         assertEquals(2, resultStreams.size());
         assertEquals(Arrays.asList(1, 2), resultStreams.get(0).toList());
-        assertEquals(Arrays.asList(99, 4, 5), resultStreams.get(1).toList()); // 99 is first of second stream
+        assertEquals(Arrays.asList(99, 4, 5), resultStreams.get(1).toList());
 
         resultStreams = Stream.of(99, 1, 2).splitAt(x -> x == 99).toList();
         assertEquals(2, resultStreams.size());
         assertTrue(resultStreams.get(0).toList().isEmpty());
         assertEquals(Arrays.asList(99, 1, 2), resultStreams.get(1).toList());
 
-        resultStreams = Stream.of(1, 2, 3).splitAt(x -> x == 99).toList(); // Predicate never met
+        resultStreams = Stream.of(1, 2, 3).splitAt(x -> x == 99).toList();
         assertEquals(2, resultStreams.size());
         assertEquals(Arrays.asList(1, 2, 3), resultStreams.get(0).toList());
         assertTrue(resultStreams.get(1).toList().isEmpty());
@@ -779,7 +758,7 @@ public class Stream200Test extends TestBase {
             assertEquals(0, Stream.of(1, 2).sliding(2).skip(1).count());
             assertEquals(1, Stream.of(1, 2, 3).sliding(2).skip(1).count());
 
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5)).sliding(3).skip(2).count()); // [1,2,3], [2,3,4], [3,4,5] - skip first two);
+            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5)).sliding(3).skip(2).count());
 
             assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 2).skip(1).count());
             assertEquals(0, Stream.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 2).skip(2).count());
@@ -797,7 +776,7 @@ public class Stream200Test extends TestBase {
             assertEquals(0, Stream.of(N.asList(1, 2).iterator()).sliding(2).skip(1).count());
             assertEquals(1, Stream.of(N.asList(1, 2, 3).iterator()).sliding(2).skip(1).count());
 
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3).skip(2).count()); // [1,2,3], [2,3,4], [3,4,5] - skip first two);
+            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3).skip(2).count());
 
             assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 2).skip(1).count());
             assertEquals(0, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 2).skip(2).count());
@@ -815,7 +794,7 @@ public class Stream200Test extends TestBase {
             assertEquals(0, Stream.of(N.asList(1, 2).iterator()).sliding(2, Collectors.toList()).skip(1).count());
             assertEquals(1, Stream.of(N.asList(1, 2, 3).iterator()).sliding(2, Collectors.toList()).skip(1).count());
 
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, Collectors.toList()).skip(2).count()); // [1,2,3], [2,3,4], [3,4,5] - skip first two);
+            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, Collectors.toList()).skip(2).count());
 
             assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 2, Collectors.toList()).skip(1).count());
             assertEquals(0, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 2, Collectors.toList()).skip(2).count());
@@ -833,7 +812,7 @@ public class Stream200Test extends TestBase {
             assertEquals(0, Seq.of(1, 2).sliding(2).skip(1).count());
             assertEquals(1, Seq.of(1, 2, 3).sliding(2).skip(1).count());
 
-            assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3).skip(2).count()); // [1,2,3], [2,3,4], [3,4,5] - skip first two);
+            assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3).skip(2).count());
 
             assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 2).skip(1).count());
             assertEquals(0, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 2).skip(2).count());
@@ -851,7 +830,7 @@ public class Stream200Test extends TestBase {
             assertEquals(0, Seq.of(1, 2).sliding(2, Collectors.toList()).skip(1).count());
             assertEquals(1, Seq.of(1, 2, 3).sliding(2, Collectors.toList()).skip(1).count());
 
-            assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, Collectors.toList()).skip(2).count()); // [1,2,3], [2,3,4], [3,4,5] - skip first two);
+            assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, Collectors.toList()).skip(2).count());
 
             assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 2, Collectors.toList()).skip(1).count());
             assertEquals(0, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 2, Collectors.toList()).skip(2).count());
@@ -868,7 +847,7 @@ public class Stream200Test extends TestBase {
     @Test
     public void testSlidingWindowSizeAndIncrement() {
         List<List<Integer>> result = Stream.of(1, 2, 3, 4, 5, 6).sliding(3, 2).toList();
-        assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(3, 4, 5), Arrays.asList(5, 6)), result); // Next would be [5,6,?] - too short
+        assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(3, 4, 5), Arrays.asList(5, 6)), result);
     }
 
     @Test
@@ -880,11 +859,10 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testDistinctWithMerge() {
-        // Key collision, merge by summing
         List<Pair<String, Integer>> data = Arrays.asList(Pair.of("a", 1), Pair.of("b", 2), Pair.of("a", 3));
         List<Pair<String, Integer>> result = Stream.of(data)
                 .distinctBy(Pair::left, (p1, p2) -> Pair.of(p1.left(), p1.right() + p2.right()))
-                .sorted(Comparator.comparing(Pair::left)) // For stable assertion order
+                .sorted(Comparator.comparing(Pair::left))
                 .toList();
 
         assertEquals(Arrays.asList(Pair.of("a", 4), Pair.of("b", 2)), result);
@@ -893,9 +871,8 @@ public class Stream200Test extends TestBase {
     @Test
     public void testDistinctByFunction() {
         List<String> result = Stream.of("apple", "apricot", "banana", "blueberry", "Apple")
-                .distinctBy(s -> s.toLowerCase().charAt(0)) // Distinct by first char, case-insensitive
+                .distinctBy(s -> s.toLowerCase().charAt(0))
                 .toList();
-        // Expect one 'a' word (apple or apricot or Apple), one 'b' word. Order depends on original.
         assertEquals(2, result.size());
         assertTrue(result.stream().anyMatch(s -> s.toLowerCase().startsWith("a")));
         assertTrue(result.stream().anyMatch(s -> s.toLowerCase().startsWith("b")));
@@ -911,13 +888,12 @@ public class Stream200Test extends TestBase {
     public void testSortedBy() {
         List<String> words = Arrays.asList("banana", "apple", "cherry");
         assertEquals(Arrays.asList("apple", "banana", "cherry"), Stream.of(words).sortedBy(Fn.identity()).toList());
-        assertEquals(Arrays.asList("apple", "banana", "cherry"), Stream.of(words).sortedBy(String::length).toList()); // apple, cherry (5), banana (6)
+        assertEquals(Arrays.asList("apple", "banana", "cherry"), Stream.of(words).sortedBy(String::length).toList());
     }
-    // Similar for sortedByInt, Long, Double and reverse versions
 
     @Test
     public void testTopN() {
-        assertEquals(Arrays.asList(4, 5), Stream.of(1, 5, 2, 4, 3).top(2).toList()); // Natural order, so largest
+        assertEquals(Arrays.asList(4, 5), Stream.of(1, 5, 2, 4, 3).top(2).toList());
         assertEquals(Arrays.asList(4, 5), Stream.of(1, 5, 2, 4, 3).top(2, Comparator.naturalOrder()).toList());
         assertEquals(Arrays.asList(2, 1), Stream.of(1, 5, 2, 4, 3).top(2, Comparator.reverseOrder()).toList());
         assertEquals(Arrays.asList(1, 2, 3), Stream.of(1, 2, 3).top(5).toList());
@@ -925,8 +901,8 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testSkipRange() {
-        assertEquals(Arrays.asList(1, 5), Stream.of(1, 2, 3, 4, 5).skipRange(1, 4).toList()); // Skips index 1,2,3 (elements 2,3,4)
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).skipRange(5, 5).toList()); // Empty range
+        assertEquals(Arrays.asList(1, 5), Stream.of(1, 2, 3, 4, 5).skipRange(1, 4).toList());
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).skipRange(5, 5).toList());
         assertEquals(Collections.emptyList(), Stream.of(1, 2, 3, 4, 5).skipRange(0, 5).toList());
     }
 
@@ -981,7 +957,6 @@ public class Stream200Test extends TestBase {
     @Test
     public void testPeekIfWithBiPredicate() {
         List<Integer> peeked = new ArrayList<>();
-        // Peek if element is even AND index (1-based) is > 1
         Stream.of(1, 2, 3, 4, 5, 6).peekIf((val, idx) -> val % 2 == 0 && idx > 1, peeked::add).toList();
         assertEquals(Arrays.asList(2, 4, 6), peeked);
     }
@@ -1046,13 +1021,12 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        // At least 2, at most 3 even numbers
-        assertTrue(Stream.of(1, 2, 3, 4, 5, 6).nMatch(2, 3, x -> x % 2 == 0)); // 2,4,6 are even (3 matches)
-        assertFalse(Stream.of(1, 2, 3, 4, 5).nMatch(3, 3, x -> x % 2 == 0)); // 2,4 are even (2 matches) -> should be false
+        assertTrue(Stream.of(1, 2, 3, 4, 5, 6).nMatch(2, 3, x -> x % 2 == 0));
+        assertFalse(Stream.of(1, 2, 3, 4, 5).nMatch(3, 3, x -> x % 2 == 0));
         assertTrue(Stream.of(1, 2, 3, 4, 5).nMatch(2, 2, x -> x % 2 == 0));
 
-        assertFalse(Stream.of(1, 2, 3).nMatch(2, 3, x -> x % 2 == 0)); // only 1 even
-        assertFalse(Stream.of(2, 4, 6, 8).nMatch(2, 3, x -> x % 2 == 0)); // 4 even numbers, limit is 3 for atMost, count of 3 is <= atMost.
+        assertFalse(Stream.of(1, 2, 3).nMatch(2, 3, x -> x % 2 == 0));
+        assertFalse(Stream.of(2, 4, 6, 8).nMatch(2, 3, x -> x % 2 == 0));
     }
 
     @Test
@@ -1063,9 +1037,7 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testFindAnyPredicate() {
-        // For sequential streams, findAny typically returns the first.
         assertEquals(Optional.of(2), Stream.of(1, 2, 3, 4).findAny(x -> x % 2 == 0));
-        // For parallel, it could be any element that matches.
         Optional<Integer> result = Stream.of(1, 2, 3, 4).parallel().findAny(x -> x % 2 == 0);
         assertTrue(result.isPresent() && result.get() % 2 == 0);
     }
@@ -1081,7 +1053,7 @@ public class Stream200Test extends TestBase {
     public void testContainsAllArray() {
         assertTrue(Stream.of(1, 2, 3, 4).containsAll(2, 4));
         assertFalse(Stream.of(1, 2, 3).containsAll(2, 5));
-        assertTrue(Stream.of(1, 2, 3).containsAll()); // Empty array
+        assertTrue(Stream.of(1, 2, 3).containsAll());
     }
 
     @Test
@@ -1137,10 +1109,9 @@ public class Stream200Test extends TestBase {
     public void testToMapWithMerge() {
         Map<Integer, String> map = Stream.of("a", "b", "cc", "d").toMap(String::length, Fn.identity(), (s1, s2) -> s1 + ";" + s2);
 
-        // Order of merge for HashMap is not guaranteed, check content
-        Map<Integer, String> expected = N.asMap(1, "a;b;d", 2, "cc"); // Or "b;a;d" etc.
+        Map<Integer, String> expected = N.asMap(1, "a;b;d", 2, "cc");
         assertEquals(expected.get(2), map.get(2));
-        assertEquals(3, map.get(1).chars().filter(ch -> ch == ';').count() + 1); // 3 items merged
+        assertEquals(3, map.get(1).chars().filter(ch -> ch == ';').count() + 1);
         assertTrue(map.get(1).contains("a") && map.get(1).contains("b") && map.get(1).contains("d"));
     }
 
@@ -1171,16 +1142,15 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testGroupToWithDownstreamCollectorAndMapFactory() {
-        TreeMap<Integer, Long> map = Stream.of("a", "bb", "c", "ddd", "ee").groupTo(String::length, Collectors.counting(), TreeMap::new); // Standard Java Collectors.counting()
+        TreeMap<Integer, Long> map = Stream.of("a", "bb", "c", "ddd", "ee").groupTo(String::length, Collectors.counting(), TreeMap::new);
         assertTrue(map instanceof TreeMap);
-        assertEquals(2L, map.get(1)); // "a", "c"
-        assertEquals(2L, map.get(2)); // "bb", "ee"
-        assertEquals(1L, map.get(3)); // "ddd"
+        assertEquals(2L, map.get(1));
+        assertEquals(2L, map.get(2));
+        assertEquals(1L, map.get(3));
     }
 
     @Test
     public void testFlatGroupToKeyExtractor() {
-        // Each string maps to a collection of its characters (as keys)
         Map<Character, List<String>> map = Stream.of("ant", "bat", "cat").flatGroupTo(s -> Stream.of(s.toCharArray()).map(c -> (Character) c).toList());
         assertEquals(Arrays.asList("ant", "bat", "cat"), map.get('a'));
         assertEquals(Arrays.asList("ant", "bat", "cat"), map.get('t'));
@@ -1191,14 +1161,13 @@ public class Stream200Test extends TestBase {
     @Test
     public void testFlatGroupToWithDownstreamCollector() {
         Map<Character, Long> map = Stream.of("apple", "apricot", "banana")
-                .flatGroupTo(s -> Stream.of(s.toCharArray()).map(c -> (Character) c).toList(), // flatKeyExtractor
+                .flatGroupTo(s -> Stream.of(s.toCharArray()).map(c -> (Character) c).toList(),
                         Collectors.counting());
 
-        assertEquals(Long.valueOf(5), map.get('a')); // from apple, apricot, banana
-        assertEquals(Long.valueOf(3), map.get('p')); // from apple (2)
+        assertEquals(Long.valueOf(5), map.get('a'));
+        assertEquals(Long.valueOf(3), map.get('p'));
         assertEquals(Long.valueOf(1), map.get('l'));
         assertEquals(Long.valueOf(1), map.get('e'));
-        // ... and so on for other characters
     }
 
     @Test
@@ -1212,12 +1181,11 @@ public class Stream200Test extends TestBase {
     public void testToMultimapKeyAndValueMapperAndFactory() {
         ListMultimap<Character, Integer> multimap = Stream.of("apple", "apricot").toMultimap(s -> s.charAt(0), String::length, Suppliers.ofListMultimap());
 
-        assertEquals(Arrays.asList(5, 7), multimap.get('a')); // lengths of apple, apricot
+        assertEquals(Arrays.asList(5, 7), multimap.get('a'));
     }
 
     @Test
     public void testToDatasetSimple() {
-        // Requires T to be Map or Bean. Let's use Maps.
         Map<String, Object> row1 = N.asMap("id", 1, "name", "Alice");
         Map<String, Object> row2 = N.asMap("id", 2, "name", "Bob");
         Dataset dataset = Stream.of(row1, row2).toDataset();
@@ -1229,7 +1197,6 @@ public class Stream200Test extends TestBase {
     @Test
     public void testToDatasetWithColumnNames() {
         List<String> columnNames = Arrays.asList("val1", "val2");
-        // Assuming T can be converted to a list matching columnNames order
         List<Object> row1Data = Arrays.asList(10, "X");
         List<Object> row2Data = Arrays.asList(20, "Y");
 
@@ -1254,28 +1221,15 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testFoldRight() {
-        // For (x,y) -> x - y. List [1,2,3]
-        // Abacus foldRight should be (a op (b op c)) style where op is (prev_result, current_from_right)
-        // which means, the elements are processed effectively right-to-left.
-        // (1, (2, 3)) -> (1, (2-3)) -> (1, -1) -> 1 - (-1) = 2.
         Optional<Integer> resultInt = Stream.of(1, 2, 3).foldRight((acc, curr) -> acc - curr);
         assertEquals(Optional.of(0), resultInt);
 
-        // (a, (b, c)) for (x,y) -> x + "/" + y
-        // (a, (b + "/" + c)) -> a + "/" + (b + "/" + c) -> "a/b/c"
-        // This is how StreamEx defines it. Abacus might collect, reverse, then foldLeft.
-        // If reversed and foldLeft: (c,b,a) -> ((c/b)/a)
-        // Let's check Abacus actual behavior if it buffers and reverses for foldRight.
-        // If it does, for ("a","b","c") with (x,y) -> x + "-" + y:
-        // reversed: ["c", "b", "a"]. foldLeft: "c", then "c-b", then "c-b-a".
         Optional<String> resultStr = Stream.of("a", "b", "c").foldRight((s1, s2) -> s1 + "-" + s2);
-        assertEquals(Optional.of("c-b-a"), resultStr); // This indicates collect, reverse, foldLeft
+        assertEquals(Optional.of("c-b-a"), resultStr);
     }
 
     @Test
     public void testFoldRightWithIdentity() {
-        // Identity "x", elements ["a","b","c"], op (s1,s2) -> s1+s2
-        // reversed: ["c","b","a"]. foldLeft with "x": x-> (x+c) -> (xc+b) -> (xcb+a) = "xcba"
         String result = Stream.of("a", "b", "c").foldRight("x", (s1, s2) -> s1 + s2);
         assertEquals("xcba", result);
         assertEquals("x", Stream.<String> empty().foldRight("x", (s1, s2) -> s1 + s2));
@@ -1289,7 +1243,7 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testReduceIdentityBinaryOperator() {
-        assertEquals(10, (int) Stream.of(1, 2, 3).reduce(4, (a, b) -> a + b)); // 4+1+2+3
+        assertEquals(10, (int) Stream.of(1, 2, 3).reduce(4, (a, b) -> a + b));
         assertEquals(4, (int) Stream.<Integer> empty().reduce(4, (a, b) -> a + b));
     }
 
@@ -1298,27 +1252,22 @@ public class Stream200Test extends TestBase {
         int result = Stream.of("1", "2", "3").reduce(0, (sum, str) -> sum + Integer.parseInt(str), (s1, s2) -> s1 + s2);
         assertEquals(6, result);
 
-        // Test with parallel stream
         result = Stream.of("1", "2", "3", "4", "5", "6").parallel().reduce(0, (sum, str) -> sum + Integer.parseInt(str), Integer::sum);
         assertEquals(21, result);
     }
 
     @Test
     public void testReduceUntilAccumulatorAndCondition() {
-        // Reduce sum until sum > 5
         Optional<Integer> result = Stream.of(1, 2, 3, 4, 5).reduceUntil((a, b) -> a + b, sum -> sum > 5);
-        assertEquals(Optional.of(6), result); // 1+2+3 = 6. 6 > 5 is true, loop breaks.
+        assertEquals(Optional.of(6), result);
 
         Optional<Integer> result2 = Stream.of(1, 2, 3).reduceUntil((a, b) -> a + b, sum -> sum > 10);
-        assertEquals(Optional.of(6), result2); // 1+2+3=6. 6>10 is false. Stream ends.
+        assertEquals(Optional.of(6), result2);
     }
 
     @Test
     public void testReduceUntilAccumulatorAndBiCondition() {
-        // Reduce sum until current accumulated value (acc) + the next element (next) > 5
         Optional<Integer> result = Stream.of(1, 2, 3, 4, 5).reduceUntil((acc, next) -> acc + next, (acc, next) -> (acc + next) > 5);
-        // 1. acc=1, next=2 -> 1+2=3. (3 > 5) is false. current_sum = 3
-        // 2. acc=3, next=3 -> 3+3=6. (6 > 5) is true. loop breaks. result is 6.
         assertEquals(Optional.of(6), result);
     }
 
@@ -1377,7 +1326,7 @@ public class Stream200Test extends TestBase {
     @Test
     public void testMinAll() {
         assertEquals(Arrays.asList(1, 1), Stream.of(5, 1, 3, 1).minAll(Comparator.naturalOrder()));
-        assertEquals(Arrays.asList(1, 1), Stream.of(5, 1, 3, 1).sorted().minAll(Comparator.naturalOrder())); // ensure sorted to get consistent multiple min
+        assertEquals(Arrays.asList(1, 1), Stream.of(5, 1, 3, 1).sorted().minAll(Comparator.naturalOrder()));
     }
 
     @Test
@@ -1406,13 +1355,12 @@ public class Stream200Test extends TestBase {
         assertEquals(OptionalDouble.of(2.0), Stream.of(1, 2, 3).averageDouble(Integer::doubleValue));
         assertEquals(OptionalDouble.empty(), Stream.<Integer> empty().averageDouble(Integer::doubleValue));
     }
-    // ... similar for sumLong, sumDouble, averageInt, averageLong ...
 
     @Test
     public void testKthLargest() {
-        assertEquals(Optional.of(4), Stream.of(1, 5, 2, 4, 3).kthLargest(2, Comparator.naturalOrder())); // 2nd largest is 4
-        assertEquals(Optional.of(5), Stream.of(1, 5, 2, 4, 3).kthLargest(1, Comparator.naturalOrder())); // 1st largest is 5
-        assertEquals(Optional.of(1), Stream.of(1, 5, 2, 4, 3).kthLargest(5, Comparator.naturalOrder())); // 5th largest is 1
+        assertEquals(Optional.of(4), Stream.of(1, 5, 2, 4, 3).kthLargest(2, Comparator.naturalOrder()));
+        assertEquals(Optional.of(5), Stream.of(1, 5, 2, 4, 3).kthLargest(1, Comparator.naturalOrder()));
+        assertEquals(Optional.of(1), Stream.of(1, 5, 2, 4, 3).kthLargest(5, Comparator.naturalOrder()));
         assertEquals(Optional.empty(), Stream.of(1, 2).kthLargest(3, Comparator.naturalOrder()));
     }
 
@@ -1426,7 +1374,6 @@ public class Stream200Test extends TestBase {
     @Test
     public void testCombinationsNoLength() {
         List<List<Integer>> combs = Stream.of(1, 2).combinations().toList();
-        // Expected: [], [1], [2], [1,2]
         assertEquals(4, combs.size());
         assertTrue(combs.contains(Collections.emptyList()));
         assertTrue(combs.contains(Arrays.asList(1)));
@@ -1437,7 +1384,6 @@ public class Stream200Test extends TestBase {
     @Test
     public void testCombinationsWithLength() {
         List<List<Integer>> combs = Stream.of(1, 2, 3).combinations(2).toList();
-        // Expected: [1,2], [1,3], [2,3]
         assertEquals(3, combs.size());
         assertTrue(combs.contains(Arrays.asList(1, 2)));
         assertTrue(combs.contains(Arrays.asList(1, 3)));
@@ -1460,7 +1406,6 @@ public class Stream200Test extends TestBase {
     @Test
     public void testPermutations() {
         List<List<Integer>> perms = Stream.of(1, 2).permutations().toList();
-        // Expected: [1,2], [2,1]
         assertEquals(2, perms.size());
         assertTrue(perms.contains(Arrays.asList(1, 2)));
         assertTrue(perms.contains(Arrays.asList(2, 1)));
@@ -1499,13 +1444,13 @@ public class Stream200Test extends TestBase {
     @Test
     public void testIntersection() {
         List<String> result = Stream.of("a", "b", "a", "c", "d").intersection(Fn.identity(), Arrays.asList("a", "c", "a", "e")).toList();
-        assertEquals(Arrays.asList("a", "a", "c"), result); // Order from original stream
+        assertEquals(Arrays.asList("a", "a", "c"), result);
     }
 
     @Test
     public void testDifference() {
         List<String> result = Stream.of("a", "b", "a", "c", "d")
-                .difference(Fn.identity(), Arrays.asList("a", "c", "e")) // remove one 'a', one 'c'
+                .difference(Fn.identity(), Arrays.asList("a", "c", "e"))
                 .toList();
         assertEquals(Arrays.asList("b", "a", "d"), result);
     }
@@ -1535,14 +1480,13 @@ public class Stream200Test extends TestBase {
     @Test
     public void testBuffered() throws InterruptedException {
         List<Integer> source = Arrays.asList(1, 2, 3, 4, 5);
-        Stream<Integer> bufferedStream = Stream.of(source).buffered(2); // Small buffer
+        Stream<Integer> bufferedStream = Stream.of(source).buffered(2);
         List<Integer> result = new ArrayList<>();
 
-        // Simulate slow consumption
         bufferedStream.forEach(e -> {
             result.add(e);
             try {
-                Thread.sleep(10); // Ensure producer might get ahead
+                Thread.sleep(10);
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
@@ -1550,61 +1494,11 @@ public class Stream200Test extends TestBase {
         assertEquals(source, result);
     }
 
-    //    @Test
-    //    public void testBufferedWithQueue() throws InterruptedException {
-    //        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(5);
-    //        List<Integer> source = Arrays.asList(1, 2, 3, 4, 5, 6, 7);
-    //        AtomicBoolean producerFinished = new AtomicBoolean(false);
-    //
-    //        Thread producerThread = new Thread(() -> {
-    //            try {
-    //                for (Integer item : source) {
-    //                    queue.put(item); // This will block if queue is full
-    //                }
-    //            } catch (InterruptedException e) {
-    //                Thread.currentThread().interrupt();
-    //            } finally {
-    //                producerFinished.set(true);
-    //            }
-    //        });
-    //        producerThread.start();
-    //
-    //        // Give producer a head start to fill the initial queue capacity.
-    //        // This is not strictly necessary for the buffered(queue) method itself,
-    //        // but for testing that it draws from the provided queue.
-    //        while (queue.isEmpty() && producerThread.isAlive()) {
-    //            Thread.sleep(1);
-    //        }
-    //
-    //        assertThrows(IllegalArgumentException.class, () -> Stream.of(queue.iterator()) // Create a base stream from the queue's current state
-    //                .buffered(queue)); // Then apply buffering with the *same* queue
-    //
-    //        List<Integer> consumed = new ArrayList<>();
-    //        // Consume slightly slower to see buffering in action
-    //        Stream.of(queue.iterator()).buffered().forEach(e -> {
-    //            consumed.add(e);
-    //            try {
-    //                Thread.sleep(5);
-    //            } catch (InterruptedException ex) {
-    //                /* ignore */ }
-    //        });
-    //
-    //        producerThread.join(); // Ensure producer is done.
-    //        assertTrue(producerFinished.get());
-    //
-    //        // Elements in 'consumed' should be from 'source' via the queue.
-    //        // The exact number might depend on timing if the stream terminates early
-    //        // or if the test logic for queue filling/draining isn't perfectly synced.
-    //        // Here, we expect all items if the stream consumes until the queue is empty
-    //        // and the producer has finished.
-    //        assertEquals(source, consumed);
-    //    }
-
+    //                 }
     @Test
     public void testMergeWithCollection() {
         Stream<Integer> s1 = Stream.of(1, 3, 5, 7);
         Collection<Integer> c2 = Arrays.asList(2, 4, 6);
-        // Merge favoring smaller numbers
         List<Integer> merged = s1.mergeWith(c2, (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7), merged);
     }
@@ -1621,7 +1515,7 @@ public class Stream200Test extends TestBase {
     public void testZipWithCollection() {
         Collection<String> coll = Arrays.asList("a", "b", "c");
         List<Pair<Integer, String>> result = Stream.of(1, 2, 3, 4).zipWith(coll, Pair::of).toList();
-        assertEquals(Arrays.asList(Pair.of(1, "a"), Pair.of(2, "b"), Pair.of(3, "c")), result); // Length of shorter
+        assertEquals(Arrays.asList(Pair.of(1, "a"), Pair.of(2, "b"), Pair.of(3, "c")), result);
     }
 
     @Test
@@ -1650,7 +1544,6 @@ public class Stream200Test extends TestBase {
         assertEquals(Arrays.asList("val1", "val2", "val3"), transformed.toList());
     }
 
-    // Static factory methods tests
     @Test
     public void testStreamEmpty() {
         assertTrue(Stream.empty().toList().isEmpty());
@@ -1664,7 +1557,7 @@ public class Stream200Test extends TestBase {
             return Stream.of(1, 2);
         };
         Stream<Integer> deferredStream = Stream.defer(supplier);
-        assertEquals(0, counter.get()); // Supplier not called yet
+        assertEquals(0, counter.get());
         assertEquals(Arrays.asList(1, 2), deferredStream.toList());
         assertEquals(1, counter.get());
     }
@@ -1707,7 +1600,6 @@ public class Stream200Test extends TestBase {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
         assertEquals(Arrays.asList(2, 3, 4), Stream.of(list.iterator()).skip(1).limit(3).toList());
         assertEquals(Collections.emptyList(), Stream.of(list.iterator()).skip(1).limit(0).toList());
-        // assertThrows(IllegalArgumentException.class, () -> Stream.of(list.iterator(), 4, 1).toList());
     }
 
     @Test
@@ -1737,7 +1629,7 @@ public class Stream200Test extends TestBase {
     public void testStreamOfOptional() {
         assertEquals(Collections.singletonList(1), Stream.of(Optional.of(1)).toList());
         assertTrue(Stream.of(Optional.empty()).toList().isEmpty());
-        assertTrue(Stream.of((Optional<Integer>) null).toList().isEmpty()); // ofNullable handles null Optional
+        assertTrue(Stream.of((Optional<Integer>) null).toList().isEmpty());
     }
 
     @Test
@@ -1756,7 +1648,7 @@ public class Stream200Test extends TestBase {
     @Test
     public void testStreamOfValues() {
         Map<String, Integer> map = N.asMap("a", 1, "b", 2);
-        List<Integer> values = Stream.ofValues(map).sorted().toList(); // Sort for predictable test
+        List<Integer> values = Stream.ofValues(map).sorted().toList();
         assertEquals(Arrays.asList(1, 2), values);
     }
 
@@ -1801,8 +1693,6 @@ public class Stream200Test extends TestBase {
     @Test
     public void testStreamFlatten2DArrayVertically() {
         Integer[][] arrayOfArrays = { { 1, 2, 3 }, { 4, 5 }, { 6, 7, 8, 9 } };
-        // Expected: 1,4,6, 2,5,7, 3,null,8, null,null,9 (if padded with null)
-        // Abacus flatten vertically does not pad with nulls, it iterates existing elements.
         List<Integer> expected = Arrays.asList(1, 4, 6, 2, 5, 7, 3, 8, 9);
         assertEquals(expected, Stream.flatten(arrayOfArrays, true).toList());
 
@@ -1815,11 +1705,9 @@ public class Stream200Test extends TestBase {
     public void testStreamFlatten2DArrayWithValueForAlignment() {
         Integer[][] arrayOfArrays = { { 1, 2 }, { 3 }, { 4, 5, 6 } };
         Integer fill = 0;
-        // Horizontal (normal flatten, alignment not really used this way)
         List<Integer> horizontal = Stream.flatten(arrayOfArrays, fill, false).toList();
-        assertEquals(Arrays.asList(1, 2, 0, 3, 0, 0, 4, 5, 6), horizontal); // Max length is 3.
+        assertEquals(Arrays.asList(1, 2, 0, 3, 0, 0, 4, 5, 6), horizontal);
 
-        // Vertical
         List<Integer> vertical = Stream.flatten(arrayOfArrays, fill, true).toList();
         assertEquals(Arrays.asList(1, 3, 4, 2, 0, 5, 0, 0, 6), vertical);
     }
@@ -1909,7 +1797,6 @@ public class Stream200Test extends TestBase {
         Stream<Integer> s2 = Stream.of(3, 4);
         Stream<Integer> s3 = Stream.of(5, 6);
 
-        // Collect to a Set because order is not guaranteed with parallelConcat
         Set<Integer> result = Stream.parallelConcat(s1, s2, s3).toSet();
         assertEquals(Set.of(1, 2, 3, 4, 5, 6), result);
     }
@@ -1920,13 +1807,11 @@ public class Stream200Test extends TestBase {
         Iterator<Integer> iter2 = Arrays.asList(4, 5, 6).iterator();
         Collection<Iterator<? extends Integer>> iterators = Arrays.asList(iter1, iter2);
 
-        // Test with specific readThreadNum and bufferSize
-        Stream<Integer> stream = Stream.parallelConcatIterators(iterators, 1, 10); // 1 read thread, buffer 10
+        Stream<Integer> stream = Stream.parallelConcatIterators(iterators, 1, 10);
         Set<Integer> result = stream.toSet();
         assertEquals(Set.of(1, 2, 3, 4, 5, 6), result);
     }
 
-    // Representative Zip Test
     @Test
     public void testZipArrays() {
         String[] a = { "a", "b" };
@@ -1947,26 +1832,19 @@ public class Stream200Test extends TestBase {
     public void testParallelZipIteratorsWithParams() {
         Iterator<Integer> iterA = Arrays.asList(1, 2, 3, 4).iterator();
         Iterator<String> iterB = Arrays.asList("a", "b", "c").iterator();
-        // List<String> defaultValues = Arrays.asList("defaultB"); // Incorrect, should match T for iterators
 
-        // This static method is parallelZipIterators(Collection, Function, int)
-        // or parallelZipIterators(Collection, List, Function, int)
-
-        List<Pair<Integer, String>> result = Stream.parallelZipIterators(Arrays.asList(iterA, iterB), // This means it will zip (1 with "a"), (2 with "b"), (3 with "c") element-wise from the *zipped stream*
-                // The parallelZipIterators that takes a list of iterators and a single zipFunction is for zipping *corresponding elements* across multiple iterators
-                //  into a List<T> which is then passed to the zipFunction.
+        List<Pair<Integer, String>> result = Stream.parallelZipIterators(Arrays.asList(iterA, iterB),
                 (List<Object> list) -> Pair.of((Integer) list.get(0), (String) list.get(1)), 2).toList();
 
         assertTrue(N.isEqualCollection(Arrays.asList(Pair.of(1, "a"), Pair.of(2, "b"), Pair.of(3, "c")), result));
 
         Iterator<Integer> iterA2 = Arrays.asList(1, 2, 3, 4).iterator();
         Iterator<String> iterB2 = Arrays.asList("a", "b", "c").iterator();
-        List<Pair<Integer, String>> resultWithDefaults = Stream.parallelZipIterators(Arrays.asList(iterA2, iterB2), Arrays.asList(0, "defaultVal"), // valuesForNone
+        List<Pair<Integer, String>> resultWithDefaults = Stream.parallelZipIterators(Arrays.asList(iterA2, iterB2), Arrays.asList(0, "defaultVal"),
                 (List<Object> list) -> Pair.of((Integer) list.get(0), (String) list.get(1)), 2).toList();
         assertTrue(N.isEqualCollection(Arrays.asList(Pair.of(1, "a"), Pair.of(2, "b"), Pair.of(3, "c"), Pair.of(4, "defaultVal")), resultWithDefaults));
     }
 
-    // Representative Merge Test
     @Test
     public void testMergeIterables() {
         List<Integer> list1 = Arrays.asList(1, 4, 6);
@@ -2009,14 +1887,13 @@ public class Stream200Test extends TestBase {
 
         List<Stream<Integer>> streams = Arrays.asList(s1, s2, s3, s4);
 
-        List<Integer> result = Stream.parallelMerge(streams, (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 2) // Using 2 threads for merging pairs
+        List<Integer> result = Stream.parallelMerge(streams, (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 2)
                 .toList();
 
         List<Integer> expected = IntStream.rangeClosed(1, 12).boxed().toList();
         assertEquals(expected, result);
     }
 
-    // Test for a static zip variant to ensure those are covered conceptually
     @Test
     public void testStaticZipIntArrays() {
         int[] a = { 1, 2, 3 };
@@ -2039,7 +1916,6 @@ public class Stream200Test extends TestBase {
         List<Integer> producedItems = Collections.synchronizedList(new ArrayList<>());
         Duration observationDuration = Duration.ofMillis(200);
 
-        // Producer thread
         Thread producer = new Thread(() -> {
             try {
                 for (int i = 0; i < 5; i++) {
@@ -2056,8 +1932,6 @@ public class Stream200Test extends TestBase {
         Stream.observe(queue, observationDuration).forEach(producedItems::add);
 
         producer.join();
-        // Depending on exact timings, between 4 to 5 items might be consumed.
-        // (5 items * 30ms = 150ms, which is < 200ms duration)
         assertEquals(5, producedItems.size());
         assertEquals(Arrays.asList(0, 1, 2, 3, 4), producedItems);
     }
@@ -2067,9 +1941,8 @@ public class Stream200Test extends TestBase {
         BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
         List<Integer> consumedItems = Collections.synchronizedList(new ArrayList<>());
         MutableBoolean hasMore = MutableBoolean.of(true);
-        long maxWaitInterval = 50; // ms
+        long maxWaitInterval = 50;
 
-        // Producer thread
         Thread producer = new Thread(() -> {
             try {
                 for (int i = 0; i < 5; i++) {
@@ -2108,16 +1981,12 @@ public class Stream200Test extends TestBase {
     @Test
     public void testSplitByChunkCountStatic() {
         List<int[]> result = Stream.splitByChunkCount(7, 3, (from, to) -> Arrays.copyOfRange(new int[] { 0, 1, 2, 3, 4, 5, 6 }, from, to)).toList();
-        // 7 items, 3 chunks. Sizes: 3, 2, 2 (bigger first)
-        // Chunks: [0,1,2], [3,4], [5,6]
         assertArrayEquals(new int[] { 0, 1, 2 }, result.get(0));
         assertArrayEquals(new int[] { 3, 4 }, result.get(1));
         assertArrayEquals(new int[] { 5, 6 }, result.get(2));
 
         List<int[]> resultSmallerFirst = Stream.splitByChunkCount(7, 3, true, (from, to) -> Arrays.copyOfRange(new int[] { 0, 1, 2, 3, 4, 5, 6 }, from, to))
                 .toList();
-        // Sizes: 2, 2, 3
-        // Chunks: [0,1], [2,3], [4,5,6]
         assertArrayEquals(new int[] { 0, 1 }, resultSmallerFirst.get(0));
         assertArrayEquals(new int[] { 2, 3 }, resultSmallerFirst.get(1));
         assertArrayEquals(new int[] { 4, 5, 6 }, resultSmallerFirst.get(2));
@@ -2143,7 +2012,7 @@ public class Stream200Test extends TestBase {
                 closed.set(true);
             }
         };
-        Stream.ofLines(reader, true).toList(); // Consume the stream
+        Stream.ofLines(reader, true).toList();
         assertTrue(closed.get(), "Reader should be closed when stream is closed");
 
         closed.set(false);
@@ -2156,7 +2025,7 @@ public class Stream200Test extends TestBase {
         };
         Stream.ofLines(readerNoClose, false).toList();
         assertFalse(closed.get(), "Reader should not be closed when autoClose is false");
-        readerNoClose.close(); // Manually close for test hygiene
+        readerNoClose.close();
     }
 
 }

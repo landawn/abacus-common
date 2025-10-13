@@ -68,7 +68,7 @@ public final class Comparators {
     @SuppressWarnings("rawtypes")
     static final Comparator NATURAL_ORDER = NULL_FIRST_COMPARATOR;
 
-    // It's reversed order of NATURAL_ORDER and null last
+    // Reversed comparison order (b.compareTo(a)) with nulls treated as greater (nulls last)
     @SuppressWarnings("rawtypes")
     static final Comparator REVERSED_ORDER = NULL_LAST_REVERSED_ORDER;
 
@@ -101,7 +101,7 @@ public final class Comparators {
             }
         }
 
-        return NATURAL_ORDER.compare(lenA, lenB);
+        return Integer.compare(lenA, lenB);
     };
 
     /**
@@ -121,7 +121,7 @@ public final class Comparators {
             }
         }
 
-        return NATURAL_ORDER.compare(lenA, lenB);
+        return Integer.compare(lenA, lenB);
     };
 
     /**
@@ -141,7 +141,7 @@ public final class Comparators {
             }
         }
 
-        return NATURAL_ORDER.compare(lenA, lenB);
+        return Integer.compare(lenA, lenB);
     };
 
     /**
@@ -161,7 +161,7 @@ public final class Comparators {
             }
         }
 
-        return NATURAL_ORDER.compare(lenA, lenB);
+        return Integer.compare(lenA, lenB);
     };
 
     /**
@@ -181,7 +181,7 @@ public final class Comparators {
             }
         }
 
-        return NATURAL_ORDER.compare(lenA, lenB);
+        return Integer.compare(lenA, lenB);
     };
 
     /**
@@ -201,7 +201,7 @@ public final class Comparators {
             }
         }
 
-        return NATURAL_ORDER.compare(lenA, lenB);
+        return Integer.compare(lenA, lenB);
     };
 
     /**
@@ -224,7 +224,7 @@ public final class Comparators {
             }
         }
 
-        return NATURAL_ORDER.compare(lenA, lenB);
+        return Integer.compare(lenA, lenB);
     };
 
     /**
@@ -247,7 +247,7 @@ public final class Comparators {
             }
         }
 
-        return NATURAL_ORDER.compare(lenA, lenB);
+        return Integer.compare(lenA, lenB);
     };
 
     /**
@@ -270,7 +270,7 @@ public final class Comparators {
             }
         }
 
-        return NATURAL_ORDER.compare(lenA, lenB);
+        return Integer.compare(lenA, lenB);
     };
 
     /**
@@ -303,7 +303,7 @@ public final class Comparators {
             }
         }
 
-        return NATURAL_ORDER.compare(lenA, lenB);
+        return Integer.compare(lenA, lenB);
     };
 
     private Comparators() {
@@ -1278,15 +1278,6 @@ public final class Comparators {
         return (Comparator<T>) COMPARING_BY_MAP_SIZE;
     }
 
-    //  /**
-    //     *
-    //     *
-    //     * @return
-    //     */
-    //    public static Comparator<Object[]> comparingObjArray() {
-    //        return comparingObjArray(naturalOrder());
-    //    }
-
     /**
      * Returns a comparator that compares {@code Object[]} arrays using the specified comparator
      * for element-wise comparison. The arrays are compared lexicographically, with shorter
@@ -1836,24 +1827,26 @@ public final class Comparators {
 
     /**
      * Returns a comparator that imposes the reverse of the natural ordering on a collection
-     * of {@link Comparable} objects. This is equivalent to {@code Collections.reverseOrder()}.
+     * of {@link Comparable} objects. Unlike {@code Collections.reverseOrder()}, this comparator
+     * handles null values by treating them as greater than non-null values (nulls last).
      *
-     * <p>The returned comparator is serializable and throws {@link NullPointerException}
-     * when comparing null values.</p>
+     * <p>The returned comparator does NOT throw {@link NullPointerException} when comparing
+     * null values. Instead, null is considered greater than any non-null value, and when both
+     * values are null, they are considered equal.</p>
      *
      * <p>Example usage:</p>
      * <pre>{@code
-     * List<Integer> numbers = Arrays.asList(3, 1, 4, 1, 5, 9);
+     * List<Integer> numbers = Arrays.asList(3, 1, null, 4, 1, 5, 9);
      * numbers.sort(Comparators.reverseOrder());
-     * // Result: [9, 5, 4, 3, 1, 1]
-     * 
-     * List<String> words = Arrays.asList("apple", "zebra", "banana");
+     * // Result: [9, 5, 4, 3, 1, 1, null]
+     *
+     * List<String> words = Arrays.asList("apple", null, "zebra", "banana");
      * words.sort(Comparators.reverseOrder());
-     * // Result: ["zebra", "banana", "apple"]
+     * // Result: ["zebra", "banana", "apple", null]
      * }</pre>
      *
      * @param <T> the type of Comparable objects to compare
-     * @return a comparator that imposes the reverse natural ordering
+     * @return a comparator that imposes the reverse natural ordering with nulls last
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Comparator<T> reverseOrder() {

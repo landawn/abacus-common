@@ -33,6 +33,11 @@ public class UUIDType extends AbstractType<UUID> {
      * {@link java.util.UUID} class that this UUIDType handles.
      * </p>
      *
+     * <pre>{@code
+     * UUIDType uuidType = new UUIDType();
+     * Class<UUID> clazz = uuidType.clazz(); // Returns UUID.class
+     * }</pre>
+     *
      * @return the Class object for UUID.class
      */
     @Override
@@ -47,6 +52,11 @@ public class UUIDType extends AbstractType<UUID> {
      * "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" where 'x' is a hexadecimal digit.
      * If the input UUID is null, this method returns null.
      * </p>
+     *
+     * <pre>{@code
+     * UUID uuid = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+     * String str = uuidType.stringOf(uuid); // Returns "550e8400-e29b-41d4-a716-446655440000"
+     * }</pre>
      *
      * @param x the UUID instance to convert to string
      * @return the string representation of the UUID, or null if the input is null
@@ -63,6 +73,11 @@ public class UUIDType extends AbstractType<UUID> {
      * The string must be in the standard UUID format "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
      * where 'x' is a hexadecimal digit. If the string is null or empty, this method returns null.
      * </p>
+     *
+     * <pre>{@code
+     * UUID uuid = uuidType.valueOf("550e8400-e29b-41d4-a716-446655440000");
+     * // uuid represents the parsed UUID object
+     * }</pre>
      *
      * @param str the string to convert to a UUID
      * @return a UUID instance created from the string, or null if the string is empty

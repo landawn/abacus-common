@@ -84,14 +84,14 @@ public final class HttpSettings {
      * Creates a new HttpSettings instance with default values.
      * This is a convenience factory method equivalent to calling the constructor.
      *
-     * @return A new HttpSettings instance
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * HttpSettings settings = HttpSettings.create()
      *     .setConnectionTimeout(5000)
      *     .header("Accept", "application/json");
      * }</pre>
+     *
+     * @return A new HttpSettings instance
      */
     public static HttpSettings create() {
         return new HttpSettings();
@@ -114,13 +114,13 @@ public final class HttpSettings {
      * 
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *
-     * @param connectionTimeout The connection timeout in milliseconds
-     * @return This HttpSettings instance for method chaining
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * settings.setConnectionTimeout(5000); // 5 seconds
      * }</pre>
+     *
+     * @param connectionTimeout The connection timeout in milliseconds
+     * @return This HttpSettings instance for method chaining
      */
     public HttpSettings setConnectionTimeout(final long connectionTimeout) {
         this.connectionTimeout = connectionTimeout;
@@ -145,13 +145,13 @@ public final class HttpSettings {
      * 
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *
-     * @param readTimeout The read timeout in milliseconds
-     * @return This HttpSettings instance for method chaining
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * settings.setReadTimeout(10000); // 10 seconds
      * }</pre>
+     *
+     * @param readTimeout The read timeout in milliseconds
+     * @return This HttpSettings instance for method chaining
      */
     public HttpSettings setReadTimeout(final long readTimeout) {
         this.readTimeout = readTimeout;
@@ -172,15 +172,15 @@ public final class HttpSettings {
      * Sets the SSL socket factory for HTTPS connections.
      * This allows customization of SSL/TLS behavior, such as certificate validation.
      *
-     * @param sslSocketFactory The SSL socket factory to use
-     * @return This HttpSettings instance for method chaining
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * SSLContext sslContext = SSLContext.getInstance("TLS");
      * // Configure SSL context...
      * settings.setSSLSocketFactory(sslContext.getSocketFactory());
      * }</pre>
+     *
+     * @param sslSocketFactory The SSL socket factory to use
+     * @return This HttpSettings instance for method chaining
      */
     public HttpSettings setSSLSocketFactory(final SSLSocketFactory sslSocketFactory) {
         this.sslSocketFactory = sslSocketFactory;
@@ -201,15 +201,15 @@ public final class HttpSettings {
      * Sets the proxy for HTTP connections.
      * This allows requests to be routed through a proxy server.
      *
-     * @param proxy The proxy to use
-     * @return This HttpSettings instance for method chaining
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * Proxy proxy = new Proxy(Proxy.Type.HTTP, 
      *     new InetSocketAddress("proxy.example.com", 8080));
      * settings.setProxy(proxy);
      * }</pre>
+     *
+     * @param proxy The proxy to use
+     * @return This HttpSettings instance for method chaining
      */
     public HttpSettings setProxy(final Proxy proxy) {
         this.proxy = proxy;
@@ -337,15 +337,15 @@ public final class HttpSettings {
      * Sets the content format for request/response serialization.
      * This determines how request bodies are serialized and response bodies are deserialized.
      *
-     * @param contentFormat The content format to use
-     * @return This HttpSettings instance for method chaining
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * settings.setContentFormat(ContentFormat.JSON);
      * settings.setContentFormat(ContentFormat.XML);
      * settings.setContentFormat(ContentFormat.FormUrlEncoded);
      * }</pre>
+     *
+     * @param contentFormat The content format to use
+     * @return This HttpSettings instance for method chaining
      */
     public HttpSettings setContentFormat(final ContentFormat contentFormat) {
         this.contentFormat = contentFormat;
@@ -413,13 +413,13 @@ public final class HttpSettings {
      *   <li>text/html</li>
      * </ul>
      *
-     * @param contentType The Content-Type header value
-     * @return This HttpSettings instance for method chaining
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * settings.setContentType("application/json; charset=UTF-8");
      * }</pre>
+     *
+     * @param contentType The Content-Type header value
+     * @return This HttpSettings instance for method chaining
      */
     public HttpSettings setContentType(final String contentType) {
         header(HttpHeaders.Names.CONTENT_TYPE, contentType);
@@ -459,13 +459,13 @@ public final class HttpSettings {
      *   <li>snappy</li>
      * </ul>
      *
-     * @param contentEncoding The Content-Encoding header value
-     * @return This HttpSettings instance for method chaining
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * settings.setContentEncoding("gzip");
      * }</pre>
+     *
+     * @param contentEncoding The Content-Encoding header value
+     * @return This HttpSettings instance for method chaining
      */
     public HttpSettings setContentEncoding(final String contentEncoding) {
         header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
@@ -477,15 +477,15 @@ public final class HttpSettings {
      * Sets HTTP Basic Authentication header using the specified username and password.
      * This method automatically encodes the credentials and sets the Authorization header.
      *
-     * @param user The username for authentication
-     * @param password The password for authentication
-     * @return This HttpSettings instance for method chaining
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * settings.basicAuth("username", "password");
      * // This sets the header: "Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ="
      * }</pre>
+     *
+     * @param user The username for authentication
+     * @param password The password for authentication
+     * @return This HttpSettings instance for method chaining
      */
     @SuppressWarnings("UnusedReturnValue")
     public HttpSettings basicAuth(final String user, final Object password) {
@@ -496,17 +496,17 @@ public final class HttpSettings {
      * Sets an HTTP header with the specified name and value.
      * If this settings object already has any headers with that name, they are all replaced.
      *
-     * @param name The header name
-     * @param value The header value
-     * @return This HttpSettings instance for method chaining
-     * @see HttpHeaders
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * settings.header("Authorization", "Bearer token123")
      *         .header("Accept", "application/json")
      *         .header("User-Agent", "MyApp/1.0");
      * }</pre>
+     *
+     * @param name The header name
+     * @param value The header value
+     * @return This HttpSettings instance for method chaining
+     * @see HttpHeaders
      */
     public HttpSettings header(final String name, final Object value) {
         headers().set(name, value);
@@ -557,10 +557,6 @@ public final class HttpSettings {
      * Sets HTTP headers from the specified map.
      * If this settings object already has any headers with the same names, they are all replaced.
      *
-     * @param headers A map containing header names and values
-     * @return This HttpSettings instance for method chaining
-     * @see HttpHeaders
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * Map<String, String> headers = Map.of(
@@ -570,6 +566,10 @@ public final class HttpSettings {
      * );
      * settings.headers(headers);
      * }</pre>
+     *
+     * @param headers A map containing header names and values
+     * @return This HttpSettings instance for method chaining
+     * @see HttpHeaders
      */
     public HttpSettings headers(final Map<String, ?> headers) {
         headers().setAll(headers);
@@ -598,14 +598,14 @@ public final class HttpSettings {
      * Gets the HTTP headers configured in this settings object.
      * If no headers have been set yet, this method creates an empty HttpHeaders object.
      *
-     * @return The HttpHeaders object (never null)
-     * @see HttpHeaders
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * HttpHeaders headers = settings.headers();
      * headers.set("X-Custom-Header", "value");
      * }</pre>
+     *
+     * @return The HttpHeaders object (never null)
+     * @see HttpHeaders
      */
     public HttpHeaders headers() {
         if (headers == null) {
@@ -619,8 +619,6 @@ public final class HttpSettings {
      * Creates a copy of this HttpSettings object.
      * The copy includes all settings including headers, timeouts, SSL configuration, etc.
      *
-     * @return A new HttpSettings instance with the same configuration
-     * 
      * <p>Example:</p>
      * <pre>{@code
      * HttpSettings original = HttpSettings.create()
@@ -630,6 +628,8 @@ public final class HttpSettings {
      * HttpSettings copy = original.copy();
      * // copy has the same settings as original
      * }</pre>
+     *
+     * @return A new HttpSettings instance with the same configuration
      */
     public HttpSettings copy() {
         final HttpSettings copy = new HttpSettings().setConnectionTimeout(connectionTimeout)

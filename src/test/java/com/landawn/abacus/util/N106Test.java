@@ -25,13 +25,13 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.TriFunction;
 
+@Tag("new-test")
 public class N106Test extends TestBase {
-
-    // ==================== Complex merge scenarios ====================
 
     @Test
     public void testComplexMergeWithMultipleIterables() {
@@ -61,14 +61,11 @@ public class N106Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
     }
 
-    // ==================== Complex groupBy scenarios ====================
-
     @Test
     public void testGroupByWithComplexCollector() {
         List<Person> people = Arrays.asList(new Person("Alice", 25, "Engineering"), new Person("Bob", 30, "Engineering"), new Person("Charlie", 35, "Sales"),
                 new Person("David", 25, "Sales"), new Person("Eve", 30, "Engineering"));
 
-        // Group by department and calculate average age
         Map<String, Double> avgAgeByDept = N.groupBy(people, Person::getDepartment, Collectors.averagingInt(Person::getAge));
 
         assertEquals(28.33, avgAgeByDept.get("Engineering"), 0.01);
@@ -80,10 +77,8 @@ public class N106Test extends TestBase {
         List<Person> people = Arrays.asList(new Person("Alice", 25, "Engineering"), new Person("Bob", 30, "Engineering"), new Person("Charlie", 25, "Sales"),
                 new Person("David", 30, "Sales"));
 
-        // First group by department
         Map<String, List<Person>> byDept = N.groupBy(people, Person::getDepartment);
 
-        // Then group each department by age
         Map<String, Map<Integer, List<Person>>> result = new HashMap<>();
         for (Map.Entry<String, List<Person>> entry : byDept.entrySet()) {
             result.put(entry.getKey(), N.groupBy(entry.getValue(), Person::getAge));
@@ -93,8 +88,6 @@ public class N106Test extends TestBase {
         assertEquals(1, result.get("Engineering").get(25).size());
         assertEquals("Alice", result.get("Engineering").get(25).get(0).getName());
     }
-
-    // ==================== Complex zip/unzip scenarios ====================
 
     @Test
     public void testZipWithDifferentTypesAndTransformations() {
@@ -122,11 +115,8 @@ public class N106Test extends TestBase {
         assertEquals(Arrays.asList(25, 30, 35), result.right());
     }
 
-    // ==================== Performance and edge case tests ====================
-
     @Test
     public void testFilterPerformanceWithLargeData() {
-        // Create large dataset
         int size = 100000;
         Integer[] data = new Integer[size];
         for (int i = 0; i < size; i++) {
@@ -145,7 +135,6 @@ public class N106Test extends TestBase {
     public void testChainedOperations() {
         String[] data = { "apple", "banana", "apricot", "berry", "cherry", "date" };
 
-        // Filter -> Map -> Distinct
         List<String> filtered = N.filter(data, s -> s.length() > 5);
         List<Character> mapped = N.map(filtered, s -> s.charAt(0));
         List<Character> distinct = N.distinct(mapped);
@@ -160,7 +149,6 @@ public class N106Test extends TestBase {
     public void testComplexPredicateCombinations() {
         Integer[] numbers = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
-        // Multiple conditions
         Predicate<Integer> isEven = i -> i % 2 == 0;
         Predicate<Integer> isGreaterThan5 = i -> i > 5;
         Predicate<Integer> combined = i -> isEven.test(i) && isGreaterThan5.test(i);
@@ -176,11 +164,9 @@ public class N106Test extends TestBase {
         public void testUnicodeAndSpecialCharacters() {
             String[] unicodeStrings = { "café", "naïve", "résumé", "🎉", "😀" };
 
-            // Test filter with unicode
             List<String> filtered = N.filter(unicodeStrings, s -> s.contains("é"));
             assertEquals(2, filtered.size());
 
-            // Test map with unicode
             List<Integer> lengths = N.map(unicodeStrings, String::length);
             assertEquals(Arrays.asList(4, 5, 6, 2, 2), lengths);
         }
@@ -189,10 +175,9 @@ public class N106Test extends TestBase {
         public void testConcurrentModificationScenarios() {
             List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
 
-            // This should work as N.filter creates a new list
             assertThrows(ConcurrentModificationException.class, () -> N.filter(list, i -> {
                 if (i == 3) {
-                    list.add(6); // Modifying during iteration
+                    list.add(6);
                 }
                 return i % 2 == 0;
             }));
@@ -201,34 +186,28 @@ public class N106Test extends TestBase {
 
         @Test
         public void testMemoryEfficientOperations() {
-            // Test that operations don't create unnecessary intermediate collections
             int[] largeArray = new int[1000000];
             for (int i = 0; i < largeArray.length; i++) {
                 largeArray[i] = i;
             }
 
-            // Count should not create intermediate collection
             long startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
             int count = N.count(largeArray, i -> i % 1000 == 0);
             long endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
             assertEquals(1000, count);
-            // Memory increase should be minimal
             assertTrue((endMemory - startMemory) < 1000000, "Memory usage increased significantly");
         }
 
         @Test
         public void testBoundaryValues() {
-            // Test with maximum array sizes
-            int maxSize = 1000; // Using smaller size for test performance
+            int maxSize = 1000;
 
-            // Boolean array with all same values
             boolean[] allTrue = new boolean[maxSize];
             Arrays.fill(allTrue, true);
             assertTrue(N.allTrue(allTrue));
             assertFalse(N.anyFalse(allTrue));
 
-            // Empty ranges
             int[] numbers = { 1, 2, 3, 4, 5 };
             assertArrayEquals(new int[0], N.filter(numbers, 3, 3, i -> true));
             assertEquals(0, N.count(numbers, 5, 5, i -> true));
@@ -236,10 +215,8 @@ public class N106Test extends TestBase {
 
         @Test
         public void testCustomPredicatesAndFunctions() {
-            // Test with custom implementations
             String[] words = { "hello", "world", "java", "programming" };
 
-            // Custom predicate that checks multiple conditions
             Predicate<String> complexPredicate = new Predicate<String>() {
                 @Override
                 public boolean test(String s) {
@@ -250,7 +227,6 @@ public class N106Test extends TestBase {
             List<String> result = N.filter(words, complexPredicate);
             assertEquals(Arrays.asList("hello", "world"), result);
 
-            // Custom function with state
             Function<String, String> statefulMapper = new Function<String, String>() {
                 private int counter = 0;
 
@@ -267,21 +243,17 @@ public class N106Test extends TestBase {
 
         @Test
         public void testNullElementHandling() {
-            // Arrays with null elements
             String[] withNulls = { "a", null, "b", null, "c" };
 
-            // Filter nulls
             List<String> nonNulls = N.filter(withNulls, Objects::nonNull);
             assertEquals(Arrays.asList("a", "b", "c"), nonNulls);
 
-            // Map with null handling
             List<Integer> lengths = N.map(withNulls, s -> s == null ? -1 : s.length());
             assertEquals(Arrays.asList(1, -1, 1, -1, 1), lengths);
 
-            // Distinct with nulls
             String[] duplicatesWithNulls = { "a", null, "a", null, "b" };
             List<String> distinct = N.distinct(duplicatesWithNulls);
-            assertEquals(3, distinct.size()); // "a", null, "b"
+            assertEquals(3, distinct.size());
         }
 
         @Test
@@ -291,15 +263,12 @@ public class N106Test extends TestBase {
                 array[i] = i;
             }
 
-            // Test with full range
             int[] filtered = N.filter(array, 0, 100, i -> i % 10 == 0);
             assertEquals(10, filtered.length);
 
-            // Test with single element range
             filtered = N.filter(array, 50, 51, i -> true);
             assertArrayEquals(new int[] { 50 }, filtered);
 
-            // Test with last element
             filtered = N.filter(array, 99, 100, i -> true);
             assertArrayEquals(new int[] { 99 }, filtered);
         }
@@ -310,17 +279,14 @@ public class N106Test extends TestBase {
 
         @Test
         public void testWithDifferentCollectionTypes() {
-            // LinkedList
             LinkedList<String> linkedList = new LinkedList<>(Arrays.asList("a", "b", "c"));
             List<String> upperLinked = N.map(linkedList, 0, 3, String::toUpperCase);
             assertEquals(Arrays.asList("A", "B", "C"), upperLinked);
 
-            // TreeSet (sorted)
             TreeSet<Integer> treeSet = new TreeSet<>(Arrays.asList(3, 1, 4, 1, 5, 9));
             List<Integer> filtered = N.filter(treeSet, i -> i > 3);
             assertEquals(Arrays.asList(4, 5, 9), filtered);
 
-            // ArrayDeque
             ArrayDeque<String> deque = new ArrayDeque<>(Arrays.asList("first", "second", "third"));
             List<Integer> lengths = N.map(deque, String::length);
             assertEquals(Arrays.asList(5, 6, 5), lengths);
@@ -328,7 +294,6 @@ public class N106Test extends TestBase {
 
         @Test
         public void testWithCustomCollections() {
-            // Custom collection that implements Iterable
             CustomIterable<Integer> custom = new CustomIterable<>(Arrays.asList(1, 2, 3, 4, 5));
 
             List<Integer> filtered = N.filter(custom, i -> i % 2 == 0);
@@ -342,21 +307,18 @@ public class N106Test extends TestBase {
         public void testCollectorIntegration() {
             List<String> words = Arrays.asList("apple", "banana", "apricot", "blueberry", "cherry");
 
-            // Group by first letter and join
             Map<Character, String> joined = N.groupBy(words, s -> s.charAt(0), Collectors.joining(", "));
 
             assertEquals("apple, apricot", joined.get('a'));
             assertEquals("banana, blueberry", joined.get('b'));
             assertEquals("cherry", joined.get('c'));
 
-            // Group by length and count
             Map<Integer, Long> countByLength = N.groupBy(words, String::length, Collectors.counting());
 
             assertEquals(1L, (long) countByLength.get(5));
             assertEquals(2L, (long) countByLength.get(6));
         }
 
-        // Helper custom iterable class
         static class CustomIterable<T> implements Iterable<T> {
             private final List<T> data;
 
@@ -376,17 +338,14 @@ public class N106Test extends TestBase {
 
         @Test
         public void testPrimitiveArrayConversions() {
-            // Test mapToInt from long
             long[] longs = { 1L, 2L, 3L, 4L, 5L };
             int[] ints = N.mapToInt(longs, l -> (int) (l * 2));
             assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, ints);
 
-            // Test mapToLong from int
             int[] intArray = { 1, 2, 3 };
             long[] longArray = N.mapToLong(intArray, i -> i * 1000000L);
             assertArrayEquals(new long[] { 1000000L, 2000000L, 3000000L }, longArray);
 
-            // Test mapToDouble from int
             int[] scores = { 85, 90, 78, 92, 88 };
             double[] percentages = N.mapToDouble(scores, score -> score / 100.0);
             assertArrayEquals(new double[] { 0.85, 0.90, 0.78, 0.92, 0.88 }, percentages, 0.001);
@@ -394,7 +353,6 @@ public class N106Test extends TestBase {
 
         @Test
         public void testPrimitivePredicates() {
-            // Test with various primitive predicates
             char[] chars = { 'a', 'B', 'c', 'D', 'e' };
             char[] uppercase = N.filter(chars, Character::isUpperCase);
             assertArrayEquals(new char[] { 'B', 'D' }, uppercase);
@@ -410,7 +368,6 @@ public class N106Test extends TestBase {
 
         @Test
         public void testPrimitiveDistinct() {
-            // Test distinct with various primitive types
             char[] chars = { 'a', 'b', 'a', 'c', 'b', 'c' };
             char[] distinctChars = N.distinct(chars);
             Arrays.sort(distinctChars);
@@ -420,14 +377,12 @@ public class N106Test extends TestBase {
             double[] distinctDoubles = N.distinct(doubles);
             assertEquals(3, distinctDoubles.length);
 
-            // Test with NaN and infinity
             double[] special = { Double.NaN, 1.0, Double.POSITIVE_INFINITY, Double.NaN, 1.0 };
             double[] distinctSpecial = N.distinct(special);
-            assertEquals(3, distinctSpecial.length); // NaN, 1.0, Infinity
+            assertEquals(3, distinctSpecial.length);
         }
     }
 
-    // Helper class for complex tests
     public static class Person {
         private String name;
         private int age;

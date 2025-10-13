@@ -814,56 +814,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     Collectors() {
     }
 
-    //    static class CollectorImpl<T, A, R> implements Collector<T, A, R> {
-    //        private static final Function<Object, Object> IDENTITY_FINISHER = t -> t;
-    //
-    //        private final Supplier<A> supplier;
-    //        private final BiConsumer<A, T> accumulator;
-    //        private final BinaryOperator<A> combiner;
-    //        private final Function<A, R> finisher;
-    //        private final Set<Characteristics> characteristics;
-    //
-    //        CollectorImpl(final Supplier<? extends A> supplier, final BiConsumer<? super A, ? super T> accumulator, final BinaryOperator<A> combiner,
-    //                final Set<Characteristics> characteristics) {
-    //            this(supplier, accumulator, combiner, (Function<A, R>) IDENTITY_FINISHER, characteristics);
-    //        }
-    //
-    //        @SuppressWarnings("rawtypes")
-    //        CollectorImpl(final Supplier<? extends A> supplier, final BiConsumer<? super A, ? super T> accumulator, final BinaryOperator<A> combiner,
-    //                final Function<? super A, ? extends R> finisher, final Set<Characteristics> characteristics) {
-    //            this.supplier = (Supplier) supplier;
-    //            this.accumulator = (BiConsumer) accumulator;
-    //            this.combiner = combiner;
-    //            this.finisher = (Function) finisher;
-    //            this.characteristics = characteristics == null ? N.emptySet() : characteristics;
-    //        }
-    //
-    //        @Override
-    //        public BiConsumer<A, T> accumulator() {
-    //            return accumulator;
-    //        }
-    //
-    //        @Override
-    //        public Supplier<A> supplier() {
-    //            return supplier;
-    //        }
-    //
-    //        @Override
-    //        public BinaryOperator<A> combiner() {
-    //            return combiner;
-    //        }
-    //
-    //        @Override
-    //        public Function<A, R> finisher() {
-    //            return finisher;
-    //        }
-    //
-    //        @Override
-    //        public Set<Characteristics> characteristics() {
-    //            return characteristics;
-    //        }
-    //    }
-
     /**
      * Creates a new {@code Collector} with the specified supplier, accumulator, and combiner.
      *
@@ -8577,6 +8527,33 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return java.util.stream.Collectors.teeing(downstream1, downstream2, merger);
     }
 
+    /**
+     * Extended collector factory providing advanced collectors for multi-value operations.
+     *
+     * <p>This class extends {@code Collectors} to provide additional collector methods that
+     * operate on multiple values or mappers simultaneously. These collectors are particularly
+     * useful when you need to perform multiple aggregations on the same stream elements in
+     * a single pass, avoiding the need to process the stream multiple times.</p>
+     *
+     * <p>Key features include:</p>
+     * <ul>
+     * <li>Multiple summing operations (e.g., summing 2 or 3 different properties at once)</li>
+     * <li>Multiple averaging operations with tuple results</li>
+     * <li>Combining multiple collectors with custom merging functions</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * // Calculate both sum and average in one pass
+     * Tuple2<Integer, Integer> result = orders.stream()
+     *     .collect(MoreCollectors.summingInt(
+     *         Order::getQuantity,
+     *         Order::getPrice
+     *     ));
+     * }</pre>
+     *
+     * @see Collectors
+     */
     public static final class MoreCollectors extends Collectors {
         MoreCollectors() {
             // for extension.

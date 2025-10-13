@@ -32,7 +32,6 @@ import com.landawn.abacus.annotation.Internal;
  * String csv = "John" + WD.COMMA_SPACE + "Doe" + WD.COMMA_SPACE + "30";
  * }</pre>
  *
- * @author Haiyang Li
  * @since 0.8
  */
 @Beta

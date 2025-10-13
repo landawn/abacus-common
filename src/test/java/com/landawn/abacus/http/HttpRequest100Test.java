@@ -31,12 +31,13 @@ import javax.net.ssl.SSLContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.util.ContinuableFuture;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class HttpRequest100Test extends TestBase {
 
     private MockWebServer server;
@@ -92,35 +93,30 @@ public class HttpRequest100Test extends TestBase {
         HttpRequest request = HttpRequest.url(baseUrl);
         HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
         request.settings(settings);
-        // Settings should be applied
     }
 
     @Test
     public void testBasicAuth() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.basicAuth("user", "password");
-        // Auth header should be set
     }
 
     @Test
     public void testHeader() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.header("X-Custom-Header", "value");
-        // Header should be set
     }
 
     @Test
     public void testHeadersWithTwoParameters() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.headers("Header1", "value1", "Header2", "value2");
-        // Headers should be set
     }
 
     @Test
     public void testHeadersWithThreeParameters() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.headers("Header1", "value1", "Header2", "value2", "Header3", "value3");
-        // Headers should be set
     }
 
     @Test
@@ -130,52 +126,43 @@ public class HttpRequest100Test extends TestBase {
         headers.put("Header1", "value1");
         headers.put("Header2", "value2");
         request.headers(headers);
-        // Headers should be set
     }
 
     @Test
     public void testHeadersWithHttpHeaders() {
         HttpRequest request = HttpRequest.url(baseUrl);
-        HttpHeaders headers = HttpHeaders.create()
-            .set("Header1", "value1")
-            .set("Header2", "value2");
+        HttpHeaders headers = HttpHeaders.create().set("Header1", "value1").set("Header2", "value2");
         request.headers(headers);
-        // Headers should be set
     }
 
     @Test
     public void testConnectionTimeoutMillis() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.connectionTimeout(5000L);
-        // Timeout should be set
     }
 
     @Test
     public void testConnectionTimeoutDuration() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.connectionTimeout(Duration.ofSeconds(5));
-        // Timeout should be set
     }
 
     @Test
     public void testReadTimeoutMillis() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.readTimeout(10000L);
-        // Timeout should be set
     }
 
     @Test
     public void testReadTimeoutDuration() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.readTimeout(Duration.ofSeconds(10));
-        // Timeout should be set
     }
 
     @Test
     public void testUseCaches() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.useCaches(true);
-        // Use caches should be set
     }
 
     @Test
@@ -183,7 +170,6 @@ public class HttpRequest100Test extends TestBase {
         HttpRequest request = HttpRequest.url(baseUrl);
         SSLContext sslContext = SSLContext.getDefault();
         request.sslSocketFactory(sslContext.getSocketFactory());
-        // SSL socket factory should be set
     }
 
     @Test
@@ -191,14 +177,12 @@ public class HttpRequest100Test extends TestBase {
         HttpRequest request = HttpRequest.url(baseUrl);
         Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
         request.proxy(proxy);
-        // Proxy should be set
     }
 
     @Test
     public void testQueryString() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.query("param1=value1&param2=value2");
-        // Query parameters should be set
     }
 
     @Test
@@ -208,14 +192,12 @@ public class HttpRequest100Test extends TestBase {
         params.put("param1", "value1");
         params.put("param2", "value2");
         request.query(params);
-        // Query parameters should be set
     }
 
     @Test
     public void testJsonBodyString() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.jsonBody("{\"name\":\"John\"}");
-        // JSON body and content type should be set
     }
 
     @Test
@@ -224,14 +206,12 @@ public class HttpRequest100Test extends TestBase {
         Map<String, String> obj = new HashMap<>();
         obj.put("name", "John");
         request.jsonBody(obj);
-        // JSON body and content type should be set
     }
 
     @Test
     public void testXmlBodyString() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.xmlBody("<user><name>John</name></user>");
-        // XML body and content type should be set
     }
 
     @Test
@@ -240,7 +220,6 @@ public class HttpRequest100Test extends TestBase {
         Map<String, String> obj = new HashMap<>();
         obj.put("name", "John");
         request.xmlBody(obj);
-        // XML body and content type should be set
     }
 
     @Test
@@ -250,7 +229,6 @@ public class HttpRequest100Test extends TestBase {
         formData.put("field1", "value1");
         formData.put("field2", "value2");
         request.formBody(formData);
-        // Form body and content type should be set
     }
 
     @Test
@@ -260,14 +238,12 @@ public class HttpRequest100Test extends TestBase {
         bean.field1 = "value1";
         bean.field2 = "value2";
         request.formBody(bean);
-        // Form body and content type should be set
     }
 
     @Test
     public void testBody() {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.body("test body");
-        // Body should be set
     }
 
     @Test
@@ -377,12 +353,12 @@ public class HttpRequest100Test extends TestBase {
     public void testExecuteToFile() throws IOException {
         server.enqueue(new MockResponse().setBody("File content"));
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         File tempFile = File.createTempFile("test", ".txt");
         tempFile.deleteOnExit();
-        
+
         request.execute(HttpMethod.GET, tempFile);
-        
+
         String content = new String(Files.readAllBytes(tempFile.toPath()));
         assertEquals("File content", content);
     }
@@ -391,10 +367,10 @@ public class HttpRequest100Test extends TestBase {
     public void testExecuteToOutputStream() throws IOException {
         server.enqueue(new MockResponse().setBody("Stream content"));
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         request.execute(HttpMethod.GET, baos);
-        
+
         assertEquals("Stream content", baos.toString());
     }
 
@@ -402,10 +378,10 @@ public class HttpRequest100Test extends TestBase {
     public void testExecuteToWriter() throws IOException {
         server.enqueue(new MockResponse().setBody("Writer content"));
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         StringWriter writer = new StringWriter();
         request.execute(HttpMethod.GET, writer);
-        
+
         assertEquals("Writer content", writer.toString());
     }
 
@@ -413,7 +389,7 @@ public class HttpRequest100Test extends TestBase {
     public void testAsyncGet() throws Exception {
         server.enqueue(new MockResponse().setBody("Async GET response"));
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         ContinuableFuture<HttpResponse> future = request.asyncGet();
         HttpResponse response = future.get();
         assertNotNull(response);
@@ -425,7 +401,7 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("Async GET response"));
         HttpRequest request = HttpRequest.url(baseUrl);
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         ContinuableFuture<HttpResponse> future = request.asyncGet(executor);
         HttpResponse response = future.get();
         assertNotNull(response);
@@ -436,7 +412,7 @@ public class HttpRequest100Test extends TestBase {
     public void testAsyncGetWithResultClass() throws Exception {
         server.enqueue(new MockResponse().setBody("Async GET response"));
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         ContinuableFuture<String> future = request.asyncGet(String.class);
         String response = future.get();
         assertEquals("Async GET response", response);
@@ -447,7 +423,7 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("Async GET response"));
         HttpRequest request = HttpRequest.url(baseUrl);
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         ContinuableFuture<String> future = request.asyncGet(String.class, executor);
         String response = future.get();
         assertEquals("Async GET response", response);
@@ -458,7 +434,7 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("Async POST response"));
         HttpRequest request = HttpRequest.url(baseUrl);
         request.body("test body");
-        
+
         ContinuableFuture<HttpResponse> future = request.asyncPost();
         HttpResponse response = future.get();
         assertNotNull(response);
@@ -471,7 +447,7 @@ public class HttpRequest100Test extends TestBase {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.body("test body");
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         ContinuableFuture<HttpResponse> future = request.asyncPost(executor);
         HttpResponse response = future.get();
         assertNotNull(response);
@@ -483,7 +459,7 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("Async POST response"));
         HttpRequest request = HttpRequest.url(baseUrl);
         request.body("test body");
-        
+
         ContinuableFuture<String> future = request.asyncPost(String.class);
         String response = future.get();
         assertEquals("Async POST response", response);
@@ -495,7 +471,7 @@ public class HttpRequest100Test extends TestBase {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.body("test body");
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         ContinuableFuture<String> future = request.asyncPost(String.class, executor);
         String response = future.get();
         assertEquals("Async POST response", response);
@@ -506,7 +482,7 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("Async PUT response"));
         HttpRequest request = HttpRequest.url(baseUrl);
         request.body("test body");
-        
+
         ContinuableFuture<HttpResponse> future = request.asyncPut();
         HttpResponse response = future.get();
         assertNotNull(response);
@@ -519,7 +495,7 @@ public class HttpRequest100Test extends TestBase {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.body("test body");
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         ContinuableFuture<HttpResponse> future = request.asyncPut(executor);
         HttpResponse response = future.get();
         assertNotNull(response);
@@ -531,7 +507,7 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("Async PUT response"));
         HttpRequest request = HttpRequest.url(baseUrl);
         request.body("test body");
-        
+
         ContinuableFuture<String> future = request.asyncPut(String.class);
         String response = future.get();
         assertEquals("Async PUT response", response);
@@ -543,7 +519,7 @@ public class HttpRequest100Test extends TestBase {
         HttpRequest request = HttpRequest.url(baseUrl);
         request.body("test body");
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         ContinuableFuture<String> future = request.asyncPut(String.class, executor);
         String response = future.get();
         assertEquals("Async PUT response", response);
@@ -553,7 +529,7 @@ public class HttpRequest100Test extends TestBase {
     public void testAsyncDelete() throws Exception {
         server.enqueue(new MockResponse().setBody("Async DELETE response"));
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         ContinuableFuture<HttpResponse> future = request.asyncDelete();
         HttpResponse response = future.get();
         assertNotNull(response);
@@ -565,7 +541,7 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("Async DELETE response"));
         HttpRequest request = HttpRequest.url(baseUrl);
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         ContinuableFuture<HttpResponse> future = request.asyncDelete(executor);
         HttpResponse response = future.get();
         assertNotNull(response);
@@ -576,7 +552,7 @@ public class HttpRequest100Test extends TestBase {
     public void testAsyncDeleteWithResultClass() throws Exception {
         server.enqueue(new MockResponse().setBody("Async DELETE response"));
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         ContinuableFuture<String> future = request.asyncDelete(String.class);
         String response = future.get();
         assertEquals("Async DELETE response", response);
@@ -587,7 +563,7 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("Async DELETE response"));
         HttpRequest request = HttpRequest.url(baseUrl);
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         ContinuableFuture<String> future = request.asyncDelete(String.class, executor);
         String response = future.get();
         assertEquals("Async DELETE response", response);
@@ -597,7 +573,7 @@ public class HttpRequest100Test extends TestBase {
     public void testAsyncHead() throws Exception {
         server.enqueue(new MockResponse());
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         ContinuableFuture<HttpResponse> future = request.asyncHead();
         HttpResponse response = future.get();
         assertNotNull(response);
@@ -608,7 +584,7 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse());
         HttpRequest request = HttpRequest.url(baseUrl);
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         ContinuableFuture<HttpResponse> future = request.asyncHead(executor);
         HttpResponse response = future.get();
         assertNotNull(response);
@@ -618,7 +594,7 @@ public class HttpRequest100Test extends TestBase {
     public void testAsyncExecute() throws Exception {
         server.enqueue(new MockResponse().setBody("Async Execute response"));
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         ContinuableFuture<HttpResponse> future = request.asyncExecute(HttpMethod.GET);
         HttpResponse response = future.get();
         assertNotNull(response);
@@ -630,7 +606,7 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("Async Execute response"));
         HttpRequest request = HttpRequest.url(baseUrl);
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         ContinuableFuture<HttpResponse> future = request.asyncExecute(HttpMethod.GET, executor);
         HttpResponse response = future.get();
         assertNotNull(response);
@@ -641,7 +617,7 @@ public class HttpRequest100Test extends TestBase {
     public void testAsyncExecuteWithResultClass() throws Exception {
         server.enqueue(new MockResponse().setBody("Async Execute response"));
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         ContinuableFuture<String> future = request.asyncExecute(HttpMethod.GET, String.class);
         String response = future.get();
         assertEquals("Async Execute response", response);
@@ -652,7 +628,7 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("Async Execute response"));
         HttpRequest request = HttpRequest.url(baseUrl);
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         ContinuableFuture<String> future = request.asyncExecute(HttpMethod.GET, String.class, executor);
         String response = future.get();
         assertEquals("Async Execute response", response);
@@ -668,13 +644,13 @@ public class HttpRequest100Test extends TestBase {
     public void testAsyncExecuteToFile() throws Exception {
         server.enqueue(new MockResponse().setBody("File content"));
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         File tempFile = File.createTempFile("test", ".txt");
         tempFile.deleteOnExit();
-        
+
         ContinuableFuture<Void> future = request.asyncExecute(HttpMethod.GET, tempFile);
         future.get();
-        
+
         String content = new String(Files.readAllBytes(tempFile.toPath()));
         assertEquals("File content", content);
     }
@@ -684,13 +660,13 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("File content"));
         HttpRequest request = HttpRequest.url(baseUrl);
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         File tempFile = File.createTempFile("test", ".txt");
         tempFile.deleteOnExit();
-        
+
         ContinuableFuture<Void> future = request.asyncExecute(HttpMethod.GET, tempFile, executor);
         future.get();
-        
+
         String content = new String(Files.readAllBytes(tempFile.toPath()));
         assertEquals("File content", content);
     }
@@ -699,11 +675,11 @@ public class HttpRequest100Test extends TestBase {
     public void testAsyncExecuteToOutputStream() throws Exception {
         server.enqueue(new MockResponse().setBody("Stream content"));
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ContinuableFuture<Void> future = request.asyncExecute(HttpMethod.GET, baos);
         future.get();
-        
+
         assertEquals("Stream content", baos.toString());
     }
 
@@ -712,11 +688,11 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("Stream content"));
         HttpRequest request = HttpRequest.url(baseUrl);
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ContinuableFuture<Void> future = request.asyncExecute(HttpMethod.GET, baos, executor);
         future.get();
-        
+
         assertEquals("Stream content", baos.toString());
     }
 
@@ -724,11 +700,11 @@ public class HttpRequest100Test extends TestBase {
     public void testAsyncExecuteToWriter() throws Exception {
         server.enqueue(new MockResponse().setBody("Writer content"));
         HttpRequest request = HttpRequest.url(baseUrl);
-        
+
         StringWriter writer = new StringWriter();
         ContinuableFuture<Void> future = request.asyncExecute(HttpMethod.GET, writer);
         future.get();
-        
+
         assertEquals("Writer content", writer.toString());
     }
 
@@ -737,11 +713,11 @@ public class HttpRequest100Test extends TestBase {
         server.enqueue(new MockResponse().setBody("Writer content"));
         HttpRequest request = HttpRequest.url(baseUrl);
         Executor executor = Executors.newSingleThreadExecutor();
-        
+
         StringWriter writer = new StringWriter();
         ContinuableFuture<Void> future = request.asyncExecute(HttpMethod.GET, writer, executor);
         future.get();
-        
+
         assertEquals("Writer content", writer.toString());
     }
 
@@ -751,19 +727,27 @@ public class HttpRequest100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> request.execute(() -> "test", null));
     }
 
-    // Helper classes
     public static class TestBean {
         public String field1;
         public String field2;
-        
-        public String getField1() { return field1; }
-        public void setField1(String field1) { this.field1 = field1; }
-        
-        public String getField2() { return field2; }
-        public void setField2(String field2) { this.field2 = field2; }
+
+        public String getField1() {
+            return field1;
+        }
+
+        public void setField1(String field1) {
+            this.field1 = field1;
+        }
+
+        public String getField2() {
+            return field2;
+        }
+
+        public void setField2(String field2) {
+            this.field2 = field2;
+        }
     }
 
-    // Mock classes for testing (simplified versions)
     private static class MockWebServer {
         private ServerSocket serverSocket;
         private Thread serverThread;
@@ -778,7 +762,6 @@ public class HttpRequest100Test extends TestBase {
                         handleConnection(socket);
                     }
                 } catch (IOException e) {
-                    // Server stopped
                 }
             });
             serverThread.start();
@@ -791,7 +774,6 @@ public class HttpRequest100Test extends TestBase {
             String requestLine = reader.readLine();
             String line;
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
-                // Read headers
             }
 
             MockResponse response = responses.poll();

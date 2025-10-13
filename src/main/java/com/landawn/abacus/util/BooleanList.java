@@ -270,16 +270,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     *
-     * @param index
-     */
-    private void rangeCheck(final int index) {
-        if (index >= size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
-        }
-    }
-
-    /**
      * Replaces the element at the specified position in this list with the specified element.
      * 
      * <p>This method runs in constant time.</p>
@@ -797,7 +787,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             N.fill(elementData, tmp.length, size, false);
         }
 
-        size -= elementData.length - tmp.length;
+        size = size - (elementData.length - tmp.length);
     }
 
     /**
@@ -841,29 +831,27 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Moves a range of elements within this list to a new position.
-     * The elements in the range [{@code fromIndex}, {@code toIndex}) are moved so that
-     * the element originally at {@code fromIndex} will be at {@code newPositionStartIndexAfterMove}.
-     * 
-     * <p>No elements are deleted in the process; this list maintains its size. Elements
-     * are shifted as necessary to accommodate the move.</p>
+     * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
+     * so that the element originally at fromIndex will be at newPositionAfterMove.
+     * Other elements are shifted as necessary to accommodate the move.
      * 
      * <p>Example usage:
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
-     * list.moveRange(1, 3, 3); // moves elements at indices 1-2 to start at index 3
-     * // list is now [true, true, false, false, true]
+     * list.moveRange(1, 3, 2); // moves elements at indices 1-2 to start at index 2
+     * // list is now [true, false, false, true, true]
      * }</pre></p>
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionStartIndexAfterMove the index where the moved range should start
-     *        after the move operation. Must be in the range: [0, size() - (toIndex - fromIndex)]
-     * @throws IndexOutOfBoundsException if the range is out of bounds or if
-     *         {@code newPositionStartIndexAfterMove} is invalid
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     *      must be between 0 and size() - lengthOfRange, inclusive.
+     * @throws IndexOutOfBoundsException if any index is out of bounds or if
+     *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndexAfterMove) {
-        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndexAfterMove);
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
     /**
@@ -1512,7 +1500,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *         or {@code -1} if this list does not contain the element
      */
     public int lastIndexOf(final boolean valueToFind) {
-        return lastIndexOf(valueToFind, size);
+        return lastIndexOf(valueToFind, size - 1);
     }
 
     /**
@@ -1915,34 +1903,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return result;
     }
 
-    //    @Override
-    //    public List<BooleanList> split(int fromIndex, int toIndex, BooleanPredicate predicate) {
-    //        checkIndex(fromIndex, toIndex);
-    //
-    //        final List<BooleanList> result = new ArrayList<>();
-    //        BooleanList piece = null;
-    //
-    //        for (int i = fromIndex; i < toIndex;) {
-    //            if (piece == null) {
-    //                piece = BooleanList.of(N.EMPTY_BOOLEAN_ARRAY);
-    //            }
-    //
-    //            if (predicate.test(elementData[i])) {
-    //                piece.add(elementData[i]);
-    //                i++;
-    //            } else {
-    //                result.add(piece);
-    //                piece = null;
-    //            }
-    //        }
-    //
-    //        if (piece != null) {
-    //            result.add(piece);
-    //        }
-    //
-    //        return result;
-    //    }
-
     /**
      * Trims the capacity of this list to be the list's current size. This operation
      * minimizes the memory footprint of the list by removing any unused capacity.
@@ -2225,70 +2185,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return delete(size - 1);
     }
 
-    //    /**
-    //     * Returns a new BooleanList with the elements in reverse order.
-    //     *
-    //     * @return A new BooleanList with all elements of the current list in reverse order.
-    //     */
-    //    public BooleanList reversed() {
-    //        final boolean[] a = N.copyOfRange(elementData, 0, size);
-    //
-    //        N.reverse(a);
-    //
-    //        return new BooleanList(a);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param <E>
-    //     * @param func
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <R, E extends Exception> R apply(final Throwables.Function<? super BooleanList, ? extends R, E> func) throws E {
-    //        return func.apply(this);
-    //    }
-    //
-    //    /**
-    //     * Apply if not empty.
-    //     *
-    //     * @param <R>
-    //     * @param <E>
-    //     * @param func
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super BooleanList, ? extends R, E> func) throws E {
-    //        return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <E extends Exception> void accept(final Throwables.Consumer<? super BooleanList, E> action) throws E {
-    //        action.accept(this);
-    //    }
-    //
-    //    /**
-    //     * Accept if not empty.
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super BooleanList, E> action) throws E {
-    //        return If.is(size > 0).then(this, action);
-    //    }
-
     /**
      * Returns a hash code value for this list. The hash code is calculated based on
      * the elements in the list and their order.
@@ -2345,7 +2241,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     private void ensureCapacity(final int minCapacity) {
-        if (minCapacity > MAX_ARRAY_SIZE || minCapacity < 0) {
+        if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
             throw new OutOfMemoryError();
         }
 

@@ -24,6 +24,7 @@ import java.util.TreeMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.DiffIgnore;
@@ -32,9 +33,9 @@ import com.landawn.abacus.annotation.Record;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.util.Tuple.Tuple3;
 
+@Tag("new-test")
 public class Beans100Test extends TestBase {
 
-    // Test classes
     public static class SimpleBean {
         private String name;
         private int age;
@@ -240,7 +241,6 @@ public class Beans100Test extends TestBase {
     }
 
     public static class NonBean {
-        // No getters/setters
         private String field;
     }
 
@@ -265,7 +265,6 @@ public class Beans100Test extends TestBase {
         }
     }
 
-    // Test data
     private SimpleBean simpleBean;
     private NestedBean nestedBean;
     private EntityBean entityBean;
@@ -319,7 +318,6 @@ public class Beans100Test extends TestBase {
 
     @Test
     public void testRefreshBeanPropInfo() {
-        // Just ensure it doesn't throw
         Beans.refreshBeanPropInfo(SimpleBean.class);
     }
 
@@ -332,7 +330,6 @@ public class Beans100Test extends TestBase {
         assertNotNull(builderInfo._2);
         assertNotNull(builderInfo._3);
 
-        // Test builder creation
         Object builder = builderInfo._2.get();
         assertNotNull(builder);
 
@@ -357,7 +354,6 @@ public class Beans100Test extends TestBase {
 
         assertTrue(Beans.isBeanClass(TestNonBean.class));
         Beans.registerNonBeanClass(TestNonBean.class);
-        // Note: The cache might still return true, but the registration is done
     }
 
     @Test
@@ -370,7 +366,6 @@ public class Beans100Test extends TestBase {
         Method method = SimpleBean.class.getMethod("getName");
         Beans.registerPropGetSetMethod("name", method);
 
-        // Test invalid method
         Method invalidMethod = Object.class.getMethod("toString");
         assertThrows(IllegalArgumentException.class, () -> Beans.registerPropGetSetMethod("invalid", invalidMethod));
     }
@@ -411,7 +406,6 @@ public class Beans100Test extends TestBase {
         assertTrue(props.contains("active"));
         assertFalse(props.contains("age"));
 
-        // Test with collection overload
         props = Beans.getPropNames(SimpleBean.class, Arrays.asList("age", "active"));
         assertTrue(props.contains("name"));
         assertFalse(props.contains("age"));
@@ -422,7 +416,6 @@ public class Beans100Test extends TestBase {
 
     @Test
     public void testGetPropNamesFromBean() {
-        // Test with ignoreNullValue
         simpleBean.setActive(null);
         List<String> props = Beans.getPropNames(simpleBean, true);
         assertTrue(props.contains("name"));
@@ -432,13 +425,11 @@ public class Beans100Test extends TestBase {
         props = Beans.getPropNames(simpleBean, false);
         assertTrue(props.contains("active"));
 
-        // Test with predicate filter
         props = Beans.getPropNames(simpleBean, name -> name.startsWith("a"));
         assertTrue(props.contains("age"));
         assertTrue(props.contains("active"));
         assertFalse(props.contains("name"));
 
-        // Test with BiPredicate filter
         props = Beans.getPropNames(simpleBean, (name, value) -> value instanceof String);
         assertTrue(props.contains("name"));
         assertFalse(props.contains("age"));
@@ -457,7 +448,6 @@ public class Beans100Test extends TestBase {
         assertNotNull(field);
         assertEquals("name", field.getName());
 
-        // Test case-insensitive
         field = Beans.getPropField(SimpleBean.class, "NAME");
         assertNotNull(field);
 
@@ -479,7 +469,6 @@ public class Beans100Test extends TestBase {
         assertNotNull(method);
         assertEquals("getName", method.getName());
 
-        // Test case variations
         method = Beans.getPropGetMethod(SimpleBean.class, "NAME");
         assertNotNull(method);
 
@@ -519,14 +508,11 @@ public class Beans100Test extends TestBase {
         assertEquals(25, (Integer) Beans.getPropValue(simpleBean, "age"));
         assertEquals(true, Beans.getPropValue(simpleBean, "active"));
 
-        // Test with method
         Method getName = SimpleBean.class.getMethod("getName");
         assertEquals("John", Beans.getPropValue(simpleBean, getName));
 
-        // Test nested property
         assertEquals("New York", Beans.getPropValue(nestedBean, "address.city"));
 
-        // Test with ignoreUnmatchedProperty
         assertNull(Beans.getPropValue(simpleBean, "nonExistent", true));
         assertThrows(IllegalArgumentException.class, () -> Beans.getPropValue(simpleBean, "nonExistent", false));
     }
@@ -539,16 +525,13 @@ public class Beans100Test extends TestBase {
         Beans.setPropValue(simpleBean, "age", 30);
         assertEquals(30, simpleBean.getAge());
 
-        // Test with method
         Method setName = SimpleBean.class.getMethod("setName", String.class);
         Beans.setPropValue(simpleBean, setName, "Bob");
         assertEquals("Bob", simpleBean.getName());
 
-        // Test with null value
         Beans.setPropValue(simpleBean, "active", null);
         assertNull(simpleBean.getActive());
 
-        // Test with ignoreUnmatchedProperty
         boolean result = Beans.setPropValue(simpleBean, "nonExistent", "value", true);
         assertFalse(result);
 
@@ -578,9 +561,8 @@ public class Beans100Test extends TestBase {
         assertEquals("new1", bean.getItems().get(0));
         assertEquals("new2", bean.getItems().get(1));
 
-        // Test with null
         Beans.setPropValueByGet(bean, getItems, null);
-        assertEquals(2, bean.getItems().size()); // No change
+        assertEquals(2, bean.getItems().size());
     }
 
     @Test
@@ -668,15 +650,12 @@ public class Beans100Test extends TestBase {
         assertEquals(30, bean.getAge());
         assertEquals(false, bean.getActive());
 
-        // Test with null map
         assertNull(Beans.map2Bean((Map<String, Object>) null, SimpleBean.class));
 
-        // Test with ignoreNullProperty
         map.put("active", null);
         bean = Beans.map2Bean(map, true, true, SimpleBean.class);
         assertNotNull(bean);
 
-        // Test with selectPropNames
         bean = Beans.map2Bean(map, Arrays.asList("name", "age"), SimpleBean.class);
         assertEquals("Jane", bean.getName());
         assertEquals(30, bean.getAge());
@@ -701,11 +680,10 @@ public class Beans100Test extends TestBase {
         assertEquals("John", beans.get(0).getName());
         assertEquals("Jane", beans.get(1).getName());
 
-        // Test with selectPropNames
         beans = Beans.map2Bean(mapList, Arrays.asList("name"), SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
-        assertEquals(0, beans.get(0).getAge()); // Not selected
+        assertEquals(0, beans.get(0).getAge());
     }
 
     @Test
@@ -715,16 +693,13 @@ public class Beans100Test extends TestBase {
         assertEquals(25, map.get("age"));
         assertEquals(true, map.get("active"));
 
-        // Test with custom map supplier
         TreeMap<String, Object> treeMap = Beans.bean2Map(simpleBean, IntFunctions.ofTreeMap());
         assertTrue(treeMap instanceof TreeMap);
 
-        // Test with selectPropNames
         map = Beans.bean2Map(simpleBean, Arrays.asList("name", "age"));
         assertEquals(2, map.size());
         assertFalse(map.containsKey("active"));
 
-        // Test with naming policy
         map = Beans.bean2Map(simpleBean, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
         assertTrue(map.containsKey("name"));
         assertTrue(map.containsKey("age"));
@@ -734,7 +709,6 @@ public class Beans100Test extends TestBase {
     public void testBean2MapWithFiltering() {
         simpleBean.setActive(null);
 
-        // Test ignoreNullProperty
         Map<String, Object> map = Beans.bean2Map(simpleBean, true);
         assertFalse(map.containsKey("active"));
 
@@ -742,12 +716,11 @@ public class Beans100Test extends TestBase {
         assertTrue(map.containsKey("active"));
         assertNull(map.get("active"));
 
-        // Test with ignoredPropNames
         Set<String> ignored = new HashSet<>();
         ignored.add("age");
         map = Beans.bean2Map(simpleBean, true, ignored);
         assertFalse(map.containsKey("age"));
-        assertFalse(map.containsKey("active")); // null
+        assertFalse(map.containsKey("active"));
         assertTrue(map.containsKey("name"));
     }
 
@@ -761,12 +734,10 @@ public class Beans100Test extends TestBase {
         Map<String, Object> simpleBeanMap = (Map<String, Object>) map.get("simpleBean");
         assertEquals("John", simpleBeanMap.get("name"));
 
-        // Test with selectPropNames
         map = Beans.deepBean2Map(nestedBean, Arrays.asList("id", "address"));
         assertEquals(2, map.size());
         assertFalse(map.containsKey("simpleBean"));
 
-        // Test with naming policy
         BeanWithSnakeCase snakeBean = new BeanWithSnakeCase();
         snakeBean.setFirstName("John");
         snakeBean.setLastName("Doe");
@@ -780,11 +751,9 @@ public class Beans100Test extends TestBase {
     public void testDeepBean2MapWithFiltering() {
         nestedBean.setSimpleBean(null);
 
-        // Test ignoreNullProperty
         Map<String, Object> map = Beans.deepBean2Map(nestedBean, true);
         assertFalse(map.containsKey("simpleBean"));
 
-        // Test with ignoredPropNames
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
         map = Beans.deepBean2Map(nestedBean, true, ignored);
@@ -801,13 +770,11 @@ public class Beans100Test extends TestBase {
         assertEquals("New York", map.get("address.city"));
         assertEquals("5th Avenue", map.get("address.street"));
 
-        // Test with selectPropNames
         map = Beans.bean2FlatMap(nestedBean, Arrays.asList("id", "address"));
         assertEquals("123", map.get("id"));
         assertTrue(map.containsKey("address.city"));
         assertFalse(map.containsKey("simpleBean.name"));
 
-        // Test with naming policy
         map = Beans.bean2FlatMap(nestedBean, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
         assertTrue(map.containsKey("id"));
         assertTrue(map.containsKey("simple_bean.name"));
@@ -817,11 +784,9 @@ public class Beans100Test extends TestBase {
     public void testBean2FlatMapWithFiltering() {
         nestedBean.getAddress().setZipCode(null);
 
-        // Test ignoreNullProperty
         Map<String, Object> map = Beans.bean2FlatMap(nestedBean, true);
         assertFalse(map.containsKey("address.zipCode"));
 
-        // Test with ignoredPropNames
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
         map = Beans.bean2FlatMap(nestedBean, true, ignored);
@@ -845,15 +810,12 @@ public class Beans100Test extends TestBase {
         assertEquals(simpleBean.getName(), cloned.getName());
         assertEquals(simpleBean.getAge(), cloned.getAge());
 
-        // Test with null
         assertNull(Beans.clone(null));
 
-        // Test with target type
         SimpleBean cloned2 = Beans.clone(simpleBean, SimpleBean.class);
         assertNotNull(cloned2);
         assertEquals(simpleBean.getName(), cloned2.getName());
 
-        // Test cloning null with target type
         SimpleBean fromNull = Beans.clone(null, SimpleBean.class);
         assertNotNull(fromNull);
 
@@ -868,26 +830,21 @@ public class Beans100Test extends TestBase {
         assertEquals(simpleBean.getName(), copied.getName());
         assertEquals(simpleBean.getAge(), copied.getAge());
 
-        // Test with null
         assertNull(Beans.copy(null));
 
-        // Test with selectPropNames
         copied = Beans.copy(simpleBean, Arrays.asList("name"));
         assertEquals("John", copied.getName());
-        assertEquals(0, copied.getAge()); // Not selected
+        assertEquals(0, copied.getAge());
 
-        // Test with propFilter
         copied = Beans.copy(simpleBean, (name, value) -> !name.equals("age"));
         assertEquals("John", copied.getName());
-        assertEquals(0, copied.getAge()); // Filtered out
+        assertEquals(0, copied.getAge());
 
-        // Test with target type
         EntityBean entity = new EntityBean();
         entity.setId(100L);
         EntityBean copiedEntity = Beans.copy(entity, EntityBean.class);
         assertEquals(100L, copiedEntity.getId());
 
-        // Test with propNameConverter
         BeanWithSnakeCase snakeBean = new BeanWithSnakeCase();
         snakeBean.setFirstName("John");
         copied = Beans.copy(snakeBean, (Collection<String>) null, name -> Beans.toCamelCase(name), SimpleBean.class);
@@ -898,11 +855,9 @@ public class Beans100Test extends TestBase {
     public void testCopyWithIgnoreUnmatched() {
         SimpleBean source = new SimpleBean("John", 25);
 
-        // Test with ignoreUnmatchedProperty = true
         EntityBean target = Beans.copy(source, true, null, EntityBean.class);
         assertNotNull(target);
 
-        // Test with ignoreUnmatchedProperty = false (should work if no unmatched)
         SimpleBean target2 = Beans.copy(source, false, null, SimpleBean.class);
         assertEquals("John", target2.getName());
 
@@ -919,7 +874,6 @@ public class Beans100Test extends TestBase {
             assertEquals("Jane", target.getName());
             assertEquals(30, target.getAge());
 
-            // Test with null source
             SimpleBean original = new SimpleBean("Bob", 40);
             Beans.merge(null, original);
             assertEquals("Bob", original.getName());
@@ -927,14 +881,12 @@ public class Beans100Test extends TestBase {
 
         {
 
-            // Test with selectPropNames
             SimpleBean source = new SimpleBean("Alice", 35);
             SimpleBean target = new SimpleBean("Charlie", 28);
             Beans.merge(source, target, Arrays.asList("age"));
-            assertEquals("Charlie", target.getName()); // Not selected
+            assertEquals("Charlie", target.getName());
             assertEquals(35, target.getAge());
 
-            // Test with mergeFunc
             source.setAge(10);
             target.setAge(20);
             Beans.merge(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
@@ -951,17 +903,15 @@ public class Beans100Test extends TestBase {
         SimpleBean target = new SimpleBean("John", 25);
         target.setActive(false);
 
-        // Merge only string properties
         Beans.merge(source, target, Fn.p((name, value) -> value instanceof String));
         assertEquals("Jane", target.getName());
-        assertEquals(25, target.getAge()); // Not merged
-        assertEquals(false, target.getActive()); // Not merged
+        assertEquals(25, target.getAge());
+        assertEquals(false, target.getActive());
 
-        // Test with propNameConverter
         BeanWithSnakeCase snakeSource = new BeanWithSnakeCase();
         snakeSource.setFirstName("NewFirst");
         SimpleBean convertTarget = new SimpleBean();
-        Beans.merge(snakeSource, convertTarget, (name, value) -> true, name -> "name"); // Map all to "name"
+        Beans.merge(snakeSource, convertTarget, (name, value) -> true, name -> "name");
         assertEquals("NewFirst", convertTarget.getName());
     }
 
@@ -971,11 +921,9 @@ public class Beans100Test extends TestBase {
         EntityBean target = new EntityBean();
         target.setId(1L);
 
-        // Test with ignoreUnmatchedProperty = true
         Beans.merge(source, target, true, null);
-        assertEquals(1L, target.getId()); // Unchanged
+        assertEquals(1L, target.getId());
 
-        // Test with custom merge function
         source.setAge(5);
         SimpleBean target2 = new SimpleBean("John", 10);
         Beans.merge(source, target2, true, null, (srcVal, tgtVal) -> {
@@ -995,21 +943,18 @@ public class Beans100Test extends TestBase {
         Beans.erase(bean, "name", "age");
         assertNull(bean.getName());
         assertEquals(0, bean.getAge());
-        assertEquals(true, bean.getActive()); // Not erased
+        assertEquals(true, bean.getActive());
 
-        // Test with collection
         bean = new SimpleBean("Jane", 30);
         Beans.erase(bean, Arrays.asList("name"));
         assertNull(bean.getName());
         assertEquals(30, bean.getAge());
 
-        // Test with null bean
-        Beans.erase(null, "name"); // Should not throw
+        Beans.erase(null, "name");
 
-        // Test with empty propNames
         bean = new SimpleBean("Bob", 35);
         Beans.erase(bean, new String[0]);
-        assertEquals("Bob", bean.getName()); // Unchanged
+        assertEquals("Bob", bean.getName());
     }
 
     @Test
@@ -1022,8 +967,7 @@ public class Beans100Test extends TestBase {
         assertEquals(0, bean.getAge());
         assertNull(bean.getActive());
 
-        // Test with null
-        Beans.eraseAll(null); // Should not throw
+        Beans.eraseAll(null);
     }
 
     @Test
@@ -1034,28 +978,24 @@ public class Beans100Test extends TestBase {
         assertTrue(bean.getAge() != 0);
         assertNotNull(bean.getActive());
 
-        // Test with selectPropNames
         bean = new SimpleBean();
         Beans.fill(bean, Arrays.asList("name"));
         assertNotNull(bean.getName());
-        assertEquals(0, bean.getAge()); // Not filled
+        assertEquals(0, bean.getAge());
 
-        // Test creating filled instance
         SimpleBean filled = Beans.fill(SimpleBean.class);
         assertNotNull(filled);
         assertNotNull(filled.getName());
 
-        // Test creating multiple filled instances
         List<SimpleBean> filledList = Beans.fill(SimpleBean.class, 3);
         assertEquals(3, filledList.size());
         for (SimpleBean b : filledList) {
             assertNotNull(b.getName());
         }
 
-        // Test with selectPropNames for class
         filled = Beans.fill(SimpleBean.class, Arrays.asList("age"));
         assertTrue(filled.getAge() != 0);
-        assertNull(filled.getName()); // Not filled
+        assertNull(filled.getName());
 
         assertThrows(IllegalArgumentException.class, () -> Beans.fill((Object) null));
         assertThrows(IllegalArgumentException.class, () -> Beans.fill((Class<?>) null));
@@ -1079,10 +1019,8 @@ public class Beans100Test extends TestBase {
         EntityBean bean2 = new EntityBean();
         bean2.setValue("test");
 
-        // No common properties except from Object class
         assertThrows(IllegalArgumentException.class, () -> Beans.equalsByCommonProps(bean1, bean2));
 
-        // Test with beans having common properties
         class BeanA {
             private String name;
             private int age;
@@ -1150,7 +1088,6 @@ public class Beans100Test extends TestBase {
 
         assertTrue(Beans.compareByProps(bean1, bean2, Arrays.asList("age")) < 0);
 
-        // Test multiple properties
         SimpleBean bean3 = new SimpleBean("Alice", 30);
         assertTrue(Beans.compareByProps(bean1, bean3, Arrays.asList("name", "age")) < 0);
 
@@ -1167,7 +1104,6 @@ public class Beans100Test extends TestBase {
         assertTrue(props.stream().anyMatch(e -> "name".equals(e.getKey()) && "John".equals(e.getValue())));
         assertTrue(props.stream().anyMatch(e -> "age".equals(e.getKey()) && Integer.valueOf(25).equals(e.getValue())));
 
-        // Test with filter
         simpleBean.setActive(null);
         props = Beans.properties(simpleBean, (name, value) -> value != null).toList();
 

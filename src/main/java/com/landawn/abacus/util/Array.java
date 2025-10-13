@@ -767,169 +767,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return a;
     }
 
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    @SafeVarargs
-    //    public static BigInteger[] of(final BigInteger... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    @SafeVarargs
-    //    public static BigDecimal[] of(final BigDecimal... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends Enum<T>> T[] of(final T... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends java.util.Date> T[] of(final T... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends Calendar> T[] of(final T... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends Runnable> T[] of(final T... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends Callable<?>> T[] of(final T... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    @SuppressWarnings("rawtypes")
-    //    public static Class[] of(final Class... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends EntityId> T[] of(final T... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends DirtyMarker> T[] of(final T... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends Condition> T[] of(final T... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends Type<?>> T[] of(final T... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends List<?>> T[] of(final T... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends Set<?>> T[] of(final T... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends Queue<?>> T[] of(final T... a) {
-    //        return a;
-    //    }
-    //
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T extends Map<?, ?>> T[] of(final T... a) {
-    //        return a;
-    //    }
-
     //    // Only for Java 8. It's ambiguous in the Java version before 8.
     //    /**
     //     * Returns the input array
@@ -945,11 +782,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Generates a range of characters from the start (inclusive) to the end (exclusive).
      *
      * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to, but not including, the <i>endExclusive</i> character.
-     * The characters are generated in ascending order.
+     * The characters are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endExclusive The upper bound (exclusive) of the char array.
-     * @return A char array containing characters from <i>startInclusive</i> to <i>endExclusive</i>.
+     * @return A char array containing characters from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
      */
     public static char[] range(char startInclusive, final char endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -969,11 +806,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Generates a range of bytes from the start (inclusive) to the end (exclusive).
      *
      * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to, but not including, the <i>endExclusive</i> byte.
-     * The bytes are generated in ascending order.
+     * The bytes are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endExclusive The upper bound (exclusive) of the byte array.
-     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i>.
+     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
      */
     public static byte[] range(byte startInclusive, final byte endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -993,11 +830,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Generates a range of short integers from the start (inclusive) to the end (exclusive).
      *
      * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to, but not including, the <i>endExclusive</i> short integer.
-     * The short integers are generated in ascending order.
+     * The short integers are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endExclusive The upper bound (exclusive) of the short array.
-     * @return A short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i>.
+     * @return A short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
      */
     public static short[] range(short startInclusive, final short endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -1017,11 +854,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Generates a range of integers from the start (inclusive) to the end (exclusive).
      *
      * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to, but not including, the <i>endExclusive</i> integer.
-     * The integers are generated in ascending order.
+     * The integers are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endExclusive The upper bound (exclusive) of the integer array.
-     * @return An integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i>.
+     * @return An integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive >= endExclusive.
+     * @throws IllegalArgumentException if the range size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static int[] range(int startInclusive, final int endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -1045,11 +883,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Generates a range of long integers from the start (inclusive) to the end (exclusive).
      *
      * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to, but not including, the <i>endExclusive</i> long integer.
-     * The long integers are generated in ascending order.
+     * The long integers are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endExclusive The upper bound (exclusive) of the long array.
-     * @return A long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i>.
+     * @return A long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive >= endExclusive.
+     * @throws IllegalArgumentException if the range size is negative or exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static long[] range(long startInclusive, final long endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -1071,50 +910,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return a;
     }
 
-    //    // Doesn't work as expected due to precision issue. "3.3d - 1.1d != 2.2d". Refer to: https://en.wikipedia.org/wiki/IEEE_floating_point
-    //    // http://stackoverflow.com/questions/15625556/java-adding-and-subtracting-doubles-are-giving-strange-results
-    //    static float[] range(float startInclusive, final float endExclusive) {
-    //        if (endExclusive == startInclusive) {
-    //            return N.EMPTY_FLOAT_ARRAY;
-    //        }
-    //
-    //        int tmp = (int) (endExclusive - startInclusive);
-    //        final float[] a = new float[(startInclusive + tmp == endExclusive) ? tmp : tmp + 1];
-    //
-    //        for (int i = 0, len = a.length; i < len; i++) {
-    //            a[i] = startInclusive++;
-    //        }
-    //
-    //        return a;
-    //    }
-    //
-    //    // Doesn't work as expected due to precision issue. "3.3d - 1.1d != 2.2d". Refer to: https://en.wikipedia.org/wiki/IEEE_floating_point
-    //    // http://stackoverflow.com/questions/15625556/java-adding-and-subtracting-doubles-are-giving-strange-results
-    //    static double[] range(double startInclusive, final double endExclusive) {
-    //        if (endExclusive == startInclusive) {
-    //            return N.EMPTY_DOUBLE_ARRAY;
-    //        }
-    //
-    //        int tmp = (int) (endExclusive - startInclusive);
-    //        final double[] a = new double[(startInclusive + tmp == endExclusive) ? tmp : tmp + 1];
-    //
-    //        for (int i = 0, len = a.length; i < len; i++) {
-    //            a[i] = startInclusive++;
-    //        }
-    //
-    //        return a;
-    //    }
-
     /**
      * Generates a range of characters from the start (inclusive) to the end (exclusive) with a specific step.
      *
      * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to, but not including, the <i>endExclusive</i> character.
      * The characters are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
+     * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      *
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endExclusive The upper bound (exclusive) of the char array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent character.
-     * @return A char array containing characters from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by.
+     * @return A char array containing characters from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static char[] range(char startInclusive, final char endExclusive, final int by) {
@@ -1147,11 +953,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to, but not including, the <i>endExclusive</i> byte.
      * The bytes are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
+     * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      *
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endExclusive The upper bound (exclusive) of the byte array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent byte.
-     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by.
+     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static byte[] range(byte startInclusive, final byte endExclusive, final byte by) {
@@ -1183,11 +990,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to, but not including, the <i>endExclusive</i> short integer.
      * The short integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
+     * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      *
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endExclusive The upper bound (exclusive) of the short array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent short integer.
-     * @return A short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by.
+     * @return A short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static short[] range(short startInclusive, final short endExclusive, final short by) {
@@ -1219,12 +1027,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to, but not including, the <i>endExclusive</i> integer.
      * The integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
+     * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      *
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endExclusive The upper bound (exclusive) of the integer array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent integer.
-     * @return An integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by.
-     * @throws IllegalArgumentException if <i>by</i> is zero.
+     * @return An integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static int[] range(int startInclusive, final int endExclusive, final int by) {
         if (by == 0) {
@@ -1260,12 +1069,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to, but not including, the <i>endExclusive</i> long integer.
      * The long integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
+     * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
+     * This method handles potential overflow scenarios using BigInteger for large ranges.
      *
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endExclusive The upper bound (exclusive) of the long array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent long integer.
-     * @return A long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by.
-     * @throws IllegalArgumentException if <i>by</i> is zero.
+     * @return A long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static long[] range(long startInclusive, final long endExclusive, final long by) {
         if (by == 0) {
@@ -1309,69 +1120,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return a;
     }
 
-    //    // Doesn't work as expected due to precision issue. "3.3d - 1.1d != 2.2d". Refer to: https://en.wikipedia.org/wiki/IEEE_floating_point
-    //    // http://stackoverflow.com/questions/15625556/java-adding-and-subtracting-doubles-are-giving-strange-results
-    //    static float[] range(float startInclusive, final float endExclusive, final float by) {
-    //        if (by == 0) {
-    //            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
-    //        }
-    //
-    //        if (endExclusive == startInclusive) {
-    //            return N.EMPTY_FLOAT_ARRAY;
-    //        }
-    //
-    //        if (endExclusive > startInclusive != by > 0) {
-    //            throw new IllegalArgumentException(
-    //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
-    //        }
-    //
-    //        final int tmp = (int) ((endExclusive - startInclusive) / by);
-    //        final int len = startInclusive + (tmp * by) == endExclusive ? tmp : tmp + 1;
-    //        final float[] a = new float[len];
-    //
-    //        for (int i = 0; i < len; i++, startInclusive += by) {
-    //            a[i] = startInclusive;
-    //        }
-    //
-    //        return a;
-    //    }
-    //
-    //    // Doesn't work as expected due to precision issue. "3.3d - 1.1d != 2.2d". Refer to: https://en.wikipedia.org/wiki/IEEE_floating_point
-    //    // http://stackoverflow.com/questions/15625556/java-adding-and-subtracting-doubles-are-giving-strange-results
-    //    static double[] range(double startInclusive, final double endExclusive, final double by) {
-    //        if (by == 0) {
-    //            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
-    //        }
-    //
-    //        if (endExclusive == startInclusive) {
-    //            return N.EMPTY_DOUBLE_ARRAY;
-    //        }
-    //
-    //        if (endExclusive > startInclusive != by > 0) {
-    //            throw new IllegalArgumentException(
-    //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
-    //        }
-    //
-    //        final int tmp = (int) ((endExclusive - startInclusive) / by);
-    //        final int len = startInclusive + (tmp * by) == endExclusive ? tmp : tmp + 1;
-    //        final double[] a = new double[len];
-    //
-    //        for (int i = 0; i < len; i++, startInclusive += by) {
-    //            a[i] = startInclusive;
-    //        }
-    //
-    //        return a;
-    //    }
-
     /**
      * Generates a range of characters from the start (inclusive) to the end (inclusive).
      *
      * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to and including the <i>endInclusive</i> character.
-     * The characters are generated in ascending order.
+     * The characters are generated in ascending order. If start is greater than end, an empty array is returned.
+     * If start equals end, a single-element array containing that value is returned.
      *
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endInclusive The upper bound (inclusive) of the char array.
-     * @return A char array containing characters from <i>startInclusive</i> to <i>endInclusive</i>.
+     * @return A char array containing characters from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
      */
     public static char[] rangeClosed(char startInclusive, final char endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1393,11 +1151,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Generates a range of bytes from the start (inclusive) to the end (inclusive).
      *
      * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to and including the <i>endInclusive</i> byte.
-     * The bytes are generated in ascending order.
+     * The bytes are generated in ascending order. If start is greater than end, an empty array is returned.
+     * If start equals end, a single-element array containing that value is returned.
      *
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endInclusive The upper bound (inclusive) of the byte array.
-     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i>.
+     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
      */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1419,11 +1178,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Generates a range of short integers from the start (inclusive) to the end (inclusive).
      *
      * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to and including the <i>endInclusive</i> short integer.
-     * The short integers are generated in ascending order.
+     * The short integers are generated in ascending order. If start is greater than end, an empty array is returned.
+     * If start equals end, a single-element array containing that value is returned.
      *
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endInclusive The upper bound (inclusive) of the short array.
-     * @return A short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i>.
+     * @return A short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
      */
     public static short[] rangeClosed(short startInclusive, final short endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1445,11 +1205,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Generates a range of integers from the start (inclusive) to the end (inclusive).
      *
      * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to and including the <i>endInclusive</i> integer.
-     * The integers are generated in ascending order.
+     * The integers are generated in ascending order. If start is greater than end, an empty array is returned.
+     * If start equals end, a single-element array containing that value is returned.
      *
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endInclusive The upper bound (inclusive) of the integer array.
-     * @return An integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i>.
+     * @return An integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
+     * @throws IllegalArgumentException if the range size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1475,11 +1237,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Generates a range of long integers from the start (inclusive) to the end (inclusive).
      *
      * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to and including the <i>endInclusive</i> long integer.
-     * The long integers are generated in ascending order.
+     * The long integers are generated in ascending order. If start is greater than end, an empty array is returned.
+     * If start equals end, a single-element array containing that value is returned.
      *
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endInclusive The upper bound (inclusive) of the long array.
-     * @return A long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i>.
+     * @return A long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
+     * @throws IllegalArgumentException if the range size is invalid (negative or exceeds Integer.MAX_VALUE - overflow detected).
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1503,40 +1267,18 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return a;
     }
 
-    //    // Doesn't work as expected due to precision issue. "3.3d - 1.1d != 2.2d". Refer to: https://en.wikipedia.org/wiki/IEEE_floating_point
-    //    // http://stackoverflow.com/questions/15625556/java-adding-and-subtracting-doubles-are-giving-strange-results
-    //    static float[] rangeClosed(float startInclusive, final float endInclusive) {
-    //        final float[] a = new float[(int) (endInclusive - startInclusive) + 1];
-    //
-    //        for (int i = 0, len = a.length; i < len; i++) {
-    //            a[i] = startInclusive++;
-    //        }
-    //
-    //        return a;
-    //    }
-    //
-    //    // Doesn't work as expected due to precision issue. "3.3d - 1.1d != 2.2d". Refer to: https://en.wikipedia.org/wiki/IEEE_floating_point
-    //    // http://stackoverflow.com/questions/15625556/java-adding-and-subtracting-doubles-are-giving-strange-results
-    //    static double[] rangeClosed(double startInclusive, final double endInclusive) {
-    //        final double[] a = new double[(int) (endInclusive - startInclusive) + 1];
-    //
-    //        for (int i = 0, len = a.length; i < len; i++) {
-    //            a[i] = startInclusive++;
-    //        }
-    //
-    //        return a;
-    //    }
-
     /**
      * Generates a range of characters from the start (inclusive) to the end (inclusive) with a specific step.
      *
      * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to and including the <i>endInclusive</i> character.
      * The characters are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
+     * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
+     * If start equals end, a single-element array containing that value is returned regardless of the step value.
      *
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endInclusive The upper bound (inclusive) of the char array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent character.
-     * @return A char array containing characters from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by.
+     * @return A char array containing characters from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static char[] rangeClosed(char startInclusive, final char endInclusive, final int by) {
@@ -1571,11 +1313,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to and including the <i>endInclusive</i> byte.
      * The bytes are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
+     * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
+     * If start equals end, a single-element array containing that value is returned regardless of the step value.
      *
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endInclusive The upper bound (inclusive) of the byte array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent byte.
-     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by.
+     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive, final byte by) {
@@ -1609,11 +1353,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to and including the <i>endInclusive</i> short integer.
      * The short integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
+     * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
+     * If start equals end, a single-element array containing that value is returned regardless of the step value.
      *
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endInclusive The upper bound (inclusive) of the short array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent short integer.
-     * @return A short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by.
+     * @return A short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static short[] rangeClosed(short startInclusive, final short endInclusive, final short by) {
@@ -1647,12 +1393,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to and including the <i>endInclusive</i> integer.
      * The integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
+     * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
+     * If start equals end, a single-element array containing that value is returned regardless of the step value.
      *
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endInclusive The upper bound (inclusive) of the integer array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent integer.
-     * @return An integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by.
-     * @throws IllegalArgumentException if <i>by</i> is zero.
+     * @return An integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive, final int by) {
         if (by == 0) {
@@ -1690,12 +1438,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to and including the <i>endInclusive</i> long integer.
      * The long integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
+     * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
+     * If start equals end, a single-element array containing that value is returned regardless of the step value.
+     * This method handles potential overflow scenarios using BigInteger for large ranges.
      *
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endInclusive The upper bound (inclusive) of the long array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent long integer.
-     * @return A long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by.
-     * @throws IllegalArgumentException if <i>by</i> is zero.
+     * @return A long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive, final long by) {
         if (by == 0) {
@@ -1739,58 +1490,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
         return a;
     }
-
-    //    // Doesn't work as expected due to precision issue. "3.3d - 1.1d != 2.2d". Refer to: https://en.wikipedia.org/wiki/IEEE_floating_point
-    //    // http://stackoverflow.com/questions/15625556/java-adding-and-subtracting-doubles-are-giving-strange-results
-    //    static float[] rangeClosed(float startInclusive, final float endExclusive, final float by) {
-    //        if (by == 0) {
-    //            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
-    //        }
-    //
-    //        if (endExclusive == startInclusive) {
-    //            return new float[] { startInclusive };
-    //        }
-    //
-    //        if (endExclusive > startInclusive != by > 0) {
-    //            throw new IllegalArgumentException(
-    //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
-    //        }
-    //
-    //        final int len = (int) (((double) endExclusive - (double) startInclusive) / by) + 1;
-    //        final float[] a = new float[len];
-    //
-    //        for (int i = 0; i < len; i++, startInclusive += by) {
-    //            a[i] = startInclusive;
-    //        }
-    //
-    //        return a;
-    //    }
-    //
-    //    // Doesn't work as expected due to precision issue. "3.3d - 1.1d != 2.2d". Refer to: https://en.wikipedia.org/wiki/IEEE_floating_point
-    //    // http://stackoverflow.com/questions/15625556/java-adding-and-subtracting-doubles-are-giving-strange-results
-    //    static double[] rangeClosed(double startInclusive, final double endExclusive, final double by) {
-    //        if (by == 0) {
-    //            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
-    //        }
-    //
-    //        if (endExclusive == startInclusive) {
-    //            return new double[] { startInclusive };
-    //        }
-    //
-    //        if (endExclusive > startInclusive != by > 0) {
-    //            throw new IllegalArgumentException(
-    //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
-    //        }
-    //
-    //        final int len = (int) ((endExclusive - startInclusive) / by) + 1;
-    //        final double[] a = new double[len];
-    //
-    //        for (int i = 0; i < len; i++, startInclusive += by) {
-    //            a[i] = startInclusive;
-    //        }
-    //
-    //        return a;
-    //    }
 
     /**
      * Generates a new boolean array of a specified length, with all elements set to the <i>element</i> value.
@@ -2335,7 +2034,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element The String value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @return A String array of length <i>n</i> with all elements set to <i>element</i>.
-     * @@throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative
      */
     public static String[] repeat(final String element, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2497,13 +2196,18 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new array of a specified length, with all elements set to the <i>element</i> value.
      * The type of the array is determined by the type of <i>element</i>.
-     * Unlike the {@link Array#repeat(Object, int)} method, this method does not throw a NullPointerException when <i>element</i> is {@code null}.
+     *
+     * <p>This method provides a clearer alternative to the deprecated {@link Array#repeat(Object, int)} method
+     * by explicitly indicating in its name that null elements are not allowed. Unlike the deprecated method which
+     * may throw NullPointerException, this method consistently throws IllegalArgumentException for null elements.</p>
      *
      * @param <T> The type of the elements in the array.
-     * @param element The value to be repeated in the array.
-     * @param n The length of the array to be generated.
+     * @param element The value to be repeated in the array. Must not be {@code null}.
+     * @param n The length of the array to be generated. Must be non-negative.
      * @return An array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if <i>element</i> is {@code null} or if <i>n</i> is negative.
+     * @see #repeat(Object, int, Class)
+     * @see N#repeat(Object, int)
      */
     public static <T> T[] repeatNonNull(final T element, final int n) throws IllegalArgumentException {
         N.checkArgNotNull(element, cs.element);
@@ -2517,10 +2221,21 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates an array of random integers of the specified length.
      *
-     * @param len the length of the array to be generated
+     * <p>Each element in the returned array is a random integer that can be any value
+     * in the full range of int values (from Integer.MIN_VALUE to Integer.MAX_VALUE).</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int[] randomInts = Array.random(5);
+     * // Result: an array of 5 random integers, e.g., [-1234567, 987654321, -42, 2147483647, 0]
+     * }</pre>
+     *
+     * @param len the length of the array to be generated. Must be non-negative.
      * @return an array of random integers of the specified length
+     * @throws NegativeArraySizeException if len is negative
      * @see Random#nextInt()
      * @see IntList#random(int)
+     * @see #random(int, int, int)
      */
     @Beta
     public static int[] random(final int len) {
@@ -2536,13 +2251,24 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates an array of random integers within the specified range.
      *
+     * <p>Each element in the returned array is a random integer in the range [startInclusive, endExclusive).</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * int[] randomInts = Array.random(1, 100, 5);
+     * // Result: an array of 5 random integers between 1 (inclusive) and 100 (exclusive)
+     * // e.g., [42, 7, 99, 23, 65]
+     * }</pre>
+     *
      * @param startInclusive the lower bound (inclusive) of the random integers
      * @param endExclusive the upper bound (exclusive) of the random integers
-     * @param len the length of the array to be generated
+     * @param len the length of the array to be generated. Must be non-negative.
      * @return an array of random integers within the specified range
      * @throws IllegalArgumentException if startInclusive is not less than endExclusive
+     * @throws NegativeArraySizeException if len is negative
      * @see Random#nextInt(int)
      * @see IntList#random(int, int, int)
+     * @see #random(int)
      */
     @Beta
     public static int[] random(final int startInclusive, final int endExclusive, final int len) {
@@ -2569,14 +2295,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D boolean arrays.
+     * Concatenates two 2D boolean arrays element-wise by combining their corresponding row elements.
      *
-     * <p>This method takes two 2D boolean arrays as input and returns a new 2D boolean array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each row index:
+     * <ul>
+     *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
+     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
+     * </ul>
      *
-     * @param a The first 2D boolean array to be concatenated.
-     * @param b The second 2D boolean array to be concatenated.
-     * @return A new 2D boolean array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 2D arrays
+     * boolean[][] a = {{true, false}, {true}};
+     * boolean[][] b = {{false}, {true, true}};
+     * boolean[][] result = Array.concat(a, b);
+     * // result = {{true, false, false}, {true, true, true}}
+     *
+     * // Example 2: Arrays with different lengths
+     * boolean[][] a = {{true, false}, {true}};
+     * boolean[][] b = {{false}};
+     * boolean[][] result = Array.concat(a, b);
+     * // result = {{true, false, false}, {true}}
+     *
+     * // Example 3: Concatenation with empty array
+     * boolean[][] a = {{true, false}};
+     * boolean[][] b = new boolean[0][];
+     * boolean[][] result = Array.concat(a, b);
+     * // result = {{true, false}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * boolean[][] result = Array.concat(null, null);
+     * // result = new boolean[0][]
+     * }</pre>
+     *
+     * @param a The first 2D boolean array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 2D boolean array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 2D boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static boolean[][] concat(final boolean[][] a, final boolean[][] b) {
         if (N.isEmpty(a)) {
@@ -2596,14 +2356,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D boolean arrays.
+     * Concatenates two 3D boolean arrays element-wise by combining their corresponding 2D layer elements.
      *
-     * <p>This method takes two 3D boolean arrays as input and returns a new 3D boolean array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
+     * <ul>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     * </ul>
      *
-     * @param a The first 3D boolean array to be concatenated.
-     * @param b The second 3D boolean array to be concatenated.
-     * @return A new 3D boolean array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 3D arrays
+     * boolean[][][] a = {{{true, false}}, {{true}}};
+     * boolean[][][] b = {{{false}}, {{true, true}}};
+     * boolean[][][] result = Array.concat(a, b);
+     * // result = {{{true, false, false}}, {{true, true, true}}}
+     *
+     * // Example 2: Arrays with different lengths
+     * boolean[][][] a = {{{true, false}}, {{true}}};
+     * boolean[][][] b = {{{false}}};
+     * boolean[][][] result = Array.concat(a, b);
+     * // result = {{{true, false, false}}, {{true}}}
+     *
+     * // Example 3: Concatenation with empty array
+     * boolean[][][] a = {{{true, false}}};
+     * boolean[][][] b = new boolean[0][][];
+     * boolean[][][] result = Array.concat(a, b);
+     * // result = {{{true, false}}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * boolean[][][] result = Array.concat(null, null);
+     * // result = new boolean[0][][]
+     * }</pre>
+     *
+     * @param a The first 3D boolean array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 3D boolean array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 3D boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static boolean[][][] concat(final boolean[][][] a, final boolean[][][] b) {
         if (N.isEmpty(a)) {
@@ -2623,14 +2417,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D char arrays.
+     * Concatenates two 2D char arrays element-wise by combining their corresponding row elements.
      *
-     * <p>This method takes two 2D char arrays as input and returns a new 2D char array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each row index:
+     * <ul>
+     *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
+     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
+     * </ul>
      *
-     * @param a The first 2D char array to be concatenated.
-     * @param b The second 2D char array to be concatenated.
-     * @return A new 2D char array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 2D arrays
+     * char[][] a = {{'a', 'b'}, {'c'}};
+     * char[][] b = {{'d'}, {'e', 'f'}};
+     * char[][] result = Array.concat(a, b);
+     * // result = {{'a', 'b', 'd'}, {'c', 'e', 'f'}}
+     *
+     * // Example 2: Arrays with different lengths
+     * char[][] a = {{'a', 'b'}, {'c'}};
+     * char[][] b = {{'d'}};
+     * char[][] result = Array.concat(a, b);
+     * // result = {{'a', 'b', 'd'}, {'c'}}
+     *
+     * // Example 3: Concatenation with empty array
+     * char[][] a = {{'a', 'b'}};
+     * char[][] b = new char[0][];
+     * char[][] result = Array.concat(a, b);
+     * // result = {{'a', 'b'}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * char[][] result = Array.concat(null, null);
+     * // result = new char[0][]
+     * }</pre>
+     *
+     * @param a The first 2D char array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 2D char array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 2D char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static char[][] concat(final char[][] a, final char[][] b) {
         if (N.isEmpty(a)) {
@@ -2650,14 +2478,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D char arrays.
+     * Concatenates two 3D char arrays element-wise by combining their corresponding 2D layer elements.
      *
-     * <p>This method takes two 3D char arrays as input and returns a new 3D char array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
+     * <ul>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     * </ul>
      *
-     * @param a The first 3D char array to be concatenated.
-     * @param b The second 3D char array to be concatenated.
-     * @return A new 3D char array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 3D arrays
+     * char[][][] a = {{{'a', 'b'}}, {{'c'}}};
+     * char[][][] b = {{{'d'}}, {{'e', 'f'}}};
+     * char[][][] result = Array.concat(a, b);
+     * // result = {{{'a', 'b', 'd'}}, {{'c', 'e', 'f'}}}
+     *
+     * // Example 2: Arrays with different lengths
+     * char[][][] a = {{{'a', 'b'}}, {{'c'}}};
+     * char[][][] b = {{{'d'}}};
+     * char[][][] result = Array.concat(a, b);
+     * // result = {{{'a', 'b', 'd'}}, {{'c'}}}
+     *
+     * // Example 3: Concatenation with empty array
+     * char[][][] a = {{{'a', 'b'}}};
+     * char[][][] b = new char[0][][];
+     * char[][][] result = Array.concat(a, b);
+     * // result = {{{'a', 'b'}}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * char[][][] result = Array.concat(null, null);
+     * // result = new char[0][][]
+     * }</pre>
+     *
+     * @param a The first 3D char array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 3D char array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 3D char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static char[][][] concat(final char[][][] a, final char[][][] b) {
         if (N.isEmpty(a)) {
@@ -2677,14 +2539,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D byte arrays.
+     * Concatenates two 2D byte arrays element-wise by combining their corresponding row elements.
      *
-     * <p>This method takes two 2D byte arrays as input and returns a new 2D byte array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each row index:
+     * <ul>
+     *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
+     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
+     * </ul>
      *
-     * @param a The first 2D byte array to be concatenated.
-     * @param b The second 2D byte array to be concatenated.
-     * @return A new 2D byte array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 2D arrays
+     * byte[][] a = {{1, 2}, {3}};
+     * byte[][] b = {{4}, {5, 6}};
+     * byte[][] result = Array.concat(a, b);
+     * // result = {{1, 2, 4}, {3, 5, 6}}
+     *
+     * // Example 2: Arrays with different lengths
+     * byte[][] a = {{1, 2}, {3}};
+     * byte[][] b = {{4}};
+     * byte[][] result = Array.concat(a, b);
+     * // result = {{1, 2, 4}, {3}}
+     *
+     * // Example 3: Concatenation with empty array
+     * byte[][] a = {{1, 2}};
+     * byte[][] b = new byte[0][];
+     * byte[][] result = Array.concat(a, b);
+     * // result = {{1, 2}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * byte[][] result = Array.concat(null, null);
+     * // result = new byte[0][]
+     * }</pre>
+     *
+     * @param a The first 2D byte array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 2D byte array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 2D byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static byte[][] concat(final byte[][] a, final byte[][] b) {
         if (N.isEmpty(a)) {
@@ -2704,14 +2600,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D byte arrays.
+     * Concatenates two 3D byte arrays element-wise by combining their corresponding 2D layer elements.
      *
-     * <p>This method takes two 3D byte arrays as input and returns a new 3D byte array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
+     * <ul>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     * </ul>
      *
-     * @param a The first 3D byte array to be concatenated.
-     * @param b The second 3D byte array to be concatenated.
-     * @return A new 3D byte array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 3D arrays
+     * byte[][][] a = {{{1, 2}}, {{3}}};
+     * byte[][][] b = {{{4}}, {{5, 6}}};
+     * byte[][][] result = Array.concat(a, b);
+     * // result = {{{1, 2, 4}}, {{3, 5, 6}}}
+     *
+     * // Example 2: Arrays with different lengths
+     * byte[][][] a = {{{1, 2}}, {{3}}};
+     * byte[][][] b = {{{4}}};
+     * byte[][][] result = Array.concat(a, b);
+     * // result = {{{1, 2, 4}}, {{3}}}
+     *
+     * // Example 3: Concatenation with empty array
+     * byte[][][] a = {{{1, 2}}};
+     * byte[][][] b = new byte[0][][];
+     * byte[][][] result = Array.concat(a, b);
+     * // result = {{{1, 2}}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * byte[][][] result = Array.concat(null, null);
+     * // result = new byte[0][][]
+     * }</pre>
+     *
+     * @param a The first 3D byte array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 3D byte array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 3D byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static byte[][][] concat(final byte[][][] a, final byte[][][] b) {
         if (N.isEmpty(a)) {
@@ -2731,14 +2661,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D short arrays.
+     * Concatenates two 2D short arrays element-wise by combining their corresponding row elements.
      *
-     * <p>This method takes two 2D short arrays as input and returns a new 2D short array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each row index:
+     * <ul>
+     *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
+     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
+     * </ul>
      *
-     * @param a The first 2D short array to be concatenated.
-     * @param b The second 2D short array to be concatenated.
-     * @return A new 2D short array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 2D arrays
+     * short[][] a = {{1, 2}, {3}};
+     * short[][] b = {{4}, {5, 6}};
+     * short[][] result = Array.concat(a, b);
+     * // result = {{1, 2, 4}, {3, 5, 6}}
+     *
+     * // Example 2: Arrays with different lengths
+     * short[][] a = {{1, 2}, {3}};
+     * short[][] b = {{4}};
+     * short[][] result = Array.concat(a, b);
+     * // result = {{1, 2, 4}, {3}}
+     *
+     * // Example 3: Concatenation with empty array
+     * short[][] a = {{1, 2}};
+     * short[][] b = new short[0][];
+     * short[][] result = Array.concat(a, b);
+     * // result = {{1, 2}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * short[][] result = Array.concat(null, null);
+     * // result = new short[0][]
+     * }</pre>
+     *
+     * @param a The first 2D short array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 2D short array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 2D short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static short[][] concat(final short[][] a, final short[][] b) {
         if (N.isEmpty(a)) {
@@ -2758,14 +2722,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D short arrays.
+     * Concatenates two 3D short arrays element-wise by combining their corresponding 2D layer elements.
      *
-     * <p>This method takes two 3D short arrays as input and returns a new 3D short array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
+     * <ul>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     * </ul>
      *
-     * @param a The first 3D short array to be concatenated.
-     * @param b The second 3D short array to be concatenated.
-     * @return A new 3D short array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 3D arrays
+     * short[][][] a = {{{1, 2}}, {{3}}};
+     * short[][][] b = {{{4}}, {{5, 6}}};
+     * short[][][] result = Array.concat(a, b);
+     * // result = {{{1, 2, 4}}, {{3, 5, 6}}}
+     *
+     * // Example 2: Arrays with different lengths
+     * short[][][] a = {{{1, 2}}, {{3}}};
+     * short[][][] b = {{{4}}};
+     * short[][][] result = Array.concat(a, b);
+     * // result = {{{1, 2, 4}}, {{3}}}
+     *
+     * // Example 3: Concatenation with empty array
+     * short[][][] a = {{{1, 2}}};
+     * short[][][] b = new short[0][][];
+     * short[][][] result = Array.concat(a, b);
+     * // result = {{{1, 2}}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * short[][][] result = Array.concat(null, null);
+     * // result = new short[0][][]
+     * }</pre>
+     *
+     * @param a The first 3D short array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 3D short array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 3D short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static short[][][] concat(final short[][][] a, final short[][][] b) {
         if (N.isEmpty(a)) {
@@ -2785,14 +2783,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D integer arrays.
+     * Concatenates two 2D integer arrays element-wise by combining their corresponding row elements.
      *
-     * <p>This method takes two 2D integer arrays as input and returns a new 2D integer array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each row index:
+     * <ul>
+     *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
+     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
+     * </ul>
      *
-     * @param a The first 2D integer array to be concatenated.
-     * @param b The second 2D integer array to be concatenated.
-     * @return A new 2D integer array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 2D arrays
+     * int[][] a = {{1, 2}, {3}};
+     * int[][] b = {{4}, {5, 6}};
+     * int[][] result = Array.concat(a, b);
+     * // result = {{1, 2, 4}, {3, 5, 6}}
+     *
+     * // Example 2: Arrays with different lengths
+     * int[][] a = {{1, 2}, {3}};
+     * int[][] b = {{4}};
+     * int[][] result = Array.concat(a, b);
+     * // result = {{1, 2, 4}, {3}}
+     *
+     * // Example 3: Concatenation with empty array
+     * int[][] a = {{1, 2}};
+     * int[][] b = new int[0][];
+     * int[][] result = Array.concat(a, b);
+     * // result = {{1, 2}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * int[][] result = Array.concat(null, null);
+     * // result = new int[0][]
+     * }</pre>
+     *
+     * @param a The first 2D int array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 2D int array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 2D int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static int[][] concat(final int[][] a, final int[][] b) {
         if (N.isEmpty(a)) {
@@ -2812,14 +2844,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D integer arrays.
+     * Concatenates two 3D integer arrays element-wise by combining their corresponding 2D layer elements.
      *
-     * <p>This method takes two 3D integer arrays as input and returns a new 3D integer array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
+     * <ul>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     * </ul>
      *
-     * @param a The first 3D integer array to be concatenated.
-     * @param b The second 3D integer array to be concatenated.
-     * @return A new 3D integer array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 3D arrays
+     * int[][][] a = {{{1, 2}}, {{3}}};
+     * int[][][] b = {{{4}}, {{5, 6}}};
+     * int[][][] result = Array.concat(a, b);
+     * // result = {{{1, 2, 4}}, {{3, 5, 6}}}
+     *
+     * // Example 2: Arrays with different lengths
+     * int[][][] a = {{{1, 2}}, {{3}}};
+     * int[][][] b = {{{4}}};
+     * int[][][] result = Array.concat(a, b);
+     * // result = {{{1, 2, 4}}, {{3}}}
+     *
+     * // Example 3: Concatenation with empty array
+     * int[][][] a = {{{1, 2}}};
+     * int[][][] b = new int[0][][];
+     * int[][][] result = Array.concat(a, b);
+     * // result = {{{1, 2}}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * int[][][] result = Array.concat(null, null);
+     * // result = new int[0][][]
+     * }</pre>
+     *
+     * @param a The first 3D int array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 3D int array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 3D int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static int[][][] concat(final int[][][] a, final int[][][] b) {
         if (N.isEmpty(a)) {
@@ -2839,14 +2905,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D long arrays.
+     * Concatenates two 2D long arrays element-wise by combining their corresponding row elements.
      *
-     * <p>This method takes two 2D long arrays as input and returns a new 2D long array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each row index:
+     * <ul>
+     *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
+     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
+     * </ul>
      *
-     * @param a The first 2D long array to be concatenated.
-     * @param b The second 2D long array to be concatenated.
-     * @return A new 2D long array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 2D arrays
+     * long[][] a = {{1L, 2L}, {3L}};
+     * long[][] b = {{4L}, {5L, 6L}};
+     * long[][] result = Array.concat(a, b);
+     * // result = {{1L, 2L, 4L}, {3L, 5L, 6L}}
+     *
+     * // Example 2: Arrays with different lengths
+     * long[][] a = {{1L, 2L}, {3L}};
+     * long[][] b = {{4L}};
+     * long[][] result = Array.concat(a, b);
+     * // result = {{1L, 2L, 4L}, {3L}}
+     *
+     * // Example 3: Concatenation with empty array
+     * long[][] a = {{1L, 2L}};
+     * long[][] b = new long[0][];
+     * long[][] result = Array.concat(a, b);
+     * // result = {{1L, 2L}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * long[][] result = Array.concat(null, null);
+     * // result = new long[0][]
+     * }</pre>
+     *
+     * @param a The first 2D long array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 2D long array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 2D long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static long[][] concat(final long[][] a, final long[][] b) {
         if (N.isEmpty(a)) {
@@ -2866,14 +2966,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D long arrays.
+     * Concatenates two 3D long arrays element-wise by combining their corresponding 2D layer elements.
      *
-     * <p>This method takes two 3D long arrays as input and returns a new 3D long array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
+     * <ul>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     * </ul>
      *
-     * @param a The first 3D long array to be concatenated.
-     * @param b The second 3D long array to be concatenated.
-     * @return A new 3D long array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 3D arrays
+     * long[][][] a = {{{1L, 2L}}, {{3L}}};
+     * long[][][] b = {{{4L}}, {{5L, 6L}}};
+     * long[][][] result = Array.concat(a, b);
+     * // result = {{{1L, 2L, 4L}}, {{3L, 5L, 6L}}}
+     *
+     * // Example 2: Arrays with different lengths
+     * long[][][] a = {{{1L, 2L}}, {{3L}}};
+     * long[][][] b = {{{4L}}};
+     * long[][][] result = Array.concat(a, b);
+     * // result = {{{1L, 2L, 4L}}, {{3L}}}
+     *
+     * // Example 3: Concatenation with empty array
+     * long[][][] a = {{{1L, 2L}}};
+     * long[][][] b = new long[0][][];
+     * long[][][] result = Array.concat(a, b);
+     * // result = {{{1L, 2L}}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * long[][][] result = Array.concat(null, null);
+     * // result = new long[0][][]
+     * }</pre>
+     *
+     * @param a The first 3D long array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 3D long array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 3D long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static long[][][] concat(final long[][][] a, final long[][][] b) {
         if (N.isEmpty(a)) {
@@ -2893,14 +3027,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D float arrays.
+     * Concatenates two 2D float arrays element-wise by combining their corresponding row elements.
      *
-     * <p>This method takes two 2D float arrays as input and returns a new 2D float array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each row index:
+     * <ul>
+     *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
+     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
+     * </ul>
      *
-     * @param a The first 2D float array to be concatenated.
-     * @param b The second 2D float array to be concatenated.
-     * @return A new 2D float array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 2D arrays
+     * float[][] a = {{1.0f, 2.0f}, {3.0f}};
+     * float[][] b = {{4.0f}, {5.0f, 6.0f}};
+     * float[][] result = Array.concat(a, b);
+     * // result = {{1.0f, 2.0f, 4.0f}, {3.0f, 5.0f, 6.0f}}
+     *
+     * // Example 2: Arrays with different lengths
+     * float[][] a = {{1.0f, 2.0f}, {3.0f}};
+     * float[][] b = {{4.0f}};
+     * float[][] result = Array.concat(a, b);
+     * // result = {{1.0f, 2.0f, 4.0f}, {3.0f}}
+     *
+     * // Example 3: Concatenation with empty array
+     * float[][] a = {{1.0f, 2.0f}};
+     * float[][] b = new float[0][];
+     * float[][] result = Array.concat(a, b);
+     * // result = {{1.0f, 2.0f}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * float[][] result = Array.concat(null, null);
+     * // result = new float[0][]
+     * }</pre>
+     *
+     * @param a The first 2D float array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 2D float array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 2D float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static float[][] concat(final float[][] a, final float[][] b) {
         if (N.isEmpty(a)) {
@@ -2920,14 +3088,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D float arrays.
+     * Concatenates two 3D float arrays element-wise by combining their corresponding 2D layer elements.
      *
-     * <p>This method takes two 3D float arrays as input and returns a new 3D float array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
+     * <ul>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     * </ul>
      *
-     * @param a The first 3D float array to be concatenated.
-     * @param b The second 3D float array to be concatenated.
-     * @return A new 3D float array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 3D arrays
+     * float[][][] a = {{{1.0f, 2.0f}}, {{3.0f}}};
+     * float[][][] b = {{{4.0f}}, {{5.0f, 6.0f}}};
+     * float[][][] result = Array.concat(a, b);
+     * // result = {{{1.0f, 2.0f, 4.0f}}, {{3.0f, 5.0f, 6.0f}}}
+     *
+     * // Example 2: Arrays with different lengths
+     * float[][][] a = {{{1.0f, 2.0f}}, {{3.0f}}};
+     * float[][][] b = {{{4.0f}}};
+     * float[][][] result = Array.concat(a, b);
+     * // result = {{{1.0f, 2.0f, 4.0f}}, {{3.0f}}}
+     *
+     * // Example 3: Concatenation with empty array
+     * float[][][] a = {{{1.0f, 2.0f}}};
+     * float[][][] b = new float[0][][];
+     * float[][][] result = Array.concat(a, b);
+     * // result = {{{1.0f, 2.0f}}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * float[][][] result = Array.concat(null, null);
+     * // result = new float[0][][]
+     * }</pre>
+     *
+     * @param a The first 3D float array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 3D float array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 3D float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static float[][][] concat(final float[][][] a, final float[][][] b) {
         if (N.isEmpty(a)) {
@@ -2947,14 +3149,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D double arrays.
+     * Concatenates two 2D double arrays element-wise by combining their corresponding row elements.
      *
-     * <p>This method takes two 2D double arrays as input and returns a new 2D double array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each row index:
+     * <ul>
+     *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
+     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
+     * </ul>
      *
-     * @param a The first 2D double array to be concatenated.
-     * @param b The second 2D double array to be concatenated.
-     * @return A new 2D double array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 2D arrays
+     * double[][] a = {{1.0, 2.0}, {3.0}};
+     * double[][] b = {{4.0}, {5.0, 6.0}};
+     * double[][] result = Array.concat(a, b);
+     * // result = {{1.0, 2.0, 4.0}, {3.0, 5.0, 6.0}}
+     *
+     * // Example 2: Arrays with different lengths
+     * double[][] a = {{1.0, 2.0}, {3.0}};
+     * double[][] b = {{4.0}};
+     * double[][] result = Array.concat(a, b);
+     * // result = {{1.0, 2.0, 4.0}, {3.0}}
+     *
+     * // Example 3: Concatenation with empty array
+     * double[][] a = {{1.0, 2.0}};
+     * double[][] b = new double[0][];
+     * double[][] result = Array.concat(a, b);
+     * // result = {{1.0, 2.0}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * double[][] result = Array.concat(null, null);
+     * // result = new double[0][]
+     * }</pre>
+     *
+     * @param a The first 2D double array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 2D double array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 2D double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static double[][] concat(final double[][] a, final double[][] b) {
         if (N.isEmpty(a)) {
@@ -2974,14 +3210,48 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D double arrays.
+     * Concatenates two 3D double arrays element-wise by combining their corresponding 2D layer elements.
      *
-     * <p>This method takes two 3D double arrays as input and returns a new 3D double array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
+     * <ul>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     * </ul>
      *
-     * @param a The first 3D double array to be concatenated.
-     * @param b The second 3D double array to be concatenated.
-     * @return A new 3D double array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 3D arrays
+     * double[][][] a = {{{1.0, 2.0}}, {{3.0}}};
+     * double[][][] b = {{{4.0}}, {{5.0, 6.0}}};
+     * double[][][] result = Array.concat(a, b);
+     * // result = {{{1.0, 2.0, 4.0}}, {{3.0, 5.0, 6.0}}}
+     *
+     * // Example 2: Arrays with different lengths
+     * double[][][] a = {{{1.0, 2.0}}, {{3.0}}};
+     * double[][][] b = {{{4.0}}};
+     * double[][][] result = Array.concat(a, b);
+     * // result = {{{1.0, 2.0, 4.0}}, {{3.0}}}
+     *
+     * // Example 3: Concatenation with empty array
+     * double[][][] a = {{{1.0, 2.0}}};
+     * double[][][] b = new double[0][][];
+     * double[][][] result = Array.concat(a, b);
+     * // result = {{{1.0, 2.0}}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * double[][][] result = Array.concat(null, null);
+     * // result = new double[0][][]
+     * }</pre>
+     *
+     * @param a The first 3D double array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b The second 3D double array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return A new 3D double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static double[][][] concat(final double[][][] a, final double[][][] b) {
         if (N.isEmpty(a)) {
@@ -3001,15 +3271,50 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D arrays of generic type T.
+     * Concatenates two 2D arrays of generic type T element-wise by combining their corresponding row elements.
      *
-     * <p>This method takes two 2D arrays of type T as input and returns a new 2D array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each row index:
+     * <ul>
+     *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
+     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
+     * </ul>
      *
-     * @param <T> The type of the elements in the arrays.
-     * @param a The first 2D array to be concatenated.
-     * @param b The second 2D array to be concatenated.
-     * @return A new 2D array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully. The method preserves the component type of the input arrays in the result.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 2D String arrays
+     * String[][] a = {{"a", "b"}, {"c"}};
+     * String[][] b = {{"d"}, {"e", "f"}};
+     * String[][] result = Array.concatt(a, b);
+     * // result = {{"a", "b", "d"}, {"c", "e", "f"}}
+     *
+     * // Example 2: Arrays with different lengths
+     * Integer[][] a = {{1, 2}, {3}};
+     * Integer[][] b = {{4}};
+     * Integer[][] result = Array.concatt(a, b);
+     * // result = {{1, 2, 4}, {3}}
+     *
+     * // Example 3: Concatenation with empty array
+     * String[][] a = {{"hello", "world"}};
+     * String[][] b = new String[0][];
+     * String[][] result = Array.concatt(a, b);
+     * // result = {{"hello", "world"}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * String[][] result = Array.concatt(null, null);
+     * // result = null
+     * }</pre>
+     *
+     * @param <T> The component type of the elements in the arrays.
+     * @param a The first 2D array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned.
+     * @param b The second 2D array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned.
+     * @return A new 2D array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
+     *         Returns null if both input arrays are null.
      */
     public static <T> T[][] concatt(final T[][] a, final T[][] b) {
         if (N.isEmpty(a)) {
@@ -3029,15 +3334,50 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D arrays of generic type T.
+     * Concatenates two 3D arrays of generic type T element-wise by combining their corresponding 2D layer elements.
      *
-     * <p>This method takes two 3D arrays of type T as input and returns a new 3D array which is the concatenation of the two input arrays.
-     * The input arrays are not modified during the operation.
+     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
+     * <ul>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concatt method</li>
+     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     * </ul>
      *
-     * @param <T> The type of the elements in the arrays.
-     * @param a The first 3D array to be concatenated.
-     * @param b The second 3D array to be concatenated.
-     * @return A new 3D array which is the concatenation of the input arrays.
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * which will be handled gracefully. The method preserves the component type of the input arrays in the result.
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Example 1: Basic concatenation of two 3D String arrays
+     * String[][][] a = {{{"a", "b"}}, {{"c"}}};
+     * String[][][] b = {{{"d"}}, {{"e", "f"}}};
+     * String[][][] result = Array.concatt(a, b);
+     * // result = {{{"a", "b", "d"}}, {{"c", "e", "f"}}}
+     *
+     * // Example 2: Arrays with different lengths
+     * Integer[][][] a = {{{1, 2}}, {{3}}};
+     * Integer[][][] b = {{{4}}};
+     * Integer[][][] result = Array.concatt(a, b);
+     * // result = {{{1, 2, 4}}, {{3}}}
+     *
+     * // Example 3: Concatenation with empty array
+     * String[][][] a = {{{"hello", "world"}}};
+     * String[][][] b = new String[0][][];
+     * String[][][] result = Array.concatt(a, b);
+     * // result = {{{"hello", "world"}}} (clone of a)
+     *
+     * // Example 4: Both arrays are null/empty
+     * String[][][] result = Array.concatt(null, null);
+     * // result = null
+     * }</pre>
+     *
+     * @param <T> The component type of the elements in the arrays.
+     * @param a The first 3D array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned.
+     * @param b The second 3D array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned.
+     * @return A new 3D array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     *         Returns null if both input arrays are null.
      */
     public static <T> T[][][] concatt(final T[][][] a, final T[][][] b) {
         if (N.isEmpty(a)) {
@@ -3186,10 +3526,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts an array of primitive bytes to an array of Byte objects.
+     * Converts an array of primitive shorts to an array of Short objects.
      *
-     * @param a The array of primitive bytes to be converted.
-     * @return An array of Byte objects, {@code null} if the input array is {@code null}.
+     * @param a The array of primitive shorts to be converted.
+     * @return An array of Short objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Short[] box(final short... a) {
@@ -3229,10 +3569,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts an array of primitive bytes to an array of Byte objects.
+     * Converts an array of primitive integers to an array of Integer objects.
      *
-     * @param a The array of primitive bytes to be converted.
-     * @return An array of Byte objects, {@code null} if the input array is {@code null}.
+     * @param a The array of primitive integers to be converted.
+     * @return An array of Integer objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Integer[] box(final int... a) {
@@ -3272,10 +3612,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts an array of primitive bytes to an array of Byte objects.
+     * Converts an array of primitive longs to an array of Long objects.
      *
-     * @param a The array of primitive bytes to be converted.
-     * @return An array of Byte objects, {@code null} if the input array is {@code null}.
+     * @param a The array of primitive longs to be converted.
+     * @return An array of Long objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Long[] box(final long... a) {
@@ -3315,10 +3655,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts an array of primitive bytes to an array of Byte objects.
+     * Converts an array of primitive floats to an array of Float objects.
      *
-     * @param a The array of primitive bytes to be converted.
-     * @return An array of Byte objects, {@code null} if the input array is {@code null}.
+     * @param a The array of primitive floats to be converted.
+     * @return An array of Float objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Float[] box(final float... a) {
@@ -3358,10 +3698,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts an array of primitive bytes to an array of Byte objects.
+     * Converts an array of primitive doubles to an array of Double objects.
      *
-     * @param a The array of primitive bytes to be converted.
-     * @return An array of Byte objects, {@code null} if the input array is {@code null}.
+     * @param a The array of primitive doubles to be converted.
+     * @return An array of Double objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Double[] box(final double... a) {
@@ -4464,7 +4804,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see #unbox(Long[])
      */
     public static long[][] unbox(final Long[][] a) {
-        return unbox(a, 0);
+        return unbox(a, 0L);
     }
 
     /**
@@ -4501,7 +4841,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see #unbox(Float[])
      */
     public static float[][] unbox(final Float[][] a) {
-        return unbox(a, 0);
+        return unbox(a, 0f);
     }
 
     /**
@@ -4538,7 +4878,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see #unbox(Double[])
      */
     public static double[][] unbox(final Double[][] a) {
-        return unbox(a, 0);
+        return unbox(a, 0d);
     }
 
     /**
@@ -4754,7 +5094,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see #unbox(Long[][][], long)
      */
     public static long[][][] unbox(final Long[][][] a) {
-        return unbox(a, 0);
+        return unbox(a, 0L);
     }
 
     /**
@@ -4790,7 +5130,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see #unbox(Float[][][], float)
      */
     public static float[][][] unbox(final Float[][][] a) {
-        return unbox(a, 0);
+        return unbox(a, 0f);
     }
 
     /**
@@ -4826,7 +5166,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see #unbox(Double[][][], double)
      */
     public static double[][][] unbox(final Double[][][] a) {
-        return unbox(a, 0);
+        return unbox(a, 0d);
     }
 
     /**
@@ -4859,6 +5199,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * boolean[][] matrix = {
+     *     {true, false, true},
+     *     {false, true, false}
+     * };
+     * boolean[][] transposed = Array.transpose(matrix);
+     * // Result: {{true, false}, {false, true}, {true, false}}
+     * // Original matrix is 2x3, transposed is 3x2
+     * }</pre>
      *
      * @param a the 2D array to be transposed
      * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
@@ -5202,6 +5553,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The original 2D array is unchanged; a new 2D array representing the transposed matrix is returned.
      * This method can be used to interchange the rows and columns of the 2D array.
      *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[][] matrix = {
+     *     {"A", "B", "C"},
+     *     {"D", "E", "F"}
+     * };
+     * String[][] transposed = Array.transpose(matrix);
+     * // Result: {{"A", "D"}, {"B", "E"}, {"C", "F"}}
+     * // Original matrix is 2x3, transposed is 3x2
+     * }</pre>
+     *
      * @param <T> The type of the elements in the 2D array.
      * @param a The original 2D array to be transposed.
      * @return A new 2D array representing the transposed matrix, or {@code null} if the input array is {@code null}.
@@ -5254,1637 +5616,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
         }
     }
 
-    //    // TODO It seems there is some bug in  Arrays.parallelSort(a, fromIndex, toIndex). see below test:
-    //
-    //    @Test
-    //    public void test_parallelSort_double() throws Exception {
-    //        assertFalse(1d > Double.NaN);
-    //        assertFalse(1d < Double.NaN);
-    //        assertFalse(1d == Double.NaN);
-    //        assertFalse(1d <= Double.NaN);
-    //
-    //        final Random rand = new Random();
-    //        final int maxSize = 10000;
-    //
-    //        for (int c = 1; c < 17; c++) {
-    //            changeCPUCoreNum(c);
-    //
-    //            for (int i = 0; i < 13; i++) {
-    //                double[] a = new double[rand.nextInt(maxSize)];
-    //
-    //                for (int k = 0, len = a.length; k < len; k++) {
-    //                    a[k] = k % 3 == 0 ? Double.NaN : rand.nextFloat();
-    //                }
-    //
-    //                double[] b = a.clone();
-    //                // N.println(a);
-    //                N.parallelSort(a);
-    //                // N.println(a);
-    //                Arrays.sort(b);
-    //                // N.println(b);
-    //
-    //                for (int k = 0, len = a.length; k < len; k++) {
-    //                    assertEquals(b[k], a[k]);
-    //                }
-    //            }
-    //        }
-    //    }
-    //
-    //    private void changeCPUCoreNum(final int c) {
-    //        Array.CPU_CORES = c;
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param array
-    //    */
-    //    static void parallelSort(final char[] array) {
-    //        if (N.isEmpty(array)) {
-    //            return;
-    //        }
-    //
-    //        parallelSort(array, 0, array.length);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndex
-    //    * @param toIndex
-    //    */
-    //    static void parallelSort(final char[] a, final int fromIndex, final int toIndex) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        final int len = toIndex - fromIndex;
-    //
-    //        if (len < MIN_ARRAY_SORT_GRAN || CPU_CORES == 1) {
-    //            N.sort(a, fromIndex, toIndex);
-    //            return;
-    //        }
-    //
-    //        final Queue<Pair<Integer, Integer>> subArrayIndexQueue = new LinkedList<>();
-    //        final AtomicInteger activeThreadNum = new AtomicInteger();
-    //        final Holder<Throwable> errorHolder = new Holder<>();
-    //        final int lenOfSubArray = len % CPU_CORES == 0 ? len / CPU_CORES : (len / CPU_CORES) + 1;
-    //
-    //        for (int i = 0; i < CPU_CORES; i++) {
-    //            final int start = fromIndex + i * lenOfSubArray;
-    //            final int end = toIndex - start < lenOfSubArray ? toIndex : start + lenOfSubArray;
-    //            subArrayIndexQueue.add(Pair.of(start, end));
-    //
-    //            activeThreadNum.incrementAndGet();
-    //
-    //            parallelSortExecutor.execute(new Runnable() {
-    //                @Override
-    //                public void run() {
-    //                    try {
-    //                        if (errorHolder.value() != null) {
-    //                            return;
-    //                        }
-    //
-    //                        Arrays.sort(a, start, end);
-    //                    } catch (Exception e) {
-    //                        setError(errorHolder, e);
-    //                    } finally {
-    //                        activeThreadNum.decrementAndGet();
-    //                    }
-    //                }
-    //            });
-    //        }
-    //
-    //        while (activeThreadNum.get() > 0) {
-    //            N.sleep(1);
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //
-    //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
-    //            for (int i = 0, size = subArrayIndexQueue.size(); i < size;) {
-    //                final Pair<Integer, Integer> pairA = subArrayIndexQueue.poll();
-    //                if (++i == size) {
-    //                    subArrayIndexQueue.add(pairA);
-    //                } else {
-    //                    i++;
-    //                    final Pair<Integer, Integer> pairB = subArrayIndexQueue.poll();
-    //                    subArrayIndexQueue.offer(Pair.of(pairA.left, pairB.right));
-    //
-    //                    activeThreadNum.incrementAndGet();
-    //
-    //                    parallelSortExecutor.execute(new Runnable() {
-    //                        @Override
-    //                        public void run() {
-    //                            try {
-    //                                if (errorHolder.value() != null) {
-    //                                    return;
-    //                                }
-    //
-    //                                merge(N.copyOfRange(a, pairA.left, pairA.right), 0, pairA.right - pairA.left, a, pairB.left, pairB.right, pairA.left);
-    //
-    //                            } catch (Exception e) {
-    //                                setError(errorHolder, e);
-    //                            } finally {
-    //                                activeThreadNum.decrementAndGet();
-    //                            }
-    //                        }
-    //                    });
-    //                }
-    //            }
-    //
-    //            while (activeThreadNum.get() > 0) {
-    //                N.sleep(1);
-    //            }
-    //
-    //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //            }
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndexA
-    //    * @param toIndexA
-    //    * @param b
-    //    * @param fromIndexB
-    //    * @param toIndexB
-    //    * @param fromIndex
-    //    */
-    //    static void merge(final char[] a, int fromIndexA, int toIndexA, final char[] b, int fromIndexB, int toIndexB, int fromIndex) {
-    //        while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
-    //            if (a[fromIndexA] <= b[fromIndexB]) {
-    //                b[fromIndex++] = a[fromIndexA++];
-    //            } else {
-    //                b[fromIndex++] = b[fromIndexB++];
-    //            }
-    //        }
-    //
-    //        if (fromIndexA < toIndexA) {
-    //            N.copy(a, fromIndexA, b, fromIndex, toIndexA - fromIndexA);
-    //            fromIndex += toIndexA - fromIndexA;
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param array
-    //    */
-    //    static void parallelSort(final byte[] array) {
-    //        if (N.isEmpty(array)) {
-    //            return;
-    //        }
-    //
-    //        parallelSort(array, 0, array.length);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndex
-    //    * @param toIndex
-    //    */
-    //    static void parallelSort(final byte[] a, final int fromIndex, final int toIndex) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        final int len = toIndex - fromIndex;
-    //
-    //        if (len < MIN_ARRAY_SORT_GRAN || CPU_CORES == 1) {
-    //            N.sort(a, fromIndex, toIndex);
-    //            return;
-    //        }
-    //
-    //        final Queue<Pair<Integer, Integer>> subArrayIndexQueue = new LinkedList<>();
-    //        final AtomicInteger activeThreadNum = new AtomicInteger();
-    //        final Holder<Throwable> errorHolder = new Holder<>();
-    //        final int lenOfSubArray = len % CPU_CORES == 0 ? len / CPU_CORES : (len / CPU_CORES) + 1;
-    //
-    //        for (int i = 0; i < CPU_CORES; i++) {
-    //            final int start = fromIndex + i * lenOfSubArray;
-    //            final int end = toIndex - start < lenOfSubArray ? toIndex : start + lenOfSubArray;
-    //            subArrayIndexQueue.add(Pair.of(start, end));
-    //
-    //            activeThreadNum.incrementAndGet();
-    //
-    //            parallelSortExecutor.execute(new Runnable() {
-    //                @Override
-    //                public void run() {
-    //                    try {
-    //                        if (errorHolder.value() != null) {
-    //                            return;
-    //                        }
-    //
-    //                        Arrays.sort(a, start, end);
-    //                    } catch (Exception e) {
-    //                        setError(errorHolder, e);
-    //                    } finally {
-    //                        activeThreadNum.decrementAndGet();
-    //                    }
-    //                }
-    //            });
-    //        }
-    //
-    //        while (activeThreadNum.get() > 0) {
-    //            N.sleep(1);
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //
-    //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
-    //            for (int i = 0, size = subArrayIndexQueue.size(); i < size;) {
-    //                final Pair<Integer, Integer> pairA = subArrayIndexQueue.poll();
-    //                if (++i == size) {
-    //                    subArrayIndexQueue.add(pairA);
-    //                } else {
-    //                    i++;
-    //                    final Pair<Integer, Integer> pairB = subArrayIndexQueue.poll();
-    //                    subArrayIndexQueue.offer(Pair.of(pairA.left, pairB.right));
-    //
-    //                    activeThreadNum.incrementAndGet();
-    //
-    //                    parallelSortExecutor.execute(new Runnable() {
-    //                        @Override
-    //                        public void run() {
-    //                            try {
-    //                                if (errorHolder.value() != null) {
-    //                                    return;
-    //                                }
-    //
-    //                                merge(N.copyOfRange(a, pairA.left, pairA.right), 0, pairA.right - pairA.left, a, pairB.left, pairB.right, pairA.left);
-    //
-    //                            } catch (Exception e) {
-    //                                setError(errorHolder, e);
-    //                            } finally {
-    //                                activeThreadNum.decrementAndGet();
-    //                            }
-    //                        }
-    //                    });
-    //                }
-    //            }
-    //
-    //            while (activeThreadNum.get() > 0) {
-    //                N.sleep(1);
-    //            }
-    //
-    //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //            }
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndexA
-    //    * @param toIndexA
-    //    * @param b
-    //    * @param fromIndexB
-    //    * @param toIndexB
-    //    * @param fromIndex
-    //    */
-    //    static void merge(final byte[] a, int fromIndexA, int toIndexA, final byte[] b, int fromIndexB, int toIndexB, int fromIndex) {
-    //        while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
-    //            if (a[fromIndexA] <= b[fromIndexB]) {
-    //                b[fromIndex++] = a[fromIndexA++];
-    //            } else {
-    //                b[fromIndex++] = b[fromIndexB++];
-    //            }
-    //        }
-    //
-    //        if (fromIndexA < toIndexA) {
-    //            N.copy(a, fromIndexA, b, fromIndex, toIndexA - fromIndexA);
-    //            fromIndex += toIndexA - fromIndexA;
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param array
-    //    */
-    //    static void parallelSort(final short[] array) {
-    //        if (N.isEmpty(array)) {
-    //            return;
-    //        }
-    //
-    //        parallelSort(array, 0, array.length);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndex
-    //    * @param toIndex
-    //    */
-    //    static void parallelSort(final short[] a, final int fromIndex, final int toIndex) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        final int len = toIndex - fromIndex;
-    //
-    //        if (len < MIN_ARRAY_SORT_GRAN || CPU_CORES == 1) {
-    //            N.sort(a, fromIndex, toIndex);
-    //            return;
-    //        }
-    //
-    //        final Queue<Pair<Integer, Integer>> subArrayIndexQueue = new LinkedList<>();
-    //        final AtomicInteger activeThreadNum = new AtomicInteger();
-    //        final Holder<Throwable> errorHolder = new Holder<>();
-    //        final int lenOfSubArray = len % CPU_CORES == 0 ? len / CPU_CORES : (len / CPU_CORES) + 1;
-    //
-    //        for (int i = 0; i < CPU_CORES; i++) {
-    //            final int start = fromIndex + i * lenOfSubArray;
-    //            final int end = toIndex - start < lenOfSubArray ? toIndex : start + lenOfSubArray;
-    //            subArrayIndexQueue.add(Pair.of(start, end));
-    //
-    //            activeThreadNum.incrementAndGet();
-    //
-    //            parallelSortExecutor.execute(new Runnable() {
-    //                @Override
-    //                public void run() {
-    //                    try {
-    //                        if (errorHolder.value() != null) {
-    //                            return;
-    //                        }
-    //
-    //                        Arrays.sort(a, start, end);
-    //                    } catch (Exception e) {
-    //                        setError(errorHolder, e);
-    //                    } finally {
-    //                        activeThreadNum.decrementAndGet();
-    //                    }
-    //                }
-    //            });
-    //        }
-    //
-    //        while (activeThreadNum.get() > 0) {
-    //            N.sleep(1);
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //
-    //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
-    //            for (int i = 0, size = subArrayIndexQueue.size(); i < size;) {
-    //                final Pair<Integer, Integer> pairA = subArrayIndexQueue.poll();
-    //                if (++i == size) {
-    //                    subArrayIndexQueue.add(pairA);
-    //                } else {
-    //                    i++;
-    //                    final Pair<Integer, Integer> pairB = subArrayIndexQueue.poll();
-    //                    subArrayIndexQueue.offer(Pair.of(pairA.left, pairB.right));
-    //
-    //                    activeThreadNum.incrementAndGet();
-    //
-    //                    parallelSortExecutor.execute(new Runnable() {
-    //                        @Override
-    //                        public void run() {
-    //                            try {
-    //                                if (errorHolder.value() != null) {
-    //                                    return;
-    //                                }
-    //
-    //                                merge(N.copyOfRange(a, pairA.left, pairA.right), 0, pairA.right - pairA.left, a, pairB.left, pairB.right, pairA.left);
-    //
-    //                            } catch (Exception e) {
-    //                                setError(errorHolder, e);
-    //                            } finally {
-    //                                activeThreadNum.decrementAndGet();
-    //                            }
-    //                        }
-    //                    });
-    //                }
-    //            }
-    //
-    //            while (activeThreadNum.get() > 0) {
-    //                N.sleep(1);
-    //            }
-    //
-    //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //            }
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndexA
-    //    * @param toIndexA
-    //    * @param b
-    //    * @param fromIndexB
-    //    * @param toIndexB
-    //    * @param fromIndex
-    //    */
-    //    static void merge(final short[] a, int fromIndexA, int toIndexA, final short[] b, int fromIndexB, int toIndexB, int fromIndex) {
-    //        while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
-    //            if (a[fromIndexA] <= b[fromIndexB]) {
-    //                b[fromIndex++] = a[fromIndexA++];
-    //            } else {
-    //                b[fromIndex++] = b[fromIndexB++];
-    //            }
-    //        }
-    //
-    //        if (fromIndexA < toIndexA) {
-    //            N.copy(a, fromIndexA, b, fromIndex, toIndexA - fromIndexA);
-    //            fromIndex += toIndexA - fromIndexA;
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param array
-    //    */
-    //    static void parallelSort(final int[] array) {
-    //        if (N.isEmpty(array)) {
-    //            return;
-    //        }
-    //
-    //        parallelSort(array, 0, array.length);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndex
-    //    * @param toIndex
-    //    */
-    //    static void parallelSort(final int[] a, final int fromIndex, final int toIndex) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        final int len = toIndex - fromIndex;
-    //
-    //        if (len < MIN_ARRAY_SORT_GRAN || CPU_CORES == 1) {
-    //            N.sort(a, fromIndex, toIndex);
-    //            return;
-    //        }
-    //
-    //        final Queue<Pair<Integer, Integer>> subArrayIndexQueue = new LinkedList<>();
-    //        final AtomicInteger activeThreadNum = new AtomicInteger();
-    //        final Holder<Throwable> errorHolder = new Holder<>();
-    //        final int lenOfSubArray = len % CPU_CORES == 0 ? len / CPU_CORES : (len / CPU_CORES) + 1;
-    //
-    //        for (int i = 0; i < CPU_CORES; i++) {
-    //            final int start = fromIndex + i * lenOfSubArray;
-    //            final int end = toIndex - start < lenOfSubArray ? toIndex : start + lenOfSubArray;
-    //            subArrayIndexQueue.add(Pair.of(start, end));
-    //
-    //            activeThreadNum.incrementAndGet();
-    //
-    //            parallelSortExecutor.execute(new Runnable() {
-    //                @Override
-    //                public void run() {
-    //                    try {
-    //                        if (errorHolder.value() != null) {
-    //                            return;
-    //                        }
-    //
-    //                        Arrays.sort(a, start, end);
-    //                    } catch (Exception e) {
-    //                        setError(errorHolder, e);
-    //                    } finally {
-    //                        activeThreadNum.decrementAndGet();
-    //                    }
-    //                }
-    //            });
-    //        }
-    //
-    //        while (activeThreadNum.get() > 0) {
-    //            N.sleep(1);
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //
-    //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
-    //            for (int i = 0, size = subArrayIndexQueue.size(); i < size;) {
-    //                final Pair<Integer, Integer> pairA = subArrayIndexQueue.poll();
-    //                if (++i == size) {
-    //                    subArrayIndexQueue.add(pairA);
-    //                } else {
-    //                    i++;
-    //                    final Pair<Integer, Integer> pairB = subArrayIndexQueue.poll();
-    //                    subArrayIndexQueue.offer(Pair.of(pairA.left, pairB.right));
-    //
-    //                    activeThreadNum.incrementAndGet();
-    //
-    //                    parallelSortExecutor.execute(new Runnable() {
-    //                        @Override
-    //                        public void run() {
-    //                            try {
-    //                                if (errorHolder.value() != null) {
-    //                                    return;
-    //                                }
-    //
-    //                                merge(N.copyOfRange(a, pairA.left, pairA.right), 0, pairA.right - pairA.left, a, pairB.left, pairB.right, pairA.left);
-    //
-    //                            } catch (Exception e) {
-    //                                setError(errorHolder, e);
-    //                            } finally {
-    //                                activeThreadNum.decrementAndGet();
-    //                            }
-    //                        }
-    //                    });
-    //                }
-    //            }
-    //
-    //            while (activeThreadNum.get() > 0) {
-    //                N.sleep(1);
-    //            }
-    //
-    //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //            }
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndexA
-    //    * @param toIndexA
-    //    * @param b
-    //    * @param fromIndexB
-    //    * @param toIndexB
-    //    * @param fromIndex
-    //    */
-    //    static void merge(final int[] a, int fromIndexA, int toIndexA, final int[] b, int fromIndexB, int toIndexB, int fromIndex) {
-    //        while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
-    //            if (a[fromIndexA] <= b[fromIndexB]) {
-    //                b[fromIndex++] = a[fromIndexA++];
-    //            } else {
-    //                b[fromIndex++] = b[fromIndexB++];
-    //            }
-    //        }
-    //
-    //        if (fromIndexA < toIndexA) {
-    //            N.copy(a, fromIndexA, b, fromIndex, toIndexA - fromIndexA);
-    //            fromIndex += toIndexA - fromIndexA;
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param array
-    //    */
-    //    static void parallelSort(final long[] array) {
-    //        if (N.isEmpty(array)) {
-    //            return;
-    //        }
-    //
-    //        parallelSort(array, 0, array.length);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndex
-    //    * @param toIndex
-    //    */
-    //    static void parallelSort(final long[] a, final int fromIndex, final int toIndex) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        final int len = toIndex - fromIndex;
-    //
-    //        if (len < MIN_ARRAY_SORT_GRAN || CPU_CORES == 1) {
-    //            N.sort(a, fromIndex, toIndex);
-    //            return;
-    //        }
-    //
-    //        final Queue<Pair<Integer, Integer>> subArrayIndexQueue = new LinkedList<>();
-    //        final AtomicInteger activeThreadNum = new AtomicInteger();
-    //        final Holder<Throwable> errorHolder = new Holder<>();
-    //        final int lenOfSubArray = len % CPU_CORES == 0 ? len / CPU_CORES : (len / CPU_CORES) + 1;
-    //
-    //        for (int i = 0; i < CPU_CORES; i++) {
-    //            final int start = fromIndex + i * lenOfSubArray;
-    //            final int end = toIndex - start < lenOfSubArray ? toIndex : start + lenOfSubArray;
-    //            subArrayIndexQueue.add(Pair.of(start, end));
-    //
-    //            activeThreadNum.incrementAndGet();
-    //
-    //            parallelSortExecutor.execute(new Runnable() {
-    //                @Override
-    //                public void run() {
-    //                    try {
-    //                        if (errorHolder.value() != null) {
-    //                            return;
-    //                        }
-    //
-    //                        Arrays.sort(a, start, end);
-    //                    } catch (Exception e) {
-    //                        setError(errorHolder, e);
-    //                    } finally {
-    //                        activeThreadNum.decrementAndGet();
-    //                    }
-    //                }
-    //            });
-    //        }
-    //
-    //        while (activeThreadNum.get() > 0) {
-    //            N.sleep(1);
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //
-    //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
-    //            for (int i = 0, size = subArrayIndexQueue.size(); i < size;) {
-    //                final Pair<Integer, Integer> pairA = subArrayIndexQueue.poll();
-    //                if (++i == size) {
-    //                    subArrayIndexQueue.add(pairA);
-    //                } else {
-    //                    i++;
-    //                    final Pair<Integer, Integer> pairB = subArrayIndexQueue.poll();
-    //                    subArrayIndexQueue.offer(Pair.of(pairA.left, pairB.right));
-    //
-    //                    activeThreadNum.incrementAndGet();
-    //
-    //                    parallelSortExecutor.execute(new Runnable() {
-    //                        @Override
-    //                        public void run() {
-    //                            try {
-    //                                if (errorHolder.value() != null) {
-    //                                    return;
-    //                                }
-    //
-    //                                merge(N.copyOfRange(a, pairA.left, pairA.right), 0, pairA.right - pairA.left, a, pairB.left, pairB.right, pairA.left);
-    //
-    //                            } catch (Exception e) {
-    //                                setError(errorHolder, e);
-    //                            } finally {
-    //                                activeThreadNum.decrementAndGet();
-    //                            }
-    //                        }
-    //                    });
-    //                }
-    //            }
-    //
-    //            while (activeThreadNum.get() > 0) {
-    //                N.sleep(1);
-    //            }
-    //
-    //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //            }
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndexA
-    //    * @param toIndexA
-    //    * @param b
-    //    * @param fromIndexB
-    //    * @param toIndexB
-    //    * @param fromIndex
-    //    */
-    //    static void merge(final long[] a, int fromIndexA, int toIndexA, final long[] b, int fromIndexB, int toIndexB, int fromIndex) {
-    //        while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
-    //            if (a[fromIndexA] <= b[fromIndexB]) {
-    //                b[fromIndex++] = a[fromIndexA++];
-    //            } else {
-    //                b[fromIndex++] = b[fromIndexB++];
-    //            }
-    //        }
-    //
-    //        if (fromIndexA < toIndexA) {
-    //            N.copy(a, fromIndexA, b, fromIndex, toIndexA - fromIndexA);
-    //            fromIndex += toIndexA - fromIndexA;
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param array
-    //    */
-    //    static void parallelSort(final float[] array) {
-    //        if (N.isEmpty(array)) {
-    //            return;
-    //        }
-    //
-    //        parallelSort(array, 0, array.length);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndex
-    //    * @param toIndex
-    //    */
-    //    static void parallelSort(final float[] a, final int fromIndex, final int toIndex) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        final int len = toIndex - fromIndex;
-    //
-    //        if (len < MIN_ARRAY_SORT_GRAN || CPU_CORES == 1) {
-    //            N.sort(a, fromIndex, toIndex);
-    //            return;
-    //        }
-    //
-    //        final Queue<Pair<Integer, Integer>> subArrayIndexQueue = new LinkedList<>();
-    //        final AtomicInteger activeThreadNum = new AtomicInteger();
-    //        final Holder<Throwable> errorHolder = new Holder<>();
-    //        final int lenOfSubArray = len % CPU_CORES == 0 ? len / CPU_CORES : (len / CPU_CORES) + 1;
-    //
-    //        for (int i = 0; i < CPU_CORES; i++) {
-    //            final int start = fromIndex + i * lenOfSubArray;
-    //            final int end = toIndex - start < lenOfSubArray ? toIndex : start + lenOfSubArray;
-    //            subArrayIndexQueue.add(Pair.of(start, end));
-    //
-    //            activeThreadNum.incrementAndGet();
-    //
-    //            parallelSortExecutor.execute(new Runnable() {
-    //                @Override
-    //                public void run() {
-    //                    try {
-    //                        if (errorHolder.value() != null) {
-    //                            return;
-    //                        }
-    //
-    //                        Arrays.sort(a, start, end);
-    //                    } catch (Exception e) {
-    //                        setError(errorHolder, e);
-    //                    } finally {
-    //                        activeThreadNum.decrementAndGet();
-    //                    }
-    //                }
-    //            });
-    //        }
-    //
-    //        while (activeThreadNum.get() > 0) {
-    //            N.sleep(1);
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //
-    //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
-    //            for (int i = 0, size = subArrayIndexQueue.size(); i < size;) {
-    //                final Pair<Integer, Integer> pairA = subArrayIndexQueue.poll();
-    //                if (++i == size) {
-    //                    subArrayIndexQueue.add(pairA);
-    //                } else {
-    //                    i++;
-    //                    final Pair<Integer, Integer> pairB = subArrayIndexQueue.poll();
-    //                    subArrayIndexQueue.offer(Pair.of(pairA.left, pairB.right));
-    //
-    //                    activeThreadNum.incrementAndGet();
-    //
-    //                    parallelSortExecutor.execute(new Runnable() {
-    //                        @Override
-    //                        public void run() {
-    //                            try {
-    //                                if (errorHolder.value() != null) {
-    //                                    return;
-    //                                }
-    //
-    //                                merge(N.copyOfRange(a, pairA.left, pairA.right), 0, pairA.right - pairA.left, a, pairB.left, pairB.right, pairA.left);
-    //
-    //                            } catch (Exception e) {
-    //                                setError(errorHolder, e);
-    //                            } finally {
-    //                                activeThreadNum.decrementAndGet();
-    //                            }
-    //                        }
-    //                    });
-    //                }
-    //            }
-    //
-    //            while (activeThreadNum.get() > 0) {
-    //                N.sleep(1);
-    //            }
-    //
-    //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //            }
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndexA
-    //    * @param toIndexA
-    //    * @param b
-    //    * @param fromIndexB
-    //    * @param toIndexB
-    //    * @param fromIndex
-    //    */
-    //    static void merge(final float[] a, int fromIndexA, int toIndexA, final float[] b, int fromIndexB, int toIndexB, int fromIndex) {
-    //        int numOfNaN = 0;
-    //
-    //        for (int i = toIndexA - 1; i >= fromIndexA && Float.isNaN(a[i]); i--) {
-    //            toIndexA--;
-    //            numOfNaN++;
-    //        }
-    //
-    //        for (int i = toIndexB - 1; i >= fromIndexB && Float.isNaN(b[i]); i--) {
-    //            toIndexB--;
-    //            numOfNaN++;
-    //        }
-    //
-    //        while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
-    //            if (Float.compare(a[fromIndexA], b[fromIndexB]) <= 0) {
-    //                b[fromIndex++] = a[fromIndexA++];
-    //            } else {
-    //                b[fromIndex++] = b[fromIndexB++];
-    //            }
-    //        }
-    //
-    //        if (fromIndexA < toIndexA) {
-    //            N.copy(a, fromIndexA, b, fromIndex, toIndexA - fromIndexA);
-    //            fromIndex += toIndexA - fromIndexA;
-    //        } else if (fromIndexB < toIndexB && numOfNaN > 0) {
-    //            N.copy(b, fromIndexB, b, fromIndex, toIndexB - fromIndexB);
-    //            fromIndex += toIndexB - fromIndexB;
-    //        }
-    //
-    //        if (numOfNaN > 0) {
-    //            N.fill(b, fromIndex, fromIndex + numOfNaN, Float.NaN);
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param array
-    //    */
-    //    static void parallelSort(final double[] array) {
-    //        if (N.isEmpty(array)) {
-    //            return;
-    //        }
-    //
-    //        parallelSort(array, 0, array.length);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndex
-    //    * @param toIndex
-    //    */
-    //    static void parallelSort(final double[] a, final int fromIndex, final int toIndex) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        final int len = toIndex - fromIndex;
-    //
-    //        if (len < MIN_ARRAY_SORT_GRAN || CPU_CORES == 1) {
-    //            N.sort(a, fromIndex, toIndex);
-    //            return;
-    //        }
-    //
-    //        final Queue<Pair<Integer, Integer>> subArrayIndexQueue = new LinkedList<>();
-    //        final AtomicInteger activeThreadNum = new AtomicInteger();
-    //        final Holder<Throwable> errorHolder = new Holder<>();
-    //        final int lenOfSubArray = len % CPU_CORES == 0 ? len / CPU_CORES : (len / CPU_CORES) + 1;
-    //
-    //        for (int i = 0; i < CPU_CORES; i++) {
-    //            final int start = fromIndex + i * lenOfSubArray;
-    //            final int end = toIndex - start < lenOfSubArray ? toIndex : start + lenOfSubArray;
-    //            subArrayIndexQueue.add(Pair.of(start, end));
-    //
-    //            activeThreadNum.incrementAndGet();
-    //
-    //            parallelSortExecutor.execute(new Runnable() {
-    //                @Override
-    //                public void run() {
-    //                    try {
-    //                        if (errorHolder.value() != null) {
-    //                            return;
-    //                        }
-    //
-    //                        Arrays.sort(a, start, end);
-    //                    } catch (Exception e) {
-    //                        setError(errorHolder, e);
-    //                    } finally {
-    //                        activeThreadNum.decrementAndGet();
-    //                    }
-    //                }
-    //            });
-    //        }
-    //
-    //        while (activeThreadNum.get() > 0) {
-    //            N.sleep(1);
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //
-    //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
-    //            for (int i = 0, size = subArrayIndexQueue.size(); i < size;) {
-    //                final Pair<Integer, Integer> pairA = subArrayIndexQueue.poll();
-    //                if (++i == size) {
-    //                    subArrayIndexQueue.add(pairA);
-    //                } else {
-    //                    i++;
-    //                    final Pair<Integer, Integer> pairB = subArrayIndexQueue.poll();
-    //                    subArrayIndexQueue.offer(Pair.of(pairA.left, pairB.right));
-    //
-    //                    activeThreadNum.incrementAndGet();
-    //
-    //                    parallelSortExecutor.execute(new Runnable() {
-    //                        @Override
-    //                        public void run() {
-    //                            try {
-    //                                if (errorHolder.value() != null) {
-    //                                    return;
-    //                                }
-    //
-    //                                merge(N.copyOfRange(a, pairA.left, pairA.right), 0, pairA.right - pairA.left, a, pairB.left, pairB.right, pairA.left);
-    //
-    //                            } catch (Exception e) {
-    //                                setError(errorHolder, e);
-    //                            } finally {
-    //                                activeThreadNum.decrementAndGet();
-    //                            }
-    //                        }
-    //                    });
-    //                }
-    //            }
-    //
-    //            while (activeThreadNum.get() > 0) {
-    //                N.sleep(1);
-    //            }
-    //
-    //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //            }
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndexA
-    //    * @param toIndexA
-    //    * @param b
-    //    * @param fromIndexB
-    //    * @param toIndexB
-    //    * @param fromIndex
-    //    */
-    //    static void merge(final double[] a, int fromIndexA, int toIndexA, final double[] b, int fromIndexB, int toIndexB, int fromIndex) {
-    //        int numOfNaN = 0;
-    //
-    //        for (int i = toIndexA - 1; i >= fromIndexA && Double.isNaN(a[i]); i--) {
-    //            toIndexA--;
-    //            numOfNaN++;
-    //        }
-    //
-    //        for (int i = toIndexB - 1; i >= fromIndexB && Double.isNaN(b[i]); i--) {
-    //            toIndexB--;
-    //            numOfNaN++;
-    //        }
-    //
-    //        while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
-    //            if (Double.compare(a[fromIndexA], b[fromIndexB]) <= 0) {
-    //                b[fromIndex++] = a[fromIndexA++];
-    //            } else {
-    //                b[fromIndex++] = b[fromIndexB++];
-    //            }
-    //        }
-    //
-    //        if (fromIndexA < toIndexA) {
-    //            N.copy(a, fromIndexA, b, fromIndex, toIndexA - fromIndexA);
-    //            fromIndex += toIndexA - fromIndexA;
-    //        } else if (fromIndexB < toIndexB && numOfNaN > 0) {
-    //            N.copy(b, fromIndexB, b, fromIndex, toIndexB - fromIndexB);
-    //            fromIndex += toIndexB - fromIndexB;
-    //        }
-    //
-    //        if (numOfNaN > 0) {
-    //            N.fill(b, fromIndex, fromIndex + numOfNaN, Double.NaN);
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    */
-    //    static void parallelSort(final Object[] a) {
-    //        if (N.isEmpty(a)) {
-    //            return;
-    //        }
-    //
-    //        parallelSort(a, 0, a.length);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param a
-    //    * @param fromIndex
-    //    * @param toIndex
-    //    */
-    //    static void parallelSort(final Object[] a, final int fromIndex, final int toIndex) {
-    //        parallelSort(a, fromIndex, toIndex, Comparators.NATURAL_ORDER);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param <T>
-    //    * @param a
-    //    * @param cmp
-    //    */
-    //    static <T> void parallelSort(final T[] a, final Comparator<? super T> cmp) {
-    //        if (N.isEmpty(a)) {
-    //            return;
-    //        }
-    //
-    //        parallelSort(a, 0, a.length, cmp);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param <T>
-    //    * @param a
-    //    * @param fromIndex
-    //    * @param toIndex
-    //    * @param cmp
-    //    */
-    //    static <T> void parallelSort(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
-    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-    //
-    //        if (N.isEmpty(a) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        final Comparator<? super T> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
-    //        final int len = toIndex - fromIndex;
-    //
-    //        if (len < MIN_ARRAY_SORT_GRAN || CPU_CORES == 1) {
-    //            N.sort(a, fromIndex, toIndex, comparator);
-    //            return;
-    //        }
-    //
-    //        final Queue<Pair<Integer, Integer>> subArrayIndexQueue = new LinkedList<>();
-    //        final AtomicInteger activeThreadNum = new AtomicInteger();
-    //        final Holder<Throwable> errorHolder = new Holder<>();
-    //        final int lenOfSubArray = len % CPU_CORES == 0 ? len / CPU_CORES : (len / CPU_CORES) + 1;
-    //
-    //        for (int i = 0; i < CPU_CORES; i++) {
-    //            final int start = fromIndex + i * lenOfSubArray;
-    //            final int end = toIndex - start < lenOfSubArray ? toIndex : start + lenOfSubArray;
-    //            subArrayIndexQueue.add(Pair.of(start, end));
-    //
-    //            activeThreadNum.incrementAndGet();
-    //
-    //            parallelSortExecutor.execute(new Runnable() {
-    //                @Override
-    //                public void run() {
-    //                    try {
-    //                        if (errorHolder.value() != null) {
-    //                            return;
-    //                        }
-    //
-    //                        Arrays.sort(a, start, end, comparator);
-    //                    } catch (Exception e) {
-    //                        setError(errorHolder, e);
-    //                    } finally {
-    //                        activeThreadNum.decrementAndGet();
-    //                    }
-    //                }
-    //            });
-    //        }
-    //
-    //        while (activeThreadNum.get() > 0) {
-    //            N.sleep(1);
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //
-    //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
-    //            for (int i = 0, size = subArrayIndexQueue.size(); i < size;) {
-    //                final Pair<Integer, Integer> pairA = subArrayIndexQueue.poll();
-    //                if (++i == size) {
-    //                    subArrayIndexQueue.add(pairA);
-    //                } else {
-    //                    i++;
-    //                    final Pair<Integer, Integer> pairB = subArrayIndexQueue.poll();
-    //                    subArrayIndexQueue.offer(Pair.of(pairA.left, pairB.right));
-    //
-    //                    activeThreadNum.incrementAndGet();
-    //
-    //                    parallelSortExecutor.execute(new Runnable() {
-    //                        @Override
-    //                        public void run() {
-    //                            try {
-    //                                if (errorHolder.value() != null) {
-    //                                    return;
-    //                                }
-    //
-    //                                merge(N.copyOfRange(a, pairA.left, pairA.right), 0, pairA.right - pairA.left, a, pairB.left, pairB.right, pairA.left,
-    //                                        comparator);
-    //
-    //                            } catch (Exception e) {
-    //                                setError(errorHolder, e);
-    //                            } finally {
-    //                                activeThreadNum.decrementAndGet();
-    //                            }
-    //                        }
-    //                    });
-    //                }
-    //            }
-    //
-    //            while (activeThreadNum.get() > 0) {
-    //                N.sleep(1);
-    //            }
-    //
-    //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //            }
-    //        }
-    //
-    //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param <T>
-    //    * @param a
-    //    * @param fromIndexA
-    //    * @param toIndexA
-    //    * @param b
-    //    * @param fromIndexB
-    //    * @param toIndexB
-    //    * @param fromIndex
-    //    * @param cmp
-    //    */
-    //    static <T> void merge(final T[] a, int fromIndexA, int toIndexA, final T[] b, int fromIndexB, int toIndexB, int fromIndex, Comparator<? super T> cmp) {
-    //        while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
-    //            if (cmp.compare(a[fromIndexA], b[fromIndexB]) <= 0) {
-    //                b[fromIndex++] = a[fromIndexA++];
-    //            } else {
-    //                b[fromIndex++] = b[fromIndexB++];
-    //            }
-    //        }
-    //
-    //        if (fromIndexA < toIndexA) {
-    //            N.copy(a, fromIndexA, b, fromIndex, toIndexA - fromIndexA);
-    //            fromIndex += toIndexA - fromIndexA;
-    //        }
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param <T>
-    //    * @param c
-    //    */
-    //    static <T extends Comparable<? super T>> void parallelSort(final List<? extends T> c) {
-    //        if (N.isEmpty(c)) {
-    //            return;
-    //        }
-    //
-    //        parallelSort(c, 0, c.size());
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param <T>
-    //    * @param c
-    //    * @param fromIndex
-    //    * @param toIndex
-    //    */
-    //    static <T extends Comparable<? super T>> void parallelSort(final List<? extends T> c, final int fromIndex, final int toIndex) {
-    //        parallelSort(c, fromIndex, toIndex, Comparators.NATURAL_ORDER);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param <T>
-    //    * @param list
-    //    * @param cmp
-    //    */
-    //    static <T> void parallelSort(final List<? extends T> list, final Comparator<? super T> cmp) {
-    //        if (N.isEmpty(list)) {
-    //            return;
-    //        }
-    //
-    //        parallelSort(list, 0, list.size(), cmp);
-    //    }
-    //
-    //    /**
-    //    *
-    //    * @param <T>
-    //    * @param c
-    //    * @param fromIndex
-    //    * @param toIndex
-    //    * @param cmp
-    //    */
-    //    @SuppressWarnings("rawtypes")
-    //    static <T> void parallelSort(final List<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-    //        if ((N.isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-    //            return;
-    //        }
-    //
-    //        @SuppressWarnings("deprecation")
-    //        final T[] a = (T[]) InternalUtil.getInternalArray(c);
-    //
-    //        if (a != null) {
-    //            parallelSort(a, fromIndex, toIndex, cmp);
-    //
-    //            return;
-    //        }
-    //
-    //        final T[] array = (T[]) c.toArray();
-    //
-    //        parallelSort(array, fromIndex, toIndex, cmp);
-    //
-    //        final ListIterator<Object> it = (ListIterator) c.listIterator();
-    //
-    //        for (int i = 0, len = array.length; i < len; i++) {
-    //            it.next();
-    //
-    //            it.set(array[i]);
-    //        }
-    //    }
-    //
-    //    /**
-    //    * Sets the error.
-    //    *
-    //    * @param errorHolder
-    //    * @param e
-    //    */
-    //    private static void setError(final Holder<Throwable> errorHolder, Throwable e) {
-    //        synchronized (errorHolder) {
-    //            if (errorHolder.value() == null) {
-    //                errorHolder.setValue(e);
-    //            } else {
-    //                errorHolder.value().addSuppressed(e);
-    //            }
-    //        }
-    //    }
-
-    //    static double medianOfTwoSortedArrays(final int[] a, final int[] b) {
-    //        final int n = a.length;
-    //        final int m = b.length;
-    //
-    //        if (n > m) {
-    //            return medianOfTwoSortedArrays(b, a);
-    //        }
-    //
-    //        int k = (n + m - 1) / 2;
-    //        int l = 0, r = Math.min(k, n);
-    //        while (l < r) {
-    //            int mid1 = (l + r) / 2;
-    //            int mid2 = k - mid1;
-    //
-    //            if (a[mid1] < b[mid2]) {
-    //                l = mid1 + 1;
-    //            } else {
-    //                r = mid1;
-    //            }
-    //        }
-    //
-    //        int num1 = Math.max(l - 1 >= 0 ? a[l - 1] : Integer.MIN_VALUE, k - l >= 0 ? b[k - l] : Integer.MIN_VALUE);
-    //
-    //        if ((n + m) % 2 != 0) {
-    //            return num1;
-    //        }
-    //
-    //        int num2 = Math.min(l < n ? a[l] : Integer.MAX_VALUE, k - l + 1 < m ? b[k - l + 1] : Integer.MAX_VALUE);
-    //
-    //        return (num1 + num2) / (double) 2;
-    //    }
-    //
-    //    static int theKthNumberOfTwoSortedArrays(final int[] a, final int[] b, final int k) {
-    //        final int n = a.length;
-    //        final int m = b.length;
-    //
-    //        if (n > m) {
-    //            return theKthNumberOfTwoSortedArrays(b, a, k);
-    //        }
-    //
-    //        int l = 0, r = Math.min(k, n);
-    //        while (l < r) {
-    //            int mid1 = (l + r) / 2;
-    //            int mid2 = k - mid1;
-    //
-    //            if (a[mid1] < b[mid2]) {
-    //                l = mid1 + 1;
-    //            } else {
-    //                r = mid1;
-    //            }
-    //        }
-    //
-    //        return Math.max(l - 1 >= 0 ? a[l - 1] : Integer.MIN_VALUE, k - l >= 0 ? b[k - l] : Integer.MIN_VALUE);
-    //    }
-    //
-    //    static long theKthNumberOfTwoSortedArrays(final long[] a, final long[] b, final int k) {
-    //        final int n = a.length;
-    //        final int m = b.length;
-    //
-    //        if (n > m) {
-    //            return theKthNumberOfTwoSortedArrays(b, a, k);
-    //        }
-    //
-    //        int l = 0, r = Math.min(k, n);
-    //        while (l < r) {
-    //            int mid1 = (l + r) / 2;
-    //            int mid2 = k - mid1;
-    //
-    //            if (a[mid1] < b[mid2]) {
-    //                l = mid1 + 1;
-    //            } else {
-    //                r = mid1;
-    //            }
-    //        }
-    //
-    //        return Math.max(l - 1 >= 0 ? a[l - 1] : Integer.MIN_VALUE, k - l >= 0 ? b[k - l] : Integer.MIN_VALUE);
-    //    }
-    //
-    //    static float theKthNumberOfTwoSortedArrays(final float[] a, final float[] b, final int k) {
-    //        final int n = a.length;
-    //        final int m = b.length;
-    //
-    //        if (n > m) {
-    //            return theKthNumberOfTwoSortedArrays(b, a, k);
-    //        }
-    //
-    //        int l = 0, r = Math.min(k, n);
-    //        while (l < r) {
-    //            int mid1 = (l + r) / 2;
-    //            int mid2 = k - mid1;
-    //
-    //            if (a[mid1] < b[mid2]) {
-    //                l = mid1 + 1;
-    //            } else {
-    //                r = mid1;
-    //            }
-    //        }
-    //
-    //        return Math.max(l - 1 >= 0 ? a[l - 1] : Integer.MIN_VALUE, k - l >= 0 ? b[k - l] : Integer.MIN_VALUE);
-    //    }
-    //
-    //    static double theKthNumberOfTwoSortedArrays(final double[] a, final double[] b, final int k) {
-    //        final int n = a.length;
-    //        final int m = b.length;
-    //
-    //        if (n > m) {
-    //            return theKthNumberOfTwoSortedArrays(b, a, k);
-    //        }
-    //
-    //        int l = 0, r = Math.min(k, n);
-    //        while (l < r) {
-    //            int mid1 = (l + r) / 2;
-    //            int mid2 = k - mid1;
-    //
-    //            if (a[mid1] < b[mid2]) {
-    //                l = mid1 + 1;
-    //            } else {
-    //                r = mid1;
-    //            }
-    //        }
-    //
-    //        return Math.max(l - 1 >= 0 ? a[l - 1] : Integer.MIN_VALUE, k - l >= 0 ? b[k - l] : Integer.MIN_VALUE);
-    //    }
-    //
-    //    static <E> Collection<List<E>> permutationsOf(final Collection<E> elements) {
-    //        return Collections2.permutations(elements);
-    //    }
-    //
-    //    static <E extends Comparable<? super E>> Collection<List<E>> orderedPermutationsOf(final Collection<E> elements) {
-    //        return Collections2.orderedPermutations(elements);
-    //    }
-    //
-    //    static <E> Collection<List<E>> orderedPermutationsOf(final Collection<E> elements, final Comparator<? super E> comparator) {
-    //        return Collections2.orderedPermutations(elements, comparator);
-    //    }
-    //
-    //    private static final String[] tens = { "", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety" };
-    //    private static final String[] lessThan20 = { "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
-    //            "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen" };
-    //    private static final String[] thousands = { "", "Thousand", "Million", "Billion" };
-    //
-    //    static String numberToWords(int num) {
-    //        // https://leetcode.com/discuss/55462/my-clean-java-solution-very-easy-to-understand
-    //        if (num == 0) {
-    //            return "Zero";
-    //        }
-    //        int i = 0;
-    //        String words = "";
-    //
-    //        while (num > 0) {
-    //            if (num % 1000 != 0) {
-    //                words = numberToWordsHelper(num % 1000) + thousands[i] + " " + words;
-    //            }
-    //            num /= 1000;
-    //            i++;
-    //        }
-    //
-    //        return words.trim();
-    //    }
-    //
-    //    private static String numberToWordsHelper(int num) {
-    //        if (num == 0)
-    //            return "";
-    //        else if (num < 20)
-    //            return lessThan20[num] + " ";
-    //        else if (num < 100)
-    //            return tens[num / 10] + " " + numberToWordsHelper(num % 10);
-    //        else
-    //            return lessThan20[num / 100] + " Hundred " + numberToWordsHelper(num % 100);
-    //    }
-    //
-    //    private static final String[] t = { "", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz" };
-    //
-    //    static List<String> letterCombinationsOfPhoneNum(final String digits) {
-    //        List<String> res = new ArrayList<String>();
-    //
-    //        if (digits == null || digits.length() == 0) {
-    //            return res;
-    //        }
-    //
-    //        res.add("");
-    //        for (int i = 0, len = digits.length(); i < len; i++) {
-    //            String str = t[digits.charAt(i) - '0'];
-    //            if (str.length() == 0) {
-    //                continue;
-    //            }
-    //            int size = res.size();
-    //            for (int j = 0; j < size; j++) {
-    //                for (int k = 0; k < str.length(); k++) {
-    //                    res.add(res.get(j) + str.charAt(k));
-    //                }
-    //            }
-    //
-    //            res = res.subList(size, res.size());
-    //        }
-    //        return res;
-    //    }
-    //
-    //    static boolean isPowerOfTwo(final int n) {
-    //        return (n > 0 && (n & (n - 1)) == 0);
-    //    }
-    //
-    //    static int reverse(int x) {
-    //        long res = 0;
-    //        while (x != 0) {
-    //            res = res * 10 + x % 10;
-    //            x = x / 10;
-    //        }
-    //
-    //        return (res > Integer.MAX_VALUE || res < Integer.MIN_VALUE) ? 0 : (int) res;
-    //    }
-    //
-    //    static int reverse(long x) {
-    //        long res = 0;
-    //        while (x != 0) {
-    //            res = res * 10 + x % 10;
-    //            x = x / 10;
-    //        }
-    //
-    //        return (res > Long.MAX_VALUE || res < Long.MIN_VALUE) ? 0 : (int) res;
-    //    }
-    //
-    //    static boolean isPalindromeNumber(final int x) {
-    //        if (x < 0) {
-    //            return false;
-    //        }
-    //        if (x < 10) {
-    //            return true;
-    //        }
-    //        int y = x;
-    //        long z = 0;
-    //        while (y != 0) {
-    //            z = z * 10 + y % 10;
-    //            y = y / 10;
-    //        }
-    //        return z == x;
-    //    }
-    //
-    //    /**
-    //     * Given a string containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.
-    //     * The brackets must close in the correct order, "()" and "()[]{}" are all valid but "(]" and "([)]" are not.
-    //     * @param str
-    //     * @return
-    //     */
-    //    static boolean isValidParentheses(final String str) {
-    //        if (str == null || str.length() == 0) {
-    //            return true;
-    //        }
-    //
-    //        final Map<Character, Character> m = new HashMap<Character, Character>();
-    //        m.put('(', ')');
-    //        m.put('{', '}');
-    //        m.put('[', ']');
-    //
-    //        final Stack<Character> stack = new Stack<>();
-    //        for (int i = 0, len = str.length(); i < len; i++) {
-    //            char ch = str.charAt(i);
-    //            Character p = m.get(ch);
-    //
-    //            if (p == null) {
-    //                if (stack.size() == 0 || m.get(stack.pop()) != ch) {
-    //                    return false;
-    //                }
-    //            } else {
-    //                stack.push(ch);
-    //            }
-    //        }
-    //
-    //        return stack.size() == 0;
-    //    }
-    //
-    //    static List<String> generateParenthesis(final int n) {
-    //        final List<String> res = new ArrayList<>();
-    //        generate(n, 0, 0, res, "");
-    //        return res;
-    //    }
-    //
-    //    private static void generate(int n, int open, int close, List<String> result, String current) {
-    //        if (close == n && open == n) {
-    //            result.add(current);
-    //        } else {
-    //            if (open < n) {
-    //                generate(n, open + 1, close, result, current + "(");
-    //            }
-    //
-    //            if (close < open) {
-    //                generate(n, open, close + 1, result, current + ")");
-    //            }
-    //        }
-    //    }
-    //
-    //    static void rotate90Degree(int[][] matrix) {
-    //        int n = matrix.length;
-    //
-    //        for (int i = 0; i < n / 2; ++i) {
-    //            for (int j = i; j < n - 1 - i; ++j) {
-    //                int tmp = matrix[i][j];
-    //                matrix[i][j] = matrix[n - j - 1][i];
-    //                matrix[n - j - 1][i] = matrix[n - i - 1][n - j - 1];
-    //                matrix[n - i - 1][n - j - 1] = matrix[j][n - i - 1];
-    //                matrix[j][n - i - 1] = tmp;
-    //            }
-    //        }
-    //    }
-
+    /**
+     * Utility class that extends Array, providing access to all Array methods.
+     * This class is marked as Beta and may be subject to changes in future releases.
+     *
+     * @see Array
+     */
     @Beta
     public static final class ArrayUtil extends Array {
         private ArrayUtil() {

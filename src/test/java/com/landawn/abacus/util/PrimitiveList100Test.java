@@ -20,13 +20,11 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-/**
- * Unit tests for PrimitiveList abstract class.
- * Since PrimitiveList is abstract, we'll use IntList as a concrete implementation for testing.
- */
+@Tag("new-test")
 public class PrimitiveList100Test extends TestBase {
 
     private IntList list;
@@ -67,7 +65,7 @@ public class PrimitiveList100Test extends TestBase {
         assertEquals(7, list.size());
         assertEquals(10, list.get(2));
         assertEquals(11, list.get(3));
-        assertEquals(3, list.get(4)); // Original element shifted
+        assertEquals(3, list.get(4));
     }
 
     @Test
@@ -508,7 +506,7 @@ public class PrimitiveList100Test extends TestBase {
     public void testTrimToSize() {
         IntList trimmed = list.trimToSize();
 
-        assertSame(list, trimmed); // Should return the same instance
+        assertSame(list, trimmed);
         assertEquals(5, trimmed.size());
     }
 
@@ -677,7 +675,6 @@ public class PrimitiveList100Test extends TestBase {
     @Test
     @DisplayName("Test println() method")
     public void testPrintln() {
-        // This method prints to console, so we just ensure it doesn't throw
         assertDoesNotThrow(() -> list.println());
     }
 
@@ -686,18 +683,15 @@ public class PrimitiveList100Test extends TestBase {
     public void testEdgeCases() {
         IntList emptyList = IntList.of();
 
-        // Test operations on empty list
         assertTrue(emptyList.isEmpty());
         assertEquals(0, emptyList.size());
         assertFalse(emptyList.hasDuplicates());
         assertTrue(emptyList.isSorted());
 
-        // Test boundary conditions
         assertThrows(IndexOutOfBoundsException.class, () -> list.copy(-1, 3));
         assertThrows(IndexOutOfBoundsException.class, () -> list.copy(1, 10));
         assertThrows(IndexOutOfBoundsException.class, () -> list.copy(3, 1));
 
-        // Test with null inputs where applicable
         list.addAll((IntList) null);
         list.removeAll((IntList) null);
     }

@@ -17,12 +17,14 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.Optional;
 
+@Tag("new-test")
 public class OptionalType100Test extends TestBase {
 
     private OptionalType<String> optionalStringType;
@@ -113,11 +115,9 @@ public class OptionalType100Test extends TestBase {
 
     @Test
     public void testValueOfReturningNull() {
-        // Test when element type's valueOf returns null
         OptionalType<Object> optionalObjectType = (OptionalType<Object>) createType("Optional<Object>");
         Optional<Object> result = optionalObjectType.valueOf("null");
         assertNotNull(result);
-        // Optional.ofNullable should handle null gracefully
     }
 
     @Test

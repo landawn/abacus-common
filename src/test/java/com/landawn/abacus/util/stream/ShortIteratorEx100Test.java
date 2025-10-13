@@ -7,11 +7,13 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.ShortList;
 
+@Tag("new-test")
 public class ShortIteratorEx100Test extends TestBase {
 
     @Test
@@ -21,7 +23,7 @@ public class ShortIteratorEx100Test extends TestBase {
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextShort());
         Assertions.assertEquals(0, iter.count());
         Assertions.assertArrayEquals(new short[0], iter.toArray());
-        iter.close(); // Should not throw
+        iter.close();
     }
 
     @Test
@@ -143,14 +145,11 @@ public class ShortIteratorEx100Test extends TestBase {
         ObjIteratorEx<Short> objIter = ObjIteratorEx.of((short)1, (short)2, (short)3);
         ShortIteratorEx iter = ShortIteratorEx.from(objIter);
         
-        // Test advance
         iter.advance(1);
         Assertions.assertEquals((short)2, iter.nextShort());
         
-        // Test count
         Assertions.assertEquals(1, iter.count());
         
-        // Test close
         iter.close();
     }
 
@@ -165,7 +164,6 @@ public class ShortIteratorEx100Test extends TestBase {
         iter.advance(1);
         Assertions.assertEquals((short)5, iter.nextShort());
         
-        // Advance beyond end
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
@@ -182,7 +180,6 @@ public class ShortIteratorEx100Test extends TestBase {
     @Test
     public void testAdvanceNegative() {
         ShortIteratorEx iter = ShortIteratorEx.of((short)1, (short)2, (short)3);
-        // Assertions.assertThrows(IllegalArgumentException.class, () -> iter.advance(-1));
         iter.advance(-1);
     }
 
@@ -244,6 +241,6 @@ public class ShortIteratorEx100Test extends TestBase {
     @Test
     public void testClose() {
         ShortIteratorEx iter = ShortIteratorEx.of((short)1, (short)2, (short)3);
-        iter.close(); // Should not throw
+        iter.close();
     }
 }

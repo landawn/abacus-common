@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -32,11 +33,9 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalShort;
 
+@Tag("new-test")
 public class ShortStream100Test extends TestBase {
 
-    // This method needs to be implemented by a concrete test class to provide a ShortStream instance.
-    // For example, in ArrayShortStreamTest, it would return new ArrayShortStream(a);
-    // In IteratorShortStreamTest, it would return new IteratorShortStream(ShortIterator.of(a));
     protected ShortStream createShortStream(short... a) {
         return ShortStream.of(a);
     }
@@ -65,7 +64,6 @@ public class ShortStream100Test extends TestBase {
         return ShortStream.of(buff);
     }
 
-
     @Test
     public void testEmpty() {
         ShortStream stream = ShortStream.empty();
@@ -74,26 +72,21 @@ public class ShortStream100Test extends TestBase {
 
     @Test
     public void testOfNullable() {
-        // Test with null
         ShortStream stream1 = ShortStream.ofNullable(null);
         assertEquals(0, stream1.count());
 
-        // Test with non-null value
         ShortStream stream2 = ShortStream.ofNullable((short) 42);
         assertEquals(1, stream2.count());
     }
 
     @Test
     public void testOfArray() {
-        // Test empty array
         ShortStream stream1 = createShortStream();
         assertEquals(0, stream1.count());
 
-        // Test single element
         ShortStream stream2 = createShortStream((short) 1);
         assertArrayEquals(new short[] { 1 }, stream2.toArray());
 
-        // Test multiple elements
         ShortStream stream3 = createShortStream((short) 1, (short) 2, (short) 3);
         assertArrayEquals(new short[] { 1, 2, 3 }, stream3.toArray());
     }
@@ -102,15 +95,12 @@ public class ShortStream100Test extends TestBase {
     public void testOfArrayWithRange() {
         short[] array = { 1, 2, 3, 4, 5 };
 
-        // Test full range
         ShortStream stream1 = createShortStream(array, 0, 5);
         assertArrayEquals(array, stream1.toArray());
 
-        // Test partial range
         ShortStream stream2 = createShortStream(array, 1, 4);
         assertArrayEquals(new short[] { 2, 3, 4 }, stream2.toArray());
 
-        // Test empty range
         ShortStream stream3 = createShortStream(array, 2, 2);
         assertEquals(0, stream3.count());
     }
@@ -131,26 +121,21 @@ public class ShortStream100Test extends TestBase {
 
     @Test
     public void testRange() {
-        // Test ascending range
         ShortStream stream1 = ShortStream.range((short) 1, (short) 4);
         assertArrayEquals(new short[] { 1, 2, 3 }, stream1.toArray());
 
-        // Test empty range
         ShortStream stream2 = ShortStream.range((short) 5, (short) 5);
         assertEquals(0, stream2.count());
 
-        // Test invalid range
         ShortStream stream3 = ShortStream.range((short) 5, (short) 3);
         assertEquals(0, stream3.count());
     }
 
     @Test
     public void testRangeWithStep() {
-        // Test positive step
         ShortStream stream1 = ShortStream.range((short) 0, (short) 10, (short) 3);
         assertArrayEquals(new short[] { 0, 3, 6, 9 }, stream1.toArray());
 
-        // Test negative step
         ShortStream stream2 = ShortStream.range((short) 10, (short) 0, (short) -3);
         assertArrayEquals(new short[] { 10, 7, 4, 1 }, stream2.toArray());
     }
@@ -162,25 +147,21 @@ public class ShortStream100Test extends TestBase {
 
     @Test
     public void testRangeClosed() {
-        // Test inclusive range
         ShortStream stream = ShortStream.rangeClosed((short) 1, (short) 3);
         assertArrayEquals(new short[] { 1, 2, 3 }, stream.toArray());
     }
 
     @Test
     public void testRepeat() {
-        // Test repeat n times
         ShortStream stream1 = ShortStream.repeat((short) 5, 3);
         assertArrayEquals(new short[] { 5, 5, 5 }, stream1.toArray());
 
-        // Test repeat 0 times
         ShortStream stream2 = ShortStream.repeat((short) 5, 0);
         assertEquals(0, stream2.count());
     }
 
     @Test
     public void testIterate() {
-        // Test with hasNext and next
         final int[] count = { 0 };
         ShortStream stream = ShortStream.iterate(() -> count[0] < 3, () -> (short) count[0]++);
         assertArrayEquals(new short[] { 0, 1, 2 }, stream.toArray());
@@ -188,7 +169,6 @@ public class ShortStream100Test extends TestBase {
 
     @Test
     public void testIterateWithSeed() {
-        // Test with seed and UnaryOperator
         ShortStream stream = ShortStream.iterate((short) 1, n -> (short) (n * 2)).limit(4);
         assertArrayEquals(new short[] { 1, 2, 4, 8 }, stream.toArray());
     }
@@ -202,13 +182,11 @@ public class ShortStream100Test extends TestBase {
 
     @Test
     public void testConcat() {
-        // Test concat arrays
         short[] a1 = { 1, 2 };
         short[] a2 = { 3, 4 };
         ShortStream stream1 = ShortStream.concat(a1, a2);
         assertArrayEquals(new short[] { 1, 2, 3, 4 }, stream1.toArray());
 
-        // Test concat streams
         ShortStream s1 = createShortStream((short) 1, (short) 2);
         ShortStream s2 = createShortStream((short) 3, (short) 4);
         ShortStream stream2 = ShortStream.concat(s1, s2);
@@ -232,8 +210,6 @@ public class ShortStream100Test extends TestBase {
         ShortStream stream = ShortStream.merge(a, b, (x, y) -> x < y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertArrayEquals(new short[] { 1, 2, 3, 4, 5, 6 }, stream.toArray());
     }
-
-    // Test instance methods
 
     @Test
     public void testMap() {
@@ -311,7 +287,7 @@ public class ShortStream100Test extends TestBase {
     public void testPeek() {
         List<Short> peeked = new ArrayList<>();
         ShortStream stream = createShortStream((short) 1, (short) 2, (short) 3).peek(peeked::add);
-        stream.toArray(); // Terminal operation to trigger peek
+        stream.toArray();
         assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), peeked);
     }
 
@@ -418,11 +394,9 @@ public class ShortStream100Test extends TestBase {
 
     @Test
     public void testReduce() {
-        // Test reduce with identity
         short result1 = createShortStream((short) 1, (short) 2, (short) 3).reduce((short) 0, (a, b) -> (short) (a + b));
         assertEquals(6, result1);
 
-        // Test reduce without identity
         OptionalShort result2 = createShortStream((short) 1, (short) 2, (short) 3).reduce((a, b) -> (short) (a + b));
         assertTrue(result2.isPresent());
         assertEquals(6, result2.get());
@@ -430,12 +404,10 @@ public class ShortStream100Test extends TestBase {
 
     @Test
     public void testOnlyOne() {
-        // Test with single element
         OptionalShort result1 = createShortStream((short) 42).onlyOne();
         assertTrue(result1.isPresent());
         assertEquals(42, result1.get());
 
-        // Test with empty stream
         OptionalShort result2 = ShortStream.empty().onlyOne();
         assertFalse(result2.isPresent());
     }
@@ -509,7 +481,6 @@ public class ShortStream100Test extends TestBase {
 
     @Test
     public void testShuffled() {
-        // Test that shuffled contains same elements (order might differ)
         short[] original = { 1, 2, 3, 4, 5 };
         short[] shuffled = createShortStream(original).shuffled().sorted().toArray();
         assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, shuffled);
@@ -567,7 +538,6 @@ public class ShortStream100Test extends TestBase {
 
     @Test
     public void testCollapse() {
-        // Test collapse to list
         Stream<ShortList> stream1 = createShortStream((short) 1, (short) 1, (short) 2, (short) 3, (short) 3, (short) 3).collapse((a, b) -> a == b);
         List<ShortList> lists = stream1.toList();
         assertEquals(3, lists.size());
@@ -575,7 +545,6 @@ public class ShortStream100Test extends TestBase {
         assertArrayEquals(new short[] { 2 }, lists.get(1).toArray());
         assertArrayEquals(new short[] { 3, 3, 3 }, lists.get(2).toArray());
 
-        // Test collapse with merge function
         ShortStream stream2 = createShortStream((short) 1, (short) 1, (short) 2, (short) 3, (short) 3).collapse((a, b) -> a == b, (a, b) -> (short) (a + b));
         assertArrayEquals(new short[] { 2, 2, 6 }, stream2.toArray());
     }
@@ -616,7 +585,6 @@ public class ShortStream100Test extends TestBase {
 
     @Test
     public void testParallel() {
-        // Test that parallel stream produces same results
         short[] sequential = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(n -> (short) (n * 2)).toArray();
 
         short[] parallel = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).parallel().map(n -> (short) (n * 2)).toArray();
@@ -639,7 +607,6 @@ public class ShortStream100Test extends TestBase {
         assertTrue(result.isPresent());
         Map<Percentage, Short> percentiles = result.get();
         assertNotNull(percentiles);
-        // Verify some percentiles exist
         assertTrue(percentiles.containsKey(Percentage._50));
     }
 
@@ -656,12 +623,10 @@ public class ShortStream100Test extends TestBase {
 
     @Test
     public void testFlatten() {
-        // Test 2D array flatten
         short[][] array2d = { { 1, 2 }, { 3, 4 }, { 5 } };
         ShortStream stream1 = ShortStream.flatten(array2d);
         assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, stream1.toArray());
 
-        // Test 3D array flatten  
         short[][][] array3d = { { { 1, 2 }, { 3 } }, { { 4, 5 } } };
         ShortStream stream2 = ShortStream.flatten(array3d);
         assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, stream2.toArray());
@@ -685,22 +650,18 @@ public class ShortStream100Test extends TestBase {
 
     @Test
     public void testThrowIfEmpty() {
-        // Test non-empty stream
         short[] result1 = createShortStream((short) 1, (short) 2).throwIfEmpty().toArray();
         assertArrayEquals(new short[] { 1, 2 }, result1);
 
-        // Test empty stream
         try {
             ShortStream.empty().throwIfEmpty().toArray();
             fail("Should throw NoSuchElementException");
         } catch (NoSuchElementException e) {
-            // Expected
         }
     }
 
     @Test
     public void testRandom() {
-        // Test that random generates values in short range
         short[] values = ShortStream.random().limit(100).toArray();
         assertEquals(100, values.length);
         for (short value : values) {
@@ -716,7 +677,6 @@ public class ShortStream100Test extends TestBase {
             return createShortStream((short) 1, (short) 2, (short) 3);
         });
 
-        // Supplier shouldn't be called until terminal operation
         assertEquals(0, count[0]);
 
         short[] result = stream.toArray();

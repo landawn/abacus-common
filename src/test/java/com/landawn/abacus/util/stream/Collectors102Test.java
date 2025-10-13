@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -19,6 +20,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Tag("new-test")
 public class Collectors102Test extends TestBase {
 
     private List<String> stringList;
@@ -73,7 +75,7 @@ public class Collectors102Test extends TestBase {
         Tuple3<Long, Long, Long> result = Stream.of("a", "bb", "ccc")
                 .collect(MoreCollectors.summingIntToLong(e -> e.length(), e -> e.length() * 2, e -> e.length() * 3));
 
-        Assertions.assertEquals(6L, result._1); // 1 + 2 + 3
+        Assertions.assertEquals(6L, result._1);
         Assertions.assertEquals(12L, result._2);
         Assertions.assertEquals(18L, result._3);
     }

@@ -17,26 +17,23 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class CommonUtil108Test extends TestBase {
-
-    // Tests for clone methods
 
     @Test
     public void testCloneDouble3DArray() {
-        // Test null array
         double[][][] nullArray = null;
         assertNull(N.clone(nullArray));
 
-        // Test empty array
         double[][][] emptyArray = new double[0][][];
         double[][][] clonedEmpty = N.clone(emptyArray);
         assertNotNull(clonedEmpty);
         assertEquals(0, clonedEmpty.length);
 
-        // Test regular array
         double[][][] original = new double[][][] { { { 1.0, 2.0 }, { 3.0, 4.0 } }, { { 5.0, 6.0 }, { 7.0, 8.0 } } };
 
         double[][][] cloned = N.clone(original);
@@ -44,7 +41,6 @@ public class CommonUtil108Test extends TestBase {
         assertNotSame(original, cloned);
         assertEquals(original.length, cloned.length);
 
-        // Verify deep clone
         for (int i = 0; i < original.length; i++) {
             assertNotSame(original[i], cloned[i]);
             assertEquals(original[i].length, cloned[i].length);
@@ -55,24 +51,20 @@ public class CommonUtil108Test extends TestBase {
             }
         }
 
-        // Verify modifications don't affect original
         cloned[0][0][0] = 99.0;
         assertNotEquals(original[0][0][0], cloned[0][0][0]);
     }
 
     @Test
     public void testCloneGeneric3DArray() {
-        // Test null array
         String[][][] nullArray = null;
         assertNull(N.clone(nullArray));
 
-        // Test empty array
         String[][][] emptyArray = new String[0][][];
         String[][][] clonedEmpty = N.clone(emptyArray);
         assertNotNull(clonedEmpty);
         assertEquals(0, clonedEmpty.length);
 
-        // Test regular array
         String[][][] original = new String[][][] { { { "a", "b" }, { "c", "d" } }, { { "e", "f" }, { "g", "h" } } };
 
         String[][][] cloned = N.clone(original);
@@ -80,7 +72,6 @@ public class CommonUtil108Test extends TestBase {
         assertNotSame(original, cloned);
         assertEquals(original.length, cloned.length);
 
-        // Verify deep clone structure (but not objects)
         for (int i = 0; i < original.length; i++) {
             assertNotSame(original[i], cloned[i]);
             assertEquals(original[i].length, cloned[i].length);
@@ -92,20 +83,15 @@ public class CommonUtil108Test extends TestBase {
         }
     }
 
-    // Tests for isSorted methods - boolean arrays
-
     @Test
     public void testIsSortedBooleanArray() {
-        // Test null/empty
         assertTrue(N.isSorted((boolean[]) null));
         assertTrue(N.isSorted(new boolean[0]));
         assertTrue(N.isSorted(new boolean[] { true }));
 
-        // Test sorted arrays
         assertTrue(N.isSorted(new boolean[] { false, false, true, true }));
         assertTrue(N.isSorted(new boolean[] { false, true }));
 
-        // Test unsorted arrays
         assertFalse(N.isSorted(new boolean[] { true, false }));
         assertFalse(N.isSorted(new boolean[] { false, true, false }));
     }
@@ -114,35 +100,27 @@ public class CommonUtil108Test extends TestBase {
     public void testIsSortedBooleanArrayRange() {
         boolean[] array = { true, false, false, true, true };
 
-        // Test valid ranges
-        assertTrue(N.isSorted(array, 1, 3)); // {false, false}
-        assertTrue(N.isSorted(array, 3, 5)); // {true, true}
-        assertFalse(N.isSorted(array, 0, 3)); // {true, false, false}
+        assertTrue(N.isSorted(array, 1, 3));
+        assertTrue(N.isSorted(array, 3, 5));
+        assertFalse(N.isSorted(array, 0, 3));
 
-        // Test edge cases
-        assertTrue(N.isSorted(array, 2, 2)); // empty range
-        assertTrue(N.isSorted(array, 2, 3)); // single element
+        assertTrue(N.isSorted(array, 2, 2));
+        assertTrue(N.isSorted(array, 2, 3));
 
-        // Test exceptions
         assertThrows(IndexOutOfBoundsException.class, () -> N.isSorted(array, -1, 2));
         assertThrows(IndexOutOfBoundsException.class, () -> N.isSorted(array, 0, 6));
         assertThrows(IndexOutOfBoundsException.class, () -> N.isSorted(array, 3, 2));
     }
 
-    // Tests for isSorted methods - char arrays
-
     @Test
     public void testIsSortedCharArray() {
-        // Test null/empty
         assertTrue(N.isSorted((char[]) null));
         assertTrue(N.isSorted(new char[0]));
         assertTrue(N.isSorted(new char[] { 'a' }));
 
-        // Test sorted arrays
         assertTrue(N.isSorted(new char[] { 'a', 'b', 'c', 'd' }));
         assertTrue(N.isSorted(new char[] { 'a', 'a', 'b', 'b' }));
 
-        // Test unsorted arrays
         assertFalse(N.isSorted(new char[] { 'b', 'a' }));
         assertFalse(N.isSorted(new char[] { 'a', 'c', 'b' }));
     }
@@ -151,13 +129,11 @@ public class CommonUtil108Test extends TestBase {
     public void testIsSortedCharArrayRange() {
         char[] array = { 'd', 'a', 'b', 'c', 'e' };
 
-        assertTrue(N.isSorted(array, 1, 4)); // {'a', 'b', 'c'}
-        assertFalse(N.isSorted(array, 0, 3)); // {'d', 'a', 'b'}
+        assertTrue(N.isSorted(array, 1, 4));
+        assertFalse(N.isSorted(array, 0, 3));
 
         assertThrows(IndexOutOfBoundsException.class, () -> N.isSorted(array, -1, 2));
     }
-
-    // Tests for isSorted methods - numeric arrays
 
     @Test
     public void testIsSortedByteArray() {
@@ -226,7 +202,6 @@ public class CommonUtil108Test extends TestBase {
         assertTrue(N.isSorted(new float[] { 1.0f, 2.0f, 3.0f }));
         assertFalse(N.isSorted(new float[] { 3.0f, 2.0f, 1.0f }));
 
-        // Test with NaN
         assertTrue(N.isSorted(new float[] { 1.0f, 2.0f, Float.NaN }));
     }
 
@@ -244,7 +219,6 @@ public class CommonUtil108Test extends TestBase {
         assertTrue(N.isSorted(new double[] { 1.0, 2.0, 3.0 }));
         assertFalse(N.isSorted(new double[] { 3.0, 2.0, 1.0 }));
 
-        // Test with NaN
         assertTrue(N.isSorted(new double[] { 1.0, 2.0, Double.NaN }));
     }
 
@@ -255,8 +229,6 @@ public class CommonUtil108Test extends TestBase {
         assertFalse(N.isSorted(array, 0, 3));
     }
 
-    // Tests for isSorted methods - Object arrays
-
     @Test
     public void testIsSortedObjectArray() {
         assertTrue(N.isSorted((String[]) null));
@@ -264,7 +236,6 @@ public class CommonUtil108Test extends TestBase {
         assertTrue(N.isSorted(new String[] { "a", "b", "c" }));
         assertFalse(N.isSorted(new String[] { "c", "b", "a" }));
 
-        // Test with nulls
         assertTrue(N.isSorted(new String[] { null, null, "a", "b" }));
         assertFalse(N.isSorted(new String[] { "a", null, "b" }));
     }
@@ -280,13 +251,10 @@ public class CommonUtil108Test extends TestBase {
     public void testIsSortedObjectArrayWithComparator() {
         String[] array = { "aaa", "bb", "c" };
 
-        // Natural order
         assertTrue(N.isSorted(array, Comparator.naturalOrder()));
 
-        // By length
         assertTrue(N.isSorted(array, Comparator.comparing(String::length).reversed()));
 
-        // Null comparator should use natural order
         assertTrue(N.isSorted(array, null));
     }
 
@@ -298,8 +266,6 @@ public class CommonUtil108Test extends TestBase {
         assertFalse(N.isSorted(array, 0, 3, Comparator.naturalOrder()));
     }
 
-    // Tests for isSorted methods - Collections
-
     @Test
     public void testIsSortedCollection() {
         assertTrue(N.isSorted((Collection<String>) null));
@@ -307,7 +273,6 @@ public class CommonUtil108Test extends TestBase {
         assertTrue(N.isSorted(Arrays.asList("a", "b", "c")));
         assertFalse(N.isSorted(Arrays.asList("c", "b", "a")));
 
-        // Test with nulls
         assertTrue(N.isSorted(Arrays.asList(null, null, "a", "b")));
     }
 
@@ -337,20 +302,15 @@ public class CommonUtil108Test extends TestBase {
         assertFalse(N.isSorted(list, 0, 3, Comparator.naturalOrder()));
     }
 
-    // Tests for sort methods - boolean arrays
-
     @Test
     public void testSortBooleanArray() {
-        // Test null/empty
         N.sort((boolean[]) null);
         N.sort(new boolean[0]);
 
-        // Test sorting
         boolean[] array = { true, false, true, false, false };
         N.sort(array);
         assertArrayEquals(new boolean[] { false, false, false, true, true }, array);
 
-        // Test already sorted
         boolean[] sorted = { false, false, true, true };
         N.sort(sorted);
         assertArrayEquals(new boolean[] { false, false, true, true }, sorted);
@@ -362,15 +322,12 @@ public class CommonUtil108Test extends TestBase {
         N.sort(array, 1, 4);
         assertArrayEquals(new boolean[] { true, false, true, true, false }, array);
 
-        // Test empty range
         boolean[] array2 = { true, false };
         N.sort(array2, 1, 1);
         assertArrayEquals(new boolean[] { true, false }, array2);
 
         assertThrows(IndexOutOfBoundsException.class, () -> N.sort(array, -1, 2));
     }
-
-    // Tests for sort methods - primitive arrays
 
     @Test
     public void testSortCharArray() {
@@ -491,8 +448,6 @@ public class CommonUtil108Test extends TestBase {
         assertArrayEquals(new double[] { 5.0, 1.0, 2.0, 3.0, 4.0 }, array);
     }
 
-    // Tests for sort methods - Object arrays
-
     @Test
     public void testSortObjectArray() {
         N.sort((Object[]) null);
@@ -502,7 +457,6 @@ public class CommonUtil108Test extends TestBase {
         N.sort(array);
         assertArrayEquals(new String[] { "a", "b", "c", "d" }, array);
 
-        // Test with nulls
         String[] arrayWithNulls = { "b", null, "a", null };
         N.sort(arrayWithNulls);
         assertArrayEquals(new String[] { null, null, "a", "b" }, arrayWithNulls);
@@ -528,8 +482,6 @@ public class CommonUtil108Test extends TestBase {
         N.sort(array, 1, 4, Comparator.comparing(String::length));
         assertArrayEquals(new String[] { "e", "b", "cc", "aaa", "d" }, array);
     }
-
-    // Tests for sort methods - Lists
 
     @Test
     public void testSortList() {
@@ -561,13 +513,10 @@ public class CommonUtil108Test extends TestBase {
         N.sort(list, 1, 4, Comparator.comparing(String::length));
         assertEquals(Arrays.asList("e", "b", "cc", "aaa", "d"), list);
 
-        // Test empty list with range
         List<String> emptyList = new ArrayList<>();
         N.sort(emptyList, 0, 0, Comparator.naturalOrder());
         assertTrue(emptyList.isEmpty());
     }
-
-    // Tests for sortBy methods
 
     @Test
     public void testSortByArray() {
@@ -654,8 +603,6 @@ public class CommonUtil108Test extends TestBase {
         N.sortByDouble(people, p -> p.getAge());
         assertEquals("Jane", people.get(0).getName());
     }
-
-    // Tests for parallelSort methods
 
     @Test
     public void testParallelSortCharArray() {
@@ -838,8 +785,6 @@ public class CommonUtil108Test extends TestBase {
         assertEquals(Arrays.asList("e", "b", "cc", "aaa", "d"), list);
     }
 
-    // Tests for parallelSortBy methods
-
     @Test
     public void testParallelSortByArray() {
         Person[] people = { new Person("John", 30), new Person("Jane", 25), new Person("Bob", 35) };
@@ -921,8 +866,6 @@ public class CommonUtil108Test extends TestBase {
         N.parallelSortByDouble(people, p -> p.getAge());
         assertEquals("Jane", people.get(0).getName());
     }
-
-    // Tests for reverseSort methods
 
     @Test
     public void testReverseSortBooleanArray() {
@@ -1066,8 +1009,6 @@ public class CommonUtil108Test extends TestBase {
         assertEquals(Arrays.asList("a", "d", "c", "b", "e"), list);
     }
 
-    // Tests for reverseSortBy methods
-
     @Test
     public void testReverseSortByArray() {
         Person[] people = { new Person("John", 30), new Person("Jane", 25), new Person("Bob", 35) };
@@ -1150,8 +1091,6 @@ public class CommonUtil108Test extends TestBase {
         assertEquals("Bob", people.get(0).getName());
     }
 
-    // Tests for binarySearch methods
-
     @Test
     public void testBinarySearchCharArray() {
         assertEquals(-1, N.binarySearch((char[]) null, 'a'));
@@ -1204,7 +1143,6 @@ public class CommonUtil108Test extends TestBase {
         assertTrue(N.binarySearch(array, (short) 6) < 0);
     }
 
-    // Helper class for testing
     private static class Person implements Comparable<Person> {
         private String name;
         private int age;

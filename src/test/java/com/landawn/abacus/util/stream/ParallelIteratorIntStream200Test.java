@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
@@ -36,15 +37,13 @@ import com.landawn.abacus.util.function.IntUnaryOperator;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
+@Tag("new-test")
 public class ParallelIteratorIntStream200Test extends TestBase {
-    private static final int testMaxThreadNum = 4; // Use a fixed small number of threads for predictable testing 
+    private static final int testMaxThreadNum = 4;
 
     private static final int[] TEST_ARRAY = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
 
-    // Empty method to be implemented by the user for initializing IntStream
     protected IntStream createIntStream(int... elements) {
-        // Using default values for maxThreadNum, executorNumForVirtualThread, splitor, cancelUncompletedThreads
-        // For testing, we might want to vary these parameters.
         return IntStream.of(elements).map(e -> (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
     }
 
@@ -90,13 +89,13 @@ public class ParallelIteratorIntStream200Test extends TestBase {
         IntUnaryOperator mapper = i -> i + 1;
         List<Integer> result = stream.map(mapper).toList();
         assertEquals(TEST_ARRAY.length, result.size());
-        assertTrue(result.contains(2)); // 1 maps to 2
+        assertTrue(result.contains(2));
         assertFalse(result.contains(1));
     }
 
     @Test
     public void testMapToChar() {
-        IntStream stream = createIntStream(new int[] { 97, 98, 99 }); // ASCII for a, b, c
+        IntStream stream = createIntStream(new int[] { 97, 98, 99 });
         IntToCharFunction mapper = i -> (char) i;
         List<Character> result = stream.mapToChar(mapper).toList();
         assertEquals(3, result.size());
@@ -296,12 +295,12 @@ public class ParallelIteratorIntStream200Test extends TestBase {
         IntStream stream = createIntStream(TEST_ARRAY);
         List<Integer> consumed = new ArrayList<>();
         IntConsumer action = it -> {
-            synchronized (consumed) { // Ensure thread safety
+            synchronized (consumed) {
                 consumed.add(it);
             }
         };
         stream.onEach(action).forEach(i -> {
-        }); // Trigger the onEach action
+        });
         assertEquals(TEST_ARRAY.length, consumed.size());
 
         assertHaveSameElements(N.toList(TEST_ARRAY), consumed);
@@ -312,7 +311,7 @@ public class ParallelIteratorIntStream200Test extends TestBase {
         IntStream stream = createIntStream(TEST_ARRAY);
         List<Integer> consumed = new ArrayList<>();
         IntConsumer action = it -> {
-            synchronized (consumed) { // Ensure thread safety
+            synchronized (consumed) {
                 consumed.add(it);
             }
         };
@@ -481,8 +480,8 @@ public class ParallelIteratorIntStream200Test extends TestBase {
     public void testZipWithBinaryOperatorWithNoneValues() {
         IntStream streamA = createIntStream(new int[] { 1, 2 });
         IntStream streamB = IntStream.of(10, 20, 30);
-        int valA = 0; // Assuming 0 as 'none' for int
-        int valB = -1; // Assuming -1 as 'none' for int
+        int valA = 0;
+        int valB = -1;
         IntBinaryOperator zipper = (i1, i2) -> {
             if (i1 == valA)
                 return i2;
@@ -492,9 +491,9 @@ public class ParallelIteratorIntStream200Test extends TestBase {
         };
         List<Integer> result = streamA.zipWith(streamB, valA, valB, zipper).sorted().toList();
         assertEquals(3, result.size());
-        assertEquals(11, result.get(0)); // 1 + 10
-        assertEquals(22, result.get(1)); // 2 + 20
-        assertEquals(30, result.get(2)); // 0 (valA) + 30 -> 30
+        assertEquals(11, result.get(0));
+        assertEquals(22, result.get(1));
+        assertEquals(30, result.get(2));
     }
 
     @Test
@@ -511,8 +510,8 @@ public class ParallelIteratorIntStream200Test extends TestBase {
         List<Integer> result = streamA.zipWith(streamB, streamC, valA, valB, valC, zipper).sorted().toList();
         assertEquals(3, result.size());
         assertEquals(1 + 10 + 100, result.get(1));
-        assertEquals(0 + 20 + 101, result.get(2)); // valA (0) + 20 + 101
-        assertEquals(0 + -1 + 102, result.get(0)); // valA (0) + valB (-1) + 102
+        assertEquals(0 + 20 + 101, result.get(2));
+        assertEquals(0 + -1 + 102, result.get(0));
     }
 
     @Test
@@ -537,28 +536,14 @@ public class ParallelIteratorIntStream200Test extends TestBase {
 
     @Test
     public void testMaxThreadNum() throws IllegalAccessException, NoSuchFieldException {
-        // Since maxThreadNum() is protected in the superclass,
-        // and its value is used internally, we can't directly call it from here.
-        // However, we can assert its behavior indirectly or via reflection if necessary.
-        // For this test, we'll assume the constructor correctly sets it and other tests
-        // indirectly verify its usage.
-        // If it was a public method of ParallelArrayIntStream, we would test it directly.
-        // IntStream stream = createIntStream(intArray);
-        //assertTrue(stream.maxThreadNum() > 0); // This line would work if maxThreadNum() was public in IntStream
     }
 
     @Test
     public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        // Similar to maxThreadNum, splitor() is protected.
-        // IntStream stream = createIntStream(intArray);
-        //assertNotNull(stream.splitor());
     }
 
     @Test
     public void testAsyncExecutor() throws IllegalAccessException, NoSuchFieldException {
-        // Similar to maxThreadNum, asyncExecutor() is protected.
-        // IntStream stream = createIntStream(intArray);
-        //assertNotNull(stream.asyncExecutor());
     }
 
     @Test
@@ -568,9 +553,9 @@ public class ParallelIteratorIntStream200Test extends TestBase {
         Runnable closeHandler = () -> closedFlag.set(true);
 
         IntStream newStream = stream.onClose(closeHandler);
-        assertFalse(closedFlag.get()); // Not closed yet
-        newStream.close(); // Close the stream, which should trigger the handler
-        assertTrue(closedFlag.get()); // Now it should be closed
+        assertFalse(closedFlag.get());
+        newStream.close();
+        assertTrue(closedFlag.get());
     }
 
     @Test
@@ -590,7 +575,7 @@ public class ParallelIteratorIntStream200Test extends TestBase {
     public void testOnCloseEmptyHandler() {
         IntStream stream = createIntStream(TEST_ARRAY);
         IntStream newStream = stream.onClose(null);
-        assertSame(stream, newStream); // Should return the same instance if handler is null
-        newStream.close(); // Should not throw
+        assertSame(stream, newStream);
+        newStream.close();
     }
 }

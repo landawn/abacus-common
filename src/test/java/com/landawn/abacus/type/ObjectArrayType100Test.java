@@ -21,11 +21,13 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class ObjectArrayType100Test extends TestBase {
 
     private ObjectArrayType<String> stringArrayType;
@@ -66,7 +68,6 @@ public class ObjectArrayType100Test extends TestBase {
 
     @Test
     public void testIsSerializable() {
-        // Assuming String and Integer are serializable
         assertTrue(stringArrayType.isSerializable());
         assertTrue(intArrayType.isSerializable());
     }
@@ -185,7 +186,7 @@ public class ObjectArrayType100Test extends TestBase {
     public void testWriteCharacterWithEmptyArray() throws IOException {
         String[] emptyArray = new String[0];
         stringArrayType.writeCharacter(writer, emptyArray, config);
-        verify(writer, times(2)).write(anyChar()); // '[' and ']'
+        verify(writer, times(2)).write(anyChar());
     }
 
     @Test

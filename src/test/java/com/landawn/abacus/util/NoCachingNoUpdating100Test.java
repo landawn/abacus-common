@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
@@ -38,9 +39,9 @@ import com.landawn.abacus.util.NoCachingNoUpdating.DisposableShortArray;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableTriple;
 import com.landawn.abacus.util.NoCachingNoUpdating.Timed;
 
+@Tag("new-test")
 public class NoCachingNoUpdating100Test extends TestBase {
 
-    // Test DisposableArray
     @Test
     public void testDisposableArray_create() {
         DisposableArray<String> array = DisposableArray.create(String.class, 5);
@@ -77,7 +78,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         String[] result = array.toArray(target);
         assertArrayEquals(arr, result);
 
-        // Test with smaller target array
         String[] smallTarget = new String[2];
         String[] smallResult = array.toArray(smallTarget);
         assertEquals(3, smallResult.length);
@@ -166,7 +166,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertFalse(iter.hasNext());
     }
 
-    // Test DisposableObjArray
     @Test
     public void testDisposableObjArray_create() {
         DisposableObjArray array = DisposableObjArray.create(10);
@@ -185,7 +184,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals(true, array.get(2));
     }
 
-    // Test DisposableBooleanArray
     @Test
     public void testDisposableBooleanArray_create() {
         DisposableBooleanArray array = DisposableBooleanArray.create(5);
@@ -248,7 +246,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals("[true|false|true]", array.join("|", "[", "]"));
     }
 
-    // Test DisposableCharArray
     @Test
     public void testDisposableCharArray_create() {
         DisposableCharArray array = DisposableCharArray.create(5);
@@ -290,7 +287,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals('c', array.max());
     }
 
-    // Test DisposableByteArray
     @Test
     public void testDisposableByteArray_create() {
         DisposableByteArray array = DisposableByteArray.create(5);
@@ -330,7 +326,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals(3, array.max());
     }
 
-    // Test DisposableShortArray
     @Test
     public void testDisposableShortArray_create() {
         DisposableShortArray array = DisposableShortArray.create(5);
@@ -370,7 +365,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals(30, array.max());
     }
 
-    // Test DisposableIntArray
     @Test
     public void testDisposableIntArray_create() {
         DisposableIntArray array = DisposableIntArray.create(5);
@@ -410,7 +404,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals(300, array.max());
     }
 
-    // Test DisposableLongArray
     @Test
     public void testDisposableLongArray_create() {
         DisposableLongArray array = DisposableLongArray.create(5);
@@ -450,7 +443,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals(3000L, array.max());
     }
 
-    // Test DisposableFloatArray
     @Test
     public void testDisposableFloatArray_create() {
         DisposableFloatArray array = DisposableFloatArray.create(5);
@@ -490,7 +482,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals(3.5f, array.max(), 0.001f);
     }
 
-    // Test DisposableDoubleArray
     @Test
     public void testDisposableDoubleArray_create() {
         DisposableDoubleArray array = DisposableDoubleArray.create(5);
@@ -530,7 +521,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals(3.5, array.max(), 0.001);
     }
 
-    // Test DisposableDeque
     @Test
     public void testDisposableDeque_create() {
         DisposableDeque<String> deque = DisposableDeque.create(10);
@@ -603,7 +593,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals("[a|b|c]", deque.join("|", "[", "]"));
     }
 
-    // Test DisposableEntry
     @Test
     public void testDisposableEntry_wrap() {
         Map.Entry<String, Integer> original = new AbstractMap.SimpleEntry<>("key", 100);
@@ -664,7 +653,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals("key=100", entry.toString());
     }
 
-    // Test DisposablePair
     @Test
     public void testDisposablePair_wrap() {
         Pair<String, Integer> original = Pair.of("left", 100);
@@ -710,7 +698,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals("[left, 100]", pair.toString());
     }
 
-    // Test DisposableTriple
     @Test
     public void testDisposableTriple_wrap() {
         Triple<String, Integer, Boolean> original = Triple.of("left", 100, true);
@@ -758,7 +745,6 @@ public class NoCachingNoUpdating100Test extends TestBase {
         assertEquals("[left, 100, true]", triple.toString());
     }
 
-    // Test Timed
     @Test
     public void testTimed_of() {
         long timestamp = System.currentTimeMillis();

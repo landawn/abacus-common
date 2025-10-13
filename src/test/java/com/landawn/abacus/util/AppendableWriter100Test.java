@@ -5,9 +5,11 @@ import java.io.StringWriter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class AppendableWriter100Test extends TestBase {
 
     @Test
@@ -55,7 +57,7 @@ public class AppendableWriter100Test extends TestBase {
     public void testWriteInt() throws IOException {
         StringBuilder sb = new StringBuilder();
         AppendableWriter writer = new AppendableWriter(sb);
-        writer.write(65); // 'A'
+        writer.write(65);
         Assertions.assertEquals("A", sb.toString());
     }
 
@@ -99,7 +101,6 @@ public class AppendableWriter100Test extends TestBase {
         AppendableWriter writer = new AppendableWriter(sw);
         writer.write("Test");
         writer.flush();
-        // StringWriter is Flushable, so flush should work
         Assertions.assertEquals("Test", sw.toString());
     }
 
@@ -108,7 +109,7 @@ public class AppendableWriter100Test extends TestBase {
         StringBuilder sb = new StringBuilder();
         AppendableWriter writer = new AppendableWriter(sb);
         writer.write("Test");
-        writer.flush(); // Should not throw
+        writer.flush();
         Assertions.assertEquals("Test", sb.toString());
     }
 
@@ -118,7 +119,6 @@ public class AppendableWriter100Test extends TestBase {
         AppendableWriter writer = new AppendableWriter(sw);
         writer.write("Test");
         writer.close();
-        // Should flush before closing
         Assertions.assertEquals("Test", sw.toString());
     }
 

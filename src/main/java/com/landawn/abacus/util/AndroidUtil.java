@@ -15,7 +15,9 @@
 package com.landawn.abacus.util;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.annotation.Internal;
 
@@ -49,8 +51,29 @@ public final class AndroidUtil {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
         } else {
-            SERIAL_EXECUTOR = Executors.newSingleThreadExecutor();
-            TP_EXECUTOR = Executors.newFixedThreadPool(IOUtil.CPU_CORES);
+            final ExecutorService serialExecutor = Executors.newSingleThreadExecutor();
+            final ExecutorService tpExecutor = Executors.newFixedThreadPool(IOUtil.CPU_CORES);
+
+            SERIAL_EXECUTOR = serialExecutor;
+            TP_EXECUTOR = tpExecutor;
+
+            // Register shutdown hook to properly cleanup executors
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                serialExecutor.shutdown();
+                tpExecutor.shutdown();
+                try {
+                    if (!serialExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                        serialExecutor.shutdownNow();
+                    }
+                    if (!tpExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                        tpExecutor.shutdownNow();
+                    }
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    serialExecutor.shutdownNow();
+                    tpExecutor.shutdownNow();
+                }
+            }));
         }
     }
 

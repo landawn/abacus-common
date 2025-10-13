@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -33,6 +34,7 @@ import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u;
 import com.landawn.abacus.util.u.Optional;
 
+@Tag("new-test")
 public class ArrayStream100Test extends TestBase {
 
     private String[] stringArray;
@@ -48,15 +50,12 @@ public class ArrayStream100Test extends TestBase {
 
     @Test
     public void testConstructors() {
-        // Test basic constructor
         Stream<String> stream1 = Stream.of(stringArray);
         assertEquals(5, stream1.count());
 
-        // Test constructor with range
         Stream<String> stream2 = Stream.of(stringArray, 1, 4);
         assertEquals(3, stream2.count());
 
-        // Test constructor with empty array
         Stream<String> stream3 = Stream.of(emptyArray);
         assertEquals(0, stream3.count());
     }
@@ -67,7 +66,6 @@ public class ArrayStream100Test extends TestBase {
         List<Integer> result = stream.filter(x -> x % 2 == 0).toList();
         assertEquals(Arrays.asList(2, 4, 6, 8, 10), result);
 
-        // Test with empty result
         Stream<String> stream2 = Stream.of(stringArray);
         List<String> result2 = stream2.filter(s -> s.startsWith("z")).toList();
         assertTrue(result2.isEmpty());
@@ -79,7 +77,6 @@ public class ArrayStream100Test extends TestBase {
         List<Integer> result = stream.takeWhile(x -> x <= 5).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
 
-        // Test with no matching elements
         Stream<Integer> stream2 = Stream.of(integerArray);
         List<Integer> result2 = stream2.takeWhile(x -> x > 10).toList();
         assertTrue(result2.isEmpty());
@@ -91,7 +88,6 @@ public class ArrayStream100Test extends TestBase {
         List<Integer> result = stream.dropWhile(x -> x <= 5).toList();
         assertEquals(Arrays.asList(6, 7, 8, 9, 10), result);
 
-        // Test dropping all elements
         Stream<Integer> stream2 = Stream.of(integerArray);
         List<Integer> result2 = stream2.dropWhile(x -> x <= 20).toList();
         assertTrue(result2.isEmpty());
@@ -103,12 +99,10 @@ public class ArrayStream100Test extends TestBase {
         List<Integer> result = stream.step(2).toList();
         assertEquals(Arrays.asList(1, 3, 5, 7, 9), result);
 
-        // Test step of 1 (should be same as original)
         Stream<Integer> stream2 = Stream.of(integerArray);
         List<Integer> result2 = stream2.step(1).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), result2);
 
-        // Test with step larger than array
         Stream<Integer> stream3 = Stream.of(integerArray);
         List<Integer> result3 = stream3.step(20).toList();
         assertEquals(Arrays.asList(1), result3);
@@ -120,7 +114,6 @@ public class ArrayStream100Test extends TestBase {
         List<String> result = stream.map(String::toUpperCase).toList();
         assertEquals(Arrays.asList("APPLE", "BANANA", "CHERRY", "DATE", "ELDERBERRY"), result);
 
-        // Test mapping to different type
         Stream<String> stream2 = Stream.of(stringArray);
         List<Integer> result2 = stream2.map(String::length).toList();
         assertEquals(Arrays.asList(5, 6, 6, 4, 10), result2);
@@ -129,54 +122,44 @@ public class ArrayStream100Test extends TestBase {
     @Test
     public void testSlidingMap() {
         {
-            // Test BiFunction with increment 1
             Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
             List<Integer> result = stream.slidingMap(1, false, (a, b) -> a + b).toList();
             assertEquals(Arrays.asList(3, 5, 7, 9), result);
 
-            // Test with increment 2
             Stream<Integer> stream2 = Stream.of(1, 2, 3, 4, 5);
             List<Integer> result2 = stream2.slidingMap(2, false, (a, b) -> a + (b == null ? 0 : b)).toList();
             assertEquals(Arrays.asList(3, 7, 5), result2);
 
-            // Test TriFunction
             Stream<Integer> stream3 = Stream.of(1, 2, 3, 4, 5);
             List<Integer> result3 = stream3.slidingMap(1, false, (a, b, c) -> a + b + c).toList();
             assertEquals(Arrays.asList(6, 9, 12), result3);
 
-            // Test TriFunction
             Stream<Integer> stream4 = Stream.of(1, 2, 3, 4, 5);
             List<Integer> result4 = stream4.slidingMap(2, false, (a, b, c) -> a + b + c).toList();
             assertEquals(Arrays.asList(6, 12), result4);
 
-            // Test TriFunction
             Stream<Integer> stream5 = Stream.of(1, 2, 3, 4, 5);
             List<Integer> result5 = stream5.slidingMap(3, false, (a, b, c) -> a + b + (c == null ? 0 : c)).toList();
             assertEquals(Arrays.asList(6, 9), result5);
         }
 
         {
-            // Test BiFunction with increment 1
             Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
             List<Integer> result = stream.slidingMap(1, true, (a, b) -> a + b).toList();
             assertEquals(Arrays.asList(3, 5, 7, 9), result);
 
-            // Test with increment 2
             Stream<Integer> stream2 = Stream.of(1, 2, 3, 4, 5);
             List<Integer> result2 = stream2.slidingMap(2, true, (a, b) -> a + (b == null ? 0 : b)).toList();
             assertEquals(Arrays.asList(3, 7), result2);
 
-            // Test TriFunction
             Stream<Integer> stream3 = Stream.of(1, 2, 3, 4, 5);
             List<Integer> result3 = stream3.slidingMap(1, true, (a, b, c) -> a + b + c).toList();
             assertEquals(Arrays.asList(6, 9, 12), result3);
 
-            // Test TriFunction
             Stream<Integer> stream4 = Stream.of(1, 2, 3, 4, 5);
             List<Integer> result4 = stream4.slidingMap(2, true, (a, b, c) -> a + b + c).toList();
             assertEquals(Arrays.asList(6, 12), result4);
 
-            // Test TriFunction
             Stream<Integer> stream5 = Stream.of(1, 2, 3, 4, 5);
             List<Integer> result5 = stream5.slidingMap(3, true, (a, b, c) -> a + b + (c == null ? 0 : c)).toList();
             assertEquals(Arrays.asList(6), result5);
@@ -199,12 +182,10 @@ public class ArrayStream100Test extends TestBase {
         assertEquals("APPLE", result.get(0));
         assertEquals("banana", result.get(1));
 
-        // Test with single element
         Stream<String> stream2 = Stream.of(new String[] { "single" });
         List<String> result2 = stream2.mapFirst(String::toUpperCase).toList();
         assertEquals(Arrays.asList("SINGLE"), result2);
 
-        // Test with empty array
         Stream<String> stream3 = Stream.of(emptyArray);
         List<String> result3 = stream3.mapFirst(String::toUpperCase).toList();
         assertTrue(result3.isEmpty());
@@ -217,7 +198,6 @@ public class ArrayStream100Test extends TestBase {
         assertEquals("APPLE", result.get(0));
         assertEquals("banana", result.get(1));
 
-        // Test with empty array
         Stream<String> stream2 = Stream.of(emptyArray);
         List<String> result2 = stream2.mapFirstOrElse(String::toUpperCase, String::toLowerCase).toList();
         assertTrue(result2.isEmpty());
@@ -230,7 +210,6 @@ public class ArrayStream100Test extends TestBase {
         assertEquals("apple", result.get(0));
         assertEquals("ELDERBERRY", result.get(4));
 
-        // Test with single element
         Stream<String> stream2 = Stream.of(new String[] { "single" });
         List<String> result2 = stream2.mapLast(String::toUpperCase).toList();
         assertEquals(Arrays.asList("SINGLE"), result2);
@@ -330,7 +309,6 @@ public class ArrayStream100Test extends TestBase {
 
     @Test
     public void testSplit() {
-        // Test split by chunk size
         Stream<Integer> stream = Stream.of(integerArray);
         List<List<Integer>> result = stream.split(3).toList();
         assertEquals(4, result.size());
@@ -414,7 +392,6 @@ public class ArrayStream100Test extends TestBase {
         List<Integer> result = stream.limit(5).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
 
-        // Test limit larger than array size
         Stream<Integer> stream2 = Stream.of(integerArray);
         List<Integer> result2 = stream2.limit(20).toList();
         assertEquals(10, result2.size());
@@ -426,7 +403,6 @@ public class ArrayStream100Test extends TestBase {
         List<Integer> result = stream.skip(5).toList();
         assertEquals(Arrays.asList(6, 7, 8, 9, 10), result);
 
-        // Test skip larger than array size
         Stream<Integer> stream2 = Stream.of(integerArray);
         List<Integer> result2 = stream2.skip(20).toList();
         assertTrue(result2.isEmpty());
@@ -439,7 +415,6 @@ public class ArrayStream100Test extends TestBase {
         assertEquals(3, result.size());
         assertTrue(result.contains(8) || result.contains(9) || result.contains(10));
 
-        // Test with custom comparator
         Stream<String> stream2 = Stream.of(stringArray);
         List<String> result2 = stream2.top(2, Comparator.comparing(String::length)).toList();
         assertEquals(2, result2.size());
@@ -452,7 +427,7 @@ public class ArrayStream100Test extends TestBase {
         AtomicInteger sum = new AtomicInteger(0);
         List<Integer> result = stream.onEach(sum::addAndGet).toList();
         assertEquals(10, result.size());
-        assertEquals(55, sum.get()); // Sum of 1+2+...+10
+        assertEquals(55, sum.get());
     }
 
     @Test
@@ -463,7 +438,7 @@ public class ArrayStream100Test extends TestBase {
 
         stream.forEach(sum::addAndGet, () -> completed.set(true));
 
-        assertEquals(55, sum.get()); // Sum of 1+2+...+10
+        assertEquals(55, sum.get());
         assertTrue(completed.get());
     }
 
@@ -565,7 +540,6 @@ public class ArrayStream100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals("apple", result.get());
 
-        // Test with empty array
         Stream<String> stream2 = Stream.of(emptyArray);
         Optional<String> result2 = stream2.first();
         assertFalse(result2.isPresent());
@@ -578,7 +552,6 @@ public class ArrayStream100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals("elderberry", result.get());
 
-        // Test with empty array
         Stream<String> stream2 = Stream.of(emptyArray);
         Optional<String> result2 = stream2.last();
         assertFalse(result2.isPresent());
@@ -591,7 +564,6 @@ public class ArrayStream100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals("cherry", result.get());
 
-        // Test out of bounds
         Stream<String> stream2 = Stream.of(stringArray);
         Optional<String> result2 = stream2.elementAt(10);
         assertFalse(result2.isPresent());
@@ -599,18 +571,15 @@ public class ArrayStream100Test extends TestBase {
 
     @Test
     public void testOnlyOne() {
-        // Test with single element
         Stream<String> stream = Stream.of(new String[] { "single" });
         Optional<String> result = stream.onlyOne();
         assertTrue(result.isPresent());
         assertEquals("single", result.get());
 
-        // Test with empty array
         Stream<String> stream2 = Stream.of(emptyArray);
         Optional<String> result2 = stream2.onlyOne();
         assertFalse(result2.isPresent());
 
-        // Test with multiple elements - should throw exception
         Stream<String> stream3 = Stream.of(stringArray);
         assertThrows(TooManyElementsException.class, () -> stream3.onlyOne());
     }
@@ -620,9 +589,8 @@ public class ArrayStream100Test extends TestBase {
         Stream<Integer> stream = Stream.of(integerArray);
         Optional<Integer> result = stream.foldLeft(Integer::sum);
         assertTrue(result.isPresent());
-        assertEquals(55, result.get().intValue()); // Sum of 1+2+...+10
+        assertEquals(55, result.get().intValue());
 
-        // Test with identity
         Stream<Integer> stream2 = Stream.of(integerArray);
         Integer result2 = stream2.foldLeft(0, Integer::sum);
         assertEquals(55, result2.intValue());
@@ -635,7 +603,6 @@ public class ArrayStream100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(55, result.get().intValue());
 
-        // Test with identity
         Stream<Integer> stream2 = Stream.of(integerArray);
         Integer result2 = stream2.foldRight(0, Integer::sum);
         assertEquals(55, result2.intValue());
@@ -648,7 +615,6 @@ public class ArrayStream100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(55, result.get().intValue());
 
-        // Test with identity and combiner
         Stream<Integer> stream2 = Stream.of(integerArray);
         Integer result2 = stream2.reduce(0, Integer::sum, Integer::sum);
         assertEquals(55, result2.intValue());
@@ -663,7 +629,6 @@ public class ArrayStream100Test extends TestBase {
                 .collect(Collectors.joining(","));
         assertTrue(result.contains("apple"));
 
-        // Test with Collector
         Stream<String> stream2 = Stream.of(stringArray);
         String result2 = stream2.collect(Collectors.joining(","));
         assertTrue(result2.contains("apple"));
@@ -675,7 +640,6 @@ public class ArrayStream100Test extends TestBase {
         List<Integer> result = stream.takeLast(3).toList();
         assertEquals(Arrays.asList(8, 9, 10), result);
 
-        // Test taking more than available
         Stream<Integer> stream2 = Stream.of(integerArray);
         List<Integer> result2 = stream2.takeLast(20).toList();
         assertEquals(10, result2.size());
@@ -687,7 +651,6 @@ public class ArrayStream100Test extends TestBase {
         List<Integer> result = stream.skipLast(3).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7), result);
 
-        // Test skipping more than available
         Stream<Integer> stream2 = Stream.of(integerArray);
         List<Integer> result2 = stream2.skipLast(20).toList();
         assertTrue(result2.isEmpty());
@@ -700,7 +663,6 @@ public class ArrayStream100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(1), result.get());
 
-        // Test with empty array
         Stream<Integer> stream2 = Stream.of(new Integer[0]);
         Optional<Integer> result2 = stream2.min(Integer::compareTo);
         assertFalse(result2.isPresent());
@@ -713,7 +675,6 @@ public class ArrayStream100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(10), result.get());
 
-        // Test with empty array
         Stream<Integer> stream2 = Stream.of(new Integer[0]);
         Optional<Integer> result2 = stream2.max(Integer::compareTo);
         assertFalse(result2.isPresent());
@@ -731,9 +692,8 @@ public class ArrayStream100Test extends TestBase {
         Stream<Integer> stream = Stream.of(integerArray);
         Optional<Integer> result = stream.kthLargest(3, Integer::compareTo);
         assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(8), result.get()); // 3rd largest
+        assertEquals(Integer.valueOf(8), result.get());
 
-        // Test k larger than array size
         Stream<Integer> stream2 = Stream.of(integerArray);
         Optional<Integer> result2 = stream2.kthLargest(20, Integer::compareTo);
         assertFalse(result2.isPresent());
@@ -745,7 +705,6 @@ public class ArrayStream100Test extends TestBase {
         long count = stream.count();
         assertEquals(5, count);
 
-        // Test with empty array
         Stream<String> stream2 = Stream.of(emptyArray);
         long count2 = stream2.count();
         assertEquals(0, count2);
@@ -781,10 +740,10 @@ public class ArrayStream100Test extends TestBase {
     @Test
     public void testNMatch() {
         Stream<Integer> stream = Stream.of(integerArray);
-        assertTrue(stream.nMatch(5, 5, x -> x <= 5)); // Exactly 5 elements <= 5
+        assertTrue(stream.nMatch(5, 5, x -> x <= 5));
 
         Stream<Integer> stream2 = Stream.of(integerArray);
-        assertTrue(stream2.nMatch(1, 3, x -> x > 8)); // Only 2 elements > 8, not between 1-3
+        assertTrue(stream2.nMatch(1, 3, x -> x > 8));
     }
 
     @Test
@@ -794,7 +753,6 @@ public class ArrayStream100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(6), result.get());
 
-        // Test no match
         Stream<Integer> stream2 = Stream.of(integerArray);
         Optional<Integer> result2 = stream2.findFirst(x -> x > 20);
         assertFalse(result2.isPresent());
@@ -807,7 +765,6 @@ public class ArrayStream100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(7), result.get());
 
-        // Test no match
         Stream<Integer> stream2 = Stream.of(integerArray);
         Optional<Integer> result2 = stream2.findLast(x -> x > 20);
         assertFalse(result2.isPresent());
@@ -836,13 +793,11 @@ public class ArrayStream100Test extends TestBase {
 
     @Test
     public void testAppendIfEmpty() {
-        // Test with non-empty stream
         Stream<String> stream = Stream.of(stringArray);
         List<String> result = stream.appendIfEmpty(Arrays.asList("x", "y")).toList();
         assertEquals(5, result.size());
         assertEquals("apple", result.get(0));
 
-        // Test with empty stream
         Stream<String> stream2 = Stream.of(emptyArray);
         List<String> result2 = stream2.appendIfEmpty(Arrays.asList("x", "y")).toList();
         assertEquals(2, result2.size());
@@ -851,12 +806,10 @@ public class ArrayStream100Test extends TestBase {
 
     @Test
     public void testAppendIfEmptyWithSupplier() {
-        // Test with non-empty stream
         Stream<String> stream = Stream.of(stringArray);
         List<String> result = stream.appendIfEmpty(() -> Stream.of("x", "y")).toList();
         assertEquals(5, result.size());
 
-        // Test with empty stream
         Stream<String> stream2 = Stream.of(emptyArray);
         List<String> result2 = stream2.appendIfEmpty(() -> Stream.of("x", "y")).toList();
         assertEquals(2, result2.size());
@@ -866,13 +819,11 @@ public class ArrayStream100Test extends TestBase {
     public void testIfEmpty() {
         AtomicBoolean actionExecuted = new AtomicBoolean(false);
 
-        // Test with non-empty stream
         Stream<String> stream = Stream.of(stringArray);
         List<String> result = stream.ifEmpty(() -> actionExecuted.set(true)).toList();
         assertEquals(5, result.size());
         assertFalse(actionExecuted.get());
 
-        // Test with empty stream
         Stream<String> stream2 = Stream.of(emptyArray);
         List<String> result2 = stream2.ifEmpty(() -> actionExecuted.set(true)).toList();
         assertEquals(0, result2.size());
@@ -881,13 +832,11 @@ public class ArrayStream100Test extends TestBase {
 
     @Test
     public void testApplyIfNotEmpty() {
-        // Test with non-empty stream
         Stream<String> stream = Stream.of(stringArray);
         u.Optional<Long> result = stream.applyIfNotEmpty(s -> s.count());
         assertTrue(result.isPresent());
         assertEquals(Long.valueOf(5), result.get());
 
-        // Test with empty stream
         Stream<String> stream2 = Stream.of(emptyArray);
         u.Optional<Long> result2 = stream2.applyIfNotEmpty(s -> s.count());
         assertFalse(result2.isPresent());
@@ -907,24 +856,19 @@ public class ArrayStream100Test extends TestBase {
         Stream<String> stream = Stream.of(stringArray);
         Stream<String> streamWithCloseHandler = stream.onClose(() -> closed.set(true));
 
-        // Force stream to close
         streamWithCloseHandler.toList();
-        // Note: In a real implementation, close() would be called automatically
     }
 
     @Test
     public void testEdgeCases() {
-        // Test with null elements
         String[] arrayWithNulls = { "a", null, "b", null, "c" };
         Stream<String> stream = Stream.of(arrayWithNulls);
         List<String> result = stream.filter(Objects::nonNull).toList();
         assertEquals(Arrays.asList("a", "b", "c"), result);
 
-        // Test with single element
         Stream<String> singleStream = Stream.of(new String[] { "single" });
         assertEquals("single", singleStream.first().get());
 
-        // Test range constructor edge cases
         Stream<Integer> rangeStream = Stream.of(integerArray, 0, 0);
         assertEquals(0, rangeStream.count());
 
@@ -934,20 +878,19 @@ public class ArrayStream100Test extends TestBase {
 
     @Test
     public void testExceptionCases() {
-        // Test illegal arguments
         assertThrows(IllegalArgumentException.class, () -> {
             Stream<Integer> stream = Stream.of(integerArray);
-            stream.step(0); // Step must be positive
+            stream.step(0);
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
             Stream<Integer> stream = Stream.of(integerArray);
-            stream.limit(-1); // Limit must be non-negative
+            stream.limit(-1);
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
             Stream<Integer> stream = Stream.of(integerArray);
-            stream.skip(-1); // Skip must be non-negative
+            stream.skip(-1);
         });
     }
 }

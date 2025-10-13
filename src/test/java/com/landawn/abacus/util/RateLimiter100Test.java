@@ -4,9 +4,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class RateLimiter100Test extends TestBase {
 
     @Test
@@ -58,7 +60,7 @@ public class RateLimiter100Test extends TestBase {
 
     @Test
     public void testAcquire() {
-        RateLimiter limiter = RateLimiter.create(1000.0); // High rate to minimize wait
+        RateLimiter limiter = RateLimiter.create(1000.0);
         double waitTime = limiter.acquire();
         Assertions.assertTrue(waitTime >= 0);
     }

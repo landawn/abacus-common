@@ -24,11 +24,13 @@ import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class AbstractLongType100Test extends TestBase {
 
     private Type<Number> longType;
@@ -56,28 +58,22 @@ public class AbstractLongType100Test extends TestBase {
     public void testValueOfObject() {
         assertEquals(null, longType.valueOf((Object) null));
 
-        // Test Date
         Date date = new Date(1234567890L);
         assertEquals(1234567890L, longType.valueOf(date));
 
-        // Test Calendar
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(9876543210L);
         assertEquals(9876543210L, longType.valueOf(calendar));
 
-        // Test Instant
         Instant instant = Instant.ofEpochMilli(1111111111L);
         assertEquals(1111111111L, longType.valueOf(instant));
 
-        // Test ZonedDateTime
         ZonedDateTime zdt = ZonedDateTime.of(2023, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         assertEquals(zdt.toInstant().toEpochMilli(), longType.valueOf(zdt));
 
-        // Test LocalDateTime
         LocalDateTime ldt = LocalDateTime.of(2023, 1, 1, 0, 0, 0);
         assertEquals(Timestamp.valueOf(ldt).getTime(), longType.valueOf(ldt));
 
-        // Test other objects
         assertEquals(123L, longType.valueOf("123"));
     }
 
@@ -184,20 +180,16 @@ public class AbstractLongType100Test extends TestBase {
 
     @Test
     public void testWriteCharacter() throws IOException {
-        // Test null value
         longType.writeCharacter(writer, null, null);
         verify(writer).write(any(char[].class));
 
-        // Test with value
         longType.writeCharacter(writer, 123456789L, null);
         verify(writer).write(123456789L);
 
-        // Test with writeNullNumberAsZero config
         when(config.writeNullNumberAsZero()).thenReturn(true);
         longType.writeCharacter(writer, null, config);
         verify(writer).write(0L);
 
-        // Test with writeLongAsString config
         when(config.writeLongAsString()).thenReturn(true);
         when(config.getStringQuotation()).thenReturn('"');
         longType.writeCharacter(writer, 987654321L, config);

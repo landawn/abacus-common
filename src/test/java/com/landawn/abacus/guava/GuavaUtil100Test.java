@@ -9,18 +9,19 @@ import java.util.Date;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.google.common.collect.Range;
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class GuavaUtil100Test extends TestBase {
 
     @Test
     public void testTransform_ClosedRange() {
         Range<Integer> intRange = Range.closed(1, 10);
         Range<String> stringRange = GuavaUtil.transform(intRange, Object::toString);
-        
+
         assertTrue(stringRange.hasLowerBound());
         assertTrue(stringRange.hasUpperBound());
         assertEquals("1", stringRange.lowerEndpoint());
@@ -34,7 +35,7 @@ public class GuavaUtil100Test extends TestBase {
     public void testTransform_OpenRange() {
         Range<Integer> intRange = Range.open(1, 10);
         Range<String> stringRange = GuavaUtil.transform(intRange, Object::toString);
-        
+
         assertTrue(stringRange.hasLowerBound());
         assertTrue(stringRange.hasUpperBound());
         assertEquals("1", stringRange.lowerEndpoint());
@@ -48,7 +49,7 @@ public class GuavaUtil100Test extends TestBase {
     public void testTransform_ClosedOpenRange() {
         Range<Integer> intRange = Range.closedOpen(1, 10);
         Range<Double> doubleRange = GuavaUtil.transform(intRange, Integer::doubleValue);
-        
+
         assertTrue(doubleRange.hasLowerBound());
         assertTrue(doubleRange.hasUpperBound());
         assertEquals(1.0, doubleRange.lowerEndpoint());
@@ -61,7 +62,7 @@ public class GuavaUtil100Test extends TestBase {
     public void testTransform_UnboundedRange() {
         Range<Integer> intRange = Range.all();
         Range<String> stringRange = GuavaUtil.transform(intRange, Object::toString);
-        
+
         assertFalse(stringRange.hasLowerBound());
         assertFalse(stringRange.hasUpperBound());
         assertTrue(stringRange.contains("100"));
@@ -72,7 +73,7 @@ public class GuavaUtil100Test extends TestBase {
     public void testTransform_GreaterThanRange() {
         Range<Integer> intRange = Range.greaterThan(5);
         Range<Double> doubleRange = GuavaUtil.transform(intRange, Integer::doubleValue);
-        
+
         assertTrue(doubleRange.hasLowerBound());
         assertFalse(doubleRange.hasUpperBound());
         assertEquals(5.0, doubleRange.lowerEndpoint());
@@ -85,7 +86,7 @@ public class GuavaUtil100Test extends TestBase {
     public void testTransform_AtLeastRange() {
         Range<Integer> intRange = Range.atLeast(5);
         Range<String> stringRange = GuavaUtil.transform(intRange, Object::toString);
-        
+
         assertTrue(stringRange.hasLowerBound());
         assertFalse(stringRange.hasUpperBound());
         assertEquals("5", stringRange.lowerEndpoint());
@@ -98,7 +99,7 @@ public class GuavaUtil100Test extends TestBase {
     public void testTransform_LessThanRange() {
         Range<Integer> intRange = Range.lessThan(10);
         Range<Double> doubleRange = GuavaUtil.transform(intRange, Integer::doubleValue);
-        
+
         assertFalse(doubleRange.hasLowerBound());
         assertTrue(doubleRange.hasUpperBound());
         assertEquals(10.0, doubleRange.upperEndpoint());
@@ -111,7 +112,7 @@ public class GuavaUtil100Test extends TestBase {
     public void testTransform_AtMostRange() {
         Range<Integer> intRange = Range.atMost(10);
         Range<String> stringRange = GuavaUtil.transform(intRange, Object::toString);
-        
+
         assertFalse(stringRange.hasLowerBound());
         assertTrue(stringRange.hasUpperBound());
         assertEquals("10", stringRange.upperEndpoint());
@@ -124,7 +125,7 @@ public class GuavaUtil100Test extends TestBase {
     public void testTransform_SingletonRange() {
         Range<Integer> intRange = Range.singleton(5);
         Range<String> stringRange = GuavaUtil.transform(intRange, Object::toString);
-        
+
         assertTrue(stringRange.hasLowerBound());
         assertTrue(stringRange.hasUpperBound());
         assertEquals("5", stringRange.lowerEndpoint());
@@ -140,7 +141,7 @@ public class GuavaUtil100Test extends TestBase {
         Date end = new Date(2000);
         Range<Date> dateRange = Range.closed(start, end);
         Range<Long> timestampRange = GuavaUtil.transform(dateRange, Date::getTime);
-        
+
         assertTrue(timestampRange.hasLowerBound());
         assertTrue(timestampRange.hasUpperBound());
         assertEquals(1000L, timestampRange.lowerEndpoint());
@@ -153,7 +154,7 @@ public class GuavaUtil100Test extends TestBase {
         Range<Integer> intRange = Range.closed(1, 100);
         Function<Integer, String> complexMapper = i -> "NUM_" + (i * 2);
         Range<String> stringRange = GuavaUtil.transform(intRange, complexMapper);
-        
+
         assertEquals("NUM_2", stringRange.lowerEndpoint());
         assertEquals("NUM_200", stringRange.upperEndpoint());
     }
@@ -161,11 +162,11 @@ public class GuavaUtil100Test extends TestBase {
     @Test
     public void testTransform_NullPointerException() {
         Range<Integer> intRange = Range.closed(1, 10);
-        
+
         assertThrows(NullPointerException.class, () -> {
             GuavaUtil.transform(null, Object::toString);
         });
-        
+
         assertThrows(NullPointerException.class, () -> {
             GuavaUtil.transform(intRange, null);
         });
@@ -175,16 +176,15 @@ public class GuavaUtil100Test extends TestBase {
     public void testTransform_EmptyRange() {
         Range<Integer> emptyRange = Range.closedOpen(5, 5);
         Range<String> transformedEmpty = GuavaUtil.transform(emptyRange, Object::toString);
-        
+
         assertTrue(transformedEmpty.isEmpty());
     }
 
     @Test
     public void testTransform_ComparableConsistency() {
-        // Test that the transformed range maintains comparable ordering
         Range<Integer> intRange = Range.closed(1, 10);
         Range<String> stringRange = GuavaUtil.transform(intRange, i -> String.format("%02d", i));
-        
+
         assertTrue(stringRange.contains("05"));
         assertFalse(stringRange.contains("00"));
         assertFalse(stringRange.contains("11"));

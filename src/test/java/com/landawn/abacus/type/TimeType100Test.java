@@ -16,9 +16,11 @@ import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class TimeType100Test extends TestBase {
 
     private TimeType timeType;
@@ -35,55 +37,45 @@ public class TimeType100Test extends TestBase {
 
     @Test
     public void testValueOfObject() {
-        // Test with Number
         Long time = 123456789L;
         Time result = timeType.valueOf(time);
         assertNotNull(result);
         assertEquals(time.longValue(), result.getTime());
 
-        // Test with Date
         Date date = new Date();
         result = timeType.valueOf(date);
         assertNotNull(result);
         assertEquals(date.getTime(), result.getTime());
 
-        // Test with null
         assertNull(timeType.valueOf((Object) null));
 
-        // Test with String
         result = timeType.valueOf((Object) "2024-01-15T14:30:45-08:00");
         assertNotNull(result);
     }
 
     @Test
     public void testValueOfString() {
-        // Test with time string
         Time result = timeType.valueOf("2024-01-15T14:30:45-08:00");
         assertNotNull(result);
 
-        // Test with SYS_TIME
         result = timeType.valueOf("sysTime");
         assertNotNull(result);
 
-        // Test with null/empty
         assertNull(timeType.valueOf((String) null));
         assertNull(timeType.valueOf(""));
     }
 
     @Test
     public void testValueOfCharArray() {
-        // Test with time as long
         char[] chars = "123456789".toCharArray();
         Time result = timeType.valueOf(chars, 0, chars.length);
         assertNotNull(result);
         assertEquals(123456789L, result.getTime());
 
-        // Test with time string
         chars = "2024-01-15T14:30:45-08:00".toCharArray();
         result = timeType.valueOf(chars, 0, chars.length);
         assertNotNull(result);
 
-        // Test with null/empty
         assertNull(timeType.valueOf(null, 0, 0));
         assertNull(timeType.valueOf(new char[0], 0, 0));
     }

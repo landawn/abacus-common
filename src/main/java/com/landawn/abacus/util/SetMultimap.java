@@ -55,10 +55,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Constructs a new instance of SetMultimap with the specified map type and list type.
+     * Constructs a new instance of SetMultimap with the specified map type and set type.
      *
      * @param mapType The class of the map to be used as the backing map.
-     * @param valueType The class of the list to be used as the value collection.
+     * @param valueType The class of the set to be used as the value collection.
      */
     @SuppressWarnings("rawtypes")
     SetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
@@ -66,21 +66,21 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Constructs a new instance of SetMultimap with the specified map supplier and list supplier.
+     * Constructs a new instance of SetMultimap with the specified map supplier and set supplier.
      *
      * @param mapSupplier The supplier that provides the map to be used as the backing map.
-     * @param valueSupplier The supplier that provides the list to be used as the value collection.
+     * @param valueSupplier The supplier that provides the set to be used as the value collection.
      */
     SetMultimap(final Supplier<? extends Map<K, Set<E>>> mapSupplier, final Supplier<? extends Set<E>> valueSupplier) {
         super(mapSupplier, valueSupplier);
     }
 
     /**
-     * Constructs a new instance of SetMultimap with the specified map and list type.
-     * This constructor allows the user to specify a custom map and list type for the backing map and value collections respectively.
+     * Constructs a new instance of SetMultimap with the specified map and set type.
+     * This constructor allows the user to specify a custom map and set type for the backing map and value collections respectively.
      *
      * @param valueMap The map to be used as the backing map.
-     * @param valueType The class of the list to be used as the value collection.
+     * @param valueType The class of the set to be used as the value collection.
      */
     @Internal
     @SuppressWarnings("rawtypes")
@@ -89,11 +89,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Constructs a new instance of SetMultimap with the specified map and list supplier.
-     * This constructor allows the user to specify a custom map and list supplier for the backing map and value collections respectively.
+     * Constructs a new instance of SetMultimap with the specified map and set supplier.
+     * This constructor allows the user to specify a custom map and set supplier for the backing map and value collections respectively.
      *
      * @param valueMap The map to be used as the backing map.
-     * @param valueSupplier The supplier that provides the list to be used as the value collection.
+     * @param valueSupplier The supplier that provides the set to be used as the value collection.
      */
     @Internal
     SetMultimap(final Map<K, Set<E>> valueMap, final Supplier<? extends Set<E>> valueSupplier) {
@@ -272,7 +272,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5, final K k6, final E v6, final K k7, final E v7) {
-        final SetMultimap<K, E> map = new SetMultimap<>();
+        final SetMultimap<K, E> map = new SetMultimap<>(7);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -286,12 +286,23 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Creates a new instance of SetMultimap with the key-value pairs from the specified map.
+     * Creates a new instance of SetMultimap from a regular map by converting each key-value pair
+     * into a key with a single-element set containing the value.
+     *
+     * <p>The returned SetMultimap uses the same map type as the input map for its backing storage,
+     * and uses {@link HashSet} for value collections.
+     *
+     * <pre>{@code
+     * Map<String, Integer> map = Map.of("a", 1, "b", 2);
+     * SetMultimap<String, Integer> multimap = SetMultimap.create(map);
+     * // multimap contains: {"a" -> [1], "b" -> [2]}
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
-     * @param map the map containing the key-value pairs to be added to the new SetMultimap
+     * @param map the map containing the key-value pairs to be added to the new SetMultimap, may be null or empty
      * @return a new instance of SetMultimap with the key-value pairs from the specified map
+     *
      */
     public static <K, E> SetMultimap<K, E> create(final Map<? extends K, ? extends E> map) {
         //noinspection rawtypes
@@ -325,14 +336,24 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     //    }
 
     /**
-     * Creates a new instance of SetMultimap from a given collection and a key mapper function.
+     * Creates a new instance of SetMultimap from a collection by grouping elements by keys extracted using the provided function.
+     * Each element is mapped to a key, and all elements with the same key are collected into a set.
+     *
+     * <p>This method is useful for grouping objects by a specific property or attribute.
+     *
+     * <pre>{@code
+     * List<String> words = List.of("apple", "ant", "banana", "bear");
+     * SetMultimap<Character, String> grouped = SetMultimap.create(words, s -> s.charAt(0));
+     * // grouped contains: {'a' -> ["apple", "ant"], 'b' -> ["banana", "bear"]}
+     * }</pre>
      *
      * @param <T> the type of the elements in the collection
      * @param <K> the type of the keys in the SetMultimap
-     * @param c the collection of elements to be added to the SetMultimap
-     * @param keyExtractor the function to generate keys for the SetMultimap
-     * @return a new instance of SetMultimap with keys and values from the specified collection
+     * @param c the collection of elements to be added to the SetMultimap, may be null or empty
+     * @param keyExtractor the function to extract keys from elements; must not be null
+     * @return a new instance of SetMultimap with keys extracted from elements and values being the elements themselves
      * @throws IllegalArgumentException if the keyExtractor is null
+     *
      */
     public static <T, K> SetMultimap<K, T> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor)
             throws IllegalArgumentException {
@@ -350,16 +371,28 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Creates a new instance of SetMultimap from a given collection, a key mapper function, and a value extractor function.
+     * Creates a new instance of SetMultimap from a collection by extracting both keys and values using the provided functions.
+     * Elements with the same key will have their extracted values collected into a set.
+     *
+     * <p>This method is useful for creating a multimap from a collection of objects by transforming them into
+     * different key-value pairs.
+     *
+     * <pre>{@code
+     * List<String> words = List.of("apple", "ant", "banana");
+     * SetMultimap<Character, Integer> multimap =
+     *     SetMultimap.create(words, s -> s.charAt(0), String::length);
+     * // multimap contains: {'a' -> [5, 3], 'b' -> [6]}
+     * }</pre>
      *
      * @param <T> the type of the elements in the collection
      * @param <K> the type of the keys in the SetMultimap
      * @param <E> the type of the values in the SetMultimap
-     * @param c the collection of elements to be added to the SetMultimap
-     * @param keyExtractor the function to generate keys for the SetMultimap
-     * @param valueExtractor the function to extract values for the SetMultimap
-     * @return a new instance of SetMultimap with keys and values from the specified collection
-     * @throws IllegalArgumentException if the keyExtractor or valueExtractor is null
+     * @param c the collection of elements to be transformed, may be null or empty
+     * @param keyExtractor the function to extract keys from elements; must not be null
+     * @param valueExtractor the function to extract values from elements; must not be null
+     * @return a new instance of SetMultimap with extracted keys and values from the specified collection
+     * @throws IllegalArgumentException if either keyExtractor or valueExtractor is null
+     *
      */
     public static <T, K, E> SetMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
@@ -518,20 +551,35 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Wraps the provided map into a SetMultimap. Changes to the specified map will be reflected in the SetMultimap and vice versa.
+     * Wraps an existing map into a SetMultimap without copying its contents. Changes to the wrapped map
+     * will be reflected in the SetMultimap and vice versa, as they share the same underlying storage.
+     *
+     * <p><strong>Important:</strong> The provided map must not contain null values.
+     * All values must be non-null Set instances. This constraint is validated at wrap time.
+     *
+     * <p>This method is useful when you want to treat an existing Map&lt;K, Set&lt;E&gt;&gt; as a SetMultimap
+     * without creating a copy.
+     *
+     * <pre>{@code
+     * Map<String, Set<Integer>> map = new HashMap<>();
+     * map.put("a", new HashSet<>(List.of(1, 2)));
+     * SetMultimap<String, Integer> multimap = SetMultimap.wrap(map);
+     * multimap.put("a", 3);  // modifies the original map
+     * }</pre>
      *
      * @param <K> the type of the keys in the map
-     * @param <E> the type of the elements in the list
-     * @param <V> the type of the list
-     * @param map the map to be wrapped into a SetMultimap
-     * @return a new instance of SetMultimap backed by the provided map.
-     * @throws IllegalArgumentException if the provided map is null
+     * @param <E> the type of the elements in the set
+     * @param <V> the type of the set extending Set&lt;E&gt;
+     * @param map the map to be wrapped into a SetMultimap; must not be null and must not contain null values
+     * @return a SetMultimap instance backed by the provided map
+     * @throws IllegalArgumentException if the provided map is null or contains null values
+     *
      */
     @SuppressWarnings("rawtypes")
     @Beta
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);
-        N.checkArgument(map.values().stream().noneMatch(Fn.isEmptyC()), "The specified map contains null or empty value: %s", map);
+        N.checkArgument(map.values().stream().allMatch(v -> v != null), "The specified map contains null value: %s", map);
 
         final Class<? extends Set> valueType = map.isEmpty() ? HashSet.class : map.values().iterator().next().getClass();
 
@@ -539,15 +587,27 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Wraps the provided map into a SetMultimap with a custom list supplier. Changes to the specified map will be reflected in the SetMultimap and vice versa.
+     * Wraps an existing map into a SetMultimap with a custom set supplier. Changes to the wrapped map
+     * will be reflected in the SetMultimap and vice versa, as they share the same underlying storage.
+     *
+     * <p>The provided value supplier will be used to create new sets when new keys are added to the multimap.
+     *
+     * <pre>{@code
+     * Map<String, TreeSet<Integer>> map = new HashMap<>();
+     * SetMultimap<String, Integer> multimap =
+     *     SetMultimap.wrap(map, TreeSet::new);
+     * multimap.put("a", 3);
+     * multimap.put("a", 1);  // Creates TreeSet, values will be sorted
+     * }</pre>
      *
      * @param <K> the type of the keys in the map
-     * @param <E> the type of the elements in the list
-     * @param <V> the type of the list
-     * @param map the map to be wrapped into a SetMultimap
-     * @param valueSupplier the supplier that provides the list to be used as the value collection
-     * @return a new instance of SetMultimap backed by the provided map.
+     * @param <E> the type of the elements in the set
+     * @param <V> the type of the set extending Set&lt;E&gt;
+     * @param map the map to be wrapped into a SetMultimap; must not be null
+     * @param valueSupplier the supplier that provides new set instances for new keys; must not be null
+     * @return a SetMultimap instance backed by the provided map
      * @throws IllegalArgumentException if the provided map or valueSupplier is null
+     *
      */
     @Beta
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
@@ -559,9 +619,21 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Inverts the SetMultimap, swapping keys with values.
+     * Creates a new SetMultimap with inverted key-value relationships. Each value in the original multimap
+     * becomes a key in the result, and each original key becomes a value associated with that new key.
      *
-     * @return a new instance of SetMultimap where the original keys are now values and the original values are now keys
+     * <p>This operation creates a new multimap and does not modify the original. The new multimap will
+     * preserve the ordering characteristics of the original map.
+     *
+     * <pre>{@code
+     * SetMultimap<String, Integer> original = SetMultimap.of("a", 1, "a", 2, "b", 1);
+     * // original: {"a" -> [1, 2], "b" -> [1]}
+     * SetMultimap<Integer, String> inverted = original.inverse();
+     * // inverted: {1 -> ["a", "b"], 2 -> ["a"]}
+     * }</pre>
+     *
+     * @return a new SetMultimap where each original value is mapped to the set of keys that contained it
+     *
      */
     public SetMultimap<E, K> inverse() {
         final SetMultimap<K, E> multimap = this;
@@ -584,11 +656,23 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Returns a new SetMultimap and copies all key-value pairs from this SetMultimap to the new one.
-     * The new SetMultimap has the same structural and hash characteristics as this one.
+     * Creates a deep copy of this SetMultimap. The returned multimap contains all key-value pairs from the original,
+     * but uses new set instances for value collections.
      *
-     * @return A new SetMultimap containing all the key-value pairs of this SetMultimap.
+     * <p>The new SetMultimap uses the same map and set suppliers as the original, ensuring consistent behavior
+     * and characteristics (ordering, implementation type, etc.).
+     *
+     * <p>Modifications to the returned multimap will not affect the original and vice versa.
+     *
+     * <pre>{@code
+     * SetMultimap<String, Integer> original = SetMultimap.of("a", 1, "b", 2);
+     * SetMultimap<String, Integer> copy = original.copy();
+     * copy.put("c", 3);  // Does not modify original
+     * }</pre>
+     *
+     * @return a new SetMultimap containing all the key-value pairs of this SetMultimap
      * @see #putMany(Multimap)
+     *
      */
     @Override
     public SetMultimap<K, E> copy() {
@@ -600,13 +684,23 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Filters the SetMultimap based on the provided key-value pair filter.
+     * Creates a new SetMultimap containing only the entries that satisfy the given predicate.
+     * The predicate is applied to each key and its complete set of values.
      *
-     * This method creates a new SetMultimap and adds all key-value pairs from the current SetMultimap that satisfy the provided key-value pair filter.
-     * The new SetMultimap has the same structural and hash characteristics as the current one.
+     * <p>The new SetMultimap shares the same set instances as the original for matching entries
+     * (shallow copy of matching entries), and uses the same map and set suppliers.
      *
-     * @param filter The predicate to be applied to each key-value pair in the SetMultimap. If the predicate returns {@code true}, the key-value pair is included in the new SetMultimap.
-     * @return A new SetMultimap containing all the key-value pairs of the current SetMultimap that satisfy the provided key-value pair filter.
+     * <pre>{@code
+     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "b", 3);
+     * SetMultimap<String, Integer> filtered = map.filter((k, v) -> v.size() > 1);
+     * // filtered contains: {"a" -> [1, 2]}
+     * }</pre>
+     *
+     * @param filter the predicate to test each key-value pair; must not be null.
+     *               The predicate receives the key and the complete set of values associated with that key.
+     *               If it returns {@code true}, the entire entry is included in the result.
+     * @return a new SetMultimap containing only the entries that match the filter
+     *
      */
     @Override
     public SetMultimap<K, E> filter(final BiPredicate<? super K, ? super Set<E>> filter) {
@@ -614,7 +708,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
         for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey(), entry.getValue())) {
-                result.backingMap.put(entry.getKey(), entry.getValue());
+                result.putMany(entry.getKey(), entry.getValue());
             }
         }
 
@@ -622,13 +716,21 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Filters the SetMultimap based on the provided key filter.
+     * Creates a new SetMultimap containing only the entries whose keys satisfy the given predicate.
      *
-     * This method creates a new SetMultimap and adds all key-value pairs from the current SetMultimap that satisfy the provided key filter.
-     * The new SetMultimap has the same structural and hash characteristics as the current one.
+     * <p>The new SetMultimap shares the same set instances as the original for matching entries
+     * (shallow copy of matching entries), and uses the same map and set suppliers.
      *
-     * @param filter The predicate to be applied to each key in the SetMultimap. If the predicate returns {@code true}, the key-value pair is included in the new SetMultimap.
-     * @return A new SetMultimap containing all the key-value pairs of the current SetMultimap that satisfy the provided key filter.
+     * <pre>{@code
+     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3);
+     * SetMultimap<String, Integer> filtered = map.filterByKey(k -> k.equals("a") || k.equals("b"));
+     * // filtered contains: {"a" -> [1], "b" -> [2]}
+     * }</pre>
+     *
+     * @param filter the predicate to test each key; must not be null.
+     *               If it returns {@code true} for a key, all values associated with that key are included in the result.
+     * @return a new SetMultimap containing only the entries whose keys match the filter
+     *
      */
     @Override
     public SetMultimap<K, E> filterByKey(final Predicate<? super K> filter) {
@@ -636,7 +738,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
         for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey())) {
-                result.backingMap.put(entry.getKey(), entry.getValue());
+                result.putMany(entry.getKey(), entry.getValue());
             }
         }
 
@@ -644,13 +746,23 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Filters the SetMultimap based on the provided value filter.
+     * Creates a new SetMultimap containing only the entries whose value sets satisfy the given predicate.
+     * The predicate is applied to each complete set of values associated with a key.
      *
-     * This method creates a new SetMultimap and adds all key-value pairs from the current SetMultimap that satisfy the provided value filter.
-     * The new SetMultimap has the same structural and hash characteristics as the current one.
+     * <p>The new SetMultimap shares the same set instances as the original for matching entries
+     * (shallow copy of matching entries), and uses the same map and set suppliers.
      *
-     * @param filter The predicate to be applied to each value in the SetMultimap. If the predicate returns {@code true}, the key-value pair is included in the new SetMultimap.
-     * @return A new SetMultimap containing all the key-value pairs of the current SetMultimap that satisfy the provided value filter.
+     * <pre>{@code
+     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "b", 3);
+     * SetMultimap<String, Integer> filtered = map.filterByValue(v -> !v.isEmpty() && v.size() > 1);
+     * // filtered contains: {"a" -> [1, 2]}
+     * }</pre>
+     *
+     * @param filter the predicate to test each value set; must not be null.
+     *               The predicate receives the complete set of values for each key.
+     *               If it returns {@code true}, the entire entry is included in the result.
+     * @return a new SetMultimap containing only the entries whose value sets match the filter
+     *
      */
     @Override
     public SetMultimap<K, E> filterByValue(final Predicate<? super Set<E>> filter) {
@@ -658,7 +770,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
         for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getValue())) {
-                result.backingMap.put(entry.getKey(), entry.getValue());
+                result.putMany(entry.getKey(), entry.getValue());
             }
         }
 
@@ -666,12 +778,22 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Converts the current SetMultimap into an ImmutableMap.
+     * Converts this SetMultimap into an immutable map where each key is associated with an immutable set of values.
      *
-     * Each key-value pair in the SetMultimap is transformed into a key-ImmutableSet pair in the ImmutableMap.
-     * The ImmutableSet contains all the values associated with the key in the SetMultimap.
+     * <p>This method creates a new map using the same type as the backing map, converts each value set
+     * to an {@link ImmutableSet}, and wraps the result in an {@link ImmutableMap}.
      *
-     * @return an ImmutableMap where each key is associated with an ImmutableSet of values from the original SetMultimap
+     * <p>The returned map and its value sets are completely immutable and cannot be modified.
+     *
+     * <pre>{@code
+     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "b", 3);
+     * ImmutableMap<String, ImmutableSet<Integer>> immutable = map.toImmutableMap();
+     * // immutable.get("a") returns ImmutableSet[1, 2]
+     * }</pre>
+     *
+     * @return an ImmutableMap where each key from this multimap is associated with an ImmutableSet
+     *         containing all values that were associated with that key
+     *
      */
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap() {
         final Map<K, ImmutableSet<E>> map = Maps.newTargetMap(backingMap);
@@ -684,13 +806,26 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Converts the current SetMultimap into an ImmutableMap using a provided map supplier.
+     * Converts this SetMultimap into an immutable map using a custom map supplier.
+     * Each key is associated with an immutable set of values.
      *
-     * Each key-value pair in the SetMultimap is transformed into a key-ImmutableSet pair in the ImmutableMap.
-     * The ImmutableSet contains all the values associated with the key in the SetMultimap.
+     * <p>The provided map supplier allows you to control the type of the underlying map in the returned ImmutableMap
+     * (e.g., use a TreeMap for sorted keys, or a LinkedHashMap for insertion-order).
      *
-     * @param mapSupplier The supplier function that provides a Map instance. The function takes an integer argument which is the initial size of the map.
-     * @return an ImmutableMap where each key is associated with an ImmutableSet of values from the original SetMultimap
+     * <p>The returned map and its value sets are completely immutable and cannot be modified.
+     *
+     * <pre>{@code
+     * SetMultimap<String, Integer> map = SetMultimap.of("b", 2, "a", 1);
+     * ImmutableMap<String, ImmutableSet<Integer>> sorted =
+     *     map.toImmutableMap(size -> new TreeMap<>());
+     * // Keys will be in sorted order: "a", "b"
+     * }</pre>
+     *
+     * @param mapSupplier a function that creates a new map instance given an initial capacity;
+     *                    the function receives the size of this multimap as its argument
+     * @return an ImmutableMap where each key from this multimap is associated with an ImmutableSet
+     *         containing all values that were associated with that key
+     *
      */
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier) {
         final Map<K, ImmutableSet<E>> map = mapSupplier.apply(backingMap.size());

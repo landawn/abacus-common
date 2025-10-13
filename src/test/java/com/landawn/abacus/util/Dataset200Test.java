@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -37,6 +38,7 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.stream.Stream;
 
 @SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
+@Tag("new-test")
 public class Dataset200Test extends TestBase {
 
     private RowDataset emptyDataset;
@@ -50,9 +52,9 @@ public class Dataset200Test extends TestBase {
 
         columnNames = new ArrayList<>(Arrays.asList("ID", "Name", "Age"));
         columnValues = new ArrayList<>();
-        columnValues.add(new ArrayList<>(Arrays.asList(1, 2, 3))); // ID
-        columnValues.add(new ArrayList<>(Arrays.asList("Alice", "Bob", "Charlie"))); // Name
-        columnValues.add(new ArrayList<>(Arrays.asList(30, 24, 35))); // Age
+        columnValues.add(new ArrayList<>(Arrays.asList(1, 2, 3)));
+        columnValues.add(new ArrayList<>(Arrays.asList("Alice", "Bob", "Charlie")));
+        columnValues.add(new ArrayList<>(Arrays.asList(30, 24, 35)));
         sampleDataset = new RowDataset(columnNames, columnValues);
     }
 
@@ -87,14 +89,14 @@ public class Dataset200Test extends TestBase {
     @Test
     public void constructor_mismatchedColumnNameAndListSize_throwsIllegalArgumentException() {
         List<String> names = Arrays.asList("A", "B");
-        List<List<Object>> values = List.of(Arrays.asList(1, 2)); // Only one column of data
+        List<List<Object>> values = List.of(Arrays.asList(1, 2));
         assertThrows(IllegalArgumentException.class, () -> new RowDataset(names, values));
     }
 
     @Test
     public void constructor_mismatchedColumnSizes_throwsIllegalArgumentException() {
         List<String> names = Arrays.asList("A", "B");
-        List<List<Object>> values = List.of(Arrays.asList(1, 2), Arrays.asList(3)); // Col B has fewer rows
+        List<List<Object>> values = List.of(Arrays.asList(1, 2), Arrays.asList(3));
         assertThrows(IllegalArgumentException.class, () -> new RowDataset(names, values));
     }
 
@@ -142,7 +144,7 @@ public class Dataset200Test extends TestBase {
 
         Collection<String> allNames = sampleDataset.columnNameList();
         int[] allIndexes = sampleDataset.getColumnIndexes(allNames);
-        assertArrayEquals(new int[] { 0, 1, 2 }, allIndexes); // Should use cached _columnIndexes
+        assertArrayEquals(new int[] { 0, 1, 2 }, allIndexes);
 
         assertThrows(IllegalArgumentException.class, () -> sampleDataset.getColumnIndexes(Arrays.asList("ID", "NonExistent")));
         assertArrayEquals(N.EMPTY_INT_ARRAY, sampleDataset.getColumnIndexes(Collections.emptyList()));
@@ -159,7 +161,7 @@ public class Dataset200Test extends TestBase {
     public void containsAllColumns() {
         assertTrue(sampleDataset.containsAllColumns(Arrays.asList("ID", "Age")));
         assertFalse(sampleDataset.containsAllColumns(Arrays.asList("ID", "NonExistent")));
-        assertTrue(sampleDataset.containsAllColumns(Collections.emptyList())); // Empty set should be true
+        assertTrue(sampleDataset.containsAllColumns(Collections.emptyList()));
         assertTrue(emptyDataset.containsAllColumns(Collections.emptyList()));
         assertFalse(emptyDataset.containsAllColumns(Arrays.asList("ID")));
     }
@@ -171,9 +173,9 @@ public class Dataset200Test extends TestBase {
         assertTrue(sampleDataset.columnNameList().contains("Years"));
         assertFalse(sampleDataset.columnNameList().contains("Age"));
         assertThrows(IllegalArgumentException.class, () -> sampleDataset.renameColumn("NonExistent", "NewName"));
-        assertThrows(IllegalArgumentException.class, () -> sampleDataset.renameColumn("ID", "Name")); // Duplicate
+        assertThrows(IllegalArgumentException.class, () -> sampleDataset.renameColumn("ID", "Name"));
 
-        sampleDataset.renameColumn("Years", "Years"); // Rename to self
+        sampleDataset.renameColumn("Years", "Years");
         assertEquals(2, sampleDataset.getColumnIndex("Years"));
 
         RowDataset ds = createSimpleDataset();
@@ -198,7 +200,7 @@ public class Dataset200Test extends TestBase {
 
         Map<String, String> duplicateNewNames = new HashMap<>();
         duplicateNewNames.put("Name", "Duplicate");
-        duplicateNewNames.put("Years", "Duplicate"); // Years was Age
+        duplicateNewNames.put("Years", "Duplicate");
         assertThrows(IllegalArgumentException.class, () -> sampleDataset.renameColumns(duplicateNewNames));
     }
 
@@ -223,31 +225,22 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void moveColumn() {
-        sampleDataset.moveColumn("Age", 0); // Move Age to the first position
+        sampleDataset.moveColumn("Age", 0);
         assertEquals(Arrays.asList("Age", "ID", "Name"), sampleDataset.columnNameList());
-        assertEquals((Integer) 35, sampleDataset.absolute(2).get("Age")); // Charlie's age
+        assertEquals((Integer) 35, sampleDataset.absolute(2).get("Age"));
 
-        assertThrows(IndexOutOfBoundsException.class, () -> sampleDataset.moveColumn("ID", 5)); // Invalid new position
+        assertThrows(IndexOutOfBoundsException.class, () -> sampleDataset.moveColumn("ID", 5));
         assertThrows(IllegalArgumentException.class, () -> sampleDataset.moveColumn("NonExistent", 0));
     }
-
-    //    @Test
-    //    public void moveColumns_map() {
-    //        Map<String, Integer> moves = new HashMap<>();
-    //        moves.put("Age", 0); // Age to first
-    //        moves.put("ID", 2); // ID to last (after Age is moved)
-    //        sampleDataset.moveColumns(moves);
-    //        assertEquals(Arrays.asList("Age", "Name", "ID"), sampleDataset.columnNameList());
-    //    }
 
     @Test
     public void swapColumnPosition() {
         sampleDataset.swapColumnPosition("ID", "Age");
         assertEquals(Arrays.asList("Age", "Name", "ID"), sampleDataset.columnNameList());
-        assertEquals((Integer) 30, sampleDataset.absolute(0).get("Age")); // Alice's ID is now in Age column
-        assertEquals((Integer) 1, sampleDataset.absolute(0).get("ID")); // Alice's Age is now in ID column
+        assertEquals((Integer) 30, sampleDataset.absolute(0).get("Age"));
+        assertEquals((Integer) 1, sampleDataset.absolute(0).get("ID"));
 
-        sampleDataset.swapColumnPosition("Name", "Name"); // Swap with self
+        sampleDataset.swapColumnPosition("Name", "Name");
         assertEquals(Arrays.asList("Age", "Name", "ID"), sampleDataset.columnNameList());
 
         assertThrows(IllegalArgumentException.class, () -> sampleDataset.swapColumnPosition("ID", "NonExistent"));
@@ -279,19 +272,17 @@ public class Dataset200Test extends TestBase {
         assertTrue(sampleDataset.isNull(0, 0));
     }
 
-    // Test for get(columnIndex) - relies on currentRowNum
     @Test
     public void get_columnIndex_withAbsolute() {
-        sampleDataset.absolute(1); // Bob's row
-        assertEquals((Integer) 2, sampleDataset.get(0)); // Bob's ID
+        sampleDataset.absolute(1);
+        assertEquals((Integer) 2, sampleDataset.get(0));
         assertEquals("Bob", sampleDataset.get(1));
         assertEquals((Integer) 24, sampleDataset.get(2));
     }
 
-    // Test for get(columnName) - relies on currentRowNum
     @Test
     public void get_columnName_withAbsolute() {
-        sampleDataset.absolute(2); // Charlie's row
+        sampleDataset.absolute(2);
         assertEquals((Integer) 3, sampleDataset.get("ID"));
         assertEquals("Charlie", sampleDataset.get("Name"));
         assertEquals((Integer) 35, sampleDataset.get("Age"));
@@ -310,8 +301,8 @@ public class Dataset200Test extends TestBase {
         boolDs.absolute(1);
         assertFalse(boolDs.getBoolean(0));
 
-        boolDs.absolute(2); // null
-        assertFalse(boolDs.getBoolean(0)); // null becomes false for primitive
+        boolDs.absolute(2);
+        assertFalse(boolDs.getBoolean(0));
 
         boolDs.absolute(3);
         assertTrue(boolDs.getBoolean(0));
@@ -333,14 +324,13 @@ public class Dataset200Test extends TestBase {
         charDs.absolute(1);
         assertEquals('Z', charDs.getChar(0));
 
-        charDs.absolute(2); // null
-        assertEquals((char) 0, charDs.getChar(0)); // null becomes (char)0 for primitive
+        charDs.absolute(2);
+        assertEquals((char) 0, charDs.getChar(0));
 
         charDs.absolute(3);
         assertEquals('x', charDs.getChar(0));
     }
 
-    // Similar tests for getByte, getShort, getInt, getLong, getFloat, getDouble
     @Test
     public void getInt_primitiveAndObject() {
         List<String> intNames = List.of("IntCol");
@@ -354,13 +344,13 @@ public class Dataset200Test extends TestBase {
         intDs.absolute(1);
         assertEquals(-5, intDs.getInt(0));
 
-        intDs.absolute(2); // null
-        assertEquals(0, intDs.getInt(0)); // null becomes 0 for primitive
+        intDs.absolute(2);
+        assertEquals(0, intDs.getInt(0));
 
         intDs.absolute(3);
         assertEquals(100, intDs.getInt(0));
 
-        intDs.absolute(4); // Long value
+        intDs.absolute(4);
         assertEquals(200, intDs.getInt(0));
     }
 
@@ -368,30 +358,29 @@ public class Dataset200Test extends TestBase {
     public void isNull_columnIndex_withAbsolute() {
         sampleDataset.absolute(0);
         assertFalse(sampleDataset.isNull(0));
-        sampleDataset.set(0, null); // set ID of current row (Alice) to null
+        sampleDataset.set(0, null);
         assertTrue(sampleDataset.isNull(0));
         assertTrue(sampleDataset.isNull("ID"));
     }
 
     @Test
     public void set_columnIndex_value_withAbsolute() {
-        sampleDataset.absolute(1); // Bob's row
-        sampleDataset.set(0, 200); // Set Bob's ID
-        assertEquals((Integer) 200, sampleDataset.absolute(1).get(0)); // Verify Bob's ID in the underlying list
+        sampleDataset.absolute(1);
+        sampleDataset.set(0, 200);
+        assertEquals((Integer) 200, sampleDataset.absolute(1).get(0));
     }
 
     @Test
     public void set_columnName_value_withAbsolute() {
-        sampleDataset.absolute(2); // Charlie's row
+        sampleDataset.absolute(2);
         sampleDataset.set("Age", 40);
-        assertEquals((Integer) 40, sampleDataset.absolute(2).get(2)); // Verify Charlie's Age
+        assertEquals((Integer) 40, sampleDataset.absolute(2).get(2));
     }
 
     @Test
     public void getColumn_byIndex() {
         List<Object> idColumn = sampleDataset.getColumn(0);
         assertEquals(Arrays.asList(1, 2, 3), idColumn);
-        // Check immutability
         assertThrows(UnsupportedOperationException.class, () -> sampleDataset.getColumn(0).add(4));
     }
 
@@ -405,7 +394,7 @@ public class Dataset200Test extends TestBase {
     public void copyColumn() {
         List<Object> ageColumnCopy = sampleDataset.copyColumn("Age");
         assertEquals(Arrays.asList(30, 24, 35), ageColumnCopy);
-        ageColumnCopy.add(40); // Should not affect original
+        ageColumnCopy.add(40);
         assertEquals(Arrays.asList(30, 24, 35), sampleDataset.getColumn("Age"));
     }
 
@@ -418,25 +407,24 @@ public class Dataset200Test extends TestBase {
         assertEquals(newColData, sampleDataset.getColumn("Grade"));
         assertEquals("X", sampleDataset.absolute(0).get("Grade"));
 
-        // Test adding null column
         sampleDataset.addColumn("EmptyGrade", null);
         assertEquals(5, sampleDataset.columnCount());
         assertEquals(Arrays.asList(null, null, null), sampleDataset.getColumn("EmptyGrade"));
 
-        assertThrows(IllegalArgumentException.class, () -> sampleDataset.addColumn("ID", Arrays.asList("A"))); // duplicate name
-        assertThrows(IllegalArgumentException.class, () -> sampleDataset.addColumn("Score", Arrays.asList(10, 20))); // wrong size
+        assertThrows(IllegalArgumentException.class, () -> sampleDataset.addColumn("ID", Arrays.asList("A")));
+        assertThrows(IllegalArgumentException.class, () -> sampleDataset.addColumn("Score", Arrays.asList(10, 20)));
     }
 
     @Test
     public void addColumn_newColumnPosition_newColumnName_collection() {
         List<Double> scores = Arrays.asList(90.5, 88.0, 92.0);
-        sampleDataset.addColumn(1, "Score", scores); // Add at index 1
+        sampleDataset.addColumn(1, "Score", scores);
         assertEquals(4, sampleDataset.columnCount());
         assertEquals(Arrays.asList("ID", "Score", "Name", "Age"), sampleDataset.columnNameList());
         assertEquals(scores, sampleDataset.getColumn("Score"));
         assertEquals(90.5, sampleDataset.absolute(0).get("Score"));
 
-        assertThrows(IllegalArgumentException.class, () -> sampleDataset.addColumn(0, "ID", scores)); // duplicate name
+        assertThrows(IllegalArgumentException.class, () -> sampleDataset.addColumn(0, "ID", scores));
     }
 
     @Test
@@ -496,19 +484,17 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void removeColumns_predicate() {
-        sampleDataset.removeColumns(name -> name.equals("ID") || name.endsWith("e")); // Removes ID, Name, Age
+        sampleDataset.removeColumns(name -> name.equals("ID") || name.endsWith("e"));
         assertEquals(0, sampleDataset.columnCount());
         assertTrue(sampleDataset.columnNameList().isEmpty());
     }
 
     @Test
     public void convertColumn() {
-        // Age is Integer, convert to String
         sampleDataset.convertColumn("Age", String.class);
         assertEquals("30", sampleDataset.absolute(0).get("Age"));
         assertTrue(sampleDataset.getColumn("Age").get(0) instanceof String);
 
-        // ID is Integer, convert to Double
         sampleDataset.convertColumn("ID", Double.class);
         assertEquals(1.0, sampleDataset.absolute(0).get("ID"));
         assertTrue(sampleDataset.getColumn("ID").get(0) instanceof Double);
@@ -535,27 +521,20 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void updateColumns_collection() {
-        sampleDataset.updateColumns(Arrays.asList("ID", "Age"), (c, v) -> ((Number) v).intValue() + 100);
+        sampleDataset.updateColumns(Arrays.asList("ID", "Age"), (i, c, v) -> ((Number) v).intValue() + 100);
         assertEquals(Arrays.asList(101, 102, 103), sampleDataset.getColumn("ID"));
         assertEquals(Arrays.asList(130, 124, 135), sampleDataset.getColumn("Age"));
     }
 
     @Test
     public void combineColumns_toNewType() {
-        // Combine ID (Integer) and Age (Integer) into a new String column "ID_Age"
         sampleDataset.combineColumns(Arrays.asList("ID", "Age"), "ID_Age_Combined", Map.class);
-        assertEquals(2, sampleDataset.columnCount()); // Name, ID_Age_Combined
+        assertEquals(2, sampleDataset.columnCount());
         assertTrue(sampleDataset.columnNameList().contains("ID_Age_Combined"));
         assertTrue(sampleDataset.columnNameList().contains("Name"));
         assertFalse(sampleDataset.columnNameList().contains("ID"));
         assertFalse(sampleDataset.columnNameList().contains("Age"));
 
-        // Check combined values (assuming default conversion combines them as a list string)
-        // The default behavior if newColumnType is specified is to create a List<Map<String, Object>>
-        // and then convert that list to the target type. For String.class, it's List.toString().
-        // This might not be the most intuitive for simple combination, function version is better.
-        // For direct control, use the function-based combine.
-        // For example, row 0: ID=1, Age=30. Becomes [{ID=1, Age=30}].toString()
         assertEquals(Map.of("ID", 1, "Age", 30), sampleDataset.absolute(0).get("ID_Age_Combined"));
         assertEquals(Map.of("ID", 2, "Age", 24), sampleDataset.absolute(1).get("ID_Age_Combined"));
     }
@@ -563,14 +542,13 @@ public class Dataset200Test extends TestBase {
     @Test
     public void combineColumns_withFunction() {
         sampleDataset.combineColumns(Arrays.asList("Name", "Age"), "NameAndAge", (DisposableObjArray row) -> row.get(0) + " is " + row.get(1));
-        assertEquals(2, sampleDataset.columnCount()); // ID, NameAndAge
+        assertEquals(2, sampleDataset.columnCount());
         assertTrue(sampleDataset.columnNameList().contains("NameAndAge"));
         assertEquals(Arrays.asList("Alice is 30", "Bob is 24", "Charlie is 35"), sampleDataset.getColumn("NameAndAge"));
     }
 
     @Test
     public void divideColumn_withFunctionToList() {
-        // Add a column "FullName" like "Alice Wonderland"
         sampleDataset.addColumn("FullName", Arrays.asList("Alice Wonderland", "Bob TheBuilder", "Charlie Brown"));
         sampleDataset.divideColumn("FullName", Arrays.asList("FirstName", "LastName"), (String fullName) -> {
             if (fullName == null)
@@ -579,7 +557,7 @@ public class Dataset200Test extends TestBase {
             return Arrays.asList(parts[0], parts.length > 1 ? parts[1] : null);
         });
 
-        assertEquals(5, sampleDataset.columnCount()); // ID, Name, Age, FirstName, LastName
+        assertEquals(5, sampleDataset.columnCount());
         assertTrue(sampleDataset.columnNameList().contains("FirstName"));
         assertTrue(sampleDataset.columnNameList().contains("LastName"));
         assertEquals(Arrays.asList("Alice", "Bob", "Charlie"), sampleDataset.getColumn("FirstName"));
@@ -645,14 +623,12 @@ public class Dataset200Test extends TestBase {
         assertEquals("Frank", sampleDataset.absolute(3).get("Name"));
 
         Map<String, Object> incompleteMap = Map.of("ID", 5, "Name", "Grace");
-        assertThrows(IllegalArgumentException.class, () -> sampleDataset.addRow(incompleteMap)); // Missing Age
+        assertThrows(IllegalArgumentException.class, () -> sampleDataset.addRow(incompleteMap));
     }
 
     @Test
     public void addRow_fromBean() {
         TestBean bean = new TestBean(4, "Ivy", 22);
-        // To add from bean, column names must match bean property names (case-sensitive default)
-        // Or, use a custom RowDataset where column names are "id", "name", "value"
         RowDataset beanDs = new RowDataset(Arrays.asList("id", "name", "value"), Arrays.asList(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         beanDs.addRow(bean);
         assertEquals(1, beanDs.size());
@@ -663,33 +639,33 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void addRow_atPosition() {
-        sampleDataset.addRow(1, new Object[] { 0, "Zero", 0 }); // Add at index 1
+        sampleDataset.addRow(1, new Object[] { 0, "Zero", 0 });
         assertEquals(4, sampleDataset.size());
         assertEquals("Zero", sampleDataset.absolute(1).get("Name"));
-        assertEquals("Bob", sampleDataset.absolute(2).get("Name")); // Bob is shifted
+        assertEquals("Bob", sampleDataset.absolute(2).get("Name"));
     }
 
     @Test
     public void removeRow() {
-        sampleDataset.removeRow(1); // Remove Bob
+        sampleDataset.removeRow(1);
         assertEquals(2, sampleDataset.size());
-        assertEquals("Charlie", sampleDataset.absolute(1).get("Name")); // Charlie is now at index 1
+        assertEquals("Charlie", sampleDataset.absolute(1).get("Name"));
         assertThrows(IndexOutOfBoundsException.class, () -> sampleDataset.removeRow(5));
     }
 
     @Test
     public void removeRows_indices() {
-        sampleDataset.removeRows(0, 2); // Remove Alice and Charlie
+        sampleDataset.removeMultiRows(0, 2);
         assertEquals(1, sampleDataset.size());
         assertEquals("Bob", sampleDataset.absolute(0).get("Name"));
     }
 
     @Test
     public void removeRowRange() {
-        sampleDataset.removeRowRange(0, 2); // Remove Alice and Bob
+        sampleDataset.removeRows(0, 2);
         assertEquals(1, sampleDataset.size());
         assertEquals("Charlie", sampleDataset.absolute(0).get("Name"));
-        assertThrows(IndexOutOfBoundsException.class, () -> sampleDataset.removeRowRange(0, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> sampleDataset.removeRows(0, 5));
     }
 
     @Test
@@ -698,7 +674,7 @@ public class Dataset200Test extends TestBase {
             if (val instanceof String)
                 return ((String) val).toUpperCase();
             if (val instanceof Integer && ((Integer) val) == 30)
-                return 31; // Alice's age
+                return 31;
             return val;
         });
         assertEquals("ALICE", sampleDataset.absolute(0).get("Name"));
@@ -725,7 +701,7 @@ public class Dataset200Test extends TestBase {
         assertEquals("Robert", sampleDataset.absolute(1).get("Name"));
 
         sampleDataset.replaceIf(val -> val instanceof Integer && (Integer) val > 30, 0);
-        assertEquals((Integer) 0, sampleDataset.absolute(2).get("Age")); // Charlie's age was 35
+        assertEquals((Integer) 0, sampleDataset.absolute(2).get("Age"));
     }
 
     @Test
@@ -756,7 +732,6 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void getRow_asSpecificType_Bean() {
-        // Need column names to match bean properties for direct mapping
         RowDataset beanFriendlyDs = new RowDataset(Arrays.asList("id", "name", "value"), Arrays.asList(new ArrayList<>(Arrays.asList(101, 102)),
                 new ArrayList<>(Arrays.asList("Bean1", "Bean2")), new ArrayList<>(Arrays.asList(10.5, 20.5))));
         TestBean bean1 = beanFriendlyDs.getRow(0, TestBean.class);
@@ -774,10 +749,9 @@ public class Dataset200Test extends TestBase {
     @Test
     public void getRow_withSupplier() {
         AtomicInteger counter = new AtomicInteger(0);
-        // Supplier creates a new Map for each row, good for custom map types
         Map<String, Object> row = sampleDataset.getRow(0, size -> {
             counter.incrementAndGet();
-            return new LinkedHashMap<>(size); // Use LinkedHashMap
+            return new LinkedHashMap<>(size);
         });
         assertEquals(1, counter.get());
         assertTrue(row instanceof LinkedHashMap);
@@ -841,8 +815,8 @@ public class Dataset200Test extends TestBase {
         Pair<String, Integer> p = iter.next();
         assertEquals("Alice", p.left());
         assertEquals(30, p.right());
-        iter.next(); // Bob
-        iter.next(); // Charlie
+        iter.next();
+        iter.next();
         assertFalse(iter.hasNext());
     }
 
@@ -907,38 +881,24 @@ public class Dataset200Test extends TestBase {
     @Test
     public void toMergedEntities_singleId() {
         List<String> names = Arrays.asList("id", "name", "value", "detail");
-        List<List<Object>> values = Arrays.asList(new ArrayList<>(Arrays.asList(1, 1, 2)), // id
-                new ArrayList<>(Arrays.asList("A", "A", "B")), // name
-                new ArrayList<>(Arrays.asList(10.0, 10.0, 20.0)), // value
-                new ArrayList<>(Arrays.asList("d1", "d2", "d3")) // detail (will be part of nested TestNestedBean)
-        );
+        List<List<Object>> values = Arrays.asList(new ArrayList<>(Arrays.asList(1, 1, 2)), new ArrayList<>(Arrays.asList("A", "A", "B")),
+                new ArrayList<>(Arrays.asList(10.0, 10.0, 20.0)), new ArrayList<>(Arrays.asList("d1", "d2", "d3")));
         RowDataset ds = new RowDataset(names, values);
 
-        // This test is complex due to the merging logic with nested beans.
-        // A simpler version without nested beans:
         List<String> simpleNames = Arrays.asList("id", "name", "value");
-        List<List<Object>> simpleValues = Arrays.asList(new ArrayList<>(Arrays.asList(1, 1, 2)), // id
-                new ArrayList<>(Arrays.asList("Alice", "Alice", "Bob")), // name
-                new ArrayList<>(Arrays.asList(10.0, 11.0, 20.0)) // value
-        );
+        List<List<Object>> simpleValues = Arrays.asList(new ArrayList<>(Arrays.asList(1, 1, 2)), new ArrayList<>(Arrays.asList("Alice", "Alice", "Bob")),
+                new ArrayList<>(Arrays.asList(10.0, 11.0, 20.0)));
         RowDataset simpleDs = new RowDataset(simpleNames, simpleValues);
 
-        // Assuming the last value for a given ID is taken for non-id fields or that they are compatible for merging.
-        // The actual merging logic for non-ID properties depends on how PropInfo.setPropValue handles multiple sets.
-        // Typically, for primitive/String types, the last one wins. For collections, it might add.
-        // Let's test for distinct IDs first.
-
         List<TestBean> merged = simpleDs.toMergedEntities("id", TestBean.class);
-        assertEquals(2, merged.size()); // 2 distinct IDs
+        assertEquals(2, merged.size());
 
         TestBean bean1 = merged.stream().filter(b -> b.getId() == 1).findFirst().orElse(null);
         TestBean bean2 = merged.stream().filter(b -> b.getId() == 2).findFirst().orElse(null);
 
         assertNotNull(bean1);
-        // The value for name/value for ID 1 will be from the *last* row with ID=1 in the source,
-        // if not handled as a collection.
-        assertEquals("Alice", bean1.getName()); // From second row for ID=1
-        assertEquals(11.0, bean1.getValue(), 0.001); // From second row for ID=1
+        assertEquals("Alice", bean1.getName());
+        assertEquals(11.0, bean1.getValue(), 0.001);
 
         assertNotNull(bean2);
         assertEquals("Bob", bean2.getName());
@@ -970,7 +930,6 @@ public class Dataset200Test extends TestBase {
         StringWriter sw = new StringWriter();
         sampleDataset.toJson(sw);
         String json = sw.toString();
-        // Basic check, actual JSON structure might be complex to assert precisely without a JSON lib
         assertTrue(json.startsWith("["));
         assertTrue(json.endsWith("]"));
         assertTrue(json.contains("\"ID\":1"));
@@ -1029,9 +988,9 @@ public class Dataset200Test extends TestBase {
         Dataset grouped = dsToGroup.groupBy("Category", "Value", "TotalValue", Collectors.summingInt(val -> (Integer) val));
 
         assertEquals(2, grouped.columnCount());
-        assertEquals(2, grouped.size()); // A and B
+        assertEquals(2, grouped.size());
 
-        grouped.absolute(0); // Assuming "A" comes first (LinkedHashMap behavior)
+        grouped.absolute(0);
         assertEquals("A", grouped.get("Category"));
         assertEquals((Integer) (10 + 5 + 2), grouped.get("TotalValue"));
 
@@ -1047,14 +1006,11 @@ public class Dataset200Test extends TestBase {
                 new ArrayList<>(Arrays.asList("S1", "S2", "S1", "S1")), new ArrayList<>(Arrays.asList(10, 20, 30, 40)));
         RowDataset dsToGroup = new RowDataset(gNames, gValues);
 
-        Dataset grouped = dsToGroup.groupBy(Arrays.asList("Group", "SubGroup"), "Data", "CollectedData", Collectors.toList()); // Collector collects Integers into a List<Integer>
+        Dataset grouped = dsToGroup.groupBy(Arrays.asList("Group", "SubGroup"), "Data", "CollectedData", Collectors.toList());
 
-        // Expected: (G1, S1, [10, 40]), (G1, S2, [20]), (G2, S1, [30])
-        assertEquals(3, grouped.columnCount()); // Group, SubGroup, CollectedData
+        assertEquals(3, grouped.columnCount());
         assertEquals(3, grouped.size());
 
-        // This requires checking specific rows, which depends on the order from groupBy
-        // For simplicity, convert to a known structure like a map for assertion.
         Map<Tuple2<String, String>, List<Integer>> resultMap = new HashMap<>();
         for (int i = 0; i < grouped.size(); i++) {
             grouped.absolute(i);
@@ -1068,17 +1024,14 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void sortBy_singleColumn_defaultOrder() {
-        // Original: (1,A,30), (2,B,24), (3,C,35)
-        // Sort by Age: (2,B,24), (1,A,30), (3,C,35)
         sampleDataset.sortBy("Age");
-        assertEquals((Integer) 2, sampleDataset.absolute(0).get("ID")); // Bob
-        assertEquals((Integer) 1, sampleDataset.absolute(1).get("ID")); // Alice
-        assertEquals((Integer) 3, sampleDataset.absolute(2).get("ID")); // Charlie
+        assertEquals((Integer) 2, sampleDataset.absolute(0).get("ID"));
+        assertEquals((Integer) 1, sampleDataset.absolute(1).get("ID"));
+        assertEquals((Integer) 3, sampleDataset.absolute(2).get("ID"));
     }
 
     @Test
     public void sortBy_singleColumn_customComparator() {
-        // Sort by Name descending
         sampleDataset.sortBy("Name", Comparator.reverseOrder());
         assertEquals("Charlie", sampleDataset.absolute(0).get("Name"));
         assertEquals("Bob", sampleDataset.absolute(1).get("Name"));
@@ -1087,21 +1040,17 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void sortBy_multipleColumns_defaultComparator() {
-        // Add a row to make multi-column sort meaningful
-        sampleDataset.addRow(new Object[] { 4, "Alice", 25 }); // (4,Alice,25)
-        // Now: (1,A,30), (2,B,24), (3,C,35), (4,A,25)
-        // Sort by Name, then Age
+        sampleDataset.addRow(new Object[] { 4, "Alice", 25 });
         sampleDataset.sortBy(Arrays.asList("Name", "Age"));
-        // Expected: (4,A,25), (1,A,30), (2,B,24), (3,C,35)
-        assertEquals((Integer) 4, sampleDataset.absolute(0).get("ID")); // Alice, 25
-        assertEquals((Integer) 1, sampleDataset.absolute(1).get("ID")); // Alice, 30
-        assertEquals((Integer) 2, sampleDataset.absolute(2).get("ID")); // Bob, 24
-        assertEquals((Integer) 3, sampleDataset.absolute(3).get("ID")); // Charlie, 35
+        assertEquals((Integer) 4, sampleDataset.absolute(0).get("ID"));
+        assertEquals((Integer) 1, sampleDataset.absolute(1).get("ID"));
+        assertEquals((Integer) 2, sampleDataset.absolute(2).get("ID"));
+        assertEquals((Integer) 3, sampleDataset.absolute(3).get("ID"));
     }
 
     @Test
     public void distinct() {
-        sampleDataset.addRow(new Object[] { 1, "Alice", 30 }); // Add duplicate row
+        sampleDataset.addRow(new Object[] { 1, "Alice", 30 });
         assertEquals(4, sampleDataset.size());
         Dataset distinctDs = sampleDataset.distinct();
         assertEquals(3, distinctDs.size());
@@ -1109,9 +1058,8 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void distinctBy_singleColumn() {
-        sampleDataset.addRow(new Object[] { 4, "Alice", 28 }); // Another Alice
+        sampleDataset.addRow(new Object[] { 4, "Alice", 28 });
         Dataset distinctByName = sampleDataset.distinctBy("Name");
-        // Should keep first occurrence of each name
         assertEquals(3, distinctByName.size());
         List<Object> names = distinctByName.getColumn("Name");
         assertTrue(names.contains("Alice") && names.contains("Bob") && names.contains("Charlie"));
@@ -1134,7 +1082,7 @@ public class Dataset200Test extends TestBase {
     @Test
     public void map_singleColumnToNew() {
         Dataset mapped = sampleDataset.map("Age", "AgeInMonths", "ID", (Integer age) -> age * 12);
-        assertEquals(2, mapped.columnCount()); // AgeInMonths, ID
+        assertEquals(2, mapped.columnCount());
         assertTrue(mapped.columnNameList().contains("AgeInMonths"));
         assertTrue(mapped.columnNameList().contains("ID"));
         assertEquals(30 * 12, mapped.getRow(0, Map.class).get("AgeInMonths"));
@@ -1142,12 +1090,10 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void flatMap_singleColumnToNewCollection() {
-        // Add a column with list-like strings
         sampleDataset.addColumn("Hobbies", Arrays.asList("Reading,Hiking", "Gaming", "Cooking,Swimming"));
         Dataset flatMapped = sampleDataset.flatMap("Hobbies", "Hobby", "Name", (String hobbies) -> Arrays.asList(hobbies.split(",")));
 
-        // Expected rows: (Alice,Reading), (Alice,Hiking), (Bob,Gaming), (Charlie,Cooking), (Charlie,Swimming)
-        assertEquals(2, flatMapped.columnCount()); // Hobby, Name
+        assertEquals(2, flatMapped.columnCount());
         assertEquals(5, flatMapped.size());
         assertEquals("Reading", flatMapped.absolute(0).get("Hobby"));
         assertEquals("Alice", flatMapped.absolute(0).get("Name"));
@@ -1159,8 +1105,7 @@ public class Dataset200Test extends TestBase {
     public void copy_full() {
         Dataset copied = sampleDataset.copy();
         assertNotSame(sampleDataset, copied);
-        assertEquals(sampleDataset, copied); // Content equality
-        // Modify copy, original should not change
+        assertEquals(sampleDataset, copied);
         copied.set(0, 0, 100);
         assertEquals((Integer) 1, sampleDataset.absolute(0).get(0));
     }
@@ -1171,12 +1116,12 @@ public class Dataset200Test extends TestBase {
         assertEquals(2, copied.columnCount());
         assertTrue(copied.columnNameList().contains("Name"));
         assertTrue(copied.columnNameList().contains("Age"));
-        assertEquals("Alice", copied.get(0, 0)); // Name of first row
+        assertEquals("Alice", copied.get(0, 0));
     }
 
     @Test
     public void copy_range() {
-        Dataset copied = sampleDataset.copy(1, 3); // Bob and Charlie
+        Dataset copied = sampleDataset.copy(1, 3);
         assertEquals(2, copied.size());
         assertEquals("Bob", copied.absolute(0).get("Name"));
         assertEquals("Charlie", copied.absolute(1).get("Name"));
@@ -1184,24 +1129,11 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void clone_method() {
-        // The actual clone uses Kryo. If Kryo is not set up, it throws RuntimeException.
-        // Here, we test that behavior, or if Kryo was mocked/available, we'd test content.
-        // For now, assume Kryo is not available for this basic test setup.
-        // To properly test clone, you'd need Kryo in the test classpath or mock ParserFactory.
-        // assertThrows(RuntimeException.class, () -> sampleDataset.clone(), "Kryo is required");
 
         Dataset copy = sampleDataset.clone();
         assertFalse(copy == sampleDataset);
-        assertEquals(sampleDataset, copy); // Content equality
+        assertEquals(sampleDataset, copy);
 
-        // If Kryo were available, the test would be more like:
-        // RowDataset clonedDs = (RowDataset) sampleDataset.clone();
-        // assertNotSame(sampleDataset, clonedDs);
-        // assertEquals(sampleDataset, clonedDs);
-        // assertFalse(clonedDs.isFrozen()); // Default clone is not frozen
-        //
-        // RowDataset frozenClone = (RowDataset) sampleDataset.clone(true);
-        // assertTrue(frozenClone.isFrozen());
     }
 
     @Test
@@ -1209,19 +1141,19 @@ public class Dataset200Test extends TestBase {
         Stream<Dataset> stream = sampleDataset.split(2);
         List<Dataset> chunks = stream.toList();
         assertEquals(2, chunks.size());
-        assertEquals(2, chunks.get(0).size()); // First chunk: Alice, Bob
-        assertEquals(1, chunks.get(1).size()); // Second chunk: Charlie
+        assertEquals(2, chunks.get(0).size());
+        assertEquals(1, chunks.get(1).size());
         assertEquals("Alice", chunks.get(0).absolute(0).get("Name"));
         assertEquals("Charlie", chunks.get(1).absolute(0).get("Name"));
     }
 
     @Test
     public void slice_dataset() {
-        Dataset sliced = sampleDataset.slice(1, 2, Arrays.asList("Name")); // Bob's Name
+        Dataset sliced = sampleDataset.slice(1, 2, Arrays.asList("Name"));
         assertEquals(1, sliced.size());
         assertEquals(1, sliced.columnCount());
-        assertEquals("Bob", sliced.get(0, 0)); // Only one column "Name"
-        assertTrue(sliced.isFrozen()); // Slice result is frozen
+        assertEquals("Bob", sliced.get(0, 0));
+        assertTrue(sliced.isFrozen());
     }
 
     @Test
@@ -1264,7 +1196,6 @@ public class Dataset200Test extends TestBase {
         assertFalse(sampleDataset.isFrozen());
         sampleDataset.freeze();
         assertTrue(sampleDataset.isFrozen());
-        // Try an operation that modifies
         assertThrows(IllegalStateException.class, () -> sampleDataset.set(0, 0, 100));
     }
 
@@ -1276,7 +1207,6 @@ public class Dataset200Test extends TestBase {
         sampleDataset.clear();
         assertTrue(sampleDataset.isEmpty());
         assertEquals(0, sampleDataset.size());
-        // Columns should still exist, but be empty
         assertEquals(3, sampleDataset.columnCount());
         assertTrue(sampleDataset.getColumn(0).isEmpty());
 
@@ -1292,15 +1222,8 @@ public class Dataset200Test extends TestBase {
         props.put("version", 1.2);
         RowDataset dsWithProps = new RowDataset(columnNames, columnValues, props);
         assertEquals(1.2, (Double) dsWithProps.getProperties().get("version"), 0.001);
-        // Test immutability of returned properties map
         assertThrows(UnsupportedOperationException.class, () -> dsWithProps.getProperties().put("newKey", "newVal"));
     }
-
-    //    @Test
-    //    public void columnNames_stream() {
-    //        List<String> streamedNames = sampleDataset.columnNames().toList();
-    //        assertEquals(columnNames, streamedNames);
-    //    }
 
     @Test
     public void columns_streamOfImmutableLists() {
@@ -1322,21 +1245,20 @@ public class Dataset200Test extends TestBase {
         sampleDataset.println(stringWriter);
         String output = stringWriter.toString();
 
-        assertTrue(output.contains("+----+---------+-----+")); // Header separator
-        assertTrue(output.contains("| ID | Name    | Age |")); // Header
-        assertTrue(output.contains("| 1  | Alice   | 30  |")); // Row 1
-        assertTrue(output.contains("| 2  | Bob     | 24  |")); // Row 2
-        assertTrue(output.contains("| 3  | Charlie | 35  |")); // Row 3
+        assertTrue(output.contains("+----+---------+-----+"));
+        assertTrue(output.contains("| ID | Name    | Age |"));
+        assertTrue(output.contains("| 1  | Alice   | 30  |"));
+        assertTrue(output.contains("| 2  | Bob     | 24  |"));
+        assertTrue(output.contains("| 3  | Charlie | 35  |"));
     }
 
     @Test
     public void hashCode_equals_toString() {
         RowDataset ds1 = createSimpleDataset();
-        RowDataset ds2 = createSimpleDataset(); // Same content
-        RowDataset ds3 = new RowDataset(Arrays.asList("ID", "Name", "Value"), // Different column name
-                Arrays.asList(new ArrayList<>(Arrays.asList(1, 2, 3)), new ArrayList<>(Arrays.asList("Alice", "Bob", "Charlie")),
-                        new ArrayList<>(Arrays.asList(30.0, 24.0, 35.0))));
-        RowDataset ds4 = new RowDataset(columnNames, Arrays.asList(new ArrayList<>(Arrays.asList(1, 2, 99)), // Different data
+        RowDataset ds2 = createSimpleDataset();
+        RowDataset ds3 = new RowDataset(Arrays.asList("ID", "Name", "Value"), Arrays.asList(new ArrayList<>(Arrays.asList(1, 2, 3)),
+                new ArrayList<>(Arrays.asList("Alice", "Bob", "Charlie")), new ArrayList<>(Arrays.asList(30.0, 24.0, 35.0))));
+        RowDataset ds4 = new RowDataset(columnNames, Arrays.asList(new ArrayList<>(Arrays.asList(1, 2, 99)),
                 new ArrayList<>(Arrays.asList("Alice", "Bob", "David")), new ArrayList<>(Arrays.asList(30, 24, 40))));
 
         assertEquals(ds1.hashCode(), ds2.hashCode());
@@ -1354,18 +1276,16 @@ public class Dataset200Test extends TestBase {
 
     @Test
     public void innerJoin_singleColumn() {
-        List<String> orderCN = Arrays.asList("OrderID", "ID", "Product"); // ID is foreign key
-        List<List<Object>> orderCV = Arrays.asList(new ArrayList<>(Arrays.asList(101, 102, 103, 104)), new ArrayList<>(Arrays.asList(1, 1, 2, 4)), // User IDs
+        List<String> orderCN = Arrays.asList("OrderID", "ID", "Product");
+        List<List<Object>> orderCV = Arrays.asList(new ArrayList<>(Arrays.asList(101, 102, 103, 104)), new ArrayList<>(Arrays.asList(1, 1, 2, 4)),
                 new ArrayList<>(Arrays.asList("Book", "Pen", "Paper", "Clip")));
         RowDataset orders = new RowDataset(orderCN, orderCV);
 
         Dataset joined = sampleDataset.innerJoin(orders, "ID", "ID");
-        // Expected: (1,Alice,30,101,Book), (1,Alice,30,102,Pen), (2,Bob,24,103,Paper)
         assertEquals(3, joined.size());
-        assertEquals(sampleDataset.columnCount() + orders.columnCount(), joined.columnCount()); // Names might be adjusted for duplicates
-        assertTrue(joined.columnNameList().contains("ID_2")); // Due to duplicate ID column name
+        assertEquals(sampleDataset.columnCount() + orders.columnCount(), joined.columnCount());
+        assertTrue(joined.columnNameList().contains("ID_2"));
 
-        // Check a merged row
         joined.absolute(0);
         assertEquals((Integer) 1, joined.get("ID"));
         assertEquals("Alice", joined.get("Name"));
@@ -1376,29 +1296,26 @@ public class Dataset200Test extends TestBase {
     @Test
     public void leftJoin_singleColumn() {
         List<String> orderCN = Arrays.asList("OrderID", "ID", "Product");
-        List<List<Object>> orderCV = Arrays.asList(new ArrayList<>(Arrays.asList(101, 102)), // Only for ID 1
-                new ArrayList<>(Arrays.asList(1, 1)), new ArrayList<>(Arrays.asList("Book", "Pen")));
+        List<List<Object>> orderCV = Arrays.asList(new ArrayList<>(Arrays.asList(101, 102)), new ArrayList<>(Arrays.asList(1, 1)),
+                new ArrayList<>(Arrays.asList("Book", "Pen")));
         RowDataset orders = new RowDataset(orderCN, orderCV);
 
         Dataset joined = sampleDataset.leftJoin(orders, "ID", "ID");
-        // Expected: (1,A,30,101,Book), (1,A,30,102,Pen), (2,B,24,null,null), (3,C,35,null,null)
         assertEquals(4, joined.size());
 
-        joined.absolute(2); // Bob's row
+        joined.absolute(2);
         assertEquals((Integer) 2, joined.get("ID"));
-        assertNull(joined.get("OrderID")); // No matching order for Bob
+        assertNull(joined.get("OrderID"));
     }
 
     @Test
     public void union_datasets() {
-        List<String> otherNames = Arrays.asList("ID", "Name", "Salary"); // Age vs Salary
-        List<List<Object>> otherValues = Arrays.asList(new ArrayList<>(Arrays.asList(3, 4)), // Charlie (duplicate ID), David
-                new ArrayList<>(Arrays.asList("Charlie", "David")), new ArrayList<>(Arrays.asList(70000, 80000)));
+        List<String> otherNames = Arrays.asList("ID", "Name", "Salary");
+        List<List<Object>> otherValues = Arrays.asList(new ArrayList<>(Arrays.asList(3, 4)), new ArrayList<>(Arrays.asList("Charlie", "David")),
+                new ArrayList<>(Arrays.asList(70000, 80000)));
         RowDataset otherDs = new RowDataset(otherNames, otherValues);
 
         Dataset unionResult = sampleDataset.union(otherDs);
-        // Columns: ID, Name, Age, Salary
-        // Rows: (1,A,30,null), (2,B,24,null), (3,C,35,70000 -- Age from sample, Salary from other), (4,D,null,80000)
         assertEquals(4, unionResult.columnCount());
         assertEquals(4, unionResult.size());
 
@@ -1416,8 +1333,8 @@ public class Dataset200Test extends TestBase {
         assertNull(resultMap.get(1).get("Salary"));
 
         assertEquals("Charlie", resultMap.get(3).get("Name"));
-        assertEquals(35, resultMap.get(3).get("Age")); // From sampleDataset (first occurrence)
-        assertNull(resultMap.get(3).get("Salary")); // From otherDs
+        assertEquals(35, resultMap.get(3).get("Age"));
+        assertNull(resultMap.get(3).get("Salary"));
 
         assertEquals("David", resultMap.get(4).get("Name"));
         assertNull(resultMap.get(4).get("Age"));
@@ -1427,12 +1344,11 @@ public class Dataset200Test extends TestBase {
     @Test
     public void intersect_datasets() {
         List<String> otherNames = Arrays.asList("ID", "Name", "Age");
-        List<List<Object>> otherValues = Arrays.asList(new ArrayList<>(Arrays.asList(2, 3, 4)), // Bob, Charlie, David
-                new ArrayList<>(Arrays.asList("Bob", "Charlie", "David")), new ArrayList<>(Arrays.asList(24, 35, 28)));
+        List<List<Object>> otherValues = Arrays.asList(new ArrayList<>(Arrays.asList(2, 3, 4)), new ArrayList<>(Arrays.asList("Bob", "Charlie", "David")),
+                new ArrayList<>(Arrays.asList(24, 35, 28)));
         RowDataset otherDs = new RowDataset(otherNames, otherValues);
 
         Dataset intersectResult = sampleDataset.intersect(otherDs);
-        // Common rows: Bob, Charlie
         assertEquals(2, intersectResult.size());
         List<String> names = intersectResult.toList(Map.class).stream().map(m -> (String) m.get("Name")).sorted().toList();
         assertEquals(Arrays.asList("Bob", "Charlie"), names);
@@ -1441,17 +1357,15 @@ public class Dataset200Test extends TestBase {
     @Test
     public void except_datasets() {
         List<String> otherNames = Arrays.asList("ID", "Name", "Age");
-        List<List<Object>> otherValues = Arrays.asList(new ArrayList<>(Arrays.asList(2, 3)), // Bob, Charlie
-                new ArrayList<>(Arrays.asList("Bob", "Charlie")), new ArrayList<>(Arrays.asList(24, 35)));
+        List<List<Object>> otherValues = Arrays.asList(new ArrayList<>(Arrays.asList(2, 3)), new ArrayList<>(Arrays.asList("Bob", "Charlie")),
+                new ArrayList<>(Arrays.asList(24, 35)));
         RowDataset otherDs = new RowDataset(otherNames, otherValues);
 
         Dataset exceptResult = sampleDataset.except(otherDs);
-        // Rows in sampleDataset but not in otherDs: Alice
         assertEquals(1, exceptResult.size());
         assertEquals("Alice", exceptResult.absolute(0).get("Name"));
     }
 
-    // A simple bean for testing toEntities, etc.
     public static class TestBean {
         private int id;
         private String name;

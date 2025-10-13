@@ -110,8 +110,8 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     //-----------------------------------------------------------------------
 
     /**
-     * Gets the value as a Long instance.
-     * 
+     * Gets the value as a long.
+     *
      * @return the current value
      * @deprecated replace by {@link #value()}.
      */
@@ -357,8 +357,8 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Returns the value of this MutableLong as an int.
-     * Note that this may involve rounding or truncation.
-     * 
+     * Note that this may involve truncation of the high-order bits if the value exceeds the int range.
+     *
      * @return the value as an int
      */
     @Override
@@ -378,8 +378,8 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Returns the value of this MutableLong as a float.
-     * Note that this may involve rounding.
-     * 
+     * Note that this may involve rounding and precision loss for large values.
+     *
      * @return the value as a float
      */
     @Override
@@ -446,8 +446,8 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Returns a hash code for this MutableLong.
-     * The hash code is computed from the long value using Long.hashCode().
-     * 
+     * The hash code is computed using {@link Long#hashCode(long)} on the wrapped value.
+     *
      * @return a suitable hash code
      */
     @Override

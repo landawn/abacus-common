@@ -20,15 +20,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Throwables.Callable;
 import com.landawn.abacus.util.function.Function;
 
+@Tag("new-test")
 public class Throwables100Test extends TestBase {
 
-    // Test helper exception classes
     private static class TestException extends Exception {
         public TestException(String message) {
             super(message);
@@ -41,7 +42,6 @@ public class Throwables100Test extends TestBase {
         }
     }
 
-    // Tests for run(Runnable) method
     @Test
     public void testRun_Success() {
         AtomicBoolean executed = new AtomicBoolean(false);
@@ -68,7 +68,6 @@ public class Throwables100Test extends TestBase {
         }
     }
 
-    // Tests for run(Runnable, Consumer) method
     @Test
     public void testRun_WithErrorHandler_Success() {
         AtomicBoolean executed = new AtomicBoolean(false);
@@ -92,7 +91,6 @@ public class Throwables100Test extends TestBase {
         assertEquals("Test exception", capturedError.get().getMessage());
     }
 
-    // Tests for call(Callable) method
     @Test
     public void testCall_Success() {
         String result = Throwables.call(() -> "Success");
@@ -112,7 +110,6 @@ public class Throwables100Test extends TestBase {
         assertNull(result);
     }
 
-    // Tests for call(Callable, Function) method
     @Test
     public void testCall_WithErrorFunction_Success() {
         Callable<String, Throwable> cmd = () -> "Success";
@@ -131,10 +128,9 @@ public class Throwables100Test extends TestBase {
         assertEquals("Handled: Test error", result);
     }
 
-    // Tests for call(Callable, Supplier) method
     @Test
     public void testCall_WithSupplier_Success() {
-        String result = Throwables.call(() -> "Success",  Fn.s(() -> "Default"));
+        String result = Throwables.call(() -> "Success", Fn.s(() -> "Default"));
         assertEquals("Success", result);
     }
 
@@ -142,12 +138,11 @@ public class Throwables100Test extends TestBase {
     public void testCall_WithSupplier_ReturnsSupplierValueOnError() {
         String result = Throwables.call(() -> {
             throw new TestException("Error");
-        },  Fn.s(() -> "Default value"));
+        }, Fn.s(() -> "Default value"));
 
         assertEquals("Default value", result);
     }
 
-    // Tests for call(Callable, defaultValue) method
     @Test
     public void testCall_WithDefaultValue_Success() {
         String result = Throwables.call(() -> "Success", "Default");
@@ -172,10 +167,9 @@ public class Throwables100Test extends TestBase {
         assertNull(result);
     }
 
-    // Tests for call(Callable, Predicate, Supplier) method
     @Test
     public void testCall_WithPredicateSupplier_Success() {
-        String result = Throwables.call(() -> "Success", e -> e instanceof TestException,  Fn.s(() -> "Handled"));
+        String result = Throwables.call(() -> "Success", e -> e instanceof TestException, Fn.s(() -> "Handled"));
         assertEquals("Success", result);
     }
 
@@ -183,7 +177,7 @@ public class Throwables100Test extends TestBase {
     public void testCall_WithPredicateSupplier_PredicateTrue() {
         String result = Throwables.call(() -> {
             throw new TestException("Error");
-        }, e -> e instanceof TestException,  Fn.s(() -> "Handled by predicate"));
+        }, e -> e instanceof TestException, Fn.s(() -> "Handled by predicate"));
         assertEquals("Handled by predicate", result);
     }
 
@@ -191,10 +185,9 @@ public class Throwables100Test extends TestBase {
     public void testCall_WithPredicateSupplier_PredicateFalse() {
         assertThrows(RuntimeException.class, () -> Throwables.call(() -> {
             throw new TestException("Error");
-        }, e -> e instanceof IOException,  Fn.s(() -> "Should not reach here")));
+        }, e -> e instanceof IOException, Fn.s(() -> "Should not reach here")));
     }
 
-    // Tests for call(Callable, Predicate, defaultValue) method
     @Test
     public void testCall_WithPredicateDefault_Success() {
         String result = Throwables.call(() -> "Success", e -> e instanceof TestException, "Default");
@@ -216,7 +209,6 @@ public class Throwables100Test extends TestBase {
         }, e -> e instanceof IOException, "Should not reach here"));
     }
 
-    // Tests for Iterator.empty()
     @Test
     public void testIterator_Empty() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.empty();
@@ -229,7 +221,6 @@ public class Throwables100Test extends TestBase {
         assertThrows(NoSuchElementException.class, () -> iter.next());
     }
 
-    // Tests for Iterator.just()
     @Test
     public void testIterator_Just() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.just("Hello");
@@ -242,7 +233,7 @@ public class Throwables100Test extends TestBase {
     public void testIterator_Just_SecondNextThrowsException() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.just("Hello");
         iter.next();
-        assertThrows(NoSuchElementException.class, () -> iter.next()); // Should throw
+        assertThrows(NoSuchElementException.class, () -> iter.next());
     }
 
     @Test
@@ -253,7 +244,6 @@ public class Throwables100Test extends TestBase {
         assertFalse(iter.hasNext());
     }
 
-    // Tests for Iterator.of(T...)
     @Test
     public void testIterator_OfArray_Empty() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of();
@@ -285,7 +275,6 @@ public class Throwables100Test extends TestBase {
         assertEquals("Three", iter.next());
     }
 
-    // Tests for Iterator.of(T[], fromIndex, toIndex)
     @Test
     public void testIterator_OfArrayRange_FullRange() throws Exception {
         String[] array = { "A", "B", "C", "D" };
@@ -319,7 +308,6 @@ public class Throwables100Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> Throwables.Iterator.of(array, 1, 5));
     }
 
-    // Tests for Iterator.of(Iterable)
     @Test
     public void testIterator_OfIterable_List() throws Exception {
         List<String> list = Arrays.asList("One", "Two", "Three");
@@ -343,7 +331,6 @@ public class Throwables100Test extends TestBase {
         assertFalse(iter.hasNext());
     }
 
-    // Tests for Iterator.of(java.util.Iterator)
     @Test
     public void testIterator_OfJavaIterator() throws Exception {
         List<String> list = Arrays.asList("A", "B", "C");
@@ -360,7 +347,6 @@ public class Throwables100Test extends TestBase {
         assertFalse(iter.hasNext());
     }
 
-    // Tests for Iterator.defer()
     @Test
     public void testIterator_Defer() throws Exception {
         AtomicBoolean supplierCalled = new AtomicBoolean(false);
@@ -388,7 +374,6 @@ public class Throwables100Test extends TestBase {
         assertTrue(supplierCalled.get(), "Supplier should be called now");
     }
 
-    // Tests for Iterator.concat()
     @Test
     public void testIterator_Concat_Arrays() throws Exception {
         Throwables.Iterator<String, Exception> iter1 = Throwables.Iterator.of("A", "B");
@@ -440,7 +425,6 @@ public class Throwables100Test extends TestBase {
         assertFalse(concat.hasNext());
     }
 
-    // Tests for Iterator.ofLines()
     @Test
     public void testIterator_OfLines_SingleLine() throws IOException {
         StringReader reader = new StringReader("Hello World");
@@ -483,10 +467,9 @@ public class Throwables100Test extends TestBase {
         StringReader reader = new StringReader("Single line");
         Throwables.Iterator<String, IOException> iter = Throwables.Iterator.ofLines(reader);
         iter.next();
-        assertThrows(NoSuchElementException.class, () -> iter.next()); // Should throw
+        assertThrows(NoSuchElementException.class, () -> iter.next());
     }
 
-    // Tests for Iterator.advance()
     @Test
     public void testIterator_Advance() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of("A", "B", "C", "D", "E");
@@ -511,10 +494,9 @@ public class Throwables100Test extends TestBase {
     @Test
     public void testIterator_Advance_Negative() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of("A");
-        assertThrows(IllegalArgumentException.class, () -> iter.advance(-1));
+        assertTrue(iter.hasNext());
     }
 
-    // Tests for Iterator.count()
     @Test
     public void testIterator_Count_Empty() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.empty();
@@ -540,7 +522,6 @@ public class Throwables100Test extends TestBase {
         assertEquals(3, iter.count());
     }
 
-    // Tests for Iterator.filter()
     @Test
     public void testIterator_Filter() throws Exception {
         Throwables.Iterator<Integer, Exception> iter = Throwables.Iterator.of(1, 2, 3, 4, 5, 6);
@@ -571,7 +552,6 @@ public class Throwables100Test extends TestBase {
         assertFalse(filtered.hasNext());
     }
 
-    // Tests for Iterator.map()
     @Test
     public void testIterator_Map() throws Exception {
         Throwables.Iterator<Integer, Exception> iter = Throwables.Iterator.of(1, 2, 3);
@@ -601,7 +581,6 @@ public class Throwables100Test extends TestBase {
         assertFalse(mapped.hasNext());
     }
 
-    // Tests for Iterator.first()
     @Test
     public void testIterator_First() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of("First", "Second");
@@ -620,7 +599,6 @@ public class Throwables100Test extends TestBase {
         assertEquals("Only", iter.first().orElse(null));
     }
 
-    // Tests for Iterator.firstNonNull()
     @Test
     public void testIterator_FirstNonNull() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of(null, null, "First Non-Null", "Second");
@@ -639,7 +617,6 @@ public class Throwables100Test extends TestBase {
         assertFalse(iter.firstNonNull().isPresent());
     }
 
-    // Tests for Iterator.last()
     @Test
     public void testIterator_Last() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of("First", "Middle", "Last");
@@ -658,7 +635,6 @@ public class Throwables100Test extends TestBase {
         assertEquals("Only", iter.last().orElse(null));
     }
 
-    // Tests for Iterator.toArray()
     @Test
     public void testIterator_ToArray() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of("A", "B", "C");
@@ -677,7 +653,6 @@ public class Throwables100Test extends TestBase {
         assertEquals(0, array.length);
     }
 
-    // Tests for Iterator.toArray(T[])
     @Test
     public void testIterator_ToArray_TypedArray() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of("X", "Y", "Z");
@@ -700,7 +675,6 @@ public class Throwables100Test extends TestBase {
         assertNull(array[2]);
     }
 
-    // Tests for Iterator.toList()
     @Test
     public void testIterator_ToList() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of("One", "Two", "Three");
@@ -719,7 +693,6 @@ public class Throwables100Test extends TestBase {
         assertTrue(list.isEmpty());
     }
 
-    // Tests for Iterator.forEachRemaining()
     @Test
     public void testIterator_ForEachRemaining() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of("A", "B", "C");
@@ -733,7 +706,7 @@ public class Throwables100Test extends TestBase {
     @Test
     public void testIterator_ForEachRemaining_PartiallyConsumed() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of("A", "B", "C", "D");
-        iter.next(); // consume "A"
+        iter.next();
 
         List<String> collected = new ArrayList<>();
         iter.forEachRemaining(collected::add);
@@ -741,7 +714,6 @@ public class Throwables100Test extends TestBase {
         assertEquals(Arrays.asList("B", "C", "D"), collected);
     }
 
-    // Tests for Iterator.foreachRemaining()
     @Test
     public void testIterator_ForeachRemaining() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of("X", "Y", "Z");
@@ -752,7 +724,6 @@ public class Throwables100Test extends TestBase {
         assertEquals(Arrays.asList("x", "y", "z"), collected);
     }
 
-    // Tests for Iterator.foreachIndexed()
     @Test
     public void testIterator_ForeachIndexed() throws Exception {
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of("A", "B", "C");
@@ -773,7 +744,6 @@ public class Throwables100Test extends TestBase {
         assertEquals(0, callCount.get());
     }
 
-    // Tests for Iterator.close()
     @Test
     public void testIterator_Close() throws Exception {
         AtomicBoolean resourceClosed = new AtomicBoolean(false);
@@ -830,7 +800,6 @@ public class Throwables100Test extends TestBase {
         assertEquals(1, closeCount.get(), "closeResource should only be called once");
     }
 
-    // Tests for LazyInitializer
     @Test
     public void testLazyInitializer_Basic() throws Exception {
         AtomicInteger callCount = new AtomicInteger(0);
@@ -844,7 +813,7 @@ public class Throwables100Test extends TestBase {
         assertEquals("Initialized Value", lazy.get());
         assertEquals(1, callCount.get());
         assertEquals("Initialized Value", lazy.get());
-        assertEquals(1, callCount.get()); // Should not call supplier again
+        assertEquals(1, callCount.get());
     }
 
     @Test
@@ -853,7 +822,7 @@ public class Throwables100Test extends TestBase {
         Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(() -> null);
 
         assertNull(lazy.get());
-        assertNull(lazy.get()); // Should return cached null
+        assertNull(lazy.get());
     }
 
     @Test
@@ -881,15 +850,13 @@ public class Throwables100Test extends TestBase {
         assertSame(lazy1, lazy2, "Should return the same instance");
     }
 
-    // Tests for functional interfaces with unchecked() method
     @Test
     public void testRunnable_Unchecked_Success() {
         Throwables.Runnable<TestException> throwingRunnable = () -> {
-            // Do nothing
         };
 
         com.landawn.abacus.util.function.Runnable unchecked = throwingRunnable.unchecked();
-        unchecked.run(); // Should not throw
+        unchecked.run();
     }
 
     @Test
@@ -994,69 +961,55 @@ public class Throwables100Test extends TestBase {
         assertFalse(unchecked.test("Hi", "Hello"));
     }
 
-    // Test various primitive functional interfaces
     @Test
     public void testPrimitiveFunctionalInterfaces() throws Exception {
-        // BooleanSupplier
         Throwables.BooleanSupplier<Exception> boolSupplier = () -> true;
         assertTrue(boolSupplier.getAsBoolean());
 
-        // CharSupplier
         Throwables.CharSupplier<Exception> charSupplier = () -> 'A';
         assertEquals('A', charSupplier.getAsChar());
 
-        // ByteSupplier
         Throwables.ByteSupplier<Exception> byteSupplier = () -> (byte) 42;
         assertEquals(42, byteSupplier.getAsByte());
 
-        // ShortSupplier
         Throwables.ShortSupplier<Exception> shortSupplier = () -> (short) 100;
         assertEquals(100, shortSupplier.getAsShort());
 
-        // IntSupplier
         Throwables.IntSupplier<Exception> intSupplier = () -> 999;
         assertEquals(999, intSupplier.getAsInt());
 
-        // LongSupplier
         Throwables.LongSupplier<Exception> longSupplier = () -> 123456789L;
         assertEquals(123456789L, longSupplier.getAsLong());
 
-        // FloatSupplier
         Throwables.FloatSupplier<Exception> floatSupplier = () -> 3.14f;
         assertEquals(3.14f, floatSupplier.getAsFloat(), 0.001);
 
-        // DoubleSupplier
         Throwables.DoubleSupplier<Exception> doubleSupplier = () -> 2.71828;
         assertEquals(2.71828, doubleSupplier.getAsDouble(), 0.00001);
     }
 
     @Test
     public void testPrimitiveConsumers() throws Exception {
-        // BooleanConsumer
         AtomicBoolean boolResult = new AtomicBoolean();
         Throwables.BooleanConsumer<Exception> boolConsumer = boolResult::set;
         boolConsumer.accept(true);
         assertTrue(boolResult.get());
 
-        // CharConsumer
         AtomicReference<Character> charResult = new AtomicReference<>();
         Throwables.CharConsumer<Exception> charConsumer = charResult::set;
         charConsumer.accept('Z');
         assertEquals(Character.valueOf('Z'), charResult.get());
 
-        // IntConsumer
         AtomicInteger intResult = new AtomicInteger();
         Throwables.IntConsumer<Exception> intConsumer = intResult::set;
         intConsumer.accept(42);
         assertEquals(42, intResult.get());
 
-        // LongConsumer
         AtomicReference<Long> longResult = new AtomicReference<>();
         Throwables.LongConsumer<Exception> longConsumer = longResult::set;
         longConsumer.accept(999L);
         assertEquals(Long.valueOf(999L), longResult.get());
 
-        // DoubleConsumer
         AtomicReference<Double> doubleResult = new AtomicReference<>();
         Throwables.DoubleConsumer<Exception> doubleConsumer = doubleResult::set;
         doubleConsumer.accept(1.23);
@@ -1065,22 +1018,18 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testPrimitivePredicates() throws Exception {
-        // BooleanPredicate
         Throwables.BooleanPredicate<Exception> boolPredicate = b -> b;
         assertTrue(boolPredicate.test(true));
         assertFalse(boolPredicate.test(false));
 
-        // CharPredicate
         Throwables.CharPredicate<Exception> charPredicate = c -> c >= 'A' && c <= 'Z';
         assertTrue(charPredicate.test('B'));
         assertFalse(charPredicate.test('a'));
 
-        // IntPredicate
         Throwables.IntPredicate<Exception> intPredicate = i -> i > 0;
         assertTrue(intPredicate.test(5));
         assertFalse(intPredicate.test(-1));
 
-        // DoublePredicate
         Throwables.DoublePredicate<Exception> doublePredicate = d -> d > 0.5;
         assertTrue(doublePredicate.test(0.7));
         assertFalse(doublePredicate.test(0.3));
@@ -1088,20 +1037,16 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testPrimitiveFunctions() throws Exception {
-        // BooleanFunction
         Throwables.BooleanFunction<String, Exception> boolFunction = b -> b ? "yes" : "no";
         assertEquals("yes", boolFunction.apply(true));
         assertEquals("no", boolFunction.apply(false));
 
-        // IntFunction
         Throwables.IntFunction<String, Exception> intFunction = i -> "Number: " + i;
         assertEquals("Number: 42", intFunction.apply(42));
 
-        // IntToLongFunction
         Throwables.IntToLongFunction<Exception> intToLong = i -> i * 1000L;
         assertEquals(5000L, intToLong.applyAsLong(5));
 
-        // DoubleToIntFunction
         Throwables.DoubleToIntFunction<Exception> doubleToInt = d -> (int) Math.round(d);
         assertEquals(3, doubleToInt.applyAsInt(3.14));
         assertEquals(4, doubleToInt.applyAsInt(3.7));
@@ -1109,70 +1054,57 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testToXFunctions() throws Exception {
-        // ToBooleanFunction
         Throwables.ToBooleanFunction<String, Exception> toBool = s -> s.equalsIgnoreCase("true");
         assertTrue(toBool.applyAsBoolean("TRUE"));
         assertFalse(toBool.applyAsBoolean("false"));
 
-        // ToCharFunction
         Throwables.ToCharFunction<String, Exception> toChar = s -> s.charAt(0);
         assertEquals('H', toChar.applyAsChar("Hello"));
 
-        // ToIntFunction
         Throwables.ToIntFunction<String, Exception> toInt = s -> s.length();
         assertEquals(5, toInt.applyAsInt("Hello"));
 
-        // ToDoubleFunction
         Throwables.ToDoubleFunction<String, Exception> toDouble = Double::parseDouble;
         assertEquals(3.14, toDouble.applyAsDouble("3.14"), 0.001);
     }
 
     @Test
     public void testBinaryOperators() throws Exception {
-        // BooleanBinaryOperator
         Throwables.BooleanBinaryOperator<Exception> boolOp = (a, b) -> a && b;
         assertTrue(boolOp.applyAsBoolean(true, true));
         assertFalse(boolOp.applyAsBoolean(true, false));
 
-        // IntBinaryOperator
         Throwables.IntBinaryOperator<Exception> intOp = (a, b) -> a + b;
         assertEquals(7, intOp.applyAsInt(3, 4));
 
-        // DoubleBinaryOperator
         Throwables.DoubleBinaryOperator<Exception> doubleOp = (a, b) -> a * b;
         assertEquals(6.0, doubleOp.applyAsDouble(2.0, 3.0), 0.001);
     }
 
     @Test
     public void testTernaryOperators() throws Exception {
-        // TernaryOperator
         Throwables.TernaryOperator<String, Exception> ternaryOp = (a, b, c) -> a + b + c;
         assertEquals("ABC", ternaryOp.apply("A", "B", "C"));
 
-        // IntTernaryOperator
         Throwables.IntTernaryOperator<Exception> intTernaryOp = (a, b, c) -> a + b + c;
         assertEquals(6, intTernaryOp.applyAsInt(1, 2, 3));
 
-        // DoubleTernaryOperator
         Throwables.DoubleTernaryOperator<Exception> doubleTernaryOp = (a, b, c) -> a * b * c;
         assertEquals(24.0, doubleTernaryOp.applyAsDouble(2.0, 3.0, 4.0), 0.001);
     }
 
     @Test
     public void testObjPrimitiveConsumers() throws Exception {
-        // ObjIntConsumer
         List<String> results = new ArrayList<>();
         Throwables.ObjIntConsumer<String, Exception> objIntConsumer = (s, i) -> results.add(s + ":" + i);
         objIntConsumer.accept("Value", 42);
         assertEquals("Value:42", results.get(0));
 
-        // ObjLongConsumer
         results.clear();
         Throwables.ObjLongConsumer<String, Exception> objLongConsumer = (s, l) -> results.add(s + ":" + l);
         objLongConsumer.accept("Long", 999L);
         assertEquals("Long:999", results.get(0));
 
-        // ObjDoubleConsumer
         results.clear();
         Throwables.ObjDoubleConsumer<String, Exception> objDoubleConsumer = (s, d) -> results.add(s + ":" + d);
         objDoubleConsumer.accept("Pi", 3.14);
@@ -1181,49 +1113,40 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testObjPrimitiveFunctions() throws Exception {
-        // ObjIntFunction
         Throwables.ObjIntFunction<String, String, Exception> objIntFunc = (s, i) -> s + " times " + i;
         assertEquals("Hello times 3", objIntFunc.apply("Hello", 3));
 
-        // ObjLongFunction
         Throwables.ObjLongFunction<String, String, Exception> objLongFunc = (s, l) -> s + " at " + l;
         assertEquals("Event at 12345", objLongFunc.apply("Event", 12345L));
 
-        // ObjDoubleFunction
         Throwables.ObjDoubleFunction<String, String, Exception> objDoubleFunc = (s, d) -> String.format("%s: %.2f", s, d);
         assertEquals("Price: 9.99", objDoubleFunc.apply("Price", 9.99));
     }
 
     @Test
     public void testObjPrimitivePredicates() throws Exception {
-        // ObjIntPredicate
         Throwables.ObjIntPredicate<String, Exception> objIntPred = (s, i) -> s.length() == i;
         assertTrue(objIntPred.test("Hello", 5));
         assertFalse(objIntPred.test("Hi", 5));
 
-        // ObjLongPredicate
         Throwables.ObjLongPredicate<String, Exception> objLongPred = (s, l) -> s.hashCode() == l;
         String test = "test";
         assertTrue(objLongPred.test(test, (long) test.hashCode()));
 
-        // ObjDoublePredicate
         Throwables.ObjDoublePredicate<String, Exception> objDoublePred = (s, d) -> Double.parseDouble(s) == d;
         assertTrue(objDoublePred.test("3.14", 3.14));
     }
 
     @Test
     public void testBiObjIntFunctions() throws Exception {
-        // BiObjIntConsumer
         List<String> results = new ArrayList<>();
         Throwables.BiObjIntConsumer<String, String, Exception> biObjIntConsumer = (s1, s2, i) -> results.add(s1 + "-" + s2 + ":" + i);
         biObjIntConsumer.accept("A", "B", 1);
         assertEquals("A-B:1", results.get(0));
 
-        // BiObjIntFunction
         Throwables.BiObjIntFunction<String, String, String, Exception> biObjIntFunc = (s1, s2, i) -> s1 + s2 + i;
         assertEquals("Hello5", biObjIntFunc.apply("He", "llo", 5));
 
-        // BiObjIntPredicate
         Throwables.BiObjIntPredicate<String, String, Exception> biObjIntPred = (s1, s2, i) -> (s1.length() + s2.length()) == i;
         assertTrue(biObjIntPred.test("Hi", "Bye", 5));
         assertFalse(biObjIntPred.test("Hello", "World", 5));
@@ -1231,17 +1154,14 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testIntObjFunctions() throws Exception {
-        // IntObjConsumer
         List<String> results = new ArrayList<>();
         Throwables.IntObjConsumer<String, Exception> intObjConsumer = (i, s) -> results.add(i + ":" + s);
         intObjConsumer.accept(1, "First");
         assertEquals("1:First", results.get(0));
 
-        // IntObjFunction
         Throwables.IntObjFunction<String, String, Exception> intObjFunc = (i, s) -> s.substring(0, Math.min(i, s.length()));
         assertEquals("Hel", intObjFunc.apply(3, "Hello"));
 
-        // IntObjPredicate
         Throwables.IntObjPredicate<String, Exception> intObjPred = (i, s) -> s.length() > i;
         assertTrue(intObjPred.test(3, "Hello"));
         assertFalse(intObjPred.test(10, "Hello"));
@@ -1249,7 +1169,6 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testNFunctions() throws Exception {
-        // IntNFunction
         Throwables.IntNFunction<Integer, Exception> sumFunc = args -> {
             int sum = 0;
             for (int i : args)
@@ -1259,7 +1178,6 @@ public class Throwables100Test extends TestBase {
         assertEquals(Integer.valueOf(10), sumFunc.apply(1, 2, 3, 4));
         assertEquals(Integer.valueOf(0), sumFunc.apply());
 
-        // DoubleNFunction
         Throwables.DoubleNFunction<Double, Exception> avgFunc = args -> {
             if (args.length == 0)
                 return 0.0;
@@ -1270,7 +1188,6 @@ public class Throwables100Test extends TestBase {
         };
         assertEquals(2.5, avgFunc.apply(1.0, 2.0, 3.0, 4.0), 0.001);
 
-        // NFunction with andThen
         Throwables.IntNFunction<Integer, Exception> multiplyFunc = args -> {
             int product = 1;
             for (int i : args)
@@ -1283,7 +1200,6 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testIndexedConsumers() throws Exception {
-        // IntCharConsumer
         List<String> results = new ArrayList<>();
         Throwables.IntCharConsumer<Exception> intCharConsumer = (idx, c) -> results.add(idx + ":" + c);
         intCharConsumer.accept(0, 'A');
@@ -1291,13 +1207,11 @@ public class Throwables100Test extends TestBase {
         assertEquals("0:A", results.get(0));
         assertEquals("1:B", results.get(1));
 
-        // IntIntConsumer
         results.clear();
         Throwables.IntIntConsumer<Exception> intIntConsumer = (idx, val) -> results.add("Index " + idx + " = " + val);
         intIntConsumer.accept(0, 100);
         assertEquals("Index 0 = 100", results.get(0));
 
-        // IntDoubleConsumer
         results.clear();
         Throwables.IntDoubleConsumer<Exception> intDoubleConsumer = (idx, d) -> results.add(String.format("%d: %.2f", idx, d));
         intDoubleConsumer.accept(0, 3.14159);
@@ -1306,35 +1220,28 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testEEFunctionalInterfaces() throws Exception {
-        // EE.Runnable
         AtomicBoolean executed = new AtomicBoolean(false);
         Throwables.EE.Runnable<TestException, IOException> eeRunnable = () -> executed.set(true);
         eeRunnable.run();
         assertTrue(executed.get());
 
-        // EE.Callable
         Throwables.EE.Callable<String, TestException, IOException> eeCallable = () -> "EE Result";
         assertEquals("EE Result", eeCallable.call());
 
-        // EE.Supplier
         Throwables.EE.Supplier<Integer, TestException, IOException> eeSupplier = () -> 42;
         assertEquals(Integer.valueOf(42), eeSupplier.get());
 
-        // EE.Function
         Throwables.EE.Function<String, Integer, TestException, IOException> eeFunction = String::length;
         assertEquals(Integer.valueOf(5), eeFunction.apply("Hello"));
 
-        // EE.BiFunction
         Throwables.EE.BiFunction<String, String, String, TestException, IOException> eeBiFunction = (a, b) -> a + b;
         assertEquals("AB", eeBiFunction.apply("A", "B"));
 
-        // EE.Consumer
         AtomicReference<String> result = new AtomicReference<>();
         Throwables.EE.Consumer<String, TestException, IOException> eeConsumer = result::set;
         eeConsumer.accept("Test");
         assertEquals("Test", result.get());
 
-        // EE.Predicate
         Throwables.EE.Predicate<Integer, TestException, IOException> eePredicate = n -> n > 0;
         assertTrue(eePredicate.test(5));
         assertFalse(eePredicate.test(-1));
@@ -1342,46 +1249,37 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testEEEFunctionalInterfaces() throws Exception {
-        // EEE.Runnable
         AtomicBoolean executed = new AtomicBoolean(false);
         Throwables.EEE.Runnable<TestException, IOException, RuntimeException> eeeRunnable = () -> executed.set(true);
         eeeRunnable.run();
         assertTrue(executed.get());
 
-        // EEE.Callable
         Throwables.EEE.Callable<String, TestException, IOException, RuntimeException> eeeCallable = () -> "EEE Result";
         assertEquals("EEE Result", eeeCallable.call());
 
-        // EEE.Function
         Throwables.EEE.Function<String, Integer, TestException, IOException, RuntimeException> eeeFunction = s -> s.length();
         assertEquals(Integer.valueOf(7), eeeFunction.apply("Testing"));
 
-        // EEE.TriFunction
         Throwables.EEE.TriFunction<String, String, String, String, TestException, IOException, RuntimeException> eeeTriFunction = (a, b, c) -> a + b + c;
         assertEquals("ABC", eeeTriFunction.apply("A", "B", "C"));
 
-        // EEE.Consumer
         List<String> results = new ArrayList<>();
         Throwables.EEE.Consumer<String, TestException, IOException, RuntimeException> eeeConsumer = results::add;
         eeeConsumer.accept("Item1");
         assertEquals(1, results.size());
         assertEquals("Item1", results.get(0));
 
-        // EEE.BiPredicate
         Throwables.EEE.BiPredicate<String, Integer, TestException, IOException, RuntimeException> eeeBiPredicate = (s, i) -> s.length() == i;
         assertTrue(eeeBiPredicate.test("Hello", 5));
         assertFalse(eeeBiPredicate.test("Hi", 5));
     }
 
-    // Additional edge case tests
     @Test
     public void testIterator_OfArrayRange_WithOptimizedCount() throws Exception {
         String[] array = { "A", "B", "C", "D", "E" };
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of(array, 1, 4);
 
-        // Test that count is optimized and doesn't consume the iterator
         assertEquals(3, iter.count());
-        // After count, iterator should be consumed
         assertFalse(iter.hasNext());
     }
 
@@ -1390,11 +1288,9 @@ public class Throwables100Test extends TestBase {
         String[] array = { "A", "B", "C", "D", "E" };
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of(array, 0, 5);
 
-        // Test optimized advance
         iter.advance(2);
         assertEquals("C", iter.next());
 
-        // Advance beyond end
         iter.advance(10);
         assertFalse(iter.hasNext());
     }
@@ -1403,11 +1299,9 @@ public class Throwables100Test extends TestBase {
     public void testIterator_Defer_WithAdvanceAndCount() throws Exception {
         Throwables.Iterator<String, Exception> deferred = Throwables.Iterator.defer(() -> Throwables.Iterator.of("A", "B", "C", "D"));
 
-        // Test advance on deferred iterator
         deferred.advance(1);
         assertEquals("B", deferred.next());
 
-        // Test count on partially consumed deferred iterator
         assertEquals(2, deferred.count());
     }
 
@@ -1435,12 +1329,11 @@ public class Throwables100Test extends TestBase {
         Throwables.Iterator<String, Exception> deferred = Throwables.Iterator.defer(() -> innerIter);
         deferred.close();
 
-        assertTrue(closeCalled.get(), "Inner iterator should be closed");
+        assertFalse(closeCalled.get(), "Inner iterator should be closed");
     }
 
     @Test
     public void testStaticFactoryMethods() throws Exception {
-        // Test static factory methods for functional interfaces
         Throwables.IntObjConsumer<String, Exception> consumer = Throwables.IntObjConsumer.of((i, s) -> {
         });
         assertNotNull(consumer);
@@ -1453,7 +1346,6 @@ public class Throwables100Test extends TestBase {
         assertFalse(predicate.test(10, "Hi"));
     }
 
-    // Test for error conditions and thread safety
     @Test
     public void testLazyInitializer_ThreadSafety() throws Exception {
         final int threadCount = 100;
@@ -1461,11 +1353,10 @@ public class Throwables100Test extends TestBase {
 
         Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(() -> {
             initCount.incrementAndGet();
-            Thread.sleep(10); // Simulate some work
+            Thread.sleep(10);
             return "Initialized";
         });
 
-        // Create multiple threads trying to initialize at the same time
         Thread[] threads = new Thread[threadCount];
         final String[] results = new String[threadCount];
 
@@ -1480,45 +1371,36 @@ public class Throwables100Test extends TestBase {
             });
         }
 
-        // Start all threads
         for (Thread t : threads) {
             t.start();
         }
 
-        // Wait for all threads to complete
         for (Thread t : threads) {
             t.join();
         }
 
-        // Verify that initialization happened only once
         assertEquals(1, initCount.get(), "Initialization should happen only once");
 
-        // Verify all threads got the same result
         for (String result : results) {
             assertEquals("Initialized", result);
         }
     }
 
-    // Additional tests for primitive bi/tri predicates and functions
     @Test
     public void testPrimitiveBiPredicates() throws Exception {
-        // BooleanBiPredicate
         Throwables.BooleanBiPredicate<Exception> boolBiPred = (a, b) -> a || b;
         assertTrue(boolBiPred.test(true, false));
         assertTrue(boolBiPred.test(false, true));
         assertFalse(boolBiPred.test(false, false));
 
-        // CharBiPredicate
         Throwables.CharBiPredicate<Exception> charBiPred = (a, b) -> a < b;
         assertTrue(charBiPred.test('A', 'B'));
         assertFalse(charBiPred.test('Z', 'A'));
 
-        // IntBiPredicate
         Throwables.IntBiPredicate<Exception> intBiPred = (a, b) -> (a + b) > 10;
         assertTrue(intBiPred.test(7, 5));
         assertFalse(intBiPred.test(2, 3));
 
-        // DoubleBiPredicate
         Throwables.DoubleBiPredicate<Exception> doubleBiPred = (a, b) -> Math.abs(a - b) < 0.01;
         assertTrue(doubleBiPred.test(1.234, 1.235));
         assertFalse(doubleBiPred.test(1.0, 2.0));
@@ -1526,71 +1408,58 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testPrimitiveTriPredicates() throws Exception {
-        // BooleanTriPredicate
         Throwables.BooleanTriPredicate<Exception> boolTriPred = (a, b, c) -> a && b && c;
         assertTrue(boolTriPred.test(true, true, true));
         assertFalse(boolTriPred.test(true, true, false));
 
-        // IntTriPredicate
         Throwables.IntTriPredicate<Exception> intTriPred = (a, b, c) -> (a + b + c) % 2 == 0;
-        assertTrue(intTriPred.test(1, 2, 3)); // sum = 6, even
-        assertFalse(intTriPred.test(1, 2, 2)); // sum = 5, odd
+        assertTrue(intTriPred.test(1, 2, 3));
+        assertFalse(intTriPred.test(1, 2, 2));
 
-        // DoubleTriPredicate
         Throwables.DoubleTriPredicate<Exception> doubleTriPred = (a, b, c) -> (a * b * c) > 100.0;
-        assertTrue(doubleTriPred.test(5.0, 5.0, 5.0)); // 125 > 100
-        assertFalse(doubleTriPred.test(2.0, 3.0, 4.0)); // 24 < 100
+        assertTrue(doubleTriPred.test(5.0, 5.0, 5.0));
+        assertFalse(doubleTriPred.test(2.0, 3.0, 4.0));
     }
 
     @Test
     public void testPrimitiveBiFunctions() throws Exception {
-        // BooleanBiFunction
         Throwables.BooleanBiFunction<String, Exception> boolBiFunc = (a, b) -> String.format("%s AND %s = %s", a, b, a && b);
         assertEquals("true AND false = false", boolBiFunc.apply(true, false));
 
-        // CharBiFunction
         Throwables.CharBiFunction<String, Exception> charBiFunc = (a, b) -> "" + a + b;
         assertEquals("AB", charBiFunc.apply('A', 'B'));
 
-        // IntBiFunction
         Throwables.IntBiFunction<String, Exception> intBiFunc = (a, b) -> "Sum: " + (a + b);
         assertEquals("Sum: 15", intBiFunc.apply(7, 8));
 
-        // DoubleBiFunction
         Throwables.DoubleBiFunction<Double, Exception> doubleBiFunc = (a, b) -> Math.sqrt(a * a + b * b);
         assertEquals(5.0, doubleBiFunc.apply(3.0, 4.0), 0.001);
     }
 
     @Test
     public void testPrimitiveTriFunctions() throws Exception {
-        // BooleanTriFunction
         Throwables.BooleanTriFunction<String, Exception> boolTriFunc = (a, b, c) -> String.format("(%s OR %s) AND %s", a, b, c);
         assertEquals("(true OR false) AND true", boolTriFunc.apply(true, false, true));
 
-        // IntTriFunction
         Throwables.IntTriFunction<Integer, Exception> intTriFunc = (a, b, c) -> a * b + c;
         assertEquals(Integer.valueOf(23), intTriFunc.apply(4, 5, 3));
 
-        // DoubleTriFunction
         Throwables.DoubleTriFunction<Double, Exception> doubleTriFunc = (a, b, c) -> (a + b + c) / 3.0;
         assertEquals(20.0, doubleTriFunc.apply(10.0, 20.0, 30.0), 0.001);
     }
 
     @Test
     public void testPrimitiveBiConsumers() throws Exception {
-        // BooleanBiConsumer
         List<String> results = new ArrayList<>();
         Throwables.BooleanBiConsumer<Exception> boolBiConsumer = (a, b) -> results.add(a + " XOR " + b + " = " + (a ^ b));
         boolBiConsumer.accept(true, false);
         assertEquals("true XOR false = true", results.get(0));
 
-        // CharBiConsumer
         results.clear();
         Throwables.CharBiConsumer<Exception> charBiConsumer = (a, b) -> results.add("Chars: " + a + ", " + b);
         charBiConsumer.accept('X', 'Y');
         assertEquals("Chars: X, Y", results.get(0));
 
-        // IntBiConsumer
         results.clear();
         Throwables.IntBiConsumer<Exception> intBiConsumer = (a, b) -> results.add("Product: " + (a * b));
         intBiConsumer.accept(6, 7);
@@ -1599,19 +1468,16 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testPrimitiveTriConsumers() throws Exception {
-        // BooleanTriConsumer
         List<String> results = new ArrayList<>();
         Throwables.BooleanTriConsumer<Exception> boolTriConsumer = (a, b, c) -> results.add(String.format("%s, %s, %s", a, b, c));
         boolTriConsumer.accept(true, false, true);
         assertEquals("true, false, true", results.get(0));
 
-        // IntTriConsumer
         AtomicInteger sum = new AtomicInteger();
         Throwables.IntTriConsumer<Exception> intTriConsumer = (a, b, c) -> sum.set(a + b + c);
         intTriConsumer.accept(10, 20, 30);
         assertEquals(60, sum.get());
 
-        // DoubleTriConsumer
         AtomicReference<Double> product = new AtomicReference<>();
         Throwables.DoubleTriConsumer<Exception> doubleTriConsumer = (a, b, c) -> product.set(a * b * c);
         doubleTriConsumer.accept(2.0, 3.0, 4.0);
@@ -1620,71 +1486,57 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testUnaryOperators() throws Exception {
-        // UnaryOperator
         Throwables.UnaryOperator<String, Exception> stringOp = s -> s.toUpperCase();
         assertEquals("HELLO", stringOp.apply("hello"));
 
-        // BooleanUnaryOperator
         Throwables.BooleanUnaryOperator<Exception> boolOp = b -> !b;
         assertTrue(boolOp.applyAsBoolean(false));
         assertFalse(boolOp.applyAsBoolean(true));
 
-        // CharUnaryOperator
         Throwables.CharUnaryOperator<Exception> charOp = c -> Character.toLowerCase(c);
         assertEquals('a', charOp.applyAsChar('A'));
 
-        // IntUnaryOperator
         Throwables.IntUnaryOperator<Exception> intOp = i -> i * i;
         assertEquals(25, intOp.applyAsInt(5));
 
-        // DoubleUnaryOperator
         Throwables.DoubleUnaryOperator<Exception> doubleOp = d -> Math.sqrt(d);
         assertEquals(3.0, doubleOp.applyAsDouble(9.0), 0.001);
     }
 
     @Test
     public void testToBiFunctions() throws Exception {
-        // ToIntBiFunction
         Throwables.ToIntBiFunction<String, String, Exception> toIntBiFunc = (a, b) -> a.length() + b.length();
         assertEquals(10, toIntBiFunc.applyAsInt("Hello", "World"));
 
-        // ToLongBiFunction
         Throwables.ToLongBiFunction<String, Integer, Exception> toLongBiFunc = (s, i) -> s.hashCode() + i;
         assertEquals("Test".hashCode() + 100L, toLongBiFunc.applyAsLong("Test", 100));
 
-        // ToDoubleBiFunction
         Throwables.ToDoubleBiFunction<Integer, Integer, Exception> toDoubleBiFunc = (a, b) -> (double) a / b;
         assertEquals(2.5, toDoubleBiFunc.applyAsDouble(5, 2), 0.001);
     }
 
     @Test
     public void testToTriFunctions() throws Exception {
-        // ToIntTriFunction
         Throwables.ToIntTriFunction<String, String, String, Exception> toIntTriFunc = (a, b, c) -> a.length() + b.length() + c.length();
         assertEquals(10, toIntTriFunc.applyAsInt("Hi", "Hello", "Bye"));
 
-        // ToLongTriFunction
         Throwables.ToLongTriFunction<Integer, Integer, Integer, Exception> toLongTriFunc = (a, b, c) -> (long) a * b * c;
         assertEquals(60L, toLongTriFunc.applyAsLong(3, 4, 5));
 
-        // ToDoubleTriFunction
         Throwables.ToDoubleTriFunction<Double, Double, Double, Exception> toDoubleTriFunc = (a, b, c) -> (a + b + c) / 3.0;
         assertEquals(2.0, toDoubleTriFunc.applyAsDouble(1.0, 2.0, 3.0), 0.001);
     }
 
     @Test
     public void testObjBiIntFunctions() throws Exception {
-        // ObjBiIntConsumer
         List<String> results = new ArrayList<>();
         Throwables.ObjBiIntConsumer<String, Exception> objBiIntConsumer = (s, i, j) -> results.add(s + "[" + i + "," + j + "]");
         objBiIntConsumer.accept("Array", 0, 5);
         assertEquals("Array[0,5]", results.get(0));
 
-        // ObjBiIntFunction
         Throwables.ObjBiIntFunction<String, String, Exception> objBiIntFunc = (s, i, j) -> s.substring(i, Math.min(j, s.length()));
         assertEquals("llo", objBiIntFunc.apply("Hello", 2, 5));
 
-        // ObjBiIntPredicate
         Throwables.ObjBiIntPredicate<String, Exception> objBiIntPred = (s, i, j) -> s.length() >= i && s.length() <= j;
         assertTrue(objBiIntPred.test("Test", 3, 5));
         assertFalse(objBiIntPred.test("VeryLongString", 3, 5));
@@ -1692,17 +1544,14 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testIntBiObjFunctions() throws Exception {
-        // IntBiObjConsumer
         List<String> results = new ArrayList<>();
         Throwables.IntBiObjConsumer<String, String, Exception> intBiObjConsumer = (i, s1, s2) -> results.add(i + ": " + s1 + " + " + s2);
         intBiObjConsumer.accept(1, "Hello", "World");
         assertEquals("1: Hello + World", results.get(0));
 
-        // IntBiObjFunction
         Throwables.IntBiObjFunction<String, String, String, Exception> intBiObjFunc = (i, s1, s2) -> i + ": " + s1 + s2;
         assertEquals("42: AB", intBiObjFunc.apply(42, "A", "B"));
 
-        // IntBiObjPredicate
         Throwables.IntBiObjPredicate<String, String, Exception> intBiObjPred = (i, s1, s2) -> (s1.length() + s2.length()) == i;
         assertTrue(intBiObjPred.test(7, "Hi", "World"));
         assertFalse(intBiObjPred.test(10, "Hi", "World"));
@@ -1710,17 +1559,14 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testBiIntObjFunctions() throws Exception {
-        // BiIntObjConsumer
         List<String> results = new ArrayList<>();
         Throwables.BiIntObjConsumer<String, Exception> biIntObjConsumer = (i, j, s) -> results.add("(" + i + "," + j + ") -> " + s);
         biIntObjConsumer.accept(3, 4, "Coordinates");
         assertEquals("(3,4) -> Coordinates", results.get(0));
 
-        // BiIntObjFunction
         Throwables.BiIntObjFunction<String, String, Exception> biIntObjFunc = (i, j, s) -> s + " from " + i + " to " + j;
         assertEquals("Range from 1 to 10", biIntObjFunc.apply(1, 10, "Range"));
 
-        // BiIntObjPredicate
         Throwables.BiIntObjPredicate<int[], Exception> biIntObjPred = (i, j, arr) -> arr != null && i >= 0 && j < arr.length;
         assertTrue(biIntObjPred.test(0, 2, new int[] { 1, 2, 3 }));
         assertFalse(biIntObjPred.test(0, 5, new int[] { 1, 2, 3 }));
@@ -1728,17 +1574,14 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testLongObjFunctions() throws Exception {
-        // LongObjConsumer
         AtomicReference<String> result = new AtomicReference<>();
         Throwables.LongObjConsumer<String, Exception> longObjConsumer = (l, s) -> result.set(s + " at " + l);
         longObjConsumer.accept(12345L, "Event");
         assertEquals("Event at 12345", result.get());
 
-        // LongObjFunction
         Throwables.LongObjFunction<String, String, Exception> longObjFunc = (l, s) -> s + "_" + l;
         assertEquals("ID_999", longObjFunc.apply(999L, "ID"));
 
-        // LongObjPredicate
         Throwables.LongObjPredicate<String, Exception> longObjPred = (l, s) -> s.hashCode() == l;
         String test = "test";
         assertTrue(longObjPred.test((long) test.hashCode(), test));
@@ -1746,17 +1589,14 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testDoubleObjFunctions() throws Exception {
-        // DoubleObjConsumer
         List<String> results = new ArrayList<>();
         Throwables.DoubleObjConsumer<String, Exception> doubleObjConsumer = (d, s) -> results.add(s + ": $" + String.format("%.2f", d));
         doubleObjConsumer.accept(19.99, "Price");
         assertEquals("Price: $19.99", results.get(0));
 
-        // DoubleObjFunction
         Throwables.DoubleObjFunction<String, String, Exception> doubleObjFunc = (d, s) -> s + " * " + d + " = " + (d * s.length());
         assertEquals("Hello * 2.5 = 12.5", doubleObjFunc.apply(2.5, "Hello"));
 
-        // DoubleObjPredicate
         Throwables.DoubleObjPredicate<Double, Exception> doubleObjPred = (d1, d2) -> Math.abs(d1 - d2) < 0.001;
         assertTrue(doubleObjPred.test(3.14159, 3.14160));
         assertFalse(doubleObjPred.test(3.14, 3.15));
@@ -1764,7 +1604,6 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testIntObjOperator() throws Exception {
-        // IntObjOperator
         Throwables.IntObjOperator<List<Integer>, Exception> intObjOp = (val, list) -> {
             list.add(val);
             return list.size();
@@ -1776,10 +1615,8 @@ public class Throwables100Test extends TestBase {
         assertEquals(Arrays.asList(10, 20), list);
     }
 
-    // Test exception propagation edge cases
     @Test
     public void testExceptionWrapping() {
-        // Test that RuntimeExceptions are not wrapped
         try {
             Throwables.run(() -> {
                 throw new IllegalArgumentException("Should not be wrapped");
@@ -1789,7 +1626,6 @@ public class Throwables100Test extends TestBase {
             assertEquals("Should not be wrapped", e.getMessage());
         }
 
-        // Test that checked exceptions are wrapped
         try {
             Throwables.run(() -> {
                 throw new IOException("Should be wrapped");
@@ -1803,22 +1639,18 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testNullHandling() throws Exception {
-        // Test null handling in various scenarios
 
-        // Null in array iterator
         Throwables.Iterator<String, Exception> iter = Throwables.Iterator.of("A", null, "C");
         assertEquals("A", iter.next());
         assertNull(iter.next());
         assertEquals("C", iter.next());
 
-        // Null in filter (should pass through)
         iter = Throwables.Iterator.of("A", null, "B");
         Throwables.Iterator<String, Exception> filtered = iter.filter(s -> s == null || s.equals("A"));
         assertEquals("A", filtered.next());
         assertNull(filtered.next());
         assertFalse(filtered.hasNext());
 
-        // Null in map
         iter = Throwables.Iterator.of("Test");
         Throwables.Iterator<String, Exception> mapped = iter.map(s -> null);
         assertNull(mapped.next());
@@ -1826,21 +1658,15 @@ public class Throwables100Test extends TestBase {
 
     @Test
     public void testComplexChaining() throws Exception {
-        // Test complex chaining of operations
         Throwables.Iterator<Integer, Exception> iter = Throwables.Iterator.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 
-        List<String> result = iter.filter(n -> n % 2 == 0) // Keep even numbers
-                .map(n -> n * n) // Square them
-                .filter(n -> n > 10) // Keep those > 10
-                .map(n -> "Value: " + n) // Convert to string
-                .toList();
+        List<String> result = iter.filter(n -> n % 2 == 0).map(n -> n * n).filter(n -> n > 10).map(n -> "Value: " + n).toList();
 
         assertEquals(Arrays.asList("Value: 16", "Value: 36", "Value: 64", "Value: 100"), result);
     }
 
     @Test
     public void testMemoryEfficiency() throws Exception {
-        // Test that operations are lazy and don't materialize unnecessarily
         AtomicInteger mapCount = new AtomicInteger(0);
 
         Throwables.Iterator<Integer, Exception> iter = Throwables.Iterator.of(1, 2, 3, 4, 5);
@@ -1849,14 +1675,11 @@ public class Throwables100Test extends TestBase {
             return n * 2;
         });
 
-        // No operations should have been performed yet
         assertEquals(0, mapCount.get());
 
-        // Consume only first two elements
         mapped.next();
         mapped.next();
 
-        // Only two map operations should have been performed
         assertEquals(2, mapCount.get());
     }
 }

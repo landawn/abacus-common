@@ -18,17 +18,17 @@ import java.util.TreeMap;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Difference.BeanDifference;
 import com.landawn.abacus.util.Difference.MapDifference;
 
+@Tag("new-test")
 public class Difference101Test extends TestBase {
 
-    // Additional tests for MapDifference.of with collection of maps and different key extractors
     @Test
     public void testMapDifferenceCollectionsWithDifferentIdExtractors() {
-        // First collection of maps with String keys
         Map<String, Object> map1a = new HashMap<>();
         map1a.put("id", "A");
         map1a.put("value", 100);
@@ -41,7 +41,6 @@ public class Difference101Test extends TestBase {
 
         List<Map<String, Object>> col1 = Arrays.asList(map1a, map1b);
 
-        // Second collection of maps with different structure
         Map<String, Object> map2a = new HashMap<>();
         map2a.put("code", "A");
         map2a.put("value", 100);
@@ -54,7 +53,6 @@ public class Difference101Test extends TestBase {
 
         List<Map<String, Object>> col2 = Arrays.asList(map2a, map2c);
 
-        // Different id extractors for each collection
         Function<Map<? extends String, ? extends Object>, String> idExtractor1 = m -> (String) m.get("id");
         Function<Map<? extends String, ? extends Object>, String> idExtractor2 = m -> (String) m.get("code");
 
@@ -71,12 +69,11 @@ public class Difference101Test extends TestBase {
         assertEquals(1, diff.withDifferentValues().size());
         assertTrue(diff.withDifferentValues().containsKey("A"));
 
-        // Check the inner difference for map with id/code "A"
         MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> innerDiff = diff.withDifferentValues().get("A");
         assertEquals(1, innerDiff.inCommon().size());
         assertEquals(100, innerDiff.inCommon().get("value"));
-        assertEquals(2, innerDiff.onLeftOnly().size()); // id and type
-        assertEquals(2, innerDiff.onRightOnly().size()); // code and category
+        assertEquals(2, innerDiff.onLeftOnly().size());
+        assertEquals(2, innerDiff.onRightOnly().size());
     }
 
     @Test
@@ -98,7 +95,7 @@ public class Difference101Test extends TestBase {
         Map<String, Object> map2a = new HashMap<>();
         map2a.put("userId", 1);
         map2a.put("name", "Alice");
-        map2a.put("age", 26); // Different age
+        map2a.put("age", 26);
         map2a.put("country", "USA");
 
         Map<String, Object> map2c = new HashMap<>();
@@ -167,7 +164,6 @@ public class Difference101Test extends TestBase {
         assertFalse(diff2.areEqual());
     }
 
-    // Additional BeanDifference tests
     public static class PersonBean {
         private Long id;
         private String firstName;
@@ -280,7 +276,7 @@ public class Difference101Test extends TestBase {
 
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(person1, person2);
 
-        assertEquals(4, diff.inCommon().size()); // id, firstName, lastName, address
+        assertEquals(4, diff.inCommon().size());
         assertEquals(1, diff.withDifferentValues().size());
         assertEquals(Pair.of(30, 31), diff.withDifferentValues().get("age"));
     }
@@ -295,7 +291,7 @@ public class Difference101Test extends TestBase {
 
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(person1, person2);
 
-        assertEquals(4, diff.inCommon().size()); // id, firstName, lastName
+        assertEquals(4, diff.inCommon().size());
         assertEquals(1, diff.withDifferentValues().size());
         assertTrue(diff.withDifferentValues().containsKey("address"));
         assertEquals(person1.getAddress(), diff.withDifferentValues().get("address").left());
@@ -308,11 +304,10 @@ public class Difference101Test extends TestBase {
         PersonBean person1b = new PersonBean(2L, "Bob", "Jones", 30);
         List<PersonBean> list1 = Arrays.asList(person1a, person1b);
 
-        PersonBean person2a = new PersonBean(10L, "Alice", "Smith", 26); // Different id but same name
+        PersonBean person2a = new PersonBean(10L, "Alice", "Smith", 26);
         PersonBean person2c = new PersonBean(30L, "Charlie", "Brown", 35);
         List<PersonBean> list2 = Arrays.asList(person2a, person2c);
 
-        // Use full name as identifier instead of id
         Function<PersonBean, String> nameExtractor = p -> p.getFirstName() + " " + p.getLastName();
 
         BeanDifference<List<PersonBean>, List<PersonBean>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = BeanDifference
@@ -327,8 +322,8 @@ public class Difference101Test extends TestBase {
 
         assertEquals(1, diff.withDifferentValues().size());
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> aliceDiff = diff.withDifferentValues().get("Alice Smith");
-        assertEquals(2, aliceDiff.inCommon().size()); // firstName, lastName
-        assertEquals(2, aliceDiff.withDifferentValues().size()); // id and age are different
+        assertEquals(2, aliceDiff.inCommon().size());
+        assertEquals(2, aliceDiff.withDifferentValues().size());
     }
 
     @Test
@@ -337,17 +332,16 @@ public class Difference101Test extends TestBase {
         PersonBean person1b = new PersonBean(2L, "Bob", "Jones", 30);
         List<PersonBean> list1 = Arrays.asList(person1a, person1b);
 
-        PersonBean person2a = new PersonBean(100L, "Alice", "SMITH", 25); // Different id and lastName case
+        PersonBean person2a = new PersonBean(100L, "Alice", "SMITH", 25);
         PersonBean person2c = new PersonBean(200L, "Charlie", "Brown", 35);
         List<PersonBean> list2 = Arrays.asList(person2a, person2c);
 
         Collection<String> propsToCompare = Arrays.asList("firstName", "age");
 
         BeanDifference<List<PersonBean>, List<PersonBean>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = BeanDifference
-                .of(list1, list2, propsToCompare, PersonBean::getFirstName, // Use firstName as identifier
-                        PersonBean::getFirstName);
+                .of(list1, list2, propsToCompare, PersonBean::getFirstName, PersonBean::getFirstName);
 
-        assertEquals(1, diff.inCommon().size()); // Alice matches on firstName and age
+        assertEquals(1, diff.inCommon().size());
         assertEquals("Alice", diff.inCommon().get(0).getFirstName());
 
         assertEquals(1, diff.onLeftOnly().size());
@@ -356,7 +350,7 @@ public class Difference101Test extends TestBase {
         assertEquals(1, diff.onRightOnly().size());
         assertEquals("Charlie", diff.onRightOnly().get(0).getFirstName());
 
-        assertTrue(diff.withDifferentValues().isEmpty()); // Alice matches on compared properties
+        assertTrue(diff.withDifferentValues().isEmpty());
     }
 
     @Test
@@ -364,7 +358,6 @@ public class Difference101Test extends TestBase {
         PersonBean person1 = new PersonBean(1L, "JOHN", "DOE", 30);
         PersonBean person2 = new PersonBean(1L, "john", "doe", 30);
 
-        // Case-insensitive string comparison
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(person1, person2, (v1, v2) -> {
             if (v1 instanceof String && v2 instanceof String) {
                 return ((String) v1).equalsIgnoreCase((String) v2);
@@ -372,7 +365,7 @@ public class Difference101Test extends TestBase {
             return Objects.equals(v1, v2);
         });
 
-        assertEquals(4, diff.inCommon().size()); // All properties match with custom equivalence
+        assertEquals(4, diff.inCommon().size());
         assertTrue(diff.withDifferentValues().isEmpty());
         assertTrue(diff.areEqual());
     }
@@ -428,7 +421,7 @@ public class Difference101Test extends TestBase {
 
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(person1, person2);
 
-        assertEquals(3, diff.inCommon().size()); // id and firstName
+        assertEquals(3, diff.inCommon().size());
         assertEquals(1, diff.withDifferentValues().size());
         assertEquals(Pair.of(null, "Doe"), diff.withDifferentValues().get("lastName"));
     }
@@ -440,8 +433,7 @@ public class Difference101Test extends TestBase {
 
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(person1, person2);
 
-        // When comparing all properties, null values are ignored
-        assertEquals(2, diff.inCommon().size()); // id and firstName
+        assertEquals(2, diff.inCommon().size());
         assertTrue(diff.withDifferentValues().isEmpty());
         assertTrue(diff.onLeftOnly().isEmpty());
         assertTrue(diff.onRightOnly().isEmpty());
@@ -456,15 +448,12 @@ public class Difference101Test extends TestBase {
 
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(person1, person2, propsToCompare);
 
-        // When specific properties are compared, null values are included
-        assertEquals(2, diff.inCommon().size()); // lastName and age (both null)
+        assertEquals(2, diff.inCommon().size());
         assertTrue(diff.withDifferentValues().isEmpty());
     }
 
-    // Test for complex scenarios with multiple differences
     @Test
     public void testComplexMapDifferenceScenario() {
-        // Create complex maps with various data types
         Map<String, Object> map1 = new HashMap<>();
         map1.put("string", "value1");
         map1.put("integer", 42);
@@ -475,17 +464,17 @@ public class Difference101Test extends TestBase {
         map1.put("onlyInFirst", "unique");
 
         Map<String, Object> map2 = new HashMap<>();
-        map2.put("string", "value2"); // Different
-        map2.put("integer", 42); // Same
-        map2.put("double", 3.14159); // Different
-        map2.put("boolean", true); // Same
-        map2.put("list", Arrays.asList(1, 2, 3)); // Same
-        map2.put("null", null); // Same
+        map2.put("string", "value2");
+        map2.put("integer", 42);
+        map2.put("double", 3.14159);
+        map2.put("boolean", true);
+        map2.put("list", Arrays.asList(1, 2, 3));
+        map2.put("null", null);
         map2.put("onlyInSecond", "unique");
 
         MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = MapDifference.of(map1, map2);
 
-        assertEquals(4, diff.inCommon().size()); // integer, boolean, list, null
+        assertEquals(4, diff.inCommon().size());
         assertEquals(1, diff.onLeftOnly().size());
         assertTrue(diff.onLeftOnly().containsKey("onlyInFirst"));
         assertEquals(1, diff.onRightOnly().size());
@@ -495,7 +484,6 @@ public class Difference101Test extends TestBase {
         assertEquals(Pair.of(3.14, 3.14159), diff.withDifferentValues().get("double"));
     }
 
-    // Test TreeMap to ensure sorted order is maintained
     @Test
     public void testMapDifferenceWithTreeMap() {
         Map<String, Integer> map1 = new TreeMap<>();
@@ -510,14 +498,12 @@ public class Difference101Test extends TestBase {
 
         MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
 
-        // Should preserve LinkedHashMap for sorted maps
         assertTrue(diff.inCommon() instanceof LinkedHashMap);
         assertTrue(diff.onLeftOnly() instanceof LinkedHashMap);
         assertTrue(diff.onRightOnly() instanceof LinkedHashMap);
         assertTrue(diff.withDifferentValues() instanceof LinkedHashMap);
     }
 
-    // Edge case: Maps with same keys but all different values
     @Test
     public void testMapDifferenceAllDifferentValues() {
         Map<String, Integer> map1 = new HashMap<>();
@@ -539,13 +525,11 @@ public class Difference101Test extends TestBase {
         assertFalse(diff.areEqual());
     }
 
-    // Test with very large collections to ensure performance
     @Test
     public void testDifferenceWithLargeCollections() {
         List<Integer> list1 = new ArrayList<>();
         List<Integer> list2 = new ArrayList<>();
 
-        // Create large lists with some overlap
         for (int i = 0; i < 10000; i++) {
             list1.add(i);
         }
@@ -559,13 +543,11 @@ public class Difference101Test extends TestBase {
         assertEquals(5000, diff.onLeftOnly().size());
         assertEquals(5000, diff.onRightOnly().size());
 
-        // Verify some samples
         assertTrue(diff.inCommon().contains(7500));
         assertTrue(diff.onLeftOnly().contains(2500));
         assertTrue(diff.onRightOnly().contains(12500));
     }
 
-    // Test handling of collections with all duplicates
     @Test
     public void testDifferenceAllDuplicates() {
         List<String> list1 = Arrays.asList("a", "a", "a", "a");
@@ -578,7 +560,6 @@ public class Difference101Test extends TestBase {
         assertEquals(Arrays.asList("b", "b"), diff.onRightOnly());
     }
 
-    // Test primitive lists with extreme values
     @Test
     public void testPrimitiveListsWithExtremeValues() {
         IntList list1 = IntList.of(Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE);
@@ -598,7 +579,6 @@ public class Difference101Test extends TestBase {
 
         Difference<FloatList, FloatList> diff = Difference.of(list1, list2);
 
-        // NaN != NaN, so they won't be in common
         assertEquals(FloatList.of(Float.NaN, 3.0f), diff.inCommon());
         assertEquals(FloatList.of(1.0f), diff.onLeftOnly());
         assertEquals(FloatList.of(4.0f), diff.onRightOnly());

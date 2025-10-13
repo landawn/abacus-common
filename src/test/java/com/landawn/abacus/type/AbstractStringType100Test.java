@@ -20,12 +20,14 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class AbstractStringType100Test extends TestBase {
 
     private Type<String> stringType;
@@ -84,7 +86,6 @@ public class AbstractStringType100Test extends TestBase {
     public void testValueOfObject() throws SQLException {
         assertNull(stringType.valueOf((Object) null));
 
-        // Test with Clob
         Clob clob = mock(Clob.class);
         when(clob.length()).thenReturn(5L);
         when(clob.getSubString(1, 5)).thenReturn("hello");
@@ -93,21 +94,16 @@ public class AbstractStringType100Test extends TestBase {
         verify(clob).getSubString(1, 5);
         verify(clob).free();
 
-        // Test with Clob that throws SQLException on read
         Clob errorClob = mock(Clob.class);
         when(errorClob.length()).thenThrow(new SQLException("Read error"));
 
         assertThrows(UncheckedSQLException.class, () -> stringType.valueOf(errorClob));
 
-        // Test with Clob that throws SQLException on free
         Clob freeErrorClob = mock(Clob.class);
         when(freeErrorClob.length()).thenReturn(3L);
         when(freeErrorClob.getSubString(1, 3)).thenReturn("foo");
         doThrow(new SQLException("Free error")).when(freeErrorClob).free();
 
-        // assertThrows(UncheckedSQLException.class, () -> stringType.valueOf(freeErrorClob));
-
-        // Test with other objects
         assertEquals("123", stringType.valueOf(123));
         assertEquals("true", stringType.valueOf(true));
     }
@@ -190,25 +186,20 @@ public class AbstractStringType100Test extends TestBase {
 
     @Test
     public void testWriteCharacter() throws IOException {
-        // Test null value
         stringType.writeCharacter(writer, null, null);
         verify(writer).write(any(char[].class));
 
-        // Test empty string
         stringType.writeCharacter(writer, "", null);
         verify(writer).writeCharacter("");
 
-        // Test with value and no quotation
         stringType.writeCharacter(writer, "hello", null);
         verify(writer).writeCharacter("hello");
 
-        // Test with writeNullStringAsEmpty config
         when(config.writeNullStringAsEmpty()).thenReturn(true);
         when(config.getStringQuotation()).thenReturn((char) 0);
         stringType.writeCharacter(writer, null, config);
         verify(writer, times(2)).writeCharacter("");
 
-        // Test with string quotation
         when(config.getStringQuotation()).thenReturn('"');
         stringType.writeCharacter(writer, "world", config);
         verify(writer, times(2)).write('"');

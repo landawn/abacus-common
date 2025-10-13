@@ -110,9 +110,12 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     //-----------------------------------------------------------------------
 
     /**
-     * Gets the value as a Byte instance.
-     * 
-     * @return the current value
+     * Gets the value as a byte primitive.
+     *
+     * <p>This method is deprecated in favor of {@link #value()} which provides
+     * the same functionality with a more concise name.</p>
+     *
+     * @return the current byte value
      * @deprecated replace by {@link #value()}.
      */
     @Deprecated
@@ -361,8 +364,15 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
 
     /**
      * Returns the value of this MutableByte as a byte.
-     * 
-     * @return the byte value
+     * This is equivalent to calling {@link #value()}.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableByte num = MutableByte.of((byte)42);
+     * byte val = num.byteValue(); // returns 42
+     * }</pre>
+     *
+     * @return the byte value represented by this object
      */
     @Override
     public byte byteValue() {
@@ -370,9 +380,16 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Returns the value of this MutableByte as a short.
-     * 
-     * @return the value as a short
+     * Returns the value of this MutableByte as a short after a widening primitive conversion.
+     * The byte value is sign-extended to create the short value.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableByte num = MutableByte.of((byte)-1);
+     * short val = num.shortValue(); // returns -1 (sign-extended)
+     * }</pre>
+     *
+     * @return the numeric value represented by this object after conversion to type short
      */
     @Override
     public short shortValue() {
@@ -380,9 +397,16 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Returns the value of this MutableByte as an int.
-     * 
-     * @return the value as an int
+     * Returns the value of this MutableByte as an int after a widening primitive conversion.
+     * The byte value is sign-extended to create the int value.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableByte num = MutableByte.of((byte)100);
+     * int val = num.intValue(); // returns 100
+     * }</pre>
+     *
+     * @return the numeric value represented by this object after conversion to type int
      */
     @Override
     public int intValue() {
@@ -390,9 +414,16 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Returns the value of this MutableByte as a long.
-     * 
-     * @return the value as a long
+     * Returns the value of this MutableByte as a long after a widening primitive conversion.
+     * The byte value is sign-extended to create the long value.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableByte num = MutableByte.of((byte)50);
+     * long val = num.longValue(); // returns 50L
+     * }</pre>
+     *
+     * @return the numeric value represented by this object after conversion to type long
      */
     @Override
     public long longValue() {
@@ -400,9 +431,16 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Returns the value of this MutableByte as a float.
-     * 
-     * @return the value as a float
+     * Returns the value of this MutableByte as a float after a widening primitive conversion.
+     * The conversion is exact (no loss of precision).
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableByte num = MutableByte.of((byte)75);
+     * float val = num.floatValue(); // returns 75.0f
+     * }</pre>
+     *
+     * @return the numeric value represented by this object after conversion to type float
      */
     @Override
     public float floatValue() {
@@ -410,9 +448,16 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Returns the value of this MutableByte as a double.
-     * 
-     * @return the value as a double
+     * Returns the value of this MutableByte as a double after a widening primitive conversion.
+     * The conversion is exact (no loss of precision).
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableByte num = MutableByte.of((byte)-128);
+     * double val = num.doubleValue(); // returns -128.0
+     * }</pre>
+     *
+     * @return the numeric value represented by this object after conversion to type double
      */
     @Override
     public double doubleValue() {
@@ -468,9 +513,18 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
 
     /**
      * Returns a hash code for this MutableByte.
-     * The hash code is equal to the byte value.
-     * 
-     * @return a suitable hash code
+     * The hash code is equal to the byte value cast to an int.
+     *
+     * <p>This implementation ensures that two MutableByte objects with equal values
+     * will have equal hash codes, satisfying the {@link Object#hashCode()} contract.</p>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * MutableByte num = MutableByte.of((byte)42);
+     * int hash = num.hashCode(); // returns 42
+     * }</pre>
+     *
+     * @return a hash code value for this object
      */
     @Override
     public int hashCode() {

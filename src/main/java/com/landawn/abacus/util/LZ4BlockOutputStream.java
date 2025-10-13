@@ -40,7 +40,6 @@ import java.io.OutputStream;
  * }</pre>
  * 
  * @see LZ4BlockInputStream
- * @author HaiYang Li
  * @since 1.0
  */
 public final class LZ4BlockOutputStream extends OutputStream {

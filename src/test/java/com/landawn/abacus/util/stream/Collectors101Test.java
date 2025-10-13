@@ -32,6 +32,7 @@ import java.util.stream.Collector;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -63,11 +64,11 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 
+@Tag("new-test")
 public class Collectors101Test extends TestBase {
 
     @Test
     public void testCreate() {
-        // Test create with supplier, accumulator, combiner
         Supplier<List<String>> supplier = ArrayList::new;
         BiConsumer<List<String>, String> accumulator = List::add;
         BinaryOperator<List<String>> combiner = (list1, list2) -> {
@@ -85,7 +86,6 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testCreateWithCharacteristics() {
-        // Test create with characteristics array
         Supplier<Set<String>> supplier = HashSet::new;
         BiConsumer<Set<String>, String> accumulator = Set::add;
         BinaryOperator<Set<String>> combiner = (set1, set2) -> {
@@ -101,7 +101,6 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testCreateWithCharacteristicsCollection() {
-        // Test create with characteristics collection
         Supplier<Set<String>> supplier = HashSet::new;
         BiConsumer<Set<String>, String> accumulator = Set::add;
         BinaryOperator<Set<String>> combiner = (set1, set2) -> {
@@ -118,7 +117,6 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testCreateWithFinisher() {
-        // Test create with finisher
         Supplier<List<String>> supplier = ArrayList::new;
         BiConsumer<List<String>, String> accumulator = List::add;
         BinaryOperator<List<String>> combiner = (list1, list2) -> {
@@ -135,7 +133,6 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testCreateWithFinisherAndCharacteristics() {
-        // Test create with finisher and characteristics
         Supplier<List<String>> supplier = ArrayList::new;
         BiConsumer<List<String>, String> accumulator = List::add;
         BinaryOperator<List<String>> combiner = (list1, list2) -> {
@@ -473,11 +470,9 @@ public class Collectors101Test extends TestBase {
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals("unique", result.get());
 
-        // Test empty stream
         Optional<String> empty = Stream.<String> empty().collect(Collectors.onlyOne());
         Assertions.assertFalse(empty.isPresent());
 
-        // Test multiple elements throws exception
         Assertions.assertThrows(TooManyElementsException.class, () -> Stream.of("a", "b").collect(Collectors.onlyOne()));
     }
 
@@ -517,7 +512,6 @@ public class Collectors101Test extends TestBase {
 
         Assertions.assertEquals(Arrays.asList("a", "b", "c"), result);
 
-        // Test with more elements requested than available
         List<String> all = Stream.of("a", "b").collect(Collectors.first(5));
         Assertions.assertEquals(Arrays.asList("a", "b"), all);
     }
@@ -528,7 +522,6 @@ public class Collectors101Test extends TestBase {
 
         Assertions.assertEquals(Arrays.asList("c", "d", "e"), result);
 
-        // Test with more elements requested than available
         List<String> all = Stream.of("a", "b").collect(Collectors.last(5));
         Assertions.assertEquals(Arrays.asList("a", "b"), all);
     }
@@ -610,34 +603,6 @@ public class Collectors101Test extends TestBase {
 
         Assertions.assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }
-
-    //    @Test
-    //    public void testFlatMappingWithBiFunction() {
-    //        List<String> result = Stream.of("a", "b").collect(Collectors.flatMapping(s -> Stream.of(1, 2), (s, n) -> s + n, Collectors.toList()));
-    //
-    //        Assertions.assertEquals(Arrays.asList("a1", "a2", "b1", "b2"), result);
-    //    }
-    //
-    //    @Test
-    //    public void testFlatMappingToListWithBiFunction() {
-    //        List<String> result = Stream.of("a", "b").collect(Collectors.flatMappingToList(s -> Stream.of(1, 2), (s, n) -> s + n));
-    //
-    //        Assertions.assertEquals(Arrays.asList("a1", "a2", "b1", "b2"), result);
-    //    }
-    //
-    //    @Test
-    //    public void testFlatmappingWithBiFunctionAndCollection() {
-    //        List<String> result = Stream.of("a", "b").collect(Collectors.flatmapping(s -> Arrays.asList(1, 2), (s, n) -> s + n, Collectors.toList()));
-    //
-    //        Assertions.assertEquals(Arrays.asList("a1", "a2", "b1", "b2"), result);
-    //    }
-    //
-    //    @Test
-    //    public void testFlatmappingToListWithBiFunctionAndCollection() {
-    //        List<String> result = Stream.of("a", "b").collect(Collectors.flatmappingToList(s -> Arrays.asList(1, 2), (s, n) -> s + n));
-    //
-    //        Assertions.assertEquals(Arrays.asList("a1", "a2", "b1", "b2"), result);
-    //    }
 
     @Test
     public void testCollectingAndThen() {
@@ -990,7 +955,7 @@ public class Collectors101Test extends TestBase {
     public void testMinAllWithComparatorAndDownstream() {
         Integer count = Stream.of("a", "bb", "ccc", "d", "e").collect(Collectors.minAll(Comparator.comparing(String::length), Collectors.countingToInt()));
 
-        Assertions.assertEquals(3, count); // "a", "d", "e"
+        Assertions.assertEquals(3, count);
     }
 
     @Test
@@ -1053,7 +1018,7 @@ public class Collectors101Test extends TestBase {
     public void testMaxAllWithComparatorAndDownstream() {
         Integer count = Stream.of("a", "bb", "ccc", "dd", "eee").collect(Collectors.maxAll(Comparator.comparing(String::length), Collectors.countingToInt()));
 
-        Assertions.assertEquals(2, count); // "ccc", "eee"
+        Assertions.assertEquals(2, count);
     }
 
     @Test
@@ -1110,7 +1075,7 @@ public class Collectors101Test extends TestBase {
         Optional<Integer> result = Stream.of(3, 1, 4, 1, 5).collect(Collectors.minMax(Integer::compare, (min, max) -> max - min));
 
         Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(4, result.get()); // 5 - 1
+        Assertions.assertEquals(4, result.get());
     }
 
     @Test
@@ -1127,7 +1092,7 @@ public class Collectors101Test extends TestBase {
         Optional<Integer> result = Stream.of("apple", "pie", "banana").collect(Collectors.minMaxBy(String::length, (min, max) -> max.length() - min.length()));
 
         Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get()); // 6 - 3
+        Assertions.assertEquals(3, result.get());
     }
 
     @Test
@@ -1174,14 +1139,14 @@ public class Collectors101Test extends TestBase {
     public void testSummingInt() {
         Integer sum = Stream.of("a", "bb", "ccc").collect(Collectors.summingInt(String::length));
 
-        Assertions.assertEquals(6, sum); // 1 + 2 + 3
+        Assertions.assertEquals(6, sum);
     }
 
     @Test
     public void testSummingIntToLong() {
         Long sum = Stream.of("a", "bb", "ccc").collect(Collectors.summingIntToLong(String::length));
 
-        Assertions.assertEquals(6L, sum); // 1 + 2 + 3
+        Assertions.assertEquals(6L, sum);
     }
 
     @Test
@@ -1190,7 +1155,7 @@ public class Collectors101Test extends TestBase {
             Tuple3<Long, Long, Long> result = Stream.of("a", "bb", "ccc")
                     .collect(MoreCollectors.summingIntToLong(e -> e.length(), e -> e.length() * 2, e -> e.length() * 3));
 
-            Assertions.assertEquals(6L, result._1); // 1 + 2 + 3
+            Assertions.assertEquals(6L, result._1);
             Assertions.assertEquals(12L, result._2);
             Assertions.assertEquals(18L, result._3);
         }
@@ -1198,7 +1163,7 @@ public class Collectors101Test extends TestBase {
             Tuple3<Long, Long, Long> result = Stream.of("a", "bb", "ccc")
                     .collect(MoreCollectors.summingLong(e -> e.length(), e -> e.length() * 2, e -> e.length() * 3));
 
-            Assertions.assertEquals(6L, result._1); // 1 + 2 + 3
+            Assertions.assertEquals(6L, result._1);
             Assertions.assertEquals(12L, result._2);
             Assertions.assertEquals(18L, result._3);
         }
@@ -1206,7 +1171,7 @@ public class Collectors101Test extends TestBase {
             Tuple3<Double, Double, Double> result = Stream.of("a", "bb", "ccc")
                     .collect(MoreCollectors.summingDouble(e -> e.length(), e -> e.length() * 2, e -> e.length() * 3));
 
-            Assertions.assertEquals(6L, result._1); // 1 + 2 + 3
+            Assertions.assertEquals(6L, result._1);
             Assertions.assertEquals(12L, result._2);
             Assertions.assertEquals(18L, result._3);
         }
@@ -1215,7 +1180,7 @@ public class Collectors101Test extends TestBase {
                     .collect(MoreCollectors.summingBigInteger(e -> BigInteger.valueOf(e.length()), e -> BigInteger.valueOf(e.length() * 2),
                             e -> BigInteger.valueOf(e.length() * 3)));
 
-            Assertions.assertEquals(6L, result._1.longValue()); // 1 + 2 + 3
+            Assertions.assertEquals(6L, result._1.longValue());
             Assertions.assertEquals(12L, result._2.longValue());
             Assertions.assertEquals(18L, result._3.longValue());
         }
@@ -1224,7 +1189,7 @@ public class Collectors101Test extends TestBase {
                     .collect(MoreCollectors.summingBigDecimal(e -> BigDecimal.valueOf(e.length()), e -> BigDecimal.valueOf(e.length() * 2),
                             e -> BigDecimal.valueOf(e.length() * 3)));
 
-            Assertions.assertEquals(6L, result._1.longValue()); // 1 + 2 + 3
+            Assertions.assertEquals(6L, result._1.longValue());
             Assertions.assertEquals(12L, result._2.longValue());
             Assertions.assertEquals(18L, result._3.longValue());
         }
@@ -1236,7 +1201,7 @@ public class Collectors101Test extends TestBase {
             Tuple3<Double, Double, Double> result = Stream.of("a", "bb", "ccc")
                     .collect(MoreCollectors.averagingInt(e -> e.length(), e -> e.length() * 2, e -> e.length() * 3));
 
-            Assertions.assertEquals(2L, result._1); // (1 + 2 + 3) / 3
+            Assertions.assertEquals(2L, result._1);
             Assertions.assertEquals(4L, result._2);
             Assertions.assertEquals(6L, result._3);
         }
@@ -1244,7 +1209,7 @@ public class Collectors101Test extends TestBase {
             Tuple3<Double, Double, Double> result = Stream.of("a", "bb", "ccc")
                     .collect(MoreCollectors.averagingLong(e -> e.length(), e -> e.length() * 2, e -> e.length() * 3));
 
-            Assertions.assertEquals(2L, result._1); // (1 + 2 + 3) / 3
+            Assertions.assertEquals(2L, result._1);
             Assertions.assertEquals(4L, result._2);
             Assertions.assertEquals(6L, result._3);
         }
@@ -1252,7 +1217,7 @@ public class Collectors101Test extends TestBase {
             Tuple3<Double, Double, Double> result = Stream.of("a", "bb", "ccc")
                     .collect(MoreCollectors.averagingDouble(e -> e.length(), e -> e.length() * 2, e -> e.length() * 3));
 
-            Assertions.assertEquals(2L, result._1); // (1 + 2 + 3) / 3
+            Assertions.assertEquals(2L, result._1);
             Assertions.assertEquals(4L, result._2);
             Assertions.assertEquals(6L, result._3);
         }
@@ -1261,7 +1226,7 @@ public class Collectors101Test extends TestBase {
                     .collect(MoreCollectors.averagingBigInteger(e -> BigInteger.valueOf(e.length()), e -> BigInteger.valueOf(e.length() * 2),
                             e -> BigInteger.valueOf(e.length() * 3)));
 
-            Assertions.assertEquals(2L, result._1.longValue()); // (1 + 2 + 3) / 3
+            Assertions.assertEquals(2L, result._1.longValue());
             Assertions.assertEquals(4L, result._2.longValue());
             Assertions.assertEquals(6L, result._3.longValue());
         }
@@ -1270,7 +1235,7 @@ public class Collectors101Test extends TestBase {
                     .collect(MoreCollectors.averagingBigDecimal(e -> BigDecimal.valueOf(e.length()), e -> BigDecimal.valueOf(e.length() * 2),
                             e -> BigDecimal.valueOf(e.length() * 3)));
 
-            Assertions.assertEquals(2L, result._1.longValue()); // (1 + 2 + 3) / 3
+            Assertions.assertEquals(2L, result._1.longValue());
             Assertions.assertEquals(4L, result._2.longValue());
             Assertions.assertEquals(6L, result._3.longValue());
         }
@@ -1309,7 +1274,7 @@ public class Collectors101Test extends TestBase {
         OptionalDouble avg = Stream.of("a", "bb", "ccc").collect(Collectors.averagingIntOrEmpty(String::length));
 
         Assertions.assertTrue(avg.isPresent());
-        Assertions.assertEquals(2.0, avg.getAsDouble(), 0.001); // (1 + 2 + 3) / 3
+        Assertions.assertEquals(2.0, avg.getAsDouble(), 0.001);
     }
 
     @Test
@@ -1738,7 +1703,7 @@ public class Collectors101Test extends TestBase {
                 .of(new AbstractMap.SimpleEntry<>("a", 1), new AbstractMap.SimpleEntry<>("a", 2), new AbstractMap.SimpleEntry<>("b", 3))
                 .collect(Collectors.toMap(Integer::sum));
 
-        Assertions.assertEquals(3, map.get("a")); // 1 + 2
+        Assertions.assertEquals(3, map.get("a"));
         Assertions.assertEquals(3, map.get("b"));
     }
 
@@ -1852,7 +1817,6 @@ public class Collectors101Test extends TestBase {
         Assertions.assertTrue(map instanceof LinkedHashMap);
         Assertions.assertEquals(1, map.get("a"));
 
-        // Test order preservation
         Iterator<String> keys = map.keySet().iterator();
         Assertions.assertEquals("a", keys.next());
         Assertions.assertEquals("bb", keys.next());
@@ -1943,7 +1907,7 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testToBiMapWithMergeFunction() {
-        BiMap<Integer, String> biMap = Stream.of("a", "bb", "ccc", "dd").collect(Collectors.toBiMap(String::length, e -> e, (s1, s2) -> s1 // Keep first
+        BiMap<Integer, String> biMap = Stream.of("a", "bb", "ccc", "dd").collect(Collectors.toBiMap(String::length, e -> e, (s1, s2) -> s1
         ));
 
         Assertions.assertEquals("bb", biMap.get(2));
@@ -1952,7 +1916,7 @@ public class Collectors101Test extends TestBase {
     @Test
     public void testToBiMapWithAllParameters() {
         BiMap<Integer, String> biMap = Stream.of("a", "bb", "ccc", "dd")
-                .collect(Collectors.toBiMap(String::length, e -> e, (s1, s2) -> s1, // Keep first
+                .collect(Collectors.toBiMap(String::length, e -> e, (s1, s2) -> s1,
                         BiMap::new));
 
         Assertions.assertEquals("bb", biMap.get(2));

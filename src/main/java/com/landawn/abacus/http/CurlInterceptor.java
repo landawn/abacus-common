@@ -45,7 +45,6 @@ import okio.Buffer;
  *     .build();
  * }</pre>
  * 
- * @author HaiYang Li
  */
 class CurlInterceptor implements Interceptor {
     static final char DEFAULT_QUOTE_CHAR = '\'';

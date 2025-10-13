@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -55,14 +56,12 @@ import com.landawn.abacus.util.function.ByteNFunction;
 import com.landawn.abacus.util.function.ByteTriPredicate;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 
+@Tag("new-test")
 public class ByteStream201Test extends TestBase {
 
     private static final byte[] TEST_ARRAY = new byte[] { 1, 2, 3, 4, 5 };
     private ByteStream byteStream;
 
-    // This method needs to be implemented by a concrete test class to provide a ByteStream instance.
-    // For example, in ArrayByteStreamTest, it would return new ArrayByteStream(a);
-    // In IteratorByteStreamTest, it would return new IteratorByteStream(ByteIterator.of(a));
     protected ByteStream createByteStream(byte... a) {
         return ByteStream.of(a).map(e -> (byte) (e + 0));
     }
@@ -105,12 +104,9 @@ public class ByteStream201Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Initialize the stream for each test.
-        // This method will be implemented in concrete test classes to provide specific stream instances.
         byteStream = createByteStream(TEST_ARRAY);
     }
 
-    // Test for map(ByteUnaryOperator mapper)
     @Test
     public void testMap() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -118,7 +114,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 2, (byte) 4, (byte) 6), result);
     }
 
-    // Test for mapToInt(ByteToIntFunction mapper)
     @Test
     public void testMapToInt() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -126,7 +121,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList(11, 12, 13), result);
     }
 
-    // Test for mapToObj(ByteFunction<? extends T> mapper)
     @Test
     public void testMapToObj() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -134,7 +128,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList("Byte_1", "Byte_2", "Byte_3"), result);
     }
 
-    // Test for flatMap(ByteFunction<? extends ByteStream> mapper)
     @Test
     public void testFlatMap() {
         byteStream = createByteStream(new byte[] { 1, 2 });
@@ -142,7 +135,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 11, (byte) 2, (byte) 12), result);
     }
 
-    // Test for flatmap(ByteFunction<byte[]> mapper)
     @Test
     public void testFlatmapByteArray() {
         byteStream = createByteStream(new byte[] { 1, 2 });
@@ -150,7 +142,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 10, (byte) 2, (byte) 20), result);
     }
 
-    // Test for flatMapToInt(ByteFunction<? extends IntStream> mapper)
     @Test
     public void testFlatMapToInt() {
         byteStream = createByteStream(new byte[] { 1, 2 });
@@ -158,7 +149,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList(1, 11, 2, 12), result);
     }
 
-    // Test for flatMapToObj(ByteFunction<? extends Stream<? extends T>> mapper)
     @Test
     public void testFlatMapToObj() {
         byteStream = createByteStream(new byte[] { 1, 2 });
@@ -166,7 +156,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList("A1", "B1", "A2", "B2"), result);
     }
 
-    // Test for flatmapToObj(ByteFunction<? extends Collection<? extends T>> mapper)
     @Test
     public void testFlatmapToObjCollection() {
         byteStream = createByteStream(new byte[] { 1, 2 });
@@ -174,7 +163,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList("C1", "D1", "C2", "D2"), result);
     }
 
-    // Test for flattmapToObj(ByteFunction<T[]> mapper)
     @Test
     public void testFlattMapToObj() {
         byteStream = createByteStream(new byte[] { 1, 2 });
@@ -182,7 +170,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList("E1", "F1", "E2", "F2"), result);
     }
 
-    // Test for mapPartial(ByteFunction<OptionalByte> mapper)
     @Test
     public void testMapPartial() {
         byteStream = createByteStream(new byte[] { 1, 2, 3, 4 });
@@ -190,17 +177,15 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 2, (byte) 4), result);
     }
 
-    // Test for rangeMap(ByteBiPredicate sameRange, ByteBinaryOperator mapper)
     @Test
     public void testRangeMap() {
         byteStream = createByteStream(new byte[] { 1, 2, 3, 10, 11, 20, 21 });
         ByteBiPredicate sameRange = (a, b) -> Math.abs(a - b) < 2;
         ByteBinaryOperator mapper = (first, last) -> (byte) (first + last);
         List<Byte> result = byteStream.rangeMap(sameRange, mapper).toList();
-        assertEquals(Arrays.asList((byte) 3, (byte) 6, (byte) 21, (byte) 41), result); // (1+2), 3, (10+11), (20+21)
+        assertEquals(Arrays.asList((byte) 3, (byte) 6, (byte) 21, (byte) 41), result);
     }
 
-    // Test for rangeMapToObj(ByteBiPredicate sameRange, ByteBiFunction<? extends T> mapper)
     @Test
     public void testRangeMapToObj() {
         byteStream = createByteStream(new byte[] { 1, 2, 3, 10, 11, 20, 21 });
@@ -210,7 +195,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList("Range[1-2]", "Range[3-3]", "Range[10-11]", "Range[20-21]"), result);
     }
 
-    // Test for collapse(ByteBiPredicate collapsible)
     @Test
     public void testCollapseBiPredicate() {
         byteStream = createByteStream(new byte[] { 1, 2, 5, 6, 7, 10 });
@@ -219,37 +203,24 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList(ByteList.of((byte) 1, (byte) 2), ByteList.of((byte) 5, (byte) 6, (byte) 7), ByteList.of((byte) 10)), result);
     }
 
-    // Test for collapse(ByteBiPredicate collapsible, ByteBinaryOperator mergeFunction)
     @Test
     public void testCollapseBiPredicateMergeFunction() {
         byteStream = createByteStream(new byte[] { 1, 2, 5, 6, 7, 10 });
         ByteBiPredicate collapsible = (a, b) -> Math.abs(a - b) < 3;
         ByteBinaryOperator mergeFunction = (a, b) -> (byte) (a + b);
         List<Byte> result = byteStream.collapse(collapsible, mergeFunction).toList();
-        assertEquals(Arrays.asList((byte) 3, (byte) 18, (byte) 10), result); // (1+2), (5+6+7), 10
+        assertEquals(Arrays.asList((byte) 3, (byte) 18, (byte) 10), result);
     }
 
-    // Test for collapse(ByteTriPredicate collapsible, ByteBinaryOperator mergeFunction)
     @Test
     public void testCollapseTriPredicateMergeFunction() {
         byteStream = createByteStream(new byte[] { 1, 3, 6, 10, 15, 16 });
-        // Predicate: first, last of current group, the next element. Collapse if the next element is >= last.
         ByteTriPredicate collapsible = (first, last, next) -> next >= last;
-        ByteBinaryOperator mergeFunction = (a, b) -> (byte) (a + b); // Sum elements
+        ByteBinaryOperator mergeFunction = (a, b) -> (byte) (a + b);
         List<Byte> result = byteStream.collapse(collapsible, mergeFunction).toList();
-        // (1,3,6) -> 1+3+6=10. Next is 10. (first=1, last=6, next=10). 10>=6. So collapse 10. (1,6,10) -> 1+3+6+10=20. Next is 15. (first=1, last=10, next=15). 15>=10. So collapse 15.
-        // Group 1: 1, 3, 6. Collapsible(1, 3, 6) true. new group = 1,3. Next is 6. collapsible(1,3,6)
-        // Grouping:
-        // 1. Current group: [1]. Next: 3. (1,1,3) -> 3 >= 1. Yes. Group: [1,3].
-        // 2. Current group: [1,3]. Next: 6. (1,3,6) -> 6 >= 3. Yes. Group: [1,3,6].
-        // 3. Current group: [1,3,6]. Next: 10. (1,6,10) -> 10 >= 6. Yes. Group: [1,3,6,10].
-        // 4. Current group: [1,3,6,10]. Next: 15. (1,10,15) -> 15 >= 10. Yes. Group: [1,3,6,10,15].
-        // 5. Current group: [1,3,6,10,15]. Next: 16. (1,15,16) -> 16 >= 15. Yes. Group: [1,3,6,10,15,16].
-        // End of stream. Result: (1+3+6+10+15+16) = 51
         assertEquals(Arrays.asList((byte) 51), result);
     }
 
-    // Test for scan(ByteBinaryOperator accumulator)
     @Test
     public void testScanAccumulator() {
         byteStream = createByteStream(new byte[] { 1, 2, 3, 4 });
@@ -257,7 +228,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 3, (byte) 6, (byte) 10), result);
     }
 
-    // Test for scan(byte init, ByteBinaryOperator accumulator)
     @Test
     public void testScanInitAccumulator() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -265,7 +235,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 11, (byte) 13, (byte) 16), result);
     }
 
-    // Test for scan(byte init, boolean initIncluded, ByteBinaryOperator accumulator)
     @Test
     public void testScanInitIncludedAccumulator() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -273,7 +242,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 10, (byte) 11, (byte) 13, (byte) 16), result);
     }
 
-    // Test for prepend(byte... a)
     @Test
     public void testPrependBytes() {
         byteStream = createByteStream(new byte[] { 4, 5 });
@@ -281,7 +249,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), result);
     }
 
-    // Test for prepend(ByteStream stream)
     @Test
     public void testPrependByteStream() {
         byteStream = createByteStream(new byte[] { 4, 5 });
@@ -290,7 +257,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), result);
     }
 
-    // Test for prepend(OptionalByte op)
     @Test
     public void testPrependOptionalByte() {
         byteStream = createByteStream(new byte[] { 2, 3 });
@@ -302,7 +268,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 2, (byte) 3), result);
     }
 
-    // Test for append(byte... a)
     @Test
     public void testAppendBytes() {
         byteStream = createByteStream(new byte[] { 1, 2 });
@@ -310,7 +275,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), result);
     }
 
-    // Test for append(ByteStream stream)
     @Test
     public void testAppendByteStream() {
         byteStream = createByteStream(new byte[] { 1, 2 });
@@ -319,7 +283,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), result);
     }
 
-    // Test for append(OptionalByte op)
     @Test
     public void testAppendOptionalByte() {
         byteStream = createByteStream(new byte[] { 1, 2 });
@@ -331,7 +294,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2), result);
     }
 
-    // Test for appendIfEmpty(byte... a)
     @Test
     public void testAppendIfEmptyBytes() {
         byteStream = createByteStream(new byte[] { 1, 2 });
@@ -343,7 +305,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 10, (byte) 11), result);
     }
 
-    // Test for toByteList()
     @Test
     public void testToByteList() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -351,7 +312,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(ByteList.of((byte) 1, (byte) 2, (byte) 3), result);
     }
 
-    // Test for toMap(Throwables.ByteFunction<? extends K, E> keyMapper, Throwables.ByteFunction<? extends V, E2> valueMapper)
     @Test
     public void testToMapKeyValue() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -362,7 +322,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(30, (int) result.get("K3"));
     }
 
-    // Test for toMap(Throwables.ByteFunction<? extends K, E> keyMapper, Throwables.ByteFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory)
     @Test
     public void testToMapKeyValueMapFactory() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -371,17 +330,15 @@ public class ByteStream201Test extends TestBase {
         assertEquals(10, (int) result.get("K1"));
     }
 
-    // Test for toMap(Throwables.ByteFunction<? extends K, E> keyMapper, Throwables.ByteFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction)
     @Test
     public void testToMapKeyValueMergeFunction() {
-        byteStream = createByteStream(new byte[] { 1, 2, 1 }); // Duplicate key 'K1'
+        byteStream = createByteStream(new byte[] { 1, 2, 1 });
         Map<String, Integer> result = byteStream.toMap(b -> "K" + b, b -> (int) b * 10, (v1, v2) -> v1 + v2);
         assertEquals(2, result.size());
-        assertEquals(20, (int) result.get("K1")); // 10 + 10
+        assertEquals(20, (int) result.get("K1"));
         assertEquals(20, (int) result.get("K2"));
     }
 
-    // Test for toMap(Throwables.ByteFunction<? extends K, E> keyMapper, Throwables.ByteFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory)
     @Test
     public void testToMapKeyValueMergeFunctionMapFactory() {
         byteStream = createByteStream(new byte[] { 1, 2, 1 });
@@ -391,7 +348,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(20, (int) result.get("K2"));
     }
 
-    // Test for groupTo(Throwables.ByteFunction<? extends K, E> keyMapper, final Collector<? super Byte, ?, D> downstream)
     @Test
     public void testGroupToCollector() {
         byteStream = createByteStream(TEST_ARRAY);
@@ -401,26 +357,22 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 3, (byte) 5), result.get("Odd"));
     }
 
-    // Test for groupTo(Throwables.ByteFunction<? extends K, E> keyMapper, final Collector<? super Byte, ?, D> downstream, final Supplier<? extends M> mapFactory)
     @Test
     public void testGroupToCollectorMapFactory() {
         byteStream = createByteStream(TEST_ARRAY);
         Map<String, Long> result = byteStream.groupTo(b -> (b % 2 == 0) ? "Even" : "Odd", Collectors.counting(), Suppliers.ofTreeMap());
-        // Group by Even and Odd, counting occurrences
         assertEquals(2, result.size());
         assertEquals(Long.valueOf(2), result.get("Even"));
         assertEquals(Long.valueOf(3), result.get("Odd"));
     }
 
-    // Test for reduce(byte identity, ByteBinaryOperator op)
     @Test
     public void testReduceIdentity() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
         byte result = byteStream.reduce((byte) 10, (a, b) -> (byte) (a + b));
-        assertEquals((byte) 16, result); // 10 + 1 + 2 + 3
+        assertEquals((byte) 16, result);
     }
 
-    // Test for reduce(ByteBinaryOperator op)
     @Test
     public void testReduce() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -433,7 +385,6 @@ public class ByteStream201Test extends TestBase {
         assertFalse(result.isPresent());
     }
 
-    // Test for collect(Supplier<R> supplier, ObjByteConsumer<? super R> accumulator, BiConsumer<R, R> combiner)
     @Test
     public void testCollectFull() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -441,7 +392,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals("123", sb.toString());
     }
 
-    // Test for collect(Supplier<R> supplier, ObjByteConsumer<? super R> accumulator)
     @Test
     public void testCollectSimplified() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -449,7 +399,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(ByteList.of((byte) 1, (byte) 2, (byte) 3), list);
     }
 
-    // Test for forEach(Throwables.ByteConsumer<E> action)
     @Test
     public void testForEach() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -458,7 +407,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), consumed);
     }
 
-    // Test for forEachIndexed(Throwables.IntByteConsumer<E> action)
     @Test
     public void testForEachIndexed() {
         byteStream = createByteStream(new byte[] { 10, 20, 30 });
@@ -467,7 +415,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList("0:10", "1:20", "2:30"), indexedConsumed);
     }
 
-    // Test for anyMatch(Throwables.BytePredicate<E> predicate)
     @Test
     public void testAnyMatch() {
         byteStream = createByteStream(TEST_ARRAY);
@@ -476,23 +423,20 @@ public class ByteStream201Test extends TestBase {
         assertFalse(createByteStream(new byte[] {}).anyMatch(b -> true));
     }
 
-    // Test for allMatch(Throwables.BytePredicate<E> predicate)
     @Test
     public void testAllMatch() {
         assertTrue(createByteStream(new byte[] { 1, 2, 3 }).allMatch(b -> b > 0));
         assertFalse(createByteStream(new byte[] { 1, 2, 3 }).allMatch(b -> b > 1));
-        assertTrue(createByteStream(new byte[] {}).allMatch(b -> false)); // All match true for empty stream
+        assertTrue(createByteStream(new byte[] {}).allMatch(b -> false));
     }
 
-    // Test for noneMatch(Throwables.BytePredicate<E> predicate)
     @Test
     public void testNoneMatch() {
         assertTrue(createByteStream(new byte[] { 1, 2, 3 }).noneMatch(b -> b > 5));
         assertFalse(createByteStream(new byte[] { 1, 2, 3 }).noneMatch(b -> b == 2));
-        assertTrue(createByteStream(new byte[] {}).noneMatch(b -> true)); // None match true for empty stream
+        assertTrue(createByteStream(new byte[] {}).noneMatch(b -> true));
     }
 
-    // Test for findFirst(Throwables.BytePredicate<E> predicate)
     @Test
     public void testFindFirst() {
         byteStream = createByteStream(new byte[] { 10, 20, 30, 20, 40 });
@@ -504,31 +448,28 @@ public class ByteStream201Test extends TestBase {
         assertFalse(result.isPresent());
     }
 
-    // Test for findAny(Throwables.BytePredicate<E> predicate)
     @Test
     public void testFindAny() {
         byteStream = createByteStream(new byte[] { 10, 20, 30, 20, 40 });
         OptionalByte result = byteStream.findAny(b -> b == 20);
         assertTrue(result.isPresent());
-        assertEquals((byte) 20, result.get()); // Can be any 20
+        assertEquals((byte) 20, result.get());
 
         result = createByteStream(new byte[] { 10, 20, 30, 20, 40 }).findAny(b -> b == 50);
         assertFalse(result.isPresent());
     }
 
-    // Test for findLast(Throwables.BytePredicate<E> predicate)
     @Test
     public void testFindLast() {
         byteStream = createByteStream(new byte[] { 10, 20, 30, 20, 40 });
         OptionalByte result = byteStream.findLast(b -> b == 20);
         assertTrue(result.isPresent());
-        assertEquals((byte) 20, result.get()); // Last 20
+        assertEquals((byte) 20, result.get());
 
         result = createByteStream(new byte[] { 10, 20, 30, 20, 40 }).findLast(b -> b == 50);
         assertFalse(result.isPresent());
     }
 
-    // Test for min()
     @Test
     public void testMin() {
         byteStream = createByteStream(new byte[] { 5, 1, 8, 2 });
@@ -541,7 +482,6 @@ public class ByteStream201Test extends TestBase {
         assertFalse(result.isPresent());
     }
 
-    // Test for max()
     @Test
     public void testMax() {
         byteStream = createByteStream(new byte[] { 5, 1, 8, 2 });
@@ -554,23 +494,22 @@ public class ByteStream201Test extends TestBase {
         assertFalse(result.isPresent());
     }
 
-    // Test for kthLargest(int k)
     @Test
     public void testKthLargest() {
-        byteStream = createByteStream(new byte[] { 5, 1, 8, 2, 7 }); // Sorted: 1, 2, 5, 7, 8
-        OptionalByte result = byteStream.kthLargest(1); // 1st largest = 8
+        byteStream = createByteStream(new byte[] { 5, 1, 8, 2, 7 });
+        OptionalByte result = byteStream.kthLargest(1);
         assertTrue(result.isPresent());
         assertEquals((byte) 8, result.get());
 
-        result = createByteStream(new byte[] { 5, 1, 8, 2, 7 }).kthLargest(3); // 3rd largest = 5
+        result = createByteStream(new byte[] { 5, 1, 8, 2, 7 }).kthLargest(3);
         assertTrue(result.isPresent());
         assertEquals((byte) 5, result.get());
 
-        result = createByteStream(new byte[] { 5, 1, 8, 2, 7 }).kthLargest(5); // 5th largest = 1
+        result = createByteStream(new byte[] { 5, 1, 8, 2, 7 }).kthLargest(5);
         assertTrue(result.isPresent());
         assertEquals((byte) 1, result.get());
 
-        result = createByteStream(new byte[] { 5, 1, 8, 2, 7 }).kthLargest(6); // k out of bounds
+        result = createByteStream(new byte[] { 5, 1, 8, 2, 7 }).kthLargest(6);
         assertFalse(result.isPresent());
 
         byteStream = createByteStream(new byte[] {});
@@ -578,7 +517,6 @@ public class ByteStream201Test extends TestBase {
         assertFalse(result.isPresent());
     }
 
-    // Test for sum()
     @Test
     public void testSum() {
         byteStream = createByteStream(TEST_ARRAY);
@@ -590,7 +528,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(0, result);
     }
 
-    // Test for average()
     @Test
     public void testAverage() {
         byteStream = createByteStream(TEST_ARRAY);
@@ -603,7 +540,6 @@ public class ByteStream201Test extends TestBase {
         assertFalse(result.isPresent());
     }
 
-    // Test for summarize()
     @Test
     public void testSummarize() {
         byteStream = createByteStream(new byte[] { 1, 5, 2, 8, 3 });
@@ -619,7 +555,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(0, stats.getCount());
     }
 
-    // Test for summarizeAndPercentiles()
     @Test
     public void testSummarizeAndPercentiles() {
         byteStream = createByteStream(new byte[] { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 });
@@ -634,32 +569,28 @@ public class ByteStream201Test extends TestBase {
         Optional<Map<Percentage, Byte>> percentilesOpt = result.right();
         assertTrue(percentilesOpt.isPresent());
         Map<Percentage, Byte> percentiles = percentilesOpt.get();
-        assertEquals((byte) 60, percentiles.get(Percentage._50).byteValue()); // Median
-        assertEquals((byte) 100, percentiles.get(Percentage._90).byteValue()); // Median
+        assertEquals((byte) 60, percentiles.get(Percentage._50).byteValue());
+        assertEquals((byte) 100, percentiles.get(Percentage._90).byteValue());
         assertEquals((byte) 100, percentiles.get(Percentage._99_9999).byteValue());
     }
 
-    // Test for mergeWith(ByteStream b, ByteBiFunction<MergeResult> nextSelector)
     @Test
     public void testMergeWith() {
         byteStream = createByteStream(new byte[] { 1, 3, 5 });
         ByteStream otherStream = createByteStream(new byte[] { 2, 4, 6 });
-        // Merge in ascending order
         ByteBiFunction<MergeResult> selector = (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
         List<Byte> result = byteStream.mergeWith(otherStream, selector).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), result);
     }
 
-    // Test for zipWith(ByteStream b, ByteBinaryOperator zipFunction)
     @Test
     public void testZipWithTwoStreams() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
         ByteStream otherStream = createByteStream(new byte[] { 10, 20, 30, 40 });
         List<Byte> result = byteStream.zipWith(otherStream, (a, b) -> (byte) (a + b)).toList();
-        assertEquals(Arrays.asList((byte) 11, (byte) 22, (byte) 33), result); // Zips until shortest stream ends
+        assertEquals(Arrays.asList((byte) 11, (byte) 22, (byte) 33), result);
     }
 
-    // Test for zipWith(ByteStream b, ByteStream c, ByteTernaryOperator zipFunction)
     @Test
     public void testZipWithThreeStreams() {
         byteStream = createByteStream(new byte[] { 1, 2 });
@@ -669,7 +600,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) (1 + 10 + 50), (byte) (2 + 20 + 60)), result);
     }
 
-    // Test for zipWith(ByteStream b, byte valueForNoneA, byte valueForNoneB, ByteBinaryOperator zipFunction)
     @Test
     public void testZipWithTwoStreamsWithDefaults() {
         byteStream = createByteStream(new byte[] { 1, 2 });
@@ -678,7 +608,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 11, (byte) 22, (byte) (99 + 30)), result);
     }
 
-    // Test for zipWith(ByteStream b, ByteStream c, byte valueForNoneA, byte valueForNoneB, byte valueForNoneC, ByteTernaryOperator zipFunction)
     @Test
     public void testZipWithThreeStreamsWithDefaults() {
         byteStream = createByteStream(new byte[] { 1 });
@@ -688,7 +617,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) (1 + 10 + 50), (byte) (99 + 20 + 60), (byte) (99 + 88 + 70)), result);
     }
 
-    // Test for asIntStream()
     @Test
     public void testAsIntStream() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -696,7 +624,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3), result);
     }
 
-    // Test for boxed()
     @Test
     public void testBoxed() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
@@ -704,14 +631,12 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), result);
     }
 
-    // Test for empty()
     @Test
     public void testEmpty() {
         ByteStream emptyStream = ByteStream.empty();
         assertEquals(0, emptyStream.count());
     }
 
-    // Test for defer(Supplier<ByteStream> supplier)
     @Test
     public void testDefer() {
         AtomicBoolean supplierCalled = new AtomicBoolean(false);
@@ -719,14 +644,13 @@ public class ByteStream201Test extends TestBase {
             supplierCalled.set(true);
             return createByteStream((byte) 1, (byte) 2);
         });
-        assertFalse(supplierCalled.get()); // Not called yet
+        assertFalse(supplierCalled.get());
 
         List<Byte> result = deferredStream.toList();
-        assertTrue(supplierCalled.get()); // Now called
+        assertTrue(supplierCalled.get());
         assertEquals(Arrays.asList((byte) 1, (byte) 2), result);
     }
 
-    // Test for ofNullable(Byte e)
     @Test
     public void testOfNullable() {
         List<Byte> result = ByteStream.ofNullable((byte) 10).toList();
@@ -736,7 +660,6 @@ public class ByteStream201Test extends TestBase {
         assertTrue(result.isEmpty());
     }
 
-    // Test for of(byte... a)
     @Test
     public void testOfBytes() {
         List<Byte> result = createByteStream((byte) 1, (byte) 2, (byte) 3).toList();
@@ -744,7 +667,6 @@ public class ByteStream201Test extends TestBase {
         assertTrue(createByteStream().toList().isEmpty());
     }
 
-    // Test for of(byte[] a, int startIndex, int endIndex)
     @Test
     public void testOfBytesRange() {
         byte[] data = { 10, 20, 30, 40, 50 };
@@ -754,7 +676,6 @@ public class ByteStream201Test extends TestBase {
         assertTrue(createByteStream(data, 0, 0).toList().isEmpty());
     }
 
-    // Test for of(Byte[] a)
     @Test
     public void testOfBoxedBytes() {
         Byte[] data = { 1, 2, 3 };
@@ -762,7 +683,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), result);
     }
 
-    // Test for of(Byte[] a, int startIndex, int endIndex)
     @Test
     public void testOfBoxedBytesRange() {
         Byte[] data = { 10, 20, 30, 40, 50 };
@@ -770,7 +690,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 20, (byte) 30, (byte) 40), result);
     }
 
-    // Test for of(Collection<Byte> c)
     @Test
     public void testOfCollection() {
         Collection<Byte> data = Arrays.asList((byte) 1, (byte) 2, (byte) 3);
@@ -778,7 +697,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), result);
     }
 
-    // Test for of(ByteIterator iterator)
     @Test
     public void testOfByteIterator() {
         ByteIterator iterator = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
@@ -786,7 +704,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), result);
     }
 
-    // Test for of(ByteBuffer buf)
     @Test
     public void testOfByteBuffer() {
         ByteBuffer buffer = ByteBuffer.wrap(new byte[] { 10, 20, 30, 40 });
@@ -796,7 +713,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 20, (byte) 30), result);
     }
 
-    // Test for of(File file) - Requires a temporary file
     @Test
     public void testOfFile() throws IOException {
         File tempFile = File.createTempFile("bytestream_test", ".tmp");
@@ -809,7 +725,6 @@ public class ByteStream201Test extends TestBase {
         }
     }
 
-    // Test for of(InputStream is)
     @Test
     public void testOfInputStream() throws IOException {
         InputStream is = new ByteArrayInputStream(new byte[] { 1, 2, 3 });
@@ -819,7 +734,6 @@ public class ByteStream201Test extends TestBase {
         }
     }
 
-    // Test for flatten(byte[][] a)
     @Test
     public void testFlatten2DArray() {
         byte[][] data = { { 1, 2 }, { 3, 4, 5 }, { 6 } };
@@ -827,29 +741,26 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), result);
     }
 
-    // Test for flatten(byte[][] a, boolean vertically)
     @Test
     public void testFlatten2DArrayVertically() {
         byte[][] data = { { 1, 2, 3 }, { 4, 5, 6 } };
-        List<Byte> result = ByteStream.flatten(data, true).toList(); // Column-major
+        List<Byte> result = ByteStream.flatten(data, true).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 4, (byte) 2, (byte) 5, (byte) 3, (byte) 6), result);
 
-        result = ByteStream.flatten(data, false).toList(); // Row-major (same as default)
+        result = ByteStream.flatten(data, false).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), result);
     }
 
-    // Test for flatten(byte[][] a, byte valueForAlignment, boolean vertically)
     @Test
     public void testFlatten2DArrayWithAlignment() {
         byte[][] data = { { 1, 2 }, { 3, 4, 5 }, { 6 } };
-        List<Byte> result = ByteStream.flatten(data, (byte) 0, false).toList(); // Row-major with padding
+        List<Byte> result = ByteStream.flatten(data, (byte) 0, false).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 0, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 0, (byte) 0), result);
 
-        result = ByteStream.flatten(data, (byte) 0, true).toList(); // Column-major with padding
+        result = ByteStream.flatten(data, (byte) 0, true).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 3, (byte) 6, (byte) 2, (byte) 4, (byte) 0, (byte) 0, (byte) 5, (byte) 0), result);
     }
 
-    // Test for flatten(byte[][][] a)
     @Test
     public void testFlatten3DArray() {
         byte[][][] data = { { { 1, 2 } }, { { 3, 4, 5 } } };
@@ -857,7 +768,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), result);
     }
 
-    // Test for range(byte startInclusive, byte endExclusive)
     @Test
     public void testRange() {
         List<Byte> result = ByteStream.range((byte) 1, (byte) 5).toList();
@@ -865,7 +775,6 @@ public class ByteStream201Test extends TestBase {
         assertTrue(ByteStream.range((byte) 5, (byte) 1).toList().isEmpty());
     }
 
-    // Test for range(byte startInclusive, byte endExclusive, byte by)
     @Test
     public void testRangeBy() {
         List<Byte> result = ByteStream.range((byte) 1, (byte) 10, (byte) 2).toList();
@@ -877,7 +786,6 @@ public class ByteStream201Test extends TestBase {
         assertTrue(ByteStream.range((byte) 1, (byte) 5, (byte) -1).toList().isEmpty());
     }
 
-    // Test for rangeClosed(byte startInclusive, byte endInclusive)
     @Test
     public void testRangeClosed() {
         List<Byte> result = ByteStream.rangeClosed((byte) 1, (byte) 5).toList();
@@ -885,11 +793,10 @@ public class ByteStream201Test extends TestBase {
         assertTrue(ByteStream.rangeClosed((byte) 5, (byte) 1).toList().isEmpty());
     }
 
-    // Test for rangeClosed(byte startInclusive, byte endInclusive, byte by)
     @Test
     public void testRangeClosedBy() {
         List<Byte> result = ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 2).toList();
-        assertEquals(Arrays.asList((byte) 1, (byte) 3, (byte) 5, (byte) 7, (byte) 9), result); // 10 is not included because it's even
+        assertEquals(Arrays.asList((byte) 1, (byte) 3, (byte) 5, (byte) 7, (byte) 9), result);
 
         result = ByteStream.rangeClosed((byte) 1, (byte) 9, (byte) 2).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 3, (byte) 5, (byte) 7, (byte) 9), result);
@@ -898,7 +805,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 10, (byte) 8, (byte) 6, (byte) 4, (byte) 2), result);
     }
 
-    // Test for repeat(byte element, long n)
     @Test
     public void testRepeat() {
         List<Byte> result = ByteStream.repeat((byte) 7, 3).toList();
@@ -906,7 +812,6 @@ public class ByteStream201Test extends TestBase {
         assertTrue(ByteStream.repeat((byte) 7, 0).toList().isEmpty());
     }
 
-    // Test for random()
     @Test
     public void testRandom() {
         List<Byte> result = ByteStream.random().limit(5).toList();
@@ -916,7 +821,6 @@ public class ByteStream201Test extends TestBase {
         }
     }
 
-    // Test for iterate(BooleanSupplier hasNext, ByteSupplier next)
     @Test
     public void testIterateBooleanSupplierByteSupplier() {
         AtomicReference<Byte> current = new AtomicReference<>((byte) 0);
@@ -928,7 +832,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 0, (byte) 1, (byte) 2), result);
     }
 
-    // Test for iterate(byte init, BooleanSupplier hasNext, ByteUnaryOperator f)
     @Test
     public void testIterateInitBooleanSupplierByteUnaryOperator() {
         AtomicReference<Byte> currentVal = new AtomicReference<>((byte) 1);
@@ -939,21 +842,18 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), result);
     }
 
-    // Test for iterate(byte init, BytePredicate hasNext, ByteUnaryOperator f)
     @Test
     public void testIterateInitBytePredicateByteUnaryOperator() {
         List<Byte> result = ByteStream.iterate((byte) 1, b -> b < 5, b -> (byte) (b * 2)).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 4), result);
     }
 
-    // Test for iterate(byte init, ByteUnaryOperator f)
     @Test
     public void testIterateInitByteUnaryOperator() {
         List<Byte> result = ByteStream.iterate((byte) 1, b -> (byte) (b + 1)).limit(3).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), result);
     }
 
-    // Test for generate(ByteSupplier s)
     @Test
     public void testGenerate() {
         AtomicReference<Byte> counter = new AtomicReference<>((byte) 0);
@@ -965,14 +865,12 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 0, (byte) 1, (byte) 2), result);
     }
 
-    // Test for concat(byte[]... a)
     @Test
     public void testConcatByteArrays() {
         List<Byte> result = ByteStream.concat(new byte[] { 1, 2 }, new byte[] { 3, 4, 5 }).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), result);
     }
 
-    // Test for concat(ByteIterator... a)
     @Test
     public void testConcatByteIterators() {
         ByteIterator iter1 = ByteIterator.of((byte) 1, (byte) 2);
@@ -981,7 +879,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4), result);
     }
 
-    // Test for concat(ByteStream... a)
     @Test
     public void testConcatByteStreams() {
         ByteStream s1 = createByteStream((byte) 1, (byte) 2);
@@ -990,7 +887,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4), result);
     }
 
-    // Test for concat(List<byte[]> c)
     @Test
     public void testConcatListOfByteArrays() {
         List<byte[]> listOfArrays = new ArrayList<>();
@@ -1000,7 +896,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), result);
     }
 
-    // Test for concat(Collection<? extends ByteStream> streams)
     @Test
     public void testConcatCollectionOfByteStreams() {
         Collection<ByteStream> streams = new ArrayList<>();
@@ -1010,7 +905,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4), result);
     }
 
-    // Test for concatIterators(Collection<? extends ByteIterator> byteIterators)
     @Test
     public void testConcatIteratorsCollection() {
         Collection<ByteIterator> iterators = new ArrayList<>();
@@ -1020,7 +914,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4), result);
     }
 
-    // Test for zip(byte[] a, byte[] b, ByteBinaryOperator zipFunction)
     @Test
     public void testZipByteArrays() {
         byte[] a = { 1, 2, 3 };
@@ -1029,7 +922,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 11, (byte) 22, (byte) 33), result);
     }
 
-    // Test for zip(byte[] a, byte[] b, byte[] c, ByteTernaryOperator zipFunction)
     @Test
     public void testZipThreeByteArrays() {
         byte[] a = { 1, 2 };
@@ -1039,7 +931,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) (1 + 10 + 50), (byte) (2 + 20 + 60)), result);
     }
 
-    // Test for zip(ByteIterator a, ByteIterator b, ByteBinaryOperator zipFunction)
     @Test
     public void testZipByteIterators() {
         ByteIterator a = ByteIterator.of((byte) 1, (byte) 2);
@@ -1048,7 +939,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 11, (byte) 22), result);
     }
 
-    // Test for zip(ByteIterator a, ByteIterator b, ByteIterator c, ByteTernaryOperator zipFunction)
     @Test
     public void testZipThreeByteIterators() {
         ByteIterator a = ByteIterator.of((byte) 1);
@@ -1058,7 +948,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) (1 + 10 + 50)), result);
     }
 
-    // Test for zip(ByteStream a, ByteStream b, ByteBinaryOperator zipFunction)
     @Test
     public void testZipByteStreams() {
         ByteStream a = createByteStream((byte) 1, (byte) 2);
@@ -1067,7 +956,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 11, (byte) 22), result);
     }
 
-    // Test for zip(ByteStream a, ByteStream b, ByteStream c, ByteTernaryOperator zipFunction)
     @Test
     public void testZipThreeByteStreams() {
         ByteStream a = createByteStream((byte) 1);
@@ -1077,7 +965,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) (1 + 10 + 50)), result);
     }
 
-    // Test for zip(Collection<? extends ByteStream> streams, ByteNFunction<Byte> zipFunction)
     @Test
     public void testZipCollectionOfStreams() {
         Collection<ByteStream> streams = Arrays.asList(createByteStream((byte) 1, (byte) 2), createByteStream((byte) 10, (byte) 20));
@@ -1086,7 +973,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 11, (byte) 22), result);
     }
 
-    // Test for zip(byte[] a, byte[] b, byte valueForNoneA, byte valueForNoneB, ByteBinaryOperator zipFunction)
     @Test
     public void testZipByteArraysWithDefaults() {
         byte[] a = { 1, 2 };
@@ -1095,7 +981,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 11, (byte) 22, (byte) 30), result);
     }
 
-    // Test for zip(byte[] a, byte[] b, byte[] c, byte valueForNoneA, byte valueForNoneB, byte valueForNoneC, ByteTernaryOperator zipFunction)
     @Test
     public void testZipThreeByteArraysWithDefaults() {
         byte[] a = { 1 };
@@ -1105,7 +990,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) (1 + 10 + 50), (byte) (0 + 20 + 60), (byte) (0 + 0 + 70)), result);
     }
 
-    // Test for zip(ByteIterator a, ByteIterator b, byte valueForNoneA, byte valueForNoneB, ByteBinaryOperator zipFunction)
     @Test
     public void testZipByteIteratorsWithDefaults() {
         ByteIterator a = ByteIterator.of((byte) 1, (byte) 2);
@@ -1114,7 +998,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 11, (byte) 22, (byte) 30), result);
     }
 
-    // Test for zip(ByteIterator a, ByteIterator b, ByteIterator c, byte valueForNoneA, byte valueForNoneB, byte valueForNoneC, ByteTernaryOperator zipFunction)
     @Test
     public void testZipThreeByteIteratorsWithDefaults() {
         ByteIterator a = ByteIterator.of((byte) 1);
@@ -1124,7 +1007,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) (1 + 10 + 50), (byte) (0 + 20 + 60), (byte) (0 + 0 + 300)), result);
     }
 
-    // Test for zip(ByteStream a, ByteStream b, byte valueForNoneA, byte valueForNoneB, ByteBinaryOperator zipFunction)
     @Test
     public void testZipByteStreamsWithDefaults() {
         ByteStream a = createByteStream((byte) 1, (byte) 2);
@@ -1133,7 +1015,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 11, (byte) 22, (byte) 30), result);
     }
 
-    // Test for zip(ByteStream a, ByteStream b, ByteStream c, byte valueForNoneA, byte valueForNoneB, byte valueForNoneC, ByteTernaryOperator zipFunction)
     @Test
     public void testZipThreeByteStreamsWithDefaults() {
         ByteStream a = createByteStream((byte) 1);
@@ -1143,17 +1024,15 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) (1 + 10 + 50), (byte) (0 + 20 + 60), (byte) (0 + 0 + 300)), result);
     }
 
-    // Test for zip(Collection<? extends ByteStream> streams, byte[] valuesForNone, ByteNFunction<Byte> zipFunction)
     @Test
     public void testZipCollectionOfStreamsWithDefaults() {
         Collection<ByteStream> streams = Arrays.asList(createByteStream((byte) 1), createByteStream((byte) 10, (byte) 20));
         byte[] defaults = { 0, 0 };
         ByteNFunction<Byte> zipFunction = bytes -> (byte) (bytes[0] + bytes[1]);
         List<Byte> result = ByteStream.zip(streams, defaults, zipFunction).toList();
-        assertEquals(Arrays.asList((byte) 11, (byte) 20), result); // Max length of streams is 2. (1+10), (0+20)
+        assertEquals(Arrays.asList((byte) 11, (byte) 20), result);
     }
 
-    // Test for merge(byte[] a, byte[] b, ByteBiFunction<MergeResult> nextSelector)
     @Test
     public void testMergeByteArrays() {
         byte[] a = { 1, 5, 10 };
@@ -1163,7 +1042,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 4, (byte) 5, (byte) 10, (byte) 11), result);
     }
 
-    // Test for merge(byte[] a, byte[] b, byte[] c, ByteBiFunction<MergeResult> nextSelector)
     @Test
     public void testMergeThreeByteArrays() {
         byte[] a = { 1, 7 };
@@ -1174,7 +1052,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 7), result);
     }
 
-    // Test for merge(ByteIterator a, ByteIterator b, ByteBiFunction<MergeResult> nextSelector)
     @Test
     public void testMergeByteIterators() {
         ByteIterator a = ByteIterator.of((byte) 1, (byte) 5);
@@ -1184,7 +1061,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 5, (byte) 6), result);
     }
 
-    // Test for merge(ByteIterator a, ByteIterator b, ByteIterator c, ByteBiFunction<MergeResult> nextSelector)
     @Test
     public void testMergeThreeByteIterators() {
         ByteIterator a = ByteIterator.of((byte) 1, (byte) 7);
@@ -1195,7 +1071,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 7), result);
     }
 
-    // Test for merge(ByteStream a, ByteStream b, ByteBiFunction<MergeResult> nextSelector)
     @Test
     public void testMergeByteStreams() {
         ByteStream a = createByteStream((byte) 1, (byte) 5);
@@ -1205,7 +1080,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 5, (byte) 6), result);
     }
 
-    // Test for merge(ByteStream a, ByteStream b, ByteStream c, ByteBiFunction<MergeResult> nextSelector)
     @Test
     public void testMergeThreeByteStreams() {
         ByteStream a = createByteStream((byte) 1, (byte) 7);
@@ -1216,7 +1090,6 @@ public class ByteStream201Test extends TestBase {
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 7), result);
     }
 
-    // Test for merge(Collection<? extends ByteStream> streams, ByteBiFunction<MergeResult> nextSelector)
     @Test
     public void testMergeCollectionOfByteStreams() {
         Collection<ByteStream> streams = new ArrayList<>();
@@ -1316,8 +1189,6 @@ public class ByteStream201Test extends TestBase {
         Collection<Byte> other = Arrays.asList((byte) 2, (byte) 3, (byte) 3, (byte) 5);
         List<Byte> result = byteStream.symmetricDifference(other).toList();
         List<Byte> expected = Arrays.asList((byte) 1, (byte) 2, (byte) 4, (byte) 3, (byte) 5);
-        // The order for symmetric difference might vary slightly based on internal set iteration.
-        // Convert to Set for comparison if order is not guaranteed by implementation.
         assertEquals(new HashSet<>(expected), new HashSet<>(result));
     }
 
@@ -1342,11 +1213,11 @@ public class ByteStream201Test extends TestBase {
     public void testShuffled() {
         byteStream = createByteStream(TEST_ARRAY);
         List<Byte> original = byteStream.toList();
-        byteStream = createByteStream(TEST_ARRAY); // Recreate for shuffle
+        byteStream = createByteStream(TEST_ARRAY);
         List<Byte> shuffled = byteStream.shuffled().toList();
         assertEquals(original.size(), shuffled.size());
         assertTrue(original.containsAll(shuffled) && shuffled.containsAll(original));
-        assertNotEquals(original, shuffled); // Unlikely to be equal for non-trivial cases
+        assertNotEquals(original, shuffled);
     }
 
     @Test
@@ -1356,9 +1227,9 @@ public class ByteStream201Test extends TestBase {
         List<Byte> shuffled1 = byteStream.shuffled(rnd).toList();
 
         byteStream = createByteStream(TEST_ARRAY);
-        rnd = new Random(123); // Same seed
+        rnd = new Random(123);
         List<Byte> shuffled2 = byteStream.shuffled(rnd).toList();
-        assertEquals(shuffled1, shuffled2); // Deterministic shuffle
+        assertEquals(shuffled1, shuffled2);
     }
 
     @Test
@@ -1447,21 +1318,21 @@ public class ByteStream201Test extends TestBase {
     public void testRateLimited() {
         byteStream = createByteStream(TEST_ARRAY);
         long startTime = System.currentTimeMillis();
-        List<Byte> result = byteStream.rateLimited(2.0).toList(); // 2 permits per second
+        List<Byte> result = byteStream.rateLimited(2.0).toList();
         long endTime = System.currentTimeMillis();
         assertEquals(5, result.size());
-        assertTrue((endTime - startTime) >= 2000, "Rate limit was not applied or was too fast"); // Expect at least 2 seconds for 5 items at 2/s
+        assertTrue((endTime - startTime) >= 2000, "Rate limit was not applied or was too fast");
     }
 
     @Test
     public void testRateLimitedWithRateLimiter() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
-        RateLimiter limiter = RateLimiter.create(1.0); // 1 permit per second
+        RateLimiter limiter = RateLimiter.create(1.0);
         long startTime = System.currentTimeMillis();
         List<Byte> result = byteStream.rateLimited(limiter).toList();
         long endTime = System.currentTimeMillis();
         assertEquals(3, result.size());
-        assertTrue((endTime - startTime) >= 2000, "Rate limiter not working as expected"); // At least 2 seconds for 3 items
+        assertTrue((endTime - startTime) >= 2000, "Rate limiter not working as expected");
     }
 
     @Test
@@ -1472,8 +1343,6 @@ public class ByteStream201Test extends TestBase {
         List<Byte> result = byteStream.delay(delay).toList();
         long endTime = System.currentTimeMillis();
         assertEquals(3, result.size());
-        // Expect at least (n-1) * delay time, where n is the number of elements.
-        // For 3 elements, 2 delays.
         assertTrue((endTime - startTime) >= 2 * 50, "Delay was not applied or was too short");
     }
 
@@ -1498,14 +1367,13 @@ public class ByteStream201Test extends TestBase {
     @Test
     public void testThrowIfEmpty() {
         byteStream = createByteStream(new byte[] { 1 });
-        byteStream.throwIfEmpty().toList(); // Should not throw
+        byteStream.throwIfEmpty().toList();
 
         byteStream = createByteStream(new byte[] {});
         try {
             byteStream.throwIfEmpty().toList();
             fail("Should throw NoSuchElementException");
         } catch (NoSuchElementException e) {
-            // Expected
         }
     }
 
@@ -1526,12 +1394,12 @@ public class ByteStream201Test extends TestBase {
         AtomicBoolean actionExecuted = new AtomicBoolean(false);
         byteStream = createByteStream(new byte[] { 1, 2 });
         byteStream.ifEmpty(() -> actionExecuted.set(true)).toList();
-        assertFalse(actionExecuted.get()); // Not empty, action not executed
+        assertFalse(actionExecuted.get());
 
         actionExecuted.set(false);
         byteStream = createByteStream(new byte[] {});
         byteStream.ifEmpty(() -> actionExecuted.set(true)).toList();
-        assertTrue(actionExecuted.get()); // Empty, action executed
+        assertTrue(actionExecuted.get());
     }
 
     @Test
@@ -1617,7 +1485,7 @@ public class ByteStream201Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals((byte) 20, result.get());
 
-        result = createByteStream(new byte[] { 10, 20, 30 }).elementAt(10); // Out of bounds
+        result = createByteStream(new byte[] { 10, 20, 30 }).elementAt(10);
         assertFalse(result.isPresent());
     }
 
@@ -1637,7 +1505,6 @@ public class ByteStream201Test extends TestBase {
             byteStream.onlyOne();
             fail("Should throw TooManyElementsException");
         } catch (TooManyElementsException e) {
-            // Expected
         }
     }
 
@@ -1674,7 +1541,6 @@ public class ByteStream201Test extends TestBase {
             result.add((byte) 4);
             fail("Should be immutable");
         } catch (UnsupportedOperationException e) {
-            // Expected
         }
     }
 
@@ -1687,7 +1553,6 @@ public class ByteStream201Test extends TestBase {
             result.add((byte) 4);
             fail("Should be immutable");
         } catch (UnsupportedOperationException e) {
-            // Expected
         }
     }
 
@@ -1718,8 +1583,6 @@ public class ByteStream201Test extends TestBase {
 
     @Test
     public void testPrintln() {
-        // This test only verifies that the method runs without error.
-        // Verifying console output directly is generally not recommended in unit tests.
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
         byteStream.println();
     }
@@ -1768,7 +1631,6 @@ public class ByteStream201Test extends TestBase {
     @Test
     public void testParallelExecutor() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
-        // Using a simple direct executor for testing purposes
         ByteStream parallelStream = byteStream.parallel(Runnable::run);
         assertTrue(parallelStream.isParallel());
     }
@@ -1776,7 +1638,6 @@ public class ByteStream201Test extends TestBase {
     @Test
     public void testParallelMaxThreadNumExecutor() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
-        // Using a simple direct executor for testing purposes
         ByteStream parallelStream = byteStream.parallel(2, Runnable::run);
         assertTrue(parallelStream.isParallel());
     }
@@ -1794,7 +1655,7 @@ public class ByteStream201Test extends TestBase {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
         List<Integer> result = byteStream.sps(s -> s.mapToInt(b -> b * 10)).toList();
         assertHaveSameElements(Arrays.asList(10, 20, 30), result);
-        assertFalse(byteStream.isParallel()); // Original stream remains sequential
+        assertFalse(byteStream.isParallel());
     }
 
     @Test
@@ -1815,10 +1676,10 @@ public class ByteStream201Test extends TestBase {
 
     @Test
     public void testPspFunction() {
-        byteStream = createByteStream(new byte[] { 3, 1, 2 }).parallel(); // Start parallel
-        List<Byte> result = byteStream.psp(s -> s.sorted()).toList(); // Sort sequentially
+        byteStream = createByteStream(new byte[] { 3, 1, 2 }).parallel();
+        List<Byte> result = byteStream.psp(s -> s.sorted()).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), result);
-        assertTrue(byteStream.isParallel()); // Stream remains parallel after psp
+        assertTrue(byteStream.isParallel());
     }
 
     @Test
@@ -1853,12 +1714,12 @@ public class ByteStream201Test extends TestBase {
     public void testOnClose() {
         AtomicBoolean closed = new AtomicBoolean(false);
         byteStream = createByteStream(new byte[] { 1, 2, 3 }).onClose(() -> closed.set(true));
-        byteStream.toList(); // Terminal operation should close the stream
+        byteStream.toList();
         assertTrue(closed.get());
 
         closed.set(false);
         byteStream = createByteStream(new byte[] { 1, 2, 3 }).onClose(() -> closed.set(true));
-        byteStream.close(); // Explicit close
+        byteStream.close();
         assertTrue(closed.get());
     }
 
@@ -1868,8 +1729,8 @@ public class ByteStream201Test extends TestBase {
         byteStream = createByteStream(new byte[] { 1, 2, 3 }).onClose(() -> closed.set(true));
         byteStream.close();
         assertTrue(closed.get());
-        closed.set(false); // Reset to check if it's called again
+        closed.set(false);
         byteStream.close();
-        assertFalse(closed.get()); // Should not be called again
+        assertFalse(closed.get());
     }
 }

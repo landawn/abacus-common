@@ -5,9 +5,11 @@ import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class MergeResult100Test extends TestBase {
 
     @Test
@@ -112,12 +114,10 @@ public class MergeResult100Test extends TestBase {
     public void testAlternate() {
         BiFunction<String, String, MergeResult> alternator = MergeResult.alternate();
 
-        // Test alternating behavior
         MergeResult result1 = alternator.apply("a", "b");
         MergeResult result2 = alternator.apply("c", "d");
         MergeResult result3 = alternator.apply("e", "f");
 
-        // Should alternate between TAKE_FIRST and TAKE_SECOND
         Assertions.assertNotEquals(result1, result2);
         Assertions.assertEquals(result1, result3);
     }

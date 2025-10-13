@@ -15,10 +15,12 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class ClobType100Test extends TestBase {
 
     private ClobType type;
@@ -39,13 +41,11 @@ public class ClobType100Test extends TestBase {
     @Test
     public void testStringOf() {
         Clob clob = mock(Clob.class);
-        // Assertions.assertThrows(UnsupportedOperationException.class, () -> type.stringOf(clob));
         type.stringOf(clob);
     }
 
     @Test
     public void testStringOf_Null() {
-        // Assertions.assertThrows(UnsupportedOperationException.class, () -> type.stringOf(null));
 
         assertNull(type.stringOf(null));
     }
@@ -151,7 +151,6 @@ public class ClobType100Test extends TestBase {
 
     @Test
     public void testMultipleOperations() throws SQLException {
-        // Test multiple operations on the same type instance
         ResultSet rs = mock(ResultSet.class);
         PreparedStatement stmt = mock(PreparedStatement.class);
         Clob clob1 = mock(Clob.class);

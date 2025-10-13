@@ -17,18 +17,19 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParseException;
 
+@Tag("new-test")
 public class Configuration100Test extends TestBase {
 
     private File tempDir;
     private File tempConfigFile;
 
-    // Test implementation of Configuration
     public static class TestConfiguration extends Configuration {
         public TestConfiguration() {
             super();
@@ -130,33 +131,26 @@ public class Configuration100Test extends TestBase {
     public void testGetCommonConfigPath() {
         List<String> paths = Configuration.getCommonConfigPath();
         Assertions.assertNotNull(paths);
-        // Should have some paths, but exact number depends on environment
         Assertions.assertFalse(paths.isEmpty());
     }
 
     @Test
     public void testFindDir() throws Exception {
-        // Create a test directory
         File testDir = new File(tempDir, "testdir");
         testDir.mkdirs();
 
-        // This test is environment-dependent, so we'll just verify the method doesn't throw
         File result = Configuration.findDir("nonexistent");
-        // Result may be null if not found
     }
 
     @Test
     public void testFindFile() throws Exception {
         createConfigFile("<?xml version=\"1.0\"?><config/>");
 
-        // Test finding by absolute path
         File found = Configuration.findFile(tempConfigFile.getAbsolutePath());
         Assertions.assertNotNull(found);
         Assertions.assertEquals(tempConfigFile.getAbsolutePath(), found.getAbsolutePath());
 
-        // Test finding non-existent file
         File notFound = Configuration.findFile("nonexistent.xml");
-        // May be null if not found
     }
 
     @Test
@@ -171,34 +165,28 @@ public class Configuration100Test extends TestBase {
         File srcFile = new File(tempDir, "source.txt");
         srcFile.createNewFile();
 
-        // Test finding in same directory
         File targetFile = new File(tempDir, "test.xml");
         File found = Configuration.findFileByFile(srcFile, targetFile.getName());
         Assertions.assertNotNull(found);
         Assertions.assertEquals(targetFile.getName(), found.getName());
 
-        // Test with null source file
         found = Configuration.findFileByFile(null, "test.xml");
-        // Should still work using common paths
     }
 
     @Test
     public void testFindFileInDir() throws Exception {
         createConfigFile("<?xml version=\"1.0\"?><config/>");
 
-        // Test finding file in directory
         File found = Configuration.findFileInDir(tempConfigFile.getName(), tempDir, false);
         Assertions.assertNotNull(found);
         Assertions.assertEquals(tempConfigFile.getName(), found.getName());
 
-        // Test finding directory
         File subDir = new File(tempDir, "subdir");
         subDir.mkdirs();
         found = Configuration.findFileInDir("subdir", tempDir, true);
         Assertions.assertNotNull(found);
         Assertions.assertTrue(found.isDirectory());
 
-        // Test with empty name
         Assertions.assertThrows(RuntimeException.class, () -> Configuration.findFileInDir("", tempDir, false));
     }
 
@@ -239,7 +227,6 @@ public class Configuration100Test extends TestBase {
 
     @Test
     public void testReadTimeInMillis() {
-        // Test various time formats
         Assertions.assertEquals(1000L, Configuration.readTimeInMillis("1000"));
         Assertions.assertEquals(1000L, Configuration.readTimeInMillis("1000ms"));
         Assertions.assertEquals(1000L, Configuration.readTimeInMillis("1000MS"));
@@ -254,15 +241,12 @@ public class Configuration100Test extends TestBase {
         Assertions.assertEquals(604800000L, Configuration.readTimeInMillis("1w"));
         Assertions.assertEquals(604800000L, Configuration.readTimeInMillis("1W"));
 
-        // Test with 'l' or 'L' suffix
         Assertions.assertEquals(1000L, Configuration.readTimeInMillis("1000l"));
         Assertions.assertEquals(1000L, Configuration.readTimeInMillis("1000L"));
 
-        // Test multiplication
         Assertions.assertEquals(6000L, Configuration.readTimeInMillis("2 * 3 * 1000"));
         Assertions.assertEquals(120000L, Configuration.readTimeInMillis("2 * 60s"));
 
-        // Test null/empty
         Assertions.assertEquals(0L, Configuration.readTimeInMillis(null));
         Assertions.assertEquals(0L, Configuration.readTimeInMillis(""));
         Assertions.assertEquals(0L, Configuration.readTimeInMillis("  "));
@@ -315,21 +299,17 @@ public class Configuration100Test extends TestBase {
     public void testSetAttribute() {
         TestConfiguration config = new TestConfiguration();
 
-        // Test setting new attribute
         String old = config.setAttribute("newAttr", "newValue");
         Assertions.assertNull(old);
         Assertions.assertEquals("newValue", config.getAttribute("newAttr"));
 
-        // Test updating existing attribute
         old = config.setAttribute("newAttr", "updatedValue");
         Assertions.assertEquals("newValue", old);
         Assertions.assertEquals("updatedValue", config.getAttribute("newAttr"));
 
-        // Test setting null value
         config.setAttribute("nullAttr", null);
         Assertions.assertEquals("", config.getAttribute("nullAttr"));
 
-        // Test trimming
         config.setAttribute("trimAttr", "  trimmed  ");
         Assertions.assertEquals("trimmed", config.getAttribute("trimAttr"));
     }
@@ -344,7 +324,6 @@ public class Configuration100Test extends TestBase {
         Assertions.assertEquals("value", removed);
         Assertions.assertNull(config.getAttribute("toRemove"));
 
-        // Remove non-existent
         removed = config.removeAttribute("nonExistent");
         Assertions.assertNull(removed);
     }
@@ -356,11 +335,9 @@ public class Configuration100Test extends TestBase {
         String[] result = config.string2Array("one,two,three");
         Assertions.assertArrayEquals(new String[] { "one", "two", "three" }, result);
 
-        // Test with spaces
         result = config.string2Array(" one , two , three ");
         Assertions.assertArrayEquals(new String[] { "one", "two", "three" }, result);
 
-        // Test empty
         result = config.string2Array("");
         Assertions.assertEquals(1, result.length);
         Assertions.assertEquals("", result[0]);
@@ -396,7 +373,6 @@ public class Configuration100Test extends TestBase {
         TestConfiguration config2 = new TestConfiguration();
         config2.setAttribute("attr", "value");
 
-        // Should have same hashCode if attributes are the same
         Assertions.assertEquals(config1.hashCode(), config2.hashCode());
     }
 
@@ -411,10 +387,9 @@ public class Configuration100Test extends TestBase {
         TestConfiguration config3 = new TestConfiguration();
         config3.setAttribute("attr", "different");
 
-        // Test equality
-        Assertions.assertEquals(config1, config1); // Same instance
-        Assertions.assertEquals(config1, config2); // Same attributes
-        Assertions.assertNotEquals(config1, config3); // Different attributes
+        Assertions.assertEquals(config1, config1);
+        Assertions.assertEquals(config1, config2);
+        Assertions.assertNotEquals(config1, config3);
         Assertions.assertNotEquals(config1, null);
         Assertions.assertNotEquals(config1, "not a configuration");
     }
@@ -435,7 +410,6 @@ public class Configuration100Test extends TestBase {
 
     @Test
     public void testComplexElement2Attr() {
-        // Test that unknown elements throw exception
         Configuration config = new Configuration() {
             @Override
             protected void complexElement2Attr(Element element) {
@@ -454,13 +428,10 @@ public class Configuration100Test extends TestBase {
         String xml = "<config>" + "<level1>value1</level1>" + "<nested>" + "  <level2>value2</level2>" + "</nested>" + "</config>";
         Element element = parseXmlString(xml);
 
-        // Default implementation should handle text elements but not nested complex elements
         Configuration config = new Configuration(element, null) {
             @Override
             protected void complexElement2Attr(Element element) {
-                // Just ignore complex elements for this test
                 if ("nested".equals(element.getNodeName())) {
-                    // Process nested elements
                     return;
                 }
                 super.complexElement2Attr(element);

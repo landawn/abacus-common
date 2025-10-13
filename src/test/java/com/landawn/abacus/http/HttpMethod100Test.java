@@ -5,18 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class HttpMethod100Test extends TestBase {
 
     @Test
     public void testEnumValues() {
         HttpMethod[] values = HttpMethod.values();
         assertEquals(9, values.length);
-        
-        // Verify all enum constants exist
+
         assertNotNull(HttpMethod.GET);
         assertNotNull(HttpMethod.POST);
         assertNotNull(HttpMethod.PUT);
@@ -44,7 +44,7 @@ public class HttpMethod100Test extends TestBase {
     @Test
     public void testValueOfInvalid() {
         assertThrows(IllegalArgumentException.class, () -> HttpMethod.valueOf("INVALID"));
-        assertThrows(IllegalArgumentException.class, () -> HttpMethod.valueOf("get")); // lowercase
+        assertThrows(IllegalArgumentException.class, () -> HttpMethod.valueOf("get"));
         assertThrows(NullPointerException.class, () -> HttpMethod.valueOf(null));
     }
 

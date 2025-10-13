@@ -92,7 +92,51 @@ public final class RegExUtil {
      * @see java.util.regex.Pattern
      */
     public static final Pattern INTEGER_FINDER = Pattern.compile("([+-]?\\d+)");
+
+    /**
+     * A regular expression {@link Pattern} that matches positive (unsigned) integers within a string.
+     * <p>
+     * This pattern captures sequences of one or more digits without any sign prefix.
+     * It is useful for extracting positive integer values from arbitrary text.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code \\d+} — matches one or more digits</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "42"}</li>
+     *   <li>{@code "1234"}</li>
+     *   <li>{@code "0"}</li>
+     * </ul>
+     *
+     * @see java.util.regex.Pattern
+     */
     public static final Pattern POSITIVE_INTEGER_FINDER = Pattern.compile("\\d+");
+
+    /**
+     * A regular expression {@link Pattern} that matches negative integers within a string.
+     * <p>
+     * This pattern captures sequences of digits that are prefixed with a minus sign.
+     * It is useful for extracting negative integer values from arbitrary text.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code -} — matches the minus sign</li>
+     *   <li>{@code \\d+} — matches one or more digits</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "-7"}</li>
+     *   <li>{@code "-1234"}</li>
+     * </ul>
+     *
+     * @see java.util.regex.Pattern
+     */
     public static final Pattern NEGATIVE_INTEGER_FINDER = Pattern.compile("-\\d+");
 
     /**
@@ -129,7 +173,70 @@ public final class RegExUtil {
      * @see java.util.regex.Pattern
      */
     public static final Pattern NUMBER_FINDER = Pattern.compile("([+-]?\\d+(\\.\\d+)?)");
+
+    /**
+     * A regular expression {@link Pattern} that matches positive (unsigned) numbers including decimals.
+     * <p>
+     * This pattern captures numeric values that may include:
+     * <ul>
+     *   <li>An optional integer part (zero or more digits)</li>
+     *   <li>An optional decimal point</li>
+     *   <li>A fractional part (one or more digits)</li>
+     * </ul>
+     * It can match numbers like {@code .25}, {@code 3.14}, or {@code 100}.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code \\d*} — zero or more digits (the optional integer part)</li>
+     *   <li>{@code \\.?} — optional decimal point</li>
+     *   <li>{@code \\d+} — one or more digits (required)</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "42"}</li>
+     *   <li>{@code "3.14"}</li>
+     *   <li>{@code "0.99"}</li>
+     *   <li>{@code ".25"}</li>
+     *   <li>{@code "100."}</li>
+     * </ul>
+     *
+     * @see java.util.regex.Pattern
+     */
     public static final Pattern POSITIVE_NUMBER_FINDER = Pattern.compile("\\d*\\.?\\d+");
+
+    /**
+     * A regular expression {@link Pattern} that matches negative numbers including decimals.
+     * <p>
+     * This pattern captures negative numeric values that may include:
+     * <ul>
+     *   <li>A required minus sign prefix</li>
+     *   <li>An optional integer part (zero or more digits)</li>
+     *   <li>An optional decimal point</li>
+     *   <li>A fractional part (one or more digits)</li>
+     * </ul>
+     * It can match numbers like {@code -.25}, {@code -3.14}, or {@code -100}.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code -} — required minus sign</li>
+     *   <li>{@code \\d*} — zero or more digits (the optional integer part)</li>
+     *   <li>{@code \\.?} — optional decimal point</li>
+     *   <li>{@code \\d+} — one or more digits (required)</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "-7"}</li>
+     *   <li>{@code "-3.14"}</li>
+     *   <li>{@code "-0.99"}</li>
+     *   <li>{@code "-.25"}</li>
+     * </ul>
+     *
+     * @see java.util.regex.Pattern
+     */
     public static final Pattern NEGATIVE_NUMBER_FINDER = Pattern.compile("-\\d*\\.?\\d+");
 
     /**
@@ -168,7 +275,55 @@ public final class RegExUtil {
      */
     public static final Pattern SCIENTIFIC_NUMBER_FINDER = Pattern.compile("([+-]?\\d+(\\.\\d+)?([eE][+-]?\\d+)?)");
 
+    /**
+     * A regular expression {@link Pattern} that matches phone numbers within a string.
+     * <p>
+     * This pattern matches sequences of digits and spaces that are at least 3 characters long,
+     * optionally prefixed with a plus sign for international dialing codes.
+     * It is useful for extracting basic phone numbers from text.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code \\+?} — optional plus sign for international code</li>
+     *   <li>{@code [\\d\\s]{3,}} — at least 3 digits or spaces</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "123 456 7890"}</li>
+     *   <li>{@code "+1 234 567 8900"}</li>
+     *   <li>{@code "555-1234"} (note: hyphens not matched, only digits and spaces)</li>
+     * </ul>
+     *
+     * @see java.util.regex.Pattern
+     */
     public static final Pattern PHONE_NUMBER_FINDER = Pattern.compile("\\+?[\\d\\s]{3,}");
+
+    /**
+     * A regular expression {@link Pattern} that matches phone numbers with country codes.
+     * <p>
+     * This pattern matches phone numbers with an optional plus sign, followed by digits and spaces,
+     * with an optional opening parenthesis, and requires at least 10 digits/spaces after that.
+     * It is designed to match longer phone numbers that include country and area codes.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code \\+?} — optional plus sign for international code</li>
+     *   <li>{@code [\\d\\s]+} — one or more digits or spaces</li>
+     *   <li>{@code \\(?} — optional opening parenthesis</li>
+     *   <li>{@code [\\d\\s]{10,}} — at least 10 digits or spaces</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "+1 (234) 567 8900"}</li>
+     *   <li>{@code "+44 20 1234 5678"}</li>
+     * </ul>
+     *
+     * @see java.util.regex.Pattern
+     */
     public static final Pattern PHONE_NUMBER_WITH_CODE_FINDER = Pattern.compile("\\+?[\\d\\s]+\\(?[\\d\\s]{10,}");
 
     /**
@@ -188,71 +343,427 @@ public final class RegExUtil {
     public static final Pattern DATE_TIME_FINDER = Pattern
             .compile("(19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01]) ([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)");
 
+    /**
+     * A regular expression {@link Pattern} that matches bank card numbers.
+     * <p>
+     * This pattern matches sequences that look like credit/debit card numbers,
+     * typically consisting of 16 digits optionally separated by spaces or hyphens
+     * in groups of 4 digits (e.g., 1234-5678-9012-3456).
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code (?:\\d{4}[-\\s]?){3}} — three groups of 4 digits, each optionally followed by a hyphen or space</li>
+     *   <li>{@code \\d{4}} — final group of 4 digits</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "1234 5678 9012 3456"}</li>
+     *   <li>{@code "1234-5678-9012-3456"}</li>
+     *   <li>{@code "1234567890123456"}</li>
+     * </ul>
+     *
+     * <p><strong>Note:</strong> This pattern does not validate that the card number is legitimate,
+     * it only checks the format.</p>
+     *
+     * @see java.util.regex.Pattern
+     */
     public static final Pattern BANK_CARD_NUMBER_FINDER = Pattern.compile("(?:\\d{4}[-\\s]?){3}\\d{4}");
 
-    // https://www.baeldung.com/java-email-validation-regex
-    // https://owasp.org/www-community/OWASP_Validation_Regex_Repository
-    // https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression
+    /**
+     * A regular expression {@link Pattern} that matches email addresses according to RFC 5322 specification.
+     * <p>
+     * This is a comprehensive pattern that validates email addresses according to the official RFC 5322 standard.
+     * It handles various valid email formats including quoted local parts, IP address domains, and special characters.
+     * </p>
+     *
+     * <p>The pattern validates:</p>
+     * <ul>
+     *   <li>Local part: alphanumeric characters and special characters {@code !#$%&'*+/=?^_`{|}~-}</li>
+     *   <li>Domain part: standard domain names or IP addresses in brackets</li>
+     *   <li>Quoted strings in the local part with escaped characters</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "user@example.com"}</li>
+     *   <li>{@code "john.doe@company.co.uk"}</li>
+     *   <li>{@code "user+tag@example.com"}</li>
+     *   <li>{@code "\"quoted.user\"@example.com"}</li>
+     * </ul>
+     *
+     * @see java.util.regex.Pattern
+     * @see <a href="https://www.baeldung.com/java-email-validation-regex">Baeldung Email Validation</a>
+     * @see <a href="https://owasp.org/www-community/OWASP_Validation_Regex_Repository">OWASP Validation Regex Repository</a>
+     * @see <a href="https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression">Stack Overflow Email Validation</a>
+     */
     public static final Pattern EMAIL_ADDRESS_RFC_5322_FINDER = Pattern.compile(
             "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
 
-    // https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
-    public static final Pattern URL_FINDER = Pattern.compile("[a-zA-Z][a-zA-Z0-9+.-]*:\\/\\/(?:[^\\s@\\/]+@)?[^\\s@\\/]+(?:\\/[^\\s]*)?");
+    /**
+     * A regular expression {@link Pattern} that matches complete URLs.
+     * <p>
+     * This pattern validates URLs that must match from start to end of the string.
+     * It supports HTTP, HTTPS, FTP, and FILE protocols and ensures the URL
+     * contains a valid host and optional path components.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code ^} — start of string anchor</li>
+     *   <li>{@code (https?|ftp|file)} — protocol: http, https, ftp, or file</li>
+     *   <li>{@code ://} — protocol separator</li>
+     *   <li>{@code [^\\s/$.?#]} — first character of host (not whitespace, slash, dollar, dot, question mark, or hash)</li>
+     *   <li>{@code .} — any character (typically part of the host)</li>
+     *   <li>{@code [^\\s]*} — zero or more non-whitespace characters (rest of URL)</li>
+     *   <li>{@code $} — end of string anchor</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "http://example.com"}</li>
+     *   <li>{@code "https://www.example.com/path/to/resource"}</li>
+     *   <li>{@code "ftp://ftp.example.com/file.txt"}</li>
+     *   <li>{@code "file://localhost/path/to/file"}</li>
+     * </ul>
+     *
+     * <p>Example non-matches:</p>
+     * <ul>
+     *   <li>{@code "http://.example.com"} — starts with dot after protocol</li>
+     *   <li>{@code "http://example .com"} — contains whitespace</li>
+     *   <li>{@code "example.com"} — missing protocol</li>
+     *   <li>{@code "Visit http://example.com today"} — doesn't match entire string</li>
+     * </ul>
+     *
+     * <p><strong>Note:</strong> This pattern requires the entire input string to be a valid URL
+     * due to the start {@code ^} and end {@code $} anchors. For finding URLs within text,
+     * use {@link #HTTP_URL_FINDER} or create a pattern without anchors.</p>
+     *
+     * @see java.util.regex.Pattern
+     * @see #HTTP_URL_FINDER
+     * @see #URL_MATCHER
+     */
+    public static final Pattern URL_FINDER = Pattern.compile("^(https?|ftp|file)://[^\\s/$.?#].[^\\s]*$");
+
+    /**
+     * A regular expression {@link Pattern} that matches HTTP and HTTPS URLs.
+     * <p>
+     * This pattern specifically matches web URLs using HTTP or HTTPS protocols.
+     * It supports hosts, ports, paths, query strings, and fragments.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code https?} — http or https scheme</li>
+     *   <li>{@code :\\/\\/} — separator</li>
+     *   <li>{@code (?:[-\\w.])+} — host/domain with word characters, hyphens, and dots</li>
+     *   <li>{@code (?:\\:[0-9]+)?} — optional port number</li>
+     *   <li>{@code (?:\\/(?:[\\w\\/_.])*} — optional path</li>
+     *   <li>{@code (?:\\?(?:[\\w&=%.])*)?} — optional query string</li>
+     *   <li>{@code (?:\\#(?:[\\w.])*)?)?} — optional fragment/anchor</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "http://www.example.com"}</li>
+     *   <li>{@code "https://api.example.com:8443/v1/users?id=123&name=test"}</li>
+     *   <li>{@code "http://localhost:3000/path/to/resource#section"}</li>
+     * </ul>
+     *
+     * @see java.util.regex.Pattern
+     */
     public static final Pattern HTTP_URL_FINDER = Pattern
             .compile("https?:\\/\\/(?:[-\\w.])+(?:\\:[0-9]+)?(?:\\/(?:[\\w\\/_.])*(?:\\?(?:[\\w&=%.])*)?(?:\\#(?:[\\w.])*)?)?");
 
     /**
-     * Pattern for alphanumeric string without space.
+     * A regular expression {@link Pattern} that matches alphanumeric strings without spaces.
+     * <p>
+     * This pattern matches sequences of letters (a-z, A-Z) and digits (0-9) with no spaces or other characters.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code [a-zA-Z0-9]+} — one or more alphanumeric characters</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "ABC123"}</li>
+     *   <li>{@code "test123"}</li>
+     *   <li>{@code "HelloWorld"}</li>
+     * </ul>
+     *
+     * @see java.util.regex.Pattern
      */
-    public static final Pattern ALPHANUMERIC_FINDER = Pattern.compile("\\+?[\\d\\s]+\\(?[\\d\\s]{10,}");
+    public static final Pattern ALPHANUMERIC_FINDER = Pattern.compile("[a-zA-Z0-9]+");
+
     /**
-     * Pattern for alphanumeric string with space.
+     * A regular expression {@link Pattern} that matches alphanumeric strings with spaces.
+     * <p>
+     * This pattern matches sequences of letters (a-z, A-Z), digits (0-9), and whitespace characters.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code [a-zA-Z0-9\\s]+} — one or more alphanumeric characters or whitespace</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "ABC 123"}</li>
+     *   <li>{@code "Hello World 123"}</li>
+     *   <li>{@code "test 456"}</li>
+     * </ul>
+     *
+     * @see java.util.regex.Pattern
      */
-    public static final Pattern ALPHANUMERIC_SPACE_FINDER = Pattern.compile("\\+?[\\d\\s]+\\(?[\\d\\s]{10,}");
+    public static final Pattern ALPHANUMERIC_SPACE_FINDER = Pattern.compile("[a-zA-Z0-9\\s]+");
+
     /**
-     * Pattern for duplicate words.
+     * A regular expression {@link Pattern} that matches duplicate words within a string.
+     * <p>
+     * This pattern uses a word boundary and backreference to find words that appear
+     * more than once in the text. It matches each occurrence of a word that has a duplicate elsewhere.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code (\\b\\w+\\b)} — captures a complete word</li>
+     *   <li>{@code (?=.*\\b\\1\\b)} — lookahead to check if the same word appears again later</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String text = "the quick brown fox jumps over the lazy dog";
+     * Matcher matcher = RegExUtil.DUPLICATES_FINDER.matcher(text);
+     * // Will match "the" (appears twice)
+     * }</pre>
+     *
+     * @see java.util.regex.Pattern
      */
     public static final Pattern DUPLICATES_FINDER = Pattern.compile("(\\b\\w+\\b)(?=.*\\b\\1\\b)");
 
     /**
-     * Pattern for whitespace.
+     * A regular expression {@link Pattern} that matches whitespace sequences.
+     * <p>
+     * This pattern matches one or more consecutive whitespace characters including
+     * spaces, tabs, line breaks, etc.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code \\s+} — one or more whitespace characters</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code " "} (single space)</li>
+     *   <li>{@code "   "} (multiple spaces)</li>
+     *   <li>{@code "\t"} (tab)</li>
+     *   <li>{@code "\n"} (newline)</li>
+     * </ul>
+     *
+     * @see java.util.regex.Pattern
      */
     public static final Pattern WHITESPACE_FINDER = Pattern.compile("\\s+");
 
-    // https://stackoverflow.com/questions/1449817/what-are-some-of-the-most-useful-regular-expressions-for-programmers
+    /**
+     * Pattern that matches an entire string if it is a valid Java identifier.
+     * This is the anchored version of {@link #JAVA_IDENTIFIER_FINDER} that requires the entire string to match.
+     *
+     * @see #JAVA_IDENTIFIER_FINDER
+     * @see <a href="https://stackoverflow.com/questions/1449817/what-are-some-of-the-most-useful-regular-expressions-for-programmers">Stack Overflow Useful Regex</a>
+     */
     public static final Pattern JAVA_IDENTIFIER_MATCHER = Pattern.compile("^" + JAVA_IDENTIFIER_FINDER.pattern() + "$");
+
+    /**
+     * Pattern that matches an entire string if it is a signed or unsigned integer.
+     * This is the anchored version of {@link #INTEGER_FINDER} that requires the entire string to match.
+     *
+     * @see #INTEGER_FINDER
+     */
     public static final Pattern INTEGER_MATCHER = Pattern.compile("^" + INTEGER_FINDER.pattern() + "$");
+
+    /**
+     * Pattern that matches an entire string if it is a positive (unsigned) integer.
+     * This is the anchored version of {@link #POSITIVE_INTEGER_FINDER} that requires the entire string to match.
+     *
+     * @see #POSITIVE_INTEGER_FINDER
+     */
     public static final Pattern POSITIVE_INTEGER_MATCHER = Pattern.compile("^" + POSITIVE_INTEGER_FINDER.pattern() + "$");
+
+    /**
+     * Pattern that matches an entire string if it is a negative integer.
+     * This is the anchored version of {@link #NEGATIVE_INTEGER_FINDER} that requires the entire string to match.
+     *
+     * @see #NEGATIVE_INTEGER_FINDER
+     */
     public static final Pattern NEGATIVE_INTEGER_MATCHER = Pattern.compile("^" + NEGATIVE_INTEGER_FINDER.pattern() + "$");
+
+    /**
+     * Pattern that matches an entire string if it is a signed or unsigned number (integer or decimal).
+     * This is the anchored version of {@link #NUMBER_FINDER} that requires the entire string to match.
+     *
+     * @see #NUMBER_FINDER
+     */
     public static final Pattern NUMBER_MATCHER = Pattern.compile("^" + NUMBER_FINDER.pattern() + "$");
+
+    /**
+     * Pattern that matches an entire string if it is a positive number (integer or decimal).
+     * This is the anchored version of {@link #POSITIVE_NUMBER_FINDER} that requires the entire string to match.
+     *
+     * @see #POSITIVE_NUMBER_FINDER
+     */
     public static final Pattern POSITIVE_NUMBER_MATCHER = Pattern.compile("^" + POSITIVE_NUMBER_FINDER.pattern() + "$");
+
+    /**
+     * Pattern that matches an entire string if it is a negative number (integer or decimal).
+     * This is the anchored version of {@link #NEGATIVE_NUMBER_FINDER} that requires the entire string to match.
+     *
+     * @see #NEGATIVE_NUMBER_FINDER
+     */
     public static final Pattern NEGATIVE_NUMBER_MATCHER = Pattern.compile("^" + NEGATIVE_NUMBER_FINDER.pattern() + "$");
+
+    /**
+     * Pattern that matches an entire string if it is a number in standard or scientific notation.
+     * This is the anchored version of {@link #SCIENTIFIC_NUMBER_FINDER} that requires the entire string to match.
+     *
+     * @see #SCIENTIFIC_NUMBER_FINDER
+     */
     public static final Pattern SCIENTIFIC_NUMBER_MATCHER = Pattern.compile("^" + SCIENTIFIC_NUMBER_FINDER.pattern() + "$");
 
+    /**
+     * Pattern that matches an entire string if it is a phone number.
+     * This is the anchored version of {@link #PHONE_NUMBER_FINDER} that requires the entire string to match.
+     *
+     * @see #PHONE_NUMBER_FINDER
+     */
     public static final Pattern PHONE_NUMBER_MATCHER = Pattern.compile("^" + PHONE_NUMBER_FINDER.pattern() + "$");
+
+    /**
+     * Pattern that matches an entire string if it is a phone number with country code.
+     * This is the anchored version of {@link #PHONE_NUMBER_WITH_CODE_FINDER} that requires the entire string to match.
+     *
+     * @see #PHONE_NUMBER_WITH_CODE_FINDER
+     */
     public static final Pattern PHONE_NUMBER_WITH_CODE_MATCHER = Pattern.compile("^" + PHONE_NUMBER_WITH_CODE_FINDER.pattern() + "$");
 
+    /**
+     * Pattern that matches an entire string if it is a date in yyyy-MM-dd format.
+     * This is the anchored version of {@link #DATE_FINDER} that requires the entire string to match.
+     *
+     * @see #DATE_FINDER
+     */
     public static final Pattern DATE_MATCHER = Pattern.compile("^" + DATE_FINDER.pattern() + "$");
+
+    /**
+     * Pattern that matches an entire string if it is a time in HH:mm:ss format.
+     * This is the anchored version of {@link #TIME_FINDER} that requires the entire string to match.
+     *
+     * @see #TIME_FINDER
+     */
     public static final Pattern TIME_MATCHER = Pattern.compile("^" + TIME_FINDER.pattern() + "$");
+
+    /**
+     * Pattern that matches an entire string if it is a date-time in yyyy-MM-dd HH:mm:ss format.
+     * This is the anchored version of {@link #DATE_TIME_FINDER} that requires the entire string to match.
+     *
+     * @see #DATE_TIME_FINDER
+     */
     public static final Pattern DATE_TIME_MATCHER = Pattern.compile("^" + DATE_TIME_FINDER.pattern() + "$");
 
+    /**
+     * Pattern that matches an entire string if it is a bank card number.
+     * This is the anchored version of {@link #BANK_CARD_NUMBER_FINDER} that requires the entire string to match.
+     *
+     * @see #BANK_CARD_NUMBER_FINDER
+     */
     public static final Pattern BANK_CARD_NUMBER_MATCHER = Pattern.compile("^" + BANK_CARD_NUMBER_FINDER.pattern() + "$");
 
+    /**
+     * Pattern that matches an entire string if it is a valid email address according to RFC 5322.
+     * This is the anchored version of {@link #EMAIL_ADDRESS_RFC_5322_FINDER} that requires the entire string to match.
+     *
+     * @see #EMAIL_ADDRESS_RFC_5322_FINDER
+     */
     public static final Pattern EMAIL_ADDRESS_RFC_5322_MATCHER = Pattern.compile("^" + EMAIL_ADDRESS_RFC_5322_FINDER.pattern() + "$");
 
+    /**
+     * Pattern that matches an entire string if it is a URL.
+     * This is the anchored version of {@link #URL_FINDER} that requires the entire string to match.
+     *
+     * @see #URL_FINDER
+     */
     public static final Pattern URL_MATCHER = Pattern.compile("^" + URL_FINDER.pattern() + "$");
+
+    /**
+     * Pattern that matches an entire string if it is an HTTP or HTTPS URL.
+     * This is the anchored version of {@link #HTTP_URL_FINDER} that requires the entire string to match.
+     *
+     * @see #HTTP_URL_FINDER
+     */
     public static final Pattern HTTP_URL_MATCHER = Pattern.compile("^" + HTTP_URL_FINDER.pattern() + "$");
 
+    /**
+     * Pattern that matches an entire string if it consists only of alphanumeric characters (no spaces).
+     * This is the anchored version of {@link #ALPHANUMERIC_FINDER} that requires the entire string to match.
+     *
+     * @see #ALPHANUMERIC_FINDER
+     */
     public static final Pattern ALPHANUMERIC_MATCHER = Pattern.compile("^" + ALPHANUMERIC_FINDER.pattern() + "$");
+
+    /**
+     * Pattern that matches an entire string if it consists only of alphanumeric characters and spaces.
+     * This is the anchored version of {@link #ALPHANUMERIC_SPACE_FINDER} that requires the entire string to match.
+     *
+     * @see #ALPHANUMERIC_SPACE_FINDER
+     */
     public static final Pattern ALPHANUMERIC_SPACE_MATCHER = Pattern.compile("^" + ALPHANUMERIC_SPACE_FINDER.pattern() + "$");
 
+    /**
+     * Pattern that matches an entire string if it contains duplicate words.
+     * This is the anchored version of {@link #DUPLICATES_FINDER} that requires the entire string to match.
+     *
+     * @see #DUPLICATES_FINDER
+     */
     public static final Pattern DUPLICATES_MATCHER = Pattern.compile("^" + DUPLICATES_FINDER.pattern() + "$");
 
+    /**
+     * Pattern that matches an entire string if it consists only of whitespace.
+     * This is the anchored version of {@link #WHITESPACE_FINDER} that requires the entire string to match.
+     *
+     * @see #WHITESPACE_FINDER
+     */
     public static final Pattern WHITESPACE_MATCHER = Pattern.compile("^" + WHITESPACE_FINDER.pattern() + "$");
 
-    public static final Pattern LINE_SEPARATOR = Pattern.compile("\\R"); // Matches any line break sequence (CR, LF, CRLF, etc.));
+    /**
+     * A regular expression {@link Pattern} that matches any line separator sequence.
+     * <p>
+     * This pattern uses {@code \R} which is a Unicode linebreak matcher that handles
+     * all common line break sequences across different operating systems and Unicode standards.
+     * </p>
+     *
+     * <p>Matches:</p>
+     * <ul>
+     *   <li>{@code \n} — Line Feed (LF, Unix/Linux/Mac)</li>
+     *   <li>{@code \r\n} — Carriage Return + Line Feed (CRLF, Windows)</li>
+     *   <li>{@code \r} — Carriage Return (CR, old Mac)</li>
+     *   <li>Other Unicode line terminators</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String[] lines = RegExUtil.LINE_SEPARATOR.split("line1\nline2\r\nline3");
+     * // Returns: ["line1", "line2", "line3"]
+     * }</pre>
+     *
+     * @see java.util.regex.Pattern
+     * @see #splitToLines(String)
+     */
+    public static final Pattern LINE_SEPARATOR = Pattern.compile("\\R");
 
-    static final Pattern CAMEL_CASE_SEPARATOR = Pattern.compile("[_-]");
+    static final Pattern CAMEL_CASE_SEPARATOR = Pattern.compile("[_\\-\\s]");
 
     private RegExUtil() {
         // Singleton for utility class.
@@ -260,70 +771,118 @@ public final class RegExUtil {
 
     /**
      * Checks if the specified string contains a substring that matches the given regular expression.
-     * This method is equivalent to {@code Pattern.compile(regex).matcher(source).find()}.
+     * This method is equivalent to {@code Pattern.compile(regex).matcher(checkSourceString(source)).find()}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Null Handling:</b></p>
+     * <ul>
+     *   <li>If {@code source} is {@code null}, throws {@code NullPointerException}</li>
+     *   <li>If {@code regex} is {@code null} or empty, throws {@code IllegalArgumentException}</li>
+     *   <li>If {@code source} is empty string, returns {@code false} (no match possible)</li>
+     * </ul>
+     *
+     * <p>Examples:</p>
      * <pre>{@code
      * boolean hasEmail = RegExUtil.find("Contact: john@example.com", "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
      * // Returns: true
+     *
+     * boolean hasNumber = RegExUtil.find("abc", "\\d+");
+     * // Returns: false (no numbers found)
+     *
+     * boolean empty = RegExUtil.find("", "\\d+");
+     * // Returns: false (empty string has no matches)
      * }</pre>
      *
-     * @param source the string to be checked, may be {@code null} or empty
-     * @param regex the regular expression to find
+     * <p><b>Common Mistakes:</b></p>
+     * <pre>{@code
+     * // DON'T: Pass null source (throws NullPointerException)
+     * RegExUtil.find(null, "\\d+");
+     *
+     * // DO: Check for null before calling
+     * String text = getUserInput();
+     * if (text != null && RegExUtil.find(text, "\\d+")) {
+     *     // Process match
+     * }
+     * }</pre>
+     *
+     * @param source the string to be checked; must not be {@code null}
+     * @param regex the regular expression to find; must not be {@code null} or empty
      * @return {@code true} if the string contains a match, {@code false} otherwise
-     * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
+     * @throws NullPointerException if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code regex} is {@code null} or empty
+     * @see #find(String, Pattern)
+     * @see #matches(String, String)
      */
     public static boolean find(final String source, final String regex) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
 
-        return Pattern.compile(regex).matcher(source).find();
+        return Pattern.compile(regex).matcher(checkSourceString(source)).find();
+    }
+
+    private static String checkSourceString(String source) {
+        return Strings.nullToEmpty(source);
     }
 
     /**
      * Checks if the specified string contains a substring that matches the given regular expression pattern.
      * This method is more efficient than {@link #find(String, String)} when using the same pattern multiple times.
      *
-     * <p>Example usage:</p>
+     * <p>Examples:</p>
      * <pre>{@code
      * Pattern emailPattern = Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
      * boolean hasEmail = RegExUtil.find("Contact: john@example.com", emailPattern);
      * // Returns: true
+     *
+     * Pattern digitPattern = Pattern.compile("\\d+");
+     * boolean hasDigit = RegExUtil.find("abc", digitPattern);
+     * // Returns: false (no digits found)
      * }</pre>
      *
-     * @param source the string to be checked, may be {@code null} or empty
-     * @param pattern the regular expression pattern to find
+     * @param source the string to be checked; must not be {@code null}
+     * @param pattern the regular expression pattern to find; must not be {@code null}
      * @return {@code true} if the string contains a match, {@code false} otherwise
-     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @throws NullPointerException if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code pattern} is {@code null}
+     * @see #find(String, String)
+     * @see #matches(String, Pattern)
      */
     public static boolean find(final String source, final Pattern pattern) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
 
-        return pattern.matcher(source).find();
+        return pattern.matcher(checkSourceString(source)).find();
     }
 
     /**
      * Checks if the specified string matches the given regular expression.
      * The entire string must match the pattern (equivalent to anchoring with ^ and $).
      *
-     * <p>Example usage:</p>
+     * <p>Examples:</p>
      * <pre>{@code
      * boolean isInteger = RegExUtil.matches("123", "\\d+");
-     * // Returns: true
-     * 
+     * // Returns: true (entire string is digits)
+     *
      * boolean isPartialMatch = RegExUtil.matches("abc123", "\\d+");
-     * // Returns: false (entire string must match)
+     * // Returns: false (entire string must match, not just part)
+     *
+     * boolean isEmpty = RegExUtil.matches("", "");
+     * // Returns: true (empty matches empty)
+     *
+     * boolean emptyDigits = RegExUtil.matches("", "\\d+");
+     * // Returns: false (empty string doesn't match digit pattern)
      * }</pre>
      *
-     * @param source the string to be checked, may be {@code null} or empty
-     * @param regex the regular expression to match
-     * @return {@code true} if the string matches the regex, {@code false} otherwise
-     * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
+     * @param source the string to be checked; must not be {@code null}
+     * @param regex the regular expression to match; must not be {@code null} or empty
+     * @return {@code true} if the entire string matches the regex, {@code false} otherwise
+     * @throws NullPointerException if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code regex} is {@code null} or empty
      * @see Pattern#matches(String, CharSequence)
+     * @see #matches(String, Pattern)
+     * @see #find(String, String)
      */
     public static boolean matches(final String source, final String regex) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
 
-        return Pattern.matches(regex, source);
+        return Pattern.matches(regex, checkSourceString(source));
     }
 
     /**
@@ -331,23 +890,33 @@ public final class RegExUtil {
      * The entire string must match the pattern. This method is more efficient than
      * {@link #matches(String, String)} when using the same pattern multiple times.
      *
-     * <p>Example usage:</p>
+     * <p>Examples:</p>
      * <pre>{@code
      * Pattern datePattern = RegExUtil.DATE_MATCHER;
      * boolean isDate = RegExUtil.matches("2023-12-25", datePattern);
      * // Returns: true
+     *
+     * Pattern digitPattern = Pattern.compile("\\d+");
+     * boolean isDigits = RegExUtil.matches("12345", digitPattern);
+     * // Returns: true
+     *
+     * boolean hasDigits = RegExUtil.matches("abc123", digitPattern);
+     * // Returns: false (entire string must be digits)
      * }</pre>
      *
-     * @param source the string to be checked, may be {@code null} or empty
-     * @param pattern the regular expression pattern to match
-     * @return {@code true} if the string matches the regex, {@code false} otherwise
-     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @param source the string to be checked; must not be {@code null}
+     * @param pattern the regular expression pattern to match; must not be {@code null}
+     * @return {@code true} if the entire string matches the regex, {@code false} otherwise
+     * @throws NullPointerException if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code pattern} is {@code null}
      * @see Pattern#matches(String, CharSequence)
+     * @see #matches(String, String)
+     * @see #find(String, Pattern)
      */
     public static boolean matches(final String source, final Pattern pattern) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
 
-        return pattern.matcher(source).matches();
+        return pattern.matcher(checkSourceString(source)).matches();
     }
 
     /**
@@ -487,7 +1056,7 @@ public final class RegExUtil {
      * This method is a {@code null} safe equivalent to:
      * <ul>
      *  <li>{@code source.replaceAll(regex, replacement)}</li>
-     *  <li>{@code Pattern.compile(regex).matcher(source).replaceAll(replacement)}</li>
+     *  <li>{@code Pattern.compile(regex).matcher(checkSourceString(source)).replaceAll(replacement)}</li>
      * </ul>
      *
      * <p>Example usage:</p>
@@ -581,7 +1150,7 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        return pattern.matcher(source).replaceAll(Strings.nullToEmpty(replacement));
+        return pattern.matcher(checkSourceString(source)).replaceAll(Strings.nullToEmpty(replacement));
     }
 
     /**
@@ -609,7 +1178,7 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        return pattern.matcher(source).replaceAll(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
+        return pattern.matcher(checkSourceString(source)).replaceAll(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
     }
 
     /**
@@ -637,7 +1206,7 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        return pattern.matcher(source).replaceAll(matcher -> replacer.apply(matcher.start(), matcher.end()));
+        return pattern.matcher(checkSourceString(source)).replaceAll(matcher -> replacer.apply(matcher.start(), matcher.end()));
     }
 
     /**
@@ -663,7 +1232,7 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        return replaceFirst(source, Pattern.compile(regex), N.nullToEmpty(replacement));
+        return replaceFirst(source, Pattern.compile(regex), Strings.nullToEmpty(replacement));
     }
 
     /**
@@ -737,13 +1306,13 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        return pattern.matcher(source).replaceFirst(Strings.nullToEmpty(replacement));
+        return pattern.matcher(checkSourceString(source)).replaceFirst(Strings.nullToEmpty(replacement));
     }
 
     /**
      * Replaces the first substring of the source string that matches the given regular expression pattern with the given replacer.
      * This method is a {@code null} safe equivalent to:
-     * {@code pattern.matcher(source).replaceFirst(replacer)}
+     * {@code pattern.matcher(checkSourceString(source)).replaceFirst(replacer)}
      *
      * <p>Example usage:</p>
      * <pre>{@code
@@ -766,13 +1335,13 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        return pattern.matcher(source).replaceFirst(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
+        return pattern.matcher(checkSourceString(source)).replaceFirst(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
     }
 
     /**
      * Replaces the first substring of the source string that matches the given regular expression pattern with the given replacer.
      * This method is a {@code null} safe equivalent to:
-     * {@code pattern.matcher(source).replaceFirst(replacer)}
+     * {@code pattern.matcher(checkSourceString(source)).replaceFirst(replacer)}
      *
      * <p>Example usage:</p>
      * <pre>{@code
@@ -795,7 +1364,7 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        return pattern.matcher(source).replaceFirst(matcher -> replacer.apply(matcher.start(), matcher.end()));
+        return pattern.matcher(checkSourceString(source)).replaceFirst(matcher -> replacer.apply(matcher.start(), matcher.end()));
     }
 
     /**
@@ -899,7 +1468,7 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        final Matcher matcher = pattern.matcher(source);
+        final Matcher matcher = pattern.matcher(checkSourceString(source));
 
         for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
             if (matcher.find(i)) {
@@ -942,7 +1511,7 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        final Matcher matcher = pattern.matcher(source);
+        final Matcher matcher = pattern.matcher(checkSourceString(source));
 
         for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
             if (matcher.find(i)) {
@@ -950,10 +1519,10 @@ public final class RegExUtil {
                     start = matcher.start();
                     end = matcher.end();
                 } else {
-                    return Strings.replaceRange(source, start, end, replacer.apply(source.substring(matcher.start(), matcher.end())));
+                    return Strings.replaceRange(source, start, end, replacer.apply(source.substring(start, end)));
                 }
             } else if (start >= 0) {
-                return Strings.replaceRange(source, start, end, replacer.apply(source.substring(matcher.start(), matcher.end())));
+                return Strings.replaceRange(source, start, end, replacer.apply(source.substring(start, end)));
             }
         }
 
@@ -985,7 +1554,7 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        final Matcher matcher = pattern.matcher(source);
+        final Matcher matcher = pattern.matcher(checkSourceString(source));
 
         for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
             if (matcher.find(i)) {
@@ -993,10 +1562,10 @@ public final class RegExUtil {
                     start = matcher.start();
                     end = matcher.end();
                 } else {
-                    return Strings.replaceRange(source, start, end, replacer.apply(matcher.start(), matcher.end()));
+                    return Strings.replaceRange(source, start, end, replacer.apply(start, end));
                 }
             } else if (start >= 0) {
-                return Strings.replaceRange(source, start, end, replacer.apply(matcher.start(), matcher.end()));
+                return Strings.replaceRange(source, start, end, replacer.apply(start, end));
             }
         }
 
@@ -1018,7 +1587,8 @@ public final class RegExUtil {
      * @param source the string to be checked, may be {@code null} or empty
      * @param regex the regular expression pattern to be counted
      * @return the number of occurrences of the specified pattern in the string, or 0 if the input source string is {@code null} or empty
-     * @see #countMatches(String, String)
+     * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
+     * @see #countMatches(String, Pattern)
      */
     public static int countMatches(final String source, final String regex) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
@@ -1054,7 +1624,7 @@ public final class RegExUtil {
             return 0;
         }
 
-        final Matcher matcher = pattern.matcher(source);
+        final Matcher matcher = pattern.matcher(checkSourceString(source));
         int occurrences = 0;
 
         while (matcher.find()) {
@@ -1116,7 +1686,7 @@ public final class RegExUtil {
             return Stream.empty();
         }
 
-        return pattern.matcher(source).results();
+        return pattern.matcher(checkSourceString(source)).results();
     }
 
     /**
@@ -1173,7 +1743,7 @@ public final class RegExUtil {
             return IntStream.empty();
         }
 
-        return pattern.matcher(source).results().mapToInt(MatchResult::start);
+        return pattern.matcher(checkSourceString(source)).results().mapToInt(MatchResult::start);
     }
 
     /**

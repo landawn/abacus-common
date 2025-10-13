@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -41,6 +42,7 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalByte;
 import com.landawn.abacus.util.u.OptionalDouble;
 
+@Tag("new-test")
 public class ByteStream102Test extends TestBase {
 
     @Test
@@ -50,9 +52,6 @@ public class ByteStream102Test extends TestBase {
         assertFalse(stream.first().isPresent());
     }
 
-    // This method needs to be implemented by a concrete test class to provide a ByteStream instance.
-    // For example, in ArrayByteStreamTest, it would return new ArrayByteStream(a);
-    // In IteratorByteStreamTest, it would return new IteratorByteStream(ByteIterator.of(a));
     protected ByteStream createByteStream(byte... a) {
         return ByteStream.of(a).map(e -> (byte) (e + 0));
     }
@@ -102,10 +101,10 @@ public class ByteStream102Test extends TestBase {
         };
 
         ByteStream stream = ByteStream.defer(supplier);
-        assertEquals(0, counter.get()); // Supplier not called yet
+        assertEquals(0, counter.get());
 
         byte[] result = stream.toArray();
-        assertEquals(1, counter.get()); // Supplier called once
+        assertEquals(1, counter.get());
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
     }
 
@@ -124,11 +123,9 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = createByteStream(array);
         assertArrayEquals(array, stream.toArray());
 
-        // Test empty array
         ByteStream emptyStream = createByteStream(new byte[0]);
         assertEquals(0, emptyStream.count());
 
-        // Test with range
         ByteStream rangeStream = createByteStream(array, 1, 4);
         assertArrayEquals(new byte[] { 2, 3, 4 }, rangeStream.toArray());
     }
@@ -139,7 +136,6 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = createByteStream(array);
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, stream.toArray());
 
-        // Test with range
         ByteStream rangeStream = createByteStream(array, 1, 3);
         assertArrayEquals(new byte[] { 2, 3 }, rangeStream.toArray());
     }
@@ -157,7 +153,6 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = createByteStream(iter);
         assertArrayEquals(new byte[] { 1, 2, 3 }, stream.toArray());
 
-        // Test null iterator
         ByteStream nullStream = createByteStream((ByteIterator) null);
         assertEquals(0, nullStream.count());
     }
@@ -171,7 +166,6 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = createByteStream(buffer);
         assertArrayEquals(new byte[] { 2, 3, 4 }, stream.toArray());
 
-        // Test null buffer
         ByteStream nullStream = createByteStream((ByteBuffer) null);
         assertEquals(0, nullStream.count());
     }
@@ -196,7 +190,6 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = createByteStream(inputStream);
         assertArrayEquals(data, stream.toArray());
 
-        // Test with closeStreamOnClose flag
         ByteArrayInputStream inputStream2 = new ByteArrayInputStream(data);
         ByteStream stream2 = createByteStream(inputStream2, true);
         assertArrayEquals(data, stream2.toArray());
@@ -208,11 +201,9 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = ByteStream.flatten(array);
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, stream.toArray());
 
-        // Test vertically
         ByteStream verticalStream = ByteStream.flatten(array, true);
         assertArrayEquals(new byte[] { 1, 3, 5, 2, 4 }, verticalStream.toArray());
 
-        // Test with alignment
         ByteStream alignedStream = ByteStream.flatten(array, (byte) 0, false);
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5, 0 }, alignedStream.toArray());
     }
@@ -229,11 +220,9 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = ByteStream.range((byte) 1, (byte) 5);
         assertArrayEquals(new byte[] { 1, 2, 3, 4 }, stream.toArray());
 
-        // Test with step
         ByteStream stepStream = ByteStream.range((byte) 0, (byte) 10, (byte) 2);
         assertArrayEquals(new byte[] { 0, 2, 4, 6, 8 }, stepStream.toArray());
 
-        // Test empty range
         ByteStream emptyStream = ByteStream.range((byte) 5, (byte) 5);
         assertEquals(0, emptyStream.count());
     }
@@ -243,11 +232,9 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = ByteStream.rangeClosed((byte) 1, (byte) 5);
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, stream.toArray());
 
-        // Test with step
         ByteStream stepStream = ByteStream.rangeClosed((byte) 0, (byte) 10, (byte) 3);
         assertArrayEquals(new byte[] { 0, 3, 6, 9 }, stepStream.toArray());
 
-        // Test single element
         ByteStream singleStream = ByteStream.rangeClosed((byte) 5, (byte) 5);
         assertArrayEquals(new byte[] { 5 }, singleStream.toArray());
     }
@@ -257,7 +244,6 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = ByteStream.repeat((byte) 7, 5);
         assertArrayEquals(new byte[] { 7, 7, 7, 7, 7 }, stream.toArray());
 
-        // Test zero repetitions
         ByteStream zeroStream = ByteStream.repeat((byte) 7, 0);
         assertEquals(0, zeroStream.count());
     }
@@ -267,7 +253,6 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = ByteStream.random();
         byte[] array = stream.limit(10).toArray();
         assertEquals(10, array.length);
-        // All values should be valid bytes
         for (byte b : array) {
             assertTrue(b >= Byte.MIN_VALUE && b <= Byte.MAX_VALUE);
         }
@@ -315,7 +300,6 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = ByteStream.concat(a1, a2, a3);
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, stream.toArray());
 
-        // Test empty arrays
         ByteStream emptyStream = ByteStream.concat(new byte[0][0]);
         assertEquals(0, emptyStream.count());
     }
@@ -363,7 +347,6 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = ByteStream.zip(a, b, (x, y) -> (byte) (x + y));
         assertArrayEquals(new byte[] { 5, 7, 9 }, stream.toArray());
 
-        // Test different lengths
         byte[] c = { 1, 2, 3, 4 };
         ByteStream stream2 = ByteStream.zip(a, c, (x, y) -> (byte) (x * y));
         assertArrayEquals(new byte[] { 1, 4, 9 }, stream2.toArray());
@@ -908,7 +891,6 @@ public class ByteStream102Test extends TestBase {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
         byte[] shuffled = stream.shuffled().toArray();
         assertEquals(5, shuffled.length);
-        // Should contain all original elements
         Set<Byte> set = new HashSet<>();
         for (byte b : shuffled) {
             set.add(b);
@@ -1134,7 +1116,6 @@ public class ByteStream102Test extends TestBase {
         stream.close();
         assertEquals(1, closed.get());
 
-        // Close should be idempotent
         stream.close();
         assertEquals(1, closed.get());
     }
@@ -1147,7 +1128,6 @@ public class ByteStream102Test extends TestBase {
         ByteStream parallel = stream.parallel();
         assertTrue(parallel.isParallel());
 
-        // Operations should still work correctly
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, parallel.sorted().toArray());
     }
 

@@ -33,7 +33,15 @@ public final class PrimitiveShortType extends AbstractShortType {
 
     /**
      * Returns the Class object representing the primitive short type.
-     * 
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveShortType type = new PrimitiveShortType();
+     * Class clazz = type.clazz();
+     * System.out.println(clazz.getName()); // Output: short
+     * System.out.println(clazz.isPrimitive()); // Output: true
+     * }</pre>
+     *
      * @return the Class object for short.class
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -46,6 +54,13 @@ public final class PrimitiveShortType extends AbstractShortType {
      * Indicates whether this type represents a primitive type.
      * For PrimitiveShortType, this always returns {@code true} since it represents the primitive short type.
      *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveShortType type = new PrimitiveShortType();
+     * boolean isPrimitive = type.isPrimitiveType();
+     * System.out.println(isPrimitive); // Output: true
+     * }</pre>
+     *
      * @return true, indicating this is a primitive type
      */
     @Override
@@ -56,6 +71,13 @@ public final class PrimitiveShortType extends AbstractShortType {
     /**
      * Returns the default value for the primitive short type.
      * The default value for primitive short is 0.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveShortType type = new PrimitiveShortType();
+     * Short defaultVal = type.defaultValue();
+     * System.out.println(defaultVal); // Output: 0
+     * }</pre>
      *
      * @return Short object containing the value 0
      */
@@ -68,6 +90,18 @@ public final class PrimitiveShortType extends AbstractShortType {
      * Retrieves a short value from the specified column in the ResultSet.
      * This method handles various data types that can be converted to short,
      * including direct short values, other numeric types, and string representations.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveShortType type = new PrimitiveShortType();
+     * // Assuming rs is a ResultSet with a short value in column 1
+     * Short value = type.get(rs, 1);
+     * System.out.println(value); // Output: the short value from the database
+     *
+     * // If the column contains NULL
+     * Short nullValue = type.get(rs, 2);
+     * System.out.println(nullValue); // Output: null
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
@@ -95,6 +129,18 @@ public final class PrimitiveShortType extends AbstractShortType {
      * Retrieves a short value from the specified column in the ResultSet.
      * This method handles various data types that can be converted to short,
      * including direct short values, other numeric types, and string representations.
+     *
+     * <p>Usage example:
+     * <pre>{@code
+     * PrimitiveShortType type = new PrimitiveShortType();
+     * // Assuming rs is a ResultSet with a short value in column "age"
+     * Short age = type.get(rs, "age");
+     * System.out.println(age); // Output: the short value from the database
+     *
+     * // If the column contains NULL
+     * Short nullValue = type.get(rs, "missing_column");
+     * System.out.println(nullValue); // Output: null
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to retrieve (column name or alias)

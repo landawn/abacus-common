@@ -16,11 +16,13 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.DoubleStream;
 
+@Tag("new-test")
 public class DoubleIterator100Test extends TestBase {
 
     @Test

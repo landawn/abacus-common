@@ -12,9 +12,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class PropertiesUtil101Test extends TestBase {
 
     private File tempFile;
@@ -34,26 +36,22 @@ public class PropertiesUtil101Test extends TestBase {
     @Test
     public void testFindFile() {
         File file = PropertiesUtil.findFile("test.properties");
-        // May be null if file doesn't exist
         Assertions.assertTrue(file == null || file.getName().equals("test.properties"));
     }
 
     @Test
     public void testFindDir() {
         File dir = PropertiesUtil.findDir("test");
-        // May be null if directory doesn't exist
         Assertions.assertTrue(dir == null || dir.isDirectory());
     }
 
     @Test
     public void testLoadFromFile() throws IOException {
-        // Write test properties
         Properties<String, String> testProps = new Properties<>();
         testProps.put("key1", "value1");
         testProps.put("key2", "value2");
         PropertiesUtil.store(testProps, "Test", tempFile);
 
-        // Load and verify
         Properties<String, String> loaded = PropertiesUtil.load(tempFile);
         Assertions.assertEquals("value1", loaded.get("key1"));
         Assertions.assertEquals("value2", loaded.get("key2"));
@@ -203,14 +201,11 @@ public class PropertiesUtil101Test extends TestBase {
 
         try {
             PropertiesUtil.xml2Java(xml, srcPath, packageName, className, false);
-            // Verify file was created
             File expectedFile = new File(srcPath + "/com/test/TestConfig.java");
-            // Clean up
             if (expectedFile.exists()) {
                 expectedFile.delete();
             }
         } catch (Exception e) {
-            // May fail due to file system permissions
         }
     }
 }

@@ -85,7 +85,7 @@ public final class JsonMappers {
     private static final List<JsonMapper> mapperPool = new ArrayList<>(POOL_SIZE);
 
     private static final JsonMapper defaultJsonMapper = new JsonMapper();
-    private static final JsonMapper defaultJsonMapperForPretty = (JsonMapper) new JsonMapper().enable(SerializationFeature.INDENT_OUTPUT);
+    private static final JsonMapper defaultJsonMapperForPretty;
     private static final SerializationConfig defaultSerializationConfig = defaultJsonMapper.getSerializationConfig();
     private static final DeserializationConfig defaultDeserializationConfig = defaultJsonMapper.getDeserializationConfig();
 
@@ -95,6 +95,11 @@ public final class JsonMappers {
     private static final DeserializationFeature deserializationFeatureNotEnabledByDefault;
 
     static {
+        // Initialize defaultJsonMapperForPretty properly
+        final JsonMapper temp = new JsonMapper();
+        temp.enable(SerializationFeature.INDENT_OUTPUT);
+        defaultJsonMapperForPretty = temp;
+
         {
             SerializationFeature tmp = null;
             for (final SerializationFeature serializationFeature : SerializationFeature.values()) {
@@ -105,7 +110,11 @@ public final class JsonMappers {
             }
 
             serializationFeatureNotEnabledByDefault = tmp;
-            defaultSerializationConfigForCopy = defaultSerializationConfig.with(serializationFeatureNotEnabledByDefault);
+            if (tmp != null) {
+                defaultSerializationConfigForCopy = defaultSerializationConfig.with(serializationFeatureNotEnabledByDefault);
+            } else {
+                defaultSerializationConfigForCopy = defaultSerializationConfig;
+            }
         }
 
         {
@@ -118,7 +127,11 @@ public final class JsonMappers {
             }
 
             deserializationFeatureNotEnabledByDefault = tmp;
-            defaultDeserializationConfigForCopy = defaultDeserializationConfig.with(deserializationFeatureNotEnabledByDefault);
+            if (tmp != null) {
+                defaultDeserializationConfigForCopy = defaultDeserializationConfig.with(deserializationFeatureNotEnabledByDefault);
+            } else {
+                defaultDeserializationConfigForCopy = defaultDeserializationConfig;
+            }
         }
     }
 
@@ -1713,24 +1726,6 @@ public final class JsonMappers {
         return defaultDeserializationConfigForCopy.without(deserializationFeatureNotEnabledByDefault);
     }
 
-    //    /**
-    //     *
-    //     * @param setter first parameter is the copy of default {@code SerializationConfig}
-    //     * @return
-    //     */
-    //    public static SerializationConfig createSerializationConfig(final Function<? super SerializationConfig, ? extends SerializationConfig> setter) {
-    //        return setter.apply(createSerializationConfig());
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param setter first parameter is the copy of default {@code DeserializationConfig}
-    //     * @return
-    //     */
-    //    public static DeserializationConfig createDeserializationConfig(final Function<? super DeserializationConfig, ? extends DeserializationConfig> setter) {
-    //        return setter.apply(createDeserializationConfig());
-    //    }
-
     static JsonMapper getJsonMapper(final SerializationConfig config) {
         if (config == null) {
             return defaultJsonMapper;
@@ -1742,13 +1737,13 @@ public final class JsonMappers {
             if (mapperPool.size() > 0) {
                 mapper = mapperPool.remove(mapperPool.size() - 1);
             }
-        }
 
-        if (mapper == null) {
-            mapper = new JsonMapper();
-        }
+            if (mapper == null) {
+                mapper = new JsonMapper();
+            }
 
-        mapper.setConfig(config);
+            mapper.setConfig(config);
+        }
 
         return mapper;
     }
@@ -1764,19 +1759,19 @@ public final class JsonMappers {
             if (mapperPool.size() > 0) {
                 mapper = mapperPool.remove(mapperPool.size() - 1);
             }
-        }
 
-        if (mapper == null) {
-            mapper = new JsonMapper();
-        }
+            if (mapper == null) {
+                mapper = new JsonMapper();
+            }
 
-        mapper.setConfig(config);
+            mapper.setConfig(config);
+        }
 
         return mapper;
     }
 
     static void recycle(final JsonMapper mapper) {
-        if (mapper == null) {
+        if (mapper == null || mapper == defaultJsonMapper || mapper == defaultJsonMapperForPretty) {
             return;
         }
 

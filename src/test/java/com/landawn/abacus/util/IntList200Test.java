@@ -18,9 +18,11 @@ import java.util.function.IntPredicate;
 import java.util.function.IntUnaryOperator;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class IntList200Test extends TestBase {
 
     @Test
@@ -80,7 +82,7 @@ public class IntList200Test extends TestBase {
         assertEquals(3, list.size());
         assertArrayEquals(a, list.toArray());
         a[0] = 99;
-        assertNotEquals(99, list.get(0)); // Ensure it's a copy
+        assertNotEquals(99, list.get(0));
     }
 
     @Test
@@ -303,7 +305,7 @@ public class IntList200Test extends TestBase {
     @Test
     public void testMoveRange() {
         IntList list = IntList.of(0, 1, 2, 3, 4, 5);
-        list.moveRange(1, 3, 4); // should result in { 0, 3, 4, 5, 1, 2 }
+        list.moveRange(1, 3, 4);
         assertArrayEquals(new int[] { 0, 3, 4, 5, 1, 2 }, list.toArray());
     }
 
@@ -547,7 +549,7 @@ public class IntList200Test extends TestBase {
     public void testBinarySearch() {
         IntList list = IntList.of(1, 2, 3, 4, 5);
         assertEquals(2, list.binarySearch(3));
-        assertTrue(list.binarySearch(6) < 0); // Not found
+        assertTrue(list.binarySearch(6) < 0);
     }
 
     @Test
@@ -569,7 +571,6 @@ public class IntList200Test extends TestBase {
         IntList list1 = IntList.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         IntList list2 = list1.copy();
         list1.shuffle();
-        // It's possible for a shuffle to result in the same order, but unlikely for a larger list
         assertFalse(Arrays.equals(list1.toArray(), list2.toArray()) && list1.size() > 1);
     }
 

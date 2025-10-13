@@ -21,12 +21,14 @@ import java.time.Instant;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
+@Tag("new-test")
 public class InstantType100Test extends TestBase {
 
     private InstantType instantType;
@@ -125,7 +127,6 @@ public class InstantType100Test extends TestBase {
         String str = "2023-12-25T10:30:45.123Z";
         Instant result = instantType.valueOf(str);
         assertNotNull(result);
-        // assertEquals(str, result.toString());
     }
 
     @Test

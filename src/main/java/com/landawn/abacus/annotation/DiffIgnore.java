@@ -67,7 +67,6 @@ import java.lang.annotation.Target;
  * BeanDifference diff = BeanDifference.of(user1, user2);
  * </pre>
  * 
- * @author HaiYang Li
  * @since 2025
  * @see com.landawn.abacus.util.Difference.BeanDifference
  * @see com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)

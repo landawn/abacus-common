@@ -6,10 +6,12 @@ import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class BSONObjectIdType100Test extends TestBase {
 
     private BSONObjectIdType type;
@@ -70,7 +72,7 @@ public class BSONObjectIdType100Test extends TestBase {
 
     @Test
     public void testValueOf_WrongLengthHexString() {
-        String wrongLengthHex = "507f1f77bcf86cd79943901"; // 23 chars instead of 24
+        String wrongLengthHex = "507f1f77bcf86cd79943901";
         Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf(wrongLengthHex));
     }
 

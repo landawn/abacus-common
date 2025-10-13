@@ -20,9 +20,11 @@ import java.util.Date;
 import org.joda.time.MutableDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class JodaMutableDateTimeType100Test extends TestBase {
 
     private JodaMutableDateTimeType mutableDateTimeType;

@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 import org.w3c.dom.Node;
 
@@ -33,6 +34,7 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
+@Tag("new-test")
 public class JAXBParser100Test extends TestBase {
 
     private JAXBParser parser;
@@ -45,7 +47,6 @@ public class JAXBParser100Test extends TestBase {
         parser = new JAXBParser();
     }
 
-    // Test Data Classes with JAXB annotations
     @XmlRootElement
     public static class Person {
         private String name;
@@ -319,7 +320,6 @@ public class JAXBParser100Test extends TestBase {
         JAXBParser parserWithConfig = new JAXBParser(xsc, xdc);
         assertNotNull(parserWithConfig);
 
-        // Test that it still works
         Person person = new Person("Test", 30);
         String xml = parserWithConfig.serialize(person, (XMLSerializationConfig) null);
         Person deserialized = parserWithConfig.deserialize(xml, null, Person.class);

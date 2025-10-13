@@ -20,11 +20,13 @@ import java.util.function.BiFunction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 
+@Tag("new-test")
 public class Iterators104Test extends TestBase {
 
     private List<Integer> testList;
@@ -36,7 +38,6 @@ public class Iterators104Test extends TestBase {
         testIterator = testList.iterator();
     }
 
-    // Test forEach(Iterator, offset, count, elementConsumer, onComplete)
     @Test
     public void testForEachIteratorWithOffsetCountConsumerAndOnComplete() throws Exception {
         List<Integer> result = new ArrayList<>();
@@ -69,7 +70,6 @@ public class Iterators104Test extends TestBase {
         Assertions.assertTrue(result.isEmpty());
     }
 
-    // Test forEach(Iterator, offset, count, processThreadNum, queueSize, elementConsumer)
     @Test
     public void testForEachIteratorWithThreadsNoOnComplete() throws Exception {
         List<Integer> synchronizedResult = Collections.synchronizedList(new ArrayList<>());
@@ -80,7 +80,6 @@ public class Iterators104Test extends TestBase {
         Assertions.assertEquals(Arrays.asList(2, 3, 4, 5), synchronizedResult);
     }
 
-    // Test forEach(Iterator, offset, count, processThreadNum, queueSize, elementConsumer, onComplete)
     @Test
     public void testForEachIteratorWithThreadsAndOnComplete() throws Exception {
         List<Integer> synchronizedResult = Collections.synchronizedList(new ArrayList<>());
@@ -104,7 +103,6 @@ public class Iterators104Test extends TestBase {
         Assertions.assertEquals(Arrays.asList(1, 2, 3), result);
     }
 
-    // Test forEach(Collection<Iterator>, elementConsumer)
     @Test
     public void testForEachCollectionBasic() throws Exception {
         List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2, 3).iterator(), Arrays.asList(4, 5, 6).iterator(),
@@ -126,7 +124,6 @@ public class Iterators104Test extends TestBase {
         Assertions.assertTrue(result.isEmpty());
     }
 
-    // Test forEach(Collection<Iterator>, elementConsumer, onComplete)
     @Test
     public void testForEachCollectionWithOnComplete() throws Exception {
         List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2).iterator(), Arrays.asList(3, 4).iterator());
@@ -140,7 +137,6 @@ public class Iterators104Test extends TestBase {
         Assertions.assertTrue(onCompleteCalled.get());
     }
 
-    // Test forEach(Collection<Iterator>, offset, count, elementConsumer)
     @Test
     public void testForEachCollectionWithOffsetCount() throws Exception {
         List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2, 3, 4).iterator(), Arrays.asList(5, 6, 7, 8).iterator());
@@ -151,7 +147,6 @@ public class Iterators104Test extends TestBase {
         Assertions.assertEquals(Arrays.asList(3, 4, 5, 6), result);
     }
 
-    // Test forEach(Collection<Iterator>, offset, count, elementConsumer, onComplete)
     @Test
     public void testForEachCollectionWithOffsetCountAndOnComplete() throws Exception {
         List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(10, 20, 30).iterator(), Arrays.asList(40, 50, 60).iterator());
@@ -166,7 +161,6 @@ public class Iterators104Test extends TestBase {
         Assertions.assertTrue(onCompleteCalled.get());
     }
 
-    // Test forEach(Collection<Iterator>, readThreadNum, processThreadNum, queueSize, elementConsumer)
     @Test
     public void testForEachCollectionWithThreadsNoOnComplete() throws Exception {
         List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2, 3).iterator(), Arrays.asList(4, 5, 6).iterator());
@@ -178,7 +172,6 @@ public class Iterators104Test extends TestBase {
         Assertions.assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), synchronizedResult);
     }
 
-    // Test forEach(Collection<Iterator>, readThreadNum, processThreadNum, queueSize, elementConsumer, onComplete)
     @Test
     public void testForEachCollectionWithThreadsAndOnComplete() throws Exception {
         List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(10, 11).iterator(), Arrays.asList(12, 13).iterator());
@@ -194,7 +187,6 @@ public class Iterators104Test extends TestBase {
         Assertions.assertTrue(onCompleteCalled.get());
     }
 
-    // Test forEach(Collection<Iterator>, offset, count, readThreadNum, processThreadNum, queueSize, elementConsumer)
     @Test
     public void testForEachCollectionFullParamsNoOnComplete() throws Exception {
         List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2, 3, 4, 5).iterator(), Arrays.asList(6, 7, 8, 9, 10).iterator());
@@ -206,7 +198,6 @@ public class Iterators104Test extends TestBase {
         Assertions.assertEquals(Arrays.asList(3, 4, 5, 6, 7), synchronizedResult);
     }
 
-    // Test forEach(Collection<Iterator>, offset, count, readThreadNum, processThreadNum, queueSize, elementConsumer, onComplete)
     @Test
     public void testForEachCollectionFullParams() throws Exception {
         List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(100, 101, 102).iterator(), Arrays.asList(103, 104, 105).iterator());
@@ -222,7 +213,6 @@ public class Iterators104Test extends TestBase {
         Assertions.assertTrue(onCompleteCalled.get());
     }
 
-    // Test edge cases and exceptions
     @Test
     public void testNegativeOffset() {
         List<Iterator<Integer>> iterators = Arrays.asList(testIterator);
@@ -649,7 +639,6 @@ public class Iterators104Test extends TestBase {
         BiIterator<String, Integer> iter = createBiIterator(pairs);
         BiIterator<String, Integer> result = Iterators.concat(iter);
 
-        // Multiple hasNext calls should not consume elements
         assertTrue(result.hasNext());
         assertTrue(result.hasNext());
         assertTrue(result.hasNext());
@@ -667,7 +656,6 @@ public class Iterators104Test extends TestBase {
         TriIterator<String, Integer, Double> iter = createTriIterator(triples);
         TriIterator<String, Integer, Double> result = Iterators.concat(iter);
 
-        // Multiple hasNext calls should not consume elements
         assertTrue(result.hasNext());
         assertTrue(result.hasNext());
         assertTrue(result.hasNext());

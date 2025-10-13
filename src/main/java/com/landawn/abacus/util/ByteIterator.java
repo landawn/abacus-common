@@ -282,9 +282,21 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Returns the next element as a Byte (boxed).
-     * 
-     * @return the next byte value as a Byte
-     * @deprecated use {@code nextByte()} instead to avoid boxing overhead
+     *
+     * <p>This method boxes the primitive byte value into a Byte object, which incurs
+     * performance overhead. It is provided for compatibility with the Iterator interface
+     * but should generally be avoided in favor of {@link #nextByte()}.</p>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * ByteIterator iter = ByteIterator.of((byte)1, (byte)2);
+     * Byte boxed = iter.next(); // Returns Byte.valueOf((byte)1) - avoid this
+     * byte primitive = iter.nextByte(); // Returns (byte)2 - prefer this
+     * }</pre>
+     *
+     * @return the next byte value as a Byte object
+     * @throws NoSuchElementException if no more elements are available
+     * @deprecated use {@link #nextByte()} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
@@ -293,34 +305,45 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Returns the next byte value.
-     * 
+     * Returns the next byte value without boxing.
+     *
+     * <p>This is the primary method for retrieving elements from a ByteIterator.
+     * It returns primitive byte values directly, avoiding the performance overhead
+     * of object allocation and boxing that would occur with {@link #next()}.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
-     * byte b = iter.nextByte(); // 1
+     * while (iter.hasNext()) {
+     *     byte b = iter.nextByte(); // Efficient primitive access
+     *     System.out.println(b);
+     * }
      * }</pre>
-     * 
-     * @return the next byte value
-     * @throws NoSuchElementException if no more elements are available
+     *
+     * @return the next byte value in the iteration
+     * @throws NoSuchElementException if the iteration has no more elements
      */
     public abstract byte nextByte();
 
     /**
-     * Returns a new iterator that skips the first n elements.
-     * 
-     * <p>If n is greater than the number of remaining elements, all elements
-     * are skipped and an empty iterator is effectively returned.</p>
-     * 
+     * Returns a new iterator that skips the first n elements of this iterator.
+     *
+     * <p>The skip operation is performed lazily - elements are not skipped until
+     * the first call to {@link #hasNext()} or {@link #nextByte()} on the returned
+     * iterator. If n is 0 or negative (after validation), this iterator is returned
+     * unchanged. If n is greater than the number of remaining elements, all elements
+     * are consumed and the returned iterator will be empty.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
      * ByteIterator skipped = iter.skip(2);
      * // skipped will iterate over 3, 4, 5
+     * byte first = skipped.nextByte(); // 3
      * }</pre>
      *
-     * @param n the number of elements to skip
-     * @return a new iterator with the first n elements skipped
+     * @param n the number of elements to skip (must be non-negative)
+     * @return a new ByteIterator that skips the first n elements
      * @throws IllegalArgumentException if n is negative
      */
     public ByteIterator skip(final long n) throws IllegalArgumentException {
@@ -366,17 +389,21 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Returns a new iterator that limits the number of elements to the specified count.
-     * 
+     * Returns a new iterator that limits the number of elements to at most the specified count.
+     *
+     * <p>The returned iterator will produce at most {@code count} elements from this iterator.
+     * If this iterator has fewer than {@code count} elements remaining, all remaining elements
+     * will be included. If count is 0, an empty iterator is returned immediately.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
      * ByteIterator limited = iter.limit(3);
-     * // limited will iterate over 1, 2, 3
+     * byte[] result = limited.toArray(); // [1, 2, 3]
      * }</pre>
      *
-     * @param count the maximum number of elements to iterate
-     * @return a new iterator limited to count elements
+     * @param count the maximum number of elements to iterate (must be non-negative)
+     * @return a new ByteIterator limited to at most count elements
      * @throws IllegalArgumentException if count is negative
      */
     public ByteIterator limit(final long count) throws IllegalArgumentException {
@@ -410,16 +437,20 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Returns a new iterator that includes only elements matching the specified predicate.
-     * 
+     *
+     * <p>The returned iterator applies the predicate to each element of this iterator
+     * and only returns elements for which the predicate returns {@code true}. Elements
+     * are tested lazily as the returned iterator is consumed.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
      * ByteIterator evens = iter.filter(b -> b % 2 == 0);
-     * // evens will iterate over 2, 4
+     * byte[] result = evens.toArray(); // [2, 4]
      * }</pre>
      *
-     * @param predicate the predicate to test elements
-     * @return a new filtered iterator
+     * @param predicate the predicate to test each element (must not be {@code null})
+     * @return a new ByteIterator containing only elements that match the predicate
      * @throws IllegalArgumentException if predicate is {@code null}
      */
     public ByteIterator filter(final BytePredicate predicate) throws IllegalArgumentException {
@@ -462,17 +493,19 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Returns the first element wrapped in an OptionalByte, or an empty OptionalByte if no elements are available.
-     * 
-     * <p>This method consumes the first element if present.</p>
-     * 
+     *
+     * <p>This method consumes and returns the first element from this iterator. After calling
+     * this method, the iterator is positioned at the second element (if it exists). If the
+     * iterator is empty, an empty OptionalByte is returned.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * OptionalByte first = iter.first(); // OptionalByte.of(1)
-     * // Iterator now points to 2
+     * byte second = iter.nextByte(); // 2 - iterator advanced
      * }</pre>
-     * 
-     * @return an OptionalByte containing the first element, or empty if none
+     *
+     * @return an OptionalByte containing the first element if present, otherwise empty
      */
     public OptionalByte first() {
         if (hasNext()) {
@@ -484,17 +517,19 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Returns the last element wrapped in an OptionalByte, or an empty OptionalByte if no elements are available.
-     * 
-     * <p>This method consumes all remaining elements.</p>
-     * 
+     *
+     * <p>This method consumes all remaining elements from this iterator to find the last one.
+     * After calling this method, the iterator is completely exhausted (hasNext() will return false).
+     * If the iterator is empty when this method is called, an empty OptionalByte is returned.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * OptionalByte last = iter.last(); // OptionalByte.of(3)
-     * // Iterator is now exhausted
+     * boolean hasMore = iter.hasNext(); // false - iterator exhausted
      * }</pre>
-     * 
-     * @return an OptionalByte containing the last element, or empty if none
+     *
+     * @return an OptionalByte containing the last element if present, otherwise empty
      */
     public OptionalByte last() {
         if (hasNext()) {
@@ -512,14 +547,20 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Collects all remaining elements into a byte array.
-     * 
+     *
+     * <p>This method consumes all remaining elements from this iterator and returns them
+     * as a primitive byte array. After calling this method, the iterator is exhausted
+     * (hasNext() will return false). The returned array's length equals the number of
+     * remaining elements.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * byte[] array = iter.toArray(); // [1, 2, 3]
+     * boolean hasMore = iter.hasNext(); // false
      * }</pre>
-     * 
-     * @return a byte array containing all remaining elements
+     *
+     * @return a byte array containing all remaining elements in iteration order
      */
     @SuppressWarnings("deprecation")
     public byte[] toArray() {
@@ -528,15 +569,20 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Collects all remaining elements into a ByteList.
-     * 
+     *
+     * <p>This method consumes all remaining elements from this iterator and collects them
+     * into a ByteList. After calling this method, the iterator is exhausted (hasNext() will
+     * return false). The returned ByteList can be further manipulated or converted to other
+     * collections.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * ByteList list = iter.toList();
      * System.out.println(list); // [1, 2, 3]
      * }</pre>
-     * 
-     * @return a ByteList containing all remaining elements
+     *
+     * @return a ByteList containing all remaining elements in iteration order
      */
     public ByteList toList() {
         final ByteList list = new ByteList();
@@ -549,16 +595,20 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Converts this iterator to a ByteStream.
-     * 
+     * Converts this iterator to a ByteStream for functional-style operations.
+     *
+     * <p>This method creates a sequential ByteStream backed by this iterator. The returned
+     * stream can be used to perform various functional operations like filtering, mapping,
+     * and reducing. The stream consumes elements from this iterator as needed.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * ByteStream stream = iter.stream();
      * int sum = stream.sum(); // 6
      * }</pre>
-     * 
-     * @return a ByteStream backed by this iterator
+     *
+     * @return a sequential ByteStream backed by this iterator
      */
     public ByteStream stream() {
         return ByteStream.of(this);
@@ -566,8 +616,11 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Returns an iterator of IndexedByte elements, where each byte is paired with its index.
-     * The index starts from 0.
-     * 
+     *
+     * <p>This method creates an iterator that wraps each byte value with its position in the
+     * iteration sequence. The index starts from 0 and increments by 1 for each element. This
+     * is equivalent to calling {@link #indexed(long) indexed(0)}.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)10, (byte)20, (byte)30);
@@ -578,8 +631,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * }
      * // Output: 0: 10, 1: 20, 2: 30
      * }</pre>
-     * 
-     * @return an iterator of IndexedByte elements
+     *
+     * @return an ObjIterator of IndexedByte elements with 0-based indexing
      */
     @Beta
     public ObjIterator<IndexedByte> indexed() {
@@ -587,25 +640,29 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Returns an iterator of IndexedByte elements, where each byte is paired with its index.
-     * The index starts from the specified value.
-     * 
+     * Returns an iterator of IndexedByte elements, where each byte is paired with its index
+     * starting from the specified value.
+     *
+     * <p>This method creates an iterator that wraps each byte value with its position in the
+     * iteration sequence. The index starts from {@code startIndex} and increments by 1 for
+     * each subsequent element. This is useful when you need custom index numbering, such as
+     * when processing a subset of a larger sequence.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)10, (byte)20, (byte)30);
      * ObjIterator<IndexedByte> indexed = iter.indexed(100);
-     * // Produces IndexedByte with indices: 100, 101, 102
+     * IndexedByte first = indexed.next(); // index=100, value=10
+     * IndexedByte second = indexed.next(); // index=101, value=20
      * }</pre>
      *
-     * @param startIndex the starting index value
-     * @return an iterator of IndexedByte elements
+     * @param startIndex the starting index value (must be non-negative)
+     * @return an ObjIterator of IndexedByte elements with custom starting index
      * @throws IllegalArgumentException if startIndex is negative
      */
     @Beta
     public ObjIterator<IndexedByte> indexed(final long startIndex) {
-        if (startIndex < 0) {
-            throw new IllegalArgumentException("Invalid start index: " + startIndex);
-        }
+        N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final ByteIterator iter = this;
 
@@ -625,9 +682,20 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Performs the given action for each remaining element.
+     * Performs the given action for each remaining element, with boxing overhead.
      *
-     * @param action the action to perform on each element
+     * <p>This method boxes each primitive byte value into a Byte object before passing it
+     * to the action, which incurs performance overhead. It is provided for compatibility
+     * with the standard Iterator interface. For better performance, use
+     * {@link #foreachRemaining(Throwables.ByteConsumer)} instead.</p>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * ByteIterator iter = ByteIterator.of((byte)1, (byte)2);
+     * iter.forEachRemaining((Byte b) -> System.out.print(b + " ")); // Avoid - causes boxing
+     * }</pre>
+     *
+     * @param action the action to perform on each boxed element
      * @deprecated use {@link #foreachRemaining(Throwables.ByteConsumer)} instead to avoid boxing
      */
     @Deprecated
@@ -637,16 +705,22 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Performs the given action for each remaining element.
-     * 
+     * Performs the given action for each remaining element without boxing overhead.
+     *
+     * <p>This method consumes all remaining elements from this iterator and applies the
+     * specified action to each element. The action receives primitive byte values directly,
+     * avoiding the performance overhead of boxing. After calling this method, the iterator
+     * is exhausted (hasNext() will return false).</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
-     * iter.foreachRemaining(b -> System.out.print(b + " ")); // 1 2 3
+     * iter.foreachRemaining(b -> System.out.print(b + " ")); // Output: 1 2 3
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element
+     * @param action the action to perform on each element (must not be {@code null})
+     * @throws IllegalArgumentException if action is {@code null}
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachRemaining(final Throwables.ByteConsumer<E> action) throws E {//NOSONAR
@@ -658,22 +732,28 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Performs the given action for each remaining element along with its index.
-     * 
-     * <p>The index starts from 0 and increments for each element.</p>
-     * 
+     * Performs the given action for each remaining element along with its 0-based index.
+     *
+     * <p>This method consumes all remaining elements from this iterator and applies the
+     * specified action to each element along with its position in the sequence. The index
+     * starts from 0 and increments by 1 for each element. After calling this method, the
+     * iterator is exhausted (hasNext() will return false).</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)10, (byte)20, (byte)30);
-     * iter.foreachIndexed((index, b) -> 
-     *     System.out.println(index + ": " + b)
+     * iter.foreachIndexed((index, b) ->
+     *     System.out.println("Position " + index + ": " + b)
      * );
-     * // Output: 0: 10, 1: 20, 2: 30
+     * // Output:
+     * // Position 0: 10
+     * // Position 1: 20
+     * // Position 2: 30
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element and its index
-     * @throws IllegalArgumentException if action is null
+     * @param action the action to perform on each element and its index (must not be {@code null})
+     * @throws IllegalArgumentException if action is {@code null}
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntByteConsumer<E> action) throws IllegalArgumentException, E {
@@ -682,6 +762,9 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         int idx = 0;
 
         while (hasNext()) {
+            if (idx < 0) {
+                throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
+            }
             action.accept(idx++, nextByte());
         }
     }

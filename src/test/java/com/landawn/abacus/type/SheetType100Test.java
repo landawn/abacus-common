@@ -8,11 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Sheet;
 
+@Tag("new-test")
 public class SheetType100Test extends TestBase {
 
     private SheetType<String, String, Integer> sheetType;
@@ -57,10 +59,7 @@ public class SheetType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with null
         assertNull(sheetType.stringOf(null));
-
-        // Test with sheet (would need actual implementation to test properly)
 
         Sheet<String, String, Object> sheet = Sheet.rows(N.asList("r1", "r2", "r3"), N.asList("c1", "c2"),
                 new Object[][] { { 1, "a" }, { null, "b" }, { 5, "c" } });
@@ -71,7 +70,6 @@ public class SheetType100Test extends TestBase {
 
     @Test
     public void testValueOf() {
-        // Test with null/empty string
         assertNull(sheetType.valueOf(null));
         assertNull(sheetType.valueOf(""));
         assertNull(sheetType.valueOf(" "));

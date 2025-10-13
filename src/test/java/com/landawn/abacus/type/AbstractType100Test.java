@@ -24,12 +24,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.BufferedJSONWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class AbstractType100Test extends TestBase {
 
     private Type<String> stringType;
@@ -49,8 +51,6 @@ public class AbstractType100Test extends TestBase {
     @AfterEach
     public void tearDown() {
     }
-
-    // Tests for constructor and name-related methods
 
     @Test
     @DisplayName("Test AbstractType constructor with simple name")
@@ -77,12 +77,9 @@ public class AbstractType100Test extends TestBase {
     public void testXmlName() {
         assertEquals("String", stringType.xmlName());
 
-        // Test XML escaping
         Type<String> genericType = createType("Map<String,Integer>");
         assertEquals("Map&lt;String, Integer&gt;", genericType.xmlName());
     }
-
-    // Tests for type checking methods
 
     @Test
     @DisplayName("Test isPrimitiveType()")
@@ -276,8 +273,6 @@ public class AbstractType100Test extends TestBase {
         assertFalse(stringType.isObjectType());
     }
 
-    // Tests for element and parameter type methods
-
     @Test
     @DisplayName("Test getElementType()")
     public void testGetElementType() {
@@ -292,8 +287,6 @@ public class AbstractType100Test extends TestBase {
         assertEquals(0, paramTypes.length);
     }
 
-    // Tests for default value methods
-
     @Test
     @DisplayName("Test defaultValue()")
     public void testDefaultValue() {
@@ -307,8 +300,6 @@ public class AbstractType100Test extends TestBase {
         assertFalse(stringType.isDefaultValue("test"));
     }
 
-    // Tests for comparison methods
-
     @Test
     @DisplayName("Test compare() with comparable type")
     public void testCompareComparable() {
@@ -321,7 +312,6 @@ public class AbstractType100Test extends TestBase {
         assertTrue(comparableType.compare("a", null) > 0);
     }
 
-    // Test comparable type
     private static class TestComparableType extends AbstractType<String> {
         public TestComparableType() {
             super("TestComparableType");
@@ -348,8 +338,6 @@ public class AbstractType100Test extends TestBase {
         }
     }
 
-    // Tests for valueOf methods
-
     @Test
     @DisplayName("Test valueOf(Object)")
     public void testValueOfObject() {
@@ -365,8 +353,6 @@ public class AbstractType100Test extends TestBase {
         assertEquals("world", stringType.valueOf(chars, 6, 5));
         assertNull(stringType.valueOf(null, 0, 0));
     }
-
-    // Tests for SQL methods
 
     @Test
     @DisplayName("Test get(ResultSet, int)")
@@ -426,8 +412,6 @@ public class AbstractType100Test extends TestBase {
         verify(stmt).setString("param", "test");
     }
 
-    // Tests for I/O methods
-
     @Test
     @DisplayName("Test appendTo()")
     public void testAppendTo() throws IOException {
@@ -465,8 +449,6 @@ public class AbstractType100Test extends TestBase {
         verify(writer).writeCharacter("test");
     }
 
-    // Tests for collection/array methods
-
     @Test
     @DisplayName("Test collection2Array()")
     public void testCollection2Array() {
@@ -491,8 +473,6 @@ public class AbstractType100Test extends TestBase {
         });
     }
 
-    // Tests for hash code methods
-
     @Test
     @DisplayName("Test hashCode(T)")
     public void testHashCodeValue() {
@@ -506,8 +486,6 @@ public class AbstractType100Test extends TestBase {
         assertEquals("test".hashCode(), stringType.deepHashCode("test"));
         assertEquals(0, stringType.deepHashCode(null));
     }
-
-    // Tests for equals methods
 
     @Test
     @DisplayName("Test equals(T, T)")
@@ -528,8 +506,6 @@ public class AbstractType100Test extends TestBase {
         assertFalse(stringType.deepEquals("test", null));
     }
 
-    // Tests for toString methods
-
     @Test
     @DisplayName("Test toString(T)")
     public void testToStringValue() {
@@ -544,8 +520,6 @@ public class AbstractType100Test extends TestBase {
         assertEquals("null", stringType.deepToString(null));
     }
 
-    // Tests for Object methods
-
     @Test
     @DisplayName("Test hashCode()")
     public void testHashCode() {
@@ -557,7 +531,5 @@ public class AbstractType100Test extends TestBase {
     public void testToString() {
         assertEquals("String", stringType.toString());
     }
-
-    // Tests for protected static methods
 
 }

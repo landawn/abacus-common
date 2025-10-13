@@ -4,16 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class DateTimeFormat100Test extends TestBase {
 
     @Test
     public void testEnumValues() {
         DateTimeFormat[] values = DateTimeFormat.values();
         assertEquals(3, values.length);
-        
+
         assertEquals(DateTimeFormat.LONG, values[0]);
         assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, values[1]);
         assertEquals(DateTimeFormat.ISO_8601_TIMESTAMP, values[2]);

@@ -11,6 +11,7 @@ import java.util.AbstractMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -18,6 +19,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class ImmutableMapEntryType100Test extends TestBase {
 
     private ImmutableMapEntryType<String, Integer> immutableMapEntryType;
@@ -61,55 +63,41 @@ public class ImmutableMapEntryType100Test extends TestBase {
 
     @Test
     public void testStringOf() {
-        // Test with null
         assertNull(immutableMapEntryType.stringOf(null));
 
-        // Test with actual entry would require mocking Utils.jsonParser
-        // and N.asMap()
     }
 
     @Test
     public void testValueOf() {
-        // Test with null and empty string
         assertNull(immutableMapEntryType.valueOf(null));
         assertNull(immutableMapEntryType.valueOf(""));
         assertNull(immutableMapEntryType.valueOf("{}"));
 
-        // Test with JSON string would require mocking Utils.jsonParser
-        // and ImmutableEntry.copyOf()
     }
 
     @Test
     public void testAppendTo() throws IOException {
         StringWriter writer = new StringWriter();
 
-        // Test with null
         immutableMapEntryType.appendTo(writer, null);
         assertEquals("null", writer.toString());
 
-        // Test with actual entry would require mocking type handlers
-        // for key and value types
     }
 
     @Test
     public void testWriteCharacter() throws IOException {
-        // Test with null
         immutableMapEntryType.writeCharacter(characterWriter, null, config);
 
-        // Test with actual entry would require mocking type handlers
-        // for key and value types
     }
 
     @Test
     public void testGetTypeName() {
-        // Test static method with declaring name
         String typeName = ImmutableMapEntryType.getTypeName("String", "Integer", true);
         assertNotNull(typeName);
         assertTrue(typeName.contains("Map.ImmutableEntry"));
         assertTrue(typeName.contains("String"));
         assertTrue(typeName.contains("Integer"));
 
-        // Test static method without declaring name
         typeName = ImmutableMapEntryType.getTypeName("String", "Integer", false);
         assertNotNull(typeName);
         assertTrue(typeName.contains("Map.ImmutableEntry"));

@@ -7,10 +7,12 @@ import java.nio.ByteBuffer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class ByteBufferType100Test extends TestBase {
 
     private ByteBufferType type;
@@ -57,7 +59,6 @@ public class ByteBufferType100Test extends TestBase {
 
         String result = type.stringOf(buffer);
         Assertions.assertNotNull(result);
-        // Base64 encoding of [1, 2, 3]
         assertEquals("AQID", result);
     }
 
@@ -78,7 +79,7 @@ public class ByteBufferType100Test extends TestBase {
 
     @Test
     public void testValueOf_ValidBase64() {
-        String base64 = "AQID"; // Base64 encoding of [1, 2, 3]
+        String base64 = "AQID";
         ByteBuffer result = type.valueOf(base64);
 
         Assertions.assertNotNull(result);
@@ -86,7 +87,6 @@ public class ByteBufferType100Test extends TestBase {
         assertEquals(3, result.limit());
         assertEquals(3, result.capacity());
 
-        // Verify content
         result.position(0);
         assertEquals((byte) 1, result.get());
         assertEquals((byte) 2, result.get());
@@ -110,7 +110,6 @@ public class ByteBufferType100Test extends TestBase {
         assertEquals((byte) 30, result[2]);
         assertEquals((byte) 40, result[3]);
 
-        // Verify position is restored
         assertEquals(4, buffer.position());
     }
 
@@ -120,7 +119,6 @@ public class ByteBufferType100Test extends TestBase {
         buffer.put((byte) 1);
         buffer.put((byte) 2);
         buffer.put((byte) 3);
-        // Position is now 3, capacity is 5
 
         byte[] result = ByteBufferType.byteArrayOf(buffer);
 
@@ -130,7 +128,6 @@ public class ByteBufferType100Test extends TestBase {
         assertEquals((byte) 2, result[1]);
         assertEquals((byte) 3, result[2]);
 
-        // Verify position is restored
         assertEquals(3, buffer.position());
     }
 
@@ -144,7 +141,6 @@ public class ByteBufferType100Test extends TestBase {
         assertEquals(3, result.limit());
         assertEquals(3, result.capacity());
 
-        // Verify content
         result.position(0);
         assertEquals((byte) -1, result.get());
         assertEquals((byte) 0, result.get());
@@ -164,22 +160,18 @@ public class ByteBufferType100Test extends TestBase {
 
     @Test
     public void testRoundTrip() {
-        // Create original buffer
         ByteBuffer original = ByteBuffer.allocate(4);
         original.put((byte) 10);
         original.put((byte) 20);
         original.put((byte) 30);
         original.put((byte) 40);
 
-        // Convert to string
         String base64 = type.stringOf(original);
         Assertions.assertNotNull(base64);
 
-        // Convert back to ByteBuffer
         ByteBuffer restored = type.valueOf(base64);
         Assertions.assertNotNull(restored);
 
-        // Verify content matches
         assertEquals(original.position(), restored.position());
         assertEquals(original.limit(), restored.limit());
 

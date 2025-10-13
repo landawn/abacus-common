@@ -10,9 +10,11 @@ import java.util.Currency;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class CurrencyType100Test extends TestBase {
 
     private CurrencyType currencyType;

@@ -34,6 +34,7 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.base.Predicate;
@@ -47,6 +48,7 @@ import com.google.common.io.RecursiveDeleteOption;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.guava.Files.MoreFiles;
 
+@Tag("new-test")
 public class Files100Test extends TestBase {
 
     @TempDir
@@ -67,19 +69,16 @@ public class Files100Test extends TestBase {
 
     @AfterEach
     public void tearDown() throws IOException {
-        // Clean up is handled by @TempDir
     }
 
     @Test
     public void testNewReader() throws IOException {
-        // Test with valid file
         try (BufferedReader reader = MoreFiles.newReader(tempFile, UTF_8)) {
             assertNotNull(reader);
             String firstLine = reader.readLine();
             assertEquals("Hello, World!", firstLine);
         }
 
-        // Test with non-existent file
         File nonExistentFile = new File(tempDir.toFile(), "nonexistent.txt");
         assertThrows(FileNotFoundException.class, () -> MoreFiles.newReader(nonExistentFile, UTF_8));
     }
@@ -119,12 +118,10 @@ public class Files100Test extends TestBase {
     public void testAsByteSinkFile() throws IOException {
         File sinkFile = new File(tempDir.toFile(), "sink_test.txt");
 
-        // Test truncate mode (default)
         ByteSink byteSink = MoreFiles.asByteSink(sinkFile);
         byteSink.write(TEST_BYTES);
         assertArrayEquals(TEST_BYTES, Files.readAllBytes(sinkFile.toPath()));
 
-        // Test append mode
         ByteSink appendSink = MoreFiles.asByteSink(sinkFile, FileWriteMode.APPEND);
         appendSink.write(" Appended".getBytes(UTF_8));
         String content = Files.readString(sinkFile.toPath());
@@ -166,7 +163,6 @@ public class Files100Test extends TestBase {
         charSink.write("Test content");
         assertEquals("Test content", Files.readString(sinkFile.toPath()));
 
-        // Test append mode
         CharSink appendSink = MoreFiles.asCharSink(sinkFile, UTF_8, FileWriteMode.APPEND);
         appendSink.write(" Appended");
         assertEquals("Test content Appended", Files.readString(sinkFile.toPath()));
@@ -186,7 +182,6 @@ public class Files100Test extends TestBase {
         byte[] bytes = MoreFiles.toByteArray(tempFile);
         assertArrayEquals(TEST_BYTES, bytes);
 
-        // Test with non-existent file
         File nonExistent = new File(tempDir.toFile(), "nonexistent.txt");
         assertThrows(IOException.class, () -> MoreFiles.toByteArray(nonExistent));
     }
@@ -199,7 +194,6 @@ public class Files100Test extends TestBase {
         MoreFiles.write(data, writeFile);
         assertArrayEquals(data, Files.readAllBytes(writeFile.toPath()));
 
-        // Test overwrite
         byte[] newData = "New data".getBytes(UTF_8);
         MoreFiles.write(newData, writeFile);
         assertArrayEquals(newData, Files.readAllBytes(writeFile.toPath()));
@@ -207,7 +201,6 @@ public class Files100Test extends TestBase {
 
     @Test
     public void testEqualFiles() throws IOException {
-        // Test equal files
         File file1 = new File(tempDir.toFile(), "equal1.txt");
         File file2 = new File(tempDir.toFile(), "equal2.txt");
         Files.write(file1.toPath(), TEST_BYTES);
@@ -215,15 +208,10 @@ public class Files100Test extends TestBase {
 
         assertTrue(MoreFiles.equal(file1, file2));
 
-        // Test different files
         Files.write(file2.toPath(), "Different content".getBytes(UTF_8));
         assertFalse(MoreFiles.equal(file1, file2));
 
-        // Test same file
         assertTrue(MoreFiles.equal(file1, file1));
-
-        // Test with directory
-        // assertFalse(MoreFiles.equal(file1, tempDir.toFile()));
 
         assertThrows(FileNotFoundException.class, () -> MoreFiles.equal(file1, tempDir.toFile()));
     }
@@ -237,14 +225,12 @@ public class Files100Test extends TestBase {
 
         assertTrue(MoreFiles.equal(path1, path2));
 
-        // Test different paths
         Files.write(path2, "Different content".getBytes(UTF_8));
         assertFalse(MoreFiles.equal(path1, path2));
     }
 
     @Test
     public void testTouchFile() throws IOException, InterruptedException {
-        // Test creating new file
         File newFile = new File(tempDir.toFile(), "touch_test.txt");
         assertFalse(newFile.exists());
 
@@ -252,9 +238,8 @@ public class Files100Test extends TestBase {
         assertTrue(newFile.exists());
         assertEquals(0, newFile.length());
 
-        // Test updating timestamp
         long originalTime = newFile.lastModified();
-        Thread.sleep(10); // Ensure time difference
+        Thread.sleep(10);
         MoreFiles.touch(newFile);
         assertTrue(newFile.lastModified() >= originalTime);
     }
@@ -276,7 +261,6 @@ public class Files100Test extends TestBase {
         assertTrue(tempDirectory.exists());
         assertTrue(tempDirectory.isDirectory());
 
-        // Clean up
         tempDirectory.delete();
     }
 
@@ -295,12 +279,10 @@ public class Files100Test extends TestBase {
         Path deepPath = tempDir.resolve("x/y/z/file.txt");
         assertFalse(Files.exists(deepPath.getParent()));
 
-        // Test with POSIX permissions if supported
         try {
             FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-xr-x"));
             MoreFiles.createParentDirectories(deepPath, attr);
         } catch (UnsupportedOperationException e) {
-            // Fallback for non-POSIX systems
             MoreFiles.createParentDirectories(deepPath);
         }
 
@@ -324,12 +306,10 @@ public class Files100Test extends TestBase {
         assertTrue(destFile.exists());
         assertArrayEquals(TEST_BYTES, Files.readAllBytes(destFile.toPath()));
 
-        // Test overwriting
         Files.write(destFile.toPath(), "Old content".getBytes(UTF_8));
         MoreFiles.copy(tempFile, destFile);
         assertArrayEquals(TEST_BYTES, Files.readAllBytes(destFile.toPath()));
 
-        // Test copying to same file should throw
         assertThrows(IllegalArgumentException.class, () -> MoreFiles.copy(tempFile, tempFile));
     }
 
@@ -344,7 +324,6 @@ public class Files100Test extends TestBase {
         assertTrue(destFile.exists());
         assertArrayEquals(TEST_BYTES, Files.readAllBytes(destFile.toPath()));
 
-        // Test moving to same file should throw
         assertThrows(IllegalArgumentException.class, () -> MoreFiles.move(destFile, destFile));
     }
 
@@ -355,7 +334,6 @@ public class Files100Test extends TestBase {
         assertEquals("Hello, World!", lines.get(0));
         assertEquals("This is a test file.", lines.get(1));
 
-        // Test with empty file
         File emptyFile = new File(tempDir.toFile(), "empty.txt");
         emptyFile.createNewFile();
         List<String> emptyLines = MoreFiles.readLines(emptyFile, UTF_8);
@@ -364,11 +342,9 @@ public class Files100Test extends TestBase {
 
     @Test
     public void testMap() throws IOException {
-        // Create a file with known content
         File mapFile = new File(tempDir.toFile(), "map_test.txt");
         Files.write(mapFile.toPath(), TEST_BYTES);
 
-        // Test read-only mapping
         MappedByteBuffer buffer = MoreFiles.map(mapFile);
         assertNotNull(buffer);
         assertEquals(TEST_BYTES.length, buffer.remaining());
@@ -377,7 +353,7 @@ public class Files100Test extends TestBase {
         buffer.get(readBytes);
         assertArrayEquals(TEST_BYTES, readBytes);
 
-        buffer.clear(); // Clear the buffer for further operations
+        buffer.clear();
 
         unmap(buffer);
     }
@@ -387,16 +363,13 @@ public class Files100Test extends TestBase {
         File mapFile = new File(tempDir.toFile(), "map_mode_test.txt");
         Files.write(mapFile.toPath(), TEST_BYTES);
 
-        // Test with READ_ONLY mode
         MappedByteBuffer readOnlyBuffer = MoreFiles.map(mapFile, MapMode.READ_ONLY);
         assertNotNull(readOnlyBuffer);
         assertEquals(TEST_BYTES.length, readOnlyBuffer.remaining());
 
-        // Test with READ_WRITE mode
         MappedByteBuffer readWriteBuffer = MoreFiles.map(mapFile, MapMode.READ_WRITE);
         assertNotNull(readWriteBuffer);
 
-        // Verify we can write
         readWriteBuffer.put(0, (byte) 'h');
         readWriteBuffer.force();
         unmap(readOnlyBuffer);
@@ -407,13 +380,11 @@ public class Files100Test extends TestBase {
     public void testMapWithModeAndSize() throws IOException {
         File mapFile = new File(tempDir.toFile(), "map_size_test.txt");
 
-        // Create file with specific size
         long size = 1024;
         MappedByteBuffer buffer = MoreFiles.map(mapFile, MapMode.READ_WRITE, size);
         assertNotNull(buffer);
         assertEquals(size, buffer.capacity());
 
-        // Write some data
         buffer.put("Test".getBytes(UTF_8));
         buffer.force();
 
@@ -476,7 +447,6 @@ public class Files100Test extends TestBase {
 
     @Test
     public void testFileTraverser() throws IOException {
-        // Create test directory structure
         Path rootDir = tempDir.resolve("traverse_test");
         Path subDir1 = rootDir.resolve("dir1");
         Path subDir2 = rootDir.resolve("dir2");
@@ -493,16 +463,14 @@ public class Files100Test extends TestBase {
         Traverser<File> traverser = MoreFiles.fileTraverser();
         assertNotNull(traverser);
 
-        // Test depth-first traversal
         Iterable<File> files = traverser.depthFirstPreOrder(rootDir.toFile());
         int count = 0;
         for (File f : files) {
             assertNotNull(f);
             count++;
         }
-        assertEquals(6, count); // root + 2 dirs + 3 files
+        assertEquals(6, count);
 
-        // Test breadth-first traversal
         files = traverser.breadthFirst(rootDir.toFile());
         count = 0;
         for (File f : files) {
@@ -514,7 +482,6 @@ public class Files100Test extends TestBase {
 
     @Test
     public void testPathTraverser() throws IOException {
-        // Create test directory structure
         Path rootDir = tempDir.resolve("path_traverse_test");
         Path subDir = rootDir.resolve("subdir");
         Path file1 = rootDir.resolve("file1.txt");
@@ -527,19 +494,17 @@ public class Files100Test extends TestBase {
         Traverser<Path> traverser = MoreFiles.pathTraverser();
         assertNotNull(traverser);
 
-        // Test traversal
         Iterable<Path> paths = traverser.depthFirstPreOrder(rootDir);
         int count = 0;
         for (Path p : paths) {
             assertNotNull(p);
             count++;
         }
-        assertEquals(4, count); // root + 1 dir + 2 files
+        assertEquals(4, count);
     }
 
     @Test
     public void testListFiles() throws IOException {
-        // Create test files
         Path dir = tempDir.resolve("list_test");
         Files.createDirectory(dir);
         Path file1 = dir.resolve("file1.txt");
@@ -556,16 +521,13 @@ public class Files100Test extends TestBase {
         assertTrue(files.contains(file2));
         assertTrue(files.contains(subDir));
 
-        // Test with non-existent directory
         assertThrows(NoSuchFileException.class, () -> MoreFiles.listFiles(tempDir.resolve("nonexistent")));
 
-        // Test with file instead of directory
         assertThrows(NotDirectoryException.class, () -> MoreFiles.listFiles(file1));
     }
 
     @Test
     public void testDeleteRecursively() throws IOException {
-        // Create directory structure
         Path rootDir = tempDir.resolve("delete_test");
         Path subDir = rootDir.resolve("subdir");
         Path file1 = rootDir.resolve("file1.txt");
@@ -579,10 +541,8 @@ public class Files100Test extends TestBase {
         MoreFiles.deleteRecursively(rootDir, RecursiveDeleteOption.ALLOW_INSECURE);
         assertFalse(Files.exists(rootDir));
 
-        // Test with non-existent path
         assertThrows(NoSuchFileException.class, () -> MoreFiles.deleteRecursively(tempDir.resolve("nonexistent"), RecursiveDeleteOption.ALLOW_INSECURE));
 
-        // Test with single file
         Path singleFile = tempDir.resolve("single.txt");
         Files.write(singleFile, "content".getBytes(UTF_8));
         MoreFiles.deleteRecursively(singleFile, RecursiveDeleteOption.ALLOW_INSECURE);
@@ -591,7 +551,6 @@ public class Files100Test extends TestBase {
 
     @Test
     public void testDeleteDirectoryContents() throws IOException {
-        // Create directory structure
         Path rootDir = tempDir.resolve("delete_contents_test");
         Path subDir = rootDir.resolve("subdir");
         Path file1 = rootDir.resolve("file1.txt");
@@ -602,13 +561,11 @@ public class Files100Test extends TestBase {
         Files.write(file2, "content".getBytes(UTF_8));
 
         MoreFiles.deleteDirectoryContents(rootDir, RecursiveDeleteOption.ALLOW_INSECURE);
-        assertTrue(Files.exists(rootDir)); // Directory itself should still exist
-        assertTrue(Files.list(rootDir).count() == 0); // But should be empty
+        assertTrue(Files.exists(rootDir));
+        assertTrue(Files.list(rootDir).count() == 0);
 
-        // Test with non-existent directory
         assertThrows(NoSuchFileException.class, () -> MoreFiles.deleteDirectoryContents(tempDir.resolve("nonexistent")));
 
-        // Test with file instead of directory
         Path notADir = tempDir.resolve("notadir.txt");
         Files.write(notADir, "content".getBytes(UTF_8));
         assertThrows(NotDirectoryException.class, () -> MoreFiles.deleteDirectoryContents(notADir));
@@ -627,18 +584,14 @@ public class Files100Test extends TestBase {
         assertTrue(isDirPredicate.apply(dir));
         assertFalse(isDirPredicate.apply(file));
 
-        // Test with symlink if supported
         try {
             Files.createSymbolicLink(link, dir);
 
-            // Without NOFOLLOW_LINKS, should return true for symlink to directory
             assertTrue(isDirPredicate.apply(link));
 
-            // With NOFOLLOW_LINKS, should return false for symlink
             Predicate<Path> isDirNoFollow = MoreFiles.isDirectory(LinkOption.NOFOLLOW_LINKS);
             assertFalse(isDirNoFollow.apply(link));
         } catch (UnsupportedOperationException | IOException e) {
-            // Symbolic links not supported on this system
         }
     }
 
@@ -654,21 +607,18 @@ public class Files100Test extends TestBase {
         assertFalse(isFilePredicate.apply(dir));
         assertTrue(isFilePredicate.apply(file));
 
-        // Test with non-existent path
         Path nonExistent = tempDir.resolve("nonexistent");
         assertFalse(isFilePredicate.apply(nonExistent));
     }
 
     @Test
     public void testMoreFilesClass() {
-        // Test that MoreFiles class exists and is properly structured
         assertNotNull(MoreFiles.class);
         assertTrue(MoreFiles.class.isAssignableFrom(MoreFiles.class));
     }
 
     @Test
     public void testEdgeCases() throws IOException {
-        // Test with very long file names (if supported by the file system)
         StringBuilder longName = new StringBuilder();
         for (int i = 0; i < 200; i++) {
             longName.append("a");
@@ -679,10 +629,8 @@ public class Files100Test extends TestBase {
             MoreFiles.touch(longFile);
             assertTrue(longFile.exists());
         } catch (IOException e) {
-            // File name too long for this file system
         }
 
-        // Test with special characters in file names
         String[] specialNames = { "file with spaces.txt", "file-with-dashes.txt", "file_with_underscores.txt", "file.multiple.dots.txt" };
 
         for (String name : specialNames) {
@@ -690,7 +638,6 @@ public class Files100Test extends TestBase {
             MoreFiles.touch(specialFile);
             assertTrue(specialFile.exists());
 
-            // Test extension extraction
             if (name.contains(".")) {
                 String ext = MoreFiles.getFileExtension(name);
                 assertNotNull(ext);
@@ -700,7 +647,6 @@ public class Files100Test extends TestBase {
 
     @Test
     public void testConcurrentAccess() throws Exception {
-        // Test concurrent file operations
         Path concurrentFile = tempDir.resolve("concurrent.txt");
         Files.write(concurrentFile, "Initial content".getBytes(UTF_8));
 
@@ -711,11 +657,9 @@ public class Files100Test extends TestBase {
             final int index = i;
             threads[i] = new Thread(() -> {
                 try {
-                    // Read operations
                     byte[] content = MoreFiles.toByteArray(concurrentFile.toFile());
                     assertNotNull(content);
 
-                    // Touch operations
                     MoreFiles.touch(concurrentFile);
                 } catch (IOException e) {
                     fail("Concurrent operation failed: " + e.getMessage());
@@ -723,43 +667,35 @@ public class Files100Test extends TestBase {
             });
         }
 
-        // Start all threads
         for (Thread t : threads) {
             t.start();
         }
 
-        // Wait for all threads to complete
         for (Thread t : threads) {
             t.join();
         }
 
-        // Verify file still exists and is readable
         assertTrue(Files.exists(concurrentFile));
         assertNotNull(MoreFiles.toByteArray(concurrentFile.toFile()));
     }
 
     @Test
     public void testLargeFile() throws IOException {
-        // Test with a moderately large file (1MB)
         Path largeFile = tempDir.resolve("large.dat");
-        byte[] largeData = new byte[1024 * 1024]; // 1MB
+        byte[] largeData = new byte[1024 * 1024];
         for (int i = 0; i < largeData.length; i++) {
             largeData[i] = (byte) (i % 256);
         }
 
-        // Write large file
         MoreFiles.write(largeData, largeFile.toFile());
 
-        // Read and verify
         byte[] readData = MoreFiles.toByteArray(largeFile.toFile());
         assertArrayEquals(largeData, readData);
 
-        // Test copying large file
         Path copyDest = tempDir.resolve("large_copy.dat");
         MoreFiles.copy(largeFile.toFile(), copyDest.toFile());
         assertTrue(MoreFiles.equal(largeFile, copyDest));
 
-        // Test memory mapping large file
         MappedByteBuffer buffer = MoreFiles.map(largeFile.toFile());
         assertEquals(largeData.length, buffer.remaining());
         unmap(buffer);

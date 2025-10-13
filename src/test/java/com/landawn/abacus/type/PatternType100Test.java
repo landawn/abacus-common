@@ -12,9 +12,11 @@ import java.util.regex.PatternSyntaxException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class PatternType100Test extends TestBase {
 
     private PatternType patternType;
@@ -53,7 +55,6 @@ public class PatternType100Test extends TestBase {
         Pattern pattern = Pattern.compile("test", Pattern.CASE_INSENSITIVE);
         String result = patternType.stringOf(pattern);
         assertNotNull(result);
-        // The pattern string includes flag information in its toString()
         assertTrue(result.contains("test"));
     }
 
@@ -84,7 +85,7 @@ public class PatternType100Test extends TestBase {
 
     @Test
     public void testValueOfWithSpecialCharacters() {
-        String regex = "\\d{3}-\\d{3}-\\d{4}"; // Phone number pattern
+        String regex = "\\d{3}-\\d{3}-\\d{4}";
         Pattern pattern = patternType.valueOf(regex);
         assertNotNull(pattern);
         assertEquals(regex, pattern.pattern());
@@ -92,7 +93,6 @@ public class PatternType100Test extends TestBase {
 
     @Test
     public void testValueOfWithInvalidPattern() {
-        // Invalid regex pattern should throw exception
         assertThrows(PatternSyntaxException.class, () -> {
             patternType.valueOf("[");
         });
@@ -100,7 +100,6 @@ public class PatternType100Test extends TestBase {
 
     @Test
     public void testPatternMatching() {
-        // Test that created patterns work correctly
         Pattern emailPattern = patternType.valueOf("\\w+@\\w+\\.\\w+");
         assertNotNull(emailPattern);
         assertTrue(emailPattern.matcher("test@example.com").find());
@@ -109,8 +108,7 @@ public class PatternType100Test extends TestBase {
 
     @Test
     public void testRoundTrip() {
-        // Test that stringOf and valueOf are inverse operations
-        String originalRegex = "\\d{4}-\\d{2}-\\d{2}"; // Date pattern
+        String originalRegex = "\\d{4}-\\d{2}-\\d{2}";
         Pattern pattern1 = patternType.valueOf(originalRegex);
         String stringRepresentation = patternType.stringOf(pattern1);
         Pattern pattern2 = patternType.valueOf(stringRepresentation);
@@ -130,16 +128,7 @@ public class PatternType100Test extends TestBase {
 
     @Test
     public void testVariousPatterns() {
-        // Test various common regex patterns
-        String[] patterns = { ".*", // Match all
-                "^start", // Start anchor
-                "end$", // End anchor
-                "(group1|group2)", // Groups
-                "a{2,5}", // Quantifiers
-                "[^abc]", // Negated character class
-                "\\s+", // Whitespace
-                "(?i)case", // Inline flags
-        };
+        String[] patterns = { ".*", "^start", "end$", "(group1|group2)", "a{2,5}", "[^abc]", "\\s+", "(?i)case", };
 
         for (String regex : patterns) {
             Pattern pattern = patternType.valueOf(regex);

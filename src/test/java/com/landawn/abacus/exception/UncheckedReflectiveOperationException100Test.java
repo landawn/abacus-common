@@ -4,10 +4,11 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class UncheckedReflectiveOperationException100Test extends TestBase {
 
     @Test
@@ -93,7 +94,7 @@ public class UncheckedReflectiveOperationException100Test extends TestBase {
         InvocationTargetException invocationTargetException = new InvocationTargetException(targetException, "Invocation failed");
         UncheckedReflectiveOperationException exception = new UncheckedReflectiveOperationException(invocationTargetException);
         Assertions.assertEquals(invocationTargetException, exception.getCause());
-        Assertions.assertEquals(targetException, ((InvocationTargetException)exception.getCause()).getTargetException());
+        Assertions.assertEquals(targetException, ((InvocationTargetException) exception.getCause()).getTargetException());
     }
 
     @Test
@@ -101,7 +102,7 @@ public class UncheckedReflectiveOperationException100Test extends TestBase {
         ReflectiveOperationException reflectiveException = new ReflectiveOperationException("Reflection error");
         ReflectiveOperationException suppressed = new ReflectiveOperationException("Suppressed reflection error");
         reflectiveException.addSuppressed(suppressed);
-        
+
         UncheckedReflectiveOperationException exception = new UncheckedReflectiveOperationException(reflectiveException);
         Throwable[] suppressedExceptions = exception.getSuppressed();
         Assertions.assertNotNull(suppressedExceptions);
@@ -118,7 +119,7 @@ public class UncheckedReflectiveOperationException100Test extends TestBase {
 
     @Test
     public void testNullMessage() {
-        ReflectiveOperationException reflectiveException = new ReflectiveOperationException((String)null);
+        ReflectiveOperationException reflectiveException = new ReflectiveOperationException((String) null);
         UncheckedReflectiveOperationException exception = new UncheckedReflectiveOperationException(reflectiveException);
         Assertions.assertEquals("java.lang.ReflectiveOperationException", exception.getMessage());
     }

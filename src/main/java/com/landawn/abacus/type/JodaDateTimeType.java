@@ -40,6 +40,16 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     /**
      * Gets the class type for Joda DateTime.
+     * This method returns the Class object representing org.joda.time.DateTime, which is used
+     * for type identification and reflection operations.
+     *
+     * <pre>
+     * {@code
+     * JodaDateTimeType type = new JodaDateTimeType();
+     * Class<DateTime> clazz = type.clazz();
+     * System.out.println(clazz.getName()); // Outputs: org.joda.time.DateTime
+     * }
+     * </pre>
      *
      * @return the Class object representing org.joda.time.DateTime
      */
@@ -50,13 +60,35 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     /**
      * Converts the specified object to a Joda DateTime instance.
-     * 
+     * This method provides flexible conversion from various types including Number, java.util.Date,
+     * and String representations. It intelligently handles different input types to create a
+     * proper DateTime object.
+     *
      * This method handles the following conversions:
      * - Number: treated as milliseconds since epoch and converted to DateTime
      * - java.util.Date: converted using the date's time in milliseconds
      * - String: parsed using the valueOf(String) method
      * - null: returns null
      * - Other types: converted to string first, then parsed
+     *
+     * <pre>
+     * {@code
+     * JodaDateTimeType type = new JodaDateTimeType();
+     *
+     * // From Number (milliseconds since epoch)
+     * DateTime dt1 = type.valueOf(1609459200000L);
+     *
+     * // From java.util.Date
+     * Date date = new Date();
+     * DateTime dt2 = type.valueOf(date);
+     *
+     * // From String
+     * DateTime dt3 = type.valueOf("2021-01-01T00:00:00");
+     *
+     * // null input returns null
+     * DateTime dt4 = type.valueOf(null); // returns null
+     * }
+     * </pre>
      *
      * @param obj the object to convert to DateTime
      * @return a DateTime instance, or null if the input is null
@@ -74,13 +106,35 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     /**
      * Parses a string representation into a Joda DateTime instance.
-     * 
+     * This method supports multiple string formats including ISO 8601 formats and a special
+     * "SYS_TIME" keyword for current time. It intelligently detects the format based on
+     * string length and content.
+     *
      * This method handles the following string formats:
      * - Empty/null string: returns null
      * - "SYS_TIME": returns current system time as DateTime
      * - ISO 8601 date-time format (20 characters): parsed as yyyy-MM-dd'T'HH:mm:ss
      * - ISO 8601 timestamp format (24 characters): parsed as yyyy-MM-dd'T'HH:mm:ss.SSS
-     * 
+     *
+     * <pre>
+     * {@code
+     * JodaDateTimeType type = new JodaDateTimeType();
+     *
+     * // Parse ISO 8601 date-time format
+     * DateTime dt1 = type.valueOf("2021-01-01T10:30:00");
+     *
+     * // Parse ISO 8601 timestamp format
+     * DateTime dt2 = type.valueOf("2021-01-01T10:30:00.123");
+     *
+     * // Get current system time
+     * DateTime dt3 = type.valueOf("SYS_TIME");
+     *
+     * // Empty or null returns null
+     * DateTime dt4 = type.valueOf(null); // returns null
+     * DateTime dt5 = type.valueOf(""); // returns null
+     * }
+     * </pre>
+     *
      * @param str the string to parse
      * @return a DateTime instance, or null if the string is empty or null
      * @throws IllegalArgumentException if the string format is invalid
@@ -101,10 +155,34 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     /**
      * Parses a character array into a Joda DateTime instance.
-     * 
+     * This method provides efficient parsing from character arrays, attempting numeric parsing first
+     * for performance, then falling back to string parsing. This is useful for parsing data from
+     * streams or buffers without creating intermediate String objects.
+     *
      * This method first attempts to parse the character array as a long value (milliseconds since epoch).
      * If that fails, it converts the character array to a string and delegates to valueOf(String).
-     * 
+     *
+     * <pre>
+     * {@code
+     * JodaDateTimeType type = new JodaDateTimeType();
+     *
+     * // Parse from character array containing milliseconds
+     * char[] millisChars = "1609459200000".toCharArray();
+     * DateTime dt1 = type.valueOf(millisChars, 0, millisChars.length);
+     *
+     * // Parse from character array containing ISO 8601 format
+     * char[] isoChars = "2021-01-01T10:30:00".toCharArray();
+     * DateTime dt2 = type.valueOf(isoChars, 0, isoChars.length);
+     *
+     * // Parse substring from character array
+     * char[] buffer = "prefix2021-01-01T10:30:00suffix".toCharArray();
+     * DateTime dt3 = type.valueOf(buffer, 6, 19);
+     *
+     * // null or empty array returns null
+     * DateTime dt4 = type.valueOf(null, 0, 0); // returns null
+     * }
+     * </pre>
+     *
      * @param cbuf the character buffer containing the value to parse
      * @param offset the start offset in the character buffer
      * @param len the number of characters to parse
@@ -130,9 +208,28 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     /**
      * Retrieves a DateTime value from the specified column in a ResultSet.
-     * 
+     * This method provides database-to-Java type conversion for DateTime objects, reading
+     * from SQL TIMESTAMP columns and converting them to Joda-Time DateTime instances.
+     *
      * This method reads a Timestamp from the ResultSet and converts it to a Joda DateTime.
      * If the timestamp is null, this method returns null.
+     *
+     * <pre>
+     * {@code
+     * JodaDateTimeType type = new JodaDateTimeType();
+     *
+     * try (Connection conn = dataSource.getConnection();
+     *      PreparedStatement stmt = conn.prepareStatement("SELECT created_at FROM events WHERE id = ?")) {
+     *     stmt.setInt(1, eventId);
+     *     try (ResultSet rs = stmt.executeQuery()) {
+     *         if (rs.next()) {
+     *             DateTime createdAt = type.get(rs, 1);
+     *             System.out.println("Event created at: " + createdAt);
+     *         }
+     *     }
+     * }
+     * }
+     * </pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
@@ -147,10 +244,30 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
     }
 
     /**
-     * Retrieves a DateTime value from the specified column in a ResultSet.
-     * 
+     * Retrieves a DateTime value from the specified column in a ResultSet using column label.
+     * This method provides database-to-Java type conversion for DateTime objects by column name,
+     * reading from SQL TIMESTAMP columns and converting them to Joda-Time DateTime instances.
+     *
      * This method reads a Timestamp from the ResultSet and converts it to a Joda DateTime.
      * If the timestamp is null, this method returns null.
+     *
+     * <pre>
+     * {@code
+     * JodaDateTimeType type = new JodaDateTimeType();
+     *
+     * try (Connection conn = dataSource.getConnection();
+     *      PreparedStatement stmt = conn.prepareStatement("SELECT created_at, updated_at FROM events WHERE id = ?")) {
+     *     stmt.setInt(1, eventId);
+     *     try (ResultSet rs = stmt.executeQuery()) {
+     *         if (rs.next()) {
+     *             DateTime createdAt = type.get(rs, "created_at");
+     *             DateTime updatedAt = type.get(rs, "updated_at");
+     *             System.out.println("Created: " + createdAt + ", Updated: " + updatedAt);
+     *         }
+     *     }
+     * }
+     * }
+     * </pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label to retrieve the value from
@@ -166,9 +283,28 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     /**
      * Sets a DateTime parameter in a PreparedStatement.
-     * 
+     * This method provides Java-to-database type conversion, transforming Joda-Time DateTime
+     * objects into SQL TIMESTAMP values for database insertion or update operations.
+     *
      * This method converts the Joda DateTime to a SQL Timestamp before setting it in the statement.
      * If the DateTime is null, a SQL NULL is set for the parameter.
+     *
+     * <pre>
+     * {@code
+     * JodaDateTimeType type = new JodaDateTimeType();
+     * DateTime eventTime = new DateTime(2021, 1, 1, 10, 30, 0);
+     *
+     * try (Connection conn = dataSource.getConnection();
+     *      PreparedStatement stmt = conn.prepareStatement("INSERT INTO events (name, created_at) VALUES (?, ?)")) {
+     *     stmt.setString(1, "Conference");
+     *     type.set(stmt, 2, eventTime);
+     *     stmt.executeUpdate();
+     * }
+     *
+     * // Setting null value
+     * type.set(stmt, 2, null); // Sets SQL NULL
+     * }
+     * </pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -182,9 +318,28 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     /**
      * Sets a named DateTime parameter in a CallableStatement.
-     * 
+     * This method provides Java-to-database type conversion for stored procedure calls,
+     * transforming Joda-Time DateTime objects into SQL TIMESTAMP values using named parameters.
+     *
      * This method converts the Joda DateTime to a SQL Timestamp before setting it in the statement.
      * If the DateTime is null, a SQL NULL is set for the parameter.
+     *
+     * <pre>
+     * {@code
+     * JodaDateTimeType type = new JodaDateTimeType();
+     * DateTime eventTime = new DateTime(2021, 1, 1, 10, 30, 0);
+     *
+     * try (Connection conn = dataSource.getConnection();
+     *      CallableStatement stmt = conn.prepareCall("{call create_event(?, ?)}")) {
+     *     stmt.setString("event_name", "Conference");
+     *     type.set(stmt, "event_time", eventTime);
+     *     stmt.execute();
+     * }
+     *
+     * // Setting null value
+     * type.set(stmt, "event_time", null); // Sets SQL NULL
+     * }
+     * </pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

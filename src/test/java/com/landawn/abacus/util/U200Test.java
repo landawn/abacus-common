@@ -15,9 +15,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class U200Test extends TestBase {
 
     @Nested
@@ -25,24 +27,20 @@ public class U200Test extends TestBase {
 
         @Test
         public void testCreation() {
-            // empty
             u.Optional<String> empty = u.Optional.empty();
             assertFalse(empty.isPresent());
             assertTrue(empty.isEmpty());
 
-            // of
             u.Optional<String> present = u.Optional.of("test");
             assertTrue(present.isPresent());
             assertEquals("test", present.get());
             assertThrows(NullPointerException.class, () -> u.Optional.of(null));
 
-            // ofNullable
             u.Optional<String> fromNullable = u.Optional.ofNullable("test");
             assertTrue(fromNullable.isPresent());
             u.Optional<String> fromNull = u.Optional.ofNullable(null);
             assertFalse(fromNull.isPresent());
 
-            // from jdk Optional
             u.Optional<String> fromJdk = u.Optional.from(java.util.Optional.of("jdk"));
             assertTrue(fromJdk.isPresent());
             assertEquals("jdk", fromJdk.get());
@@ -88,18 +86,15 @@ public class U200Test extends TestBase {
             u.Optional<String> present = u.Optional.of("value");
             u.Optional<String> empty = u.Optional.empty();
 
-            // filter
             assertTrue(present.filter(s -> s.equals("value")).isPresent());
             assertFalse(present.filter(s -> s.equals("wrong")).isPresent());
             assertFalse(empty.filter(s -> true).isPresent());
 
-            // map
             u.Optional<Integer> mapped = present.map(String::length);
             assertTrue(mapped.isPresent());
             assertEquals(5, mapped.get());
             assertFalse(empty.map(String::length).isPresent());
 
-            // flatMap
             u.Optional<Integer> flatMapped = present.flatMap(s -> u.Optional.of(s.length()));
             assertTrue(flatMapped.isPresent());
             assertEquals(5, flatMapped.get());
@@ -145,19 +140,15 @@ public class U200Test extends TestBase {
             u.Optional<String> present = u.Optional.of("v");
             u.Optional<String> empty = u.Optional.empty();
 
-            // stream
             assertEquals(1, present.stream().count());
             assertEquals(0, empty.stream().count());
 
-            // toList
             assertEquals(List.of("v"), present.toList());
             assertTrue(empty.toList().isEmpty());
 
-            // toSet
             assertEquals(Set.of("v"), present.toSet());
             assertTrue(empty.toSet().isEmpty());
 
-            // toJdkOptional
             assertTrue(present.toJdkOptional().isPresent());
             assertFalse(empty.toJdkOptional().isPresent());
 
@@ -171,17 +162,14 @@ public class U200Test extends TestBase {
             u.Optional<String> e1 = u.Optional.empty();
             u.Optional<String> e2 = u.Optional.empty();
 
-            // equals
             assertEquals(p1, p2);
             assertNotEquals(p1, p3);
             assertEquals(e1, e2);
             assertNotEquals(p1, e1);
 
-            // hashCode
             assertEquals(p1.hashCode(), p2.hashCode());
             assertEquals(e1.hashCode(), e2.hashCode());
 
-            // toString
             assertEquals("Optional[A]", p1.toString());
             assertEquals("Optional.empty", e1.toString());
         }
@@ -255,12 +243,10 @@ public class U200Test extends TestBase {
 
         @Test
         public void testCreation() {
-            // empty
             u.Nullable<String> empty = u.Nullable.empty();
             assertFalse(empty.isPresent());
             assertTrue(empty.isNotPresent());
 
-            // of
             u.Nullable<String> present = u.Nullable.of("test");
             assertTrue(present.isPresent());
             assertEquals("test", present.get());
@@ -276,17 +262,14 @@ public class U200Test extends TestBase {
             u.Nullable<String> present = u.Nullable.of("test");
             u.Nullable<String> presentNull = u.Nullable.of(null);
 
-            // isPresent
             assertFalse(empty.isPresent());
             assertTrue(present.isPresent());
             assertTrue(presentNull.isPresent());
 
-            // isNull
-            assertTrue(empty.isNull()); // An empty nullable's value is null
+            assertTrue(empty.isNull());
             assertFalse(present.isNull());
             assertTrue(presentNull.isNull());
 
-            // isNotNull
             assertFalse(empty.isNotNull());
             assertTrue(present.isNotNull());
             assertFalse(presentNull.isNotNull());
@@ -298,17 +281,14 @@ public class U200Test extends TestBase {
             u.Nullable<String> present = u.Nullable.of("val");
             u.Nullable<String> presentNull = u.Nullable.of(null);
 
-            // orElse
             assertEquals("val", present.orElse("other"));
             assertEquals("other", empty.orElse("other"));
             assertEquals(null, presentNull.orElse("other"));
 
-            // orElseIfNull
             assertEquals("val", present.orElseIfNull("other"));
             assertEquals("other", empty.orElseIfNull("other"));
             assertEquals("other", presentNull.orElseIfNull("other"));
 
-            // orElseGetIfNull
             AtomicInteger supplierCalls = new AtomicInteger(0);
             assertEquals("val", present.orElseGetIfNull(() -> {
                 supplierCalls.incrementAndGet();
@@ -329,7 +309,7 @@ public class U200Test extends TestBase {
             u.Nullable<String> presentNull = u.Nullable.of(null);
 
             assertThrows(NoSuchElementException.class, empty::orElseThrow);
-            assertNull(presentNull.orElseThrow()); // Throws only if not present, null is a present value
+            assertNull(presentNull.orElseThrow());
 
             assertThrows(NoSuchElementException.class, empty::orElseThrowIfNull);
             assertThrows(NoSuchElementException.class, presentNull::orElseThrowIfNull);
@@ -341,14 +321,12 @@ public class U200Test extends TestBase {
             u.Nullable<String> present = u.Nullable.of("val");
             u.Nullable<String> presentNull = u.Nullable.of(null);
 
-            // map
             assertEquals("VAL", present.map(String::toUpperCase).get());
             assertEquals("not called", presentNull.map(v -> "not called").get());
             assertFalse(empty.map(v -> "not called").isPresent());
 
-            // mapIfNotNull
             assertEquals("VAL", present.mapIfNotNull(String::toUpperCase).get());
-            assertFalse(presentNull.mapIfNotNull(v -> "not called").isPresent()); // Becomes empty
+            assertFalse(presentNull.mapIfNotNull(v -> "not called").isPresent());
             assertFalse(empty.mapIfNotNull(v -> "not called").isPresent());
         }
 
@@ -373,12 +351,10 @@ public class U200Test extends TestBase {
             u.Nullable<String> presentNull = u.Nullable.of(null);
             u.Nullable<String> empty = u.Nullable.empty();
 
-            // toOptional
             assertTrue(present.toOptional().isPresent());
             assertFalse(presentNull.toOptional().isPresent());
             assertFalse(empty.toOptional().isPresent());
 
-            // streamIfNotNull
             assertEquals(1, present.streamIfNotNull().count());
             assertEquals(0, presentNull.streamIfNotNull().count());
             assertEquals(0, empty.streamIfNotNull().count());
@@ -414,8 +390,4 @@ public class U200Test extends TestBase {
         }
     }
 
-    // NOTE: Tests for OptionalBoolean, OptionalChar, OptionalByte, OptionalShort,
-    // OptionalLong, OptionalFloat, OptionalDouble would follow a similar pattern
-    // to OptionalInt, adjusted for their respective primitive types.
-    // A complete test suite would include a @Nested class for each.
 }

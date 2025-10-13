@@ -13,10 +13,12 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("new-test")
 public class Seq106Test extends TestBase {
 
     @Test
@@ -258,8 +260,8 @@ public class Seq106Test extends TestBase {
         List<Integer> result = seq.sliding(3, 2, Collectors.summingInt(Integer::intValue)).toList();
 
         assertEquals(2, result.size());
-        assertEquals(6, result.get(0)); // 1+2+3
-        assertEquals(12, result.get(1)); // 3+4+5
+        assertEquals(6, result.get(0));
+        assertEquals(12, result.get(1));
     }
 
     @Test
@@ -363,7 +365,6 @@ public class Seq106Test extends TestBase {
 
         Seq<Integer, Exception> result = seq.transformB(stream -> stream.map(n -> n * 2), true);
 
-        // Deferred execution - transformation happens when consumed
         List<Integer> list = result.toList();
         assertEquals(Arrays.asList(2, 4, 6), list);
     }
@@ -374,7 +375,6 @@ public class Seq106Test extends TestBase {
 
         Seq<Integer, Exception> result = seq.transformB(stream -> stream.map(n -> n * 2), false);
 
-        // Immediate execution
         List<Integer> list = result.toList();
         assertEquals(Arrays.asList(2, 4, 6), list);
     }
@@ -457,7 +457,6 @@ public class Seq106Test extends TestBase {
             return n;
         }), true);
 
-        // Exception should be thrown when the deferred sequence is consumed
         assertThrows(Exception.class, () -> {
             result.toList();
         });

@@ -11,10 +11,12 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class CharacterType100Test extends TestBase {
 
     private CharacterType type;
@@ -58,7 +60,7 @@ public class CharacterType100Test extends TestBase {
         Character result = type.get(rs, 1);
 
         Assertions.assertNotNull(result);
-        assertEquals(Character.valueOf('A'), result); // Should return first character
+        assertEquals(Character.valueOf('A'), result);
         verify(rs).getString(1);
     }
 
@@ -105,7 +107,7 @@ public class CharacterType100Test extends TestBase {
         Character result = type.get(rs, "charColumn");
 
         Assertions.assertNotNull(result);
-        assertEquals(Character.valueOf('H'), result); // Should return first character
+        assertEquals(Character.valueOf('H'), result);
         verify(rs).getString("charColumn");
     }
 

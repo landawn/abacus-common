@@ -122,13 +122,20 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Sets the value to the specified float.
-     * 
+     *
+     * <p>This method allows setting any valid float value including special values
+     * like {@link Float#NaN}, {@link Float#POSITIVE_INFINITY}, and {@link Float#NEGATIVE_INFINITY}.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
      * num.setValue(20.7f); // value is now 20.7f
+     *
+     * // Special values are allowed
+     * num.setValue(Float.NaN);
+     * num.setValue(Float.POSITIVE_INFINITY);
      * }</pre>
-     * 
+     *
      * @param value the value to set
      */
     public void setValue(final float value) {
@@ -138,13 +145,24 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Returns the current value and then sets the new value.
      * This is an atomic-like operation for single-threaded use.
-     * 
+     *
+     * <p>This method is useful when you need both the old and new values in a single operation,
+     * such as calculating deltas or maintaining state transitions.</p>
+     *
+     * <p><strong>Note:</strong> While this operation appears atomic, this class is NOT thread-safe.
+     * For multi-threaded scenarios, use {@link java.util.concurrent.atomic.AtomicReference} with Float.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
      * float old = num.getAndSet(20.7f); // returns 10.5f, value is now 20.7f
+     *
+     * // Useful for tracking changes
+     * MutableFloat temperature = MutableFloat.of(98.6f);
+     * float previousTemp = temperature.getAndSet(99.1f);
+     * float delta = temperature.value() - previousTemp; // 0.5f
      * }</pre>
-     * 
+     *
      * @param value the new value to set
      * @return the value before it was updated
      */
@@ -157,13 +175,23 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Sets the value and then returns it.
      * This is useful when you want to update and immediately use the new value.
-     * 
+     *
+     * <p>This method is particularly useful in fluent programming and when you need to
+     * both update a value and use it in the same expression.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
      * float newVal = num.setAndGet(20.7f); // returns 20.7f, value is now 20.7f
+     *
+     * // Useful in method chaining or inline assignments
+     * MutableFloat score = MutableFloat.of(0.0f);
+     * System.out.println("New score: " + score.setAndGet(95.5f)); // prints and updates
+     *
+     * // Can be used in calculations
+     * float result = score.setAndGet(100.0f) * 0.9f; // Sets to 100.0f and calculates
      * }</pre>
-     * 
+     *
      * @param value the new value to set
      * @return the new value after it has been set
      */
@@ -175,14 +203,29 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Sets the value to newValue if the predicate evaluates to true for the current value.
      * If the predicate returns false, the value remains unchanged.
-     * 
+     *
+     * <p>This method provides conditional update functionality, useful for implementing
+     * business rules, validation, or state machine transitions.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
      * boolean updated = num.setIf(20.5f, v -> v < 15.0f); // returns true, value is now 20.5f
      * updated = num.setIf(30.5f, v -> v < 15.0f); // returns false, value remains 20.5f
+     *
+     * // More complex predicates
+     * MutableFloat temperature = MutableFloat.of(98.6f);
+     * // Only update if temperature is within normal range
+     * temperature.setIf(99.5f, t -> t >= 97.0f && t <= 100.0f);
+     *
+     * // With exception handling
+     * MutableFloat price = MutableFloat.of(100.0f);
+     * price.setIf(120.0f, p -> {
+     *     if (p < 0) throw new IllegalStateException("Negative price");
+     *     return p < 150.0f;
+     * });
      * }</pre>
-     * 
+     *
      * @param <E> the type of exception the predicate may throw
      * @param newValue the new value to set if the condition is met
      * @param predicate the predicate to test the current value
@@ -262,13 +305,26 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Adds the specified operand to the current value.
-     * 
+     *
+     * <p>Note: Float addition may result in precision loss or overflow to infinity.
+     * This operation follows standard IEEE 754 floating-point arithmetic rules.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
      * num.add(5.3f); // value is now 15.8f
+     *
+     * // Accumulating values in a loop
+     * MutableFloat sum = MutableFloat.of(0.0f);
+     * for (float value : floatArray) {
+     *     sum.add(value);
+     * }
+     *
+     * // Be aware of overflow
+     * MutableFloat large = MutableFloat.of(Float.MAX_VALUE);
+     * large.add(Float.MAX_VALUE); // Results in POSITIVE_INFINITY
      * }</pre>
-     * 
+     *
      * @param operand the value to add
      */
     public void add(final float operand) {
@@ -277,13 +333,24 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Subtracts the specified operand from the current value.
-     * 
+     *
+     * <p>Note: Float subtraction may result in precision loss or underflow to negative infinity.
+     * This operation follows standard IEEE 754 floating-point arithmetic rules.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
      * num.subtract(3.2f); // value is now 7.3f
+     *
+     * // Tracking decrements
+     * MutableFloat balance = MutableFloat.of(1000.0f);
+     * balance.subtract(250.0f); // balance is now 750.0f
+     *
+     * // Be aware of underflow
+     * MutableFloat small = MutableFloat.of(-Float.MAX_VALUE);
+     * small.subtract(Float.MAX_VALUE); // Results in NEGATIVE_INFINITY
      * }</pre>
-     * 
+     *
      * @param operand the value to subtract
      */
     public void subtract(final float operand) {
@@ -352,13 +419,27 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Returns the current value and then adds the specified delta.
-     * 
+     *
+     * <p>This method is useful when you need to know the value before modification,
+     * commonly used in delta calculations or state tracking.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
      * float old = num.getAndAdd(5.3f); // returns 10.5f, value is now 15.8f
+     *
+     * // Tracking changes
+     * MutableFloat counter = MutableFloat.of(100.0f);
+     * float previous = counter.getAndAdd(25.5f);
+     * float change = counter.value() - previous; // 25.5f
+     *
+     * // Accumulating with history
+     * MutableFloat total = MutableFloat.of(0.0f);
+     * List<Float> history = new ArrayList<>();
+     * history.add(total.getAndAdd(10.5f)); // Adds 10.5f, saves old value (0.0f)
+     * history.add(total.getAndAdd(20.3f)); // Adds 20.3f, saves old value (10.5f)
      * }</pre>
-     * 
+     *
      * @param delta the value to add
      * @return the value before adding
      */
@@ -370,13 +451,26 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Adds the specified delta to the current value and then returns it.
-     * 
+     *
+     * <p>This method is useful when you need the updated value immediately after modification,
+     * commonly used in calculations or conditional logic.</p>
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
      * float newVal = num.addAndGet(5.3f); // returns 15.8f, value is now 15.8f
+     *
+     * // Using the result directly in calculations
+     * MutableFloat score = MutableFloat.of(85.0f);
+     * float bonus = score.addAndGet(10.0f) * 0.1f; // Adds 10, then calculates 10% of 95.0f
+     *
+     * // Conditional logic based on updated value
+     * MutableFloat progress = MutableFloat.of(75.0f);
+     * if (progress.addAndGet(15.0f) >= 100.0f) {
+     *     System.out.println("Task complete!"); // Executes if progress reaches 100%
+     * }
      * }</pre>
-     * 
+     *
      * @param delta the value to add
      * @return the value after adding
      */
@@ -434,19 +528,22 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Compares this MutableFloat to another MutableFloat in ascending order.
      * The comparison is consistent with Float.compare() and handles NaN values.
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
      * MutableFloat a = MutableFloat.of(10.5f);
      * MutableFloat b = MutableFloat.of(20.5f);
      * int result = a.compareTo(b); // returns negative value
      * }</pre>
-     * 
+     *
      * @param other the other MutableFloat to compare to, not null
      * @return negative if this is less, zero if equal, positive if greater
      */
     @Override
     public int compareTo(final MutableFloat other) {
+        if (other == null) {
+            throw new NullPointerException("Cannot compare to null");
+        }
         return Float.compare(value, other.value);
     }
 
@@ -486,14 +583,14 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Returns a hash code for this MutableFloat.
-     * The hash code is computed using Float.floatToIntBits() to ensure consistency
-     * with equals() method.
-     * 
+     * The hash code is computed using Float.hashCode() to ensure consistency
+     * with equals() method and modern Java best practices.
+     *
      * @return a suitable hash code
      */
     @Override
     public int hashCode() {
-        return Float.floatToIntBits(value);
+        return Float.hashCode(value);
     }
 
     //-----------------------------------------------------------------------

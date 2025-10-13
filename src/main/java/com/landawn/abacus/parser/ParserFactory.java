@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.parser;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -151,7 +151,7 @@ public final class ParserFactory {
         }
     }
 
-    static final Set<Class<?>> _kryoClassSet = new HashSet<>();
+    static final Set<Class<?>> _kryoClassSet = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     static final Map<Class<?>, Integer> _kryoClassIdMap = new ConcurrentHashMap<>();
 
@@ -209,10 +209,7 @@ public final class ParserFactory {
     /**
      * Creates a new Avro parser instance.
      * Avro provides schema evolution and is particularly useful for data interchange.
-     * 
-     * @return a new {@link AvroParser} instance
-     * @throws NoClassDefFoundError if Avro library is not available
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * if (ParserFactory.isAvroAvailable()) {
@@ -220,6 +217,9 @@ public final class ParserFactory {
      *     // Use Avro parser
      * }
      * }</pre>
+     *
+     * @return a new {@link AvroParser} instance
+     * @throws NoClassDefFoundError if Avro library is not available
      */
     public static AvroParser createAvroParser() {
         return new AvroParser();
@@ -228,10 +228,7 @@ public final class ParserFactory {
     /**
      * Creates a new Kryo parser instance.
      * Kryo provides fast binary serialization with automatic deep copying.
-     * 
-     * @return a new {@link KryoParser} instance
-     * @throws NoClassDefFoundError if Kryo library is not available
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * if (ParserFactory.isKryoAvailable()) {
@@ -239,6 +236,9 @@ public final class ParserFactory {
      *     byte[] data = parser.serialize(myObject);
      * }
      * }</pre>
+     *
+     * @return a new {@link KryoParser} instance
+     * @throws NoClassDefFoundError if Kryo library is not available
      */
     public static KryoParser createKryoParser() {
         return new KryoParser();
@@ -247,15 +247,15 @@ public final class ParserFactory {
     /**
      * Creates a new JSON parser instance with default configuration.
      * JSON parser is always available as it has no external dependencies.
-     * 
-     * @return a new {@link JSONParser} instance
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * JSONParser parser = ParserFactory.createJSONParser();
      * String json = parser.serialize(myObject);
      * MyObject obj = parser.deserialize(json, MyObject.class);
      * }</pre>
+     *
+     * @return a new {@link JSONParser} instance
      */
     public static JSONParser createJSONParser() {
         return new JSONParserImpl();
@@ -263,11 +263,7 @@ public final class ParserFactory {
 
     /**
      * Creates a new JSON parser instance with specified configurations.
-     * 
-     * @param jsc the JSON serialization configuration
-     * @param jdc the JSON deserialization configuration
-     * @return a new {@link JSONParser} instance with the specified configurations
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * JSONSerializationConfig jsc = new JSONSerializationConfig()
@@ -275,9 +271,13 @@ public final class ParserFactory {
      *     .writeLongAsString(true);
      * JSONDeserializationConfig jdc = new JSONDeserializationConfig()
      *     .ignoreUnmatchedProperty(true);
-     * 
+     *
      * JSONParser parser = ParserFactory.createJSONParser(jsc, jdc);
      * }</pre>
+     *
+     * @param jsc the JSON serialization configuration
+     * @param jdc the JSON deserialization configuration
+     * @return a new {@link JSONParser} instance with the specified configurations
      */
     public static JSONParser createJSONParser(final JSONSerializationConfig jsc, final JSONDeserializationConfig jdc) {
         return new JSONParserImpl(jsc, jdc);
@@ -286,10 +286,7 @@ public final class ParserFactory {
     /**
      * Creates a new Abacus XML parser instance with default configuration.
      * Uses StAX (Streaming API for XML) as the default parser type.
-     * 
-     * @return a new Abacus {@link XMLParser} instance
-     * @throws NoClassDefFoundError if Abacus XML support is not available
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * if (ParserFactory.isAbacusXMLAvailable()) {
@@ -297,6 +294,9 @@ public final class ParserFactory {
      *     String xml = parser.serialize(myObject);
      * }
      * }</pre>
+     *
+     * @return a new Abacus {@link XMLParser} instance
+     * @throws NoClassDefFoundError if Abacus XML support is not available
      */
     public static XMLParser createAbacusXMLParser() {
         return new AbacusXMLParserImpl(XMLParserType.StAX);
@@ -304,12 +304,7 @@ public final class ParserFactory {
 
     /**
      * Creates a new Abacus XML parser instance with specified configurations.
-     * 
-     * @param xsc the XML serialization configuration
-     * @param xdc the XML deserialization configuration
-     * @return a new Abacus {@link XMLParser} instance with the specified configurations
-     * @throws NoClassDefFoundError if Abacus XML support is not available
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * XMLSerializationConfig xsc = new XMLSerializationConfig()
@@ -317,9 +312,14 @@ public final class ParserFactory {
      *     .writeTypeInfo(false);
      * XMLDeserializationConfig xdc = new XMLDeserializationConfig()
      *     .ignoreUnmatchedProperty(true);
-     * 
+     *
      * XMLParser parser = ParserFactory.createAbacusXMLParser(xsc, xdc);
      * }</pre>
+     *
+     * @param xsc the XML serialization configuration
+     * @param xdc the XML deserialization configuration
+     * @return a new Abacus {@link XMLParser} instance with the specified configurations
+     * @throws NoClassDefFoundError if Abacus XML support is not available
      */
     public static XMLParser createAbacusXMLParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
         return new AbacusXMLParserImpl(XMLParserType.StAX, xsc, xdc);
@@ -358,10 +358,7 @@ public final class ParserFactory {
     /**
      * Creates a new standard XML parser instance with default configuration.
      * Uses StAX (Streaming API for XML) as the default parser type.
-     * 
-     * @return a new standard {@link XMLParser} instance
-     * @throws NoClassDefFoundError if XML support is not available
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * if (ParserFactory.isXMLAvailable()) {
@@ -369,6 +366,9 @@ public final class ParserFactory {
      *     String xml = parser.serialize(myObject);
      * }
      * }</pre>
+     *
+     * @return a new standard {@link XMLParser} instance
+     * @throws NoClassDefFoundError if XML support is not available
      */
     public static XMLParser createXMLParser() {
         return new XMLParserImpl(XMLParserType.StAX);
@@ -376,21 +376,21 @@ public final class ParserFactory {
 
     /**
      * Creates a new standard XML parser instance with specified configurations.
-     * 
-     * @param xsc the XML serialization configuration
-     * @param xdc the XML deserialization configuration
-     * @return a new standard {@link XMLParser} instance with the specified configurations
-     * @throws NoClassDefFoundError if XML support is not available
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * XMLSerializationConfig xsc = new XMLSerializationConfig()
      *     .prettyFormat(true);
      * XMLDeserializationConfig xdc = new XMLDeserializationConfig()
      *     .setElementType(String.class);
-     * 
+     *
      * XMLParser parser = ParserFactory.createXMLParser(xsc, xdc);
      * }</pre>
+     *
+     * @param xsc the XML serialization configuration
+     * @param xdc the XML deserialization configuration
+     * @return a new standard {@link XMLParser} instance with the specified configurations
+     * @throws NoClassDefFoundError if XML support is not available
      */
     public static XMLParser createXMLParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
         return new XMLParserImpl(XMLParserType.StAX, xsc, xdc);
@@ -417,14 +417,14 @@ public final class ParserFactory {
     /**
      * Creates a new JAXB parser instance with default configuration.
      * JAXB (Java Architecture for XML Binding) provides annotation-based XML binding.
-     * 
-     * @return a new JAXB {@link XMLParser} instance
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * XMLParser parser = ParserFactory.createJAXBParser();
      * // Use with JAXB-annotated classes
      * }</pre>
+     *
+     * @return a new JAXB {@link XMLParser} instance
      */
     public static XMLParser createJAXBParser() {
         return new JAXBParser();
@@ -432,46 +432,36 @@ public final class ParserFactory {
 
     /**
      * Creates a new JAXB parser instance with specified configurations.
-     * 
-     * @param xsc the XML serialization configuration
-     * @param xdc the XML deserialization configuration
+     * JAXB (Java Architecture for XML Binding) provides annotation-based XML binding with customizable behavior.
+     *
+     * <p>Example:
+     * <pre>{@code
+     * XMLSerializationConfig xsc = new XMLSerializationConfig().prettyFormat(true);
+     * XMLDeserializationConfig xdc = new XMLDeserializationConfig();
+     * XMLParser parser = ParserFactory.createJAXBParser(xsc, xdc);
+     * }</pre>
+     *
+     * @param xsc the XML serialization configuration, configures how objects are converted to XML
+     * @param xdc the XML deserialization configuration, configures how XML is converted to objects
      * @return a new JAXB {@link XMLParser} instance with the specified configurations
      */
     public static XMLParser createJAXBParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
         return new JAXBParser(xsc, xdc);
     }
 
-    //    /**
-    //     * Creates a new Parser object.
-    //     *
-    //     * @return
-    //     */
-    //    public static JacksonMapper createJacksonMapper() {
-    //        return new JacksonMapper();
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param jmc
-    //     * @return
-    //     */
-    //    public static JacksonMapper createJacksonMapper(final JacksonMapperConfig jmc) {
-    //        return new JacksonMapper(jmc);
-    //    }
-
     /**
      * Registers a class with Kryo for serialization.
      * Registration can improve performance and reduce serialized size.
-     * 
-     * @param type the class to register
-     * @throws IllegalArgumentException if type is null
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * // Register commonly used classes
      * ParserFactory.registerKryo(MyDomainObject.class);
      * ParserFactory.registerKryo(MyValueObject.class);
      * }</pre>
+     *
+     * @param type the class to register
+     * @throws IllegalArgumentException if type is null
      */
     public static void registerKryo(final Class<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -482,11 +472,7 @@ public final class ParserFactory {
     /**
      * Registers a class with Kryo using a specific ID.
      * Using fixed IDs ensures compatibility across different JVM instances.
-     * 
-     * @param type the class to register
-     * @param id the unique ID for this class
-     * @throws IllegalArgumentException if type is null
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * // Register with fixed IDs for compatibility
@@ -494,6 +480,10 @@ public final class ParserFactory {
      * ParserFactory.registerKryo(Order.class, 101);
      * ParserFactory.registerKryo(Product.class, 102);
      * }</pre>
+     *
+     * @param type the class to register
+     * @param id the unique ID for this class
+     * @throws IllegalArgumentException if type is null
      */
     public static void registerKryo(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -504,17 +494,17 @@ public final class ParserFactory {
     /**
      * Registers a class with Kryo using a custom serializer.
      * Custom serializers can handle special serialization requirements.
-     * 
-     * @param type the class to register
-     * @param serializer the custom serializer for this class
-     * @throws IllegalArgumentException if type or serializer is null
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * // Register with custom serializer
      * ParserFactory.registerKryo(DateTime.class, new DateTimeSerializer());
      * ParserFactory.registerKryo(Money.class, new MoneySerializer());
      * }</pre>
+     *
+     * @param type the class to register
+     * @param serializer the custom serializer for this class
+     * @throws IllegalArgumentException if type or serializer is null
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -526,18 +516,18 @@ public final class ParserFactory {
     /**
      * Registers a class with Kryo using a custom serializer and specific ID.
      * Combines the benefits of custom serialization and fixed IDs.
-     * 
-     * @param type the class to register
-     * @param serializer the custom serializer for this class
-     * @param id the unique ID for this class
-     * @throws IllegalArgumentException if type or serializer is null
-     * 
+     *
      * <p>Example:
      * <pre>{@code
      * // Register with both custom serializer and ID
      * ParserFactory.registerKryo(BigDecimal.class, new BigDecimalSerializer(), 200);
      * ParserFactory.registerKryo(UUID.class, new UUIDSerializer(), 201);
      * }</pre>
+     *
+     * @param type the class to register
+     * @param serializer the custom serializer for this class
+     * @param id the unique ID for this class
+     * @throws IllegalArgumentException if type or serializer is null
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);

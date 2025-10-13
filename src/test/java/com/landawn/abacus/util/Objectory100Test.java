@@ -11,9 +11,11 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class Objectory100Test extends TestBase {
 
     @Test
@@ -73,7 +75,6 @@ public class Objectory100Test extends TestBase {
     public void testCreateObjectArray() {
         Object[] array = Objectory.createObjectArray();
         Assertions.assertNotNull(array);
-        // Assertions.assertEquals(Objectory.POOLABLE_ARRAY_LENGTH, array.length);
         Assertions.assertEquals(128, array.length);
     }
 
@@ -91,7 +92,6 @@ public class Objectory100Test extends TestBase {
 
     @Test
     public void testCreateObjectArrayLargeSize() {
-        // int largeSize = Objectory.POOLABLE_ARRAY_LENGTH + 100;
         int largeSize = 128 + 100;
         Object[] array = Objectory.createObjectArray(largeSize);
         Assertions.assertNotNull(array);
@@ -318,13 +318,11 @@ public class Objectory100Test extends TestBase {
         list.add("test");
 
         Objectory.recycle(list);
-        // After recycle, list should be cleared but still usable
         Assertions.assertTrue(list.isEmpty());
     }
 
     @Test
     public void testRecycleNullList() {
-        // Should not throw
         Objectory.recycle((List<?>) null);
     }
 
@@ -377,7 +375,6 @@ public class Objectory100Test extends TestBase {
 
     @Test
     public void testRecycleNullObjectArray() {
-        // Should not throw
         Objectory.recycle((Object[]) null);
     }
 
@@ -386,7 +383,6 @@ public class Objectory100Test extends TestBase {
         Object[] array = Objectory.createObjectArray(128 + 100);
         array[0] = "test";
 
-        // Large arrays should not be recycled
         Objectory.recycle(array);
         Assertions.assertEquals("test", array[0]);
     }
@@ -397,7 +393,6 @@ public class Objectory100Test extends TestBase {
         buffer[0] = 'A';
 
         Objectory.recycle(buffer);
-        // Buffer is returned to pool, content not cleared
     }
 
     @Test
@@ -406,7 +401,6 @@ public class Objectory100Test extends TestBase {
         buffer[0] = 65;
 
         Objectory.recycle(buffer);
-        // Buffer is returned to pool, content not cleared
     }
 
     @Test
@@ -431,75 +425,63 @@ public class Objectory100Test extends TestBase {
     public void testRecycleBufferedXMLWriter() {
         BufferedXMLWriter bw = Objectory.createBufferedXMLWriter();
         Objectory.recycle(bw);
-        // Should not throw
     }
 
     @Test
     public void testRecycleBufferedJSONWriter() {
         BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
         Objectory.recycle(bw);
-        // Should not throw
     }
 
     @Test
     public void testRecycleBufferedCSVWriter() {
         BufferedCSVWriter bw = Objectory.createBufferedCSVWriter();
         Objectory.recycle(bw);
-        // Should not throw
     }
 
     @Test
     public void testRecycleBufferedWriter() {
         java.io.BufferedWriter writer = Objectory.createBufferedWriter();
         Objectory.recycle(writer);
-        // Should not throw
     }
 
     @Test
     public void testRecycleBufferedWriterJSON() {
         BufferedJSONWriter writer = Objectory.createBufferedJSONWriter();
         Objectory.recycle((java.io.BufferedWriter) writer);
-        // Should not throw
     }
 
     @Test
     public void testRecycleBufferedWriterXML() {
         BufferedXMLWriter writer = Objectory.createBufferedXMLWriter();
         Objectory.recycle((java.io.BufferedWriter) writer);
-        // Should not throw
     }
 
     @Test
     public void testRecycleBufferedWriterCSV() {
         BufferedCSVWriter writer = Objectory.createBufferedCSVWriter();
         Objectory.recycle((java.io.BufferedWriter) writer);
-        // Should not throw
     }
 
     @Test
     public void testRecycleBufferedReader() throws Exception {
         java.io.BufferedReader reader = Objectory.createBufferedReader("test");
         Objectory.recycle(reader);
-        // Should not throw
     }
 
     @Test
     public void testRecycleRegularBufferedReader() {
-        // Regular BufferedReader (not our custom one) should not be recycled
         java.io.BufferedReader reader = new java.io.BufferedReader(new StringReader("test"));
         Objectory.recycle(reader);
-        // Should not throw, but won't be pooled
     }
 
     @Test
     public void testPoolReuse() {
-        // Test that objects are actually reused from the pool
         StringBuilder sb1 = Objectory.createStringBuilder();
         sb1.append("test");
         Objectory.recycle(sb1);
 
         StringBuilder sb2 = Objectory.createStringBuilder();
-        // Due to pooling, sb2 might be the same instance as sb1 (after clearing)
         Assertions.assertEquals(0, sb2.length());
     }
 }

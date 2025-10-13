@@ -58,7 +58,6 @@ import java.util.function.Supplier;
  * }</pre>
  *
  * @param <T> The type of the resource that extends AutoCloseable
- * @author HaiYang Li
  */
 public final class Try<T extends AutoCloseable> {
     private final T targetResource;
@@ -93,7 +92,7 @@ public final class Try<T extends AutoCloseable> {
      * @throws IllegalArgumentException if the targetResource is null
      */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource) throws IllegalArgumentException {
-        N.checkArgNotNull(targetResource, "targetResource");//NOSONAR
+        N.checkArgNotNull(targetResource, cs.targetResource);
 
         return new Try<>(targetResource, null, null);
     }

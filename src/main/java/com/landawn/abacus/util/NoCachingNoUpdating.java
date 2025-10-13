@@ -98,6 +98,9 @@ public interface NoCachingNoUpdating {
          * @return a new DisposableArray instance
          */
         public static <T> DisposableArray<T> create(final Class<T> componentType, final int len) {
+            if (len < 0) {
+                throw new IllegalArgumentException("Length must be non-negative: " + len);
+            }
             return new DisposableArray<>(N.newArray(componentType, len));
         }
 
@@ -153,9 +156,12 @@ public interface NoCachingNoUpdating {
          * @param target the array into which the elements are to be stored
          * @return an array containing the elements
          */
+        @SuppressWarnings("unchecked")
         public <A> A[] toArray(A[] target) {
+            N.checkArgNotNull(target, "target");
+
             if (target.length < length()) {
-                target = N.newArray(target.getClass().getComponentType(), length());
+                target = (A[]) java.lang.reflect.Array.newInstance(target.getClass().getComponentType(), length());
             }
 
             N.copy(a, 0, target, 0, length());
@@ -365,6 +371,9 @@ public interface NoCachingNoUpdating {
          * @return a new DisposableObjArray instance
          */
         public static DisposableObjArray create(final int len) {
+            if (len < 0) {
+                throw new IllegalArgumentException("Length must be non-negative: " + len);
+            }
             return new DisposableObjArray(new Object[len]);
         }
 
@@ -436,6 +445,9 @@ public interface NoCachingNoUpdating {
          * @return a new DisposableBooleanArray instance
          */
         public static DisposableBooleanArray create(final int len) {
+            if (len < 0) {
+                throw new IllegalArgumentException("Length must be non-negative: " + len);
+            }
             return new DisposableBooleanArray(new boolean[len]);
         }
 
@@ -643,6 +655,9 @@ public interface NoCachingNoUpdating {
          * @return a new DisposableCharArray instance
          */
         public static DisposableCharArray create(final int len) {
+            if (len < 0) {
+                throw new IllegalArgumentException("Length must be non-negative: " + len);
+            }
             return new DisposableCharArray(new char[len]);
         }
 
@@ -882,6 +897,9 @@ public interface NoCachingNoUpdating {
          * @return a new DisposableByteArray instance
          */
         public static DisposableByteArray create(final int len) {
+            if (len < 0) {
+                throw new IllegalArgumentException("Length must be non-negative: " + len);
+            }
             return new DisposableByteArray(new byte[len]);
         }
 
@@ -1119,6 +1137,9 @@ public interface NoCachingNoUpdating {
          * @return a new DisposableShortArray instance
          */
         public static DisposableShortArray create(final int len) {
+            if (len < 0) {
+                throw new IllegalArgumentException("Length must be non-negative: " + len);
+            }
             return new DisposableShortArray(new short[len]);
         }
 
@@ -1357,6 +1378,9 @@ public interface NoCachingNoUpdating {
          * @return a new DisposableIntArray instance
          */
         public static DisposableIntArray create(final int len) {
+            if (len < 0) {
+                throw new IllegalArgumentException("Length must be non-negative: " + len);
+            }
             return new DisposableIntArray(new int[len]);
         }
 
@@ -1594,6 +1618,9 @@ public interface NoCachingNoUpdating {
          * @return a new DisposableLongArray instance
          */
         public static DisposableLongArray create(final int len) {
+            if (len < 0) {
+                throw new IllegalArgumentException("Length must be non-negative: " + len);
+            }
             return new DisposableLongArray(new long[len]);
         }
 
@@ -1831,6 +1858,9 @@ public interface NoCachingNoUpdating {
          * @return a new DisposableFloatArray instance
          */
         public static DisposableFloatArray create(final int len) {
+            if (len < 0) {
+                throw new IllegalArgumentException("Length must be non-negative: " + len);
+            }
             return new DisposableFloatArray(new float[len]);
         }
 
@@ -2069,6 +2099,9 @@ public interface NoCachingNoUpdating {
          * @return a new DisposableDoubleArray instance
          */
         public static DisposableDoubleArray create(final int len) {
+            if (len < 0) {
+                throw new IllegalArgumentException("Length must be non-negative: " + len);
+            }
             return new DisposableDoubleArray(new double[len]);
         }
 
@@ -2310,6 +2343,9 @@ public interface NoCachingNoUpdating {
          * @return a new DisposableDeque instance
          */
         public static <T> DisposableDeque<T> create(final int len) {
+            if (len < 0) {
+                throw new IllegalArgumentException("Length must be non-negative: " + len);
+            }
             return new DisposableDeque<>(new ArrayDeque<>(len));
         }
 
@@ -2605,7 +2641,7 @@ public interface NoCachingNoUpdating {
          */
         @Override
         public String toString() {
-            return getKey() + "=" + getValue();
+            return N.toString(getKey()) + "=" + N.toString(getValue());
         }
     }
 
@@ -2938,7 +2974,9 @@ public interface NoCachingNoUpdating {
          */
         @Override
         public int hashCode() {
-            return (int) (timeInMillis * 31 + (value == null ? 0 : value.hashCode()));
+            int result = Long.hashCode(timeInMillis);
+            result = 31 * result + (value == null ? 0 : value.hashCode());
+            return result;
         }
 
         /**

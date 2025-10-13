@@ -24,11 +24,13 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.TriFunction;
 
+@Tag("new-test")
 public class Iterators100Test extends TestBase {
 
     private List<Integer> intList;
@@ -44,7 +46,6 @@ public class Iterators100Test extends TestBase {
         stringIterator = stringList.iterator();
     }
 
-    // Tests for get method
     @Test
     public void testGet() {
         Iterator<String> iter = Arrays.asList("a", "b", "c", "d").iterator();
@@ -53,19 +54,15 @@ public class Iterators100Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals("c", result.get());
 
-        // Test index out of bounds
         result = Iterators.get(iter, 10);
         assertFalse(result.isPresent());
 
-        // Test null iterator
         result = Iterators.get(null, 0);
         assertFalse(result.isPresent());
 
-        // Test negative index
         assertThrows(IllegalArgumentException.class, () -> Iterators.get(intList.iterator(), -1));
     }
 
-    // Tests for occurrencesOf method
     @Test
     public void testOccurrencesOf() {
         List<Integer> numbers = Arrays.asList(1, 2, 3, 2, 4, 2, 5);
@@ -73,15 +70,12 @@ public class Iterators100Test extends TestBase {
         assertEquals(1, Iterators.occurrencesOf(numbers.iterator(), 5));
         assertEquals(0, Iterators.occurrencesOf(numbers.iterator(), 6));
 
-        // Test with nulls
         List<String> withNulls = Arrays.asList("a", null, "b", null, "c");
         assertEquals(2, Iterators.occurrencesOf(withNulls.iterator(), null));
 
-        // Test null iterator
         assertEquals(0, Iterators.occurrencesOf(null, "test"));
     }
 
-    // Tests for count methods
     @Test
     public void testCount() {
         assertEquals(5, Iterators.count(intList.iterator()));
@@ -99,7 +93,6 @@ public class Iterators100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Iterators.count(intList.iterator(), null));
     }
 
-    // Tests for indexOf methods
     @Test
     public void testIndexOf() {
         List<String> list = Arrays.asList("a", "b", "c", "b", "d");
@@ -115,7 +108,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(-1, Iterators.indexOf(list.iterator(), "b", 4));
     }
 
-    // Tests for elementsEqual
     @Test
     public void testElementsEqual() {
         List<Integer> list1 = Arrays.asList(1, 2, 3);
@@ -125,11 +117,9 @@ public class Iterators100Test extends TestBase {
         assertTrue(Iterators.elementsEqual(list1.iterator(), list2.iterator()));
         assertFalse(Iterators.elementsEqual(list1.iterator(), list3.iterator()));
 
-        // Different lengths
         assertFalse(Iterators.elementsEqual(Arrays.asList(1, 2).iterator(), Arrays.asList(1, 2, 3).iterator()));
     }
 
-    // Tests for repeat methods
     @Test
     public void testRepeatElement() {
         ObjIterator<String> iter = Iterators.repeat("test", 3);
@@ -138,11 +128,9 @@ public class Iterators100Test extends TestBase {
         assertEquals("test", iter.next());
         assertFalse(iter.hasNext());
 
-        // Test with 0
         iter = Iterators.repeat("test", 0);
         assertFalse(iter.hasNext());
 
-        // Test negative
         assertThrows(IllegalArgumentException.class, () -> Iterators.repeat("test", -1));
     }
 
@@ -168,7 +156,6 @@ public class Iterators100Test extends TestBase {
         assertEquals("b", iter.next());
         assertFalse(iter.hasNext());
 
-        // Test with empty collection
         iter = Iterators.repeatElements(new ArrayList<>(), 5L);
         assertFalse(iter.hasNext());
     }
@@ -197,7 +184,6 @@ public class Iterators100Test extends TestBase {
         assertEquals("b", iter.next());
         assertFalse(iter.hasNext());
 
-        // Test invalid cases
         assertThrows(IllegalArgumentException.class, () -> Iterators.repeatElementsToSize(list, -1L));
         assertThrows(IllegalArgumentException.class, () -> Iterators.repeatElementsToSize(new ArrayList<>(), 5L));
     }
@@ -214,22 +200,18 @@ public class Iterators100Test extends TestBase {
         assertEquals(Arrays.asList("a", "b", "c", "a", "b", "c", "a"), result);
     }
 
-    // Tests for cycle methods
     @Test
     public void testCycleArray() {
         ObjIterator<String> iter = Iterators.cycle("a", "b", "c");
 
-        // Test cycling behavior
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
         assertEquals("c", iter.next());
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
 
-        // Always has next
         assertTrue(iter.hasNext());
 
-        // Test empty array
         iter = Iterators.cycle();
         assertFalse(iter.hasNext());
     }
@@ -244,7 +226,6 @@ public class Iterators100Test extends TestBase {
         assertEquals("x", iter.next());
         assertEquals("y", iter.next());
 
-        // Test empty iterable
         iter = Iterators.cycle(new ArrayList<>());
         assertFalse(iter.hasNext());
     }
@@ -260,15 +241,12 @@ public class Iterators100Test extends TestBase {
         }
         assertEquals(Arrays.asList("a", "b", "a", "b", "a", "b"), result);
 
-        // Test with 0 rounds
         iter = Iterators.cycle(list, 0L);
         assertFalse(iter.hasNext());
 
-        // Test negative rounds
         assertThrows(IllegalArgumentException.class, () -> Iterators.cycle(list, -1L));
     }
 
-    // Tests for concat methods
     @Test
     public void testConcatBooleanArrays() {
         boolean[] arr1 = { true, false };
@@ -372,7 +350,6 @@ public class Iterators100Test extends TestBase {
         assertFalse(result.hasNext());
     }
 
-    // Tests for merge methods
     @Test
     public void testMerge() {
         Iterator<Integer> iter1 = Arrays.asList(1, 3, 5).iterator();
@@ -433,7 +410,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(Arrays.asList("date", "apple", "cherry", "banana"), collected);
     }
 
-    // Tests for zip methods
     @Test
     public void testZip() {
         Iterator<String> iter1 = Arrays.asList("a", "b", "c").iterator();
@@ -477,7 +453,6 @@ public class Iterators100Test extends TestBase {
         assertFalse(result.hasNext());
     }
 
-    // Tests for unzip methods
     @Test
     public void testUnzip() {
         List<Pair<String, Integer>> pairs = Arrays.asList(Pair.of("a", 1), Pair.of("b", 2), Pair.of("c", 3));
@@ -501,7 +476,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3), rights);
     }
 
-    // Tests for advance
     @Test
     public void testAdvance() {
         Iterator<String> iter = Arrays.asList("a", "b", "c", "d", "e").iterator();
@@ -510,16 +484,13 @@ public class Iterators100Test extends TestBase {
         assertEquals(3, advanced);
         assertEquals("d", iter.next());
 
-        // Test advancing past end
         advanced = Iterators.advance(iter, 10);
-        assertEquals(1, advanced); // Only "e" was left
+        assertEquals(1, advanced);
         assertFalse(iter.hasNext());
 
-        // Test negative
         assertThrows(IllegalArgumentException.class, () -> Iterators.advance(intList.iterator(), -1));
     }
 
-    // Tests for skip
     @Test
     public void testSkip() {
         ObjIterator<String> iter = Iterators.skip(stringList.iterator(), 2);
@@ -528,20 +499,16 @@ public class Iterators100Test extends TestBase {
         assertEquals("date", iter.next());
         assertFalse(iter.hasNext());
 
-        // Test skip 0
         iter = Iterators.skip(stringList.iterator(), 0);
         assertEquals("apple", iter.next());
 
-        // Test skip more than size
         iter = Iterators.skip(stringList.iterator(), 10);
         assertFalse(iter.hasNext());
 
-        // Test null iterator
         iter = Iterators.skip(null, 2);
         assertFalse(iter.hasNext());
     }
 
-    // Tests for limit
     @Test
     public void testLimit() {
         ObjIterator<String> iter = Iterators.limit(stringList.iterator(), 2);
@@ -550,11 +517,9 @@ public class Iterators100Test extends TestBase {
         assertEquals("banana", iter.next());
         assertFalse(iter.hasNext());
 
-        // Test limit 0
         iter = Iterators.limit(stringList.iterator(), 0);
         assertFalse(iter.hasNext());
 
-        // Test limit more than size
         iter = Iterators.limit(stringList.iterator(), 10);
         int count = 0;
         while (iter.hasNext()) {
@@ -564,7 +529,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(4, count);
     }
 
-    // Tests for skipAndLimit
     @Test
     public void testSkipAndLimit() {
         List<String> list = Arrays.asList("a", "b", "c", "d", "e", "f");
@@ -575,14 +539,12 @@ public class Iterators100Test extends TestBase {
         assertEquals("e", iter.next());
         assertFalse(iter.hasNext());
 
-        // Test with iterable
         iter = Iterators.skipAndLimit(list, 1, 2);
         assertEquals("b", iter.next());
         assertEquals("c", iter.next());
         assertFalse(iter.hasNext());
     }
 
-    // Tests for skipNulls
     @Test
     public void testSkipNulls() {
         List<String> withNulls = Arrays.asList("a", null, "b", null, "c");
@@ -593,7 +555,6 @@ public class Iterators100Test extends TestBase {
         assertEquals("c", iter.next());
         assertFalse(iter.hasNext());
 
-        // Test with iterable
         iter = Iterators.skipNulls(withNulls);
         List<String> result = new ArrayList<>();
         while (iter.hasNext()) {
@@ -602,7 +563,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(Arrays.asList("a", "b", "c"), result);
     }
 
-    // Tests for distinct
     @Test
     public void testDistinct() {
         List<Integer> withDuplicates = Arrays.asList(1, 2, 3, 2, 4, 3, 5);
@@ -614,7 +574,6 @@ public class Iterators100Test extends TestBase {
         }
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
 
-        // Test with iterable
         iter = Iterators.distinct(withDuplicates);
         result = new ArrayList<>();
         while (iter.hasNext()) {
@@ -637,7 +596,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(Arrays.asList("apple", "banana", "cherry"), result);
     }
 
-    // Tests for filter
     @Test
     public void testFilter() {
         Predicate<Integer> isEven = n -> n % 2 == 0;
@@ -647,7 +605,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(Integer.valueOf(4), iter.next());
         assertFalse(iter.hasNext());
 
-        // Test with iterable
         iter = Iterators.filter(intList, isEven);
         List<Integer> result = new ArrayList<>();
         while (iter.hasNext()) {
@@ -656,7 +613,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(Arrays.asList(2, 4), result);
     }
 
-    // Tests for takeWhile
     @Test
     public void testTakeWhile() {
         Predicate<Integer> lessThan4 = n -> n < 4;
@@ -667,7 +623,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(Integer.valueOf(3), iter.next());
         assertFalse(iter.hasNext());
 
-        // Test with iterable
         iter = Iterators.takeWhile(intList, lessThan4);
         List<Integer> result = new ArrayList<>();
         while (iter.hasNext()) {
@@ -684,11 +639,10 @@ public class Iterators100Test extends TestBase {
         assertEquals(Integer.valueOf(1), iter.next());
         assertEquals(Integer.valueOf(2), iter.next());
         assertEquals(Integer.valueOf(3), iter.next());
-        assertEquals(Integer.valueOf(4), iter.next()); // Includes the first false element
+        assertEquals(Integer.valueOf(4), iter.next());
         assertFalse(iter.hasNext());
     }
 
-    // Tests for dropWhile
     @Test
     public void testDropWhile() {
         Predicate<Integer> lessThan3 = n -> n < 3;
@@ -699,7 +653,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(Integer.valueOf(5), iter.next());
         assertFalse(iter.hasNext());
 
-        // Test with iterable
         iter = Iterators.dropWhile(intList, lessThan3);
         List<Integer> result = new ArrayList<>();
         while (iter.hasNext()) {
@@ -708,7 +661,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(Arrays.asList(3, 4, 5), result);
     }
 
-    // Tests for skipUntil
     @Test
     public void testSkipUntil() {
         Predicate<Integer> greaterThan2 = n -> n > 2;
@@ -719,7 +671,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(Integer.valueOf(5), iter.next());
         assertFalse(iter.hasNext());
 
-        // Test with iterable
         iter = Iterators.skipUntil(intList, greaterThan2);
         List<Integer> result = new ArrayList<>();
         while (iter.hasNext()) {
@@ -728,7 +679,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(Arrays.asList(3, 4, 5), result);
     }
 
-    // Tests for map
     @Test
     public void testMap() {
         Function<Integer, String> toString = Object::toString;
@@ -741,13 +691,11 @@ public class Iterators100Test extends TestBase {
         assertEquals("5", iter.next());
         assertFalse(iter.hasNext());
 
-        // Test with iterable
         iter = Iterators.map(intList, toString);
         assertTrue(iter.hasNext());
         assertEquals("1", iter.next());
     }
 
-    // Tests for flatMap
     @Test
     public void testFlatMap() {
         Function<Integer, List<String>> duplicateAsString = n -> Arrays.asList(String.valueOf(n), String.valueOf(n));
@@ -762,7 +710,6 @@ public class Iterators100Test extends TestBase {
         assertEquals("3", iter.next());
         assertFalse(iter.hasNext());
 
-        // Test with iterable
         iter = Iterators.flatMap(Arrays.asList(1, 2), duplicateAsString);
         List<String> result = new ArrayList<>();
         while (iter.hasNext()) {
@@ -784,19 +731,16 @@ public class Iterators100Test extends TestBase {
         assertFalse(iter.hasNext());
     }
 
-    // Tests for forEach methods
     @Test
     public void testForEach() throws Exception {
         List<Integer> collected = new ArrayList<>();
         Iterators.forEach(intList.iterator(), collected::add);
         assertEquals(intList, collected);
 
-        // Test with offset and count
         collected.clear();
         Iterators.forEach(intList.iterator(), 1, 3, collected::add);
         assertEquals(Arrays.asList(2, 3, 4), collected);
 
-        // Test with onComplete
         AtomicInteger completeCount = new AtomicInteger(0);
         collected.clear();
         Iterators.forEach(intList.iterator(), collected::add, completeCount::incrementAndGet);
@@ -812,7 +756,6 @@ public class Iterators100Test extends TestBase {
         Iterators.forEach(iterators, collected::add);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), collected);
 
-        // Test with offset and count
         iterators = Arrays.asList(Arrays.asList(1, 2, 3).iterator(), Arrays.asList(4, 5, 6).iterator());
         collected.clear();
         Iterators.forEach(iterators, 2, 3, collected::add);
@@ -835,7 +778,6 @@ public class Iterators100Test extends TestBase {
         }
     }
 
-    // Edge cases and error conditions
     @Test
     public void testNullIteratorHandling() {
         assertFalse(Iterators.skip(null, 5).hasNext());
@@ -865,10 +807,8 @@ public class Iterators100Test extends TestBase {
         assertThrows(NoSuchElementException.class, () -> iter2.next());
     }
 
-    // Test primitive array concatenation
     @Test
     public void testConcatPrimitiveArrays() {
-        // Test char arrays
         char[] charArr1 = { 'a', 'b' };
         char[] charArr2 = { 'c', 'd' };
         CharIterator charIter = Iterators.concat(charArr1, charArr2);
@@ -878,7 +818,6 @@ public class Iterators100Test extends TestBase {
         assertEquals('d', charIter.nextChar());
         assertFalse(charIter.hasNext());
 
-        // Test byte arrays
         byte[] byteArr1 = { 1, 2 };
         byte[] byteArr2 = { 3, 4 };
         ByteIterator byteIter = Iterators.concat(byteArr1, byteArr2);
@@ -888,7 +827,6 @@ public class Iterators100Test extends TestBase {
         assertEquals((byte) 4, byteIter.nextByte());
         assertFalse(byteIter.hasNext());
 
-        // Test short arrays
         short[] shortArr1 = { 10, 20 };
         short[] shortArr2 = { 30, 40 };
         ShortIterator shortIter = Iterators.concat(shortArr1, shortArr2);
@@ -898,7 +836,6 @@ public class Iterators100Test extends TestBase {
         assertEquals((short) 40, shortIter.nextShort());
         assertFalse(shortIter.hasNext());
 
-        // Test long arrays
         long[] longArr1 = { 100L, 200L };
         long[] longArr2 = { 300L, 400L };
         LongIterator longIter = Iterators.concat(longArr1, longArr2);
@@ -908,7 +845,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(400L, longIter.nextLong());
         assertFalse(longIter.hasNext());
 
-        // Test float arrays
         float[] floatArr1 = { 1.1f, 2.2f };
         float[] floatArr2 = { 3.3f, 4.4f };
         FloatIterator floatIter = Iterators.concat(floatArr1, floatArr2);
@@ -918,7 +854,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(4.4f, floatIter.nextFloat(), 0.001f);
         assertFalse(floatIter.hasNext());
 
-        // Test double arrays
         double[] doubleArr1 = { 1.11, 2.22 };
         double[] doubleArr2 = { 3.33, 4.44 };
         DoubleIterator doubleIter = Iterators.concat(doubleArr1, doubleArr2);
@@ -929,10 +864,8 @@ public class Iterators100Test extends TestBase {
         assertFalse(doubleIter.hasNext());
     }
 
-    // Test primitive iterator concatenation
     @Test
     public void testConcatPrimitiveIterators() {
-        // Test IntIterator concatenation
         IntIterator intIter1 = IntIterator.of(1, 2);
         IntIterator intIter2 = IntIterator.of(3, 4);
         IntIterator concatenated = Iterators.concat(intIter1, intIter2);
@@ -942,7 +875,6 @@ public class Iterators100Test extends TestBase {
         assertEquals(4, concatenated.nextInt());
         assertFalse(concatenated.hasNext());
 
-        // Test empty iterator handling
         IntIterator empty = IntIterator.empty();
         IntIterator nonEmpty = IntIterator.of(5, 6);
         concatenated = Iterators.concat(empty, nonEmpty);
@@ -951,7 +883,6 @@ public class Iterators100Test extends TestBase {
         assertFalse(concatenated.hasNext());
     }
 
-    // Test TriIterator operations
     @Test
     public void testTriIteratorConcat() {
         TriIterator<String, Integer, Boolean> tri1 = TriIterator.zip(N.asList("a"), N.asList(1), N.asList(true));
@@ -972,12 +903,10 @@ public class Iterators100Test extends TestBase {
         assertFalse(result.hasNext());
     }
 
-    // Complex scenarios
     @Test
     public void testChainedOperations() {
         List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 
-        // Skip 2, filter even, map to string, limit to 3
         ObjIterator<Integer> iter1 = Iterators.skip(numbers.iterator(), 2);
         ObjIterator<Integer> iter2 = Iterators.filter(iter1, n -> n % 2 == 0);
         ObjIterator<String> iter3 = Iterators.map(iter2, Object::toString);
@@ -992,12 +921,10 @@ public class Iterators100Test extends TestBase {
 
     @Test
     public void testMergeIterablesEdgeCases() {
-        // Test with empty collection
         List<Iterable<Integer>> empty = new ArrayList<>();
         ObjIterator<Integer> result = Iterators.mergeIterables(empty, (a, b) -> MergeResult.TAKE_FIRST);
         assertFalse(result.hasNext());
 
-        // Test with single iterable
         List<Iterable<Integer>> single = Arrays.asList(Arrays.asList(1, 2, 3));
         result = Iterators.mergeIterables(single, (a, b) -> MergeResult.TAKE_FIRST);
         assertEquals(Integer.valueOf(1), result.next());
@@ -1008,7 +935,6 @@ public class Iterators100Test extends TestBase {
 
     @Test
     public void testConcatIterablesEdgeCases() {
-        // Test with null in collection
         List<Iterable<String>> withNull = new ArrayList<>();
         withNull.add(Arrays.asList("a", "b"));
         withNull.add(null);

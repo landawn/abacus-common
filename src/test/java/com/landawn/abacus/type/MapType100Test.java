@@ -12,6 +12,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParseException;
@@ -20,6 +21,7 @@ import com.landawn.abacus.util.N;
 
 import lombok.Data;
 
+@Tag("new-test")
 public class MapType100Test extends TestBase {
 
     private MapType<String, Integer, Map<String, Integer>> mapType;

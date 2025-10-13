@@ -16,36 +16,34 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.DoubleConsumer;
 import com.landawn.abacus.util.function.DoublePredicate;
 import com.landawn.abacus.util.function.DoubleUnaryOperator;
 
+@Tag("new-test")
 public class DoubleList200Test extends TestBase {
 
     private final double delta = 0.00001;
 
     @Test
     public void testConstructors() {
-        // Default constructor
         DoubleList list1 = new DoubleList();
         assertEquals(0, list1.size());
         assertTrue(list1.isEmpty());
 
-        // Constructor with initial capacity
         DoubleList list2 = new DoubleList(10);
         assertEquals(0, list2.size());
         assertTrue(list2.array().length >= 10 || list2.array().length == 0);
 
-        // Constructor with array
         double[] arr = { 1.1, 2.2, 3.3 };
         DoubleList list3 = new DoubleList(arr);
         assertEquals(3, list3.size());
         assertArrayEquals(arr, list3.toArray(), delta);
-        assertSame(arr, list3.array()); // Should use the same array instance
+        assertSame(arr, list3.array());
 
-        // Constructor with array and size
         DoubleList list4 = new DoubleList(arr, 2);
         assertEquals(2, list4.size());
         assertArrayEquals(new double[] { 1.1, 2.2 }, list4.toArray(), delta);
@@ -54,30 +52,24 @@ public class DoubleList200Test extends TestBase {
 
     @Test
     public void testFactoryMethods() {
-        // of(double...)
         DoubleList list1 = DoubleList.of(1.1, 2.2, 3.3);
         assertArrayEquals(new double[] { 1.1, 2.2, 3.3 }, list1.toArray(), delta);
 
-        // of()
         DoubleList emptyList = DoubleList.of();
         assertTrue(emptyList.isEmpty());
 
-        // copyOf(double[])
         double[] arr = { 1.1, 2.2, 3.3 };
         DoubleList list2 = DoubleList.copyOf(arr);
         assertArrayEquals(arr, list2.toArray(), delta);
         arr[0] = 9.9;
-        assertEquals(1.1, list2.get(0), delta); // Ensure it's a true copy
+        assertEquals(1.1, list2.get(0), delta);
 
-        // copyOf(double[], from, to)
         DoubleList list3 = DoubleList.copyOf(arr, 1, 3);
         assertArrayEquals(new double[] { 2.2, 3.3 }, list3.toArray(), delta);
 
-        // repeat(double, int)
         DoubleList list4 = DoubleList.repeat(5.5, 3);
         assertArrayEquals(new double[] { 5.5, 5.5, 5.5 }, list4.toArray(), delta);
 
-        // random(int)
         DoubleList list5 = DoubleList.random(10);
         assertEquals(10, list5.size());
     }
@@ -168,18 +160,15 @@ public class DoubleList200Test extends TestBase {
 
     @Test
     public void testReplaceMethods() {
-        // replaceAll(oldVal, newVal)
         DoubleList list1 = DoubleList.of(1.1, 2.2, 1.1, 3.3);
         assertEquals(2, list1.replaceAll(1.1, 9.9));
         assertArrayEquals(new double[] { 9.9, 2.2, 9.9, 3.3 }, list1.toArray(), delta);
 
-        // replaceAll(operator)
         DoubleList list2 = DoubleList.of(1.0, 2.0, 3.0);
         DoubleUnaryOperator operator = d -> d * 2.0;
         list2.replaceAll(operator);
         assertArrayEquals(new double[] { 2.0, 4.0, 6.0 }, list2.toArray(), delta);
 
-        // replaceIf(predicate, newVal)
         DoubleList list3 = DoubleList.of(1.0, 2.0, 3.0, 4.0);
         assertTrue(list3.replaceIf(d -> d > 2.5, 5.5));
         assertArrayEquals(new double[] { 1.0, 2.0, 5.5, 5.5 }, list3.toArray(), delta);
@@ -204,20 +193,16 @@ public class DoubleList200Test extends TestBase {
         DoubleList listA = DoubleList.of(1.1, 2.2, 2.2, 3.3);
         DoubleList listB = DoubleList.of(2.2, 3.3, 4.4);
 
-        // disjoint
         assertFalse(listA.disjoint(listB));
         assertTrue(listA.disjoint(DoubleList.of(5.5, 6.6)));
 
-        // intersection
         DoubleList intersection = listA.intersection(listB);
         intersection.sort();
         assertArrayEquals(new double[] { 2.2, 3.3 }, intersection.toArray(), delta);
 
-        // difference
         DoubleList difference = listA.difference(listB);
         assertArrayEquals(new double[] { 1.1, 2.2 }, difference.toArray(), delta);
 
-        // symmetricDifference
         DoubleList symmDiff = listA.symmetricDifference(listB);
         symmDiff.sort();
         assertArrayEquals(new double[] { 1.1, 2.2, 4.4 }, symmDiff.toArray(), delta);

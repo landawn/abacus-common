@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -33,27 +34,24 @@ import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
 
+@Tag("new-test")
 public class AbstractCharStream201Test extends TestBase {
 
     private static final char[] TEST_ARRAY = new char[] { 'a', 'b', 'c', 'd', 'e' };
     private CharStream stream;
 
-    // Helper method to create a concrete CharStream for testing
-    // In a real scenario, you might have an actual implementation or a mock.
-    // For this example, we'll use ArrayCharStream as it's provided.
     protected CharStream createCharStream(char[] array) {
         return CharStream.of(array);
     }
 
     @BeforeEach
     public void setUp() {
-        // Initialize with some default data for general tests
         stream = createCharStream(TEST_ARRAY);
     }
 
     @Test
     public void testRateLimited() {
-        RateLimiter rateLimiter = RateLimiter.create(100); // 100 permits per second
+        RateLimiter rateLimiter = RateLimiter.create(100);
         long startTime = System.nanoTime();
         createCharStream(
                 new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' })
@@ -61,18 +59,17 @@ public class AbstractCharStream201Test extends TestBase {
                         .forEach(c -> {
                         });
         long endTime = System.nanoTime();
-        // A rough check: at least some time should have passed if limiting occurred for 26 characters
-        assertTrue(TimeUnit.NANOSECONDS.toMillis(endTime - startTime) > 200); // Expecting at least 26/100 * 1000 = 260ms, add some buffer
+        assertTrue(TimeUnit.NANOSECONDS.toMillis(endTime - startTime) > 200);
     }
 
     @Test
     public void testDelay() {
         long startTime = System.nanoTime();
-        createCharStream(new char[] { 'a', 'b', 'c' }).delay(Duration.ofMillis(10)) // 10 ms delay per element
+        createCharStream(new char[] { 'a', 'b', 'c' }).delay(Duration.ofMillis(10))
                 .forEach(c -> {
                 });
         long endTime = System.nanoTime();
-        assertTrue(TimeUnit.NANOSECONDS.toMillis(endTime - startTime) >= 30); // At least 3 * 10ms = 30ms
+        assertTrue(TimeUnit.NANOSECONDS.toMillis(endTime - startTime) >= 30);
     }
 
     @Test
@@ -150,19 +147,7 @@ public class AbstractCharStream201Test extends TestBase {
                 .rangeMap((c1, c2) -> (c2 - c1) == 1, (first, last) -> (char) (first + last))
                 .boxed()
                 .toList();
-        assertEquals(Arrays.asList((char) ('a' + 'b'), (char) ('c' + 'c'), (char) ('e' + 'f'), (char) ('g' + 'g'), (char) ('i' + 'i')), result); // (a+b, b+c) -> (a+c)
-        // 'a', 'b', 'c' -> 'a'+'c'
-        // 'e', 'f', 'g' -> 'e'+'g'
-        // 'i' -> 'i'
-        // Need to reconsider the expected output based on the provided example.
-        // The example seems to suggest the first and last of the *range*.
-
-        // Let's re-evaluate with a clearer example or explanation.
-        // If rangeMap applies (first_in_range, last_in_range) -> mapped_value
-        // Input: [1, 2, 3, 10, 11, 20, 21], sameRange: diff < 2 (i.e., consecutive)
-        // Ranges: [1,2,3], [10,11], [20,21]
-        // Mapper: (first, last) -> first + last
-        // Expected: [1+3, 10+11, 20+21] = [4, 21, 41]
+        assertEquals(Arrays.asList((char) ('a' + 'b'), (char) ('c' + 'c'), (char) ('e' + 'f'), (char) ('g' + 'g'), (char) ('i' + 'i')), result);
 
         result = createCharStream(new char[] { '1', '2', '3', ':', ';', '>', 'A' })
                 .rangeMap((c1, c2) -> (c2 - c1) == 1, (first, last) -> (char) ((last - '0') - (first - '0') + '0'))
@@ -197,9 +182,6 @@ public class AbstractCharStream201Test extends TestBase {
         List<Character> result = createCharStream(new char[] { 'a', 'b', 'd', 'e', 'f', 'h' }).collapse((c1, c2) -> (c2 - c1) <= 1, (c1, c2) -> (char) (c1 + c2))
                 .boxed()
                 .toList();
-        // a,b -> (a+b)
-        // d,e,f -> (d+e)+f
-        // h -> h
         assertEquals(Arrays.asList((char) ('a' + 'b'), (char) ('d' + 'e' + 'f'), 'h'), result);
 
         result = createCharStream(new char[] {}).collapse((c1, c2) -> true, (c1, c2) -> c1).boxed().toList();
@@ -212,10 +194,6 @@ public class AbstractCharStream201Test extends TestBase {
                 .collapse((first, prev, current) -> (current - prev) == 1 && (current - first) < 3, (prev, current) -> (char) (prev + current))
                 .boxed()
                 .toList();
-        // (a,b,c) -> a+b+c (a-b=1, a-c=2 < 3. b-c=1)
-        // (d) -> d
-        // (f,g,h) -> f+g+h
-        // (i) -> i
         assertEquals(Arrays.asList((char) ('a' + 'b' + 'c'), 'd', (char) ('f' + 'g' + 'h'), 'i'), result);
 
         result = createCharStream(new char[] {}).collapse((f, p, c) -> true, (p, c) -> p).boxed().toList();
@@ -248,12 +226,6 @@ public class AbstractCharStream201Test extends TestBase {
         CharStream s = createCharStream(TEST_ARRAY);
         List<Character> result = s.filter(c -> c % 2 == 1, c -> droppedItems.add(c)).boxed().toList();
 
-        // Assuming 'a' is 97, 'b' is 98, etc.
-        // a (97) % 2 = 1 -> keep
-        // b (98) % 2 = 0 -> drop, action on 'b'
-        // c (99) % 2 = 1 -> keep
-        // d (100) % 2 = 0 -> drop, action on 'd'
-        // e (101) % 2 = 1 -> keep
         assertEquals(Arrays.asList('a', 'c', 'e'), result);
         assertEquals(CharList.of('b', 'd'), droppedItems);
 
@@ -269,7 +241,6 @@ public class AbstractCharStream201Test extends TestBase {
         CharStream s = createCharStream(TEST_ARRAY);
         List<Character> result = s.dropWhile(c -> c != 'c', c -> droppedItems.add(c)).boxed().toList();
 
-        // Drop 'a', 'b', then 'c' is not satisfying the predicate, so stop dropping
         assertEquals(Arrays.asList('c', 'd', 'e'), result);
         assertEquals(CharList.of('a', 'b'), droppedItems);
 
@@ -311,12 +282,9 @@ public class AbstractCharStream201Test extends TestBase {
 
     @Test
     public void testScanAccumulator() {
-        List<Character> result = createCharStream(new char[] { '1', '2', '3' }).scan((c1, c2) -> (char) (c1 + c2 - '0')) // Summing char values as numbers
+        List<Character> result = createCharStream(new char[] { '1', '2', '3' }).scan((c1, c2) -> (char) (c1 + c2 - '0'))
                 .boxed()
                 .toList();
-        // 1
-        // 1+2 = 3
-        // 3+3 = 6
         assertEquals(Arrays.asList('1', (char) ('1' + '2' - '0'), (char) ('1' + '2' + '3' - '0' - '0')), result);
 
         result = createCharStream(new char[] {}).scan((c1, c2) -> c1).boxed().toList();
@@ -328,12 +296,9 @@ public class AbstractCharStream201Test extends TestBase {
 
     @Test
     public void testScanInitAccumulator() {
-        List<Character> result = createCharStream(new char[] { '1', '2', '3' }).scan('0', (c1, c2) -> (char) (c1 + c2 - '0')) // Initial '0' (ascii 48)
+        List<Character> result = createCharStream(new char[] { '1', '2', '3' }).scan('0', (c1, c2) -> (char) (c1 + c2 - '0'))
                 .boxed()
                 .toList();
-        // (0+1) = 1
-        // (1+2) = 3
-        // (3+3) = 6
         assertEquals(Arrays.asList((char) ('0' + '1' - '0'), (char) ('0' + '1' + '2' - '0' - '0'), (char) ('0' + '1' + '2' + '3' - '0' - '0' - '0')), result);
 
         result = createCharStream(new char[] {}).scan('x', (c1, c2) -> c1).boxed().toList();
@@ -380,14 +345,10 @@ public class AbstractCharStream201Test extends TestBase {
     public void testSymmetricDifference() {
         Collection<Character> other = Arrays.asList('b', 'd', 'f', 'g');
         List<Character> result = createCharStream(TEST_ARRAY).symmetricDifference(other).boxed().toList();
-        // Elements in stream but not in other: 'a', 'c', 'e'
-        // Elements in other but not in stream (after removing common): 'f', 'g'
-        // Combined and order might vary depending on internal implementation but content should be correct.
-        // The implementation uses append, so it should be a,c,e then f,g.
         assertEquals(Arrays.asList('a', 'c', 'e', 'f', 'g'), result);
 
         result = createCharStream(new char[] {}).symmetricDifference(other).boxed().toList();
-        assertEquals(Arrays.asList('b', 'd', 'f', 'g'), result); // All elements from 'other' should remain. Order might be arbitrary.
+        assertEquals(Arrays.asList('b', 'd', 'f', 'g'), result);
 
         result = createCharStream(new char[] { 'a', 'b' }).symmetricDifference(Arrays.asList()).boxed().toList();
         assertEquals(Arrays.asList('a', 'b'), result);
@@ -408,7 +369,7 @@ public class AbstractCharStream201Test extends TestBase {
         assertEquals(Arrays.asList('d', 'e', 'a', 'b', 'c'), result);
 
         result = createCharStream(TEST_ARRAY).rotated(-2).boxed().toList();
-        assertEquals(Arrays.asList('c', 'd', 'e', 'a', 'b'), result); // -2 is equivalent to +3 in a list of 5
+        assertEquals(Arrays.asList('c', 'd', 'e', 'a', 'b'), result);
 
         result = createCharStream(new char[] {}).rotated(1).boxed().toList();
         assertEquals(0, result.size());
@@ -420,13 +381,11 @@ public class AbstractCharStream201Test extends TestBase {
     @Test
     public void testShuffled() {
         char[] original = { 'a', 'b', 'c', 'd', 'e' };
-        List<Character> result = createCharStream(original).shuffled(new Random(0)).boxed().toList(); // Use a fixed seed for reproducibility
-        // The exact shuffled order depends on the Random implementation and seed.
-        // We can assert that it contains the same elements and is a permutation.
+        List<Character> result = createCharStream(original).shuffled(new Random(0)).boxed().toList();
         assertEquals(original.length, result.size());
         assertTrue(result.containsAll(Arrays.asList('a', 'b', 'c', 'd', 'e')));
         assertTrue(Arrays.asList('a', 'b', 'c', 'd', 'e').containsAll(result));
-        assertNotEquals(Arrays.asList('a', 'b', 'c', 'd', 'e'), result); // Unlikely to be the same with shuffling
+        assertNotEquals(Arrays.asList('a', 'b', 'c', 'd', 'e'), result);
     }
 
     @Test
@@ -437,7 +396,7 @@ public class AbstractCharStream201Test extends TestBase {
         result = createCharStream(new char[] {}).sorted().boxed().toList();
         assertEquals(0, result.size());
 
-        result = createCharStream(new char[] { 'a', 'b', 'c' }).sorted().boxed().toList(); // Already sorted
+        result = createCharStream(new char[] { 'a', 'b', 'c' }).sorted().boxed().toList();
         assertEquals(Arrays.asList('a', 'b', 'c'), result);
     }
 
@@ -681,7 +640,6 @@ public class AbstractCharStream201Test extends TestBase {
     @Test
     public void testGroupTo() {
         Map<Boolean, List<Character>> result = createCharStream(new char[] { 'a', 'b', 'c', 'd' }).groupTo(c -> c % 2 == 0, java.util.stream.Collectors.toList());
-        // 'a' (97) -> odd, 'b' (98) -> even, 'c' (99) -> odd, 'd' (100) -> even
         assertEquals(2, result.size());
         assertEquals(Arrays.asList('b', 'd'), result.get(true));
         assertEquals(Arrays.asList('a', 'c'), result.get(false));
@@ -700,7 +658,7 @@ public class AbstractCharStream201Test extends TestBase {
     @Test
     public void testForEachIndexed() {
         CharList processed = new CharList();
-        createCharStream(new char[] { 'a', 'b', 'c' }).forEachIndexed((idx, c) -> processed.add((char) (c + idx))); // Simulate some operation
+        createCharStream(new char[] { 'a', 'b', 'c' }).forEachIndexed((idx, c) -> processed.add((char) (c + idx)));
         assertEquals(CharList.of('a', (char) ('b' + 1), (char) ('c' + 2)), processed);
 
         processed.clear();
@@ -751,7 +709,7 @@ public class AbstractCharStream201Test extends TestBase {
     public void testFindAny() {
         OptionalChar result = createCharStream(new char[] { 'a', 'b', 'c' }).findAny(c -> c == 'b');
         assertTrue(result.isPresent());
-        assertEquals('b', result.get()); // For parallel streams, this could be any matching element. For sequential, usually first.
+        assertEquals('b', result.get());
 
         result = createCharStream(new char[] { 'a', 'b', 'c' }).findAny(c -> c == 'x');
         assertFalse(result.isPresent());

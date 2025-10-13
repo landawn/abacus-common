@@ -16,15 +16,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Difference.BeanDifference;
 import com.landawn.abacus.util.Difference.MapDifference;
 import com.landawn.abacus.util.function.BiPredicate;
 
+@Tag("new-test")
 public class Difference100Test extends TestBase {
 
-    // Test for boolean arrays
     @Test
     public void testOfBooleanArrays() {
         boolean[] a = { true, false, true, false };
@@ -51,7 +52,6 @@ public class Difference100Test extends TestBase {
         assertTrue(diff.areEqual());
     }
 
-    // Test for char arrays
     @Test
     public void testOfCharArrays() {
         char[] a = { 'a', 'b', 'c', 'd' };
@@ -65,7 +65,6 @@ public class Difference100Test extends TestBase {
         assertFalse(diff.areEqual());
     }
 
-    // Test for byte arrays
     @Test
     public void testOfByteArrays() {
         byte[] a = { 1, 2, 3, 4 };
@@ -78,7 +77,6 @@ public class Difference100Test extends TestBase {
         assertEquals(ByteList.of((byte) 5), diff.onRightOnly());
     }
 
-    // Test for short arrays
     @Test
     public void testOfShortArrays() {
         short[] a = { 10, 20, 30 };
@@ -91,7 +89,6 @@ public class Difference100Test extends TestBase {
         assertEquals(ShortList.of((short) 40), diff.onRightOnly());
     }
 
-    // Test for int arrays
     @Test
     public void testOfIntArrays() {
         int[] a = { 1, 2, 3, 4, 5 };
@@ -104,7 +101,6 @@ public class Difference100Test extends TestBase {
         assertEquals(IntList.of(6, 7), diff.onRightOnly());
     }
 
-    // Test for long arrays
     @Test
     public void testOfLongArrays() {
         long[] a = { 100L, 200L, 300L };
@@ -117,7 +113,6 @@ public class Difference100Test extends TestBase {
         assertEquals(LongList.of(400L), diff.onRightOnly());
     }
 
-    // Test for float arrays
     @Test
     public void testOfFloatArrays() {
         float[] a = { 1.1f, 2.2f, 3.3f };
@@ -130,7 +125,6 @@ public class Difference100Test extends TestBase {
         assertEquals(FloatList.of(4.4f), diff.onRightOnly());
     }
 
-    // Test for double arrays
     @Test
     public void testOfDoubleArrays() {
         double[] a = { 1.11, 2.22, 3.33 };
@@ -143,7 +137,6 @@ public class Difference100Test extends TestBase {
         assertEquals(DoubleList.of(4.44), diff.onRightOnly());
     }
 
-    // Test for generic arrays
     @Test
     public void testOfGenericArrays() {
         String[] a = { "apple", "banana", "cherry" };
@@ -156,7 +149,6 @@ public class Difference100Test extends TestBase {
         assertEquals(Arrays.asList("date"), diff.onRightOnly());
     }
 
-    // Test for collections
     @Test
     public void testOfCollections() {
         List<Integer> a = Arrays.asList(1, 2, 3, 4, 5);
@@ -207,7 +199,6 @@ public class Difference100Test extends TestBase {
         assertFalse(diff.areEqual());
     }
 
-    // Test for primitive lists
     @Test
     public void testOfBooleanLists() {
         BooleanList a = BooleanList.of(true, false, true);
@@ -304,7 +295,6 @@ public class Difference100Test extends TestBase {
         assertEquals(DoubleList.of(4.25), diff.onRightOnly());
     }
 
-    // Test equals and hashCode
     @Test
     public void testEqualsAndHashCode() {
         List<String> a1 = Arrays.asList("a", "b", "c");
@@ -328,7 +318,6 @@ public class Difference100Test extends TestBase {
         assertEquals(diff1, diff1);
     }
 
-    // Test toString
     @Test
     public void testToString() {
         List<String> a = Arrays.asList("a", "b");
@@ -342,7 +331,6 @@ public class Difference100Test extends TestBase {
         assertTrue(str.contains("onRightOnly"));
     }
 
-    // MapDifference Tests
     @Test
     public void testMapDifferenceBasic() {
         Map<String, Integer> map1 = new HashMap<>();
@@ -427,7 +415,6 @@ public class Difference100Test extends TestBase {
         map2.put("a", "hello");
         map2.put("b", "world");
 
-        // Case-insensitive comparison
         MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>> diff = MapDifference.of(map1, map2,
                 (v1, v2) -> v1.equalsIgnoreCase(v2));
 
@@ -448,10 +435,9 @@ public class Difference100Test extends TestBase {
         map2.put("threshold", 105);
         map2.put("value", 200);
 
-        // Different tolerance based on key
         MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2, (k, v1, v2) -> {
             if ("threshold".equals(k)) {
-                return Math.abs(v1 - v2) <= 10; // 10% tolerance
+                return Math.abs(v1 - v2) <= 10;
             }
             return v1.equals(v2);
         });
@@ -536,7 +522,6 @@ public class Difference100Test extends TestBase {
         assertTrue(diff.withDifferentValues().containsKey(1));
     }
 
-    // BeanDifference Tests
     public static class TestBean {
         private String name;
         private int value;
@@ -625,7 +610,6 @@ public class Difference100Test extends TestBase {
         assertEquals(1, diff.withDifferentValues().size());
         assertEquals(Pair.of("test1", "test2"), diff.withDifferentValues().get("name"));
 
-        // "active" property is not compared
         assertFalse(diff.withDifferentValues().containsKey("active"));
     }
 
@@ -677,7 +661,6 @@ public class Difference100Test extends TestBase {
         TestBean bean1 = new TestBean("TEST", 100, true);
         TestBean bean2 = new TestBean("test", 100, true);
 
-        // Case-insensitive comparison for name
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(bean1, bean2,
                 (propName, v1, v2) -> {
                     if ("name".equals(propName) && v1 instanceof String && v2 instanceof String) {
@@ -703,7 +686,6 @@ public class Difference100Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> MapDifference.of(map1, map2, (BiPredicate<Integer, Integer>) null));
     }
 
-    // KeyValueDifference equals/hashCode/toString tests
     @Test
     public void testMapDifferenceEqualsHashCodeToString() {
         Map<String, Integer> map1a = new HashMap<>();

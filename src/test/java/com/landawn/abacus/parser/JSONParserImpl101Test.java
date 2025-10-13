@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -32,6 +33,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.RowDataset;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("new-test")
 public class JSONParserImpl101Test extends TestBase {
 
     private JSONParserImpl parser;
@@ -46,11 +48,9 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testConstructors() {
-        // Test default constructor
         JSONParserImpl parser1 = new JSONParserImpl();
         Assertions.assertNotNull(parser1);
 
-        // Test constructor with configs
         JSONSerializationConfig jsc = JSC.create();
         JSONDeserializationConfig jdc = JDC.create();
         JSONParserImpl parser2 = new JSONParserImpl(jsc, jdc);
@@ -59,23 +59,18 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testReadString_SimpleTypes() {
-        // Test with String
         String result1 = parser.readString("\"hello\"", null, String.class);
         Assertions.assertEquals("\"hello\"", result1);
 
-        // Test with Integer
         Integer result2 = parser.readString("123", null, Integer.class);
         Assertions.assertEquals(123, result2);
 
-        // Test with Boolean
         Boolean result3 = parser.readString("true", null, Boolean.class);
         Assertions.assertTrue(result3);
 
-        // Test with null
         String result4 = parser.readString(null, null, String.class);
         Assertions.assertNull(result4);
 
-        // Test with empty string
         String result5 = parser.readString("", null, String.class);
         Assertions.assertEquals("", result5);
     }
@@ -84,16 +79,13 @@ public class JSONParserImpl101Test extends TestBase {
     public void testReadString_WithConfig() {
         JSONDeserializationConfig config = JDC.create().readNullToEmpty(true);
 
-        // Test null to empty for String
         String result1 = parser.readString(null, config, String.class);
         Assertions.assertEquals("", result1);
 
-        // Test null to empty for List
         List<String> result2 = parser.readString(null, config, List.class);
         Assertions.assertNotNull(result2);
         Assertions.assertTrue(result2.isEmpty());
 
-        // Test null to empty for Map
         Map<String, Object> result3 = parser.readString(null, config, Map.class);
         Assertions.assertNotNull(result3);
         Assertions.assertTrue(result3.isEmpty());
@@ -101,16 +93,13 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testReadString_ComplexTypes() {
-        // Test with Map
         Map<String, Object> result1 = parser.readString("{\"key\":\"value\"}", null, Map.class);
         Assertions.assertEquals("value", result1.get("key"));
 
-        // Test with List
         List<String> result2 = parser.readString("[\"a\",\"b\",\"c\"]", null, List.class);
         Assertions.assertEquals(3, result2.size());
         Assertions.assertEquals("a", result2.get(0));
 
-        // Test with nested structures
         String json = "{\"list\":[1,2,3],\"map\":{\"nested\":\"value\"}}";
         Map<String, Object> result3 = parser.readString(json, null, Map.class);
         Assertions.assertTrue(result3.get("list") instanceof List);
@@ -119,15 +108,12 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testReadString_Array() {
-        // Test with int array
         int[] intArray = parser.readString("[1,2,3]", null, int[].class);
         Assertions.assertArrayEquals(new int[] { 1, 2, 3 }, intArray);
 
-        // Test with String array
         String[] strArray = parser.readString("[\"a\",\"b\",\"c\"]", null, String[].class);
         Assertions.assertArrayEquals(new String[] { "a", "b", "c" }, strArray);
 
-        // Test with Object array
         Object[] objArray = parser.readString("[1,\"two\",true]", null, Object[].class);
         Assertions.assertEquals(3, objArray.length);
     }
@@ -140,7 +126,6 @@ public class JSONParserImpl101Test extends TestBase {
         Assertions.assertEquals("b", output[1]);
         Assertions.assertEquals("c", output[2]);
 
-        // Test with null source
         Object[] output2 = new Object[3];
         parser.readString(null, null, output2);
         Assertions.assertNull(output2[0]);
@@ -153,13 +138,11 @@ public class JSONParserImpl101Test extends TestBase {
         Assertions.assertEquals(3, output.size());
         Assertions.assertEquals("x", output.get(0));
 
-        // Test with Set
         Set<Integer> outputSet = new HashSet<>();
         parser.readString("[1,2,3]", null, outputSet);
         Assertions.assertEquals(3, outputSet.size());
         Assertions.assertTrue(outputSet.contains(1));
 
-        // Test with null source
         List<String> output2 = new ArrayList<>();
         parser.readString(null, null, output2);
         Assertions.assertTrue(output2.isEmpty());
@@ -173,7 +156,6 @@ public class JSONParserImpl101Test extends TestBase {
         Assertions.assertEquals(1, output.get("a"));
         Assertions.assertEquals(2, output.get("b"));
 
-        // Test with empty string
         Map<String, Object> output2 = new HashMap<>();
         parser.readString("", null, output2);
         Assertions.assertTrue(output2.isEmpty());
@@ -181,39 +163,32 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testSerialize_SimpleTypes() {
-        // Test String
         String result1 = parser.serialize("test");
         Assertions.assertEquals("test", result1);
 
-        // Test Integer
         String result2 = parser.serialize(123);
         Assertions.assertEquals("123", result2);
 
-        // Test Boolean
         String result3 = parser.serialize(true);
         Assertions.assertEquals("true", result3);
 
-        // Test null
         String result4 = parser.serialize(null);
         Assertions.assertNull(result4);
     }
 
     @Test
     public void testSerialize_ComplexTypes() {
-        // Test Map
         Map<String, Object> map = new HashMap<>();
         map.put("key", "value");
         String result1 = parser.serialize(map);
         Assertions.assertTrue(result1.contains("\"key\""));
         Assertions.assertTrue(result1.contains("\"value\""));
 
-        // Test List
         List<String> list = Arrays.asList("a", "b", "c");
         String result2 = parser.serialize(list);
         Assertions.assertTrue(result2.startsWith("["));
         Assertions.assertTrue(result2.endsWith("]"));
 
-        // Test array
         int[] array = { 1, 2, 3 };
         String result3 = parser.serialize(array);
         Assertions.assertEquals("[1, 2, 3]", result3);
@@ -247,7 +222,6 @@ public class JSONParserImpl101Test extends TestBase {
         Assertions.assertTrue(content.contains("\"name\""));
         Assertions.assertTrue(content.contains("\"test\""));
 
-        // Test with null
         File file2 = tempDir.resolve("test2.json").toFile();
         parser.serialize(null, null, file2);
         Assertions.assertTrue(file2.exists());
@@ -264,7 +238,6 @@ public class JSONParserImpl101Test extends TestBase {
         String result = baos.toString();
         Assertions.assertEquals("[1, 2, 3]", result);
 
-        // Test with null
         ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
         parser.serialize(null, null, baos2);
         Assertions.assertEquals("", baos2.toString());
@@ -283,7 +256,6 @@ public class JSONParserImpl101Test extends TestBase {
         Assertions.assertTrue(result.contains("\"foo\""));
         Assertions.assertTrue(result.contains("\"bar\""));
 
-        // Test with null
         StringWriter writer2 = new StringWriter();
         parser.serialize(null, null, writer2);
         Assertions.assertEquals("", writer2.toString());
@@ -291,21 +263,18 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testDeserialize_FromString() {
-        // Test simple types
         String result1 = parser.deserialize("hello", null, String.class);
         Assertions.assertEquals("hello", result1);
 
         Integer result2 = parser.deserialize("42", null, Integer.class);
         Assertions.assertEquals(42, result2);
 
-        // Test complex types
         Map<String, Object> result3 = parser.deserialize("{\"a\":1}", null, Map.class);
         Assertions.assertEquals(1, result3.get("a"));
 
         List<String> result4 = parser.deserialize("[\"x\",\"y\"]", null, List.class);
         Assertions.assertEquals(2, result4.size());
 
-        // Test null and empty
         String result5 = parser.deserialize((String) null, null, String.class);
         Assertions.assertNull(result5);
 
@@ -318,21 +287,17 @@ public class JSONParserImpl101Test extends TestBase {
     public void testDeserialize_FromStringWithIndices() {
         String json = "{\"start\":true,\"middle\":123,\"end\":false}";
 
-        // Test full range
         Map<String, Object> result1 = parser.deserialize(json, 0, json.length(), null, Map.class);
         Assertions.assertEquals(3, result1.size());
 
-        // Test partial range - just the number
         int start = json.indexOf("123");
         int end = start + 3;
         Integer result2 = parser.deserialize(json, start, end, null, Integer.class);
         Assertions.assertEquals(123, result2);
 
-        // Test empty range
         String result3 = parser.deserialize(json, 5, 5, null, String.class);
         Assertions.assertEquals("", result3);
 
-        // Test with readNullToEmpty
         JSONDeserializationConfig config = JDC.create().readNullToEmpty(true);
         List<String> result4 = parser.deserialize(json, 5, 5, config, List.class);
         Assertions.assertNotNull(result4);
@@ -384,11 +349,9 @@ public class JSONParserImpl101Test extends TestBase {
         Assertions.assertEquals(1, result.get(0).get(0));
         Assertions.assertEquals(6, result.get(2).get(1));
 
-        // Test empty array
         Stream<List<String>> stream2 = parser.stream("[]", null, Type.ofList(String.class));
         Assertions.assertEquals(0, stream2.count());
 
-        // Test empty string
         Stream<List<String>> stream3 = parser.stream("", null, Type.ofList(String.class));
         Assertions.assertEquals(0, stream3.count());
     }
@@ -449,17 +412,14 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testStream_CloseHandling() throws IOException {
-        // Test with closeInputStreamWhenStreamIsClosed = false
         String json = "[[1,2],[3,4],[5,6]]";
         ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes());
 
         Stream<List<Integer>> stream = parser.stream(bais, null, true, Type.ofList(Integer.class));
         stream.toList();
 
-        // Stream should be readable after stream is closed
         Assertions.assertTrue(bais.available() >= 0);
 
-        // Test with closeReaderWhenStreamIsClosed = true
         StringReader reader = new StringReader("[[1,2],[3,4],[5,6]]");
         Stream<List<Integer>> stream2 = parser.stream(reader, null, false, Type.ofList(Integer.class));
         List<List<Integer>> result = stream2.toList();
@@ -471,7 +431,7 @@ public class JSONParserImpl101Test extends TestBase {
         JSONSerializationConfig config = JSC.create().supportCircularReference(true);
 
         Map<String, Object> map = new HashMap<>();
-        map.put("self", map); // Circular reference
+        map.put("self", map);
 
         String result = parser.serialize(map, config);
         Assertions.assertNotNull(result);
@@ -480,21 +440,17 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testSpecialCases_EmptyAndNull() {
-        // Test various empty/null scenarios
         JSONDeserializationConfig readConfig = JDC.create().readNullToEmpty(true);
         JSONSerializationConfig writeConfig = JSC.create().writeNullToEmpty(true);
 
-        // Empty string to empty collection
         List<String> list1 = parser.deserialize("", readConfig, List.class);
         Assertions.assertNotNull(list1);
         Assertions.assertTrue(list1.isEmpty());
 
-        // Null to empty map
         Map<String, Object> map1 = parser.deserialize((String) null, readConfig, Map.class);
         Assertions.assertNotNull(map1);
         Assertions.assertTrue(map1.isEmpty());
 
-        // Serialize with writeNullToEmpty
         Map<String, Object> mapWithNull = new HashMap<>();
         mapWithNull.put("nullValue", null);
         mapWithNull.put("normalValue", "test");
@@ -505,7 +461,6 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testSpecialCases_Dataset() {
-        // Test Dataset serialization/deserialization
         List<String> columnNames = Arrays.asList("col1", "col2");
         List<List<Object>> columns = new ArrayList<>();
         columns.add(Arrays.asList("a", "b", "c"));
@@ -526,7 +481,6 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testSpecialCases_NestedStructures() {
-        // Create deeply nested structure
         Map<String, Object> root = new HashMap<>();
         Map<String, Object> level1 = new HashMap<>();
         List<Map<String, Object>> level2 = new ArrayList<>();
@@ -561,7 +515,7 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testConfiguration_PrettyFormat() {
-        JSONSerializationConfig config = JSC.create().prettyFormat(true).setIndentation("    "); // 4 spaces
+        JSONSerializationConfig config = JSC.create().prettyFormat(true).setIndentation("    ");
 
         Map<String, Object> data = new HashMap<>();
         data.put("field1", "value1");
@@ -570,7 +524,7 @@ public class JSONParserImpl101Test extends TestBase {
         String result = parser.serialize(data, config);
 
         Assertions.assertTrue(result.contains("\n"));
-        Assertions.assertTrue(result.contains("    ")); // Check indentation
+        Assertions.assertTrue(result.contains("    "));
     }
 
     @Test
@@ -582,18 +536,17 @@ public class JSONParserImpl101Test extends TestBase {
         map.put("key", "value");
 
         String result1 = parser.serialize(map, config1);
-        Assertions.assertTrue(result1.contains("key")); // Without quotes
+        Assertions.assertTrue(result1.contains("key"));
 
         Map<Integer, String> intKeyMap = new HashMap<>();
         intKeyMap.put(123, "value");
 
         String result2 = parser.serialize(intKeyMap, config2);
-        Assertions.assertTrue(result2.contains("123")); // Number key without quotes
+        Assertions.assertTrue(result2.contains("123"));
     }
 
     @Test
     public void testPrimitiveArrays() {
-        // Test various primitive arrays
         int[] intArray = { 1, 2, 3 };
         String intResult = parser.serialize(intArray);
         int[] intDeserialized = parser.deserialize(intResult, null, int[].class);
@@ -612,7 +565,6 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testEdgeCases_EmptyCollections() {
-        // Empty collections
         List<String> emptyList = new ArrayList<>();
         String listJson = parser.serialize(emptyList);
         List<String> deserializedList = parser.deserialize(listJson, null, List.class);
@@ -631,7 +583,6 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testEdgeCases_NullValues() {
-        // Collections with null values
         List<String> listWithNulls = Arrays.asList("a", null, "c");
         String listJson = parser.serialize(listWithNulls);
         List<String> deserializedList = parser.deserialize(listJson, null, List.class);
@@ -649,7 +600,6 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testComplexBean() {
-        // Test with a complex bean structure
         TestBean bean = new TestBean();
         bean.setName("Test");
         bean.setValue(42);
@@ -672,7 +622,6 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testUnsupportedTypes() {
-        // Test error handling for unsupported types in stream
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             parser.stream("[1,2,3]", null, Type.of(StringBuilder.class));
         });
@@ -680,7 +629,6 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testInvalidJson() {
-        // Test various invalid JSON scenarios
         Assertions.assertThrows(Exception.class, () -> {
             parser.deserialize("{invalid json}", null, Map.class);
         });
@@ -696,7 +644,6 @@ public class JSONParserImpl101Test extends TestBase {
 
     @Test
     public void testLargeData() {
-        // Test with larger data sets
         List<Map<String, Object>> largeList = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             Map<String, Object> item = new HashMap<>();
@@ -714,7 +661,6 @@ public class JSONParserImpl101Test extends TestBase {
         Assertions.assertEquals(999, deserialized.get(999).get("id"));
     }
 
-    // Helper class for bean testing
     public static class TestBean {
         private String name;
         private int value;

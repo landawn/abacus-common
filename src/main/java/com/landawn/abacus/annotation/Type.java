@@ -59,7 +59,6 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  * 
- * @author HaiYang Li
  * @since 2016
  */
 @Documented

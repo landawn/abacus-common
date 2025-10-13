@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -33,16 +34,11 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 
+@Tag("new-test")
 public class Collectors200Test extends TestBase {
-
-    //    @Test
-    //    public void test_constructorIsPrivate() {
-    //        // This test is to ensure the constructor is not public, enforcing the utility class pattern.
-    //        // It's a compile-time check rather than a runtime test.
-    //        assertThrows(IllegalAccessException.class, () -> Collectors.class.getDeclaredConstructor().newInstance());
-    //    }
 
     @Test
     public void test_toCollection() {
@@ -61,7 +57,6 @@ public class Collectors200Test extends TestBase {
         assertEquals(3, list.size());
         assertEquals(Arrays.asList(1, 2, 3), list);
 
-        // Test with parallel stream
         List<Integer> parallelList = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).parallel().collect(Collectors.toCollection(5, ArrayList::new));
         assertEquals(5, parallelList.size());
     }
@@ -214,11 +209,11 @@ public class Collectors200Test extends TestBase {
 
     @Test
     public void test_averaging() {
-        assertEquals(2.0, Stream.of(1, 2, 3).collect(Collectors.averagingInt(i -> i)));
-        assertEquals(2.0, Stream.of(1L, 2L, 3L).collect(Collectors.averagingLong(i -> i)));
-        assertEquals(2.0, Stream.of(1.0, 2.0, 3.0).collect(Collectors.averagingDouble(i -> i)));
-        assertEquals(new BigDecimal("2"), Stream.of("1", "2", "3").collect(Collectors.averagingBigInteger(BigInteger::new)));
-        assertEquals(new BigDecimal("2.2"), Stream.of("1.1", "2.2", "3.3").collect(Collectors.averagingBigDecimal(BigDecimal::new)));
+        assertEquals(OptionalDouble.of(2.0), Stream.of(1, 2, 3).collect(Collectors.averagingIntOrEmpty(i -> i)));
+        assertEquals(OptionalDouble.of(2.0), Stream.of(1L, 2L, 3L).collect(Collectors.averagingLongOrEmpty(i -> i)));
+        assertEquals(OptionalDouble.of(2.0), Stream.of(1.0, 2.0, 3.0).collect(Collectors.averagingDoubleOrEmpty(i -> i)));
+        assertEquals(Optional.of(new BigDecimal("2")), Stream.of("1", "2", "3").collect(Collectors.averagingBigIntegerOrEmpty(BigInteger::new)));
+        assertEquals(Optional.of(new BigDecimal("2.2")), Stream.of("1.1", "2.2", "3.3").collect(Collectors.averagingBigDecimalOrEmpty(BigDecimal::new)));
 
         assertThrows(NoSuchElementException.class, () -> Stream.<Integer> empty().collect(Collectors.averagingIntOrElseThrow(i -> i)));
     }

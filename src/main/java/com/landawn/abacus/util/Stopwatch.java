@@ -350,9 +350,23 @@ public final class Stopwatch {
     }
 
     /**
+     * Chooses the most appropriate time unit for displaying the given nanoseconds value.
+     * The unit is selected to ensure the value is at least 1 in that unit, preferring
+     * larger units when possible for better readability.
      *
-     * @param nanos
-     * @return
+     * <p>Selection logic:</p>
+     * <ul>
+     *   <li>DAYS if ≥ 1 day</li>
+     *   <li>HOURS if ≥ 1 hour</li>
+     *   <li>MINUTES if ≥ 1 minute</li>
+     *   <li>SECONDS if ≥ 1 second</li>
+     *   <li>MILLISECONDS if ≥ 1 millisecond</li>
+     *   <li>MICROSECONDS if ≥ 1 microsecond</li>
+     *   <li>NANOSECONDS otherwise</li>
+     * </ul>
+     *
+     * @param nanos the elapsed time in nanoseconds
+     * @return the most appropriate {@code TimeUnit} for displaying the given duration
      */
     private static TimeUnit chooseUnit(final long nanos) {
         if (DAYS.convert(nanos, NANOSECONDS) > 0) {
@@ -377,9 +391,23 @@ public final class Stopwatch {
     }
 
     /**
+     * Returns the abbreviated string representation for the given time unit.
+     * This is used for formatting the stopwatch's {@code toString()} output.
      *
-     * @param unit
-     * @return
+     * <p>Abbreviations:</p>
+     * <ul>
+     *   <li>NANOSECONDS → "ns"</li>
+     *   <li>MICROSECONDS → "μs"</li>
+     *   <li>MILLISECONDS → "ms"</li>
+     *   <li>SECONDS → "s"</li>
+     *   <li>MINUTES → "min"</li>
+     *   <li>HOURS → "h"</li>
+     *   <li>DAYS → "d"</li>
+     * </ul>
+     *
+     * @param unit the time unit to abbreviate
+     * @return the abbreviated string representation of the time unit
+     * @throws AssertionError if the unit is not one of the standard TimeUnit values
      */
     private static String abbreviate(final TimeUnit unit) {
         switch (unit) {

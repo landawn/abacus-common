@@ -6,9 +6,11 @@ import java.io.InputStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class BinaryStreamType100Test extends TestBase {
 
     private Type<InputStream> binaryStreamType;
@@ -23,7 +25,4 @@ public class BinaryStreamType100Test extends TestBase {
         assertEquals("BinaryStream", binaryStreamType.name());
     }
 
-    // Note: BinaryStreamType inherits all functionality from InputStreamType,
-    // so the actual behavior is tested through InputStreamType tests.
-    // BinaryStreamType only provides a different type name constant.
 }

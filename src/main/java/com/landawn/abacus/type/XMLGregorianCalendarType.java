@@ -46,6 +46,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * {@link javax.xml.datatype.XMLGregorianCalendar} class that this type handles.
      * </p>
      *
+     * <pre>{@code
+     * XMLGregorianCalendarType type = new XMLGregorianCalendarType();
+     * Class<XMLGregorianCalendar> clazz = type.clazz(); // Returns XMLGregorianCalendar.class
+     * }</pre>
+     *
      * @return the Class object for XMLGregorianCalendar.class
      */
     @Override
@@ -64,6 +69,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </ul>
      * </p>
      *
+     * <pre>{@code
+     * XMLGregorianCalendar cal1 = type.valueOf("2023-10-15T10:30:00");
+     * XMLGregorianCalendar cal2 = type.valueOf("SYS_TIME"); // Current time
+     * }</pre>
+     *
      * @param str the string to convert to XMLGregorianCalendar
      * @return an XMLGregorianCalendar instance, or null if the string is empty
      * @throws IllegalArgumentException if the string cannot be parsed as a valid date/time
@@ -80,6 +90,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * If so, it creates an XMLGregorianCalendar from that timestamp. Otherwise, it converts the
      * character array to a string and delegates to {@link #valueOf(String)}.
      * </p>
+     *
+     * <pre>{@code
+     * char[] chars = "1697364600000".toCharArray();
+     * XMLGregorianCalendar cal = type.valueOf(chars, 0, chars.length); // From epoch millis
+     * }</pre>
      *
      * @param cbuf the character array containing the date/time representation
      * @param offset the starting position in the character array
@@ -111,6 +126,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * If the input is null, this method returns null.
      * </p>
      *
+     * <pre>{@code
+     * XMLGregorianCalendar cal = Dates.currentXMLGregorianCalendar();
+     * String str = type.stringOf(cal); // Returns formatted date/time string
+     * }</pre>
+     *
      * @param x the XMLGregorianCalendar instance to convert to string
      * @return the string representation of the XMLGregorianCalendar, or null if the input is null
      */
@@ -125,6 +145,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * This method reads a Timestamp value from the ResultSet and converts it to an
      * XMLGregorianCalendar using the Dates utility.
      * </p>
+     *
+     * <pre>{@code
+     * XMLGregorianCalendar cal = type.get(resultSet, 1);
+     * // Retrieves timestamp from first column as XMLGregorianCalendar
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) of the timestamp value
@@ -144,6 +169,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * XMLGregorianCalendar using the Dates utility.
      * </p>
      *
+     * <pre>{@code
+     * XMLGregorianCalendar cal = type.get(resultSet, "created_date");
+     * // Retrieves timestamp from 'created_date' column
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column containing the timestamp value
      * @return the XMLGregorianCalendar value, or null if the database value is NULL
@@ -162,6 +192,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * PreparedStatement. If the XMLGregorianCalendar is null, a NULL value is set.
      * </p>
      *
+     * <pre>{@code
+     * XMLGregorianCalendar cal = Dates.currentXMLGregorianCalendar();
+     * type.set(preparedStatement, 1, cal); // Sets timestamp at first parameter
+     * }</pre>
+     *
      * @param stmt the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the value
      * @param x the XMLGregorianCalendar value to set, or null for SQL NULL
@@ -179,6 +214,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * CallableStatement. If the XMLGregorianCalendar is null, a NULL value is set.
      * </p>
      *
+     * <pre>{@code
+     * XMLGregorianCalendar cal = Dates.currentXMLGregorianCalendar();
+     * type.set(callableStatement, "created_date", cal); // Sets timestamp parameter
+     * }</pre>
+     *
      * @param stmt the CallableStatement to set the value in
      * @param parameterName the name of the parameter where to set the value
      * @param x the XMLGregorianCalendar value to set, or null for SQL NULL
@@ -195,6 +235,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * This method formats the XMLGregorianCalendar and appends it to the provided Appendable.
      * If the XMLGregorianCalendar is null, it appends the string "null".
      * </p>
+     *
+     * <pre>{@code
+     * StringBuilder sb = new StringBuilder();
+     * type.appendTo(sb, xmlGregorianCalendar); // Appends formatted date/time
+     * }</pre>
      *
      * @param appendable the Appendable to write to
      * @param x the XMLGregorianCalendar value to append
@@ -221,6 +266,12 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </ul>
      * The output may be quoted based on the configuration settings.
      * </p>
+     *
+     * <pre>{@code
+     * CharacterWriter writer = new CharacterWriter();
+     * JSONXMLSerializationConfig<?> config = JSONXMLSerializationConfig.of();
+     * type.writeCharacter(writer, xmlGregorianCalendar, config); // Writes formatted date/time
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the XMLGregorianCalendar value to write

@@ -17,10 +17,11 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
-
+@Tag("new-test")
 public class KeyedObjectPool100Test extends TestBase {
 
     private TestKeyedObjectPool pool;
@@ -78,13 +79,17 @@ public class KeyedObjectPool100Test extends TestBase {
 
         @Override
         public boolean put(String key, TestPoolable e) {
-            if (closed) throw new IllegalStateException("Pool is closed");
-            if (key == null || e == null) throw new IllegalArgumentException("Key and value cannot be null");
-            if (e.activityPrint().isExpired()) return false;
-            
+            if (closed)
+                throw new IllegalStateException("Pool is closed");
+            if (key == null || e == null)
+                throw new IllegalArgumentException("Key and value cannot be null");
+            if (e.activityPrint().isExpired())
+                return false;
+
             synchronized (lock) {
-                if (map.size() >= capacity) return false;
-                
+                if (map.size() >= capacity)
+                    return false;
+
                 TestPoolable old = map.put(key, e);
                 if (old != null) {
                     old.destroy(Poolable.Caller.REMOVE_REPLACE_CLEAR);
@@ -92,7 +97,7 @@ public class KeyedObjectPool100Test extends TestBase {
                         totalMemorySize -= memoryMeasure.sizeOf(key, old);
                     }
                 }
-                
+
                 if (memoryMeasure != null) {
                     totalMemorySize += memoryMeasure.sizeOf(key, e);
                 }
@@ -115,8 +120,9 @@ public class KeyedObjectPool100Test extends TestBase {
 
         @Override
         public TestPoolable get(String key) {
-            if (closed) throw new IllegalStateException("Pool is closed");
-            
+            if (closed)
+                throw new IllegalStateException("Pool is closed");
+
             synchronized (lock) {
                 TestPoolable e = map.get(key);
                 if (e != null) {
@@ -137,8 +143,9 @@ public class KeyedObjectPool100Test extends TestBase {
 
         @Override
         public TestPoolable remove(String key) {
-            if (closed) throw new IllegalStateException("Pool is closed");
-            
+            if (closed)
+                throw new IllegalStateException("Pool is closed");
+
             synchronized (lock) {
                 TestPoolable e = map.remove(key);
                 if (e != null) {
@@ -154,8 +161,9 @@ public class KeyedObjectPool100Test extends TestBase {
 
         @Override
         public TestPoolable peek(String key) {
-            if (closed) throw new IllegalStateException("Pool is closed");
-            
+            if (closed)
+                throw new IllegalStateException("Pool is closed");
+
             synchronized (lock) {
                 TestPoolable e = map.get(key);
                 if (e != null && e.activityPrint().isExpired()) {
@@ -172,7 +180,8 @@ public class KeyedObjectPool100Test extends TestBase {
 
         @Override
         public Set<String> keySet() {
-            if (closed) throw new IllegalStateException("Pool is closed");
+            if (closed)
+                throw new IllegalStateException("Pool is closed");
             synchronized (lock) {
                 return new HashSet<>(map.keySet());
             }
@@ -180,7 +189,8 @@ public class KeyedObjectPool100Test extends TestBase {
 
         @Override
         public Collection<TestPoolable> values() {
-            if (closed) throw new IllegalStateException("Pool is closed");
+            if (closed)
+                throw new IllegalStateException("Pool is closed");
             synchronized (lock) {
                 return new ArrayList<>(map.values());
             }
@@ -188,7 +198,8 @@ public class KeyedObjectPool100Test extends TestBase {
 
         @Override
         public boolean containsKey(String key) {
-            if (closed) throw new IllegalStateException("Pool is closed");
+            if (closed)
+                throw new IllegalStateException("Pool is closed");
             synchronized (lock) {
                 return map.containsKey(key);
             }
@@ -196,12 +207,10 @@ public class KeyedObjectPool100Test extends TestBase {
 
         @Override
         public void lock() {
-            // Simple implementation
         }
 
         @Override
         public void unlock() {
-            // Simple implementation
         }
 
         @Override
@@ -223,7 +232,8 @@ public class KeyedObjectPool100Test extends TestBase {
 
         @Override
         public void vacate() {
-            if (closed) throw new IllegalStateException("Pool is closed");
+            if (closed)
+                throw new IllegalStateException("Pool is closed");
             synchronized (lock) {
                 int toRemove = Math.max(1, map.size() / 5);
                 Iterator<Map.Entry<String, TestPoolable>> it = map.entrySet().iterator();
@@ -239,7 +249,8 @@ public class KeyedObjectPool100Test extends TestBase {
 
         @Override
         public void clear() {
-            if (closed) throw new IllegalStateException("Pool is closed");
+            if (closed)
+                throw new IllegalStateException("Pool is closed");
             synchronized (lock) {
                 for (Map.Entry<String, TestPoolable> entry : map.entrySet()) {
                     entry.getValue().destroy(Poolable.Caller.REMOVE_REPLACE_CLEAR);
@@ -305,20 +316,17 @@ public class KeyedObjectPool100Test extends TestBase {
         try {
             Thread.sleep(10);
         } catch (InterruptedException e) {
-            // Ignore
         }
         assertFalse(pool.put("key", expired));
     }
 
     @Test
     public void testPutToFullPool() {
-        // Fill the pool
         for (int i = 0; i < 5; i++) {
             assertTrue(pool.put("key" + i, new TestPoolable("value" + i)));
         }
         assertEquals(5, pool.size());
-        
-        // Try to add one more
+
         TestPoolable extra = new TestPoolable("extra");
         assertFalse(pool.put("key5", extra));
         assertEquals(5, pool.size());
@@ -328,18 +336,16 @@ public class KeyedObjectPool100Test extends TestBase {
     public void testPutReplace() {
         TestPoolable poolable1 = new TestPoolable("value1");
         TestPoolable poolable2 = new TestPoolable("value2");
-        
+
         assertTrue(pool.put("key1", poolable1));
         assertEquals(1, pool.size());
-        
+
         assertTrue(pool.put("key1", poolable2));
         assertEquals(1, pool.size());
-        
-        // First poolable should be destroyed
+
         assertTrue(poolable1.isDestroyed());
         assertEquals(Poolable.Caller.REMOVE_REPLACE_CLEAR, poolable1.getDestroyedByCaller());
-        
-        // Second poolable should be in pool
+
         assertEquals(poolable2, pool.get("key1"));
     }
 
@@ -351,12 +357,10 @@ public class KeyedObjectPool100Test extends TestBase {
 
     @Test
     public void testPutWithAutoDestroy() {
-        // Fill the pool
         for (int i = 0; i < 5; i++) {
             assertTrue(pool.put("key" + i, new TestPoolable("value" + i)));
         }
-        
-        // Try to add with auto-destroy
+
         TestPoolable extra = new TestPoolable("extra");
         assertFalse(pool.put("key5", extra, true));
         assertTrue(extra.isDestroyed());
@@ -367,13 +371,12 @@ public class KeyedObjectPool100Test extends TestBase {
     public void testGet() {
         TestPoolable poolable = new TestPoolable("value1");
         pool.put("key1", poolable);
-        
+
         TestPoolable retrieved = pool.get("key1");
         assertNotNull(retrieved);
         assertEquals("value1", retrieved.getValue());
         assertEquals(poolable, retrieved);
-        
-        // Activity should be updated
+
         assertEquals(1, retrieved.activityPrint().getAccessCount());
     }
 
@@ -386,9 +389,9 @@ public class KeyedObjectPool100Test extends TestBase {
     public void testGetExpired() throws InterruptedException {
         TestPoolable expired = new TestPoolable("expired", 50, 50);
         pool.put("key", expired);
-        
+
         Thread.sleep(60);
-        
+
         TestPoolable retrieved = pool.get("key");
         assertNull(retrieved);
         assertTrue(expired.isDestroyed());
@@ -406,14 +409,13 @@ public class KeyedObjectPool100Test extends TestBase {
     public void testRemove() {
         TestPoolable poolable = new TestPoolable("value1");
         pool.put("key1", poolable);
-        
+
         TestPoolable removed = pool.remove("key1");
         assertNotNull(removed);
         assertEquals(poolable, removed);
         assertEquals(0, pool.size());
         assertFalse(pool.containsKey("key1"));
-        
-        // Activity should be updated
+
         assertEquals(1, removed.activityPrint().getAccessCount());
     }
 
@@ -432,12 +434,11 @@ public class KeyedObjectPool100Test extends TestBase {
     public void testPeek() {
         TestPoolable poolable = new TestPoolable("value1");
         pool.put("key1", poolable);
-        
+
         TestPoolable peeked = pool.peek("key1");
         assertNotNull(peeked);
         assertEquals(poolable, peeked);
-        
-        // Activity should NOT be updated
+
         assertEquals(0, peeked.activityPrint().getAccessCount());
     }
 
@@ -445,9 +446,9 @@ public class KeyedObjectPool100Test extends TestBase {
     public void testPeekExpired() throws InterruptedException {
         TestPoolable expired = new TestPoolable("expired", 50, 50);
         pool.put("key", expired);
-        
+
         Thread.sleep(60);
-        
+
         TestPoolable peeked = pool.peek("key");
         assertNull(peeked);
         assertTrue(expired.isDestroyed());
@@ -465,14 +466,13 @@ public class KeyedObjectPool100Test extends TestBase {
         pool.put("key1", new TestPoolable("value1"));
         pool.put("key2", new TestPoolable("value2"));
         pool.put("key3", new TestPoolable("value3"));
-        
+
         Set<String> keys = pool.keySet();
         assertEquals(3, keys.size());
         assertTrue(keys.contains("key1"));
         assertTrue(keys.contains("key2"));
         assertTrue(keys.contains("key3"));
-        
-        // Should be a copy
+
         keys.clear();
         assertEquals(3, pool.size());
     }
@@ -487,16 +487,15 @@ public class KeyedObjectPool100Test extends TestBase {
     public void testValues() {
         TestPoolable poolable1 = new TestPoolable("value1");
         TestPoolable poolable2 = new TestPoolable("value2");
-        
+
         pool.put("key1", poolable1);
         pool.put("key2", poolable2);
-        
+
         Collection<TestPoolable> values = pool.values();
         assertEquals(2, values.size());
         assertTrue(values.contains(poolable1));
         assertTrue(values.contains(poolable2));
-        
-        // Should be a copy
+
         values.clear();
         assertEquals(2, pool.size());
     }
@@ -511,7 +510,7 @@ public class KeyedObjectPool100Test extends TestBase {
     public void testContainsKey() {
         pool.put("key1", new TestPoolable("value1"));
         pool.put("key2", new TestPoolable("value2"));
-        
+
         assertTrue(pool.containsKey("key1"));
         assertTrue(pool.containsKey("key2"));
         assertFalse(pool.containsKey("key3"));
@@ -525,44 +524,41 @@ public class KeyedObjectPool100Test extends TestBase {
 
     @Test
     public void testMemoryMeasure() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = 
-            (key, value) -> key.length() + 100; // Key length + 100 bytes per object
-        
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (key, value) -> key.length() + 100;
+
         TestKeyedObjectPool memPool = new TestKeyedObjectPool(5, measure);
-        
-        memPool.put("k1", new TestPoolable("value1")); // 2 + 100 = 102
+
+        memPool.put("k1", new TestPoolable("value1"));
         assertEquals(102, memPool.getTotalMemorySize());
-        
-        memPool.put("key2", new TestPoolable("value2")); // 4 + 100 = 104
+
+        memPool.put("key2", new TestPoolable("value2"));
         assertEquals(206, memPool.getTotalMemorySize());
-        
-        memPool.put("k1", new TestPoolable("value3")); // Replace: -102 + 102 = 0
+
+        memPool.put("k1", new TestPoolable("value3"));
         assertEquals(206, memPool.getTotalMemorySize());
-        
+
         memPool.remove("key2");
         assertEquals(102, memPool.getTotalMemorySize());
-        
+
         memPool.clear();
         assertEquals(0, memPool.getTotalMemorySize());
     }
 
     @Test
     public void testMemoryMeasureInterface() {
-        KeyedObjectPool.MemoryMeasure<Integer, String> measure = 
-            (key, value) -> 4 + value.length() * 2; // 4 bytes for int + 2 bytes per char
-        
-        assertEquals(14, measure.sizeOf(1, "hello")); // 4 + 10
-        assertEquals(4, measure.sizeOf(100, "")); // 4 + 0
+        KeyedObjectPool.MemoryMeasure<Integer, String> measure = (key, value) -> 4 + value.length() * 2;
+
+        assertEquals(14, measure.sizeOf(1, "hello"));
+        assertEquals(4, measure.sizeOf(100, ""));
     }
 
     @Test
     public void testVacate() {
-        // Fill the pool
         for (int i = 0; i < 5; i++) {
             pool.put("key" + i, new TestPoolable("value" + i));
         }
         assertEquals(5, pool.size());
-        
+
         pool.vacate();
         assertTrue(pool.size() < 5);
         assertTrue(pool.size() >= 0);
@@ -572,16 +568,15 @@ public class KeyedObjectPool100Test extends TestBase {
     public void testClear() {
         TestPoolable poolable1 = new TestPoolable("value1");
         TestPoolable poolable2 = new TestPoolable("value2");
-        
+
         pool.put("key1", poolable1);
         pool.put("key2", poolable2);
         assertEquals(2, pool.size());
-        
+
         pool.clear();
         assertEquals(0, pool.size());
         assertTrue(pool.isEmpty());
-        
-        // All values should be destroyed
+
         assertTrue(poolable1.isDestroyed());
         assertTrue(poolable2.isDestroyed());
         assertEquals(Poolable.Caller.REMOVE_REPLACE_CLEAR, poolable1.getDestroyedByCaller());
@@ -592,15 +587,14 @@ public class KeyedObjectPool100Test extends TestBase {
     public void testClose() {
         TestPoolable poolable1 = new TestPoolable("value1");
         TestPoolable poolable2 = new TestPoolable("value2");
-        
+
         pool.put("key1", poolable1);
         pool.put("key2", poolable2);
-        
+
         assertFalse(pool.isClosed());
         pool.close();
         assertTrue(pool.isClosed());
-        
-        // All pooled objects should be destroyed
+
         assertTrue(poolable1.isDestroyed());
         assertTrue(poolable2.isDestroyed());
         assertEquals(Poolable.Caller.CLOSE, poolable1.getDestroyedByCaller());

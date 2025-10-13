@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -29,7 +30,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Suppliers;
 
-
+@Tag("new-test")
 public class EntryStream200Test extends TestBase {
 
     @Test
@@ -95,14 +96,12 @@ public class EntryStream200Test extends TestBase {
     public void testDistinct() {
         Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
-        map.put("b", 1); // Duplicate value
+        map.put("b", 1);
         map.put("c", 2);
 
-        // distinct by value
         long count = EntryStream.of(map).distinctByValue().count();
         assertEquals(2, count);
 
-        // distinct by key is default
         assertEquals(3, EntryStream.of(map).distinct().count());
     }
 
@@ -158,11 +157,10 @@ public class EntryStream200Test extends TestBase {
         Map<String, Integer> resultMap = EntryStream.of(map).toMap();
         assertEquals(map, resultMap);
 
-        // test with merge function
         Map<String, Integer> mapWithDuplicates = new HashMap<>();
         mapWithDuplicates.put("a", 1);
         mapWithDuplicates.put("b", 2);
-        mapWithDuplicates.put("a", 3); // duplicate key
+        mapWithDuplicates.put("a", 3);
 
         Map<String, Integer> mergedMap = EntryStream.of(mapWithDuplicates).toMap((v1, v2) -> v1 + v2);
         assertEquals(3, (int) mergedMap.get("a"));
@@ -414,12 +412,10 @@ public class EntryStream200Test extends TestBase {
         assertEquals("a", immutableMap.get(1));
         assertEquals("b", immutableMap.get(2));
 
-        // Test immutability
         try {
             immutableMap.put(3, "c");
             assert false;
         } catch (UnsupportedOperationException e) {
-            // expected
         }
     }
 
@@ -531,7 +527,6 @@ public class EntryStream200Test extends TestBase {
         map.put("b", 2);
         map.put("a", 3);
 
-        // distinctByKey is default for maps.
         assertEquals(2, EntryStream.of(map).distinctByKey().count());
     }
 
@@ -859,7 +854,6 @@ public class EntryStream200Test extends TestBase {
         long count = EntryStream.of(map).parallel().filter(e -> e.getValue() % 2 == 0).count();
         assertEquals(500, count);
 
-        // Ensure original stream is not modified.
         assertFalse(EntryStream.of(map).isParallel());
     }
 
@@ -882,7 +876,7 @@ public class EntryStream200Test extends TestBase {
         EntryStream<String, Integer> stream = EntryStream.of(new HashMap<String, Integer>()).onClose(closeCounter::incrementAndGet);
         stream.close();
         assertEquals(1, closeCounter.get());
-        stream.close(); // should not increment again
+        stream.close();
         assertEquals(1, closeCounter.get());
     }
 
@@ -906,8 +900,8 @@ public class EntryStream200Test extends TestBase {
         final Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
         map.put("b", 2);
-        map.put("c", 1); // value is not distinct
-        map.put("a", 3); // key is not distinct
+        map.put("c", 1);
+        map.put("a", 3);
 
         final EntryStream<String, Integer> stream = EntryStream.of(map);
 
@@ -1129,7 +1123,7 @@ public class EntryStream200Test extends TestBase {
         final List<Map.Entry<Integer, String>> shuffled = EntryStream.of(map).shuffled().toList();
 
         assertEquals(original.size(), shuffled.size());
-        assertFalse(original.equals(shuffled)); // Highly likely to be different
+        assertFalse(original.equals(shuffled));
         assertTrue(original.containsAll(shuffled));
     }
 
@@ -1192,8 +1186,6 @@ public class EntryStream200Test extends TestBase {
         EntryStream.of(N.asMap("a", 1)).ifEmpty(counter::incrementAndGet);
         assertEquals(1, counter.get());
     }
-
-    // Additional tests for remaining methods
 
     @Test
     public void testPrependIfEmptyWithSupplier() {
@@ -1303,7 +1295,7 @@ public class EntryStream200Test extends TestBase {
         map.put("b", 2);
         final AtomicInteger indexSum = new AtomicInteger(0);
         EntryStream.of(map).forEachIndexed((i, e) -> indexSum.addAndGet(i));
-        assertEquals(1, indexSum.get()); // 0 + 1
+        assertEquals(1, indexSum.get());
     }
 
     @Test

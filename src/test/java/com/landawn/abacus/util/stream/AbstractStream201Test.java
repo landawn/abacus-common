@@ -27,12 +27,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 
-
+@Tag("new-test")
 public class AbstractStream201Test extends TestBase {
 
     @Test
@@ -161,7 +162,7 @@ public class AbstractStream201Test extends TestBase {
         StringWriter writer = new StringWriter();
         long count = Stream.of(data).persistToJSON(writer);
         assertEquals(2, count);
-        N.println(writer.toString()); // For debugging purposes
+        N.println(writer.toString());
         String result = writer.toString().replaceAll("\\s", "");
         assertEquals("[{\"key\":\"val1\"},{\"key\":\"val2\"}]", result);
     }
@@ -176,14 +177,12 @@ public class AbstractStream201Test extends TestBase {
             return null;
         }).when(stmtMock).addBatch();
 
-        Stream.of("a", "b", "c").saveEach(stmtMock, 2, 0, (val, ps) -> ps.setString(1, val)).count(); // Terminal operation to trigger saveEach
+        Stream.of("a", "b", "c").saveEach(stmtMock, 2, 0, (val, ps) -> ps.setString(1, val)).count();
 
         verify(stmtMock, times(3)).setString(anyInt(), anyString());
         verify(stmtMock, times(3)).addBatch();
-        verify(stmtMock, times(2)).executeBatch(); // (3 / 2) = 1 batch executed inside
+        verify(stmtMock, times(2)).executeBatch();
 
-        // The final batch is executed in the close() handler of the iterator, which is not easily tested here without a full pipeline.
-        // We verified the core logic of setting params and adding to batch.
     }
 
     @Test
@@ -192,7 +191,7 @@ public class AbstractStream201Test extends TestBase {
         PreparedStatement stmtMock = mock(PreparedStatement.class);
         when(connMock.prepareStatement(anyString())).thenReturn(stmtMock);
 
-        Stream.of("a", "b").saveEach(connMock, "INSERT INTO foo VALUES(?)", (val, ps) -> ps.setString(1, val)).count(); // Terminal operation
+        Stream.of("a", "b").saveEach(connMock, "INSERT INTO foo VALUES(?)", (val, ps) -> ps.setString(1, val)).count();
 
         verify(connMock, times(1)).prepareStatement("INSERT INTO foo VALUES(?)");
         verify(stmtMock, times(2)).setString(anyInt(), anyString());

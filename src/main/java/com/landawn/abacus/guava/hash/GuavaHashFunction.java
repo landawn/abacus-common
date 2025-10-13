@@ -31,7 +31,6 @@ import com.google.common.hash.HashCode;
  * <p><b>Implementation Note:</b> This class is not intended for direct use by clients.
  * Use the factory methods in {@link Hashing} to obtain hash function instances.
  * 
- * @author Haiyang Li
  * @see HashFunction
  * @see Hashing
  */

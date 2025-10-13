@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.Column;
@@ -23,9 +24,9 @@ import com.landawn.abacus.annotation.Transient;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 
+@Tag("new-test")
 public class ParserUtil100Test extends TestBase {
 
-    // Test classes
     @Table("test_bean")
     public static class TestBean {
         @Id
@@ -45,7 +46,6 @@ public class ParserUtil100Test extends TestBase {
         @ReadOnlyId
         private String readOnlyId;
 
-        // Getters and setters
         public Long getId() {
             return id;
         }
@@ -133,9 +133,7 @@ public class ParserUtil100Test extends TestBase {
 
     @Test
     public void testRefreshBeanPropInfo() {
-        // This method is deprecated and for internal use only
         ParserUtil.refreshBeanPropInfo(TestBean.class);
-        // Just verify it doesn't throw exception
     }
 
     @Test
@@ -166,7 +164,7 @@ public class ParserUtil100Test extends TestBase {
         PropInfo propInfo1 = beanInfo1.getPropInfo("name");
         PropInfo propInfo2 = beanInfo2.getPropInfo(propInfo1);
 
-        assertNull(propInfo2); // Different bean, property doesn't exist
+        assertNull(propInfo2);
     }
 
     @Test
@@ -398,12 +396,10 @@ public class ParserUtil100Test extends TestBase {
         BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class, false);
         TestBean bean = new TestBean();
 
-        // Set properties
         beanInfo.setPropValue(bean, "name", "Alice");
         beanInfo.setPropValue(bean, "age", 28);
         beanInfo.setPropValue(bean, "createdDate", new Date());
 
-        // Get properties
         String name = (String) beanInfo.getPropValue(bean, "name");
         int age = (int) beanInfo.getPropValue(bean, "age");
         Date createdDate = (Date) beanInfo.getPropValue(bean, "createdDate");

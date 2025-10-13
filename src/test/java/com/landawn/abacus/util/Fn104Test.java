@@ -43,6 +43,7 @@ import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -64,9 +65,9 @@ import com.landawn.abacus.util.function.ToShortFunction;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.TriPredicate;
 
+@Tag("new-test")
 public class Fn104Test extends TestBase {
 
-    // Test Constants
     @Test
     public void testGetAsBooleanConstant() {
         OptionalBoolean ob = OptionalBoolean.of(true);
@@ -137,69 +138,66 @@ public class Fn104Test extends TestBase {
     public void testIsPresentPredicates() {
         assertTrue(Fn.IS_PRESENT_BOOLEAN.test(OptionalBoolean.of(true)));
         assertFalse(Fn.IS_PRESENT_BOOLEAN.test(OptionalBoolean.empty()));
-        
+
         assertTrue(Fn.IS_PRESENT_CHAR.test(OptionalChar.of('a')));
         assertFalse(Fn.IS_PRESENT_CHAR.test(OptionalChar.empty()));
-        
+
         assertTrue(Fn.IS_PRESENT_BYTE.test(OptionalByte.of((byte) 1)));
         assertFalse(Fn.IS_PRESENT_BYTE.test(OptionalByte.empty()));
-        
+
         assertTrue(Fn.IS_PRESENT_SHORT.test(OptionalShort.of((short) 1)));
         assertFalse(Fn.IS_PRESENT_SHORT.test(OptionalShort.empty()));
-        
+
         assertTrue(Fn.IS_PRESENT_INT.test(OptionalInt.of(1)));
         assertFalse(Fn.IS_PRESENT_INT.test(OptionalInt.empty()));
-        
+
         assertTrue(Fn.IS_PRESENT_LONG.test(OptionalLong.of(1L)));
         assertFalse(Fn.IS_PRESENT_LONG.test(OptionalLong.empty()));
-        
+
         assertTrue(Fn.IS_PRESENT_FLOAT.test(OptionalFloat.of(1.0f)));
         assertFalse(Fn.IS_PRESENT_FLOAT.test(OptionalFloat.empty()));
-        
+
         assertTrue(Fn.IS_PRESENT_DOUBLE.test(OptionalDouble.of(1.0)));
         assertFalse(Fn.IS_PRESENT_DOUBLE.test(OptionalDouble.empty()));
-        
+
         assertTrue(Fn.IS_PRESENT_INT_JDK.test(java.util.OptionalInt.of(1)));
         assertFalse(Fn.IS_PRESENT_INT_JDK.test(java.util.OptionalInt.empty()));
-        
+
         assertTrue(Fn.IS_PRESENT_LONG_JDK.test(java.util.OptionalLong.of(1L)));
         assertFalse(Fn.IS_PRESENT_LONG_JDK.test(java.util.OptionalLong.empty()));
-        
+
         assertTrue(Fn.IS_PRESENT_DOUBLE_JDK.test(java.util.OptionalDouble.of(1.0)));
         assertFalse(Fn.IS_PRESENT_DOUBLE_JDK.test(java.util.OptionalDouble.empty()));
     }
 
-    // Test memoize methods
     @Test
     public void testMemoizeSupplier() {
         AtomicInteger counter = new AtomicInteger(0);
         Supplier<Integer> memoized = Fn.memoize(() -> counter.incrementAndGet());
-        
+
         assertEquals(1, memoized.get());
-        assertEquals(1, memoized.get()); // Should return cached value
-        assertEquals(1, counter.get()); // Counter should only be incremented once
+        assertEquals(1, memoized.get());
+        assertEquals(1, counter.get());
     }
 
     @Test
     public void testMemoizeWithExpiration() throws InterruptedException {
         AtomicInteger counter = new AtomicInteger(0);
         Supplier<Integer> memoized = Fn.memoizeWithExpiration(() -> counter.incrementAndGet(), 100, TimeUnit.MILLISECONDS);
-        
+
         assertEquals(1, memoized.get());
-        assertEquals(1, memoized.get()); // Should return cached value
-        
-        Thread.sleep(150); // Wait for expiration
-        
-        assertEquals(2, memoized.get()); // Should fetch new value
-        assertEquals(2, memoized.get()); // Should return new cached value
+        assertEquals(1, memoized.get());
+
+        Thread.sleep(150);
+
+        assertEquals(2, memoized.get());
+        assertEquals(2, memoized.get());
     }
 
     @Test
     public void testMemoizeWithExpirationInvalidArgument() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.memoizeWithExpiration(() -> 1, -1, TimeUnit.SECONDS));
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.memoizeWithExpiration(() -> 1, 0, TimeUnit.SECONDS));
+        assertThrows(IllegalArgumentException.class, () -> Fn.memoizeWithExpiration(() -> 1, -1, TimeUnit.SECONDS));
+        assertThrows(IllegalArgumentException.class, () -> Fn.memoizeWithExpiration(() -> 1, 0, TimeUnit.SECONDS));
     }
 
     @Test
@@ -209,33 +207,29 @@ public class Fn104Test extends TestBase {
             counter.incrementAndGet();
             return s.length();
         });
-        
+
         assertEquals(5, memoized.apply("hello"));
-        assertEquals(5, memoized.apply("hello")); // Should return cached value
+        assertEquals(5, memoized.apply("hello"));
         assertEquals(3, memoized.apply("bye"));
-        assertEquals(2, counter.get()); // Counter should be 2 (once for each unique input)
-        
-        // Test null handling
-        // assertNull(memoized.apply(null));
+        assertEquals(2, counter.get());
+
         assertThrows(NullPointerException.class, () -> memoized.apply(null));
     }
 
-    // Test close/closeAll methods
     @Test
     public void testClose() throws Exception {
         AtomicBoolean closed = new AtomicBoolean(false);
         AutoCloseable closeable = () -> closed.set(true);
-        
+
         Runnable closer = Fn.close(closeable);
         assertFalse(closed.get());
-        
+
         closer.run();
         assertTrue(closed.get());
-        
-        // Test idempotency
+
         closed.set(false);
         closer.run();
-        assertFalse(closed.get()); // Should not close again
+        assertFalse(closed.get());
     }
 
     @Test
@@ -244,11 +238,11 @@ public class Fn104Test extends TestBase {
         AtomicBoolean closed2 = new AtomicBoolean(false);
         AutoCloseable closeable1 = () -> closed1.set(true);
         AutoCloseable closeable2 = () -> closed2.set(true);
-        
+
         Runnable closer = Fn.closeAll(closeable1, closeable2);
         assertFalse(closed1.get());
         assertFalse(closed2.get());
-        
+
         closer.run();
         assertTrue(closed1.get());
         assertTrue(closed2.get());
@@ -257,52 +251,52 @@ public class Fn104Test extends TestBase {
     @Test
     public void testCloseAllCollection() throws Exception {
         List<AtomicBoolean> closedFlags = Arrays.asList(new AtomicBoolean(false), new AtomicBoolean(false));
-        List<AutoCloseable> closeables = Arrays.asList(
-            () -> closedFlags.get(0).set(true),
-            () -> closedFlags.get(1).set(true)
-        );
-        
+        List<AutoCloseable> closeables = Arrays.asList(() -> closedFlags.get(0).set(true), () -> closedFlags.get(1).set(true));
+
         Runnable closer = Fn.closeAll(closeables);
         closer.run();
-        
+
         assertTrue(closedFlags.get(0).get());
         assertTrue(closedFlags.get(1).get());
     }
 
     @Test
     public void testCloseQuietly() {
-        AutoCloseable failing = () -> { throw new Exception("Test exception"); };
+        AutoCloseable failing = () -> {
+            throw new Exception("Test exception");
+        };
         Runnable closer = Fn.closeQuietly(failing);
-        
-        // Should not throw
+
         assertDoesNotThrow(() -> closer.run());
     }
 
     @Test
     public void testCloseAllQuietly() {
-        AutoCloseable failing1 = () -> { throw new Exception("Test exception 1"); };
-        AutoCloseable failing2 = () -> { throw new Exception("Test exception 2"); };
-        
+        AutoCloseable failing1 = () -> {
+            throw new Exception("Test exception 1");
+        };
+        AutoCloseable failing2 = () -> {
+            throw new Exception("Test exception 2");
+        };
+
         Runnable closer = Fn.closeAllQuietly(failing1, failing2);
-        
-        // Should not throw
+
         assertDoesNotThrow(() -> closer.run());
     }
 
     @Test
     public void testCloseAllQuietlyCollection() {
-        List<AutoCloseable> closeables = Arrays.asList(
-            () -> { throw new Exception("Test exception 1"); },
-            () -> { throw new Exception("Test exception 2"); }
-        );
-        
+        List<AutoCloseable> closeables = Arrays.asList(() -> {
+            throw new Exception("Test exception 1");
+        }, () -> {
+            throw new Exception("Test exception 2");
+        });
+
         Runnable closer = Fn.closeAllQuietly(closeables);
-        
-        // Should not throw
+
         assertDoesNotThrow(() -> closer.run());
     }
 
-    // Test action methods
     @Test
     public void testEmptyAction() {
         Runnable action = Fn.emptyAction();
@@ -313,7 +307,7 @@ public class Fn104Test extends TestBase {
     public void testShutDown() {
         ExecutorService service = Executors.newSingleThreadExecutor();
         Runnable shutdown = Fn.shutDown(service);
-        
+
         assertFalse(service.isShutdown());
         shutdown.run();
         assertTrue(service.isShutdown());
@@ -329,14 +323,13 @@ public class Fn104Test extends TestBase {
                 Thread.currentThread().interrupt();
             }
         });
-        
+
         Runnable shutdown = Fn.shutDown(service, 200, TimeUnit.MILLISECONDS);
         shutdown.run();
-        
+
         assertTrue(service.isShutdown());
     }
 
-    // Test consumer methods
     @Test
     public void testDoNothing() {
         Consumer<String> consumer = Fn.doNothing();
@@ -365,10 +358,10 @@ public class Fn104Test extends TestBase {
     @Test
     public void testToRuntimeException() {
         Function<Throwable, RuntimeException> converter = Fn.toRuntimeException();
-        
+
         RuntimeException re = new RuntimeException("test");
         assertSame(re, converter.apply(re));
-        
+
         Exception e = new Exception("test");
         RuntimeException converted = converter.apply(e);
         assertTrue(converted instanceof RuntimeException);
@@ -379,7 +372,7 @@ public class Fn104Test extends TestBase {
     public void testCloseConsumer() throws Exception {
         AtomicBoolean closed = new AtomicBoolean(false);
         AutoCloseable closeable = () -> closed.set(true);
-        
+
         Consumer<AutoCloseable> consumer = Fn.close();
         consumer.accept(closeable);
         assertTrue(closed.get());
@@ -387,9 +380,11 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testCloseQuietlyConsumer() {
-        AutoCloseable failing = () -> { throw new Exception("Test"); };
+        AutoCloseable failing = () -> {
+            throw new Exception("Test");
+        };
         Consumer<AutoCloseable> consumer = Fn.closeQuietly();
-        
+
         assertDoesNotThrow(() -> consumer.accept(failing));
     }
 
@@ -413,21 +408,20 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testRateLimiter() {
-        Consumer<String> rateLimited = Fn.rateLimiter(2.0); // 2 permits per second
-        
+        Consumer<String> rateLimited = Fn.rateLimiter(2.0);
+
         long start = System.currentTimeMillis();
         rateLimited.accept("1");
         rateLimited.accept("2");
-        rateLimited.accept("3"); // This should wait
+        rateLimited.accept("3");
         long duration = System.currentTimeMillis() - start;
-        
-        assertTrue(duration >= 500); // Should take at least 500ms for 3 calls at 2/sec
+
+        assertTrue(duration >= 500);
     }
 
     @Test
     public void testPrintln() {
         Consumer<String> printer = Fn.println();
-        // Just test it doesn't throw
         assertDoesNotThrow(() -> printer.accept("test"));
     }
 
@@ -435,8 +429,7 @@ public class Fn104Test extends TestBase {
     public void testPrintlnWithSeparator() {
         BiConsumer<String, String> printer = Fn.println("=");
         assertDoesNotThrow(() -> printer.accept("key", "value"));
-        
-        // Test various separators
+
         assertNotNull(Fn.println(":"));
         assertNotNull(Fn.println(": "));
         assertNotNull(Fn.println("-"));
@@ -447,7 +440,6 @@ public class Fn104Test extends TestBase {
         assertNotNull(Fn.println("custom"));
     }
 
-    // Test string transformation methods
     @Test
     public void testToStr() {
         Function<Object, String> toStr = Fn.toStr();
@@ -500,7 +492,6 @@ public class Fn104Test extends TestBase {
         assertNotNull(xml);
     }
 
-    // Test identity and wrapper methods
     @Test
     public void testIdentity() {
         Function<String, String> identity = Fn.identity();
@@ -540,10 +531,7 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testWrapWithCustomFunctions() {
-        Function<String, Wrapper<String>> wrap = Fn.wrap(
-            String::length,
-            (a, b) -> a.equalsIgnoreCase(b)
-        );
+        Function<String, Wrapper<String>> wrap = Fn.wrap(String::length, (a, b) -> a.equalsIgnoreCase(b));
         Wrapper<String> wrapped = wrap.apply("test");
         assertEquals("test", wrapped.value());
     }
@@ -555,7 +543,6 @@ public class Fn104Test extends TestBase {
         assertEquals("test", unwrap.apply(wrapped));
     }
 
-    // Test Map.Entry methods
     @Test
     public void testKey() {
         Function<Map.Entry<String, Integer>, String> keyFunc = Fn.key();
@@ -633,7 +620,6 @@ public class Fn104Test extends TestBase {
         assertEquals(5, entry.getValue());
     }
 
-    // Test Pair/Triple/Tuple methods
     @Test
     public void testPair() {
         BiFunction<String, Integer, Pair<String, Integer>> pairFunc = Fn.pair();
@@ -685,7 +671,6 @@ public class Fn104Test extends TestBase {
         assertEquals(3.14, tuple._4);
     }
 
-    // Test string manipulation methods
     @Test
     public void testTrim() {
         UnaryOperator<String> trim = Fn.trim();
@@ -759,11 +744,10 @@ public class Fn104Test extends TestBase {
         assertSame(map, nullToEmptyMap.apply(map));
     }
 
-    // Test size/length methods
     @Test
     public void testLen() {
         Function<String[], Integer> len = Fn.len();
-        assertEquals(3, len.apply(new String[]{"a", "b", "c"}));
+        assertEquals(3, len.apply(new String[] { "a", "b", "c" }));
         assertEquals(0, len.apply(new String[0]));
         assertEquals(0, len.apply(null));
     }
@@ -799,7 +783,6 @@ public class Fn104Test extends TestBase {
         assertThrows(ClassCastException.class, () -> cast.apply(123));
     }
 
-    // Test predicate methods
     @Test
     public void testAlwaysTrue() {
         Predicate<String> pred = Fn.alwaysTrue();
@@ -864,7 +847,7 @@ public class Fn104Test extends TestBase {
         Predicate<String[]> pred = Fn.isEmptyA();
         assertTrue(pred.test(new String[0]));
         assertTrue(pred.test(null));
-        assertFalse(pred.test(new String[]{"a"}));
+        assertFalse(pred.test(new String[] { "a" }));
     }
 
     @Test
@@ -935,7 +918,7 @@ public class Fn104Test extends TestBase {
         Predicate<String[]> pred = Fn.notEmptyA();
         assertFalse(pred.test(new String[0]));
         assertFalse(pred.test(null));
-        assertTrue(pred.test(new String[]{"a"}));
+        assertTrue(pred.test(new String[] { "a" }));
     }
 
     @Test
@@ -978,7 +961,7 @@ public class Fn104Test extends TestBase {
         assertTrue(pred.test("test"));
         assertFalse(pred.test("other"));
         assertFalse(pred.test(null));
-        
+
         Predicate<String> nullPred = Fn.equal(null);
         assertTrue(nullPred.test(null));
         assertFalse(nullPred.test("test"));
@@ -990,7 +973,7 @@ public class Fn104Test extends TestBase {
         assertTrue(pred2.test("a"));
         assertTrue(pred2.test("b"));
         assertFalse(pred2.test("c"));
-        
+
         Predicate<String> pred3 = Fn.eqOr("a", "b", "c");
         assertTrue(pred3.test("a"));
         assertTrue(pred3.test("b"));
@@ -1095,8 +1078,7 @@ public class Fn104Test extends TestBase {
         assertTrue(pred.test("a"));
         assertTrue(pred.test("b"));
         assertFalse(pred.test("d"));
-        
-        // Test with empty collection
+
         Predicate<String> emptyPred = Fn.in(Collections.emptyList());
         assertFalse(emptyPred.test("a"));
     }
@@ -1108,8 +1090,7 @@ public class Fn104Test extends TestBase {
         assertFalse(pred.test("a"));
         assertFalse(pred.test("b"));
         assertTrue(pred.test("d"));
-        
-        // Test with empty collection
+
         Predicate<String> emptyPred = Fn.notIn(Collections.emptyList());
         assertTrue(emptyPred.test("a"));
     }
@@ -1187,7 +1168,6 @@ public class Fn104Test extends TestBase {
         assertFalse(pred.test("abc"));
     }
 
-    // Test BiPredicate methods
     @Test
     public void testEqualBiPredicate() {
         BiPredicate<String, String> pred = Fn.equal();
@@ -1236,7 +1216,6 @@ public class Fn104Test extends TestBase {
         assertTrue(pred.test(3, 3));
     }
 
-    // Test logical operation methods
     @Test
     public void testNot() {
         Predicate<String> isNull = Fn.isNull();
@@ -1265,13 +1244,13 @@ public class Fn104Test extends TestBase {
     public void testAndBooleanSupplier() {
         BooleanSupplier and2 = Fn.and(() -> true, () -> true);
         assertTrue(and2.getAsBoolean());
-        
+
         and2 = Fn.and(() -> true, () -> false);
         assertFalse(and2.getAsBoolean());
-        
+
         BooleanSupplier and3 = Fn.and(() -> true, () -> true, () -> true);
         assertTrue(and3.getAsBoolean());
-        
+
         and3 = Fn.and(() -> true, () -> false, () -> true);
         assertFalse(and3.getAsBoolean());
     }
@@ -1280,12 +1259,12 @@ public class Fn104Test extends TestBase {
     public void testAndPredicate() {
         Predicate<String> notNull = Fn.notNull();
         Predicate<String> notEmpty = Fn.notEmpty();
-        
+
         Predicate<String> and2 = Fn.and(notNull, notEmpty);
         assertTrue(and2.test("test"));
         assertFalse(and2.test(""));
         assertFalse(and2.test(null));
-        
+
         Predicate<String> notBlank = Fn.notBlank();
         Predicate<String> and3 = Fn.and(notNull, notEmpty, notBlank);
         assertTrue(and3.test("test"));
@@ -1294,27 +1273,23 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testAndPredicateCollection() {
-        List<Predicate<Integer>> predicates = Arrays.asList(
-            x -> x > 0,
-            x -> x < 10,
-            x -> x % 2 == 0
-        );
+        List<Predicate<Integer>> predicates = Arrays.asList(x -> x > 0, x -> x < 10, x -> x % 2 == 0);
         Predicate<Integer> combined = Fn.and(predicates);
         assertTrue(combined.test(4));
-        assertFalse(combined.test(5)); // not even
-        assertFalse(combined.test(12)); // not < 10
+        assertFalse(combined.test(5));
+        assertFalse(combined.test(12));
     }
 
     @Test
     public void testAndBiPredicate() {
         BiPredicate<String, Integer> pred1 = (s, i) -> s.length() == i;
         BiPredicate<String, Integer> pred2 = (s, i) -> i > 0;
-        
+
         BiPredicate<String, Integer> and2 = Fn.and(pred1, pred2);
         assertTrue(and2.test("hello", 5));
         assertFalse(and2.test("hello", 4));
         assertFalse(and2.test("", 0));
-        
+
         BiPredicate<String, Integer> pred3 = (s, i) -> s.startsWith("h");
         BiPredicate<String, Integer> and3 = Fn.and(pred1, pred2, pred3);
         assertTrue(and3.test("hello", 5));
@@ -1323,10 +1298,7 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testAndBiPredicateList() {
-        List<BiPredicate<String, Integer>> predicates = Arrays.asList(
-            (s, i) -> s.length() == i,
-            (s, i) -> i > 0
-        );
+        List<BiPredicate<String, Integer>> predicates = Arrays.asList((s, i) -> s.length() == i, (s, i) -> i > 0);
         BiPredicate<String, Integer> combined = Fn.and(predicates);
         assertTrue(combined.test("hello", 5));
         assertFalse(combined.test("hello", 4));
@@ -1336,13 +1308,13 @@ public class Fn104Test extends TestBase {
     public void testOrBooleanSupplier() {
         BooleanSupplier or2 = Fn.or(() -> false, () -> false);
         assertFalse(or2.getAsBoolean());
-        
+
         or2 = Fn.or(() -> true, () -> false);
         assertTrue(or2.getAsBoolean());
-        
+
         BooleanSupplier or3 = Fn.or(() -> false, () -> false, () -> false);
         assertFalse(or3.getAsBoolean());
-        
+
         or3 = Fn.or(() -> false, () -> true, () -> false);
         assertTrue(or3.getAsBoolean());
     }
@@ -1351,12 +1323,12 @@ public class Fn104Test extends TestBase {
     public void testOrPredicate() {
         Predicate<String> isNull = Fn.isNull();
         Predicate<String> isEmpty = Fn.isEmpty();
-        
+
         Predicate<String> or2 = Fn.or(isNull, isEmpty);
         assertTrue(or2.test(null));
         assertTrue(or2.test(""));
         assertFalse(or2.test("test"));
-        
+
         Predicate<String> isBlank = Fn.isBlank();
         Predicate<String> or3 = Fn.or(isNull, isEmpty, isBlank);
         assertTrue(or3.test("   "));
@@ -1364,11 +1336,7 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testOrPredicateCollection() {
-        List<Predicate<Integer>> predicates = Arrays.asList(
-            x -> x < 0,
-            x -> x > 10,
-            x -> x == 5
-        );
+        List<Predicate<Integer>> predicates = Arrays.asList(x -> x < 0, x -> x > 10, x -> x == 5);
         Predicate<Integer> combined = Fn.or(predicates);
         assertTrue(combined.test(-1));
         assertTrue(combined.test(15));
@@ -1380,12 +1348,12 @@ public class Fn104Test extends TestBase {
     public void testOrBiPredicate() {
         BiPredicate<String, Integer> pred1 = (s, i) -> s.length() == i;
         BiPredicate<String, Integer> pred2 = (s, i) -> i == 0;
-        
+
         BiPredicate<String, Integer> or2 = Fn.or(pred1, pred2);
         assertTrue(or2.test("hello", 5));
         assertTrue(or2.test("world", 0));
         assertFalse(or2.test("hello", 4));
-        
+
         BiPredicate<String, Integer> pred3 = (s, i) -> s.isEmpty();
         BiPredicate<String, Integer> or3 = Fn.or(pred1, pred2, pred3);
         assertTrue(or3.test("", 10));
@@ -1393,17 +1361,13 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testOrBiPredicateList() {
-        List<BiPredicate<String, Integer>> predicates = Arrays.asList(
-            (s, i) -> s.length() == i,
-            (s, i) -> i == 0
-        );
+        List<BiPredicate<String, Integer>> predicates = Arrays.asList((s, i) -> s.length() == i, (s, i) -> i == 0);
         BiPredicate<String, Integer> combined = Fn.or(predicates);
         assertTrue(combined.test("hello", 5));
         assertTrue(combined.test("world", 0));
         assertFalse(combined.test("hello", 4));
     }
 
-    // Test Map.Entry operation methods
     @Test
     public void testTestByKey() {
         Predicate<Map.Entry<String, Integer>> pred = Fn.testByKey(s -> s.startsWith("k"));
@@ -1487,7 +1451,6 @@ public class Fn104Test extends TestBase {
         assertEquals("key=123", func.apply(new AbstractMap.SimpleEntry<>("key", 123)));
     }
 
-    // Test conditional methods
     @Test
     public void testAcceptIfNotNull() {
         List<String> list = new ArrayList<>();
@@ -1529,11 +1492,7 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testApplyIfNotNullOrDefault2() {
-        Function<String, String> func = Fn.applyIfNotNullOrDefault(
-            String::trim,
-            String::toUpperCase,
-            "DEFAULT"
-        );
+        Function<String, String> func = Fn.applyIfNotNullOrDefault(String::trim, String::toUpperCase, "DEFAULT");
         assertEquals("HELLO", func.apply("  hello  "));
         assertEquals("DEFAULT", func.apply(null));
         assertEquals("", func.apply("  "));
@@ -1541,12 +1500,7 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testApplyIfNotNullOrDefault3() {
-        Function<String, Integer> func = Fn.applyIfNotNullOrDefault(
-            String::trim,
-            String::toUpperCase,
-            String::length,
-            -1
-        );
+        Function<String, Integer> func = Fn.applyIfNotNullOrDefault(String::trim, String::toUpperCase, String::length, -1);
         assertEquals(5, func.apply("  hello  "));
         assertEquals(-1, func.apply(null));
         assertEquals(0, func.apply("  "));
@@ -1554,60 +1508,35 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testApplyIfNotNullOrDefault4() {
-        Function<String, Character> func = Fn.applyIfNotNullOrDefault(
-            String::trim,
-            String::toUpperCase,
-            s -> s.substring(0, 1),
-            s -> s.charAt(0),
-            '?'
-        );
+        Function<String, Character> func = Fn.applyIfNotNullOrDefault(String::trim, String::toUpperCase, s -> s.substring(0, 1), s -> s.charAt(0), '?');
         assertEquals('H', func.apply("  hello  "));
         assertEquals('?', func.apply(null));
     }
 
     @Test
     public void testApplyIfNotNullOrElseGet2() {
-        Function<String, String> func = Fn.applyIfNotNullOrElseGet(
-            String::trim,
-            String::toUpperCase,
-            () -> "SUPPLIED"
-        );
+        Function<String, String> func = Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, () -> "SUPPLIED");
         assertEquals("HELLO", func.apply("  hello  "));
         assertEquals("SUPPLIED", func.apply(null));
     }
 
     @Test
     public void testApplyIfNotNullOrElseGet3() {
-        Function<String, Integer> func = Fn.applyIfNotNullOrElseGet(
-            String::trim,
-            String::toUpperCase,
-            String::length,
-            () -> -1
-        );
+        Function<String, Integer> func = Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, String::length, () -> -1);
         assertEquals(5, func.apply("  hello  "));
         assertEquals(-1, func.apply(null));
     }
 
     @Test
     public void testApplyIfNotNullOrElseGet4() {
-        Function<String, Character> func = Fn.applyIfNotNullOrElseGet(
-            String::trim,
-            String::toUpperCase,
-            s -> s.substring(0, 1),
-            s -> s.charAt(0),
-            () -> '?'
-        );
+        Function<String, Character> func = Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, s -> s.substring(0, 1), s -> s.charAt(0), () -> '?');
         assertEquals('H', func.apply("  hello  "));
         assertEquals('?', func.apply(null));
     }
 
     @Test
     public void testApplyIfOrElseDefault() {
-        Function<Integer, String> func = Fn.applyIfOrElseDefault(
-            i -> i > 0,
-            i -> "positive: " + i,
-            "non-positive"
-        );
+        Function<Integer, String> func = Fn.applyIfOrElseDefault(i -> i > 0, i -> "positive: " + i, "non-positive");
         assertEquals("positive: 5", func.apply(5));
         assertEquals("non-positive", func.apply(-3));
         assertEquals("non-positive", func.apply(0));
@@ -1616,11 +1545,7 @@ public class Fn104Test extends TestBase {
     @Test
     public void testApplyIfOrElseGet() {
         AtomicInteger counter = new AtomicInteger(0);
-        Function<Integer, String> func = Fn.applyIfOrElseGet(
-            i -> i > 0,
-            i -> "positive: " + i,
-            () -> "supplied: " + counter.incrementAndGet()
-        );
+        Function<Integer, String> func = Fn.applyIfOrElseGet(i -> i > 0, i -> "positive: " + i, () -> "supplied: " + counter.incrementAndGet());
         assertEquals("positive: 5", func.apply(5));
         assertEquals("supplied: 1", func.apply(-3));
         assertEquals("supplied: 2", func.apply(0));
@@ -1632,17 +1557,16 @@ public class Fn104Test extends TestBase {
         map.put("a", Arrays.asList(1, 2, 3));
         map.put("b", Arrays.asList(4, 5, 6));
         map.put("c", Arrays.asList(7, 8));
-        
+
         Function<Map<String, ? extends Collection<Integer>>, List<Map<String, Integer>>> func = Fn.flatmapValue();
         List<Map<String, Integer>> result = func.apply(map);
-        
+
         assertEquals(3, result.size());
         assertEquals(1, result.get(0).get("a").intValue());
         assertEquals(4, result.get(0).get("b").intValue());
         assertEquals(7, result.get(0).get("c").intValue());
     }
 
-    // Test parsing methods
     @Test
     public void testParseByte() {
         ToByteFunction<String> parser = Fn.parseByte();
@@ -1727,33 +1651,28 @@ public class Fn104Test extends TestBase {
         assertTrue(atMost3.test("3"));
         assertFalse(atMost3.test("4"));
         assertFalse(atMost3.test("5"));
-        
-        // Test negative count throws exception
+
         assertThrows(IllegalArgumentException.class, () -> Fn.atMost(-1));
     }
 
-    // Test deprecated methods for coverage
     @Test
     public void testDeprecatedEntry() {
-        // Test deprecated entry(K key)
         Function<Integer, Map.Entry<String, Integer>> entryFunc = Fn.entry("fixedKey");
         Map.Entry<String, Integer> entry = entryFunc.apply(123);
         assertEquals("fixedKey", entry.getKey());
         assertEquals(123, entry.getValue());
-        
-        // Test deprecated entry(Function keyExtractor)
+
         Function<String, Map.Entry<Integer, String>> entryFunc2 = Fn.entry(String::length);
         Map.Entry<Integer, String> entry2 = entryFunc2.apply("hello");
         assertEquals(5, entry2.getKey());
         assertEquals("hello", entry2.getValue());
     }
 
-    // Additional edge case tests
     @Test
     public void testMemoizeFunctionWithNull() {
         Function<String, String> memoized = Fn.memoize(s -> s == null ? "null" : s.toUpperCase());
         assertEquals("null", memoized.apply(null));
-        assertEquals("null", memoized.apply(null)); // Should return cached value
+        assertEquals("null", memoized.apply(null));
         assertEquals("HELLO", memoized.apply("hello"));
     }
 
@@ -1814,12 +1733,12 @@ public class Fn104Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Fn.not((Predicate<String>) null));
         assertThrows(IllegalArgumentException.class, () -> Fn.not((BiPredicate<String, String>) null));
         assertThrows(IllegalArgumentException.class, () -> Fn.not((TriPredicate<String, String, String>) null));
-        
+
         assertThrows(IllegalArgumentException.class, () -> Fn.and((BooleanSupplier) null, () -> true));
         assertThrows(IllegalArgumentException.class, () -> Fn.and(() -> true, (BooleanSupplier) null));
         assertThrows(IllegalArgumentException.class, () -> Fn.and((Collection<Predicate<String>>) null));
         assertThrows(IllegalArgumentException.class, () -> Fn.and(Collections.<Predicate<String>> emptyList()));
-        
+
         assertThrows(IllegalArgumentException.class, () -> Fn.or((BooleanSupplier) null, () -> true));
         assertThrows(IllegalArgumentException.class, () -> Fn.or(() -> true, (BooleanSupplier) null));
         assertThrows(IllegalArgumentException.class, () -> Fn.or((Collection<Predicate<String>>) null));
@@ -1835,13 +1754,13 @@ public class Fn104Test extends TestBase {
     public void testRateLimiterWithRateLimiterInstance() {
         RateLimiter rateLimiter = RateLimiter.create(2.0);
         Consumer<String> rateLimited = Fn.rateLimiter(rateLimiter);
-        
+
         long start = System.currentTimeMillis();
         rateLimited.accept("1");
         rateLimited.accept("2");
         rateLimited.accept("3");
         long duration = System.currentTimeMillis() - start;
-        
+
         assertTrue(duration >= 500);
     }
 
@@ -1862,38 +1781,26 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testApplyIfNotNullOrDefaultWithNullMappers() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.applyIfNotNullOrDefault(null, String::length, 0));
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.applyIfNotNullOrDefault(String::trim, null, 0));
-        
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.applyIfNotNullOrDefault(null, String::trim, String::length, 0));
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.applyIfNotNullOrDefault(String::trim, null, String::length, 0));
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.applyIfNotNullOrDefault(String::trim, String::toUpperCase, null, 0));
-        
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.applyIfNotNullOrDefault(null, s -> s, s -> s, s -> s, 'a'));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(null, String::length, 0));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(String::trim, null, 0));
+
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(null, String::trim, String::length, 0));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(String::trim, null, String::length, 0));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(String::trim, String::toUpperCase, null, 0));
+
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(null, s -> s, s -> s, s -> s, 'a'));
     }
 
     @Test
     public void testApplyIfNotNullOrElseGetWithNullMappers() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.applyIfNotNullOrElseGet(null, String::length, () -> 0));
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.applyIfNotNullOrElseGet(String::trim, null, () -> 0));
-        
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.applyIfNotNullOrElseGet(null, String::trim, String::length, () -> 0));
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.applyIfNotNullOrElseGet(String::trim, null, String::length, () -> 0));
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, null, () -> 0));
-        
-        assertThrows(IllegalArgumentException.class, () -> 
-            Fn.applyIfNotNullOrElseGet(null, s -> s, s -> s, s -> s, () -> 'a'));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(null, String::length, () -> 0));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, null, () -> 0));
+
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(null, String::trim, String::length, () -> 0));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, null, String::length, () -> 0));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, null, () -> 0));
+
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(null, s -> s, s -> s, s -> s, () -> 'a'));
     }
 
     @Test
@@ -1901,43 +1808,33 @@ public class Fn104Test extends TestBase {
         AtomicInteger counter = new AtomicInteger(0);
         Supplier<Integer> memoized = Fn.memoizeWithExpiration(() -> {
             try {
-                Thread.sleep(50); // Simulate slow operation
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
             return counter.incrementAndGet();
         }, 200, TimeUnit.MILLISECONDS);
-        
-        // Test concurrent access
+
         List<CompletableFuture<Integer>> futures = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             futures.add(CompletableFuture.supplyAsync(memoized::get));
         }
-        
-        List<Integer> results = futures.stream()
-            .map(CompletableFuture::join)
-            .collect(java.util.stream.Collectors.toList());
-        
-        // All should get the same value
+
+        List<Integer> results = futures.stream().map(CompletableFuture::join).collect(java.util.stream.Collectors.toList());
+
         assertTrue(results.stream().allMatch(r -> r.equals(1)));
         assertEquals(1, counter.get());
     }
 
     @Test
     public void testMemoizeWithExpirationEdgeCase() throws InterruptedException {
-        // Test when expiration time is exactly 1 nanosecond
         AtomicInteger counter = new AtomicInteger(0);
-        Supplier<Integer> memoized = Fn.memoizeWithExpiration(
-            counter::incrementAndGet, 
-            1, 
-            TimeUnit.NANOSECONDS
-        );
-        
+        Supplier<Integer> memoized = Fn.memoizeWithExpiration(counter::incrementAndGet, 1, TimeUnit.NANOSECONDS);
+
         int first = memoized.get();
-        Thread.sleep(1); // Wait more than 1 nanosecond
+        Thread.sleep(1);
         int second = memoized.get();
-        
-        // Should be different values due to expiration
+
         assertNotEquals(first, second);
     }
 }

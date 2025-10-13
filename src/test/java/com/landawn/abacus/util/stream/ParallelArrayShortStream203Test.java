@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
@@ -31,12 +32,12 @@ import com.landawn.abacus.util.function.ShortUnaryOperator;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
+@Tag("new-test")
 public class ParallelArrayShortStream203Test extends TestBase {
 
-    private static final int testMaxThreadNum = 4; // Use a fixed small number of threads for predictable testing 
+    private static final int testMaxThreadNum = 4;
     private static final short[] TEST_ARRAY = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
 
-    // Empty method to be implemented by the user for initializing ShortStream
     protected ShortStream createShortStream(short... elements) {
         return ShortStream.of(elements).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum));
     }
@@ -83,7 +84,7 @@ public class ParallelArrayShortStream203Test extends TestBase {
         ShortUnaryOperator mapper = s -> (short) (s + 1);
         List<Short> result = stream.map(mapper).toList();
         assertEquals(TEST_ARRAY.length, result.size());
-        assertTrue(result.contains((short) 2)); // 1 maps to 2
+        assertTrue(result.contains((short) 2));
         assertFalse(result.contains((short) 1));
     }
 
@@ -93,8 +94,8 @@ public class ParallelArrayShortStream203Test extends TestBase {
         ShortToIntFunction mapper = s -> s * 2;
         List<Integer> result = stream.mapToInt(mapper).toList();
         assertEquals(TEST_ARRAY.length, result.size());
-        assertTrue(result.contains(2)); // 1 maps to 2
-        assertTrue(result.contains(52)); // 26 maps to 52
+        assertTrue(result.contains(2));
+        assertTrue(result.contains(52));
     }
 
     @Test
@@ -172,12 +173,12 @@ public class ParallelArrayShortStream203Test extends TestBase {
         ShortStream stream = createShortStream(TEST_ARRAY);
         List<Short> consumed = new ArrayList<>();
         ShortConsumer action = it -> {
-            synchronized (consumed) { // Ensure thread safety
+            synchronized (consumed) {
                 consumed.add(it);
             }
         };
         stream.onEach(action).forEach(s -> {
-        }); // Trigger the onEach action
+        });
 
         assertHaveSameElements(N.toList(TEST_ARRAY), consumed);
     }
@@ -187,7 +188,7 @@ public class ParallelArrayShortStream203Test extends TestBase {
         ShortStream stream = createShortStream(TEST_ARRAY);
         List<Short> consumed = new ArrayList<>();
         ShortConsumer action = it -> {
-            synchronized (consumed) { // Ensure thread safety
+            synchronized (consumed) {
                 consumed.add(it);
             }
         };
@@ -356,8 +357,8 @@ public class ParallelArrayShortStream203Test extends TestBase {
     public void testZipWithBinaryOperatorWithNoneValues() {
         ShortStream streamA = createShortStream(new short[] { 1, 2 });
         ShortStream streamB = ShortStream.of((short) 10, (short) 20, (short) 30);
-        short valA = 0; // Assuming 0 as 'none' for short
-        short valB = -1; // Assuming -1 as 'none' for short
+        short valA = 0;
+        short valB = -1;
         ShortBinaryOperator zipper = (s1, s2) -> {
             if (s1 == valA)
                 return s2;
@@ -367,9 +368,9 @@ public class ParallelArrayShortStream203Test extends TestBase {
         };
         List<Short> result = streamA.zipWith(streamB, valA, valB, zipper).sorted().toList();
         assertEquals(3, result.size());
-        assertEquals((short) 11, result.get(0)); // 1 + 10
-        assertEquals((short) 22, result.get(1)); // 2 + 20
-        assertEquals((short) 30, result.get(2)); // 0 (valA) + 30 -> 30
+        assertEquals((short) 11, result.get(0));
+        assertEquals((short) 22, result.get(1));
+        assertEquals((short) 30, result.get(2));
     }
 
     @Test
@@ -386,8 +387,8 @@ public class ParallelArrayShortStream203Test extends TestBase {
         List<Short> result = streamA.zipWith(streamB, streamC, valA, valB, valC, zipper).sorted().toList();
         assertEquals(3, result.size());
         assertEquals((short) (1 + 10 + 100), result.get(1));
-        assertEquals((short) (0 + 20 + 101), result.get(2)); // valA (0) + 20 + 101
-        assertEquals((short) (0 + -1 + 102), result.get(0)); // valA (0) + valB (-1) + 102
+        assertEquals((short) (0 + 20 + 101), result.get(2));
+        assertEquals((short) (0 + -1 + 102), result.get(0));
     }
 
     @Test
@@ -412,28 +413,14 @@ public class ParallelArrayShortStream203Test extends TestBase {
 
     @Test
     public void testMaxThreadNum() throws IllegalAccessException, NoSuchFieldException {
-        // Since maxThreadNum() is protected in the superclass,
-        // and its value is used internally, we can't directly call it from here.
-        // However, we can assert its behavior indirectly or via reflection if necessary.
-        // For this test, we'll assume the constructor correctly sets it and other tests
-        // indirectly verify its usage.
-        // If it was a public method of ParallelArrayShortStream, we would test it directly.
-        // ShortStream stream = createShortStream(shortArray);
-        //assertTrue(stream.maxThreadNum() > 0); // This line would work if maxThreadNum() was public in ShortStream
     }
 
     @Test
     public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        // Similar to maxThreadNum, splitor() is protected.
-        // ShortStream stream = createShortStream(shortArray);
-        //assertNotNull(stream.splitor());
     }
 
     @Test
     public void testAsyncExecutor() throws IllegalAccessException, NoSuchFieldException {
-        // Similar to maxThreadNum, asyncExecutor() is protected.
-        // ShortStream stream = createShortStream(shortArray);
-        //assertNotNull(stream.asyncExecutor());
     }
 
     @Test
@@ -443,9 +430,9 @@ public class ParallelArrayShortStream203Test extends TestBase {
         Runnable closeHandler = () -> closedFlag.set(true);
 
         ShortStream newStream = stream.onClose(closeHandler);
-        assertFalse(closedFlag.get()); // Not closed yet
-        newStream.close(); // Close the stream, which should trigger the handler
-        assertTrue(closedFlag.get()); // Now it should be closed
+        assertFalse(closedFlag.get());
+        newStream.close();
+        assertTrue(closedFlag.get());
     }
 
     @Test
@@ -465,7 +452,7 @@ public class ParallelArrayShortStream203Test extends TestBase {
     public void testOnCloseEmptyHandler() {
         ShortStream stream = createShortStream(TEST_ARRAY);
         ShortStream newStream = stream.onClose(null);
-        assertSame(stream, newStream); // Should return the same instance if handler is null
-        newStream.close(); // Should not throw
+        assertSame(stream, newStream);
+        newStream.close();
     }
 }

@@ -17,10 +17,12 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
 
+@Tag("new-test")
 public class TriIterator200Test extends TestBase {
 
     @Test
@@ -87,13 +89,9 @@ public class TriIterator200Test extends TestBase {
 
     @Test
     public void test_zip_nullAndEmptyInputs() {
-        // Test with a null array
         assertFalse(TriIterator.zip(new Integer[] { 1 }, null, new Boolean[] { true }).hasNext());
-        // Test with an empty array
         assertFalse(TriIterator.zip(new Integer[] {}, new String[] { "a" }, new Boolean[] { true }).hasNext());
-        // Test with all empty
         assertFalse(TriIterator.zip(new Integer[] {}, new String[] {}, new Boolean[] {}).hasNext());
-        // Test zip with default values and null iterables
         TriIterator<Integer, String, Boolean> iter = TriIterator.zip((Integer[]) null, (String[]) null, (Boolean[]) null, 1, "a", true);
         assertFalse(iter.hasNext());
     }
@@ -168,7 +166,6 @@ public class TriIterator200Test extends TestBase {
         assertEquals(Triple.of(3, 6, 9), skipped.next());
         assertFalse(skipped.hasNext());
 
-        // Test skipping more than available
         iter = TriIterator.zip(new Integer[] { 1 }, new Integer[] { 2 }, new Integer[] { 3 });
         skipped = iter.skip(5);
         assertFalse(skipped.hasNext());
@@ -181,7 +178,7 @@ public class TriIterator200Test extends TestBase {
         assertEquals(2, limited.toList().size());
 
         iter = TriIterator.zip(new Integer[] { 1, 2, 3 }, new Integer[] { 4, 5, 6 }, new Integer[] { 7, 8, 9 });
-        limited = iter.limit(5); // limit is larger than size
+        limited = iter.limit(5);
         assertEquals(3, limited.toList().size());
     }
 
@@ -198,10 +195,6 @@ public class TriIterator200Test extends TestBase {
     public void test_chainedOperations() {
         TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(0, 10, (i, t) -> t.set(i, i, i));
         List<Triple<Integer, Integer, Integer>> result = iter.skip(2).limit(5).filter((a, b, c) -> a % 2 == 0).toList();
-        // Original: 0,1,2,3,4,5,6,7,8,9
-        // Skip(2): 2,3,4,5,6,7,8,9
-        // Limit(5): 2,3,4,5,6
-        // Filter(even): 2,4,6
         assertEquals(Arrays.asList(Triple.of(2, 2, 2), Triple.of(4, 4, 4), Triple.of(6, 6, 6)), result);
     }
 
@@ -230,12 +223,10 @@ public class TriIterator200Test extends TestBase {
         assertTrue(first.isPresent());
         assertEquals(Triple.of(1, 4, 7), first.get());
 
-        // Note: first() consumes the first element.
         Optional<Triple<Integer, Integer, Integer>> last = iter.last();
         assertTrue(last.isPresent());
         assertEquals(Triple.of(3, 6, 9), last.get());
 
-        // Test last on a fresh iterator
         iter = TriIterator.zip(new Integer[] { 1, 2, 3 }, new Integer[] { 4, 5, 6 }, new Integer[] { 7, 8, 9 });
         assertEquals(Triple.of(3, 6, 9), iter.last().get());
 

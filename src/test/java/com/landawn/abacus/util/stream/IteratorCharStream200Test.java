@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -36,6 +37,7 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.u.OptionalDouble;
 
+@Tag("new-test")
 public class IteratorCharStream200Test extends TestBase {
 
     private static final char[] TEST_ARRAY = new char[] { 'a', 'b', 'c', 'd', 'e' };
@@ -45,67 +47,62 @@ public class IteratorCharStream200Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        // Initialize with some default data for general tests
         stream = createCharStream(TEST_ARRAY);
         stream2 = createCharStream(TEST_ARRAY);
         stream3 = createCharStream(TEST_ARRAY);
     }
 
-    // This method will be used to initialize CharStream instances for tests.
-    // For ArrayCharStream, we directly instantiate it.
     protected CharStream createCharStream(char... array) {
-        return CharStream.of(array).map(c -> (char) (c + 0)); // Ensure it returns a IteratorCharStream);
+        return CharStream.of(array).map(c -> (char) (c + 0));
     }
 
     protected CharStream createCharStream(char[] array, int fromIndex, int toIndex) {
-        return CharStream.of(array, fromIndex, toIndex).map(c -> (char) (c + 0)); // Ensure it returns a IteratorCharStream);
+        return CharStream.of(array, fromIndex, toIndex).map(c -> (char) (c + 0));
     }
 
     protected CharStream createCharStream(Character[] array) {
-        return CharStream.of(array).map(c -> (char) (c + 0)); // Ensure it returns a IteratorCharStream);
+        return CharStream.of(array).map(c -> (char) (c + 0));
     }
 
     protected CharStream createCharStream(Character[] array, int fromIndex, int toIndex) {
-        return CharStream.of(array, fromIndex, toIndex).map(c -> (char) (c + 0)); // Ensure it returns a IteratorCharStream);
+        return CharStream.of(array, fromIndex, toIndex).map(c -> (char) (c + 0));
     }
 
     protected CharStream createCharStream(Collection<Character> coll) {
-        return CharStream.of(coll).map(c -> (char) (c + 0)); // Ensure it returns a IteratorCharStream);
+        return CharStream.of(coll).map(c -> (char) (c + 0));
     }
 
     protected CharStream createCharStream(Collection<Character> coll, int fromIndex, int toIndex) {
-        return CharStream.of(coll.toArray(new Character[coll.size()]), fromIndex, toIndex).map(c -> (char) (c + 0)); // Ensure it returns a IteratorCharStream);
+        return CharStream.of(coll.toArray(new Character[coll.size()]), fromIndex, toIndex).map(c -> (char) (c + 0));
     }
 
     protected CharStream createCharStream(CharIterator iter) {
-        return CharStream.of(iter).map(c -> (char) (c + 0)); // Ensure it returns a IteratorCharStream);
+        return CharStream.of(iter).map(c -> (char) (c + 0));
     }
 
     protected CharStream createCharStream(File file) {
-        return CharStream.of(file).map(c -> (char) (c + 0)); // Ensure it returns a IteratorCharStream);
+        return CharStream.of(file).map(c -> (char) (c + 0));
     }
 
     protected CharStream createCharStream(Reader reader) {
-        return CharStream.of(reader).map(c -> (char) (c + 0)); // Ensure it returns a IteratorCharStream);
+        return CharStream.of(reader).map(c -> (char) (c + 0));
     }
 
     protected CharStream createCharStream(Reader reader, boolean closeReader) {
-        return CharStream.of(reader, closeReader).map(c -> (char) (c + 0)); // Ensure it returns a IteratorCharStream);
+        return CharStream.of(reader, closeReader).map(c -> (char) (c + 0));
     }
 
     protected CharStream createCharStream(CharSequence str) {
-        return CharStream.of(str).map(c -> (char) (c + 0)); // Ensure it returns a IteratorCharStream);
+        return CharStream.of(str).map(c -> (char) (c + 0));
     }
 
     protected CharStream createCharStream(CharSequence str, int fromIndex, int toIndex) {
-        return CharStream.of(str, fromIndex, toIndex).map(c -> (char) (c + 0)); // Ensure it returns a IteratorCharStream);
+        return CharStream.of(str, fromIndex, toIndex).map(c -> (char) (c + 0));
     }
-
-    //region Tests for public methods overridden or specifically implemented in ArrayCharStream
 
     @Test
     public void testFilter() {
-        List<Character> result = stream.filter(c -> c % 2 == 1).boxed().toList(); // 'a' (97), 'c' (99), 'e' (101) are odd
+        List<Character> result = stream.filter(c -> c % 2 == 1).boxed().toList();
         assertEquals(Arrays.asList('a', 'c', 'e'), result);
 
         result = createCharStream(new char[] {}).filter(c -> true).boxed().toList();
@@ -117,7 +114,7 @@ public class IteratorCharStream200Test extends TestBase {
 
     @Test
     public void testTakeWhile() {
-        List<Character> result = stream.takeWhile(c -> c < 'd').boxed().toList(); // Take 'a', 'b', 'c'
+        List<Character> result = stream.takeWhile(c -> c < 'd').boxed().toList();
         assertEquals(Arrays.asList('a', 'b', 'c'), result);
 
         result = createCharStream('a', 'b', 'c').takeWhile(c -> c > 'z').boxed().toList();
@@ -129,7 +126,7 @@ public class IteratorCharStream200Test extends TestBase {
 
     @Test
     public void testDropWhile() {
-        List<Character> result = stream.dropWhile(c -> c < 'd').boxed().toList(); // Drop 'a', 'b', 'c'
+        List<Character> result = stream.dropWhile(c -> c < 'd').boxed().toList();
         assertEquals(Arrays.asList('d', 'e'), result);
 
         result = createCharStream('a', 'b', 'c').dropWhile(c -> c == 'x').boxed().toList();
@@ -161,7 +158,7 @@ public class IteratorCharStream200Test extends TestBase {
 
     @Test
     public void testStepWithNegative() {
-        assertThrows(IllegalArgumentException.class, () -> createCharStream(new char[] { 'a', 'b' }).step(-1)); // Although checkArgPositive should catch it.
+        assertThrows(IllegalArgumentException.class, () -> createCharStream(new char[] { 'a', 'b' }).step(-1));
     }
 
     @Test
@@ -413,7 +410,7 @@ public class IteratorCharStream200Test extends TestBase {
 
     @Test
     public void testReduceIdentity() {
-        char sum = createCharStream(new char[] { '1', '2', '3' }).reduce('0', (c1, c2) -> (char) (c1 + c2 - '0')); // Summing char values as numbers
+        char sum = createCharStream(new char[] { '1', '2', '3' }).reduce('0', (c1, c2) -> (char) (c1 + c2 - '0'));
         assertEquals((char) ('0' + '1' + '2' + '3' - '0' - '0' - '0'), sum);
 
         sum = createCharStream(new char[] {}).reduce('X', (c1, c2) -> c1);
@@ -469,11 +466,11 @@ public class IteratorCharStream200Test extends TestBase {
     public void testKthLargest() {
         OptionalChar kl = createCharStream(new char[] { 'a', 'c', 'b', 'e', 'd' }).kthLargest(1);
         assertTrue(kl.isPresent());
-        assertEquals('e', kl.get()); // Largest
+        assertEquals('e', kl.get());
 
         kl = createCharStream(new char[] { 'a', 'c', 'b', 'e', 'd' }).kthLargest(3);
         assertTrue(kl.isPresent());
-        assertEquals('c', kl.get()); // 3rd largest: e,d,c,b,a -> c
+        assertEquals('c', kl.get());
 
         kl = createCharStream(new char[] { 'a' }).kthLargest(1);
         assertEquals('a', kl.get());
@@ -492,7 +489,7 @@ public class IteratorCharStream200Test extends TestBase {
 
     @Test
     public void testSum() {
-        int sum = createCharStream(new char[] { '1', '2', '3' }).sum(); // ASCII sum: 49+50+51 = 150
+        int sum = createCharStream(new char[] { '1', '2', '3' }).sum();
         assertEquals(150, sum);
 
         sum = createCharStream(new char[] {}).sum();
@@ -501,7 +498,7 @@ public class IteratorCharStream200Test extends TestBase {
 
     @Test
     public void testAverage() {
-        OptionalDouble avg = createCharStream(new char[] { '1', '2', '3' }).average(); // (49+50+51)/3 = 50.0
+        OptionalDouble avg = createCharStream(new char[] { '1', '2', '3' }).average();
         assertTrue(avg.isPresent());
         assertEquals(50.0, avg.getAsDouble(), 0.001);
 
@@ -605,7 +602,7 @@ public class IteratorCharStream200Test extends TestBase {
     @Test
     public void testIfEmpty() {
         AtomicInteger counter = new AtomicInteger(0);
-        createCharStream(new char[] {}).ifEmpty(() -> counter.incrementAndGet()).count(); // Terminal operation to trigger ifEmpty
+        createCharStream(new char[] {}).ifEmpty(() -> counter.incrementAndGet()).count();
         assertEquals(1, counter.get());
 
         counter.set(0);
@@ -667,31 +664,25 @@ public class IteratorCharStream200Test extends TestBase {
     public void testOnClose() {
         AtomicInteger closeCount = new AtomicInteger(0);
         CharStream closableStream = createCharStream('a', 'b', 'c').onClose(() -> closeCount.incrementAndGet());
-        closableStream.count(); // Terminal operation
+        closableStream.count();
         assertEquals(1, closeCount.get());
 
         closeCount.set(0);
         closableStream = createCharStream('a', 'b', 'c').onClose(() -> closeCount.incrementAndGet()).onClose(() -> closeCount.incrementAndGet());
-        closableStream.toList(); // Another terminal operation
+        closableStream.toList();
         assertEquals(2, closeCount.get());
 
-        // Ensure chaining onClose doesn't break.
         closeCount.set(0);
         closableStream = createCharStream(new char[] { 'a' }).onClose(() -> closeCount.incrementAndGet());
-        closableStream = closableStream.filter(c -> true); // Intermediate, should retain close handlers
+        closableStream = closableStream.filter(c -> true);
         closableStream.forEach(c -> {
         });
         assertEquals(1, closeCount.get());
 
-        // Test with empty stream
         closeCount.set(0);
         createCharStream(new char[] {}).onClose(() -> closeCount.incrementAndGet()).count();
         assertEquals(1, closeCount.get());
     }
-
-    //endregion
-
-    //region Tests for public static methods (from CharStream.java) - copied for completeness
 
     @Test
     public void testEmpty() {
@@ -707,9 +698,9 @@ public class IteratorCharStream200Test extends TestBase {
             counter.incrementAndGet();
             return createCharStream(new char[] { 'd', 'e', 'f' });
         });
-        assertEquals(0, counter.get()); // Should not be invoked yet
+        assertEquals(0, counter.get());
         List<Character> result = deferredStream.boxed().toList();
-        assertEquals(1, counter.get()); // Should be invoked now
+        assertEquals(1, counter.get());
         assertEquals(Arrays.asList('d', 'e', 'f'), result);
     }
 
@@ -744,21 +735,18 @@ public class IteratorCharStream200Test extends TestBase {
             createCharStream(data, -1, 2);
             fail("Expected IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
 
         try {
             createCharStream(data, 2, 1);
             fail("Expected IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
 
         try {
             createCharStream(data, 0, 10);
             fail("Expected IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
     }
 
@@ -784,7 +772,6 @@ public class IteratorCharStream200Test extends TestBase {
             createCharStream(str, -1, 2);
             fail("Expected IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
-            // Expected
         }
     }
 
@@ -828,7 +815,7 @@ public class IteratorCharStream200Test extends TestBase {
     @Test
     public void testOfCharBuffer() {
         CharBuffer buffer = CharBuffer.wrap(new char[] { 't', 'e', 's', 't' });
-        buffer.position(1).limit(3); // 'e', 's'
+        buffer.position(1).limit(3);
         CharStream stream1 = createCharStream(buffer);
         assertEquals(Arrays.asList('e', 's'), stream1.boxed().toList());
 
@@ -864,7 +851,6 @@ public class IteratorCharStream200Test extends TestBase {
             reader.read();
             fail("Expected IOException due to closed reader");
         } catch (IOException e) {
-            // Expected
         }
     }
 
@@ -1306,5 +1292,4 @@ public class IteratorCharStream200Test extends TestBase {
         assertEquals(Arrays.asList('1', '2', '3', '4', '5', '6'), result);
     }
 
-    //endregion
 }

@@ -17,11 +17,13 @@ import java.sql.Types;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class AbstractShortType100Test extends TestBase {
 
     private Type<Number> shortType;
@@ -75,7 +77,6 @@ public class AbstractShortType100Test extends TestBase {
         char[] negChars = "-789".toCharArray();
         assertEquals((short) -789, shortType.valueOf(negChars, 0, 4));
 
-        // Test out of range
         char[] outOfRange = "40000".toCharArray();
         assertThrows(NumberFormatException.class, () -> shortType.valueOf(outOfRange, 0, 5));
 
@@ -155,15 +156,12 @@ public class AbstractShortType100Test extends TestBase {
 
     @Test
     public void testWriteCharacter() throws IOException {
-        // Test null value
         shortType.writeCharacter(writer, null, null);
         verify(writer).write(any(char[].class));
 
-        // Test with value
         shortType.writeCharacter(writer, (short) 123, null);
         verify(writer).write((short) 123);
 
-        // Test with writeNullNumberAsZero config
         when(config.writeNullNumberAsZero()).thenReturn(true);
         shortType.writeCharacter(writer, null, config);
         verify(writer).write((short) 0);

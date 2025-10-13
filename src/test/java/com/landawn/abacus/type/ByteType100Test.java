@@ -11,10 +11,12 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 
+@Tag("new-test")
 public class ByteType100Test extends TestBase {
 
     private ByteType type;
@@ -181,12 +183,10 @@ public class ByteType100Test extends TestBase {
     public void testGet_ResultSet_String_BoundaryValues() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
 
-        // Test Byte.MAX_VALUE
         when(rs.getObject("maxCol")).thenReturn("127");
         Byte maxResult = type.get(rs, "maxCol");
         assertEquals(Byte.MAX_VALUE, maxResult);
 
-        // Test Byte.MIN_VALUE
         when(rs.getObject("minCol")).thenReturn("-128");
         Byte minResult = type.get(rs, "minCol");
         assertEquals(Byte.MIN_VALUE, minResult);
@@ -195,12 +195,10 @@ public class ByteType100Test extends TestBase {
     @Test
     public void testGet_ResultSet_String_Overflow() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        // Values that overflow byte range will be truncated
         when(rs.getObject("overflowCol")).thenReturn(256);
 
         Byte result = type.get(rs, "overflowCol");
 
-        // 256 overflows to 0 in byte
         assertEquals(Byte.valueOf((byte) 0), result);
         verify(rs).getObject("overflowCol");
     }

@@ -11,9 +11,11 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.landawn.abacus.TestBase;
 
+@Tag("new-test")
 public class IdentityHashSet100Test extends TestBase {
 
     @Test
@@ -55,11 +57,11 @@ public class IdentityHashSet100Test extends TestBase {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         String s1 = new String("hello");
         String s2 = new String("hello");
-        
+
         Assertions.assertTrue(set.add(s1));
-        Assertions.assertFalse(set.add(s1)); // Same reference
-        Assertions.assertTrue(set.add(s2)); // Different reference, same value
-        
+        Assertions.assertFalse(set.add(s1));
+        Assertions.assertTrue(set.add(s2));
+
         Assertions.assertEquals(2, set.size());
     }
 
@@ -77,14 +79,14 @@ public class IdentityHashSet100Test extends TestBase {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         String s1 = new String("hello");
         String s2 = new String("hello");
-        
+
         set.add(s1);
         set.add(s2);
-        
+
         Assertions.assertTrue(set.remove(s1));
-        Assertions.assertFalse(set.remove(s1)); // Already removed
+        Assertions.assertFalse(set.remove(s1));
         Assertions.assertEquals(1, set.size());
-        
+
         Assertions.assertTrue(set.remove(s2));
         Assertions.assertTrue(set.isEmpty());
     }
@@ -94,10 +96,10 @@ public class IdentityHashSet100Test extends TestBase {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         String s1 = new String("hello");
         String s2 = new String("hello");
-        
+
         set.add(s1);
-        
-        Assertions.assertFalse(set.remove(s2)); // Different reference
+
+        Assertions.assertFalse(set.remove(s2));
         Assertions.assertEquals(1, set.size());
     }
 
@@ -106,11 +108,11 @@ public class IdentityHashSet100Test extends TestBase {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         String s1 = new String("hello");
         String s2 = new String("hello");
-        
+
         set.add(s1);
-        
+
         Assertions.assertTrue(set.contains(s1));
-        Assertions.assertFalse(set.contains(s2)); // Different reference
+        Assertions.assertFalse(set.contains(s2));
     }
 
     @Test
@@ -119,10 +121,10 @@ public class IdentityHashSet100Test extends TestBase {
         String s1 = "a";
         String s2 = "b";
         String s3 = "c";
-        
+
         set.add(s1);
         set.add(s2);
-        
+
         Assertions.assertTrue(set.containsAll(Arrays.asList(s1, s2)));
         Assertions.assertFalse(set.containsAll(Arrays.asList(s1, s2, s3)));
         Assertions.assertTrue(set.containsAll(Collections.emptyList()));
@@ -134,11 +136,11 @@ public class IdentityHashSet100Test extends TestBase {
         String s1 = "a";
         String s2 = "b";
         String s3 = "c";
-        
+
         Assertions.assertTrue(set.addAll(Arrays.asList(s1, s2, s3)));
         Assertions.assertEquals(3, set.size());
-        
-        Assertions.assertFalse(set.addAll(Arrays.asList(s1, s2))); // Already present
+
+        Assertions.assertFalse(set.addAll(Arrays.asList(s1, s2)));
         Assertions.assertFalse(set.addAll(Collections.emptyList()));
     }
 
@@ -148,13 +150,13 @@ public class IdentityHashSet100Test extends TestBase {
         String s1 = "a";
         String s2 = "b";
         String s3 = "c";
-        
+
         set.addAll(Arrays.asList(s1, s2, s3));
-        
+
         Assertions.assertTrue(set.removeAll(Arrays.asList(s1, s2)));
         Assertions.assertEquals(1, set.size());
         Assertions.assertTrue(set.contains(s3));
-        
+
         Assertions.assertFalse(set.removeAll(Collections.emptyList()));
     }
 
@@ -164,9 +166,9 @@ public class IdentityHashSet100Test extends TestBase {
         String s1 = "a";
         String s2 = "b";
         String s3 = "c";
-        
+
         set.addAll(Arrays.asList(s1, s2, s3));
-        
+
         Assertions.assertTrue(set.retainAll(Arrays.asList(s1, s2)));
         Assertions.assertEquals(2, set.size());
         Assertions.assertTrue(set.contains(s1));
@@ -179,7 +181,7 @@ public class IdentityHashSet100Test extends TestBase {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         set.add("a");
         set.add("b");
-        
+
         Assertions.assertTrue(set.retainAll(Collections.emptyList()));
         Assertions.assertTrue(set.isEmpty());
     }
@@ -189,10 +191,10 @@ public class IdentityHashSet100Test extends TestBase {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         String s1 = "a";
         String s2 = "b";
-        
+
         set.add(s1);
         set.add(s2);
-        
+
         Assertions.assertFalse(set.retainAll(Arrays.asList(s1, s2, "c")));
         Assertions.assertEquals(2, set.size());
     }
@@ -203,15 +205,15 @@ public class IdentityHashSet100Test extends TestBase {
         String s1 = "a";
         String s2 = "b";
         String s3 = "c";
-        
+
         set.addAll(Arrays.asList(s1, s2, s3));
-        
+
         Set<String> collected = new HashSet<>();
         Iterator<String> iter = set.iterator();
         while (iter.hasNext()) {
             collected.add(iter.next());
         }
-        
+
         Assertions.assertEquals(3, collected.size());
         Assertions.assertTrue(collected.contains(s1));
         Assertions.assertTrue(collected.contains(s2));
@@ -223,10 +225,10 @@ public class IdentityHashSet100Test extends TestBase {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         String s1 = "a";
         String s2 = "b";
-        
+
         set.add(s1);
         set.add(s2);
-        
+
         Object[] array = set.toArray();
         Assertions.assertEquals(2, array.length);
         Assertions.assertTrue(Arrays.asList(array).contains(s1));
@@ -238,10 +240,10 @@ public class IdentityHashSet100Test extends TestBase {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         String s1 = "a";
         String s2 = "b";
-        
+
         set.add(s1);
         set.add(s2);
-        
+
         String[] array = set.toArray(new String[0]);
         Assertions.assertEquals(2, array.length);
         Assertions.assertTrue(Arrays.asList(array).contains(s1));
@@ -253,7 +255,7 @@ public class IdentityHashSet100Test extends TestBase {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         set.add("a");
         set.add("b");
-        
+
         String[] providedArray = new String[5];
         String[] result = set.toArray(providedArray);
         Assertions.assertSame(providedArray, result);
@@ -264,13 +266,13 @@ public class IdentityHashSet100Test extends TestBase {
     public void testSize() {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         Assertions.assertEquals(0, set.size());
-        
+
         set.add("a");
         Assertions.assertEquals(1, set.size());
-        
+
         set.add("b");
         Assertions.assertEquals(2, set.size());
-        
+
         set.remove("a");
         Assertions.assertEquals(1, set.size());
     }
@@ -279,10 +281,10 @@ public class IdentityHashSet100Test extends TestBase {
     public void testIsEmpty() {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         Assertions.assertTrue(set.isEmpty());
-        
+
         set.add("a");
         Assertions.assertFalse(set.isEmpty());
-        
+
         set.clear();
         Assertions.assertTrue(set.isEmpty());
     }
@@ -293,7 +295,7 @@ public class IdentityHashSet100Test extends TestBase {
         set.add("a");
         set.add("b");
         set.add("c");
-        
+
         set.clear();
         Assertions.assertTrue(set.isEmpty());
         Assertions.assertEquals(0, set.size());
@@ -303,17 +305,17 @@ public class IdentityHashSet100Test extends TestBase {
     public void testEquals() {
         IdentityHashSet<String> set1 = new IdentityHashSet<>();
         IdentityHashSet<String> set2 = new IdentityHashSet<>();
-        
+
         String s = "hello";
         set1.add(s);
         set2.add(s);
-        
-        Assertions.assertTrue(set1.equals(set1)); // Same instance
-        Assertions.assertTrue(set1.equals(set2)); // Same contents
-        
+
+        Assertions.assertTrue(set1.equals(set1));
+        Assertions.assertTrue(set1.equals(set2));
+
         set2.add("world");
-        Assertions.assertFalse(set1.equals(set2)); // Different contents
-        
+        Assertions.assertFalse(set1.equals(set2));
+
         Assertions.assertFalse(set1.equals(null));
         Assertions.assertFalse(set1.equals("not a set"));
         Assertions.assertFalse(set1.equals(new HashSet<>()));
@@ -323,11 +325,11 @@ public class IdentityHashSet100Test extends TestBase {
     public void testHashCode() {
         IdentityHashSet<String> set1 = new IdentityHashSet<>();
         IdentityHashSet<String> set2 = new IdentityHashSet<>();
-        
+
         String s = "hello";
         set1.add(s);
         set2.add(s);
-        
+
         Assertions.assertEquals(set1.hashCode(), set2.hashCode());
     }
 
@@ -336,7 +338,7 @@ public class IdentityHashSet100Test extends TestBase {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         set.add("a");
         set.add("b");
-        
+
         String str = set.toString();
         Assertions.assertTrue(str.startsWith("["));
         Assertions.assertTrue(str.endsWith("]"));
@@ -347,33 +349,33 @@ public class IdentityHashSet100Test extends TestBase {
     @Test
     public void testIdentitySemantics() {
         IdentityHashSet<Integer> set = new IdentityHashSet<>();
-        
-        Integer i1 = new Integer(128); // Outside Integer cache
+
+        Integer i1 = new Integer(128);
         Integer i2 = new Integer(128);
-        
+
         set.add(i1);
         set.add(i2);
-        
-        Assertions.assertEquals(2, set.size()); // Both added because different instances
+
+        Assertions.assertEquals(2, set.size());
         Assertions.assertTrue(set.contains(i1));
         Assertions.assertTrue(set.contains(i2));
-        Assertions.assertFalse(set.contains(new Integer(128))); // Different instance
+        Assertions.assertFalse(set.contains(new Integer(128)));
     }
 
     @Test
     public void testWithMutableObjects() {
         IdentityHashSet<StringBuilder> set = new IdentityHashSet<>();
-        
+
         StringBuilder sb1 = new StringBuilder("hello");
         StringBuilder sb2 = new StringBuilder("hello");
-        
+
         set.add(sb1);
         set.add(sb2);
-        
+
         Assertions.assertEquals(2, set.size());
-        
+
         sb1.append(" world");
-        Assertions.assertTrue(set.contains(sb1)); // Still contains despite mutation
+        Assertions.assertTrue(set.contains(sb1));
         Assertions.assertEquals(2, set.size());
     }
 }
