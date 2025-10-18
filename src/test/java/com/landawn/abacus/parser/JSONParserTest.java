@@ -58,6 +58,7 @@ import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.JsonXmlValue;
 import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.entity.extendDirty.basic.AccountDevice;
+import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
@@ -2205,7 +2206,7 @@ public class JSONParserTest extends AbstractJSONParserTest {
 
     @Test
     public void test_readString_3() {
-        final EntityId entityId = Seid.of(Account.ID, 123);
+        final EntityId entityId = Seid.of(AccountPNL.ID, 123);
 
         final JSONSerializationConfig jsc = JSC.create().bracketRootValue(false);
         String str = jsonParser.serialize(entityId, jsc);
@@ -2254,7 +2255,7 @@ public class JSONParserTest extends AbstractJSONParserTest {
 
     @Test
     public void test_readString_4() {
-        final EntityId entityId = Seid.of(Account.ID, 123);
+        final EntityId entityId = Seid.of(AccountPNL.ID, 123);
 
         final JSONSerializationConfig jsc = JSC.create().bracketRootValue(true);
         String str = jsonParser.serialize(entityId, jsc);
@@ -2303,7 +2304,7 @@ public class JSONParserTest extends AbstractJSONParserTest {
 
     @Test
     public void test_readString_5() {
-        final EntityId entityId = Seid.of(Account.ID, 123);
+        final EntityId entityId = Seid.of(AccountPNL.ID, 123);
 
         final JSONSerializationConfig jsc = JSC.create().bracketRootValue(false).quoteMapKey(false).quotePropName(false).setStringQuotation(WD.CHAR_ZERO);
         String str = jsonParser.serialize(entityId, jsc);
@@ -2352,9 +2353,9 @@ public class JSONParserTest extends AbstractJSONParserTest {
 
     @Test
     public void testSerialize_mapEntity() {
-        final MapEntity mapEntity = new MapEntity(Account.__);
-        mapEntity.set(Account.ID, 123);
-        mapEntity.set(Account.FIRST_NAME, "firstName");
+        final MapEntity mapEntity = new MapEntity(AccountPNL.__);
+        mapEntity.set(AccountPNL.ID, 123);
+        mapEntity.set(AccountPNL.FIRST_NAME, "firstName");
 
         String json = jsonParser.serialize(mapEntity);
         N.println(json);
@@ -2376,11 +2377,11 @@ public class JSONParserTest extends AbstractJSONParserTest {
 
     @Test
     public void testSerialize_entityId() {
-        Seid entityId = Seid.of(Account.ID, 123);
+        Seid entityId = Seid.of(AccountPNL.ID, 123);
 
         String json = jsonParser.serialize(entityId);
         N.println(json);
-        entityId = Seid.of(Account.__).set("id", 123);
+        entityId = Seid.of(AccountPNL.__).set("id", 123);
 
         json = jsonParser.serialize(entityId);
         N.println(json);

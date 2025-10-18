@@ -62,8 +62,8 @@ import com.landawn.abacus.util.function.TriPredicate;
  * <p>For maps and beans, additional comparison capabilities are provided through the {@link MapDifference} 
  * and {@link BeanDifference} subclasses, which can also identify entries/properties with different values.
  *
- * @param <L> The type of the collection containing elements from the left (first) collection
- * @param <R> The type of the collection containing elements from the right (second) collection
+ * @param <L> the type of the collection containing elements from the left (first) collection
+ * @param <R> the type of the collection containing elements from the right (second) collection
  * @see com.landawn.abacus.annotation.DiffIgnore
  * @see N#difference(Collection, Collection)
  * @see N#symmetricDifference(Collection, Collection)
@@ -101,9 +101,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code true} appears twice in the first array and once in the second array, the result will
      * have one {@code true} in common and one {@code true} in left only.
      *
-     * @param a The first boolean array to compare. Can be {@code null}, which is treated as an empty array.
-     * @param b The second boolean array to compare. Can be {@code null}, which is treated as an empty array.
-     * @return A {@code Difference} object containing {@code BooleanList} instances for common elements,
+     * @param a the first boolean array to compare. Can be {@code null}, which is treated as an empty array.
+     * @param b the second boolean array to compare. Can be {@code null}, which is treated as an empty array.
+     * @return a {@code Difference} object containing {@code BooleanList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -126,9 +126,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 'a'} appears twice in the first array and once in the second array, the result will
      * have one {@code 'a'} in common and one {@code 'a'} in left only.
      *
-     * @param a The first char array to compare. Can be {@code null}, which is treated as an empty array.
-     * @param b The second char array to compare. Can be {@code null}, which is treated as an empty array.
-     * @return A {@code Difference} object containing {@code CharList} instances for common elements,
+     * @param a the first char array to compare. Can be {@code null}, which is treated as an empty array.
+     * @param b the second char array to compare. Can be {@code null}, which is treated as an empty array.
+     * @return a {@code Difference} object containing {@code CharList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -151,9 +151,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
-     * @param a The first byte array to compare. Can be {@code null}, which is treated as an empty array.
-     * @param b The second byte array to compare. Can be {@code null}, which is treated as an empty array.
-     * @return A {@code Difference} object containing {@code ByteList} instances for common elements,
+     * @param a the first byte array to compare. Can be {@code null}, which is treated as an empty array.
+     * @param b the second byte array to compare. Can be {@code null}, which is treated as an empty array.
+     * @return a {@code Difference} object containing {@code ByteList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -176,9 +176,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
-     * @param a The first short array to compare. Can be {@code null}, which is treated as an empty array.
-     * @param b The second short array to compare. Can be {@code null}, which is treated as an empty array.
-     * @return A {@code Difference} object containing {@code ShortList} instances for common elements,
+     * @param a the first short array to compare. Can be {@code null}, which is treated as an empty array.
+     * @param b the second short array to compare. Can be {@code null}, which is treated as an empty array.
+     * @return a {@code Difference} object containing {@code ShortList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -201,9 +201,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
-     * @param a The first int array to compare. Can be {@code null}, which is treated as an empty array.
-     * @param b The second int array to compare. Can be {@code null}, which is treated as an empty array.
-     * @return A {@code Difference} object containing {@code IntList} instances for common elements,
+     * @param a the first int array to compare. Can be {@code null}, which is treated as an empty array.
+     * @param b the second int array to compare. Can be {@code null}, which is treated as an empty array.
+     * @return a {@code Difference} object containing {@code IntList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -226,9 +226,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
-     * @param a The first long array to compare. Can be {@code null}, which is treated as an empty array.
-     * @param b The second long array to compare. Can be {@code null}, which is treated as an empty array.
-     * @return A {@code Difference} object containing {@code LongList} instances for common elements,
+     * @param a the first long array to compare. Can be {@code null}, which is treated as an empty array.
+     * @param b the second long array to compare. Can be {@code null}, which is treated as an empty array.
+     * @return a {@code Difference} object containing {@code LongList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -256,9 +256,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
-     * @param a The first float array to compare. Can be {@code null}, which is treated as an empty array.
-     * @param b The second float array to compare. Can be {@code null}, which is treated as an empty array.
-     * @return A {@code Difference} object containing {@code FloatList} instances for common elements,
+     * @param a the first float array to compare. Can be {@code null}, which is treated as an empty array.
+     * @param b the second float array to compare. Can be {@code null}, which is treated as an empty array.
+     * @return a {@code Difference} object containing {@code FloatList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -286,9 +286,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
-     * @param a The first double array to compare. Can be {@code null}, which is treated as an empty array.
-     * @param b The second double array to compare. Can be {@code null}, which is treated as an empty array.
-     * @return A {@code Difference} object containing {@code DoubleList} instances for common elements,
+     * @param a the first double array to compare. Can be {@code null}, which is treated as an empty array.
+     * @param b the second double array to compare. Can be {@code null}, which is treated as an empty array.
+     * @return a {@code Difference} object containing {@code DoubleList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -318,13 +318,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * 
      * <p>The returned lists maintain the order of elements as they appear in the original arrays.
      *
-     * @param <T1> The element type of the first array
-     * @param <T2> The element type of the second array
-     * @param <L> The type of List containing elements of type T1
-     * @param <R> The type of List containing elements of type T2
-     * @param a The first array to compare. Can be {@code null}, which is treated as an empty array.
-     * @param b The second array to compare. Can be {@code null}, which is treated as an empty array.
-     * @return A {@code Difference} object containing lists of common elements (type L),
+     * @param <T1> the element type of the first array
+     * @param <T2> the element type of the second array
+     * @param <L> the type of List containing elements of type T1
+     * @param <R> the type of List containing elements of type T2
+     * @param a the first array to compare. Can be {@code null}, which is treated as an empty array.
+     * @param b the second array to compare. Can be {@code null}, which is treated as an empty array.
+     * @return a {@code Difference} object containing lists of common elements (type L),
      *         elements only in the first array (type L), and elements only in the second array (type R).
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -364,13 +364,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code "apple"} appears twice in the first collection and once in the second collection, the result will
      * have one {@code "apple"} in common and one {@code "apple"} in left only.
      *
-     * @param <T1> The element type of the first collection
-     * @param <T2> The element type of the second collection
-     * @param <L> The type of List containing elements of type T1
-     * @param <R> The type of List containing elements of type T2
-     * @param a The first collection to compare. Can be {@code null} or empty.
-     * @param b The second collection to compare. Can be {@code null} or empty.
-     * @return A {@code Difference} object containing lists of common elements (type L),
+     * @param <T1> the element type of the first collection
+     * @param <T2> the element type of the second collection
+     * @param <L> the type of List containing elements of type T1
+     * @param <R> the type of List containing elements of type T2
+     * @param a the first collection to compare. Can be {@code null} or empty.
+     * @param b the second collection to compare. Can be {@code null} or empty.
+     * @return a {@code Difference} object containing lists of common elements (type L),
      *         elements only in the first collection (type L), and elements only in the second collection (type R).
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -435,9 +435,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code true} appears twice in the first list and once in the second list, the result will
      * have one {@code true} in common and one {@code true} in left only.
      *
-     * @param a The first BooleanList to compare. Can be {@code null} or empty.
-     * @param b The second BooleanList to compare. Can be {@code null} or empty.
-     * @return A {@code Difference} object containing BooleanLists for common elements,
+     * @param a the first BooleanList to compare. Can be {@code null} or empty.
+     * @param b the second BooleanList to compare. Can be {@code null} or empty.
+     * @return a {@code Difference} object containing BooleanLists for common elements,
      *         elements only in the first list, and elements only in the second list.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -499,9 +499,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 'a'} appears twice in the first list and once in the second list, the result will
      * have one {@code 'a'} in common and one {@code 'a'} in left only.
      *
-     * @param a The first CharList to compare. Can be {@code null} or empty.
-     * @param b The second CharList to compare. Can be {@code null} or empty.
-     * @return A {@code Difference} object containing CharLists for common elements,
+     * @param a the first CharList to compare. Can be {@code null} or empty.
+     * @param b the second CharList to compare. Can be {@code null} or empty.
+     * @return a {@code Difference} object containing CharLists for common elements,
      *         elements only in the first list, and elements only in the second list.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -563,9 +563,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
-     * @param a The first ByteList to compare. Can be {@code null} or empty.
-     * @param b The second ByteList to compare. Can be {@code null} or empty.
-     * @return A {@code Difference} object containing ByteLists for common elements,
+     * @param a the first ByteList to compare. Can be {@code null} or empty.
+     * @param b the second ByteList to compare. Can be {@code null} or empty.
+     * @return a {@code Difference} object containing ByteLists for common elements,
      *         elements only in the first list, and elements only in the second list.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -627,9 +627,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
-     * @param a The first ShortList to compare. Can be {@code null} or empty.
-     * @param b The second ShortList to compare. Can be {@code null} or empty.
-     * @return A {@code Difference} object containing ShortLists for common elements,
+     * @param a the first ShortList to compare. Can be {@code null} or empty.
+     * @param b the second ShortList to compare. Can be {@code null} or empty.
+     * @return a {@code Difference} object containing ShortLists for common elements,
      *         elements only in the first list, and elements only in the second list.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -691,9 +691,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
-     * @param a The first IntList to compare. Can be {@code null} or empty.
-     * @param b The second IntList to compare. Can be {@code null} or empty.
-     * @return A {@code Difference} object containing IntLists for common elements,
+     * @param a the first IntList to compare. Can be {@code null} or empty.
+     * @param b the second IntList to compare. Can be {@code null} or empty.
+     * @return a {@code Difference} object containing IntLists for common elements,
      *         elements only in the first list, and elements only in the second list.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -755,9 +755,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
-     * @param a The first LongList to compare. Can be {@code null} or empty.
-     * @param b The second LongList to compare. Can be {@code null} or empty.
-     * @return A {@code Difference} object containing LongLists for common elements,
+     * @param a the first LongList to compare. Can be {@code null} or empty.
+     * @param b the second LongList to compare. Can be {@code null} or empty.
+     * @return a {@code Difference} object containing LongLists for common elements,
      *         elements only in the first list, and elements only in the second list.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -824,9 +824,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
-     * @param a The first FloatList to compare. Can be {@code null} or empty.
-     * @param b The second FloatList to compare. Can be {@code null} or empty.
-     * @return A {@code Difference} object containing FloatLists for common elements,
+     * @param a the first FloatList to compare. Can be {@code null} or empty.
+     * @param b the second FloatList to compare. Can be {@code null} or empty.
+     * @return a {@code Difference} object containing FloatLists for common elements,
      *         elements only in the first list, and elements only in the second list.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -893,9 +893,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
-     * @param a The first DoubleList to compare. Can be {@code null} or empty.
-     * @param b The second DoubleList to compare. Can be {@code null} or empty.
-     * @return A {@code Difference} object containing DoubleLists for common elements,
+     * @param a the first DoubleList to compare. Can be {@code null} or empty.
+     * @param b the second DoubleList to compare. Can be {@code null} or empty.
+     * @return a {@code Difference} object containing DoubleLists for common elements,
      *         elements only in the first list, and elements only in the second list.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
@@ -953,7 +953,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * 
      * <p>The returned collection maintains the order of elements as they appear in the first collection.
      *
-     * @return A collection containing the common elements. The type L is typically a List or similar collection.
+     * @return a collection containing the common elements. The type L is typically a List or similar collection.
      */
     public L inCommon() {
         return common;
@@ -969,7 +969,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * 
      * <p>The returned collection maintains the order of elements as they appear in the first collection.
      *
-     * @return A collection containing elements only in the left collection. The type L is typically a List or similar collection.
+     * @return a collection containing elements only in the left collection. The type L is typically a List or similar collection.
      */
     public L onLeftOnly() {
         return leftOnly;
@@ -985,7 +985,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * 
      * <p>The returned collection maintains the order of elements as they appear in the second collection.
      *
-     * @return A collection containing elements only in the right collection. The type R is typically a List or similar collection.
+     * @return a collection containing elements only in the right collection. The type R is typically a List or similar collection.
      */
     public R onRightOnly() {
         return rightOnly;
@@ -1026,7 +1026,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>This method properly handles {@code null} values and ensures type safety by checking
      * that the compared object is also a {@code Difference} instance.
      *
-     * @param obj The object to compare with this {@code Difference}
+     * @param obj the object to compare with this {@code Difference}
      * @return {@code true} if the specified object is equal to this {@code Difference}, {@code false} otherwise
      */
     @Override
@@ -1053,7 +1053,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>The implementation uses a standard hash code calculation pattern with a prime
      * number (31) to combine the hash codes of the three components.
      *
-     * @return A hash code value for this {@code Difference} object
+     * @return a hash code value for this {@code Difference} object
      */
     @Override
     public int hashCode() {
@@ -1079,7 +1079,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * 
      * <p>This method is useful for debugging and logging purposes.
      *
-     * @return A string representation of this {@code Difference} object
+     * @return a string representation of this {@code Difference} object
      */
     @Override
     public String toString() {
@@ -1099,9 +1099,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>{@link BeanDifference} - for comparing Java beans</li>
      * </ul>
      *
-     * @param <L> The type of the collection containing entries/properties from the left (first) structure
-     * @param <R> The type of the collection containing entries/properties from the right (second) structure
-     * @param <D> The type of the collection containing entries/properties with different values
+     * @param <L> the type of the collection containing entries/properties from the left (first) structure
+     * @param <R> the type of the collection containing entries/properties from the right (second) structure
+     * @param <D> the type of the collection containing entries/properties with different values
      * @see com.landawn.abacus.annotation.DiffIgnore
      * @see Maps#difference(Map, Map)
      * @see Maps#symmetricDifference(Map, Map)
@@ -1146,7 +1146,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Values are {@link Pair} objects containing the property values from the left and right beans</li>
          * </ul>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * Map<String, Integer> map1 = Map.of("a", 1, "b", 2);
          * Map<String, Integer> map2 = Map.of("a", 1, "b", 3);
@@ -1154,7 +1154,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // diff.withDifferentValues() returns {"b": Pair.of(2, 3)}
          * }</pre>
          *
-         * @return A map containing entries/properties with different values. The type D is typically
+         * @return a map containing entries/properties with different values. The type D is typically
          *         a Map with Pair values representing the differing values from left and right.
          */
         public D withDifferentValues() {
@@ -1192,7 +1192,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Entries/properties with different values</li>
          * </ul>
          *
-         * @param obj The object to compare with this {@code KeyValueDifference}
+         * @param obj the object to compare with this {@code KeyValueDifference}
          * @return {@code true} if the specified object is equal to this {@code KeyValueDifference}, {@code false} otherwise
          */
         @Override
@@ -1220,7 +1220,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Entries/properties with different values</li>
          * </ul>
          *
-         * @return A hash code value for this {@code KeyValueDifference} object
+         * @return a hash code value for this {@code KeyValueDifference} object
          */
         @Override
         public int hashCode() {
@@ -1246,7 +1246,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * 
          * <p>Format: {@code {areEqual=<boolean>, inCommon=<common>, onLeftOnly=<leftOnly>, onRightOnly=<rightOnly>, withDifferentValues=<diffValues>}}
          *
-         * @return A string representation of this {@code KeyValueDifference} object
+         * @return a string representation of this {@code KeyValueDifference} object
          */
         @Override
         public String toString() {
@@ -1283,9 +1283,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * // diff.withDifferentValues() returns {"c": Pair.of(3, 4)}
      * }</pre>
      *
-     * @param <L> The type of the map containing entries from the left (first) map
-     * @param <R> The type of the map containing entries from the right (second) map
-     * @param <D> The type of the map containing entries with different values (typically Map with Pair values)
+     * @param <L> the type of the map containing entries from the left (first) map
+     * @param <R> the type of the map containing entries from the right (second) map
+     * @param <D> the type of the map containing entries with different values (typically Map with Pair values)
      * @see com.landawn.abacus.annotation.DiffIgnore
      * @see Maps#difference(Map, Map)
      * @see Maps#symmetricDifference(Map, Map)
@@ -1331,7 +1331,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Otherwise, results use {@link HashMap}</li>
          * </ul>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * Map<String, Integer> map1 = Map.of("a", 1, "b", 2, "c", 3);
          * Map<String, Integer> map2 = Map.of("b", 2, "c", 4, "d", 5);
@@ -1343,14 +1343,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // withDifferentValues: {"c": Pair.of(3, 4)}
          * }</pre>
          *
-         * @param <CK> The common key type shared by both maps
-         * @param <K1> The key type of the first map (must extend CK)
-         * @param <V1> The value type of the first map
-         * @param <K2> The key type of the second map (must extend CK)
-         * @param <V2> The value type of the second map
-         * @param map1 The first map to compare. Can be {@code null} or empty.
-         * @param map2 The second map to compare. Can be {@code null} or empty.
-         * @return A {@code MapDifference} object containing the comparison results
+         * @param <CK> the common key type shared by both maps
+         * @param <K1> the key type of the first map (must extend CK)
+         * @param <V1> the value type of the first map
+         * @param <K2> the key type of the second map (must extend CK)
+         * @param <V2> the value type of the second map
+         * @param map1 the first map to compare. Can be {@code null} or empty.
+         * @param map2 the second map to compare. Can be {@code null} or empty.
+         * @return a {@code MapDifference} object containing the comparison results
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
          * @see N#difference(Collection, Collection)
@@ -1383,7 +1383,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <p>If {@code keysToCompare} is {@code null}, all keys from both maps are compared (equivalent
          * to calling {@link #of(Map, Map)}).
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * Map<String, Integer> map1 = Map.of("a", 1, "b", 2, "c", 3, "d", 4);
          * Map<String, Integer> map2 = Map.of("a", 1, "b", 5, "c", 3, "e", 6);
@@ -1397,15 +1397,15 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Note: "c" and "d" are not compared because they're not in keysToCompare
          * }</pre>
          *
-         * @param <CK> The common key type shared by both maps
-         * @param <K1> The key type of the first map (must extend CK)
-         * @param <V1> The value type of the first map
-         * @param <K2> The key type of the second map (must extend CK)
-         * @param <V2> The value type of the second map
-         * @param map1 The first map to compare. Can be {@code null} or empty.
-         * @param map2 The second map to compare. Can be {@code null} or empty.
-         * @param keysToCompare The keys to compare between the two maps. If {@code null}, all keys will be compared.
-         * @return A {@code MapDifference} object containing the comparison results for the specified keys
+         * @param <CK> the common key type shared by both maps
+         * @param <K1> the key type of the first map (must extend CK)
+         * @param <V1> the value type of the first map
+         * @param <K2> the key type of the second map (must extend CK)
+         * @param <V2> the value type of the second map
+         * @param map1 the first map to compare. Can be {@code null} or empty.
+         * @param map2 the second map to compare. Can be {@code null} or empty.
+         * @param keysToCompare the keys to compare between the two maps. If {@code null}, all keys will be compared.
+         * @return a {@code MapDifference} object containing the comparison results for the specified keys
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
          * @see N#difference(Collection, Collection)
@@ -1454,15 +1454,15 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // withDifferentValues: {}
          * }</pre>
          *
-         * @param <CK> The common key type shared by both maps
-         * @param <K1> The key type of the first map (must extend CK)
-         * @param <V1> The value type of the first map
-         * @param <K2> The key type of the second map (must extend CK)
-         * @param <V2> The value type of the second map
-         * @param map1 The first map to compare. Can be {@code null} or empty.
-         * @param map2 The second map to compare. Can be {@code null} or empty.
-         * @param valueEquivalence The predicate to determine if two values are equivalent. Must not be {@code null}.
-         * @return A {@code MapDifference} object containing the comparison results
+         * @param <CK> the common key type shared by both maps
+         * @param <K1> the key type of the first map (must extend CK)
+         * @param <V1> the value type of the first map
+         * @param <K2> the key type of the second map (must extend CK)
+         * @param <V2> the value type of the second map
+         * @param map1 the first map to compare. Can be {@code null} or empty.
+         * @param map2 the second map to compare. Can be {@code null} or empty.
+         * @param valueEquivalence the predicate to determine if two values are equivalent. Must not be {@code null}.
+         * @return a {@code MapDifference} object containing the comparison results
          * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
@@ -1526,15 +1526,15 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // withDifferentValues: {"apple": Pair.of(1.99, 2.01)} (exceeds $0.10 tolerance)
          * }</pre>
          *
-         * @param <CK> The common key type shared by both maps
-         * @param <K1> The key type of the first map (must extend CK)
-         * @param <V1> The value type of the first map
-         * @param <K2> The key type of the second map (must extend CK)
-         * @param <V2> The value type of the second map
-         * @param map1 The first map to compare. Can be {@code null} or empty.
-         * @param map2 The second map to compare. Can be {@code null} or empty.
-         * @param valueEquivalence The predicate to determine if two values are equivalent for a given key. Must not be {@code null}.
-         * @return A {@code MapDifference} object containing the comparison results
+         * @param <CK> the common key type shared by both maps
+         * @param <K1> the key type of the first map (must extend CK)
+         * @param <V1> the value type of the first map
+         * @param <K2> the key type of the second map (must extend CK)
+         * @param <V2> the value type of the second map
+         * @param map1 the first map to compare. Can be {@code null} or empty.
+         * @param map2 the second map to compare. Can be {@code null} or empty.
+         * @param valueEquivalence the predicate to determine if two values are equivalent for a given key. Must not be {@code null}.
+         * @return a {@code MapDifference} object containing the comparison results
          * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
@@ -1573,7 +1573,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>The predicate receives the key and both values, allowing key-dependent comparison</li>
          * </ol>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * Map<String, Object> config1 = Map.of(
          *     "timeout", 30,
@@ -1607,16 +1607,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Note: "url" and "proxy" are not compared
          * }</pre>
          *
-         * @param <CK> The common key type shared by both maps
-         * @param <K1> The key type of the first map (must extend CK)
-         * @param <V1> The value type of the first map
-         * @param <K2> The key type of the second map (must extend CK)
-         * @param <V2> The value type of the second map
-         * @param map1 The first map to compare. Can be {@code null} or empty.
-         * @param map2 The second map to compare. Can be {@code null} or empty.
-         * @param keysToCompare The keys to compare. If {@code null}, all keys will be compared.
-         * @param valueEquivalence The predicate to determine if values are equivalent. Must not be {@code null}.
-         * @return A {@code MapDifference} object containing the comparison results
+         * @param <CK> the common key type shared by both maps
+         * @param <K1> the key type of the first map (must extend CK)
+         * @param <V1> the value type of the first map
+         * @param <K2> the key type of the second map (must extend CK)
+         * @param <V2> the value type of the second map
+         * @param map1 the first map to compare. Can be {@code null} or empty.
+         * @param map2 the second map to compare. Can be {@code null} or empty.
+         * @param keysToCompare the keys to compare. If {@code null}, all keys will be compared.
+         * @param valueEquivalence the predicate to determine if values are equivalent. Must not be {@code null}.
+         * @return a {@code MapDifference} object containing the comparison results
          * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
@@ -1772,7 +1772,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Different values: Maps that exist in both collections (same ID) but have different values</li>
          * </ul>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * List<Map<String, Object>> users1 = Arrays.asList(
          *     Map.of("id", 1, "name", "John", "age", 30),
@@ -1791,13 +1791,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // withDifferentValues: {1: MapDifference of the two "John" maps showing age difference}
          * }</pre>
          *
-         * @param <CK> The common key type of the maps
-         * @param <CV> The common value type of the maps
-         * @param <K> The type of the identifier extracted from each map
-         * @param a The first collection of maps to compare. Can be {@code null} or empty.
-         * @param b The second collection of maps to compare. Can be {@code null} or empty.
+         * @param <CK> the common key type of the maps
+         * @param <CV> the common value type of the maps
+         * @param <K> the type of the identifier extracted from each map
+         * @param a the first collection of maps to compare. Can be {@code null} or empty.
+         * @param b the second collection of maps to compare. Can be {@code null} or empty.
          * @param idExtractor Function to extract a unique identifier from each map. Must not be {@code null}.
-         * @return A {@code MapDifference} object containing the comparison results
+         * @return a {@code MapDifference} object containing the comparison results
          * @throws IllegalArgumentException if {@code idExtractor} is {@code null}
          * @throws IllegalStateException if duplicate IDs are found within a single collection
          */
@@ -1822,7 +1822,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Keys not in {@code keysToCompare} are ignored during value comparison</li>
          * </ol>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * List<Map<String, Object>> users1 = Arrays.asList(
          *     Map.of("id", 1, "name", "John", "age", 30, "lastLogin", "2024-01-01"),
@@ -1844,14 +1844,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // withDifferentValues: {2: MapDifference showing age difference for Jane}
          * }</pre>
          *
-         * @param <CK> The common key type of the maps
-         * @param <CV> The common value type of the maps
-         * @param <K> The type of the identifier extracted from each map
-         * @param a The first collection of maps to compare. Can be {@code null} or empty.
-         * @param b The second collection of maps to compare. Can be {@code null} or empty.
-         * @param keysToCompare The keys to compare within each map. If {@code null}, all keys are compared.
+         * @param <CK> the common key type of the maps
+         * @param <CV> the common value type of the maps
+         * @param <K> the type of the identifier extracted from each map
+         * @param a the first collection of maps to compare. Can be {@code null} or empty.
+         * @param b the second collection of maps to compare. Can be {@code null} or empty.
+         * @param keysToCompare the keys to compare within each map. If {@code null}, all keys are compared.
          * @param idExtractor Function to extract a unique identifier from each map. Must not be {@code null}.
-         * @return A {@code MapDifference} object containing the comparison results
+         * @return a {@code MapDifference} object containing the comparison results
          * @throws IllegalArgumentException if {@code idExtractor} is {@code null}
          * @throws IllegalStateException if duplicate IDs are found within a single collection
          */
@@ -1872,7 +1872,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <p>The comparison matches maps between collections based on the IDs extracted by the respective
          * ID extractors. Maps with the same ID are compared to identify differences in their key-value pairs.
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * // Collection A: Old API format
          * List<Map<String, Object>> oldFormat = Arrays.asList(
@@ -1898,17 +1898,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // withDifferentValues: {1: MapDifference showing structural differences}
          * }</pre>
          *
-         * @param <CK> The common key type shared by maps in both collections
-         * @param <K1> The key type of maps in the first collection (must extend CK)
-         * @param <V1> The value type of maps in the first collection
-         * @param <K2> The key type of maps in the second collection (must extend CK)
-         * @param <V2> The value type of maps in the second collection
-         * @param <K> The type of the identifier used to match maps between collections
-         * @param a The first collection of maps to compare. Can be {@code null} or empty.
-         * @param b The second collection of maps to compare. Can be {@code null} or empty.
+         * @param <CK> the common key type shared by maps in both collections
+         * @param <K1> the key type of maps in the first collection (must extend CK)
+         * @param <V1> the value type of maps in the first collection
+         * @param <K2> the key type of maps in the second collection (must extend CK)
+         * @param <V2> the value type of maps in the second collection
+         * @param <K> the type of the identifier used to match maps between collections
+         * @param a the first collection of maps to compare. Can be {@code null} or empty.
+         * @param b the second collection of maps to compare. Can be {@code null} or empty.
          * @param idExtractor1 Function to extract IDs from maps in the first collection. Must not be {@code null}.
          * @param idExtractor2 Function to extract IDs from maps in the second collection. Must not be {@code null}.
-         * @return A {@code MapDifference} object containing the comparison results
+         * @return a {@code MapDifference} object containing the comparison results
          * @throws IllegalArgumentException if either {@code idExtractor1} or {@code idExtractor2} is {@code null}
          * @throws IllegalStateException if duplicate IDs are found within a single collection
          */
@@ -1971,18 +1971,18 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // withDifferentValues: {} (empty, since we're only comparing username)
          * }</pre>
          *
-         * @param <CK> The common key type shared by maps in both collections
-         * @param <K1> The key type of maps in the first collection (must extend CK)
-         * @param <V1> The value type of maps in the first collection
-         * @param <K2> The key type of maps in the second collection (must extend CK)
-         * @param <V2> The value type of maps in the second collection
-         * @param <K> The type of the identifier used to match maps between collections
-         * @param a The first collection of maps to compare. Can be {@code null} or empty.
-         * @param b The second collection of maps to compare. Can be {@code null} or empty.
+         * @param <CK> the common key type shared by maps in both collections
+         * @param <K1> the key type of maps in the first collection (must extend CK)
+         * @param <V1> the value type of maps in the first collection
+         * @param <K2> the key type of maps in the second collection (must extend CK)
+         * @param <V2> the value type of maps in the second collection
+         * @param <K> the type of the identifier used to match maps between collections
+         * @param a the first collection of maps to compare. Can be {@code null} or empty.
+         * @param b the second collection of maps to compare. Can be {@code null} or empty.
          * @param keysToCompare Keys to compare within matched maps. If {@code null}, all keys are compared.
          * @param idExtractor1 Function to extract IDs from maps in the first collection. Must not be {@code null}.
          * @param idExtractor2 Function to extract IDs from maps in the second collection. Must not be {@code null}.
-         * @return A {@code MapDifference} object containing detailed comparison results
+         * @return a {@code MapDifference} object containing detailed comparison results
          * @throws IllegalArgumentException if either {@code idExtractor1} or {@code idExtractor2} is {@code null}
          * @throws IllegalStateException if duplicate IDs are found within a single collection
          */
@@ -2087,9 +2087,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * // diff.withDifferentValues() returns {"age": Pair.of(30, 31), "email": Pair.of("john@old.com", "john@new.com")}
      * }</pre>
      *
-     * @param <L> The type of the map representing properties from the left (first) bean
-     * @param <R> The type of the map representing properties from the right (second) bean
-     * @param <D> The type of the map containing properties with different values
+     * @param <L> the type of the map representing properties from the left (first) bean
+     * @param <R> the type of the map representing properties from the right (second) bean
+     * @param <D> the type of the map containing properties with different values
      * @see KeyValueDifference
      * @see com.landawn.abacus.annotation.DiffIgnore
      * @see Maps#difference(Map, Map)
@@ -2128,7 +2128,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Property values are compared using the standard {@code equals} method</li>
          * </ul>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * class User {
          *     private String name;
@@ -2150,9 +2150,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Note: lastModified is ignored due to @DiffIgnore
          * }</pre>
          *
-         * @param bean1 The first bean to compare. Can be {@code null}.
-         * @param bean2 The second bean to compare. Can be {@code null}.
-         * @return A {@code BeanDifference} object containing the comparison results
+         * @param bean1 the first bean to compare. Can be {@code null}.
+         * @param bean2 the second bean to compare. Can be {@code null}.
+         * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if either bean is not a valid bean class (i.e., is a primitive, array, collection, map, etc.)
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
@@ -2186,7 +2186,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>If a specified property doesn't exist in a bean, it's treated as a missing property</li>
          * </ul>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * class Employee {
          *     private String id;
@@ -2210,10 +2210,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Note: salary and department differences are ignored
          * }</pre>
          *
-         * @param bean1 The first bean to compare. Can be {@code null}.
-         * @param bean2 The second bean to compare. Can be {@code null}.
-         * @param propNamesToCompare The property names to compare. If {@code null} or empty, all properties are compared.
-         * @return A {@code BeanDifference} object containing the comparison results for the specified properties
+         * @param bean1 the first bean to compare. Can be {@code null}.
+         * @param bean2 the second bean to compare. Can be {@code null}.
+         * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
+         * @return a {@code BeanDifference} object containing the comparison results for the specified properties
          * @throws IllegalArgumentException if either bean is not a valid bean class
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object)
@@ -2248,7 +2248,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Ignoring whitespace or formatting differences</li>
          * </ul>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * class Product {
          *     private String name;
@@ -2276,10 +2276,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // All properties are considered equal due to custom comparison
          * }</pre>
          *
-         * @param bean1 The first bean to compare. Can be {@code null}.
-         * @param bean2 The second bean to compare. Can be {@code null}.
-         * @param valueEquivalence The predicate to determine if two property values are equivalent. Must not be {@code null}.
-         * @return A {@code BeanDifference} object containing the comparison results
+         * @param bean1 the first bean to compare. Can be {@code null}.
+         * @param bean2 the second bean to compare. Can be {@code null}.
+         * @param valueEquivalence the predicate to determine if two property values are equivalent. Must not be {@code null}.
+         * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if either bean is not a valid bean class, or if {@code valueEquivalence} is {@code null}
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
@@ -2318,7 +2318,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Complex business logic that depends on the property context</li>
          * </ul>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * class Account {
          *     private String accountId;
@@ -2352,11 +2352,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Results may show all properties as common if they meet the criteria
          * }</pre>
          *
-         * @param bean1 The first bean to compare. Can be {@code null}.
-         * @param bean2 The second bean to compare. Can be {@code null}.
-         * @param valueEquivalence The predicate to determine if values are equivalent for a given property. 
+         * @param bean1 the first bean to compare. Can be {@code null}.
+         * @param bean2 the second bean to compare. Can be {@code null}.
+         * @param valueEquivalence the predicate to determine if values are equivalent for a given property. 
          *                         Receives (propertyName, value1, value2). Must not be {@code null}.
-         * @return A {@code BeanDifference} object containing the comparison results
+         * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if either bean is not a valid bean class, or if {@code valueEquivalence} is {@code null}
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
@@ -2390,7 +2390,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>{@code @DiffIgnore} annotations are ignored when specific properties are requested</li>
          * </ul>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * class Customer {
          *     private String id;
@@ -2427,11 +2427,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Note: id and notes are not compared
          * }</pre>
          *
-         * @param bean1 The first bean to compare. Can be {@code null}.
-         * @param bean2 The second bean to compare. Can be {@code null}.
-         * @param propNamesToCompare The property names to compare. If {@code null} or empty, all properties are compared.
-         * @param valueEquivalence The predicate to determine if values are equivalent for a given property. Must not be {@code null}.
-         * @return A {@code BeanDifference} object containing the comparison results
+         * @param bean1 the first bean to compare. Can be {@code null}.
+         * @param bean2 the second bean to compare. Can be {@code null}.
+         * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
+         * @param valueEquivalence the predicate to determine if values are equivalent for a given property. Must not be {@code null}.
+         * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if either bean is not a valid bean class, or if {@code valueEquivalence} is {@code null}
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
@@ -2603,7 +2603,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Results are categorized into common, left-only, right-only, and different beans</li>
          * </ol>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * class Employee {
          *     private String id;
@@ -2629,13 +2629,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // withDifferentValues: {"E001": BeanDifference showing department change}
          * }</pre>
          *
-         * @param <T> The type of beans in both collections
-         * @param <C> The type of the list containing beans (typically List<T>)
-         * @param <K> The type of the identifier used to match beans between collections
-         * @param a The first collection of beans to compare. Can be {@code null} or empty.
-         * @param b The second collection of beans to compare. Can be {@code null} or empty.
-         * @param idExtractor The function to extract a unique identifier from each bean. Must not be {@code null}.
-         * @return A {@code BeanDifference} object containing the comparison results
+         * @param <T> the type of beans in both collections
+         * @param <C> the type of the list containing beans (typically List<T>)
+         * @param <K> the type of the identifier used to match beans between collections
+         * @param a the first collection of beans to compare. Can be {@code null} or empty.
+         * @param b the second collection of beans to compare. Can be {@code null} or empty.
+         * @param idExtractor the function to extract a unique identifier from each bean. Must not be {@code null}.
+         * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if {@code idExtractor} is {@code null} or if the collections contain non-bean objects
          */
         public static <T, C extends List<T>, K> BeanDifference<C, C, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
@@ -2657,7 +2657,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Versioning scenarios where only certain fields should trigger differences</li>
          * </ul>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * class Product {
          *     private String sku;
@@ -2686,14 +2686,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Results show price difference for SKU001, ignoring other field changes
          * }</pre>
          *
-         * @param <T> The type of beans in both collections
-         * @param <C> The type of the list containing beans (typically List<T>)
-         * @param <K> The type of the identifier used to match beans between collections
-         * @param a The first collection of beans to compare. Can be {@code null} or empty.
-         * @param b The second collection of beans to compare. Can be {@code null} or empty.
-         * @param propNamesToCompare The property names to compare. If {@code null} or empty, all properties are compared.
-         * @param idExtractor The function to extract a unique identifier from each bean. Must not be {@code null}.
-         * @return A {@code BeanDifference} object containing the comparison results
+         * @param <T> the type of beans in both collections
+         * @param <C> the type of the list containing beans (typically List<T>)
+         * @param <K> the type of the identifier used to match beans between collections
+         * @param a the first collection of beans to compare. Can be {@code null} or empty.
+         * @param b the second collection of beans to compare. Can be {@code null} or empty.
+         * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
+         * @param idExtractor the function to extract a unique identifier from each bean. Must not be {@code null}.
+         * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if {@code idExtractor} is {@code null} or if the collections contain non-bean objects
          */
         public static <T, C extends List<T>, K> BeanDifference<C, C, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
@@ -2715,7 +2715,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <p>Only properties with matching names between the bean types are compared. Properties
          * unique to either bean type are reported as left-only or right-only properties.
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * class CustomerV1 {
          *     private Long customerId;
@@ -2752,16 +2752,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // - Customer 103 exists only in new system
          * }</pre>
          *
-         * @param <T1> The type of beans in the first collection
-         * @param <T2> The type of beans in the second collection
-         * @param <L> The type of the list containing beans from the first collection
-         * @param <R> The type of the list containing beans from the second collection
-         * @param <K> The type of the identifier used to match beans between collections
-         * @param a The first collection of beans to compare. Can be {@code null} or empty.
-         * @param b The second collection of beans to compare. Can be {@code null} or empty.
-         * @param idExtractor1 The function to extract identifiers from beans in the first collection. Must not be {@code null}.
-         * @param idExtractor2 The function to extract identifiers from beans in the second collection. Must not be {@code null}.
-         * @return A {@code BeanDifference} object containing the comparison results
+         * @param <T1> the type of beans in the first collection
+         * @param <T2> the type of beans in the second collection
+         * @param <L> the type of the list containing beans from the first collection
+         * @param <R> the type of the list containing beans from the second collection
+         * @param <K> the type of the identifier used to match beans between collections
+         * @param a the first collection of beans to compare. Can be {@code null} or empty.
+         * @param b the second collection of beans to compare. Can be {@code null} or empty.
+         * @param idExtractor1 the function to extract identifiers from beans in the first collection. Must not be {@code null}.
+         * @param idExtractor2 the function to extract identifiers from beans in the second collection. Must not be {@code null}.
+         * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if either {@code idExtractor1} or {@code idExtractor2} is {@code null}, 
          *         or if the collections contain non-bean objects
          */
@@ -2790,7 +2790,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Performance-sensitive comparisons of large objects</li>
          * </ul>
          * 
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * class Order {
          *     private String orderId;
@@ -2833,17 +2833,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Compares only the "status" property for matched orders
          * }</pre>
          *
-         * @param <T1> The type of beans in the first collection
-         * @param <T2> The type of beans in the second collection
-         * @param <L> The type of the list containing beans from the first collection
-         * @param <R> The type of the list containing beans from the second collection
-         * @param <K> The type of the identifier used to match beans between collections
-         * @param a The first collection of beans to compare. Can be {@code null} or empty.
-         * @param b The second collection of beans to compare. Can be {@code null} or empty.
-         * @param propNamesToCompare The property names to compare. If {@code null} or empty, all matching properties are compared.
-         * @param idExtractor1 The function to extract identifiers from beans in the first collection. Must not be {@code null}.
-         * @param idExtractor2 The function to extract identifiers from beans in the second collection. Must not be {@code null}.
-         * @return A {@code BeanDifference} object containing the comparison results
+         * @param <T1> the type of beans in the first collection
+         * @param <T2> the type of beans in the second collection
+         * @param <L> the type of the list containing beans from the first collection
+         * @param <R> the type of the list containing beans from the second collection
+         * @param <K> the type of the identifier used to match beans between collections
+         * @param a the first collection of beans to compare. Can be {@code null} or empty.
+         * @param b the second collection of beans to compare. Can be {@code null} or empty.
+         * @param propNamesToCompare the property names to compare. If {@code null} or empty, all matching properties are compared.
+         * @param idExtractor1 the function to extract identifiers from beans in the first collection. Must not be {@code null}.
+         * @param idExtractor2 the function to extract identifiers from beans in the second collection. Must not be {@code null}.
+         * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if either {@code idExtractor1} or {@code idExtractor2} is {@code null},
          *         or if the collections contain non-bean objects
          */

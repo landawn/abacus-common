@@ -12,8 +12,8 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -301,7 +301,7 @@ public class RowDataset103Test extends TestBase {
 
         String keyColumn = "category";
         Collection<String> valueColumns = Arrays.asList("product", "price");
-        IntFunction<ListMultimap<String, List<Object>>> supplier = capacity -> N.newLinkedListMultimap();
+        IntFunction<ListMultimap<String, List<Object>>> supplier = capacity -> CommonUtil.newLinkedListMultimap();
 
         ListMultimap<String, List<Object>> result = dupDataset.toMultimap(0, dupDataset.size(), keyColumn, valueColumns, Clazz.ofList(), supplier);
 
@@ -314,7 +314,7 @@ public class RowDataset103Test extends TestBase {
     public void testToMultimapWithMapRowType() {
         String keyColumn = "city";
         Collection<String> valueColumns = Arrays.asList("id", "name", "age");
-        IntFunction<ListMultimap<String, Map<String, Object>>> supplier = capacity -> N.newLinkedListMultimap();
+        IntFunction<ListMultimap<String, Map<String, Object>>> supplier = capacity -> CommonUtil.newLinkedListMultimap();
 
         ListMultimap<String, Map<String, Object>> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, Clazz.ofMap(), supplier);
 
@@ -328,7 +328,7 @@ public class RowDataset103Test extends TestBase {
     public void testToMultimapWithBeanRowType() {
         String keyColumn = "city";
         Collection<String> valueColumns = Arrays.asList("id", "name", "age");
-        IntFunction<ListMultimap<String, Person>> supplier = capacity -> N.newLinkedListMultimap();
+        IntFunction<ListMultimap<String, Person>> supplier = capacity -> CommonUtil.newLinkedListMultimap();
 
         ListMultimap<String, Person> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, Person.class, supplier);
 
@@ -357,7 +357,7 @@ public class RowDataset103Test extends TestBase {
         String keyColumn = "city";
         Collection<String> valueColumns = Arrays.asList("name", "age");
         IntFunction<Object[]> rowSupplier = size -> new Object[size];
-        IntFunction<ListMultimap<String, Object[]>> supplier = capacity -> N.newLinkedListMultimap();
+        IntFunction<ListMultimap<String, Object[]>> supplier = capacity -> CommonUtil.newLinkedListMultimap();
 
         ListMultimap<String, Object[]> result = dataset.toMultimap(keyColumn, valueColumns, rowSupplier, supplier);
 

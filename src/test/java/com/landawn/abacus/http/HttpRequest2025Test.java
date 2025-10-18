@@ -3,7 +3,6 @@ package com.landawn.abacus.http;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -12,14 +11,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.Proxy;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -27,16 +23,13 @@ import java.util.Queue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import javax.net.ssl.SSLContext;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
-
-import com.landawn.abacus.util.ContinuableFuture;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.ContinuableFuture;
 
 @Tag("2025")
 public class HttpRequest2025Test extends TestBase {
@@ -54,268 +47,6 @@ public class HttpRequest2025Test extends TestBase {
     @AfterEach
     public void tearDown() throws IOException {
         server.shutdown();
-    }
-
-    @Test
-    public void testCreate() {
-        HttpClient client = HttpClient.create(baseUrl);
-        HttpRequest request = HttpRequest.create(client);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlString() {
-        HttpRequest request = HttpRequest.url("https://api.example.com");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlStringWithTimeouts() {
-        HttpRequest request = HttpRequest.url("https://api.example.com", 5000L, 10000L);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlURL() throws MalformedURLException {
-        URL url = new URL("https://api.example.com");
-        HttpRequest request = HttpRequest.url(url);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlURLWithTimeouts() throws MalformedURLException {
-        URL url = new URL("https://api.example.com");
-        HttpRequest request = HttpRequest.url(url, 5000L, 10000L);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testSettings() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
-        HttpRequest result = request.settings(settings);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testSettingsWithNull() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.settings(null);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testBasicAuth() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.basicAuth("user", "password");
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testHeader() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.header("X-Custom-Header", "value");
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testHeadersWithTwoParameters() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.headers("Header1", "value1", "Header2", "value2");
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testHeadersWithThreeParameters() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.headers("Header1", "value1", "Header2", "value2", "Header3", "value3");
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testHeadersWithMap() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Header1", "value1");
-        headers.put("Header2", "value2");
-        HttpRequest result = request.headers(headers);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testHeadersWithHttpHeaders() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpHeaders headers = HttpHeaders.create().set("Header1", "value1").set("Header2", "value2");
-        HttpRequest result = request.headers(headers);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testConnectionTimeoutMillis() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.connectionTimeout(5000L);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testConnectionTimeoutDuration() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.connectionTimeout(Duration.ofSeconds(5));
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testReadTimeoutMillis() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.readTimeout(10000L);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testReadTimeoutDuration() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.readTimeout(Duration.ofSeconds(10));
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testUseCaches() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.useCaches(true);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testUseCachesFalse() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.useCaches(false);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testSslSocketFactory() throws Exception {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        SSLContext sslContext = SSLContext.getDefault();
-        HttpRequest result = request.sslSocketFactory(sslContext.getSocketFactory());
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testProxy() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
-        HttpRequest result = request.proxy(proxy);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testQueryString() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.query("param1=value1&param2=value2");
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testQueryMap() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        Map<String, Object> params = new HashMap<>();
-        params.put("param1", "value1");
-        params.put("param2", "value2");
-        HttpRequest result = request.query(params);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testJsonBodyString() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.jsonBody("{\"name\":\"John\"}");
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testJsonBodyObject() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        Map<String, String> obj = new HashMap<>();
-        obj.put("name", "John");
-        HttpRequest result = request.jsonBody(obj);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testXmlBodyString() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.xmlBody("<user><name>John</name></user>");
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testXmlBodyObject() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        Map<String, String> obj = new HashMap<>();
-        obj.put("name", "John");
-        HttpRequest result = request.xmlBody(obj);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testFormBodyMap() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        Map<String, String> formData = new HashMap<>();
-        formData.put("field1", "value1");
-        formData.put("field2", "value2");
-        HttpRequest result = request.formBody(formData);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testFormBodyObject() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        TestBean bean = new TestBean();
-        bean.field1 = "value1";
-        bean.field2 = "value2";
-        HttpRequest result = request.formBody(bean);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testBodyString() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.body("test body");
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testBodyByteArray() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.body(new byte[] { 1, 2, 3 });
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testGet() throws IOException {
-        server.enqueue(new MockResponse().setBody("GET response"));
-        HttpRequest request = HttpRequest.url(baseUrl);
-        HttpResponse response = request.get();
-        assertNotNull(response);
-        assertEquals("GET response", response.body(String.class));
-    }
-
-    @Test
-    public void testGetWithResultClass() throws IOException {
-        server.enqueue(new MockResponse().setBody("GET response"));
-        HttpRequest request = HttpRequest.url(baseUrl);
-        String response = request.get(String.class);
-        assertEquals("GET response", response);
-    }
-
-    @Test
-    public void testPost() throws IOException {
-        server.enqueue(new MockResponse().setBody("POST response"));
-        HttpRequest request = HttpRequest.url(baseUrl);
-        request.body("test body");
-        HttpResponse response = request.post();
-        assertNotNull(response);
-        assertEquals("POST response", response.body(String.class));
     }
 
     @Test

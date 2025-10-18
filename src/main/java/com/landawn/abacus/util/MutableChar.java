@@ -97,7 +97,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Returns the current char value stored in this mutable object.
+     * Returns the current char value.
      *
      * <p>Example:</p>
      * <pre>{@code
@@ -127,7 +127,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Sets the value to the specified char, replacing any previous value.
+     * Sets the value to the specified char.
      *
      * <p>Example:</p>
      * <pre>{@code
@@ -135,7 +135,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * ch.setValue('B'); // value is now 'B'
      * }</pre>
      *
-     * @param value the new char value to set
+     * @param value the value to set
      */
     public void setValue(final char value) {
         this.value = value;

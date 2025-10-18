@@ -63,6 +63,16 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
+     * Returns the default value for OptionalInt type, which is an empty OptionalInt.
+     *
+     * @return OptionalInt.empty()
+     */
+    @Override
+    public OptionalInt defaultValue() {
+        return OptionalInt.empty();
+    }
+
+    /**
      * Converts an {@link OptionalInt} object to its string representation.
      * 
      * @param x the OptionalInt object to convert

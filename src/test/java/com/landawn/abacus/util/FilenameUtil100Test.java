@@ -6,8 +6,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -403,9 +403,9 @@ public class FilenameUtil100Test extends TestBase {
 
         // Null or empty extensions
         Assertions.assertTrue(FilenameUtil.isExtension("file", (Collection<String>) null));
-        Assertions.assertTrue(FilenameUtil.isExtension("file", new ArrayList<String>()));
+        Assertions.assertTrue(FilenameUtil.isExtension("file", new ArrayList<>()));
         Assertions.assertFalse(FilenameUtil.isExtension("file.txt", (Collection<String>) null));
-        Assertions.assertFalse(FilenameUtil.isExtension("file.txt", new ArrayList<String>()));
+        Assertions.assertFalse(FilenameUtil.isExtension("file.txt", new ArrayList<>()));
 
         // Null filename
         Assertions.assertFalse(FilenameUtil.isExtension(null, exts));

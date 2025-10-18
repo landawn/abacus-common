@@ -217,7 +217,7 @@ public class Strings101Test extends TestBase {
         assertEquals(" World", substringAfterAny("Hello World", 'o', ' '));
         assertNull(substringAfterAny("Hello", 'x', 'y', 'z'));
         assertNull(substringAfterAny(null, 'a', 'b'));
-        assertNull(substringAfterAny("test", N.EMPTY_CHAR_ARRAY));
+        assertNull(substringAfterAny("test", CommonUtil.EMPTY_CHAR_ARRAY));
     }
 
     @Test
@@ -226,7 +226,7 @@ public class Strings101Test extends TestBase {
         assertEquals(" World", substringAfterAny("Hello World", "abc", "Hello", "xyz"));
         assertNull(substringAfterAny("Hello", "xyz", "abc"));
         assertNull(substringAfterAny(null, "test", "abc"));
-        assertNull(substringAfterAny("test", N.EMPTY_STRING_ARRAY));
+        assertNull(substringAfterAny("test", CommonUtil.EMPTY_STRING_ARRAY));
     }
 
     @Test
@@ -313,7 +313,7 @@ public class Strings101Test extends TestBase {
         assertEquals("Hello ", substringBeforeAny("Hello World", 'W', ' '));
         assertNull(substringBeforeAny("Hello", 'x', 'y', 'z'));
         assertNull(substringBeforeAny(null, 'a', 'b'));
-        assertNull(substringBeforeAny("test", N.EMPTY_CHAR_ARRAY));
+        assertNull(substringBeforeAny("test", CommonUtil.EMPTY_CHAR_ARRAY));
     }
 
     @Test
@@ -322,7 +322,7 @@ public class Strings101Test extends TestBase {
         assertEquals("", substringBeforeAny("Hello World", "abc", "Hello", "xyz"));
         assertNull(substringBeforeAny("Hello", "xyz", "abc"));
         assertNull(substringBeforeAny(null, "test", "abc"));
-        assertNull(substringBeforeAny("test", N.EMPTY_STRING_ARRAY));
+        assertNull(substringBeforeAny("test", CommonUtil.EMPTY_STRING_ARRAY));
     }
 
     @Test

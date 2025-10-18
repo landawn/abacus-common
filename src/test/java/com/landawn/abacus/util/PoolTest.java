@@ -15,16 +15,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.entity.extendDirty.basic.Account;
+import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
 import com.landawn.abacus.pool.ActivityPrint;
 import com.landawn.abacus.pool.EvictionPolicy;
 import com.landawn.abacus.pool.KeyedObjectPool;
 import com.landawn.abacus.pool.ObjectPool;
 import com.landawn.abacus.pool.PoolFactory;
 import com.landawn.abacus.pool.PoolableWrapper;
-import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Seid;
-import com.landawn.abacus.util.Strings;
 
 public class PoolTest extends AbstractTest {
 
@@ -97,7 +94,7 @@ public class PoolTest extends AbstractTest {
         assertTrue(objectPool.contains(PoolableWrapper.of("123")));
 
         for (int i = 0; i < 3000; i++) {
-            objectPool.add(PoolableWrapper.of(N.stringOf(i)));
+            objectPool.add(PoolableWrapper.of(CommonUtil.stringOf(i)));
         }
 
         assertFalse(objectPool.add(PoolableWrapper.of("123")));
@@ -111,7 +108,7 @@ public class PoolTest extends AbstractTest {
         assertTrue(objectPool.contains(PoolableWrapper.of("123")));
 
         for (int i = 0; i < 30000; i++) {
-            objectPool.add(PoolableWrapper.of(N.stringOf(i)));
+            objectPool.add(PoolableWrapper.of(CommonUtil.stringOf(i)));
         }
 
         assertTrue(objectPool.add(PoolableWrapper.of("123")));
@@ -180,7 +177,7 @@ public class PoolTest extends AbstractTest {
         keyedObjectPool = PoolFactory.createKeyedObjectPool(1000, 1000, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
 
         for (int i = 0; i < 1000; i++) {
-            keyedObjectPool.put(Strings.uuid(), PoolableWrapper.of(N.stringOf(i)));
+            keyedObjectPool.put(Strings.uuid(), PoolableWrapper.of(CommonUtil.stringOf(i)));
         }
 
         assertFalse(keyedObjectPool.put(Strings.uuid(), PoolableWrapper.of("123")));
@@ -188,7 +185,7 @@ public class PoolTest extends AbstractTest {
         keyedObjectPool = PoolFactory.createKeyedObjectPool(1000, 1000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f);
 
         for (int i = 0; i < 1000; i++) {
-            keyedObjectPool.put(Strings.uuid(), PoolableWrapper.of(N.stringOf(i)));
+            keyedObjectPool.put(Strings.uuid(), PoolableWrapper.of(CommonUtil.stringOf(i)));
         }
 
         assertTrue(keyedObjectPool.put(Strings.uuid(), PoolableWrapper.of("123")));
@@ -319,14 +316,14 @@ public class PoolTest extends AbstractTest {
 
     @Test
     public void test_Wrapper() {
-        PoolableWrapper<Seid> wrapper = PoolableWrapper.of(Seid.of(Account.ID, 1));
+        PoolableWrapper<Seid> wrapper = PoolableWrapper.of(Seid.of(AccountPNL.ID, 1));
 
         N.println(wrapper);
 
-        final PoolableWrapper<Seid> wrapper2 = PoolableWrapper.of(Seid.of(Account.ID, 1));
+        final PoolableWrapper<Seid> wrapper2 = PoolableWrapper.of(Seid.of(AccountPNL.ID, 1));
 
         assertTrue(wrapper.equals(wrapper2));
-        assertTrue(N.asSet(wrapper).contains(wrapper2));
+        assertTrue(CommonUtil.asSet(wrapper).contains(wrapper2));
 
         N.println(wrapper.value());
 
@@ -344,7 +341,7 @@ public class PoolTest extends AbstractTest {
 
         // assertTrue(activityPrint.equals(activityPrint2));
         assertTrue(activityPrint.equals(activityPrint.clone()));
-        assertTrue(N.asSet(activityPrint).contains(activityPrint.clone()));
+        assertTrue(CommonUtil.asSet(activityPrint).contains(activityPrint.clone()));
 
         activityPrint2.setLiveTime(1);
         activityPrint2.setMaxIdleTime(100);

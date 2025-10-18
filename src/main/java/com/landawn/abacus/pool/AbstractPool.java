@@ -293,16 +293,4 @@ public abstract class AbstractPool implements Pool {
         }
     }
 
-    //    /**
-    //     *
-    //     * @throws Throwable the throwable
-    //     */
-    //    @Override
-    //    protected void finalize() throws Throwable {
-    //        super.finalize();
-    //
-    //        if (!isClosed) {
-    //            close();
-    //        }
-    //    }
 }

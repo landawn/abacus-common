@@ -20,8 +20,8 @@ public class IndexTest {
         N.println(Index.ofSubArray(a, 0, b, 0, b.length).orElse(-1));
         assertEquals(-1, Index.ofSubArray(a, 0, b, 0, b.length).orElse(-1));
         assertEquals(4, Index.ofSubArray(a, 1, b, 2, 3).orElse(-1));
-        assertEquals(-1, Index.ofSubList(N.toList(a), 0, N.toList(b), 0, b.length).orElse(-1));
-        assertEquals(4, Index.ofSubList(N.toList(a), 1, N.toList(b), 2, 3).orElse(-1));
+        assertEquals(-1, Index.ofSubList(CommonUtil.toList(a), 0, CommonUtil.toList(b), 0, b.length).orElse(-1));
+        assertEquals(4, Index.ofSubList(CommonUtil.toList(a), 1, CommonUtil.toList(b), 2, 3).orElse(-1));
 
         N.println(Index.lastOfSubArray(a, 0, b, 0, b.length).orElse(-1));
         assertEquals(-1, Index.lastOfSubArray(a, 0, b, 0, b.length).orElse(-1));
@@ -29,8 +29,8 @@ public class IndexTest {
         assertEquals(8, Index.lastOfSubArray(a, a.length - 2, b, 2, 3).orElse(-1));
         assertEquals(8, Index.lastOfSubArray(a, a.length - 3, b, 2, 3).orElse(-1));
         assertEquals(4, Index.lastOfSubArray(a, a.length - 4, b, 2, 3).orElse(-1));
-        assertEquals(8, Index.lastOfSubList(N.toList(a), a.length - 1, N.toList(b), 2, 3).orElse(-1));
-        assertEquals(4, Index.lastOfSubList(N.toList(a), a.length - 4, N.toList(b), 2, 3).orElse(-1));
+        assertEquals(8, Index.lastOfSubList(CommonUtil.toList(a), a.length - 1, CommonUtil.toList(b), 2, 3).orElse(-1));
+        assertEquals(4, Index.lastOfSubList(CommonUtil.toList(a), a.length - 4, CommonUtil.toList(b), 2, 3).orElse(-1));
 
         assertEquals(8, Index.last(Strings.join(a, ""), Strings.join(b, 2, 5, ""), a.length - 1).orElse(-1));
         assertEquals(8, Index.last(Strings.join(a, ""), Strings.join(b, 2, 5, ""), a.length - 2).orElse(-1));

@@ -350,34 +350,6 @@ public final class HttpSettings {
     public HttpSettings setContentFormat(final ContentFormat contentFormat) {
         this.contentFormat = contentFormat;
 
-        //    if (contentFormat == null || contentFormat == ContentFormat.NONE) {
-        //        if (headers != null) {
-        //            headers.remove(HttpHeaders.Names.CONTENT_TYPE);
-        //            headers.remove(HttpHeaders.Names.CONTENT_ENCODING);
-        //        }
-        //    } else {
-        //        final String contentType = N.toString(headers().get(HttpHeaders.Names.CONTENT_TYPE));
-        //        final String contentEncoding = N.toString(headers().get(HttpHeaders.Names.CONTENT_ENCODING));
-        //
-        //        if (!contentFormat.equals(HTTP.getContentFormat(contentType, contentEncoding))) {
-        //            final String newContentType = HTTP.getContentType(contentFormat);
-        //
-        //            if (N.isEmpty(newContentType)) {
-        //                headers().remove(HttpHeaders.Names.CONTENT_TYPE);
-        //            } else {
-        //                header(HttpHeaders.Names.CONTENT_TYPE, newContentType);
-        //            }
-        //
-        //            final String newContentEncoding = HTTP.getContentEncoding(contentFormat);
-        //
-        //            if (N.isEmpty(newContentEncoding)) {
-        //                headers().remove(HttpHeaders.Names.CONTENT_ENCODING);
-        //            } else {
-        //                header(HttpHeaders.Names.CONTENT_ENCODING, newContentEncoding);
-        //            }
-        //        }
-        //    }
-
         return this;
     }
 

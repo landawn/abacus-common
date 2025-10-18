@@ -1084,7 +1084,7 @@ public class IOUtil2025Test extends TestBase {
     public void testWrite_ObjectIntegerToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
         Writer writer = IOUtil.stringBuilder2Writer(sb);
-        IOUtil.write((Object) Integer.valueOf(42), writer);
+        IOUtil.write(Integer.valueOf(42), writer);
         writer.flush();
         assertEquals("42", sb.toString());
         writer.close();
@@ -1171,7 +1171,7 @@ public class IOUtil2025Test extends TestBase {
     public void testWrite_CharSequenceToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
         Writer writer = IOUtil.stringBuilder2Writer(sb);
-        IOUtil.write((CharSequence) TEST_CONTENT, writer);
+        IOUtil.write(TEST_CONTENT, writer);
         writer.flush();
         assertEquals(TEST_CONTENT, sb.toString());
         writer.close();
@@ -1181,7 +1181,7 @@ public class IOUtil2025Test extends TestBase {
     public void testWrite_CharSequenceToWriterWithFlush() throws IOException {
         StringBuilder sb = new StringBuilder();
         Writer writer = IOUtil.stringBuilder2Writer(sb);
-        IOUtil.write((CharSequence) TEST_CONTENT, writer, true);
+        IOUtil.write(TEST_CONTENT, writer, true);
         assertEquals(TEST_CONTENT, sb.toString());
         writer.close();
     }
@@ -1190,7 +1190,7 @@ public class IOUtil2025Test extends TestBase {
     public void testWrite_CharSequenceToWriterWithoutFlush() throws IOException {
         StringBuilder sb = new StringBuilder();
         Writer writer = IOUtil.stringBuilder2Writer(sb);
-        IOUtil.write((CharSequence) TEST_CONTENT, writer, false);
+        IOUtil.write(TEST_CONTENT, writer, false);
         writer.flush();
         assertEquals(TEST_CONTENT, sb.toString());
         writer.close();
@@ -5570,9 +5570,9 @@ public class IOUtil2025Test extends TestBase {
         java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
         closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8))));
         closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data2".getBytes(UTF_8))));
-        ;
+
         closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8))));
-        ;
+
 
         IOUtil.closeAll(closeables);
 
@@ -5592,10 +5592,10 @@ public class IOUtil2025Test extends TestBase {
     public void testCloseAll_IterableWithNulls() throws Exception {
         java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
         closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8))));
-        ;
+
         closeables.add(null);
         closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8))));
-        ;
+
 
         IOUtil.closeAll(closeables);
 
@@ -5706,10 +5706,10 @@ public class IOUtil2025Test extends TestBase {
     public void testCloseAllQuietly_IterableWithNulls() throws Exception {
         java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
         closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8))));
-        ;
+
         closeables.add(null);
         closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8))));
-        ;
+
 
         IOUtil.closeAllQuietly(closeables);
 

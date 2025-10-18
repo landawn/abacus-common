@@ -19,8 +19,8 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -60,7 +60,7 @@ public class LocalDateType100Test extends TestBase {
     @Test
     public void testValueOf_Object_Number() {
         long millis = 1703502645123L;
-        LocalDate result = localDateType.valueOf((Object) millis);
+        LocalDate result = localDateType.valueOf(millis);
         assertNotNull(result);
     }
 

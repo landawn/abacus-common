@@ -41,6 +41,17 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
+     * Indicates whether Duration values are comparable.
+     * Duration implements Comparable, so this returns true.
+     *
+     * @return true, indicating Duration values are comparable
+     */
+    @Override
+    public boolean isComparable() {
+        return true;
+    }
+
+    /**
      * Returns the Java class type handled by this type handler.
      *
      * @return The Class object representing Duration.class

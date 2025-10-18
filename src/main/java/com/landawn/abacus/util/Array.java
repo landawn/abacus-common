@@ -43,10 +43,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method uses {@link java.lang.reflect.Array#newInstance(Class, int)} to create a new instance of the specified array.
      *
-     * @param <T> The type of the array.
-     * @param componentType The Class object representing the component type of the new array.
-     * @param length The length of the new array.
-     * @return The new array.
+     * @param <T> the type of the array.
+     * @param componentType the Class object representing the component type of the new array.
+     * @param length the length of the new array.
+     * @return the new array.
      * @throws NegativeArraySizeException if the specified length is negative.
      */
     public static <T> T newInstance(final Class<?> componentType, final int length) throws NegativeArraySizeException {
@@ -75,10 +75,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param <T> The type of the array.
-     * @param componentType The Class object representing the component type of the new array.
-     * @param dimensions The dimensions of the new array.
-     * @return The new array.}.
+     * @param <T> the type of the array.
+     * @param componentType the Class object representing the component type of the new array.
+     * @param dimensions the dimensions of the new array.
+     * @return the new array.}.
      * @throws NegativeArraySizeException if any of the specified dimensions is negative.
      * @see java.lang.reflect.Array#newInstance(Class, int...)
      */
@@ -93,8 +93,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The array can be an object array or a primitive array.
      * If the array is null, this method returns 0.
      *
-     * @param array The array whose length is to be determined.
-     * @return The length of the array, or 0 if the array is null.
+     * @param array the array whose length is to be determined.
+     * @return the length of the array, or 0 if the array is null.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @see java.lang.reflect.Array#getLength(Object)
      */
@@ -116,10 +116,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param <T> The type of the array.
-     * @param array The array from which to retrieve the element.
-     * @param index The index of the element to be retrieved.
-     * @return The element at the specified index.
+     * @param <T> the type of the array.
+     * @param array the array from which to retrieve the element.
+     * @param index the index of the element to be retrieved.
+     * @return the element at the specified index.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#get(Object, int)
@@ -142,9 +142,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array from which to retrieve the boolean value.
-     * @param index The index of the boolean value to be retrieved.
-     * @return The boolean value at the specified index.
+     * @param array the array from which to retrieve the boolean value.
+     * @param index the index of the boolean value to be retrieved.
+     * @return the boolean value at the specified index.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getBoolean(Object, int)
@@ -167,9 +167,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array from which to retrieve the byte value.
-     * @param index The index of the byte value to be retrieved.
-     * @return The byte value at the specified index.
+     * @param array the array from which to retrieve the byte value.
+     * @param index the index of the byte value to be retrieved.
+     * @return the byte value at the specified index.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getByte(Object, int)
@@ -192,9 +192,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array from which to retrieve the char value.
-     * @param index The index of the char value to be retrieved.
-     * @return The char value at the specified index.
+     * @param array the array from which to retrieve the char value.
+     * @param index the index of the char value to be retrieved.
+     * @return the char value at the specified index.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getChar(Object, int)
@@ -217,9 +217,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array from which to retrieve the short value.
-     * @param index The index of the short value to be retrieved.
-     * @return The short value at the specified index.
+     * @param array the array from which to retrieve the short value.
+     * @param index the index of the short value to be retrieved.
+     * @return the short value at the specified index.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getShort(Object, int)
@@ -242,9 +242,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array from which to retrieve the integer value.
-     * @param index The index of the integer value to be retrieved.
-     * @return The integer value at the specified index.
+     * @param array the array from which to retrieve the integer value.
+     * @param index the index of the integer value to be retrieved.
+     * @return the integer value at the specified index.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getInt(Object, int)
@@ -267,9 +267,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array from which to retrieve the long value.
-     * @param index The index of the long value to be retrieved.
-     * @return The long value at the specified index.
+     * @param array the array from which to retrieve the long value.
+     * @param index the index of the long value to be retrieved.
+     * @return the long value at the specified index.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getLong(Object, int)
@@ -292,9 +292,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array from which to retrieve the float value.
-     * @param index The index of the float value to be retrieved.
-     * @return The float value at the specified index.
+     * @param array the array from which to retrieve the float value.
+     * @param index the index of the float value to be retrieved.
+     * @return the float value at the specified index.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getFloat(Object, int)
@@ -317,9 +317,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array from which to retrieve the double value.
-     * @param index The index of the double value to be retrieved.
-     * @return The double value at the specified index.
+     * @param array the array from which to retrieve the double value.
+     * @param index the index of the double value to be retrieved.
+     * @return the double value at the specified index.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getDouble(Object, int)
@@ -342,9 +342,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array in which to set the value.
-     * @param index The index at which the value is to be set.
-     * @param value The value to be set.
+     * @param array the array in which to set the value.
+     * @param index the index at which the value is to be set.
+     * @param value the value to be set.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#set(Object, int, Object)
@@ -367,9 +367,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array in which to set the boolean value.
-     * @param index The index at which the boolean value is to be set.
-     * @param z The boolean value to be set.
+     * @param array the array in which to set the boolean value.
+     * @param index the index at which the boolean value is to be set.
+     * @param z the boolean value to be set.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setBoolean(Object, int, boolean)
@@ -392,9 +392,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array in which to set the byte value.
-     * @param index The index at which the byte value is to be set.
-     * @param b The byte value to be set.
+     * @param array the array in which to set the byte value.
+     * @param index the index at which the byte value is to be set.
+     * @param b the byte value to be set.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setByte(Object, int, byte)
@@ -417,9 +417,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array in which to set the char value.
-     * @param index The index at which the char value is to be set.
-     * @param c The char value to be set.
+     * @param array the array in which to set the char value.
+     * @param index the index at which the char value is to be set.
+     * @param c the char value to be set.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setChar(Object, int, char)
@@ -442,9 +442,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array in which to set the short value.
-     * @param index The index at which the short value is to be set.
-     * @param s The short value to be set.
+     * @param array the array in which to set the short value.
+     * @param index the index at which the short value is to be set.
+     * @param s the short value to be set.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setShort(Object, int, short)
@@ -467,9 +467,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array in which to set the integer value.
-     * @param index The index at which the integer value is to be set.
-     * @param i The integer value to be set.
+     * @param array the array in which to set the integer value.
+     * @param index the index at which the integer value is to be set.
+     * @param i the integer value to be set.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setInt(Object, int, int)
@@ -492,9 +492,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array in which to set the long value.
-     * @param index The index at which the long value is to be set.
-     * @param l The long value to be set.
+     * @param array the array in which to set the long value.
+     * @param index the index at which the long value is to be set.
+     * @param l the long value to be set.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setLong(Object, int, long)
@@ -517,9 +517,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array in which to set the float value.
-     * @param index The index at which the float value is to be set.
-     * @param f The float value to be set.
+     * @param array the array in which to set the float value.
+     * @param index the index at which the float value is to be set.
+     * @param f the float value to be set.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setFloat(Object, int, float)
@@ -542,9 +542,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * </code>
      * </pre>
      *
-     * @param array The array in which to set the double value.
-     * @param index The index at which the double value is to be set.
-     * @param d The double value to be set.
+     * @param array the array in which to set the double value.
+     * @param index the index at which the double value is to be set.
+     * @param d the double value to be set.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setDouble(Object, int, double)
@@ -688,18 +688,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return a;
     }
 
-    //    /**
-    //     * Returns the input array as-is without any modification or copying.
-    //     *
-    //     * @param <T>
-    //     * @param a
-    //     * @return
-    //     */
-    //    @SafeVarargs
-    //    public static <T extends Number> T[] of(final T... a) {
-    //        return a;
-    //    }
-
     /**
      * Returns the input array as-is without any modification or copying.
      *
@@ -767,26 +755,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return a;
     }
 
-    //    // Only for Java 8. It's ambiguous in the Java version before 8.
-    //    /**
-    //     * Returns the input array
-    //     *
-    //     * @param a
-    //     * @return
-    //     */
-    //    public static <T> T[] of(final T... a) {
-    //        return a;
-    //    }
-
     /**
      * Generates a range of characters from the start (inclusive) to the end (exclusive).
      *
      * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to, but not including, the <i>endExclusive</i> character.
      * The characters are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
-     * @param startInclusive The first character (inclusive) in the char array.
-     * @param endExclusive The upper bound (exclusive) of the char array.
-     * @return A char array containing characters from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
+     * @param startInclusive the first character (inclusive) in the char array.
+     * @param endExclusive the upper bound (exclusive) of the char array.
+     * @return a char array containing characters from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
      */
     public static char[] range(char startInclusive, final char endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -808,9 +785,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to, but not including, the <i>endExclusive</i> byte.
      * The bytes are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
-     * @param startInclusive The first byte (inclusive) in the byte array.
-     * @param endExclusive The upper bound (exclusive) of the byte array.
-     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
+     * @param startInclusive the first byte (inclusive) in the byte array.
+     * @param endExclusive the upper bound (exclusive) of the byte array.
+     * @return a byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
      */
     public static byte[] range(byte startInclusive, final byte endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -832,9 +809,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to, but not including, the <i>endExclusive</i> short integer.
      * The short integers are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
-     * @param startInclusive The first short integer (inclusive) in the short array.
-     * @param endExclusive The upper bound (exclusive) of the short array.
-     * @return A short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
+     * @param startInclusive the first short integer (inclusive) in the short array.
+     * @param endExclusive the upper bound (exclusive) of the short array.
+     * @return a short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
      */
     public static short[] range(short startInclusive, final short endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -856,9 +833,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to, but not including, the <i>endExclusive</i> integer.
      * The integers are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
-     * @param startInclusive The first integer (inclusive) in the integer array.
-     * @param endExclusive The upper bound (exclusive) of the integer array.
-     * @return An integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive >= endExclusive.
+     * @param startInclusive the first integer (inclusive) in the integer array.
+     * @param endExclusive the upper bound (exclusive) of the integer array.
+     * @return an integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive >= endExclusive.
      * @throws IllegalArgumentException if the range size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static int[] range(int startInclusive, final int endExclusive) {
@@ -885,9 +862,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to, but not including, the <i>endExclusive</i> long integer.
      * The long integers are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
-     * @param startInclusive The first long integer (inclusive) in the long array.
-     * @param endExclusive The upper bound (exclusive) of the long array.
-     * @return A long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive >= endExclusive.
+     * @param startInclusive the first long integer (inclusive) in the long array.
+     * @param endExclusive the upper bound (exclusive) of the long array.
+     * @return a long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive >= endExclusive.
      * @throws IllegalArgumentException if the range size is negative or exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static long[] range(long startInclusive, final long endExclusive) {
@@ -917,10 +894,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The characters are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      *
-     * @param startInclusive The first character (inclusive) in the char array.
-     * @param endExclusive The upper bound (exclusive) of the char array.
-     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent character.
-     * @return A char array containing characters from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @param startInclusive the first character (inclusive) in the char array.
+     * @param endExclusive the upper bound (exclusive) of the char array.
+     * @param by the step to increment (if positive) or decrement (if negative) for each subsequent character.
+     * @return a char array containing characters from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static char[] range(char startInclusive, final char endExclusive, final int by) {
@@ -955,10 +932,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The bytes are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      *
-     * @param startInclusive The first byte (inclusive) in the byte array.
-     * @param endExclusive The upper bound (exclusive) of the byte array.
-     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent byte.
-     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @param startInclusive the first byte (inclusive) in the byte array.
+     * @param endExclusive the upper bound (exclusive) of the byte array.
+     * @param by the step to increment (if positive) or decrement (if negative) for each subsequent byte.
+     * @return a byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static byte[] range(byte startInclusive, final byte endExclusive, final byte by) {
@@ -992,10 +969,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The short integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      *
-     * @param startInclusive The first short integer (inclusive) in the short array.
-     * @param endExclusive The upper bound (exclusive) of the short array.
-     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent short integer.
-     * @return A short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @param startInclusive the first short integer (inclusive) in the short array.
+     * @param endExclusive the upper bound (exclusive) of the short array.
+     * @param by the step to increment (if positive) or decrement (if negative) for each subsequent short integer.
+     * @return a short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static short[] range(short startInclusive, final short endExclusive, final short by) {
@@ -1029,10 +1006,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      *
-     * @param startInclusive The first integer (inclusive) in the integer array.
-     * @param endExclusive The upper bound (exclusive) of the integer array.
-     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent integer.
-     * @return An integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @param startInclusive the first integer (inclusive) in the integer array.
+     * @param endExclusive the upper bound (exclusive) of the integer array.
+     * @param by the step to increment (if positive) or decrement (if negative) for each subsequent integer.
+     * @return an integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static int[] range(int startInclusive, final int endExclusive, final int by) {
@@ -1072,10 +1049,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      * This method handles potential overflow scenarios using BigInteger for large ranges.
      *
-     * @param startInclusive The first long integer (inclusive) in the long array.
-     * @param endExclusive The upper bound (exclusive) of the long array.
-     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent long integer.
-     * @return A long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @param startInclusive the first long integer (inclusive) in the long array.
+     * @param endExclusive the upper bound (exclusive) of the long array.
+     * @param by the step to increment (if positive) or decrement (if negative) for each subsequent long integer.
+     * @return a long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static long[] range(long startInclusive, final long endExclusive, final long by) {
@@ -1127,9 +1104,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The characters are generated in ascending order. If start is greater than end, an empty array is returned.
      * If start equals end, a single-element array containing that value is returned.
      *
-     * @param startInclusive The first character (inclusive) in the char array.
-     * @param endInclusive The upper bound (inclusive) of the char array.
-     * @return A char array containing characters from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
+     * @param startInclusive the first character (inclusive) in the char array.
+     * @param endInclusive the upper bound (inclusive) of the char array.
+     * @return a char array containing characters from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
      */
     public static char[] rangeClosed(char startInclusive, final char endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1154,9 +1131,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The bytes are generated in ascending order. If start is greater than end, an empty array is returned.
      * If start equals end, a single-element array containing that value is returned.
      *
-     * @param startInclusive The first byte (inclusive) in the byte array.
-     * @param endInclusive The upper bound (inclusive) of the byte array.
-     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
+     * @param startInclusive the first byte (inclusive) in the byte array.
+     * @param endInclusive the upper bound (inclusive) of the byte array.
+     * @return a byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
      */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1181,9 +1158,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The short integers are generated in ascending order. If start is greater than end, an empty array is returned.
      * If start equals end, a single-element array containing that value is returned.
      *
-     * @param startInclusive The first short integer (inclusive) in the short array.
-     * @param endInclusive The upper bound (inclusive) of the short array.
-     * @return A short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
+     * @param startInclusive the first short integer (inclusive) in the short array.
+     * @param endInclusive the upper bound (inclusive) of the short array.
+     * @return a short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
      */
     public static short[] rangeClosed(short startInclusive, final short endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1208,9 +1185,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The integers are generated in ascending order. If start is greater than end, an empty array is returned.
      * If start equals end, a single-element array containing that value is returned.
      *
-     * @param startInclusive The first integer (inclusive) in the integer array.
-     * @param endInclusive The upper bound (inclusive) of the integer array.
-     * @return An integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
+     * @param startInclusive the first integer (inclusive) in the integer array.
+     * @param endInclusive the upper bound (inclusive) of the integer array.
+     * @return an integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
      * @throws IllegalArgumentException if the range size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive) {
@@ -1240,9 +1217,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The long integers are generated in ascending order. If start is greater than end, an empty array is returned.
      * If start equals end, a single-element array containing that value is returned.
      *
-     * @param startInclusive The first long integer (inclusive) in the long array.
-     * @param endInclusive The upper bound (inclusive) of the long array.
-     * @return A long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
+     * @param startInclusive the first long integer (inclusive) in the long array.
+     * @param endInclusive the upper bound (inclusive) of the long array.
+     * @return a long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
      * @throws IllegalArgumentException if the range size is invalid (negative or exceeds Integer.MAX_VALUE - overflow detected).
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive) {
@@ -1275,10 +1252,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      * If start equals end, a single-element array containing that value is returned regardless of the step value.
      *
-     * @param startInclusive The first character (inclusive) in the char array.
-     * @param endInclusive The upper bound (inclusive) of the char array.
-     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent character.
-     * @return A char array containing characters from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @param startInclusive the first character (inclusive) in the char array.
+     * @param endInclusive the upper bound (inclusive) of the char array.
+     * @param by the step to increment (if positive) or decrement (if negative) for each subsequent character.
+     * @return a char array containing characters from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static char[] rangeClosed(char startInclusive, final char endInclusive, final int by) {
@@ -1316,10 +1293,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      * If start equals end, a single-element array containing that value is returned regardless of the step value.
      *
-     * @param startInclusive The first byte (inclusive) in the byte array.
-     * @param endInclusive The upper bound (inclusive) of the byte array.
-     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent byte.
-     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @param startInclusive the first byte (inclusive) in the byte array.
+     * @param endInclusive the upper bound (inclusive) of the byte array.
+     * @param by the step to increment (if positive) or decrement (if negative) for each subsequent byte.
+     * @return a byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive, final byte by) {
@@ -1356,10 +1333,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      * If start equals end, a single-element array containing that value is returned regardless of the step value.
      *
-     * @param startInclusive The first short integer (inclusive) in the short array.
-     * @param endInclusive The upper bound (inclusive) of the short array.
-     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent short integer.
-     * @return A short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @param startInclusive the first short integer (inclusive) in the short array.
+     * @param endInclusive the upper bound (inclusive) of the short array.
+     * @param by the step to increment (if positive) or decrement (if negative) for each subsequent short integer.
+     * @return a short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static short[] rangeClosed(short startInclusive, final short endInclusive, final short by) {
@@ -1396,10 +1373,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      * If start equals end, a single-element array containing that value is returned regardless of the step value.
      *
-     * @param startInclusive The first integer (inclusive) in the integer array.
-     * @param endInclusive The upper bound (inclusive) of the integer array.
-     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent integer.
-     * @return An integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @param startInclusive the first integer (inclusive) in the integer array.
+     * @param endInclusive the upper bound (inclusive) of the integer array.
+     * @param by the step to increment (if positive) or decrement (if negative) for each subsequent integer.
+     * @return an integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive, final int by) {
@@ -1442,10 +1419,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If start equals end, a single-element array containing that value is returned regardless of the step value.
      * This method handles potential overflow scenarios using BigInteger for large ranges.
      *
-     * @param startInclusive The first long integer (inclusive) in the long array.
-     * @param endInclusive The upper bound (inclusive) of the long array.
-     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent long integer.
-     * @return A long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
+     * @param startInclusive the first long integer (inclusive) in the long array.
+     * @param endInclusive the upper bound (inclusive) of the long array.
+     * @param by the step to increment (if positive) or decrement (if negative) for each subsequent long integer.
+     * @return a long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive, final long by) {
@@ -1494,9 +1471,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new boolean array of a specified length, with all elements set to the <i>element</i> value.
      *
-     * @param element The boolean value to be repeated in the array.
-     * @param n The length of the array to be generated.
-     * @return A boolean array of length <i>n</i> with all elements set to <i>element</i>.
+     * @param element the boolean value to be repeated in the array.
+     * @param n the length of the array to be generated.
+     * @return a boolean array of length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if n is negative
      */
     public static boolean[] repeat(final boolean element, final int n) {
@@ -1562,9 +1539,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new char array of a specified length, with all elements set to the <i>element</i> value.
      *
-     * @param element The char value to be repeated in the array.
-     * @param n The length of the array to be generated.
-     * @return A char array of length <i>n</i> with all elements set to <i>element</i>.
+     * @param element the char value to be repeated in the array.
+     * @param n the length of the array to be generated.
+     * @return a char array of length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if n is negative
      */
     public static char[] repeat(final char element, final int n) {
@@ -1629,9 +1606,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new byte array of a specified length, with all elements set to the <i>element</i> value.
      *
-     * @param element The byte value to be repeated in the array.
-     * @param n The length of the array to be generated.
-     * @return A byte array of length <i>n</i> with all elements set to <i>element</i>.
+     * @param element the byte value to be repeated in the array.
+     * @param n the length of the array to be generated.
+     * @return a byte array of length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if n is negative
      */
     public static byte[] repeat(final byte element, final int n) {
@@ -1696,9 +1673,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new short array of a specified length, with all elements set to the <i>element</i> value.
      *
-     * @param element The short value to be repeated in the array.
-     * @param n The length of the array to be generated.
-     * @return A short array of length <i>n</i> with all elements set to <i>element</i>.
+     * @param element the short value to be repeated in the array.
+     * @param n the length of the array to be generated.
+     * @return a short array of length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if n is negative
      */
     public static short[] repeat(final short element, final int n) {
@@ -1763,9 +1740,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new integer array of a specified length, with all elements set to the <i>element</i> value.
      *
-     * @param element The integer value to be repeated in the array.
-     * @param n The length of the array to be generated.
-     * @return An integer array of length <i>n</i> with all elements set to <i>element</i>.
+     * @param element the integer value to be repeated in the array.
+     * @param n the length of the array to be generated.
+     * @return an integer array of length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if n is negative
      */
     public static int[] repeat(final int element, final int n) {
@@ -1830,9 +1807,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new long array of a specified length, with all elements set to the <i>element</i> value.
      *
-     * @param element The long value to be repeated in the array.
-     * @param n The length of the array to be generated.
-     * @return A long array of length <i>n</i> with all elements set to <i>element</i>.
+     * @param element the long value to be repeated in the array.
+     * @param n the length of the array to be generated.
+     * @return a long array of length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if n is negative
      */
     public static long[] repeat(final long element, final int n) {
@@ -1897,9 +1874,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new float array of a specified length, with all elements set to the <i>element</i> value.
      *
-     * @param element The float value to be repeated in the array.
-     * @param n The length of the array to be generated.
-     * @return A float array of length <i>n</i> with all elements set to <i>element</i>.
+     * @param element the float value to be repeated in the array.
+     * @param n the length of the array to be generated.
+     * @return a float array of length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if n is negative
      */
     public static float[] repeat(final float element, final int n) {
@@ -1964,9 +1941,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new double array of a specified length, with all elements set to the <i>element</i> value.
      *
-     * @param element The double value to be repeated in the array.
-     * @param n The length of the array to be generated.
-     * @return A double array of length <i>n</i> with all elements set to <i>element</i>.
+     * @param element the double value to be repeated in the array.
+     * @param n the length of the array to be generated.
+     * @return a double array of length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if n is negative
      */
     public static double[] repeat(final double element, final int n) {
@@ -2031,9 +2008,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new String array of a specified length, with all elements set to the <i>element</i> value.
      *
-     * @param element The String value to be repeated in the array.
-     * @param n The length of the array to be generated.
-     * @return A String array of length <i>n</i> with all elements set to <i>element</i>.
+     * @param element the String value to be repeated in the array.
+     * @param n the length of the array to be generated.
+     * @return a String array of length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if n is negative
      */
     public static String[] repeat(final String element, final int n) {
@@ -2099,10 +2076,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Generates a new array of a specified length, with all elements set to the <i>element</i> value.
      * The type of the array is determined by the type of <i>element</i>.
      *
-     * @param <T> The type of the elements in the array.
-     * @param element The value to be repeated in the array.
-     * @param n The length of the array to be generated.
-     * @return An array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
+     * @param <T> the type of the elements in the array.
+     * @param element the value to be repeated in the array.
+     * @param n the length of the array to be generated.
+     * @return an array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException <i>element</i> is {@code null} or {@code n} is negative.
      * @deprecated prefer to {@link Array#repeatNonNull(Object, int)} or {@link Array#repeat(Object, int, Class)} 
      *  because this method throws NullPointerException when element is {@code null}
@@ -2124,11 +2101,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Generates a new array of a specified length, with all elements set to the <i>element</i> value.
      * The type of the array is determined by the <i>elementClass</i> parameter.
      *
-     * @param <T> The type of the elements in the array.
-     * @param element The value to be repeated in the array.
-     * @param n The length of the array to be generated.
-     * @param elementClass The class of the elements in the array.
-     * @return An array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
+     * @param <T> the type of the elements in the array.
+     * @param element the value to be repeated in the array.
+     * @param n the length of the array to be generated.
+     * @param elementClass the class of the elements in the array.
+     * @return an array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if <i>n</i> is negative.
      * @see N#repeat(Object, int)
      */
@@ -2163,10 +2140,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param <T> The type of the elements in the array.
+     * @param <T> the type of the elements in the array.
      * @param a the input array to be repeated
      * @param n the number of times to repeat the array (must be non-negative)
-     * @param elementClass The class of the elements in the array.
+     * @param elementClass the class of the elements in the array.
      * @return a new array containing the input array repeated n times
      * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
      */
@@ -2201,10 +2178,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * by explicitly indicating in its name that null elements are not allowed. Unlike the deprecated method which
      * may throw NullPointerException, this method consistently throws IllegalArgumentException for null elements.</p>
      *
-     * @param <T> The type of the elements in the array.
-     * @param element The value to be repeated in the array. Must not be {@code null}.
-     * @param n The length of the array to be generated. Must be non-negative.
-     * @return An array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
+     * @param <T> the type of the elements in the array.
+     * @param element the value to be repeated in the array. Must not be {@code null}.
+     * @param n the length of the array to be generated. Must be non-negative.
+     * @return an array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if <i>element</i> is {@code null} or if <i>n</i> is negative.
      * @see #repeat(Object, int, Class)
      * @see N#repeat(Object, int)
@@ -2333,9 +2310,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new boolean[0][]
      * }</pre>
      *
-     * @param a The first 2D boolean array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 2D boolean array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 2D boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 2D boolean array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D boolean array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 2D boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static boolean[][] concat(final boolean[][] a, final boolean[][] b) {
@@ -2394,9 +2371,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new boolean[0][][]
      * }</pre>
      *
-     * @param a The first 3D boolean array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 3D boolean array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 3D boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 3D boolean array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D boolean array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 3D boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static boolean[][][] concat(final boolean[][][] a, final boolean[][][] b) {
@@ -2455,9 +2432,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new char[0][]
      * }</pre>
      *
-     * @param a The first 2D char array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 2D char array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 2D char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 2D char array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D char array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 2D char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static char[][] concat(final char[][] a, final char[][] b) {
@@ -2516,9 +2493,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new char[0][][]
      * }</pre>
      *
-     * @param a The first 3D char array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 3D char array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 3D char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 3D char array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D char array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 3D char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static char[][][] concat(final char[][][] a, final char[][][] b) {
@@ -2577,9 +2554,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new byte[0][]
      * }</pre>
      *
-     * @param a The first 2D byte array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 2D byte array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 2D byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 2D byte array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D byte array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 2D byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static byte[][] concat(final byte[][] a, final byte[][] b) {
@@ -2638,9 +2615,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new byte[0][][]
      * }</pre>
      *
-     * @param a The first 3D byte array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 3D byte array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 3D byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 3D byte array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D byte array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 3D byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static byte[][][] concat(final byte[][][] a, final byte[][][] b) {
@@ -2699,9 +2676,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new short[0][]
      * }</pre>
      *
-     * @param a The first 2D short array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 2D short array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 2D short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 2D short array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D short array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 2D short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static short[][] concat(final short[][] a, final short[][] b) {
@@ -2760,9 +2737,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new short[0][][]
      * }</pre>
      *
-     * @param a The first 3D short array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 3D short array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 3D short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 3D short array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D short array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 3D short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static short[][][] concat(final short[][][] a, final short[][][] b) {
@@ -2821,9 +2798,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new int[0][]
      * }</pre>
      *
-     * @param a The first 2D int array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 2D int array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 2D int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 2D int array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D int array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 2D int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static int[][] concat(final int[][] a, final int[][] b) {
@@ -2882,9 +2859,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new int[0][][]
      * }</pre>
      *
-     * @param a The first 3D int array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 3D int array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 3D int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 3D int array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D int array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 3D int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static int[][][] concat(final int[][][] a, final int[][][] b) {
@@ -2943,9 +2920,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new long[0][]
      * }</pre>
      *
-     * @param a The first 2D long array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 2D long array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 2D long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 2D long array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D long array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 2D long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static long[][] concat(final long[][] a, final long[][] b) {
@@ -3004,9 +2981,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new long[0][][]
      * }</pre>
      *
-     * @param a The first 3D long array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 3D long array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 3D long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 3D long array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D long array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 3D long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static long[][][] concat(final long[][][] a, final long[][][] b) {
@@ -3065,9 +3042,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new float[0][]
      * }</pre>
      *
-     * @param a The first 2D float array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 2D float array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 2D float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 2D float array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D float array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 2D float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static float[][] concat(final float[][] a, final float[][] b) {
@@ -3126,9 +3103,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new float[0][][]
      * }</pre>
      *
-     * @param a The first 3D float array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 3D float array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 3D float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 3D float array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D float array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 3D float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static float[][][] concat(final float[][][] a, final float[][][] b) {
@@ -3187,9 +3164,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new double[0][]
      * }</pre>
      *
-     * @param a The first 2D double array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 2D double array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 2D double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 2D double array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D double array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 2D double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static double[][] concat(final double[][] a, final double[][] b) {
@@ -3248,9 +3225,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new double[0][][]
      * }</pre>
      *
-     * @param a The first 3D double array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b The second 3D double array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return A new 3D double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first 3D double array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D double array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new 3D double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static double[][][] concat(final double[][][] a, final double[][][] b) {
@@ -3309,10 +3286,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = null
      * }</pre>
      *
-     * @param <T> The component type of the elements in the arrays.
-     * @param a The first 2D array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned.
-     * @param b The second 2D array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned.
-     * @return A new 2D array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param <T> the component type of the elements in the arrays.
+     * @param a the first 2D array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned.
+     * @param b the second 2D array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned.
+     * @return a new 2D array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      *         Returns null if both input arrays are null.
      */
@@ -3372,10 +3349,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = null
      * }</pre>
      *
-     * @param <T> The component type of the elements in the arrays.
-     * @param a The first 3D array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned.
-     * @param b The second 3D array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned.
-     * @return A new 3D array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param <T> the component type of the elements in the arrays.
+     * @param a the first 3D array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned.
+     * @param b the second 3D array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned.
+     * @return a new 3D array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      *         Returns null if both input arrays are null.
      */
@@ -3399,8 +3376,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive booleans to an array of Boolean objects.
      *
-     * @param a The array of primitive booleans to be converted.
-     * @return An array of Boolean objects, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive booleans to be converted.
+     * @return an array of Boolean objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Boolean[] box(final boolean... a) {
@@ -3414,10 +3391,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive booleans to an array of Boolean objects.
      *
-     * @param a The array of primitive booleans to be converted.
-     * @param fromIndex The start index of the portion to be converted.
-     * @param toIndex The end index of the portion to be converted.
-     * @return An array of Boolean objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive booleans to be converted.
+     * @param fromIndex the start index of the portion to be converted.
+     * @param toIndex the end index of the portion to be converted.
+     * @return an array of Boolean objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
@@ -3442,8 +3419,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive chars to an array of Character objects.
      *
-     * @param a The array of primitive chars to be converted.
-     * @return An array of Character objects, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive chars to be converted.
+     * @return an array of Character objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Character[] box(final char... a) {
@@ -3457,10 +3434,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive chars to an array of Character objects.
      *
-     * @param a The array of primitive chars to be converted.
-     * @param fromIndex The start index of the portion to be converted.
-     * @param toIndex The end index of the portion to be converted.
-     * @return An array of Character objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive chars to be converted.
+     * @param fromIndex the start index of the portion to be converted.
+     * @param toIndex the end index of the portion to be converted.
+     * @return an array of Character objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
@@ -3485,8 +3462,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive bytes to an array of Byte objects.
      *
-     * @param a The array of primitive bytes to be converted.
-     * @return An array of Byte objects, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive bytes to be converted.
+     * @return an array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Byte[] box(final byte... a) {
@@ -3500,10 +3477,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive bytes to an array of Byte objects.
      *
-     * @param a The array of primitive bytes to be converted.
-     * @param fromIndex The start index of the portion to be converted.
-     * @param toIndex The end index of the portion to be converted.
-     * @return An array of Byte objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive bytes to be converted.
+     * @param fromIndex the start index of the portion to be converted.
+     * @param toIndex the end index of the portion to be converted.
+     * @return an array of Byte objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
@@ -3528,8 +3505,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive shorts to an array of Short objects.
      *
-     * @param a The array of primitive shorts to be converted.
-     * @return An array of Short objects, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive shorts to be converted.
+     * @return an array of Short objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Short[] box(final short... a) {
@@ -3543,10 +3520,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive shorts to an array of Short objects.
      *
-     * @param a The array of primitive shorts to be converted.
-     * @param fromIndex The start index of the portion to be converted.
-     * @param toIndex The end index of the portion to be converted.
-     * @return An array of Short objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive shorts to be converted.
+     * @param fromIndex the start index of the portion to be converted.
+     * @param toIndex the end index of the portion to be converted.
+     * @return an array of Short objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
@@ -3571,8 +3548,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive integers to an array of Integer objects.
      *
-     * @param a The array of primitive integers to be converted.
-     * @return An array of Integer objects, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive integers to be converted.
+     * @return an array of Integer objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Integer[] box(final int... a) {
@@ -3586,10 +3563,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive integers to an array of Integer objects.
      *
-     * @param a The array of primitive integers to be converted.
-     * @param fromIndex The start index of the portion to be converted.
-     * @param toIndex The end index of the portion to be converted.
-     * @return An array of Integer objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive integers to be converted.
+     * @param fromIndex the start index of the portion to be converted.
+     * @param toIndex the end index of the portion to be converted.
+     * @return an array of Integer objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
@@ -3614,8 +3591,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive longs to an array of Long objects.
      *
-     * @param a The array of primitive longs to be converted.
-     * @return An array of Long objects, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive longs to be converted.
+     * @return an array of Long objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Long[] box(final long... a) {
@@ -3629,10 +3606,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive longs to an array of Long objects.
      *
-     * @param a The array of primitive longs to be converted.
-     * @param fromIndex The start index of the portion to be converted.
-     * @param toIndex The end index of the portion to be converted.
-     * @return An array of Long objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive longs to be converted.
+     * @param fromIndex the start index of the portion to be converted.
+     * @param toIndex the end index of the portion to be converted.
+     * @return an array of Long objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
@@ -3657,8 +3634,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive floats to an array of Float objects.
      *
-     * @param a The array of primitive floats to be converted.
-     * @return An array of Float objects, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive floats to be converted.
+     * @return an array of Float objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Float[] box(final float... a) {
@@ -3672,10 +3649,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive floats to an array of Float objects.
      *
-     * @param a The array of primitive floats to be converted.
-     * @param fromIndex The start index of the portion to be converted.
-     * @param toIndex The end index of the portion to be converted.
-     * @return An array of Float objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive floats to be converted.
+     * @param fromIndex the start index of the portion to be converted.
+     * @param toIndex the end index of the portion to be converted.
+     * @return an array of Float objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
@@ -3700,8 +3677,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive doubles to an array of Double objects.
      *
-     * @param a The array of primitive doubles to be converted.
-     * @return An array of Double objects, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive doubles to be converted.
+     * @return an array of Double objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Double[] box(final double... a) {
@@ -3715,10 +3692,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive doubles to an array of Double objects.
      *
-     * @param a The array of primitive doubles to be converted.
-     * @param fromIndex The start index of the portion to be converted.
-     * @param toIndex The end index of the portion to be converted.
-     * @return An array of Double objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @param a the array of primitive doubles to be converted.
+     * @param fromIndex the start index of the portion to be converted.
+     * @param toIndex the end index of the portion to be converted.
+     * @return an array of Double objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
@@ -3743,8 +3720,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 2D array of primitive booleans to a 2D array of Boolean objects.
      *
-     * @param a The 2D array of primitive booleans to be converted.
-     * @return A 2D array of Boolean objects, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of primitive booleans to be converted.
+     * @return a 2D array of Boolean objects, {@code null} if the input array is {@code null}.
      * @see #box(boolean[])
      */
     @MayReturnNull
@@ -3765,8 +3742,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 2D array of primitive chars to a 2D array of Character objects.
      *
-     * @param a The 2D array of primitive chars to be converted.
-     * @return A 2D array of Character objects, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of primitive chars to be converted.
+     * @return a 2D array of Character objects, {@code null} if the input array is {@code null}.
      * @see #box(char[])
      */
     @MayReturnNull
@@ -3787,8 +3764,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 2D array of primitive bytes to a 2D array of Byte objects.
      *
-     * @param a The 2D array of primitive bytes to be converted.
-     * @return A 2D array of Byte objects, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of primitive bytes to be converted.
+     * @return a 2D array of Byte objects, {@code null} if the input array is {@code null}.
      * @see #box(byte[])
      */
     @MayReturnNull
@@ -3809,8 +3786,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 2D array of primitive shorts to a 2D array of Short objects.
      *
-     * @param a The 2D array of primitive shorts to be converted.
-     * @return A 2D array of Short objects, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of primitive shorts to be converted.
+     * @return a 2D array of Short objects, {@code null} if the input array is {@code null}.
      * @see #box(short[])
      */
     @MayReturnNull
@@ -3831,8 +3808,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 2D array of primitive integers to a 2D array of Integer objects.
      *
-     * @param a The 2D array of primitive integers to be converted.
-     * @return A 2D array of Integer objects, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of primitive integers to be converted.
+     * @return a 2D array of Integer objects, {@code null} if the input array is {@code null}.
      * @see #box(int[])
      */
     @MayReturnNull
@@ -3853,8 +3830,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 2D array of primitive longs to a 2D array of Long objects.
      *
-     * @param a The 2D array of primitive longs to be converted.
-     * @return A 2D array of Long objects, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of primitive longs to be converted.
+     * @return a 2D array of Long objects, {@code null} if the input array is {@code null}.
      * @see #box(long[])
      */
     @MayReturnNull
@@ -3875,8 +3852,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 2D array of primitive floats to a 2D array of Float objects.
      *
-     * @param a The 2D array of primitive floats to be converted.
-     * @return A 2D array of Float objects, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of primitive floats to be converted.
+     * @return a 2D array of Float objects, {@code null} if the input array is {@code null}.
      * @see #box(float[])
      */
     @MayReturnNull
@@ -3897,8 +3874,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 2D array of primitive doubles to a 2D array of Double objects.
      *
-     * @param a The 2D array of primitive doubles to be converted.
-     * @return A 2D array of Double objects, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of primitive doubles to be converted.
+     * @return a 2D array of Double objects, {@code null} if the input array is {@code null}.
      * @see #box(double[])
      */
     @MayReturnNull
@@ -3919,8 +3896,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 3D array of primitive booleans to a 3D array of Boolean objects.
      *
-     * @param a The 3D array of primitive booleans to be converted.
-     * @return A 3D array of Boolean objects, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of primitive booleans to be converted.
+     * @return a 3D array of Boolean objects, {@code null} if the input array is {@code null}.
      * @see #box(boolean[])
      * @see #box(boolean[][])
      */
@@ -3942,8 +3919,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 3D array of primitive chars to a 3D array of Character objects.
      *
-     * @param a The 3D array of primitive chars to be converted.
-     * @return A 3D array of Character objects, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of primitive chars to be converted.
+     * @return a 3D array of Character objects, {@code null} if the input array is {@code null}.
      * @see #box(char[])
      * @see #box(char[][])
      */
@@ -3965,8 +3942,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 3D array of primitive bytes to a 3D array of Byte objects.
      *
-     * @param a The 3D array of primitive bytes to be converted.
-     * @return A 3D array of Byte objects, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of primitive bytes to be converted.
+     * @return a 3D array of Byte objects, {@code null} if the input array is {@code null}.
      * @see #box(byte[])
      * @see #box(byte[][])
      */
@@ -3988,8 +3965,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 3D array of primitive shorts to a 3D array of Short objects.
      *
-     * @param a The 3D array of primitive shorts to be converted.
-     * @return A 3D array of Short objects, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of primitive shorts to be converted.
+     * @return a 3D array of Short objects, {@code null} if the input array is {@code null}.
      * @see #box(short[])
      * @see #box(short[][])
      */
@@ -4011,8 +3988,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 3D array of primitive integers to a 3D array of Integer objects.
      *
-     * @param a The 3D array of primitive integers to be converted.
-     * @return A 3D array of Integer objects, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of primitive integers to be converted.
+     * @return a 3D array of Integer objects, {@code null} if the input array is {@code null}.
      * @see #box(int[])
      * @see #box(int[][])
      */
@@ -4034,8 +4011,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 3D array of primitive longs to a 3D array of Long objects.
      *
-     * @param a The 3D array of primitive longs to be converted.
-     * @return A 3D array of Long objects, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of primitive longs to be converted.
+     * @return a 3D array of Long objects, {@code null} if the input array is {@code null}.
      * @see #box(long[])
      * @see #box(long[][])
      */
@@ -4057,8 +4034,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 3D array of primitive floats to a 3D array of Float objects.
      *
-     * @param a The 3D array of primitive floats to be converted.
-     * @return A 3D array of Float objects, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of primitive floats to be converted.
+     * @return a 3D array of Float objects, {@code null} if the input array is {@code null}.
      * @see #box(float[])
      * @see #box(float[][])
      */
@@ -4080,8 +4057,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a 3D array of primitive doubles to a 3D array of Double objects.
      *
-     * @param a The 3D array of primitive doubles to be converted.
-     * @return A 3D array of Double objects, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of primitive doubles to be converted.
+     * @return a 3D array of Double objects, {@code null} if the input array is {@code null}.
      * @see #box(double[])
      * @see #box(double[][])
      */
@@ -4106,8 +4083,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Boolean objects into an array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code false}.
      *
-     * @param a The array of Boolean objects to be converted.
-     * @return An array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @param a the array of Boolean objects to be converted.
+     * @return an array of primitive booleans, {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[], boolean)
      * @see #unbox(Boolean[], int, int, boolean)
      */
@@ -4119,9 +4096,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Boolean objects into an array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Boolean objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @param a the array of Boolean objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive booleans, {@code null} if the input array is {@code null}.
      * See #unbox(Boolean[], int, int, boolean)
      */
     @MayReturnNull
@@ -4137,11 +4114,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a portion of an array of Boolean objects into an array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Boolean objects to be converted.
-     * @param fromIndex The starting index (inclusive) in the array to be converted.
-     * @param toIndex The ending index (exclusive) in the array to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @param a the array of Boolean objects to be converted.
+     * @param fromIndex the starting index (inclusive) in the array to be converted.
+     * @param toIndex the ending index (exclusive) in the array to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive booleans, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Boolean[], boolean)
      */
@@ -4168,8 +4145,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Character objects into an array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (char) 0.
      *
-     * @param a The array of Character objects to be converted.
-     * @return An array of primitive chars, {@code null} if the input array is {@code null}.
+     * @param a the array of Character objects to be converted.
+     * @return an array of primitive chars, {@code null} if the input array is {@code null}.
      * @see #unbox(Character[], char)
      * @see #unbox(Character[], int, int, char)
      */
@@ -4181,9 +4158,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Character objects into an array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Character objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive chars, {@code null} if the input array is {@code null}.
+     * @param a the array of Character objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive chars, {@code null} if the input array is {@code null}.
      * @see #unbox(Character[], int, int, char)
      */
     @MayReturnNull
@@ -4199,11 +4176,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a portion of an array of Character objects into an array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Character objects to be converted.
-     * @param fromIndex The starting index (inclusive) in the array to be converted.
-     * @param toIndex The ending index (exclusive) in the array to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive chars, {@code null} if the input array is {@code null}.
+     * @param a the array of Character objects to be converted.
+     * @param fromIndex the starting index (inclusive) in the array to be converted.
+     * @param toIndex the ending index (exclusive) in the array to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive chars, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Character[], char)
      * @see #unbox(Character[])
@@ -4231,8 +4208,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Byte objects into an array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (byte) 0.
      *
-     * @param a The array of Byte objects to be converted.
-     * @return An array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @param a the array of Byte objects to be converted.
+     * @return an array of primitive bytes, {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[], byte)
      * @see #unbox(Byte[], int, int, byte)
      */
@@ -4244,9 +4221,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Byte objects into an array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Byte objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @param a the array of Byte objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive bytes, {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[], int, int, byte)
      */
     @MayReturnNull
@@ -4262,11 +4239,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a portion of an array of Byte objects into an array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Byte objects to be converted.
-     * @param fromIndex The starting index (inclusive) in the array to be converted.
-     * @param toIndex The ending index (exclusive) in the array to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @param a the array of Byte objects to be converted.
+     * @param fromIndex the starting index (inclusive) in the array to be converted.
+     * @param toIndex the ending index (exclusive) in the array to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive bytes, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Byte[], byte)
      * @see #unbox(Byte[])
@@ -4294,8 +4271,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Short objects into an array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (short) 0.
      *
-     * @param a The array of Short objects to be converted.
-     * @return An array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @param a the array of Short objects to be converted.
+     * @return an array of primitive shorts, {@code null} if the input array is {@code null}.
      * @see #unbox(Short[], short)
      * @see #unbox(Short[], int, int, short)
      */
@@ -4307,9 +4284,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Short objects into an array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Short objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @param a the array of Short objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive shorts, {@code null} if the input array is {@code null}.
      * @see #unbox(Short[], int, int, short)
      */
     @MayReturnNull
@@ -4325,11 +4302,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a portion of an array of Short objects into an array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Short objects to be converted.
-     * @param fromIndex The starting index (inclusive) in the array to be converted.
-     * @param toIndex The ending index (exclusive) in the array to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @param a the array of Short objects to be converted.
+     * @param fromIndex the starting index (inclusive) in the array to be converted.
+     * @param toIndex the ending index (exclusive) in the array to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive shorts, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Short[], short)
      * @see #unbox(Short[])
@@ -4357,8 +4334,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Integer objects into an array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (int) 0.
      *
-     * @param a The array of Integer objects to be converted.
-     * @return An array of primitive integers, {@code null} if the input array is {@code null}.
+     * @param a the array of Integer objects to be converted.
+     * @return an array of primitive integers, {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[], int)
      * @see #unbox(Integer[], int, int, int)
      */
@@ -4370,9 +4347,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Integer objects into an array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Integer objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive integers, {@code null} if the input array is {@code null}.
+     * @param a the array of Integer objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive integers, {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[], int, int, int)
      * @see #unbox(Integer...)
      */
@@ -4389,11 +4366,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a portion of an array of Integer objects into an array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Integer objects to be converted.
-     * @param fromIndex The starting index (inclusive) in the array to be converted.
-     * @param toIndex The ending index (exclusive) in the array to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive integers, {@code null} if the input array is {@code null}.
+     * @param a the array of Integer objects to be converted.
+     * @param fromIndex the starting index (inclusive) in the array to be converted.
+     * @param toIndex the ending index (exclusive) in the array to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive integers, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Integer[], int)
      * @see #unbox(Integer...)
@@ -4421,8 +4398,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Long objects into an array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (long) 0.
      *
-     * @param a The array of Long objects to be converted.
-     * @return An array of primitive longs, {@code null} if the input array is {@code null}.
+     * @param a the array of Long objects to be converted.
+     * @return an array of primitive longs, {@code null} if the input array is {@code null}.
      * @see #unbox(Long[], long)
      * @see #unbox(Long[], int, int, long)
      */
@@ -4434,9 +4411,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Long objects into an array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Long objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive longs, {@code null} if the input array is {@code null}.
+     * @param a the array of Long objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive longs, {@code null} if the input array is {@code null}.
      * @see #unbox(Long[], int, int, long)
      * @see #unbox(Long...)
      */
@@ -4453,11 +4430,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a portion of an array of Long objects into an array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Long objects to be converted.
-     * @param fromIndex The starting index (inclusive) in the array to be converted.
-     * @param toIndex The ending index (exclusive) in the array to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive longs, {@code null} if the input array is {@code null}.
+     * @param a the array of Long objects to be converted.
+     * @param fromIndex the starting index (inclusive) in the array to be converted.
+     * @param toIndex the ending index (exclusive) in the array to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive longs, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Long[], long)
      * @see #unbox(Long...)
@@ -4485,8 +4462,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Float objects into an array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (float) 0.
      *
-     * @param a The array of Float objects to be converted.
-     * @return An array of primitive floats, {@code null} if the input array is {@code null}.
+     * @param a the array of Float objects to be converted.
+     * @return an array of primitive floats, {@code null} if the input array is {@code null}.
      * @see #unbox(Float[], float)
      * @see #unbox(Float[], int, int, float)
      */
@@ -4498,9 +4475,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Float objects into an array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Float objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive floats, {@code null} if the input array is {@code null}.
+     * @param a the array of Float objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive floats, {@code null} if the input array is {@code null}.
      * @see #unbox(Float[], int, int, float)
      * @see #unbox(Float...)
      */
@@ -4517,11 +4494,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a portion of an array of Float objects into an array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Float objects to be converted.
-     * @param fromIndex The starting index (inclusive) in the array to be converted.
-     * @param toIndex The ending index (exclusive) in the array to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive floats, {@code null} if the input array is {@code null}.
+     * @param a the array of Float objects to be converted.
+     * @param fromIndex the starting index (inclusive) in the array to be converted.
+     * @param toIndex the ending index (exclusive) in the array to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive floats, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Float[], float)
      * @see #unbox(Float...)
@@ -4549,8 +4526,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Double objects into an array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (double) 0.
      *
-     * @param a The array of Double objects to be converted.
-     * @return An array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @param a the array of Double objects to be converted.
+     * @return an array of primitive doubles, {@code null} if the input array is {@code null}.
      * @see #unbox(Double[], double)
      * @see #unbox(Double[], int, int, double)
      */
@@ -4562,9 +4539,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Double objects into an array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Double objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @param a the array of Double objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive doubles, {@code null} if the input array is {@code null}.
      * @see #unbox(Double[], int, int, double)
      * @see #unbox(Double...)
      */
@@ -4581,11 +4558,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a portion of an array of Double objects into an array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The array of Double objects to be converted.
-     * @param fromIndex The starting index (inclusive) in the array to be converted.
-     * @param toIndex The ending index (exclusive) in the array to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return An array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @param a the array of Double objects to be converted.
+     * @param fromIndex the starting index (inclusive) in the array to be converted.
+     * @param toIndex the ending index (exclusive) in the array to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return an array of primitive doubles, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Double[], double)
      * @see #unbox(Double...)
@@ -4613,8 +4590,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Boolean objects into a 2D array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (boolean) {@code false}.
      *
-     * @param a The 2D array of Boolean objects to be converted.
-     * @return A 2D array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Boolean objects to be converted.
+     * @return a 2D array of primitive booleans, {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[][], boolean)
      * @see #unbox(Boolean[])
      */
@@ -4626,9 +4603,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Boolean objects into a 2D array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 2D array of Boolean objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 2D array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Boolean objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 2D array of primitive booleans, {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[], boolean)
      */
     @MayReturnNull
@@ -4650,8 +4627,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Character objects into a 2D array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (char) 0.
      *
-     * @param a The 2D array of Character objects to be converted.
-     * @return A 2D array of primitive chars, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Character objects to be converted.
+     * @return a 2D array of primitive chars, {@code null} if the input array is {@code null}.
      * @see #unbox(Character[][], char)
      * @see #unbox(Character[])
      */
@@ -4663,9 +4640,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Character objects into a 2D array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 2D array of Character objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 2D array of primitive chars, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Character objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 2D array of primitive chars, {@code null} if the input array is {@code null}.
      * @see #unbox(Character[], char)
      */
     @MayReturnNull
@@ -4687,8 +4664,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Byte objects into a 2D array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (byte) 0.
      *
-     * @param a The 2D array of Byte objects to be converted.
-     * @return A 2D array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Byte objects to be converted.
+     * @return a 2D array of primitive bytes, {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[][], byte)
      * @see #unbox(Byte[])
      */
@@ -4700,9 +4677,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Byte objects into a 2D array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 2D array of Byte objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 2D array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Byte objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 2D array of primitive bytes, {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[], byte)
      */
     @MayReturnNull
@@ -4724,8 +4701,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Short objects into a 2D array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (short) 0.
      *
-     * @param a The 2D array of Short objects to be converted.
-     * @return A 2D array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Short objects to be converted.
+     * @return a 2D array of primitive shorts, {@code null} if the input array is {@code null}.
      * @see #unbox(Short[][], short)
      * @see #unbox(Short[])
      */
@@ -4737,9 +4714,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Short objects into a 2D array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 2D array of Short objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 2D array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Short objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 2D array of primitive shorts, {@code null} if the input array is {@code null}.
      * @see #unbox(Short[], short)
      */
     @MayReturnNull
@@ -4761,8 +4738,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Integer objects into a 2D array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (int) 0.
      *
-     * @param a The 2D array of Integer objects to be converted.
-     * @return A 2D array of primitive integers, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Integer objects to be converted.
+     * @return a 2D array of primitive integers, {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[][], int)
      * @see #unbox(Integer[])
      */
@@ -4774,9 +4751,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Integer objects into a 2D array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 2D array of Integer objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 2D array of primitive integers, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Integer objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 2D array of primitive integers, {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[], int)
      */
     @MayReturnNull
@@ -4798,8 +4775,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Long objects into a 2D array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (long) 0.
      *
-     * @param a The 2D array of Long objects to be converted.
-     * @return A 2D array of primitive longs, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Long objects to be converted.
+     * @return a 2D array of primitive longs, {@code null} if the input array is {@code null}.
      * @see #unbox(Long[][], long)
      * @see #unbox(Long[])
      */
@@ -4811,9 +4788,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Long objects into a 2D array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 2D array of Long objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 2D array of primitive longs, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Long objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 2D array of primitive longs, {@code null} if the input array is {@code null}.
      * @see #unbox(Long[], long)
      */
     @MayReturnNull
@@ -4835,8 +4812,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Float objects into a 2D array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (float) 0.
      *
-     * @param a The 2D array of Float objects to be converted.
-     * @return A 2D array of primitive floats, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Float objects to be converted.
+     * @return a 2D array of primitive floats, {@code null} if the input array is {@code null}.
      * @see #unbox(Float[][], float)
      * @see #unbox(Float[])
      */
@@ -4848,9 +4825,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Float objects into a 2D array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 2D array of Float objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 2D array of primitive floats, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Float objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 2D array of primitive floats, {@code null} if the input array is {@code null}.
      * @see #unbox(Float[], float)
      */
     @MayReturnNull
@@ -4872,8 +4849,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Double objects into a 2D array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (double) 0.
      *
-     * @param a The 2D array of Double objects to be converted.
-     * @return A 2D array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Double objects to be converted.
+     * @return a 2D array of primitive doubles, {@code null} if the input array is {@code null}.
      * @see #unbox(Double[][], double)
      * @see #unbox(Double[])
      */
@@ -4885,9 +4862,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 2D array of Double objects into a 2D array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 2D array of Double objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 2D array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @param a the 2D array of Double objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 2D array of primitive doubles, {@code null} if the input array is {@code null}.
      * @see #unbox(Double[], double)
      */
     @MayReturnNull
@@ -4909,8 +4886,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Boolean objects into a 3D array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (boolean) {@code false}.
      *
-     * @param a The 3D array of Boolean objects to be converted.
-     * @return A 3D array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Boolean objects to be converted.
+     * @return a 3D array of primitive booleans, {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[][][], boolean)
      */
     public static boolean[][][] unbox(final Boolean[][][] a) {
@@ -4921,9 +4898,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Boolean objects into a 3D array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 3D array of Boolean objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 3D array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Boolean objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 3D array of primitive booleans, {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[][], boolean)
      */
     @MayReturnNull
@@ -4945,8 +4922,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Character objects into a 3D array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (char) 0.
      *
-     * @param a The 3D array of Character objects to be converted.
-     * @return A 3D array of primitive chars, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Character objects to be converted.
+     * @return a 3D array of primitive chars, {@code null} if the input array is {@code null}.
      * @see #unbox(Character[][][], char)
      */
     public static char[][][] unbox(final Character[][][] a) {
@@ -4957,9 +4934,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Character objects into a 3D array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 3D array of Character objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 3D array of primitive chars, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Character objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 3D array of primitive chars, {@code null} if the input array is {@code null}.
      * @see #unbox(Character[][], char)
      */
     @MayReturnNull
@@ -4981,8 +4958,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Byte objects into a 3D array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (byte) 0.
      *
-     * @param a The 3D array of Byte objects to be converted.
-     * @return A 3D array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Byte objects to be converted.
+     * @return a 3D array of primitive bytes, {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[][][], byte)
      */
     public static byte[][][] unbox(final Byte[][][] a) {
@@ -4993,9 +4970,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Byte objects into a 3D array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 3D array of Byte objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 3D array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Byte objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 3D array of primitive bytes, {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[][], byte)
      */
     @MayReturnNull
@@ -5017,8 +4994,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Short objects into a 3D array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (short) 0.
      *
-     * @param a The 3D array of Short objects to be converted.
-     * @return A 3D array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Short objects to be converted.
+     * @return a 3D array of primitive shorts, {@code null} if the input array is {@code null}.
      * @see #unbox(Short[][][], short)
      */
     public static short[][][] unbox(final Short[][][] a) {
@@ -5029,9 +5006,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Short objects into a 3D array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 3D array of Short objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 3D array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Short objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 3D array of primitive shorts, {@code null} if the input array is {@code null}.
      * @see #unbox(Short[][], short)
      */
     @MayReturnNull
@@ -5053,8 +5030,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Integer objects into a 3D array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (int) 0.
      *
-     * @param a The 3D array of Integer objects to be converted.
-     * @return A 3D array of primitive integers, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Integer objects to be converted.
+     * @return a 3D array of primitive integers, {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[][][], int)
      */
     public static int[][][] unbox(final Integer[][][] a) {
@@ -5065,9 +5042,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Integer objects into a 3D array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 3D array of Integer objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 3D array of primitive integers, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Integer objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 3D array of primitive integers, {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[][], int)
      */
     @MayReturnNull
@@ -5089,8 +5066,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Long objects into a 3D array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (long) 0.
      *
-     * @param a The 3D array of Long objects to be converted.
-     * @return A 3D array of primitive longs, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Long objects to be converted.
+     * @return a 3D array of primitive longs, {@code null} if the input array is {@code null}.
      * @see #unbox(Long[][][], long)
      */
     public static long[][][] unbox(final Long[][][] a) {
@@ -5101,9 +5078,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Long objects into a 3D array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 3D array of Long objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 3D array of primitive longs, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Long objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 3D array of primitive longs, {@code null} if the input array is {@code null}.
      * @see #unbox(Long[][], long)
      */
     @MayReturnNull
@@ -5125,8 +5102,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Float objects into a 3D array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (float) 0.
      *
-     * @param a The 3D array of Float objects to be converted.
-     * @return A 3D array of primitive floats, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Float objects to be converted.
+     * @return a 3D array of primitive floats, {@code null} if the input array is {@code null}.
      * @see #unbox(Float[][][], float)
      */
     public static float[][][] unbox(final Float[][][] a) {
@@ -5137,9 +5114,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Float objects into a 3D array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 3D array of Float objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 3D array of primitive floats, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Float objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 3D array of primitive floats, {@code null} if the input array is {@code null}.
      * @see #unbox(Float[][], float)
      */
     @MayReturnNull
@@ -5161,8 +5138,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Double objects into a 3D array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (double) 0.
      *
-     * @param a The 3D array of Double objects to be converted.
-     * @return A 3D array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Double objects to be converted.
+     * @return a 3D array of primitive doubles, {@code null} if the input array is {@code null}.
      * @see #unbox(Double[][][], double)
      */
     public static double[][][] unbox(final Double[][][] a) {
@@ -5173,9 +5150,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a 3D array of Double objects into a 3D array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a The 3D array of Double objects to be converted.
-     * @param valueForNull The value to be used for {@code null} values in the input array.
-     * @return A 3D array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @param a the 3D array of Double objects to be converted.
+     * @param valueForNull the value to be used for {@code null} values in the input array.
+     * @return a 3D array of primitive doubles, {@code null} if the input array is {@code null}.
      * @see #unbox(Double[][], double)
      */
     @MayReturnNull
@@ -5564,9 +5541,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Original matrix is 2x3, transposed is 3x2
      * }</pre>
      *
-     * @param <T> The type of the elements in the 2D array.
-     * @param a The original 2D array to be transposed.
-     * @return A new 2D array representing the transposed matrix, or {@code null} if the input array is {@code null}.
+     * @param <T> the type of the elements in the 2D array.
+     * @param a the original 2D array to be transposed.
+     * @return a new 2D array representing the transposed matrix, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a matrix.
      */
     @MayReturnNull

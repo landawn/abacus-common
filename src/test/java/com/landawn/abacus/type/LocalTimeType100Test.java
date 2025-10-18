@@ -19,8 +19,8 @@ import java.sql.Time;
 import java.time.LocalTime;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -60,7 +60,7 @@ public class LocalTimeType100Test extends TestBase {
     @Test
     public void testValueOf_Object_Number() {
         long millis = 1703502645123L;
-        LocalTime result = localTimeType.valueOf((Object) millis);
+        LocalTime result = localTimeType.valueOf(millis);
         assertNotNull(result);
     }
 

@@ -251,14 +251,6 @@ public abstract class Wrapper<T> implements Immutable {
     @Override
     public abstract boolean equals(final Object obj);
 
-    //    static <T> T checkArray(T a) {
-    //        if (a != null && a.getClass().isArray() == false) {
-    //            throw new IllegalArgumentException(a.getClass().getCanonicalName() + " is not array type");
-    //        }
-    //
-    //        return a;
-    //    }
-
     static final class AnyWrapper<T> extends Wrapper<T> {
 
         private final ToIntFunction<? super T> hashFunction;

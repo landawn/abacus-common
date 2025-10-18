@@ -20,8 +20,8 @@ import java.sql.Timestamp;
 import java.time.Instant;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -67,7 +67,7 @@ public class InstantType100Test extends TestBase {
     @Test
     public void testValueOf_Object_Number() {
         long millis = 1703502645123L;
-        Instant result = instantType.valueOf((Object) millis);
+        Instant result = instantType.valueOf(millis);
         assertNotNull(result);
         assertEquals(millis, result.toEpochMilli());
     }

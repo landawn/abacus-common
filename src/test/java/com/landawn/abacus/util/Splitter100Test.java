@@ -21,8 +21,8 @@ import java.util.TreeMap;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
@@ -231,7 +231,7 @@ public class Splitter100Test extends TestBase {
     @Test
     public void testSplitWithType() {
         Splitter splitter = Splitter.with(',');
-        Type<Integer> intType = N.typeOf(Integer.class);
+        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
         List<Integer> result = splitter.split("1,2,3", intType);
         assertEquals(Arrays.asList(1, 2, 3), result);
 
@@ -241,7 +241,7 @@ public class Splitter100Test extends TestBase {
     @Test
     public void testSplitWithTypeAndSupplier() {
         Splitter splitter = Splitter.with(',');
-        Type<Integer> intType = N.typeOf(Integer.class);
+        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
         Vector<Integer> result = splitter.split("1,2,3", intType, Fn.s(() -> new Vector<>()));
         assertEquals(Arrays.asList(1, 2, 3), result);
         assertTrue(result instanceof Vector);
@@ -272,7 +272,7 @@ public class Splitter100Test extends TestBase {
     @Test
     public void testSplitIntoCollectionWithType() {
         Splitter splitter = Splitter.with(',');
-        Type<Integer> intType = N.typeOf(Integer.class);
+        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
         List<Integer> output = new ArrayList<>();
         splitter.split("1,2,3", intType, output);
         assertEquals(Arrays.asList(1, 2, 3), output);
@@ -504,7 +504,7 @@ public class Splitter100Test extends TestBase {
 
         assertThrows(IllegalArgumentException.class, () -> mapSplitter.split("a=1,b"));
 
-        assertEquals(N.asMap("a", "1=2"), mapSplitter.split("a=1=2"));
+        assertEquals(CommonUtil.asMap("a", "1=2"), mapSplitter.split("a=1=2"));
     }
 
     @Test
@@ -536,8 +536,8 @@ public class Splitter100Test extends TestBase {
     @Test
     public void testMapSplitterSplitWithTypes() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=");
-        Type<String> stringType = N.typeOf(String.class);
-        Type<Integer> intType = N.typeOf(Integer.class);
+        Type<String> stringType = CommonUtil.typeOf(String.class);
+        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
         Map<String, Integer> result = mapSplitter.split("a=1,b=2,c=3", stringType, intType);
         Map<String, Integer> expected = new LinkedHashMap<>();
         expected.put("a", 1);
@@ -564,8 +564,8 @@ public class Splitter100Test extends TestBase {
     @Test
     public void testMapSplitterSplitWithTypesAndSupplier() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=");
-        Type<String> stringType = N.typeOf(String.class);
-        Type<Integer> intType = N.typeOf(Integer.class);
+        Type<String> stringType = CommonUtil.typeOf(String.class);
+        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
         Map<String, Integer> result = mapSplitter.split("a=1,b=2,c=3", stringType, intType, Suppliers.ofLinkedHashMap());
         Map<String, Integer> expected = new LinkedHashMap<>();
         expected.put("a", 1);
@@ -608,8 +608,8 @@ public class Splitter100Test extends TestBase {
     @Test
     public void testMapSplitterSplitIntoMapWithTypes() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=");
-        Type<String> stringType = N.typeOf(String.class);
-        Type<Integer> intType = N.typeOf(Integer.class);
+        Type<String> stringType = CommonUtil.typeOf(String.class);
+        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
         Map<String, Integer> output = new HashMap<>();
         mapSplitter.split("a=1,b=2,c=3", stringType, intType, output);
         Map<String, Integer> expected = new HashMap<>();

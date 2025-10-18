@@ -1809,7 +1809,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Elements are combined by applying the zip function to elements at the same index from both arrays.
      * This is a lazy operation - arrays are not accessed until the sequence is consumed.
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Integer[] a1 = {1, 2, 3};
      * String[] a2 = {"a", "b", "c", "d"};
@@ -1860,7 +1860,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Elements are combined by applying the zip function to elements at the same index from all three arrays.
      * This is a lazy operation - arrays are not accessed until the sequence is consumed.
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Integer[] a1 = {1, 2, 3};
      * String[] a2 = {"a", "b", "c"};
@@ -1913,7 +1913,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Elements are combined by applying the zip function to elements at the same position from both iterables.
      * This is a lazy operation - iterables are not accessed until the sequence is consumed.
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<Integer> list1 = Arrays.asList(1, 2, 3);
      * Set<String> set2 = new HashSet<>(Arrays.asList("a", "b", "c", "d"));
@@ -2140,7 +2140,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * The resulting sequence length is equal to the length of the longer input array.
      * This is a lazy operation - arrays are not accessed until the sequence is consumed.
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Integer[] a1 = {1, 2};
      * String[] a2 = {"a", "b", "c"};
@@ -2197,7 +2197,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * The resulting sequence length is equal to the length of the longest input array.
      * This is a lazy operation - arrays are not accessed until the sequence is consumed.
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Integer[] a1 = {1, 2};
      * String[] a2 = {"a", "b", "c"};
@@ -5031,7 +5031,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(3, 4, 5);
      * List<Integer> toPrepend = Arrays.asList(1, 2);
@@ -5055,7 +5055,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq1 = Seq.of("world");
      * Seq<String> seq2 = Seq.of("hello", " ");
@@ -5081,7 +5081,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("world");
      * Optional<String> maybeHello = Optional.of("hello");
@@ -5112,7 +5112,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2);
      * Seq<Integer> result = seq.append(3, 4, 5);
@@ -5136,7 +5136,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b");
      * List<String> toAppend = Arrays.asList("c", "d");
@@ -5160,7 +5160,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq1 = Seq.of(1, 2);
      * Seq<Integer> seq2 = Seq.of(3, 4);
@@ -5186,7 +5186,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("hello");
      * Optional<String> maybeWorld = Optional.of("world");
@@ -5217,7 +5217,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> emptySeq = Seq.<Integer>empty();
      * Seq<Integer> result1 = emptySeq.appendIfEmpty(1, 2, 3);
@@ -5244,7 +5244,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> emptySeq = Seq.<String>empty();
      * List<String> defaults = Arrays.asList("default1", "default2");
@@ -5330,7 +5330,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> emptySeq = Seq.<Integer>empty();
      * Supplier<Seq<Integer>> defaultSupplier = () -> Seq.of(1, 2, 3);
@@ -5415,7 +5415,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> emptySeq = Seq.<String>empty();
      * Seq<String> result1 = emptySeq.defaultIfEmpty("default");
@@ -5443,7 +5443,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> emptySeq = Seq.<Integer>empty();
      * Supplier<Seq<Integer>> defaultSupplier = () -> Seq.of(1, 2, 3);
@@ -5471,7 +5471,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = getSeq();
      * Integer first = seq.throwIfEmpty().first().orElseThrow();
@@ -5493,7 +5493,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = getSeq();
      * String result = seq.throwIfEmpty(() -> new IllegalStateException("Sequence must not be empty"))
@@ -5522,7 +5522,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = getSeq();
      * seq.ifEmpty(() -> System.out.println("Sequence is empty"))
@@ -5603,7 +5603,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * List<Integer> sideEffect = new ArrayList<>();
@@ -5645,7 +5645,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("first", "second", "third");
      * seq.onFirst(s -> System.out.println("Processing first: " + s))
@@ -5695,7 +5695,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("first", "second", "last");
      * seq.onLast(s -> System.out.println("Processing last: " + s))
@@ -5744,7 +5744,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * seq.peek(n -> System.out.println("Processing: " + n))
@@ -5777,7 +5777,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("first", "second", "third");
      * seq.peekFirst(s -> System.out.println("First element: " + s))
@@ -5807,7 +5807,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("first", "second", "last");
      * seq.peekLast(s -> System.out.println("Last element: " + s))
@@ -5837,7 +5837,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * seq.peekIf(n -> n % 2 == 0, n -> System.out.println("Even number found: " + n))
@@ -5872,7 +5872,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c", "d", "e");
      * seq.peekIf((s, index) -> index % 2 == 0, s -> System.out.println("Element at even position: " + s))
@@ -5882,7 +5882,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Element at even position: d
      * }</pre>
      *
-     * @param predicate The predicate to test each element. The first parameter is the element, and the second parameter is the count of iterated elements, starting with 1.
+     * @param predicate the predicate to test each element. The first parameter is the element, and the second parameter is the count of iterated elements, starting with 1.
      * @param action the action to be performed on the elements pulled by downstream/terminal operation which matches the given predicate
      * @return this {@code Seq} instance
      * @throws IllegalStateException if the sequence is already closed
@@ -5910,7 +5910,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5, 6, 7);
      * Seq<List<Integer>> chunks = seq.split(3);
@@ -5933,7 +5933,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c", "d", "e");
      * Seq<Set<String>> chunks = seq.split(2, HashSet::new);
@@ -5998,7 +5998,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5, 6);
      * Seq<String> joined = seq.split(2, Collectors.joining(","));
@@ -6068,7 +6068,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 3, 5, 2, 4, 6, 7, 9);
      * Seq<List<Integer>> groups = seq.split(n -> n % 2 == 0);
@@ -6094,7 +6094,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "ab", "abc", "d", "de");
      * Seq<Set<String>> groups = seq.split(s -> s.length() > 1, HashSet::new);
@@ -6164,7 +6164,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 3, 5, 2, 4, 6, 7, 9);
      * Seq<String> joined = seq.split(n -> n % 2 == 0, Collectors.joining(","));
@@ -6239,7 +6239,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * Seq<Seq<Integer, E>, E> split = seq.splitAt(3);
@@ -6323,7 +6323,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * Seq<Seq<Integer, E>, E> split = seq.splitAt(n -> n > 3);
@@ -6447,7 +6447,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * Seq<List<Integer>> windows = seq.sliding(3);
@@ -6471,7 +6471,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c", "d");
      * Seq<Set<String>> windows = seq.sliding(2, HashSet::new);
@@ -6498,7 +6498,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * Seq<String> windows = seq.sliding(3, Collectors.joining(","));
@@ -6538,18 +6538,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public Seq<List<T>, E> sliding(final int windowSize, final int increment) throws IllegalStateException, IllegalArgumentException {
         return sliding(windowSize, increment, IntFunctions.ofList());
     }
-
-    //    /**
-    //     * Sliding to set.
-    //     *
-    //     * @param windowSize
-    //     * @param increment
-    //     * @return
-    //     */
-    //    @IntermediateOp
-    //    public Seq<Set<T>, E> slidingToSet(final int windowSize, final int increment) {
-    //        return sliding(windowSize, increment, IntFunctions.<T> ofSet());
-    //    }
 
     /**
      * Creates a sliding window view of the sequence with the specified window size and increment.
@@ -7023,18 +7011,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }, sorted, cmp, closeHandlers);
     }
 
-    //    /**
-    //     *
-    //     *
-    //     * @return
-    //     * @deprecated Use {@link #skipNulls()} instead
-    //     */
-    //    @Deprecated
-    //    @IntermediateOp
-    //    public Seq<T, E> skipNull() {
-    //        return skipNulls();
-    //    }
-
     /**
      * Limits the number of elements in the sequence to the specified maximum size.
      * If the sequence contains fewer elements than maxSize, all elements are included.
@@ -7085,22 +7061,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         }, sorted, cmp, closeHandlers);
     }
-
-    //    /**
-    //     *
-    //     * @param from
-    //     * @param to
-    //     * @return
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    public Seq<T, E> slice(final long from, final long to) {
-    //        checkArgNotNegative(from, "from");
-    //        checkArgNotNegative(to, "to");
-    //        checkArgument(to >= from, "'to' can't be less than 'from'");
-    //
-    //        return from == 0 ? limit(to) : skip(from).limit(to - from);
-    //    }
 
     /**
      * Returns a new {@code Seq} consisting of the last {@code n} elements of this sequence.
@@ -7293,18 +7253,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                 cursor = n < to - cursor ? cursor + (int) n : to;
             }
-
-            //                //    public <A> A[] toArray(A[] b) throws E {
-            //        if (initialized == false) {
-            //            init();
-            //        }
-            //
-            //        b = b.length >= to - cursor ? b : (A[]) N.newArray(b.getClass().getComponentType(), to - cursor);
-            //
-            //        N.copy(aar, cursor, b, 0, to - cursor);
-            //        cursor = to;
-            //        return b;
-            //    }
 
             private void init() throws E {
                 if (!initialized) {
@@ -8196,7 +8144,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>This is an intermediate operation that creates a new sequence containing every n-th element from the original
      * sequence, where n is the specified step size. The first element is always included.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Returns [1, 3, 5]
      * Seq.of(1, 2, 3, 4, 5).step(2).toList()
@@ -8243,7 +8191,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>This is an intermediate operation that transforms each element into an {@link Indexed} object
      * containing the original element and its zero-based position in the sequence.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Returns [Indexed{value=a, index=0}, Indexed{value=b, index=1}, Indexed{value=c, index=2}]
      * Seq.of("a", "b", "c").indexed().toList()
@@ -8275,7 +8223,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>The default queue size is 64. If the queue becomes full, the producer thread will block until space becomes available.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Buffer elements for smoother processing
      * seq.buffered().forEach(element -> processSlowly(element));
@@ -8300,7 +8248,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>If the queue becomes full, the producer thread will block until space becomes available.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Buffer up to 100 elements
      * seq.buffered(100).forEach(element -> processSlowly(element));
@@ -8337,7 +8285,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * based on the merge strategy determined by the selector function. The selector function is called for each
      * pair of elements and returns a {@link MergeResult} indicating which element(s) to include in the output.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq1 = Seq.of(1, 3, 5);
      * List<Integer> list2 = Arrays.asList(2, 4, 6);
@@ -8373,7 +8321,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <li>TAKE_BOTH: Take both elements (first sequence element followed by second)</li>
      * </ul></p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq1 = Seq.of(1, 3, 5);
      * Seq<Integer> seq2 = Seq.of(2, 4, 6);
@@ -8397,27 +8345,26 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this sequence with the given collection using the provided zip function.
-     * <p>This is an intermediate operation that combines corresponding elements from this sequence and the given
-     * collection using the specified function. The resulting sequence will have a length equal to the minimum of
-     * the two input sizes. Extra elements from the longer input are ignored.</p>
-     * 
+     * Zips this stream with the given collection using the provided zip function.
+     * The zip function takes elements from this stream and the given collection until either the current stream or the given collection runs out of elements.
+     * The resulting stream will have the length of the shorter of the current stream and the given collection.
+     * This is an intermediate operation.
+     *
      * <p>Example:
      * <pre>{@code
-     * Seq<String> names = Seq.of("Alice", "Bob", "Charlie");
-     * List<Integer> ages = Arrays.asList(25, 30, 35);
-     * 
-     * // Returns ["Alice:25", "Bob:30", "Charlie:35"]
-     * names.zipWith(ages, (name, age) -> name + ":" + age).toList()
-     * }</pre></p>
+     * Seq.of("a", "b", "c")
+     *    .zipWith(Arrays.asList(1, 2, 3, 4),
+     *             (s, i) -> s + i)
+     *    .toList(); // Returns ["a1", "b2", "c3"]
+     * }</pre>
      *
-     * @param <T2> the type of elements in the given collection
-     * @param <R> the type of elements in the resulting sequence
-     * @param b the collection to zip with this sequence
-     * @param zipFunction a BiFunction that combines an element from this sequence with an element from the collection
-     * @return a new {@code Seq} containing the zipped elements
+     * @param <T2> the type of elements in the given Collection
+     * @param <R> the type of elements in the resulting Seq
+     * @param b the Collection to be combined with the current Seq. Must be non-null.
+     * @param zipFunction a BiFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @return a new Seq that is the result of combining the current Seq with the given Collection
      * @throws IllegalStateException if the sequence is already closed
-     * @see #zip(Iterable, Iterable, Throwables.BiFunction)
+     * @see #zipWith(Collection, Object, Object, Throwables.BiFunction)
      * @see N#zip(Iterable, Iterable, BiFunction)
      */
     @IntermediateOp
@@ -8429,27 +8376,28 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this sequence with the given collection using the provided zip function and default values.
-     * <p>This is an intermediate operation that combines corresponding elements from this sequence and the given
-     * collection using the specified function. Unlike {@link #zipWith(Collection, Throwables.BiFunction)}, this method
-     * continues until both inputs are exhausted, using the provided default values when one input runs out.</p>
-     * 
+     * Zips this stream with the given collection using the provided zip function.
+     * The zip function combines elements from this stream and the given collection until both the current stream or the given collection runs out of elements.
+     * The resulting stream will have the length of the longer of the current stream and the given collection.
+     * If the current stream or the given collection runs out of elements before the other, the provided default values are used.
+     * This is an intermediate operation.
+     *
      * <p>Example:
      * <pre>{@code
-     * Seq<String> names = Seq.of("Alice", "Bob");
-     * List<Integer> ages = Arrays.asList(25, 30, 35);
-     * 
-     * // Returns ["Alice:25", "Bob:30", "Unknown:35"]
-     * names.zipWith(ages, "Unknown", 0, (name, age) -> name + ":" + age).toList()
-     * }</pre></p>
+     * Seq.of("a", "b")
+     *    .zipWith(Arrays.asList(1, 2, 3),
+     *             "z", 0,
+     *             (s, i) -> s + i)
+     *    .toList(); // Returns ["a1", "b2", "z3"]
+     * }</pre>
      *
-     * @param <T2> the type of elements in the given collection
-     * @param <R> the type of elements in the resulting sequence
-     * @param b the collection to zip with this sequence
-     * @param valueForNoneA the default value to use when this sequence is exhausted
-     * @param valueForNoneB the default value to use when the collection is exhausted
-     * @param zipFunction a BiFunction that combines elements from both inputs
-     * @return a new {@code Seq} containing the zipped elements
+     * @param <T2> the type of elements in the given Collection
+     * @param <R> the type of elements in the resulting Seq
+     * @param b the Collection to be combined with the current Seq. Must be non-null.
+     * @param valueForNoneA the default value to use for the current Seq when it runs out of elements
+     * @param valueForNoneB the default value to use for the Collection when it runs out of elements
+     * @param zipFunction a BiFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @return a new Seq that is the result of combining the current Seq with the given Collection
      * @throws IllegalStateException if the sequence is already closed
      * @see N#zip(Iterable, Iterable, Object, Object, BiFunction)
      */
@@ -8462,28 +8410,27 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this sequence with two collections using the provided zip function.
-     * <p>This is an intermediate operation that combines corresponding elements from this sequence and two
-     * collections using the specified function. The resulting sequence will have a length equal to the minimum
-     * of the three input sizes. Extra elements from longer inputs are ignored.</p>
-     * 
+     * Zips this stream with the given collections using the provided zip function.
+     * The zip function takes elements from this stream and the given collections until either the current stream or one of the given collections runs out of elements.
+     * The resulting stream will have the length of the shortest of the current stream and the given collections.
+     * This is an intermediate operation.
+     *
      * <p>Example:
      * <pre>{@code
-     * Seq<String> names = Seq.of("Alice", "Bob");
-     * List<Integer> ages = Arrays.asList(25, 30);
-     * List<String> cities = Arrays.asList("NYC", "LA");
-     * 
-     * // Returns ["Alice (25) - NYC", "Bob (30) - LA"]
-     * names.zipWith(ages, cities, (n, a, c) -> n + " (" + a + ") - " + c).toList()
-     * }</pre></p>
+     * Seq.of("a", "b", "c")
+     *    .zipWith(Arrays.asList(1, 2),
+     *             Arrays.asList(true, false, true),
+     *             (s, i, b) -> s + i + b)
+     *    .toList(); // Returns ["a1true", "b2false"]
+     * }</pre>
      *
-     * @param <T2> the type of elements in the first collection
-     * @param <T3> the type of elements in the second collection
-     * @param <R> the type of elements in the resulting sequence
-     * @param b the first collection to zip with this sequence
-     * @param c the second collection to zip with this sequence
-     * @param zipFunction a TriFunction that combines elements from all three inputs
-     * @return a new {@code Seq} containing the zipped elements
+     * @param <T2> the type of elements in the first given Collection
+     * @param <T3> the type of elements in the second given Collection
+     * @param <R> the type of elements in the resulting Seq
+     * @param b the first Collection to be combined with the current Seq. Must be non-null.
+     * @param c the second Collection to be combined with the current Seq. Must be non-null.
+     * @param zipFunction a TriFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @return a new Seq that is the result of combining the current Seq with the given Collections
      * @throws IllegalStateException if the sequence is already closed
      * @see #zipWith(Collection, Collection, Object, Object, Object, Throwables.TriFunction)
      * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
@@ -8497,32 +8444,32 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this sequence with two collections using the provided zip function and default values.
-     * <p>This is an intermediate operation that combines corresponding elements from this sequence and two
-     * collections using the specified function. Unlike {@link #zipWith(Collection, Collection, Throwables.TriFunction)},
-     * this method continues until all inputs are exhausted, using the provided default values when an input runs out.</p>
-     * 
+     * Zips this stream with the given collections using the provided zip function.
+     * The zip function combines elements from this stream and the given collections until both the current stream or the given collections runs out of elements.
+     * The resulting stream will have the length of the longest of the current stream and the given collections.
+     * If the current stream or one of the given collections runs out of elements before the other, the provided default values are used.
+     * This is an intermediate operation.
+     *
      * <p>Example:
      * <pre>{@code
-     * Seq<String> names = Seq.of("Alice", "Bob");
-     * List<Integer> ages = Arrays.asList(25);
-     * List<String> cities = Arrays.asList("NYC", "LA", "Chicago");
-     * 
-     * // Returns ["Alice (25) - NYC", "Bob (0) - LA", "? (0) - Chicago"]
-     * names.zipWith(ages, cities, "?", 0, "Unknown", 
-     *     (n, a, c) -> n + " (" + a + ") - " + c).toList()
-     * }</pre></p>
+     * Seq.of("a", "b")
+     *    .zipWith(Arrays.asList(1),
+     *             Arrays.asList(true, false, true),
+     *             "z", 0, false,
+     *             (s, i, b) -> s + i + b)
+     *    .toList(); // Returns ["a1true", "b0false", "z0true"]
+     * }</pre>
      *
-     * @param <T2> the type of elements in the first collection
-     * @param <T3> the type of elements in the second collection
-     * @param <R> the type of elements in the resulting sequence
-     * @param b the first collection to zip with this sequence
-     * @param c the second collection to zip with this sequence
-     * @param valueForNoneA the default value to use when this sequence is exhausted
-     * @param valueForNoneB the default value to use when the first collection is exhausted
-     * @param valueForNoneC the default value to use when the second collection is exhausted
-     * @param zipFunction a TriFunction that combines elements from all three inputs
-     * @return a new {@code Seq} containing the zipped elements
+     * @param <T2> the type of elements in the first given Collection
+     * @param <T3> the type of elements in the second given Collection
+     * @param <R> the type of elements in the resulting Seq
+     * @param b the first Collection to be combined with the current Seq. Must be non-null.
+     * @param c the second Collection to be combined with the current Seq. Must be non-null.
+     * @param valueForNoneA the default value to use for the current Seq when it runs out of elements
+     * @param valueForNoneB the default value to use for the first Collection when it runs out of elements
+     * @param valueForNoneC the default value to use for the second Collection when it runs out of elements
+     * @param zipFunction a TriFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @return a new Seq that is the result of combining the current Seq with the given Collections
      * @throws IllegalStateException if the sequence is already closed
      * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
@@ -8535,27 +8482,26 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this sequence with the given sequence using the provided zip function.
-     * <p>This is an intermediate operation that combines corresponding elements from two sequences using the
-     * specified function. The resulting sequence will have a length equal to the minimum of the two input sizes.
-     * Extra elements from the longer sequence are ignored.</p>
-     * 
+     * Zips this stream with the given stream using the provided zip function.
+     * The zip function takes elements from this stream and the given stream until either the current stream or the given stream runs out of elements.
+     * The resulting stream will have the length of the shorter of the current stream and the given stream.
+     * This is an intermediate operation.
+     *
      * <p>Example:
      * <pre>{@code
-     * Seq<String> firstNames = Seq.of("John", "Jane", "Bob");
-     * Seq<String> lastNames = Seq.of("Doe", "Smith");
-     * 
-     * // Returns ["John Doe", "Jane Smith"]
-     * firstNames.zipWith(lastNames, (f, l) -> f + " " + l).toList()
-     * }</pre></p>
+     * Seq.of(1, 2, 3)
+     *    .zipWith(Seq.of("a", "b", "c", "d"),
+     *             (i, s) -> i + s)
+     *    .toList(); // Returns ["1a", "2b", "3c"]
+     * }</pre>
      *
-     * @param <T2> the type of elements in the given sequence
-     * @param <R> the type of elements in the resulting sequence
-     * @param b the sequence to zip with this sequence
-     * @param zipFunction a BiFunction that combines elements from both sequences
-     * @return a new {@code Seq} containing the zipped elements
+     * @param <T2> the type of elements in the given Seq
+     * @param <R> the type of elements in the resulting Seq
+     * @param b the Seq to be combined with the current Seq. Must be non-null.
+     * @param zipFunction a BiFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @return a new Seq that is the result of combining the current Seq with the given Seq
      * @throws IllegalStateException if the sequence is already closed
-     * @see #zip(Seq, Seq, Object, Object, Throwables.BiFunction)
+     * @see #zipWith(Seq, Object, Object, Throwables.BiFunction)
      * @see N#zip(Iterable, Iterable, BiFunction)
      */
     @IntermediateOp
@@ -8567,27 +8513,26 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this sequence with the given sequence using the provided zip function and default values.
-     * <p>This is an intermediate operation that combines corresponding elements from two sequences using the
-     * specified function. Unlike {@link #zipWith(Seq, Throwables.BiFunction)}, this method continues until both sequences
-     * are exhausted, using the provided default values when one sequence runs out.</p>
-     * 
+     * Zips this stream with the given stream using the provided zip function, with default values for missing elements.
+     * This is an intermediate operation that combines elements from two streams pairwise.
+     *
+     * <p>The resulting stream will have the length of the longer of the two streams.
+     * Default values are used when one stream runs out of elements before the other.
+     *
      * <p>Example:
      * <pre>{@code
-     * Seq<String> firstNames = Seq.of("John", "Jane");
-     * Seq<String> lastNames = Seq.of("Doe", "Smith", "Johnson");
-     * 
-     * // Returns ["John Doe", "Jane Smith", "? Johnson"]
-     * firstNames.zipWith(lastNames, "?", "Anonymous", (f, l) -> f + " " + l).toList()
-     * }</pre></p>
+     * Seq.of(1, 2, 3)
+     *    .zipWith(Seq.of("a"), 0, "z", (i, s) -> i + s)
+     *    .toList(); // Returns ["1a", "2z", "3z"]
+     * }</pre>
      *
-     * @param <T2> the type of elements in the given sequence
-     * @param <R> the type of elements in the resulting sequence
-     * @param b the sequence to zip with this sequence
-     * @param valueForNoneA the default value to use when this sequence is exhausted
-     * @param valueForNoneB the default value to use when the given sequence is exhausted
-     * @param zipFunction a BiFunction that combines elements from both sequences
-     * @return a new {@code Seq} containing the zipped elements
+     * @param <T2> the type of elements in the given Seq
+     * @param <R> the type of elements in the resulting Seq
+     * @param b the Seq to be combined with the current Seq. Will be closed along with this Seq.
+     * @param valueForNoneA the default value to use for the current Seq when it runs out of elements
+     * @param valueForNoneB the default value to use for the given Seq when it runs out of elements
+     * @param zipFunction a BiFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @return a new Seq that is the result of combining the current Seq with the given Seq
      * @throws IllegalStateException if the sequence is already closed
      * @see N#zip(Iterable, Iterable, Object, Object, BiFunction)
      */
@@ -8600,31 +8545,29 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this sequence with two other sequences using the provided zip function.
-     * <p>This is an intermediate operation that combines corresponding elements from three sequences using the
-     * specified function. The resulting sequence will have a length equal to the minimum of the three input sizes.
-     * Extra elements from longer sequences are ignored.</p>
-     * 
+     * Zips this stream with two other streams using the provided zip function.
+     * This is an intermediate operation that combines elements from three streams.
+     *
+     * <p>The resulting stream will have the length of the shortest of the three streams.
+     * If any stream is longer, its remaining elements are ignored.
+     *
      * <p>Example:
      * <pre>{@code
-     * Seq<String> names = Seq.of("Product A", "Product B");
-     * Seq<Double> prices = Seq.of(10.99, 25.50);
-     * Seq<Integer> quantities = Seq.of(5, 3);
-     * 
-     * // Returns ["Product A: $54.95", "Product B: $76.50"]
-     * names.zipWith(prices, quantities, 
-     *     (n, p, q) -> n + ": $" + (p * q)).toList()
-     * }</pre></p>
+     * Seq.of(1, 2, 3)
+     *    .zipWith(Seq.of("a", "b"), Seq.of(true, false),
+     *             (i, s, b) -> i + s + b)
+     *    .toList(); // Returns ["1atrue", "2bfalse"]
+     * }</pre>
      *
-     * @param <T2> the type of elements in the first additional sequence
-     * @param <T3> the type of elements in the second additional sequence
-     * @param <R> the type of elements in the resulting sequence
-     * @param b the first sequence to zip with this sequence
-     * @param c the second sequence to zip with this sequence
-     * @param zipFunction a TriFunction that combines elements from all three sequences
-     * @return a new {@code Seq} containing the zipped elements
+     * @param <T2> the type of elements in the second Seq
+     * @param <T3> the type of elements in the third Seq
+     * @param <R> the type of elements in the resulting Seq
+     * @param b the second Seq to be combined with the current Seq. Will be closed along with this Seq.
+     * @param c the third Seq to be combined with the current Seq. Will be closed along with this Seq.
+     * @param zipFunction a TriFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @return a new Seq that is the result of combining the current Seq with the given Seqs
      * @throws IllegalStateException if the sequence is already closed
-     * @see #zip(Seq, Seq, Seq, Object, Object, Object, Throwables.TriFunction)
+     * @see #zipWith(Seq, Seq, Object, Object, Object, Throwables.TriFunction)
      * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      */
     @IntermediateOp
@@ -8636,32 +8579,31 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this sequence with two other sequences using the provided zip function and default values.
-     * <p>This is an intermediate operation that combines corresponding elements from three sequences using the
-     * specified function. Unlike {@link #zipWith(Seq, Seq, Throwables.TriFunction)}, this method continues until all
-     * sequences are exhausted, using the provided default values when a sequence runs out.</p>
-     * 
+     * Zips this stream with two other streams using the provided zip function, with default values for missing elements.
+     * This is an intermediate operation that combines elements from three streams.
+     *
+     * <p>The resulting stream will have the length of the longest of the three streams.
+     * Default values are used when any stream runs out of elements before the others.
+     *
      * <p>Example:
      * <pre>{@code
-     * Seq<String> names = Seq.of("Product A");
-     * Seq<Double> prices = Seq.of(10.99, 25.50);
-     * Seq<Integer> quantities = Seq.of(5, 3, 7);
-     * 
-     * // Returns ["Product A: $54.95", "Unknown: $76.50", "Unknown: $0.00"]
-     * names.zipWith(prices, quantities, "Unknown", 0.0, 0,
-     *     (n, p, q) -> n + ": $" + (p * q)).toList()
-     * }</pre></p>
+     * Seq.of(1, 2, 3)
+     *    .zipWith(Seq.of("a"), Seq.of(true),
+     *             0, "z", false,
+     *             (i, s, b) -> i + s + b)
+     *    .toList(); // Returns ["1atrue", "2zfalse", "3zfalse"]
+     * }</pre>
      *
-     * @param <T2> the type of elements in the first additional sequence
-     * @param <T3> the type of elements in the second additional sequence
-     * @param <R> the type of elements in the resulting sequence
-     * @param b the first sequence to zip with this sequence
-     * @param c the second sequence to zip with this sequence
-     * @param valueForNoneA the default value to use when this sequence is exhausted
-     * @param valueForNoneB the default value to use when the first additional sequence is exhausted
-     * @param valueForNoneC the default value to use when the second additional sequence is exhausted
-     * @param zipFunction a TriFunction that combines elements from all three sequences
-     * @return a new {@code Seq} containing the zipped elements
+     * @param <T2> the type of elements in the second Seq
+     * @param <T3> the type of elements in the third Seq
+     * @param <R> the type of elements in the resulting Seq
+     * @param b the second Seq to be combined with the current Seq. Will be closed along with this Seq.
+     * @param c the third Seq to be combined with the current Seq. Will be closed along with this Seq.
+     * @param valueForNoneA the default value to use for the current Seq when it runs out of elements
+     * @param valueForNoneB the default value to use for the second Seq when it runs out of elements
+     * @param valueForNoneC the default value to use for the third Seq when it runs out of elements
+     * @param zipFunction a TriFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @return a new Seq that is the result of combining the current Seq with the given Seqs
      * @throws IllegalStateException if the sequence is already closed
      * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
@@ -8681,7 +8623,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>This method is an alias for {@link #forEach(Throwables.Consumer)} that accepts a regular {@link Consumer}
      * instead of a {@link Throwables.Consumer}.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * seq.foreach(System.out::println);
      * 
@@ -8715,7 +8657,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>The action can throw checked exceptions of type E2, which will be propagated to the caller.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Simple printing
      * seq.forEach(System.out::println);
@@ -8752,7 +8694,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>This is a terminal operation that executes the specified action for each element along with its
      * zero-based index. The sequence is automatically closed after this operation completes.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq.of("a", "b", "c").forEachIndexed((index, value) -> 
      *     System.out.println(index + ": " + value));
@@ -8795,7 +8737,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>The flag can only be set after at least one element has been processed. Once the flag is set to
      * {@code true}, iteration stops and the sequence is closed.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Process elements until sum exceeds 100
      * MutableInt sum = MutableInt.of(0);
@@ -8836,7 +8778,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This method is equivalent to {@code takeWhile(value -> flagToBreak.isFalse()).forEach(action)}.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * MutableBoolean stopFlag = MutableBoolean.of(false);
      * 
@@ -8875,7 +8817,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>The onComplete action is executed even if no elements are present in the sequence, but is not executed
      * if an exception occurs during element processing.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> results = new ArrayList<>();
      * seq.forEach(
@@ -8918,7 +8860,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * the flatMapper function is applied to produce an Iterable, and then the action is executed for each
      * combination of the original element and the items from the Iterable.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Print all person-hobby combinations
      * Seq<Person> people = Seq.of(person1, person2);
@@ -8972,7 +8914,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * produces another Iterable. The action is executed for each combination of the original element and
      * the items from both levels of flat-mapping.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Print all company-department-employee combinations
      * Seq<Company> companies = Seq.of(company1, company2);
@@ -9045,7 +8987,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>If the sequence has fewer than 2 elements, no action is performed.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq.of(1, 3, 6, 10).forEachPair((a, b) -> 
      *     System.out.println(b + " - " + a + " = " + (b - a)));
@@ -9083,7 +9025,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <li>Pairs processed: (a,b), (b,c), (c,d), (d,e), (e,f)</li>
      * </ul></p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Process non-overlapping pairs
      * Seq.of(1, 2, 3, 4, 5, 6).forEachPair(2, (a, b) -> 
@@ -9145,7 +9087,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>If the sequence has fewer than 3 elements, no action is performed.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq.of(1, 2, 3, 4, 5).forEachTriple((a, b, c) -> 
      *     System.out.println("(" + a + "," + b + "," + c + ") -> avg = " + (a+b+c)/3.0));
@@ -9183,7 +9125,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <li>Triples processed: (a,b,c), (b,c,d), (c,d,e), (d,e,f), (e,f,g), (f,g,h), (g,h,i)</li>
      * </ul></p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Process non-overlapping triples
      * Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9).forEachTriple(3, (a, b, c) -> 
@@ -9252,7 +9194,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>If the sequence is already sorted with the same comparator, this operation will return the first
      * element for optimal performance.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Optional<String> shortest = Seq.of("apple", "pie", "banana")
      *     .min(Comparator.comparingInt(String::length));
@@ -9307,7 +9249,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a convenience method equivalent to calling {@code min(Comparators.nullsLastBy(keyMapper))}.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Optional<Person> youngest = people.minBy(Person::getAge);
      * 
@@ -9343,7 +9285,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(3, 1, 4, 1, 5);
      * Optional<Integer> max = seq.max(Integer::compare);
@@ -9391,7 +9333,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("apple", "pie", "banana");
      * Optional<String> longest = seq.maxBy(String::length);
@@ -9429,7 +9371,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * boolean hasEven = seq.anyMatch(n -> n % 2 == 0);
@@ -9469,7 +9411,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(2, 4, 6, 8);
      * boolean allEven = seq.allMatch(n -> n % 2 == 0);
@@ -9510,7 +9452,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 3, 5, 7);
      * boolean noEven = seq.noneMatch(n -> n % 2 == 0);
@@ -9553,7 +9495,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>Implementation note: This is equivalent to {@code atLeast <= stream.filter(predicate).limit(atMost + 1).count() <= atMost}</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5, 6);
      * boolean has2to4Even = seq.nMatch(2, 4, n -> n % 2 == 0);
@@ -9600,7 +9542,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * Optional<Integer> firstEven = seq.findFirst(n -> n % 2 == 0);
@@ -9672,7 +9614,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>Performance note: Consider using {@code seq.reversed().findFirst(predicate)} for better performance 
      * if the sequence supports efficient reversal.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * Optional<Integer> lastEven = seq.findLast(n -> n % 2 == 0);
@@ -9718,7 +9660,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * boolean hasAll = seq.containsAll(2, 4);
@@ -9767,7 +9709,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * List<Integer> list = Arrays.asList(2, 3, 4);
@@ -9810,7 +9752,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * boolean hasAny = seq.containsAny(7, 3, 9);
@@ -9860,7 +9802,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * List<Integer> list = Arrays.asList(7, 3, 9);
@@ -9901,7 +9843,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * boolean hasNone = seq.containsNone(6, 7, 8);
@@ -9936,7 +9878,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * List<Integer> list = Arrays.asList(6, 7, 8);
@@ -9971,7 +9913,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq1 = Seq.of(1, 2, 3, 2, 4);
      * boolean hasDups1 = seq1.hasDuplicates(); // true
@@ -10010,7 +9952,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(3, 1, 4, 1, 5, 9, 2, 6);
      * Optional<Integer> third = seq.kthLargest(3, Integer::compare);
@@ -10079,7 +10021,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
      * Optional<Map<Percentage, Integer>> percentiles = seq.percentiles();
@@ -10118,7 +10060,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("apple", "pie", "banana", "zoo");
      * Optional<Map<Percentage, String>> percentiles = seq.percentiles(String::compareTo);
@@ -10158,7 +10100,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("first", "second", "third");
      * Optional<String> first = seq.first();
@@ -10196,7 +10138,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>Performance note: Consider using {@code seq.reversed().first()} for better performance 
      * when the sequence supports efficient reversal.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("first", "second", "third");
      * Optional<String> last = seq.last();
@@ -10237,7 +10179,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("zero", "one", "two", "three");
      * Optional<String> elem = seq.elementAt(2);
@@ -10274,7 +10216,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq1 = Seq.of("single");
      * Optional<String> only1 = seq1.onlyOne(); // only1.get() == "single"
@@ -10315,7 +10257,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c", "d");
      * long count = seq.count(); // count == 4
@@ -10341,7 +10283,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c");
      * Object[] array = seq.toArray();
@@ -10382,7 +10324,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c");
      * String[] array = seq.toArray(String[]::new);
@@ -10417,7 +10359,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * List<Integer> list = seq.toList();
@@ -10453,7 +10395,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 2, 4, 3);
      * Set<Integer> set = seq.toSet();
@@ -10489,7 +10431,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c");
      * LinkedList<String> list = seq.toCollection(LinkedList::new);
@@ -10529,7 +10471,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c");
      * ImmutableList<String> list = seq.toImmutableList();
@@ -10553,7 +10495,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 2, 4);
      * ImmutableSet<Integer> set = seq.toImmutableSet();
@@ -10576,7 +10518,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * int sum = seq.toListThenApply(list -> list.stream().mapToInt(Integer::intValue).sum());
@@ -10608,7 +10550,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("apple", "banana", "cherry");
      * seq.toListThenAccept(list -> {
@@ -10640,7 +10582,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 2, 4, 3);
      * int distinctCount = seq.toSetThenApply(Set::size);
@@ -10672,7 +10614,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("apple", "banana", "apple", "cherry");
      * seq.toSetThenAccept(set -> {
@@ -10704,7 +10646,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("apple", "banana", "cherry");
      * String first = seq.toCollectionThenApply(
@@ -10741,7 +10683,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(3, 1, 4, 1, 5);
      * seq.toCollectionThenAccept(
@@ -10778,7 +10720,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * Map<String, Integer> map = seq.toMap(
      *     person -> person.getName(),
@@ -10816,7 +10758,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * LinkedHashMap<String, Integer> map = seq.toMap(
      *     person -> person.getName(),
@@ -10855,7 +10797,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Sum ages for duplicate names
      * Map<String, Integer> map = seq.toMap(
@@ -10898,7 +10840,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Collect to TreeMap, keeping the last value for duplicates
      * TreeMap<String, Integer> map = seq.toMap(
@@ -10962,7 +10904,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = seq.toImmutableMap(
      *     person -> person.getName(),
@@ -10999,7 +10941,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Create immutable map, concatenating values for duplicate keys
      * ImmutableMap<String, String> map = seq.toImmutableMap(
@@ -11041,7 +10983,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Group persons by department
      * Map<String, List<Person>> byDepartment = seq.groupTo(
@@ -11071,7 +11013,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Group persons by age in a TreeMap
      * TreeMap<Integer, List<Person>> byAge = seq.groupTo(
@@ -11106,7 +11048,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Group persons by department, collecting only names
      * Map<String, List<String>> namesByDept = seq.groupTo(
@@ -11142,7 +11084,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Group persons by age range, collecting salaries in a LinkedHashMap
      * LinkedHashMap<String, List<Double>> salariesByAgeRange = seq.groupTo(
@@ -11207,7 +11149,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Group persons by department and count them
      * Map<String, Long> countByDept = seq.groupTo(
@@ -11239,7 +11181,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Group persons by age and calculate average salary in a TreeMap
      * TreeMap<Integer, Double> avgSalaryByAge = seq.groupTo(
@@ -11274,7 +11216,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Group persons by department, extract names, and join them
      * Map<String, String> namesByDept = seq.groupTo(
@@ -11313,7 +11255,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Group employees by department, extract salaries, and get max salary per department
      * LinkedHashMap<String, Optional<Double>> maxSalaryByDept = seq.groupTo(
@@ -11392,7 +11334,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Partition persons into adults and minors
      * Map<Boolean, List<Person>> adultPartition = seq.partitionTo(
@@ -11423,7 +11365,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Partition persons and count each group
      * Map<Boolean, Long> adultCount = seq.partitionTo(
@@ -11472,7 +11414,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Create multimap of persons by department
      * ListMultimap<String, Person> personsByDept = seq.toMultimap(
@@ -11501,7 +11443,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Create SetMultimap of persons by age
      * SetMultimap<Integer, Person> personsByAge = seq.toMultimap(
@@ -11536,7 +11478,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Create multimap of employee names by department
      * ListMultimap<String, String> namesByDept = seq.toMultimap(
@@ -11571,7 +11513,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Create SetMultimap of employee IDs by department
      * SetMultimap<String, Long> idsByDept = seq.toMultimap(
@@ -11629,7 +11571,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Count occurrences of each element
      * Multiset<String> wordCounts = seq.toMultiset();
@@ -11652,7 +11594,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Create a custom multiset implementation
      * Multiset<String> wordCounts = seq.toMultiset(MyMultiset::new);
@@ -11688,7 +11630,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Convert sequence of Person objects to Dataset
      * Dataset dataset = seq.toDataset();
@@ -11712,14 +11654,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Create Dataset with specific column names
      * List<String> columns = Arrays.asList("Name", "Age", "Department");
      * Dataset dataset = seq.toDataset(columns);
      * }</pre>
      *
-     * @param columnNames The list of column names to be used in the Dataset. Must not be null.
+     * @param columnNames the list of column names to be used in the Dataset. Must not be null.
      * @return a Dataset containing the elements from this sequence with the specified column names
      * @throws IllegalStateException if the sequence is already closed
      * @throws E if an exception occurs during the conversion
@@ -11737,7 +11679,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Sum the ages of all persons
      * long totalAge = seq.sumInt(person -> person.getAge());
@@ -11773,7 +11715,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Sum the IDs of all records
      * long totalIds = seq.sumLong(record -> record.getId());
@@ -11809,7 +11751,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Sum the salaries of all employees
      * double totalSalary = seq.sumDouble(employee -> employee.getSalary());
@@ -11846,7 +11788,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Calculate average age
      * OptionalDouble avgAge = seq.averageInt(person -> person.getAge());
@@ -11892,7 +11834,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Calculate average file size
      * OptionalDouble avgSize = seq.averageLong(file -> file.getSize());
@@ -11935,7 +11877,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Calculate average price
      * OptionalDouble avgPrice = seq.averageDouble(product -> product.getPrice());
@@ -11976,7 +11918,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Sum all numbers
      * Optional<Integer> sum = Seq.of(1, 2, 3, 4, 5)
@@ -12028,7 +11970,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Sum with initial value
      * Integer sum = Seq.of(1, 2, 3, 4, 5)
@@ -12077,7 +12019,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Collect to List
      * List<String> list = Seq.of("a", "b", "c")
@@ -12128,7 +12070,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Collect to List then get size
      * Integer size = Seq.of("a", "b", "c")
@@ -12187,7 +12129,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Collect to List
      * List<String> list = Seq.of("a", "b", "c")
@@ -12234,7 +12176,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Collect to List then check if contains element
      * Boolean contains = Seq.of("a", "b", "c")
@@ -12274,7 +12216,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Collect to List then print
      * Seq.of("a", "b", "c")
@@ -12314,7 +12256,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Join with comma
      * String result = Seq.of("a", "b", "c").join(", ");
@@ -12341,7 +12283,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Join with brackets
      * String result = Seq.of("a", "b", "c").join(", ", "[", "]");
@@ -12383,7 +12325,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a terminal operation and will close the sequence after execution.</p>
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Reuse a Joiner
      * Joiner joiner = Joiner.with(", ", "[", "]");
@@ -12475,25 +12417,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }
     }
 
-    //    /**
-    //     *
-    //     * @return
-    //     * @throws IllegalStateException
-    //     * @throws IllegalArgumentException
-    //     */
-    //    @IntermediateOp
-    //    public java.util.stream.Stream<T> toJdkStream() throws IllegalStateException, IllegalArgumentException {
-    //        assertNotClosed();
-    //
-    //        final Spliterator<T> spliterator = Spliterators.spliteratorUnknownSize(newObjIteratorEx(elements), Spliterator.ORDERED | Spliterator.IMMUTABLE);
-    //
-    //        if (isEmptyCloseHandlers(closeHandlers)) {
-    //            return StreamSupport.stream(spliterator, false);
-    //        } else {
-    //            return StreamSupport.stream(spliterator, false).onClose(this::close);
-    //        }
-    //    }
-
     /**
      * Transforms this sequence into another sequence by applying the provided transformation function.
      * The function receives this sequence as input and returns a new sequence of potentially different element type.
@@ -12553,13 +12476,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     public <U> Seq<U, E> transformB(final Function<? super Stream<T>, ? extends Stream<? extends U>> transfer)
             throws IllegalStateException, IllegalArgumentException {
-        // Major reason for commenting out below lines is to keep consistent with method transform.
-        //        assertNotClosed();
-        //        checkArgNotNull(transfer, "transfer");
-        //
-        //        final Supplier<Seq<U, E>> delayInitializer = () -> Seq.from(transfer.apply(this.unchecked()));
-        //
-        //        return Seq.defer(delayInitializer);
 
         return transformB(transfer, false);
     }
@@ -12617,11 +12533,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                .filter(x -> x > threshold));
      * }</pre>
      *
-     * @param <R> The type of elements in the returned sequence
-     * @param ops The function to be applied on the parallel stream. This function takes the
+     * @param <R> the type of elements in the returned sequence
+     * @param ops the function to be applied on the parallel stream. This function takes the
      *            current sequence converted to a parallel stream and returns a stream with
      *            elements of type R
-     * @return A new sequence containing the elements resulting from the parallel stream operations
+     * @return a new sequence containing the elements resulting from the parallel stream operations
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @see #sps(int, Function)
      * @see #transform(Function)

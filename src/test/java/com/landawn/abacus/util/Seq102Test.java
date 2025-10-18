@@ -18,15 +18,14 @@ import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
-import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 
 @Tag("new-test")
 public class Seq102Test extends TestBase {
@@ -222,6 +221,7 @@ public class Seq102Test extends TestBase {
             this.name = name;
         }
 
+        @Override
         public String toString() {
             return name;
         }
@@ -1317,7 +1317,7 @@ public class Seq102Test extends TestBase {
     @Test
     public void testSplitBySizeWithCollector() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6);
-        List<String> joined = seq.split(2, MoreCollectors.joining(",")).toList();
+        List<String> joined = seq.split(2, com.landawn.abacus.util.stream.Collectors.joining(",")).toList();
         assertEquals(Arrays.asList("1,2", "3,4", "5,6"), joined);
 
         seq = Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
@@ -1374,7 +1374,7 @@ public class Seq102Test extends TestBase {
     @Test
     public void testSplitByPredicateWithCollector() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 3, 5, 2, 4, 6, 7, 9);
-        List<String> joined = seq.split(n -> n % 2 == 0, MoreCollectors.joining(",")).toList();
+        List<String> joined = seq.split(n -> n % 2 == 0, com.landawn.abacus.util.stream.Collectors.joining(",")).toList();
         assertEquals(Arrays.asList("1,3,5", "2,4,6", "7,9"), joined);
 
         Seq<String, Exception> strSeq = Seq.of("a", "b", "cc", "dd", "e", "f");
@@ -1382,7 +1382,7 @@ public class Seq102Test extends TestBase {
         assertEquals(Arrays.asList(2L, 2L, 2L), counts);
 
         seq = Seq.of(1, 3, 2, 8, 6, 4, 5, 7);
-        List<Optional<Integer>> maxValues = seq.split(n -> n > 4, MoreCollectors.max()).toList();
+        List<Optional<Integer>> maxValues = seq.split(n -> n > 4, com.landawn.abacus.util.stream.Collectors.max()).toList();
         assertEquals(3, maxValues.get(0).get().intValue());
         assertEquals(8, maxValues.get(1).get().intValue());
         assertEquals(4, maxValues.get(2).get().intValue());

@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.zip.GZIPOutputStream;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Charsets;
@@ -331,8 +331,8 @@ public class HttpUtil100Test extends TestBase {
 
     @Test
     public void testGetContentTypeForContentFormat() {
-        assertNull(HttpUtil.getContentType((ContentFormat) null));
-        assertNull(HttpUtil.getContentType(ContentFormat.NONE));
+        assertEquals("", HttpUtil.getContentType((ContentFormat) null));
+        assertEquals("", HttpUtil.getContentType(ContentFormat.NONE));
 
         assertEquals("application/json", HttpUtil.getContentType(ContentFormat.JSON));
         assertEquals("application/json", HttpUtil.getContentType(ContentFormat.JSON_GZIP));
@@ -344,8 +344,8 @@ public class HttpUtil100Test extends TestBase {
 
     @Test
     public void testGetContentEncodingForContentFormat() {
-        assertNull(HttpUtil.getContentEncoding((ContentFormat) null));
-        assertNull(HttpUtil.getContentEncoding(ContentFormat.NONE));
+        assertEquals("", HttpUtil.getContentEncoding((ContentFormat) null));
+        assertEquals("", HttpUtil.getContentEncoding(ContentFormat.NONE));
 
         assertEquals("", HttpUtil.getContentEncoding(ContentFormat.JSON));
         assertEquals("gzip", HttpUtil.getContentEncoding(ContentFormat.JSON_GZIP));
@@ -434,14 +434,6 @@ public class HttpUtil100Test extends TestBase {
         assertSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.XML));
         assertSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.FormUrlEncoded));
 
-        //    assertNotSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.JSON_GZIP));
-        //    assertNotSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.JSON_BR));
-        //    assertNotSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.JSON_SNAPPY));
-        //    assertNotSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.JSON_LZ4));
-        //    assertNotSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.GZIP));
-        //    assertNotSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.BR));
-        //    assertNotSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.SNAPPY));
-        //    assertNotSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.LZ4));
     }
 
     @Test

@@ -29,8 +29,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.stream.Stream;
@@ -1409,7 +1409,7 @@ public class Sheet200Test extends TestBase {
             sheet.clear();
             assertDoesNotThrow(() -> sheet.trimToSize());
 
-            Sheet<String, String, String> s = new Sheet<>(N.asSet("R"), N.asSet("C"));
+            Sheet<String, String, String> s = new Sheet<>(CommonUtil.asSet("R"), CommonUtil.asSet("C"));
             assertDoesNotThrow(() -> s.trimToSize());
 
             s.put("R", "C", "V");
@@ -1625,7 +1625,7 @@ public class Sheet200Test extends TestBase {
         @Test
         public void testToDatasetH() {
             Dataset ds = sheet.toDatasetH();
-            assertEquals(N.asList("C1", "C2", "C3"), ds.columnNameList());
+            assertEquals(CommonUtil.asList("C1", "C2", "C3"), ds.columnNameList());
             assertEquals(3, ds.size());
             assertEquals("V11", ds.absolute(0).get("C1"));
             assertEquals(true, ds.absolute(1).get("C3"));
@@ -1636,7 +1636,7 @@ public class Sheet200Test extends TestBase {
         public void testToDatasetH_uninitialized() {
             Sheet<String, String, String> uninit = new Sheet<>(rowKeys, colKeys);
             Dataset ds = uninit.toDatasetH();
-            assertEquals(N.asList("C1", "C2", "C3"), ds.columnNameList());
+            assertEquals(CommonUtil.asList("C1", "C2", "C3"), ds.columnNameList());
             assertEquals(3, ds.size());
             assertNull(ds.absolute(0).get("C1"));
         }
@@ -1644,7 +1644,7 @@ public class Sheet200Test extends TestBase {
         @Test
         public void testToDatasetV() {
             Dataset ds = sheet.toDatasetV();
-            assertEquals(N.asList("R1", "R2", "R3"), ds.columnNameList());
+            assertEquals(CommonUtil.asList("R1", "R2", "R3"), ds.columnNameList());
             assertEquals(3, ds.size());
             assertEquals("V11", ds.absolute(0).get("R1"));
             assertEquals(true, ds.absolute(2).get("R2"));

@@ -115,13 +115,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Creates a new ByteList containing the specified byte values.
-     * This factory method provides a convenient way to create a ByteList with initial values.
-     * If no arguments are provided, an empty list is returned. If the argument is null,
-     * an empty list is returned.
+     * Creates a new ByteList containing the specified elements. The specified array is used directly
+     * as the backing array without copying, so subsequent modifications to the array will affect the list.
+     * If the input array is {@code null}, an empty list is returned.
      *
-     * @param a the byte values to be included in the new list. Can be null or empty.
-     * @return a new ByteList containing the specified values
+     * @param a the array of elements to be included in the new list. Can be {@code null}.
+     * @return a new ByteList containing the elements from the specified array, or an empty list if the array is {@code null}
      */
     public static ByteList of(final byte... a) {
         return new ByteList(N.nullToEmpty(a));
@@ -296,12 +295,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Returns the byte value at the specified position in this list.
-     * The index must be within the valid range of the list (0 to size-1).
+     * Returns the element at the specified position in this list.
      *
-     * @param index the index of the element to return. Must be between 0 and size()-1.
-     * @return the byte value at the specified position
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @param index the index of the element to return
+     * @return the element at the specified position in this list
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public byte get(final int index) {
         rangeCheck(index);
@@ -311,12 +309,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Replaces the element at the specified position in this list with the specified element.
-     * Returns the element previously at the specified position.
      *
-     * @param index the index of the element to replace. Must be between 0 and size()-1.
-     * @param e the byte value to be stored at the specified position
+     * @param index the index of the element to replace
+     * @param e the element to be stored at the specified position
      * @return the element previously at the specified position
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public byte set(final int index, final byte e) {
         rangeCheck(index);
@@ -1063,10 +1060,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Returns {@code true} if this list contains the specified element.
      * More formally, returns {@code true} if and only if this list contains
-     * at least one element e such that e == valueToFind.
+     * at least one element {@code e} such that {@code e == valueToFind}.
      *
-     * @param valueToFind the byte value to search for
-     * @return {@code true} if this list contains the specified element
+     * <p>This method performs a linear search through the list.
+     *
+     * @param valueToFind the element whose presence in this list is to be tested
+     * @return {@code true} if this list contains the specified element, {@code false} otherwise
      */
     public boolean contains(final byte valueToFind) {
         return indexOf(valueToFind) >= 0;
@@ -1685,42 +1684,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         }
     }
 
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @throws E the e
-    //     */
-    //    public <E extends Exception> void forEachIndexed(final Throwables.IntByteConsumer<E> action) throws E {
-    //        forEachIndexed(0, size, action);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param action
-    //     * @throws IndexOutOfBoundsException
-    //     * @throws E the e
-    //     */
-    //    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntByteConsumer<E> action)
-    //            throws IndexOutOfBoundsException, E {
-    //        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
-    //
-    //        if (size > 0) {
-    //            if (fromIndex <= toIndex) {
-    //                for (int i = fromIndex; i < toIndex; i++) {
-    //                    action.accept(i, elementData[i]);
-    //                }
-    //            } else {
-    //                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
-    //                    action.accept(i, elementData[i]);
-    //                }
-    //            }
-    //        }
-    //    }
-
     /**
      * Returns the first element of this list wrapped in an OptionalByte.
      * 
@@ -2213,34 +2176,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return result;
     }
 
-    //    @Override
-    //    public List<ByteList> split(int fromIndex, int toIndex, Try.BytePredicate<E> predicate) throws E {
-    //        checkIndex(fromIndex, toIndex);
-    //
-    //        final List<ByteList> result = new ArrayList<>();
-    //        ByteList piece = null;
-    //
-    //        for (int i = fromIndex; i < toIndex;) {
-    //            if (piece == null) {
-    //                piece = ByteList.of(N.EMPTY_BYTE_ARRAY);
-    //            }
-    //
-    //            if (predicate.test(elementData[i])) {
-    //                piece.add(elementData[i]);
-    //                i++;
-    //            } else {
-    //                result.add(piece);
-    //                piece = null;
-    //            }
-    //        }
-    //
-    //        if (piece != null) {
-    //            result.add(piece);
-    //        }
-    //
-    //        return result;
-    //    }
-
     /**
      * Trims the internal array to the current size of the list.
      * 
@@ -2265,14 +2200,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Removes all elements from this list.
-     * 
-     * <p>This method sets all elements in the internal array to 0 (zero) and updates the size to 0.
-     * The capacity of the list (internal array size) is not changed. After this call, the list will
-     * be empty but retain its current capacity for potential reuse.</p>
-     * 
-     * <p>Setting elements to zero before clearing helps with debugging and ensures consistent behavior,
-     * though it's not strictly necessary for primitive byte values.</p>
+     * Removes all elements from this list. The list will be empty after this call returns.
+     * The capacity of the list is not changed.
      */
     @Override
     public void clear() {
@@ -2284,11 +2213,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Returns whether this list contains no elements.
-     * 
-     * <p>This method provides a convenient way to check if the list is empty without comparing
-     * the size to zero. It's equivalent to {@code size() == 0} but may be more readable in
-     * conditional statements.</p>
+     * Returns {@code true} if this list contains no elements.
      *
      * @return {@code true} if this list contains no elements, {@code false} otherwise
      */
@@ -2299,10 +2224,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns the number of elements in this list.
-     * 
-     * <p>This method returns the count of actual elements stored in the list, not the capacity
-     * of the internal array. The size is always non-negative and never exceeds the maximum
-     * array size supported by the JVM.</p>
      *
      * @return the number of elements in this list
      */
@@ -2362,20 +2283,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Returns a new byte array containing all elements in this list.
-     * 
-     * <p>This method creates a new array and copies all elements from this list into it. The returned
-     * array is independent of this list's internal storage, so modifications to the returned array
-     * do not affect this list. The array length equals the size of the list.</p>
-     * 
-     * <p>This is useful when you need to:</p>
-     * <ul>
-     *   <li>Pass list data to methods expecting byte arrays</li>
-     *   <li>Create a snapshot of the current list state</li>
-     *   <li>Interface with APIs that work with arrays rather than lists</li>
-     * </ul>
+     * Returns a new array containing all elements of this list in proper sequence.
      *
-     * @return a new byte array containing all elements from this list
+     * @return a new byte array containing all elements of this list
      */
     @Override
     public byte[] toArray() {

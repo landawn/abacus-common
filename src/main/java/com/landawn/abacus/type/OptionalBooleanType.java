@@ -62,6 +62,16 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     }
 
     /**
+     * Returns the default value for OptionalBoolean type, which is an empty OptionalBoolean.
+     *
+     * @return OptionalBoolean.empty()
+     */
+    @Override
+    public OptionalBoolean defaultValue() {
+        return OptionalBoolean.empty();
+    }
+
+    /**
      * Converts an {@link OptionalBoolean} object to its string representation.
      * 
      * @param x the OptionalBoolean object to convert

@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -93,7 +93,7 @@ public class AbstractDateType100Test extends TestBase {
     @Test
     public void testWriteCharacter_ValidDate_WithQuotation() throws IOException {
         Date date = new Date();
-        when(config.getStringQuotation()).thenReturn((char) '"');
+        when(config.getStringQuotation()).thenReturn('"');
         when(config.getDateTimeFormat()).thenReturn(null);
 
         type.writeCharacter(characterWriter, date, config);
@@ -103,7 +103,7 @@ public class AbstractDateType100Test extends TestBase {
     public void testWriteCharacter_ValidDate_LongFormat() throws IOException {
         Date date = new Date();
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
-        when(config.getStringQuotation()).thenReturn((char) '"');
+        when(config.getStringQuotation()).thenReturn('"');
 
         type.writeCharacter(characterWriter, date, config);
     }
@@ -130,7 +130,7 @@ public class AbstractDateType100Test extends TestBase {
     public void testWriteCharacter_ValidDate_QuotationWithLongFormat() throws IOException {
         Date date = new Date();
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
-        when(config.getStringQuotation()).thenReturn((char) '"');
+        when(config.getStringQuotation()).thenReturn('"');
 
         type.writeCharacter(characterWriter, date, config);
     }
@@ -139,7 +139,7 @@ public class AbstractDateType100Test extends TestBase {
     public void testWriteCharacter_ValidDate_WithQuotationAndISO8601() throws IOException {
         Date date = new Date();
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
-        when(config.getStringQuotation()).thenReturn((char) '\'');
+        when(config.getStringQuotation()).thenReturn('\'');
 
         type.writeCharacter(characterWriter, date, config);
     }

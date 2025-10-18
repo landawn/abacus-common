@@ -153,15 +153,15 @@ public class SeqTest extends AbstractTest {
             Seq.of("a").cycled().limit(10).println();
             Seq.of("a", "b").cycled().limit(10).println();
             Stream.of("a").cycled().limit(10).println();
-            Stream.of(N.asList("a").iterator()).cycled().limit(9).println();
-            Stream.of(N.asList("a", "b").iterator()).cycled().limit(9).println();
+            Stream.of(CommonUtil.asList("a").iterator()).cycled().limit(9).println();
+            Stream.of(CommonUtil.asList("a", "b").iterator()).cycled().limit(9).println();
         }
         {
             Seq.of("a").cycled(10).limit(10).println();
             Seq.of("a", "b").cycled(10).limit(10).println();
             Stream.of("a").cycled(10).limit(10).println();
-            Stream.of(N.asList("a").iterator()).cycled(10).limit(9).println();
-            Stream.of(N.asList("a", "b").iterator()).cycled(10).limit(9).println();
+            Stream.of(CommonUtil.asList("a").iterator()).cycled(10).limit(9).println();
+            Stream.of(CommonUtil.asList("a", "b").iterator()).cycled(10).limit(9).println();
         }
     }
 
@@ -210,7 +210,7 @@ public class SeqTest extends AbstractTest {
     @Test
     public void test_cast() {
         Seq.<String, SQLException> of("a", "b").transform(s -> s.map(String::length));
-        Seq.of(N.asList("a", "b"), SQLException.class).cast().onEach(it -> IOUtils.readLines(new FileInputStream(new File("./test.txt")), Charsets.DEFAULT));
+        Seq.of(CommonUtil.asList("a", "b"), SQLException.class).cast().onEach(it -> IOUtils.readLines(new FileInputStream(new File("./test.txt")), Charsets.DEFAULT));
     }
 
     @Test
@@ -253,8 +253,8 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void test_index() {
-        Iterables.indexOf(N.asList(1, 2, 5, 1), 1).boxed().ifPresent(Fn.println());
-        Iterables.lastIndexOf(N.asLinkedHashSet(1, 2, 5, 3), 3).boxed().ifPresent(Fn.println());
+        Iterables.indexOf(CommonUtil.asList(1, 2, 5, 1), 1).boxed().ifPresent(Fn.println());
+        Iterables.lastIndexOf(CommonUtil.asLinkedHashSet(1, 2, 5, 3), 3).boxed().ifPresent(Fn.println());
     }
 
     //    @Test

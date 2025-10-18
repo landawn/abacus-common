@@ -24,8 +24,8 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -397,7 +397,7 @@ public class CSVUtil100Test extends TestBase {
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            CSVUtil.loadCSV(testCsvFile, new HashMap<String, Type<?>>());
+            CSVUtil.loadCSV(testCsvFile, new HashMap<>());
         });
     }
 

@@ -19,8 +19,8 @@ import java.util.Date;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -47,7 +47,7 @@ public class JodaDateTimeType100Test extends TestBase {
     @Test
     public void testValueOf_Object_Number() {
         long millis = 1703502645123L;
-        DateTime result = dateTimeType.valueOf((Object) millis);
+        DateTime result = dateTimeType.valueOf(millis);
         assertNotNull(result);
         assertEquals(millis, result.getMillis());
     }
@@ -55,7 +55,7 @@ public class JodaDateTimeType100Test extends TestBase {
     @Test
     public void testValueOf_Object_Date() {
         Date date = new Date(1703502645123L);
-        DateTime result = dateTimeType.valueOf((Object) date);
+        DateTime result = dateTimeType.valueOf(date);
         assertNotNull(result);
         assertEquals(date.getTime(), result.getMillis());
     }

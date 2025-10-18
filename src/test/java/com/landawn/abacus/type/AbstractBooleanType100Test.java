@@ -13,8 +13,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -79,22 +79,22 @@ public class AbstractBooleanType100Test extends TestBase {
 
     @Test
     public void testValueOf_BooleanObject() {
-        assertEquals(Boolean.TRUE, type.valueOf((Object) Boolean.TRUE));
-        assertEquals(Boolean.FALSE, type.valueOf((Object) Boolean.FALSE));
+        assertEquals(Boolean.TRUE, type.valueOf(Boolean.TRUE));
+        assertEquals(Boolean.FALSE, type.valueOf(Boolean.FALSE));
     }
 
     @Test
     public void testValueOf_PositiveNumber() {
-        assertEquals(Boolean.TRUE, type.valueOf((Object) 1));
-        assertEquals(Boolean.TRUE, type.valueOf((Object) 100L));
-        assertEquals(Boolean.FALSE, type.valueOf((Object) 0.1));
+        assertEquals(Boolean.TRUE, type.valueOf(1));
+        assertEquals(Boolean.TRUE, type.valueOf(100L));
+        assertEquals(Boolean.FALSE, type.valueOf(0.1));
     }
 
     @Test
     public void testValueOf_ZeroNumber() {
-        assertEquals(Boolean.FALSE, type.valueOf((Object) 0));
-        assertEquals(Boolean.FALSE, type.valueOf((Object) 0L));
-        assertEquals(Boolean.FALSE, type.valueOf((Object) 0.0));
+        assertEquals(Boolean.FALSE, type.valueOf(0));
+        assertEquals(Boolean.FALSE, type.valueOf(0L));
+        assertEquals(Boolean.FALSE, type.valueOf(0.0));
     }
 
     @Test

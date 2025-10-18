@@ -97,6 +97,16 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
     }
 
     /**
+     * Returns the default value for Nullable type, which is an empty Nullable.
+     *
+     * @return Nullable.empty()
+     */
+    @Override
+    public Nullable<T> defaultValue() {
+        return Nullable.<T> empty();
+    }
+
+    /**
      * Converts a {@link Nullable} object to its string representation.
      * If the Nullable is null or contains null, returns null. Otherwise,
      * delegates to the element type's string conversion.

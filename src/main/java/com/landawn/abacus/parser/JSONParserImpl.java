@@ -1934,14 +1934,6 @@ final class JSONParserImpl extends AbstractJSONParser {
      */
     @Override
     public <T> T deserialize(final InputStream source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
-        // BufferedReader br = ObjectFactory.createBufferedReader(is);
-        //
-        // try {
-        // return read(cls, br, config);
-        // } finally {
-        // ObjectFactory.recycle(br);
-        // }
-        //
 
         // No need to close the reader because the InputStream will/should be
         // closely externally.
@@ -1960,17 +1952,6 @@ final class JSONParserImpl extends AbstractJSONParser {
      */
     @Override
     public <T> T deserialize(final Reader source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
-        // boolean isBufferedReader = reader instanceof BufferedReader;
-        // BufferedReader br = isBufferedReader ? (BufferedReader) reader :
-        // ObjectFactory.createBufferedReader(reader);
-        //
-        // try {
-        // return read(cls, br, config);
-        // } finally {
-        // if (!isBufferedReader) {
-        // ObjectFactory.recycle(br);
-        // }
-        // }
 
         return read(source, config, targetClass);
     }
@@ -3258,24 +3239,6 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 throw new ParseException(token, getErrorMsg(jr, token));
                             }
 
-                            //NOSONAR
-                            //    case 1:
-                            //        beanName = jr.readValue(strType);
-                            //        break;
-                            //
-                            //    case 2:
-                            //        String str = jr.readValue(strType);
-                            //        if (N.isEmpty(str)) {
-                            //            beanClass = Map.class;
-                            //        } else {
-                            //            try {
-                            //                beanClass = N.forClass(str);
-                            //            } catch (Exception e) {
-                            //                beanClass = Map.class;
-                            //            }
-                            //        }
-                            //
-                            //        break;
                             if (order == 6) {
                                 isFrozen = jr.readValue(boolType);
                             } else {
@@ -3311,24 +3274,6 @@ final class JSONParserImpl extends AbstractJSONParser {
                                     throw new ParseException(token, getErrorMsg(jr, token));
                                 }
 
-                                //NOSONAR
-                                //    case 1:
-                                //        beanName = jr.readValue(strType);
-                                //        break;
-                                //
-                                //    case 2:
-                                //        String str = jr.readValue(strType);
-                                //        if (N.isEmpty(str)) {
-                                //            beanClass = Map.class;
-                                //        } else {
-                                //            try {
-                                //                beanClass = N.forClass(str);
-                                //            } catch (Exception e) {
-                                //                beanClass = Map.class;
-                                //            }
-                                //        }
-                                //
-                                //        break;
                                 if (order == 6) {
                                     isFrozen = jr.readValue(boolType);
                                 } else {
@@ -3776,17 +3721,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    //    static final int START_BRACE = 1;
-    //    static final int END_BRACE = 2;
-    //    static final int START_BRACKET = 3;
-    //    static final int END_BRACKET = 4;
-    //    static final int START_QUOTATION_D = 5;
-    //    static final int END_QUOTATION_D = 6;
-    //    static final int START_QUOTATION_S = 7;
-    //    static final int END_QUOTATION_S = 8;
-    //    static final int COLON = 9;
-    //    static final int COMMA = 10;
-
     protected Object readBracketedValue(final JSONReader jr, JSONDeserializationConfig config, final BiConsumer<? super Collection<Object>, ?> propHandler,
             final Type<?> type) throws IOException {
         if (N.len(type.getParameterTypes()) == 1) {
@@ -4186,17 +4120,6 @@ final class JSONParserImpl extends AbstractJSONParser {
                     N.convert(list.get(6), paramTypes[6]), N.convert(list.get(7), paramTypes[7]), N.convert(list.get(8), paramTypes[8]));
         });
     }
-
-    //    static final int START_BRACE = 1;
-    //    static final int END_BRACE = 2;
-    //    static final int START_BRACKET = 3;
-    //    static final int END_BRACKET = 4;
-    //    static final int START_QUOTATION_D = 5;
-    //    static final int END_QUOTATION_D = 6;
-    //    static final int START_QUOTATION_S = 7;
-    //    static final int END_QUOTATION_S = 8;
-    //    static final int COLON = 9;
-    //    static final int COMMA = 10;
 
     /**
      * Gets the error msg.

@@ -328,7 +328,7 @@ public class Indexed2025Test extends TestBase {
 
     @Test
     public void test_veryLargeIndexWithLongOverload() {
-        long largeIndex = (long) Integer.MAX_VALUE + 1000L;
+        long largeIndex = Integer.MAX_VALUE + 1000L;
         Indexed<String> indexed = Indexed.of("Test", largeIndex);
         assertEquals(largeIndex, indexed.longIndex());
     }

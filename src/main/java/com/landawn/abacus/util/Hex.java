@@ -61,7 +61,7 @@ public final class Hex {
      * The returned array will be exactly double the length of the input array.
      * This method is equivalent to calling {@code encode(data, true)}.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * byte[] data = {0x01, 0x23, (byte)0xAB, (byte)0xCD};
      * char[] hex = Hex.encode(data);  // returns ['0','1','2','3','a','b','c','d']
@@ -81,7 +81,7 @@ public final class Hex {
      * <p>Each byte in the input array is converted to two hexadecimal characters.
      * The returned array will be exactly double the length of the input array.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * byte[] data = {0x01, (byte)0xAB};
      * char[] lower = Hex.encode(data, true);   // returns ['0','1','a','b']
@@ -107,7 +107,7 @@ public final class Hex {
      * string conversion. Each byte is represented by exactly two hexadecimal characters
      * in the resulting string.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F}; // "Hello" in ASCII
      * String hex = Hex.encodeToString(data);         // returns "48656c6c6f"
@@ -128,7 +128,7 @@ public final class Hex {
      * string conversion. Each byte is represented by exactly two hexadecimal characters
      * in the resulting string.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * byte[] data = {(byte)0xFF, 0x00, 0x42};
      * String lower = Hex.encodeToString(data, true);   // returns "ff0042"
@@ -153,7 +153,7 @@ public final class Hex {
      *            a byte[] to convert to Hex characters
      * @param toDigits
      *            the output alphabet
-     * @return A char[] containing hexadecimal characters
+     * @return a char[] containing hexadecimal characters
      */
     static char[] encode(final byte[] data, final char[] toDigits) {
         final int l = data.length;
@@ -173,7 +173,7 @@ public final class Hex {
      * Each pair of characters represents one byte in the output array. Both uppercase
      * and lowercase hexadecimal digits are accepted.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * byte[] data1 = Hex.decode("48656c6c6f");     // returns bytes for "Hello"
      * byte[] data2 = Hex.decode("FF00");           // returns {(byte)0xFF, 0x00}
@@ -207,7 +207,7 @@ public final class Hex {
      *   <li>Each pair of characters forms one byte: first char = high nibble, second char = low nibble</li>
      * </ul>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * char[] hex = {'4', '8', '6', '5', '6', 'C', '6', 'C', '6', 'F'};
      * byte[] data = Hex.decode(hex);  // returns bytes for "Hello"
@@ -248,7 +248,7 @@ public final class Hex {
      * <p>This method validates that the character is a valid hexadecimal digit and converts it
      * to its corresponding integer value. Valid characters are '0'-'9', 'A'-'F', and 'a'-'f'.</p>
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int value1 = toDigit('5', 0);  // returns 5
      * int value2 = toDigit('A', 1);  // returns 10

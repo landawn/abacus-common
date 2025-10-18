@@ -4447,16 +4447,6 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
@@ -4531,16 +4521,6 @@ sealed class CommonUtil permits N {
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 3));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
 
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
 
@@ -4618,16 +4598,6 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
@@ -4701,16 +4671,6 @@ sealed class CommonUtil permits N {
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
 
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
@@ -4786,16 +4746,6 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
@@ -4869,16 +4819,6 @@ sealed class CommonUtil permits N {
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
 
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
@@ -4954,16 +4894,6 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
-
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
@@ -5037,16 +4967,6 @@ sealed class CommonUtil permits N {
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
 
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
@@ -5125,16 +5045,6 @@ sealed class CommonUtil permits N {
         } else if (a.length == 0) {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
-
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
-        //
-        //    try {
-        //        toString(sb, a, fromIndex, toIndex);
-        //
-        //        return sb.toString();
-        //    } finally {
-        //        Objectory.recycle(sb);
-        //    }
 
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R, false);
     }
@@ -6846,15 +6756,6 @@ sealed class CommonUtil permits N {
      * @see Strings#nullToEmpty(String[])
      */
     public static String[] nullToEmpty(final String[] a) {
-        //    if (a == null) {
-        //        return EMPTY_STRING_ARRAY;
-        //    }
-        //
-        //    for (int i = 0, len = a.length; i < len; i++) {
-        //        a[i] = a[i] == null ? Strings.EMPTY : a[i];
-        //    }
-        //
-        //    return a;
 
         return a == null ? EMPTY_STRING_ARRAY : a;
     }
@@ -7615,10 +7516,10 @@ sealed class CommonUtil permits N {
     /**
      * Converts the given string to its corresponding value of the specified target type by {@code typeOf(targetType).valueOf(str)}.
      *
-     * @param <T> The type of the target object after conversion.
-     * @param str The string to be converted.
-     * @param targetType The class of the target type to which the string is to be converted.
-     * @return The converted value of the specified target type. If the input string is {@code null}, it returns the default value of the target type.
+     * @param <T> the type of the target object after conversion.
+     * @param str the string to be converted.
+     * @param targetType the class of the target type to which the string is to be converted.
+     * @return the converted value of the specified target type. If the input string is {@code null}, it returns the default value of the target type.
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see #stringOf(Object)
      * @see Type#valueOf(String)
@@ -7636,8 +7537,8 @@ sealed class CommonUtil permits N {
      * Registers a converter for a specific source class. The converter is a function that takes an object of the source class
      * and a target class, and converts the source object into an instance of the target class.
      *
-     * @param srcClass The source class that the converter can convert from. This must not be a built-in class.
-     * @param converter The converter function that takes a source object and a target class, and returns an instance of the target class.
+     * @param srcClass the source class that the converter can convert from. This must not be a built-in class.
+     * @param converter the converter function that takes a source object and a target class, and returns an instance of the target class.
      * @return {@code true} if there is no {@code converter} registered with specified {@code srcClass} yet before this call.
      * @throws IllegalArgumentException if the specified {@code srcClass} is a built-in class or if either {@code srcClass} or {@code converter} is {@code null}.
      */
@@ -7690,10 +7591,10 @@ sealed class CommonUtil permits N {
      * If the source object is {@code null}, the default value of the target type is returned.
      * If the source object can be converted to the target type, an instance of the target type is returned.
      *
-     * @param <T> The type of the target object after conversion.
-     * @param srcObj The source object to be converted. If {@code null}, the default value of the target type is returned.
-     * @param targetType The class of the target type to which the source object is to be converted.
-     * @return An instance of the target type converted from the source object, or the default value of the target type if the source object is {@code null}.
+     * @param <T> the type of the target object after conversion.
+     * @param srcObj the source object to be converted. If {@code null}, the default value of the target type is returned.
+     * @param targetType the class of the target type to which the source object is to be converted.
+     * @return an instance of the target type converted from the source object, or the default value of the target type if the source object is {@code null}.
      * @throws IllegalArgumentException if the source object cannot be converted to the target type.
      * @throws NumberFormatException if string value of the source object cannot be parsed to the target(Number) type.
      * @throws RuntimeException if any other error occurs during the conversion.
@@ -7721,10 +7622,10 @@ sealed class CommonUtil permits N {
      * If the source object is {@code null}, the default value of the target type is returned.
      * If the source object can be converted to the target type, an instance of the target type is returned.
      *
-     * @param <T> The type of the target object after conversion.
-     * @param srcObj The source object to be converted.
-     * @param targetType The Type instance of the target type to which the source object is to be converted.
-     * @return An instance of the target type converted from the source object, or the default value of the target type if the source object is {@code null}.
+     * @param <T> the type of the target object after conversion.
+     * @param srcObj the source object to be converted.
+     * @param targetType the Type instance of the target type to which the source object is to be converted.
+     * @return an instance of the target type converted from the source object, or the default value of the target type if the source object is {@code null}.
      * @throws IllegalArgumentException if the source object cannot be converted to the target type.
      * @throws NumberFormatException if string value of the source object cannot be parsed to the target(Number) type.
      * @throws RuntimeException if any other error occurs during the conversion.
@@ -7867,17 +7768,6 @@ sealed class CommonUtil permits N {
                 return (T) result;
             }
 
-            // If it works, it has returned by: targetType.clazz().isAssignableFrom(srcClass)
-            //    } else if (srcType.isObjectArray()) {
-            //        try {
-            //            final Object[] srcArray = (Object[]) obj;
-            //            final Object[] result = newArray(targetType.clazz().getComponentType(), srcArray.length);
-            //            copy(srcArray, 0, result, 0, srcArray.length);
-            //            return (T) result;
-            //        } catch (Exception e) {
-            //            // ignore;
-            //        }
-            //    }
         }
 
         if (targetType.clazz().equals(byte[].class)) {
@@ -7992,10 +7882,10 @@ sealed class CommonUtil permits N {
      * If the object is {@code null} or cannot be assigned to the target type, an empty {@code Nullable} is returned.
      * Note that {@code null} can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/double.
      *
-     * @param <T> The type of the target object after casting.
-     * @param val The object to be casted.
-     * @param targetType The class of the target type to which the object is to be casted.
-     * @return A {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is {@code null} or cannot be casted to the target type.
+     * @param <T> the type of the target object after casting.
+     * @param val the object to be casted.
+     * @param targetType the class of the target type to which the object is to be casted.
+     * @return a {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is {@code null} or cannot be casted to the target type.
      */
     @SuppressWarnings("unchecked")
     @Beta
@@ -8012,10 +7902,10 @@ sealed class CommonUtil permits N {
      * If the object is {@code null} or cannot be assigned to the target type, an empty {@code Nullable} is returned.
      * Note that {@code null} can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/double.
      *
-     * @param <T> The type of the target object after casting.
-     * @param val The object to be casted.
-     * @param targetType The Type instance of the target type to which the object is to be casted.
-     * @return A {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is {@code null} or cannot be casted to the target type.
+     * @param <T> the type of the target object after casting.
+     * @param val the object to be casted.
+     * @param targetType the Type instance of the target type to which the object is to be casted.
+     * @return a {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is {@code null} or cannot be casted to the target type.
      */
     @Beta
     public static <T> Nullable<T> castIfAssignable(final Object val, final Type<? extends T> targetType) {
@@ -8092,9 +7982,9 @@ sealed class CommonUtil permits N {
      * This method retrieves all the enum constants defined in the given enum class and returns them as an ImmutableList.
      * The order of the constants in the list is the order in which they're declared in the enum class.
      *
-     * @param <E> The type of the enum constants. This should be an enum type.
-     * @param enumClass The class object of the enum type whose constants are to be listed. Must not be {@code null}.
-     * @return An ImmutableList containing all the enum constants in the order they're declared in the enum class.
+     * @param <E> the type of the enum constants. This should be an enum type.
+     * @param enumClass the class object of the enum type whose constants are to be listed. Must not be {@code null}.
+     * @return an ImmutableList containing all the enum constants in the order they're declared in the enum class.
      */
     public static <E extends Enum<E>> ImmutableList<E> enumListOf(final Class<E> enumClass) {
         checkArgNotNull(enumClass, cs.enumClass);
@@ -8116,9 +8006,9 @@ sealed class CommonUtil permits N {
      * This method retrieves all the enum constants defined in the given enum class and returns them as an ImmutableSet.
      * The order of the constants in the set is the order in which they're declared in the enum class.
      *
-     * @param <E> The type of the enum constants. This should be an enum type.
-     * @param enumClass The class object of the enum type whose constants are to be listed. Must not be {@code null}.
-     * @return An ImmutableSet containing all the enum constants in the order they're declared in the enum class.
+     * @param <E> the type of the enum constants. This should be an enum type.
+     * @param enumClass the class object of the enum type whose constants are to be listed. Must not be {@code null}.
+     * @return an ImmutableSet containing all the enum constants in the order they're declared in the enum class.
      */
     public static <E extends Enum<E>> ImmutableSet<E> enumSetOf(final Class<E> enumClass) {
         checkArgNotNull(enumClass, cs.enumClass);
@@ -8140,9 +8030,9 @@ sealed class CommonUtil permits N {
      * This method retrieves all the enum constants defined in the given enum class and maps them to their names as an ImmutableBiMap.
      * The order of the constants in the map is the order in which they're declared in the enum class.
      *
-     * @param <E> The type of the enum constants. This should be an enum type.
-     * @param enumClass The class object of the enum type whose constants are to be listed. Must not be {@code null}.
-     * @return An ImmutableBiMap where each key-value pair corresponds to an enum constant and its name.
+     * @param <E> the type of the enum constants. This should be an enum type.
+     * @param enumClass the class object of the enum type whose constants are to be listed. Must not be {@code null}.
+     * @return an ImmutableBiMap where each key-value pair corresponds to an enum constant and its name.
      */
     public static <E extends Enum<E>> ImmutableBiMap<E, String> enumMapOf(final Class<E> enumClass) {
         checkArgNotNull(enumClass, cs.enumClass);
@@ -8292,14 +8182,14 @@ sealed class CommonUtil permits N {
     /**
      * Invokes the specified constructor with the provided arguments to create new instances of a class.
      *
-     * @param <T> The type of the object to be created.
-     * @param c The Constructor object representing the constructor to be invoked. Must not be {@code null}.
-     * @param args The array of arguments to be passed to the constructor. It can be empty if the constructor takes no arguments.
-     * @return A new instance of the class that the constructor belongs to.
-     * @throws InstantiationException If the class that declares the underlying constructor represents an abstract class.
-     * @throws IllegalAccessException If this Constructor object enforces Java language access control and the underlying constructor is inaccessible.
-     * @throws IllegalArgumentException If the number of actual and formal parameters differ, or if an unwrapping conversion for primitive arguments fails.
-     * @throws InvocationTargetException If the underlying constructor throws an exception.
+     * @param <T> the type of the object to be created.
+     * @param c the Constructor object representing the constructor to be invoked. Must not be {@code null}.
+     * @param args the array of arguments to be passed to the constructor. It can be empty if the constructor takes no arguments.
+     * @return a new instance of the class that the constructor belongs to.
+     * @throws InstantiationException if the class that declares the underlying constructor represents an abstract class.
+     * @throws IllegalAccessException if this Constructor object enforces Java language access control and the underlying constructor is inaccessible.
+     * @throws IllegalArgumentException if the number of actual and formal parameters differ, or if an unwrapping conversion for primitive arguments fails.
+     * @throws InvocationTargetException if the underlying constructor throws an exception.
      */
     @SuppressWarnings({ "deprecation" })
     static <T> T invoke(final Constructor<T> c, final Object... args)
@@ -8317,9 +8207,9 @@ sealed class CommonUtil permits N {
      * This method is a utility for creating dynamic proxies. A dynamic proxy class is a class that implements a list of interfaces specified at runtime such that a method invocation through one of the interfaces on an instance of the class will be encoded and dispatched to another object through a uniform interface.
      * Thus, a dynamic proxy class can be used to create an object that can implement an arbitrary set of interfaces specified at runtime.
      *
-     * @param <T> The type of the interface for the proxy class to implement.
-     * @param interfaceClass The Class object of the interface for the proxy class to implement. Must not be {@code null}.
-     * @param h The invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
+     * @param <T> the type of the interface for the proxy class to implement.
+     * @param interfaceClass the Class object of the interface for the proxy class to implement. Must not be {@code null}.
+     * @param h the invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
      * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
      * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
      */
@@ -8333,9 +8223,9 @@ sealed class CommonUtil permits N {
      * This method is a utility for creating dynamic proxies. A dynamic proxy class is a class that implements a list of interfaces specified at runtime such that a method invocation through one of the interfaces on an instance of the class will be encoded and dispatched to another object through a uniform interface.
      * Thus, a dynamic proxy class can be used to create an object that can implement an arbitrary set of interfaces specified at runtime.
      *
-     * @param <T> The type of the interface for the proxy class to implement.
-     * @param interfaceClasses The array of Class objects of the interfaces for the proxy class to implement. Must not be {@code null}.
-     * @param h The invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
+     * @param <T> the type of the interface for the proxy class to implement.
+     * @param interfaceClasses the array of Class objects of the interfaces for the proxy class to implement. Must not be {@code null}.
+     * @param h the invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
      * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
      * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
      */
@@ -8683,22 +8573,6 @@ sealed class CommonUtil permits N {
         return isEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
     }
 
-    // ambiguous
-    //    /**
-    //     * Creates a new instance of a TreeSet with the elements from the specified sorted set.
-    //     *
-    //     * @param <T> the type of elements in the set
-    //     * @param sortedSet the sorted set whose elements are to be placed into this set
-    //     * @return a new instance of a TreeSet containing the elements from the specified sorted set
-    //     * @throws IllegalArgumentException if the specified {@code SortedSet} is {@code null}.
-    //     * @see java.util.TreeSet#TreeSet(SortedSet)
-    //     */
-    //    public static <T> TreeSet<T> newTreeSet(final SortedSet<T> sortedSet) { //NOSONAR
-    //        checkArgNotNull(sortedSet, cs.sortedSet);
-    //
-    //        return new TreeSet<>(sortedSet);
-    //    }
-
     /**
      * Creates a new instance of a concurrent hash set by {@code ConcurrentHashMap}.
      *
@@ -9032,22 +8906,6 @@ sealed class CommonUtil permits N {
     public static <K extends Comparable<? super K>, V> TreeMap<K, V> newTreeMap(final Map<? extends K, ? extends V> m) { //NOSONAR
         return isEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
     }
-
-    // ambiguous
-    //    /**
-    //     * Creates a new instance of a TreeMap with the entries from the specified sorted map.
-    //     *
-    //     * @param <K> the type of keys maintained by this map
-    //     * @param <V> the type of mapped values
-    //     * @param sortedMap the sorted map whose elements are to be placed into this map
-    //     * @return a new instance of a TreeMap containing the entries from the specified sorted map
-    //     * @throws IllegalArgumentException if the specified {@code SortedMap} is {@code null}.
-    //     */
-    //    public static <K, V> TreeMap<K, V> newTreeMap(final SortedMap<K, ? extends V> sortedMap) { //NOSONAR
-    //        checkArgNotNull(sortedMap, cs.sortedMap);
-    //
-    //        return new TreeMap<>(sortedMap);
-    //    }
 
     /**
      * Creates a new instance of an IdentityHashMap.
@@ -9561,7 +9419,7 @@ sealed class CommonUtil permits N {
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * This method creates a Dataset with no rows or columns.
      *
-     * @return A new empty Dataset.
+     * @return a new empty Dataset.
      * @see Dataset#empty()
      */
     public static Dataset newEmptyDataset() {
@@ -9574,8 +9432,8 @@ sealed class CommonUtil permits N {
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * This method creates a Dataset with no rows or columns, but with the specified properties.
      *
-     * @param properties A map representing the properties of the Dataset. The keys are property names and the values are the corresponding property values.
-     * @return A new empty Dataset with the specified properties.
+     * @param properties a map representing the properties of the Dataset. The keys are property names and the values are the corresponding property values.
+     * @return a new empty Dataset with the specified properties.
      * @see Dataset#empty()
      */
     static Dataset newEmptyDataset(final Map<String, Object> properties) {
@@ -9588,8 +9446,8 @@ sealed class CommonUtil permits N {
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * This method creates a Dataset with no rows, but with the specified column names.
      *
-     * @param columnNames A collection of strings representing the names of the columns in the Dataset.
-     * @return A new empty Dataset with the specified column names.
+     * @param columnNames a collection of strings representing the names of the columns in the Dataset.
+     * @return a new empty Dataset with the specified column names.
      * @see Dataset#empty()
      */
     public static Dataset newEmptyDataset(final Collection<String> columnNames) {
@@ -9602,9 +9460,9 @@ sealed class CommonUtil permits N {
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * This method creates a Dataset with no rows, but with the specified column names and properties.
      *
-     * @param columnNames A collection of strings representing the names of the columns in the Dataset.
-     * @param properties A map representing the properties of the Dataset. The keys are property names and the values are the corresponding property values.
-     * @return A new empty Dataset with the specified column names and properties.
+     * @param columnNames a collection of strings representing the names of the columns in the Dataset.
+     * @param properties a map representing the properties of the Dataset. The keys are property names and the values are the corresponding property values.
+     * @return a new empty Dataset with the specified column names and properties.
      * @see Dataset#empty()
      */
     public static Dataset newEmptyDataset(final Collection<String> columnNames, final Map<String, Object> properties) {
@@ -9627,9 +9485,9 @@ sealed class CommonUtil permits N {
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * The <i>rows</i> parameter is a collection where each item represents a row in the Dataset.
      *
-     * @param rows A collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean.
-     * @return A new Dataset with the specified rows.
-     * @throws IllegalArgumentException If the provided rows do not align properly.
+     * @param rows a collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean.
+     * @return a new Dataset with the specified rows.
+     * @throws IllegalArgumentException if the provided rows do not align properly.
      * @see Dataset#rows(Collection, Object[][])
      * @see Dataset#rows(Collection, Collection)
      * @see Dataset#columns(Collection, Object[][])
@@ -9646,10 +9504,10 @@ sealed class CommonUtil permits N {
      * The <i>rows</i> parameter is a collection where each item represents a row in the Dataset.
      * The <i>properties</i> parameter is a map where each entry represents a property of the Dataset.
      *
-     * @param rows A collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean.
-     * @param properties A map of properties for the Dataset. Each key is a property name and each value is the property value.
-     * @return A new Dataset with the specified rows and properties.
-     * @throws IllegalArgumentException If the provided rows and properties do not align properly.
+     * @param rows a collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean.
+     * @param properties a map of properties for the Dataset. Each key is a property name and each value is the property value.
+     * @return a new Dataset with the specified rows and properties.
+     * @throws IllegalArgumentException if the provided rows and properties do not align properly.
      * @see Dataset#rows(Collection, Object[][])
      * @see Dataset#rows(Collection, Collection)
      * @see Dataset#columns(Collection, Object[][])
@@ -9687,10 +9545,10 @@ sealed class CommonUtil permits N {
      * The <i>rows</i> parameter is a collection where each item represents a row in the Dataset.
      * The order of elements in each row should correspond to the order of column names.
      *
-     * @param columnNames A collection of strings representing the names of the columns in the Dataset.
-     * @param rows A collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean/Array/List.
-     * @return A new Dataset with the specified column names and rows.
-     * @throws IllegalArgumentException If the length of <i>columnNames</i> is zero or not align with row list.
+     * @param columnNames a collection of strings representing the names of the columns in the Dataset.
+     * @param rows a collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean/Array/List.
+     * @return a new Dataset with the specified column names and rows.
+     * @throws IllegalArgumentException if the length of <i>columnNames</i> is zero or not align with row list.
      * @see Dataset#rows(Collection, Object[][])
      * @see Dataset#rows(Collection, Collection)
      * @see Dataset#columns(Collection, Object[][])
@@ -9709,11 +9567,11 @@ sealed class CommonUtil permits N {
      * The order of elements in each row should correspond to the order of column names.
      * The <i>properties</i> parameter is a map where each entry represents a property of the Dataset.
      *
-     * @param columnNames A collection of strings representing the names of the columns in the Dataset.
-     * @param rows A collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean/Array/List.
-     * @param properties A map of properties for the Dataset. Each key is a property name and each value is the property value.
-     * @return A new Dataset with the specified column names, rows, and properties.
-     * @throws IllegalArgumentException If the length of <i>columnNames</i> is zero or not align with row list.
+     * @param columnNames a collection of strings representing the names of the columns in the Dataset.
+     * @param rows a collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean/Array/List.
+     * @param properties a map of properties for the Dataset. Each key is a property name and each value is the property value.
+     * @return a new Dataset with the specified column names, rows, and properties.
+     * @throws IllegalArgumentException if the length of <i>columnNames</i> is zero or not align with row list.
      * @see Dataset#rows(Collection, Object[][])
      * @see Dataset#rows(Collection, Collection)
      * @see Dataset#columns(Collection, Object[][])
@@ -9733,50 +9591,6 @@ sealed class CommonUtil permits N {
         }
 
         // int startRowIndex = 0;
-
-        //    if (isEmpty(columnNames)) {
-        //        final Object firstElement = firstOrNullIfEmpty(rows);
-        //
-        //        if (firstElement == null) {
-        //            // return newEmptyDataset(properties);
-        //            throw new IllegalArgumentException("Column name list cannot be obtained from row list because its first element is null");
-        //        }
-        //
-        //        final Class<?> cls = firstElement.getClass();
-        //        final Type<?> type = typeOf(cls);
-        //
-        //        if (type.isMap()) {
-        //            columnNames = new ArrayList<>(((Map<String, Object>) firstElement).keySet());
-        //        } else if (type.isBean()) {
-        //            columnNames = new ArrayList<>(Beans.getPropNameList(cls));
-        //        } else {
-        //            //    if (type.isArray()) {
-        //            //        final Object[] a = (Object[]) firstNonNullRow;
-        //            //        columnNames = new ArrayList<>(a.length);
-        //            //
-        //            //        for (final Object e : a) {
-        //            //            columnNames.add(stringOf(e));
-        //            //        }
-        //            //    } else if (type.isCollection()) {
-        //            //        final Collection<?> c = (Collection<?>) firstNonNullRow;
-        //            //        columnNames = new ArrayList<>(c.size());
-        //            //
-        //            //        for (final Object e : c) {
-        //            //            columnNames.add(stringOf(e));
-        //            //        }
-        //            //    } else {
-        //            //        throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
-        //            //    }
-        //            //
-        //            //    startRowIndex = 1;
-        //
-        //            throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
-        //        }
-        //
-        //        if (isEmpty(columnNames)) {
-        //            throw new IllegalArgumentException("Column name list cannot be obtained from row list because it's empty or null");
-        //        }
-        //    }
 
         // final int rowCount = rows.size() - startRowIndex;
         final int rowCount = rows.size();
@@ -9874,10 +9688,10 @@ sealed class CommonUtil permits N {
      * The <i>rowList</i> parameter is a 2D array where each subarray represents a row in the Dataset.
      * The order of elements in each row should correspond to the order of column names.
      *
-     * @param columnNames A collection of strings representing the names of the columns in the Dataset.
-     * @param rows A 2D array of objects representing the data in the Dataset. Each subarray is a row.
-     * @return A new Dataset with the specified column names and rows.
-     * @throws IllegalArgumentException If the length of <i>columnNames</i> is zero or not equal to the length of the subarrays in <i>rowList</i>.
+     * @param columnNames a collection of strings representing the names of the columns in the Dataset.
+     * @param rows a 2D array of objects representing the data in the Dataset. Each subarray is a row.
+     * @return a new Dataset with the specified column names and rows.
+     * @throws IllegalArgumentException if the length of <i>columnNames</i> is zero or not equal to the length of the subarrays in <i>rowList</i>.
      * @see Dataset#rows(Collection, Object[][])
      * @see Dataset#rows(Collection, Collection)
      * @see Dataset#columns(Collection, Object[][])
@@ -9911,10 +9725,10 @@ sealed class CommonUtil permits N {
      * Creates a new Dataset from the provided Map.
      * The Dataset will have two columns: one for keys and one for values from the Map.
      *
-     * @param keyColumnName The name of the column for the keys from the Map.
-     * @param valueColumnName The name of the column for the values from the Map.
-     * @param m The Map to convert into a Dataset.
-     * @return A new Dataset with two columns: one for keys and one for values from the Map.
+     * @param keyColumnName the name of the column for the keys from the Map.
+     * @param valueColumnName the name of the column for the values from the Map.
+     * @param m the Map to convert into a Dataset.
+     * @return a new Dataset with two columns: one for keys and one for values from the Map.
      */
     public static Dataset newDataset(final String keyColumnName, final String valueColumnName, final Map<?, ?> m) {
         final List<Object> keyColumn = new ArrayList<>(m.size());
@@ -9940,9 +9754,9 @@ sealed class CommonUtil permits N {
      * If a column has fewer rows than the maximum number of rows, the missing rows will be filled with {@code null} values.
      * Eventually all the columns will have the same number of rows.
      *
-     * @param <C> The type of the Collection values in the Map.
-     * @param map The Map to convert into a Dataset. The keys of the map represent the column names and the values (which are collections) represent the data in the columns.
-     * @return A new Dataset with columns created from the Map.
+     * @param <C> the type of the Collection values in the Map.
+     * @param map the Map to convert into a Dataset. The keys of the map represent the column names and the values (which are collections) represent the data in the columns.
+     * @return a new Dataset with columns created from the Map.
      */
     public static <C extends Collection<?>> Dataset newDataset(final Map<String, C> map) {
         if (isEmpty(map)) {
@@ -9981,9 +9795,9 @@ sealed class CommonUtil permits N {
      * The Dataset will have one column with the provided column name.
      * The data in the column is the data from the provided Collection.
      *
-     * @param columnName The name of the column in the Dataset.
-     * @param column The Collection to convert into a Dataset column.
-     * @return A new Dataset with one column containing the data from the provided Collection.
+     * @param columnName the name of the column in the Dataset.
+     * @param column the Collection to convert into a Dataset column.
+     * @return a new Dataset with one column containing the data from the provided Collection.
      * @throws IllegalArgumentException if the provided columnName is empty.
      */
     public static Dataset newDataset(final String columnName, final Collection<?> column) throws IllegalArgumentException {
@@ -9999,9 +9813,9 @@ sealed class CommonUtil permits N {
     /**
      * Merges two given Datasets into a new single Dataset.
      *
-     * @param a The first Dataset to be merged.
-     * @param b The second Dataset to be merged.
-     * @return A new Dataset which is the result of merging Dataset <i>a</i> and Dataset <i>b</i>.
+     * @param a the first Dataset to be merged.
+     * @param b the second Dataset to be merged.
+     * @return a new Dataset which is the result of merging Dataset <i>a</i> and Dataset <i>b</i>.
      * @throws IllegalArgumentException if either <i>a</i> or <i>b</i> is {@code null}.
      */
     public static Dataset merge(@NotNull final Dataset a, @NotNull final Dataset b) throws IllegalArgumentException {
@@ -10016,10 +9830,10 @@ sealed class CommonUtil permits N {
     /**
      * Merges three given Datasets into a new single Dataset.
      *
-     * @param a The first Dataset to be merged.
-     * @param b The second Dataset to be merged.
-     * @param c The third Dataset to be merged.
-     * @return A new Dataset which is the result of merging Dataset <i>a</i>, <i>b</i> and <i>c</i>.
+     * @param a the first Dataset to be merged.
+     * @param b the second Dataset to be merged.
+     * @param c the third Dataset to be merged.
+     * @return a new Dataset which is the result of merging Dataset <i>a</i>, <i>b</i> and <i>c</i>.
      * @throws IllegalArgumentException if either <i>a</i>, <i>b</i> or <i>c</i> is {@code null}.
      */
     public static Dataset merge(@NotNull final Dataset a, @NotNull final Dataset b, @NotNull final Dataset c) throws IllegalArgumentException {
@@ -10033,8 +9847,8 @@ sealed class CommonUtil permits N {
     /**
      * Merges a collection of Datasets into a new single Dataset.
      *
-     * @param dss The collection of Datasets to be merged.
-     * @return A new Dataset which is the result of merging all the Datasets in the provided collection.
+     * @param dss the collection of Datasets to be merged.
+     * @return a new Dataset which is the result of merging all the Datasets in the provided collection.
      * @throws IllegalArgumentException if the provided collection is {@code null} or empty.
      */
     public static Dataset merge(final Collection<? extends Dataset> dss) throws IllegalArgumentException {
@@ -10044,11 +9858,11 @@ sealed class CommonUtil permits N {
     /**
      * Merges a collection of Datasets into a new single Dataset.
      *
-     * @param dss The collection of Datasets to be merged.
-     * @param requiresSameColumns A boolean flag that indicates whether the Datasets in the collection should have the same columns.
+     * @param dss the collection of Datasets to be merged.
+     * @param requiresSameColumns a boolean flag that indicates whether the Datasets in the collection should have the same columns.
      *                            If set to {@code true}, all Datasets in the collection must have the same columns.
      *                            If set to {@code false}, the Datasets in the collection can have different columns.
-     * @return A new Dataset which is the result of merging all the Datasets in the provided collection.
+     * @return a new Dataset which is the result of merging all the Datasets in the provided collection.
      * @throws IllegalArgumentException if the provided collection is {@code null} or empty or {@code requiresSameColumns} is {@code true} and the {@code Datasets} in {@code dss} don't have the same the same column names.
      */
     public static Dataset merge(final Collection<? extends Dataset> dss, final boolean requiresSameColumns) throws IllegalArgumentException {
@@ -10139,10 +9953,10 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified range in the specified collection into an array.
      *
-     * @param c The collection to be converted into an array.
-     * @param fromIndex The starting (inclusive) index of the range to be converted.
-     * @param toIndex The ending (exclusive) index of the range to be converted.
-     * @return An array containing the elements of the specified range of the collection.
+     * @param c the collection to be converted into an array.
+     * @param fromIndex the starting (inclusive) index of the range to be converted.
+     * @param toIndex the ending (exclusive) index of the range to be converted.
+     * @return an array containing the elements of the specified range of the collection.
      * @throws IndexOutOfBoundsException if the provided indices are out of the collection's range.
      */
     @SuppressWarnings("rawtypes")
@@ -10178,11 +9992,11 @@ sealed class CommonUtil permits N {
      * Converts a collection into an array. If the provided array is large enough to hold the elements of the collection,
      * it is filled with the collection's elements, otherwise, a new array of the same runtime type is allocated for this purpose.
      *
-     * @param <A> The type of the array.
-     * @param <T> The type of the elements in the collection. It must extend or be the same as the type of the array.
-     * @param c The collection to be converted into an array.
-     * @param a The array into which the elements of the collection are to be stored, if it is big enough; otherwise, a new array of the same runtime type is allocated for this purpose.
-     * @return The array containing the elements of the collection. If the provided array was large enough to hold the collection's elements, it is the same as the provided array.
+     * @param <A> the type of the array.
+     * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
+     * @param c the collection to be converted into an array.
+     * @param a the array into which the elements of the collection are to be stored, if it is big enough; otherwise, a new array of the same runtime type is allocated for this purpose.
+     * @return the array containing the elements of the collection. If the provided array was large enough to hold the collection's elements, it is the same as the provided array.
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null}.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, @NotNull final A[] a)
@@ -10200,13 +10014,13 @@ sealed class CommonUtil permits N {
      * Converts the specified range in the specified collection into an array. If the provided array is large enough to hold the elements of the collection,
      * it is filled with the collection's elements, otherwise, a new array of the same runtime type is allocated for this purpose.
      *
-     * @param <A> The type of the array.
-     * @param <T> The type of the elements in the collection. It must extend or be the same as the type of the array.
-     * @param c The collection to be converted into an array.
-     * @param fromIndex The starting (inclusive) index of the range to be converted.
-     * @param toIndex The ending (exclusive) index of the range to be converted.
-     * @param a The array into which the elements of the collection are to be stored, if it is big enough; otherwise, a new array of the same runtime type is allocated for this purpose.
-     * @return The array containing the elements of the specified portion of the collection. If the provided array was large enough to hold the collection's elements, it is the same as the provided array.
+     * @param <A> the type of the array.
+     * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
+     * @param c the collection to be converted into an array.
+     * @param fromIndex the starting (inclusive) index of the range to be converted.
+     * @param toIndex the ending (exclusive) index of the range to be converted.
+     * @param a the array into which the elements of the collection are to be stored, if it is big enough; otherwise, a new array of the same runtime type is allocated for this purpose.
+     * @return the array containing the elements of the specified portion of the collection. If the provided array was large enough to hold the collection's elements, it is the same as the provided array.
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null}.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, @NotNull final A[] a)
@@ -10243,10 +10057,10 @@ sealed class CommonUtil permits N {
      * Converts a collection into an array using a provided array supplier function.
      * The array supplier function is responsible for creating a new array of the appropriate type and size.
      *
-     * @param <A> The type of the array.
-     * @param <T> The type of the elements in the collection. It must extend or be the same as the type of the array.
-     * @param c The collection to be converted into an array.
-     * @param arraySupplier The function to generate a new array of the appropriate type and size.
+     * @param <A> the type of the array.
+     * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
+     * @param c the collection to be converted into an array.
+     * @param arraySupplier the function to generate a new array of the appropriate type and size.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final IntFunction<A[]> arraySupplier) {
         if (isEmpty(c)) {
@@ -10260,13 +10074,13 @@ sealed class CommonUtil permits N {
      * Converts the specified range in the specified collection into an array using a provided array supplier function.
      * The array supplier function is responsible for creating a new array of the appropriate type and size.
      *
-     * @param <A> The type of the array.
-     * @param <T> The type of the elements in the collection. It must extend or be the same as the type of the array.
-     * @param c The collection to be converted into an array.
-     * @param fromIndex The starting (inclusive) index of the portion to be converted.
-     * @param toIndex The ending (exclusive) index of the portion to be converted.
-     * @param arraySupplier The function to generate a new array of the appropriate type and size.
-     * @return The array containing the elements of the specified portion of the collection.
+     * @param <A> the type of the array.
+     * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
+     * @param c the collection to be converted into an array.
+     * @param fromIndex the starting (inclusive) index of the portion to be converted.
+     * @param toIndex the ending (exclusive) index of the portion to be converted.
+     * @param arraySupplier the function to generate a new array of the appropriate type and size.
+     * @return the array containing the elements of the specified portion of the collection.
      * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of the collection's range.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final IntFunction<A[]> arraySupplier)
@@ -10301,11 +10115,11 @@ sealed class CommonUtil permits N {
     /**
      * Converts a collection into an array of a specified type.
      *
-     * @param <A> The type of the array.
-     * @param <T> The type of the elements in the collection. It must extend or be the same as the type of the array.
-     * @param c The collection to be converted into an array.
-     * @param targetType The Class object representing the type of the array to be returned.
-     * @return The array containing the elements of the collection.
+     * @param <A> the type of the array.
+     * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
+     * @param c the collection to be converted into an array.
+     * @param targetType the Class object representing the type of the array to be returned.
+     * @return the array containing the elements of the collection.
      * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, @NotNull final Class<A[]> targetType)
@@ -10322,13 +10136,13 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified range in the specified collection into an array of a specified type.
      *
-     * @param <A> The type of the array.
-     * @param <T> The type of the elements in the collection. It must extend or be the same as the type of the array.
-     * @param c The collection to be converted into an array.
-     * @param fromIndex The starting (inclusive) index of the range to be converted.
-     * @param toIndex The ending (exclusive) index of the range to be converted.
-     * @param targetType The Class object representing the type of the array to be returned.
-     * @return The array containing the elements of the specified portion of the collection.
+     * @param <A> the type of the array.
+     * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
+     * @param c the collection to be converted into an array.
+     * @param fromIndex the starting (inclusive) index of the range to be converted.
+     * @param toIndex the ending (exclusive) index of the range to be converted.
+     * @param targetType the Class object representing the type of the array to be returned.
+     * @return the array containing the elements of the specified portion of the collection.
      * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
      * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of the collection's range.
      */
@@ -21144,33 +20958,6 @@ sealed class CommonUtil permits N {
         return Beans.fill(beanClass, count);
     }
 
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param c
-    //     * @param valueToAdd
-    //     * @param minSize
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static <T> boolean append(final Collection<T> c, final T valueToAdd, final int minSize) {
-    //        return padRight(c, minSize, valueToAdd);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param list
-    //     * @param valueToAdd
-    //     * @param fromIndex
-    //     * @param minSize
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static <T> boolean append(final List<T> list, final T valueToAdd, final int fromIndex, final int minSize) {
-    //        return padLeft(list, minSize, valueToAdd);
-    //    }
-
     /**
      * Appends the provided object to the beginning of the list till the list has at least the specified minimum size.
      *
@@ -23290,69 +23077,6 @@ sealed class CommonUtil permits N {
 
         return cp;
     }
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param a
-    //     * @param newType
-    //     * @return
-    //     */
-    //    public static <T> T[] copy(Object[] a, Class<T[]> newType) {
-    //        if (isEmpty(a)) {
-    //            return newArray(newType.getComponentType(), 0);
-    //        }
-    //
-    //        return copyOf(a, a.length, newType);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param a
-    //     * @param newType
-    //     * @return
-    //     */
-    //    public static <T> T[][] copy(Object[][] a, Class<T[][]> newType) {
-    //        final Class<T[]> componentType = (Class<T[]>) newType.getComponentType();
-    //
-    //        if (isEmpty(a)) {
-    //            return newArray(componentType, 0);
-    //        }
-    //
-    //        final int len = len(a);
-    //        final T[][] result = newArray(componentType, len);
-    //
-    //        for (int i = 0; i < len; i++) {
-    //            result[i] = copy(componentType, a[i]);
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param a
-    //     * @param newType
-    //     * @return
-    //     */
-    //    public static <T> T[][][] copy(Object[][][] a, Class<T[][][]> newType) {
-    //        final Class<T[][]> componentType = (Class<T[][]>) newType.getComponentType();
-    //
-    //        if (isEmpty(a)) {
-    //            return newArray(componentType, 0);
-    //        }
-    //
-    //        final int len = len(a);
-    //        final T[][][] result = newArray(componentType, len);
-    //
-    //        for (int i = 0; i < len; i++) {
-    //            result[i] = copy(componentType, a[i]);
-    //        }
-    //
-    //        return result;
-    //    }
 
     // ================================ copy/copyOf/copyOfRange/clone... ================================================
 
@@ -25701,22 +25425,6 @@ sealed class CommonUtil permits N {
         sort(list, Comparators.reversedComparingDouble(keyExtractor));
     }
 
-    //    /**
-    //     * Add it because {@code Comparator.reversed()} doesn't work well in some scenarios.
-    //     *
-    //     * @param <T>
-    //     * @param cmp
-    //     * @return
-    //     * @see Collections#reverseOrder(Comparator)
-    //     * @see Comparators#reverseOrder(Comparator)
-    //     * @deprecated replaced by {@code Comparators.reverseOrder(Comparator)}
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
-    //        return Comparators.reverseOrder(cmp);
-    //    }
-
     /**
      * Performs a binary search on the specified array of booleans to find the specified value.
      * The array must be sorted (as by the {@link #sort(boolean[])} method) before making this call.
@@ -26716,10 +26424,10 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the given iterator.
      *
-     * @param iter The iterator to be searched.
-     * @param valueToFind The value to find in the iterator.
-     * @return The index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
-     * @throws ArithmeticException If the found {@code index} overflows an int.
+     * @param iter the iterator to be searched.
+     * @param valueToFind the value to find in the iterator.
+     * @return the index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
+     * @throws ArithmeticException if the found {@code index} overflows an int.
      * @see Iterators#indexOf(Iterator, Object)
      */
     public static int indexOf(final Iterator<?> iter, final Object valueToFind) throws ArithmeticException {
@@ -26729,11 +26437,11 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the given iterator, starting the search from the specified index.
      *
-     * @param iter The iterator to be searched.
-     * @param valueToFind The value to find in the iterator.
-     * @param fromIndex The index to start the search from.
-     * @return The index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
-     * @throws ArithmeticException If the found {@code index} overflows an int.
+     * @param iter the iterator to be searched.
+     * @param valueToFind the value to find in the iterator.
+     * @param fromIndex the index to start the search from.
+     * @return the index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
+     * @throws ArithmeticException if the found {@code index} overflows an int.
      * @see Iterators#indexOf(Iterator, Object, long)
      */
     public static int indexOf(final Iterator<?> iter, final Object valueToFind, final int fromIndex) throws ArithmeticException {

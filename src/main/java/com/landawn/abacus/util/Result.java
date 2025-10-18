@@ -30,8 +30,8 @@ import com.landawn.abacus.util.u.Optional;
  * The class is parameterized by two types: {@code T} which is the type of the result value, and {@code E} which is the type of the exception.
  * The exception type {@code E} is constrained to be a subtype of {@code Throwable}.
  *
- * @param <T> The type of the result value.
- * @param <E> The type of the exception. Must be a subtype of {@code Throwable}.
+ * @param <T> the type of the result value.
+ * @param <E> the type of the exception. Must be a subtype of {@code Throwable}.
  * @see com.landawn.abacus.util.u.Optional
  * @see com.landawn.abacus.util.u.Nullable
  * @see com.landawn.abacus.util.Holder
@@ -63,11 +63,11 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Result<String, IOException> failure = Result.of(null, new IOException("error"));
      * }</pre>
      *
-     * @param <T> The type of the result value
-     * @param <E> The type of the exception, must extend Throwable
-     * @param value The successful result value, can be null
-     * @param exception The exception that occurred during the operation, null if operation was successful
-     * @return A new Result instance containing either the value or the exception
+     * @param <T> the type of the result value
+     * @param <E> the type of the exception, must extend Throwable
+     * @param value the successful result value, can be null
+     * @param exception the exception that occurred during the operation, null if operation was successful
+     * @return a new Result instance containing either the value or the exception
      */
     public static <T, E extends Throwable> Result<T, E> of(final T value, final E exception) {
         return new Result<>(value, exception);
@@ -118,9 +118,9 @@ public class Result<T, E extends Throwable> implements Immutable {
      * result.ifFailure(ex -> log.error("Operation failed", ex));
      * }</pre>
      *
-     * @param <E2> The type of exception that the action might throw
-     * @param actionOnFailure The action to execute if this Result contains an exception, must not be null
-     * @throws E2 If the actionOnFailure throws an exception of type E2
+     * @param <E2> the type of exception that the action might throw
+     * @param actionOnFailure the action to execute if this Result contains an exception, must not be null
+     * @throws E2 if the actionOnFailure throws an exception of type E2
      */
     public <E2 extends Throwable> void ifFailure(final Throwables.Consumer<? super E, E2> actionOnFailure) throws E2 {
         ifFailureOrElse(actionOnFailure, Fn.emptyConsumer());
@@ -140,13 +140,13 @@ public class Result<T, E extends Throwable> implements Immutable {
      * );
      * }</pre>
      *
-     * @param <E2> The type of exception that actionOnFailure might throw
-     * @param <E3> The type of exception that actionOnSuccess might throw
-     * @param actionOnFailure The action to execute if this Result contains an exception, must not be null
-     * @param actionOnSuccess The action to execute if this Result is successful, must not be null
-     * @throws IllegalArgumentException If either actionOnFailure or actionOnSuccess is null
-     * @throws E2 If the actionOnFailure is executed and throws an exception
-     * @throws E3 If the actionOnSuccess is executed and throws an exception
+     * @param <E2> the type of exception that actionOnFailure might throw
+     * @param <E3> the type of exception that actionOnSuccess might throw
+     * @param actionOnFailure the action to execute if this Result contains an exception, must not be null
+     * @param actionOnSuccess the action to execute if this Result is successful, must not be null
+     * @throws IllegalArgumentException if either actionOnFailure or actionOnSuccess is null
+     * @throws E2 if the actionOnFailure is executed and throws an exception
+     * @throws E3 if the actionOnSuccess is executed and throws an exception
      */
     public <E2 extends Throwable, E3 extends Throwable> void ifFailureOrElse(final Throwables.Consumer<? super E, E2> actionOnFailure,
             final Throwables.Consumer<? super T, E3> actionOnSuccess) throws IllegalArgumentException, E2, E3 {
@@ -170,9 +170,9 @@ public class Result<T, E extends Throwable> implements Immutable {
      * result.ifSuccess(val -> System.out.println("Success: " + val));
      * }</pre>
      *
-     * @param <E2> The type of exception that the action might throw
-     * @param actionOnSuccess The action to execute if this Result is successful, must not be null
-     * @throws E2 If the actionOnSuccess throws an exception of type E2
+     * @param <E2> the type of exception that the action might throw
+     * @param actionOnSuccess the action to execute if this Result is successful, must not be null
+     * @throws E2 if the actionOnSuccess throws an exception of type E2
      */
     public <E2 extends Throwable> void ifSuccess(final Throwables.Consumer<? super T, E2> actionOnSuccess) throws E2 {
         ifSuccessOrElse(actionOnSuccess, Fn.emptyConsumer());
@@ -192,13 +192,13 @@ public class Result<T, E extends Throwable> implements Immutable {
      * );
      * }</pre>
      *
-     * @param <E2> The type of exception that actionOnSuccess might throw
-     * @param <E3> The type of exception that actionOnFailure might throw
-     * @param actionOnSuccess The action to execute if this Result is successful, must not be null
-     * @param actionOnFailure The action to execute if this Result contains an exception, must not be null
-     * @throws IllegalArgumentException If either actionOnSuccess or actionOnFailure is null
-     * @throws E2 If the actionOnSuccess is executed and throws an exception
-     * @throws E3 If the actionOnFailure is executed and throws an exception
+     * @param <E2> the type of exception that actionOnSuccess might throw
+     * @param <E3> the type of exception that actionOnFailure might throw
+     * @param actionOnSuccess the action to execute if this Result is successful, must not be null
+     * @param actionOnFailure the action to execute if this Result contains an exception, must not be null
+     * @throws IllegalArgumentException if either actionOnSuccess or actionOnFailure is null
+     * @throws E2 if the actionOnSuccess is executed and throws an exception
+     * @throws E3 if the actionOnFailure is executed and throws an exception
      */
     public <E2 extends Throwable, E3 extends Throwable> void ifSuccessOrElse(final Throwables.Consumer<? super T, E2> actionOnSuccess,
             final Throwables.Consumer<? super E, E3> actionOnFailure) throws IllegalArgumentException, E2, E3 {
@@ -221,8 +221,8 @@ public class Result<T, E extends Throwable> implements Immutable {
      * String value = result.orElseIfFailure("default");
      * }</pre>
      *
-     * @param defaultValueIfErrorOccurred The value to return if this Result contains an exception
-     * @return The value contained in this Result if successful, otherwise the defaultValueIfErrorOccurred
+     * @param defaultValueIfErrorOccurred the value to return if this Result contains an exception
+     * @return the value contained in this Result if successful, otherwise the defaultValueIfErrorOccurred
      */
     public T orElseIfFailure(final T defaultValueIfErrorOccurred) {
         if (exception == null) {
@@ -242,9 +242,9 @@ public class Result<T, E extends Throwable> implements Immutable {
      * String value = result.orElseGetIfFailure(() -> computeDefault());
      * }</pre>
      *
-     * @param otherIfErrorOccurred A supplier that provides the value to return if this Result contains an exception, must not be null
-     * @return The value contained in this Result if successful, otherwise the value provided by the supplier
-     * @throws IllegalArgumentException If otherIfErrorOccurred is null
+     * @param otherIfErrorOccurred a supplier that provides the value to return if this Result contains an exception, must not be null
+     * @return the value contained in this Result if successful, otherwise the value provided by the supplier
+     * @throws IllegalArgumentException if otherIfErrorOccurred is null
      */
     public T orElseGetIfFailure(final Supplier<? extends T> otherIfErrorOccurred) throws IllegalArgumentException {
         N.checkArgNotNull(otherIfErrorOccurred, cs.otherIfErrorOccurred);
@@ -265,8 +265,8 @@ public class Result<T, E extends Throwable> implements Immutable {
      * String value = result.orElseThrow(); // throws exception if failed
      * }</pre>
      *
-     * @return The value contained in this Result if successful
-     * @throws E The exception contained in this Result if it represents a failure
+     * @return the value contained in this Result if successful
+     * @throws E the exception contained in this Result if it represents a failure
      */
     public T orElseThrow() throws E {
         if (exception == null) {
@@ -286,11 +286,11 @@ public class Result<T, E extends Throwable> implements Immutable {
      * String value = result.orElseThrow(ex -> new RuntimeException("Failed", ex));
      * }</pre>
      *
-     * @param <E2> The type of exception to be thrown
-     * @param exceptionSupplierIfErrorOccurred A function that creates a new exception based on the contained exception, must not be null
-     * @return The value contained in this Result if successful
-     * @throws IllegalArgumentException If exceptionSupplierIfErrorOccurred is null
-     * @throws E2 The exception created by the exceptionSupplierIfErrorOccurred function if this Result contains an exception
+     * @param <E2> the type of exception to be thrown
+     * @param exceptionSupplierIfErrorOccurred a function that creates a new exception based on the contained exception, must not be null
+     * @return the value contained in this Result if successful
+     * @throws IllegalArgumentException if exceptionSupplierIfErrorOccurred is null
+     * @throws E2 the exception created by the exceptionSupplierIfErrorOccurred function if this Result contains an exception
      */
     public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws IllegalArgumentException, E2 {
         N.checkArgNotNull(exceptionSupplierIfErrorOccurred, cs.exceptionSupplierIfErrorOccurred);
@@ -312,11 +312,11 @@ public class Result<T, E extends Throwable> implements Immutable {
      * String value = result.orElseThrow(() -> new IllegalStateException("Failed"));
      * }</pre>
      *
-     * @param <E2> The type of exception to be thrown
-     * @param exceptionSupplier A supplier that provides the exception to throw if this Result contains an exception, must not be null
-     * @return The value contained in this Result if successful
-     * @throws IllegalArgumentException If exceptionSupplier is null
-     * @throws E2 The exception provided by the exceptionSupplier if this Result contains an exception
+     * @param <E2> the type of exception to be thrown
+     * @param exceptionSupplier a supplier that provides the exception to throw if this Result contains an exception, must not be null
+     * @return the value contained in this Result if successful
+     * @throws IllegalArgumentException if exceptionSupplier is null
+     * @throws E2 the exception provided by the exceptionSupplier if this Result contains an exception
      */
     public <E2 extends Throwable> T orElseThrow(final Supplier<? extends E2> exceptionSupplier) throws IllegalArgumentException, E2 {
         N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
@@ -336,10 +336,10 @@ public class Result<T, E extends Throwable> implements Immutable {
      * eagerly even if the Result is successful. Use {@link #orElseThrow(Supplier)} instead for
      * better performance.
      *
-     * @param <E2> The type of exception to be thrown
-     * @param exception The exception to throw if this Result contains an exception
-     * @return The value contained in this Result if successful
-     * @throws E2 The provided exception if this Result contains an exception
+     * @param <E2> the type of exception to be thrown
+     * @param exception the exception to throw if this Result contains an exception
+     * @return the value contained in this Result if successful
+     * @throws E2 the provided exception if this Result contains an exception
      * @deprecated Use {@link #orElseThrow(Supplier)} instead for better performance (avoids creating exception if not needed)
      */
     @Deprecated
@@ -363,7 +363,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }
      * }</pre>
      *
-     * @return The exception if this Result represents a failure, null if the Result is successful
+     * @return the exception if this Result represents a failure, null if the Result is successful
      */
     @Beta
     public E getException() {
@@ -378,7 +378,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * <p><b>Note:</b> This method is deprecated in favor of {@link #getException()} which provides
      * direct access to the exception without the Optional wrapper overhead.
      *
-     * @return An Optional containing the exception if present, otherwise an empty Optional
+     * @return an Optional containing the exception if present, otherwise an empty Optional
      * @deprecated Use {@link #getException()} instead for direct access to the exception
      */
     @Deprecated
@@ -399,7 +399,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Exception ex = pair._2;
      * }</pre>
      *
-     * @return A Pair where the first element is the value and the second element is the exception
+     * @return a Pair where the first element is the value and the second element is the exception
      */
     public Pair<T, E> toPair() {
         return Pair.of(value, exception);
@@ -417,7 +417,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Exception ex = tuple._2;
      * }</pre>
      *
-     * @return A Tuple2 where the first element is the value and the second element is the exception
+     * @return a Tuple2 where the first element is the value and the second element is the exception
      */
     public Tuple2<T, E> toTuple() {
         return Tuple.of(value, exception);
@@ -429,7 +429,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * This ensures that Results with the same exception or value will have the same hash code.
      * This method is consistent with the {@link #equals(Object)} implementation.
      *
-     * @return The hash code of the exception if present, otherwise the hash code of the value
+     * @return the hash code of the exception if present, otherwise the hash code of the value
      */
     @Override
     public int hashCode() {
@@ -449,7 +449,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * boolean isEqual = r1.equals(r2); // true
      * }</pre>
      *
-     * @param obj The object to compare with this Result
+     * @param obj the object to compare with this Result
      * @return {@code true} if the specified object is a Result with equal value and exception, {@code false} otherwise
      */
     @SuppressFBWarnings
@@ -479,7 +479,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * {value=null, exception=java.io.IOException: Error}
      * }</pre>
      *
-     * @return A string representation of this Result showing both value and exception
+     * @return a string representation of this Result showing both value and exception
      */
     @Override
     public String toString() {
@@ -491,7 +491,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * This class provides a more convenient way to work with Results that may contain RuntimeExceptions,
      * which don't need to be declared in method signatures.
      *
-     * @param <T> The type of the result value
+     * @param <T> the type of the result value
      */
     @Beta
     public static class RR<T> extends Result<T, RuntimeException> {
@@ -511,10 +511,10 @@ public class Result<T, E extends Throwable> implements Immutable {
          * Result.RR<String> failure = Result.RR.of(null, new RuntimeException("error"));
          * }</pre>
          *
-         * @param <T> The type of the result value
-         * @param value The successful result value, can be null
-         * @param exception The RuntimeException that occurred during the operation, null if operation was successful
-         * @return A new RR instance containing either the value or the RuntimeException
+         * @param <T> the type of the result value
+         * @param value the successful result value, can be null
+         * @param exception the RuntimeException that occurred during the operation, null if operation was successful
+         * @return a new RR instance containing either the value or the RuntimeException
          */
         public static <T> Result.RR<T> of(final T value, final RuntimeException exception) {
             return new RR<>(value, exception);

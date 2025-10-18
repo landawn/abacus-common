@@ -156,8 +156,8 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
     public void combine(final BigIntegerSummaryStatistics other) {
         count += other.count;
         sum = sum.add(other.sum);
-        min = min == null ? other.min : min.compareTo(other.min) > 0 ? other.min : min;
-        max = max == null ? other.max : max.compareTo(other.max) < 0 ? other.max : max;
+        min = N.min(min, other.min);
+        max = N.max(max, other.max);
     }
 
     /**

@@ -20,29 +20,29 @@ public class NTest3 {
 
     @Test
     public void test_forEach_2() {
-        List<?> list = N.toList(Array.range(0, 12));
+        List<?> list = CommonUtil.toList(Array.range(0, 12));
 
         N.forEach(list, e -> N.println(e + ": " + Thread.currentThread().getName()), 3);
 
         N.forEach(0, 10, 3, N::println);
         N.forEach(10, -3, -3, N::println);
 
-        N.forEach(0, 10, N.asList("a", "b"), (i, c) -> N.println(i + ": " + c));
-        N.forEach(10, -3, -3, N.asList("a", "b"), (i, c) -> N.println(i + ": " + c));
+        N.forEach(0, 10, CommonUtil.asList("a", "b"), (i, c) -> N.println(i + ": " + c));
+        N.forEach(10, -3, -3, CommonUtil.asList("a", "b"), (i, c) -> N.println(i + ": " + c));
     }
 
     @Test
     public void test_stringOf() {
         {
             Long val = null;
-            N.println(N.stringOf(val));
+            N.println(CommonUtil.stringOf(val));
         }
 
     }
 
     @Test
     public void test_countBy() {
-        List<String> c = N.asList("a", "b", "c", "a", "d", "E", "a", "b");
+        List<String> c = CommonUtil.asList("a", "b", "c", "a", "d", "E", "a", "b");
 
         N.countBy(c, Fn.identity()).forEach(Fn.println("="));
     }
@@ -50,46 +50,46 @@ public class NTest3 {
     @Test
     public void test_deleteAllByIndices() {
         {
-            List<Integer> c = N.asLinkedList(1, 2, 3, 4, 5, 6);
+            List<Integer> c = CommonUtil.asLinkedList(1, 2, 3, 4, 5, 6);
 
             N.deleteAllByIndices(c, 1, 3, 5);
             N.println(c);
-            assertEquals(N.asLinkedList(1, 3, 5), c);
+            assertEquals(CommonUtil.asLinkedList(1, 3, 5), c);
         }
         {
-            List<Integer> c = N.asLinkedList(1, 2, 3, 4, 5, 6);
+            List<Integer> c = CommonUtil.asLinkedList(1, 2, 3, 4, 5, 6);
 
             N.deleteAllByIndices(c, 0, 2, 4);
             N.println(c);
-            assertEquals(N.asLinkedList(2, 4, 6), c);
+            assertEquals(CommonUtil.asLinkedList(2, 4, 6), c);
         }
         {
-            List<Integer> c = N.asLinkedList(1, 2, 3, 4, 5, 6);
+            List<Integer> c = CommonUtil.asLinkedList(1, 2, 3, 4, 5, 6);
 
             N.deleteAllByIndices(c, 0, 1, 2, 4, 5);
             N.println(c);
-            assertEquals(N.asLinkedList(4), c);
+            assertEquals(CommonUtil.asLinkedList(4), c);
         }
         {
-            List<Integer> c = N.asList(1, 2, 3, 4, 5, 6);
+            List<Integer> c = CommonUtil.asList(1, 2, 3, 4, 5, 6);
 
             N.deleteAllByIndices(c, 1, 3, 5);
             N.println(c);
-            assertEquals(N.asList(1, 3, 5), c);
+            assertEquals(CommonUtil.asList(1, 3, 5), c);
         }
         {
-            List<Integer> c = N.asList(1, 2, 3, 4, 5, 6);
+            List<Integer> c = CommonUtil.asList(1, 2, 3, 4, 5, 6);
 
             N.deleteAllByIndices(c, 0, 2, 4);
             N.println(c);
-            assertEquals(N.asList(2, 4, 6), c);
+            assertEquals(CommonUtil.asList(2, 4, 6), c);
         }
         {
-            List<Integer> c = N.asList(1, 2, 3, 4, 5, 6);
+            List<Integer> c = CommonUtil.asList(1, 2, 3, 4, 5, 6);
 
             N.deleteAllByIndices(c, 0, 1, 2, 4, 5);
             N.println(c);
-            assertEquals(N.asList(4), c);
+            assertEquals(CommonUtil.asList(4), c);
         }
 
     }
@@ -98,7 +98,7 @@ public class NTest3 {
     public void test_forEach() {
         {
             N.println("==================: LinkedHashSet");
-            Collection<String> c = N.asLinkedHashSet("a", "b", "c", "d", "e", "f");
+            Collection<String> c = CommonUtil.asLinkedHashSet("a", "b", "c", "d", "e", "f");
             Joiner joiner = Joiner.with(", ");
             N.forEach(c, 2, 5, it -> joiner.append(it));
 
@@ -106,7 +106,7 @@ public class NTest3 {
         }
         {
             N.println("==================: LinkedList");
-            Collection<String> c = N.asLinkedList("a", "b", "c", "d", "e", "f");
+            Collection<String> c = CommonUtil.asLinkedList("a", "b", "c", "d", "e", "f");
             Joiner joiner = Joiner.with(", ");
             N.forEach(c, 2, 5, it -> joiner.append(it));
 
@@ -114,7 +114,7 @@ public class NTest3 {
         }
         {
             N.println("==================: List");
-            Collection<String> c = N.asList("a", "b", "c", "d", "e", "f");
+            Collection<String> c = CommonUtil.asList("a", "b", "c", "d", "e", "f");
             Joiner joiner = Joiner.with(", ");
             N.forEach(c, 2, 5, it -> joiner.append(it));
 
@@ -122,7 +122,7 @@ public class NTest3 {
         }
         {
             N.println("==================: LinkedHashSet");
-            Collection<String> c = N.asLinkedHashSet("a", "b", "c", "d", "e", "f");
+            Collection<String> c = CommonUtil.asLinkedHashSet("a", "b", "c", "d", "e", "f");
             Joiner joiner = Joiner.with(", ");
             N.forEach(c, 5, 2, it -> joiner.append(it));
 
@@ -130,7 +130,7 @@ public class NTest3 {
         }
         {
             N.println("==================: LinkedList");
-            Collection<String> c = N.asLinkedList("a", "b", "c", "d", "e", "f");
+            Collection<String> c = CommonUtil.asLinkedList("a", "b", "c", "d", "e", "f");
             Joiner joiner = Joiner.with(", ");
             N.forEach(c, 5, 2, it -> joiner.append(it));
 
@@ -138,7 +138,7 @@ public class NTest3 {
         }
         {
             N.println("==================: List");
-            Collection<String> c = N.asList("a", "b", "c", "d", "e", "f");
+            Collection<String> c = CommonUtil.asList("a", "b", "c", "d", "e", "f");
             Joiner joiner = Joiner.with(", ");
             N.forEach(c, 5, 2, it -> joiner.append(it));
 

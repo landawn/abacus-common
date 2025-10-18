@@ -66,7 +66,7 @@ public final class UnitTestUtil {
             throw new RuntimeException(beanClass.getCanonicalName() + " is not a valid bean class with property getter/setter method");
         }
 
-        T bean = N.newInstance(beanClass);
+        T bean = CommonUtil.newInstance(beanClass);
 
         if (withFixedValues) {
             for (PropInfo propInfo : ParserUtil.getBeanInfo(beanClass).propInfoList) {
@@ -84,7 +84,7 @@ public final class UnitTestUtil {
     }
 
     public static <T> List<T> createBeanList(Class<T> beanClass, int size, boolean withFixedValues) {
-        final List<T> list = N.newArrayList(size);
+        final List<T> list = CommonUtil.newArrayList(size);
 
         for (int i = 0; i < size; i++) {
             list.add(createBean(beanClass, withFixedValues));
@@ -98,7 +98,7 @@ public final class UnitTestUtil {
     }
 
     public static <T> T[] createBeanArray(Class<T> beanClass, int size, boolean withFixedValues) {
-        final T[] a = N.newArray(beanClass, size);
+        final T[] a = CommonUtil.newArray(beanClass, size);
 
         for (int i = 0; i < size; i++) {
             a[i] = createBean(beanClass, withFixedValues);
@@ -121,7 +121,7 @@ public final class UnitTestUtil {
     }
 
     public static List<Object> executeMethod(Object instance, List<Method> methodList, List<Object[]> parametersList) {
-        if (N.notEmpty(parametersList) && (parametersList.size() != methodList.size())) {
+        if (CommonUtil.notEmpty(parametersList) && (parametersList.size() != methodList.size())) {
             throw new IllegalArgumentException("the size of parameters list must be same as the size of method list");
         }
 
@@ -135,13 +135,13 @@ public final class UnitTestUtil {
 
             Class<?>[] parameterTypes = method.getParameterTypes();
 
-            if (N.notEmpty(parametersList)) {
+            if (CommonUtil.notEmpty(parametersList)) {
                 parameters = parametersList.get(i);
-            } else if (N.notEmpty(parameterTypes)) {
+            } else if (CommonUtil.notEmpty(parameterTypes)) {
                 parameters = new Object[parameterTypes.length];
 
                 for (int k = 0; k < parameterTypes.length; k++) {
-                    parameters[k] = N.defaultValueOf(parameterTypes[k]);
+                    parameters[k] = CommonUtil.defaultValueOf(parameterTypes[k]);
                 }
             } else {
                 parameters = null;
@@ -152,7 +152,7 @@ public final class UnitTestUtil {
             try {
                 method.setAccessible(true);
 
-                if (N.isEmpty(parameterTypes)) {
+                if (CommonUtil.isEmpty(parameterTypes)) {
                     method.invoke(instance);
                 } else {
                     method.invoke(instance, parameters);
@@ -176,7 +176,7 @@ public final class UnitTestUtil {
     public static void generateUnitTest(Class<?> cls, boolean inFail) {
         String simpleClassName = cls.getSimpleName();
         String canonicalClassName = cls.getCanonicalName();
-        Set<String> importClasses = N.asSortedSet();
+        Set<String> importClasses = CommonUtil.asSortedSet();
         Map<String, Integer> methodNameMap = new HashMap<>();
         StringBuilder sb = new StringBuilder();
         sb.append("import junit.framework.TestCase;" + IOUtil.LINE_SEPARATOR);
@@ -232,7 +232,7 @@ public final class UnitTestUtil {
                 String defaultValue = null;
 
                 for (Class<?> pt : m.getParameterTypes()) {
-                    defaultValue = N.stringOf(N.defaultValueOf(pt));
+                    defaultValue = CommonUtil.stringOf(CommonUtil.defaultValueOf(pt));
 
                     if (float.class.equals(pt)) {
                         defaultValue += "f";

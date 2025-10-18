@@ -1335,14 +1335,6 @@ public final class HttpClient {
             //noinspection DataFlowIssue
             setHttpProperties(connection, settings == null || settings.headers().isEmpty() ? _settings : settings);
 
-            // won't work for HttpURLConnection. 
-            // com.landawn.abacus.exception.UncheckedIOException: java.net.ProtocolException: Cannot read from URLConnection if doInput=false (call setDoInput(true))
-            //    if (isOneWayRequest(settings, resultClass)) {
-            //        connection.setDoInput(false);
-            //    } else {
-            //        connection.setDoOutput(doOutput);
-            //    }
-
             connection.setRequestMethod(httpMethod.name());
 
             return connection;

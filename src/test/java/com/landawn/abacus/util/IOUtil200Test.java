@@ -66,7 +66,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.guava.Files.MoreFiles;
 
 @Tag("new-test")
 public class IOUtil200Test extends TestBase {
@@ -153,9 +152,9 @@ public class IOUtil200Test extends TestBase {
 
     @Test
     public void testChars2BytesAndBytes2Chars() {
-        char[] emptyChars = N.EMPTY_CHAR_ARRAY;
+        char[] emptyChars = CommonUtil.EMPTY_CHAR_ARRAY;
         byte[] emptyBytes = IOUtil.chars2Bytes(emptyChars);
-        assertArrayEquals(N.EMPTY_BYTE_ARRAY, emptyBytes);
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, emptyBytes);
         assertArrayEquals(emptyChars, IOUtil.bytes2Chars(emptyBytes));
 
         char[] testChars = "Hello World".toCharArray();
@@ -249,14 +248,14 @@ public class IOUtil200Test extends TestBase {
         byte[] readPart = IOUtil.readBytes(testFile, 5, 9);
         assertArrayEquals(expectedPart, readPart);
 
-        byte[] readBeyond = IOUtil.readBytes(testFile, 0, (int) (fullContent.length + 10));
+        byte[] readBeyond = IOUtil.readBytes(testFile, 0, fullContent.length + 10);
         assertArrayEquals(fullContent, readBeyond);
 
         byte[] readFromFarOffset = IOUtil.readBytes(testFile, fullContent.length + 5, 10);
-        assertArrayEquals(N.EMPTY_BYTE_ARRAY, readFromFarOffset);
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, readFromFarOffset);
 
         byte[] readZero = IOUtil.readBytes(testFile, 5, 0);
-        assertArrayEquals(N.EMPTY_BYTE_ARRAY, readZero);
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, readZero);
     }
 
     @Test
@@ -278,11 +277,11 @@ public class IOUtil200Test extends TestBase {
 
         InputStream isReadFromFarOffset = new ByteArrayInputStream(fullContent);
         byte[] readFromFarOffset = IOUtil.readBytes(isReadFromFarOffset, fullContent.length + 5, 10);
-        assertArrayEquals(N.EMPTY_BYTE_ARRAY, readFromFarOffset);
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, readFromFarOffset);
 
         InputStream isReadZero = new ByteArrayInputStream(fullContent);
         byte[] readZero = IOUtil.readBytes(isReadZero, 5, 0);
-        assertArrayEquals(N.EMPTY_BYTE_ARRAY, readZero);
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, readZero);
     }
 
     @Test
@@ -346,10 +345,10 @@ public class IOUtil200Test extends TestBase {
         assertArrayEquals(fullContentStr.toCharArray(), readBeyond);
 
         char[] readFromFarOffset = IOUtil.readChars(testFile, StandardCharsets.UTF_8, fullContentStr.length() + 5, 10);
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, readFromFarOffset);
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, readFromFarOffset);
 
         char[] readZero = IOUtil.readChars(testFile, StandardCharsets.UTF_8, 5, 0);
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, readZero);
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, readZero);
     }
 
     @Test
@@ -371,11 +370,11 @@ public class IOUtil200Test extends TestBase {
 
         InputStream isReadFromFarOffset = new ByteArrayInputStream(fullContentStr.getBytes(StandardCharsets.UTF_8));
         char[] readFromFarOffset = IOUtil.readChars(isReadFromFarOffset, StandardCharsets.UTF_8, fullContentStr.length() + 5, 10);
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, readFromFarOffset);
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, readFromFarOffset);
 
         InputStream isReadZero = new ByteArrayInputStream(fullContentStr.getBytes(StandardCharsets.UTF_8));
         char[] readZero = IOUtil.readChars(isReadZero, StandardCharsets.UTF_8, 5, 0);
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, readZero);
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, readZero);
     }
 
     @Test
@@ -397,11 +396,11 @@ public class IOUtil200Test extends TestBase {
 
         Reader rReadFromFarOffset = new StringReader(fullContentStr);
         char[] readFromFarOffset = IOUtil.readChars(rReadFromFarOffset, fullContentStr.length() + 5, 10);
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, readFromFarOffset);
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, readFromFarOffset);
 
         Reader rReadZero = new StringReader(fullContentStr);
         char[] readZero = IOUtil.readChars(rReadZero, 5, 0);
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, readZero);
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, readZero);
     }
 
     @Test
@@ -691,7 +690,7 @@ public class IOUtil200Test extends TestBase {
 
         Object obj = new Date(0);
         IOUtil.write(obj, sw);
-        assertEquals(N.toString(obj), sw.toString());
+        assertEquals(CommonUtil.toString(obj), sw.toString());
         sw.getBuffer().setLength(0);
 
         IOUtil.write((Object) null, sw);
@@ -1044,7 +1043,7 @@ public class IOUtil200Test extends TestBase {
         Object objToAppend = "Appended line with Ümlaut €";
         IOUtil.appendLine(objToAppend, StandardCharsets.UTF_8, testFile);
 
-        String expected = initialContent + N.toString(objToAppend) + IOUtil.LINE_SEPARATOR;
+        String expected = initialContent + CommonUtil.toString(objToAppend) + IOUtil.LINE_SEPARATOR;
         assertEquals(expected, IOUtil.readAllToString(testFile, StandardCharsets.UTF_8));
     }
 
@@ -1190,7 +1189,7 @@ public class IOUtil200Test extends TestBase {
         assertNull(IOUtil.getFileExtension((File) null));
         File nonExistentFile = new File(tempDir.toFile(), "non.existent");
         assertEquals("existent", IOUtil.getFileExtension(nonExistentFile));
-        assertEquals("existent", MoreFiles.getFileExtension(nonExistentFile.toPath()));
+        assertEquals("existent", com.landawn.abacus.guava.Files.getFileExtension(nonExistentFile.toPath()));
     }
 
     @Test

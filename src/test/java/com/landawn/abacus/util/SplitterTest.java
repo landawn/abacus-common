@@ -26,7 +26,7 @@ public class SplitterTest extends AbstractTest {
     public void test_splitToCount() {
         final int[] a = Array.rangeClosed(1, 7);
 
-        final IntBiFunction<int[]> func = (fromIndex, toIndex) -> N.copyOfRange(a, fromIndex, toIndex);
+        final IntBiFunction<int[]> func = (fromIndex, toIndex) -> CommonUtil.copyOfRange(a, fromIndex, toIndex);
 
         N.splitByChunkCount(7, 5, true, func).forEach(Fn.println());
         N.splitByChunkCount(7, 5, false, func).forEach(Fn.println());
@@ -78,17 +78,17 @@ public class SplitterTest extends AbstractTest {
     public void test_01() {
         String source = "aaaaa";
         N.println(Splitter.with("aa").split(source));
-        assertTrue(N.equals(Array.of("", "", "", "", "", ""), Splitter.with("a").splitToArray(source)));
-        assertTrue(N.equals(N.asList("", "", "", "", "", ""), com.google.common.base.Splitter.on("a").splitToList(source)));
+        assertTrue(CommonUtil.equals(Array.of("", "", "", "", "", ""), Splitter.with("a").splitToArray(source)));
+        assertTrue(CommonUtil.equals(CommonUtil.asList("", "", "", "", "", ""), com.google.common.base.Splitter.on("a").splitToList(source)));
 
-        assertTrue(N.equals(Array.of("", "", "a"), Splitter.with("aa").splitToArray(source)));
-        assertTrue(N.equals(N.asList("", "", "a"), com.google.common.base.Splitter.on("aa").splitToList(source)));
+        assertTrue(CommonUtil.equals(Array.of("", "", "a"), Splitter.with("aa").splitToArray(source)));
+        assertTrue(CommonUtil.equals(CommonUtil.asList("", "", "a"), com.google.common.base.Splitter.on("aa").splitToList(source)));
 
-        assertTrue(N.equals(Array.of("", "", "", "", "", ""), Splitter.pattern("a").splitToArray(source)));
-        assertTrue(N.equals(N.asList("", "", "", "", "", ""), com.google.common.base.Splitter.onPattern("a").splitToList(source)));
+        assertTrue(CommonUtil.equals(Array.of("", "", "", "", "", ""), Splitter.pattern("a").splitToArray(source)));
+        assertTrue(CommonUtil.equals(CommonUtil.asList("", "", "", "", "", ""), com.google.common.base.Splitter.onPattern("a").splitToList(source)));
 
-        assertTrue(N.equals(Array.of("", "", "a"), Splitter.pattern("aa").splitToArray(source)));
-        assertTrue(N.equals(N.asList("", "", "a"), com.google.common.base.Splitter.onPattern("aa").splitToList(source)));
+        assertTrue(CommonUtil.equals(Array.of("", "", "a"), Splitter.pattern("aa").splitToArray(source)));
+        assertTrue(CommonUtil.equals(CommonUtil.asList("", "", "a"), com.google.common.base.Splitter.onPattern("aa").splitToList(source)));
 
         source = "a   b \t \n c \n \t \r d " + '\u0009' + '\u000B' + '\u000C' + " \re";
         N.println(source);

@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -607,7 +607,7 @@ public class N202Test extends TestBase {
         assertEquals(6L, N.sumToLong(1, 2, 3));
         assertEquals((long) Integer.MAX_VALUE + 1, N.sumToLong(new int[] { Integer.MAX_VALUE, 1 }));
 
-        assertEquals((long) Integer.MAX_VALUE, N.sumToLong(new int[] { Integer.MAX_VALUE }));
+        assertEquals(Integer.MAX_VALUE, N.sumToLong(new int[] { Integer.MAX_VALUE }));
         assertEquals(3L, N.sumToLong(new int[] { 1, 2 }));
     }
 
@@ -647,8 +647,8 @@ public class N202Test extends TestBase {
     public void testAverageCharArray() {
         assertEquals(0.0, N.average((char[]) null), DELTA);
         assertEquals(0.0, N.average(new char[] {}), DELTA);
-        assertEquals((double) ('a' + 'b' + 'c') / 3.0, N.average('a', 'b', 'c'), DELTA);
-        assertEquals((double) ('b' + 'c') / 2.0, N.average(new char[] { 'a', 'b', 'c', 'd' }, 1, 3), DELTA);
+        assertEquals(('a' + 'b' + 'c') / 3.0, N.average('a', 'b', 'c'), DELTA);
+        assertEquals(('b' + 'c') / 2.0, N.average(new char[] { 'a', 'b', 'c', 'd' }, 1, 3), DELTA);
     }
 
     @Test
@@ -657,7 +657,7 @@ public class N202Test extends TestBase {
         assertEquals(0.0, N.average(new int[] {}), DELTA);
         assertEquals(2.0, N.average(1, 2, 3), DELTA);
         assertEquals(2.5, N.average(new int[] { 1, 2, 3, 4 }, 1, 3), DELTA);
-        assertEquals((double) (Integer.MAX_VALUE + Integer.MIN_VALUE) / 2.0, N.average(Integer.MAX_VALUE, Integer.MIN_VALUE), DELTA);
+        assertEquals((Integer.MAX_VALUE + Integer.MIN_VALUE) / 2.0, N.average(Integer.MAX_VALUE, Integer.MIN_VALUE), DELTA);
     }
 
     @Test
@@ -686,7 +686,7 @@ public class N202Test extends TestBase {
         assertEquals(0L, N.sumIntToLong((Iterable<Integer>) null));
         assertEquals(0L, N.sumIntToLong(Collections.<Integer> emptyList()));
         assertEquals(6L, N.sumIntToLong(Arrays.asList(1, 2, 3)));
-        assertEquals((long) Integer.MAX_VALUE + 1L, N.sumIntToLong(Arrays.asList(Integer.MAX_VALUE, 1)));
+        assertEquals(Integer.MAX_VALUE + 1L, N.sumIntToLong(Arrays.asList(Integer.MAX_VALUE, 1)));
         assertEquals(9L, N.sumIntToLong(Arrays.asList("1", "3", "5"), s -> Integer.parseInt(s)));
     }
 
@@ -912,7 +912,7 @@ public class N202Test extends TestBase {
     @Test
     public void testTopPrimitives() {
         assertArrayEquals(new int[] { 5, 9, 6 }, N.top(new int[] { 3, 1, 5, 9, 2, 6 }, 3));
-        List<Integer> top3 = N.toList(N.top(new int[] { 3, 1, 5, 9, 2, 6 }, 3));
+        List<Integer> top3 = CommonUtil.toList(N.top(new int[] { 3, 1, 5, 9, 2, 6 }, 3));
         assertTrue(top3.containsAll(Arrays.asList(5, 9, 6)) && top3.size() == 3);
 
         assertArrayEquals(new int[] {}, N.top(new int[] { 1, 2, 3 }, 0));

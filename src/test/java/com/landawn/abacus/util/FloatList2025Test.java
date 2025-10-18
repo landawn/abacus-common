@@ -1287,7 +1287,7 @@ public class FloatList2025Test extends TestBase {
     public void testLargeCapacityGrowth() {
         FloatList list = new FloatList();
         for (int i = 0; i < 1000; i++) {
-            list.add((float) i);
+            list.add(i);
         }
         assertEquals(1000, list.size());
         assertEquals(999.0f, list.get(999), 0.0001f);

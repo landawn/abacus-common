@@ -107,11 +107,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Creates a new ShortList containing the specified elements. The list will have exactly the length
-     * of the provided array. If the array is null, an empty list is returned.
+     * Creates a new ShortList containing the specified elements. The specified array is used directly
+     * as the backing array without copying, so subsequent modifications to the array will affect the list.
+     * If the input array is {@code null}, an empty list is returned.
      *
-     * @param a the array of shorts to be contained in the new list. Can be null.
-     * @return a new ShortList containing the elements of the specified array, or an empty list if a is null
+     * @param a the array of elements to be included in the new list. Can be {@code null}.
+     * @return a new ShortList containing the elements from the specified array, or an empty list if the array is {@code null}
      */
     public static ShortList of(final short... a) {
         return new ShortList(N.nullToEmpty(a));
@@ -257,11 +258,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns the short value at the specified position in this list.
+     * Returns the element at the specified position in this list.
      *
      * @param index the index of the element to return
-     * @return the short value at the specified position in this list
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @return the element at the specified position in this list
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public short get(final int index) {
         rangeCheck(index);
@@ -275,7 +276,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param index the index of the element to replace
      * @param e the element to be stored at the specified position
      * @return the element previously at the specified position
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public short set(final int index, final short e) {
         rangeCheck(index);
@@ -941,11 +942,14 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns true if this list contains the specified element. More formally, returns {@code true} if and only if
-     * this list contains at least one element e such that e == valueToFind.
+     * Returns {@code true} if this list contains the specified element.
+     * More formally, returns {@code true} if and only if this list contains
+     * at least one element {@code e} such that {@code e == valueToFind}.
+     *
+     * <p>This method performs a linear search through the list.
      *
      * @param valueToFind the element whose presence in this list is to be tested
-     * @return {@code true} if this list contains the specified element
+     * @return {@code true} if this list contains the specified element, {@code false} otherwise
      */
     public boolean contains(final short valueToFind) {
         return indexOf(valueToFind) >= 0;
@@ -1907,9 +1911,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Removes all elements from this list.
-     * 
-     * <p>After this call, the list will be empty. The capacity of the list is not changed.</p>
+     * Removes all elements from this list. The list will be empty after this call returns.
+     * The capacity of the list is not changed.
      */
     @Override
     public void clear() {
@@ -1921,7 +1924,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns true if this list contains no elements.
+     * Returns {@code true} if this list contains no elements.
      *
      * @return {@code true} if this list contains no elements, {@code false} otherwise
      */
@@ -1932,7 +1935,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns the number of elements in this list.
-     * 
+     *
      * @return the number of elements in this list
      */
     @Override
@@ -1978,11 +1981,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns a new array containing all elements in this list.
-     * 
-     * <p>The returned array is independent of this list. Modifications to the array
-     * do not affect the list, and vice versa.</p>
-     * 
+     * Returns a new array containing all elements of this list in proper sequence.
+     *
      * @return a new short array containing all elements of this list
      */
     @Override

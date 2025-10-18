@@ -3,8 +3,8 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -340,8 +340,8 @@ public class Ascii2025Test extends TestBase {
 
     @Test
     public void testCharRangeConversion() {
-        char min = (char) Ascii.MIN;
-        char max = (char) Ascii.MAX;
+        char min = Ascii.MIN;
+        char max = Ascii.MAX;
         assertEquals(0, min);
         assertEquals(127, max);
     }

@@ -456,7 +456,7 @@ public class FractionTest extends AbstractTest {
             }
         }
     }
- 
+
 
     @Test
     public void testFactory_String_double() {

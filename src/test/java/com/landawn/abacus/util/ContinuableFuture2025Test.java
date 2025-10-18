@@ -278,9 +278,9 @@ public class ContinuableFuture2025Test extends TestBase {
             assertTrue(future2.isCancelled());
             assertTrue(combined.isCancelled());
         } else {
+            assertFalse(combined.isCancelled());
             assertFalse(future1.isCancelled());
             assertFalse(future2.isCancelled());
-            assertFalse(combined.isCancelled());
         }
     }
 

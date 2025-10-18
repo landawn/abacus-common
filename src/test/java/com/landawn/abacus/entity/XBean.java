@@ -209,19 +209,7 @@ public class XBean {
 
         XBean other = (XBean) obj;
 
-        if (!Objects.equals(firstName, other.firstName)) {
-            return false;
-        }
-
-        if (!Objects.equals(lastName, other.lastName)) {
-            return false;
-        }
-
-        if (!Objects.equals(middleName, other.middleName)) {
-            return false;
-        }
-
-        if (typeBoolean != other.typeBoolean) {
+        if (!Objects.equals(firstName, other.firstName) || !Objects.equals(lastName, other.lastName) || !Objects.equals(middleName, other.middleName) || (typeBoolean != other.typeBoolean)) {
             return false;
         }
 

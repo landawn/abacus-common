@@ -25,8 +25,8 @@ import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Nullable;
@@ -97,7 +97,7 @@ public class Maps200Test extends TestBase {
         assertEquals(map.entrySet(), Maps.entrySet(map));
 
         Set<Map.Entry<String, String>> emptyEntries = Maps.entrySet(null);
-        assertThrows(UnsupportedOperationException.class, () -> emptyEntries.add(N.newEntry("k", "v")));
+        assertThrows(UnsupportedOperationException.class, () -> emptyEntries.add(CommonUtil.newEntry("k", "v")));
     }
 
     @Test
@@ -440,10 +440,10 @@ public class Maps200Test extends TestBase {
         Map<String, Integer> map = Map.of("a", 1, "b", 2);
         map = new HashMap<>(map);
         map.put("c", null);
-        assertTrue(Maps.contains(map, N.newEntry("a", 1)));
-        assertFalse(Maps.contains(map, N.newEntry("a", 2)));
-        assertTrue(Maps.contains(map, N.newEntry("c", null)));
-        assertFalse(Maps.contains(map, N.newEntry("d", null)));
+        assertTrue(Maps.contains(map, CommonUtil.newEntry("a", 1)));
+        assertFalse(Maps.contains(map, CommonUtil.newEntry("a", 2)));
+        assertTrue(Maps.contains(map, CommonUtil.newEntry("c", null)));
+        assertFalse(Maps.contains(map, CommonUtil.newEntry("d", null)));
     }
 
     @Test
@@ -544,9 +544,9 @@ public class Maps200Test extends TestBase {
     @Test
     public void testRemove_entry() {
         Map<String, Integer> map = new HashMap<>(Map.of("a", 1, "b", 2));
-        assertTrue(Maps.remove(map, N.newEntry("a", 1)));
+        assertTrue(Maps.remove(map, CommonUtil.newEntry("a", 1)));
         assertEquals(1, map.size());
-        assertFalse(Maps.remove(map, N.newEntry("b", 3)));
+        assertFalse(Maps.remove(map, CommonUtil.newEntry("b", 3)));
     }
 
     @Test

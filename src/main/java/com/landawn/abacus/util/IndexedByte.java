@@ -82,8 +82,8 @@ public final class IndexedByte extends AbstractIndexed {
     }
 
     /**
-     * Returns the byte value stored in this container.
-     * 
+     * Returns the byte value stored in this IndexedByte instance.
+     *
      * @return the byte value
      */
     public byte value() {

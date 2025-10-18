@@ -63,6 +63,16 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
     }
 
     /**
+     * Returns the default value for OptionalShort type, which is an empty OptionalShort.
+     *
+     * @return OptionalShort.empty()
+     */
+    @Override
+    public OptionalShort defaultValue() {
+        return OptionalShort.empty();
+    }
+
+    /**
      * Converts an {@link OptionalShort} object to its string representation.
      * 
      * @param x the OptionalShort object to convert

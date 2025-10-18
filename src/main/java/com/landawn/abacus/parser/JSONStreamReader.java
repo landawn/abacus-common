@@ -50,22 +50,6 @@ class JSONStreamReader extends JSONStringReader {
      * @throws UncheckedIOException if an I/O error occurs during initial setup
      */
     public static JSONReader parse(final Reader reader, final char[] rbuf, final char[] cbuf) {
-        // Warning. There is a bug in below code ---> empty value is returned if the input source is InputStream/Reader.
-        //    int n = 0;
-        //
-        //    try {
-        //        n = IOUtil.read(reader, rbuf, 0, rbuf.length);
-        //    } catch (IOException e) {
-        //        throw new UncheckedIOException(e);
-        //    }
-        //
-        //    if (n <= 0) {
-        //        return new JSONStringReader(rbuf, 0, 0, cbuf, reader);
-        //    } else if (n < rbuf.length) {
-        //        return new JSONStringReader(rbuf, 0, n, cbuf, reader);
-        //    } else {
-        //        return new JSONStreamReader(reader, rbuf, 0, n, cbuf);
-        //    }
 
         return new JSONStreamReader(reader, rbuf, cbuf);
     }

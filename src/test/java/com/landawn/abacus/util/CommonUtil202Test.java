@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -157,7 +157,7 @@ public class CommonUtil202Test extends TestBase {
         for (String propName : propNamesToCompare) {
             Object val1 = b1.getPropValue(propName);
             Object val2 = b2.getPropValue(propName);
-            if (!N.equals(val1, val2)) {
+            if (!CommonUtil.equals(val1, val2)) {
                 return (val1 == null) ? -1 : ((val2 == null) ? 1 : String.valueOf(val1).compareTo(String.valueOf(val2)));
             }
         }
@@ -166,644 +166,644 @@ public class CommonUtil202Test extends TestBase {
 
     @Test
     public void testLen_CharSequence() {
-        assertEquals(0, N.len((CharSequence) null));
-        assertEquals(0, N.len(""));
-        assertEquals(3, N.len("abc"));
+        assertEquals(0, CommonUtil.len((CharSequence) null));
+        assertEquals(0, CommonUtil.len(""));
+        assertEquals(3, CommonUtil.len("abc"));
     }
 
     @Test
     public void testLen_booleanArray() {
-        assertEquals(0, N.len((boolean[]) null));
-        assertEquals(0, N.len(new boolean[0]));
-        assertEquals(2, N.len(new boolean[] { true, false }));
+        assertEquals(0, CommonUtil.len((boolean[]) null));
+        assertEquals(0, CommonUtil.len(new boolean[0]));
+        assertEquals(2, CommonUtil.len(new boolean[] { true, false }));
     }
 
     @Test
     public void testLen_charArray() {
-        assertEquals(0, N.len((char[]) null));
-        assertEquals(0, N.len(new char[0]));
-        assertEquals(3, N.len(new char[] { 'a', 'b', 'c' }));
+        assertEquals(0, CommonUtil.len((char[]) null));
+        assertEquals(0, CommonUtil.len(new char[0]));
+        assertEquals(3, CommonUtil.len(new char[] { 'a', 'b', 'c' }));
     }
 
     @Test
     public void testLen_byteArray() {
-        assertEquals(0, N.len((byte[]) null));
-        assertEquals(0, N.len(new byte[0]));
-        assertEquals(2, N.len(new byte[] { 1, 2 }));
+        assertEquals(0, CommonUtil.len((byte[]) null));
+        assertEquals(0, CommonUtil.len(new byte[0]));
+        assertEquals(2, CommonUtil.len(new byte[] { 1, 2 }));
     }
 
     @Test
     public void testLen_shortArray() {
-        assertEquals(0, N.len((short[]) null));
-        assertEquals(0, N.len(new short[0]));
-        assertEquals(2, N.len(new short[] { 10, 20 }));
+        assertEquals(0, CommonUtil.len((short[]) null));
+        assertEquals(0, CommonUtil.len(new short[0]));
+        assertEquals(2, CommonUtil.len(new short[] { 10, 20 }));
     }
 
     @Test
     public void testLen_intArray() {
-        assertEquals(0, N.len((int[]) null));
-        assertEquals(0, N.len(new int[0]));
-        assertEquals(2, N.len(new int[] { 100, 200 }));
+        assertEquals(0, CommonUtil.len((int[]) null));
+        assertEquals(0, CommonUtil.len(new int[0]));
+        assertEquals(2, CommonUtil.len(new int[] { 100, 200 }));
     }
 
     @Test
     public void testLen_longArray() {
-        assertEquals(0, N.len((long[]) null));
-        assertEquals(0, N.len(new long[0]));
-        assertEquals(2, N.len(new long[] { 1000L, 2000L }));
+        assertEquals(0, CommonUtil.len((long[]) null));
+        assertEquals(0, CommonUtil.len(new long[0]));
+        assertEquals(2, CommonUtil.len(new long[] { 1000L, 2000L }));
     }
 
     @Test
     public void testLen_floatArray() {
-        assertEquals(0, N.len((float[]) null));
-        assertEquals(0, N.len(new float[0]));
-        assertEquals(2, N.len(new float[] { 1.0f, 2.0f }));
+        assertEquals(0, CommonUtil.len((float[]) null));
+        assertEquals(0, CommonUtil.len(new float[0]));
+        assertEquals(2, CommonUtil.len(new float[] { 1.0f, 2.0f }));
     }
 
     @Test
     public void testLen_doubleArray() {
-        assertEquals(0, N.len((double[]) null));
-        assertEquals(0, N.len(new double[0]));
-        assertEquals(2, N.len(new double[] { 1.0, 2.0 }));
+        assertEquals(0, CommonUtil.len((double[]) null));
+        assertEquals(0, CommonUtil.len(new double[0]));
+        assertEquals(2, CommonUtil.len(new double[] { 1.0, 2.0 }));
     }
 
     @Test
     public void testLen_ObjectArray() {
-        assertEquals(0, N.len((Object[]) null));
-        assertEquals(0, N.len(new Object[0]));
-        assertEquals(2, N.len(new Object[] { "a", "b" }));
+        assertEquals(0, CommonUtil.len((Object[]) null));
+        assertEquals(0, CommonUtil.len(new Object[0]));
+        assertEquals(2, CommonUtil.len(new Object[] { "a", "b" }));
     }
 
     @Test
     public void testSize_Collection() {
-        assertEquals(0, N.size((Collection<?>) null));
-        assertEquals(0, N.size(Collections.emptyList()));
-        assertEquals(2, N.size(Arrays.asList(1, 2)));
+        assertEquals(0, CommonUtil.size((Collection<?>) null));
+        assertEquals(0, CommonUtil.size(Collections.emptyList()));
+        assertEquals(2, CommonUtil.size(Arrays.asList(1, 2)));
     }
 
     @Test
     public void testSize_Map() {
-        assertEquals(0, N.size((Map<?, ?>) null));
-        assertEquals(0, N.size(Collections.emptyMap()));
+        assertEquals(0, CommonUtil.size((Map<?, ?>) null));
+        assertEquals(0, CommonUtil.size(Collections.emptyMap()));
         Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
         map.put("b", 2);
-        assertEquals(2, N.size(map));
+        assertEquals(2, CommonUtil.size(map));
     }
 
     @Test
     public void testSize_PrimitiveList() {
-        assertEquals(0, N.size((PrimitiveList) null));
+        assertEquals(0, CommonUtil.size((PrimitiveList) null));
     }
 
     @Test
     public void testIsEmpty_CharSequence() {
-        assertTrue(N.isEmpty((CharSequence) null));
-        assertTrue(N.isEmpty(""));
-        assertFalse(N.isEmpty("abc"));
-        assertFalse(N.isEmpty(" "));
+        assertTrue(CommonUtil.isEmpty((CharSequence) null));
+        assertTrue(CommonUtil.isEmpty(""));
+        assertFalse(CommonUtil.isEmpty("abc"));
+        assertFalse(CommonUtil.isEmpty(" "));
     }
 
     @Test
     public void testIsEmpty_booleanArray() {
-        assertTrue(N.isEmpty((boolean[]) null));
-        assertTrue(N.isEmpty(new boolean[0]));
-        assertFalse(N.isEmpty(new boolean[] { true }));
+        assertTrue(CommonUtil.isEmpty((boolean[]) null));
+        assertTrue(CommonUtil.isEmpty(new boolean[0]));
+        assertFalse(CommonUtil.isEmpty(new boolean[] { true }));
     }
 
     @Test
     public void testIsEmpty_charArray() {
-        assertTrue(N.isEmpty((char[]) null));
-        assertTrue(N.isEmpty(new char[0]));
-        assertFalse(N.isEmpty(new char[] { 'a' }));
+        assertTrue(CommonUtil.isEmpty((char[]) null));
+        assertTrue(CommonUtil.isEmpty(new char[0]));
+        assertFalse(CommonUtil.isEmpty(new char[] { 'a' }));
     }
 
     @Test
     public void testIsEmpty_byteArray() {
-        assertTrue(N.isEmpty((byte[]) null));
-        assertTrue(N.isEmpty(new byte[0]));
-        assertFalse(N.isEmpty(new byte[] { 1 }));
+        assertTrue(CommonUtil.isEmpty((byte[]) null));
+        assertTrue(CommonUtil.isEmpty(new byte[0]));
+        assertFalse(CommonUtil.isEmpty(new byte[] { 1 }));
     }
 
     @Test
     public void testIsEmpty_shortArray() {
-        assertTrue(N.isEmpty((short[]) null));
-        assertTrue(N.isEmpty(new short[0]));
-        assertFalse(N.isEmpty(new short[] { 1 }));
+        assertTrue(CommonUtil.isEmpty((short[]) null));
+        assertTrue(CommonUtil.isEmpty(new short[0]));
+        assertFalse(CommonUtil.isEmpty(new short[] { 1 }));
     }
 
     @Test
     public void testIsEmpty_intArray() {
-        assertTrue(N.isEmpty((int[]) null));
-        assertTrue(N.isEmpty(new int[0]));
-        assertFalse(N.isEmpty(new int[] { 1 }));
+        assertTrue(CommonUtil.isEmpty((int[]) null));
+        assertTrue(CommonUtil.isEmpty(new int[0]));
+        assertFalse(CommonUtil.isEmpty(new int[] { 1 }));
     }
 
     @Test
     public void testIsEmpty_longArray() {
-        assertTrue(N.isEmpty((long[]) null));
-        assertTrue(N.isEmpty(new long[0]));
-        assertFalse(N.isEmpty(new long[] { 1L }));
+        assertTrue(CommonUtil.isEmpty((long[]) null));
+        assertTrue(CommonUtil.isEmpty(new long[0]));
+        assertFalse(CommonUtil.isEmpty(new long[] { 1L }));
     }
 
     @Test
     public void testIsEmpty_floatArray() {
-        assertTrue(N.isEmpty((float[]) null));
-        assertTrue(N.isEmpty(new float[0]));
-        assertFalse(N.isEmpty(new float[] { 1f }));
+        assertTrue(CommonUtil.isEmpty((float[]) null));
+        assertTrue(CommonUtil.isEmpty(new float[0]));
+        assertFalse(CommonUtil.isEmpty(new float[] { 1f }));
     }
 
     @Test
     public void testIsEmpty_doubleArray() {
-        assertTrue(N.isEmpty((double[]) null));
-        assertTrue(N.isEmpty(new double[0]));
-        assertFalse(N.isEmpty(new double[] { 1.0 }));
+        assertTrue(CommonUtil.isEmpty((double[]) null));
+        assertTrue(CommonUtil.isEmpty(new double[0]));
+        assertFalse(CommonUtil.isEmpty(new double[] { 1.0 }));
     }
 
     @Test
     public void testIsEmpty_ObjectArray() {
-        assertTrue(N.isEmpty((Object[]) null));
-        assertTrue(N.isEmpty(new Object[0]));
-        assertFalse(N.isEmpty(new Object[] { "a" }));
+        assertTrue(CommonUtil.isEmpty((Object[]) null));
+        assertTrue(CommonUtil.isEmpty(new Object[0]));
+        assertFalse(CommonUtil.isEmpty(new Object[] { "a" }));
     }
 
     @Test
     public void testIsEmpty_Collection() {
-        assertTrue(N.isEmpty((Collection<?>) null));
-        assertTrue(N.isEmpty(Collections.emptyList()));
-        assertFalse(N.isEmpty(Arrays.asList(1, 2)));
+        assertTrue(CommonUtil.isEmpty((Collection<?>) null));
+        assertTrue(CommonUtil.isEmpty(Collections.emptyList()));
+        assertFalse(CommonUtil.isEmpty(Arrays.asList(1, 2)));
     }
 
     @Test
     public void testIsEmpty_Iterable() {
-        assertTrue(N.isEmpty((Iterable<?>) null));
-        assertTrue(N.isEmpty(Collections.emptyList()));
-        assertFalse(N.isEmpty(Arrays.asList(1)));
+        assertTrue(CommonUtil.isEmpty((Iterable<?>) null));
+        assertTrue(CommonUtil.isEmpty(Collections.emptyList()));
+        assertFalse(CommonUtil.isEmpty(Arrays.asList(1)));
 
         Iterable<Integer> emptyIterable = () -> Collections.<Integer> emptyIterator();
-        assertTrue(N.isEmpty(emptyIterable));
+        assertTrue(CommonUtil.isEmpty(emptyIterable));
 
         Iterable<Integer> nonEmptyIterable = () -> Arrays.asList(1, 2).iterator();
-        assertFalse(N.isEmpty(nonEmptyIterable));
+        assertFalse(CommonUtil.isEmpty(nonEmptyIterable));
     }
 
     @Test
     public void testIsEmpty_Iterator() {
-        assertTrue(N.isEmpty((Iterator<?>) null));
-        assertTrue(N.isEmpty(Collections.emptyIterator()));
-        assertFalse(N.isEmpty(Arrays.asList(1, 2).iterator()));
+        assertTrue(CommonUtil.isEmpty((Iterator<?>) null));
+        assertTrue(CommonUtil.isEmpty(Collections.emptyIterator()));
+        assertFalse(CommonUtil.isEmpty(Arrays.asList(1, 2).iterator()));
     }
 
     @Test
     public void testIsEmpty_Map() {
-        assertTrue(N.isEmpty((Map<?, ?>) null));
-        assertTrue(N.isEmpty(Collections.emptyMap()));
+        assertTrue(CommonUtil.isEmpty((Map<?, ?>) null));
+        assertTrue(CommonUtil.isEmpty(Collections.emptyMap()));
         Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
-        assertFalse(N.isEmpty(map));
+        assertFalse(CommonUtil.isEmpty(map));
     }
 
     @Test
     public void testIsEmpty_PrimitiveList() {
-        assertTrue(N.isEmpty((PrimitiveList) null));
+        assertTrue(CommonUtil.isEmpty((PrimitiveList) null));
     }
 
     @Test
     public void testIsEmpty_Multiset() {
-        assertTrue(N.isEmpty((Multiset<?>) null));
+        assertTrue(CommonUtil.isEmpty((Multiset<?>) null));
     }
 
     @Test
     public void testIsEmpty_Multimap() {
-        assertTrue(N.isEmpty((Multimap<?, ?, ?>) null));
+        assertTrue(CommonUtil.isEmpty((Multimap<?, ?, ?>) null));
     }
 
     @Test
     public void testIsEmpty_Dataset() {
-        assertTrue(N.isEmpty((Dataset) null));
+        assertTrue(CommonUtil.isEmpty((Dataset) null));
     }
 
     @Test
     public void testIsBlank() {
-        assertTrue(N.isBlank(null));
-        assertTrue(N.isBlank(""));
-        assertTrue(N.isBlank(" "));
-        assertTrue(N.isBlank("   "));
-        assertTrue(N.isBlank("\t\n\r"));
-        assertFalse(N.isBlank("abc"));
-        assertFalse(N.isBlank(" a "));
+        assertTrue(CommonUtil.isBlank(null));
+        assertTrue(CommonUtil.isBlank(""));
+        assertTrue(CommonUtil.isBlank(" "));
+        assertTrue(CommonUtil.isBlank("   "));
+        assertTrue(CommonUtil.isBlank("\t\n\r"));
+        assertFalse(CommonUtil.isBlank("abc"));
+        assertFalse(CommonUtil.isBlank(" a "));
     }
 
     @Test
     public void testIsTrue() {
-        assertTrue(N.isTrue(Boolean.TRUE));
-        assertFalse(N.isTrue(Boolean.FALSE));
-        assertFalse(N.isTrue(null));
+        assertTrue(CommonUtil.isTrue(Boolean.TRUE));
+        assertFalse(CommonUtil.isTrue(Boolean.FALSE));
+        assertFalse(CommonUtil.isTrue(null));
     }
 
     @Test
     public void testIsNotTrue() {
-        assertTrue(N.isNotTrue(null));
-        assertTrue(N.isNotTrue(Boolean.FALSE));
-        assertFalse(N.isNotTrue(Boolean.TRUE));
+        assertTrue(CommonUtil.isNotTrue(null));
+        assertTrue(CommonUtil.isNotTrue(Boolean.FALSE));
+        assertFalse(CommonUtil.isNotTrue(Boolean.TRUE));
     }
 
     @Test
     public void testIsFalse() {
-        assertTrue(N.isFalse(Boolean.FALSE));
-        assertFalse(N.isFalse(Boolean.TRUE));
-        assertFalse(N.isFalse(null));
+        assertTrue(CommonUtil.isFalse(Boolean.FALSE));
+        assertFalse(CommonUtil.isFalse(Boolean.TRUE));
+        assertFalse(CommonUtil.isFalse(null));
     }
 
     @Test
     public void testIsNotFalse() {
-        assertTrue(N.isNotFalse(null));
-        assertTrue(N.isNotFalse(Boolean.TRUE));
-        assertFalse(N.isNotFalse(Boolean.FALSE));
+        assertTrue(CommonUtil.isNotFalse(null));
+        assertTrue(CommonUtil.isNotFalse(Boolean.TRUE));
+        assertFalse(CommonUtil.isNotFalse(Boolean.FALSE));
     }
 
     @Test
     public void testNotEmpty_CharSequence() {
-        assertFalse(N.notEmpty((String) null));
-        assertFalse(N.notEmpty(""));
-        assertTrue(N.notEmpty("abc"));
-        assertTrue(N.notEmpty(" "));
+        assertFalse(CommonUtil.notEmpty((String) null));
+        assertFalse(CommonUtil.notEmpty(""));
+        assertTrue(CommonUtil.notEmpty("abc"));
+        assertTrue(CommonUtil.notEmpty(" "));
     }
 
     @Test
     public void testNotEmpty_ObjectArray() {
-        assertFalse(N.notEmpty((Object[]) null));
-        assertFalse(N.notEmpty(new Object[0]));
-        assertTrue(N.notEmpty(new Object[] { "a" }));
+        assertFalse(CommonUtil.notEmpty((Object[]) null));
+        assertFalse(CommonUtil.notEmpty(new Object[0]));
+        assertTrue(CommonUtil.notEmpty(new Object[] { "a" }));
     }
 
     @Test
     public void testNotEmpty_Collection() {
-        assertFalse(N.notEmpty((Collection<?>) null));
-        assertFalse(N.notEmpty(Collections.emptyList()));
-        assertTrue(N.notEmpty(Arrays.asList(1)));
+        assertFalse(CommonUtil.notEmpty((Collection<?>) null));
+        assertFalse(CommonUtil.notEmpty(Collections.emptyList()));
+        assertTrue(CommonUtil.notEmpty(Arrays.asList(1)));
     }
 
     @Test
     public void testNotEmpty_Iterable() {
-        assertFalse(N.notEmpty((Iterable<?>) null));
-        assertFalse(N.notEmpty(Collections.emptyList()));
-        assertTrue(N.notEmpty(Arrays.asList(1)));
+        assertFalse(CommonUtil.notEmpty((Iterable<?>) null));
+        assertFalse(CommonUtil.notEmpty(Collections.emptyList()));
+        assertTrue(CommonUtil.notEmpty(Arrays.asList(1)));
 
         Iterable<Integer> emptyIterable = () -> Collections.<Integer> emptyIterator();
-        assertFalse(N.notEmpty(emptyIterable));
+        assertFalse(CommonUtil.notEmpty(emptyIterable));
 
         Iterable<Integer> nonEmptyIterable = () -> Arrays.asList(1, 2).iterator();
-        assertTrue(N.notEmpty(nonEmptyIterable));
+        assertTrue(CommonUtil.notEmpty(nonEmptyIterable));
     }
 
     @Test
     public void testNotEmpty_Iterator() {
-        assertFalse(N.notEmpty((Iterator<?>) null));
-        assertFalse(N.notEmpty(Collections.emptyIterator()));
-        assertTrue(N.notEmpty(Arrays.asList(1).iterator()));
+        assertFalse(CommonUtil.notEmpty((Iterator<?>) null));
+        assertFalse(CommonUtil.notEmpty(Collections.emptyIterator()));
+        assertTrue(CommonUtil.notEmpty(Arrays.asList(1).iterator()));
     }
 
     @Test
     public void testNotEmpty_Map() {
-        assertFalse(N.notEmpty((Map<Object, Object>) null));
-        assertFalse(N.notEmpty(Collections.emptyMap()));
+        assertFalse(CommonUtil.notEmpty((Map<Object, Object>) null));
+        assertFalse(CommonUtil.notEmpty(Collections.emptyMap()));
         Map<String, String> map = new HashMap<>();
         map.put("key", "value");
-        assertTrue(N.notEmpty(map));
+        assertTrue(CommonUtil.notEmpty(map));
     }
 
     @Test
     public void testNotBlank() {
-        assertFalse(N.notBlank(null));
-        assertFalse(N.notBlank(""));
-        assertFalse(N.notBlank(" "));
-        assertTrue(N.notBlank("abc"));
-        assertTrue(N.notBlank(" a "));
+        assertFalse(CommonUtil.notBlank(null));
+        assertFalse(CommonUtil.notBlank(""));
+        assertFalse(CommonUtil.notBlank(" "));
+        assertTrue(CommonUtil.notBlank("abc"));
+        assertTrue(CommonUtil.notBlank(" a "));
     }
 
     @Test
     public void testAnyNull_TwoObjects() {
-        assertTrue(N.anyNull(null, "a"));
-        assertTrue(N.anyNull("a", null));
-        assertTrue(N.anyNull(null, null));
-        assertFalse(N.anyNull("a", "b"));
+        assertTrue(CommonUtil.anyNull(null, "a"));
+        assertTrue(CommonUtil.anyNull("a", null));
+        assertTrue(CommonUtil.anyNull(null, null));
+        assertFalse(CommonUtil.anyNull("a", "b"));
     }
 
     @Test
     public void testAnyNull_ThreeObjects() {
-        assertTrue(N.anyNull(null, "a", "b"));
-        assertTrue(N.anyNull("a", null, "b"));
-        assertTrue(N.anyNull("a", "b", null));
-        assertTrue(N.anyNull(null, null, "b"));
-        assertFalse(N.anyNull("a", "b", "c"));
+        assertTrue(CommonUtil.anyNull(null, "a", "b"));
+        assertTrue(CommonUtil.anyNull("a", null, "b"));
+        assertTrue(CommonUtil.anyNull("a", "b", null));
+        assertTrue(CommonUtil.anyNull(null, null, "b"));
+        assertFalse(CommonUtil.anyNull("a", "b", "c"));
     }
 
     @Test
     public void testAnyNull_VarArgs() {
-        assertFalse(N.anyNull());
-        assertFalse(N.anyNull("a", "b", "c"));
-        assertTrue(N.anyNull("a", null, "c"));
-        assertFalse(N.anyNull((Object[]) null));
-        assertTrue(N.anyNull(new Object[] { null }));
+        assertFalse(CommonUtil.anyNull());
+        assertFalse(CommonUtil.anyNull("a", "b", "c"));
+        assertTrue(CommonUtil.anyNull("a", null, "c"));
+        assertFalse(CommonUtil.anyNull((Object[]) null));
+        assertTrue(CommonUtil.anyNull(new Object[] { null }));
     }
 
     @Test
     public void testAnyNull_VarArgs_explicitNullArray() {
-        assertFalse(N.anyNull((Object[]) null));
+        assertFalse(CommonUtil.anyNull((Object[]) null));
     }
 
     @Test
     public void testAnyNull_Iterable() {
-        assertFalse(N.anyNull((Iterable<?>) null));
-        assertFalse(N.anyNull(Collections.emptyList()));
-        assertFalse(N.anyNull(Arrays.asList("a", "b")));
-        assertTrue(N.anyNull(Arrays.asList("a", null, "b")));
+        assertFalse(CommonUtil.anyNull((Iterable<?>) null));
+        assertFalse(CommonUtil.anyNull(Collections.emptyList()));
+        assertFalse(CommonUtil.anyNull(Arrays.asList("a", "b")));
+        assertTrue(CommonUtil.anyNull(Arrays.asList("a", null, "b")));
         List<String> listWithNull = new ArrayList<>();
         listWithNull.add(null);
-        assertTrue(N.anyNull(listWithNull));
+        assertTrue(CommonUtil.anyNull(listWithNull));
 
     }
 
     @Test
     public void testAnyEmpty_TwoCharSequences() {
-        assertTrue(N.anyEmpty(null, "a"));
-        assertTrue(N.anyEmpty("", "a"));
-        assertTrue(N.anyEmpty("a", null));
-        assertTrue(N.anyEmpty("a", ""));
-        assertFalse(N.anyEmpty("a", "b"));
+        assertTrue(CommonUtil.anyEmpty(null, "a"));
+        assertTrue(CommonUtil.anyEmpty("", "a"));
+        assertTrue(CommonUtil.anyEmpty("a", null));
+        assertTrue(CommonUtil.anyEmpty("a", ""));
+        assertFalse(CommonUtil.anyEmpty("a", "b"));
     }
 
     @Test
     public void testAnyEmpty_ThreeCharSequences() {
-        assertTrue(N.anyEmpty(null, "a", "b"));
-        assertTrue(N.anyEmpty("", "a", "b"));
-        assertTrue(N.anyEmpty("a", "", "b"));
-        assertFalse(N.anyEmpty("a", "b", "c"));
+        assertTrue(CommonUtil.anyEmpty(null, "a", "b"));
+        assertTrue(CommonUtil.anyEmpty("", "a", "b"));
+        assertTrue(CommonUtil.anyEmpty("a", "", "b"));
+        assertFalse(CommonUtil.anyEmpty("a", "b", "c"));
     }
 
     @Test
     public void testAnyEmpty_CharSequenceVarArgs() {
-        assertTrue(N.anyEmpty((String) null));
-        assertFalse(N.anyEmpty((String[]) null));
-        assertTrue(N.anyEmpty(null, "foo"));
-        assertTrue(N.anyEmpty("", "bar"));
-        assertFalse(N.anyEmpty("foo", "bar"));
-        assertFalse(N.anyEmpty(new String[] {}));
-        assertTrue(N.anyEmpty(new String[] { "" }));
+        assertTrue(CommonUtil.anyEmpty((String) null));
+        assertFalse(CommonUtil.anyEmpty((String[]) null));
+        assertTrue(CommonUtil.anyEmpty(null, "foo"));
+        assertTrue(CommonUtil.anyEmpty("", "bar"));
+        assertFalse(CommonUtil.anyEmpty("foo", "bar"));
+        assertFalse(CommonUtil.anyEmpty(new String[] {}));
+        assertTrue(CommonUtil.anyEmpty(new String[] { "" }));
     }
 
     @Test
     public void testAnyEmpty_CharSequenceIterable() {
-        assertTrue(N.anyEmpty(Arrays.asList(null, "a")));
-        assertTrue(N.anyEmpty(Arrays.asList("", "a")));
-        assertFalse(N.anyEmpty(Arrays.asList("a", "b")));
-        assertFalse(N.anyEmpty(Collections.<CharSequence> emptyList()));
+        assertTrue(CommonUtil.anyEmpty(Arrays.asList(null, "a")));
+        assertTrue(CommonUtil.anyEmpty(Arrays.asList("", "a")));
+        assertFalse(CommonUtil.anyEmpty(Arrays.asList("a", "b")));
+        assertFalse(CommonUtil.anyEmpty(Collections.<CharSequence> emptyList()));
     }
 
     @Test
     public void testAnyEmpty_TwoObjectArrays() {
-        assertTrue(N.anyEmpty(null, new Object[] { "a" }));
-        assertTrue(N.anyEmpty(new Object[0], new Object[] { "a" }));
-        assertTrue(N.anyEmpty(new Object[] { "a" }, null));
-        assertTrue(N.anyEmpty(new Object[] { "a" }, new Object[0]));
-        assertFalse(N.anyEmpty(new Object[] { "a" }, new Object[] { "b" }));
+        assertTrue(CommonUtil.anyEmpty(null, new Object[] { "a" }));
+        assertTrue(CommonUtil.anyEmpty(new Object[0], new Object[] { "a" }));
+        assertTrue(CommonUtil.anyEmpty(new Object[] { "a" }, null));
+        assertTrue(CommonUtil.anyEmpty(new Object[] { "a" }, new Object[0]));
+        assertFalse(CommonUtil.anyEmpty(new Object[] { "a" }, new Object[] { "b" }));
     }
 
     @Test
     public void testAnyEmpty_ThreeObjectArrays() {
-        assertTrue(N.anyEmpty(null, new Object[] { "a" }, new Object[] { "b" }));
-        assertTrue(N.anyEmpty(new Object[0], new Object[] { "a" }, new Object[] { "b" }));
-        assertTrue(N.anyEmpty(new Object[] { "a" }, new Object[0], new Object[] { "b" }));
-        assertFalse(N.anyEmpty(new Object[] { "a" }, new Object[] { "b" }, new Object[] { "c" }));
+        assertTrue(CommonUtil.anyEmpty(null, new Object[] { "a" }, new Object[] { "b" }));
+        assertTrue(CommonUtil.anyEmpty(new Object[0], new Object[] { "a" }, new Object[] { "b" }));
+        assertTrue(CommonUtil.anyEmpty(new Object[] { "a" }, new Object[0], new Object[] { "b" }));
+        assertFalse(CommonUtil.anyEmpty(new Object[] { "a" }, new Object[] { "b" }, new Object[] { "c" }));
     }
 
     @Test
     public void testAnyEmpty_TwoCollections() {
-        assertTrue(N.anyEmpty(null, Arrays.asList("a")));
-        assertTrue(N.anyEmpty(Collections.emptyList(), Arrays.asList("a")));
-        assertFalse(N.anyEmpty(Arrays.asList("a"), Arrays.asList("b")));
+        assertTrue(CommonUtil.anyEmpty(null, Arrays.asList("a")));
+        assertTrue(CommonUtil.anyEmpty(Collections.emptyList(), Arrays.asList("a")));
+        assertFalse(CommonUtil.anyEmpty(Arrays.asList("a"), Arrays.asList("b")));
     }
 
     @Test
     public void testAnyEmpty_ThreeCollections() {
-        assertTrue(N.anyEmpty(null, Arrays.asList("a"), Arrays.asList("b")));
-        assertTrue(N.anyEmpty(Collections.emptyList(), Arrays.asList("a"), Arrays.asList("b")));
-        assertTrue(N.anyEmpty(Arrays.asList("a"), Collections.emptyList(), Arrays.asList("b")));
-        assertFalse(N.anyEmpty(Arrays.asList("a"), Arrays.asList("b"), Arrays.asList("c")));
+        assertTrue(CommonUtil.anyEmpty(null, Arrays.asList("a"), Arrays.asList("b")));
+        assertTrue(CommonUtil.anyEmpty(Collections.emptyList(), Arrays.asList("a"), Arrays.asList("b")));
+        assertTrue(CommonUtil.anyEmpty(Arrays.asList("a"), Collections.emptyList(), Arrays.asList("b")));
+        assertFalse(CommonUtil.anyEmpty(Arrays.asList("a"), Arrays.asList("b"), Arrays.asList("c")));
     }
 
     @Test
     public void testAnyEmpty_TwoMaps() {
         Map<String, String> nonEmptyMap = new HashMap<>();
         nonEmptyMap.put("k", "v");
-        assertTrue(N.anyEmpty(null, nonEmptyMap));
-        assertTrue(N.anyEmpty(Collections.emptyMap(), nonEmptyMap));
-        assertFalse(N.anyEmpty(nonEmptyMap, nonEmptyMap));
+        assertTrue(CommonUtil.anyEmpty(null, nonEmptyMap));
+        assertTrue(CommonUtil.anyEmpty(Collections.emptyMap(), nonEmptyMap));
+        assertFalse(CommonUtil.anyEmpty(nonEmptyMap, nonEmptyMap));
     }
 
     @Test
     public void testAnyEmpty_ThreeMaps() {
         Map<String, String> nonEmptyMap = new HashMap<>();
         nonEmptyMap.put("k", "v");
-        assertTrue(N.anyEmpty(null, nonEmptyMap, nonEmptyMap));
-        assertTrue(N.anyEmpty(Collections.emptyMap(), nonEmptyMap, nonEmptyMap));
-        assertTrue(N.anyEmpty(nonEmptyMap, Collections.emptyMap(), nonEmptyMap));
-        assertFalse(N.anyEmpty(nonEmptyMap, nonEmptyMap, nonEmptyMap));
+        assertTrue(CommonUtil.anyEmpty(null, nonEmptyMap, nonEmptyMap));
+        assertTrue(CommonUtil.anyEmpty(Collections.emptyMap(), nonEmptyMap, nonEmptyMap));
+        assertTrue(CommonUtil.anyEmpty(nonEmptyMap, Collections.emptyMap(), nonEmptyMap));
+        assertFalse(CommonUtil.anyEmpty(nonEmptyMap, nonEmptyMap, nonEmptyMap));
     }
 
     @Test
     public void testAnyBlank_TwoCharSequences() {
-        assertTrue(N.anyBlank(null, "a"));
-        assertTrue(N.anyBlank(" ", "a"));
-        assertTrue(N.anyBlank("a", null));
-        assertTrue(N.anyBlank("a", " "));
-        assertFalse(N.anyBlank("a", "b"));
+        assertTrue(CommonUtil.anyBlank(null, "a"));
+        assertTrue(CommonUtil.anyBlank(" ", "a"));
+        assertTrue(CommonUtil.anyBlank("a", null));
+        assertTrue(CommonUtil.anyBlank("a", " "));
+        assertFalse(CommonUtil.anyBlank("a", "b"));
     }
 
     @Test
     public void testAnyBlank_ThreeCharSequences() {
-        assertTrue(N.anyBlank(null, "a", "b"));
-        assertTrue(N.anyBlank(" ", "a", "b"));
-        assertTrue(N.anyBlank("a", " ", "b"));
-        assertFalse(N.anyBlank("a", "b", "c"));
+        assertTrue(CommonUtil.anyBlank(null, "a", "b"));
+        assertTrue(CommonUtil.anyBlank(" ", "a", "b"));
+        assertTrue(CommonUtil.anyBlank("a", " ", "b"));
+        assertFalse(CommonUtil.anyBlank("a", "b", "c"));
     }
 
     @Test
     public void testAnyBlank_CharSequenceVarArgs() {
-        assertFalse(N.anyBlank((CharSequence[]) null));
-        assertFalse(N.anyBlank());
-        assertTrue(N.anyBlank((CharSequence) null));
-        assertTrue(N.anyBlank(" "));
-        assertTrue(N.anyBlank("a", " "));
-        assertFalse(N.anyBlank("a", "b"));
+        assertFalse(CommonUtil.anyBlank((CharSequence[]) null));
+        assertFalse(CommonUtil.anyBlank());
+        assertTrue(CommonUtil.anyBlank((CharSequence) null));
+        assertTrue(CommonUtil.anyBlank(" "));
+        assertTrue(CommonUtil.anyBlank("a", " "));
+        assertFalse(CommonUtil.anyBlank("a", "b"));
     }
 
     @Test
     public void testAnyBlank_CharSequenceIterable() {
-        assertFalse(N.anyBlank((Iterable<CharSequence>) null));
-        assertFalse(N.anyBlank(Collections.emptyList()));
-        assertTrue(N.anyBlank(Arrays.asList(null, "a")));
-        assertTrue(N.anyBlank(Arrays.asList(" ", "a")));
-        assertFalse(N.anyBlank(Arrays.asList("a", "b")));
+        assertFalse(CommonUtil.anyBlank((Iterable<CharSequence>) null));
+        assertFalse(CommonUtil.anyBlank(Collections.emptyList()));
+        assertTrue(CommonUtil.anyBlank(Arrays.asList(null, "a")));
+        assertTrue(CommonUtil.anyBlank(Arrays.asList(" ", "a")));
+        assertFalse(CommonUtil.anyBlank(Arrays.asList("a", "b")));
     }
 
     @Test
     public void testAllNull_TwoObjects() {
-        assertFalse(N.allNull(null, "a"));
-        assertFalse(N.allNull("a", null));
-        assertTrue(N.allNull(null, null));
-        assertFalse(N.allNull("a", "b"));
+        assertFalse(CommonUtil.allNull(null, "a"));
+        assertFalse(CommonUtil.allNull("a", null));
+        assertTrue(CommonUtil.allNull(null, null));
+        assertFalse(CommonUtil.allNull("a", "b"));
     }
 
     @Test
     public void testAllNull_ThreeObjects() {
-        assertFalse(N.allNull(null, "a", "b"));
-        assertTrue(N.allNull(null, null, null));
-        assertFalse(N.allNull("a", "b", "c"));
+        assertFalse(CommonUtil.allNull(null, "a", "b"));
+        assertTrue(CommonUtil.allNull(null, null, null));
+        assertFalse(CommonUtil.allNull("a", "b", "c"));
     }
 
     @Test
     public void testAllNull_VarArgs() {
-        assertTrue(N.allNull());
-        assertTrue(N.allNull((Object) null));
-        assertTrue(N.allNull(null, null, null));
-        assertFalse(N.allNull("a", null, null));
-        assertFalse(N.allNull("a", "b", "c"));
-        assertTrue(N.allNull((Object[]) null));
+        assertTrue(CommonUtil.allNull());
+        assertTrue(CommonUtil.allNull((Object) null));
+        assertTrue(CommonUtil.allNull(null, null, null));
+        assertFalse(CommonUtil.allNull("a", null, null));
+        assertFalse(CommonUtil.allNull("a", "b", "c"));
+        assertTrue(CommonUtil.allNull((Object[]) null));
     }
 
     @Test
     public void testAllNull_Iterable() {
-        assertTrue(N.allNull((Iterable<?>) null));
-        assertTrue(N.allNull(Collections.emptyList()));
-        assertFalse(N.allNull(Arrays.asList("a", "b")));
-        assertFalse(N.allNull(Arrays.asList("a", null, "b")));
-        assertTrue(N.allNull(Arrays.asList(null, null)));
+        assertTrue(CommonUtil.allNull((Iterable<?>) null));
+        assertTrue(CommonUtil.allNull(Collections.emptyList()));
+        assertFalse(CommonUtil.allNull(Arrays.asList("a", "b")));
+        assertFalse(CommonUtil.allNull(Arrays.asList("a", null, "b")));
+        assertTrue(CommonUtil.allNull(Arrays.asList(null, null)));
         List<String> listWithNulls = new ArrayList<>();
         listWithNulls.add(null);
         listWithNulls.add(null);
-        assertTrue(N.allNull(listWithNulls));
+        assertTrue(CommonUtil.allNull(listWithNulls));
     }
 
     @Test
     public void testAllEmpty_TwoCharSequences() {
-        assertFalse(N.allEmpty(null, "a"));
-        assertTrue(N.allEmpty(null, ""));
-        assertTrue(N.allEmpty((String) null, (String) null));
-        assertTrue(N.allEmpty("", ""));
-        assertFalse(N.allEmpty("a", ""));
+        assertFalse(CommonUtil.allEmpty(null, "a"));
+        assertTrue(CommonUtil.allEmpty(null, ""));
+        assertTrue(CommonUtil.allEmpty((String) null, (String) null));
+        assertTrue(CommonUtil.allEmpty("", ""));
+        assertFalse(CommonUtil.allEmpty("a", ""));
     }
 
     @Test
     public void testAllEmpty_ThreeCharSequences() {
-        assertFalse(N.allEmpty(null, "", "a"));
-        assertTrue(N.allEmpty(null, "", null));
-        assertFalse(N.allEmpty("a", "b", "c"));
+        assertFalse(CommonUtil.allEmpty(null, "", "a"));
+        assertTrue(CommonUtil.allEmpty(null, "", null));
+        assertFalse(CommonUtil.allEmpty("a", "b", "c"));
     }
 
     @Test
     public void testAllEmpty_CharSequenceVarArgs() {
-        assertTrue(N.allEmpty((CharSequence[]) null));
-        assertTrue(N.allEmpty());
-        assertTrue(N.allEmpty((CharSequence) null));
-        assertTrue(N.allEmpty(""));
-        assertTrue(N.allEmpty(null, ""));
-        assertFalse(N.allEmpty(null, "a"));
+        assertTrue(CommonUtil.allEmpty((CharSequence[]) null));
+        assertTrue(CommonUtil.allEmpty());
+        assertTrue(CommonUtil.allEmpty((CharSequence) null));
+        assertTrue(CommonUtil.allEmpty(""));
+        assertTrue(CommonUtil.allEmpty(null, ""));
+        assertFalse(CommonUtil.allEmpty(null, "a"));
     }
 
     @Test
     public void testAllEmpty_CharSequenceIterable() {
-        assertTrue(N.allEmpty((Iterable<CharSequence>) null));
-        assertTrue(N.allEmpty(Collections.emptyList()));
-        assertTrue(N.allEmpty(Arrays.asList(null, "")));
-        assertFalse(N.allEmpty(Arrays.asList(null, "a")));
+        assertTrue(CommonUtil.allEmpty((Iterable<CharSequence>) null));
+        assertTrue(CommonUtil.allEmpty(Collections.emptyList()));
+        assertTrue(CommonUtil.allEmpty(Arrays.asList(null, "")));
+        assertFalse(CommonUtil.allEmpty(Arrays.asList(null, "a")));
     }
 
     @Test
     public void testAllEmpty_TwoObjectArrays() {
-        assertTrue(N.allEmpty((Object[]) null, (Object[]) null));
-        assertTrue(N.allEmpty(new Object[0], null));
-        assertTrue(N.allEmpty(null, new Object[0]));
-        assertTrue(N.allEmpty(new Object[0], new Object[0]));
-        assertFalse(N.allEmpty(new Object[] { "a" }, new Object[0]));
+        assertTrue(CommonUtil.allEmpty((Object[]) null, (Object[]) null));
+        assertTrue(CommonUtil.allEmpty(new Object[0], null));
+        assertTrue(CommonUtil.allEmpty(null, new Object[0]));
+        assertTrue(CommonUtil.allEmpty(new Object[0], new Object[0]));
+        assertFalse(CommonUtil.allEmpty(new Object[] { "a" }, new Object[0]));
     }
 
     @Test
     public void testAllEmpty_ThreeObjectArrays() {
-        assertTrue(N.allEmpty((Object[]) null, (Object[]) null, (Object[]) null));
-        assertTrue(N.allEmpty(new Object[0], null, new Object[0]));
-        assertFalse(N.allEmpty(new Object[] { "a" }, new Object[0], null));
+        assertTrue(CommonUtil.allEmpty((Object[]) null, (Object[]) null, (Object[]) null));
+        assertTrue(CommonUtil.allEmpty(new Object[0], null, new Object[0]));
+        assertFalse(CommonUtil.allEmpty(new Object[] { "a" }, new Object[0], null));
     }
 
     @Test
     public void testAllEmpty_TwoCollections() {
-        assertTrue(N.allEmpty((List) null, (List) null));
-        assertTrue(N.allEmpty(Collections.emptyList(), null));
-        assertTrue(N.allEmpty(null, Collections.emptyList()));
-        assertTrue(N.allEmpty(Collections.emptyList(), Collections.emptyList()));
-        assertFalse(N.allEmpty(Arrays.asList("a"), Collections.emptyList()));
+        assertTrue(CommonUtil.allEmpty((List) null, (List) null));
+        assertTrue(CommonUtil.allEmpty(Collections.emptyList(), null));
+        assertTrue(CommonUtil.allEmpty(null, Collections.emptyList()));
+        assertTrue(CommonUtil.allEmpty(Collections.emptyList(), Collections.emptyList()));
+        assertFalse(CommonUtil.allEmpty(Arrays.asList("a"), Collections.emptyList()));
     }
 
     @Test
     public void testAllEmpty_ThreeCollections() {
-        assertTrue(N.allEmpty((List) null, (List) null, (List) null));
-        assertTrue(N.allEmpty(Collections.emptyList(), null, Collections.emptyList()));
-        assertFalse(N.allEmpty(Arrays.asList("a"), Collections.emptyList(), null));
+        assertTrue(CommonUtil.allEmpty((List) null, (List) null, (List) null));
+        assertTrue(CommonUtil.allEmpty(Collections.emptyList(), null, Collections.emptyList()));
+        assertFalse(CommonUtil.allEmpty(Arrays.asList("a"), Collections.emptyList(), null));
     }
 
     @Test
     public void testAllEmpty_TwoMaps() {
-        assertTrue(N.allEmpty((Map) null, (Map) null));
-        assertTrue(N.allEmpty(Collections.emptyMap(), null));
-        assertTrue(N.allEmpty(null, Collections.emptyMap()));
-        assertTrue(N.allEmpty(Collections.emptyMap(), Collections.emptyMap()));
+        assertTrue(CommonUtil.allEmpty((Map) null, (Map) null));
+        assertTrue(CommonUtil.allEmpty(Collections.emptyMap(), null));
+        assertTrue(CommonUtil.allEmpty(null, Collections.emptyMap()));
+        assertTrue(CommonUtil.allEmpty(Collections.emptyMap(), Collections.emptyMap()));
         Map<String, String> nonEmptyMap = new HashMap<>();
         nonEmptyMap.put("k", "v");
-        assertFalse(N.allEmpty(nonEmptyMap, Collections.emptyMap()));
+        assertFalse(CommonUtil.allEmpty(nonEmptyMap, Collections.emptyMap()));
     }
 
     @Test
     public void testAllEmpty_ThreeMaps() {
-        assertTrue(N.allEmpty((Map) null, (Map) null, (Map) null));
-        assertTrue(N.allEmpty(Collections.emptyMap(), null, Collections.emptyMap()));
+        assertTrue(CommonUtil.allEmpty((Map) null, (Map) null, (Map) null));
+        assertTrue(CommonUtil.allEmpty(Collections.emptyMap(), null, Collections.emptyMap()));
         Map<String, String> nonEmptyMap = new HashMap<>();
         nonEmptyMap.put("k", "v");
-        assertFalse(N.allEmpty(nonEmptyMap, Collections.emptyMap(), null));
+        assertFalse(CommonUtil.allEmpty(nonEmptyMap, Collections.emptyMap(), null));
     }
 
     @Test
     public void testAllBlank_TwoCharSequences() {
-        assertFalse(N.allBlank(null, "a"));
-        assertTrue(N.allBlank(null, " "));
-        assertTrue(N.allBlank(null, null));
-        assertTrue(N.allBlank(" ", " "));
-        assertFalse(N.allBlank("a", " "));
+        assertFalse(CommonUtil.allBlank(null, "a"));
+        assertTrue(CommonUtil.allBlank(null, " "));
+        assertTrue(CommonUtil.allBlank(null, null));
+        assertTrue(CommonUtil.allBlank(" ", " "));
+        assertFalse(CommonUtil.allBlank("a", " "));
     }
 
     @Test
     public void testAllBlank_ThreeCharSequences() {
-        assertFalse(N.allBlank(null, " ", "a"));
-        assertTrue(N.allBlank(null, " ", null));
-        assertFalse(N.allBlank("a", "b", "c"));
+        assertFalse(CommonUtil.allBlank(null, " ", "a"));
+        assertTrue(CommonUtil.allBlank(null, " ", null));
+        assertFalse(CommonUtil.allBlank("a", "b", "c"));
     }
 
     @Test
     public void testAllBlank_CharSequenceVarArgs() {
-        assertTrue(N.allBlank((CharSequence[]) null));
-        assertTrue(N.allBlank());
-        assertTrue(N.allBlank((CharSequence) null));
-        assertTrue(N.allBlank(" "));
-        assertTrue(N.allBlank(null, " ", "\t"));
-        assertFalse(N.allBlank(null, "a"));
+        assertTrue(CommonUtil.allBlank((CharSequence[]) null));
+        assertTrue(CommonUtil.allBlank());
+        assertTrue(CommonUtil.allBlank((CharSequence) null));
+        assertTrue(CommonUtil.allBlank(" "));
+        assertTrue(CommonUtil.allBlank(null, " ", "\t"));
+        assertFalse(CommonUtil.allBlank(null, "a"));
     }
 
     @Test
     public void testAllBlank_CharSequenceIterable() {
-        assertTrue(N.allBlank((Iterable<CharSequence>) null));
-        assertTrue(N.allBlank(Collections.emptyList()));
-        assertTrue(N.allBlank(Arrays.asList(null, " ", "\t")));
-        assertFalse(N.allBlank(Arrays.asList(null, "a")));
+        assertTrue(CommonUtil.allBlank((Iterable<CharSequence>) null));
+        assertTrue(CommonUtil.allBlank(Collections.emptyList()));
+        assertTrue(CommonUtil.allBlank(Arrays.asList(null, " ", "\t")));
+        assertFalse(CommonUtil.allBlank(Arrays.asList(null, "a")));
     }
 
 }

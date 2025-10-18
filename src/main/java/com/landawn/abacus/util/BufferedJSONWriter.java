@@ -35,7 +35,7 @@ import java.io.Writer;
  * <pre>{@code
  * try (BufferedJSONWriter writer = new BufferedJSONWriter()) {
  *     writer.write("{\"name\":\"John");
- *     writer.writeCharacter(" & ");  // Properly escaped
+ *     writer.writeCharacter(" & ");
  *     writer.write("Jane\",\"data\":\"Line1\\nLine2\"}");
  *     String json = writer.toString();
  *     // Result: {"name":"John & Jane","data":"Line1\nLine2"}
@@ -107,26 +107,6 @@ public final class BufferedJSONWriter extends CharacterWriter {
         // ...
         REPLACEMENT_CHARS['\u2028'] = "\\u2028".toCharArray();
         REPLACEMENT_CHARS['\u2029'] = "\\u2029".toCharArray();
-        //
-        // // ...
-        // REPLACEMENT_CHARS['{'] = getCharNum('{');
-        // REPLACEMENT_CHARS['}'] = getCharNum('}');
-        // REPLACEMENT_CHARS['['] = getCharNum('[');
-        // REPLACEMENT_CHARS[']'] = getCharNum(']');
-        // REPLACEMENT_CHARS[':'] = getCharNum(':');
-        // REPLACEMENT_CHARS[','] = getCharNum(',');
-        //
-        //
-        // // ...
-        // REPLACEMENT_SINGLE_CHAR = REPLACEMENT_CHARS.clone();
-        // REPLACEMENT_SINGLE_CHAR['{'] = getCharNum('{');
-        // REPLACEMENT_SINGLE_CHAR['}'] = getCharNum('}');
-        // REPLACEMENT_SINGLE_CHAR['['] = getCharNum('[');
-        // REPLACEMENT_SINGLE_CHAR[']'] = getCharNum(']');
-        // REPLACEMENT_SINGLE_CHAR[':'] = getCharNum(':');
-        // REPLACEMENT_SINGLE_CHAR[','] = getCharNum(',');
-        //
-        // ...
         HTML_SAFE_REPLACEMENT_CHARS = REPLACEMENT_CHARS.clone();
         HTML_SAFE_REPLACEMENT_CHARS['<'] = "\\u003c".toCharArray();
         HTML_SAFE_REPLACEMENT_CHARS['>'] = "\\u003e".toCharArray();

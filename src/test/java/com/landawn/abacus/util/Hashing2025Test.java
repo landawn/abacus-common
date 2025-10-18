@@ -14,8 +14,8 @@ import java.util.List;
 
 import javax.crypto.spec.SecretKeySpec;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
@@ -997,7 +997,7 @@ public class Hashing2025Test extends TestBase {
         }
     }
 
-    private static final Funnel<Person> PERSON_FUNNEL = new Funnel<Person>() {
+    private static final Funnel<Person> PERSON_FUNNEL = new Funnel<>() {
         @Override
         public void funnel(Person from, PrimitiveSink into) {
             into.putString(from.name, StandardCharsets.UTF_8).putInt(from.age);

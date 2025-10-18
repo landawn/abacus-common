@@ -138,7 +138,7 @@ final class FileSystemUtil {
      * <li>AIX/HP-UX: uses 'df -kP' on the specified path</li>
      * </ul>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Windows
      * long freeKb = FileSystemUtil.freeSpaceKb("C:");
@@ -169,7 +169,7 @@ final class FileSystemUtil {
      * specifying a timeout for the command execution. This is useful to prevent
      * hanging on unresponsive file systems.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * try {
      *     // Get free space with 5 second timeout
@@ -200,7 +200,7 @@ final class FileSystemUtil {
      * freeSpaceKb(new File(".").getAbsolutePath())
      * }</pre>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * long freeKb = FileSystemUtil.freeSpaceKb();
      * System.out.println("Current directory free space: " + freeKb + " KB");
@@ -222,7 +222,7 @@ final class FileSystemUtil {
      * freeSpaceKb(new File(".").getAbsolutePath(), timeout)
      * }</pre>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * // Get free space in current directory with 3 second timeout
      * long freeKb = FileSystemUtil.freeSpaceKb(3000);
@@ -252,7 +252,7 @@ final class FileSystemUtil {
      * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @param os the operating system code
      * @param kb whether to normalize to kilobytes
-     * @param timeout The timeout amount in milliseconds or no timeout if the value
+     * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return
      * @throws IOException if an error occurs when finding the free space
@@ -283,7 +283,7 @@ final class FileSystemUtil {
      * Find free space on the Windows platform using the <i>dir</i> command.
      *
      * @param path the path to get free space for, including the colon
-     * @param timeout The timeout amount in milliseconds or no timeout if the value
+     * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return
      * @throws IOException if an error occurs
@@ -374,7 +374,7 @@ final class FileSystemUtil {
      * @param path the path to get free space for
      * @param kb whether to normalize to kilobytes
      * @param posix whether to use the POSIX standard format flag
-     * @param timeout The timeout amount in milliseconds or no timeout if the value
+     * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return
      * @throws IOException if an error occurs
@@ -450,20 +450,13 @@ final class FileSystemUtil {
      * Performs the os command.
      *
      * @param cmdAttrs the command line parameters
-     * @param max The maximum limit for the lines returned
-     * @param timeout The timeout amount in milliseconds or no timeout if the value
+     * @param max the maximum limit for the lines returned
+     * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return
      * @throws IOException if an error occurs
      */
     List<String> performCommand(final String[] cmdAttrs, final int max, final long timeout) throws IOException {
-        // this method does what it can to avoid the 'Too many open files' error
-        // based on trial and error and these links:
-        // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4784692
-        // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4801027
-        // http://forum.java.sun.com/thread.jspa?threadID=533029&messageID=2572018
-        // however, it's still not perfect as the JDK support is so poor
-        // (see commons-exec or Ant for a better multi-thread multi-os solution)
 
         final List<String> lines = new ArrayList<>(20);
         Process proc = null;

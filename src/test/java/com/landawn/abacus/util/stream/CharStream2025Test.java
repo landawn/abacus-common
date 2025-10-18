@@ -1685,4 +1685,138 @@ public class CharStream2025Test extends TestBase {
         CharStream result = stream.parallel();
         assertNotNull(result);
     }
+
+    // Additional coverage improvement tests - Collection-based factory methods
+
+    @Test
+    public void testZipWithCollectionOfStreamsForCoverage() {
+        Collection<CharStream> streams = Arrays.asList(
+                CharStream.of('a', 'b'),
+                CharStream.of('x', 'y'),
+                CharStream.of('1', '2')
+        );
+        CharStream result = CharStream.zip(streams, chars -> chars[0]);
+        assertArrayEquals(new char[] { 'a', 'b' }, result.toArray());
+    }
+
+    @Test
+    public void testZipCollectionWithDefaultsForCoverage() {
+        Collection<CharStream> streams = Arrays.asList(
+                CharStream.of('a', 'b', 'c'),
+                CharStream.of('x', 'y')
+        );
+        char[] defaults = { '0', '9' };
+        CharStream result = CharStream.zip(streams, defaults, chars -> chars[1]);
+        assertEquals(3, result.count());
+    }
+
+    @Test
+    public void testMergeCollectionForCoverage() {
+        Collection<CharStream> streams = Arrays.asList(
+                CharStream.of('a', 'e'),
+                CharStream.of('b', 'f'),
+                CharStream.of('c', 'g')
+        );
+        CharStream result = CharStream.merge(streams, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, result.count());
+    }
+
+    @Test
+    public void testMergeThreeArraysForCoverage() {
+        char[] a1 = { 'a', 'g' };
+        char[] a2 = { 'c', 'h' };
+        char[] a3 = { 'e', 'i' };
+        CharStream stream = CharStream.merge(a1, a2, a3, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, stream.count());
+    }
+
+    @Test
+    public void testMergeThreeStreamsForCoverage() {
+        CharStream s1 = CharStream.of('a', 'j');
+        CharStream s2 = CharStream.of('e', 'k');
+        CharStream s3 = CharStream.of('h', 'l');
+        CharStream stream = CharStream.merge(s1, s2, s3, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, stream.count());
+    }
+
+    // Edge cases
+
+    @Test
+    public void testFlattenWithAlignmentHorizontallyForCoverage() {
+        char[][] array = { { 'a', 'b', 'c' }, { 'd', 'e' }, { 'f' } };
+        CharStream stream = CharStream.flatten(array, '0', true);
+        char[] result = stream.toArray();
+        assertEquals(9, result.length);
+        assertEquals('a', result[0]);
+        assertEquals('d', result[1]);
+        assertEquals('f', result[2]);
+    }
+
+    @Test
+    public void testRangeClosedWithNegativeStepForCoverage() {
+        CharStream stream = CharStream.rangeClosed('j', 'a', -2);
+        assertArrayEquals(new char[] { 'j', 'h', 'f', 'd', 'b' }, stream.toArray());
+    }
+
+    @Test
+    public void testRangeWithInvalidStepDirectionForCoverage() {
+        CharStream stream = CharStream.range('a', 'j', -1);
+        assertEquals(0, stream.count());
+    }
+
+    // Parallel operations
+
+    @Test
+    public void testParallelStreamOperationsForCoverage() {
+        CharStream stream = CharStream.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h').parallel();
+        char[] result = stream.filter(c -> c > 'c').map(c -> (char) (c + 1)).toArray();
+        assertEquals(5, result.length);
+    }
+
+    @Test
+    public void testIterateWithImmediateFalseHasNextForCoverage() {
+        CharStream stream = CharStream.iterate('a', () -> false, c -> (char) (c + 1));
+        assertEquals(0, stream.count());
+    }
+
+    @Test
+    public void testCollapseWithNoCollapsibleElementsForCoverage() {
+        CharStream stream = CharStream.of('a', 'p', 'z', 'k');
+        char[] result = stream.collapse((a, b) -> Math.abs(b - a) <= 2, (a, b) -> b).toArray();
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    public void testScanOnEmptyStreamForCoverage() {
+        CharStream emptyStream = CharStream.empty();
+        char[] result = emptyStream.scan((a, b) -> (char) Math.max(a, b)).toArray();
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testZipThreeArraysWithDefaultsForCoverage() {
+        char[] a1 = { 'a', 'b' };
+        char[] a2 = { 'x' };
+        char[] a3 = { '1', '2', '3' };
+        CharStream stream = CharStream.zip(a1, a2, a3, '0', '9', '#', (a, b, c) -> c);
+        assertEquals(3, stream.count());
+    }
+
+    @Test
+    public void testZipThreeIteratorsWithDefaultsForCoverage() {
+        CharIterator iter1 = CharIterator.of('a', 'b');
+        CharIterator iter2 = CharIterator.of('x');
+        CharIterator iter3 = CharIterator.of('1', '2', '3');
+        CharStream stream = CharStream.zip(iter1, iter2, iter3, '0', '9', '#', (a, b, c) -> c);
+        assertEquals(3, stream.count());
+    }
+
+    @Test
+    public void testZipThreeStreamsWithDefaultsForCoverage() {
+        CharStream s1 = CharStream.of('a', 'b');
+        CharStream s2 = CharStream.of('x');
+        CharStream s3 = CharStream.of('1', '2', '3');
+        CharStream stream = CharStream.zip(s1, s2, s3, '0', '9', '#', (a, b, c) -> c);
+        assertEquals(3, stream.count());
+    }
 }

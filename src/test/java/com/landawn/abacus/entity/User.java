@@ -1,6 +1,5 @@
 package com.landawn.abacus.entity;
 
-import jakarta.persistence.Column;
 import javax.persistence.Id;
 
 import com.landawn.abacus.annotation.JsonXmlConfig;
@@ -11,6 +10,7 @@ import com.landawn.abacus.annotation.Type;
 import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.util.NamingPolicy;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -31,8 +31,8 @@ import java.util.function.LongUnaryOperator;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.BooleanPredicate;
@@ -1052,9 +1052,9 @@ public class N201Test extends TestBase {
         assertArrayEquals(new String[] { "b", "c", "a" }, N.remove(new String[] { "a", "b", "c", "a" }, "a"));
         assertArrayEquals(new String[] { "a", "b" }, N.remove(new String[] { "a", "b" }, "c"));
         String[] arrNull = null;
-        assertArrayEquals(N.EMPTY_STRING_ARRAY, N.remove(arrNull, "a"));
+        assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, N.remove(arrNull, "a"));
         String[] emptyArr = {};
-        assertArrayEquals(N.EMPTY_STRING_ARRAY, N.remove(emptyArr, "a"));
+        assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, N.remove(emptyArr, "a"));
     }
 
     @Test
@@ -1091,9 +1091,9 @@ public class N201Test extends TestBase {
         assertArrayEquals(arr, result);
 
         String[] arrNull = null;
-        assertArrayEquals(N.EMPTY_STRING_ARRAY, N.removeAll(arrNull, "a"));
+        assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, N.removeAll(arrNull, "a"));
         String[] emptyArr = {};
-        assertArrayEquals(N.EMPTY_STRING_ARRAY, N.removeAll(emptyArr, "a"));
+        assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, N.removeAll(emptyArr, "a"));
     }
 
     @Test
@@ -1149,7 +1149,7 @@ public class N201Test extends TestBase {
     public void testRemoveAllOccurrencesGenericArray() {
         assertArrayEquals(new String[] { "b", "c" }, N.removeAllOccurrences(new String[] { "a", "b", "a", "c", "a" }, "a"));
         String[] arrNull = null;
-        assertArrayEquals(N.EMPTY_STRING_ARRAY, N.removeAllOccurrences(arrNull, "a"));
+        assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, N.removeAllOccurrences(arrNull, "a"));
     }
 
     @Test
@@ -1203,7 +1203,7 @@ public class N201Test extends TestBase {
         assertArrayEquals(new String[] { "a", "b", "c" }, N.removeDuplicates(new String[] { "a", "b", "a", "c", "b" }));
         assertArrayEquals(new String[] { "a", "b", "c" }, N.removeDuplicates(new String[] { "a", "a", "b", "c", "c" }, true));
         String[] arrNull = null;
-        assertArrayEquals(N.EMPTY_STRING_ARRAY, N.removeDuplicates(arrNull));
+        assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, N.removeDuplicates(arrNull));
     }
 
     @Test

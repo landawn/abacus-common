@@ -30,13 +30,11 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
-import com.landawn.abacus.util.Tuple.Tuple2;
-import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 import com.landawn.abacus.util.stream.Stream;
@@ -50,12 +48,12 @@ public class Dataset100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        columnNames = N.asList("id", "name", "age", "salary");
+        columnNames = CommonUtil.asList("id", "name", "age", "salary");
         columnList = new ArrayList<>();
-        columnList.add(N.asList(1, 2, 3, 4, 5));
-        columnList.add(N.asList("John", "Jane", "Bob", "Alice", "Charlie"));
-        columnList.add(N.asList(25, 30, 35, 28, 40));
-        columnList.add(N.asList(50000.0, 60000.0, 70000.0, 55000.0, 80000.0));
+        columnList.add(CommonUtil.asList(1, 2, 3, 4, 5));
+        columnList.add(CommonUtil.asList("John", "Jane", "Bob", "Alice", "Charlie"));
+        columnList.add(CommonUtil.asList(25, 30, 35, 28, 40));
+        columnList.add(CommonUtil.asList(50000.0, 60000.0, 70000.0, 55000.0, 80000.0));
 
         dataset = new RowDataset(columnNames, columnList);
     }
@@ -688,7 +686,7 @@ public class Dataset100Test extends TestBase {
 
     @Test
     public void testAddColumnWithBiFunction() {
-        dataset.addColumn("nameAge", Tuple2.of("name", "age"), (name, age) -> name + ":" + age);
+        dataset.addColumn("nameAge", Tuple.of("name", "age"), (name, age) -> name + ":" + age);
 
         assertTrue(dataset.containsColumn("nameAge"));
         assertEquals("John:25", dataset.get(0, 4));
@@ -696,7 +694,7 @@ public class Dataset100Test extends TestBase {
 
     @Test
     public void testAddColumnWithTriFunction() {
-        dataset.addColumn("combined", Tuple3.of("id", "name", "age"), (id, name, age) -> id + "-" + name + "-" + age);
+        dataset.addColumn("combined", Tuple.of("id", "name", "age"), (id, name, age) -> id + "-" + name + "-" + age);
 
         assertTrue(dataset.containsColumn("combined"));
         assertEquals("1-John-25", dataset.get(0, 4));
@@ -1018,7 +1016,7 @@ public class Dataset100Test extends TestBase {
 
     @Test
     public void testCombineColumnsWithBiFunction() {
-        dataset.combineColumns(Tuple2.of("id", "name"), "idName", (id, name) -> id + "-" + name);
+        dataset.combineColumns(Tuple.of("id", "name"), "idName", (id, name) -> id + "-" + name);
 
         assertTrue(dataset.containsColumn("idName"));
         assertEquals("1-John", dataset.get(0, dataset.getColumnIndex("idName")));
@@ -1294,7 +1292,7 @@ public class Dataset100Test extends TestBase {
         Collection<Object> mixedRows = Arrays.asList(new Object[] { 6, "Array", 45, 90000.0 }, Arrays.asList(7, "List", 32, 75000.0));
 
         @SuppressWarnings("unchecked")
-        Collection<?> rows = (Collection<?>) mixedRows;
+        Collection<?> rows = mixedRows;
         assertThrows(ClassCastException.class, () -> dataset.addRows(rows));
     }
 
@@ -1626,7 +1624,7 @@ public class Dataset100Test extends TestBase {
     @Test
     public void testForEachWithBiConsumer() {
         List<String> nameAges = new ArrayList<>();
-        dataset.forEach(Tuple2.of("name", "age"), (name, age) -> {
+        dataset.forEach(Tuple.of("name", "age"), (name, age) -> {
             nameAges.add(name + ":" + age);
         });
 
@@ -1636,7 +1634,7 @@ public class Dataset100Test extends TestBase {
     @Test
     public void testForEachWithTriConsumer() {
         List<String> combined = new ArrayList<>();
-        dataset.forEach(Tuple3.of("id", "name", "age"), (id, name, age) -> {
+        dataset.forEach(Tuple.of("id", "name", "age"), (id, name, age) -> {
             combined.add(id + "-" + name + "-" + age);
         });
 
@@ -2048,7 +2046,7 @@ public class Dataset100Test extends TestBase {
 
     @Test
     public void testFilterByBiPredicate() {
-        Dataset filtered = dataset.filter(Tuple2.of("age", "salary"), (age, salary) -> (int) age > 30 && (double) salary > 60000);
+        Dataset filtered = dataset.filter(Tuple.of("age", "salary"), (age, salary) -> (int) age > 30 && (double) salary > 60000);
 
         assertEquals(2, filtered.size());
     }
@@ -2068,7 +2066,7 @@ public class Dataset100Test extends TestBase {
 
     @Test
     public void testMapWithBiFunction() {
-        Dataset mapped = dataset.map(Tuple2.of("name", "age"), "nameAge", Arrays.asList("id"), (name, age) -> name + ":" + age);
+        Dataset mapped = dataset.map(Tuple.of("name", "age"), "nameAge", Arrays.asList("id"), (name, age) -> name + ":" + age);
 
         assertEquals(2, mapped.columnCount());
         assertEquals("John:25", mapped.get(0, 1));
@@ -2360,7 +2358,7 @@ public class Dataset100Test extends TestBase {
 
         Dataset result = dataset1.cartesianProduct(dataset2);
 
-        assertEquals(N.asList("id", "name", "category", "score"), result.columnNameList());
+        assertEquals(CommonUtil.asList("id", "name", "category", "score"), result.columnNameList());
         assertEquals(4, result.size());
         assertEquals(4, result.columnCount());
         assertEquals(1, (Integer) result.get(0, 0));
@@ -2993,7 +2991,7 @@ public class Dataset100Test extends TestBase {
         others.add(new RowDataset(otherColumns1, otherData1));
         others.add(new RowDataset(otherColumns2, otherData2));
 
-        Dataset merged = N.merge(others);
+        Dataset merged = CommonUtil.merge(others);
 
         assertEquals(8, merged.size());
         assertTrue(merged.containsColumn("bonus"));
@@ -3023,7 +3021,7 @@ public class Dataset100Test extends TestBase {
         assertTrue(grouped.size() <= dataset.size());
 
         Dataset multiGrouped = dataset.groupBy(Arrays.asList("age"), Arrays.asList("salary"), "totalSalary",
-                collector(Collectors.summingDouble(arr -> ((Object[]) arr)[0] != null ? (Double) ((Object[]) arr)[0] : 0.0)));
+                collector(Collectors.summingDouble(arr -> arr[0] != null ? (Double) arr[0] : 0.0)));
         assertEquals(5, multiGrouped.size());
     }
 
@@ -3049,7 +3047,7 @@ public class Dataset100Test extends TestBase {
 
     @Test
     public void testStreamWithBiFunctionMapper() {
-        List<String> nameAges = dataset.stream(Tuple2.of("name", "age"), (name, age) -> name + " is " + age + " years old").toList();
+        List<String> nameAges = dataset.stream(Tuple.of("name", "age"), (name, age) -> name + " is " + age + " years old").toList();
 
         assertEquals(5, nameAges.size());
         assertEquals("John is 25 years old", nameAges.get(0));
@@ -3057,7 +3055,7 @@ public class Dataset100Test extends TestBase {
 
     @Test
     public void testStreamWithTriFunctionMapper() {
-        List<String> combined = dataset.stream(Tuple3.of("id", "name", "age"), (id, name, age) -> "ID:" + id + " Name:" + name + " Age:" + age).toList();
+        List<String> combined = dataset.stream(Tuple.of("id", "name", "age"), (id, name, age) -> "ID:" + id + " Name:" + name + " Age:" + age).toList();
 
         assertEquals(5, combined.size());
         assertEquals("ID:1 Name:John Age:25", combined.get(0));
@@ -3345,7 +3343,7 @@ public class Dataset100Test extends TestBase {
     @DisplayName("Should move single column")
     public void testMoveColumnsSingle() {
 
-        dataset.moveColumns(N.asList("age"), 0);
+        dataset.moveColumns(CommonUtil.asList("age"), 0);
 
         assertEquals("age", dataset.columnNameList().get(0));
         assertEquals("id", dataset.columnNameList().get(1));
@@ -3523,7 +3521,7 @@ public class Dataset100Test extends TestBase {
     @Test
     @DisplayName("Should verify column order preservation with complex moves")
     public void testMoveColumnsComplexOrderPreservation() {
-        dataset.moveColumns(N.asList("salary"), 0);
+        dataset.moveColumns(CommonUtil.asList("salary"), 0);
         dataset.moveColumns(Arrays.asList("name", "age"), 2);
 
         assertEquals("salary", dataset.columnNameList().get(0));

@@ -19,8 +19,8 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -133,7 +133,7 @@ public class AbstractCalendarType100Test extends TestBase {
     @Test
     public void testWriteCharacter_ValidCalendar_WithQuotation() throws IOException {
         Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
-        when(config.getStringQuotation()).thenReturn((char) '"');
+        when(config.getStringQuotation()).thenReturn('"');
         when(config.getDateTimeFormat()).thenReturn(null);
 
         type.writeCharacter(characterWriter, calendar, config);
@@ -143,7 +143,7 @@ public class AbstractCalendarType100Test extends TestBase {
     public void testWriteCharacter_ValidCalendar_LongFormat() throws IOException {
         Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
-        when(config.getStringQuotation()).thenReturn((char) '"');
+        when(config.getStringQuotation()).thenReturn('"');
 
         type.writeCharacter(characterWriter, calendar, config);
     }
@@ -170,7 +170,7 @@ public class AbstractCalendarType100Test extends TestBase {
     public void testWriteCharacter_ValidCalendar_QuotationWithLongFormat() throws IOException {
         Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
-        when(config.getStringQuotation()).thenReturn((char) '"');
+        when(config.getStringQuotation()).thenReturn('"');
 
         type.writeCharacter(characterWriter, calendar, config);
     }

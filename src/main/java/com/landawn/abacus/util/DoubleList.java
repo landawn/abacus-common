@@ -121,13 +121,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * Creates a new DoubleList containing the specified elements.
-     * The elements are copied into a new backing array, so subsequent modifications
-     * to the original array will not affect the created list.
-     * If the input is null, an empty list is created.
+     * Creates a new DoubleList containing the specified elements. The specified array is used directly
+     * as the backing array without copying, so subsequent modifications to the array will affect the list.
+     * If the input array is {@code null}, an empty list is returned.
      *
-     * @param a the array of doubles to be included in the new list. Can be null.
-     * @return a new DoubleList containing the elements from the specified array
+     * @param a the array of elements to be included in the new list. Can be {@code null}.
+     * @return a new DoubleList containing the elements from the specified array, or an empty list if the array is {@code null}
      */
     public static DoubleList of(final double... a) {
         return new DoubleList(N.nullToEmpty(a));
@@ -228,11 +227,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * Returns the double value at the specified position in this list.
+     * Returns the element at the specified position in this list.
      *
      * @param index the index of the element to return
-     * @return the double value at the specified position in this list
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @return the element at the specified position in this list
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public double get(final int index) {
         rangeCheck(index);
@@ -246,7 +245,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param index the index of the element to replace
      * @param e the element to be stored at the specified position
      * @return the element previously at the specified position
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public double set(final int index, final double e) {
         rangeCheck(index);
@@ -917,11 +916,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * Checks if this list contains the specified element.
-     * Elements are compared using {@code Double.compare} for accurate floating-point comparison.
+     * Returns {@code true} if this list contains the specified element.
+     * More formally, returns {@code true} if and only if this list contains
+     * at least one element {@code e} such that {@code Double.compare(e, valueToFind) == 0}.
+     * This comparison method correctly handles NaN and signed zero values.
+     *
+     * <p>This method performs a linear search through the list.
      *
      * @param valueToFind the element whose presence in this list is to be tested
-     * @return {@code true} if this list contains the specified element
+     * @return {@code true} if this list contains the specified element, {@code false} otherwise
      */
     public boolean contains(final double valueToFind) {
         return indexOf(valueToFind) >= 0;
@@ -1991,13 +1994,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * Removes all elements from this list.
-     * 
-     * <p>After this call returns, the list will be empty. The capacity of the
-     * list is not changed; only the elements are cleared.</p>
-     * 
-     * <p>This implementation sets all array elements to 0 before setting the
-     * size to 0, which can help with garbage collection in some scenarios.</p>
+     * Removes all elements from this list. The list will be empty after this call returns.
+     * The capacity of the list is not changed.
      */
     @Override
     public void clear() {
@@ -2010,9 +2008,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns {@code true} if this list contains no elements.
-     * 
-     * <p>This method is a convenience method equivalent to checking if
-     * {@code size() == 0}.</p>
      *
      * @return {@code true} if this list contains no elements, {@code false} otherwise
      */
@@ -2075,12 +2070,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * Returns a new array containing all elements in this list.
-     * 
-     * <p>The returned array will have a length equal to the size of this list.
-     * Modifications to the returned array will not affect this list.</p>
+     * Returns a new array containing all elements of this list in proper sequence.
      *
-     * @return a new array containing all elements in this list in proper sequence
+     * @return a new double array containing all elements of this list
      */
     @Override
     public double[] toArray() {

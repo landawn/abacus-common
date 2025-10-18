@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.util.Array;
-import com.landawn.abacus.util.N;
 
 public class LogMessageTest extends AbstractTest {
     private static final Logger logger = LoggerFactory.getLogger(LogMessageTest.class);
@@ -27,7 +25,7 @@ public class LogMessageTest extends AbstractTest {
         logger.error("Hi {}.", Array.of(1f, 2f));
         logger.error("Hi {}.", Array.of(1d, 2d));
         logger.error("Hi {}.", "123", "abc");
-        Object obj = N.asArray("123", "abc");
+        Object obj = CommonUtil.asArray("123", "abc");
         logger.error("Hi {}.", obj);
     }
 }

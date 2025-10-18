@@ -24,8 +24,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.TriFunction;
@@ -217,7 +217,7 @@ public class N106Test extends TestBase {
         public void testCustomPredicatesAndFunctions() {
             String[] words = { "hello", "world", "java", "programming" };
 
-            Predicate<String> complexPredicate = new Predicate<String>() {
+            Predicate<String> complexPredicate = new Predicate<>() {
                 @Override
                 public boolean test(String s) {
                     return s.length() > 4 && s.contains("o") && !s.startsWith("p");
@@ -227,7 +227,7 @@ public class N106Test extends TestBase {
             List<String> result = N.filter(words, complexPredicate);
             assertEquals(Arrays.asList("hello", "world"), result);
 
-            Function<String, String> statefulMapper = new Function<String, String>() {
+            Function<String, String> statefulMapper = new Function<>() {
                 private int counter = 0;
 
                 @Override

@@ -33,8 +33,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.base.Predicate;
@@ -73,21 +73,21 @@ public class Files100Test extends TestBase {
 
     @Test
     public void testNewReader() throws IOException {
-        try (BufferedReader reader = MoreFiles.newReader(tempFile, UTF_8)) {
+        try (BufferedReader reader = com.landawn.abacus.guava.Files.newReader(tempFile, UTF_8)) {
             assertNotNull(reader);
             String firstLine = reader.readLine();
             assertEquals("Hello, World!", firstLine);
         }
 
         File nonExistentFile = new File(tempDir.toFile(), "nonexistent.txt");
-        assertThrows(FileNotFoundException.class, () -> MoreFiles.newReader(nonExistentFile, UTF_8));
+        assertThrows(FileNotFoundException.class, () -> com.landawn.abacus.guava.Files.newReader(nonExistentFile, UTF_8));
     }
 
     @Test
     public void testNewWriter() throws IOException {
         File writeFile = new File(tempDir.toFile(), "write_test.txt");
 
-        try (BufferedWriter writer = MoreFiles.newWriter(writeFile, UTF_8)) {
+        try (BufferedWriter writer = com.landawn.abacus.guava.Files.newWriter(writeFile, UTF_8)) {
             assertNotNull(writer);
             writer.write("Test content");
         }
@@ -98,7 +98,7 @@ public class Files100Test extends TestBase {
 
     @Test
     public void testAsByteSourceFile() throws IOException {
-        ByteSource byteSource = MoreFiles.asByteSource(tempFile);
+        ByteSource byteSource = com.landawn.abacus.guava.Files.asByteSource(tempFile);
         assertNotNull(byteSource);
 
         byte[] bytes = byteSource.read();
@@ -107,7 +107,7 @@ public class Files100Test extends TestBase {
 
     @Test
     public void testAsByteSourcePath() throws IOException {
-        ByteSource byteSource = MoreFiles.asByteSource(tempPath, StandardOpenOption.READ);
+        ByteSource byteSource = com.landawn.abacus.guava.Files.asByteSource(tempPath, StandardOpenOption.READ);
         assertNotNull(byteSource);
 
         byte[] bytes = byteSource.read();
@@ -118,11 +118,11 @@ public class Files100Test extends TestBase {
     public void testAsByteSinkFile() throws IOException {
         File sinkFile = new File(tempDir.toFile(), "sink_test.txt");
 
-        ByteSink byteSink = MoreFiles.asByteSink(sinkFile);
+        ByteSink byteSink = com.landawn.abacus.guava.Files.asByteSink(sinkFile);
         byteSink.write(TEST_BYTES);
         assertArrayEquals(TEST_BYTES, Files.readAllBytes(sinkFile.toPath()));
 
-        ByteSink appendSink = MoreFiles.asByteSink(sinkFile, FileWriteMode.APPEND);
+        ByteSink appendSink = com.landawn.abacus.guava.Files.asByteSink(sinkFile, FileWriteMode.APPEND);
         appendSink.write(" Appended".getBytes(UTF_8));
         String content = Files.readString(sinkFile.toPath());
         assertEquals(TEST_CONTENT + " Appended", content);
@@ -132,14 +132,14 @@ public class Files100Test extends TestBase {
     public void testAsByteSinkPath() throws IOException {
         Path sinkPath = tempDir.resolve("path_sink_test.txt");
 
-        ByteSink byteSink = MoreFiles.asByteSink(sinkPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        ByteSink byteSink = com.landawn.abacus.guava.Files.asByteSink(sinkPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         byteSink.write(TEST_BYTES);
         assertArrayEquals(TEST_BYTES, Files.readAllBytes(sinkPath));
     }
 
     @Test
     public void testAsCharSourceFile() throws IOException {
-        CharSource charSource = MoreFiles.asCharSource(tempFile, UTF_8);
+        CharSource charSource = com.landawn.abacus.guava.Files.asCharSource(tempFile, UTF_8);
         assertNotNull(charSource);
 
         String content = charSource.read();
@@ -148,7 +148,7 @@ public class Files100Test extends TestBase {
 
     @Test
     public void testAsCharSourcePath() throws IOException {
-        CharSource charSource = MoreFiles.asCharSource(tempPath, UTF_8, StandardOpenOption.READ);
+        CharSource charSource = com.landawn.abacus.guava.Files.asCharSource(tempPath, UTF_8, StandardOpenOption.READ);
         assertNotNull(charSource);
 
         String content = charSource.read();
@@ -159,11 +159,11 @@ public class Files100Test extends TestBase {
     public void testAsCharSinkFile() throws IOException {
         File sinkFile = new File(tempDir.toFile(), "char_sink_test.txt");
 
-        CharSink charSink = MoreFiles.asCharSink(sinkFile, UTF_8);
+        CharSink charSink = com.landawn.abacus.guava.Files.asCharSink(sinkFile, UTF_8);
         charSink.write("Test content");
         assertEquals("Test content", Files.readString(sinkFile.toPath()));
 
-        CharSink appendSink = MoreFiles.asCharSink(sinkFile, UTF_8, FileWriteMode.APPEND);
+        CharSink appendSink = com.landawn.abacus.guava.Files.asCharSink(sinkFile, UTF_8, FileWriteMode.APPEND);
         appendSink.write(" Appended");
         assertEquals("Test content Appended", Files.readString(sinkFile.toPath()));
     }
@@ -172,18 +172,18 @@ public class Files100Test extends TestBase {
     public void testAsCharSinkPath() throws IOException {
         Path sinkPath = tempDir.resolve("path_char_sink_test.txt");
 
-        CharSink charSink = MoreFiles.asCharSink(sinkPath, UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        CharSink charSink = com.landawn.abacus.guava.Files.asCharSink(sinkPath, UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         charSink.write("Test content");
         assertEquals("Test content", Files.readString(sinkPath));
     }
 
     @Test
     public void testToByteArray() throws IOException {
-        byte[] bytes = MoreFiles.toByteArray(tempFile);
+        byte[] bytes = com.landawn.abacus.guava.Files.toByteArray(tempFile);
         assertArrayEquals(TEST_BYTES, bytes);
 
         File nonExistent = new File(tempDir.toFile(), "nonexistent.txt");
-        assertThrows(IOException.class, () -> MoreFiles.toByteArray(nonExistent));
+        assertThrows(IOException.class, () -> com.landawn.abacus.guava.Files.toByteArray(nonExistent));
     }
 
     @Test
@@ -191,11 +191,11 @@ public class Files100Test extends TestBase {
         File writeFile = new File(tempDir.toFile(), "write_bytes_test.txt");
         byte[] data = "Test data".getBytes(UTF_8);
 
-        MoreFiles.write(data, writeFile);
+        com.landawn.abacus.guava.Files.write(data, writeFile);
         assertArrayEquals(data, Files.readAllBytes(writeFile.toPath()));
 
         byte[] newData = "New data".getBytes(UTF_8);
-        MoreFiles.write(newData, writeFile);
+        com.landawn.abacus.guava.Files.write(newData, writeFile);
         assertArrayEquals(newData, Files.readAllBytes(writeFile.toPath()));
     }
 
@@ -206,14 +206,14 @@ public class Files100Test extends TestBase {
         Files.write(file1.toPath(), TEST_BYTES);
         Files.write(file2.toPath(), TEST_BYTES);
 
-        assertTrue(MoreFiles.equal(file1, file2));
+        assertTrue(com.landawn.abacus.guava.Files.equal(file1, file2));
 
         Files.write(file2.toPath(), "Different content".getBytes(UTF_8));
-        assertFalse(MoreFiles.equal(file1, file2));
+        assertFalse(com.landawn.abacus.guava.Files.equal(file1, file2));
 
-        assertTrue(MoreFiles.equal(file1, file1));
+        assertTrue(com.landawn.abacus.guava.Files.equal(file1, file1));
 
-        assertThrows(FileNotFoundException.class, () -> MoreFiles.equal(file1, tempDir.toFile()));
+        assertThrows(FileNotFoundException.class, () -> com.landawn.abacus.guava.Files.equal(file1, tempDir.toFile()));
     }
 
     @Test
@@ -223,10 +223,10 @@ public class Files100Test extends TestBase {
         Files.write(path1, TEST_BYTES);
         Files.write(path2, TEST_BYTES);
 
-        assertTrue(MoreFiles.equal(path1, path2));
+        assertTrue(com.landawn.abacus.guava.Files.equal(path1, path2));
 
         Files.write(path2, "Different content".getBytes(UTF_8));
-        assertFalse(MoreFiles.equal(path1, path2));
+        assertFalse(com.landawn.abacus.guava.Files.equal(path1, path2));
     }
 
     @Test
@@ -234,13 +234,13 @@ public class Files100Test extends TestBase {
         File newFile = new File(tempDir.toFile(), "touch_test.txt");
         assertFalse(newFile.exists());
 
-        MoreFiles.touch(newFile);
+        com.landawn.abacus.guava.Files.touch(newFile);
         assertTrue(newFile.exists());
         assertEquals(0, newFile.length());
 
         long originalTime = newFile.lastModified();
         Thread.sleep(10);
-        MoreFiles.touch(newFile);
+        com.landawn.abacus.guava.Files.touch(newFile);
         assertTrue(newFile.lastModified() >= originalTime);
     }
 
@@ -249,7 +249,7 @@ public class Files100Test extends TestBase {
         Path newPath = tempDir.resolve("touch_path_test.txt");
         assertFalse(Files.exists(newPath));
 
-        MoreFiles.touch(newPath);
+        com.landawn.abacus.guava.Files.touch(newPath);
         assertTrue(Files.exists(newPath));
         assertEquals(0, Files.size(newPath));
     }
@@ -269,7 +269,7 @@ public class Files100Test extends TestBase {
         File deepFile = new File(tempDir.toFile(), "a/b/c/d/file.txt");
         assertFalse(deepFile.getParentFile().exists());
 
-        MoreFiles.createParentDirs(deepFile);
+        com.landawn.abacus.guava.Files.createParentDirs(deepFile);
         assertTrue(deepFile.getParentFile().exists());
         assertTrue(deepFile.getParentFile().isDirectory());
     }
@@ -281,9 +281,9 @@ public class Files100Test extends TestBase {
 
         try {
             FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-xr-x"));
-            MoreFiles.createParentDirectories(deepPath, attr);
+            com.landawn.abacus.guava.Files.createParentDirectories(deepPath, attr);
         } catch (UnsupportedOperationException e) {
-            MoreFiles.createParentDirectories(deepPath);
+            com.landawn.abacus.guava.Files.createParentDirectories(deepPath);
         }
 
         assertTrue(Files.exists(deepPath.getParent()));
@@ -294,7 +294,7 @@ public class Files100Test extends TestBase {
     public void testCopyFileToOutputStream() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        MoreFiles.copy(tempFile, baos);
+        com.landawn.abacus.guava.Files.copy(tempFile, baos);
         assertArrayEquals(TEST_BYTES, baos.toByteArray());
     }
 
@@ -302,15 +302,15 @@ public class Files100Test extends TestBase {
     public void testCopyFileToFile() throws IOException {
         File destFile = new File(tempDir.toFile(), "copy_dest.txt");
 
-        MoreFiles.copy(tempFile, destFile);
+        com.landawn.abacus.guava.Files.copy(tempFile, destFile);
         assertTrue(destFile.exists());
         assertArrayEquals(TEST_BYTES, Files.readAllBytes(destFile.toPath()));
 
         Files.write(destFile.toPath(), "Old content".getBytes(UTF_8));
-        MoreFiles.copy(tempFile, destFile);
+        com.landawn.abacus.guava.Files.copy(tempFile, destFile);
         assertArrayEquals(TEST_BYTES, Files.readAllBytes(destFile.toPath()));
 
-        assertThrows(IllegalArgumentException.class, () -> MoreFiles.copy(tempFile, tempFile));
+        assertThrows(IllegalArgumentException.class, () -> com.landawn.abacus.guava.Files.copy(tempFile, tempFile));
     }
 
     @Test
@@ -319,24 +319,24 @@ public class Files100Test extends TestBase {
         File destFile = new File(tempDir.toFile(), "move_dest.txt");
         Files.write(sourceFile.toPath(), TEST_BYTES);
 
-        MoreFiles.move(sourceFile, destFile);
+        com.landawn.abacus.guava.Files.move(sourceFile, destFile);
         assertFalse(sourceFile.exists());
         assertTrue(destFile.exists());
         assertArrayEquals(TEST_BYTES, Files.readAllBytes(destFile.toPath()));
 
-        assertThrows(IllegalArgumentException.class, () -> MoreFiles.move(destFile, destFile));
+        assertThrows(IllegalArgumentException.class, () -> com.landawn.abacus.guava.Files.move(destFile, destFile));
     }
 
     @Test
     public void testReadLines() throws IOException {
-        List<String> lines = MoreFiles.readLines(tempFile, UTF_8);
+        List<String> lines = com.landawn.abacus.guava.Files.readLines(tempFile, UTF_8);
         assertEquals(2, lines.size());
         assertEquals("Hello, World!", lines.get(0));
         assertEquals("This is a test file.", lines.get(1));
 
         File emptyFile = new File(tempDir.toFile(), "empty.txt");
         emptyFile.createNewFile();
-        List<String> emptyLines = MoreFiles.readLines(emptyFile, UTF_8);
+        List<String> emptyLines = com.landawn.abacus.guava.Files.readLines(emptyFile, UTF_8);
         assertTrue(emptyLines.isEmpty());
     }
 
@@ -345,7 +345,7 @@ public class Files100Test extends TestBase {
         File mapFile = new File(tempDir.toFile(), "map_test.txt");
         Files.write(mapFile.toPath(), TEST_BYTES);
 
-        MappedByteBuffer buffer = MoreFiles.map(mapFile);
+        MappedByteBuffer buffer = com.landawn.abacus.guava.Files.map(mapFile);
         assertNotNull(buffer);
         assertEquals(TEST_BYTES.length, buffer.remaining());
 
@@ -363,11 +363,11 @@ public class Files100Test extends TestBase {
         File mapFile = new File(tempDir.toFile(), "map_mode_test.txt");
         Files.write(mapFile.toPath(), TEST_BYTES);
 
-        MappedByteBuffer readOnlyBuffer = MoreFiles.map(mapFile, MapMode.READ_ONLY);
+        MappedByteBuffer readOnlyBuffer = com.landawn.abacus.guava.Files.map(mapFile, MapMode.READ_ONLY);
         assertNotNull(readOnlyBuffer);
         assertEquals(TEST_BYTES.length, readOnlyBuffer.remaining());
 
-        MappedByteBuffer readWriteBuffer = MoreFiles.map(mapFile, MapMode.READ_WRITE);
+        MappedByteBuffer readWriteBuffer = com.landawn.abacus.guava.Files.map(mapFile, MapMode.READ_WRITE);
         assertNotNull(readWriteBuffer);
 
         readWriteBuffer.put(0, (byte) 'h');
@@ -381,7 +381,7 @@ public class Files100Test extends TestBase {
         File mapFile = new File(tempDir.toFile(), "map_size_test.txt");
 
         long size = 1024;
-        MappedByteBuffer buffer = MoreFiles.map(mapFile, MapMode.READ_WRITE, size);
+        MappedByteBuffer buffer = com.landawn.abacus.guava.Files.map(mapFile, MapMode.READ_WRITE, size);
         assertNotNull(buffer);
         assertEquals(size, buffer.capacity());
 
@@ -395,54 +395,54 @@ public class Files100Test extends TestBase {
 
     @Test
     public void testSimplifyPath() {
-        assertEquals(".", MoreFiles.simplifyPath(""));
-        assertEquals(".", MoreFiles.simplifyPath("."));
-        assertEquals(".", MoreFiles.simplifyPath("./"));
-        assertEquals("b", MoreFiles.simplifyPath("a/../b"));
-        assertEquals("b", MoreFiles.simplifyPath("./a/../b"));
-        assertEquals("/b", MoreFiles.simplifyPath("/a/../b"));
-        assertEquals("b/c", MoreFiles.simplifyPath("a/../b/c"));
-        assertEquals("../b/c", MoreFiles.simplifyPath("a/../../b/c"));
-        assertEquals("/", MoreFiles.simplifyPath("/"));
-        assertEquals("/", MoreFiles.simplifyPath("//"));
-        assertEquals("a/b", MoreFiles.simplifyPath("a//b"));
-        assertEquals("a/b", MoreFiles.simplifyPath("a/./b"));
-        assertEquals("a/b", MoreFiles.simplifyPath("a/b/"));
+        assertEquals(".", com.landawn.abacus.guava.Files.simplifyPath(""));
+        assertEquals(".", com.landawn.abacus.guava.Files.simplifyPath("."));
+        assertEquals(".", com.landawn.abacus.guava.Files.simplifyPath("./"));
+        assertEquals("b", com.landawn.abacus.guava.Files.simplifyPath("a/../b"));
+        assertEquals("b", com.landawn.abacus.guava.Files.simplifyPath("./a/../b"));
+        assertEquals("/b", com.landawn.abacus.guava.Files.simplifyPath("/a/../b"));
+        assertEquals("b/c", com.landawn.abacus.guava.Files.simplifyPath("a/../b/c"));
+        assertEquals("../b/c", com.landawn.abacus.guava.Files.simplifyPath("a/../../b/c"));
+        assertEquals("/", com.landawn.abacus.guava.Files.simplifyPath("/"));
+        assertEquals("/", com.landawn.abacus.guava.Files.simplifyPath("//"));
+        assertEquals("a/b", com.landawn.abacus.guava.Files.simplifyPath("a//b"));
+        assertEquals("a/b", com.landawn.abacus.guava.Files.simplifyPath("a/./b"));
+        assertEquals("a/b", com.landawn.abacus.guava.Files.simplifyPath("a/b/"));
     }
 
     @Test
     public void testGetNameWithoutExtensionString() {
-        assertEquals("file", MoreFiles.getNameWithoutExtension("file.txt"));
-        assertEquals("file", MoreFiles.getNameWithoutExtension("/path/to/file.txt"));
-        assertEquals("file.backup", MoreFiles.getNameWithoutExtension("file.backup.txt"));
-        assertEquals("file", MoreFiles.getNameWithoutExtension("file"));
-        assertEquals("", MoreFiles.getNameWithoutExtension(".hidden"));
-        assertEquals("file", MoreFiles.getNameWithoutExtension("/path/to/file"));
+        assertEquals("file", com.landawn.abacus.guava.Files.getNameWithoutExtension("file.txt"));
+        assertEquals("file", com.landawn.abacus.guava.Files.getNameWithoutExtension("/path/to/file.txt"));
+        assertEquals("file.backup", com.landawn.abacus.guava.Files.getNameWithoutExtension("file.backup.txt"));
+        assertEquals("file", com.landawn.abacus.guava.Files.getNameWithoutExtension("file"));
+        assertEquals("", com.landawn.abacus.guava.Files.getNameWithoutExtension(".hidden"));
+        assertEquals("file", com.landawn.abacus.guava.Files.getNameWithoutExtension("/path/to/file"));
     }
 
     @Test
     public void testGetNameWithoutExtensionPath() {
-        assertEquals("file", MoreFiles.getNameWithoutExtension(Paths.get("file.txt")));
-        assertEquals("file", MoreFiles.getNameWithoutExtension(Paths.get("/path/to/file.txt")));
-        assertEquals("archive.tar", MoreFiles.getNameWithoutExtension(Paths.get("archive.tar.gz")));
+        assertEquals("file", com.landawn.abacus.guava.Files.getNameWithoutExtension(Paths.get("file.txt")));
+        assertEquals("file", com.landawn.abacus.guava.Files.getNameWithoutExtension(Paths.get("/path/to/file.txt")));
+        assertEquals("archive.tar", com.landawn.abacus.guava.Files.getNameWithoutExtension(Paths.get("archive.tar.gz")));
     }
 
     @Test
     public void testGetFileExtensionString() {
-        assertEquals("txt", MoreFiles.getFileExtension("file.txt"));
-        assertEquals("txt", MoreFiles.getFileExtension("/path/to/file.txt"));
-        assertEquals("gz", MoreFiles.getFileExtension("archive.tar.gz"));
-        assertEquals("", MoreFiles.getFileExtension("file"));
-        assertEquals("hidden", MoreFiles.getFileExtension(".hidden"));
-        assertEquals("", MoreFiles.getFileExtension("/path/to/file"));
-        assertEquals("TXT", MoreFiles.getFileExtension("FILE.TXT"));
+        assertEquals("txt", com.landawn.abacus.guava.Files.getFileExtension("file.txt"));
+        assertEquals("txt", com.landawn.abacus.guava.Files.getFileExtension("/path/to/file.txt"));
+        assertEquals("gz", com.landawn.abacus.guava.Files.getFileExtension("archive.tar.gz"));
+        assertEquals("", com.landawn.abacus.guava.Files.getFileExtension("file"));
+        assertEquals("hidden", com.landawn.abacus.guava.Files.getFileExtension(".hidden"));
+        assertEquals("", com.landawn.abacus.guava.Files.getFileExtension("/path/to/file"));
+        assertEquals("TXT", com.landawn.abacus.guava.Files.getFileExtension("FILE.TXT"));
     }
 
     @Test
     public void testGetFileExtensionPath() {
-        assertEquals("txt", MoreFiles.getFileExtension(Paths.get("file.txt")));
-        assertEquals("txt", MoreFiles.getFileExtension(Paths.get("/path/to/file.txt")));
-        assertEquals("", MoreFiles.getFileExtension(Paths.get("file")));
+        assertEquals("txt", com.landawn.abacus.guava.Files.getFileExtension(Paths.get("file.txt")));
+        assertEquals("txt", com.landawn.abacus.guava.Files.getFileExtension(Paths.get("/path/to/file.txt")));
+        assertEquals("", com.landawn.abacus.guava.Files.getFileExtension(Paths.get("file")));
     }
 
     @Test
@@ -460,7 +460,7 @@ public class Files100Test extends TestBase {
         Files.createFile(file2);
         Files.createFile(file3);
 
-        Traverser<File> traverser = MoreFiles.fileTraverser();
+        Traverser<File> traverser = com.landawn.abacus.guava.Files.fileTraverser();
         assertNotNull(traverser);
 
         Iterable<File> files = traverser.depthFirstPreOrder(rootDir.toFile());
@@ -491,7 +491,7 @@ public class Files100Test extends TestBase {
         Files.createFile(file1);
         Files.createFile(file2);
 
-        Traverser<Path> traverser = MoreFiles.pathTraverser();
+        Traverser<Path> traverser = com.landawn.abacus.guava.Files.pathTraverser();
         assertNotNull(traverser);
 
         Iterable<Path> paths = traverser.depthFirstPreOrder(rootDir);
@@ -515,15 +515,15 @@ public class Files100Test extends TestBase {
         Files.createFile(file2);
         Files.createDirectory(subDir);
 
-        ImmutableList<Path> files = MoreFiles.listFiles(dir);
+        ImmutableList<Path> files = com.landawn.abacus.guava.Files.listFiles(dir);
         assertEquals(3, files.size());
         assertTrue(files.contains(file1));
         assertTrue(files.contains(file2));
         assertTrue(files.contains(subDir));
 
-        assertThrows(NoSuchFileException.class, () -> MoreFiles.listFiles(tempDir.resolve("nonexistent")));
+        assertThrows(NoSuchFileException.class, () -> com.landawn.abacus.guava.Files.listFiles(tempDir.resolve("nonexistent")));
 
-        assertThrows(NotDirectoryException.class, () -> MoreFiles.listFiles(file1));
+        assertThrows(NotDirectoryException.class, () -> com.landawn.abacus.guava.Files.listFiles(file1));
     }
 
     @Test
@@ -538,14 +538,14 @@ public class Files100Test extends TestBase {
         Files.write(file2, "content".getBytes(UTF_8));
 
         assertTrue(Files.exists(rootDir));
-        MoreFiles.deleteRecursively(rootDir, RecursiveDeleteOption.ALLOW_INSECURE);
+        com.landawn.abacus.guava.Files.deleteRecursively(rootDir, RecursiveDeleteOption.ALLOW_INSECURE);
         assertFalse(Files.exists(rootDir));
 
-        assertThrows(NoSuchFileException.class, () -> MoreFiles.deleteRecursively(tempDir.resolve("nonexistent"), RecursiveDeleteOption.ALLOW_INSECURE));
+        assertThrows(NoSuchFileException.class, () -> com.landawn.abacus.guava.Files.deleteRecursively(tempDir.resolve("nonexistent"), RecursiveDeleteOption.ALLOW_INSECURE));
 
         Path singleFile = tempDir.resolve("single.txt");
         Files.write(singleFile, "content".getBytes(UTF_8));
-        MoreFiles.deleteRecursively(singleFile, RecursiveDeleteOption.ALLOW_INSECURE);
+        com.landawn.abacus.guava.Files.deleteRecursively(singleFile, RecursiveDeleteOption.ALLOW_INSECURE);
         assertFalse(Files.exists(singleFile));
     }
 
@@ -560,15 +560,15 @@ public class Files100Test extends TestBase {
         Files.write(file1, "content".getBytes(UTF_8));
         Files.write(file2, "content".getBytes(UTF_8));
 
-        MoreFiles.deleteDirectoryContents(rootDir, RecursiveDeleteOption.ALLOW_INSECURE);
+        com.landawn.abacus.guava.Files.deleteDirectoryContents(rootDir, RecursiveDeleteOption.ALLOW_INSECURE);
         assertTrue(Files.exists(rootDir));
         assertTrue(Files.list(rootDir).count() == 0);
 
-        assertThrows(NoSuchFileException.class, () -> MoreFiles.deleteDirectoryContents(tempDir.resolve("nonexistent")));
+        assertThrows(NoSuchFileException.class, () -> com.landawn.abacus.guava.Files.deleteDirectoryContents(tempDir.resolve("nonexistent")));
 
         Path notADir = tempDir.resolve("notadir.txt");
         Files.write(notADir, "content".getBytes(UTF_8));
-        assertThrows(NotDirectoryException.class, () -> MoreFiles.deleteDirectoryContents(notADir));
+        assertThrows(NotDirectoryException.class, () -> com.landawn.abacus.guava.Files.deleteDirectoryContents(notADir));
     }
 
     @Test
@@ -580,7 +580,7 @@ public class Files100Test extends TestBase {
         Files.createDirectory(dir);
         Files.createFile(file);
 
-        Predicate<Path> isDirPredicate = MoreFiles.isDirectory();
+        Predicate<Path> isDirPredicate = com.landawn.abacus.guava.Files.isDirectory();
         assertTrue(isDirPredicate.apply(dir));
         assertFalse(isDirPredicate.apply(file));
 
@@ -589,7 +589,7 @@ public class Files100Test extends TestBase {
 
             assertTrue(isDirPredicate.apply(link));
 
-            Predicate<Path> isDirNoFollow = MoreFiles.isDirectory(LinkOption.NOFOLLOW_LINKS);
+            Predicate<Path> isDirNoFollow = com.landawn.abacus.guava.Files.isDirectory(LinkOption.NOFOLLOW_LINKS);
             assertFalse(isDirNoFollow.apply(link));
         } catch (UnsupportedOperationException | IOException e) {
         }
@@ -603,7 +603,7 @@ public class Files100Test extends TestBase {
         Files.createDirectory(dir);
         Files.createFile(file);
 
-        Predicate<Path> isFilePredicate = MoreFiles.isRegularFile();
+        Predicate<Path> isFilePredicate = com.landawn.abacus.guava.Files.isRegularFile();
         assertFalse(isFilePredicate.apply(dir));
         assertTrue(isFilePredicate.apply(file));
 
@@ -626,7 +626,7 @@ public class Files100Test extends TestBase {
 
         try {
             File longFile = new File(tempDir.toFile(), longName.toString() + ".txt");
-            MoreFiles.touch(longFile);
+            com.landawn.abacus.guava.Files.touch(longFile);
             assertTrue(longFile.exists());
         } catch (IOException e) {
         }
@@ -635,11 +635,11 @@ public class Files100Test extends TestBase {
 
         for (String name : specialNames) {
             File specialFile = new File(tempDir.toFile(), name);
-            MoreFiles.touch(specialFile);
+            com.landawn.abacus.guava.Files.touch(specialFile);
             assertTrue(specialFile.exists());
 
             if (name.contains(".")) {
-                String ext = MoreFiles.getFileExtension(name);
+                String ext = com.landawn.abacus.guava.Files.getFileExtension(name);
                 assertNotNull(ext);
             }
         }
@@ -657,10 +657,10 @@ public class Files100Test extends TestBase {
             final int index = i;
             threads[i] = new Thread(() -> {
                 try {
-                    byte[] content = MoreFiles.toByteArray(concurrentFile.toFile());
+                    byte[] content = com.landawn.abacus.guava.Files.toByteArray(concurrentFile.toFile());
                     assertNotNull(content);
 
-                    MoreFiles.touch(concurrentFile);
+                    com.landawn.abacus.guava.Files.touch(concurrentFile);
                 } catch (IOException e) {
                     fail("Concurrent operation failed: " + e.getMessage());
                 }
@@ -676,7 +676,7 @@ public class Files100Test extends TestBase {
         }
 
         assertTrue(Files.exists(concurrentFile));
-        assertNotNull(MoreFiles.toByteArray(concurrentFile.toFile()));
+        assertNotNull(com.landawn.abacus.guava.Files.toByteArray(concurrentFile.toFile()));
     }
 
     @Test
@@ -687,16 +687,16 @@ public class Files100Test extends TestBase {
             largeData[i] = (byte) (i % 256);
         }
 
-        MoreFiles.write(largeData, largeFile.toFile());
+        com.landawn.abacus.guava.Files.write(largeData, largeFile.toFile());
 
-        byte[] readData = MoreFiles.toByteArray(largeFile.toFile());
+        byte[] readData = com.landawn.abacus.guava.Files.toByteArray(largeFile.toFile());
         assertArrayEquals(largeData, readData);
 
         Path copyDest = tempDir.resolve("large_copy.dat");
-        MoreFiles.copy(largeFile.toFile(), copyDest.toFile());
-        assertTrue(MoreFiles.equal(largeFile, copyDest));
+        com.landawn.abacus.guava.Files.copy(largeFile.toFile(), copyDest.toFile());
+        assertTrue(com.landawn.abacus.guava.Files.equal(largeFile, copyDest));
 
-        MappedByteBuffer buffer = MoreFiles.map(largeFile.toFile());
+        MappedByteBuffer buffer = com.landawn.abacus.guava.Files.map(largeFile.toFile());
         assertEquals(largeData.length, buffer.remaining());
         unmap(buffer);
     }

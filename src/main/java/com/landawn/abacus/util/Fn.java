@@ -231,18 +231,6 @@ public final class Fn {
 
     private static final Timer timer = new Timer();
 
-    //    @SuppressWarnings("rawtypes")
-    //    public static final IntFunction<Map<String, Object>> FACTORY_OF_MAP = (IntFunction) IntFunctions.MAP_FACTORY;
-    //
-    //    @SuppressWarnings("rawtypes")
-    //    public static final IntFunction<LinkedHashMap<String, Object>> FACTORY_OF_LINKED_HASH_MAP = (IntFunction) IntFunctions.LINKED_HASH_MAP_FACTORY;
-    //
-    //    @SuppressWarnings("rawtypes")
-    //    public static final Supplier<Map<String, Object>> SUPPLIER_OF_MAP = (Supplier) Suppliers.MAP;
-    //
-    //    @SuppressWarnings("rawtypes")
-    //    public static final Supplier<LinkedHashMap<String, Object>> SUPPLIER_OF_LINKED_HASH_MAP = (Supplier) Suppliers.LINKED_HASH_MAP;
-
     static final Runnable EMPTY_ACTION = () -> {
     };
 
@@ -431,16 +419,6 @@ public final class Fn {
     Fn() {
         // for extension.
     }
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param supplier
-    //     * @return
-    //     */
-    //    public static <T> T get(final java.util.function.Supplier<T> supplier) {
-    //        return supplier.get();
-    //    }
 
     /**
      * Returns a {@code Supplier} which returns a single instance created by calling the specified {@code supplier.get()}.

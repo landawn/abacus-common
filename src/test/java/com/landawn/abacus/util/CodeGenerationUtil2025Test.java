@@ -352,7 +352,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
                 .entityClasses(classes)
                 .className("s")
                 .generateFunctionPropName(true)
-                .propFunctions(N.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
+                .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
@@ -371,7 +371,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
                 .className("s")
                 .generateFunctionPropName(true)
                 .functionClassName("funcs")
-                .propFunctions(N.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC))
+                .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC))
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
@@ -510,7 +510,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
                 .generateLowerCaseWithUnderscore(true)
                 .generateUpperCaseWithUnderscore(true)
                 .generateFunctionPropName(true)
-                .propFunctions(N.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
+                .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);

@@ -25,8 +25,8 @@ import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.ToBooleanFunction;
@@ -489,7 +489,7 @@ public class Comparators100Test extends TestBase {
         Person p3 = new Person("Charlie", 35);
         p3.rating = 4.9f;
 
-        List<Person> list = N.asList(p1, p2, p3);
+        List<Person> list = CommonUtil.asList(p1, p2, p3);
         list.sort(comp);
 
         assertEquals(3.8f, list.get(0).rating);

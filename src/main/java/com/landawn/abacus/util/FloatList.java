@@ -116,12 +116,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Creates a new FloatList containing the specified float values. The values are copied
-     * into a new array, so modifications to the returned list will not affect the input array.
-     * If the input array is null, an empty list is returned.
+     * Creates a new FloatList containing the specified elements. The specified array is used directly
+     * as the backing array without copying, so subsequent modifications to the array will affect the list.
+     * If the input array is {@code null}, an empty list is returned.
      *
-     * @param a the array of float values to be placed into the new list. May be null.
-     * @return a new FloatList containing the elements of the specified array, or an empty list if the array is null
+     * @param a the array of elements to be included in the new list. Can be {@code null}.
+     * @return a new FloatList containing the elements from the specified array, or an empty list if the array is {@code null}
      */
     public static FloatList of(final float... a) {
         return new FloatList(N.nullToEmpty(a));
@@ -216,11 +216,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Returns the float value at the specified position in this list.
+     * Returns the element at the specified position in this list.
      *
-     * @param index the index of the element to return. Must be between 0 (inclusive) and size (exclusive).
-     * @return the float value at the specified position in this list
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @param index the index of the element to return
+     * @return the element at the specified position in this list
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public float get(final int index) {
         rangeCheck(index);
@@ -231,10 +231,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Replaces the element at the specified position in this list with the specified element.
      *
-     * @param index the index of the element to replace. Must be between 0 (inclusive) and size (exclusive).
+     * @param index the index of the element to replace
      * @param e the element to be stored at the specified position
      * @return the element previously at the specified position
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public float set(final int index, final float e) {
         rangeCheck(index);
@@ -905,8 +905,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Returns true if this list contains the specified element. The comparison is done using
-     * Float.compare() to handle NaN values correctly.
+     * Returns {@code true} if this list contains the specified element.
+     * More formally, returns {@code true} if and only if this list contains
+     * at least one element {@code e} such that {@code Float.compare(e, valueToFind) == 0}.
+     * This comparison method correctly handles NaN and signed zero values.
+     *
+     * <p>This method performs a linear search through the list.
      *
      * @param valueToFind the element whose presence in this list is to be tested
      * @return {@code true} if this list contains the specified element, {@code false} otherwise
@@ -1536,42 +1540,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         }
     }
 
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @throws E the e
-    //     */
-    //    public <E extends Exception> void forEachIndexed(final Throwables.IntFloatConsumer<E> action) throws E {
-    //        forEachIndexed(0, size, action);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param action
-    //     * @throws IndexOutOfBoundsException
-    //     * @throws E the e
-    //     */
-    //    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntFloatConsumer<E> action)
-    //            throws IndexOutOfBoundsException, E {
-    //        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
-    //
-    //        if (size > 0) {
-    //            if (fromIndex <= toIndex) {
-    //                for (int i = fromIndex; i < toIndex; i++) {
-    //                    action.accept(i, elementData[i]);
-    //                }
-    //            } else {
-    //                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
-    //                    action.accept(i, elementData[i]);
-    //                }
-    //            }
-    //        }
-    //    }
-
     /**
      * Returns the first element in this list as an OptionalFloat.
      *
@@ -1889,9 +1857,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Removes all elements from this list.
-     * The list will be empty after this call returns.
-     * The capacity of the list remains unchanged.
+     * Removes all elements from this list. The list will be empty after this call returns.
+     * The capacity of the list is not changed.
      */
     @Override
     public void clear() {
@@ -1954,10 +1921,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Returns a new float array containing all elements in this list.
-     * The returned array will be "safe" in that no references to it are maintained by this list.
+     * Returns a new array containing all elements of this list in proper sequence.
      *
-     * @return a new float array containing all elements in this list
+     * @return a new float array containing all elements of this list
      */
     @Override
     public float[] toArray() {

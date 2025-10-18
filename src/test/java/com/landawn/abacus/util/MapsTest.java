@@ -49,7 +49,7 @@ public class MapsTest extends AbstractTest {
         N.println(mapDiff.onRightOnly());
         N.println(mapDiff.withDifferentValues());
 
-        mapDiff = BeanDifference.of(account1, account2, N.asList("id", "firstName", "lastName2"));
+        mapDiff = BeanDifference.of(account1, account2, CommonUtil.asList("id", "firstName", "lastName2"));
 
         N.println(mapDiff);
         N.println(mapDiff.inCommon());
@@ -61,34 +61,34 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void test_getByPath() {
-        Map map = N.asMap("key1", "val1");
+        Map map = CommonUtil.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
 
-        map = N.asMap("key1", N.asList("val1"));
+        map = CommonUtil.asMap("key1", CommonUtil.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
 
-        map = N.asMap("key1", N.asSet("val1"));
+        map = CommonUtil.asMap("key1", CommonUtil.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
 
-        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
+        map = CommonUtil.asMap("key1", CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
 
-        map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
+        map = CommonUtil.asMap("key1", CommonUtil.asSet(CommonUtil.asList(CommonUtil.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
 
-        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
+        map = CommonUtil.asMap("key1", CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
 
-        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
+        map = CommonUtil.asMap("key1", CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.asList("val22", CommonUtil.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
 
-        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
+        map = CommonUtil.asMap("key1", CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.asList("val22", CommonUtil.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
 
-        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
+        map = CommonUtil.asMap("key1", CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.asList("val22", CommonUtil.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][1].key22[1].key3"));
 
-        map = N.asMap("key1", N.asMap("key2", null));
+        map = CommonUtil.asMap("key1", CommonUtil.asMap("key2", null));
         assertNull(Maps.getByPath(map, "key1.key2.key3"));
     }
 
@@ -116,7 +116,7 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void test_flatten() {
-        Map<String, Object> map = N.asMap("a", N.asMap("b", N.asMap("c", N.asMap("d", 4), "c2", 3), "b2", 2), "a2", 1);
+        Map<String, Object> map = CommonUtil.asMap("a", CommonUtil.asMap("b", CommonUtil.asMap("c", CommonUtil.asMap("d", 4), "c2", 3), "b2", 2), "a2", 1);
         N.println(map);
 
         Map<String, Object> result = Maps.flatten(map);
@@ -129,31 +129,31 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void test_difference() {
-        Map<String, Integer> map = N.asMap("a", 1, "b", 2, "c", 3);
-        Map<String, Integer> map2 = N.asMap("a", 1, "b", 3);
+        Map<String, Integer> map = CommonUtil.asMap("a", 1, "b", 2, "c", 3);
+        Map<String, Integer> map2 = CommonUtil.asMap("a", 1, "b", 3);
 
         N.println(Maps.intersection(map, map2));
-        assertEquals(N.asMap("a", 1), Maps.intersection(map, map2));
+        assertEquals(CommonUtil.asMap("a", 1), Maps.intersection(map, map2));
 
         N.println(Maps.difference(map, map2));
-        assertEquals(N.asMap("b", Pair.of(2, Nullable.of(3)), "c", Pair.of(3, Nullable.empty())), Maps.difference(map, map2));
+        assertEquals(CommonUtil.asMap("b", Pair.of(2, Nullable.of(3)), "c", Pair.of(3, Nullable.empty())), Maps.difference(map, map2));
 
         N.println(Maps.symmetricDifference(map, map2));
 
-        assertEquals(N.asMap("b", Pair.of(Nullable.of(2), Nullable.of(3)), "c", Pair.of(Nullable.of(3), Nullable.empty())),
+        assertEquals(CommonUtil.asMap("b", Pair.of(Nullable.of(2), Nullable.of(3)), "c", Pair.of(Nullable.of(3), Nullable.empty())),
                 Maps.symmetricDifference(map, map2));
 
     }
 
     @Test
     public void test_getOrDefault() {
-        Map<String, Integer> map = N.asMap("a", 1, "b", 2, "c", 3);
+        Map<String, Integer> map = CommonUtil.asMap("a", 1, "b", 2, "c", 3);
 
         assertEquals(1, Maps.getOrDefaultIfAbsent(map, "a", 0).intValue());
         assertEquals(0, Maps.getOrDefaultIfAbsent(map, "d", 0).intValue());
 
-        assertEquals(N.asList(1, 0), Maps.getOrDefaultIfAbsentForEach(map, N.asList("a", "d"), 0));
+        assertEquals(CommonUtil.asList(1, 0), Maps.getOrDefaultIfAbsentForEach(map, CommonUtil.asList("a", "d"), 0));
 
-        assertEquals(N.asList(1), Maps.getIfPresentForEach(map, N.asList("a", "d")));
+        assertEquals(CommonUtil.asList(1), Maps.getIfPresentForEach(map, CommonUtil.asList("a", "d")));
     }
 }

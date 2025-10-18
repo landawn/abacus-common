@@ -1377,66 +1377,6 @@ public final class CSVUtil {
         }
     }
 
-    //    /**
-    //     * Loads the data from CSV.
-    //     * <br />
-    //     * The size of specified {@code columnTypeList} must be equal to the size of columns of the specified CSV
-    //     * <br />
-    //     * To skip a column in CSV, set {@code null} to position in {@code columnTypeList}.
-    //     *
-    //     * @param source
-    //     * @param rowExtractor a TriConsumer to extract the row data to the output array.
-    //     *      The first parameter is the column names, the second parameter is the row data, and the third parameter is the output array. 
-    //     * @return
-    //     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     */
-    //    public static Dataset loadCSV(final InputStream source, final TriConsumer<? super String[], ? super String[], Object[]> rowExtractor)
-    //            throws UncheckedIOException {
-    //        return loadCSV(source, 0, Long.MAX_VALUE, rowExtractor);
-    //    }
-    //
-    //    /**
-    //     * Loads the data from CSV.
-    //     * <br />
-    //     * The size of specified {@code columnTypeList} must be equal to the size of columns of the specified CSV
-    //     * <br />
-    //     * To skip a column in CSV, set {@code null} to position in {@code columnTypeList}.
-    //     *
-    //     * @param source
-    //     * @param offset
-    //     * @param count
-    //     * @param rowExtractor a TriConsumer to extract the row data to the output array.
-    //     *      The first parameter is the column names, the second parameter is the row data, and the third parameter is the output array.
-    //     * @return
-    //     * @throws IllegalArgumentException if offset or count are negative, or the size of {@code columnTypeList} is not equal to the size of columns in CSV.
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     */
-    //    public static Dataset loadCSV(final InputStream source, final long offset, final long count,
-    //            final TriConsumer<? super String[], ? super String[], Object[]> rowExtractor) throws UncheckedIOException {
-    //        return loadCSV(source, offset, count, Fn.alwaysTrue(), rowExtractor);
-    //    }
-    //
-    //    /**
-    //     * Loads CSV data from InputStream source with specified offset, count, row filter, and column type list.
-    //     *
-    //     * @param source the InputStream source to load CSV data from
-    //     * @param offset the number of lines to skip from the beginning
-    //     * @param count the maximum number of lines to read
-    //     * @param rowFilter a Predicate to filter the lines
-    //     * @param rowExtractor a TriConsumer to extract the row data to the output array.
-    //     *      The first parameter is the column names, the second parameter is the row data, and the third parameter is the output array.
-    //     * @return a Dataset containing the loaded CSV data
-    //     * @throws IllegalArgumentException if offset or count are negative, or if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
-    //     * @throws UncheckedIOException if an I/O error occurs
-    //     */
-    //    public static Dataset loadCSV(final InputStream source, final long offset, final long count, final Predicate<? super String[]> rowFilter,
-    //            final TriConsumer<? super String[], ? super String[], Object[]> rowExtractor) throws UncheckedIOException {
-    //        final Reader reader = IOUtil.newInputStreamReader(source); // NOSONAR
-    //
-    //        return loadCSV(reader, offset, count, rowFilter, rowExtractor);
-    //    }
-
     /**
      * Load the data from CSV.
      * <br />

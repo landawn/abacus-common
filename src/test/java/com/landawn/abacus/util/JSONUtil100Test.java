@@ -12,8 +12,8 @@ import java.util.TreeMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
@@ -255,7 +255,7 @@ public class JSONUtil100Test extends TestBase {
         json.put("key1", "value1");
         json.put("key2", Arrays.asList("a", "b", "c"));
 
-        Type<Map<String, Object>> type = N.typeOf("Map<String, Object>");
+        Type<Map<String, Object>> type = CommonUtil.typeOf("Map<String, Object>");
         Map<String, Object> result = JSONUtil.unwrap(json, type);
 
         Assertions.assertNotNull(result);
@@ -364,7 +364,7 @@ public class JSONUtil100Test extends TestBase {
         json.put(obj1);
         json.put(obj2);
 
-        Type<List<TestBean>> type = N.typeOf("List<com.landawn.abacus.util.JSONUtil100Test.TestBean>");
+        Type<List<TestBean>> type = CommonUtil.typeOf("List<com.landawn.abacus.util.JSONUtil100Test.TestBean>");
         List<TestBean> users = JSONUtil.unwrap(json, type);
 
         Assertions.assertNotNull(users);
@@ -417,7 +417,7 @@ public class JSONUtil100Test extends TestBase {
         json.put(map1);
         json.put(map2);
 
-        Type<Map<String, Object>> mapType = N.typeOf("Map<String, Object>");
+        Type<Map<String, Object>> mapType = CommonUtil.typeOf("Map<String, Object>");
         List<Map<String, Object>> items = JSONUtil.toList(json, mapType);
 
         Assertions.assertNotNull(items);
@@ -457,7 +457,7 @@ public class JSONUtil100Test extends TestBase {
         outer.put(inner1);
         outer.put(inner2);
 
-        Type<List<List<Integer>>> type = N.typeOf("List<List<Integer>>");
+        Type<List<List<Integer>>> type = CommonUtil.typeOf("List<List<Integer>>");
         List<List<Integer>> result = JSONUtil.unwrap(outer, type);
 
         Assertions.assertNotNull(result);

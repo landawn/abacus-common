@@ -1,8 +1,8 @@
 package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -73,7 +73,7 @@ public class Indexed100Test extends TestBase {
         Assertions.assertNotEquals(indexed1.hashCode(), indexed4.hashCode());
 
         int nullHash = indexed5.hashCode();
-        Assertions.assertEquals((int) (5 * 31), nullHash);
+        Assertions.assertEquals(5 * 31, nullHash);
     }
 
     @Test

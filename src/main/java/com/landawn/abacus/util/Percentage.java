@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * String str = p.toString(); // Returns "95%"
  * 
  * // Get a range of percentages
- * ImmutableSet<Percentage> highPercentages = Percentage.range(Percentage._90, Percentage._100);
+ * ImmutableSet<Percentage> highPercentages = Percentage.range(Percentage._90, Percentage._99);
  * }</pre>
  */
 public enum Percentage {
@@ -81,14 +81,6 @@ public enum Percentage {
     _99_999("99.999%", 0.99999),
     _99_9999("99.9999%", 0.999999);
 
-    //    private static final Map<Integer, Percentage> valuePool = new HashMap<>();
-    //
-    //    static {
-    //        for (final Percentage p : Percentage.values()) {
-    //            valuePool.put(intValue(p), p);
-    //        }
-    //    }
-
     private static final Map<String, ImmutableSet<Percentage>> rangePool = new ConcurrentHashMap<>();
 
     private final String str;
@@ -107,7 +99,7 @@ public enum Percentage {
      * <p>Example usage:</p>
      * <pre>{@code
      * ImmutableSet<Percentage> mediumRange = Percentage.range(Percentage._40, Percentage._60);
-     * // Returns set containing: _40, _50
+     * // Returns set containing: _40, _45, _50, _55
      * }</pre>
      *
      * @param startInclusive the starting percentage (inclusive)

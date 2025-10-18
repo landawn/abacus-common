@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
@@ -70,7 +70,7 @@ public class Fn100Test extends TestBase {
         final AtomicInteger counter = new AtomicInteger(0);
         Function<String, Integer> memoized = Fn.memoize(str -> {
             counter.incrementAndGet();
-            return N.len(str);
+            return CommonUtil.len(str);
         });
 
         assertEquals(Integer.valueOf(5), memoized.apply("hello"));

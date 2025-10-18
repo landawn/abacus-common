@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.If.OrElse;
@@ -48,21 +48,21 @@ public class RowDataset102Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        List<String> columnNames1 = N.asList("id", "name", "age");
+        List<String> columnNames1 = CommonUtil.asList("id", "name", "age");
         List<List<Object>> columns1 = new ArrayList<>();
-        columns1.add(N.asList(1, 2, 3));
-        columns1.add(N.asList("Alice", "Bob", "Charlie"));
-        columns1.add(N.asList(25, 30, 35));
+        columns1.add(CommonUtil.asList(1, 2, 3));
+        columns1.add(CommonUtil.asList("Alice", "Bob", "Charlie"));
+        columns1.add(CommonUtil.asList(25, 30, 35));
         ds1 = new RowDataset(columnNames1, columns1);
 
-        List<String> columnNames2 = N.asList("id", "city", "salary");
+        List<String> columnNames2 = CommonUtil.asList("id", "city", "salary");
         List<List<Object>> columns2 = new ArrayList<>();
-        columns2.add(N.asList(2, 3, 4));
-        columns2.add(N.asList("New York", "London", "Tokyo"));
-        columns2.add(N.asList(50000, 60000, 70000));
+        columns2.add(CommonUtil.asList(2, 3, 4));
+        columns2.add(CommonUtil.asList("New York", "London", "Tokyo"));
+        columns2.add(CommonUtil.asList(50000, 60000, 70000));
         ds2 = new RowDataset(columnNames2, columns2);
 
-        List<String> emptyColumnNames = N.asList("col1", "col2");
+        List<String> emptyColumnNames = CommonUtil.asList("col1", "col2");
         List<List<Object>> emptyColumns = new ArrayList<>();
         emptyColumns.add(new ArrayList<>());
         emptyColumns.add(new ArrayList<>());
@@ -148,18 +148,18 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testRightJoinWithMultipleColumns() {
-        List<String> columnNames1 = N.asList("id", "type", "value");
+        List<String> columnNames1 = CommonUtil.asList("id", "type", "value");
         List<List<Object>> columns1 = new ArrayList<>();
-        columns1.add(N.asList(1, 1, 2));
-        columns1.add(N.asList("A", "B", "A"));
-        columns1.add(N.asList(100, 200, 300));
+        columns1.add(CommonUtil.asList(1, 1, 2));
+        columns1.add(CommonUtil.asList("A", "B", "A"));
+        columns1.add(CommonUtil.asList(100, 200, 300));
         Dataset multiDs1 = new RowDataset(columnNames1, columns1);
 
-        List<String> columnNames2 = N.asList("id", "type", "score");
+        List<String> columnNames2 = CommonUtil.asList("id", "type", "score");
         List<List<Object>> columns2 = new ArrayList<>();
-        columns2.add(N.asList(1, 2, 3));
-        columns2.add(N.asList("A", "A", "B"));
-        columns2.add(N.asList(10, 20, 30));
+        columns2.add(CommonUtil.asList(1, 2, 3));
+        columns2.add(CommonUtil.asList("A", "A", "B"));
+        columns2.add(CommonUtil.asList(10, 20, 30));
         Dataset multiDs2 = new RowDataset(columnNames2, columns2);
 
         Map<String, String> onColumnNames = new HashMap<>();
@@ -200,10 +200,10 @@ public class RowDataset102Test extends TestBase {
         Map<String, String> onColumnNames = new HashMap<>();
         onColumnNames.put("id", "id");
 
-        List<String> columnNames = N.asList("id", "value");
+        List<String> columnNames = CommonUtil.asList("id", "value");
         List<List<Object>> columns = new ArrayList<>();
-        columns.add(N.asList(2, 2, 3));
-        columns.add(N.asList("X", "Y", "Z"));
+        columns.add(CommonUtil.asList(2, 2, 3));
+        columns.add(CommonUtil.asList("X", "Y", "Z"));
         Dataset dsWithDuplicates = new RowDataset(columnNames, columns);
 
         Dataset result = ds1.rightJoin(dsWithDuplicates, onColumnNames, "values", List.class, ArrayList::new);
@@ -282,11 +282,11 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testUnionWithSameColumnsRequired() {
-        List<String> columnNames = N.asList("id", "name", "age");
+        List<String> columnNames = CommonUtil.asList("id", "name", "age");
         List<List<Object>> columns = new ArrayList<>();
-        columns.add(N.asList(4, 5));
-        columns.add(N.asList("David", "Eve"));
-        columns.add(N.asList(40, 45));
+        columns.add(CommonUtil.asList(4, 5));
+        columns.add(CommonUtil.asList("David", "Eve"));
+        columns.add(CommonUtil.asList(40, 45));
         Dataset ds3 = new RowDataset(columnNames, columns);
 
         Dataset result = ds1.union(ds3, true);
@@ -297,7 +297,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testUnionWithKeyColumns() {
-        Collection<String> keyColumns = N.asList("id");
+        Collection<String> keyColumns = CommonUtil.asList("id");
         Dataset result = ds1.union(ds2, keyColumns);
 
         assertNotNull(result);
@@ -322,7 +322,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testIntersectWithKeyColumns() {
-        Collection<String> keyColumns = N.asList("id");
+        Collection<String> keyColumns = CommonUtil.asList("id");
         Dataset result = ds1.intersect(ds2, keyColumns);
 
         assertNotNull(result);
@@ -348,7 +348,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testExceptWithKeyColumns() {
-        Collection<String> keyColumns = N.asList("id");
+        Collection<String> keyColumns = CommonUtil.asList("id");
         Dataset result = ds1.except(ds2, keyColumns);
 
         assertNotNull(result);
@@ -389,7 +389,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testMerge() {
-        Dataset result = N.merge(ds1, ds2);
+        Dataset result = CommonUtil.merge(ds1, ds2);
 
         assertNotNull(result);
         assertEquals(ds1.size() + ds2.size(), result.size());
@@ -407,7 +407,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testMergeWithColumnNames() {
-        Collection<String> columnNames = N.asList("id", "city");
+        Collection<String> columnNames = CommonUtil.asList("id", "city");
         Dataset result = ds1.copy();
         result.merge(ds2, columnNames);
 
@@ -417,8 +417,8 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testMergeMultipleDatasets() {
-        Collection<Dataset> ds = N.asList(ds1, ds2, emptyDs);
-        Dataset result = N.merge(ds);
+        Collection<Dataset> ds = CommonUtil.asList(ds1, ds2, emptyDs);
+        Dataset result = CommonUtil.merge(ds);
 
         assertNotNull(result);
         assertEquals(ds1.size() + ds2.size() + emptyDs.size(), result.size());
@@ -426,16 +426,16 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testCartesianProduct() {
-        List<String> columnNames1 = N.asList("a", "b");
+        List<String> columnNames1 = CommonUtil.asList("a", "b");
         List<List<Object>> columns1 = new ArrayList<>();
-        columns1.add(N.asList(1, 2));
-        columns1.add(N.asList("X", "Y"));
+        columns1.add(CommonUtil.asList(1, 2));
+        columns1.add(CommonUtil.asList("X", "Y"));
         Dataset ds1New = new RowDataset(columnNames1, columns1);
 
-        List<String> columnNames2 = N.asList("c", "d");
+        List<String> columnNames2 = CommonUtil.asList("c", "d");
         List<List<Object>> columns2 = new ArrayList<>();
-        columns2.add(N.asList(10, 20));
-        columns2.add(N.asList("P", "Q"));
+        columns2.add(CommonUtil.asList(10, 20));
+        columns2.add(CommonUtil.asList("P", "Q"));
         Dataset ds2New = new RowDataset(columnNames2, columns2);
 
         Dataset result = ds1New.cartesianProduct(ds2New);
@@ -467,7 +467,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testSplitWithColumns() {
-        Collection<String> columnNames = N.asList("id", "name");
+        Collection<String> columnNames = CommonUtil.asList("id", "name");
         Stream<Dataset> splitStream = ds1.split(2, columnNames);
         List<Dataset> splits = splitStream.toList();
 
@@ -488,7 +488,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testSplitToListWithColumns() {
-        Collection<String> columnNames = N.asList("id", "age");
+        Collection<String> columnNames = CommonUtil.asList("id", "age");
         List<Dataset> splits = ds1.splitToList(2, columnNames);
 
         assertEquals(2, splits.size());
@@ -499,7 +499,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testSlice() {
-        Collection<String> columnNames = N.asList("id", "name");
+        Collection<String> columnNames = CommonUtil.asList("id", "name");
         Dataset result = ds1.slice(columnNames);
 
         assertNotNull(result);
@@ -521,7 +521,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testSliceWithRowRangeAndColumns() {
-        Collection<String> columnNames = N.asList("name", "age");
+        Collection<String> columnNames = CommonUtil.asList("name", "age");
         Dataset result = ds1.slice(0, 2, columnNames);
 
         assertNotNull(result);
@@ -550,7 +550,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testPaginateWithColumns() {
-        Collection<String> columnNames = N.asList("id", "name");
+        Collection<String> columnNames = CommonUtil.asList("id", "name");
         Paginated<Dataset> paginated = ds1.paginate(columnNames, 2);
 
         assertNotNull(paginated);
@@ -568,7 +568,7 @@ public class RowDataset102Test extends TestBase {
         List<Integer> ids = idStream.toList();
 
         assertEquals(3, ids.size());
-        assertEquals(N.asList(1, 2, 3), ids);
+        assertEquals(CommonUtil.asList(1, 2, 3), ids);
     }
 
     @Test
@@ -577,7 +577,7 @@ public class RowDataset102Test extends TestBase {
         List<String> names = nameStream.toList();
 
         assertEquals(2, names.size());
-        assertEquals(N.asList("Bob", "Charlie"), names);
+        assertEquals(CommonUtil.asList("Bob", "Charlie"), names);
     }
 
     @Test
@@ -665,7 +665,7 @@ public class RowDataset102Test extends TestBase {
         });
 
         assertEquals(3, names.size());
-        assertEquals(N.asList("Alice", "Bob", "Charlie"), names);
+        assertEquals(CommonUtil.asList("Alice", "Bob", "Charlie"), names);
     }
 
     @Test
@@ -695,7 +695,7 @@ public class RowDataset102Test extends TestBase {
         assertTrue(copyDs.isFrozen());
 
         assertThrows(IllegalStateException.class, () -> {
-            copyDs.addColumn("newCol", N.asList(1, 2, 3));
+            copyDs.addColumn("newCol", CommonUtil.asList(1, 2, 3));
         });
     }
 
@@ -762,7 +762,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testPrintlnWithRangeAndColumns() {
-        Collection<String> columnNames = N.asList("id", "name");
+        Collection<String> columnNames = CommonUtil.asList("id", "name");
         ds1.println(0, 2, columnNames);
     }
 
@@ -781,7 +781,7 @@ public class RowDataset102Test extends TestBase {
     @Test
     public void testPrintlnWithRangeColumnsAndWriter() {
         StringWriter writer = new StringWriter();
-        Collection<String> columnNames = N.asList("id", "name");
+        Collection<String> columnNames = CommonUtil.asList("id", "name");
         ds1.println(1, 3, columnNames, writer);
 
         String output = writer.toString();
@@ -820,16 +820,16 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testComplexJoinScenario() {
-        List<String> columnNames1 = N.asList("id", "value");
+        List<String> columnNames1 = CommonUtil.asList("id", "value");
         List<List<Object>> columns1 = new ArrayList<>();
-        columns1.add(N.asList(1, null, 3));
-        columns1.add(N.asList("A", "B", "C"));
+        columns1.add(CommonUtil.asList(1, null, 3));
+        columns1.add(CommonUtil.asList("A", "B", "C"));
         Dataset dsWithNull1 = new RowDataset(columnNames1, columns1);
 
-        List<String> columnNames2 = N.asList("id", "score");
+        List<String> columnNames2 = CommonUtil.asList("id", "score");
         List<List<Object>> columns2 = new ArrayList<>();
-        columns2.add(N.asList(null, 2, 3));
-        columns2.add(N.asList(10, 20, 30));
+        columns2.add(CommonUtil.asList(null, 2, 3));
+        columns2.add(CommonUtil.asList(10, 20, 30));
         Dataset dsWithNull2 = new RowDataset(columnNames2, columns2);
 
         Dataset result = dsWithNull1.rightJoin(dsWithNull2, "id", "id");
@@ -848,7 +848,7 @@ public class RowDataset102Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> emptyDs.union(ds1));
         assertThrows(IllegalArgumentException.class, () -> emptyDs.intersect(ds1));
 
-        Dataset emptyDataset = N.newEmptyDataset(ds1.columnNameList());
+        Dataset emptyDataset = CommonUtil.newEmptyDataset(ds1.columnNameList());
         Dataset result3 = emptyDataset.union(ds1);
         assertTrue(result3.size() >= 0);
         Dataset result4 = emptyDataset.intersect(ds1);

@@ -546,16 +546,6 @@ public class EventBus {
         }
     }
 
-    //    /**
-    //     *
-    //     * @param subscriber General subscriber (type is {@code Subscriber} and parameter type is Object, mostly created by lambda) only can be registered with event id
-    //     * @param eventId
-    //     * @return
-    //     */
-    //    public <T> EventBus register(final Subscriber<T> subscriber) {
-    //        return register(subscriber, (ThreadMode) null);
-    //    }
-
     /**
      * Registers a Subscriber interface implementation with a specific event ID.
      * This method is specifically designed for lambda expressions and anonymous inner classes
@@ -578,15 +568,6 @@ public class EventBus {
     public <T> EventBus register(final Subscriber<T> subscriber, final String eventId) {
         return register(subscriber, eventId, null);
     }
-
-    //    /**
-    //     * @param subscriber General subscriber (type is {@code Subscriber} and parameter type is Object, mostly created by lambda) only can be registered with event id
-    //     * @param threadMode
-    //     * @return
-    //     */
-    //    public <T> EventBus register(final Subscriber<T> subscriber, ThreadMode threadMode) {
-    //        return register(subscriber, (String) null, threadMode);
-    //    }
 
     /**
      * Registers a Subscriber interface implementation with both event ID and thread mode.

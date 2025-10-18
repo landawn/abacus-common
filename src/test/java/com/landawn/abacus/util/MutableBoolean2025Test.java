@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -218,7 +218,7 @@ public class MutableBoolean2025Test extends TestBase {
     @Test
     public void testSetIf_complexPredicate() throws Exception {
         MutableBoolean mb = MutableBoolean.of(true);
-        boolean updated = mb.setIf(false, v -> v == true);
+        boolean updated = mb.setIf(false, v -> v);
         assertTrue(updated);
         assertFalse(mb.value());
     }

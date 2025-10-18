@@ -27,13 +27,13 @@ public class URLEncodedUtilTest extends AbstractTest {
         N.println(query);
 
         Account account2 = URLEncodedUtil.decode(query, Account.class);
-        N.println(N.stringOf(account2));
+        N.println(CommonUtil.stringOf(account2));
 
         query = URLEncodedUtil.encode(Beans.bean2Map(account));
         N.println(query);
 
         account2 = URLEncodedUtil.decode(query, Account.class);
-        N.println(N.stringOf(account2));
+        N.println(CommonUtil.stringOf(account2));
     }
 
     @Test
@@ -43,7 +43,7 @@ public class URLEncodedUtilTest extends AbstractTest {
         Map<String, String[]> parameters = new HashMap<>();
 
         for (String propName : props.keySet()) {
-            parameters.put(propName, N.asArray(N.stringOf(props.get(propName))));
+            parameters.put(propName, CommonUtil.asArray(CommonUtil.stringOf(props.get(propName))));
         }
 
         Account account2 = URLEncodedUtil.parameters2Bean(parameters, Account.class);

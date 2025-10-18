@@ -18,8 +18,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -268,7 +268,7 @@ public class Array200Test extends TestBase {
         assertArrayEquals(new double[] { 1.0, 2.0 }, Array.of(1.0, 2.0), 0.001);
         assertArrayEquals(new String[] { "hello", "world" }, Array.of("hello", "world"));
 
-        assertArrayEquals(new int[0], Array.of(N.EMPTY_INT_ARRAY));
+        assertArrayEquals(new int[0], Array.of(CommonUtil.EMPTY_INT_ARRAY));
     }
 
     @Test
@@ -305,48 +305,48 @@ public class Array200Test extends TestBase {
     @Test
     public void testRange_char() {
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, Array.range('a', 'd'));
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, Array.range('d', 'a'));
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, Array.range('a', 'a'));
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, Array.range('d', 'a'));
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, Array.range('a', 'a'));
     }
 
     @Test
     public void testRange_byte() {
         assertArrayEquals(new byte[] { 10, 11, 12 }, Array.range((byte) 10, (byte) 13));
-        assertArrayEquals(N.EMPTY_BYTE_ARRAY, Array.range((byte) 13, (byte) 10));
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, Array.range((byte) 13, (byte) 10));
     }
 
     @Test
     public void testRange_short() {
         assertArrayEquals(new short[] { 5, 6, 7 }, Array.range((short) 5, (short) 8));
-        assertArrayEquals(N.EMPTY_SHORT_ARRAY, Array.range((short) 8, (short) 5));
+        assertArrayEquals(CommonUtil.EMPTY_SHORT_ARRAY, Array.range((short) 8, (short) 5));
     }
 
     @Test
     public void testRange_int() {
         assertArrayEquals(new int[] { 1, 2, 3 }, Array.range(1, 4));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, Array.range(4, 1));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, Array.range(4, 1));
     }
 
     @Test
     public void testRange_int_continued() {
         assertArrayEquals(new int[] { 1, 2, 3 }, Array.range(1, 4));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, Array.range(4, 1));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, Array.range(1, 1));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, Array.range(4, 1));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, Array.range(1, 1));
     }
 
     @Test
     public void testRange_long() {
         assertArrayEquals(new long[] { 1L, 2L, 3L }, Array.range(1L, 4L));
-        assertArrayEquals(N.EMPTY_LONG_ARRAY, Array.range(4L, 1L));
-        assertArrayEquals(N.EMPTY_LONG_ARRAY, Array.range(1L, 1L));
+        assertArrayEquals(CommonUtil.EMPTY_LONG_ARRAY, Array.range(4L, 1L));
+        assertArrayEquals(CommonUtil.EMPTY_LONG_ARRAY, Array.range(1L, 1L));
     }
 
     @Test
     public void testRange_withStep_char() {
         assertArrayEquals(new char[] { 'a', 'c', 'e' }, Array.range('a', 'f', 2));
         assertArrayEquals(new char[] { 'e', 'c', 'a' }, Array.range('e', (char) ('a' - 1), -2));
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, Array.range('a', 'f', -1));
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, Array.range('a', 'a', 1));
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, Array.range('a', 'f', -1));
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, Array.range('a', 'a', 1));
         assertThrows(IllegalArgumentException.class, () -> Array.range('a', 'f', 0));
     }
 
@@ -354,7 +354,7 @@ public class Array200Test extends TestBase {
     public void testRange_withStep_byte() {
         assertArrayEquals(new byte[] { 10, 12, 14 }, Array.range((byte) 10, (byte) 15, (byte) 2));
         assertArrayEquals(new byte[] { 14, 12, 10 }, Array.range((byte) 14, (byte) 9, (byte) -2));
-        assertArrayEquals(N.EMPTY_BYTE_ARRAY, Array.range((byte) 10, (byte) 10, (byte) 1));
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, Array.range((byte) 10, (byte) 10, (byte) 1));
         assertThrows(IllegalArgumentException.class, () -> Array.range((byte) 10, (byte) 15, (byte) 0));
     }
 
@@ -369,10 +369,10 @@ public class Array200Test extends TestBase {
     public void testRange_withStep_int() {
         assertArrayEquals(new int[] { 1, 3, 5 }, Array.range(1, 6, 2));
         assertArrayEquals(new int[] { 5, 3, 1 }, Array.range(5, 0, -2));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, Array.range(1, 6, -1));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, Array.range(1, 1, 1));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, Array.range(1, 6, -1));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, Array.range(1, 1, 1));
         assertThrows(IllegalArgumentException.class, () -> Array.range(1, 10, 0));
-        assertArrayEquals(new int[] {}, Array.range(0, (int) (((long) Integer.MAX_VALUE * 2L)), 1));
+        assertArrayEquals(new int[] {}, Array.range(0, (int) ((Integer.MAX_VALUE * 2L)), 1));
     }
 
     @Test
@@ -387,28 +387,28 @@ public class Array200Test extends TestBase {
     public void testRangeClosed_char() {
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, Array.rangeClosed('a', 'd'));
         assertArrayEquals(new char[] { 'a' }, Array.rangeClosed('a', 'a'));
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, Array.rangeClosed('d', 'a'));
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, Array.rangeClosed('d', 'a'));
     }
 
     @Test
     public void testRangeClosed_byte() {
         assertArrayEquals(new byte[] { 10, 11, 12, 13 }, Array.rangeClosed((byte) 10, (byte) 13));
         assertArrayEquals(new byte[] { 10 }, Array.rangeClosed((byte) 10, (byte) 10));
-        assertArrayEquals(N.EMPTY_BYTE_ARRAY, Array.rangeClosed((byte) 13, (byte) 10));
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, Array.rangeClosed((byte) 13, (byte) 10));
     }
 
     @Test
     public void testRangeClosed_short() {
         assertArrayEquals(new short[] { 5, 6, 7, 8 }, Array.rangeClosed((short) 5, (short) 8));
         assertArrayEquals(new short[] { 5 }, Array.rangeClosed((short) 5, (short) 5));
-        assertArrayEquals(N.EMPTY_SHORT_ARRAY, Array.rangeClosed((short) 8, (short) 5));
+        assertArrayEquals(CommonUtil.EMPTY_SHORT_ARRAY, Array.rangeClosed((short) 8, (short) 5));
     }
 
     @Test
     public void testRangeClosed_int() {
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, Array.rangeClosed(1, 4));
         assertArrayEquals(new int[] { 1 }, Array.rangeClosed(1, 1));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, Array.rangeClosed(4, 1));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, Array.rangeClosed(4, 1));
         assertThrows(IllegalArgumentException.class, () -> Array.rangeClosed(0, Integer.MAX_VALUE));
     }
 
@@ -416,8 +416,8 @@ public class Array200Test extends TestBase {
     public void testRangeClosed_long() {
         assertArrayEquals(new long[] { 1L, 2L, 3L, 4L }, Array.rangeClosed(1L, 4L));
         assertArrayEquals(new long[] { 1L }, Array.rangeClosed(1L, 1L));
-        assertArrayEquals(N.EMPTY_LONG_ARRAY, Array.rangeClosed(4L, 1L));
-        assertThrows(IllegalArgumentException.class, () -> Array.rangeClosed(0L, (long) Integer.MAX_VALUE + 1L));
+        assertArrayEquals(CommonUtil.EMPTY_LONG_ARRAY, Array.rangeClosed(4L, 1L));
+        assertThrows(IllegalArgumentException.class, () -> Array.rangeClosed(0L, Integer.MAX_VALUE + 1L));
     }
 
     @Test
@@ -426,7 +426,7 @@ public class Array200Test extends TestBase {
         assertArrayEquals(new char[] { 'e', 'c', 'a' }, Array.rangeClosed('e', 'a', -2));
         assertArrayEquals(new char[] { 'a' }, Array.rangeClosed('a', 'a', 1));
         assertArrayEquals(new char[] { 'a' }, Array.rangeClosed('a', 'a', -1));
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, Array.rangeClosed('a', 'e', -1));
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, Array.rangeClosed('a', 'e', -1));
         assertThrows(IllegalArgumentException.class, () -> Array.rangeClosed('a', 'e', 0));
     }
 
@@ -620,7 +620,7 @@ public class Array200Test extends TestBase {
     @Test
     public void testBox_boolean() {
         assertNull(Array.box((boolean[]) null));
-        assertArrayEquals(N.EMPTY_BOOLEAN_OBJ_ARRAY, Array.box(new boolean[0]));
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_OBJ_ARRAY, Array.box(new boolean[0]));
         assertArrayEquals(new Boolean[] { true, false }, Array.box(true, false));
 
         boolean[] prims = { true, false, true, false };
@@ -644,7 +644,7 @@ public class Array200Test extends TestBase {
     @Test
     public void testUnbox_Integer_withDefault() {
         assertNull(Array.unbox((Integer[]) null));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, Array.unbox(new Integer[0]));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, Array.unbox(new Integer[0]));
 
         Integer[] boxed = { 1, null, 3 };
         assertArrayEquals(new int[] { 1, 0, 3 }, Array.unbox(boxed));
@@ -699,10 +699,11 @@ public class Array200Test extends TestBase {
         String[][] t1 = { { "a", "c" }, { "b", "d" } };
         assertArrayEquals(t1, Array.transpose(m1));
 
-        Object[][] m2 = { { 1, "a" }, { new Date(), 3.0 } };
+        Date date = new Date();
+        Object[][] m2 = { { 1, "a" }, { date, 3.0 } };
         Object[][] t2 = Array.transpose(m2);
         assertEquals(Object.class, t2.getClass().getComponentType().getComponentType());
-        assertArrayEquals(new Object[] { 1, new Date() }, t2[0]);
+        assertArrayEquals(new Object[] { 1, date }, t2[0]);
         assertArrayEquals(new Object[] { "a", 3.0 }, t2[1]);
 
         String[][] m3 = { {}, {} };
@@ -740,7 +741,7 @@ public class Array200Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Array.range(Long.MIN_VALUE, Long.MAX_VALUE, 1L),
                 "Should throw due to calculated length exceeding Integer.MAX_VALUE");
 
-        assertEquals(N.EMPTY_LONG_ARRAY, Array.range(Long.MAX_VALUE - 10, Long.MIN_VALUE + 10, 1L));
+        assertEquals(CommonUtil.EMPTY_LONG_ARRAY, Array.range(Long.MAX_VALUE - 10, Long.MIN_VALUE + 10, 1L));
     }
 
     @Test
@@ -806,7 +807,7 @@ public class Array200Test extends TestBase {
         assertArrayEquals(new int[] { 2 }, result2[0][1]);
 
         assertEquals(1, result2[1].length);
-        assertArrayEquals(N.EMPTY_INT_ARRAY, result2[1][0]);
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, result2[1][0]);
     }
 
     @Test
@@ -824,7 +825,7 @@ public class Array200Test extends TestBase {
         assertArrayEquals(new String[] { "b" }, result[0][1]);
 
         assertEquals(1, result[1].length);
-        assertArrayEquals(N.EMPTY_STRING_ARRAY, result[1][0]);
+        assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, result[1][0]);
 
         String[][][] c = null;
         String[][][] d = { { { "x" } } };
@@ -960,29 +961,29 @@ public class Array200Test extends TestBase {
     public void testBox_fromIndexEqualsToIndex() {
         boolean[] boolArray = { true, false, true };
         Boolean[] resultBool = Array.box(boolArray, 1, 1);
-        assertArrayEquals(N.EMPTY_BOOLEAN_OBJ_ARRAY, resultBool);
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_OBJ_ARRAY, resultBool);
         assertEquals(0, resultBool.length);
 
         int[] intArray = { 1, 2, 3, 4 };
         Integer[] resultInt = Array.box(intArray, 3, 3);
-        assertArrayEquals(N.EMPTY_INT_OBJ_ARRAY, resultInt);
+        assertArrayEquals(CommonUtil.EMPTY_INT_OBJ_ARRAY, resultInt);
         assertEquals(0, resultInt.length);
 
         char[] charArray = { 'a', 'b' };
         Character[] resultChar = Array.box(charArray, 0, 0);
-        assertArrayEquals(N.EMPTY_CHAR_OBJ_ARRAY, resultChar);
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_OBJ_ARRAY, resultChar);
     }
 
     @Test
     public void testUnbox_fromIndexEqualsToIndex() {
         Boolean[] boolArray = { true, false, true };
         boolean[] resultBool = Array.unbox(boolArray, 1, 1, false);
-        assertArrayEquals(N.EMPTY_BOOLEAN_ARRAY, resultBool);
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, resultBool);
         assertEquals(0, resultBool.length);
 
         Integer[] intArray = { 1, 2, 3, 4 };
         int[] resultInt = Array.unbox(intArray, 2, 2, 0);
-        assertArrayEquals(N.EMPTY_INT_ARRAY, resultInt);
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, resultInt);
         assertEquals(0, resultInt.length);
     }
 

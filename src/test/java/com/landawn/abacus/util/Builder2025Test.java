@@ -870,7 +870,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testMultimapBuilder_of() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         multimap.put("a", 1);
         MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         assertNotNull(builder);
@@ -879,7 +879,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testMultimapBuilder_put() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         builder.put("a", 1).put("a", 2);
         assertEquals(2, builder.val().get("a").size());
@@ -887,7 +887,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testMultimapBuilder_putMap() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
         map.put("b", 2);
@@ -898,7 +898,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testMultimapBuilder_putMany() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         builder.putMany("a", Arrays.asList(1, 2, 3));
         assertEquals(3, builder.val().get("a").size());
@@ -906,7 +906,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testMultimapBuilder_putManyMap() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         Map<String, Collection<Integer>> map = new HashMap<>();
         map.put("a", Arrays.asList(1, 2));
         map.put("b", Arrays.asList(3, 4));
@@ -917,8 +917,8 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testMultimapBuilder_putManyMultimap() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
-        ListMultimap<String, Integer> other = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
+        ListMultimap<String, Integer> other = CommonUtil.newListMultimap();
         other.put("a", 1);
         other.put("a", 2);
         MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
@@ -928,7 +928,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testMultimapBuilder_removeOne() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         multimap.put("a", 1);
         multimap.put("a", 2);
         MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
@@ -938,7 +938,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testMultimapBuilder_removeOneMap() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         multimap.put("a", 1);
         multimap.put("b", 2);
         Map<String, Integer> toRemove = new HashMap<>();
@@ -950,7 +950,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testMultimapBuilder_removeAll() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         multimap.put("a", 1);
         multimap.put("a", 2);
         multimap.put("b", 3);
@@ -961,7 +961,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testMultimapBuilder_removeMany() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         multimap.put("a", 1);
         multimap.put("a", 2);
         multimap.put("a", 3);
@@ -972,7 +972,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testMultimapBuilder_removeManyMap() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         multimap.put("a", 1);
         multimap.put("a", 2);
         multimap.put("b", 3);
@@ -985,10 +985,10 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testMultimapBuilder_removeManyMultimap() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         multimap.put("a", 1);
         multimap.put("a", 2);
-        ListMultimap<String, Integer> toRemove = N.newListMultimap();
+        ListMultimap<String, Integer> toRemove = CommonUtil.newListMultimap();
         toRemove.put("a", 1);
         MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         builder.removeMany(toRemove);
@@ -997,7 +997,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_of() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
         DatasetBuilder builder = Builder.of(dataset);
         assertNotNull(builder);
         assertEquals(2, builder.val().columnNameList().size());
@@ -1005,7 +1005,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_renameColumn() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.renameColumn("col1", "newCol1");
         assertTrue(builder.val().columnNameList().contains("newCol1"));
@@ -1013,7 +1013,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_renameColumnsMap() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
         Map<String, String> renames = new HashMap<>();
         renames.put("col1", "newCol1");
         renames.put("col2", "newCol2");
@@ -1025,7 +1025,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_renameColumnsFunction() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.renameColumns(name -> "prefix_" + name);
         assertTrue(builder.val().columnNameList().contains("prefix_col1"));
@@ -1033,7 +1033,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_renameColumnsCollectionFunction() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.renameColumns(Arrays.asList("col1"), name -> name.toUpperCase());
         assertTrue(builder.val().columnNameList().contains("COL1"));
@@ -1042,7 +1042,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_addColumn() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn("col2", Arrays.asList(3, 4));
         assertEquals(2, builder.val().columnNameList().size());
@@ -1050,7 +1050,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_addColumnAtIndex() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn(0, "col0", Arrays.asList(0, 0));
         assertEquals("col0", builder.val().columnNameList().get(0));
@@ -1058,7 +1058,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_removeColumn() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.removeColumn("col2");
         assertEquals(1, builder.val().columnNameList().size());
@@ -1066,7 +1066,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_removeColumnsCollection() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2", "col3"), Arrays.asList(Arrays.asList(1, 2, 3)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2", "col3"), Arrays.asList(Arrays.asList(1, 2, 3)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.removeColumns(Arrays.asList("col2", "col3"));
         assertEquals(1, builder.val().columnNameList().size());
@@ -1074,7 +1074,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_removeColumnsPredicate() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "temp1", "temp2"), Arrays.asList(Arrays.asList(1, 2, 3)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "temp1", "temp2"), Arrays.asList(Arrays.asList(1, 2, 3)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.removeColumns(name -> name.startsWith("temp"));
         assertEquals(1, builder.val().columnNameList().size());
@@ -1082,8 +1082,8 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_prepend() {
-        Dataset dataset1 = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1)));
-        Dataset dataset2 = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(2)));
+        Dataset dataset1 = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1)));
+        Dataset dataset2 = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset1);
         builder.prepend(dataset2);
         assertEquals(2, builder.val().size());
@@ -1091,8 +1091,8 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_append() {
-        Dataset dataset1 = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1)));
-        Dataset dataset2 = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(2)));
+        Dataset dataset1 = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1)));
+        Dataset dataset2 = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset1);
         builder.append(dataset2);
         assertEquals(2, builder.val().size());
@@ -1515,14 +1515,14 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testBuilder_ofListMultimap_returnsMultimapBuilder() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         Builder<?> builder = Builder.of(multimap);
         assertTrue(builder instanceof MultimapBuilder);
     }
 
     @Test
     public void testBuilder_ofDataset_returnsDatasetBuilder() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1)));
         Builder<?> builder = Builder.of(dataset);
         assertTrue(builder instanceof DatasetBuilder);
     }
@@ -1572,7 +1572,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_addColumn_withFunction() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn("col2", "col1", (Integer val) -> val * 2);
         assertEquals(2, builder.val().columnNameList().size());
@@ -1580,7 +1580,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_addColumn_atIndex_withFunction() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn(0, "col0", "col1", (Integer val) -> val * 10);
         assertEquals("col0", builder.val().columnNameList().get(0));
@@ -1588,7 +1588,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_addColumn_withMultiColumnFunction() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn("sum", Arrays.asList("col1", "col2"), arr -> {
             return ((Integer) arr.get(0)) + ((Integer) arr.get(1));
@@ -1598,7 +1598,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_addColumn_atIndex_withMultiColumnFunction() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn(0, "sum", Arrays.asList("col1", "col2"), arr -> {
             return ((Integer) arr.get(0)) + ((Integer) arr.get(1));
@@ -1608,7 +1608,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_addColumn_withBiFunction() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn("product", Tuple.of("col1", "col2"), (Integer a, Integer b) -> a * b);
         assertEquals(3, builder.val().columnNameList().size());
@@ -1616,7 +1616,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_addColumn_atIndex_withBiFunction() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn(0, "product", Tuple.of("col1", "col2"), (Integer a, Integer b) -> a * b);
         assertEquals("product", builder.val().columnNameList().get(0));
@@ -1624,7 +1624,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_addColumn_withTriFunction() {
-        Dataset dataset = N.newDataset(Arrays.asList("a", "b", "c"), Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("a", "b", "c"), Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn("sum", Tuple.of("a", "b", "c"), (Integer x, Integer y, Integer z) -> x + y + z);
         assertEquals(4, builder.val().columnNameList().size());
@@ -1632,7 +1632,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_addColumn_atIndex_withTriFunction() {
-        Dataset dataset = N.newDataset(Arrays.asList("a", "b", "c"), Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("a", "b", "c"), Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn(0, "sum", Tuple.of("a", "b", "c"), (Integer x, Integer y, Integer z) -> x + y + z);
         assertEquals("sum", builder.val().columnNameList().get(0));
@@ -1640,7 +1640,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_updateColumn() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.updateColumn("col1", (Integer val) -> val * 2);
         assertEquals(2, (Integer) builder.val().absolute(0).get("col1"));
@@ -1648,7 +1648,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_updateColumns() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.updateColumns(Arrays.asList("col1", "col2"), (rowIdx, colName, val) -> ((Integer) val) * 10);
         assertEquals(10, (Integer) builder.val().absolute(0).get("col1"));
@@ -1656,7 +1656,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_convertColumn() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList("123")));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList("123")));
         DatasetBuilder builder = Builder.of(dataset);
         builder.convertColumn("col1", Integer.class);
         assertTrue(builder.val().absolute(0).get("col1") instanceof Integer);
@@ -1664,7 +1664,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_convertColumns() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList("123", "456")));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList("123", "456")));
         Map<String, Class<?>> conversions = new HashMap<>();
         conversions.put("col1", Integer.class);
         conversions.put("col2", Integer.class);
@@ -1675,7 +1675,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_combineColumns() {
-        Dataset dataset = N.newDataset(Arrays.asList("a", "b"), Arrays.asList(Arrays.asList(1, 2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("a", "b"), Arrays.asList(Arrays.asList(1, 2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.combineColumns(Arrays.asList("a", "b"), "sum", arr -> {
             return ((Integer) arr.get(0)) + ((Integer) arr.get(1));
@@ -1685,7 +1685,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_combineColumns_withBiFunction() {
-        Dataset dataset = N.newDataset(Arrays.asList("a", "b"), Arrays.asList(Arrays.asList(1, 2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("a", "b"), Arrays.asList(Arrays.asList(1, 2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.combineColumns(Tuple.of("a", "b"), "sum", (Integer x, Integer y) -> x + y);
         assertTrue(builder.val().columnNameList().contains("sum"));
@@ -1693,7 +1693,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_combineColumns_withTriFunction() {
-        Dataset dataset = N.newDataset(Arrays.asList("a", "b", "c"), Arrays.asList(Arrays.asList(1, 2, 3)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("a", "b", "c"), Arrays.asList(Arrays.asList(1, 2, 3)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.combineColumns(Tuple.of("a", "b", "c"), "sum", (Integer x, Integer y, Integer z) -> x + y + z);
         assertTrue(builder.val().columnNameList().contains("sum"));
@@ -1701,7 +1701,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_divideColumn() {
-        Dataset dataset = N.newDataset(Arrays.asList("full"), Arrays.asList(Arrays.asList("a,b")));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("full"), Arrays.asList(Arrays.asList("a,b")));
         DatasetBuilder builder = Builder.of(dataset);
         builder.divideColumn("full", Arrays.asList("col1", "col2"), (String val) -> Arrays.asList(val.split(",")));
         assertTrue(builder.val().columnNameList().contains("col1"));
@@ -1710,7 +1710,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_divideColumn_withBiConsumer() {
-        Dataset dataset = N.newDataset(Arrays.asList("full"), Arrays.asList(Arrays.asList("a,b")));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("full"), Arrays.asList(Arrays.asList("a,b")));
         DatasetBuilder builder = Builder.of(dataset);
         builder.divideColumn("full", Arrays.asList("col1", "col2"), (String val, Object[] output) -> {
             String[] parts = val.split(",");
@@ -1722,7 +1722,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_divideColumn_withPair() {
-        Dataset dataset = N.newDataset(Arrays.asList("full"), Arrays.asList(Arrays.asList("a,b")));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("full"), Arrays.asList(Arrays.asList("a,b")));
         DatasetBuilder builder = Builder.of(dataset);
         builder.divideColumn("full", Tuple.of("col1", "col2"), (String val, Pair<Object, Object> output) -> {
             String[] parts = val.split(",");
@@ -1734,7 +1734,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_divideColumn_withTriple() {
-        Dataset dataset = N.newDataset(Arrays.asList("full"), Arrays.asList(Arrays.asList("a,b,c")));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("full"), Arrays.asList(Arrays.asList("a,b,c")));
         DatasetBuilder builder = Builder.of(dataset);
         builder.divideColumn("full", Tuple.of("col1", "col2", "col3"), (String val, Triple<Object, Object, Object> output) -> {
             String[] parts = val.split(",");
@@ -1747,7 +1747,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_updateAll() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.updateAll((Integer val) -> val * 2);
         assertEquals(2, (Integer) builder.val().absolute(0).get("col1"));
@@ -1755,7 +1755,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_updateAll_withRowIndexAndColumnName() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.updateAll((rowIdx, colName, val) -> ((Integer) val) + rowIdx);
         assertEquals(1, (Integer) builder.val().absolute(0).get("col1"));
@@ -1764,7 +1764,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_replaceIf() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.replaceIf((Integer val) -> val == 2, 0);
         assertEquals(0, (Integer) builder.val().absolute(1).get("col1"));
@@ -1772,7 +1772,7 @@ public class Builder2025Test extends TestBase {
 
     @Test
     public void testDatasetBuilder_replaceIf_withPredicate() {
-        Dataset dataset = N.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
+        Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.replaceIf((rowIdx, colName, val) -> ((Integer) val) > 1, 99);
         assertEquals(99, (Integer) builder.val().absolute(1).get("col1"));

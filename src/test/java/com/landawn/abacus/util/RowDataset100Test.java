@@ -17,8 +17,8 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
@@ -37,12 +37,12 @@ public class RowDataset100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        columnNames = N.asList("id", "name", "age", "score");
+        columnNames = CommonUtil.asList("id", "name", "age", "score");
         columns = new ArrayList<>();
-        columns.add(N.asList(1, 2, 3));
-        columns.add(N.asList("John", "Jane", "Bob"));
-        columns.add(N.asList(25, 30, 35));
-        columns.add(N.asList(85.5, 90.0, 88.5));
+        columns.add(CommonUtil.asList(1, 2, 3));
+        columns.add(CommonUtil.asList("John", "Jane", "Bob"));
+        columns.add(CommonUtil.asList(25, 30, 35));
+        columns.add(CommonUtil.asList(85.5, 90.0, 88.5));
         dataset = new RowDataset(columnNames, columns);
     }
 
@@ -541,7 +541,7 @@ public class RowDataset100Test extends TestBase {
 
     @Test
     public void testAddColumnWithFunction() {
-        dataset.addColumn("double_age", "age", (Function<Integer, Integer>) age -> (Integer) age * 2);
+        dataset.addColumn("double_age", "age", (Function<Integer, Integer>) age -> age * 2);
         Assertions.assertEquals(5, dataset.columnCount());
         Assertions.assertTrue(dataset.containsColumn("double_age"));
         Assertions.assertEquals(50, (Integer) dataset.get(0, 4));
@@ -626,7 +626,7 @@ public class RowDataset100Test extends TestBase {
 
     @Test
     public void testUpdateColumn() {
-        dataset.updateColumn("age", (Function<Integer, Integer>) age -> (Integer) age + 5);
+        dataset.updateColumn("age", (Function<Integer, Integer>) age -> age + 5);
         Assertions.assertEquals(30, (Integer) dataset.get(0, 2));
         Assertions.assertEquals(35, (Integer) dataset.get(1, 2));
         Assertions.assertEquals(40, (Integer) dataset.get(2, 2));

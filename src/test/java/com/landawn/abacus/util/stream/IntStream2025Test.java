@@ -1205,4 +1205,142 @@ public class IntStream2025Test extends TestBase {
         stream = IntStream.from(jdkStream);
         assertArrayEquals(new int[] { 1, 2, 3 }, stream.toArray());
     }
+
+    // Additional coverage tests for 2025
+
+    @Test
+    public void testZipWithCollectionOfStreams() {
+        Collection<IntStream> streams = Arrays.asList(
+            IntStream.of(1, 2),
+            IntStream.of(10, 20),
+            IntStream.of(100, 200)
+        );
+        stream = IntStream.zip(streams, ints -> {
+            int sum = 0;
+            for (Integer i : ints) sum += i;
+            return sum;
+        });
+        assertArrayEquals(new int[] { 111, 222 }, stream.toArray());
+    }
+
+    @Test
+    public void testZipWithCollectionDefaultValues() {
+        Collection<IntStream> streams = Arrays.asList(
+            IntStream.of(1, 2),
+            IntStream.of(10)
+        );
+        int[] defaults = new int[] { 0, 0 };
+        stream = IntStream.zip(streams, defaults, ints -> {
+            int sum = 0;
+            for (Integer i : ints) sum += i;
+            return sum;
+        });
+        assertEquals(2, stream.count());
+    }
+
+    @Test
+    public void testMergeWithCollection() {
+        Collection<IntStream> streams = Arrays.asList(
+            IntStream.of(1, 5),
+            IntStream.of(2, 6),
+            IntStream.of(3, 7)
+        );
+        stream = IntStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, stream.count());
+    }
+
+    @Test
+    public void testMergeThreeArraysAdditional() {
+        int[] a1 = { 1, 7 };
+        int[] a2 = { 3, 8 };
+        int[] a3 = { 5, 9 };
+        stream = IntStream.merge(a1, a2, a3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, stream.count());
+    }
+
+    @Test
+    public void testMergeThreeStreamsAdditional() {
+        IntStream s1 = IntStream.of(1, 7);
+        IntStream s2 = IntStream.of(3, 8);
+        IntStream s3 = IntStream.of(5, 9);
+        stream = IntStream.merge(s1, s2, s3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, stream.count());
+    }
+
+    @Test
+    public void testFlattenHorizontalWithPadding() {
+        int[][] array = { { 1, 2 }, { 3 }, { 4, 5, 6 } };
+        stream = IntStream.flatten(array, 0, false);
+        int[] result = stream.toArray();
+        assertArrayEquals(new int[] { 1, 2, 0, 3, 0, 0, 4, 5, 6 }, result);
+    }
+
+    @Test
+    public void testRangeClosedWithNegativeStep() {
+        stream = IntStream.rangeClosed(5, 1, -1);
+        int[] result = stream.toArray();
+        assertArrayEquals(new int[] { 5, 4, 3, 2, 1 }, result);
+    }
+
+    @Test
+    public void testRangeWithInvalidStepDirection() {
+        stream = IntStream.range(1, 5, -1);
+        assertEquals(0, stream.count());
+    }
+
+    @Test
+    public void testParallelFilterMap() {
+        stream = IntStream.of(1, 2, 3, 4, 5, 6, 7, 8).parallel().filter(x -> x % 2 == 0).map(x -> x * 2);
+        int[] result = stream.toArray();
+        assertEquals(4, result.length);
+    }
+
+    @Test
+    public void testIterateWithFalseHasNext() {
+        stream = IntStream.iterate(() -> false, () -> 1);
+        assertEquals(0, stream.count());
+    }
+
+    @Test
+    public void testCollapseNonCollapsible() {
+        stream = IntStream.of(1, 10, 100);
+        int[] result = stream.collapse((prev, next) -> false, (a, b) -> a + b).toArray();
+        assertArrayEquals(new int[] { 1, 10, 100 }, result);
+    }
+
+    @Test
+    public void testScanEmptyStream() {
+        stream = IntStream.empty();
+        int[] result = stream.scan((a, b) -> a + b).toArray();
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testZipThreeArraysWithDefaultsAdditional() {
+        int[] a = { 1 };
+        int[] b = { 2, 3 };
+        int[] c = { 4, 5, 6 };
+        stream = IntStream.zip(a, b, c, 100, 200, 300, (x, y, z) -> x + y + z);
+        int[] result = stream.toArray();
+        assertEquals(3, result.length);
+    }
+
+    @Test
+    public void testZipThreeIteratorsWithDefaultsAdditional() {
+        IntIterator a = IntIterator.of(new int[] { 1 });
+        IntIterator b = IntIterator.of(new int[] { 2, 3 });
+        IntIterator c = IntIterator.of(new int[] { 4, 5, 6 });
+        stream = IntStream.zip(a, b, c, 100, 200, 300, (x, y, z) -> x + y + z);
+        assertEquals(3, stream.count());
+    }
+
+    @Test
+    public void testZipThreeStreamsWithDefaultsAdditional() {
+        IntStream a = IntStream.of(1);
+        IntStream b = IntStream.of(2, 3);
+        IntStream c = IntStream.of(4, 5, 6);
+        stream = IntStream.zip(a, b, c, 100, 200, 300, (x, y, z) -> x + y + z);
+        int[] result = stream.toArray();
+        assertEquals(3, result.length);
+    }
 }

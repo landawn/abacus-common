@@ -104,10 +104,10 @@ public final class Iterators {
      * The method will advance the iterator to the specified index and return the element at that position wrapped in a {@code Nullable}.
      * If the index is out of bounds (greater than the number of elements in the iterator), a {@code Nullable}.empty() is returned.
      *
-     * @param <T> The type of elements in the iterator.
-     * @param iter The iterator from which to retrieve the element.
-     * @param index The position in the iterator of the element to be returned. Indexing starts from 0.
-     * @return A {@code Nullable} containing the element at the specified position in the iterator, or {@code Nullable}.empty() if the index is out of bounds.
+     * @param <T> the type of elements in the iterator.
+     * @param iter the iterator from which to retrieve the element.
+     * @param index the position in the iterator of the element to be returned. Indexing starts from 0.
+     * @return a {@code Nullable} containing the element at the specified position in the iterator, or {@code Nullable}.empty() if the index is out of bounds.
      * @throws IllegalArgumentException if the index is negative.
      */
     public static <T> Nullable<T> get(final Iterator<? extends T> iter, long index) throws IllegalArgumentException {
@@ -133,9 +133,9 @@ public final class Iterators {
      * Counts the occurrences of a specific value in the given iterator.
      * This method can be used to find the frequency of a particular value in the iterator.
      *
-     * @param iter The iterator to be searched.
-     * @param valueToFind The value to count occurrences of.
-     * @return The number of occurrences of the value in the iterator.
+     * @param iter the iterator to be searched.
+     * @param valueToFind the value to count occurrences of.
+     * @return the number of occurrences of the value in the iterator.
      * @see N#occurrencesOf(Iterator, Object)
      */
     public static long occurrencesOf(final Iterator<?> iter, final Object valueToFind) {
@@ -165,8 +165,8 @@ public final class Iterators {
     /**
      * Counts the number of elements in the given iterator.
      *
-     * @param iter The iterator to be counted.
-     * @return The number of elements in the iterator.
+     * @param iter the iterator to be counted.
+     * @return the number of elements in the iterator.
      * @see N#count(Iterator)
      * @see #count(Iterator, Predicate)
      */
@@ -188,10 +188,10 @@ public final class Iterators {
     /**
      * Counts the number of elements in the given iterator that match the provided predicate.
      *
-     * @param <T> The type of elements in the iterator.
-     * @param iter The iterator to be searched.
-     * @param predicate The predicate to apply to each element in the iterator.
-     * @return The number of elements in the iterator that match the provided predicate.
+     * @param <T> the type of elements in the iterator.
+     * @param iter the iterator to be searched.
+     * @param predicate the predicate to apply to each element in the iterator.
+     * @return the number of elements in the iterator that match the provided predicate.
      * @throws IllegalArgumentException if the predicate is {@code null}.
      * @see N#count(Iterator, Predicate)
      */
@@ -217,9 +217,9 @@ public final class Iterators {
      * Returns the index of the first occurrence of the specified value in the given iterator.
      * This method starts searching from the beginning of the iterator.
      *
-     * @param iter The iterator to be searched.
-     * @param valueToFind The value to find in the iterator.
-     * @return The index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
+     * @param iter the iterator to be searched.
+     * @param valueToFind the value to find in the iterator.
+     * @return the index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
      */
     public static long indexOf(final Iterator<?> iter, final Object valueToFind) {
         return indexOf(iter, valueToFind, 0);
@@ -229,10 +229,10 @@ public final class Iterators {
      * Returns the index of the first occurrence of the specified value in the given iterator,
      * starting the search from the specified index.
      *
-     * @param iter The iterator to be searched.
-     * @param valueToFind The value to find in the iterator.
-     * @param fromIndex The index to start the search from.
-     * @return The index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
+     * @param iter the iterator to be searched.
+     * @param valueToFind the value to find in the iterator.
+     * @param fromIndex the index to start the search from.
+     * @return the index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
      */
     public static long indexOf(final Iterator<?> iter, final Object valueToFind, final long fromIndex) {
         if (iter == null) {
@@ -297,10 +297,10 @@ public final class Iterators {
      *
      * <p>Example: {@code Iterators.repeat("Hello", 3)} returns an iterator that yields "Hello" three times.
      *
-     * @param <T> The type of the element to repeat.
-     * @param e The element to repeat (can be {@code null}).
-     * @param n The number of times to repeat the element. Must be non-negative.
-     * @return An {@code ObjIterator} that returns the element {@code n} times, or an empty iterator if {@code n} is 0.
+     * @param <T> the type of the element to repeat.
+     * @param e the element to repeat (can be {@code null}).
+     * @param n the number of times to repeat the element. Must be non-negative.
+     * @return an {@code ObjIterator} that returns the element {@code n} times, or an empty iterator if {@code n} is 0.
      * @throws IllegalArgumentException if {@code n} is negative.
      */
     public static <T> ObjIterator<T> repeat(final T e, final int n) throws IllegalArgumentException {
@@ -336,10 +336,10 @@ public final class Iterators {
      *
      * <p>Example: {@code Iterators.repeat("Hello", 1000000L)} returns an iterator that yields "Hello" one million times.
      *
-     * @param <T> The type of the element to repeat.
-     * @param e The element to repeat (can be {@code null}).
-     * @param n The number of times to repeat the element. Must be non-negative.
-     * @return An {@code ObjIterator} that returns the element {@code n} times, or an empty iterator if {@code n} is 0.
+     * @param <T> the type of the element to repeat.
+     * @param e the element to repeat (can be {@code null}).
+     * @param n the number of times to repeat the element. Must be non-negative.
+     * @return an {@code ObjIterator} that returns the element {@code n} times, or an empty iterator if {@code n} is 0.
      * @throws IllegalArgumentException if {@code n} is negative.
      */
     public static <T> ObjIterator<T> repeat(final T e, final long n) throws IllegalArgumentException {
@@ -372,10 +372,10 @@ public final class Iterators {
     /**
      * Repeats each element in the specified Collection <i>n</i> times.
      *
-     * @param <T> The type of elements in the collection.
-     * @param c The collection whose elements are to be repeated; must not be empty if n > 0
-     * @param n The number of times the collection's elements are to be repeated.
-     * @return An iterator over the elements in the collection, repeated <i>n</i> times.
+     * @param <T> the type of elements in the collection.
+     * @param c the collection whose elements are to be repeated; must not be empty if n > 0
+     * @param n the number of times the collection's elements are to be repeated.
+     * @return an iterator over the elements in the collection, repeated <i>n</i> times.
      * @throws IllegalArgumentException if {@code c} is null or empty when {@code n} > 0, or if {@code n} is negative
      * @see N#repeatElements(Collection, int)
      */
@@ -442,10 +442,10 @@ public final class Iterators {
      * }
      * }</pre>
      *
-     * @param <T> The type of elements in the collection.
-     * @param c The collection to be repeated; must not be empty if n > 0
-     * @param n The number of times the collection is to be repeated.
-     * @return An iterator over the collection, repeated <i>n</i> times.
+     * @param <T> the type of elements in the collection.
+     * @param c the collection to be repeated; must not be empty if n > 0
+     * @param n the number of times the collection is to be repeated.
+     * @return an iterator over the collection, repeated <i>n</i> times.
      * @throws IllegalArgumentException if {@code c} is null or empty when {@code n} > 0, or if {@code n} is negative
      * @see N#repeatCollection(Collection, int)
      */
@@ -488,10 +488,10 @@ public final class Iterators {
      * <p>Example: {@code Iterators.repeatElementsToSize(Arrays.asList("A", "B", "C"), 7)}
      * yields an iterator with elements: A, A, A, B, B, C, C (each element is repeated at least twice, with "A" repeated three times)
      *
-     * @param <T> The type of elements in the collection.
-     * @param c The collection whose elements are to be repeated. Must not be empty or {@code null} if {@code size > 0}.
-     * @param size The total number of elements the resulting iterator should produce. Must be non-negative.
-     * @return An {@code ObjIterator} that repeats each element until {@code size} elements have been produced.
+     * @param <T> the type of elements in the collection.
+     * @param c the collection whose elements are to be repeated. Must not be empty or {@code null} if {@code size > 0}.
+     * @param size the total number of elements the resulting iterator should produce. Must be non-negative.
+     * @return an {@code ObjIterator} that repeats each element until {@code size} elements have been produced.
      * @throws IllegalArgumentException if {@code size} is negative, or if {@code c} is empty or {@code null} when {@code size > 0}.
      * @see N#repeatElementsToSize(Collection, int)
      */
@@ -544,10 +544,10 @@ public final class Iterators {
      * <p>Example: {@code Iterators.repeatCollectionToSize(Arrays.asList("A", "B"), 5)}
      * yields an iterator with elements: A, B, A, B, A
      *
-     * @param <T> The type of elements in the collection.
-     * @param c The collection to be repeated. Must not be empty or {@code null} if {@code size > 0}.
-     * @param size The total number of elements the resulting iterator should produce. Must be non-negative.
-     * @return An {@code ObjIterator} that cycles through the collection until {@code size} elements have been produced.
+     * @param <T> the type of elements in the collection.
+     * @param c the collection to be repeated. Must not be empty or {@code null} if {@code size > 0}.
+     * @param size the total number of elements the resulting iterator should produce. Must be non-negative.
+     * @return an {@code ObjIterator} that cycles through the collection until {@code size} elements have been produced.
      * @throws IllegalArgumentException if {@code size} is negative, or if {@code c} is empty or {@code null} when {@code size > 0}.
      * @see N#repeatCollectionToSize(Collection, int)
      */
@@ -589,9 +589,9 @@ public final class Iterators {
      * Returns an infinite iterator cycling over the provided elements.
      * However, if the provided elements are empty, an empty iterator will be returned.
      *
-     * @param <T> The type of elements in the array.
-     * @param elements The array whose elements are to be cycled over.
-     * @return An iterator cycling over the elements of the array.
+     * @param <T> the type of elements in the array.
+     * @param elements the array whose elements are to be cycled over.
+     * @return an iterator cycling over the elements of the array.
      */
     @SafeVarargs
     public static <T> ObjIterator<T> cycle(final T... elements) {
@@ -626,9 +626,9 @@ public final class Iterators {
      * Returns an infinite iterator cycling over the elements of the provided iterable.
      * However, if the provided elements are empty, an empty iterator will be returned.
      *
-     * @param <T> The type of elements in the iterable.
-     * @param iterable The iterable whose elements are to be cycled over.
-     * @return An iterator cycling over the elements of the iterable.
+     * @param <T> the type of elements in the iterable.
+     * @param iterable the iterable whose elements are to be cycled over.
+     * @return an iterator cycling over the elements of the iterable.
      */
     public static <T> ObjIterator<T> cycle(final Iterable<? extends T> iterable) {
         if (N.isEmpty(iterable)) {
@@ -681,10 +681,10 @@ public final class Iterators {
      * If the provided iterable is empty, an empty iterator will be returned.
      * If the number of rounds is zero, an empty iterator will be returned.
      *
-     * @param <T> The type of elements in the iterable.
-     * @param iterable The iterable whose elements are to be cycled over.
-     * @param rounds The number of times to cycle over the iterable's elements.
-     * @return An iterator cycling over the elements of the iterable for the specified number of rounds.
+     * @param <T> the type of elements in the iterable.
+     * @param iterable the iterable whose elements are to be cycled over.
+     * @param rounds the number of times to cycle over the iterable's elements.
+     * @return an iterator cycling over the elements of the iterable for the specified number of rounds.
      * @throws IllegalArgumentException if <i>rounds</i> is negative.
      */
     public static <T> ObjIterator<T> cycle(final Iterable<? extends T> iterable, final long rounds) {
@@ -747,8 +747,8 @@ public final class Iterators {
     /**
      * Concatenates multiple boolean arrays into a single BooleanIterator.
      *
-     * @param a The boolean arrays to be concatenated.
-     * @return A BooleanIterator that will iterate over the elements of each provided boolean array in order.
+     * @param a the boolean arrays to be concatenated.
+     * @return a BooleanIterator that will iterate over the elements of each provided boolean array in order.
      */
     public static BooleanIterator concat(final boolean[]... a) {
         if (N.isEmpty(a)) {
@@ -784,8 +784,8 @@ public final class Iterators {
     /**
      * Concatenates multiple char arrays into a single CharIterator.
      *
-     * @param a The char arrays to be concatenated.
-     * @return A CharIterator that will iterate over the elements of each provided char array in order.
+     * @param a the char arrays to be concatenated.
+     * @return a CharIterator that will iterate over the elements of each provided char array in order.
      */
     public static CharIterator concat(final char[]... a) {
         if (N.isEmpty(a)) {
@@ -821,8 +821,8 @@ public final class Iterators {
     /**
      * Concatenates multiple byte arrays into a single ByteIterator.
      *
-     * @param a The byte arrays to be concatenated.
-     * @return A ByteIterator that will iterate over the elements of each provided byte array in order.
+     * @param a the byte arrays to be concatenated.
+     * @return a ByteIterator that will iterate over the elements of each provided byte array in order.
      */
     public static ByteIterator concat(final byte[]... a) {
         if (N.isEmpty(a)) {
@@ -858,8 +858,8 @@ public final class Iterators {
     /**
      * Concatenates multiple short arrays into a single ShortIterator.
      *
-     * @param a The short arrays to be concatenated.
-     * @return A ShortIterator that will iterate over the elements of each provided short array in order.
+     * @param a the short arrays to be concatenated.
+     * @return a ShortIterator that will iterate over the elements of each provided short array in order.
      */
     public static ShortIterator concat(final short[]... a) {
         if (N.isEmpty(a)) {
@@ -895,8 +895,8 @@ public final class Iterators {
     /**
      * Concatenates multiple int arrays into a single IntIterator.
      *
-     * @param a The int arrays to be concatenated.
-     * @return An IntIterator that will iterate over the elements of each provided int array in order.
+     * @param a the int arrays to be concatenated.
+     * @return an IntIterator that will iterate over the elements of each provided int array in order.
      */
     public static IntIterator concat(final int[]... a) {
         if (N.isEmpty(a)) {
@@ -932,8 +932,8 @@ public final class Iterators {
     /**
      * Concatenates multiple long arrays into a single LongIterator.
      *
-     * @param a The long arrays to be concatenated.
-     * @return A LongIterator that will iterate over the elements of each provided long array in order.
+     * @param a the long arrays to be concatenated.
+     * @return a LongIterator that will iterate over the elements of each provided long array in order.
      */
     public static LongIterator concat(final long[]... a) {
         if (N.isEmpty(a)) {
@@ -969,8 +969,8 @@ public final class Iterators {
     /**
      * Concatenates multiple float arrays into a single FloatIterator.
      *
-     * @param a The float arrays to be concatenated.
-     * @return A FloatIterator that will iterate over the elements of each provided float array in order.
+     * @param a the float arrays to be concatenated.
+     * @return a FloatIterator that will iterate over the elements of each provided float array in order.
      */
     public static FloatIterator concat(final float[]... a) {
         if (N.isEmpty(a)) {
@@ -1006,8 +1006,8 @@ public final class Iterators {
     /**
      * Concatenates multiple double arrays into a single DoubleIterator.
      *
-     * @param a The double arrays to be concatenated.
-     * @return A DoubleIterator that will iterate over the elements of each provided double array in order.
+     * @param a the double arrays to be concatenated.
+     * @return a DoubleIterator that will iterate over the elements of each provided double array in order.
      */
     public static DoubleIterator concat(final double[]... a) {
         if (N.isEmpty(a)) {
@@ -1043,8 +1043,8 @@ public final class Iterators {
     /**
      * Concatenates multiple BooleanIterators into a single BooleanIterator.
      *
-     * @param a The BooleanIterators to be concatenated.
-     * @return A BooleanIterator that will iterate over the elements of each provided BooleanIterator in order.
+     * @param a the BooleanIterators to be concatenated.
+     * @return a BooleanIterator that will iterate over the elements of each provided BooleanIterator in order.
      */
     public static BooleanIterator concat(final BooleanIterator... a) {
         if (N.isEmpty(a)) {
@@ -1078,8 +1078,8 @@ public final class Iterators {
     /**
      * Concatenates multiple CharIterators into a single CharIterator.
      *
-     * @param a The CharIterators to be concatenated.
-     * @return A CharIterator that will iterate over the elements of each provided CharIterator in order.
+     * @param a the CharIterators to be concatenated.
+     * @return a CharIterator that will iterate over the elements of each provided CharIterator in order.
      */
     public static CharIterator concat(final CharIterator... a) {
         if (N.isEmpty(a)) {
@@ -1113,8 +1113,8 @@ public final class Iterators {
     /**
      * Concatenates multiple ByteIterators into a single ByteIterator.
      *
-     * @param a The ByteIterators to be concatenated.
-     * @return A ByteIterator that will iterate over the elements of each provided ByteIterator in order.
+     * @param a the ByteIterators to be concatenated.
+     * @return a ByteIterator that will iterate over the elements of each provided ByteIterator in order.
      */
     public static ByteIterator concat(final ByteIterator... a) {
         if (N.isEmpty(a)) {
@@ -1148,8 +1148,8 @@ public final class Iterators {
     /**
      * Concatenates multiple ShortIterators into a single ShortIterator.
      *
-     * @param a The ShortIterators to be concatenated.
-     * @return A ShortIterator that will iterate over the elements of each provided ShortIterator in order.
+     * @param a the ShortIterators to be concatenated.
+     * @return a ShortIterator that will iterate over the elements of each provided ShortIterator in order.
      */
     public static ShortIterator concat(final ShortIterator... a) {
         if (N.isEmpty(a)) {
@@ -1183,8 +1183,8 @@ public final class Iterators {
     /**
      * Concatenates multiple IntIterators into a single IntIterator.
      *
-     * @param a The IntIterators to be concatenated.
-     * @return An IntIterator that will iterate over the elements of each provided IntIterator in order.
+     * @param a the IntIterators to be concatenated.
+     * @return an IntIterator that will iterate over the elements of each provided IntIterator in order.
      */
     public static IntIterator concat(final IntIterator... a) {
         if (N.isEmpty(a)) {
@@ -1218,8 +1218,8 @@ public final class Iterators {
     /**
      * Concatenates multiple LongIterators into a single LongIterator.
      *
-     * @param a The LongIterators to be concatenated.
-     * @return A LongIterator that will iterate over the elements of each provided LongIterator in order.
+     * @param a the LongIterators to be concatenated.
+     * @return a LongIterator that will iterate over the elements of each provided LongIterator in order.
      */
     public static LongIterator concat(final LongIterator... a) {
         if (N.isEmpty(a)) {
@@ -1253,8 +1253,8 @@ public final class Iterators {
     /**
      * Concatenates multiple FloatIterators into a single FloatIterator.
      *
-     * @param a The FloatIterators to be concatenated.
-     * @return A FloatIterator that will iterate over the elements of each provided FloatIterator in order.
+     * @param a the FloatIterators to be concatenated.
+     * @return a FloatIterator that will iterate over the elements of each provided FloatIterator in order.
      */
     public static FloatIterator concat(final FloatIterator... a) {
         if (N.isEmpty(a)) {
@@ -1288,8 +1288,8 @@ public final class Iterators {
     /**
      * Concatenates multiple DoubleIterators into a single DoubleIterator.
      *
-     * @param a The DoubleIterators to be concatenated.
-     * @return A DoubleIterator that will iterate over the elements of each provided DoubleIterator in order.
+     * @param a the DoubleIterators to be concatenated.
+     * @return a DoubleIterator that will iterate over the elements of each provided DoubleIterator in order.
      */
     public static DoubleIterator concat(final DoubleIterator... a) {
         if (N.isEmpty(a)) {
@@ -1323,9 +1323,9 @@ public final class Iterators {
     /**
      * Concatenates multiple arrays into a single ObjIterator.
      *
-     * @param <T> The type of elements in the arrays.
-     * @param a The arrays to be concatenated.
-     * @return An ObjIterator that will iterate over the elements of each provided array in order.
+     * @param <T> the type of elements in the arrays.
+     * @param a the arrays to be concatenated.
+     * @return an ObjIterator that will iterate over the elements of each provided array in order.
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final T[]... a) {
@@ -1347,9 +1347,9 @@ public final class Iterators {
     /**
      * Concatenates multiple Iterators into a single ObjIterator.
      *
-     * @param <T> The type of elements in the Iterators.
-     * @param a The Iterators to be concatenated.
-     * @return An ObjIterator that will iterate over the elements of each provided Iterator in order.
+     * @param <T> the type of elements in the Iterators.
+     * @param a the Iterators to be concatenated.
+     * @return an ObjIterator that will iterate over the elements of each provided Iterator in order.
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final Iterator<? extends T>... a) {
@@ -1363,9 +1363,9 @@ public final class Iterators {
     /**
      * Concatenates multiple Iterable objects into a single ObjIterator.
      *
-     * @param <T> The type of elements in the Iterable objects.
-     * @param a The Iterable objects to be concatenated.
-     * @return An ObjIterator that will iterate over the elements of each provided Iterable.
+     * @param <T> the type of elements in the Iterable objects.
+     * @param a the Iterable objects to be concatenated.
+     * @return an ObjIterator that will iterate over the elements of each provided Iterable.
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final Iterable<? extends T>... a) {
@@ -1385,10 +1385,10 @@ public final class Iterators {
     /**
      * Concatenates multiple Maps into a single ObjIterator of Map.Entry.
      *
-     * @param <K> The type of keys in the Maps.
-     * @param <V> The type of values in the Maps.
-     * @param a The Maps to be concatenated.
-     * @return An ObjIterator of Map.Entry that will iterate over the entries of each provided Map.
+     * @param <K> the type of keys in the Maps.
+     * @param <V> the type of values in the Maps.
+     * @param a the Maps to be concatenated.
+     * @return an ObjIterator of Map.Entry that will iterate over the entries of each provided Map.
      */
     @SafeVarargs
     public static <K, V> ObjIterator<Map.Entry<K, V>> concat(final Map<? extends K, ? extends V>... a) {
@@ -1410,9 +1410,9 @@ public final class Iterators {
     /**
      * Concatenates multiple Iterators into a single ObjIterator.
      *
-     * @param <T> The type of elements in the Iterators.
-     * @param c The collection of iterator to be concatenated.
-     * @return An ObjIterator that will iterate over the elements of each provided Iterator in order.
+     * @param <T> the type of elements in the Iterators.
+     * @param c the collection of iterator to be concatenated.
+     * @return an ObjIterator that will iterate over the elements of each provided Iterator in order.
      */
     public static <T> ObjIterator<T> concat(final Collection<? extends Iterator<? extends T>> c) {
         if (N.isEmpty(c)) {
@@ -1446,9 +1446,9 @@ public final class Iterators {
     /**
      * Concatenates multiple Iterable objects into a single ObjIterator.
      *
-     * @param <T> The type of elements in the Iterable objects.
-     * @param c The collection of Iterable objects to be concatenated.
-     * @return An ObjIterator that will iterate over the elements of each provided Iterable.
+     * @param <T> the type of elements in the Iterable objects.
+     * @param c the collection of Iterable objects to be concatenated.
+     * @return an ObjIterator that will iterate over the elements of each provided Iterable.
      * @see N#concat(Iterable...)
      * @see N#iterateEach(Collection)
      */
@@ -1484,10 +1484,10 @@ public final class Iterators {
     /**
      * Concatenates multiple BiIterators into a single BiIterator.
      *
-     * @param <A> The type of the first element in the BiIterator.
-     * @param <B> The type of the second element in the BiIterator.
-     * @param a The BiIterators to be concatenated.
-     * @return A BiIterator that will iterate over the elements of each provided BiIterator in order.
+     * @param <A> the type of the first element in the BiIterator.
+     * @param <B> the type of the second element in the BiIterator.
+     * @param a the BiIterators to be concatenated.
+     * @return a BiIterator that will iterate over the elements of each provided BiIterator in order.
      */
     @SafeVarargs
     public static <A, B> BiIterator<A, B> concat(final BiIterator<A, B>... a) {
@@ -1579,11 +1579,11 @@ public final class Iterators {
     /**
      * Concatenates multiple TriIterators into a single TriIterator.
      *
-     * @param <A> The type of the first element in the TriIterator.
-     * @param <B> The type of the second element in the TriIterator.
-     * @param <C> The type of the third element in the TriIterator.
-     * @param a The TriIterators to be concatenated.
-     * @return A TriIterator that will iterate over the elements of each provided TriIterator in order.
+     * @param <A> the type of the first element in the TriIterator.
+     * @param <B> the type of the second element in the TriIterator.
+     * @param <C> the type of the third element in the TriIterator.
+     * @param a the TriIterators to be concatenated.
+     * @return a TriIterator that will iterate over the elements of each provided TriIterator in order.
      */
     @SafeVarargs
     public static <A, B, C> TriIterator<A, B, C> concat(final TriIterator<A, B, C>... a) {
@@ -1674,11 +1674,11 @@ public final class Iterators {
     /**
      * Merges two Iterators into a single ObjIterator. The order of elements in the resulting iterator is determined by the provided BiFunction <i>nextSelector</i>.
      *
-     * @param <T> The type of elements in the Iterators.
-     * @param a The first Iterator to be merged.
-     * @param b The second Iterator to be merged.
-     * @param nextSelector A BiFunction that determines the order of elements in the resulting iterator.
-     * @return An ObjIterator that will iterate over the elements of the provided Iterators in the order determined by <i>nextSelector</i>.
+     * @param <T> the type of elements in the Iterators.
+     * @param a the first Iterator to be merged.
+     * @param b the second Iterator to be merged.
+     * @param nextSelector a BiFunction that determines the order of elements in the resulting iterator.
+     * @return an ObjIterator that will iterate over the elements of the provided Iterators in the order determined by <i>nextSelector</i>.
      * @throws IllegalArgumentException if <i>nextSelector</i> is {@code null}.
      */
     public static <T> ObjIterator<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
@@ -1748,11 +1748,11 @@ public final class Iterators {
     /**
      * Merges multiple Iterators into a single ObjIterator. The order of elements in the resulting iterator is determined by the provided BiFunction <i>nextSelector</i>.
      *
-     * @param <T> The type of elements in the Iterators.
-     * @param c The collection of iterator to be merged.
-     * @param nextSelector A BiFunction that determines the order of elements in the resulting iterator.
+     * @param <T> the type of elements in the Iterators.
+     * @param c the collection of iterator to be merged.
+     * @param nextSelector a BiFunction that determines the order of elements in the resulting iterator.
      *                     The first parameter is selected if MergeResult.TAKE_FIRST is returned, otherwise the second parameter is selected.
-     * @return An ObjIterator that will iterate over the elements of the provided Iterators in the order determined by <i>nextSelector</i>.
+     * @return an ObjIterator that will iterate over the elements of the provided Iterators in the order determined by <i>nextSelector</i>.
      * @throws IllegalArgumentException if <i>nextSelector</i> is {@code null}.
      */
     public static <T> ObjIterator<T> merge(final Collection<? extends Iterator<? extends T>> c,
@@ -1781,11 +1781,11 @@ public final class Iterators {
     /**
      * Merges two Iterable objects into a single ObjIterator. The order of elements in the resulting iterator is determined by the provided BiFunction <i>nextSelector</i>.
      *
-     * @param <T> The type of elements in the Iterable objects.
-     * @param a The first Iterable object to be merged.
-     * @param b The second Iterable object to be merged.
-     * @param nextSelector A BiFunction that determines the order of elements in the resulting iterator.
-     * @return An ObjIterator that will iterate over the elements of the provided Iterable objects in the order determined by <i>nextSelector</i>.
+     * @param <T> the type of elements in the Iterable objects.
+     * @param a the first Iterable object to be merged.
+     * @param b the second Iterable object to be merged.
+     * @param nextSelector a BiFunction that determines the order of elements in the resulting iterator.
+     * @return an ObjIterator that will iterate over the elements of the provided Iterable objects in the order determined by <i>nextSelector</i>.
      * @throws IllegalArgumentException if <i>nextSelector</i> is {@code null}.
      */
     public static <T> ObjIterator<T> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
@@ -1797,28 +1797,14 @@ public final class Iterators {
 
     }
 
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param collections
-    //     * @param nextSelector
-    //     * @return
-    //     * @deprecated replaced by {@link #mergeIterables(Collection, BiFunction)}
-    //     */
-    //    @Deprecated
-    //    public static <T> ObjIterator<T> mergeCollections(final Collection<? extends Collection<? extends T>> collections,
-    //            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
-    //        return mergeIterables(collections, nextSelector);
-    //    }
-
     /**
      * Merges multiple Iterable objects into a single ObjIterator. The order of elements in the resulting iterator is determined by the provided BiFunction <i>nextSelector</i>.
      *
-     * @param <T> The type of elements in the Iterable objects.
-     * @param iterables The collection of Iterable objects to be merged.
-     * @param nextSelector A BiFunction that determines the order of elements in the resulting iterator.
+     * @param <T> the type of elements in the Iterable objects.
+     * @param iterables the collection of Iterable objects to be merged.
+     * @param nextSelector a BiFunction that determines the order of elements in the resulting iterator.
      *                     The first parameter is selected if MergeResult.TAKE_FIRST is returned, otherwise the second parameter is selected.
-     * @return An ObjIterator that will iterate over the elements of the provided Iterable objects in the order determined by <i>nextSelector</i>.
+     * @return an ObjIterator that will iterate over the elements of the provided Iterable objects in the order determined by <i>nextSelector</i>.
      * @throws IllegalArgumentException if <i>nextSelector</i> is {@code null}.
      */
     public static <T> ObjIterator<T> mergeIterables(final Collection<? extends Iterable<? extends T>> iterables,
@@ -1847,10 +1833,10 @@ public final class Iterators {
      * Merges two sorted Iterators into a single ObjIterator, which will iterate over the elements of each Iterator in a sorted order.
      * The elements in the Iterators should implement Comparable interface.
      *
-     * @param <T> The type of elements in the Iterators, which should implement Comparable interface.
-     * @param sortedA The first Iterator to be merged. It should be in non-descending order.
-     * @param sortedB The second Iterator to be merged. It should be in non-descending order.
-     * @return An ObjIterator that will iterate over the elements of the provided Iterators in a sorted order.
+     * @param <T> the type of elements in the Iterators, which should implement Comparable interface.
+     * @param sortedA the first Iterator to be merged. It should be in non-descending order.
+     * @param sortedB the second Iterator to be merged. It should be in non-descending order.
+     * @return an ObjIterator that will iterate over the elements of the provided Iterators in a sorted order.
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB) {
@@ -1861,11 +1847,11 @@ public final class Iterators {
      * Merges two sorted Iterators into a single ObjIterator, which will iterate over the elements of each Iterator in a sorted order.
      * The order of elements in the resulting iterator is determined by the provided Comparator <i>cmp</i>.
      *
-     * @param <T> The type of elements in the Iterators.
-     * @param sortedA The first Iterator to be merged. It should be in non-descending order.
-     * @param sortedB The second Iterator to be merged. It should be in non-descending order.
-     * @param cmp The Comparator to determine the order of elements in the resulting iterator.
-     * @return An ObjIterator that will iterate over the elements of the provided Iterators in a sorted order.
+     * @param <T> the type of elements in the Iterators.
+     * @param sortedA the first Iterator to be merged. It should be in non-descending order.
+     * @param sortedB the second Iterator to be merged. It should be in non-descending order.
+     * @param cmp the Comparator to determine the order of elements in the resulting iterator.
+     * @return an ObjIterator that will iterate over the elements of the provided Iterators in a sorted order.
      * @throws IllegalArgumentException if <i>cmp</i> is {@code null}.
      */
     public static <T> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB, final Comparator<? super T> cmp)
@@ -1879,10 +1865,10 @@ public final class Iterators {
      * Merges two sorted Iterable objects into a single ObjIterator, which will iterate over the elements of each Iterable in a sorted order.
      * The elements in the Iterable objects should implement Comparable interface.
      *
-     * @param <T> The type of elements in the Iterable objects, which should implement Comparable interface.
-     * @param sortedA The first Iterable object to be merged. It should be in non-descending order.
-     * @param sortedB The second Iterable object to be merged. It should be in non-descending order.
-     * @return An ObjIterator that will iterate over the elements of the provided Iterable objects in a sorted order.
+     * @param <T> the type of elements in the Iterable objects, which should implement Comparable interface.
+     * @param sortedA the first Iterable object to be merged. It should be in non-descending order.
+     * @param sortedB the second Iterable object to be merged. It should be in non-descending order.
+     * @return an ObjIterator that will iterate over the elements of the provided Iterable objects in a sorted order.
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB) {
@@ -1892,11 +1878,11 @@ public final class Iterators {
     /**
      * Merges two sorted Iterable objects into a single ObjIterator, which will iterate over the elements of each Iterable in the order determined by the provided Comparator <i>cmp</i>.
      *
-     * @param <T> The type of elements in the Iterable objects.
-     * @param sortedA The first Iterable object to be merged. It should be in non-descending order.
-     * @param sortedB The second Iterable object to be merged. It should be in non-descending order.
-     * @param cmp The Comparator to determine the order of elements in the resulting iterator.
-     * @return An ObjIterator that will iterate over the elements of the provided Iterable objects in a sorted order.
+     * @param <T> the type of elements in the Iterable objects.
+     * @param sortedA the first Iterable object to be merged. It should be in non-descending order.
+     * @param sortedB the second Iterable object to be merged. It should be in non-descending order.
+     * @param cmp the Comparator to determine the order of elements in the resulting iterator.
+     * @return an ObjIterator that will iterate over the elements of the provided Iterable objects in a sorted order.
      * @throws IllegalArgumentException if <i>cmp</i> is {@code null}.
      */
     public static <T> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB, final Comparator<? super T> cmp) {
@@ -1910,13 +1896,13 @@ public final class Iterators {
      * Zips two Iterators into a single ObjIterator, which will iterate over the elements of each Iterator in parallel.
      * The resulting elements are determined by the provided BiFunction <i>zipFunction</i>.
      *
-     * @param <A> The type of elements in the first Iterator.
-     * @param <B> The type of elements in the second Iterator.
-     * @param <R> The type of elements in the resulting ObjIterator.
-     * @param a The first Iterator to be zipped.
-     * @param b The second Iterator to be zipped.
-     * @param zipFunction A BiFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
+     * @param <A> the type of elements in the first Iterator.
+     * @param <B> the type of elements in the second Iterator.
+     * @param <R> the type of elements in the resulting ObjIterator.
+     * @param a the first Iterator to be zipped.
+     * @param b the second Iterator to be zipped.
+     * @param zipFunction a BiFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
+     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         N.checkArgNotNull(zipFunction, cs.function);
@@ -1941,13 +1927,13 @@ public final class Iterators {
      * Zips two Iterable objects into a single ObjIterator, which will iterate over the elements of each Iterable in parallel.
      * The resulting elements are determined by the provided BiFunction <i>zipFunction</i>.
      *
-     * @param <A> The type of elements in the first Iterable.
-     * @param <B> The type of elements in the second Iterable.
-     * @param <R> The type of elements in the resulting ObjIterator.
-     * @param a The first Iterable to be zipped.
-     * @param b The second Iterable to be zipped.
-     * @param zipFunction A BiFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
+     * @param <A> the type of elements in the first Iterable.
+     * @param <B> the type of elements in the second Iterable.
+     * @param <R> the type of elements in the resulting ObjIterator.
+     * @param a the first Iterable to be zipped.
+     * @param b the second Iterable to be zipped.
+     * @param zipFunction a BiFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
+     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         final Iterator<A> iterA = N.iterate(a);
@@ -1960,15 +1946,15 @@ public final class Iterators {
      * Zips three Iterators into a single ObjIterator, which will iterate over the elements of each Iterator in parallel.
      * The resulting elements are determined by the provided TriFunction <i>zipFunction</i>.
      *
-     * @param <A> The type of elements in the first Iterator.
-     * @param <B> The type of elements in the second Iterator.
-     * @param <C> The type of elements in the third Iterator.
-     * @param <R> The type of elements in the resulting ObjIterator.
-     * @param a The first Iterator to be zipped.
-     * @param b The second Iterator to be zipped.
-     * @param c The third Iterator to be zipped.
-     * @param zipFunction A TriFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
+     * @param <A> the type of elements in the first Iterator.
+     * @param <B> the type of elements in the second Iterator.
+     * @param <C> the type of elements in the third Iterator.
+     * @param <R> the type of elements in the resulting ObjIterator.
+     * @param a the first Iterator to be zipped.
+     * @param b the second Iterator to be zipped.
+     * @param c the third Iterator to be zipped.
+     * @param zipFunction a TriFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
+     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -1993,15 +1979,15 @@ public final class Iterators {
      * Zips three Iterable objects into a single ObjIterator, which will iterate over the elements of each Iterable in parallel.
      * The resulting elements are determined by the provided TriFunction <i>zipFunction</i>.
      *
-     * @param <A> The type of elements in the first Iterable.
-     * @param <B> The type of elements in the second Iterable.
-     * @param <C> The type of elements in the third Iterable.
-     * @param <R> The type of elements in the resulting ObjIterator.
-     * @param a The first Iterable to be zipped.
-     * @param b The second Iterable to be zipped.
-     * @param c The third Iterable to be zipped.
-     * @param zipFunction A TriFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
+     * @param <A> the type of elements in the first Iterable.
+     * @param <B> the type of elements in the second Iterable.
+     * @param <C> the type of elements in the third Iterable.
+     * @param <R> the type of elements in the resulting ObjIterator.
+     * @param a the first Iterable to be zipped.
+     * @param b the second Iterable to be zipped.
+     * @param c the third Iterable to be zipped.
+     * @param zipFunction a TriFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
+     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -2018,15 +2004,15 @@ public final class Iterators {
      * When one iterator is exhausted, the provided default values are used.
      * The resulting elements are determined by the provided BiFunction <i>zipFunction</i>.
      *
-     * @param <A> The type of elements in the first Iterator.
-     * @param <B> The type of elements in the second Iterator.
-     * @param <R> The type of elements in the resulting ObjIterator.
-     * @param a The first Iterator to be zipped.
-     * @param b The second Iterator to be zipped.
-     * @param valueForNoneA The default value to be used when the first Iterator is exhausted.
-     * @param valueForNoneB The default value to be used when the second Iterator is exhausted.
-     * @param zipFunction A BiFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
+     * @param <A> the type of elements in the first Iterator.
+     * @param <B> the type of elements in the second Iterator.
+     * @param <R> the type of elements in the resulting ObjIterator.
+     * @param a the first Iterator to be zipped.
+     * @param b the second Iterator to be zipped.
+     * @param valueForNoneA the default value to be used when the first Iterator is exhausted.
+     * @param valueForNoneB the default value to be used when the second Iterator is exhausted.
+     * @param zipFunction a BiFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
+     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
@@ -2056,15 +2042,15 @@ public final class Iterators {
      * When one iterator is exhausted, the provided default values are used.
      * The resulting elements are determined by the provided BiFunction <i>zipFunction</i>.
      *
-     * @param <A> The type of elements in the first Iterable.
-     * @param <B> The type of elements in the second Iterable.
-     * @param <R> The type of elements in the resulting ObjIterator.
-     * @param a The first Iterable to be zipped.
-     * @param b The second Iterable to be zipped.
-     * @param valueForNoneA The default value to be used when the first Iterable is exhausted.
-     * @param valueForNoneB The default value to be used when the second Iterable is exhausted.
-     * @param zipFunction A BiFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
+     * @param <A> the type of elements in the first Iterable.
+     * @param <B> the type of elements in the second Iterable.
+     * @param <R> the type of elements in the resulting ObjIterator.
+     * @param a the first Iterable to be zipped.
+     * @param b the second Iterable to be zipped.
+     * @param valueForNoneA the default value to be used when the first Iterable is exhausted.
+     * @param valueForNoneB the default value to be used when the second Iterable is exhausted.
+     * @param zipFunction a BiFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
+     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
@@ -2080,17 +2066,17 @@ public final class Iterators {
      * When one iterator is exhausted, the provided default values are used.
      * The resulting elements are determined by the provided TriFunction <i>zipFunction</i>.
      *
-     * @param <A> The type of elements in the first Iterator.
-     * @param <B> The type of elements in the second Iterator.
-     * @param <C> The type of elements in the third Iterator.
-     * @param <R> The type of elements in the resulting ObjIterator.
-     * @param a The first Iterator to be zipped.
-     * @param b The second Iterator to be zipped.
-     * @param c The third Iterator to be zipped.
-     * @param valueForNoneA The default value to be used when the first Iterator is exhausted.
-     * @param valueForNoneB The default value to be used when the second Iterator is exhausted.
-     * @param zipFunction A TriFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
+     * @param <A> the type of elements in the first Iterator.
+     * @param <B> the type of elements in the second Iterator.
+     * @param <C> the type of elements in the third Iterator.
+     * @param <R> the type of elements in the resulting ObjIterator.
+     * @param a the first Iterator to be zipped.
+     * @param b the second Iterator to be zipped.
+     * @param c the third Iterator to be zipped.
+     * @param valueForNoneA the default value to be used when the first Iterator is exhausted.
+     * @param valueForNoneB the default value to be used when the second Iterator is exhausted.
+     * @param zipFunction a TriFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
+     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -2123,18 +2109,18 @@ public final class Iterators {
      * When one iterator is exhausted, the provided default values are used.
      * The resulting elements are determined by the provided TriFunction <i>zipFunction</i>.
      *
-     * @param <A> The type of elements in the first Iterable.
-     * @param <B> The type of elements in the second Iterable.
-     * @param <C> The type of elements in the third Iterable.
-     * @param <R> The type of elements in the resulting ObjIterator.
-     * @param a The first Iterable to be zipped.
-     * @param b The second Iterable to be zipped.
-     * @param c The third Iterable to be zipped.
-     * @param valueForNoneA The default value to be used when the first Iterable is exhausted.
-     * @param valueForNoneB The default value to be used when the second Iterable is exhausted.
-     * @param valueForNoneC The default value to be used when the third Iterable is exhausted.
-     * @param zipFunction A TriFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
+     * @param <A> the type of elements in the first Iterable.
+     * @param <B> the type of elements in the second Iterable.
+     * @param <C> the type of elements in the third Iterable.
+     * @param <R> the type of elements in the resulting ObjIterator.
+     * @param a the first Iterable to be zipped.
+     * @param b the second Iterable to be zipped.
+     * @param c the third Iterable to be zipped.
+     * @param valueForNoneA the default value to be used when the first Iterable is exhausted.
+     * @param valueForNoneB the default value to be used when the second Iterable is exhausted.
+     * @param valueForNoneC the default value to be used when the third Iterable is exhausted.
+     * @param zipFunction a TriFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
+     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -2149,12 +2135,12 @@ public final class Iterators {
      * Unzips an Iterator into a BiIterator.
      * The transformation is determined by the provided BiConsumer <i>unzip</i>.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param <A> The type of the first element in the resulting BiIterator.
-     * @param <B> The type of the second element in the resulting BiIterator.
-     * @param iter The original Iterator to be unzipped.
-     * @param unzip A BiConsumer that takes an element from the original Iterator and a Pair to be filled with the resulting elements for the BiIterator.
-     * @return A BiIterator that will iterate over the elements created by <i>unzip</i>.
+     * @param <T> the type of elements in the original Iterator.
+     * @param <A> the type of the first element in the resulting BiIterator.
+     * @param <B> the type of the second element in the resulting BiIterator.
+     * @param iter the original Iterator to be unzipped.
+     * @param unzip a BiConsumer that takes an element from the original Iterator and a Pair to be filled with the resulting elements for the BiIterator.
+     * @return a BiIterator that will iterate over the elements created by <i>unzip</i>.
      * @see BiIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#unzip(Iterator, BiConsumer)
      */
@@ -2166,12 +2152,12 @@ public final class Iterators {
      * Unzips an Iterable into a BiIterator.
      * The transformation is determined by the provided BiConsumer <i>unzip</i>.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param <A> The type of the first element in the resulting BiIterator.
-     * @param <B> The type of the second element in the resulting BiIterator.
-     * @param c The original Iterable to be unzipped.
-     * @param unzip A BiConsumer that takes an element from the original Iterable and a Pair to be filled with the resulting elements for the BiIterator.
-     * @return A BiIterator that will iterate over the elements created by <i>unzip</i>.
+     * @param <T> the type of elements in the original Iterable.
+     * @param <A> the type of the first element in the resulting BiIterator.
+     * @param <B> the type of the second element in the resulting BiIterator.
+     * @param c the original Iterable to be unzipped.
+     * @param unzip a BiConsumer that takes an element from the original Iterable and a Pair to be filled with the resulting elements for the BiIterator.
+     * @return a BiIterator that will iterate over the elements created by <i>unzip</i>.
      * @see BiIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#unzip(Iterator, BiConsumer)
      */
@@ -2183,13 +2169,13 @@ public final class Iterators {
      * Unzips an Iterator into a TriIterator.
      * The transformation is determined by the provided BiConsumer <i>unzip</i>.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param <A> The type of the first element in the resulting TriIterator.
-     * @param <B> The type of the second element in the resulting TriIterator.
-     * @param <C> The type of the third element in the resulting TriIterator.
-     * @param iter The original Iterator to be unzipped.
-     * @param unzip A BiConsumer that takes an element from the original Iterator and a Triple to be filled with the resulting elements for the TriIterator.
-     * @return A TriIterator that will iterate over the elements created by <i>unzip</i>.
+     * @param <T> the type of elements in the original Iterator.
+     * @param <A> the type of the first element in the resulting TriIterator.
+     * @param <B> the type of the second element in the resulting TriIterator.
+     * @param <C> the type of the third element in the resulting TriIterator.
+     * @param iter the original Iterator to be unzipped.
+     * @param unzip a BiConsumer that takes an element from the original Iterator and a Triple to be filled with the resulting elements for the TriIterator.
+     * @return a TriIterator that will iterate over the elements created by <i>unzip</i>.
      * @deprecated replaced by {@link TriIterator#unzip(Iterator, BiConsumer)}
      * @see TriIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#toMultiList(Supplier)
@@ -2205,13 +2191,13 @@ public final class Iterators {
      * Unzips an Iterable into a TriIterator.
      * The transformation is determined by the provided BiConsumer <i>unzip</i>.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param <A> The type of the first element in the resulting TriIterator.
-     * @param <B> The type of the second element in the resulting TriIterator.
-     * @param <C> The type of the third element in the resulting TriIterator.
-     * @param c The original Iterable to be unzipped.
-     * @param unzip A BiConsumer that takes an element from the original Iterable and a Triple to be filled with the resulting elements for the TriIterator.
-     * @return A TriIterator that will iterate over the elements created by <i>unzip</i>.
+     * @param <T> the type of elements in the original Iterable.
+     * @param <A> the type of the first element in the resulting TriIterator.
+     * @param <B> the type of the second element in the resulting TriIterator.
+     * @param <C> the type of the third element in the resulting TriIterator.
+     * @param c the original Iterable to be unzipped.
+     * @param unzip a BiConsumer that takes an element from the original Iterable and a Triple to be filled with the resulting elements for the TriIterator.
+     * @return a TriIterator that will iterate over the elements created by <i>unzip</i>.
      * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
      * @see TriIterator#unzip(Iterable, BiConsumer)
      * @see TriIterator#toMultiList(Supplier)
@@ -2228,9 +2214,9 @@ public final class Iterators {
      * 
      * Calls {@code next()} on {@code iterator}, either {@code numberToAdvance} times or until {@code hasNext()} returns {@code false}, whichever comes first.
      *
-     * @param iterator The iterator to be advanced.
-     * @param numberToAdvance The number of elements to advance the iterator.
-     * @return The actual number of elements the iterator was advanced.
+     * @param iterator the iterator to be advanced.
+     * @param numberToAdvance the number of elements to advance the iterator.
+     * @return the actual number of elements the iterator was advanced.
      * @throws IllegalArgumentException if <i>numberToAdvance</i> is negative.
      */
     public static long advance(final Iterator<?> iterator, final long numberToAdvance) throws IllegalArgumentException {
@@ -2256,10 +2242,10 @@ public final class Iterators {
      * <br />
      * This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param iter The original Iterator to be skipped.
-     * @param n The number of elements to skip from the beginning of the Iterator.
-     * @return A new ObjIterator that will iterate over the elements of the original Iterator starting from the (n+1)th element.
+     * @param <T> the type of elements in the original Iterator.
+     * @param iter the original Iterator to be skipped.
+     * @param n the number of elements to skip from the beginning of the Iterator.
+     * @return a new ObjIterator that will iterate over the elements of the original Iterator starting from the (n+1)th element.
      * @throws IllegalArgumentException if<i>n</i>is negative.
      */
     public static <T> ObjIterator<T> skip(final Iterator<? extends T> iter, final long n) throws IllegalArgumentException {
@@ -2307,10 +2293,10 @@ public final class Iterators {
     /**
      * Returns a new ObjIterator that is limited to the specified count of elements from the original Iterator.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param iter The original Iterator to be limited.
-     * @param count The maximum number of elements to be iterated over from the original Iterator.
-     * @return A new ObjIterator that will iterate over up to <i>count</i> elements of the original Iterator.
+     * @param <T> the type of elements in the original Iterator.
+     * @param iter the original Iterator to be limited.
+     * @param count the maximum number of elements to be iterated over from the original Iterator.
+     * @return a new ObjIterator that will iterate over up to <i>count</i> elements of the original Iterator.
      * @throws IllegalArgumentException if <i>count</i> is negative.
      */
     public static <T> ObjIterator<T> limit(final Iterator<? extends T> iter, final long count) throws IllegalArgumentException {
@@ -2350,11 +2336,11 @@ public final class Iterators {
      *
      * <p>Example: {@code Iterators.skipAndLimit(Arrays.asList(1, 2, 3, 4, 5).iterator(), 1, 3)} yields an iterator with elements: 2, 3, 4
      *
-     * @param <T> The type of elements in the iterator.
-     * @param iter The iterator to be skipped and limited.
-     * @param offset The number of elements to skip from the beginning. Must be non-negative.
-     * @param count The maximum number of elements to return after skipping. Must be non-negative.
-     * @return An {@code ObjIterator} that will iterate over up to {@code count} elements starting from the (offset+1)th element.
+     * @param <T> the type of elements in the iterator.
+     * @param iter the iterator to be skipped and limited.
+     * @param offset the number of elements to skip from the beginning. Must be non-negative.
+     * @param count the maximum number of elements to return after skipping. Must be non-negative.
+     * @return an {@code ObjIterator} that will iterate over up to {@code count} elements starting from the (offset+1)th element.
      * @see N#slice(Iterator, int, int)
      */
     public static <T> ObjIterator<T> skipAndLimit(final Iterator<? extends T> iter, final long offset, final long count) {
@@ -2410,11 +2396,11 @@ public final class Iterators {
     /**
      * Returns a new ObjIterator that starts from the specified offset and is limited to the specified count of elements from the original Iterable.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param iter The original Iterable to be skipped and limited.
-     * @param offset The number of elements to skip from the beginning of the Iterable.
-     * @param count The maximum number of elements to be iterated over from the Iterable after skipping.
-     * @return A new ObjIterator that will iterate over up to <i>count</i> elements of the original Iterable starting from the (offset+1)th element.
+     * @param <T> the type of elements in the original Iterable.
+     * @param iter the original Iterable to be skipped and limited.
+     * @param offset the number of elements to skip from the beginning of the Iterable.
+     * @param count the maximum number of elements to be iterated over from the Iterable after skipping.
+     * @return a new ObjIterator that will iterate over up to <i>count</i> elements of the original Iterable starting from the (offset+1)th element.
      * @throws IllegalArgumentException if <i>offset</i> or <i>count</i> is negative.
      */
     public static <T> ObjIterator<T> skipAndLimit(final Iterable<? extends T> iter, final long offset, final long count) {
@@ -2423,28 +2409,15 @@ public final class Iterators {
         return iter == null ? ObjIterator.empty() : skipAndLimit(iter.iterator(), offset, count);
     }
 
-    //    /**
-    //     * Returns a new {@code ObjIterator} with {@code null} elements removed.
-    //     *
-    //     * @param <T>
-    //     * @param iter
-    //     * @return
-    //     * @deprecated Use {@link #skipNulls(Iterator)} instead
-    //     */
-    //    @Deprecated
-    //    public static <T> ObjIterator<T> skipNull(final Iterator<? extends T> iter) {
-    //        return skipNulls(iter);
-    //    }
-
     /**
      * Returns a new {@code ObjIterator} with {@code null} elements removed from the specified Iterable.
      * All {@code null} elements will be filtered out, returning only non-null elements.
      *
      * <p>Example: {@code Iterators.skipNulls(Arrays.asList("A", null, "B", null, "C"))} yields an iterator with elements: "A", "B", "C"
      *
-     * @param <T> The type of elements in the iterable.
-     * @param c The iterable whose {@code null} elements should be skipped.
-     * @return An {@code ObjIterator} that iterates over only the non-null elements.
+     * @param <T> the type of elements in the iterable.
+     * @param c the iterable whose {@code null} elements should be skipped.
+     * @return an {@code ObjIterator} that iterates over only the non-null elements.
      */
     @Beta
     public static <T> ObjIterator<T> skipNulls(final Iterable<? extends T> c) {
@@ -2457,9 +2430,9 @@ public final class Iterators {
      *
      * <p>Example: {@code Iterators.skipNulls(Arrays.asList("A", null, "B", null, "C").iterator())} yields an iterator with elements: "A", "B", "C"
      *
-     * @param <T> The type of elements in the iterator.
-     * @param iter The iterator whose {@code null} elements should be skipped.
-     * @return An {@code ObjIterator} that iterates over only the non-null elements.
+     * @param <T> the type of elements in the iterator.
+     * @param iter the iterator whose {@code null} elements should be skipped.
+     * @return an {@code ObjIterator} that iterates over only the non-null elements.
      */
     public static <T> ObjIterator<T> skipNulls(final Iterator<? extends T> iter) {
         return filter(iter, Fn.notNull());
@@ -2468,9 +2441,9 @@ public final class Iterators {
     /**
      * Returns a new ObjIterator with distinct elements from the original Iterable.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param c The original Iterable to be processed for distinct elements.
-     * @return A new ObjIterator that will iterate over the distinct elements of the original Iterable.
+     * @param <T> the type of elements in the original Iterable.
+     * @param c the original Iterable to be processed for distinct elements.
+     * @return a new ObjIterator that will iterate over the distinct elements of the original Iterable.
      */
     @Beta
     public static <T> ObjIterator<T> distinct(final Iterable<? extends T> c) {
@@ -2484,9 +2457,9 @@ public final class Iterators {
     /**
      * Returns a new ObjIterator with distinct elements from the original Iterator.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param iter The original Iterator to be processed for distinct elements.
-     * @return A new ObjIterator that will iterate over the distinct elements of the original Iterator.
+     * @param <T> the type of elements in the original Iterator.
+     * @param iter the original Iterator to be processed for distinct elements.
+     * @return a new ObjIterator that will iterate over the distinct elements of the original Iterator.
      */
     public static <T> ObjIterator<T> distinct(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -2533,10 +2506,10 @@ public final class Iterators {
      * Returns a new ObjIterator with distinct elements from the original Iterable based on a key derived from each element.
      * The key for each element is determined by the provided Function <i>keyExtractor</i>.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param c The original Iterable to be processed for distinct elements.
-     * @param keyExtractor A Function that takes an element from the Iterable and returns a key. Elements with the same key are considered duplicates.
-     * @return A new ObjIterator that will iterate over the distinct elements of the original Iterable based on the keys derived from <i>keyExtractor</i>.
+     * @param <T> the type of elements in the original Iterable.
+     * @param c the original Iterable to be processed for distinct elements.
+     * @param keyExtractor a Function that takes an element from the Iterable and returns a key. Elements with the same key are considered duplicates.
+     * @return a new ObjIterator that will iterate over the distinct elements of the original Iterable based on the keys derived from <i>keyExtractor</i>.
      */
     @Beta
     public static <T> ObjIterator<T> distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
@@ -2553,10 +2526,10 @@ public final class Iterators {
      * Returns a new ObjIterator with distinct elements from the original Iterator based on a key derived from each element.
      * The key for each element is determined by the provided Function <i>keyExtractor</i>.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param iter The original Iterator to be processed for distinct elements.
-     * @param keyExtractor A Function that takes an element from the Iterator and returns a key. Elements with the same key are considered duplicates.
-     * @return A new ObjIterator that will iterate over the distinct elements of the original Iterator based on the keys derived from <i>keyExtractor</i>.
+     * @param <T> the type of elements in the original Iterator.
+     * @param iter the original Iterator to be processed for distinct elements.
+     * @param keyExtractor a Function that takes an element from the Iterator and returns a key. Elements with the same key are considered duplicates.
+     * @return a new ObjIterator that will iterate over the distinct elements of the original Iterator based on the keys derived from <i>keyExtractor</i>.
      */
     public static <T> ObjIterator<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
@@ -2604,10 +2577,10 @@ public final class Iterators {
     /**
      * Returns a new ObjIterator that only includes elements from the original Iterable that satisfy the provided Predicate.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param c The original Iterable to be filtered.
-     * @param predicate A Predicate that tests each element from the Iterable. Only elements that return <i>true</i> are included in the resulting ObjIterator.
-     * @return A new ObjIterator that will iterate over the elements of the original Iterable that satisfy the provided Predicate.
+     * @param <T> the type of elements in the original Iterable.
+     * @param c the original Iterable to be filtered.
+     * @param predicate a Predicate that tests each element from the Iterable. Only elements that return <i>true</i> are included in the resulting ObjIterator.
+     * @return a new ObjIterator that will iterate over the elements of the original Iterable that satisfy the provided Predicate.
      */
     @Beta
     public static <T> ObjIterator<T> filter(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
@@ -2623,10 +2596,10 @@ public final class Iterators {
     /**
      * Returns a new ObjIterator that only includes elements from the original Iterator that satisfy the provided Predicate.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param iter The original Iterator to be filtered.
-     * @param predicate A Predicate that tests each element from the Iterator. Only elements that return <i>true</i> are included in the resulting ObjIterator.
-     * @return A new ObjIterator that will iterate over the elements of the original Iterator that satisfy the provided Predicate.
+     * @param <T> the type of elements in the original Iterator.
+     * @param iter the original Iterator to be filtered.
+     * @param predicate a Predicate that tests each element from the Iterator. Only elements that return <i>true</i> are included in the resulting ObjIterator.
+     * @return a new ObjIterator that will iterate over the elements of the original Iterator that satisfy the provided Predicate.
      */
     public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         N.checkArgNotNull(predicate, cs.Predicate);
@@ -2673,10 +2646,10 @@ public final class Iterators {
      * Returns a new ObjIterator that includes elements from the original Iterable as long as they satisfy the provided Predicate.
      * The iteration stops when an element that does not satisfy the Predicate is encountered.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param c The original Iterable to be processed.
-     * @param predicate A Predicate that tests each element from the Iterable. The iteration continues as long as the Predicate returns <i>true</i>.
-     * @return A new ObjIterator that will iterate over the elements of the original Iterable as long as they satisfy the provided Predicate.
+     * @param <T> the type of elements in the original Iterable.
+     * @param c the original Iterable to be processed.
+     * @param predicate a Predicate that tests each element from the Iterable. The iteration continues as long as the Predicate returns <i>true</i>.
+     * @return a new ObjIterator that will iterate over the elements of the original Iterable as long as they satisfy the provided Predicate.
      */
     @Beta
     public static <T> ObjIterator<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
@@ -2693,10 +2666,10 @@ public final class Iterators {
      * Returns a new ObjIterator that includes elements from the original Iterator as long as they satisfy the provided Predicate.
      * The iteration stops when an element that does not satisfy the Predicate is encountered.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param iter The original Iterator to be processed.
-     * @param predicate A Predicate that tests each element from the Iterator. The iteration continues as long as the Predicate returns <i>true</i>.
-     * @return A new ObjIterator that will iterate over the elements of the original Iterator as long as they satisfy the provided Predicate.
+     * @param <T> the type of elements in the original Iterator.
+     * @param iter the original Iterator to be processed.
+     * @param predicate a Predicate that tests each element from the Iterator. The iteration continues as long as the Predicate returns <i>true</i>.
+     * @return a new ObjIterator that will iterate over the elements of the original Iterator as long as they satisfy the provided Predicate.
      */
     public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         N.checkArgNotNull(predicate, cs.Predicate);
@@ -2743,10 +2716,10 @@ public final class Iterators {
      * Returns a new ObjIterator that includes elements from the original Iterable as long as they satisfy the provided Predicate.
      * The iteration stops after the first element that does not satisfy the Predicate is encountered, but includes that element.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param c The original Iterable to be processed.
-     * @param predicate A Predicate that tests each element from the Iterable. The iteration continues as long as the Predicate returns <i>true</i>, including the first element that returns <i>false</i>.
-     * @return A new ObjIterator that will iterate over the elements of the original Iterable as long as they satisfy the provided Predicate, including the first element that does not satisfy the Predicate.
+     * @param <T> the type of elements in the original Iterable.
+     * @param c the original Iterable to be processed.
+     * @param predicate a Predicate that tests each element from the Iterable. The iteration continues as long as the Predicate returns <i>true</i>, including the first element that returns <i>false</i>.
+     * @return a new ObjIterator that will iterate over the elements of the original Iterable as long as they satisfy the provided Predicate, including the first element that does not satisfy the Predicate.
      */
     @Beta
     public static <T> ObjIterator<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
@@ -2763,10 +2736,10 @@ public final class Iterators {
      * Returns a new ObjIterator that includes elements from the original Iterator as long as they satisfy the provided Predicate.
      * The iteration stops after the first element that does not satisfy the Predicate is encountered, but includes that element.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param iter The original Iterator to be processed.
-     * @param predicate A Predicate that tests each element from the Iterator. The iteration continues as long as the Predicate returns <i>true</i>, including the first element that returns <i>false</i>.
-     * @return A new ObjIterator that will iterate over the elements of the original Iterator as long as they satisfy the provided Predicate, including the first element that does not satisfy the Predicate.
+     * @param <T> the type of elements in the original Iterator.
+     * @param iter the original Iterator to be processed.
+     * @param predicate a Predicate that tests each element from the Iterator. The iteration continues as long as the Predicate returns <i>true</i>, including the first element that returns <i>false</i>.
+     * @return a new ObjIterator that will iterate over the elements of the original Iterator as long as they satisfy the provided Predicate, including the first element that does not satisfy the Predicate.
      */
     public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         N.checkArgNotNull(predicate, cs.Predicate);
@@ -2814,10 +2787,10 @@ public final class Iterators {
      * Returns a new ObjIterator that skips elements from the original Iterable as long as they satisfy the provided Predicate.
      * The iteration begins when an element that does not satisfy the Predicate is encountered.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param c The original Iterable to be processed.
-     * @param predicate A Predicate that tests each element from the Iterable. The iteration skips elements as long as the Predicate returns <i>true</i>.
-     * @return A new ObjIterator that will iterate over the elements of the original Iterable starting from the first element that does not satisfy the provided Predicate.
+     * @param <T> the type of elements in the original Iterable.
+     * @param c the original Iterable to be processed.
+     * @param predicate a Predicate that tests each element from the Iterable. The iteration skips elements as long as the Predicate returns <i>true</i>.
+     * @return a new ObjIterator that will iterate over the elements of the original Iterable starting from the first element that does not satisfy the provided Predicate.
      */
     @Beta
     public static <T> ObjIterator<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
@@ -2834,10 +2807,10 @@ public final class Iterators {
      * Returns a new ObjIterator that skips elements from the original Iterator as long as they satisfy the provided Predicate.
      * The iteration begins when an element that does not satisfy the Predicate is encountered.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param iter The original Iterator to be processed.
-     * @param predicate A Predicate that tests each element from the Iterator. The iteration skips elements as long as the Predicate returns <i>true</i>.
-     * @return A new ObjIterator that will iterate over the elements of the original Iterator starting from the first element that does not satisfy the provided Predicate.
+     * @param <T> the type of elements in the original Iterator.
+     * @param iter the original Iterator to be processed.
+     * @param predicate a Predicate that tests each element from the Iterator. The iteration skips elements as long as the Predicate returns <i>true</i>.
+     * @return a new ObjIterator that will iterate over the elements of the original Iterator starting from the first element that does not satisfy the provided Predicate.
      */
     public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         N.checkArgNotNull(predicate, cs.Predicate);
@@ -2890,10 +2863,10 @@ public final class Iterators {
      * Skips elements in the provided Iterable until the provided Predicate returns {@code true}.
      * This method can be used to ignore elements in an Iterable until a certain condition is met.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param c The original Iterable to be processed.
-     * @param predicate A Predicate that tests elements from the original Iterable.
-     * @return An ObjIterator that will iterate over the remaining elements after the Predicate returns {@code true} for the first time.
+     * @param <T> the type of elements in the original Iterable.
+     * @param c the original Iterable to be processed.
+     * @param predicate a Predicate that tests elements from the original Iterable.
+     * @return an ObjIterator that will iterate over the remaining elements after the Predicate returns {@code true} for the first time.
      */
     @Beta
     public static <T> ObjIterator<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
@@ -2910,10 +2883,10 @@ public final class Iterators {
      * Skips elements in the provided Iterator until the provided Predicate returns {@code true}.
      * This method can be used to ignore elements in an Iterator until a certain condition is met.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param iter The original Iterator to be processed.
-     * @param predicate A Predicate that tests elements from the original Iterator.
-     * @return An ObjIterator that will iterate over the remaining elements after the Predicate returns {@code true} for the first time.
+     * @param <T> the type of elements in the original Iterator.
+     * @param iter the original Iterator to be processed.
+     * @param predicate a Predicate that tests elements from the original Iterator.
+     * @return an ObjIterator that will iterate over the remaining elements after the Predicate returns {@code true} for the first time.
      */
     @Beta
     public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
@@ -2966,11 +2939,11 @@ public final class Iterators {
     /**
      * Transforms the elements of the given Iterable using the provided Function and returns a new ObjIterator with the transformed elements.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param <U> The type of elements in the resulting ObjIterator.
-     * @param c The original Iterable to be transformed.
-     * @param mapper A Function that takes an element from the Iterable and returns a transformed element for the resulting ObjIterator.
-     * @return A new ObjIterator that will iterate over the transformed elements of the original Iterable.
+     * @param <T> the type of elements in the original Iterable.
+     * @param <U> the type of elements in the resulting ObjIterator.
+     * @param c the original Iterable to be transformed.
+     * @param mapper a Function that takes an element from the Iterable and returns a transformed element for the resulting ObjIterator.
+     * @return a new ObjIterator that will iterate over the transformed elements of the original Iterable.
      */
     @Beta
     public static <T, U> ObjIterator<U> map(final Iterable<? extends T> c, final Function<? super T, U> mapper) {
@@ -2986,11 +2959,11 @@ public final class Iterators {
     /**
      * Transforms the elements of the given Iterator using the provided Function and returns a new ObjIterator with the transformed elements.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param <U> The type of elements in the resulting ObjIterator.
-     * @param iter The original Iterator to be transformed.
-     * @param mapper A Function that takes an element from the Iterator and returns a transformed element for the resulting ObjIterator.
-     * @return A new ObjIterator that will iterate over the transformed elements of the original Iterator.
+     * @param <T> the type of elements in the original Iterator.
+     * @param <U> the type of elements in the resulting ObjIterator.
+     * @param iter the original Iterator to be transformed.
+     * @param mapper a Function that takes an element from the Iterator and returns a transformed element for the resulting ObjIterator.
+     * @return a new ObjIterator that will iterate over the transformed elements of the original Iterator.
      */
     public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, U> mapper) {
         N.checkArgNotNull(mapper, cs.mapper);
@@ -3015,11 +2988,11 @@ public final class Iterators {
     /**
      * Transforms the elements of the given Iterable into Iterables using the provided Function and flattens the result into a new ObjIterator.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param <U> The type of elements in the resulting ObjIterator.
-     * @param c The original Iterable to be transformed.
-     * @param mapper A Function that takes an element from the Iterable and returns an Iterable of transformed elements.
-     * @return A new ObjIterator that will iterate over the transformed elements of the original Iterable.
+     * @param <T> the type of elements in the original Iterable.
+     * @param <U> the type of elements in the resulting ObjIterator.
+     * @param c the original Iterable to be transformed.
+     * @param mapper a Function that takes an element from the Iterable and returns an Iterable of transformed elements.
+     * @return a new ObjIterator that will iterate over the transformed elements of the original Iterable.
      */
     @Beta
     public static <T, U> ObjIterator<U> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Iterable<? extends U>> mapper) {
@@ -3033,11 +3006,11 @@ public final class Iterators {
     /**
      * Transforms the elements of the given Iterator into Iterables using the provided Function and flattens the result into a new ObjIterator.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param <U> The type of elements in the resulting ObjIterator.
-     * @param iter The original Iterator to be transformed.
-     * @param mapper A Function that takes an element from the Iterator and returns an Iterable of transformed elements.
-     * @return A new ObjIterator that will iterate over the transformed elements of the original Iterator.
+     * @param <T> the type of elements in the original Iterator.
+     * @param <U> the type of elements in the resulting ObjIterator.
+     * @param iter the original Iterator to be transformed.
+     * @param mapper a Function that takes an element from the Iterator and returns an Iterable of transformed elements.
+     * @return a new ObjIterator that will iterate over the transformed elements of the original Iterator.
      */
     public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Iterable<? extends U>> mapper) {
         N.checkArgNotNull(mapper, cs.mapper);
@@ -3080,11 +3053,11 @@ public final class Iterators {
     /**
      * Transforms the elements of the given Iterable into arrays using the provided Function and flattens the result into a new ObjIterator.
      *
-     * @param <T> The type of elements in the original Iterable.
-     * @param <U> The type of elements in the resulting ObjIterator.
-     * @param c The original Iterable to be transformed.
-     * @param mapper A Function that takes an element from the Iterable and returns an array of transformed elements.
-     * @return A new ObjIterator that will iterate over the transformed elements of the original Iterable.
+     * @param <T> the type of elements in the original Iterable.
+     * @param <U> the type of elements in the resulting ObjIterator.
+     * @param c the original Iterable to be transformed.
+     * @param mapper a Function that takes an element from the Iterable and returns an array of transformed elements.
+     * @return a new ObjIterator that will iterate over the transformed elements of the original Iterable.
      */
     @Beta
     public static <T, U> ObjIterator<U> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
@@ -3098,11 +3071,11 @@ public final class Iterators {
     /**
      * Transforms the elements of the given Iterator into arrays using the provided Function and flattens the result into a new ObjIterator.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param <U> The type of elements in the resulting ObjIterator.
-     * @param iter The original Iterator to be transformed.
-     * @param mapper A Function that takes an element from the Iterator and returns an array of transformed elements.
-     * @return A new ObjIterator that will iterate over the transformed elements of the original Iterator.
+     * @param <T> the type of elements in the original Iterator.
+     * @param <U> the type of elements in the resulting ObjIterator.
+     * @param iter the original Iterator to be transformed.
+     * @param mapper a Function that takes an element from the Iterator and returns an array of transformed elements.
+     * @return a new ObjIterator that will iterate over the transformed elements of the original Iterator.
      */
     public static <T, U> ObjIterator<U> flatmap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
         N.checkArgNotNull(mapper, cs.mapper);
@@ -3147,10 +3120,10 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given Iterator
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param iter The original Iterator to be processed.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterator.
+     * @param <T> the type of elements in the original Iterator.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param iter the original Iterator to be processed.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterator.
      * @throws E if the elementConsumer encounters an exception.
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer) throws E {
@@ -3160,12 +3133,12 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given Iterator and executes a final action upon completion.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param <E2> The type of exception that can be thrown by the onComplete action.
-     * @param iter The original Iterator to be processed.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterator.
-     * @param onComplete A Runnable action to be executed after all elements in the Iterator have been processed.
+     * @param <T> the type of elements in the original Iterator.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param <E2> the type of exception that can be thrown by the onComplete action.
+     * @param iter the original Iterator to be processed.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterator.
+     * @param onComplete a Runnable action to be executed after all elements in the Iterator have been processed.
      * @throws E if the elementConsumer encounters an exception.
      * @throws E2 if the onComplete action encounters an exception.
      */
@@ -3177,12 +3150,12 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given Iterator, starting from a specified offset and up to a specified count.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param iter The original Iterator to be processed.
-     * @param offset The starting point in the Iterator from where elements will be processed.
-     * @param count The maximum number of elements to be processed from the Iterator.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterator.
+     * @param <T> the type of elements in the original Iterator.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param iter the original Iterator to be processed.
+     * @param offset the starting point in the Iterator from where elements will be processed.
+     * @param count the maximum number of elements to be processed from the Iterator.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterator.
      * @throws E if the elementConsumer encounters an exception.
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
@@ -3194,14 +3167,14 @@ public final class Iterators {
      * Performs an action for each element of the given Iterator, starting from a specified offset and up to a specified count.
      * After all elements have been processed, a final action is executed.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param <E2> The type of exception that can be thrown by the onComplete action.
-     * @param iter The original Iterator to be processed.
-     * @param offset The starting point in the Iterator from where elements will be processed.
-     * @param count The maximum number of elements to be processed from the Iterator.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterator.
-     * @param onComplete A Runnable action to be executed after all elements in the Iterator have been processed.
+     * @param <T> the type of elements in the original Iterator.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param <E2> the type of exception that can be thrown by the onComplete action.
+     * @param iter the original Iterator to be processed.
+     * @param offset the starting point in the Iterator from where elements will be processed.
+     * @param count the maximum number of elements to be processed from the Iterator.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterator.
+     * @param onComplete a Runnable action to be executed after all elements in the Iterator have been processed.
      * @throws E if the elementConsumer encounters an exception.
      * @throws E2 if the onComplete action encounters an exception.
      */
@@ -3214,14 +3187,14 @@ public final class Iterators {
      * Performs an action for each element of the given Iterator, starting from a specified offset and up to a specified count.
      * This method also supports multi-threading with a specified number of threads and queue size.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param iter The original Iterator to be processed.
-     * @param offset The starting point in the Iterator from where elements will be processed.
-     * @param count The maximum number of elements to be processed from the Iterator.
-     * @param processThreadNum The number of threads to be used for processing.
-     * @param queueSize The size of the queue for holding elements before processing.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterator.
+     * @param <T> the type of elements in the original Iterator.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param iter the original Iterator to be processed.
+     * @param offset the starting point in the Iterator from where elements will be processed.
+     * @param count the maximum number of elements to be processed from the Iterator.
+     * @param processThreadNum the number of threads to be used for processing.
+     * @param queueSize the size of the queue for holding elements before processing.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterator.
      * @throws E if the elementConsumer encounters an exception.
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count, final int processThreadNum,
@@ -3233,16 +3206,16 @@ public final class Iterators {
      * Performs an action for each element of the given Iterator, starting from a specified offset and up to a specified count.
      * This method also supports multi-threading with a specified number of threads and queue size.
      *
-     * @param <T> The type of elements in the original Iterator.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param <E2> The type of exception that can be thrown by the onComplete action.
-     * @param iter The original Iterator to be processed.
-     * @param offset The starting point in the Iterator from where processing should begin.
-     * @param count The maximum number of elements to process.
-     * @param processThreadNum The number of threads to be used for processing.
-     * @param queueSize The size of the queue to hold the processing records. The default size is 1024.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterator.
-     * @param onComplete A Runnable action to be performed once all elements have been processed.
+     * @param <T> the type of elements in the original Iterator.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param <E2> the type of exception that can be thrown by the onComplete action.
+     * @param iter the original Iterator to be processed.
+     * @param offset the starting point in the Iterator from where processing should begin.
+     * @param count the maximum number of elements to process.
+     * @param processThreadNum the number of threads to be used for processing.
+     * @param queueSize the size of the queue to hold the processing records. The default size is 1024.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterator.
+     * @param onComplete a Runnable action to be performed once all elements have been processed.
      * @throws E if the elementConsumer encounters an exception.
      * @throws E2 if the onComplete action encounters an exception.
      */
@@ -3255,10 +3228,10 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given collection of iterator.
      *
-     * @param <T> The type of elements in the original Iterators.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param iterators The original collection of iterator to be processed.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
+     * @param <T> the type of elements in the original Iterators.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param iterators the original collection of iterator to be processed.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterators.
      * @throws E if the elementConsumer encounters an exception.
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
@@ -3270,12 +3243,12 @@ public final class Iterators {
      * Performs an action for each element of the given collection of iterator.
      * After all elements have been processed, a final action is executed.
      *
-     * @param <T> The type of elements in the original Iterators.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param <E2> The type of exception that can be thrown by the onComplete action.
-     * @param iterators The original collection of iterator to be processed.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
-     * @param onComplete A Runnable action to be executed after all elements in the Iterators have been processed.
+     * @param <T> the type of elements in the original Iterators.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param <E2> the type of exception that can be thrown by the onComplete action.
+     * @param iterators the original collection of iterator to be processed.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterators.
+     * @param onComplete a Runnable action to be executed after all elements in the Iterators have been processed.
      * @throws E if the elementConsumer encounters an exception.
      * @throws E2 if the onComplete action encounters an exception.
      */
@@ -3287,12 +3260,12 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given collection of iterator, starting from a specified offset and up to a specified count.
      *
-     * @param <T> The type of elements in the original Iterators.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param iterators The original collection of iterator to be processed.
-     * @param offset The starting point in the Iterators from where elements will be processed.
-     * @param count The maximum number of elements to be processed from the Iterators.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
+     * @param <T> the type of elements in the original Iterators.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param iterators the original collection of iterator to be processed.
+     * @param offset the starting point in the Iterators from where elements will be processed.
+     * @param count the maximum number of elements to be processed from the Iterators.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterators.
      * @throws E if the elementConsumer encounters an exception.
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
@@ -3304,14 +3277,14 @@ public final class Iterators {
      * Performs an action for each element of the given collection of iterator, starting from a specified offset and up to a specified count.
      * After all elements have been processed, a final action is executed.
      *
-     * @param <T> The type of elements in the original Iterators.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param <E2> The type of exception that can be thrown by the onComplete action.
-     * @param iterators The original collection of iterator to be processed.
-     * @param offset The starting point in the Iterators from where elements will be processed.
-     * @param count The maximum number of elements to be processed from the Iterators.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
-     * @param onComplete A Runnable action to be executed after all elements in the Iterators have been processed.
+     * @param <T> the type of elements in the original Iterators.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param <E2> the type of exception that can be thrown by the onComplete action.
+     * @param iterators the original collection of iterator to be processed.
+     * @param offset the starting point in the Iterators from where elements will be processed.
+     * @param count the maximum number of elements to be processed from the Iterators.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterators.
+     * @param onComplete a Runnable action to be executed after all elements in the Iterators have been processed.
      * @throws E if the elementConsumer encounters an exception.
      * @throws E2 if the onComplete action encounters an exception.
      */
@@ -3324,11 +3297,11 @@ public final class Iterators {
      * Performs an action for each element of the given collection of iterator.
      * This method also supports multi-threading with a specified number of threads for reading.
      *
-     * @param <T> The type of elements in the original Iterators.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param iterators The original collection of iterator to be processed.
-     * @param readThreadNum The number of threads to be used for reading elements from the Iterators.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
+     * @param <T> the type of elements in the original Iterators.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param iterators the original collection of iterator to be processed.
+     * @param readThreadNum the number of threads to be used for reading elements from the Iterators.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterators.
      * @throws E if the elementConsumer encounters an exception.
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
@@ -3341,15 +3314,15 @@ public final class Iterators {
      * This method also supports multi-threading with a specified number of threads for reading and processing, and a queue for holding elements before processing.
      * After all elements have been processed, a final action is executed.
      *
-     * @param <T> The type of elements in the original Iterators.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param <E2> The type of exception that can be thrown by the onComplete action.
-     * @param iterators The original collection of iterator to be processed.
-     * @param readThreadNum The number of threads to be used for reading elements from the Iterators.
-     * @param processThreadNum The number of threads to be used for processing elements.
-     * @param queueSize The size of the queue for holding elements before processing.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
-     * @param onComplete A Runnable action to be executed after all elements in the Iterators have been processed.
+     * @param <T> the type of elements in the original Iterators.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param <E2> the type of exception that can be thrown by the onComplete action.
+     * @param iterators the original collection of iterator to be processed.
+     * @param readThreadNum the number of threads to be used for reading elements from the Iterators.
+     * @param processThreadNum the number of threads to be used for processing elements.
+     * @param queueSize the size of the queue for holding elements before processing.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterators.
+     * @param onComplete a Runnable action to be executed after all elements in the Iterators have been processed.
      * @throws E if the elementConsumer encounters an exception.
      * @throws E2 if the onComplete action encounters an exception.
      */
@@ -3363,15 +3336,15 @@ public final class Iterators {
      * Performs an action for each element of the given collection of iterator, starting from a specified offset and up to a specified count.
      * This method also supports multi-threading with a specified number of threads for reading and processing, and a queue for holding elements before processing.
      *
-     * @param <T> The type of elements in the original Iterators.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param iterators The original collection of iterator to be processed.
-     * @param offset The starting point in the Iterators from where elements will be processed.
-     * @param count The maximum number of elements to be processed from the Iterators.
-     * @param readThreadNum The number of threads to be used for reading elements from the Iterators.
-     * @param processThreadNum The number of threads to be used for processing elements.
-     * @param queueSize The size of the queue for holding elements before processing.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
+     * @param <T> the type of elements in the original Iterators.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param iterators the original collection of iterator to be processed.
+     * @param offset the starting point in the Iterators from where elements will be processed.
+     * @param count the maximum number of elements to be processed from the Iterators.
+     * @param readThreadNum the number of threads to be used for reading elements from the Iterators.
+     * @param processThreadNum the number of threads to be used for processing elements.
+     * @param queueSize the size of the queue for holding elements before processing.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterators.
      * @throws E if the elementConsumer encounters an exception.
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
@@ -3383,17 +3356,17 @@ public final class Iterators {
      * Performs an action for each element of the given collection of iterator, starting from a specified offset and up to a specified count.
      * This method also supports multi-threading with a specified number of threads for reading and processing, and a queue size for holding the processing records.
      *
-     * @param <T> The type of elements in the original Iterators.
-     * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param <E2> The type of exception that can be thrown by the onComplete action.
-     * @param iterators The original collection of iterator to be processed.
-     * @param offset The starting point in the Iterators from where processing should begin.
-     * @param count The maximum number of elements to process.
-     * @param readThreadNum The number of threads to be used for reading.
-     * @param processThreadNum The number of threads to be used for processing.
-     * @param queueSize The size of the queue to hold the processing records.
-     * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
-     * @param onComplete A Runnable action to be performed once all elements have been processed.
+     * @param <T> the type of elements in the original Iterators.
+     * @param <E> the type of exception that can be thrown by the elementConsumer.
+     * @param <E2> the type of exception that can be thrown by the onComplete action.
+     * @param iterators the original collection of iterator to be processed.
+     * @param offset the starting point in the Iterators from where processing should begin.
+     * @param count the maximum number of elements to process.
+     * @param readThreadNum the number of threads to be used for reading.
+     * @param processThreadNum the number of threads to be used for processing.
+     * @param queueSize the size of the queue to hold the processing records.
+     * @param elementConsumer a Consumer that performs an action on each element in the Iterators.
+     * @param onComplete a Runnable action to be performed once all elements have been processed.
      * @throws IllegalArgumentException if <i>offset</i> or <i>count</i> is negative.
      * @throws E if the elementConsumer encounters an exception.
      * @throws E2 if the onComplete action encounters an exception.
@@ -3498,8 +3471,8 @@ public final class Iterators {
      * Validates that the offset and count parameters are non-negative.
      * This is a package-private utility method used internally for parameter validation.
      *
-     * @param offset The offset value to check.
-     * @param count The count value to check.
+     * @param offset the offset value to check.
+     * @param count the count value to check.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
     static void checkOffsetCount(final int offset, final int count) throws IllegalArgumentException {
@@ -3512,8 +3485,8 @@ public final class Iterators {
      * Validates that the offset and count parameters are non-negative (long version).
      * This is a package-private utility method used internally for parameter validation.
      *
-     * @param offset The offset value to check.
-     * @param count The count value to check.
+     * @param offset the offset value to check.
+     * @param count the count value to check.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
     static void checkOffsetCount(final long offset, final long count) throws IllegalArgumentException {
@@ -3527,8 +3500,8 @@ public final class Iterators {
      * This is a package-private utility method used internally to optimize buffer allocation.
      * The buffer size is calculated as the minimum of 1024 and (readThreadNum * 64).
      *
-     * @param readThreadNum The number of threads that will be reading.
-     * @return The calculated buffer size, capped at 1024.
+     * @param readThreadNum the number of threads that will be reading.
+     * @return the calculated buffer size, capped at 1024.
      */
     static int calculateBufferedSize(final int readThreadNum) {
         return N.min(1024, readThreadNum * 64);

@@ -308,7 +308,7 @@ public class XMLUtilTest extends AbstractParserTest {
 
         final PersonType personType2 = (PersonType) unmarshaller.unmarshal(new ByteArrayInputStream(str.getBytes()));
 
-        N.equals(personType, personType2);
+        CommonUtil.equals(personType, personType2);
     }
 
     @Test
@@ -326,7 +326,7 @@ public class XMLUtilTest extends AbstractParserTest {
 
         final PersonType personType2 = (PersonType) unmarshaller.unmarshal(new ByteArrayInputStream(str.getBytes()));
 
-        N.equals(personType, personType2);
+        CommonUtil.equals(personType, personType2);
     }
 
     @Test
@@ -337,6 +337,6 @@ public class XMLUtilTest extends AbstractParserTest {
 
         final PersonType personType2 = XmlUtil.unmarshal(PersonType.class, str);
 
-        N.equals(personType, personType2);
+        CommonUtil.equals(personType, personType2);
     }
 }

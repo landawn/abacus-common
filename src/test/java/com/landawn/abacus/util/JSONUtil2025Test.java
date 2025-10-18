@@ -536,7 +536,7 @@ public class JSONUtil2025Test extends TestBase {
         JSONObject json = new JSONObject();
         json.put("key", "value");
 
-        Type<Map<String, Object>> type = N.typeOf("Map<String, Object>");
+        Type<Map<String, Object>> type = CommonUtil.typeOf("Map<String, Object>");
         Map<String, Object> map = JSONUtil.unwrap(json, type);
 
         assertNotNull(map);
@@ -548,7 +548,7 @@ public class JSONUtil2025Test extends TestBase {
         JSONObject json = new JSONObject();
         json.put("name", "Helen");
 
-        Type<Object> type = N.typeOf(Object.class);
+        Type<Object> type = CommonUtil.typeOf(Object.class);
         Object result = JSONUtil.unwrap(json, type);
 
         assertNotNull(result);
@@ -560,7 +560,7 @@ public class JSONUtil2025Test extends TestBase {
         JSONObject json = new JSONObject();
         json.put("test", "value");
 
-        Type<JSONObject> type = N.typeOf(JSONObject.class);
+        Type<JSONObject> type = CommonUtil.typeOf(JSONObject.class);
         JSONObject result = JSONUtil.unwrap(json, type);
 
         assertNotNull(result);
@@ -574,7 +574,7 @@ public class JSONUtil2025Test extends TestBase {
         json.put("age", 50);
         json.put("active", true);
 
-        Type<SimpleBean> type = N.typeOf(SimpleBean.class);
+        Type<SimpleBean> type = CommonUtil.typeOf(SimpleBean.class);
         SimpleBean bean = JSONUtil.unwrap(json, type);
 
         assertNotNull(bean);
@@ -587,7 +587,7 @@ public class JSONUtil2025Test extends TestBase {
         JSONObject json = new JSONObject();
         json.put("key", "value");
 
-        Type<String> type = N.typeOf(String.class);
+        Type<String> type = CommonUtil.typeOf(String.class);
 
         assertThrows(IllegalArgumentException.class, () -> {
             JSONUtil.unwrap(json, type);
@@ -712,7 +712,7 @@ public class JSONUtil2025Test extends TestBase {
         json.put(2);
         json.put(3);
 
-        Type<List<Integer>> type = N.typeOf("List<Integer>");
+        Type<List<Integer>> type = CommonUtil.typeOf("List<Integer>");
         List<Integer> list = JSONUtil.unwrap(json, type);
 
         assertNotNull(list);
@@ -724,7 +724,7 @@ public class JSONUtil2025Test extends TestBase {
         JSONArray json = new JSONArray();
         json.put("item");
 
-        Type<Object> type = N.typeOf(Object.class);
+        Type<Object> type = CommonUtil.typeOf(Object.class);
         Object result = JSONUtil.unwrap(json, type);
 
         assertNotNull(result);
@@ -736,7 +736,7 @@ public class JSONUtil2025Test extends TestBase {
         JSONArray json = new JSONArray();
         json.put("test");
 
-        Type<JSONArray> type = N.typeOf(JSONArray.class);
+        Type<JSONArray> type = CommonUtil.typeOf(JSONArray.class);
         JSONArray result = JSONUtil.unwrap(json, type);
 
         assertNotNull(result);
@@ -750,7 +750,7 @@ public class JSONUtil2025Test extends TestBase {
         json.put("y");
         json.put("z");
 
-        Type<Set<String>> type = N.typeOf("Set<String>");
+        Type<Set<String>> type = CommonUtil.typeOf("Set<String>");
         Set<String> set = JSONUtil.unwrap(json, type);
 
         assertNotNull(set);
@@ -764,7 +764,7 @@ public class JSONUtil2025Test extends TestBase {
         json.put(10);
         json.put(15);
 
-        Type<int[]> type = N.typeOf(int[].class);
+        Type<int[]> type = CommonUtil.typeOf(int[].class);
         int[] array = JSONUtil.unwrap(json, type);
 
         assertNotNull(array);
@@ -778,7 +778,7 @@ public class JSONUtil2025Test extends TestBase {
         json.put("a");
         json.put("b");
 
-        Type<String[]> type = N.typeOf(String[].class);
+        Type<String[]> type = CommonUtil.typeOf(String[].class);
         String[] array = JSONUtil.unwrap(json, type);
 
         assertNotNull(array);
@@ -791,7 +791,7 @@ public class JSONUtil2025Test extends TestBase {
         JSONArray json = new JSONArray();
         json.put("value");
 
-        Type<String> type = N.typeOf(String.class);
+        Type<String> type = CommonUtil.typeOf(String.class);
 
         assertThrows(IllegalArgumentException.class, () -> {
             JSONUtil.unwrap(json, type);
@@ -833,7 +833,7 @@ public class JSONUtil2025Test extends TestBase {
         json.put(inner1);
         json.put(inner2);
 
-        Type<List<List<Integer>>> type = N.typeOf("List<List<Integer>>");
+        Type<List<List<Integer>>> type = CommonUtil.typeOf("List<List<Integer>>");
         List<List<Integer>> result = JSONUtil.unwrap(json, type);
 
         assertNotNull(result);
@@ -918,7 +918,7 @@ public class JSONUtil2025Test extends TestBase {
         json.put("x");
         json.put("y");
 
-        Type<String> type = N.typeOf(String.class);
+        Type<String> type = CommonUtil.typeOf(String.class);
         List<String> list = JSONUtil.toList(json, type);
 
         assertNotNull(list);
@@ -939,7 +939,7 @@ public class JSONUtil2025Test extends TestBase {
         json.put(map1);
         json.put(map2);
 
-        Type<Map<String, Object>> type = N.typeOf("Map<String, Object>");
+        Type<Map<String, Object>> type = CommonUtil.typeOf("Map<String, Object>");
         List<Map<String, Object>> list = JSONUtil.toList(json, type);
 
         assertNotNull(list);
@@ -957,7 +957,7 @@ public class JSONUtil2025Test extends TestBase {
         JSONArray json = new JSONArray();
         json.put(inner);
 
-        Type<List<Integer>> type = N.typeOf("List<Integer>");
+        Type<List<Integer>> type = CommonUtil.typeOf("List<Integer>");
         List<List<Integer>> list = JSONUtil.toList(json, type);
 
         assertNotNull(list);
@@ -973,7 +973,7 @@ public class JSONUtil2025Test extends TestBase {
         json.put(JSONObject.NULL);
         json.put("third");
 
-        Type<String> type = N.typeOf(String.class);
+        Type<String> type = CommonUtil.typeOf(String.class);
         List<String> list = JSONUtil.toList(json, type);
 
         assertNotNull(list);
@@ -1028,7 +1028,7 @@ public class JSONUtil2025Test extends TestBase {
         json.put("a");
         json.put("b");
 
-        Type<ArrayList<String>> arrayListType = N.typeOf("ArrayList<String>");
+        Type<ArrayList<String>> arrayListType = CommonUtil.typeOf("ArrayList<String>");
         ArrayList<String> arrayList = JSONUtil.unwrap(json, arrayListType);
 
         assertNotNull(arrayList);

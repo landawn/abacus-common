@@ -190,6 +190,7 @@ public interface EntityId {
      *
      * @param nameValues a map of property names to their values
      * @return a new EntityId instance
+     * @throws IllegalArgumentException if the map is empty or null
      */
     static EntityId create(final Map<String, Object> nameValues) {
         return Seid.create(nameValues);

@@ -206,11 +206,11 @@ public class Numbers2025Test extends TestBase {
 
     @Test
     public void test_extractFirstInt() {
-        assertEquals(123, Numbers.extractFirstInt("abc123def"));
-        assertEquals(0, Numbers.extractFirstInt("abcdef"));
-        assertEquals(0, Numbers.extractFirstInt(""));
-        assertEquals(0, Numbers.extractFirstInt(null));
-        assertEquals(-456, Numbers.extractFirstInt("test-456xyz"));
+        assertEquals(123, Numbers.extractFirstInt("abc123def").get());
+        assertEquals(-456, Numbers.extractFirstInt("test-456xyz").get());
+        assertTrue(Numbers.extractFirstInt("noNumber").isEmpty());
+        assertTrue(Numbers.extractFirstInt("").isEmpty());
+        assertTrue(Numbers.extractFirstInt(null).isEmpty());
     }
 
     @Test
@@ -223,10 +223,10 @@ public class Numbers2025Test extends TestBase {
 
     @Test
     public void test_extractFirstLong() {
-        assertEquals(9223372036854775807L, Numbers.extractFirstLong("value9223372036854775807end"));
-        assertEquals(0L, Numbers.extractFirstLong("noNumber"));
-        assertEquals(0L, Numbers.extractFirstLong(""));
-        assertEquals(0L, Numbers.extractFirstLong(null));
+        assertEquals(9223372036854775807L, Numbers.extractFirstLong("value9223372036854775807end").get());
+        assertTrue(Numbers.extractFirstLong("noNumber").isEmpty());
+        assertTrue(Numbers.extractFirstLong("").isEmpty());
+        assertTrue(Numbers.extractFirstLong(null).isEmpty());
     }
 
     @Test
@@ -239,11 +239,12 @@ public class Numbers2025Test extends TestBase {
 
     @Test
     public void test_extractFirstDouble() {
-        assertEquals(3.14, Numbers.extractFirstDouble("pi is 3.14"), 0.001);
-        assertEquals(0.0, Numbers.extractFirstDouble("noNumber"), 0.001);
-        assertEquals(0.0, Numbers.extractFirstDouble(""), 0.001);
-        assertEquals(0.0, Numbers.extractFirstDouble(null), 0.001);
-        assertEquals(-2.5, Numbers.extractFirstDouble("temp is -2.5 degrees"), 0.001);
+        assertEquals(3.14, Numbers.extractFirstDouble("pi is 3.14").get(), 0.001);
+        assertTrue(Numbers.extractFirstDouble("noNumber").isEmpty());
+        assertTrue(Numbers.extractFirstDouble("").isEmpty());
+        assertTrue(Numbers.extractFirstDouble("null").isEmpty());
+        assertTrue(Numbers.extractFirstDouble("noNumber").isEmpty());
+        assertEquals(-2.5, Numbers.extractFirstDouble("temp is -2.5 degrees").get(), 0.001);
     }
 
     @Test
@@ -256,8 +257,8 @@ public class Numbers2025Test extends TestBase {
 
     @Test
     public void test_extractFirstDouble_scientific() {
-        assertEquals(1.23e-4, Numbers.extractFirstDouble("value is 1.23e-4", true), 0.00001);
-        assertEquals(1.23, Numbers.extractFirstDouble("value is 1.23e-4", false), 0.001);
+        assertEquals(1.23e-4, Numbers.extractFirstDouble("value is 1.23e-4", true).get(), 0.00001);
+        assertEquals(1.23, Numbers.extractFirstDouble("value is 1.23e-4", false).get(), 0.001);
         assertEquals(1.5e10, Numbers.extractFirstDouble("number 1.5e10 here", 0.0, true), 0.001);
     }
 
@@ -283,22 +284,22 @@ public class Numbers2025Test extends TestBase {
 
     @Test
     public void test_toByte_Object() {
-        assertEquals((byte) 10, Numbers.toByte((Object) 10));
-        assertEquals((byte) 10, Numbers.toByte((Object) (byte) 10));
+        assertEquals((byte) 10, Numbers.toByte(10));
+        assertEquals((byte) 10, Numbers.toByte((byte) 10));
         assertEquals((byte) 10, Numbers.toByte((Object) "10"));
         assertEquals((byte) 0, Numbers.toByte((Object) null));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toByte((Object) 200));
-        assertThrows(NumberFormatException.class, () -> Numbers.toByte((Object) 200L));
+        assertThrows(NumberFormatException.class, () -> Numbers.toByte(200));
+        assertThrows(NumberFormatException.class, () -> Numbers.toByte(200L));
     }
 
     @Test
     public void test_toByte_Object_withDefault() {
-        assertEquals((byte) 10, Numbers.toByte((Object) 10, (byte) 5));
+        assertEquals((byte) 10, Numbers.toByte(10, (byte) 5));
         assertEquals((byte) 5, Numbers.toByte((Object) null, (byte) 5));
         assertEquals((byte) 10, Numbers.toByte((Object) "10", (byte) 5));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toByte((Object) 300L, (byte) 5));
+        assertThrows(NumberFormatException.class, () -> Numbers.toByte(300L, (byte) 5));
     }
 
     @Test
@@ -323,21 +324,21 @@ public class Numbers2025Test extends TestBase {
 
     @Test
     public void test_toShort_Object() {
-        assertEquals((short) 100, Numbers.toShort((Object) 100));
-        assertEquals((short) 100, Numbers.toShort((Object) (short) 100));
+        assertEquals((short) 100, Numbers.toShort(100));
+        assertEquals((short) 100, Numbers.toShort((short) 100));
         assertEquals((short) 100, Numbers.toShort((Object) "100"));
         assertEquals((short) 0, Numbers.toShort((Object) null));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toShort((Object) 40000));
+        assertThrows(NumberFormatException.class, () -> Numbers.toShort(40000));
     }
 
     @Test
     public void test_toShort_Object_withDefault() {
-        assertEquals((short) 100, Numbers.toShort((Object) 100, (short) 50));
+        assertEquals((short) 100, Numbers.toShort(100, (short) 50));
         assertEquals((short) 50, Numbers.toShort((Object) null, (short) 50));
         assertEquals((short) 100, Numbers.toShort((Object) "100", (short) 50));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toShort((Object) 50000L, (short) 50));
+        assertThrows(NumberFormatException.class, () -> Numbers.toShort(50000L, (short) 50));
     }
 
     @Test
@@ -359,17 +360,17 @@ public class Numbers2025Test extends TestBase {
 
     @Test
     public void test_toInt_Object() {
-        assertEquals(1000, Numbers.toInt((Object) 1000));
-        assertEquals(1000, Numbers.toInt((Object) 1000L));
+        assertEquals(1000, Numbers.toInt(1000));
+        assertEquals(1000, Numbers.toInt(1000L));
         assertEquals(1000, Numbers.toInt((Object) "1000"));
         assertEquals(0, Numbers.toInt((Object) null));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toInt((Object) ((long) Integer.MAX_VALUE + 1)));
+        assertThrows(NumberFormatException.class, () -> Numbers.toInt((long) Integer.MAX_VALUE + 1));
     }
 
     @Test
     public void test_toInt_Object_withDefault() {
-        assertEquals(1000, Numbers.toInt((Object) 1000, 500));
+        assertEquals(1000, Numbers.toInt(1000, 500));
         assertEquals(500, Numbers.toInt((Object) null, 500));
         assertEquals(1000, Numbers.toInt((Object) "1000", 500));
     }
@@ -393,15 +394,15 @@ public class Numbers2025Test extends TestBase {
 
     @Test
     public void test_toLong_Object() {
-        assertEquals(1000000L, Numbers.toLong((Object) 1000000));
-        assertEquals(1000000L, Numbers.toLong((Object) 1000000L));
+        assertEquals(1000000L, Numbers.toLong(1000000));
+        assertEquals(1000000L, Numbers.toLong(1000000L));
         assertEquals(1000000L, Numbers.toLong((Object) "1000000"));
         assertEquals(0L, Numbers.toLong((Object) null));
     }
 
     @Test
     public void test_toLong_Object_withDefault() {
-        assertEquals(1000000L, Numbers.toLong((Object) 1000000, 500L));
+        assertEquals(1000000L, Numbers.toLong(1000000, 500L));
         assertEquals(500L, Numbers.toLong((Object) null, 500L));
         assertEquals(1000000L, Numbers.toLong((Object) "1000000", 500L));
     }
@@ -425,15 +426,15 @@ public class Numbers2025Test extends TestBase {
 
     @Test
     public void test_toFloat_Object() {
-        assertEquals(3.14f, Numbers.toFloat((Object) 3.14f), 0.001f);
-        assertEquals(3.14f, Numbers.toFloat((Object) 3.14), 0.001f);
+        assertEquals(3.14f, Numbers.toFloat(3.14f), 0.001f);
+        assertEquals(3.14f, Numbers.toFloat(3.14), 0.001f);
         assertEquals(3.14f, Numbers.toFloat((Object) "3.14"), 0.001f);
         assertEquals(0.0f, Numbers.toFloat((Object) null), 0.001f);
     }
 
     @Test
     public void test_toFloat_Object_withDefault() {
-        assertEquals(3.14f, Numbers.toFloat((Object) 3.14f, 1.0f), 0.001f);
+        assertEquals(3.14f, Numbers.toFloat(3.14f, 1.0f), 0.001f);
         assertEquals(1.0f, Numbers.toFloat((Object) null, 1.0f), 0.001f);
         assertEquals(3.14f, Numbers.toFloat((Object) "3.14", 1.0f), 0.001f);
     }
@@ -441,7 +442,7 @@ public class Numbers2025Test extends TestBase {
     @Test
     public void test_toDouble_String() {
         assertEquals(3.14159, Numbers.toDouble("3.14159"), 0.00001);
-        assertEquals(0.0, Numbers.toDouble((String) ""), 0.001);
+        assertEquals(0.0, Numbers.toDouble(""), 0.001);
         assertEquals(0.0, Numbers.toDouble((String) null), 0.001);
         assertEquals(-2.71828, Numbers.toDouble("-2.71828"), 0.00001);
 
@@ -451,21 +452,21 @@ public class Numbers2025Test extends TestBase {
     @Test
     public void test_toDouble_String_withDefault() {
         assertEquals(3.14159, Numbers.toDouble("3.14159", 1.0), 0.00001);
-        assertEquals(1.0, Numbers.toDouble((String) "", 1.0), 0.001);
+        assertEquals(1.0, Numbers.toDouble("", 1.0), 0.001);
         assertEquals(1.0, Numbers.toDouble((String) null, 1.0), 0.001);
     }
 
     @Test
     public void test_toDouble_Object() {
-        assertEquals(3.14159, Numbers.toDouble((Object) 3.14159), 0.00001);
-        assertEquals(3.14, Numbers.toDouble((Object) 3.14f), 0.01);
+        assertEquals(3.14159, Numbers.toDouble(3.14159), 0.00001);
+        assertEquals(3.14, Numbers.toDouble(3.14f), 0.01);
         assertEquals(3.14159, Numbers.toDouble((Object) "3.14159"), 0.00001);
         assertEquals(0.0, Numbers.toDouble((Object) null), 0.001);
     }
 
     @Test
     public void test_toDouble_Object_withDefault() {
-        assertEquals(3.14159, Numbers.toDouble((Object) 3.14159, 1.0), 0.00001);
+        assertEquals(3.14159, Numbers.toDouble(3.14159, 1.0), 0.00001);
         assertEquals(1.0, Numbers.toDouble((Object) null, 1.0), 0.001);
         assertEquals(3.14159, Numbers.toDouble((Object) "3.14159", 1.0), 0.00001);
     }
@@ -542,8 +543,8 @@ public class Numbers2025Test extends TestBase {
     @Test
     public void test_toIntExact() {
         assertEquals(100, Numbers.toIntExact(100L));
-        assertEquals(Integer.MAX_VALUE, Numbers.toIntExact((long) Integer.MAX_VALUE));
-        assertEquals(Integer.MIN_VALUE, Numbers.toIntExact((long) Integer.MIN_VALUE));
+        assertEquals(Integer.MAX_VALUE, Numbers.toIntExact(Integer.MAX_VALUE));
+        assertEquals(Integer.MIN_VALUE, Numbers.toIntExact(Integer.MIN_VALUE));
 
         assertThrows(ArithmeticException.class, () -> Numbers.toIntExact((long) Integer.MAX_VALUE + 1));
         assertThrows(ArithmeticException.class, () -> Numbers.toIntExact((long) Integer.MIN_VALUE - 1));

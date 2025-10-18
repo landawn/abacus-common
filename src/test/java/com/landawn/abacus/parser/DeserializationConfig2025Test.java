@@ -2,7 +2,6 @@ package com.landawn.abacus.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -456,12 +455,11 @@ public class DeserializationConfig2025Test extends TestBase {
 
     @Test
     public void test_methodChaining_complex() {
-        TestDeserializationConfig result = config
-            .ignoreUnmatchedProperty(false)
-            .setElementType(String.class)
-            .setMapKeyType(String.class)
-            .setMapValueType(Integer.class)
-            .setValueType("name", String.class);
+        TestDeserializationConfig result = config.ignoreUnmatchedProperty(false)
+                .setElementType(String.class)
+                .setMapKeyType(String.class)
+                .setMapValueType(Integer.class)
+                .setValueType("name", String.class);
 
         assertEquals(config, result);
         assertFalse(config.ignoreUnmatchedProperty());

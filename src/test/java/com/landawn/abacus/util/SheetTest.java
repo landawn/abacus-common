@@ -16,7 +16,7 @@ public class SheetTest extends AbstractTest {
 
         Sheet.empty().println();
 
-        Sheet<String, String, Object> sheet = Sheet.rows(N.asList("r1", "r2", "r3"), N.asList("c1", "c2"),
+        Sheet<String, String, Object> sheet = Sheet.rows(CommonUtil.asList("r1", "r2", "r3"), CommonUtil.asList("c1", "c2"),
                 new Object[][] { { 1, "a" }, { null, "b" }, { 5, "c" } });
 
         sheet.println();
@@ -35,10 +35,10 @@ public class SheetTest extends AbstractTest {
 
         N.println(sheet.countOfNonNullValue());
 
-        sheet = new Sheet<>(N.asList("r1", "r2", "r3"), N.asList("c1", "c2"));
+        sheet = new Sheet<>(CommonUtil.asList("r1", "r2", "r3"), CommonUtil.asList("c1", "c2"));
         sheet.forEachH((r, c, v) -> N.println(r + ": " + c + ": " + v));
 
-        sheet = Sheet.rows(N.emptyList(), N.emptyList(), N.emptyList());
+        sheet = Sheet.rows(CommonUtil.emptyList(), CommonUtil.emptyList(), CommonUtil.emptyList());
         N.println(sheet);
         N.println(N.toJson(sheet));
 

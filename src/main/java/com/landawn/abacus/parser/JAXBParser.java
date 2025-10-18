@@ -410,15 +410,6 @@ final class JAXBParser extends AbstractXMLParser {
      */
     @Override
     public <T> T deserialize(final Reader source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
-        //
-        // BufferedReader br = ObjectFactory.createBufferedReader(reader);
-        //
-        // try {
-        // return read(cls, br, config);
-        // } finally {
-        // ObjectFactory.recycle(br);
-        // }
-        //
         return read(source, config, targetClass);
     }
 

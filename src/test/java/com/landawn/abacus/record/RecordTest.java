@@ -5,11 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigInteger;
 import java.util.Map;
 
-import com.landawn.abacus.util.*;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
+import com.landawn.abacus.util.Beans;
+import com.landawn.abacus.util.Dataset;
+import com.landawn.abacus.util.Fn;
+import com.landawn.abacus.util.N;
 
 public class RecordTest {
 

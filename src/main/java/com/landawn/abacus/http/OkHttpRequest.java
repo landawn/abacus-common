@@ -156,8 +156,7 @@ public final class OkHttpRequest {
      *
      * @param url the URL string for the request
      * @return a new OkHttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is not a valid HTTP or HTTPS URL. Avoid this
-     * exception by calling {@link HttpUrl#parse}; it returns {@code null} for invalid URLs.
+     * @throws IllegalArgumentException if {@code url} is not a valid HTTP or HTTPS URL. Avoid this exception by calling {@link HttpUrl#parse}; it returns {@code null} for invalid URLs.
      */
     public static OkHttpRequest url(final String url) {
         return create(url, defaultClient);

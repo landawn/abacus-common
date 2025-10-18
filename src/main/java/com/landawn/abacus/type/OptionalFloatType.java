@@ -63,6 +63,16 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
     }
 
     /**
+     * Returns the default value for OptionalFloat type, which is an empty OptionalFloat.
+     *
+     * @return OptionalFloat.empty()
+     */
+    @Override
+    public OptionalFloat defaultValue() {
+        return OptionalFloat.empty();
+    }
+
+    /**
      * Converts an {@link OptionalFloat} object to its string representation.
      * 
      * @param x the OptionalFloat object to convert

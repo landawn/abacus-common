@@ -81,7 +81,7 @@ public final class EmailUtil {
     /**
      * Sends a plain text email to the specified recipients.
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * Properties props = new Properties();
      * props.put("mail.smtp.host", "smtp.example.com");
@@ -115,7 +115,7 @@ public final class EmailUtil {
     /**
      * Sends a plain text email with file attachments to the specified recipients.
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * EmailUtil.sendEmailWithAttachment(
      *     new String[]{"recipient@example.com"},
@@ -147,7 +147,7 @@ public final class EmailUtil {
     /**
      * Sends an HTML email to the specified recipients.
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * String htmlContent = "<html><body>" +
      *     "<h2>Welcome!</h2>" +
@@ -183,7 +183,7 @@ public final class EmailUtil {
     /**
      * Sends an HTML email with file attachments to the specified recipients.
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * String htmlContent = "<html><body>" +
      *     "<h1>Invoice</h1>" +

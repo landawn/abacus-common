@@ -12,42 +12,41 @@ import com.landawn.abacus.util.function.BiFunction;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.Stream;
-import com.landawn.abacus.util.stream.Stream.StreamEx;
 
 public class IteratorsTest {
 
     @Test
     public void test_cycle() {
         N.println(Iterators.cycle(1, 2, 3).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1, 2, 3)).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1, 2, 3)).limit(10).toList());
         N.println(Strings.repeat("#", 80));
-        N.println(Iterators.cycle(N.asSet(1), 0).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1), 1).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1), 2).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1), 3).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1), 4).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1), 0).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1), 1).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1), 2).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1), 3).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1), 4).limit(10).toList());
         N.println(Strings.repeat("#", 80));
-        N.println(Iterators.cycle(N.asSet(1, 2), 0).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1, 2), 1).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1, 2), 2).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1, 2), 3).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1, 2), 4).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1, 2), 0).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1, 2), 1).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1, 2), 2).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1, 2), 3).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1, 2), 4).limit(10).toList());
         N.println(Strings.repeat("#", 80));
-        N.println(Iterators.cycle(N.asSet(1, 2, 3), 0).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1, 2, 3), 1).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1, 2, 3), 2).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1, 2, 3), 3).limit(10).toList());
-        N.println(Iterators.cycle(N.asSet(1, 2, 3), 4).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1, 2, 3), 0).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1, 2, 3), 1).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1, 2, 3), 2).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1, 2, 3), 3).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.asSet(1, 2, 3), 4).limit(10).toList());
         N.println(Strings.repeat("#", 80));
-        N.println(Stream.of(N.asSet(1, 2, 3)).cycled(0).limit(10).toList());
-        N.println(Stream.of(N.asSet(1, 2, 3)).cycled(1).limit(10).toList());
-        N.println(Stream.of(N.asSet(1, 2, 3)).cycled(2).limit(10).toList());
-        N.println(Stream.of(N.asSet(1, 2, 3)).cycled(3).limit(10).toList());
-        N.println(Stream.of(N.asSet(1, 2, 3)).cycled(4).limit(10).toList());
+        N.println(Stream.of(CommonUtil.asSet(1, 2, 3)).cycled(0).limit(10).toList());
+        N.println(Stream.of(CommonUtil.asSet(1, 2, 3)).cycled(1).limit(10).toList());
+        N.println(Stream.of(CommonUtil.asSet(1, 2, 3)).cycled(2).limit(10).toList());
+        N.println(Stream.of(CommonUtil.asSet(1, 2, 3)).cycled(3).limit(10).toList());
+        N.println(Stream.of(CommonUtil.asSet(1, 2, 3)).cycled(4).limit(10).toList());
         N.println(Strings.repeat("#", 80));
 
-        N.println(Iterators.cycle(N.EMPTY_CHAR_OBJ_ARRAY).limit(10).toList());
-        N.println(Iterators.cycle(N.emptyList()).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.EMPTY_CHAR_OBJ_ARRAY).limit(10).toList());
+        N.println(Iterators.cycle(CommonUtil.emptyList()).limit(10).toList());
     }
 
     @Test
@@ -71,12 +70,12 @@ public class IteratorsTest {
         }
         {
             final Iterator<String> iter = ObjIterator.of("a", "b", "c");
-            Iterators.flatMap(iter, it -> N.asList(it + "1", it + "2")).forEachRemaining(Fn.println());
+            Iterators.flatMap(iter, it -> CommonUtil.asList(it + "1", it + "2")).forEachRemaining(Fn.println());
             N.println("==========================================================================");
         }
         {
             final Iterator<String> iter = ObjIterator.of("a", "b", "c");
-            Iterators.flatmap(iter, it -> N.asArray(it + "1", it + "2")).forEachRemaining(Fn.println());
+            Iterators.flatmap(iter, it -> CommonUtil.asArray(it + "1", it + "2")).forEachRemaining(Fn.println());
             N.println("==========================================================================");
         }
     }
@@ -85,13 +84,13 @@ public class IteratorsTest {
     public void test_filter_map_2() throws Exception {
 
         {
-            final List<String> list = N.asList("a", "b", "c");
+            final List<String> list = CommonUtil.asList("a", "b", "c");
             N.map(list, it -> it + "1").forEach(Fn.println());
             N.println("==========================================================================");
         }
         {
-            final List<String> list = N.asList("a", "b", "c");
-            N.flatMap(list, it -> N.asList(it + "1", it + "2")).forEach(Fn.println());
+            final List<String> list = CommonUtil.asList("a", "b", "c");
+            N.flatMap(list, it -> CommonUtil.asList(it + "1", it + "2")).forEach(Fn.println());
             N.println("==========================================================================");
         }
 
@@ -135,44 +134,44 @@ public class IteratorsTest {
     public void test_skipUntil() throws Exception {
         {
             final int[] a = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            final List<Integer> list = N.toList(a);
+            final List<Integer> list = CommonUtil.toList(a);
             final List<Integer> ret = N.skipUntil(list, it -> it > 3);
-            assertEquals(N.asList(4, 5, 6, 7, 8, 9), ret);
+            assertEquals(CommonUtil.asList(4, 5, 6, 7, 8, 9), ret);
         }
         {
             final int[] a = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            final List<Integer> list = N.toList(a);
+            final List<Integer> list = CommonUtil.toList(a);
             final List<Integer> ret = Stream.of(list).skipUntil(it -> it > 3).toList();
-            assertEquals(N.asList(4, 5, 6, 7, 8, 9), ret);
+            assertEquals(CommonUtil.asList(4, 5, 6, 7, 8, 9), ret);
             final int[] b = IntStream.of(a).skipUntil(it -> it > 3).toArray();
-            assertEquals(N.asList(4, 5, 6, 7, 8, 9), N.toList(b));
+            assertEquals(CommonUtil.asList(4, 5, 6, 7, 8, 9), CommonUtil.toList(b));
         }
     }
 
     @Test
     public void test_filter_2() throws Exception {
         {
-            final List<String> list = N.asList("a", "b", "c");
+            final List<String> list = CommonUtil.asList("a", "b", "c");
             N.filter(list, it -> !it.equals("b")).forEach(Fn.println());
             N.println("==========================================================================");
         }
         {
-            final List<String> list = N.asList("a", "b", "c");
+            final List<String> list = CommonUtil.asList("a", "b", "c");
             N.takeWhile(list, it -> !it.equals("b")).forEach(Fn.println());
             N.println("==========================================================================");
         }
         {
-            final List<String> list = N.asList("a", "b", "c");
+            final List<String> list = CommonUtil.asList("a", "b", "c");
             N.takeWhileInclusive(list, it -> !it.equals("b")).forEach(Fn.println());
             N.println("==========================================================================");
         }
         {
-            final List<String> list = N.asList("a", "b", "c");
+            final List<String> list = CommonUtil.asList("a", "b", "c");
             N.dropWhile(list, it -> !it.equals("b")).forEach(Fn.println());
             N.println("==========================================================================");
         }
         {
-            final List<String> list = N.asList("a", "b", "c");
+            final List<String> list = CommonUtil.asList("a", "b", "c");
             N.skipUntil(list, it -> it.equals("b")).forEach(Fn.println());
             N.println("==========================================================================");
         }
@@ -190,21 +189,21 @@ public class IteratorsTest {
         a = ObjIterator.of(1, 3, 5);
         b = ObjIterator.of(2, 4, 6);
 
-        com.google.common.collect.Iterators.mergeSorted(N.asList(a, b), Comparators.NATURAL_ORDER).forEachRemaining(Fn.println());
+        com.google.common.collect.Iterators.mergeSorted(CommonUtil.asList(a, b), Comparators.NATURAL_ORDER).forEachRemaining(Fn.println());
     }
 
     @Test
     public void test_repeat() throws Exception {
-        Stream.of(Iterators.repeatElements(N.asList(1, 2, 3), 3)).println();
-        Stream.of(Iterators.repeatCollection(N.asList(1, 2, 3), 3)).println();
-        Stream.of(Iterators.repeatElementsToSize(N.asList(1, 2, 3), 7)).println();
-        Stream.of(Iterators.repeatCollectionToSize(N.asList(1, 2, 3), 5)).println();
+        Stream.of(Iterators.repeatElements(CommonUtil.asList(1, 2, 3), 3)).println();
+        Stream.of(Iterators.repeatCollection(CommonUtil.asList(1, 2, 3), 3)).println();
+        Stream.of(Iterators.repeatElementsToSize(CommonUtil.asList(1, 2, 3), 7)).println();
+        Stream.of(Iterators.repeatCollectionToSize(CommonUtil.asList(1, 2, 3), 5)).println();
 
-        assertEquals(3, N.repeatElementsToSize(N.asList(1, 2, 3, 4, 5, 6), 3).size());
-        assertEquals(8, N.repeatElementsToSize(N.asList(1, 2, 3, 4, 5, 6), 8).size());
+        assertEquals(3, CommonUtil.repeatElementsToSize(CommonUtil.asList(1, 2, 3, 4, 5, 6), 3).size());
+        assertEquals(8, CommonUtil.repeatElementsToSize(CommonUtil.asList(1, 2, 3, 4, 5, 6), 8).size());
 
-        assertEquals(3, N.repeatCollectionToSize(N.asList(1, 2, 3, 4, 5, 6), 3).size());
-        assertEquals(8, N.repeatCollectionToSize(N.asList(1, 2, 3, 4, 5, 6), 8).size());
+        assertEquals(3, CommonUtil.repeatCollectionToSize(CommonUtil.asList(1, 2, 3, 4, 5, 6), 3).size());
+        assertEquals(8, CommonUtil.repeatCollectionToSize(CommonUtil.asList(1, 2, 3, 4, 5, 6), 8).size());
     }
 
     @Test
@@ -330,22 +329,22 @@ public class IteratorsTest {
         final BiFunction<Integer, Integer, String> action2_1 = (a, b) -> a + "-" + b;
 
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(1, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(2, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(3, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(1, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(2, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(3, action2_1).println();
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(1, true, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(2, true, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(3, true, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(1, true, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(2, true, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(3, true, action2_1).println();
         N.println("==========================================================================");
 
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(1, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(2, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(3, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(1, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(2, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(3, action2_1).println();
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(1, true, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(2, true, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(3, true, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(1, true, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(2, true, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(3, true, action2_1).println();
         N.println("==========================================================================");
 
         new TriFunction<Integer, Integer, Integer, Integer>() {
@@ -358,26 +357,26 @@ public class IteratorsTest {
         final TriFunction<Integer, Integer, Integer, String> action3_1 = (a, b, c) -> a + "-" + b + "-" + c;
 
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(1, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(2, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(3, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(4, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(1, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(2, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(3, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(4, action3_1).println();
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(1, true, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(2, true, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(3, true, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).slidingMap(4, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(1, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(2, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(3, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).slidingMap(4, true, action3_1).println();
 
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(1, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(2, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(3, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(4, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(1, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(2, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(3, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(4, action3_1).println();
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(1, true, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(2, true, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(3, true, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(4, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(1, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(2, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(3, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList().iterator()).parallel(2).slidingMap(4, true, action3_1).println();
     }
 
     @Test
@@ -393,22 +392,22 @@ public class IteratorsTest {
         final BiFunction<Integer, Integer, String> action2_1 = (a, b) -> a + "-" + b;
 
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(1, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(2, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(3, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(1, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(2, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(3, action2_1).println();
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(1, true, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(2, true, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(3, true, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(1, true, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(2, true, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(3, true, action2_1).println();
         N.println("==========================================================================");
 
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(1, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(2, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(3, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(1, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(2, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(3, action2_1).println();
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(1, true, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(2, true, action2_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(3, true, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(1, true, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(2, true, action2_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(3, true, action2_1).println();
         N.println("==========================================================================");
 
         new TriFunction<Integer, Integer, Integer, Integer>() {
@@ -421,26 +420,26 @@ public class IteratorsTest {
         final TriFunction<Integer, Integer, Integer, String> action3_1 = (a, b, c) -> a + "-" + b + "-" + c;
 
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(1, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(2, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(3, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(4, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(1, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(2, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(3, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(4, action3_1).println();
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(1, true, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(2, true, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(3, true, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).slidingMap(4, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(1, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(2, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(3, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).slidingMap(4, true, action3_1).println();
 
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(1, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(2, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(3, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(4, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(1, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(2, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(3, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(4, action3_1).println();
         N.println("==========================================================================");
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(1, true, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(2, true, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(3, true, action3_1).println();
-        StreamEx.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(4, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(1, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(2, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(3, true, action3_1).println();
+        Stream.of(IntList.range(1, 10).toList()).parallel(2).slidingMap(4, true, action3_1).println();
     }
 
     @Test

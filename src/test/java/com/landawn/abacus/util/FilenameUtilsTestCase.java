@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.Test;
 
 public class FilenameUtilsTestCase extends FileBasedTestCase {
@@ -937,32 +936,32 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         assertFalse(FilenameUtil.isExtension(null, (Collection<String>) null));
         assertFalse(FilenameUtil.isExtension("file.txt", (Collection<String>) null));
         assertTrue(FilenameUtil.isExtension("file", (Collection<String>) null));
-        assertFalse(FilenameUtil.isExtension("file.txt", new ArrayList<String>()));
+        assertFalse(FilenameUtil.isExtension("file.txt", new ArrayList<>()));
         assertTrue(FilenameUtil.isExtension("file.txt", new ArrayList<>(Arrays.asList("txt"))));
         assertFalse(FilenameUtil.isExtension("file.txt", new ArrayList<>(Arrays.asList("rtf"))));
         assertTrue(FilenameUtil.isExtension("file", new ArrayList<>(Arrays.asList("rtf", ""))));
         assertTrue(FilenameUtil.isExtension("file.txt", new ArrayList<>(Arrays.asList("rtf", "txt"))));
 
         assertFalse(FilenameUtil.isExtension("a/b/file.txt", (Collection<String>) null));
-        assertFalse(FilenameUtil.isExtension("a/b/file.txt", new ArrayList<String>()));
+        assertFalse(FilenameUtil.isExtension("a/b/file.txt", new ArrayList<>()));
         assertTrue(FilenameUtil.isExtension("a/b/file.txt", new ArrayList<>(Arrays.asList("txt"))));
         assertFalse(FilenameUtil.isExtension("a/b/file.txt", new ArrayList<>(Arrays.asList("rtf"))));
         assertTrue(FilenameUtil.isExtension("a/b/file.txt", new ArrayList<>(Arrays.asList("rtf", "txt"))));
 
         assertFalse(FilenameUtil.isExtension("a.b/file.txt", (Collection<String>) null));
-        assertFalse(FilenameUtil.isExtension("a.b/file.txt", new ArrayList<String>()));
+        assertFalse(FilenameUtil.isExtension("a.b/file.txt", new ArrayList<>()));
         assertTrue(FilenameUtil.isExtension("a.b/file.txt", new ArrayList<>(Arrays.asList("txt"))));
         assertFalse(FilenameUtil.isExtension("a.b/file.txt", new ArrayList<>(Arrays.asList("rtf"))));
         assertTrue(FilenameUtil.isExtension("a.b/file.txt", new ArrayList<>(Arrays.asList("rtf", "txt"))));
 
         assertFalse(FilenameUtil.isExtension("a\\b\\file.txt", (Collection<String>) null));
-        assertFalse(FilenameUtil.isExtension("a\\b\\file.txt", new ArrayList<String>()));
+        assertFalse(FilenameUtil.isExtension("a\\b\\file.txt", new ArrayList<>()));
         assertTrue(FilenameUtil.isExtension("a\\b\\file.txt", new ArrayList<>(Arrays.asList("txt"))));
         assertFalse(FilenameUtil.isExtension("a\\b\\file.txt", new ArrayList<>(Arrays.asList("rtf"))));
         assertTrue(FilenameUtil.isExtension("a\\b\\file.txt", new ArrayList<>(Arrays.asList("rtf", "txt"))));
 
         assertFalse(FilenameUtil.isExtension("a.b\\file.txt", (Collection<String>) null));
-        assertFalse(FilenameUtil.isExtension("a.b\\file.txt", new ArrayList<String>()));
+        assertFalse(FilenameUtil.isExtension("a.b\\file.txt", new ArrayList<>()));
         assertTrue(FilenameUtil.isExtension("a.b\\file.txt", new ArrayList<>(Arrays.asList("txt"))));
         assertFalse(FilenameUtil.isExtension("a.b\\file.txt", new ArrayList<>(Arrays.asList("rtf"))));
         assertTrue(FilenameUtil.isExtension("a.b\\file.txt", new ArrayList<>(Arrays.asList("rtf", "txt"))));

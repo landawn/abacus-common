@@ -1223,4 +1223,159 @@ public class ShortStream2025Test extends TestBase {
 
         assertEquals(0, stream.count());
     }
+
+    // Additional tests to improve coverage from 81.9% to 90%+
+
+    @Test
+    public void testZipWithCollectionOfStreams() {
+        Collection<ShortStream> streams = Arrays.asList(ShortStream.of((short) 1, (short) 2), ShortStream.of((short) 10, (short) 20),
+                ShortStream.of((short) 100, (short) 200));
+        ShortStream result = ShortStream.zip(streams, shorts -> {
+            short sum = 0;
+            for (Short s : shorts)
+                sum += s;
+            return sum;
+        });
+        assertArrayEquals(new short[] { 111, 222 }, result.toArray());
+    }
+
+    @Test
+    public void testZipWithCollectionAndValuesForNone() {
+        Collection<ShortStream> streams = Arrays.asList(ShortStream.of((short) 1, (short) 2, (short) 3), ShortStream.of((short) 10),
+                ShortStream.of((short) 100, (short) 200));
+        short[] defaults = { 0, 0, 0 };
+        ShortStream result = ShortStream.zip(streams, defaults, shorts -> {
+            short sum = 0;
+            for (Short s : shorts)
+                sum += s;
+            return sum;
+        });
+        assertArrayEquals(new short[] { 111, 202, 3 }, result.toArray());
+    }
+
+    @Test
+    public void testMergeWithCollectionOfStreams() {
+        Collection<ShortStream> streams = Arrays.asList(ShortStream.of((short) 1, (short) 5), ShortStream.of((short) 2, (short) 6),
+                ShortStream.of((short) 3, (short) 7));
+        ShortStream result = ShortStream.merge(streams, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertArrayEquals(new short[] { 1, 2, 3, 5, 6, 7 }, result.toArray());
+    }
+
+    @Test
+    public void testMergeThreeIterators() {
+        ShortIterator it1 = ShortIterator.of((short) 1, (short) 4);
+        ShortIterator it2 = ShortIterator.of((short) 2, (short) 5);
+        ShortIterator it3 = ShortIterator.of((short) 3, (short) 6);
+
+        ShortStream result = ShortStream.merge(it1, it2, it3, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertArrayEquals(new short[] { 1, 2, 3, 4, 5, 6 }, result.toArray());
+    }
+
+    @Test
+    public void testMergeThreeStreams() {
+        ShortStream s1 = ShortStream.of((short) 1, (short) 4, (short) 7);
+        ShortStream s2 = ShortStream.of((short) 2, (short) 5, (short) 8);
+        ShortStream s3 = ShortStream.of((short) 3, (short) 6, (short) 9);
+
+        ShortStream result = ShortStream.merge(s1, s2, s3, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertArrayEquals(new short[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, result.toArray());
+    }
+
+    @Test
+    public void testFlattenWithAlignmentHorizontally() {
+        short[][] array = { { 1, 2 }, { 3 }, { 4, 5, 6 } };
+        short valueForAlignment = 0;
+
+        ShortStream stream = ShortStream.flatten(array, valueForAlignment, false);
+        assertArrayEquals(new short[] { 1, 2, 0, 3, 0, 0, 4, 5, 6 }, stream.toArray());
+    }
+
+    @Test
+    public void testRangeClosedWithNegativeStep() {
+        ShortStream stream = ShortStream.rangeClosed((short) 5, (short) 1, (short) -1);
+        assertArrayEquals(new short[] { 5, 4, 3, 2, 1 }, stream.toArray());
+    }
+
+    @Test
+    public void testRangeWithInvalidStepDirection() {
+        // Positive step but start > end should return empty
+        ShortStream stream = ShortStream.range((short) 10, (short) 1, (short) 2);
+        assertEquals(0, stream.count());
+
+        // Negative step but start < end should return empty
+        ShortStream stream2 = ShortStream.range((short) 1, (short) 10, (short) -2);
+        assertEquals(0, stream2.count());
+    }
+
+    @Test
+    public void testParallelStreamOperations() {
+        long sum = ShortStream.range((short) 1, (short) 100).parallel().filter(n -> n % 2 == 0).map(n -> (short) (n * 2)).sum();
+
+        assertTrue(sum > 0);
+
+        // Verify parallel flag is maintained through operations
+        ShortStream parallelStream = ShortStream.of((short) 1, (short) 2, (short) 3).parallel().filter(n -> n > 0).map(n -> (short) (n * 2));
+        assertTrue(parallelStream.isParallel());
+    }
+
+    @Test
+    public void testIterateWithImmediateFalseHasNext() {
+        ShortStream stream = ShortStream.iterate(() -> false, () -> (short) 1);
+        assertEquals(0, stream.count());
+
+        ShortStream stream2 = ShortStream.iterate((short) 1, () -> false, n -> (short) (n + 1));
+        assertEquals(0, stream2.count());
+
+        ShortStream stream3 = ShortStream.iterate((short) 1, n -> false, n -> (short) (n + 1));
+        assertEquals(0, stream3.count());
+    }
+
+    @Test
+    public void testCollapseWithNoCollapsibleElements() {
+        ShortStream stream = ShortStream.of((short) 1, (short) 10, (short) 20, (short) 30).collapse((prev, curr) -> curr - prev <= 2,
+                (a, b) -> (short) (a + b));
+        assertArrayEquals(new short[] { 1, 10, 20, 30 }, stream.toArray());
+    }
+
+    @Test
+    public void testScanOnEmptyStream() {
+        ShortStream stream1 = ShortStream.empty().scan((a, b) -> (short) (a + b));
+        assertEquals(0, stream1.count());
+
+        ShortStream stream2 = ShortStream.empty().scan((short) 10, (a, b) -> (short) (a + b));
+        assertEquals(0, stream2.count());
+
+        ShortStream stream3 = ShortStream.empty().scan((short) 10, true, (a, b) -> (short) (a + b));
+        assertArrayEquals(new short[] { 10 }, stream3.toArray());
+    }
+
+    @Test
+    public void testZipThreeArraysWithDefaults() {
+        short[] a = { 1, 2, 3, 4 };
+        short[] b = { 10, 20 };
+        short[] c = { 100 };
+
+        ShortStream stream = ShortStream.zip(a, b, c, (short) 0, (short) 0, (short) 0, (x, y, z) -> (short) (x + y + z));
+        assertArrayEquals(new short[] { 111, 22, 3, 4 }, stream.toArray());
+    }
+
+    @Test
+    public void testZipThreeIteratorsWithDefaults() {
+        ShortIterator it1 = ShortIterator.of((short) 1, (short) 2, (short) 3);
+        ShortIterator it2 = ShortIterator.of((short) 10);
+        ShortIterator it3 = ShortIterator.of((short) 100, (short) 200);
+
+        ShortStream stream = ShortStream.zip(it1, it2, it3, (short) 0, (short) 0, (short) 0, (x, y, z) -> (short) (x + y + z));
+        assertArrayEquals(new short[] { 111, 202, 3 }, stream.toArray());
+    }
+
+    @Test
+    public void testZipThreeStreamsWithDefaults() {
+        ShortStream s1 = ShortStream.of((short) 1, (short) 2);
+        ShortStream s2 = ShortStream.of((short) 10, (short) 20, (short) 30);
+        ShortStream s3 = ShortStream.of((short) 100);
+
+        ShortStream stream = s1.zipWith(s2, s3, (short) 0, (short) 0, (short) 0, (x, y, z) -> (short) (x + y + z));
+        assertArrayEquals(new short[] { 111, 22, 30 }, stream.toArray());
+    }
 }

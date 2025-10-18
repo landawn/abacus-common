@@ -82,8 +82,8 @@ public final class IndexedChar extends AbstractIndexed {
     }
 
     /**
-     * Returns the char value stored in this container.
-     * 
+     * Returns the char value stored in this IndexedChar instance.
+     *
      * @return the char value
      */
     public char value() {

@@ -92,6 +92,8 @@ public class AsyncExecutor {
 
     private volatile Executor executor; //NOSONAR
 
+    private volatile boolean isShutdown = false;
+
     /**
      * Constructs an AsyncExecutor with default configuration.
      * 
@@ -327,29 +329,6 @@ public class AsyncExecutor {
         }));
     }
 
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param commands
-    //     * @return
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    @SafeVarargs
-    //    public final <R> List<ContinuableFuture<R>> execute(final Callable<R>... commands) {
-    //        if (N.isEmpty(commands)) {
-    //            return new ArrayList<>();
-    //        }
-    //
-    //        final List<ContinuableFuture<R>> results = new ArrayList<>(commands.length);
-    //
-    //        for (Callable<R> command : commands) {
-    //            results.add(execute(command));
-    //        }
-    //
-    //        return results;
-    //    }
-
     /**
      * Executes a collection of Callable commands asynchronously in parallel.
      *
@@ -500,6 +479,11 @@ public class AsyncExecutor {
         if (executor == null) {
             synchronized (this) {
                 if (executor == null) {
+                    // Prevent re-initialization after shutdown
+                    if (isShutdown) {
+                        throw new IllegalStateException("AsyncExecutor has been shut down and cannot be reused");
+                    }
+
                     @SuppressWarnings("UnnecessaryLocalVariable")
                     final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(coreThreadPoolSize, maxThreadPoolSize, keepAliveTime, unit,
                             new LinkedBlockingQueue<>());
@@ -573,12 +557,14 @@ public class AsyncExecutor {
      */
     public synchronized void shutdown(final long terminationTimeout, final TimeUnit timeUnit) {
         if (executor == null || !(executor instanceof ExecutorService executorService)) {
+            isShutdown = true; // Mark as shutdown even if executor is null
             return;
         }
 
         logger.warn("Starting to shutdown task in AsyncExecutor");
 
         try {
+            isShutdown = true; // Mark as shutdown before actually shutting down to prevent new tasks
             executorService.shutdown();
 
             if (terminationTimeout > 0 && !executorService.isTerminated()) {

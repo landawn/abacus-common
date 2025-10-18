@@ -212,8 +212,8 @@ public final class PropertiesUtil {
      * String dbUrl = props.get("database.url");
      * }</pre>
      *
-     * @param source The file from which to load the properties.
-     * @return A Properties object containing the loaded properties.
+     * @param source the file from which to load the properties.
+     * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static Properties<String, String> load(final File source) {
@@ -232,10 +232,10 @@ public final class PropertiesUtil {
      * // Properties will be automatically refreshed when the file is modified
      * }</pre>
      *
-     * @param source The file from which to load the properties.
-     * @param autoRefresh If {@code true}, the properties will be automatically refreshed when the file is modified.
+     * @param source the file from which to load the properties.
+     * @param autoRefresh if {@code true}, the properties will be automatically refreshed when the file is modified.
      *                    There is a background thread to check the file last modification time every second.
-     * @return A Properties object containing the loaded properties.
+     * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static Properties<String, String> load(final File source, final boolean autoRefresh) {
@@ -278,8 +278,8 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param source The InputStream from which to load the properties.
-     * @return A Properties object containing the loaded properties.
+     * @param source the InputStream from which to load the properties.
+     * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static Properties<String, String> load(final InputStream source) {
@@ -309,8 +309,8 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param source The Reader from which to load the properties.
-     * @return A Properties object containing the loaded properties.
+     * @param source the Reader from which to load the properties.
+     * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static Properties<String, String> load(final Reader source) {
@@ -332,66 +332,17 @@ public final class PropertiesUtil {
     /**
      * Merges the source properties into the target properties.
      *
-     * @param srcProperties The source properties to merge from.
-     * @param targetProperties The target properties to merge into. If {@code null}, a new Properties object will be created.
-     * @return A Properties object containing the merged properties.
+     * @param srcProperties the source properties to merge from.
+     * @param targetProperties the target properties to merge into. If {@code null}, a new Properties object will be created.
+     * @return a Properties object containing the merged properties.
      */
     @SuppressWarnings("rawtypes")
     private static void merge(final java.util.Properties srcProperties, final Properties<String, String> targetProperties) {
-        //    final Map<String, String> valueMap = new LinkedHashMap<>(targetProperties.values);
-        //
-        //    final Set<String> oldKeySet = N.newHashSet(valueMap.keySet());
-        //    final Set<String> srcPropNameSet = srcProperties.stringPropertyNames();
-        //    final Set<String> newKeySet = N.newHashSet();
-        //
-        //    for (final String srcPropName : srcPropNameSet) {
-        //        valueMap.put(srcPropName, srcProperties.getProperty(srcPropName));
-        //        newKeySet.add(srcPropName);
-        //    }
-        //
-        //    for (final String key : oldKeySet) {
-        //        if (!newKeySet.contains(key)) {
-        //            valueMap.remove(key);
-        //        }
-        //    }
-        //
-        //    targetProperties.reset(valueMap);
 
         targetProperties.reset(new LinkedHashMap<>((Map) srcProperties));
     }
 
     private static <K, V> void merge(final Properties<? extends K, ? extends V> srcProperties, final Properties<K, V> targetProperties) {
-        //    final Map<K, V> valueMap = new LinkedHashMap<>(targetProperties.values);
-        //
-        //    final Set<K> oldKeySet = N.newHashSet(valueMap.keySet());
-        //    final Set<? extends K> srcPropNameSet = srcProperties.keySet();
-        //    final Set<K> newKeySet = N.newHashSet();
-        //    V srcPropValue = null;
-        //    for (final K srcPropName : srcPropNameSet) {
-        //        srcPropValue = srcProperties.get(srcPropName);
-        //
-        //        //    targetPropValue = valueMap.get(srcPropName);
-        //        //
-        //        //    if (srcPropValue instanceof Properties && targetPropValue instanceof Properties) {
-        //        //        merge((Properties) srcPropValue, (Properties) targetPropValue);
-        //        //
-        //        //        valueMap.put(srcPropName, targetPropValue);
-        //        //    } else {
-        //        //        valueMap.put(srcPropName, srcPropValue);
-        //        //    }
-        //
-        //        valueMap.put(srcPropName, srcPropValue);
-        //
-        //        newKeySet.add(srcPropName);
-        //    }
-        //
-        //    for (final K key : oldKeySet) {
-        //        if (!newKeySet.contains(key)) {
-        //            valueMap.remove(key);
-        //        }
-        //    }
-        //
-        //    targetProperties.reset(valueMap);
 
         targetProperties.reset(new LinkedHashMap<>(srcProperties.values));
     }
@@ -406,8 +357,8 @@ public final class PropertiesUtil {
      * String dbUrl = (String) props.get("database.url");
      * }</pre>
      *
-     * @param source The XML file from which to load the properties.
-     * @return A Properties object containing the loaded properties.
+     * @param source the XML file from which to load the properties.
+     * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs
      * @throws ParseException if the XML cannot be parsed
      */
@@ -425,9 +376,9 @@ public final class PropertiesUtil {
      * Properties<String, Object> props = PropertiesUtil.loadFromXml(new File("config.xml"), true);
      * }</pre>
      *
-     * @param source The XML file from which to load the properties.
-     * @param autoRefresh If {@code true}, the properties will be automatically refreshed when the file is modified.
-     * @return A Properties object containing the loaded properties.
+     * @param source the XML file from which to load the properties.
+     * @param autoRefresh if {@code true}, the properties will be automatically refreshed when the file is modified.
+     * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs
      * @throws ParseException if the XML cannot be parsed
      */
@@ -445,8 +396,8 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param source The InputStream from which to load the properties.
-     * @return A Properties object containing the loaded properties.
+     * @param source the InputStream from which to load the properties.
+     * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs
      * @throws ParseException if the XML cannot be parsed
      */
@@ -464,8 +415,8 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param source The Reader from which to load the properties.
-     * @return A Properties object containing the loaded properties.
+     * @param source the Reader from which to load the properties.
+     * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs
      * @throws ParseException if the XML cannot be parsed
      */
@@ -486,10 +437,10 @@ public final class PropertiesUtil {
      * MyProperties props = PropertiesUtil.loadFromXml(new File("config.xml"), MyProperties.class);
      * }</pre>
      *
-     * @param <T> The type of the target properties class.
-     * @param source The XML file from which to load the properties.
-     * @param targetClass The class of the target properties.
-     * @return An instance of the target properties class containing the loaded properties.
+     * @param <T> the type of the target properties class.
+     * @param source the XML file from which to load the properties.
+     * @param targetClass the class of the target properties.
+     * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs
      * @throws ParseException if the XML cannot be parsed
      */
@@ -512,12 +463,12 @@ public final class PropertiesUtil {
      * // Config auto-refreshes when file changes
      * }</pre>
      *
-     * @param <T> The type of the target properties class, must extend Properties&lt;String, Object&gt;.
-     * @param source The XML file from which to load the properties.
-     * @param autoRefresh If {@code true}, the properties will be automatically refreshed when the file is modified.
+     * @param <T> the type of the target properties class, must extend Properties&lt;String, Object&gt;.
+     * @param source the XML file from which to load the properties.
+     * @param autoRefresh if {@code true}, the properties will be automatically refreshed when the file is modified.
      *                    A background thread checks the file last modification time every second.
-     * @param targetClass The class of the target properties.
-     * @return An instance of the target properties class containing the loaded properties.
+     * @param targetClass the class of the target properties.
+     * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs reading the file
      * @throws ParseException if the XML cannot be parsed or has invalid structure
      */
@@ -562,10 +513,10 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param <T> The type of the target properties class, must extend Properties&lt;String, Object&gt;.
-     * @param source The InputStream from which to load the properties.
-     * @param targetClass The class of the target properties.
-     * @return An instance of the target properties class containing the loaded properties.
+     * @param <T> the type of the target properties class, must extend Properties&lt;String, Object&gt;.
+     * @param source the InputStream from which to load the properties.
+     * @param targetClass the class of the target properties.
+     * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs reading the stream
      * @throws ParseException if the XML cannot be parsed or has invalid structure
      */
@@ -597,10 +548,10 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param <T> The type of the target properties class, must extend Properties&lt;String, Object&gt;.
-     * @param source The Reader from which to load the properties.
-     * @param targetClass The class of the target properties.
-     * @return An instance of the target properties class containing the loaded properties.
+     * @param <T> the type of the target properties class, must extend Properties&lt;String, Object&gt;.
+     * @param source the Reader from which to load the properties.
+     * @param targetClass the class of the target properties.
+     * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs reading from the reader
      * @throws ParseException if the XML cannot be parsed or has invalid structure
      */
@@ -689,23 +640,6 @@ public final class PropertiesUtil {
                 }
             } else {
                 if (propSetMethod == null) {
-                    // TODO it's difficult to support duplicated property and may be misused.
-                    //                    if (properties.containsKey(propName)) {
-                    //                        String listPropName = propName + "List";
-                    //                        List<Object> listProp = (List<Object>) properties.get(listPropName);
-                    //
-                    //                        if (listProp == null) {
-                    //                            listProp = Collections.synchronizedList(new ArrayList<Object>());
-                    //                            properties.set(listPropName, listProp);
-                    //                        }
-                    //
-                    //                        if (listProp.size() == 0) {
-                    //                            listProp.add(properties.get(propName));
-                    //                        }
-                    //
-                    //                        listProp.add(propValue);
-                    //                    }
-                    //
                     properties.set(propName, propValue);
                 } else {
                     final Class<?> parameterType = propSetMethod.getParameterTypes()[0];
@@ -750,9 +684,9 @@ public final class PropertiesUtil {
      * PropertiesUtil.store(props, "User configuration", new File("user.properties"));
      * }</pre>
      *
-     * @param properties The properties to store.
-     * @param comments The comments to include in the stored file.
-     * @param output The file to which the properties will be stored.
+     * @param properties the properties to store.
+     * @param comments the comments to include in the stored file.
+     * @param output the file to which the properties will be stored.
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static void store(final Properties<?, ?> properties, final String comments, final File output) {
@@ -783,9 +717,9 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param properties The properties to store.
-     * @param comments The comments to include in the stored output.
-     * @param output The OutputStream to which the properties will be stored.
+     * @param properties the properties to store.
+     * @param comments the comments to include in the stored output.
+     * @param output the OutputStream to which the properties will be stored.
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static void store(final Properties<?, ?> properties, final String comments, final OutputStream output) {
@@ -808,9 +742,9 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param properties The properties to store.
-     * @param comments The comments to include in the stored output.
-     * @param output The Writer to which the properties will be stored.
+     * @param properties the properties to store.
+     * @param comments the comments to include in the stored output.
+     * @param output the Writer to which the properties will be stored.
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static void store(final Properties<?, ?> properties, final String comments, final Writer output) {
@@ -840,10 +774,10 @@ public final class PropertiesUtil {
      * PropertiesUtil.storeToXml(props, "configuration", true, new File("config.xml"));
      * }</pre>
      *
-     * @param properties The properties to store.
-     * @param rootElementName The name of the root element in the XML.
-     * @param writeTypeInfo Whether to write type information for property values.
-     * @param output The file to which the properties will be stored.
+     * @param properties the properties to store.
+     * @param rootElementName the name of the root element in the XML.
+     * @param writeTypeInfo whether to write type information for property values.
+     * @param output the file to which the properties will be stored.
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final File output) {
@@ -874,10 +808,10 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param properties The properties to store.
-     * @param rootElementName The name of the root element in the XML.
-     * @param writeTypeInfo Whether to write type information for property values.
-     * @param output The OutputStream to which the properties will be stored.
+     * @param properties the properties to store.
+     * @param rootElementName the name of the root element in the XML.
+     * @param writeTypeInfo whether to write type information for property values.
+     * @param output the OutputStream to which the properties will be stored.
      * @throws UncheckedIOException Signals that an I/O exception has occurred.
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final OutputStream output)
@@ -895,10 +829,10 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param properties The properties to store.
-     * @param rootElementName The name of the root element in the XML.
-     * @param writeTypeInfo Whether to write type information for property values.
-     * @param output The Writer to which the properties will be stored.
+     * @param properties the properties to store.
+     * @param rootElementName the name of the root element in the XML.
+     * @param writeTypeInfo whether to write type information for property values.
+     * @param output the Writer to which the properties will be stored.
      * @throws UncheckedIOException Signals that an I/O exception has occurred.
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final Writer output)
@@ -910,11 +844,11 @@ public final class PropertiesUtil {
      * Stores the specified properties to the given XML Writer.
      * This is an internal method used recursively for nested properties.
      *
-     * @param properties The properties to store.
-     * @param rootElementName The name of the root element in the XML.
-     * @param writeTypeInfo If {@code true}, type information will be written as attributes in the XML.
-     * @param isFirstCall If {@code true}, this is the first call (writes XML declaration).
-     * @param output The Writer to which the properties will be stored.
+     * @param properties the properties to store.
+     * @param rootElementName the name of the root element in the XML.
+     * @param writeTypeInfo if {@code true}, type information will be written as attributes in the XML.
+     * @param isFirstCall if {@code true}, this is the first call (writes XML declaration).
+     * @param output the Writer to which the properties will be stored.
      * @throws UncheckedIOException if an I/O error occurs while writing
      */
     private static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final boolean isFirstCall,
@@ -1028,11 +962,11 @@ public final class PropertiesUtil {
      * // Generates Config.java with typed getters/setters
      * }</pre>
      *
-     * @param xml The XML content as a string.
-     * @param srcPath The source path where the generated Java code will be saved.
-     * @param packageName The package name for the generated Java classes.
-     * @param className The name of the generated Java class.
-     * @param isPublicField If {@code true}, the fields in the generated Java class will be public.
+     * @param xml the XML content as a string.
+     * @param srcPath the source path where the generated Java code will be saved.
+     * @param packageName the package name for the generated Java classes.
+     * @param className the name of the generated Java class.
+     * @param isPublicField if {@code true}, the fields in the generated Java class will be public.
      * @throws RuntimeException if XML parsing fails or file I/O error occurs
      */
     public static void xml2Java(final String xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
@@ -1049,11 +983,11 @@ public final class PropertiesUtil {
      * PropertiesUtil.xml2Java(xmlFile, "src/main/java", "com.example", "AppConfig", false);
      * }</pre>
      *
-     * @param xml The XML file from which to generate Java code.
-     * @param srcPath The source path where the generated Java code will be saved.
-     * @param packageName The package name for the generated Java classes.
-     * @param className The name of the generated Java class.
-     * @param isPublicField If {@code true}, the fields in the generated Java class will be public.
+     * @param xml the XML file from which to generate Java code.
+     * @param srcPath the source path where the generated Java code will be saved.
+     * @param packageName the package name for the generated Java classes.
+     * @param className the name of the generated Java class.
+     * @param isPublicField if {@code true}, the fields in the generated Java class will be public.
      * @throws RuntimeException if XML parsing fails or file I/O error occurs
      */
     public static void xml2Java(final File xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
@@ -1080,11 +1014,11 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param xml The InputStream from which to generate Java code.
-     * @param srcPath The source path where the generated Java code will be saved (e.g., "src/main/java").
-     * @param packageName The package name for the generated Java classes.
-     * @param className The name of the generated Java class.
-     * @param isPublicField If {@code true}, the fields in the generated Java class will be public; otherwise private.
+     * @param xml the InputStream from which to generate Java code.
+     * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
+     * @param packageName the package name for the generated Java classes.
+     * @param className the name of the generated Java class.
+     * @param isPublicField if {@code true}, the fields in the generated Java class will be public; otherwise private.
      * @throws RuntimeException if XML parsing fails or file I/O error occurs
      */
     public static void xml2Java(final InputStream xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
@@ -1112,11 +1046,11 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param xml The Reader from which to generate Java code.
-     * @param srcPath The source path where the generated Java code will be saved (e.g., "src/main/java").
-     * @param packageName The package name for the generated Java classes.
-     * @param className The name of the generated Java class. If {@code null}, uses the root element name from XML.
-     * @param isPublicField If {@code true}, the fields in the generated Java class will be public; otherwise private.
+     * @param xml the Reader from which to generate Java code.
+     * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
+     * @param packageName the package name for the generated Java classes.
+     * @param className the name of the generated Java class. If {@code null}, uses the root element name from XML.
+     * @param isPublicField if {@code true}, the fields in the generated Java class will be public; otherwise private.
      * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
@@ -1221,19 +1155,6 @@ public final class PropertiesUtil {
 
                 propNameSet.add(propName);
 
-                //    typeName = getTypeName(childNode, propName);
-                //
-                //    output.write(spaces + "    " + (isPublicField ? "public " : "private ") + typeName + " " + propName + ";" + IOUtil.LINE_SEPARATOR);
-                //
-                //    if (duplicatedPropNameSet.contains(propName)) {
-                //        final String listPropName = propName + "List";
-                //        final String elementTypeName = N.typeOf(typeName).isPrimitiveType()
-                //                ? ClassUtil.getSimpleClassName(ClassUtil.wrap(N.typeOf(typeName).clazz()))
-                //                : typeName;
-                //
-                //        output.write(spaces + "    " + (isPublicField ? "public " : "private ") + "List<" + elementTypeName + "> " + listPropName
-                //                + " = Collections.synchronizedList(new ArrayList<" + elementTypeName + ">());" + IOUtil.LINE_SEPARATOR);
-                //    }
             }
 
             propNameSet.clear();

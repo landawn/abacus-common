@@ -181,24 +181,6 @@ public final class HttpUtil {
         contentFormat2Type.put(ContentFormat.KRYO, HttpHeaders.Values.APPLICATION_KRYO);
     }
 
-    //    private static final Map<ContentFormat, String> contentFormat2Encoding = new EnumMap<>(ContentFormat.class);
-    //
-    //    static {
-    //        contentFormat2Encoding.put(ContentFormat.XML_GZIP, GZIP);
-    //        contentFormat2Encoding.put(ContentFormat.XML_BR, BR);
-    //        contentFormat2Encoding.put(ContentFormat.XML_SNAPPY, SNAPPY);
-    //        contentFormat2Encoding.put(ContentFormat.XML_LZ4, LZ4);
-    //        contentFormat2Encoding.put(ContentFormat.JSON_GZIP, GZIP);
-    //        contentFormat2Encoding.put(ContentFormat.JSON_BR, BR);
-    //        contentFormat2Encoding.put(ContentFormat.JSON_SNAPPY, SNAPPY);
-    //        contentFormat2Encoding.put(ContentFormat.JSON_LZ4, LZ4);
-    //        contentFormat2Encoding.put(ContentFormat.GZIP, GZIP);
-    //        contentFormat2Encoding.put(ContentFormat.BR, BR);
-    //        contentFormat2Encoding.put(ContentFormat.SNAPPY, SNAPPY);
-    //        contentFormat2Encoding.put(ContentFormat.LZ4, LZ4);
-    //        contentFormat2Encoding.put(ContentFormat.KRYO, KRYO);
-    //    }
-
     private static final Map<String, Map<String, ContentFormat>> contentTypeEncoding2Format = new ObjectPool<>(64);
 
     static {
@@ -672,12 +654,12 @@ public final class HttpUtil {
      * For example, ContentFormat.JSON returns "application/json".
      *
      * @param contentFormat The content format
-     * @return The content type string, or null if contentFormat is null or NONE
+     * @return The content type string, or an empty string "" if contentFormat is null or NONE
      */
     @MayReturnNull
     public static String getContentType(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {
-            return null;
+            return Strings.EMPTY;
         }
 
         return contentFormat.contentType();
@@ -688,12 +670,12 @@ public final class HttpUtil {
      * For example, ContentFormat.JSON_GZIP returns "gzip".
      *
      * @param contentFormat The content format
-     * @return The content encoding string, or null if contentFormat is null or has no encoding
+     * @return The content encoding string,  or an empty string "" if contentFormat is null or has no encoding
      */
     @MayReturnNull
     public static String getContentEncoding(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {
-            return null;
+            return Strings.EMPTY;
         }
 
         return contentFormat.contentEncoding();

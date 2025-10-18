@@ -396,7 +396,7 @@ public class Files2025Test extends TestBase {
         filesToCleanup.add(file);
 
         CharSink sink = Files.asCharSink(file, StandardCharsets.UTF_8);
-        List<String> lines = N.asList("Line 1", "Line 2", "Line 3");
+        List<String> lines = CommonUtil.asList("Line 1", "Line 2", "Line 3");
         sink.writeLines(lines);
 
         String content = Files.readString(file);

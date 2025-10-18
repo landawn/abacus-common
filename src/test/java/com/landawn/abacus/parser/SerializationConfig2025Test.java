@@ -356,10 +356,7 @@ public class SerializationConfig2025Test extends TestBase {
         Set<String> props = new HashSet<>();
         props.add("field1");
 
-        TestSerializationConfig result = config
-            .setExclusion(Exclusion.NULL)
-            .skipTransientField(false)
-            .setIgnoredPropNames(props);
+        TestSerializationConfig result = config.setExclusion(Exclusion.NULL).skipTransientField(false).setIgnoredPropNames(props);
 
         assertEquals(config, result);
         assertEquals(Exclusion.NULL, config.getExclusion());

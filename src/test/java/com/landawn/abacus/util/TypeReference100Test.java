@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
@@ -16,7 +16,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeReferenceSimpleType() {
-        TypeReference<String> stringRef = new TypeReference<String>() {
+        TypeReference<String> stringRef = new TypeReference<>() {
         };
         Type<String> stringType = stringRef.type();
 
@@ -26,7 +26,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeReferenceGenericList() {
-        TypeReference<List<String>> listRef = new TypeReference<List<String>>() {
+        TypeReference<List<String>> listRef = new TypeReference<>() {
         };
         Type<List<String>> listType = listRef.type();
 
@@ -36,7 +36,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeReferenceGenericMap() {
-        TypeReference<Map<String, Integer>> mapRef = new TypeReference<Map<String, Integer>>() {
+        TypeReference<Map<String, Integer>> mapRef = new TypeReference<>() {
         };
         Type<Map<String, Integer>> mapType = mapRef.type();
 
@@ -46,7 +46,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeReferenceNestedGenerics() {
-        TypeReference<Map<String, List<Set<Integer>>>> complexRef = new TypeReference<Map<String, List<Set<Integer>>>>() {
+        TypeReference<Map<String, List<Set<Integer>>>> complexRef = new TypeReference<>() {
         };
         Type<Map<String, List<Set<Integer>>>> complexType = complexRef.type();
 
@@ -56,7 +56,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeReferenceArray() {
-        TypeReference<String[]> arrayRef = new TypeReference<String[]>() {
+        TypeReference<String[]> arrayRef = new TypeReference<>() {
         };
         Type<String[]> arrayType = arrayRef.type();
 
@@ -66,7 +66,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeReferencePrimitive() {
-        TypeReference<Integer> intRef = new TypeReference<Integer>() {
+        TypeReference<Integer> intRef = new TypeReference<>() {
         };
         Type<Integer> intType = intRef.type();
 
@@ -76,7 +76,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeReferenceCustomClass() {
-        TypeReference<TestBean> beanRef = new TypeReference<TestBean>() {
+        TypeReference<TestBean> beanRef = new TypeReference<>() {
         };
         Type<TestBean> beanType = beanRef.type();
 
@@ -86,7 +86,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeReferenceGenericCustomClass() {
-        TypeReference<GenericBean<String, Integer>> genericBeanRef = new TypeReference<GenericBean<String, Integer>>() {
+        TypeReference<GenericBean<String, Integer>> genericBeanRef = new TypeReference<>() {
         };
         Type<GenericBean<String, Integer>> genericBeanType = genericBeanRef.type();
 
@@ -96,7 +96,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeTokenSimpleType() {
-        TypeReference.TypeToken<String> stringToken = new TypeReference.TypeToken<String>() {
+        TypeReference.TypeToken<String> stringToken = new TypeReference.TypeToken<>() {
         };
         Type<String> stringType = stringToken.type();
 
@@ -106,7 +106,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeTokenGenericType() {
-        TypeReference.TypeToken<List<String>> listToken = new TypeReference.TypeToken<List<String>>() {
+        TypeReference.TypeToken<List<String>> listToken = new TypeReference.TypeToken<>() {
         };
         Type<List<String>> listType = listToken.type();
 
@@ -116,16 +116,16 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeTokenIsTypeReference() {
-        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<String>() {
+        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<>() {
         };
         Assertions.assertTrue(token instanceof TypeReference);
     }
 
     @Test
     public void testMultipleInstancesAreDifferent() {
-        TypeReference<List<String>> ref1 = new TypeReference<List<String>>() {
+        TypeReference<List<String>> ref1 = new TypeReference<>() {
         };
-        TypeReference<List<String>> ref2 = new TypeReference<List<String>>() {
+        TypeReference<List<String>> ref2 = new TypeReference<>() {
         };
 
         Assertions.assertNotSame(ref1, ref2);
@@ -135,7 +135,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeReferenceWithBounds() {
-        TypeReference<List<? extends Number>> boundedRef = new TypeReference<List<? extends Number>>() {
+        TypeReference<List<? extends Number>> boundedRef = new TypeReference<>() {
         };
         Type<List<? extends Number>> boundedType = boundedRef.type();
 
@@ -145,11 +145,11 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeReferenceEquals() {
-        TypeReference<String> ref1 = new TypeReference<String>() {
+        TypeReference<String> ref1 = new TypeReference<>() {
         };
-        TypeReference<String> ref2 = new TypeReference<String>() {
+        TypeReference<String> ref2 = new TypeReference<>() {
         };
-        TypeReference<Integer> ref3 = new TypeReference<Integer>() {
+        TypeReference<Integer> ref3 = new TypeReference<>() {
         };
 
         Assertions.assertEquals(ref1.type(), ref2.type());
@@ -159,7 +159,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testComplexNestedType() {
-        TypeReference<Map<String, Map<Integer, List<Set<String>>>>> complexRef = new TypeReference<Map<String, Map<Integer, List<Set<String>>>>>() {
+        TypeReference<Map<String, Map<Integer, List<Set<String>>>>> complexRef = new TypeReference<>() {
         };
 
         Type<Map<String, Map<Integer, List<Set<String>>>>> complexType = complexRef.type();
@@ -171,7 +171,7 @@ public class TypeReference100Test extends TestBase {
     @Test
     public void testTypeReferenceNotInstantiatedDirectly() {
 
-        TypeReference<String> ref = new TypeReference<String>() {
+        TypeReference<String> ref = new TypeReference<>() {
         };
         Assertions.assertNotNull(ref);
 
@@ -180,7 +180,7 @@ public class TypeReference100Test extends TestBase {
 
     @Test
     public void testTypeTokenNotInstantiatedDirectly() {
-        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<String>() {
+        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<>() {
         };
         Assertions.assertNotNull(token);
 

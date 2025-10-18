@@ -33,8 +33,8 @@ import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
@@ -48,15 +48,15 @@ public class CommonUtil102Test extends TestBase {
         Map<String, String> map1 = new HashMap<>();
         Map<String, String> map2 = new HashMap<>();
 
-        assertTrue(N.anyEmpty(null, map2));
-        assertTrue(N.anyEmpty(map1, null));
-        assertTrue(N.anyEmpty(map1, map2));
+        assertTrue(CommonUtil.anyEmpty(null, map2));
+        assertTrue(CommonUtil.anyEmpty(map1, null));
+        assertTrue(CommonUtil.anyEmpty(map1, map2));
 
         map1.put("key", "value");
-        assertTrue(N.anyEmpty(map1, map2));
+        assertTrue(CommonUtil.anyEmpty(map1, map2));
 
         map2.put("key2", "value2");
-        assertFalse(N.anyEmpty(map1, map2));
+        assertFalse(CommonUtil.anyEmpty(map1, map2));
     }
 
     @Test
@@ -65,460 +65,460 @@ public class CommonUtil102Test extends TestBase {
         Map<String, String> map2 = new HashMap<>();
         Map<String, String> map3 = new HashMap<>();
 
-        assertTrue(N.anyEmpty(null, map2, map3));
-        assertTrue(N.anyEmpty(map1, null, map3));
-        assertTrue(N.anyEmpty(map1, map2, null));
-        assertTrue(N.anyEmpty(map1, map2, map3));
+        assertTrue(CommonUtil.anyEmpty(null, map2, map3));
+        assertTrue(CommonUtil.anyEmpty(map1, null, map3));
+        assertTrue(CommonUtil.anyEmpty(map1, map2, null));
+        assertTrue(CommonUtil.anyEmpty(map1, map2, map3));
 
         map1.put("key1", "value1");
         map2.put("key2", "value2");
-        assertTrue(N.anyEmpty(map1, map2, map3));
+        assertTrue(CommonUtil.anyEmpty(map1, map2, map3));
 
         map3.put("key3", "value3");
-        assertFalse(N.anyEmpty(map1, map2, map3));
+        assertFalse(CommonUtil.anyEmpty(map1, map2, map3));
     }
 
     @Test
     public void testAnyBlank_TwoCharSequences() {
-        assertTrue(N.anyBlank(null, "test"));
-        assertTrue(N.anyBlank("test", null));
-        assertTrue(N.anyBlank("", "test"));
-        assertTrue(N.anyBlank("test", ""));
-        assertTrue(N.anyBlank(" ", "test"));
-        assertTrue(N.anyBlank("test", " "));
-        assertFalse(N.anyBlank("test1", "test2"));
+        assertTrue(CommonUtil.anyBlank(null, "test"));
+        assertTrue(CommonUtil.anyBlank("test", null));
+        assertTrue(CommonUtil.anyBlank("", "test"));
+        assertTrue(CommonUtil.anyBlank("test", ""));
+        assertTrue(CommonUtil.anyBlank(" ", "test"));
+        assertTrue(CommonUtil.anyBlank("test", " "));
+        assertFalse(CommonUtil.anyBlank("test1", "test2"));
     }
 
     @Test
     public void testAnyBlank_ThreeCharSequences() {
-        assertTrue(N.anyBlank(null, "test", "test2"));
-        assertTrue(N.anyBlank("test", null, "test2"));
-        assertTrue(N.anyBlank("test", "test2", null));
-        assertTrue(N.anyBlank("", "test", "test2"));
-        assertTrue(N.anyBlank(" ", "test", "test2"));
-        assertFalse(N.anyBlank("test1", "test2", "test3"));
+        assertTrue(CommonUtil.anyBlank(null, "test", "test2"));
+        assertTrue(CommonUtil.anyBlank("test", null, "test2"));
+        assertTrue(CommonUtil.anyBlank("test", "test2", null));
+        assertTrue(CommonUtil.anyBlank("", "test", "test2"));
+        assertTrue(CommonUtil.anyBlank(" ", "test", "test2"));
+        assertFalse(CommonUtil.anyBlank("test1", "test2", "test3"));
     }
 
     @Test
     public void testAnyBlank_CharSequenceArray() {
-        assertFalse(N.anyBlank((CharSequence[]) null));
-        assertFalse(N.anyBlank(new CharSequence[0]));
-        assertTrue(N.anyBlank((CharSequence) null));
-        assertTrue(N.anyBlank(null, "foo"));
-        assertTrue(N.anyBlank("", "bar"));
-        assertTrue(N.anyBlank("bob", ""));
-        assertTrue(N.anyBlank("  bob  ", null));
-        assertTrue(N.anyBlank(" ", "bar"));
-        assertFalse(N.anyBlank("foo", "bar"));
-        assertFalse(N.anyBlank(new String[] {}));
-        assertTrue(N.anyBlank(new String[] { "" }));
+        assertFalse(CommonUtil.anyBlank((CharSequence[]) null));
+        assertFalse(CommonUtil.anyBlank(new CharSequence[0]));
+        assertTrue(CommonUtil.anyBlank((CharSequence) null));
+        assertTrue(CommonUtil.anyBlank(null, "foo"));
+        assertTrue(CommonUtil.anyBlank("", "bar"));
+        assertTrue(CommonUtil.anyBlank("bob", ""));
+        assertTrue(CommonUtil.anyBlank("  bob  ", null));
+        assertTrue(CommonUtil.anyBlank(" ", "bar"));
+        assertFalse(CommonUtil.anyBlank("foo", "bar"));
+        assertFalse(CommonUtil.anyBlank(new String[] {}));
+        assertTrue(CommonUtil.anyBlank(new String[] { "" }));
     }
 
     @Test
     public void testAnyBlank_Iterable() {
-        assertFalse(N.anyBlank((Iterable<CharSequence>) null));
-        assertFalse(N.anyBlank(new ArrayList<CharSequence>()));
+        assertFalse(CommonUtil.anyBlank((Iterable<CharSequence>) null));
+        assertFalse(CommonUtil.anyBlank(new ArrayList<>()));
 
         List<CharSequence> list = new ArrayList<>();
         list.add("test");
-        assertFalse(N.anyBlank(list));
+        assertFalse(CommonUtil.anyBlank(list));
 
         list.add(null);
-        assertTrue(N.anyBlank(list));
+        assertTrue(CommonUtil.anyBlank(list));
 
         list.clear();
         list.add("");
-        assertTrue(N.anyBlank(list));
+        assertTrue(CommonUtil.anyBlank(list));
 
         list.clear();
         list.add(" ");
-        assertTrue(N.anyBlank(list));
+        assertTrue(CommonUtil.anyBlank(list));
     }
 
     @Test
     public void testAllNull_TwoObjects() {
-        assertTrue(N.allNull(null, null));
-        assertFalse(N.allNull("test", null));
-        assertFalse(N.allNull(null, "test"));
-        assertFalse(N.allNull("test1", "test2"));
+        assertTrue(CommonUtil.allNull(null, null));
+        assertFalse(CommonUtil.allNull("test", null));
+        assertFalse(CommonUtil.allNull(null, "test"));
+        assertFalse(CommonUtil.allNull("test1", "test2"));
     }
 
     @Test
     public void testAllNull_ThreeObjects() {
-        assertTrue(N.allNull(null, null, null));
-        assertFalse(N.allNull("test", null, null));
-        assertFalse(N.allNull(null, "test", null));
-        assertFalse(N.allNull(null, null, "test"));
-        assertFalse(N.allNull("test1", "test2", "test3"));
+        assertTrue(CommonUtil.allNull(null, null, null));
+        assertFalse(CommonUtil.allNull("test", null, null));
+        assertFalse(CommonUtil.allNull(null, "test", null));
+        assertFalse(CommonUtil.allNull(null, null, "test"));
+        assertFalse(CommonUtil.allNull("test1", "test2", "test3"));
     }
 
     @Test
     public void testAllNull_ObjectArray() {
-        assertTrue(N.allNull((Object[]) null));
-        assertTrue(N.allNull(new Object[0]));
-        assertTrue(N.allNull(new Object[] { null, null, null }));
-        assertFalse(N.allNull(new Object[] { null, "test", null }));
-        assertFalse(N.allNull(new Object[] { "test1", "test2" }));
+        assertTrue(CommonUtil.allNull((Object[]) null));
+        assertTrue(CommonUtil.allNull(new Object[0]));
+        assertTrue(CommonUtil.allNull(new Object[] { null, null, null }));
+        assertFalse(CommonUtil.allNull(new Object[] { null, "test", null }));
+        assertFalse(CommonUtil.allNull(new Object[] { "test1", "test2" }));
     }
 
     @Test
     public void testAllNull_Iterable() {
-        assertTrue(N.allNull((Iterable<?>) null));
-        assertTrue(N.allNull(new ArrayList<>()));
+        assertTrue(CommonUtil.allNull((Iterable<?>) null));
+        assertTrue(CommonUtil.allNull(new ArrayList<>()));
 
         List<Object> list = new ArrayList<>();
         list.add(null);
         list.add(null);
-        assertTrue(N.allNull(list));
+        assertTrue(CommonUtil.allNull(list));
 
         list.add("test");
-        assertFalse(N.allNull(list));
+        assertFalse(CommonUtil.allNull(list));
     }
 
     @Test
     public void testAllEmpty_TwoCharSequences() {
-        assertTrue(N.allEmpty((String) null, (String) null));
-        assertTrue(N.allEmpty("", ""));
-        assertTrue(N.allEmpty(null, ""));
-        assertTrue(N.allEmpty("", null));
-        assertFalse(N.allEmpty("test", ""));
-        assertFalse(N.allEmpty("", "test"));
-        assertFalse(N.allEmpty("test1", "test2"));
+        assertTrue(CommonUtil.allEmpty((String) null, (String) null));
+        assertTrue(CommonUtil.allEmpty("", ""));
+        assertTrue(CommonUtil.allEmpty(null, ""));
+        assertTrue(CommonUtil.allEmpty("", null));
+        assertFalse(CommonUtil.allEmpty("test", ""));
+        assertFalse(CommonUtil.allEmpty("", "test"));
+        assertFalse(CommonUtil.allEmpty("test1", "test2"));
     }
 
     @Test
     public void testAllEmpty_ThreeCharSequences() {
-        assertTrue(N.allEmpty((String) null, (String) null, (String) null));
-        assertTrue(N.allEmpty("", "", ""));
-        assertTrue(N.allEmpty(null, "", null));
-        assertFalse(N.allEmpty("test", "", ""));
-        assertFalse(N.allEmpty("", "test", ""));
-        assertFalse(N.allEmpty("", "", "test"));
-        assertFalse(N.allEmpty("test1", "test2", "test3"));
+        assertTrue(CommonUtil.allEmpty((String) null, (String) null, (String) null));
+        assertTrue(CommonUtil.allEmpty("", "", ""));
+        assertTrue(CommonUtil.allEmpty(null, "", null));
+        assertFalse(CommonUtil.allEmpty("test", "", ""));
+        assertFalse(CommonUtil.allEmpty("", "test", ""));
+        assertFalse(CommonUtil.allEmpty("", "", "test"));
+        assertFalse(CommonUtil.allEmpty("test1", "test2", "test3"));
     }
 
     @Test
     public void testAllEmpty_CharSequenceArray() {
-        assertTrue(N.allEmpty((CharSequence[]) null));
-        assertTrue(N.allEmpty(new CharSequence[0]));
-        assertTrue(N.allEmpty(null, ""));
-        assertFalse(N.allEmpty(null, "foo"));
-        assertFalse(N.allEmpty("", "bar"));
-        assertFalse(N.allEmpty("bob", ""));
-        assertFalse(N.allEmpty("  bob  ", null));
-        assertFalse(N.allEmpty(" ", "bar"));
-        assertFalse(N.allEmpty("foo", "bar"));
+        assertTrue(CommonUtil.allEmpty((CharSequence[]) null));
+        assertTrue(CommonUtil.allEmpty(new CharSequence[0]));
+        assertTrue(CommonUtil.allEmpty(null, ""));
+        assertFalse(CommonUtil.allEmpty(null, "foo"));
+        assertFalse(CommonUtil.allEmpty("", "bar"));
+        assertFalse(CommonUtil.allEmpty("bob", ""));
+        assertFalse(CommonUtil.allEmpty("  bob  ", null));
+        assertFalse(CommonUtil.allEmpty(" ", "bar"));
+        assertFalse(CommonUtil.allEmpty("foo", "bar"));
     }
 
     @Test
     public void testAllEmpty_CharSequenceIterable() {
-        assertTrue(N.allEmpty((Iterable<? extends CharSequence>) null));
-        assertTrue(N.allEmpty(new ArrayList<CharSequence>()));
+        assertTrue(CommonUtil.allEmpty((Iterable<? extends CharSequence>) null));
+        assertTrue(CommonUtil.allEmpty(new ArrayList<>()));
 
         List<CharSequence> list = new ArrayList<>();
         list.add(null);
         list.add("");
-        assertTrue(N.allEmpty(list));
+        assertTrue(CommonUtil.allEmpty(list));
 
         list.add("test");
-        assertFalse(N.allEmpty(list));
+        assertFalse(CommonUtil.allEmpty(list));
     }
 
     @Test
     public void testAllEmpty_TwoObjectArrays() {
-        assertTrue(N.allEmpty((Object[]) null, (Object[]) null));
-        assertTrue(N.allEmpty(new Object[0], new Object[0]));
-        assertTrue(N.allEmpty((Object[]) null, new Object[0]));
-        assertFalse(N.allEmpty(new Object[] { "test" }, new Object[0]));
-        assertFalse(N.allEmpty(new Object[0], new Object[] { "test" }));
-        assertFalse(N.allEmpty(new Object[] { "test1" }, new Object[] { "test2" }));
+        assertTrue(CommonUtil.allEmpty((Object[]) null, (Object[]) null));
+        assertTrue(CommonUtil.allEmpty(new Object[0], new Object[0]));
+        assertTrue(CommonUtil.allEmpty((Object[]) null, new Object[0]));
+        assertFalse(CommonUtil.allEmpty(new Object[] { "test" }, new Object[0]));
+        assertFalse(CommonUtil.allEmpty(new Object[0], new Object[] { "test" }));
+        assertFalse(CommonUtil.allEmpty(new Object[] { "test1" }, new Object[] { "test2" }));
     }
 
     @Test
     public void testAllEmpty_ThreeObjectArrays() {
-        assertTrue(N.allEmpty((Object[]) null, (Object[]) null, (Object[]) null));
-        assertTrue(N.allEmpty(new Object[0], new Object[0], new Object[0]));
-        assertFalse(N.allEmpty(new Object[] { "test" }, new Object[0], new Object[0]));
-        assertFalse(N.allEmpty(new Object[0], new Object[] { "test" }, new Object[0]));
-        assertFalse(N.allEmpty(new Object[0], new Object[0], new Object[] { "test" }));
+        assertTrue(CommonUtil.allEmpty((Object[]) null, (Object[]) null, (Object[]) null));
+        assertTrue(CommonUtil.allEmpty(new Object[0], new Object[0], new Object[0]));
+        assertFalse(CommonUtil.allEmpty(new Object[] { "test" }, new Object[0], new Object[0]));
+        assertFalse(CommonUtil.allEmpty(new Object[0], new Object[] { "test" }, new Object[0]));
+        assertFalse(CommonUtil.allEmpty(new Object[0], new Object[0], new Object[] { "test" }));
     }
 
     @Test
     public void testAllEmpty_TwoCollections() {
-        assertTrue(N.allEmpty((Collection<?>) null, (Collection<?>) null));
-        assertTrue(N.allEmpty(new ArrayList<>(), new ArrayList<>()));
-        assertTrue(N.allEmpty((Collection<?>) null, new ArrayList<>()));
-        assertFalse(N.allEmpty(Arrays.asList("test"), new ArrayList<>()));
-        assertFalse(N.allEmpty(new ArrayList<>(), Arrays.asList("test")));
+        assertTrue(CommonUtil.allEmpty((Collection<?>) null, (Collection<?>) null));
+        assertTrue(CommonUtil.allEmpty(new ArrayList<>(), new ArrayList<>()));
+        assertTrue(CommonUtil.allEmpty((Collection<?>) null, new ArrayList<>()));
+        assertFalse(CommonUtil.allEmpty(Arrays.asList("test"), new ArrayList<>()));
+        assertFalse(CommonUtil.allEmpty(new ArrayList<>(), Arrays.asList("test")));
     }
 
     @Test
     public void testAllEmpty_ThreeCollections() {
-        assertTrue(N.allEmpty((Collection<?>) null, (Collection<?>) null, (Collection<?>) null));
-        assertTrue(N.allEmpty(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
-        assertFalse(N.allEmpty(Arrays.asList("test"), new ArrayList<>(), new ArrayList<>()));
-        assertFalse(N.allEmpty(new ArrayList<>(), Arrays.asList("test"), new ArrayList<>()));
-        assertFalse(N.allEmpty(new ArrayList<>(), new ArrayList<>(), Arrays.asList("test")));
+        assertTrue(CommonUtil.allEmpty((Collection<?>) null, (Collection<?>) null, (Collection<?>) null));
+        assertTrue(CommonUtil.allEmpty(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+        assertFalse(CommonUtil.allEmpty(Arrays.asList("test"), new ArrayList<>(), new ArrayList<>()));
+        assertFalse(CommonUtil.allEmpty(new ArrayList<>(), Arrays.asList("test"), new ArrayList<>()));
+        assertFalse(CommonUtil.allEmpty(new ArrayList<>(), new ArrayList<>(), Arrays.asList("test")));
     }
 
     @Test
     public void testAllEmpty_TwoMaps() {
-        assertTrue(N.allEmpty((Map<?, ?>) null, (Map<?, ?>) null));
-        assertTrue(N.allEmpty(new HashMap<>(), new HashMap<>()));
-        assertTrue(N.allEmpty((Map<?, ?>) null, new HashMap<>()));
+        assertTrue(CommonUtil.allEmpty((Map<?, ?>) null, (Map<?, ?>) null));
+        assertTrue(CommonUtil.allEmpty(new HashMap<>(), new HashMap<>()));
+        assertTrue(CommonUtil.allEmpty((Map<?, ?>) null, new HashMap<>()));
 
         Map<String, String> map1 = new HashMap<>();
         Map<String, String> map2 = new HashMap<>();
-        assertTrue(N.allEmpty(map1, map2));
+        assertTrue(CommonUtil.allEmpty(map1, map2));
 
         map1.put("key", "value");
-        assertFalse(N.allEmpty(map1, map2));
-        assertFalse(N.allEmpty(map2, map1));
+        assertFalse(CommonUtil.allEmpty(map1, map2));
+        assertFalse(CommonUtil.allEmpty(map2, map1));
     }
 
     @Test
     public void testAllEmpty_ThreeMaps() {
-        assertTrue(N.allEmpty((Map<?, ?>) null, (Map<?, ?>) null, (Map<?, ?>) null));
-        assertTrue(N.allEmpty(new HashMap<>(), new HashMap<>(), new HashMap<>()));
+        assertTrue(CommonUtil.allEmpty((Map<?, ?>) null, (Map<?, ?>) null, (Map<?, ?>) null));
+        assertTrue(CommonUtil.allEmpty(new HashMap<>(), new HashMap<>(), new HashMap<>()));
 
         Map<String, String> map1 = new HashMap<>();
         Map<String, String> map2 = new HashMap<>();
         Map<String, String> map3 = new HashMap<>();
-        assertTrue(N.allEmpty(map1, map2, map3));
+        assertTrue(CommonUtil.allEmpty(map1, map2, map3));
 
         map1.put("key", "value");
-        assertFalse(N.allEmpty(map1, map2, map3));
+        assertFalse(CommonUtil.allEmpty(map1, map2, map3));
     }
 
     @Test
     public void testAllBlank_TwoCharSequences() {
-        assertTrue(N.allBlank(null, null));
-        assertTrue(N.allBlank("", ""));
-        assertTrue(N.allBlank(" ", " "));
-        assertTrue(N.allBlank(null, ""));
-        assertTrue(N.allBlank("", " "));
-        assertFalse(N.allBlank("test", ""));
-        assertFalse(N.allBlank("", "test"));
-        assertFalse(N.allBlank("test1", "test2"));
+        assertTrue(CommonUtil.allBlank(null, null));
+        assertTrue(CommonUtil.allBlank("", ""));
+        assertTrue(CommonUtil.allBlank(" ", " "));
+        assertTrue(CommonUtil.allBlank(null, ""));
+        assertTrue(CommonUtil.allBlank("", " "));
+        assertFalse(CommonUtil.allBlank("test", ""));
+        assertFalse(CommonUtil.allBlank("", "test"));
+        assertFalse(CommonUtil.allBlank("test1", "test2"));
     }
 
     @Test
     public void testAllBlank_ThreeCharSequences() {
-        assertTrue(N.allBlank(null, null, null));
-        assertTrue(N.allBlank("", "", ""));
-        assertTrue(N.allBlank(" ", " ", " "));
-        assertTrue(N.allBlank(null, "", " "));
-        assertFalse(N.allBlank("test", "", ""));
-        assertFalse(N.allBlank("", "test", ""));
-        assertFalse(N.allBlank("", "", "test"));
-        assertFalse(N.allBlank("test1", "test2", "test3"));
+        assertTrue(CommonUtil.allBlank(null, null, null));
+        assertTrue(CommonUtil.allBlank("", "", ""));
+        assertTrue(CommonUtil.allBlank(" ", " ", " "));
+        assertTrue(CommonUtil.allBlank(null, "", " "));
+        assertFalse(CommonUtil.allBlank("test", "", ""));
+        assertFalse(CommonUtil.allBlank("", "test", ""));
+        assertFalse(CommonUtil.allBlank("", "", "test"));
+        assertFalse(CommonUtil.allBlank("test1", "test2", "test3"));
     }
 
     @Test
     public void testAllBlank_CharSequenceArray() {
-        assertTrue(N.allBlank((CharSequence[]) null));
-        assertTrue(N.allBlank(new CharSequence[0]));
-        assertTrue(N.allBlank(null, null));
-        assertTrue(N.allBlank("", " "));
-        assertFalse(N.allBlank(null, "foo"));
-        assertFalse(N.allBlank("", "bar"));
-        assertFalse(N.allBlank("bob", ""));
-        assertFalse(N.allBlank("  bob  ", null));
-        assertFalse(N.allBlank(" ", "bar"));
-        assertFalse(N.allBlank("foo", "bar"));
+        assertTrue(CommonUtil.allBlank((CharSequence[]) null));
+        assertTrue(CommonUtil.allBlank(new CharSequence[0]));
+        assertTrue(CommonUtil.allBlank(null, null));
+        assertTrue(CommonUtil.allBlank("", " "));
+        assertFalse(CommonUtil.allBlank(null, "foo"));
+        assertFalse(CommonUtil.allBlank("", "bar"));
+        assertFalse(CommonUtil.allBlank("bob", ""));
+        assertFalse(CommonUtil.allBlank("  bob  ", null));
+        assertFalse(CommonUtil.allBlank(" ", "bar"));
+        assertFalse(CommonUtil.allBlank("foo", "bar"));
     }
 
     @Test
     public void testAllBlank_CharSequenceIterable() {
-        assertTrue(N.allBlank((Iterable<? extends CharSequence>) null));
-        assertTrue(N.allBlank(new ArrayList<CharSequence>()));
+        assertTrue(CommonUtil.allBlank((Iterable<? extends CharSequence>) null));
+        assertTrue(CommonUtil.allBlank(new ArrayList<>()));
 
         List<CharSequence> list = new ArrayList<>();
         list.add(null);
         list.add("");
         list.add(" ");
-        assertTrue(N.allBlank(list));
+        assertTrue(CommonUtil.allBlank(list));
 
         list.add("test");
-        assertFalse(N.allBlank(list));
+        assertFalse(CommonUtil.allBlank(list));
     }
 
     @Test
     public void testNullToEmpty_String() {
-        assertEquals("", N.nullToEmpty((String) null));
-        assertEquals("test", N.nullToEmpty("test"));
-        assertEquals("", N.nullToEmpty(""));
+        assertEquals("", CommonUtil.nullToEmpty((String) null));
+        assertEquals("test", CommonUtil.nullToEmpty("test"));
+        assertEquals("", CommonUtil.nullToEmpty(""));
     }
 
     @Test
     public void testNullToEmpty_List() {
         List<String> nullList = null;
-        List<String> emptyList = N.nullToEmpty(nullList);
+        List<String> emptyList = CommonUtil.nullToEmpty(nullList);
         assertNotNull(emptyList);
         assertTrue(emptyList.isEmpty());
 
         List<String> list = new ArrayList<>();
         list.add("test");
-        assertSame(list, N.nullToEmpty(list));
+        assertSame(list, CommonUtil.nullToEmpty(list));
     }
 
     @Test
     public void testNullToEmpty_Set() {
         Set<String> nullSet = null;
-        Set<String> emptySet = N.nullToEmpty(nullSet);
+        Set<String> emptySet = CommonUtil.nullToEmpty(nullSet);
         assertNotNull(emptySet);
         assertTrue(emptySet.isEmpty());
 
         Set<String> set = new HashSet<>();
         set.add("test");
-        assertSame(set, N.nullToEmpty(set));
+        assertSame(set, CommonUtil.nullToEmpty(set));
     }
 
     @Test
     public void testNullToEmpty_SortedSet() {
         SortedSet<String> nullSet = null;
-        SortedSet<String> emptySet = N.nullToEmpty(nullSet);
+        SortedSet<String> emptySet = CommonUtil.nullToEmpty(nullSet);
         assertNotNull(emptySet);
         assertTrue(emptySet.isEmpty());
 
         SortedSet<String> set = new TreeSet<>();
         set.add("test");
-        assertSame(set, N.nullToEmpty(set));
+        assertSame(set, CommonUtil.nullToEmpty(set));
     }
 
     @Test
     public void testNullToEmpty_NavigableSet() {
         NavigableSet<String> nullSet = null;
-        NavigableSet<String> emptySet = N.nullToEmpty(nullSet);
+        NavigableSet<String> emptySet = CommonUtil.nullToEmpty(nullSet);
         assertNotNull(emptySet);
         assertTrue(emptySet.isEmpty());
 
         NavigableSet<String> set = new TreeSet<>();
         set.add("test");
-        assertSame(set, N.nullToEmpty(set));
+        assertSame(set, CommonUtil.nullToEmpty(set));
     }
 
     @Test
     public void testNullToEmpty_Collection() {
         Collection<String> nullCollection = null;
-        Collection<String> emptyCollection = N.nullToEmpty(nullCollection);
+        Collection<String> emptyCollection = CommonUtil.nullToEmpty(nullCollection);
         assertNotNull(emptyCollection);
         assertTrue(emptyCollection.isEmpty());
 
         Collection<String> collection = new ArrayList<>();
         collection.add("test");
-        assertSame(collection, N.nullToEmpty(collection));
+        assertSame(collection, CommonUtil.nullToEmpty(collection));
     }
 
     @Test
     public void testNullToEmpty_Map() {
         Map<String, String> nullMap = null;
-        Map<String, String> emptyMap = N.nullToEmpty(nullMap);
+        Map<String, String> emptyMap = CommonUtil.nullToEmpty(nullMap);
         assertNotNull(emptyMap);
         assertTrue(emptyMap.isEmpty());
 
         Map<String, String> map = new HashMap<>();
         map.put("key", "value");
-        assertSame(map, N.nullToEmpty(map));
+        assertSame(map, CommonUtil.nullToEmpty(map));
     }
 
     @Test
     public void testNullToEmpty_SortedMap() {
         SortedMap<String, String> nullMap = null;
-        SortedMap<String, String> emptyMap = N.nullToEmpty(nullMap);
+        SortedMap<String, String> emptyMap = CommonUtil.nullToEmpty(nullMap);
         assertNotNull(emptyMap);
         assertTrue(emptyMap.isEmpty());
 
         SortedMap<String, String> map = new TreeMap<>();
         map.put("key", "value");
-        assertSame(map, N.nullToEmpty(map));
+        assertSame(map, CommonUtil.nullToEmpty(map));
     }
 
     @Test
     public void testNullToEmpty_NavigableMap() {
         NavigableMap<String, String> nullMap = null;
-        NavigableMap<String, String> emptyMap = N.nullToEmpty(nullMap);
+        NavigableMap<String, String> emptyMap = CommonUtil.nullToEmpty(nullMap);
         assertNotNull(emptyMap);
         assertTrue(emptyMap.isEmpty());
 
         NavigableMap<String, String> map = new TreeMap<>();
         map.put("key", "value");
-        assertSame(map, N.nullToEmpty(map));
+        assertSame(map, CommonUtil.nullToEmpty(map));
     }
 
     @Test
     public void testNullToEmpty_Iterator() {
         Iterator<String> nullIterator = null;
-        Iterator<String> emptyIterator = N.nullToEmpty(nullIterator);
+        Iterator<String> emptyIterator = CommonUtil.nullToEmpty(nullIterator);
         assertNotNull(emptyIterator);
         assertFalse(emptyIterator.hasNext());
 
         Iterator<String> iterator = Arrays.asList("test").iterator();
-        assertSame(iterator, N.nullToEmpty(iterator));
+        assertSame(iterator, CommonUtil.nullToEmpty(iterator));
     }
 
     @Test
     public void testNullToEmpty_ListIterator() {
         ListIterator<String> nullIterator = null;
-        ListIterator<String> emptyIterator = N.nullToEmpty(nullIterator);
+        ListIterator<String> emptyIterator = CommonUtil.nullToEmpty(nullIterator);
         assertNotNull(emptyIterator);
         assertFalse(emptyIterator.hasNext());
 
         ListIterator<String> iterator = Arrays.asList("test").listIterator();
-        assertSame(iterator, N.nullToEmpty(iterator));
+        assertSame(iterator, CommonUtil.nullToEmpty(iterator));
     }
 
     @Test
     public void testNullToEmpty_PrimitiveArrays() {
-        assertArrayEquals(new boolean[0], N.nullToEmpty((boolean[]) null));
-        assertArrayEquals(new char[0], N.nullToEmpty((char[]) null));
-        assertArrayEquals(new byte[0], N.nullToEmpty((byte[]) null));
-        assertArrayEquals(new short[0], N.nullToEmpty((short[]) null));
-        assertArrayEquals(new int[0], N.nullToEmpty((int[]) null));
-        assertArrayEquals(new long[0], N.nullToEmpty((long[]) null));
-        assertArrayEquals(new float[0], N.nullToEmpty((float[]) null), 0.0f);
-        assertArrayEquals(new double[0], N.nullToEmpty((double[]) null), 0.0);
+        assertArrayEquals(new boolean[0], CommonUtil.nullToEmpty((boolean[]) null));
+        assertArrayEquals(new char[0], CommonUtil.nullToEmpty((char[]) null));
+        assertArrayEquals(new byte[0], CommonUtil.nullToEmpty((byte[]) null));
+        assertArrayEquals(new short[0], CommonUtil.nullToEmpty((short[]) null));
+        assertArrayEquals(new int[0], CommonUtil.nullToEmpty((int[]) null));
+        assertArrayEquals(new long[0], CommonUtil.nullToEmpty((long[]) null));
+        assertArrayEquals(new float[0], CommonUtil.nullToEmpty((float[]) null), 0.0f);
+        assertArrayEquals(new double[0], CommonUtil.nullToEmpty((double[]) null), 0.0);
 
         boolean[] boolArray = { true, false };
-        assertSame(boolArray, N.nullToEmpty(boolArray));
+        assertSame(boolArray, CommonUtil.nullToEmpty(boolArray));
     }
 
     @Test
     public void testNullToEmpty_ObjectArrays() {
-        assertArrayEquals(new BigInteger[0], N.nullToEmpty((BigInteger[]) null));
-        assertArrayEquals(new BigDecimal[0], N.nullToEmpty((BigDecimal[]) null));
-        assertArrayEquals(new String[0], N.nullToEmpty((String[]) null));
-        assertArrayEquals(new java.util.Date[0], N.nullToEmpty((java.util.Date[]) null));
-        assertArrayEquals(new java.sql.Date[0], N.nullToEmpty((java.sql.Date[]) null));
-        assertArrayEquals(new java.sql.Time[0], N.nullToEmpty((java.sql.Time[]) null));
-        assertArrayEquals(new java.sql.Timestamp[0], N.nullToEmpty((java.sql.Timestamp[]) null));
-        assertArrayEquals(new Calendar[0], N.nullToEmpty((Calendar[]) null));
-        assertArrayEquals(new Object[0], N.nullToEmpty((Object[]) null));
+        assertArrayEquals(new BigInteger[0], CommonUtil.nullToEmpty((BigInteger[]) null));
+        assertArrayEquals(new BigDecimal[0], CommonUtil.nullToEmpty((BigDecimal[]) null));
+        assertArrayEquals(new String[0], CommonUtil.nullToEmpty((String[]) null));
+        assertArrayEquals(new java.util.Date[0], CommonUtil.nullToEmpty((java.util.Date[]) null));
+        assertArrayEquals(new java.sql.Date[0], CommonUtil.nullToEmpty((java.sql.Date[]) null));
+        assertArrayEquals(new java.sql.Time[0], CommonUtil.nullToEmpty((java.sql.Time[]) null));
+        assertArrayEquals(new java.sql.Timestamp[0], CommonUtil.nullToEmpty((java.sql.Timestamp[]) null));
+        assertArrayEquals(new Calendar[0], CommonUtil.nullToEmpty((Calendar[]) null));
+        assertArrayEquals(new Object[0], CommonUtil.nullToEmpty((Object[]) null));
 
         String[] strArray = { "test1", "test2" };
-        assertSame(strArray, N.nullToEmpty(strArray));
+        assertSame(strArray, CommonUtil.nullToEmpty(strArray));
     }
 
     @Test
     public void testNullToEmpty_GenericArray() {
         Integer[] nullArray = null;
-        Integer[] emptyArray = N.nullToEmpty(nullArray, Integer[].class);
+        Integer[] emptyArray = CommonUtil.nullToEmpty(nullArray, Integer[].class);
         assertNotNull(emptyArray);
         assertEquals(0, emptyArray.length);
 
         Integer[] array = { 1, 2, 3 };
-        assertSame(array, N.nullToEmpty(array, Integer[].class));
+        assertSame(array, CommonUtil.nullToEmpty(array, Integer[].class));
     }
 
     @Test
     public void testNullToEmptyForEach() {
         String[] nullArray = null;
-        String[] result = N.nullToEmptyForEach(nullArray);
+        String[] result = CommonUtil.nullToEmptyForEach(nullArray);
         assertNotNull(result);
         assertEquals(0, result.length);
 
         String[] arrayWithNulls = { "test", null, "test2", null };
-        String[] converted = N.nullToEmptyForEach(arrayWithNulls);
+        String[] converted = CommonUtil.nullToEmptyForEach(arrayWithNulls);
         assertEquals("test", converted[0]);
         assertEquals("", converted[1]);
         assertEquals("test2", converted[2]);
@@ -528,152 +528,152 @@ public class CommonUtil102Test extends TestBase {
     @Test
     public void testNullToEmpty_ImmutableCollections() {
         ImmutableCollection<String> nullColl = null;
-        ImmutableCollection<String> emptyColl = N.nullToEmpty(nullColl);
+        ImmutableCollection<String> emptyColl = CommonUtil.nullToEmpty(nullColl);
         assertNotNull(emptyColl);
         assertTrue(emptyColl.isEmpty());
 
         ImmutableList<String> nullList = null;
-        ImmutableList<String> emptyList = N.nullToEmpty(nullList);
+        ImmutableList<String> emptyList = CommonUtil.nullToEmpty(nullList);
         assertNotNull(emptyList);
         assertTrue(emptyList.isEmpty());
 
         ImmutableSet<String> nullSet = null;
-        ImmutableSet<String> emptySet = N.nullToEmpty(nullSet);
+        ImmutableSet<String> emptySet = CommonUtil.nullToEmpty(nullSet);
         assertNotNull(emptySet);
         assertTrue(emptySet.isEmpty());
 
         ImmutableSortedSet<String> nullSortedSet = null;
-        ImmutableSortedSet<String> emptySortedSet = N.nullToEmpty(nullSortedSet);
+        ImmutableSortedSet<String> emptySortedSet = CommonUtil.nullToEmpty(nullSortedSet);
         assertNotNull(emptySortedSet);
         assertTrue(emptySortedSet.isEmpty());
 
         ImmutableNavigableSet<String> nullNavSet = null;
-        ImmutableNavigableSet<String> emptyNavSet = N.nullToEmpty(nullNavSet);
+        ImmutableNavigableSet<String> emptyNavSet = CommonUtil.nullToEmpty(nullNavSet);
         assertNotNull(emptyNavSet);
         assertTrue(emptyNavSet.isEmpty());
 
         ImmutableMap<String, String> nullMap = null;
-        ImmutableMap<String, String> emptyMap = N.nullToEmpty(nullMap);
+        ImmutableMap<String, String> emptyMap = CommonUtil.nullToEmpty(nullMap);
         assertNotNull(emptyMap);
         assertTrue(emptyMap.isEmpty());
 
         ImmutableSortedMap<String, String> nullSortedMap = null;
-        ImmutableSortedMap<String, String> emptySortedMap = N.nullToEmpty(nullSortedMap);
+        ImmutableSortedMap<String, String> emptySortedMap = CommonUtil.nullToEmpty(nullSortedMap);
         assertNotNull(emptySortedMap);
         assertTrue(emptySortedMap.isEmpty());
 
         ImmutableNavigableMap<String, String> nullNavMap = null;
-        ImmutableNavigableMap<String, String> emptyNavMap = N.nullToEmpty(nullNavMap);
+        ImmutableNavigableMap<String, String> emptyNavMap = CommonUtil.nullToEmpty(nullNavMap);
         assertNotNull(emptyNavMap);
         assertTrue(emptyNavMap.isEmpty());
 
         ImmutableBiMap<String, String> nullBiMap = null;
-        ImmutableBiMap<String, String> emptyBiMap = N.nullToEmpty(nullBiMap);
+        ImmutableBiMap<String, String> emptyBiMap = CommonUtil.nullToEmpty(nullBiMap);
         assertNotNull(emptyBiMap);
         assertTrue(emptyBiMap.isEmpty());
     }
 
     @Test
     public void testDefaultIfNull_Primitives() {
-        assertEquals(false, N.defaultIfNull((Boolean) null));
-        assertEquals(true, N.defaultIfNull(Boolean.TRUE));
-        assertEquals(true, N.defaultIfNull((Boolean) null, true));
-        assertEquals(false, N.defaultIfNull(Boolean.FALSE, true));
+        assertEquals(false, CommonUtil.defaultIfNull((Boolean) null));
+        assertEquals(true, CommonUtil.defaultIfNull(Boolean.TRUE));
+        assertEquals(true, CommonUtil.defaultIfNull((Boolean) null, true));
+        assertEquals(false, CommonUtil.defaultIfNull(Boolean.FALSE, true));
 
-        assertEquals('\0', N.defaultIfNull((Character) null));
-        assertEquals('a', N.defaultIfNull(Character.valueOf('a')));
-        assertEquals('b', N.defaultIfNull((Character) null, 'b'));
-        assertEquals('a', N.defaultIfNull(Character.valueOf('a'), 'b'));
+        assertEquals('\0', CommonUtil.defaultIfNull((Character) null));
+        assertEquals('a', CommonUtil.defaultIfNull(Character.valueOf('a')));
+        assertEquals('b', CommonUtil.defaultIfNull((Character) null, 'b'));
+        assertEquals('a', CommonUtil.defaultIfNull(Character.valueOf('a'), 'b'));
 
-        assertEquals((byte) 0, N.defaultIfNull((Byte) null));
-        assertEquals((byte) 5, N.defaultIfNull(Byte.valueOf((byte) 5)));
-        assertEquals((byte) 10, N.defaultIfNull((Byte) null, (byte) 10));
-        assertEquals((byte) 5, N.defaultIfNull(Byte.valueOf((byte) 5), (byte) 10));
+        assertEquals((byte) 0, CommonUtil.defaultIfNull((Byte) null));
+        assertEquals((byte) 5, CommonUtil.defaultIfNull(Byte.valueOf((byte) 5)));
+        assertEquals((byte) 10, CommonUtil.defaultIfNull((Byte) null, (byte) 10));
+        assertEquals((byte) 5, CommonUtil.defaultIfNull(Byte.valueOf((byte) 5), (byte) 10));
 
-        assertEquals((short) 0, N.defaultIfNull((Short) null));
-        assertEquals((short) 5, N.defaultIfNull(Short.valueOf((short) 5)));
-        assertEquals((short) 10, N.defaultIfNull((Short) null, (short) 10));
-        assertEquals((short) 5, N.defaultIfNull(Short.valueOf((short) 5), (short) 10));
+        assertEquals((short) 0, CommonUtil.defaultIfNull((Short) null));
+        assertEquals((short) 5, CommonUtil.defaultIfNull(Short.valueOf((short) 5)));
+        assertEquals((short) 10, CommonUtil.defaultIfNull((Short) null, (short) 10));
+        assertEquals((short) 5, CommonUtil.defaultIfNull(Short.valueOf((short) 5), (short) 10));
 
-        assertEquals(0, N.defaultIfNull((Integer) null));
-        assertEquals(5, N.defaultIfNull(Integer.valueOf(5)));
-        assertEquals(10, N.defaultIfNull((Integer) null, 10));
-        assertEquals(5, N.defaultIfNull(Integer.valueOf(5), 10));
+        assertEquals(0, CommonUtil.defaultIfNull((Integer) null));
+        assertEquals(5, CommonUtil.defaultIfNull(Integer.valueOf(5)));
+        assertEquals(10, CommonUtil.defaultIfNull((Integer) null, 10));
+        assertEquals(5, CommonUtil.defaultIfNull(Integer.valueOf(5), 10));
 
-        assertEquals(0L, N.defaultIfNull((Long) null));
-        assertEquals(5L, N.defaultIfNull(Long.valueOf(5L)));
-        assertEquals(10L, N.defaultIfNull((Long) null, 10L));
-        assertEquals(5L, N.defaultIfNull(Long.valueOf(5L), 10L));
+        assertEquals(0L, CommonUtil.defaultIfNull((Long) null));
+        assertEquals(5L, CommonUtil.defaultIfNull(Long.valueOf(5L)));
+        assertEquals(10L, CommonUtil.defaultIfNull((Long) null, 10L));
+        assertEquals(5L, CommonUtil.defaultIfNull(Long.valueOf(5L), 10L));
 
-        assertEquals(0f, N.defaultIfNull((Float) null), 0.0f);
-        assertEquals(5f, N.defaultIfNull(Float.valueOf(5f)), 0.0f);
-        assertEquals(10f, N.defaultIfNull((Float) null, 10f), 0.0f);
-        assertEquals(5f, N.defaultIfNull(Float.valueOf(5f), 10f), 0.0f);
+        assertEquals(0f, CommonUtil.defaultIfNull((Float) null), 0.0f);
+        assertEquals(5f, CommonUtil.defaultIfNull(Float.valueOf(5f)), 0.0f);
+        assertEquals(10f, CommonUtil.defaultIfNull((Float) null, 10f), 0.0f);
+        assertEquals(5f, CommonUtil.defaultIfNull(Float.valueOf(5f), 10f), 0.0f);
 
-        assertEquals(0d, N.defaultIfNull((Double) null), 0.0);
-        assertEquals(5d, N.defaultIfNull(Double.valueOf(5d)), 0.0);
-        assertEquals(10d, N.defaultIfNull((Double) null, 10d), 0.0);
-        assertEquals(5d, N.defaultIfNull(Double.valueOf(5d), 10d), 0.0);
+        assertEquals(0d, CommonUtil.defaultIfNull((Double) null), 0.0);
+        assertEquals(5d, CommonUtil.defaultIfNull(Double.valueOf(5d)), 0.0);
+        assertEquals(10d, CommonUtil.defaultIfNull((Double) null, 10d), 0.0);
+        assertEquals(5d, CommonUtil.defaultIfNull(Double.valueOf(5d), 10d), 0.0);
     }
 
     @Test
     public void testDefaultIfNull_Object() {
         String nullStr = null;
-        assertEquals("default", N.defaultIfNull(nullStr, "default"));
-        assertEquals("test", N.defaultIfNull("test", "default"));
+        assertEquals("default", CommonUtil.defaultIfNull(nullStr, "default"));
+        assertEquals("test", CommonUtil.defaultIfNull("test", "default"));
 
-        assertThrows(NullPointerException.class, () -> N.defaultIfNull(nullStr, null));
+        assertThrows(NullPointerException.class, () -> CommonUtil.defaultIfNull(nullStr, null));
     }
 
     @Test
     public void testDefaultIfNull_Supplier() {
         String nullStr = null;
-        assertEquals("default", N.defaultIfNull(nullStr, Fn.s(() -> "default")));
-        assertEquals("test", N.defaultIfNull("test", Fn.s(() -> "default")));
+        assertEquals("default", CommonUtil.defaultIfNull(nullStr, Fn.s(() -> "default")));
+        assertEquals("test", CommonUtil.defaultIfNull("test", Fn.s(() -> "default")));
 
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfNull(nullStr, () -> null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfNull(nullStr, () -> null));
     }
 
     @Test
     public void testDefaultIfEmpty_CharSequence() {
-        assertEquals("default", N.defaultIfEmpty("", "default"));
-        assertEquals("default", N.defaultIfEmpty(null, "default"));
-        assertEquals("test", N.defaultIfEmpty("test", "default"));
+        assertEquals("default", CommonUtil.defaultIfEmpty("", "default"));
+        assertEquals("default", CommonUtil.defaultIfEmpty(null, "default"));
+        assertEquals("test", CommonUtil.defaultIfEmpty("test", "default"));
 
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty("", ""));
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty("", (String) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfEmpty("", ""));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfEmpty("", (String) null));
     }
 
     @Test
     public void testDefaultIfEmpty_CharSequenceSupplier() {
-        assertEquals("default", N.defaultIfEmpty("", Fn.s(Fn.s(() -> "default"))));
-        assertEquals("default", N.defaultIfEmpty((String) null, Fn.s(() -> "default")));
-        assertEquals("test", N.defaultIfEmpty("test", Fn.s(() -> "default")));
+        assertEquals("default", CommonUtil.defaultIfEmpty("", Fn.s(Fn.s(() -> "default"))));
+        assertEquals("default", CommonUtil.defaultIfEmpty((String) null, Fn.s(() -> "default")));
+        assertEquals("test", CommonUtil.defaultIfEmpty("test", Fn.s(() -> "default")));
 
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty("", (Supplier<? extends String>) () -> ""));
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty("", (Supplier<? extends String>) () -> null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfEmpty("", (Supplier<? extends String>) () -> ""));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfEmpty("", (Supplier<? extends String>) () -> null));
     }
 
     @Test
     public void testDefaultIfBlank_CharSequence() {
-        assertEquals("default", N.defaultIfBlank("", "default"));
-        assertEquals("default", N.defaultIfBlank(" ", "default"));
-        assertEquals("default", N.defaultIfBlank(null, "default"));
-        assertEquals("test", N.defaultIfBlank("test", "default"));
+        assertEquals("default", CommonUtil.defaultIfBlank("", "default"));
+        assertEquals("default", CommonUtil.defaultIfBlank(" ", "default"));
+        assertEquals("default", CommonUtil.defaultIfBlank(null, "default"));
+        assertEquals("test", CommonUtil.defaultIfBlank("test", "default"));
 
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfBlank(" ", " "));
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfBlank(" ", (String) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfBlank(" ", " "));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfBlank(" ", (String) null));
     }
 
     @Test
     public void testDefaultIfBlank_CharSequenceSupplier() {
-        assertEquals("default", N.defaultIfBlank("", Fn.s(() -> "default")));
-        assertEquals("default", N.defaultIfBlank(" ", Fn.s(() -> "default")));
-        assertEquals("default", N.defaultIfBlank(null, Fn.s(() -> "default")));
-        assertEquals("test", N.defaultIfBlank("test", Fn.s(() -> "default")));
+        assertEquals("default", CommonUtil.defaultIfBlank("", Fn.s(() -> "default")));
+        assertEquals("default", CommonUtil.defaultIfBlank(" ", Fn.s(() -> "default")));
+        assertEquals("default", CommonUtil.defaultIfBlank(null, Fn.s(() -> "default")));
+        assertEquals("test", CommonUtil.defaultIfBlank("test", Fn.s(() -> "default")));
 
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfBlank(" ", (Supplier<? extends String>) () -> " "));
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfBlank(" ", (Supplier<? extends String>) () -> null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfBlank(" ", (Supplier<? extends String>) () -> " "));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfBlank(" ", (Supplier<? extends String>) () -> null));
     }
 
     @Test
@@ -681,14 +681,14 @@ public class CommonUtil102Test extends TestBase {
         List<String> emptyList = new ArrayList<>();
         List<String> defaultList = Arrays.asList("default");
 
-        assertEquals(defaultList, N.defaultIfEmpty(emptyList, defaultList));
-        assertEquals(defaultList, N.defaultIfEmpty(null, defaultList));
+        assertEquals(defaultList, CommonUtil.defaultIfEmpty(emptyList, defaultList));
+        assertEquals(defaultList, CommonUtil.defaultIfEmpty(null, defaultList));
 
         List<String> list = Arrays.asList("test");
-        assertEquals(list, N.defaultIfEmpty(list, defaultList));
+        assertEquals(list, CommonUtil.defaultIfEmpty(list, defaultList));
 
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty(emptyList, new ArrayList<>()));
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty(emptyList, null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfEmpty(emptyList, new ArrayList<>()));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfEmpty(emptyList, null));
     }
 
     @Test
@@ -697,192 +697,192 @@ public class CommonUtil102Test extends TestBase {
         Map<String, String> defaultMap = new HashMap<>();
         defaultMap.put("key", "value");
 
-        assertEquals(defaultMap, N.defaultIfEmpty(emptyMap, defaultMap));
-        assertEquals(defaultMap, N.defaultIfEmpty(null, defaultMap));
+        assertEquals(defaultMap, CommonUtil.defaultIfEmpty(emptyMap, defaultMap));
+        assertEquals(defaultMap, CommonUtil.defaultIfEmpty(null, defaultMap));
 
         Map<String, String> map = new HashMap<>();
         map.put("test", "value");
-        assertEquals(map, N.defaultIfEmpty(map, defaultMap));
+        assertEquals(map, CommonUtil.defaultIfEmpty(map, defaultMap));
 
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty(emptyMap, new HashMap<>()));
-        assertThrows(IllegalArgumentException.class, () -> N.defaultIfEmpty(emptyMap, null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfEmpty(emptyMap, new HashMap<>()));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfEmpty(emptyMap, null));
     }
 
     @Test
     public void testDefaultValueOf() {
-        assertEquals(false, N.defaultValueOf(boolean.class));
-        assertEquals(null, N.defaultValueOf(Boolean.class));
-        assertEquals('\0', N.defaultValueOf(char.class));
-        assertEquals(null, N.defaultValueOf(Character.class));
-        assertEquals((byte) 0, N.defaultValueOf(byte.class));
-        assertEquals(null, N.defaultValueOf(Byte.class));
-        assertEquals((short) 0, N.defaultValueOf(short.class));
-        assertEquals(null, N.defaultValueOf(Short.class));
-        assertEquals(0, N.defaultValueOf(int.class));
-        assertEquals(null, N.defaultValueOf(Integer.class));
-        assertEquals(0L, N.defaultValueOf(long.class));
-        assertEquals(null, N.defaultValueOf(Long.class));
-        assertEquals(0f, N.defaultValueOf(float.class), 0.0f);
-        assertEquals(null, N.defaultValueOf(Float.class));
-        assertEquals(0d, N.defaultValueOf(double.class), 0.0);
-        assertEquals(null, N.defaultValueOf(Double.class));
-        assertEquals(null, N.defaultValueOf(String.class));
-        assertEquals(null, N.defaultValueOf(Object.class));
+        assertEquals(false, CommonUtil.defaultValueOf(boolean.class));
+        assertEquals(null, CommonUtil.defaultValueOf(Boolean.class));
+        assertEquals('\0', CommonUtil.defaultValueOf(char.class));
+        assertEquals(null, CommonUtil.defaultValueOf(Character.class));
+        assertEquals((byte) 0, CommonUtil.defaultValueOf(byte.class));
+        assertEquals(null, CommonUtil.defaultValueOf(Byte.class));
+        assertEquals((short) 0, CommonUtil.defaultValueOf(short.class));
+        assertEquals(null, CommonUtil.defaultValueOf(Short.class));
+        assertEquals(0, CommonUtil.defaultValueOf(int.class));
+        assertEquals(null, CommonUtil.defaultValueOf(Integer.class));
+        assertEquals(0L, CommonUtil.defaultValueOf(long.class));
+        assertEquals(null, CommonUtil.defaultValueOf(Long.class));
+        assertEquals(0f, CommonUtil.defaultValueOf(float.class), 0.0f);
+        assertEquals(null, CommonUtil.defaultValueOf(Float.class));
+        assertEquals(0d, CommonUtil.defaultValueOf(double.class), 0.0);
+        assertEquals(null, CommonUtil.defaultValueOf(Double.class));
+        assertEquals(null, CommonUtil.defaultValueOf(String.class));
+        assertEquals(null, CommonUtil.defaultValueOf(Object.class));
 
-        assertThrows(IllegalArgumentException.class, () -> N.defaultValueOf(null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultValueOf(null));
     }
 
     @Test
     public void testDefaultValueOf_WithNonNullForPrimitiveWrapper() {
-        assertEquals(false, N.defaultValueOf(Boolean.class, true));
-        assertEquals(null, N.defaultValueOf(Boolean.class, false));
-        assertEquals('\0', N.defaultValueOf(Character.class, true));
-        assertEquals(null, N.defaultValueOf(Character.class, false));
-        assertEquals((byte) 0, N.defaultValueOf(Byte.class, true));
-        assertEquals(null, N.defaultValueOf(Byte.class, false));
-        assertEquals((short) 0, N.defaultValueOf(Short.class, true));
-        assertEquals(null, N.defaultValueOf(Short.class, false));
-        assertEquals(0, N.defaultValueOf(Integer.class, true));
-        assertEquals(null, N.defaultValueOf(Integer.class, false));
-        assertEquals(0L, N.defaultValueOf(Long.class, true));
-        assertEquals(null, N.defaultValueOf(Long.class, false));
-        assertEquals(0f, N.defaultValueOf(Float.class, true), 0.0f);
-        assertEquals(null, N.defaultValueOf(Float.class, false));
-        assertEquals(0d, N.defaultValueOf(Double.class, true), 0.0);
-        assertEquals(null, N.defaultValueOf(Double.class, false));
+        assertEquals(false, CommonUtil.defaultValueOf(Boolean.class, true));
+        assertEquals(null, CommonUtil.defaultValueOf(Boolean.class, false));
+        assertEquals('\0', CommonUtil.defaultValueOf(Character.class, true));
+        assertEquals(null, CommonUtil.defaultValueOf(Character.class, false));
+        assertEquals((byte) 0, CommonUtil.defaultValueOf(Byte.class, true));
+        assertEquals(null, CommonUtil.defaultValueOf(Byte.class, false));
+        assertEquals((short) 0, CommonUtil.defaultValueOf(Short.class, true));
+        assertEquals(null, CommonUtil.defaultValueOf(Short.class, false));
+        assertEquals(0, CommonUtil.defaultValueOf(Integer.class, true));
+        assertEquals(null, CommonUtil.defaultValueOf(Integer.class, false));
+        assertEquals(0L, CommonUtil.defaultValueOf(Long.class, true));
+        assertEquals(null, CommonUtil.defaultValueOf(Long.class, false));
+        assertEquals(0f, CommonUtil.defaultValueOf(Float.class, true), 0.0f);
+        assertEquals(null, CommonUtil.defaultValueOf(Float.class, false));
+        assertEquals(0d, CommonUtil.defaultValueOf(Double.class, true), 0.0);
+        assertEquals(null, CommonUtil.defaultValueOf(Double.class, false));
 
-        assertThrows(IllegalArgumentException.class, () -> N.defaultValueOf(null, true));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultValueOf(null, true));
     }
 
     @Test
     public void testTypeOf_String() {
-        Type<String> stringType = N.typeOf("java.lang.String");
+        Type<String> stringType = CommonUtil.typeOf("java.lang.String");
         assertNotNull(stringType);
         assertEquals(String.class, stringType.clazz());
 
-        Type<Integer> intType = N.typeOf("int");
+        Type<Integer> intType = CommonUtil.typeOf("int");
         assertNotNull(intType);
         assertEquals(int.class, intType.clazz());
 
-        assertThrows(IllegalArgumentException.class, () -> N.typeOf((String) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.typeOf((String) null));
     }
 
     @Test
     public void testTypeOf_Class() {
-        Type<String> stringType = N.typeOf(String.class);
+        Type<String> stringType = CommonUtil.typeOf(String.class);
         assertNotNull(stringType);
         assertEquals(String.class, stringType.clazz());
 
-        Type<Integer> intType = N.typeOf(int.class);
+        Type<Integer> intType = CommonUtil.typeOf(int.class);
         assertNotNull(intType);
         assertEquals(int.class, intType.clazz());
 
-        assertThrows(IllegalArgumentException.class, () -> N.typeOf((Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.typeOf((Class<?>) null));
     }
 
     @Test
     public void testStringOf_Primitives() {
-        assertEquals("true", N.stringOf(true));
-        assertEquals("false", N.stringOf(false));
+        assertEquals("true", CommonUtil.stringOf(true));
+        assertEquals("false", CommonUtil.stringOf(false));
 
-        assertEquals("a", N.stringOf('a'));
-        assertEquals("A", N.stringOf('A'));
-        assertEquals("0", N.stringOf('0'));
+        assertEquals("a", CommonUtil.stringOf('a'));
+        assertEquals("A", CommonUtil.stringOf('A'));
+        assertEquals("0", CommonUtil.stringOf('0'));
 
-        assertEquals("0", N.stringOf((byte) 0));
-        assertEquals("127", N.stringOf((byte) 127));
-        assertEquals("-128", N.stringOf((byte) -128));
+        assertEquals("0", CommonUtil.stringOf((byte) 0));
+        assertEquals("127", CommonUtil.stringOf((byte) 127));
+        assertEquals("-128", CommonUtil.stringOf((byte) -128));
 
-        assertEquals("0", N.stringOf((short) 0));
-        assertEquals("32767", N.stringOf(Short.MAX_VALUE));
-        assertEquals("-32768", N.stringOf(Short.MIN_VALUE));
+        assertEquals("0", CommonUtil.stringOf((short) 0));
+        assertEquals("32767", CommonUtil.stringOf(Short.MAX_VALUE));
+        assertEquals("-32768", CommonUtil.stringOf(Short.MIN_VALUE));
 
-        assertEquals("0", N.stringOf(0));
-        assertEquals("2147483647", N.stringOf(Integer.MAX_VALUE));
-        assertEquals("-2147483648", N.stringOf(Integer.MIN_VALUE));
+        assertEquals("0", CommonUtil.stringOf(0));
+        assertEquals("2147483647", CommonUtil.stringOf(Integer.MAX_VALUE));
+        assertEquals("-2147483648", CommonUtil.stringOf(Integer.MIN_VALUE));
 
-        assertEquals("0", N.stringOf(0L));
-        assertEquals("9223372036854775807", N.stringOf(Long.MAX_VALUE));
-        assertEquals("-9223372036854775808", N.stringOf(Long.MIN_VALUE));
+        assertEquals("0", CommonUtil.stringOf(0L));
+        assertEquals("9223372036854775807", CommonUtil.stringOf(Long.MAX_VALUE));
+        assertEquals("-9223372036854775808", CommonUtil.stringOf(Long.MIN_VALUE));
 
-        assertEquals("0.0", N.stringOf(0.0f));
-        assertEquals("3.14", N.stringOf(3.14f));
-        assertEquals("-3.14", N.stringOf(-3.14f));
+        assertEquals("0.0", CommonUtil.stringOf(0.0f));
+        assertEquals("3.14", CommonUtil.stringOf(3.14f));
+        assertEquals("-3.14", CommonUtil.stringOf(-3.14f));
 
-        assertEquals("0.0", N.stringOf(0.0d));
-        assertEquals("3.14159", N.stringOf(3.14159d));
-        assertEquals("-3.14159", N.stringOf(-3.14159d));
+        assertEquals("0.0", CommonUtil.stringOf(0.0d));
+        assertEquals("3.14159", CommonUtil.stringOf(3.14159d));
+        assertEquals("-3.14159", CommonUtil.stringOf(-3.14159d));
     }
 
     @Test
     public void testStringOf_Object() {
-        assertEquals("test", N.stringOf("test"));
-        assertEquals("123", N.stringOf(Integer.valueOf(123)));
-        assertEquals("true", N.stringOf(Boolean.TRUE));
-        assertNull(N.stringOf(null));
+        assertEquals("test", CommonUtil.stringOf("test"));
+        assertEquals("123", CommonUtil.stringOf(Integer.valueOf(123)));
+        assertEquals("true", CommonUtil.stringOf(Boolean.TRUE));
+        assertNull(CommonUtil.stringOf(null));
 
         java.util.Date date = new java.util.Date(0);
-        String dateStr = N.stringOf(date);
+        String dateStr = CommonUtil.stringOf(date);
         assertNotNull(dateStr);
     }
 
     @Test
     public void testValueOf() {
-        assertEquals(Integer.valueOf(123), N.valueOf("123", Integer.class));
-        assertEquals(Long.valueOf(123L), N.valueOf("123", Long.class));
-        assertEquals(Double.valueOf(3.14), N.valueOf("3.14", Double.class));
-        assertEquals(Boolean.TRUE, N.valueOf("true", Boolean.class));
-        assertEquals("test", N.valueOf("test", String.class));
+        assertEquals(Integer.valueOf(123), CommonUtil.valueOf("123", Integer.class));
+        assertEquals(Long.valueOf(123L), CommonUtil.valueOf("123", Long.class));
+        assertEquals(Double.valueOf(3.14), CommonUtil.valueOf("3.14", Double.class));
+        assertEquals(Boolean.TRUE, CommonUtil.valueOf("true", Boolean.class));
+        assertEquals("test", CommonUtil.valueOf("test", String.class));
 
-        assertEquals(0, N.valueOf(null, int.class));
-        assertEquals(null, N.valueOf(null, Integer.class));
+        assertEquals(0, CommonUtil.valueOf(null, int.class));
+        assertEquals(null, CommonUtil.valueOf(null, Integer.class));
 
-        assertThrows(IllegalArgumentException.class, () -> N.valueOf("test", null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.valueOf("test", null));
     }
 
     @Test
     public void testConvert_Basic() {
-        assertEquals(0, N.convert(null, int.class));
-        assertEquals(null, N.convert(null, Integer.class));
-        assertEquals(null, N.convert(null, String.class));
+        assertEquals(0, CommonUtil.convert(null, int.class));
+        assertEquals(null, CommonUtil.convert(null, Integer.class));
+        assertEquals(null, CommonUtil.convert(null, String.class));
 
-        assertEquals(Integer.valueOf(123), N.convert("123", Integer.class));
-        assertEquals(Long.valueOf(123L), N.convert("123", Long.class));
-        assertEquals(Double.valueOf(3.14), N.convert("3.14", Double.class));
-        assertEquals(Boolean.TRUE, N.convert("true", Boolean.class));
+        assertEquals(Integer.valueOf(123), CommonUtil.convert("123", Integer.class));
+        assertEquals(Long.valueOf(123L), CommonUtil.convert("123", Long.class));
+        assertEquals(Double.valueOf(3.14), CommonUtil.convert("3.14", Double.class));
+        assertEquals(Boolean.TRUE, CommonUtil.convert("true", Boolean.class));
 
-        assertEquals(Integer.valueOf(123), N.convert(123L, Integer.class));
-        assertEquals(Long.valueOf(123L), N.convert(123, Long.class));
-        assertEquals(Float.valueOf(3.14f), N.convert(3.14d, Float.class));
-        assertEquals(Double.valueOf(3.14d), N.convert(3.14f, Double.class));
+        assertEquals(Integer.valueOf(123), CommonUtil.convert(123L, Integer.class));
+        assertEquals(Long.valueOf(123L), CommonUtil.convert(123, Long.class));
+        assertEquals(Float.valueOf(3.14f), CommonUtil.convert(3.14d, Float.class));
+        assertEquals(Double.valueOf(3.14d), CommonUtil.convert(3.14f, Double.class));
 
-        assertEquals(true, N.convert(1, boolean.class));
-        assertEquals(false, N.convert(0, boolean.class));
-        assertEquals(true, N.convert(5L, Boolean.class));
+        assertEquals(true, CommonUtil.convert(1, boolean.class));
+        assertEquals(false, CommonUtil.convert(0, boolean.class));
+        assertEquals(true, CommonUtil.convert(5L, Boolean.class));
 
-        assertEquals(Character.valueOf('A'), N.convert(65, Character.class));
-        assertEquals(Integer.valueOf(65), N.convert('A', Integer.class));
+        assertEquals(Character.valueOf('A'), CommonUtil.convert(65, Character.class));
+        assertEquals(Integer.valueOf(65), CommonUtil.convert('A', Integer.class));
     }
 
     @Test
     public void testConvert_Collections() {
         List<String> strList = Arrays.asList("1", "2", "3");
-        List<String> convertedList = N.convert(strList, List.class);
+        List<String> convertedList = CommonUtil.convert(strList, List.class);
         assertEquals(strList, convertedList);
 
         Set<String> strSet = new HashSet<>(Arrays.asList("1", "2", "3"));
-        Set<String> convertedSet = N.convert(strSet, Set.class);
+        Set<String> convertedSet = CommonUtil.convert(strSet, Set.class);
         assertEquals(strSet, convertedSet);
 
         String[] strArray = { "1", "2", "3" };
-        Collection<String> collection = N.convert(strArray, Collection.class);
+        Collection<String> collection = CommonUtil.convert(strArray, Collection.class);
         assertEquals(3, collection.size());
         assertTrue(collection.contains("1"));
         assertTrue(collection.contains("2"));
         assertTrue(collection.contains("3"));
 
         List<String> list = Arrays.asList("1", "2", "3");
-        String[] array = N.convert(list, String[].class);
+        String[] array = CommonUtil.convert(list, String[].class);
         assertArrayEquals(new String[] { "1", "2", "3" }, array);
     }
 
@@ -891,70 +891,70 @@ public class CommonUtil102Test extends TestBase {
         Map<String, Integer> map = new HashMap<>();
         map.put("one", 1);
         map.put("two", 2);
-        Map<String, Integer> convertedMap = N.convert(map, Map.class);
+        Map<String, Integer> convertedMap = CommonUtil.convert(map, Map.class);
         assertEquals(map, convertedMap);
     }
 
     @Test
     public void testConvert_Dates() {
         long timestamp = 1000000L;
-        assertEquals(new java.util.Date(timestamp), N.convert(timestamp, java.util.Date.class));
-        assertEquals(new java.sql.Timestamp(timestamp), N.convert(timestamp, java.sql.Timestamp.class));
-        assertEquals(new java.sql.Date(timestamp), N.convert(timestamp, java.sql.Date.class));
-        assertEquals(new java.sql.Time(timestamp), N.convert(timestamp, java.sql.Time.class));
+        assertEquals(new java.util.Date(timestamp), CommonUtil.convert(timestamp, java.util.Date.class));
+        assertEquals(new java.sql.Timestamp(timestamp), CommonUtil.convert(timestamp, java.sql.Timestamp.class));
+        assertEquals(new java.sql.Date(timestamp), CommonUtil.convert(timestamp, java.sql.Date.class));
+        assertEquals(new java.sql.Time(timestamp), CommonUtil.convert(timestamp, java.sql.Time.class));
 
         java.util.Date date = new java.util.Date(timestamp);
-        assertEquals(Long.valueOf(timestamp), N.convert(date, Long.class));
+        assertEquals(Long.valueOf(timestamp), CommonUtil.convert(date, Long.class));
     }
 
     @Test
     public void testConvert_WithType() {
-        Type<Integer> intType = N.typeOf(int.class);
-        assertEquals(Integer.valueOf(123), N.convert("123", intType));
-        assertEquals(0, N.convert(null, intType));
+        Type<Integer> intType = CommonUtil.typeOf(int.class);
+        assertEquals(Integer.valueOf(123), CommonUtil.convert("123", intType));
+        assertEquals(0, CommonUtil.convert(null, intType));
 
-        Type<List> listType = N.typeOf(List.class);
+        Type<List> listType = CommonUtil.typeOf(List.class);
         String[] array = { "1", "2", "3" };
-        List<String> list = N.convert(array, listType);
+        List<String> list = CommonUtil.convert(array, listType);
         assertEquals(3, list.size());
     }
 
     @Test
     public void testCastIfAssignable() {
         String str = "test";
-        Nullable<String> strResult = N.castIfAssignable(str, String.class);
+        Nullable<String> strResult = CommonUtil.castIfAssignable(str, String.class);
         assertTrue(strResult.isPresent());
         assertEquals("test", strResult.get());
 
         Integer num = 123;
-        Nullable<Number> numResult = N.castIfAssignable(num, Number.class);
+        Nullable<Number> numResult = CommonUtil.castIfAssignable(num, Number.class);
         assertTrue(numResult.isPresent());
         assertEquals(123, numResult.get());
 
-        Nullable<Integer> failedCast = N.castIfAssignable("test", Integer.class);
+        Nullable<Integer> failedCast = CommonUtil.castIfAssignable("test", Integer.class);
         assertFalse(failedCast.isPresent());
 
-        Nullable<String> nullResult = N.castIfAssignable(null, String.class);
+        Nullable<String> nullResult = CommonUtil.castIfAssignable(null, String.class);
         assertTrue(nullResult.isPresent());
         assertNull(nullResult.get());
 
-        Nullable<Integer> primitiveResult = N.castIfAssignable(123, int.class);
+        Nullable<Integer> primitiveResult = CommonUtil.castIfAssignable(123, int.class);
         assertTrue(primitiveResult.isPresent());
         assertEquals(123, primitiveResult.get());
 
-        Nullable<Integer> nullPrimitiveResult = N.castIfAssignable(null, int.class);
+        Nullable<Integer> nullPrimitiveResult = CommonUtil.castIfAssignable(null, int.class);
         assertFalse(nullPrimitiveResult.isPresent());
     }
 
     @Test
     public void testCastIfAssignable_WithType() {
-        Type<String> strType = N.typeOf(String.class);
-        Nullable<String> strResult = N.castIfAssignable("test", strType);
+        Type<String> strType = CommonUtil.typeOf(String.class);
+        Nullable<String> strResult = CommonUtil.castIfAssignable("test", strType);
         assertTrue(strResult.isPresent());
         assertEquals("test", strResult.get());
 
-        Type<Integer> intType = N.typeOf(Integer.class);
-        Nullable<Integer> failedCast = N.castIfAssignable("test", intType);
+        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
+        Nullable<Integer> failedCast = CommonUtil.castIfAssignable("test", intType);
         assertFalse(failedCast.isPresent());
     }
 
@@ -1300,67 +1300,67 @@ public class CommonUtil102Test extends TestBase {
 
     @Test
     public void testNegate_Boolean() {
-        assertEquals(Boolean.FALSE, N.negate(Boolean.TRUE));
-        assertEquals(Boolean.TRUE, N.negate(Boolean.FALSE));
-        assertNull(N.negate((Boolean) null));
+        assertEquals(Boolean.FALSE, CommonUtil.negate(Boolean.TRUE));
+        assertEquals(Boolean.TRUE, CommonUtil.negate(Boolean.FALSE));
+        assertNull(CommonUtil.negate((Boolean) null));
     }
 
     @Test
     public void testNegate_BooleanArray() {
         boolean[] array = { true, false, true, false };
-        N.negate(array);
+        CommonUtil.negate(array);
         assertArrayEquals(new boolean[] { false, true, false, true }, array);
 
         boolean[] emptyArray = {};
-        N.negate(emptyArray);
+        CommonUtil.negate(emptyArray);
 
-        N.negate((boolean[]) null);
+        CommonUtil.negate((boolean[]) null);
     }
 
     @Test
     public void testNegate_BooleanArrayRange() {
         boolean[] array = { true, false, true, false, true };
-        N.negate(array, 1, 4);
+        CommonUtil.negate(array, 1, 4);
         assertArrayEquals(new boolean[] { true, true, false, true, true }, array);
 
-        N.negate(array, 0, 0);
+        CommonUtil.negate(array, 0, 0);
 
-        assertThrows(IndexOutOfBoundsException.class, () -> N.negate(array, -1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.negate(array, 0, 6));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.negate(array, 3, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.negate(array, -1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.negate(array, 0, 6));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.negate(array, 3, 2));
     }
 
     @Test
     public void testEnumListOf() {
-        ImmutableList<TestEnum> list = N.enumListOf(TestEnum.class);
+        ImmutableList<TestEnum> list = CommonUtil.enumListOf(TestEnum.class);
         assertNotNull(list);
         assertEquals(3, list.size());
         assertTrue(list.contains(TestEnum.ONE));
         assertTrue(list.contains(TestEnum.TWO));
         assertTrue(list.contains(TestEnum.THREE));
 
-        assertSame(list, N.enumListOf(TestEnum.class));
+        assertSame(list, CommonUtil.enumListOf(TestEnum.class));
 
-        assertThrows(IllegalArgumentException.class, () -> N.enumListOf(null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.enumListOf(null));
     }
 
     @Test
     public void testEnumSetOf() {
-        ImmutableSet<TestEnum> set = N.enumSetOf(TestEnum.class);
+        ImmutableSet<TestEnum> set = CommonUtil.enumSetOf(TestEnum.class);
         assertNotNull(set);
         assertEquals(3, set.size());
         assertTrue(set.contains(TestEnum.ONE));
         assertTrue(set.contains(TestEnum.TWO));
         assertTrue(set.contains(TestEnum.THREE));
 
-        assertSame(set, N.enumSetOf(TestEnum.class));
+        assertSame(set, CommonUtil.enumSetOf(TestEnum.class));
 
-        assertThrows(IllegalArgumentException.class, () -> N.enumSetOf(null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.enumSetOf(null));
     }
 
     @Test
     public void testEnumMapOf() {
-        ImmutableBiMap<TestEnum, String> map = N.enumMapOf(TestEnum.class);
+        ImmutableBiMap<TestEnum, String> map = CommonUtil.enumMapOf(TestEnum.class);
         assertNotNull(map);
         assertEquals(3, map.size());
         assertEquals("ONE", map.get(TestEnum.ONE));
@@ -1370,21 +1370,21 @@ public class CommonUtil102Test extends TestBase {
         assertEquals(TestEnum.TWO, map.getByValue("TWO"));
         assertEquals(TestEnum.THREE, map.getByValue("THREE"));
 
-        assertSame(map, N.enumMapOf(TestEnum.class));
+        assertSame(map, CommonUtil.enumMapOf(TestEnum.class));
 
-        assertThrows(IllegalArgumentException.class, () -> N.enumMapOf(null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.enumMapOf(null));
     }
 
     @Test
     public void testUnmodifiableCollection() {
         Collection<String> nullCollection = null;
-        Collection<String> unmodifiable = N.unmodifiableCollection(nullCollection);
+        Collection<String> unmodifiable = CommonUtil.unmodifiableCollection(nullCollection);
         assertNotNull(unmodifiable);
         assertTrue(unmodifiable.isEmpty());
 
         List<String> list = new ArrayList<>();
         list.add("test");
-        Collection<String> unmodifiableList = N.unmodifiableCollection(list);
+        Collection<String> unmodifiableList = CommonUtil.unmodifiableCollection(list);
         assertNotNull(unmodifiableList);
         assertEquals(1, unmodifiableList.size());
         assertTrue(unmodifiableList.contains("test"));

@@ -2807,32 +2807,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         return multiset;
     }
 
-    // It won't work.
     //    /**
-    //     * Returns a synchronized {@code Multimap} which shares the same internal {@code Map} with this {@code Multimap}.
-    //     * That's to say the changes in one of the returned {@code Multimap} and this {@code Multimap} will impact another one.
-    //     *
-    //     * @see Collections#synchronizedMap(Map)
-    //     */
-    //    public Multimap<K, E, V> synchronized() {
-    //        return new Multimap<>(Collections.synchronizedMap(valueMap), concreteValueType);
-    //    }
-
-    //    /**
-    //     * Returns a view of this multimap as a {@code Map} from each distinct key
-    //     * to the nonempty collection of that key's associated values.
-    //     *
-    //     * <p>Changes to the returned map or the collections that serve as its values
-    //     * will update the underlying multimap, and vice versa.
-    //     *
-    //     * @return
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public Map<K, V> unwrap() {
-    //        return backingMap;
-    //    }
 
     /**
      * Returns an iterator over the key-collection entries in this Multimap.

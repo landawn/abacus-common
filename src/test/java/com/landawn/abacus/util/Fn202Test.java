@@ -37,8 +37,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -384,7 +384,7 @@ public class Fn202Test extends TestBase {
     @Test
     public void testKkv() {
         Keyed<String, Integer> keyedKey = Keyed.of("key", 123);
-        Map.Entry<Keyed<String, Integer>, String> entry = N.newEntry(keyedKey, "value");
+        Map.Entry<Keyed<String, Integer>, String> entry = CommonUtil.newEntry(keyedKey, "value");
         assertEquals(123, Fn.<String, Integer, String> kkv().apply(entry));
     }
 
@@ -406,7 +406,7 @@ public class Fn202Test extends TestBase {
 
     @Test
     public void testKeyAndValue() {
-        Map.Entry<String, Integer> entry = N.newEntry("key", 123);
+        Map.Entry<String, Integer> entry = CommonUtil.newEntry("key", 123);
         assertEquals("key", Fn.<String, Integer> key().apply(entry));
         assertEquals(123, Fn.<String, Integer> value().apply(entry));
     }
@@ -420,7 +420,7 @@ public class Fn202Test extends TestBase {
 
     @Test
     public void testInverse() {
-        Map.Entry<String, Integer> entry = N.newEntry("key", 123);
+        Map.Entry<String, Integer> entry = CommonUtil.newEntry("key", 123);
         Map.Entry<Integer, String> inverted = Fn.<String, Integer> inverse().apply(entry);
         assertEquals(123, inverted.getKey());
         assertEquals("key", inverted.getValue());
@@ -745,7 +745,7 @@ public class Fn202Test extends TestBase {
 
     @Test
     public void testEntryFunctions() {
-        Map.Entry<String, Integer> entry = N.newEntry("key", 10);
+        Map.Entry<String, Integer> entry = CommonUtil.newEntry("key", 10);
         assertTrue(Fn.<String, Integer> testByKey(k -> k.equals("key")).test(entry));
         assertTrue(Fn.<String, Integer> testByValue(v -> v > 5).test(entry));
 
@@ -763,7 +763,7 @@ public class Fn202Test extends TestBase {
 
     @Test
     public void testMapKeyAndValue() {
-        Map.Entry<String, Integer> entry = N.newEntry("key", 10);
+        Map.Entry<String, Integer> entry = CommonUtil.newEntry("key", 10);
         Map.Entry<Integer, Integer> newKeyEntry = Fn.<String, Integer, Integer> mapKey(String::length).apply(entry);
         assertEquals(3, newKeyEntry.getKey());
         assertEquals(10, newKeyEntry.getValue());
@@ -775,7 +775,7 @@ public class Fn202Test extends TestBase {
 
     @Test
     public void testEntryKeyVal() {
-        Map.Entry<String, Integer> entry = N.newEntry("key", 3);
+        Map.Entry<String, Integer> entry = CommonUtil.newEntry("key", 3);
         assertTrue(Fn.<String, Integer> testKeyVal((k, v) -> k.length() == v).test(entry));
 
         AtomicReference<String> ref = new AtomicReference<>();
@@ -1124,19 +1124,19 @@ public class Fn202Test extends TestBase {
     public class EntriesTest {
         @Test
         public void testF() {
-            Map.Entry<String, Integer> entry = N.newEntry("a", 1);
+            Map.Entry<String, Integer> entry = CommonUtil.newEntry("a", 1);
             assertEquals("a1", Entries.<String, Integer, String> f((k, v) -> k + v).apply(entry));
         }
 
         @Test
         public void testP() {
-            Map.Entry<String, Integer> entry = N.newEntry("a", 1);
+            Map.Entry<String, Integer> entry = CommonUtil.newEntry("a", 1);
             assertTrue(Entries.<String, Integer> p((k, v) -> k.equals("a") && v == 1).test(entry));
         }
 
         @Test
         public void testC() {
-            Map.Entry<String, Integer> entry = N.newEntry("a", 1);
+            Map.Entry<String, Integer> entry = CommonUtil.newEntry("a", 1);
             AtomicReference<String> ref = new AtomicReference<>();
             Entries.<String, Integer> c((k, v) -> ref.set(k + v)).accept(entry);
             assertEquals("a1", ref.get());

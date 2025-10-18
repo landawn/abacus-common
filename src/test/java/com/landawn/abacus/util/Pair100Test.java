@@ -13,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Tuple.Tuple2;
@@ -49,7 +49,7 @@ public class Pair100Test extends TestBase {
 
     @Test
     public void testCreateFromMapEntry() {
-        Map.Entry<String, Integer> entry = new Map.Entry<String, Integer>() {
+        Map.Entry<String, Integer> entry = new Map.Entry<>() {
             @Override
             public String getKey() {
                 return "key";

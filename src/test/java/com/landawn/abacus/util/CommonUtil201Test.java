@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -158,7 +158,7 @@ public class CommonUtil201Test extends TestBase {
         for (String propName : propNamesToCompare) {
             Object val1 = b1.getPropValue(propName);
             Object val2 = b2.getPropValue(propName);
-            if (!N.equals(val1, val2)) {
+            if (!CommonUtil.equals(val1, val2)) {
                 return val1 == null ? -1 : (val2 == null ? 1 : String.valueOf(val1).compareTo(String.valueOf(val2)));
             }
         }
@@ -167,105 +167,105 @@ public class CommonUtil201Test extends TestBase {
 
     @Test
     public void testEquals_boolean() {
-        assertTrue(N.equals(true, true));
-        assertTrue(N.equals(false, false));
-        assertFalse(N.equals(true, false));
+        assertTrue(CommonUtil.equals(true, true));
+        assertTrue(CommonUtil.equals(false, false));
+        assertFalse(CommonUtil.equals(true, false));
     }
 
     @Test
     public void testEquals_char() {
-        assertTrue(N.equals('a', 'a'));
-        assertFalse(N.equals('a', 'b'));
+        assertTrue(CommonUtil.equals('a', 'a'));
+        assertFalse(CommonUtil.equals('a', 'b'));
     }
 
     @Test
     public void testEquals_byte() {
-        assertTrue(N.equals((byte) 1, (byte) 1));
-        assertFalse(N.equals((byte) 1, (byte) 2));
+        assertTrue(CommonUtil.equals((byte) 1, (byte) 1));
+        assertFalse(CommonUtil.equals((byte) 1, (byte) 2));
     }
 
     @Test
     public void testEquals_short() {
-        assertTrue(N.equals((short) 10, (short) 10));
-        assertFalse(N.equals((short) 10, (short) 20));
+        assertTrue(CommonUtil.equals((short) 10, (short) 10));
+        assertFalse(CommonUtil.equals((short) 10, (short) 20));
     }
 
     @Test
     public void testEquals_int() {
-        assertTrue(N.equals(100, 100));
-        assertFalse(N.equals(100, 200));
+        assertTrue(CommonUtil.equals(100, 100));
+        assertFalse(CommonUtil.equals(100, 200));
     }
 
     @Test
     public void testEquals_long() {
-        assertTrue(N.equals(1000L, 1000L));
-        assertFalse(N.equals(1000L, 2000L));
+        assertTrue(CommonUtil.equals(1000L, 1000L));
+        assertFalse(CommonUtil.equals(1000L, 2000L));
     }
 
     @Test
     public void testEquals_float() {
-        assertTrue(N.equals(1.0f, 1.0f));
-        assertFalse(N.equals(1.0f, 1.1f));
-        assertTrue(N.equals(Float.NaN, Float.NaN));
+        assertTrue(CommonUtil.equals(1.0f, 1.0f));
+        assertFalse(CommonUtil.equals(1.0f, 1.1f));
+        assertTrue(CommonUtil.equals(Float.NaN, Float.NaN));
     }
 
     @Test
     public void testEquals_double() {
-        assertTrue(N.equals(1.0, 1.0));
-        assertFalse(N.equals(1.0, 1.1));
-        assertTrue(N.equals(Double.NaN, Double.NaN));
+        assertTrue(CommonUtil.equals(1.0, 1.0));
+        assertFalse(CommonUtil.equals(1.0, 1.1));
+        assertTrue(CommonUtil.equals(Double.NaN, Double.NaN));
     }
 
     @Test
     public void testEquals_String() {
-        assertTrue(N.equals("abc", "abc"));
-        assertFalse(N.equals("abc", "def"));
-        assertTrue(N.equals((String) null, (String) null));
-        assertFalse(N.equals("abc", null));
-        assertFalse(N.equals(null, "abc"));
-        assertFalse(N.equals("abc", "abcd"));
+        assertTrue(CommonUtil.equals("abc", "abc"));
+        assertFalse(CommonUtil.equals("abc", "def"));
+        assertTrue(CommonUtil.equals((String) null, (String) null));
+        assertFalse(CommonUtil.equals("abc", null));
+        assertFalse(CommonUtil.equals(null, "abc"));
+        assertFalse(CommonUtil.equals("abc", "abcd"));
     }
 
     @Test
     public void testEqualsIgnoreCase_String() {
-        assertTrue(N.equalsIgnoreCase("abc", "ABC"));
-        assertTrue(N.equalsIgnoreCase("abc", "abc"));
-        assertFalse(N.equalsIgnoreCase("abc", "def"));
-        assertTrue(N.equalsIgnoreCase((String) null, (String) null));
-        assertFalse(N.equalsIgnoreCase("abc", null));
-        assertFalse(N.equalsIgnoreCase(null, "abc"));
+        assertTrue(CommonUtil.equalsIgnoreCase("abc", "ABC"));
+        assertTrue(CommonUtil.equalsIgnoreCase("abc", "abc"));
+        assertFalse(CommonUtil.equalsIgnoreCase("abc", "def"));
+        assertTrue(CommonUtil.equalsIgnoreCase((String) null, (String) null));
+        assertFalse(CommonUtil.equalsIgnoreCase("abc", null));
+        assertFalse(CommonUtil.equalsIgnoreCase(null, "abc"));
     }
 
     @Test
     public void testEquals_Object() {
-        assertTrue(N.equals((Object) null, (Object) null));
-        assertFalse(N.equals(new Object(), null));
-        assertFalse(N.equals(null, new Object()));
+        assertTrue(CommonUtil.equals((Object) null, (Object) null));
+        assertFalse(CommonUtil.equals(new Object(), null));
+        assertFalse(CommonUtil.equals(null, new Object()));
 
         Object obj1 = new Object();
         Object obj2 = new Object();
-        assertTrue(N.equals(obj1, obj1));
-        assertFalse(N.equals(obj1, obj2));
+        assertTrue(CommonUtil.equals(obj1, obj1));
+        assertFalse(CommonUtil.equals(obj1, obj2));
 
-        assertTrue(N.equals("Test", "Test"));
-        assertFalse(N.equals("Test", "test"));
+        assertTrue(CommonUtil.equals("Test", "Test"));
+        assertFalse(CommonUtil.equals("Test", "test"));
 
-        assertTrue(N.equals(new int[] { 1, 2 }, new int[] { 1, 2 }));
-        assertFalse(N.equals(new int[] { 1, 2 }, new int[] { 1, 3 }));
-        assertFalse(N.equals(new int[] { 1, 2 }, new long[] { 1, 2 }));
+        assertTrue(CommonUtil.equals(new int[] { 1, 2 }, new int[] { 1, 2 }));
+        assertFalse(CommonUtil.equals(new int[] { 1, 2 }, new int[] { 1, 3 }));
+        assertFalse(CommonUtil.equals(new int[] { 1, 2 }, new long[] { 1, 2 }));
 
-        assertTrue(N.equals(new String[] { "a" }, new String[] { "a" }));
-        assertFalse(N.equals(new String[] { "a" }, new String[] { "b" }));
-        assertFalse(N.equals(new String[] { "a" }, new Object[] { new Object() }));
+        assertTrue(CommonUtil.equals(new String[] { "a" }, new String[] { "a" }));
+        assertFalse(CommonUtil.equals(new String[] { "a" }, new String[] { "b" }));
+        assertFalse(CommonUtil.equals(new String[] { "a" }, new Object[] { new Object() }));
     }
 
     @Test
     public void testEquals_booleanArray() {
-        assertTrue(N.equals(new boolean[] { true, false }, new boolean[] { true, false }));
-        assertFalse(N.equals(new boolean[] { true }, new boolean[] { false }));
-        assertTrue(N.equals((boolean[]) null, (boolean[]) null));
-        assertFalse(N.equals(new boolean[0], (boolean[]) null));
-        assertFalse(N.equals(new boolean[] { true }, new boolean[] { true, false }));
+        assertTrue(CommonUtil.equals(new boolean[] { true, false }, new boolean[] { true, false }));
+        assertFalse(CommonUtil.equals(new boolean[] { true }, new boolean[] { false }));
+        assertTrue(CommonUtil.equals((boolean[]) null, (boolean[]) null));
+        assertFalse(CommonUtil.equals(new boolean[0], (boolean[]) null));
+        assertFalse(CommonUtil.equals(new boolean[] { true }, new boolean[] { true, false }));
     }
 
     @Test
@@ -274,19 +274,19 @@ public class CommonUtil201Test extends TestBase {
         boolean[] a2 = { false, true, true, false };
         boolean[] a3 = { true, false, true, true };
 
-        assertTrue(N.equals(a1, 1, a3, 1, 2));
-        assertFalse(N.equals(a1, 0, a2, 0, 2));
-        assertTrue(N.equals(a1, 0, a1, 0, 0));
+        assertTrue(CommonUtil.equals(a1, 1, a3, 1, 2));
+        assertFalse(CommonUtil.equals(a1, 0, a2, 0, 2));
+        assertTrue(CommonUtil.equals(a1, 0, a1, 0, 0));
 
-        assertThrows(IllegalArgumentException.class, () -> N.equals(a1, 0, a3, 0, -1));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.equals(a1, 0, a3, 0, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.equals(a1, 3, a3, 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.equals(a1, 0, a3, 0, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.equals(a1, 0, a3, 0, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.equals(a1, 3, a3, 0, 2));
     }
 
     @Test
     public void testEquals_intArray() {
-        assertTrue(N.equals(new int[] { 1, 2 }, new int[] { 1, 2 }));
-        assertFalse(N.equals(new int[] { 1 }, new int[] { 2 }));
+        assertTrue(CommonUtil.equals(new int[] { 1, 2 }, new int[] { 1, 2 }));
+        assertFalse(CommonUtil.equals(new int[] { 1 }, new int[] { 2 }));
     }
 
     @Test
@@ -295,12 +295,12 @@ public class CommonUtil201Test extends TestBase {
         int[] a2 = { 0, 2, 3, 5 };
         int[] a3 = { 1, 2, 3, 4 };
 
-        assertTrue(N.equals(a1, 1, a3, 1, 2));
-        assertFalse(N.equals(a1, 0, a2, 0, 2));
-        assertTrue(N.equals(a1, 0, a1, 0, 0));
+        assertTrue(CommonUtil.equals(a1, 1, a3, 1, 2));
+        assertFalse(CommonUtil.equals(a1, 0, a2, 0, 2));
+        assertTrue(CommonUtil.equals(a1, 0, a1, 0, 0));
 
-        assertThrows(IllegalArgumentException.class, () -> N.equals(a1, 0, a3, 0, -1));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.equals(a1, 0, a3, 0, 5));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.equals(a1, 0, a3, 0, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.equals(a1, 0, a3, 0, 5));
     }
 
     @Test
@@ -309,8 +309,8 @@ public class CommonUtil201Test extends TestBase {
         float[] a2 = { 0.0f, 2.0f, Float.NaN, 5.0f };
         float[] a3 = { 1.0f, 2.0f, Float.NaN, 4.0f };
 
-        assertTrue(N.equals(a1, 1, a3, 1, 2));
-        assertFalse(N.equals(a1, 0, a2, 0, 2));
+        assertTrue(CommonUtil.equals(a1, 1, a3, 1, 2));
+        assertFalse(CommonUtil.equals(a1, 0, a2, 0, 2));
     }
 
     @Test
@@ -319,8 +319,8 @@ public class CommonUtil201Test extends TestBase {
         double[] a2 = { 0.0, 2.0, Double.NaN, 5.0 };
         double[] a3 = { 1.0, 2.0, Double.NaN, 4.0 };
 
-        assertTrue(N.equals(a1, 1, a3, 1, 2));
-        assertFalse(N.equals(a1, 0, a2, 0, 2));
+        assertTrue(CommonUtil.equals(a1, 1, a3, 1, 2));
+        assertFalse(CommonUtil.equals(a1, 0, a2, 0, 2));
     }
 
     @Test
@@ -328,10 +328,10 @@ public class CommonUtil201Test extends TestBase {
         Object[] oa1 = { "a", 1, null };
         Object[] oa2 = { "a", 1, null };
         Object[] oa3 = { "a", 2, null };
-        assertTrue(N.equals(oa1, oa2));
-        assertFalse(N.equals(oa1, oa3));
-        assertTrue(N.equals((Object[]) null, (Object[]) null));
-        assertFalse(N.equals(new Object[0], (Object[]) null));
+        assertTrue(CommonUtil.equals(oa1, oa2));
+        assertFalse(CommonUtil.equals(oa1, oa3));
+        assertTrue(CommonUtil.equals((Object[]) null, (Object[]) null));
+        assertFalse(CommonUtil.equals(new Object[0], (Object[]) null));
     }
 
     @Test
@@ -340,34 +340,34 @@ public class CommonUtil201Test extends TestBase {
         Object[] a2 = { "start", "world", "!" };
         Object[] a3 = { "hello", "world", "!" };
 
-        assertTrue(N.equals(a1, 1, a3, 1, 2));
-        assertFalse(N.equals(a1, 0, a2, 0, 2));
-        assertTrue(N.equals(a1, 0, a1, 0, 0));
+        assertTrue(CommonUtil.equals(a1, 1, a3, 1, 2));
+        assertFalse(CommonUtil.equals(a1, 0, a2, 0, 2));
+        assertTrue(CommonUtil.equals(a1, 0, a1, 0, 0));
 
-        assertThrows(IllegalArgumentException.class, () -> N.equals(a1, 0, a3, 0, -1));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.equals(a1, 0, a3, 0, 4));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.equals(a1, 0, a3, 0, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.equals(a1, 0, a3, 0, 4));
     }
 
     @Test
     public void testDeepEquals_Object() {
-        assertTrue(N.deepEquals(null, null));
-        assertFalse(N.deepEquals(new Object(), null));
+        assertTrue(CommonUtil.deepEquals(null, null));
+        assertFalse(CommonUtil.deepEquals(new Object(), null));
 
         Object[] arr1 = { 1, new String[] { "a", "b" }, new int[] { 10, 20 } };
         Object[] arr2 = { 1, new String[] { "a", "b" }, new int[] { 10, 20 } };
         Object[] arr3 = { 1, new String[] { "a", "c" }, new int[] { 10, 20 } };
         Object[] arr4 = { 1, new String[] { "a", "b" }, new long[] { 10, 20 } };
 
-        assertTrue(N.deepEquals(arr1, arr2));
-        assertFalse(N.deepEquals(arr1, arr3));
-        assertFalse(N.deepEquals(arr1, arr4));
+        assertTrue(CommonUtil.deepEquals(arr1, arr2));
+        assertFalse(CommonUtil.deepEquals(arr1, arr3));
+        assertFalse(CommonUtil.deepEquals(arr1, arr4));
 
-        assertTrue(N.deepEquals(new int[] { 1, 2 }, new int[] { 1, 2 }));
-        assertFalse(N.deepEquals(new int[] { 1, 2 }, new int[] { 1, 3 }));
-        assertFalse(N.deepEquals(new int[] { 1, 2 }, new Integer[] { 1, 2 }));
+        assertTrue(CommonUtil.deepEquals(new int[] { 1, 2 }, new int[] { 1, 2 }));
+        assertFalse(CommonUtil.deepEquals(new int[] { 1, 2 }, new int[] { 1, 3 }));
+        assertFalse(CommonUtil.deepEquals(new int[] { 1, 2 }, new Integer[] { 1, 2 }));
 
-        assertTrue(N.deepEquals("test", "test"));
-        assertFalse(N.deepEquals("test", "Test"));
+        assertTrue(CommonUtil.deepEquals("test", "test"));
+        assertFalse(CommonUtil.deepEquals("test", "Test"));
     }
 
     @Test
@@ -375,9 +375,9 @@ public class CommonUtil201Test extends TestBase {
         Object[] a = { 1, new String[] { "a", "b" }, new int[] { 10, 20 } };
         Object[] b = { 1, new String[] { "a", "b" }, new int[] { 10, 20 } };
         Object[] c = { 1, new String[] { "a", "DIFFERENT" }, new int[] { 10, 20 } };
-        assertTrue(N.deepEquals(a, b));
-        assertFalse(N.deepEquals(a, c));
-        assertTrue(N.deepEquals((Object[]) null, (Object[]) null));
+        assertTrue(CommonUtil.deepEquals(a, b));
+        assertFalse(CommonUtil.deepEquals(a, c));
+        assertTrue(CommonUtil.deepEquals((Object[]) null, (Object[]) null));
     }
 
     @Test
@@ -386,12 +386,12 @@ public class CommonUtil201Test extends TestBase {
         Object[] arr2 = { "other", new int[] { 1, 2 }, "mid", new String[] { "x", "y" }, "end" };
         Object[] arr3 = { "first", new int[] { 1, 2 }, "mid", new String[] { "x", "y" }, "last" };
 
-        assertTrue(N.deepEquals(arr1, 1, arr3, 1, 3));
-        assertFalse(N.deepEquals(arr1, 0, arr2, 0, 2));
-        assertTrue(N.deepEquals(arr1, 0, arr1, 0, 0));
+        assertTrue(CommonUtil.deepEquals(arr1, 1, arr3, 1, 3));
+        assertFalse(CommonUtil.deepEquals(arr1, 0, arr2, 0, 2));
+        assertTrue(CommonUtil.deepEquals(arr1, 0, arr1, 0, 0));
 
-        assertThrows(IllegalArgumentException.class, () -> N.deepEquals(arr1, 0, arr3, 0, -1));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deepEquals(arr1, 0, arr3, 0, 6));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.deepEquals(arr1, 0, arr3, 0, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.deepEquals(arr1, 0, arr3, 0, 6));
 
         Object[] cyclic1 = new Object[1];
         cyclic1[0] = cyclic1;
@@ -407,9 +407,9 @@ public class CommonUtil201Test extends TestBase {
         String[] sa1 = { "abc", "DEF", null };
         String[] sa2 = { "ABC", "def", null };
         String[] sa3 = { "abc", "def", "ghi" };
-        assertTrue(N.equalsIgnoreCase(sa1, sa2));
-        assertFalse(N.equalsIgnoreCase(sa1, sa3));
-        assertTrue(N.equalsIgnoreCase((String[]) null, (String[]) null));
+        assertTrue(CommonUtil.equalsIgnoreCase(sa1, sa2));
+        assertFalse(CommonUtil.equalsIgnoreCase(sa1, sa3));
+        assertTrue(CommonUtil.equalsIgnoreCase((String[]) null, (String[]) null));
     }
 
     @Test
@@ -418,18 +418,18 @@ public class CommonUtil201Test extends TestBase {
         String[] a2 = { "start", "world", "java", "end" };
         String[] a3 = { "HELLO", "world", "JAVA", "TEST" };
 
-        assertTrue(N.equalsIgnoreCase(a1, 1, a3, 1, 2));
-        assertFalse(N.equalsIgnoreCase(a1, 0, a2, 0, 2));
-        assertTrue(N.equalsIgnoreCase(a1, 0, a1, 0, 0));
+        assertTrue(CommonUtil.equalsIgnoreCase(a1, 1, a3, 1, 2));
+        assertFalse(CommonUtil.equalsIgnoreCase(a1, 0, a2, 0, 2));
+        assertTrue(CommonUtil.equalsIgnoreCase(a1, 0, a1, 0, 0));
 
         String[] an1 = { "Test", null, "Me" };
         String[] an2 = { "test", null, "me" };
         String[] an3 = { "test", "NotNULL", "me" };
-        assertTrue(N.equalsIgnoreCase(an1, 0, an2, 0, 3));
-        assertFalse(N.equalsIgnoreCase(an1, 0, an3, 0, 3));
+        assertTrue(CommonUtil.equalsIgnoreCase(an1, 0, an2, 0, 3));
+        assertFalse(CommonUtil.equalsIgnoreCase(an1, 0, an3, 0, 3));
 
-        assertThrows(IllegalArgumentException.class, () -> N.equalsIgnoreCase(a1, 0, a3, 0, -1));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.equalsIgnoreCase(a1, 0, a3, 0, 5));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.equalsIgnoreCase(a1, 0, a3, 0, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.equalsIgnoreCase(a1, 0, a3, 0, 5));
     }
 
     @Test
@@ -457,15 +457,15 @@ public class CommonUtil201Test extends TestBase {
         Collection<String> keys = Arrays.asList("a", "b");
         Collection<String> keysWithC = Arrays.asList("a", "b", "c");
 
-        assertTrue(N.equalsByKeys(map1, map3, keysWithC));
-        assertTrue(N.equalsByKeys(map1, map3, keys));
-        assertFalse(N.equalsByKeys(map1, map2, keysWithC));
-        assertTrue(N.equalsByKeys(map1, map2, keys));
-        assertFalse(N.equalsByKeys(map1, map4, keysWithC));
+        assertTrue(CommonUtil.equalsByKeys(map1, map3, keysWithC));
+        assertTrue(CommonUtil.equalsByKeys(map1, map3, keys));
+        assertFalse(CommonUtil.equalsByKeys(map1, map2, keysWithC));
+        assertTrue(CommonUtil.equalsByKeys(map1, map2, keys));
+        assertFalse(CommonUtil.equalsByKeys(map1, map4, keysWithC));
 
-        assertTrue(N.equalsByKeys(null, null, keys));
-        assertFalse(N.equalsByKeys(map1, null, keys));
-        assertFalse(N.equalsByKeys(null, map1, keys));
+        assertTrue(CommonUtil.equalsByKeys(null, null, keys));
+        assertFalse(CommonUtil.equalsByKeys(map1, null, keys));
+        assertFalse(CommonUtil.equalsByKeys(null, map1, keys));
 
         Map<String, Integer> mapWithNullValue1 = new HashMap<>();
         mapWithNullValue1.put("k1", null);
@@ -474,13 +474,13 @@ public class CommonUtil201Test extends TestBase {
         Map<String, Integer> mapWithNonNullValue = new HashMap<>();
         mapWithNonNullValue.put("k1", 1);
 
-        assertTrue(N.equalsByKeys(mapWithNullValue1, mapWithNullValue2, Collections.singletonList("k1")));
-        assertFalse(N.equalsByKeys(mapWithNullValue1, mapWithNonNullValue, Collections.singletonList("k1")));
+        assertTrue(CommonUtil.equalsByKeys(mapWithNullValue1, mapWithNullValue2, Collections.singletonList("k1")));
+        assertFalse(CommonUtil.equalsByKeys(mapWithNullValue1, mapWithNonNullValue, Collections.singletonList("k1")));
 
         Map<String, Integer> emptyMap = Collections.emptyMap();
-        assertFalse(N.equalsByKeys(mapWithNullValue1, emptyMap, Collections.singletonList("k1")));
+        assertFalse(CommonUtil.equalsByKeys(mapWithNullValue1, emptyMap, Collections.singletonList("k1")));
 
-        assertThrows(IllegalArgumentException.class, () -> N.equalsByKeys(map1, map2, Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.equalsByKeys(map1, map2, Collections.emptyList()));
     }
 
     @Test
@@ -516,96 +516,96 @@ public class CommonUtil201Test extends TestBase {
 
     @Test
     public void testHashCode_boolean() {
-        assertEquals(1231, N.hashCode(true));
-        assertEquals(1237, N.hashCode(false));
+        assertEquals(1231, CommonUtil.hashCode(true));
+        assertEquals(1237, CommonUtil.hashCode(false));
     }
 
     @Test
     public void testHashCode_char() {
-        assertEquals((int) 'a', N.hashCode('a'));
+        assertEquals('a', CommonUtil.hashCode('a'));
     }
 
     @Test
     public void testHashCode_byte() {
-        assertEquals((int) (byte) 5, N.hashCode((byte) 5));
+        assertEquals((byte) 5, CommonUtil.hashCode((byte) 5));
     }
 
     @Test
     public void testHashCode_short() {
-        assertEquals((int) (short) 100, N.hashCode((short) 100));
+        assertEquals((short) 100, CommonUtil.hashCode((short) 100));
     }
 
     @Test
     public void testHashCode_int() {
-        assertEquals(12345, N.hashCode(12345));
+        assertEquals(12345, CommonUtil.hashCode(12345));
     }
 
     @Test
     public void testHashCode_long() {
-        assertEquals(Long.hashCode(123456789L), N.hashCode(123456789L));
+        assertEquals(Long.hashCode(123456789L), CommonUtil.hashCode(123456789L));
     }
 
     @Test
     public void testHashCode_float() {
-        assertEquals(Float.floatToIntBits(1.23f), N.hashCode(1.23f));
-        assertEquals(Float.floatToIntBits(Float.NaN), N.hashCode(Float.NaN));
+        assertEquals(Float.floatToIntBits(1.23f), CommonUtil.hashCode(1.23f));
+        assertEquals(Float.floatToIntBits(Float.NaN), CommonUtil.hashCode(Float.NaN));
     }
 
     @Test
     public void testHashCode_double() {
-        assertEquals(Double.hashCode(1.2345), N.hashCode(1.2345));
-        assertEquals(Double.hashCode(Double.NaN), N.hashCode(Double.NaN));
+        assertEquals(Double.hashCode(1.2345), CommonUtil.hashCode(1.2345));
+        assertEquals(Double.hashCode(Double.NaN), CommonUtil.hashCode(Double.NaN));
     }
 
     @Test
     public void testHashCode_Object() {
-        assertEquals(0, N.hashCode((Object) null));
+        assertEquals(0, CommonUtil.hashCode((Object) null));
         String s = "test";
-        assertEquals(s.hashCode(), N.hashCode(s));
+        assertEquals(s.hashCode(), CommonUtil.hashCode(s));
 
         int[] arr = { 1, 2, 3 };
-        assertTrue(N.hashCode(arr) != 0);
-        assertEquals(N.hashCode(arr), N.hashCode(new int[] { 1, 2, 3 }));
+        assertTrue(CommonUtil.hashCode(arr) != 0);
+        assertEquals(CommonUtil.hashCode(arr), CommonUtil.hashCode(new int[] { 1, 2, 3 }));
     }
 
     @Test
     public void testHashCode_booleanArray() {
-        assertEquals(0, N.hashCode((boolean[]) null));
+        assertEquals(0, CommonUtil.hashCode((boolean[]) null));
         boolean[] ba1 = { true, false };
         boolean[] ba2 = { true, false };
         boolean[] ba3 = { false, true };
-        assertEquals(N.hashCode(ba1), N.hashCode(ba2));
-        assertNotEquals(N.hashCode(ba1), N.hashCode(ba3));
-        assertEquals(Arrays.hashCode(new boolean[0]), N.hashCode(new boolean[0]));
+        assertEquals(CommonUtil.hashCode(ba1), CommonUtil.hashCode(ba2));
+        assertNotEquals(CommonUtil.hashCode(ba1), CommonUtil.hashCode(ba3));
+        assertEquals(Arrays.hashCode(new boolean[0]), CommonUtil.hashCode(new boolean[0]));
     }
 
     @Test
     public void testHashCode_booleanArrayRange() {
         boolean[] arr = { true, false, true, false, true };
-        assertEquals(0, N.hashCode((boolean[]) null, 0, 0));
+        assertEquals(0, CommonUtil.hashCode((boolean[]) null, 0, 0));
 
-        int fullHash = N.hashCode(arr, 0, arr.length);
-        int partialHash = N.hashCode(arr, 1, 3);
+        int fullHash = CommonUtil.hashCode(arr, 0, arr.length);
+        int partialHash = CommonUtil.hashCode(arr, 1, 3);
 
         assertNotEquals(0, fullHash);
         assertNotEquals(0, partialHash);
         assertNotEquals(fullHash, partialHash);
 
-        assertEquals(1, N.hashCode(arr, 1, 1));
+        assertEquals(1, CommonUtil.hashCode(arr, 1, 1));
 
-        assertThrows(IndexOutOfBoundsException.class, () -> N.hashCode(arr, 0, 6));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.hashCode(arr, -1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.hashCode(arr, 3, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.hashCode(arr, 0, 6));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.hashCode(arr, -1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.hashCode(arr, 3, 2));
     }
 
     @Test
     public void testHashCode_intArray() {
-        assertEquals(0, N.hashCode((int[]) null));
+        assertEquals(0, CommonUtil.hashCode((int[]) null));
         int[] arr = { 1, 2 };
         int expected = 1;
         expected = 31 * expected + 1;
         expected = 31 * expected + 2;
-        assertEquals(expected, N.hashCode(arr));
+        assertEquals(expected, CommonUtil.hashCode(arr));
     }
 
     @Test
@@ -614,24 +614,24 @@ public class CommonUtil201Test extends TestBase {
         int expected = 1;
         expected = 31 * expected + 20;
         expected = 31 * expected + 30;
-        assertEquals(expected, N.hashCode(arr, 1, 3));
-        assertEquals(1, N.hashCode(arr, 1, 1));
+        assertEquals(expected, CommonUtil.hashCode(arr, 1, 3));
+        assertEquals(1, CommonUtil.hashCode(arr, 1, 1));
     }
 
     @Test
     public void testHashCode_ObjectArray() {
-        assertEquals(0, N.hashCode((Object[]) null));
+        assertEquals(0, CommonUtil.hashCode((Object[]) null));
         Object[] oa1 = { "a", 1, null };
         Object[] oa2 = { "a", 1, null };
         Object[] oa3 = { "a", 2, null };
-        assertEquals(N.hashCode(oa1), N.hashCode(oa2));
-        assertNotEquals(N.hashCode(oa1), N.hashCode(oa3));
+        assertEquals(CommonUtil.hashCode(oa1), CommonUtil.hashCode(oa2));
+        assertNotEquals(CommonUtil.hashCode(oa1), CommonUtil.hashCode(oa3));
 
         int expected = 1;
         expected = 31 * expected + "a".hashCode();
         expected = 31 * expected + Integer.valueOf(1).hashCode();
         expected = 31 * expected + 0;
-        assertEquals(expected, N.hashCode(oa1));
+        assertEquals(expected, CommonUtil.hashCode(oa1));
     }
 
     @Test
@@ -640,196 +640,196 @@ public class CommonUtil201Test extends TestBase {
         int expected = 1;
         expected = 31 * expected + "B".hashCode();
         expected = 31 * expected + 0;
-        assertEquals(expected, N.hashCode(arr, 1, 3));
-        assertEquals(1, N.hashCode(arr, 1, 1));
+        assertEquals(expected, CommonUtil.hashCode(arr, 1, 3));
+        assertEquals(1, CommonUtil.hashCode(arr, 1, 1));
     }
 
     @Test
     public void testDeepHashCode_Object() {
-        assertEquals(0, N.deepHashCode(null));
-        assertEquals("test".hashCode(), N.deepHashCode("test"));
+        assertEquals(0, CommonUtil.deepHashCode(null));
+        assertEquals("test".hashCode(), CommonUtil.deepHashCode("test"));
 
         Object[] arr1 = { 1, new String[] { "a", "b" }, new int[] { 10, 20 } };
         Object[] arr2 = { 1, new String[] { "a", "b" }, new int[] { 10, 20 } };
         Object[] arr3 = { 1, new String[] { "a", "c" }, new int[] { 10, 20 } };
 
-        assertEquals(N.deepHashCode(arr1), N.deepHashCode(arr2));
-        assertNotEquals(N.deepHashCode(arr1), N.deepHashCode(arr3));
+        assertEquals(CommonUtil.deepHashCode(arr1), CommonUtil.deepHashCode(arr2));
+        assertNotEquals(CommonUtil.deepHashCode(arr1), CommonUtil.deepHashCode(arr3));
 
-        assertEquals(N.hashCode(new int[] { 1, 2 }), N.deepHashCode(new int[] { 1, 2 }));
+        assertEquals(CommonUtil.hashCode(new int[] { 1, 2 }), CommonUtil.deepHashCode(new int[] { 1, 2 }));
     }
 
     @Test
     public void testDeepHashCode_ObjectArray() {
-        assertEquals(0, N.deepHashCode((Object[]) null));
+        assertEquals(0, CommonUtil.deepHashCode((Object[]) null));
         Object[] arr = { 1, new String[] { "a", "b" }, new int[] { 10, 20 } };
 
         int expected = 1;
         expected = 31 * expected + Integer.valueOf(1).hashCode();
-        expected = 31 * expected + N.deepHashCode(new String[] { "a", "b" });
-        expected = 31 * expected + N.deepHashCode(new int[] { 10, 20 });
+        expected = 31 * expected + CommonUtil.deepHashCode(new String[] { "a", "b" });
+        expected = 31 * expected + CommonUtil.deepHashCode(new int[] { 10, 20 });
 
-        assertEquals(expected, N.deepHashCode(arr));
+        assertEquals(expected, CommonUtil.deepHashCode(arr));
     }
 
     @Test
     public void testDeepHashCode_ObjectArrayRange() {
         Object[] arr = { "X", new int[] { 100, 200 }, new String[] { "deep" } };
         int expected = 1;
-        expected = 31 * expected + N.deepHashCode(new int[] { 100, 200 });
-        expected = 31 * expected + N.deepHashCode(new String[] { "deep" });
-        assertEquals(expected, N.deepHashCode(arr, 1, 3));
-        assertEquals(1, N.deepHashCode(arr, 1, 1));
+        expected = 31 * expected + CommonUtil.deepHashCode(new int[] { 100, 200 });
+        expected = 31 * expected + CommonUtil.deepHashCode(new String[] { "deep" });
+        assertEquals(expected, CommonUtil.deepHashCode(arr, 1, 3));
+        assertEquals(1, CommonUtil.deepHashCode(arr, 1, 1));
 
     }
 
     @Test
     public void testToString_boolean() {
-        assertEquals(String.valueOf(true), N.toString(true));
+        assertEquals(String.valueOf(true), CommonUtil.toString(true));
     }
 
     @Test
     public void testToString_char() {
-        assertEquals(String.valueOf('z'), N.toString('z'));
+        assertEquals(String.valueOf('z'), CommonUtil.toString('z'));
     }
 
     @Test
     public void testToString_byte() {
-        assertEquals(String.valueOf((byte) 12), N.toString((byte) 12));
+        assertEquals(String.valueOf((byte) 12), CommonUtil.toString((byte) 12));
     }
 
     @Test
     public void testToString_short() {
-        assertEquals(String.valueOf((short) 123), N.toString((short) 123));
+        assertEquals(String.valueOf((short) 123), CommonUtil.toString((short) 123));
     }
 
     @Test
     public void testToString_int() {
-        assertEquals(String.valueOf(12345), N.toString(12345));
+        assertEquals(String.valueOf(12345), CommonUtil.toString(12345));
     }
 
     @Test
     public void testToString_long() {
-        assertEquals(String.valueOf(1234567L), N.toString(1234567L));
+        assertEquals(String.valueOf(1234567L), CommonUtil.toString(1234567L));
     }
 
     @Test
     public void testToString_float() {
-        assertEquals(String.valueOf(1.2f), N.toString(1.2f));
+        assertEquals(String.valueOf(1.2f), CommonUtil.toString(1.2f));
     }
 
     @Test
     public void testToString_double() {
-        assertEquals(String.valueOf(1.23), N.toString(1.23));
+        assertEquals(String.valueOf(1.23), CommonUtil.toString(1.23));
     }
 
     @Test
     public void testToString_Object() {
-        assertEquals("null", N.toString((Object) null));
-        assertEquals("test", N.toString("test"));
-        assertEquals("[1, 2, 3]", N.toString(Arrays.asList(1, 2, 3)));
+        assertEquals("null", CommonUtil.toString((Object) null));
+        assertEquals("test", CommonUtil.toString("test"));
+        assertEquals("[1, 2, 3]", CommonUtil.toString(Arrays.asList(1, 2, 3)));
         Iterator<Integer> iterator = Arrays.asList(4, 5).iterator();
-        assertEquals("[4, 5]", N.toString(iterator));
+        assertEquals("[4, 5]", CommonUtil.toString(iterator));
 
-        assertEquals(String.valueOf(true), N.toString(Boolean.TRUE));
-        assertEquals(String.valueOf('c'), N.toString(Character.valueOf('c')));
+        assertEquals(String.valueOf(true), CommonUtil.toString(Boolean.TRUE));
+        assertEquals(String.valueOf('c'), CommonUtil.toString(Character.valueOf('c')));
     }
 
     @Test
     public void testToString_Object_defaultIfNull() {
-        assertEquals("default", N.toString(null, "default"));
-        assertEquals("test", N.toString("test", "default"));
+        assertEquals("default", CommonUtil.toString(null, "default"));
+        assertEquals("test", CommonUtil.toString("test", "default"));
     }
 
     @Test
     public void testToString_booleanArray() {
-        assertEquals("null", N.toString((boolean[]) null));
-        assertEquals("[]", N.toString(new boolean[0]));
-        assertEquals("[true, false, true]", N.toString(new boolean[] { true, false, true }));
+        assertEquals("null", CommonUtil.toString((boolean[]) null));
+        assertEquals("[]", CommonUtil.toString(new boolean[0]));
+        assertEquals("[true, false, true]", CommonUtil.toString(new boolean[] { true, false, true }));
     }
 
     @Test
     public void testToString_booleanArrayRange() {
         boolean[] arr = { true, false, true, true, false };
-        assertEquals("[false, true, true]", N.toString(arr, 1, 4));
-        assertEquals("[]", N.toString(arr, 1, 1));
+        assertEquals("[false, true, true]", CommonUtil.toString(arr, 1, 4));
+        assertEquals("[]", CommonUtil.toString(arr, 1, 1));
 
-        assertThrows(IndexOutOfBoundsException.class, () -> N.toString(arr, 0, 6));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.toString(arr, 0, 6));
     }
 
     @Test
     public void testToString_charArray() {
-        assertEquals("null", N.toString((char[]) null));
-        assertEquals("[]", N.toString(new char[0]));
-        assertEquals("[a, b, c]", N.toString(new char[] { 'a', 'b', 'c' }));
+        assertEquals("null", CommonUtil.toString((char[]) null));
+        assertEquals("[]", CommonUtil.toString(new char[0]));
+        assertEquals("[a, b, c]", CommonUtil.toString(new char[] { 'a', 'b', 'c' }));
     }
 
     @Test
     public void testToString_charArrayRange() {
         char[] arr = { 'h', 'e', 'l', 'l', 'o' };
-        assertEquals("[e, l, l]", N.toString(arr, 1, 4));
-        assertEquals("[]", N.toString(arr, 1, 1));
+        assertEquals("[e, l, l]", CommonUtil.toString(arr, 1, 4));
+        assertEquals("[]", CommonUtil.toString(arr, 1, 1));
 
-        assertThrows(IndexOutOfBoundsException.class, () -> N.toString(arr, 0, 6));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.toString(arr, 0, 6));
     }
 
     @Test
     public void testToString_intArray() {
-        assertEquals("null", N.toString((int[]) null));
-        assertEquals("[]", N.toString(new int[0]));
-        assertEquals("[1, 2, 3]", N.toString(new int[] { 1, 2, 3 }));
+        assertEquals("null", CommonUtil.toString((int[]) null));
+        assertEquals("[]", CommonUtil.toString(new int[0]));
+        assertEquals("[1, 2, 3]", CommonUtil.toString(new int[] { 1, 2, 3 }));
     }
 
     @Test
     public void testToString_intArrayRange() {
         int[] arr = { 10, 20, 30, 40 };
-        assertEquals("[20, 30]", N.toString(arr, 1, 3));
-        assertEquals("[]", N.toString(arr, 1, 1));
+        assertEquals("[20, 30]", CommonUtil.toString(arr, 1, 3));
+        assertEquals("[]", CommonUtil.toString(arr, 1, 1));
     }
 
     @Test
     public void testToString_ObjectArray() {
-        assertEquals("null", N.toString((Object[]) null));
-        assertEquals("[]", N.toString(new Object[0]));
-        assertEquals("[hello, 1, null]", N.toString(new Object[] { "hello", 1, null }));
+        assertEquals("null", CommonUtil.toString((Object[]) null));
+        assertEquals("[]", CommonUtil.toString(new Object[0]));
+        assertEquals("[hello, 1, null]", CommonUtil.toString(new Object[] { "hello", 1, null }));
     }
 
     @Test
     public void testToString_ObjectArrayRange() {
         Object[] arr = { "one", 2, "three", null, 5.0 };
-        assertEquals("[2, three, null]", N.toString(arr, 1, 4));
-        assertEquals("[]", N.toString(arr, 1, 1));
+        assertEquals("[2, three, null]", CommonUtil.toString(arr, 1, 4));
+        assertEquals("[]", CommonUtil.toString(arr, 1, 1));
     }
 
     @Test
     public void testDeepToString_Object() {
-        assertEquals("null", N.deepToString(null));
-        assertEquals("simple string", N.deepToString("simple string"));
+        assertEquals("null", CommonUtil.deepToString(null));
+        assertEquals("simple string", CommonUtil.deepToString("simple string"));
 
-        assertEquals("[true, false]", N.deepToString(new boolean[] { true, false }));
-        assertEquals("[[a, b], [c, d]]", N.deepToString(new String[][] { { "a", "b" }, { "c", "d" } }));
+        assertEquals("[true, false]", CommonUtil.deepToString(new boolean[] { true, false }));
+        assertEquals("[[a, b], [c, d]]", CommonUtil.deepToString(new String[][] { { "a", "b" }, { "c", "d" } }));
 
         Object[] nested = { 1, new String[] { "x", "y" }, new int[] { 100, 200 } };
-        assertEquals("[1, [x, y], [100, 200]]", N.deepToString(nested));
+        assertEquals("[1, [x, y], [100, 200]]", CommonUtil.deepToString(nested));
     }
 
     @Test
     public void testDeepToString_ObjectArray() {
-        assertEquals("null", N.deepToString((Object[]) null));
-        assertEquals("[]", N.deepToString(new Object[0]));
+        assertEquals("null", CommonUtil.deepToString((Object[]) null));
+        assertEquals("[]", CommonUtil.deepToString(new Object[0]));
 
         Object[] arr = { "A", new int[] { 1, 2 }, new String[] { "B", "C" } };
-        assertEquals("[A, [1, 2], [B, C]]", N.deepToString(arr));
+        assertEquals("[A, [1, 2], [B, C]]", CommonUtil.deepToString(arr));
     }
 
     @Test
     public void testDeepToString_ObjectArrayRange() {
         Object[] arr = { "start", new Object[] { "nested1", new int[] { 10, 20 } }, "middle", new String[] { "s1", "s2" }, "end" };
         String expected = "[[nested1, [10, 20]], middle, [s1, s2]]";
-        assertEquals(expected, N.deepToString(arr, 1, 4));
-        assertEquals("[]", N.deepToString(arr, 1, 1));
+        assertEquals(expected, CommonUtil.deepToString(arr, 1, 4));
+        assertEquals("[]", CommonUtil.deepToString(arr, 1, 1));
 
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deepToString(arr, 0, 6));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.deepToString(arr, 0, 6));
     }
 
     @Test
@@ -837,28 +837,28 @@ public class CommonUtil201Test extends TestBase {
         Object[] cyclicArray = new Object[2];
         cyclicArray[0] = "Element 1";
         cyclicArray[1] = cyclicArray;
-        assertEquals("[Element 1, [...]]", N.deepToString(cyclicArray));
+        assertEquals("[Element 1, [...]]", CommonUtil.deepToString(cyclicArray));
 
         Object[] arr = new Object[1];
         arr[0] = arr;
-        assertEquals("[[...]]", N.deepToString(arr));
+        assertEquals("[[...]]", CommonUtil.deepToString(arr));
 
         Object[] a = new Object[2];
         Object[] b = new Object[] { "b" };
         a[0] = b;
         a[1] = b;
-        assertEquals("[[b], [b]]", N.deepToString(a));
+        assertEquals("[[b], [b]]", CommonUtil.deepToString(a));
 
         Object[] parent = new Object[1];
         Object[] child = new Object[1];
         parent[0] = child;
         child[0] = parent;
-        assertEquals("[[[...]]]", N.deepToString(parent));
+        assertEquals("[[[...]]]", CommonUtil.deepToString(parent));
     }
 
     @Test
     public void testDeepToString_ObjectArray_defaultIfNull() {
-        assertEquals("fallback", N.deepToString(null, "fallback"));
-        assertEquals("[]", N.deepToString(new Object[0], "fallback"));
+        assertEquals("fallback", CommonUtil.deepToString(null, "fallback"));
+        assertEquals("[]", CommonUtil.deepToString(new Object[0], "fallback"));
     }
 }

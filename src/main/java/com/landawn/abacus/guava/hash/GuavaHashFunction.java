@@ -19,6 +19,7 @@ import java.nio.charset.Charset;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
+import com.landawn.abacus.util.N;
 
 /**
  * Package-private implementation of {@link HashFunction} that wraps a Google Guava
@@ -48,6 +49,7 @@ final class GuavaHashFunction implements HashFunction {
      * @param gHashFunction the Guava hash function to wrap
      */
     GuavaHashFunction(final com.google.common.hash.HashFunction gHashFunction) {
+        N.requireNonNull(gHashFunction, "gHashFunction");
         this.gHashFunction = gHashFunction;
     }
 

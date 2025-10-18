@@ -1520,40 +1520,6 @@ public final class Iterables {
         return N.isEmpty(c) ? Nullable.empty() : Nullable.of(N.median(c, cmp));
     }
 
-    //    /**
-    //     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-    //     *
-    //     * @param <T>
-    //     * @param a
-    //     * @param keyExtractor
-    //     * @return
-    //     * @deprecated
-    //     * @see Comparators#comparingBy(Function)
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    @SuppressWarnings("rawtypes")
-    //    public static <T> Nullable<T> medianBy(final T[] a, final Function<? super T, ? extends Comparable> keyExtractor) {
-    //        return median(a, Comparators.comparingBy(keyExtractor));
-    //    }
-    //
-    //    /**
-    //     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-    //     *
-    //     * @param <T>
-    //     * @param c
-    //     * @param keyExtractor
-    //     * @return
-    //     * @deprecated
-    //     * @see Comparators#comparingBy(Function)
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    @SuppressWarnings("rawtypes")
-    //    public static <T> Nullable<T> medianBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyExtractor) {
-    //        return median(c, Comparators.comparingBy(keyExtractor));
-    //    }
-
     /**
      * Returns the <i>k-th</i> largest element from the provided array based on their natural ordering.
      * If the array is {@code null}, empty, or its length is less than {@code k}, it returns an empty {@code Nullable}.
@@ -1601,11 +1567,11 @@ public final class Iterables {
      * Returns the <i>k-th</i> largest element from the provided collection based on the provided comparator.
      * If the collection is {@code null}, empty, or its size is less than k, a {@code Nullable}.empty() is returned.
      *
-     * @param <T> The type of elements in the collection.
-     * @param c The collection from which to find the <i>k-th</i> largest element.
-     * @param k The position from the end of a sorted list of the collection's elements (1-based index).
-     * @param cmp The comparator used to determine the order of the collection's elements.
-     * @return A {@code Nullable} containing the <i>k-th</i> largest element if it exists, otherwise {@code Nullable}.empty().
+     * @param <T> the type of elements in the collection.
+     * @param c the collection from which to find the <i>k-th</i> largest element.
+     * @param k the position from the end of a sorted list of the collection's elements (1-based index).
+     * @param cmp the comparator used to determine the order of the collection's elements.
+     * @return a {@code Nullable} containing the <i>k-th</i> largest element if it exists, otherwise {@code Nullable}.empty().
      * @see N#kthLargest(Collection, int, Comparator)
      */
     public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
@@ -3323,7 +3289,7 @@ public final class Iterables {
      * Returns an unmodifiable <b>view</b> of the difference of two sets. The returned set contains
      * all elements that are contained in {@code set1} but not in {@code set2}.
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>
      * Set&lt;String&gt; set1 = new HashSet&lt;&gt;(Arrays.asList("a", "b", "c", "d"));
      * Set&lt;String&gt; set2 = new HashSet&lt;&gt;(Arrays.asList("b", "d", "e"));
@@ -3442,7 +3408,7 @@ public final class Iterables {
      * Returns an unmodifiable <b>view</b> of the symmetric difference of two sets. The returned set contains
      * all elements that are contained in either {@code set1} or {@code set2} but not in both.
      * 
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>
      * Set&lt;String&gt; set1 = new HashSet&lt;&gt;(Arrays.asList("a", "b", "c"));
      * Set&lt;String&gt; set2 = new HashSet&lt;&gt;(Arrays.asList("b", "c", "d"));

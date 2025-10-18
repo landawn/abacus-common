@@ -26,8 +26,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Nullable;
@@ -682,7 +682,7 @@ public class Iterables201Test extends TestBase {
         assertTrue(Iterables.sumIntToLong((Iterable<Integer>) null).isEmpty());
         assertTrue(Iterables.sumIntToLong(Collections.<Integer> emptyList()).isEmpty());
         assertEquals(15L, Iterables.sumIntToLong(Arrays.asList(1, 2, 3, 4, 5)).orElseThrow());
-        assertEquals((long) Integer.MAX_VALUE + 1L, Iterables.sumIntToLong(Arrays.asList(Integer.MAX_VALUE, 1)).orElseThrow());
+        assertEquals(Integer.MAX_VALUE + 1L, Iterables.sumIntToLong(Arrays.asList(Integer.MAX_VALUE, 1)).orElseThrow());
     }
 
     @Test
@@ -690,7 +690,7 @@ public class Iterables201Test extends TestBase {
         List<TestObject> list = Arrays.asList(new TestObject(Integer.MAX_VALUE, "a"), new TestObject(1, "b"));
         assertTrue(Iterables.sumIntToLong((Iterable<TestObject>) null, TestObject::getId).isEmpty());
         assertTrue(Iterables.sumIntToLong(Collections.<TestObject> emptyList(), TestObject::getId).isEmpty());
-        assertEquals((long) Integer.MAX_VALUE + 1L, Iterables.sumIntToLong(list, TestObject::getId).orElseThrow());
+        assertEquals(Integer.MAX_VALUE + 1L, Iterables.sumIntToLong(list, TestObject::getId).orElseThrow());
     }
 
     @Test
@@ -719,7 +719,7 @@ public class Iterables201Test extends TestBase {
     @Test
     public void testSumDoubleIterableWithFunction() {
         List<TestObject> list = Arrays.asList(new TestObject(1, "a"), new TestObject(2, "b"));
-        ToDoubleFunction<TestObject> extractor = obj -> (double) obj.getId() + 0.5;
+        ToDoubleFunction<TestObject> extractor = obj -> obj.getId() + 0.5;
         assertTrue(Iterables.sumDouble((Iterable<TestObject>) null, extractor).isEmpty());
         assertTrue(Iterables.sumDouble(Collections.<TestObject> emptyList(), extractor).isEmpty());
         assertEquals(4.0, Iterables.sumDouble(list, extractor).orElseThrow(), 0.0);
@@ -1442,7 +1442,7 @@ public class Iterables201Test extends TestBase {
     public void testSubSetNavigableSet() {
         NavigableSet<Integer> set = new TreeSet<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
 
-        assertTrue(Iterables.subSet(N.emptyNavigableSet(), Range.closed(1, 5)).isEmpty());
+        assertTrue(Iterables.subSet(CommonUtil.emptyNavigableSet(), Range.closed(1, 5)).isEmpty());
 
         Range<Integer> r1 = Range.closedOpen(3, 7);
         NavigableSet<Integer> sub1 = Iterables.subSet(set, r1);

@@ -10,11 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.util.Beans;
-import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.Difference.BeanDifference;
-import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Pair;
 
 public class DifferenceTest extends AbstractTest {
 
@@ -32,7 +28,7 @@ public class DifferenceTest extends AbstractTest {
 
         assertFalse(diff.withDifferentValues().containsKey("lastUpdateTime"));
 
-        diff = BeanDifference.of(a, b, N.asList("lastUpdateTime", "createdTime"));
+        diff = BeanDifference.of(a, b, CommonUtil.asList("lastUpdateTime", "createdTime"));
         assertTrue(diff.withDifferentValues().containsKey("lastUpdateTime"));
     }
 

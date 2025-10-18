@@ -4481,7 +4481,7 @@ public class N2025Test extends TestBase {
     @Test
     public void testSplitByChunkCountWithFunction() {
         int[] a = { 1, 2, 3, 4, 5, 6, 7 };
-        List<int[]> chunks = N.splitByChunkCount(7, 5, (fromIndex, toIndex) -> N.copyOfRange(a, fromIndex, toIndex));
+        List<int[]> chunks = N.splitByChunkCount(7, 5, (fromIndex, toIndex) -> CommonUtil.copyOfRange(a, fromIndex, toIndex));
 
         assertEquals(5, chunks.size());
         assertArrayEquals(new int[] { 1, 2 }, chunks.get(0));
@@ -4494,7 +4494,7 @@ public class N2025Test extends TestBase {
     @Test
     public void testSplitByChunkCountWithFunctionSizeSmallerFirst() {
         int[] a = { 1, 2, 3, 4, 5, 6, 7 };
-        List<int[]> chunks = N.splitByChunkCount(7, 5, true, (fromIndex, toIndex) -> N.copyOfRange(a, fromIndex, toIndex));
+        List<int[]> chunks = N.splitByChunkCount(7, 5, true, (fromIndex, toIndex) -> CommonUtil.copyOfRange(a, fromIndex, toIndex));
 
         assertEquals(5, chunks.size());
         assertArrayEquals(new int[] { 1 }, chunks.get(0));
@@ -4507,7 +4507,7 @@ public class N2025Test extends TestBase {
     @Test
     public void testSplitByChunkCountWithFunctionExactDivision() {
         int[] a = { 1, 2, 3, 4, 5, 6 };
-        List<int[]> chunks = N.splitByChunkCount(6, 3, (fromIndex, toIndex) -> N.copyOfRange(a, fromIndex, toIndex));
+        List<int[]> chunks = N.splitByChunkCount(6, 3, (fromIndex, toIndex) -> CommonUtil.copyOfRange(a, fromIndex, toIndex));
 
         assertEquals(3, chunks.size());
         assertArrayEquals(new int[] { 1, 2 }, chunks.get(0));
@@ -4518,7 +4518,7 @@ public class N2025Test extends TestBase {
     @Test
     public void testSplitByChunkCountWithFunctionSizeOne() {
         int[] a = { 1, 2, 3 };
-        List<int[]> chunks = N.splitByChunkCount(3, 1, (fromIndex, toIndex) -> N.copyOfRange(a, fromIndex, toIndex));
+        List<int[]> chunks = N.splitByChunkCount(3, 1, (fromIndex, toIndex) -> CommonUtil.copyOfRange(a, fromIndex, toIndex));
 
         assertEquals(1, chunks.size());
         assertArrayEquals(new int[] { 1, 2, 3 }, chunks.get(0));
@@ -4527,7 +4527,7 @@ public class N2025Test extends TestBase {
     @Test
     public void testSplitByChunkCountWithFunctionMoreChunksThanSize() {
         int[] a = { 1, 2, 3 };
-        List<int[]> chunks = N.splitByChunkCount(3, 5, (fromIndex, toIndex) -> N.copyOfRange(a, fromIndex, toIndex));
+        List<int[]> chunks = N.splitByChunkCount(3, 5, (fromIndex, toIndex) -> CommonUtil.copyOfRange(a, fromIndex, toIndex));
 
         assertEquals(3, chunks.size());
         assertArrayEquals(new int[] { 1 }, chunks.get(0));

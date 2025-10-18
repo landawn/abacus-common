@@ -1896,38 +1896,6 @@ public final class Multiset<E> implements Collection<E> {
         }
     }
 
-    //    /**
-    //     *
-    //     * @param <X>
-    //     * @param action
-    //     * @throws X
-    //     */
-    //    @Beta
-    //    public <X extends Exception> void foreach(final Throwables.Consumer<? super E, X> action) throws X {
-    //        N.checkArgNotNull(action);
-    //
-    //        final Iterator<E> iter = iterator();
-    //
-    //        while (iter.hasNext()) {
-    //            action.accept(iter.next());
-    //        }
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <X>
-    //     * @param action
-    //     * @throws X
-    //     */
-    //    @Beta
-    //    public <X extends Exception> void foreach(final Throwables.ObjIntConsumer<? super E, X> action) throws X {
-    //        N.checkArgNotNull(action);
-    //
-    //        for (Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
-    //            action.accept(entry.getKey(), entry.getValue().value());
-    //        }
-    //    }
-
     /**
      * Returns an (unmodifiable) {@code Stream} with elements from the {@code Multiset}.
      * Elements that occur multiple times in the multiset will appear multiple times in this {@code Stream}, though not necessarily sequentially.

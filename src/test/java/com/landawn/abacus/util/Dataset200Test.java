@@ -28,8 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -147,7 +147,7 @@ public class Dataset200Test extends TestBase {
         assertArrayEquals(new int[] { 0, 1, 2 }, allIndexes);
 
         assertThrows(IllegalArgumentException.class, () -> sampleDataset.getColumnIndexes(Arrays.asList("ID", "NonExistent")));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, sampleDataset.getColumnIndexes(Collections.emptyList()));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, sampleDataset.getColumnIndexes(Collections.emptyList()));
     }
 
     @Test
@@ -553,7 +553,7 @@ public class Dataset200Test extends TestBase {
         sampleDataset.divideColumn("FullName", Arrays.asList("FirstName", "LastName"), (String fullName) -> {
             if (fullName == null)
                 return Arrays.asList(null, null);
-            String[] parts = ((String) fullName).split(" ", 2);
+            String[] parts = fullName.split(" ", 2);
             return Arrays.asList(parts[0], parts.length > 1 ? parts[1] : null);
         });
 
@@ -573,7 +573,7 @@ public class Dataset200Test extends TestBase {
                 output[1] = null;
                 return;
             }
-            String[] parts = ((String) coords).split(",");
+            String[] parts = coords.split(",");
             output[0] = Integer.parseInt(parts[0]);
             output[1] = Integer.parseInt(parts[1]);
         });
@@ -590,7 +590,7 @@ public class Dataset200Test extends TestBase {
                 output.set(null, null);
                 return;
             }
-            String[] parts = ((String) ni).split(" ");
+            String[] parts = ni.split(" ");
             output.setLeft(parts[0]);
             output.setRight(parts[1].charAt(0));
         });

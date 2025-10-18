@@ -21,7 +21,7 @@ public class MultimapTest extends AbstractTest {
 
     @Test
     public void test_01() {
-        Multimap<String, Integer, List<Integer>> map = N.newListMultimap();
+        Multimap<String, Integer, List<Integer>> map = CommonUtil.newListMultimap();
         map.put("a", 1);
         map.put("a", 2);
         map.put("a", 3);
@@ -38,7 +38,7 @@ public class MultimapTest extends AbstractTest {
 
         N.println(list);
 
-        assertEquals(N.asList(1, 2, 3), list);
+        assertEquals(CommonUtil.asList(1, 2, 3), list);
 
         N.println(map.keySet());
         N.println(map.values());
@@ -53,7 +53,7 @@ public class MultimapTest extends AbstractTest {
         N.println(map.isEmpty());
         N.println(map.entrySet());
 
-        Multimap<String, Integer, Set<Integer>> map2 = N.newSetMultimap();
+        Multimap<String, Integer, Set<Integer>> map2 = CommonUtil.newSetMultimap();
         map2.put("a", 11);
         map2.put("a", 12);
         map2.put("a", 13);
@@ -79,7 +79,7 @@ public class MultimapTest extends AbstractTest {
 
     @Test
     public void test_02() {
-        Map<String, Integer> m = N.asMap("abc", 123, "abc", 123, "abc", 456, "a", 1, "b", 2);
+        Map<String, Integer> m = CommonUtil.asMap("abc", 123, "abc", 123, "abc", 456, "a", 1, "b", 2);
         Multimap<String, Integer, List<Integer>> multimap2 = ListMultimap.create(m);
         N.println(multimap2);
 

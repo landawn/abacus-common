@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.ToBooleanFunction;
@@ -410,7 +410,7 @@ public class Comparators2025Test extends TestBase {
 
     @Test
     public void test_comparingByte_negativeValues() {
-        ToByteFunction<Person> extractor = p -> (byte) (p.age != null ? p.age.byteValue() : 0);
+        ToByteFunction<Person> extractor = p -> (p.age != null ? p.age.byteValue() : 0);
         Comparator<Person> comp = Comparators.comparingByte(extractor);
 
         Person p1 = new Person("A", -10);
@@ -429,7 +429,7 @@ public class Comparators2025Test extends TestBase {
 
     @Test
     public void test_comparingShort_negativeValues() {
-        ToShortFunction<Person> extractor = p -> (short) (p.age != null ? p.age.shortValue() : 0);
+        ToShortFunction<Person> extractor = p -> (p.age != null ? p.age.shortValue() : 0);
         Comparator<Person> comp = Comparators.comparingShort(extractor);
 
         Person p1 = new Person("A", -100);

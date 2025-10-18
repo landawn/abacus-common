@@ -20,8 +20,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -794,7 +794,7 @@ public class N103Test extends TestBase {
     public void testCountCollection() {
         assertEquals(3, N.count(stringList, 0, 5, s -> s.length() > 3));
         assertEquals(2, N.count(stringList, 1, 4, s -> s.length() > 3));
-        assertEquals(2, N.count(N.newLinkedList(stringList), 1, 4, s -> s.length() > 3));
+        assertEquals(2, N.count(CommonUtil.newLinkedList(stringList), 1, 4, s -> s.length() > 3));
     }
 
     @Test

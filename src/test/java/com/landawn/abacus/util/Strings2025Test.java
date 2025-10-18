@@ -3001,7 +3001,7 @@ public class Strings2025Test extends TestBase {
     @Test
     @DisplayName("Test joinEntries()")
     public void testJoinEntries() {
-        Map<String, String> map = N.asLinkedHashMap("a", "1", "b", "2");
+        Map<String, String> map = CommonUtil.asLinkedHashMap("a", "1", "b", "2");
         String result = Strings.joinEntries(map, ",", "=");
         assertEquals("a=1,b=2", result);
     }

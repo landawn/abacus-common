@@ -1597,4 +1597,155 @@ public class LongStream2025Test extends TestBase {
         stream.toArray();
         assertEquals(2, closeCount[0]);
     }
+
+    // Additional tests to improve coverage from 83.3% to 90%+
+
+    @Test
+    public void testZipWithCollectionOfStreams() {
+        Collection<LongStream> streams = Arrays.asList(LongStream.of(1L, 2L), LongStream.of(10L, 20L), LongStream.of(100L, 200L));
+        LongStream result = LongStream.zip(streams, longs -> {
+            long sum = 0;
+            for (Long l : longs)
+                sum += l;
+            return sum;
+        });
+        assertArrayEquals(new long[] { 111L, 222L }, result.toArray());
+    }
+
+    @Test
+    public void testZipWithCollectionAndValuesForNone() {
+        Collection<LongStream> streams = Arrays.asList(LongStream.of(1L, 2L, 3L), LongStream.of(10L), LongStream.of(100L, 200L));
+        long[] defaults = { 0L, 0L, 0L };
+        LongStream result = LongStream.zip(streams, defaults, longs -> {
+            long sum = 0;
+            for (Long l : longs)
+                sum += l;
+            return sum;
+        });
+        assertArrayEquals(new long[] { 111L, 202L, 3L }, result.toArray());
+    }
+
+    @Test
+    public void testMergeWithCollectionOfStreams() {
+        Collection<LongStream> streams = Arrays.asList(LongStream.of(1L, 5L), LongStream.of(2L, 6L), LongStream.of(3L, 7L));
+        LongStream result = LongStream.merge(streams, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertArrayEquals(new long[] { 1L, 2L, 3L, 5L, 6L, 7L }, result.toArray());
+    }
+
+    @Test
+    public void testMergeThreeArrays() {
+        long[] a = { 1L, 4L, 7L };
+        long[] b = { 2L, 5L, 8L };
+        long[] c = { 3L, 6L, 9L };
+
+        LongStream result = LongStream.merge(a, b, c, (x, y) -> x < y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L }, result.toArray());
+    }
+
+    @Test
+    public void testMergeThreeStreams() {
+        LongStream s1 = LongStream.of(1L, 4L, 7L);
+        LongStream s2 = LongStream.of(2L, 5L, 8L);
+        LongStream s3 = LongStream.of(3L, 6L, 9L);
+
+        LongStream result = LongStream.merge(s1, s2, s3, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L }, result.toArray());
+    }
+
+    @Test
+    public void testFlattenWithAlignmentHorizontally() {
+        long[][] array = { { 1L, 2L }, { 3L }, { 4L, 5L, 6L } };
+        long valueForAlignment = 0L;
+
+        LongStream stream = LongStream.flatten(array, valueForAlignment, false);
+        assertArrayEquals(new long[] { 1L, 2L, 0L, 3L, 0L, 0L, 4L, 5L, 6L }, stream.toArray());
+    }
+
+    @Test
+    public void testRangeClosedWithNegativeStep() {
+        LongStream stream = LongStream.rangeClosed(5L, 1L, -1L);
+        assertArrayEquals(new long[] { 5L, 4L, 3L, 2L, 1L }, stream.toArray());
+    }
+
+    @Test
+    public void testRangeWithInvalidStepDirection() {
+        // Positive step but start > end should return empty
+        LongStream stream = LongStream.range(10L, 1L, 2L);
+        assertEquals(0, stream.count());
+
+        // Negative step but start < end should return empty
+        LongStream stream2 = LongStream.range(1L, 10L, -2L);
+        assertEquals(0, stream2.count());
+    }
+
+    @Test
+    public void testParallelStreamOperations() {
+        long sum = LongStream.range(1L, 100L).parallel().filter(n -> n % 2 == 0).map(n -> n * 2).sum();
+
+        assertTrue(sum > 0);
+
+        // Verify parallel flag is maintained through operations
+        LongStream parallelStream = LongStream.of(1L, 2L, 3L).parallel().filter(n -> n > 0).map(n -> n * 2);
+        assertTrue(parallelStream.isParallel());
+    }
+
+    @Test
+    public void testIterateWithImmediateFalseHasNext() {
+        LongStream stream = LongStream.iterate(() -> false, () -> 1L);
+        assertEquals(0, stream.count());
+
+        LongStream stream2 = LongStream.iterate(1L, () -> false, n -> n + 1);
+        assertEquals(0, stream2.count());
+
+        LongStream stream3 = LongStream.iterate(1L, n -> false, n -> n + 1);
+        assertEquals(0, stream3.count());
+    }
+
+    @Test
+    public void testCollapseWithNoCollapsibleElements() {
+        LongStream stream = LongStream.of(1L, 10L, 20L, 30L).collapse((prev, curr) -> curr - prev <= 2, (a, b) -> a + b);
+        assertArrayEquals(new long[] { 1L, 10L, 20L, 30L }, stream.toArray());
+    }
+
+    @Test
+    public void testScanOnEmptyStream() {
+        LongStream stream1 = LongStream.empty().scan((a, b) -> a + b);
+        assertEquals(0, stream1.count());
+
+        LongStream stream2 = LongStream.empty().scan(10L, (a, b) -> a + b);
+        assertEquals(0, stream2.count());
+
+        LongStream stream3 = LongStream.empty().scan(10L, true, (a, b) -> a + b);
+        assertArrayEquals(new long[] { 10L }, stream3.toArray());
+    }
+
+    @Test
+    public void testZipThreeArraysWithDefaults() {
+        long[] a = { 1L, 2L, 3L, 4L };
+        long[] b = { 10L, 20L };
+        long[] c = { 100L };
+
+        LongStream stream = LongStream.zip(a, b, c, 0L, 0L, 0L, (x, y, z) -> x + y + z);
+        assertArrayEquals(new long[] { 111L, 22L, 3L, 4L }, stream.toArray());
+    }
+
+    @Test
+    public void testZipThreeIteratorsWithDefaults() {
+        LongIterator it1 = LongIterator.of(new long[] { 1L, 2L, 3L });
+        LongIterator it2 = LongIterator.of(new long[] { 10L });
+        LongIterator it3 = LongIterator.of(new long[] { 100L, 200L });
+
+        LongStream stream = LongStream.zip(it1, it2, it3, 0L, 0L, 0L, (x, y, z) -> x + y + z);
+        assertArrayEquals(new long[] { 111L, 202L, 3L }, stream.toArray());
+    }
+
+    @Test
+    public void testZipThreeStreamsWithDefaults() {
+        LongStream s1 = LongStream.of(1L, 2L);
+        LongStream s2 = LongStream.of(10L, 20L, 30L);
+        LongStream s3 = LongStream.of(100L);
+
+        LongStream stream = s1.zipWith(s2, s3, 0L, 0L, 0L, (x, y, z) -> x + y + z);
+        assertArrayEquals(new long[] { 111L, 22, 30L }, stream.toArray());
+    }
 }

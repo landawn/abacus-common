@@ -229,8 +229,11 @@ public class Seid implements EntityId {
      *
      * @param nameValues a map of property names to their values
      * @return a new Seid instance
+     * @throws IllegalArgumentException if nameValues is null or empty
      */
     public static Seid create(final Map<String, Object> nameValues) {
+        N.checkArgNotEmpty(nameValues, "nameValues");
+
         return new Seid(nameValues);
     }
 

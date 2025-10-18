@@ -17,12 +17,11 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 
 @Tag("new-test")
 public class Seq103Test extends TestBase {
@@ -73,7 +72,7 @@ public class Seq103Test extends TestBase {
 
     @Test
     public void testSliding_WindowSizeAndCollector() throws Exception {
-        Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5).sliding(3, MoreCollectors.joining(","));
+        Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5).sliding(3, com.landawn.abacus.util.stream.Collectors.joining(","));
         List<String> result = seq.toList();
 
         assertEquals(3, result.size());

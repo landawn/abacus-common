@@ -18,8 +18,8 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Builder.DatasetBuilder;
@@ -37,11 +37,11 @@ public class Builder101Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        columnNames = N.asList("name", "age", "city");
+        columnNames = CommonUtil.asList("name", "age", "city");
         data = new ArrayList<>();
-        data.add(N.asList("John", 25, "NYC"));
-        data.add(N.asList("Jane", 30, "LA"));
-        data.add(N.asList("Bob", 35, "Chicago"));
+        data.add(CommonUtil.asList("John", 25, "NYC"));
+        data.add(CommonUtil.asList("Jane", 30, "LA"));
+        data.add(CommonUtil.asList("Bob", 35, "Chicago"));
         testDataset = new RowDataset(columnNames, data);
     }
 
@@ -148,7 +148,7 @@ public class Builder101Test extends TestBase {
 
     @Test
     public void testMultimapBuilderPutMany() {
-        Multimap<String, Integer, List<Integer>> multimap = N.newListMultimap();
+        Multimap<String, Integer, List<Integer>> multimap = CommonUtil.newListMultimap();
         MultimapBuilder<String, Integer, List<Integer>, Multimap<String, Integer, List<Integer>>> builder = Builder.of(multimap);
 
         Map<String, Collection<Integer>> mapToAdd = new HashMap<>();
@@ -163,8 +163,8 @@ public class Builder101Test extends TestBase {
 
     @Test
     public void testMultimapBuilderPutManyFromMultimap() {
-        Multimap<String, Integer, List<Integer>> multimap1 = N.newListMultimap();
-        Multimap<String, Integer, List<Integer>> multimap2 = N.newListMultimap();
+        Multimap<String, Integer, List<Integer>> multimap1 = CommonUtil.newListMultimap();
+        Multimap<String, Integer, List<Integer>> multimap2 = CommonUtil.newListMultimap();
 
         multimap2.put("key1", 10);
         multimap2.put("key1", 20);
@@ -180,7 +180,7 @@ public class Builder101Test extends TestBase {
 
     @Test
     public void testMultimapBuilderRemoveOperations() {
-        Multimap<String, Integer, List<Integer>> multimap = N.newListMultimap();
+        Multimap<String, Integer, List<Integer>> multimap = CommonUtil.newListMultimap();
         multimap.put("key1", 1);
         multimap.put("key1", 2);
         multimap.put("key1", 3);
@@ -241,7 +241,7 @@ public class Builder101Test extends TestBase {
 
     @Test
     public void testMultisetBuilderEdgeCases() {
-        Multiset<String> multiset = N.newMultiset();
+        Multiset<String> multiset = CommonUtil.newMultiset();
         MultisetBuilder<String> builder = Builder.of(multiset);
 
         builder.add("item", 3).remove("item", 5);

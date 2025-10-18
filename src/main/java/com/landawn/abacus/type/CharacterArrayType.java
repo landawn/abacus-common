@@ -234,30 +234,6 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
             return STR_FOR_EMPTY_ARRAY;
         }
 
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 3));
-        //
-        //    sb.append(WD._BRACKET_L);
-        //
-        //    for (int i = 0, len = x.length; i < len; i++) {
-        //        if (i > 0) {
-        //            sb.append(ELEMENT_SEPARATOR);
-        //        }
-        //
-        //        if (x[i] == null) {
-        //            sb.append(NULL_CHAR_ARRAY);
-        //        } else {
-        //            sb.append(x[i]);
-        //        }
-        //    }
-        //
-        //    sb.append(WD._BRACKET_R);
-        //
-        //    final String str = sb.toString();
-        //
-        //    Objectory.recycle(sb);
-        //
-        //    return str;
-
         return Strings.join(x, ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 }

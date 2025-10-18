@@ -10,8 +10,8 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
@@ -103,14 +103,14 @@ public class NClobReaderType100Test extends TestBase {
         Reader reader = new StringReader("test data");
         int length = 100;
         nClobReaderType.set(mockPreparedStatement, 1, reader, length);
-        Mockito.verify(mockPreparedStatement).setNClob(1, reader, (long) length);
+        Mockito.verify(mockPreparedStatement).setNClob(1, reader, length);
     }
 
     @Test
     public void testSetPreparedStatementWithLengthNull() throws SQLException {
         int length = 100;
         nClobReaderType.set(mockPreparedStatement, 1, null, length);
-        Mockito.verify(mockPreparedStatement).setNClob(1, null, (long) length);
+        Mockito.verify(mockPreparedStatement).setNClob(1, null, length);
     }
 
     @Test
@@ -118,14 +118,14 @@ public class NClobReaderType100Test extends TestBase {
         Reader reader = new StringReader("test data");
         int length = 100;
         nClobReaderType.set(mockCallableStatement, "param", reader, length);
-        Mockito.verify(mockCallableStatement).setNClob("param", reader, (long) length);
+        Mockito.verify(mockCallableStatement).setNClob("param", reader, length);
     }
 
     @Test
     public void testSetCallableStatementWithLengthNull() throws SQLException {
         int length = 100;
         nClobReaderType.set(mockCallableStatement, "param", null, length);
-        Mockito.verify(mockCallableStatement).setNClob("param", null, (long) length);
+        Mockito.verify(mockCallableStatement).setNClob("param", null, length);
     }
 
     @Test

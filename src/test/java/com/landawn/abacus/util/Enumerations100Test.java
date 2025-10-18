@@ -16,8 +16,8 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -124,7 +124,7 @@ public class Enumerations100Test extends TestBase {
         Enumeration<String> emptyEnum = Enumerations.create(new ArrayList<String>().iterator());
         Assertions.assertFalse(emptyEnum.hasMoreElements());
 
-        Iterator<Integer> iter = new Iterator<Integer>() {
+        Iterator<Integer> iter = new Iterator<>() {
             private int count = 0;
 
             @Override
@@ -227,7 +227,7 @@ public class Enumerations100Test extends TestBase {
         ObjIterator<String> nullIter = Enumerations.toIterator(null);
         Assertions.assertFalse(nullIter.hasNext());
 
-        Enumeration<Integer> countingEnum = new Enumeration<Integer>() {
+        Enumeration<Integer> countingEnum = new Enumeration<>() {
             private int count = 0;
 
             @Override

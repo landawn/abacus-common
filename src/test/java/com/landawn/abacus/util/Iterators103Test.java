@@ -20,8 +20,8 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Nullable;
@@ -103,16 +103,16 @@ public class Iterators103Test extends TestBase {
 
     @Test
     public void testIndexOfTwoParams() {
-        assertEquals(N.INDEX_NOT_FOUND, Iterators.indexOf(null, "test"));
+        assertEquals(CommonUtil.INDEX_NOT_FOUND, Iterators.indexOf(null, "test"));
 
-        assertEquals(N.INDEX_NOT_FOUND, Iterators.indexOf(Collections.emptyIterator(), "test"));
+        assertEquals(CommonUtil.INDEX_NOT_FOUND, Iterators.indexOf(Collections.emptyIterator(), "test"));
 
         List<String> list = Arrays.asList("a", "b", "c", "b", "d");
         assertEquals(0, Iterators.indexOf(list.iterator(), "a"));
         assertEquals(1, Iterators.indexOf(list.iterator(), "b"));
         assertEquals(4, Iterators.indexOf(list.iterator(), "d"));
 
-        assertEquals(N.INDEX_NOT_FOUND, Iterators.indexOf(list.iterator(), "e"));
+        assertEquals(CommonUtil.INDEX_NOT_FOUND, Iterators.indexOf(list.iterator(), "e"));
 
         List<String> listWithNull = Arrays.asList("a", null, "b", null);
         assertEquals(1, Iterators.indexOf(listWithNull.iterator(), null));
@@ -120,15 +120,15 @@ public class Iterators103Test extends TestBase {
 
     @Test
     public void testIndexOfThreeParams() {
-        assertEquals(N.INDEX_NOT_FOUND, Iterators.indexOf(null, "test", 0));
+        assertEquals(CommonUtil.INDEX_NOT_FOUND, Iterators.indexOf(null, "test", 0));
 
         List<String> list = Arrays.asList("a", "b", "c", "b", "d");
         assertEquals(1, Iterators.indexOf(list.iterator(), "b", 0));
 
         assertEquals(3, Iterators.indexOf(list.iterator(), "b", 2));
-        assertEquals(N.INDEX_NOT_FOUND, Iterators.indexOf(list.iterator(), "a", 1));
+        assertEquals(CommonUtil.INDEX_NOT_FOUND, Iterators.indexOf(list.iterator(), "a", 1));
 
-        assertEquals(N.INDEX_NOT_FOUND, Iterators.indexOf(list.iterator(), "a", 10));
+        assertEquals(CommonUtil.INDEX_NOT_FOUND, Iterators.indexOf(list.iterator(), "a", 10));
     }
 
     @Test
@@ -673,8 +673,8 @@ public class Iterators103Test extends TestBase {
         BiIterator<String, Integer> iter = Iterators.concat(new BiIterator[] {});
         assertFalse(iter.hasNext());
 
-        BiIterator<String, Integer> iter1 = BiIterator.of(N.asLinkedHashMap("a", 1, "b", 2));
-        BiIterator<String, Integer> iter2 = BiIterator.of(N.asLinkedHashMap("c", 3));
+        BiIterator<String, Integer> iter1 = BiIterator.of(CommonUtil.asLinkedHashMap("a", 1, "b", 2));
+        BiIterator<String, Integer> iter2 = BiIterator.of(CommonUtil.asLinkedHashMap("c", 3));
 
         iter = Iterators.concat(iter1, iter2);
 

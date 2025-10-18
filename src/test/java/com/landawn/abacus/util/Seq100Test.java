@@ -186,7 +186,7 @@ public class Seq100Test extends TestBase {
 
     @Test
     public void testOfThrowablesIterator() throws Exception {
-        Throwables.Iterator<String, IOException> iter = new Throwables.Iterator<String, IOException>() {
+        Throwables.Iterator<String, IOException> iter = new Throwables.Iterator<>() {
             private int index = 0;
             private String[] values = { "a", "b", "c" };
 
@@ -580,7 +580,7 @@ public class Seq100Test extends TestBase {
         List<String> result = Seq.concat(arr1, arr2, arr3).toList();
         assertEquals(Arrays.asList("a", "b", "c", "d", "e"), result);
 
-        assertEquals(0, Seq.concat(N.EMPTY_STRING_ARRAY).count());
+        assertEquals(0, Seq.concat(CommonUtil.EMPTY_STRING_ARRAY).count());
     }
 
     @Test

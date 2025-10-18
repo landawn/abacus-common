@@ -64,6 +64,16 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
     }
 
     /**
+     * Returns the default value for OptionalLong type, which is an empty OptionalLong.
+     *
+     * @return OptionalLong.empty()
+     */
+    @Override
+    public OptionalLong defaultValue() {
+        return OptionalLong.empty();
+    }
+
+    /**
      * Converts an OptionalLong to its string representation.
      * If the optional is empty or null, returns null.
      * Otherwise, returns the string representation of the contained long value.

@@ -42,7 +42,7 @@ public class KryoParserTest extends AbstractParserTest {
     @Test
     public void testSerialize_map() {
 
-        String str = kryoParser.serialize(N.asMap("abc", "123"));
+        String str = kryoParser.serialize(CommonUtil.asMap("abc", "123"));
 
         Object obj = kryoParser.deserialize(str, HashMap.class);
 
@@ -63,9 +63,9 @@ public class KryoParserTest extends AbstractParserTest {
 
         println(kryoParser.deserialize(kryoParser.serialize(account), Account.class));
 
-        println(kryoParser.serialize(N.asArray(account)));
+        println(kryoParser.serialize(CommonUtil.asArray(account)));
 
-        println(kryoParser.serialize(N.asMap("a", 12, 'c', "ddd")));
+        println(kryoParser.serialize(CommonUtil.asMap("a", 12, 'c', "ddd")));
 
         println(kryoParser.serialize(account));
 
@@ -76,7 +76,7 @@ public class KryoParserTest extends AbstractParserTest {
     @Test
     public void testSerialize1() {
         Bean bean = new Bean();
-        bean.setTypeList(N.asList(
+        bean.setTypeList(CommonUtil.asList(
                 "‰β,『�?★业€ > \n sfd \r ds \' f d // \\  \\\\ /// /////// \\\\\\\\  \\\\\\\\n \\\\\\\\r  \t sd \" fe stri‰β,『�?★业€ ng黎< > </ <//、\n", '★', '\n',
                 '\r', '\t', '\"', '\'', ' ', new char[] { '\r', '\t', '\"', '\'', ' ' },
                 new String[] {
@@ -95,8 +95,8 @@ public class KryoParserTest extends AbstractParserTest {
         N.println(xmlBean);
         N.println(kryoParser.serialize(bean));
         N.println(kryoParser.serialize(xmlBean));
-        N.println(N.stringOf(bean));
-        N.println(N.stringOf(xmlBean));
+        N.println(CommonUtil.stringOf(bean));
+        N.println(CommonUtil.stringOf(xmlBean));
         // assertEquals(bean, xmlBean);
         // assertEquals(N.deserialize(Bean.class, N.serialize(bean)),
         // N.deserialize(Bean.class, N.serialize(xmlBean)));
@@ -151,7 +151,7 @@ public class KryoParserTest extends AbstractParserTest {
         String jsonStr = kryoParser.serialize(xBean);
         println(jsonStr);
 
-        String st = N.stringOf(xBean);
+        String st = CommonUtil.stringOf(xBean);
         println(st);
 
         XBean xmlBean = kryoParser.deserialize(jsonStr, XBean.class);
@@ -159,8 +159,8 @@ public class KryoParserTest extends AbstractParserTest {
         N.println(xmlBean);
         N.println(kryoParser.serialize(xBean));
         N.println(kryoParser.serialize(xmlBean));
-        N.println(N.stringOf(xBean));
-        N.println(N.stringOf(xmlBean));
+        N.println(CommonUtil.stringOf(xBean));
+        N.println(CommonUtil.stringOf(xmlBean));
         // assertEquals(N.stringOf(xBean), N.stringOf(xmlBean));
         assertEquals(kryoParser.deserialize(kryoParser.serialize(xBean), XBean.class), kryoParser.deserialize(kryoParser.serialize(xmlBean), XBean.class));
 
@@ -181,8 +181,8 @@ public class KryoParserTest extends AbstractParserTest {
         xBean.setTypeChar('<');
         xBean.setTypeChar2('>');
         xBean.setTypeGenericList(
-                N.asList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
-        xBean.setTypeGenericSet(N.asSet(1L, 2L));
+                CommonUtil.asList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
+        xBean.setTypeGenericSet(CommonUtil.asSet(1L, 2L));
 
         String jsonStr = kryoParser.serialize(xBean);
         println(jsonStr);
@@ -245,7 +245,7 @@ public class KryoParserTest extends AbstractParserTest {
         typeGenericList.add(null);
         xBean.setTypeGenericList(typeGenericList);
 
-        Set<Long> typeGenericSet = N.asSortedSet();
+        Set<Long> typeGenericSet = CommonUtil.asSortedSet();
         typeGenericSet.add(1332333L);
         typeGenericSet.add(Long.MAX_VALUE);
         typeGenericSet.add(Long.MIN_VALUE);
@@ -292,14 +292,14 @@ public class KryoParserTest extends AbstractParserTest {
         typeGenericMap2.put(account.getFirstName(), createAccount(Account.class));
         typeGenericMap2.put(account.getLastName(), createAccount(Account.class));
         typeGenericMap2.put("null", null);
-        typeGenericMap2.put("bookList", N.asList(createAccount(Account.class)));
+        typeGenericMap2.put("bookList", CommonUtil.asList(createAccount(Account.class)));
         xBean.setTypeGenericMap2(typeGenericMap2);
 
         Map<Object, Object> typeGenericMap4 = new ConcurrentHashMap<>();
         typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
         typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
         typeGenericMap4.put("aaabbbccc", "");
-        typeGenericMap4.put("bookList", N.asList(createAccount(Account.class)));
+        typeGenericMap4.put("bookList", CommonUtil.asList(createAccount(Account.class)));
         typeGenericMap4.put("edse", " ");
         typeGenericMap4.put(new HashMap<>(), " ");
         typeGenericMap4.put(new ArrayList<>(), new HashSet<>());
@@ -313,7 +313,7 @@ public class KryoParserTest extends AbstractParserTest {
         }
 
         typeMap.put("null", null);
-        typeMap.put("bookList", N.asList(createAccount(Account.class)));
+        typeMap.put("bookList", CommonUtil.asList(createAccount(Account.class)));
         typeMap.put(" ", " ");
         typeMap.put(new HashMap<>(), " ");
         typeMap.put(new ArrayList<>(), new HashSet<>());
@@ -355,7 +355,7 @@ public class KryoParserTest extends AbstractParserTest {
         String xml = kryoParser.serialize(xBean);
         println(xml);
 
-        String st = N.stringOf(xBean);
+        String st = CommonUtil.stringOf(xBean);
         println(st);
 
         kryoParser.deserialize(xml, XBean.class);
@@ -373,8 +373,8 @@ public class KryoParserTest extends AbstractParserTest {
 
         List<Account> xmlAccounts = kryoParser.deserialize(xml, ArrayList.class);
 
-        N.println(N.stringOf(accounts));
-        N.println(N.stringOf(xmlAccounts));
+        N.println(CommonUtil.stringOf(accounts));
+        N.println(CommonUtil.stringOf(xmlAccounts));
 
         //        assertEquals(38080, N.stringOf(accounts).length());
         //        assertEquals(39380, N.stringOf(xmlAccounts).length());
@@ -410,8 +410,8 @@ public class KryoParserTest extends AbstractParserTest {
         N.println(xmlBean);
         N.println(kryoParser.serialize(bean));
         N.println(kryoParser.serialize(xmlBean));
-        N.println(N.stringOf(bean));
-        N.println(N.stringOf(xmlBean));
+        N.println(CommonUtil.stringOf(bean));
+        N.println(CommonUtil.stringOf(xmlBean));
         assertEquals(bean, xmlBean);
         assertEquals(kryoParser.deserialize(kryoParser.serialize(bean), XBean.class), kryoParser.deserialize(kryoParser.serialize(xmlBean), XBean.class));
 
@@ -474,19 +474,7 @@ public class KryoParserTest extends AbstractParserTest {
 
             Bean_1 other = (Bean_1) obj;
 
-            if (!Objects.equals(intList, other.intList)) {
-                return false;
-            }
-
-            if (!Objects.equals(shortList, other.shortList)) {
-                return false;
-            }
-
-            if (!Objects.equals(strList, other.strList)) {
-                return false;
-            }
-
-            if (!Objects.equals(xmlGregorianCalendar, other.xmlGregorianCalendar)) {
+            if (!Objects.equals(intList, other.intList) || !Objects.equals(shortList, other.shortList) || !Objects.equals(strList, other.strList) || !Objects.equals(xmlGregorianCalendar, other.xmlGregorianCalendar)) {
                 return false;
             }
 
@@ -559,19 +547,7 @@ public class KryoParserTest extends AbstractParserTest {
 
             Customer other = (Customer) obj;
 
-            if (age != other.age) {
-                return false;
-            }
-
-            if (ch != other.ch) {
-                return false;
-            }
-
-            if (id != other.id) {
-                return false;
-            }
-
-            if (!Objects.equals(name, other.name)) {
+            if ((age != other.age) || (ch != other.ch) || (id != other.id) || !Objects.equals(name, other.name)) {
                 return false;
             }
 
@@ -648,19 +624,7 @@ public class KryoParserTest extends AbstractParserTest {
 
             Bean other = (Bean) obj;
 
-            if (!Arrays.equals(bytes, other.bytes)) {
-                return false;
-            }
-
-            if (!Arrays.equals(chars, other.chars)) {
-                return false;
-            }
-
-            if (!Arrays.equals(strings, other.strings)) {
-                return false;
-            }
-
-            if (!Objects.equals(typeList, other.typeList)) {
+            if (!Arrays.equals(bytes, other.bytes) || !Arrays.equals(chars, other.chars) || !Arrays.equals(strings, other.strings) || !Objects.equals(typeList, other.typeList)) {
                 return false;
             }
 
@@ -942,19 +906,7 @@ public class KryoParserTest extends AbstractParserTest {
 
             XBean other = (XBean) obj;
 
-            if (typeBoolean != other.typeBoolean) {
-                return false;
-            }
-
-            if (!Objects.equals(typeBoolean2, other.typeBoolean2)) {
-                return false;
-            }
-
-            if (typeByte != other.typeByte) {
-                return false;
-            }
-
-            if (!Objects.equals(typeCalendar, other.typeCalendar)) {
+            if ((typeBoolean != other.typeBoolean) || !Objects.equals(typeBoolean2, other.typeBoolean2) || (typeByte != other.typeByte) || !Objects.equals(typeCalendar, other.typeCalendar)) {
                 return false;
             }
 
@@ -1107,15 +1059,7 @@ public class KryoParserTest extends AbstractParserTest {
 
             JaxbBean other = (JaxbBean) obj;
 
-            if (!Objects.equals(list, other.list)) {
-                return false;
-            }
-
-            if (!Objects.equals(map, other.map)) {
-                return false;
-            }
-
-            if (!Objects.equals(string, other.string)) {
+            if (!Objects.equals(list, other.list) || !Objects.equals(map, other.map) || !Objects.equals(string, other.string)) {
                 return false;
             }
 

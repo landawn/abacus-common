@@ -190,14 +190,6 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      */
     boolean containsKey(K key);
 
-    //    /**
-    //     * Checks if the pool contains the specified element.
-    //     *
-    //     * @param e The element to be checked for presence in the pool.
-    //     * @return {@code true} if the pool contains the specified element, {@code false} otherwise.
-    //     */
-    //    boolean containsValue(E e);
-
     /**
      * Interface for measuring the memory size of key-value pairs in the pool.
      * This allows the pool to enforce memory-based capacity limits.

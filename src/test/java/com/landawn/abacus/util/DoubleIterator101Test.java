@@ -9,8 +9,8 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -60,9 +60,9 @@ public class DoubleIterator101Test extends TestBase {
         double[] arr = { 1.0, 2.0, 3.0, 4.0, 5.0 };
 
         DoubleIterator iter1 = DoubleIterator.of(arr, 0, arr.length);
-        for (int i = 0; i < arr.length; i++) {
+        for (double element : arr) {
             Assertions.assertTrue(iter1.hasNext());
-            Assertions.assertEquals(arr[i], iter1.nextDouble());
+            Assertions.assertEquals(element, iter1.nextDouble());
         }
         Assertions.assertFalse(iter1.hasNext());
 

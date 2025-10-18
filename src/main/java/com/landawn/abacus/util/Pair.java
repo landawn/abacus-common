@@ -767,45 +767,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
         return predicate.test(this) ? Optional.of(this) : Optional.empty();
     }
 
-    //    /**
-    //     *
-    //     *
-    //     * @return
-    //     * @deprecated unlikely to be useful. It's marked to be removed.
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public Stream<Pair<L, R>> stream() {
-    //        return Stream.of(this);
-    //    }
-    //
-    //    /**
-    //     *
-    //     *
-    //     * @param <T>
-    //     * @param <E>
-    //     * @param func
-    //     * @return
-    //     * @throws E
-    //     * @deprecated unlikely to be useful. It's marked to be removed.
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super Pair<L, R>, Stream<T>, E> func) throws E {
-    //        return func.apply(this);
-    //    }
-    //
-    //    /**
-    //     *
-    //     *
-    //     * @return
-    //     * @deprecated {@code Optional} is misused. It's marked to be removed.
-    //     */
-    //    @Deprecated
-    //    public Optional<Pair<L, R>> toOptional() {
-    //        return Optional.of(this);
-    //    }
-
     /**
      * Converts this pair to a Tuple2 (2-element tuple).
      * Tuples are similar to pairs but may provide different functionality

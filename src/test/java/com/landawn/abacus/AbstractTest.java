@@ -13,10 +13,11 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Tag;
 
-import com.landawn.abacus.entity.extendDirty.basic.Account;
-import com.landawn.abacus.entity.extendDirty.basic.AccountContact;
 import com.landawn.abacus.entity.extendDirty.basic.AclGroup;
 import com.landawn.abacus.entity.extendDirty.basic.AclUser;
+import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountContactPNL;
+import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
+import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AclUserPNL;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Beans;
@@ -65,8 +66,8 @@ public abstract class AbstractTest {
     public static Map<String, Object> createAccountProps(final String firstName, final String lastName) {
         final String uuid = Strings.uuid();
 
-        return N.asProps(Account.GUI, uuid, Account.FIRST_NAME, firstName, Account.LAST_NAME, lastName, Account.MIDDLE_NAME, MIDDLE_NAME, Account.EMAIL_ADDRESS,
-                getEmail(uuid), Account.BIRTH_DATE, Dates.currentTimestamp(), Account.STATUS, 0);
+        return N.asProps(AccountPNL.GUI, uuid, AccountPNL.FIRST_NAME, firstName, AccountPNL.LAST_NAME, lastName, AccountPNL.MIDDLE_NAME, MIDDLE_NAME, AccountPNL.EMAIL_ADDRESS,
+                getEmail(uuid), AccountPNL.BIRTH_DATE, Dates.currentTimestamp(), AccountPNL.STATUS, 0);
     }
 
     public static List<Map<String, Object>> createAccountPropsList(final int size) {
@@ -78,8 +79,8 @@ public abstract class AbstractTest {
 
         for (int i = 0; i < size; i++) {
             final String uuid = Strings.uuid();
-            propsList.add(N.asProps(Account.GUI, uuid, Account.FIRST_NAME, firstName + i, Account.LAST_NAME, lastName + i, Account.MIDDLE_NAME, MIDDLE_NAME,
-                    Account.EMAIL_ADDRESS, getEmail(uuid), Account.BIRTH_DATE, Dates.currentTimestamp(), Account.STATUS, 0));
+            propsList.add(N.asProps(AccountPNL.GUI, uuid, AccountPNL.FIRST_NAME, firstName + i, AccountPNL.LAST_NAME, lastName + i, AccountPNL.MIDDLE_NAME, MIDDLE_NAME,
+                    AccountPNL.EMAIL_ADDRESS, getEmail(uuid), AccountPNL.BIRTH_DATE, Dates.currentTimestamp(), AccountPNL.STATUS, 0));
         }
 
         return propsList;
@@ -103,17 +104,17 @@ public abstract class AbstractTest {
         final Object bean = Beans.newBean(cls);
 
         if (bean instanceof MapEntity mapEntity) {
-            mapEntity.set(AccountContact.ADDRESS, ADDRESS);
-            mapEntity.set(AccountContact.CITY, CITY);
-            mapEntity.set(AccountContact.STATE, STATE);
-            mapEntity.set(AccountContact.COUNTRY, COUNTRY);
-            mapEntity.set(AccountContact.CREATE_TIME, Dates.currentTimestamp());
+            mapEntity.set(AccountContactPNL.ADDRESS, ADDRESS);
+            mapEntity.set(AccountContactPNL.CITY, CITY);
+            mapEntity.set(AccountContactPNL.STATE, STATE);
+            mapEntity.set(AccountContactPNL.COUNTRY, COUNTRY);
+            mapEntity.set(AccountContactPNL.CREATE_TIME, Dates.currentTimestamp());
         } else {
-            Beans.setPropValue(bean, AccountContact.ADDRESS, ADDRESS);
-            Beans.setPropValue(bean, AccountContact.CITY, CITY);
-            Beans.setPropValue(bean, AccountContact.STATE, STATE);
-            Beans.setPropValue(bean, AccountContact.COUNTRY, COUNTRY);
-            Beans.setPropValue(bean, AccountContact.CREATE_TIME, Dates.currentTimestamp());
+            Beans.setPropValue(bean, AccountContactPNL.ADDRESS, ADDRESS);
+            Beans.setPropValue(bean, AccountContactPNL.CITY, CITY);
+            Beans.setPropValue(bean, AccountContactPNL.STATE, STATE);
+            Beans.setPropValue(bean, AccountContactPNL.COUNTRY, COUNTRY);
+            Beans.setPropValue(bean, AccountContactPNL.CREATE_TIME, Dates.currentTimestamp());
         }
 
         return (T) bean;
@@ -124,25 +125,25 @@ public abstract class AbstractTest {
         final String uuid = Strings.uuid();
 
         if (bean instanceof MapEntity mapEntity) {
-            mapEntity.set(Account.GUI, Strings.uuid());
-            mapEntity.set(Account.FIRST_NAME, firstName);
-            mapEntity.set(Account.MIDDLE_NAME, MIDDLE_NAME);
-            mapEntity.set(Account.LAST_NAME, lastName);
-            mapEntity.set(Account.BIRTH_DATE, Dates.currentTimestamp());
-            mapEntity.set(Account.EMAIL_ADDRESS, getEmail(uuid));
-            mapEntity.set(Account.LAST_UPDATE_TIME, Dates.currentTimestamp());
-            mapEntity.set(Account.CREATE_TIME, Dates.currentTimestamp());
+            mapEntity.set(AccountPNL.GUI, Strings.uuid());
+            mapEntity.set(AccountPNL.FIRST_NAME, firstName);
+            mapEntity.set(AccountPNL.MIDDLE_NAME, MIDDLE_NAME);
+            mapEntity.set(AccountPNL.LAST_NAME, lastName);
+            mapEntity.set(AccountPNL.BIRTH_DATE, Dates.currentTimestamp());
+            mapEntity.set(AccountPNL.EMAIL_ADDRESS, getEmail(uuid));
+            mapEntity.set(AccountPNL.LAST_UPDATE_TIME, Dates.currentTimestamp());
+            mapEntity.set(AccountPNL.CREATE_TIME, Dates.currentTimestamp());
         } else {
-            Beans.setPropValue(bean, Account.GUI, Strings.uuid());
+            Beans.setPropValue(bean, AccountPNL.GUI, Strings.uuid());
 
-            Beans.setPropValue(bean, Account.FIRST_NAME, firstName);
-            Beans.setPropValue(bean, Account.MIDDLE_NAME, MIDDLE_NAME);
-            Beans.setPropValue(bean, Account.LAST_NAME, lastName);
+            Beans.setPropValue(bean, AccountPNL.FIRST_NAME, firstName);
+            Beans.setPropValue(bean, AccountPNL.MIDDLE_NAME, MIDDLE_NAME);
+            Beans.setPropValue(bean, AccountPNL.LAST_NAME, lastName);
 
-            Beans.setPropValue(bean, Account.BIRTH_DATE, Dates.currentTimestamp());
-            Beans.setPropValue(bean, Account.EMAIL_ADDRESS, getEmail(uuid));
-            Beans.setPropValue(bean, Account.LAST_UPDATE_TIME, Dates.currentTimestamp());
-            Beans.setPropValue(bean, Account.CREATE_TIME, Dates.currentTimestamp());
+            Beans.setPropValue(bean, AccountPNL.BIRTH_DATE, Dates.currentTimestamp());
+            Beans.setPropValue(bean, AccountPNL.EMAIL_ADDRESS, getEmail(uuid));
+            Beans.setPropValue(bean, AccountPNL.LAST_UPDATE_TIME, Dates.currentTimestamp());
+            Beans.setPropValue(bean, AccountPNL.CREATE_TIME, Dates.currentTimestamp());
         }
 
         return (T) bean;
@@ -150,7 +151,7 @@ public abstract class AbstractTest {
 
     public static <T> T createAccountWithContact(final Class<T> cls) {
         final T account = createAccount(cls);
-        final Method propSetMethod = Beans.getPropSetMethod(cls, Account.CONTACT);
+        final Method propSetMethod = Beans.getPropSetMethod(cls, AccountPNL.CONTACT);
         Beans.setPropValue(account, propSetMethod, createAccountContact(propSetMethod.getParameterTypes()[0]));
 
         return account;
@@ -159,7 +160,7 @@ public abstract class AbstractTest {
     public static <T> List<T> createAccountWithContact(final Class<T> cls, final int size) {
         final List<T> accounts = new ArrayList<>();
 
-        final Method propSetMethod = Beans.getPropSetMethod(cls, Account.CONTACT);
+        final Method propSetMethod = Beans.getPropSetMethod(cls, AccountPNL.CONTACT);
 
         T account = null;
 
@@ -178,7 +179,7 @@ public abstract class AbstractTest {
     }
 
     public static Map<String, Object> createAclUserProps(final String name) {
-        return N.asProps(AclUser.GUI, Strings.uuid(), AclUser.NAME, name, AclUser.DESCRIPTION, ACL_DESCRIPTION);
+        return N.asProps(AclUserPNL.GUI, Strings.uuid(), AclUserPNL.NAME, name, AclUserPNL.DESCRIPTION, ACL_DESCRIPTION);
     }
 
     public static List<Map<String, Object>> createAclUserPropsList(final int size) {
@@ -224,7 +225,7 @@ public abstract class AbstractTest {
     public static <T> T createAclUserWithAclGroup(final Class<T> cls) {
         final T aclUser = createAclUser(cls);
 
-        final Method propSetMethod = Beans.getPropSetMethod(cls, AclUser.GROUP_LIST);
+        final Method propSetMethod = Beans.getPropSetMethod(cls, AclUserPNL.GROUP_LIST);
         final Class aclGroupClass = (Class) ((ParameterizedType) propSetMethod.getGenericParameterTypes()[0]).getActualTypeArguments()[0];
 
         Beans.setPropValue(aclUser, propSetMethod, N.asList(createAclGroup(aclGroupClass)));
@@ -235,7 +236,7 @@ public abstract class AbstractTest {
     public static <T> List<T> createAclUserWithAclGroup(final Class<T> cls, final int size) {
         final List<T> aclUsers = new ArrayList<>();
 
-        final Method propSetMethod = Beans.getPropSetMethod(cls, AclUser.GROUP_LIST);
+        final Method propSetMethod = Beans.getPropSetMethod(cls, AclUserPNL.GROUP_LIST);
         final Class aclGroupClass = (Class) ((ParameterizedType) propSetMethod.getGenericParameterTypes()[0]).getActualTypeArguments()[0];
 
         T aclUser = null;

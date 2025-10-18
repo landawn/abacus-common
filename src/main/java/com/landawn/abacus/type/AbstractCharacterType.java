@@ -89,7 +89,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
         // NullPointerException Here
         // return ((cbuf == null) || (len == 0)) ? defaultValue()
         // : ((len == 1) ? cbuf[offset] : (char) N.parseInt(cbuf, offset, len));
-        if (N.isEmpty(cbuf)) {
+        if (N.isEmpty(cbuf) || (len == 0)) {
             return defaultValue();
         }
 

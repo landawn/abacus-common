@@ -434,13 +434,6 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put("JdkOptionalLong", java.util.OptionalLong.class);
         BUILT_IN_TYPE.put("JdkOptionalDouble", java.util.OptionalDouble.class);
 
-        //
-        // N.println("#########################################Builtin types================================");
-        // N.println("size = " + BUILT_IN_TYPE.size());
-        //
-        // for (Map.Entry<String, Class<?>> entry : BUILT_IN_TYPE.entrySet()) {
-        // N.println(entry.getKey() + " = " + entry.getValue());
-        // }
     }
 
     private static final Map<String, String> builtinTypeNameMap = new HashMap<>(100);

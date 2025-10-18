@@ -82,8 +82,8 @@ public final class IndexedFloat extends AbstractIndexed {
     }
 
     /**
-     * Returns the float value stored in this container.
-     * 
+     * Returns the float value stored in this IndexedFloat instance.
+     *
      * @return the float value
      */
     public float value() {

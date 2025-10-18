@@ -70,7 +70,7 @@ public final class If {
     /**
      * Creates an If instance based on the given boolean condition.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.is(temperature > 30)
      *   .then(() -> System.out.println("It's hot!"));
@@ -88,7 +88,7 @@ public final class If {
      * 
      * <p>This is equivalent to {@code is(!b)} but can be more readable in certain contexts.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.not(list.isEmpty())
      *   .then(() -> processList(list));
@@ -107,7 +107,7 @@ public final class If {
      * <p>Returns {@code true} for {@code index >= 0}, {@code false} for {@code index < 0}.
      * This is commonly used for checking the result of indexOf operations.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.exists(list.indexOf(element))
      *   .then(() -> System.out.println("Element found"))
@@ -124,7 +124,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given object is null.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.isNull(result)
      *   .then(() -> handleNullResult())
@@ -143,7 +143,7 @@ public final class If {
      * 
      * <p>A CharSequence is considered empty if it is null or has zero length.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.isEmpty(username)
      *   .then(() -> System.out.println("Username is required"));
@@ -239,7 +239,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given object array is null or empty.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.isEmpty(args)
      *   .then(() -> System.out.println("No arguments provided"));
@@ -255,7 +255,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given Collection is null or empty.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.isEmpty(resultList)
      *   .then(() -> System.out.println("No results found"))
@@ -272,7 +272,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given Map is null or empty.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.isEmpty(configMap)
      *   .then(() -> loadDefaultConfig());
@@ -322,7 +322,7 @@ public final class If {
      * <p>A CharSequence is considered blank if it is null, has zero length, or contains only
      * whitespace characters as defined by {@link Character#isWhitespace(char)}.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.isBlank(userInput)
      *   .then(() -> System.out.println("Please enter valid input"));
@@ -339,7 +339,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given object is not null.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.notNull(user)
      *   .then(u -> System.out.println("User: " + u.getName()))
@@ -356,7 +356,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given CharSequence is not null and not empty.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.notEmpty(searchQuery)
      *   .then(() -> performSearch(searchQuery));
@@ -452,7 +452,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given object array is not null and not empty.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.notEmpty(files)
      *   .then(() -> processFiles(files));
@@ -468,7 +468,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given Collection is not null and not empty.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.notEmpty(selectedItems)
      *   .then(() -> processSelection(selectedItems))
@@ -485,7 +485,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given Map is not null and not empty.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.notEmpty(properties)
      *   .then(() -> applyProperties(properties));
@@ -535,7 +535,7 @@ public final class If {
      * <p>A CharSequence is considered not blank if it is not null, has length > 0, and contains
      * at least one non-whitespace character.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.notBlank(username)
      *   .then(() -> loginUser(username))
@@ -555,7 +555,7 @@ public final class If {
      * 
      * <p>This method is useful when you only want to execute an action in the false case.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.is(cache.contains(key))
      *   .thenDoNothing()
@@ -571,7 +571,7 @@ public final class If {
     /**
      * Executes the given runnable if the condition is true.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.is(debugMode)
      *   .then(() -> logger.debug("Debug information"))
@@ -599,7 +599,7 @@ public final class If {
      * 
      * <p>This method is useful for conditional processing of a value.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.notNull(user)
      *   .then(user, u -> saveUser(u))
@@ -631,7 +631,7 @@ public final class If {
      * <p>This method is useful for validation scenarios where an exception should be thrown
      * when a certain condition is met.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * If.isEmpty(requiredField)
      *   .thenThrow(() -> new ValidationException("Required field is empty"));
@@ -717,7 +717,7 @@ public final class If {
         /**
          * Executes the given runnable if the initial condition was false.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * If.is(hasPermission)
          *   .then(() -> performAction())
@@ -740,7 +740,7 @@ public final class If {
         /**
          * Executes the given consumer with the provided input if the initial condition was false.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * If.isNull(cachedValue)
          *   .then(() -> value = loadFromCache())
@@ -769,7 +769,7 @@ public final class If {
          * <p>This method is useful for validation scenarios where an exception should be thrown
          * when a required condition is not met.</p>
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * If.notEmpty(results)
          *   .then(() -> processResults(results))

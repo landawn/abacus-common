@@ -157,11 +157,7 @@ public class SwitchTest {
                 continue;
             }
 
-            if (ch == '}') {
-                continue;
-            }
-
-            if (ch == ']') {
+            if ((ch == '}') || (ch == ']')) {
                 continue;
             }
 

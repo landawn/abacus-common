@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.util.OperationType;
 
 public class OperationTypeTest extends AbstractTest {
 

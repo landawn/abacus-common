@@ -406,7 +406,7 @@ public class MutableInt2025Test extends TestBase {
     @Test
     public void testLongValueMaxInt() {
         MutableInt num = MutableInt.of(Integer.MAX_VALUE);
-        assertEquals((long) Integer.MAX_VALUE, num.longValue());
+        assertEquals(Integer.MAX_VALUE, num.longValue());
     }
 
     @Test

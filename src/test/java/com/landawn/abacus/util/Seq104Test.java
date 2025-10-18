@@ -26,15 +26,14 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
-import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 
 @Tag("new-test")
 public class Seq104Test extends TestBase {
@@ -694,7 +693,7 @@ public class Seq104Test extends TestBase {
     @Test
     public void testGroupToWithValueMapperDownstreamCollectorAndMapFactory() {
         Seq<String, RuntimeException> seq = Seq.of("apple", "apricot", "banana");
-        Map<Character, Optional<Integer>> map = seq.groupTo(s -> s.charAt(0), String::length, MoreCollectors.max(), Suppliers.ofLinkedHashMap());
+        Map<Character, Optional<Integer>> map = seq.groupTo(s -> s.charAt(0), String::length, com.landawn.abacus.util.stream.Collectors.max(), Suppliers.ofLinkedHashMap());
         assertEquals(2, map.size());
         assertEquals(7, map.get('a').get());
         assertEquals(6, map.get('b').get());
@@ -798,7 +797,7 @@ public class Seq104Test extends TestBase {
 
     @Test
     public void testToDataset() throws Exception {
-        Seq<Map<String, Object>, Exception> seq = Seq.of(N.asMap("name", "John", "age", 25), N.asMap("name", "Jane", "age", 30));
+        Seq<Map<String, Object>, Exception> seq = Seq.of(CommonUtil.asMap("name", "John", "age", 25), CommonUtil.asMap("name", "Jane", "age", 30));
         Dataset dataset = seq.toDataset();
         assertNotNull(dataset);
         assertEquals(2, dataset.size());

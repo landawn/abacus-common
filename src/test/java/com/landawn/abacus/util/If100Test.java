@@ -10,8 +10,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -169,7 +169,7 @@ public class If100Test extends TestBase {
 
     @Test
     public void testIsEmptyMultimap() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         Assertions.assertTrue(If.isEmpty(multimap).b);
 
         multimap.put("a", 1);

@@ -24,10 +24,10 @@ public class MTest {
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
         // N.sort(a);
-        N.parallelSort(a);
+        CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(N.isSorted(a));
+        assertTrue(CommonUtil.isSorted(a));
     }
 
     @Test
@@ -42,10 +42,10 @@ public class MTest {
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
         // N.sort(a);
-        N.parallelSort(a);
+        CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(N.isSorted(a));
+        assertTrue(CommonUtil.isSorted(a));
     }
 
     @Test
@@ -60,10 +60,10 @@ public class MTest {
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
         // N.sort(a);
-        N.parallelSort(a);
+        CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(N.isSorted(a));
+        assertTrue(CommonUtil.isSorted(a));
     }
 
     @Test
@@ -78,10 +78,10 @@ public class MTest {
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
         // N.sort(a);
-        N.parallelSort(a);
+        CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(N.isSorted(a));
+        assertTrue(CommonUtil.isSorted(a));
     }
 
     @Test
@@ -96,10 +96,10 @@ public class MTest {
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
         // N.sort(a);
-        N.parallelSort(a);
+        CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(N.isSorted(a));
+        assertTrue(CommonUtil.isSorted(a));
     }
 
     @Test
@@ -118,7 +118,7 @@ public class MTest {
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
         // N.sort(a);
-        N.parallelSort(a);
+        CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
     }
 

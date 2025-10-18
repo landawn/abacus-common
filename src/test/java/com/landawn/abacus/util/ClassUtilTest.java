@@ -51,9 +51,9 @@ public class ClassUtilTest {
     public void test_getPropNameList() {
         N.println(Beans.getPropNameList(Account.class));
 
-        N.println(Beans.getPropNames(Account.class, N.asList("id", "gui")));
+        N.println(Beans.getPropNames(Account.class, CommonUtil.asList("id", "gui")));
 
-        N.println(Beans.getPropNames(Account.class, N.asSet("id", "gui")));
+        N.println(Beans.getPropNames(Account.class, CommonUtil.asSet("id", "gui")));
     }
 
     @Test

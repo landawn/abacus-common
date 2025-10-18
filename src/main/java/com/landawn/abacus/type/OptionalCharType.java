@@ -51,6 +51,16 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
+     * Returns the default value for OptionalChar type, which is an empty OptionalChar.
+     *
+     * @return OptionalChar.empty()
+     */
+    @Override
+    public OptionalChar defaultValue() {
+        return OptionalChar.empty();
+    }
+
+    /**
      * Converts an {@link OptionalChar} object to its string representation.
      * 
      * @param x the OptionalChar object to convert

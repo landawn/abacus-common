@@ -118,10 +118,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Creates a new CharList containing the specified char values.
-     * 
-     * @param a the char values to be placed into this list
-     * @return a new CharList containing the specified values
+     * Creates a new CharList containing the specified elements. The specified array is used directly
+     * as the backing array without copying, so subsequent modifications to the array will affect the list.
+     * If the input array is {@code null}, an empty list is returned.
+     *
+     * @param a the array of elements to be included in the new list. Can be {@code null}.
+     * @return a new CharList containing the elements from the specified array, or an empty list if the array is {@code null}
      */
     public static CharList of(final char... a) {
         return new CharList(N.nullToEmpty(a));
@@ -325,11 +327,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Returns the char value at the specified position in this list.
-     * 
+     * Returns the element at the specified position in this list.
+     *
      * @param index the index of the element to return
-     * @return the char value at the specified position
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @return the element at the specified position in this list
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public char get(final int index) {
         rangeCheck(index);
@@ -339,11 +341,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Replaces the element at the specified position in this list with the specified element.
-     * 
+     *
      * @param index the index of the element to replace
      * @param e the element to be stored at the specified position
      * @return the element previously at the specified position
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public char set(final int index, final char e) {
         rangeCheck(index);
@@ -993,9 +995,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Returns {@code true} if this list contains the specified element.
-     * 
+     * More formally, returns {@code true} if and only if this list contains
+     * at least one element {@code e} such that {@code e == valueToFind}.
+     *
+     * <p>This method performs a linear search through the list.
+     *
      * @param valueToFind the element whose presence in this list is to be tested
-     * @return {@code true} if this list contains the specified element
+     * @return {@code true} if this list contains the specified element, {@code false} otherwise
      */
     public boolean contains(final char valueToFind) {
         return indexOf(valueToFind) >= 0;
@@ -1989,14 +1995,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Removes all elements from this list.
-     * 
-     * <p>After this call returns, the list will be empty. The capacity of the list is
-     * unchanged; to also minimize memory usage, call {@link #trimToSize()} after clearing.</p>
-     * 
-     * <p>This method also clears the underlying array to help garbage collection.</p>
-     * 
-     * <p>Performance: O(n) where n is the size of the list.</p>
+     * Removes all elements from this list. The list will be empty after this call returns.
+     * The capacity of the list is not changed.
      */
     @Override
     public void clear() {
@@ -2009,8 +2009,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Returns {@code true} if this list contains no elements.
-     * 
-     * <p>This is a convenience method equivalent to checking if {@code size() == 0}.</p>
      *
      * @return {@code true} if this list contains no elements, {@code false} otherwise
      */
@@ -2021,9 +2019,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Returns the number of elements in this list.
-     * 
-     * <p>This method returns the count of actual elements stored in the list, not the
-     * capacity of the underlying array.</p>
      *
      * @return the number of elements in this list
      */
@@ -2079,15 +2074,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Returns a new array containing all elements in this list.
-     * 
-     * <p>This method creates a new char array and copies all elements from this list into it.
-     * The returned array will have a length equal to the size of this list. Modifications to
-     * the returned array will not affect this list.</p>
-     * 
-     * <p>Performance: O(n) where n is the size of the list.</p>
+     * Returns a new array containing all elements of this list in proper sequence.
      *
-     * @return a new char array containing all elements from this list in proper sequence
+     * @return a new char array containing all elements of this list
      */
     @Override
     public char[] toArray() {

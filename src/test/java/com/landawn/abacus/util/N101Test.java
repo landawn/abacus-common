@@ -13,8 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -49,12 +49,12 @@ public class N101Test extends TestBase {
     @Test
     public void testReplaceIfBooleanArray() {
         boolean[] arr = { true, false, true, false };
-        int count = N.replaceIf(arr, val -> val == true, false);
+        int count = N.replaceIf(arr, val -> val, false);
         assertEquals(2, count);
         assertArrayEquals(new boolean[] { false, false, false, false }, arr);
 
-        assertEquals(0, N.replaceIf(new boolean[0], val -> val == true, false));
-        assertEquals(0, N.replaceIf((boolean[]) null, val -> val == true, false));
+        assertEquals(0, N.replaceIf(new boolean[0], val -> val, false));
+        assertEquals(0, N.replaceIf((boolean[]) null, val -> val, false));
     }
 
     @Test
@@ -1337,19 +1337,19 @@ public class N101Test extends TestBase {
             assertEquals(Arrays.asList("A", "B", "C", "D"), list);
         }
         {
-            List<Character> list = N.toCollection(Array.rangeClosed('a', 'z'), IntFunctions.ofLinkedList());
+            List<Character> list = CommonUtil.toCollection(Array.rangeClosed('a', 'z'), IntFunctions.ofLinkedList());
             N.updateAll(list, Strings::toUpperCase);
-            assertEquals(N.toCollection(Array.rangeClosed('A', 'Z'), IntFunctions.ofLinkedList()), list);
+            assertEquals(CommonUtil.toCollection(Array.rangeClosed('A', 'Z'), IntFunctions.ofLinkedList()), list);
         }
         {
-            List<Character> list = N.toCollection(Array.rangeClosed('a', 'z'), IntFunctions.ofLinkedList());
+            List<Character> list = CommonUtil.toCollection(Array.rangeClosed('a', 'z'), IntFunctions.ofLinkedList());
             N.setAll(list, i -> Strings.toUpperCase(list.get(i)));
-            assertEquals(N.toCollection(Array.rangeClosed('A', 'Z'), IntFunctions.ofLinkedList()), list);
+            assertEquals(CommonUtil.toCollection(Array.rangeClosed('A', 'Z'), IntFunctions.ofLinkedList()), list);
         }
         {
-            List<Character> list = N.toCollection(Array.rangeClosed('a', 'z'), IntFunctions.ofLinkedList());
+            List<Character> list = CommonUtil.toCollection(Array.rangeClosed('a', 'z'), IntFunctions.ofLinkedList());
             N.setAll(list, (i, e) -> Strings.toUpperCase((char) (list.get(i) + e - e)));
-            assertEquals(N.toCollection(Array.rangeClosed('A', 'Z'), IntFunctions.ofLinkedList()), list);
+            assertEquals(CommonUtil.toCollection(Array.rangeClosed('A', 'Z'), IntFunctions.ofLinkedList()), list);
         }
     }
 

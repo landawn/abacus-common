@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -104,7 +104,7 @@ public class Fn102Test extends TestBase {
         AtomicInteger counter = new AtomicInteger(0);
         Function<String, Integer> func = Fn.memoize(s -> {
             counter.incrementAndGet();
-            return N.len(s);
+            return CommonUtil.len(s);
         });
 
         assertEquals(5, func.apply("hello"));

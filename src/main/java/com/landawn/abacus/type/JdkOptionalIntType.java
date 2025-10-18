@@ -63,6 +63,17 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
         return true;
     }
 
+
+    /**
+     * Returns the default value for OptionalInt type, which is an empty OptionalInt.
+     *
+     * @return OptionalInt.empty()
+     */
+    @Override
+    public OptionalInt defaultValue() {
+        return OptionalInt.empty();
+    }
+
     /**
      * Converts an OptionalInt to its string representation.
      * If the optional is empty or null, returns null.

@@ -27,8 +27,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.IntPredicate;
@@ -44,23 +44,23 @@ public class N203Test extends TestBase {
 
     @Test
     public void testFilterBooleanArray() {
-        assertArrayEquals(N.EMPTY_BOOLEAN_ARRAY, N.filter((boolean[]) null, b -> b));
-        assertArrayEquals(N.EMPTY_BOOLEAN_ARRAY, N.filter(new boolean[0], b -> b));
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.filter((boolean[]) null, b -> b));
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.filter(new boolean[0], b -> b));
         assertArrayEquals(new boolean[] { true, true }, N.filter(new boolean[] { true, false, true }, b -> b));
         assertArrayEquals(new boolean[] { false }, N.filter(new boolean[] { true, false, true }, b -> !b));
     }
 
     @Test
     public void testFilterBooleanArrayWithRange() {
-        assertArrayEquals(N.EMPTY_BOOLEAN_ARRAY, N.filter((boolean[]) null, 0, 0, b -> b));
-        assertArrayEquals(N.EMPTY_BOOLEAN_ARRAY, N.filter(new boolean[0], 0, 0, b -> b));
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.filter((boolean[]) null, 0, 0, b -> b));
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.filter(new boolean[0], 0, 0, b -> b));
 
         boolean[] arr = { true, false, true, true, false };
         assertArrayEquals(new boolean[] { true, true }, N.filter(arr, 0, 3, b -> b));
         assertArrayEquals(new boolean[] { true, true }, N.filter(arr, 2, 4, b -> b));
         assertArrayEquals(new boolean[] { false }, N.filter(arr, 3, 5, b -> !b));
 
-        assertArrayEquals(N.EMPTY_BOOLEAN_ARRAY, N.filter(arr, 1, 1, b -> b));
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.filter(arr, 1, 1, b -> b));
 
         assertThrows(IndexOutOfBoundsException.class, () -> N.filter(arr, -1, 2, b -> b));
         assertThrows(IndexOutOfBoundsException.class, () -> N.filter(arr, 0, 6, b -> b));
@@ -69,8 +69,8 @@ public class N203Test extends TestBase {
 
     @Test
     public void testFilterCharArray() {
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, N.filter((char[]) null, c -> c == 'a'));
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, N.filter(new char[0], c -> c == 'a'));
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, N.filter((char[]) null, c -> c == 'a'));
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, N.filter(new char[0], c -> c == 'a'));
         assertArrayEquals(new char[] { 'a', 'a' }, N.filter(new char[] { 'a', 'b', 'a' }, c -> c == 'a'));
         assertArrayEquals(new char[] { 'b' }, N.filter(new char[] { 'a', 'b', 'a' }, c -> c == 'b'));
     }
@@ -80,13 +80,13 @@ public class N203Test extends TestBase {
         char[] arr = { 'x', 'y', 'x', 'z', 'x' };
         assertArrayEquals(new char[] { 'x' }, N.filter(arr, 0, 2, c -> c == 'x'));
         assertArrayEquals(new char[] { 'z', 'x' }, N.filter(arr, 3, 5, c -> c == 'z' || c == 'x'));
-        assertArrayEquals(N.EMPTY_CHAR_ARRAY, N.filter(arr, 1, 1, c -> c == 'y'));
+        assertArrayEquals(CommonUtil.EMPTY_CHAR_ARRAY, N.filter(arr, 1, 1, c -> c == 'y'));
     }
 
     @Test
     public void testFilterByteArray() {
-        assertArrayEquals(N.EMPTY_BYTE_ARRAY, N.filter((byte[]) null, b -> b > 0));
-        assertArrayEquals(N.EMPTY_BYTE_ARRAY, N.filter(new byte[0], b -> b > 0));
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, N.filter((byte[]) null, b -> b > 0));
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, N.filter(new byte[0], b -> b > 0));
         assertArrayEquals(new byte[] { 1, 3 }, N.filter(new byte[] { 1, -2, 3 }, b -> b > 0));
     }
 
@@ -95,13 +95,13 @@ public class N203Test extends TestBase {
         byte[] arr = { 10, 20, -5, 30, -15 };
         assertArrayEquals(new byte[] { 10, 20 }, N.filter(arr, 0, 2, b -> b > 0));
         assertArrayEquals(new byte[] { 30 }, N.filter(arr, 2, 4, b -> b > 0));
-        assertArrayEquals(N.EMPTY_BYTE_ARRAY, N.filter(arr, 1, 1, b -> b > 0));
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, N.filter(arr, 1, 1, b -> b > 0));
     }
 
     @Test
     public void testFilterShortArray() {
-        assertArrayEquals(N.EMPTY_SHORT_ARRAY, N.filter((short[]) null, s -> s > 0));
-        assertArrayEquals(N.EMPTY_SHORT_ARRAY, N.filter(new short[0], s -> s > 0));
+        assertArrayEquals(CommonUtil.EMPTY_SHORT_ARRAY, N.filter((short[]) null, s -> s > 0));
+        assertArrayEquals(CommonUtil.EMPTY_SHORT_ARRAY, N.filter(new short[0], s -> s > 0));
         assertArrayEquals(new short[] { 100, 300 }, N.filter(new short[] { 100, -200, 300 }, s -> s > 0));
     }
 
@@ -110,13 +110,13 @@ public class N203Test extends TestBase {
         short[] arr = { 1, 2, 0, 3, -1 };
         assertArrayEquals(new short[] { 1, 2 }, N.filter(arr, 0, 2, s -> s > 0));
         assertArrayEquals(new short[] { 3 }, N.filter(arr, 2, 4, s -> s > 0));
-        assertArrayEquals(N.EMPTY_SHORT_ARRAY, N.filter(arr, 1, 1, s -> s > 0));
+        assertArrayEquals(CommonUtil.EMPTY_SHORT_ARRAY, N.filter(arr, 1, 1, s -> s > 0));
     }
 
     @Test
     public void testFilterIntArray() {
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.filter((int[]) null, IS_EVEN_INT));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.filter(new int[0], IS_EVEN_INT));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.filter((int[]) null, IS_EVEN_INT));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.filter(new int[0], IS_EVEN_INT));
         assertArrayEquals(new int[] { 2, 4 }, N.filter(new int[] { 1, 2, 3, 4, 5 }, IS_EVEN_INT));
         assertArrayEquals(new int[] { 1, 3, 5 }, N.filter(new int[] { 1, 2, 3, 4, 5 }, IS_ODD_INT));
     }
@@ -127,7 +127,7 @@ public class N203Test extends TestBase {
         assertArrayEquals(new int[] { 2, 4 }, N.filter(arr, 0, 4, IS_EVEN_INT));
         assertArrayEquals(new int[] { 5 }, N.filter(arr, 3, 5, IS_ODD_INT));
         assertArrayEquals(new int[] { 6 }, N.filter(arr, 5, 6, IS_EVEN_INT));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.filter(arr, 1, 1, IS_EVEN_INT));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.filter(arr, 1, 1, IS_EVEN_INT));
 
         assertThrows(IndexOutOfBoundsException.class, () -> N.filter(arr, -1, 2, IS_EVEN_INT));
         assertThrows(IndexOutOfBoundsException.class, () -> N.filter(arr, 0, 7, IS_EVEN_INT));
@@ -136,8 +136,8 @@ public class N203Test extends TestBase {
 
     @Test
     public void testFilterLongArray() {
-        assertArrayEquals(N.EMPTY_LONG_ARRAY, N.filter((long[]) null, l -> l > 0));
-        assertArrayEquals(N.EMPTY_LONG_ARRAY, N.filter(new long[0], l -> l > 0));
+        assertArrayEquals(CommonUtil.EMPTY_LONG_ARRAY, N.filter((long[]) null, l -> l > 0));
+        assertArrayEquals(CommonUtil.EMPTY_LONG_ARRAY, N.filter(new long[0], l -> l > 0));
         assertArrayEquals(new long[] { 1L, 3L }, N.filter(new long[] { 1L, -2L, 3L }, l -> l > 0));
     }
 
@@ -146,13 +146,13 @@ public class N203Test extends TestBase {
         long[] arr = { 10L, 20L, -5L, 30L, -15L };
         assertArrayEquals(new long[] { 10L, 20L }, N.filter(arr, 0, 2, l -> l > 0));
         assertArrayEquals(new long[] { 30L }, N.filter(arr, 2, 4, l -> l > 0));
-        assertArrayEquals(N.EMPTY_LONG_ARRAY, N.filter(arr, 1, 1, l -> l > 0));
+        assertArrayEquals(CommonUtil.EMPTY_LONG_ARRAY, N.filter(arr, 1, 1, l -> l > 0));
     }
 
     @Test
     public void testFilterFloatArray() {
-        assertArrayEquals(N.EMPTY_FLOAT_ARRAY, N.filter((float[]) null, f -> f > 0));
-        assertArrayEquals(N.EMPTY_FLOAT_ARRAY, N.filter(new float[0], f -> f > 0));
+        assertArrayEquals(CommonUtil.EMPTY_FLOAT_ARRAY, N.filter((float[]) null, f -> f > 0));
+        assertArrayEquals(CommonUtil.EMPTY_FLOAT_ARRAY, N.filter(new float[0], f -> f > 0));
         assertArrayEquals(new float[] { 1.0f, 3.0f }, N.filter(new float[] { 1.0f, -2.0f, 3.0f }, f -> f > 0), 0.001f);
     }
 
@@ -161,13 +161,13 @@ public class N203Test extends TestBase {
         float[] arr = { 1.f, 2.f, 0.f, 3.f, -1.f };
         assertArrayEquals(new float[] { 1.f, 2.f }, N.filter(arr, 0, 2, f -> f > 0));
         assertArrayEquals(new float[] { 3.f }, N.filter(arr, 2, 4, f -> f > 0));
-        assertArrayEquals(N.EMPTY_FLOAT_ARRAY, N.filter(arr, 1, 1, f -> f > 0));
+        assertArrayEquals(CommonUtil.EMPTY_FLOAT_ARRAY, N.filter(arr, 1, 1, f -> f > 0));
     }
 
     @Test
     public void testFilterDoubleArray() {
-        assertArrayEquals(N.EMPTY_DOUBLE_ARRAY, N.filter((double[]) null, d -> d > 0));
-        assertArrayEquals(N.EMPTY_DOUBLE_ARRAY, N.filter(new double[0], d -> d > 0));
+        assertArrayEquals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.filter((double[]) null, d -> d > 0));
+        assertArrayEquals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.filter(new double[0], d -> d > 0));
         assertArrayEquals(new double[] { 1.0, 3.0 }, N.filter(new double[] { 1.0, -2.0, 3.0 }, d -> d > 0), 0.001);
     }
 
@@ -176,7 +176,7 @@ public class N203Test extends TestBase {
         double[] arr = { 1., 2., 0., 3., -1. };
         assertArrayEquals(new double[] { 1., 2. }, N.filter(arr, 0, 2, d -> d > 0));
         assertArrayEquals(new double[] { 3. }, N.filter(arr, 2, 4, d -> d > 0));
-        assertArrayEquals(N.EMPTY_DOUBLE_ARRAY, N.filter(arr, 1, 1, d -> d > 0));
+        assertArrayEquals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.filter(arr, 1, 1, d -> d > 0));
     }
 
     @Test
@@ -263,30 +263,30 @@ public class N203Test extends TestBase {
     public void testMapToBooleanArray() {
         String[] arr = { "true", "false", "TRUE" };
         assertArrayEquals(new boolean[] { true, false, true }, N.mapToBoolean(arr, Boolean::parseBoolean));
-        assertArrayEquals(N.EMPTY_BOOLEAN_ARRAY, N.mapToBoolean((String[]) null, Boolean::parseBoolean));
-        assertArrayEquals(N.EMPTY_BOOLEAN_ARRAY, N.mapToBoolean(new String[0], Boolean::parseBoolean));
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.mapToBoolean((String[]) null, Boolean::parseBoolean));
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.mapToBoolean(new String[0], Boolean::parseBoolean));
     }
 
     @Test
     public void testMapToBooleanArrayWithRange() {
         String[] arr = { "true", "false", "TRUE", "yes" };
         assertArrayEquals(new boolean[] { false, true }, N.mapToBoolean(arr, 1, 3, Boolean::parseBoolean));
-        assertArrayEquals(N.EMPTY_BOOLEAN_ARRAY, N.mapToBoolean(arr, 1, 1, Boolean::parseBoolean));
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.mapToBoolean(arr, 1, 1, Boolean::parseBoolean));
     }
 
     @Test
     public void testMapToBooleanCollection() {
         List<String> list = Arrays.asList("true", "false", "TRUE");
         assertArrayEquals(new boolean[] { true, false, true }, N.mapToBoolean(list, Boolean::parseBoolean));
-        assertArrayEquals(N.EMPTY_BOOLEAN_ARRAY, N.mapToBoolean((Collection<String>) null, Boolean::parseBoolean));
-        assertArrayEquals(N.EMPTY_BOOLEAN_ARRAY, N.mapToBoolean(Collections.emptyList(), Boolean::parseBoolean));
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.mapToBoolean((Collection<String>) null, Boolean::parseBoolean));
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.mapToBoolean(Collections.emptyList(), Boolean::parseBoolean));
     }
 
     @Test
     public void testMapToBooleanCollectionWithRange() {
         List<String> list = Arrays.asList("true", "false", "TRUE", "no");
         assertArrayEquals(new boolean[] { false, true }, N.mapToBoolean(list, 1, 3, Boolean::parseBoolean));
-        assertArrayEquals(N.EMPTY_BOOLEAN_ARRAY, N.mapToBoolean(list, 0, 0, Boolean::parseBoolean));
+        assertArrayEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.mapToBoolean(list, 0, 0, Boolean::parseBoolean));
 
         Collection<String> nonRaList = new LinkedList<>(list);
         assertArrayEquals(new boolean[] { false, true }, N.mapToBoolean(nonRaList, 1, 3, Boolean::parseBoolean));
@@ -368,30 +368,30 @@ public class N203Test extends TestBase {
     public void testMapToIntArray() {
         String[] arr = { "1", "22", "333" };
         assertArrayEquals(new int[] { 1, 2, 3 }, N.mapToInt(arr, String::length));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.mapToInt((String[]) null, String::length));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.mapToInt(new String[0], String::length));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.mapToInt((String[]) null, String::length));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.mapToInt(new String[0], String::length));
     }
 
     @Test
     public void testMapToIntArrayWithRange() {
         String[] arr = { "a", "bb", "ccc", "dddd" };
         assertArrayEquals(new int[] { 2, 3 }, N.mapToInt(arr, 1, 3, String::length));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.mapToInt(arr, 2, 2, String::length));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.mapToInt(arr, 2, 2, String::length));
     }
 
     @Test
     public void testMapToIntCollection() {
         List<String> list = Arrays.asList("one", "two", "three");
         assertArrayEquals(new int[] { 3, 3, 5 }, N.mapToInt(list, String::length));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.mapToInt((Collection<String>) null, String::length));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.mapToInt(Collections.emptyList(), String::length));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.mapToInt((Collection<String>) null, String::length));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.mapToInt(Collections.emptyList(), String::length));
     }
 
     @Test
     public void testMapToIntCollectionWithRange() {
         List<String> list = Arrays.asList("apple", "banana", "cherry", "date");
         assertArrayEquals(new int[] { 6, 6 }, N.mapToInt(list, 1, 3, String::length));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.mapToInt(list, 0, 0, String::length));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.mapToInt(list, 0, 0, String::length));
 
         Collection<String> nonRaList = new LinkedList<>(list);
         assertArrayEquals(new int[] { 6, 6 }, N.mapToInt(nonRaList, 1, 3, String::length));
@@ -401,14 +401,14 @@ public class N203Test extends TestBase {
     public void testMapToIntFromLongArray() {
         long[] arr = { 1L, 10000000000L, 3L };
         assertArrayEquals(new int[] { 1, (int) 10000000000L, 3 }, N.mapToInt(arr, l -> (int) l));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.mapToInt((long[]) null, l -> (int) l));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.mapToInt((long[]) null, l -> (int) l));
     }
 
     @Test
     public void testMapToIntFromDoubleArray() {
         double[] arr = { 1.1, 2.9, 3.5 };
         assertArrayEquals(new int[] { 1, 2, 3 }, N.mapToInt(arr, d -> (int) d));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.mapToInt((double[]) null, d -> (int) d));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.mapToInt((double[]) null, d -> (int) d));
     }
 
     @Test
@@ -439,14 +439,14 @@ public class N203Test extends TestBase {
     public void testMapToLongFromIntArray() {
         int[] arr = { 1, 2, 3 };
         assertArrayEquals(new long[] { 1L, 2L, 3L }, N.mapToLong(arr, i -> (long) i));
-        assertArrayEquals(N.EMPTY_LONG_ARRAY, N.mapToLong((int[]) null, i -> (long) i));
+        assertArrayEquals(CommonUtil.EMPTY_LONG_ARRAY, N.mapToLong((int[]) null, i -> (long) i));
     }
 
     @Test
     public void testMapToLongFromDoubleArray() {
         double[] arr = { 1.1, 2.9, 3.5 };
         assertArrayEquals(new long[] { 1L, 2L, 3L }, N.mapToLong(arr, d -> (long) d));
-        assertArrayEquals(N.EMPTY_LONG_ARRAY, N.mapToLong((double[]) null, d -> (long) d));
+        assertArrayEquals(CommonUtil.EMPTY_LONG_ARRAY, N.mapToLong((double[]) null, d -> (long) d));
     }
 
     @Test
@@ -501,14 +501,14 @@ public class N203Test extends TestBase {
     public void testMapToDoubleFromIntArray() {
         int[] arr = { 1, 2, 3 };
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, N.mapToDouble(arr, i -> (double) i), 0.001);
-        assertArrayEquals(N.EMPTY_DOUBLE_ARRAY, N.mapToDouble((int[]) null, i -> (double) i));
+        assertArrayEquals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.mapToDouble((int[]) null, i -> (double) i));
     }
 
     @Test
     public void testMapToDoubleFromLongArray() {
         long[] arr = { 1L, 2L, 3L };
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, N.mapToDouble(arr, l -> (double) l), 0.001);
-        assertArrayEquals(N.EMPTY_DOUBLE_ARRAY, N.mapToDouble((long[]) null, l -> (double) l));
+        assertArrayEquals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.mapToDouble((long[]) null, l -> (double) l));
     }
 
     @Test
@@ -877,8 +877,8 @@ public class N203Test extends TestBase {
     @Test
     public void testDistinctIntArray() {
         assertArrayEquals(new int[] { 1, 2, 3 }, N.distinct(new int[] { 1, 2, 2, 3, 1, 3 }));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.distinct((int[]) null));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.distinct(new int[0]));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.distinct((int[]) null));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.distinct(new int[0]));
         assertArrayEquals(new int[] { 1 }, N.distinct(new int[] { 1, 1, 1 }));
     }
 
@@ -887,7 +887,7 @@ public class N203Test extends TestBase {
         int[] arr = { 1, 2, 1, 3, 2, 4, 1 };
         assertArrayEquals(new int[] { 1, 2, 3 }, N.distinct(arr, 0, 4));
         assertArrayEquals(new int[] { 2, 4, 1 }, N.distinct(arr, 4, 7));
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.distinct(arr, 2, 2));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.distinct(arr, 2, 2));
     }
 
     @Test
@@ -1625,7 +1625,7 @@ public class N203Test extends TestBase {
         List<String> l1 = List.of("a", "b");
         List<String> l2 = List.of("c");
         List<String> l3 = Collections.emptyList();
-        Collection<Iterable<String>> iterables = N.asList(l1, l2, l3, null);
+        Collection<Iterable<String>> iterables = CommonUtil.asList(l1, l2, l3, null);
 
         List<Iterator<String>> resultIterators = N.iterateEach(iterables);
         assertEquals(4, resultIterators.size());
@@ -1653,7 +1653,7 @@ public class N203Test extends TestBase {
         List<String> l1 = List.of("a", "b");
         List<String> l2 = List.of("c");
         List<String> l3 = Collections.emptyList();
-        Collection<Iterable<String>> iterables = N.asList(l1, null, l2, l3);
+        Collection<Iterable<String>> iterables = CommonUtil.asList(l1, null, l2, l3);
 
         Iterator<String> combinedIter = N.iterateAll(iterables);
         assertEquals("a", combinedIter.next());

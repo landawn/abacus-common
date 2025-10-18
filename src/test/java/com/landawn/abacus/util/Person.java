@@ -58,10 +58,10 @@ public abstract class Person {
     @Override
     public int hashCode() {
         int h = 17;
-        h = 31 * h + N.hashCode(firstName);
-        h = 31 * h + N.hashCode(middleName);
-        h = 31 * h + N.hashCode(lastName);
-        return 31 * h + N.hashCode(birthDate);
+        h = 31 * h + CommonUtil.hashCode(firstName);
+        h = 31 * h + CommonUtil.hashCode(middleName);
+        h = 31 * h + CommonUtil.hashCode(lastName);
+        return 31 * h + CommonUtil.hashCode(birthDate);
     }
 
     @Override
@@ -71,8 +71,8 @@ public abstract class Person {
         }
 
         if (obj instanceof Person other) {
-            if (N.equals(firstName, other.firstName) && N.equals(middleName, other.middleName) && N.equals(lastName, other.lastName)
-                    && N.equals(birthDate, other.birthDate)) {
+            if (CommonUtil.equals(firstName, other.firstName) && CommonUtil.equals(middleName, other.middleName) && CommonUtil.equals(lastName, other.lastName)
+                    && CommonUtil.equals(birthDate, other.birthDate)) {
 
                 return true;
             }
@@ -83,7 +83,7 @@ public abstract class Person {
 
     @Override
     public String toString() {
-        return "{" + "firstName=" + N.toString(firstName) + ", " + "middleName=" + N.toString(middleName) + ", " + "lastName=" + N.toString(lastName) + ", "
-                + "birthDate=" + N.toString(birthDate) + "}";
+        return "{" + "firstName=" + CommonUtil.toString(firstName) + ", " + "middleName=" + CommonUtil.toString(middleName) + ", " + "lastName=" + CommonUtil.toString(lastName) + ", "
+                + "birthDate=" + CommonUtil.toString(birthDate) + "}";
     }
 }

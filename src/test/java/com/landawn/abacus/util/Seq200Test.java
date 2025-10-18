@@ -50,8 +50,8 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -661,7 +661,7 @@ public class Seq200Test extends TestBase {
         String[] a2 = { "c", "d" };
         Seq<String, Exception> seq = Seq.concat(a1, a2);
         assertEquals(Arrays.asList("a", "b", "c", "d"), drainWithException(seq));
-        assertTrue(drainWithException(Seq.concat(N.EMPTY_STRING_ARRAY)).isEmpty());
+        assertTrue(drainWithException(Seq.concat(CommonUtil.EMPTY_STRING_ARRAY)).isEmpty());
     }
 
     @Test
@@ -956,7 +956,7 @@ public class Seq200Test extends TestBase {
 
         Seq<Integer, Exception> seqActual = Seq.of(1, 2, 3, 2, 1).dropWhile(x -> x < 3, dropped::add);
         assertEquals(Arrays.asList(3, 2, 1), drainWithException(seqActual));
-        assertEquals(N.asList(1, 2), dropped, "Action should be called on the first element not satisfying the drop condition, based on current impl.");
+        assertEquals(CommonUtil.asList(1, 2), dropped, "Action should be called on the first element not satisfying the drop condition, based on current impl.");
     }
 
     @Test
@@ -2074,7 +2074,7 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_toDataset() throws Exception {
-        List<Map<String, Object>> data = Arrays.asList(N.asMap("id", 1, "name", "Alice"), N.asMap("id", 2, "name", "Bob"));
+        List<Map<String, Object>> data = Arrays.asList(CommonUtil.asMap("id", 1, "name", "Alice"), CommonUtil.asMap("id", 2, "name", "Bob"));
         Dataset dataset = Seq.of(data).toDataset();
         assertEquals(2, dataset.size());
         assertTrue(dataset.columnNameList().containsAll(Arrays.asList("id", "name")));

@@ -92,26 +92,6 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
             return STR_FOR_EMPTY_ARRAY;
         }
 
-        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 8));
-        //
-        //    sb.append(WD._BRACKET_L);
-        //
-        //    for (int i = 0, len = x.length; i < len; i++) {
-        //        if (i > 0) {
-        //            sb.append(ELEMENT_SEPARATOR);
-        //        }
-        //
-        //        sb.append(x[i]);
-        //    }
-        //
-        //    sb.append(WD._BRACKET_R);
-        //
-        //    final String str = sb.toString();
-        //
-        //    Objectory.recycle(sb);
-        //
-        //    return str;
-
         return Strings.join(x, 0, x.length, ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 

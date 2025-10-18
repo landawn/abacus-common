@@ -8,8 +8,6 @@ import java.nio.MappedByteBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.junit.jupiter.api.Tag;
-
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.BiIterator;
 import com.landawn.abacus.util.BufferedJSONWriter;
@@ -21,10 +19,11 @@ import com.landawn.abacus.util.TriIterator;
 import com.landawn.abacus.util.Triple;
 import com.landawn.abacus.util.TypeReference;
 
-@Tag("new-test")
 public abstract class TestBase {
 
-    public static final char[] NULL_CHAR_ARRAY = "null".toCharArray();;
+    public static final char[] NULL_CHAR_ARRAY = "null".toCharArray();
+    public static final char[] TRUE_CHAR_ARRAY = "true".toCharArray();
+    public static final char[] FALSE_CHAR_ARRAY = "false".toCharArray();
 
     public static void assertHaveSameElements(boolean[] expected, boolean[] actual) {
         assertTrue(N.haveSameElements(expected, actual), "Expected: " + N.toString(expected) + ", Actual: " + N.toString(actual));

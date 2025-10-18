@@ -808,11 +808,11 @@ public class RowDataset2025Test extends TestBase {
 
     @Test
     public void testDivideColumnWithFunction() {
-        List<String> names = N.asList("fullName");
+        List<String> names = CommonUtil.asList("fullName");
         List<List<Object>> cols = new ArrayList<>();
-        cols.add(new ArrayList<>(N.asList("John Doe", "Jane Smith")));
+        cols.add(new ArrayList<>(CommonUtil.asList("John Doe", "Jane Smith")));
         RowDataset ds = new RowDataset(names, cols);
-        ds.divideColumn("fullName", N.asList("firstName", "lastName"), (String fullName) -> N.asList(fullName.split(" ")));
+        ds.divideColumn("fullName", CommonUtil.asList("firstName", "lastName"), (String fullName) -> CommonUtil.asList(fullName.split(" ")));
         assertTrue(ds.containsColumn("firstName"));
         assertTrue(ds.containsColumn("lastName"));
         assertFalse(ds.containsColumn("fullName"));
@@ -822,9 +822,9 @@ public class RowDataset2025Test extends TestBase {
 
     @Test
     public void testDivideColumnWithBiConsumer() {
-        List<String> names = N.asList("fullName");
+        List<String> names = CommonUtil.asList("fullName");
         List<List<Object>> cols = new ArrayList<>();
-        cols.add(new ArrayList<>(N.asList("John Doe", "Jane Smith")));
+        cols.add(new ArrayList<>(CommonUtil.asList("John Doe", "Jane Smith")));
         RowDataset ds = new RowDataset(names, cols);
         ds.divideColumn("fullName", Arrays.asList("firstName", "lastName"), (String fullName, Object[] output) -> {
             String[] parts = fullName.split(" ");

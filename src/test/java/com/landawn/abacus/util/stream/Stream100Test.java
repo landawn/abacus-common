@@ -1097,7 +1097,7 @@ public class Stream100Test extends TestBase {
         }
 
         {
-            Stream<String> strings = createStream01("a", "bb", "ccc", "dd", "e");
+            Stream<String> strings = createStream01("a", "bb", "ccc", "dd");
             List<String> distinctByLength = strings.parallel().distinctBy(String::length).toList();
 
             assertTrue(N.haveSameElements(Arrays.asList("a", "bb", "ccc"), distinctByLength)

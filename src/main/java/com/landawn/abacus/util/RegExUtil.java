@@ -59,36 +59,83 @@ import com.landawn.abacus.util.function.IntBiFunction;
 public final class RegExUtil {
 
     /**
-     * Pattern for a Java identifier.
+     * A regular expression {@link Pattern} that matches valid Java identifiers within a string.
      * <p>
-     * A Java identifier is a letter, currency character, or connecting punctuation character followed by
-     * zero or more Java letters, currency characters, connecting punctuation characters, digits,
-     * or one of the following special characters: {@code $} or {@code _}.
-     * </p>
-     */
-    public static final Pattern JAVA_IDENTIFIER_FINDER = Pattern.compile("([a-zA-Z_$][a-zA-Z\\d_$]*)");
-
-    /**
-     * A regular expression {@link Pattern} that matches integers within a string.
-     * <p>
-     * This pattern captures sequences of digits that may optionally be prefixed
-     * with a plus or minus sign. It is useful for extracting signed or unsigned
-     * integer values from arbitrary text.
+     * This pattern captures sequences that follow Java's identifier naming rules: starting with
+     * a letter (uppercase or lowercase), underscore, or dollar sign, followed by any number of
+     * letters, digits, underscores, or dollar signs. It is useful for extracting variable names,
+     * method names, class names, and other identifiers from Java source code or text.
      * </p>
      *
      * <p>Regex breakdown:</p>
      * <ul>
-     *   <li>{@code [+-]?} — matches an optional '+' or '-' sign</li>
-     *   <li>{@code \\d+} — matches one or more digits</li>
+     *   <li>{@code ([a-zA-Z_$]} — capturing group starting with a letter, underscore, or dollar sign</li>
+     *   <li>{@code [a-zA-Z\\d_$]*)} — followed by zero or more letters, digits, underscores, or dollar signs</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "myVariable"}</li>
+     *   <li>{@code "_privateField"}</li>
+     *   <li>{@code "$specialVar"}</li>
+     *   <li>{@code "className123"}</li>
+     *   <li>{@code "MAX_VALUE"}</li>
+     * </ul>
+     *
+     * <p>Example non-matches:</p>
+     * <ul>
+     *   <li>{@code "123invalid"} (starts with digit)</li>
+     *   <li>{@code "my-variable"} (contains hyphen)</li>
+     *   <li>{@code "class"} (Java keyword, but matches pattern - validation needed separately)</li>
+     * </ul>
+     *
+     * <p><b>Note:</b> This pattern matches the syntactic structure of Java identifiers but does not
+     * validate against Java reserved keywords. For complete validation, use this pattern in conjunction
+     * with keyword checking.</p>
+     *
+     * @see #JAVA_IDENTIFIER_MATCHER
+     * @see <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.8">Java Language Specification - Identifiers</a>
+     * @see java.util.regex.Pattern
+     */
+    public static final Pattern JAVA_IDENTIFIER_FINDER = Pattern.compile("([a-zA-Z_$][a-zA-Z\\d_$]*)");
+
+
+    /**
+     * A regular expression {@link Pattern} that matches signed integers within a string.
+     * <p>
+     * This pattern captures sequences of digits that may be preceded by an optional plus or minus sign.
+     * It is useful for extracting integer values (both positive and negative) from arbitrary text.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code ([+-]?} — capturing group with optional plus or minus sign</li>
+     *   <li>{@code \\d+)} — followed by one or more digits</li>
      * </ul>
      *
      * <p>Example matches:</p>
      * <ul>
      *   <li>{@code "42"}</li>
-     *   <li>{@code "-7"}</li>
-     *   <li>{@code "+1234"}</li>
+     *   <li>{@code "+123"}</li>
+     *   <li>{@code "-456"}</li>
+     *   <li>{@code "0"}</li>
      * </ul>
      *
+     * <p>Example non-matches:</p>
+     * <ul>
+     *   <li>{@code "12.34"} (contains decimal point)</li>
+     *   <li>{@code "abc"} (contains letters)</li>
+     *   <li>{@code "1.5e10"} (scientific notation)</li>
+     * </ul>
+     *
+     * <p><b>Note:</b> This pattern matches integer values but does not validate for overflow
+     * or underflow of specific integer types like {@code int} or {@code long}. Additional
+     * validation may be needed when converting to specific numeric types.</p>
+     *
+     * @see #POSITIVE_INTEGER_FINDER
+     * @see #NEGATIVE_INTEGER_FINDER
+     * @see #INTEGER_MATCHER
+     * @see #NUMBER_FINDER
      * @see java.util.regex.Pattern
      */
     public static final Pattern INTEGER_FINDER = Pattern.compile("([+-]?\\d+)");
@@ -327,18 +374,147 @@ public final class RegExUtil {
     public static final Pattern PHONE_NUMBER_WITH_CODE_FINDER = Pattern.compile("\\+?[\\d\\s]+\\(?[\\d\\s]{10,}");
 
     /**
-     * Pattern for date in format yyyy-MM-dd or yyyy/MM/dd or yyyy.MM.dd or yyyy MM dd.
-     * <br /> year is from 1900 to 2099.
+     * A regular expression {@link Pattern} that matches dates in YYYY-MM-DD format with flexible separators.
+     * <p>
+     * This pattern captures dates from the years 1900-2099 with month and day values, using consistent
+     * separators (hyphen, space, forward slash, or period). It validates basic date format structure
+     * but does not perform full date validation (e.g., February 30th would match the pattern).
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code (19|20)} — captures years starting with 19 or 20 (1900-2099)</li>
+     *   <li>{@code \\d\\d} — followed by two more digits to complete the year</li>
+     *   <li>{@code ([- /.])} — capturing group for separator: hyphen, space, forward slash, or period</li>
+     *   <li>{@code (0[1-9]|1[012])} — month: 01-09 or 10-12</li>
+     *   <li>{@code \\2} — backreference ensuring the same separator is used</li>
+     *   <li>{@code (0[1-9]|[12][0-9]|3[01])} — day: 01-09, 10-29, or 30-31</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "2023-12-25"}</li>
+     *   <li>{@code "1999/01/01"}</li>
+     *   <li>{@code "2000.02.29"}</li>
+     *   <li>{@code "1995 06 15"}</li>
+     * </ul>
+     *
+     * <p>Example non-matches:</p>
+     * <ul>
+     *   <li>{@code "1899-12-25"} (year before 1900)</li>
+     *   <li>{@code "2023-13-01"} (invalid month)</li>
+     *   <li>{@code "2023-12-32"} (invalid day)</li>
+     *   <li>{@code "2023/12-25"} (inconsistent separators)</li>
+     * </ul>
+     *
+     * <p><b>Note:</b> This pattern performs basic format validation but does not validate actual
+     * date validity (leap years, month-specific day limits). For complete date validation,
+     * use this pattern in conjunction with proper date parsing libraries.</p>
+     *
+     * @see #DATE_MATCHER
+     * @see #DATE_TIME_FINDER
+     * @see #TIME_FINDER
+     * @see java.time.LocalDate
+     * @see java.util.regex.Pattern
      */
     public static final Pattern DATE_FINDER = Pattern.compile("(19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01])");
+
     /**
-     * Pattern for time in format HH:mm:ss.
-     * <br /> hour is from 00 to 23, minute and second are from 00 to 59.
+     * A regular expression {@link Pattern} that matches time in HH:MM:SS format (24-hour format).
+     * <p>
+     * This pattern captures time values in 24-hour format with hours, minutes, and seconds separated by colons.
+     * It validates that hours are in the range 00-23, and minutes and seconds are in the range 00-59.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code ([01]\\d|2[0-3])} — capturing group for hours: 00-19 or 20-23</li>
+     *   <li>{@code :} — literal colon separator</li>
+     *   <li>{@code ([0-5]\\d)} — capturing group for minutes: 00-59</li>
+     *   <li>{@code :} — literal colon separator</li>
+     *   <li>{@code ([0-5]\\d)} — capturing group for seconds: 00-59</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "00:00:00"}</li>
+     *   <li>{@code "12:30:45"}</li>
+     *   <li>{@code "23:59:59"}</li>
+     *   <li>{@code "09:15:30"}</li>
+     * </ul>
+     *
+     * <p>Example non-matches:</p>
+     * <ul>
+     *   <li>{@code "24:00:00"} (invalid hour)</li>
+     *   <li>{@code "12:60:30"} (invalid minute)</li>
+     *   <li>{@code "12:30:60"} (invalid second)</li>
+     *   <li>{@code "9:15:30"} (missing leading zero)</li>
+     * </ul>
+     *
+     * <p><b>Note:</b> This pattern requires leading zeros for single-digit values and enforces
+     * strict 24-hour format validation. For matching times within larger text, this pattern
+     * can be used with find operations.</p>
+     *
+     * @see #TIME_MATCHER
+     * @see #DATE_TIME_FINDER
+     * @see #DATE_FINDER
+     * @see java.time.LocalTime
+     * @see java.util.regex.Pattern
      */
     public static final Pattern TIME_FINDER = Pattern.compile("([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)");
+
     /**
-     * Pattern for date and time in format yyyy-MM-dd HH:mm:ss or yyyy/MM/dd HH:mm:ss or yyyy.MM.dd HH:mm:ss or yyyy MM dd HH:mm:ss.
-     * <br /> year is from 1900 to 2099, hour is from 00 to 23, minute and second are from 00 to 59.
+     * A regular expression {@link Pattern} that matches date and time in YYYY-MM-DD HH:MM:SS format.
+     * <p>
+     * This pattern captures combined date and time values with the date in YYYY-MM-DD format using flexible
+     * separators (hyphen, space, forward slash, or period) followed by a space and time in 24-hour HH:MM:SS format.
+     * It validates years from 1900-2099, months 01-12, days 01-31, hours 00-23, and minutes/seconds 00-59.
+     * </p>
+     *
+     * <p>Regex breakdown:</p>
+     * <ul>
+     *   <li>{@code (19|20)} — capturing group for century: 19 or 20 (years 1900-2099)</li>
+     *   <li>{@code \\d\\d} — two more digits to complete the year</li>
+     *   <li>{@code ([- /.])} — capturing group for date separator: hyphen, space, forward slash, or period</li>
+     *   <li>{@code (0[1-9]|1[012])} — capturing group for month: 01-09 or 10-12</li>
+     *   <li>{@code \\2} — backreference ensuring the same date separator is used</li>
+     *   <li>{@code (0[1-9]|[12][0-9]|3[01])} — capturing group for day: 01-09, 10-29, or 30-31</li>
+     *   <li>{@code } — literal space separating date and time</li>
+     *   <li>{@code ([01]\\d|2[0-3])} — capturing group for hours: 00-19 or 20-23</li>
+     *   <li>{@code :} — literal colon separator</li>
+     *   <li>{@code ([0-5]\\d)} — capturing group for minutes: 00-59</li>
+     *   <li>{@code :} — literal colon separator</li>
+     *   <li>{@code ([0-5]\\d)} — capturing group for seconds: 00-59</li>
+     * </ul>
+     *
+     * <p>Example matches:</p>
+     * <ul>
+     *   <li>{@code "2023-12-25 14:30:45"}</li>
+     *   <li>{@code "1999/01/01 00:00:00"}</li>
+     *   <li>{@code "2000.02.29 23:59:59"}</li>
+     *   <li>{@code "1995 06 15 09:15:30"}</li>
+     * </ul>
+     *
+     * <p>Example non-matches:</p>
+     * <ul>
+     *   <li>{@code "1899-12-25 12:00:00"} (year before 1900)</li>
+     *   <li>{@code "2023-13-01 12:00:00"} (invalid month)</li>
+     *   <li>{@code "2023-12-32 12:00:00"} (invalid day)</li>
+     *   <li>{@code "2023/12-25 12:00:00"} (inconsistent date separators)</li>
+     *   <li>{@code "2023-12-25 24:00:00"} (invalid hour)</li>
+     *   <li>{@code "2023-12-25  12:00:00"} (multiple spaces between date and time)</li>
+     * </ul>
+     *
+     * <p><b>Note:</b> This pattern performs basic format validation but does not validate actual
+     * date-time validity (leap years, month-specific day limits). The date and time portions must
+     * be separated by exactly one space. For complete validation, use this pattern in conjunction
+     * with proper date-time parsing libraries.</p>
+     *
+     * @see #DATE_TIME_MATCHER
+     * @see #DATE_FINDER
+     * @see #TIME_FINDER
+     * @see java.time.LocalDateTime
+     * @see java.util.regex.Pattern
      */
     public static final Pattern DATE_TIME_FINDER = Pattern
             .compile("(19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01]) ([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)");
@@ -770,47 +946,44 @@ public final class RegExUtil {
     }
 
     /**
-     * Checks if the specified string contains a substring that matches the given regular expression.
-     * This method is equivalent to {@code Pattern.compile(regex).matcher(checkSourceString(source)).find()}.
+     * Checks whether the given regular expression pattern can be found anywhere in the source string.
+     * <p>
+     * This method searches the entire source string for at least one occurrence of the specified
+     * regular expression pattern. It returns {@code true} if the pattern is found, {@code false} otherwise.
+     * </p>
      *
-     * <p><b>Null Handling:</b></p>
-     * <ul>
-     *   <li>If {@code source} is {@code null}, throws {@code NullPointerException}</li>
-     *   <li>If {@code regex} is {@code null} or empty, throws {@code IllegalArgumentException}</li>
-     *   <li>If {@code source} is empty string, returns {@code false} (no match possible)</li>
-     * </ul>
-     *
-     * <p>Examples:</p>
+     * <p><b>Examples:</b></p>
      * <pre>{@code
-     * boolean hasEmail = RegExUtil.find("Contact: john@example.com", "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
-     * // Returns: true
+     * boolean result = RegExUtil.find("Hello World 123", "\\d+");
+     * // Returns: true (digits found)
      *
-     * boolean hasNumber = RegExUtil.find("abc", "\\d+");
-     * // Returns: false (no numbers found)
+     * boolean hasEmail = RegExUtil.find("Contact: user@example.com", "\\w+@\\w+\\.\\w+");
+     * // Returns: true (email pattern found)
      *
-     * boolean empty = RegExUtil.find("", "\\d+");
-     * // Returns: false (empty string has no matches)
+     * boolean noMatch = RegExUtil.find("abc def", "\\d+");
+     * // Returns: false (no digits found)
+     *
+     * boolean emptySource = RegExUtil.find("", "test");
+     * // Returns: false (empty string has no content)
+     *
+     * boolean nullSource = RegExUtil.find(null, "\\w+");
+     * // Returns: false (null treated as empty string)
      * }</pre>
      *
-     * <p><b>Common Mistakes:</b></p>
-     * <pre>{@code
-     * // DON'T: Pass null source (throws NullPointerException)
-     * RegExUtil.find(null, "\\d+");
+     * <p><b>Performance Note:</b> If you need to use the same regex pattern multiple times,
+     * consider pre-compiling it with {@link Pattern#compile(String)} and using
+     * {@link #find(String, Pattern)} to avoid recompilation overhead.</p>
      *
-     * // DO: Check for null before calling
-     * String text = getUserInput();
-     * if (text != null && RegExUtil.find(text, "\\d+")) {
-     *     // Process match
-     * }
-     * }</pre>
-     *
-     * @param source the string to be checked; must not be {@code null}
-     * @param regex the regular expression to find; must not be {@code null} or empty
-     * @return {@code true} if the string contains a match, {@code false} otherwise
-     * @throws NullPointerException if {@code source} is {@code null}
+     * @param source the input text to search; may be {@code null} (treated as empty string)
+     * @param regex the regular expression string to search for; must not be {@code null} or empty
+     * @return {@code true} if the pattern is found in the source, {@code false} otherwise
      * @throws IllegalArgumentException if {@code regex} is {@code null} or empty
      * @see #find(String, Pattern)
      * @see #matches(String, String)
+     * @see #findFirst(String, String)
+     * @see #countMatches(String, String)
+     * @see Pattern#compile(String)
+     * @see Matcher#find()
      */
     public static boolean find(final String source, final String regex) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
@@ -823,27 +996,49 @@ public final class RegExUtil {
     }
 
     /**
-     * Checks if the specified string contains a substring that matches the given regular expression pattern.
-     * This method is more efficient than {@link #find(String, String)} when using the same pattern multiple times.
+     * Checks whether the given compiled {@link Pattern} can be found anywhere in the source string.
+     * <p>
+     * This method searches the entire source string for at least one occurrence of the specified
+     * pattern. It returns {@code true} if the pattern is found, {@code false} otherwise.
+     * This is more efficient than {@link #find(String, String)} when the same pattern is used
+     * multiple times, as it avoids recompiling the pattern on each invocation.
+     * </p>
      *
-     * <p>Examples:</p>
+     * <p><b>Examples:</b></p>
      * <pre>{@code
-     * Pattern emailPattern = Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
-     * boolean hasEmail = RegExUtil.find("Contact: john@example.com", emailPattern);
-     * // Returns: true
-     *
      * Pattern digitPattern = Pattern.compile("\\d+");
-     * boolean hasDigit = RegExUtil.find("abc", digitPattern);
+     * boolean result = RegExUtil.find("Hello World 123", digitPattern);
+     * // Returns: true (digits found)
+     *
+     * Pattern emailPattern = Pattern.compile("\\w+@\\w+\\.\\w+");
+     * boolean hasEmail = RegExUtil.find("Contact: user@example.com", emailPattern);
+     * // Returns: true (email pattern found)
+     *
+     * Pattern numberPattern = Pattern.compile("\\d+");
+     * boolean noMatch = RegExUtil.find("abc def", numberPattern);
      * // Returns: false (no digits found)
+     *
+     * boolean emptySource = RegExUtil.find("", digitPattern);
+     * // Returns: false (empty string has no content)
+     *
+     * boolean nullSource = RegExUtil.find(null, digitPattern);
+     * // Returns: false (null treated as empty string)
      * }</pre>
      *
-     * @param source the string to be checked; must not be {@code null}
-     * @param pattern the regular expression pattern to find; must not be {@code null}
-     * @return {@code true} if the string contains a match, {@code false} otherwise
-     * @throws NullPointerException if {@code source} is {@code null}
+     * <p><b>Performance Note:</b> This method is preferred over {@link #find(String, String)}
+     * when performing multiple searches with the same pattern, as pattern compilation is
+     * an expensive operation.</p>
+     *
+     * @param source the input text to search; may be {@code null} (treated as empty string)
+     * @param pattern the compiled regex pattern to search for; must not be {@code null}
+     * @return {@code true} if the pattern is found in the source, {@code false} otherwise
      * @throws IllegalArgumentException if {@code pattern} is {@code null}
      * @see #find(String, String)
      * @see #matches(String, Pattern)
+     * @see #findFirst(String, Pattern)
+     * @see #countMatches(String, Pattern)
+     * @see Pattern#compile(String)
+     * @see Matcher#find()
      */
     public static boolean find(final String source, final Pattern pattern) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
@@ -852,32 +1047,47 @@ public final class RegExUtil {
     }
 
     /**
-     * Checks if the specified string matches the given regular expression.
-     * The entire string must match the pattern (equivalent to anchoring with ^ and $).
+     * Checks whether the entire source string matches the given regular expression pattern.
+     * <p>
+     * This method attempts to match the entire source string against the specified regex pattern.
+     * Unlike {@link #find(String, String)}, which searches for the pattern anywhere in the string,
+     * this method requires the entire string to match the pattern from beginning to end.
+     * It returns {@code true} only if the whole string matches, {@code false} otherwise.
+     * </p>
      *
-     * <p>Examples:</p>
+     * <p><b>Examples:</b></p>
      * <pre>{@code
-     * boolean isInteger = RegExUtil.matches("123", "\\d+");
+     * boolean result = RegExUtil.matches("12345", "\\d+");
      * // Returns: true (entire string is digits)
      *
-     * boolean isPartialMatch = RegExUtil.matches("abc123", "\\d+");
-     * // Returns: false (entire string must match, not just part)
+     * boolean partial = RegExUtil.matches("abc123def", "\\d+");
+     * // Returns: false (contains digits but also letters)
      *
-     * boolean isEmpty = RegExUtil.matches("", "");
-     * // Returns: true (empty matches empty)
+     * boolean emailMatch = RegExUtil.matches("user@example.com", "\\w+@\\w+\\.\\w+");
+     * // Returns: true (entire string is an email)
      *
-     * boolean emptyDigits = RegExUtil.matches("", "\\d+");
-     * // Returns: false (empty string doesn't match digit pattern)
+     * boolean noMatch = RegExUtil.matches("Hello World", "^Hello$");
+     * // Returns: false (string contains more than "Hello")
+     *
+     * boolean emptyMatch = RegExUtil.matches("", ".*");
+     * // Returns: true (empty string matches .*)
+     *
+     * boolean nullMatch = RegExUtil.matches(null, ".*");
+     * // Returns: true (null treated as empty string, matches .*)
      * }</pre>
      *
-     * @param source the string to be checked; must not be {@code null}
-     * @param regex the regular expression to match; must not be {@code null} or empty
-     * @return {@code true} if the entire string matches the regex, {@code false} otherwise
-     * @throws NullPointerException if {@code source} is {@code null}
+     * <p><b>Note:</b> This method implicitly adds anchors (^ and $) to the pattern, so you don't
+     * need to include them in your regex. If you want to find a pattern anywhere in the string,
+     * use {@link #find(String, String)} instead.</p>
+     *
+     * @param source the input text to match; may be {@code null} (treated as empty string)
+     * @param regex the regular expression string to match against; must not be {@code null} or empty
+     * @return {@code true} if the entire source string matches the pattern, {@code false} otherwise
      * @throws IllegalArgumentException if {@code regex} is {@code null} or empty
-     * @see Pattern#matches(String, CharSequence)
      * @see #matches(String, Pattern)
      * @see #find(String, String)
+     * @see Pattern#matches(String, CharSequence)
+     * @see Matcher#matches()
      */
     public static boolean matches(final String source, final String regex) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
@@ -886,32 +1096,53 @@ public final class RegExUtil {
     }
 
     /**
-     * Checks if the specified string matches the given regular expression pattern.
-     * The entire string must match the pattern. This method is more efficient than
-     * {@link #matches(String, String)} when using the same pattern multiple times.
+     * Checks whether the entire source string matches the given compiled {@link Pattern}.
+     * <p>
+     * This method attempts to match the entire source string against the specified pattern.
+     * Unlike {@link #find(String, Pattern)}, which searches for the pattern anywhere in the string,
+     * this method requires the entire string to match the pattern from beginning to end.
+     * It returns {@code true} only if the whole string matches, {@code false} otherwise.
+     * This is more efficient than {@link #matches(String, String)} when the same pattern is used
+     * multiple times.
+     * </p>
      *
-     * <p>Examples:</p>
+     * <p><b>Examples:</b></p>
      * <pre>{@code
-     * Pattern datePattern = RegExUtil.DATE_MATCHER;
-     * boolean isDate = RegExUtil.matches("2023-12-25", datePattern);
-     * // Returns: true
-     *
      * Pattern digitPattern = Pattern.compile("\\d+");
-     * boolean isDigits = RegExUtil.matches("12345", digitPattern);
-     * // Returns: true
+     * boolean result = RegExUtil.matches("12345", digitPattern);
+     * // Returns: true (entire string is digits)
      *
-     * boolean hasDigits = RegExUtil.matches("abc123", digitPattern);
-     * // Returns: false (entire string must be digits)
+     * boolean partial = RegExUtil.matches("abc123def", digitPattern);
+     * // Returns: false (contains digits but also letters)
+     *
+     * Pattern emailPattern = Pattern.compile("\\w+@\\w+\\.\\w+");
+     * boolean emailMatch = RegExUtil.matches("user@example.com", emailPattern);
+     * // Returns: true (entire string is an email)
+     *
+     * Pattern helloPattern = Pattern.compile("^Hello$");
+     * boolean noMatch = RegExUtil.matches("Hello World", helloPattern);
+     * // Returns: false (string contains more than "Hello")
+     *
+     * Pattern anyPattern = Pattern.compile(".*");
+     * boolean emptyMatch = RegExUtil.matches("", anyPattern);
+     * // Returns: true (empty string matches .*)
+     *
+     * boolean nullMatch = RegExUtil.matches(null, anyPattern);
+     * // Returns: true (null treated as empty string, matches .*)
      * }</pre>
      *
-     * @param source the string to be checked; must not be {@code null}
-     * @param pattern the regular expression pattern to match; must not be {@code null}
-     * @return {@code true} if the entire string matches the regex, {@code false} otherwise
-     * @throws NullPointerException if {@code source} is {@code null}
+     * <p><b>Performance Note:</b> This method is preferred over {@link #matches(String, String)}
+     * when performing multiple matches with the same pattern, as pattern compilation is
+     * an expensive operation.</p>
+     *
+     * @param source the input text to match; may be {@code null} (treated as empty string)
+     * @param pattern the compiled regex pattern to match against; must not be {@code null}
+     * @return {@code true} if the entire source string matches the pattern, {@code false} otherwise
      * @throws IllegalArgumentException if {@code pattern} is {@code null}
-     * @see Pattern#matches(String, CharSequence)
      * @see #matches(String, String)
      * @see #find(String, Pattern)
+     * @see Matcher#matches()
+     * @see Pattern#compile(String)
      */
     public static boolean matches(final String source, final Pattern pattern) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
@@ -920,45 +1151,215 @@ public final class RegExUtil {
     }
 
     /**
-     * Removes each substring of the source string that matches the given regular expression.
-     * This is equivalent to {@code replaceAll(source, regex, "")}.
+     * Finds the first match of the given regular expression in the specified input text.
+     * <p>
+     * This is a convenience method that compiles the regex string into a {@link Pattern}
+     * and then searches for the first occurrence. If a match is found, the matched substring
+     * is returned. If no match is found, {@code null} is returned.
+     * </p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Examples:</b></p>
      * <pre>{@code
-     * String result = RegExUtil.removeAll("Hello123World456", "\\d+");
-     * // Returns: "HelloWorld"
+     * String result = RegExUtil.findFirst("abc123xyz456", "\\d+");
+     * // Returns: "123"
+     *
+     * String email = RegExUtil.findFirst("Contact: john@example.com or jane@test.org", 
+     *                                   "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+     * // Returns: "john@example.com"
+     *
+     * String noResult = RegExUtil.findFirst("abc", "\\d+");
+     * // Returns: null (pattern not found)
+     *
+     * String word = RegExUtil.findFirst("", "\\b\\w+\\b");
+     * // Returns: null (empty string has no matches)
+     *
+     * String nullSource = RegExUtil.findFirst(null, "\\d+");
+     * // Returns: null (null source treated as empty)
      * }</pre>
      *
-     * @param source source string to remove from, which may be null
-     * @param regex the regular expression to which this string is to be matched
-     * @return the source string with any removes processed,  or an empty String {@code ""} if the input source string is {@code null}.
-     * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
-     * @see #replaceAll(String, String, String)
-     * @see String#replaceAll(String, String)
+     * <p><b>Performance Note:</b> If you need to use the same regex pattern multiple times,
+     * consider using {@link #findFirst(String, Pattern)} instead to avoid recompiling
+     * the pattern on each call.</p>
+     *
+     * @param source the input text to search; may be {@code null} (treated as empty string)
+     * @param regex the regular expression string to match; must not be {@code null} or empty
+     * @return the first matched substring, or {@code null} if no match is found
+     * @throws IllegalArgumentException if {@code regex} is {@code null} or empty
+     * @see #findFirst(String, Pattern)
+     * @see #findLast(String, String)
+     * @see #find(String, String)
+     * @see #matchResults(String, String)
+     * @see Pattern#compile(String)
+     * @see Matcher#find()
+     * @see Matcher#group()
      */
-    public static String removeAll(final String source, final String regex) throws IllegalArgumentException {
-        return replaceAll(source, regex, Strings.EMPTY);
+    public static String findFirst(final String source, final String regex) {
+        N.checkArgNotEmpty(regex, cs.regex);
+
+        return findFirst(source, Pattern.compile(regex));
     }
 
     /**
-     * Removes each substring of the source string that matches the given regular expression pattern.
-     * This is equivalent to {@code replaceAll(source, pattern, "")}.
+     * Finds the first match of the given {@link Pattern} in the specified input text.
+     * <p>
+     * This method searches through the input string to find the first occurrence that matches
+     * the provided regular expression pattern. If a match is found, the matched substring is
+     * returned. If no match is found, {@code null} is returned.
+     * </p> 
      *
-     * <p>Example usage:</p>
+     * <p><b>Examples:</b></p>
      * <pre>{@code
-     * String result = RegExUtil.removeAll("Hello   World", RegExUtil.WHITESPACE_FINDER);
-     * // Returns: "HelloWorld"
+     * Pattern digitPattern = Pattern.compile("\\d+");
+     * String result = RegExUtil.findFirst("abc123xyz456", digitPattern);
+     * // Returns: "123"
+     *
+     * Pattern emailPattern = Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+     * String email = RegExUtil.findFirst("Contact: john@example.com or jane@test.org", emailPattern);
+     * // Returns: "john@example.com"
+     *
+     * Pattern wordPattern = Pattern.compile("\\b\\w+\\b");
+     * String word = RegExUtil.findFirst("", wordPattern);
+     * // Returns: null (empty string has no matches)
+     *
+     * Pattern noMatch = Pattern.compile("xyz");
+     * String noResult = RegExUtil.findFirst("abc123", noMatch);
+     * // Returns: null (pattern not found)
+     * String nullSource = RegExUtil.findFirst(null, digitPattern);
+     * // Returns: null (null source treated as empty)
      * }</pre>
      *
-     * @param source source string to remove from, which may be null
-     * @param pattern the regular expression to which this string is to be matched
-     * @return the source string with any removes processed, or an empty String {@code ""} if the input source string is {@code null}.
-     * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see #replaceAll(String, Pattern, String)
-     * @see java.util.regex.Matcher#replaceAll(String)
+     * <p><b>Performance Note:</b> This method is more efficient than {@link #find(String, String)}
+     * when you need both to check for a match and retrieve the matched text, as it avoids
+     * recompiling the pattern and performs the search in a single operation.</p>
+     *
+     * @param source the input text to search; may be {@code null} (treated as empty string)
+     * @param pattern the compiled regex pattern to match; must not be {@code null}
+     * @return the first matched substring, or {@code null} if no match is found
+     * @throws IllegalArgumentException if {@code pattern} is {@code null}
+     * @see #findLast(String, Pattern)
+     * @see #find(String, Pattern)
+     * @see #matchResults(String, Pattern)
+     * @see Matcher#find()
+     * @see Matcher#group()
+     * @see Pattern#compile(String)
      */
-    public static String removeAll(final String source, final Pattern pattern) throws IllegalArgumentException {
-        return replaceAll(source, pattern, Strings.EMPTY);
+    public static String findFirst(final String source, final Pattern pattern) {
+        N.checkArgNotNull(pattern, cs.pattern);
+
+        Matcher matcher = pattern.matcher(checkSourceString(source));
+        return matcher.find() ? matcher.group() : null;
+    }
+
+    /**
+     * Finds the last match of the given regular expression in the specified input text.
+     * <p>
+     * This is a convenience method that compiles the regex string into a {@link Pattern}
+     * and then searches for the last occurrence. It iterates through all matches and returns
+     * the final one found. If no match is found, {@code null} is returned.
+     * </p>
+     *
+     * <p><b>Examples:</b></p>
+     * <pre>{@code
+     * String result = RegExUtil.findLast("abc123xyz456pqr789", "\\d+");
+     * // Returns: "789"
+     *
+     * String word = RegExUtil.findLast("hello world java", "\\b\\w+\\b");
+     * // Returns: "java"
+     *
+     * String email = RegExUtil.findLast("Contact: john@example.com or jane@test.org",
+     *                                  "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+     * // Returns: "jane@test.org"
+     *
+     * String noResult = RegExUtil.findLast("abc", "\\d+");
+     * // Returns: null (pattern not found)
+     *
+     * String nullSource = RegExUtil.findLast(null, "\\d+");
+     * // Returns: null (null source treated as empty)
+     *
+     * String empty = RegExUtil.findLast("", "\\w+");
+     * // Returns: null (empty string has no matches)
+     * }</pre>
+     *
+     * <p><b>Performance Note:</b> If you need to use the same regex pattern multiple times,
+     * consider using {@link #findLast(String, Pattern)} instead to avoid recompiling
+     * the pattern on each call. This method iterates through all matches to find the last one,
+     * so it may be less efficient than {@link #findFirst(String, String)} for very long strings.</p>
+     *
+     * @param source the input text to search; may be {@code null} (treated as empty string)
+     * @param regex the regular expression string to match; must not be {@code null} or empty
+     * @return the last matched substring, or {@code null} if no match is found
+     * @throws IllegalArgumentException if {@code regex} is {@code null} or empty
+     * @see #findLast(String, Pattern)
+     * @see #findFirst(String, String)
+     * @see #find(String, String)
+     * @see #matchResults(String, String)
+     * @see Pattern#compile(String)
+     * @see Matcher#find()
+     * @see Matcher#group()
+     */
+    public static String findLast(final String source, final String regex) {
+        N.checkArgNotEmpty(regex, cs.regex);
+
+        return findLast(source, Pattern.compile(regex));
+    }
+
+    /**
+     * Finds the last match of the given {@link Pattern} in the specified input text.
+     * <p>
+     * This method searches through the input string to find the last occurrence that matches
+     * the provided regular expression pattern. It iterates through all matches and returns
+     * the final one found. If no match is found, {@code null} is returned.
+     * </p>
+     *
+     * <p><b>Examples:</b></p>
+     * <pre>{@code
+     * Pattern digitPattern = Pattern.compile("\\d+");
+     * String result = RegExUtil.findLast("abc123xyz456pqr789", digitPattern);
+     * // Returns: "789"
+     *
+     * Pattern wordPattern = Pattern.compile("\\b\\w+\\b");
+     * String word = RegExUtil.findLast("hello world java", wordPattern);
+     * // Returns: "java"
+     *
+     * Pattern emailPattern = Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+     * String email = RegExUtil.findLast("Contact: john@example.com or jane@test.org", emailPattern);
+     * // Returns: "jane@test.org"
+     *
+     * Pattern noMatch = Pattern.compile("xyz");
+     * String noResult = RegExUtil.findLast("abc123", noMatch);
+     * // Returns: null (pattern not found)
+     *
+     * String nullSource = RegExUtil.findLast(null, digitPattern);
+     * // Returns: null (null source treated as empty)
+     * }</pre>
+     *
+     * <p><b>Performance Note:</b> This method iterates through all matches in the string
+     * to find the last one, so it may be less efficient than {@link #findFirst(String, Pattern)}
+     * for very long strings with many matches. For better performance with large texts,
+     * consider using alternative approaches if you only need to check for existence.</p>
+     *
+     * @param source the input text to search; may be {@code null} (treated as empty string)
+     * @param pattern the compiled regex pattern to match; must not be {@code null}
+     * @return the last matched substring, or {@code null} if no match is found
+     * @throws IllegalArgumentException if {@code pattern} is {@code null}
+     * @see #findFirst(String, Pattern)
+     * @see #find(String, Pattern)
+     * @see #matchResults(String, Pattern)
+     * @see Matcher#find()
+     * @see Matcher#group()
+     * @see Pattern#compile(String)
+     */
+    public static String findLast(final String source, final Pattern pattern) {
+        N.checkArgNotNull(pattern, cs.pattern);
+
+        Matcher matcher = pattern.matcher(checkSourceString(source));
+        String lastMatch = null;
+
+        while (matcher.find()) {
+            lastMatch = matcher.group();
+        }
+
+        return lastMatch;
     }
 
     /**
@@ -1050,163 +1451,45 @@ public final class RegExUtil {
     }
 
     /**
-     * Replaces each substring of the source string that matches the given regular expression
-     * with the given replacement.
-     *
-     * This method is a {@code null} safe equivalent to:
-     * <ul>
-     *  <li>{@code source.replaceAll(regex, replacement)}</li>
-     *  <li>{@code Pattern.compile(regex).matcher(checkSourceString(source)).replaceAll(replacement)}</li>
-     * </ul>
+     * Removes each substring of the source string that matches the given regular expression.
+     * This is equivalent to {@code replaceAll(source, regex, "")}.
      *
      * <p>Example usage:</p>
      * <pre>{@code
-     * String result = RegExUtil.replaceAll("Hello   World", "\\s+", " ");
-     * // Returns: "Hello World"
+     * String result = RegExUtil.removeAll("Hello123World456", "\\d+");
+     * // Returns: "HelloWorld"
      * }</pre>
      *
-     * @param source source string to search and replace in, which may be null
+     * @param source source string to remove from, which may be null
      * @param regex the regular expression to which this string is to be matched
-     * @param replacement the string to be substituted for each match
-     * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
+     * @return the source string with any removes processed,  or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
+     * @see #replaceAll(String, String, String)
      * @see String#replaceAll(String, String)
      */
-    public static String replaceAll(final String source, final String regex, final String replacement) throws IllegalArgumentException {
-        N.checkArgNotEmpty(regex, cs.regex);
-
-        return replaceAll(source, Pattern.compile(regex), Strings.nullToEmpty(replacement));
+    public static String removeAll(final String source, final String regex) throws IllegalArgumentException {
+        return replaceAll(source, regex, Strings.EMPTY);
     }
 
     /**
-     * Replaces each substring of the source string that matches the given regular expression
-     * with the result of applying the given function to the matched substring.
+     * Removes each substring of the source string that matches the given regular expression pattern.
+     * This is equivalent to {@code replaceAll(source, pattern, "")}.
      *
      * <p>Example usage:</p>
      * <pre>{@code
-     * String result = RegExUtil.replaceAll("hello world", "\\b\\w", match -> match.toUpperCase());
-     * // Returns: "Hello World"
+     * String result = RegExUtil.removeAll("Hello   World", RegExUtil.WHITESPACE_FINDER);
+     * // Returns: "HelloWorld"
      * }</pre>
      *
-     * @param source source string to search and replace in, which may be null
-     * @param regex the regular expression to which this string is to be matched
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
-     * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
-     * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
-     * @see String#replaceAll(String, String)
-     */
-    public static String replaceAll(final String source, final String regex, final Function<String, String> replacer) throws IllegalArgumentException {
-        N.checkArgNotEmpty(regex, cs.regex);
-
-        return replaceAll(source, Pattern.compile(regex), replacer);
-    }
-
-    /**
-     * Replaces each substring of the source string that matches the given regular expression
-     * with the result of applying the given function to the start and end indices of the match.
-     *
-     * <p>Example usage:</p>
-     * <pre>{@code
-     * String result = RegExUtil.replaceAll("abc123def", "\\d+", (start, end) -> "[" + start + "-" + end + "]");
-     * // Returns: "abc[3-6]def"
-     * }</pre>
-     *
-     * @param source source string to search and replace in, which may be null
-     * @param regex the regular expression to which this string is to be matched
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
-     * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
-     * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
-     * @see String#replaceAll(String, String)
-     */
-    public static String replaceAll(final String source, final String regex, final IntBiFunction<String> replacer) throws IllegalArgumentException {
-        N.checkArgNotEmpty(regex, cs.regex);
-
-        return replaceAll(source, Pattern.compile(regex), replacer);
-    }
-
-    /**
-     * Replaces each substring of the source string that matches the given regular expression pattern with the given replacement.
-     * This method is more efficient than {@link #replaceAll(String, String, String)} when using the same pattern multiple times.
-     *
-     * <p>Example usage:</p>
-     * <pre>{@code
-     * Pattern pattern = Pattern.compile("\\s+");
-     * String result = RegExUtil.replaceAll("Hello   World", pattern, " ");
-     * // Returns: "Hello World"
-     * }</pre>
-     *
-     * @param source source string to search and replace in, which may be null
-     * @param pattern the regular expression pattern to which this string is to be matched
-     * @param replacement the string to be substituted for each match
-     * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
+     * @param source source string to remove from, which may be null
+     * @param pattern the regular expression to which this string is to be matched
+     * @return the source string with any removes processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see #replaceAll(String, Pattern, String)
      * @see java.util.regex.Matcher#replaceAll(String)
-     * @see java.util.regex.Pattern
      */
-    public static String replaceAll(final String source, final Pattern pattern, final String replacement) throws IllegalArgumentException {
-        N.checkArgNotNull(pattern, cs.pattern);
-
-        if (Strings.isEmpty(source)) {
-            return Strings.EMPTY;
-        }
-
-        return pattern.matcher(checkSourceString(source)).replaceAll(Strings.nullToEmpty(replacement));
-    }
-
-    /**
-     * Replaces each substring of the source string that matches the given regular expression pattern
-     * with the result of applying the given function to the matched substring.
-     *
-     * <p>Example usage:</p>
-     * <pre>{@code
-     * Pattern pattern = Pattern.compile("\\b\\w");
-     * String result = RegExUtil.replaceAll("hello world", pattern, match -> match.toUpperCase());
-     * // Returns: "Hello World"
-     * }</pre>
-     *
-     * @param source source string to search and replace in, which may be null
-     * @param pattern the regular expression to which this string is to be matched
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
-     * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
-     * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see String#replaceAll(String, String)
-     */
-    public static String replaceAll(final String source, final Pattern pattern, final Function<String, String> replacer) throws IllegalArgumentException {
-        N.checkArgNotNull(pattern, cs.pattern);
-
-        if (Strings.isEmpty(source)) {
-            return Strings.EMPTY;
-        }
-
-        return pattern.matcher(checkSourceString(source)).replaceAll(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
-    }
-
-    /**
-     * Replaces each substring of the source string that matches the given regular expression pattern
-     * with the result of applying the given function to the start and end indices of the match.
-     *
-     * <p>Example usage:</p>
-     * <pre>{@code
-     * Pattern pattern = Pattern.compile("\\d+");
-     * String result = RegExUtil.replaceAll("abc123def", pattern, (start, end) -> "[" + start + "-" + end + "]");
-     * // Returns: "abc[3-6]def"
-     * }</pre>
-     *
-     * @param source source string to search and replace in, which may be null
-     * @param pattern the regular expression to which this string is to be matched
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
-     * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
-     * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see String#replaceAll(String, String)
-     */
-    public static String replaceAll(final String source, final Pattern pattern, final IntBiFunction<String> replacer) throws IllegalArgumentException {
-        N.checkArgNotNull(pattern, cs.pattern);
-
-        if (Strings.isEmpty(source)) {
-            return Strings.EMPTY;
-        }
-
-        return pattern.matcher(checkSourceString(source)).replaceAll(matcher -> replacer.apply(matcher.start(), matcher.end()));
+    public static String removeAll(final String source, final Pattern pattern) throws IllegalArgumentException {
+        return replaceAll(source, pattern, Strings.EMPTY);
     }
 
     /**
@@ -1573,6 +1856,166 @@ public final class RegExUtil {
     }
 
     /**
+     * Replaces each substring of the source string that matches the given regular expression
+     * with the given replacement.
+     *
+     * This method is a {@code null} safe equivalent to:
+     * <ul>
+     *  <li>{@code source.replaceAll(regex, replacement)}</li>
+     *  <li>{@code Pattern.compile(regex).matcher(checkSourceString(source)).replaceAll(replacement)}</li>
+     * </ul>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.replaceAll("Hello   World", "\\s+", " ");
+     * // Returns: "Hello World"
+     * }</pre>
+     *
+     * @param source source string to search and replace in, which may be null
+     * @param regex the regular expression to which this string is to be matched
+     * @param replacement the string to be substituted for each match
+     * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
+     * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
+     * @see String#replaceAll(String, String)
+     */
+    public static String replaceAll(final String source, final String regex, final String replacement) throws IllegalArgumentException {
+        N.checkArgNotEmpty(regex, cs.regex);
+
+        return replaceAll(source, Pattern.compile(regex), Strings.nullToEmpty(replacement));
+    }
+
+    /**
+     * Replaces each substring of the source string that matches the given regular expression
+     * with the result of applying the given function to the matched substring.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.replaceAll("hello world", "\\b\\w", match -> match.toUpperCase());
+     * // Returns: "Hello World"
+     * }</pre>
+     *
+     * @param source source string to search and replace in, which may be null
+     * @param regex the regular expression to which this string is to be matched
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
+     * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
+     * @see String#replaceAll(String, String)
+     */
+    public static String replaceAll(final String source, final String regex, final Function<String, String> replacer) throws IllegalArgumentException {
+        N.checkArgNotEmpty(regex, cs.regex);
+
+        return replaceAll(source, Pattern.compile(regex), replacer);
+    }
+
+    /**
+     * Replaces each substring of the source string that matches the given regular expression
+     * with the result of applying the given function to the start and end indices of the match.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * String result = RegExUtil.replaceAll("abc123def", "\\d+", (start, end) -> "[" + start + "-" + end + "]");
+     * // Returns: "abc[3-6]def"
+     * }</pre>
+     *
+     * @param source source string to search and replace in, which may be null
+     * @param regex the regular expression to which this string is to be matched
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
+     * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
+     * @see String#replaceAll(String, String)
+     */
+    public static String replaceAll(final String source, final String regex, final IntBiFunction<String> replacer) throws IllegalArgumentException {
+        N.checkArgNotEmpty(regex, cs.regex);
+
+        return replaceAll(source, Pattern.compile(regex), replacer);
+    }
+
+    /**
+     * Replaces each substring of the source string that matches the given regular expression pattern with the given replacement.
+     * This method is more efficient than {@link #replaceAll(String, String, String)} when using the same pattern multiple times.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\s+");
+     * String result = RegExUtil.replaceAll("Hello   World", pattern, " ");
+     * // Returns: "Hello World"
+     * }</pre>
+     *
+     * @param source source string to search and replace in, which may be null
+     * @param pattern the regular expression pattern to which this string is to be matched
+     * @param replacement the string to be substituted for each match
+     * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see java.util.regex.Matcher#replaceAll(String)
+     * @see java.util.regex.Pattern
+     */
+    public static String replaceAll(final String source, final Pattern pattern, final String replacement) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, cs.pattern);
+
+        if (Strings.isEmpty(source)) {
+            return Strings.EMPTY;
+        }
+
+        return pattern.matcher(checkSourceString(source)).replaceAll(Strings.nullToEmpty(replacement));
+    }
+
+    /**
+     * Replaces each substring of the source string that matches the given regular expression pattern
+     * with the result of applying the given function to the matched substring.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\b\\w");
+     * String result = RegExUtil.replaceAll("hello world", pattern, match -> match.toUpperCase());
+     * // Returns: "Hello World"
+     * }</pre>
+     *
+     * @param source source string to search and replace in, which may be null
+     * @param pattern the regular expression to which this string is to be matched
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see String#replaceAll(String, String)
+     */
+    public static String replaceAll(final String source, final Pattern pattern, final Function<String, String> replacer) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, cs.pattern);
+
+        if (Strings.isEmpty(source)) {
+            return Strings.EMPTY;
+        }
+
+        return pattern.matcher(checkSourceString(source)).replaceAll(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
+    }
+
+    /**
+     * Replaces each substring of the source string that matches the given regular expression pattern
+     * with the result of applying the given function to the start and end indices of the match.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\d+");
+     * String result = RegExUtil.replaceAll("abc123def", pattern, (start, end) -> "[" + start + "-" + end + "]");
+     * // Returns: "abc[3-6]def"
+     * }</pre>
+     *
+     * @param source source string to search and replace in, which may be null
+     * @param pattern the regular expression to which this string is to be matched
+     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see String#replaceAll(String, String)
+     */
+    public static String replaceAll(final String source, final Pattern pattern, final IntBiFunction<String> replacer) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, cs.pattern);
+
+        if (Strings.isEmpty(source)) {
+            return Strings.EMPTY;
+        }
+
+        return pattern.matcher(checkSourceString(source)).replaceAll(matcher -> replacer.apply(matcher.start(), matcher.end()));
+    }
+
+    /**
      * Counts the number of occurrences of the specified pattern in the given string.
      *
      * <p>Example usage:</p>
@@ -1761,7 +2204,8 @@ public final class RegExUtil {
      *
      * @param source the string to be split, may be {@code null} or empty
      * @param regex the regular expression to split by
-     * @return an array of strings computed by splitting the source string around matches of the given regular expression
+     * @return an array of strings computed by splitting the source string around matches of the given regular expression.
+     *         An empty array is returned if the input source string is {@code null}, or an array containing an empty string if the input source string is empty
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
      * @see String#split(String)
      * @see Splitter#with(Pattern)
@@ -1793,7 +2237,8 @@ public final class RegExUtil {
      * @param source the string to be split, may be {@code null} or empty
      * @param regex the regular expression to split by
      * @param limit the result threshold. A non-positive limit indicates no limit.
-     * @return an array of strings computed by splitting the source string around matches of the given regular expression
+     * @return an array of strings computed by splitting the source string around matches of the given regular expression.
+     *         An empty array is returned if the input source string is {@code null}, or an array containing an empty string if the input source string is empty
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
      * @see String#split(String, int)
      * @see Splitter#with(Pattern)
@@ -1825,7 +2270,8 @@ public final class RegExUtil {
      *
      * @param source the string to be split, may be {@code null} or empty
      * @param pattern the regular expression pattern to split by
-     * @return an array of strings computed by splitting the source string around matches of the given regular expression
+     * @return an array of strings computed by splitting the source string around matches of the given regular expression.
+     *         An empty array is returned if the input source string is {@code null}, or an array containing an empty string if the input source string is empty
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see String#split(String)
      * @see Splitter#with(Pattern)
@@ -1858,7 +2304,8 @@ public final class RegExUtil {
      * @param source the string to be split, may be {@code null} or empty
      * @param pattern the regular expression pattern to split by
      * @param limit the result threshold. A non-positive limit indicates no limit.
-     * @return an array of strings computed by splitting the source string around matches of the given regular expression
+     * @return an array of strings computed by splitting the source string around matches of the given regular expression.
+     *         An empty array is returned if the input source string is {@code null}, or an array containing an empty string if the input source string is empty
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see String#split(String, int)
      * @see Splitter#with(Pattern)
@@ -1889,7 +2336,8 @@ public final class RegExUtil {
      * }</pre>
      *
      * @param source the string to be split into lines, may be {@code null} or empty
-     * @return an array of strings computed by splitting the source string into lines 
+     * @return an array of strings computed by splitting the source string into lines.
+     *         An empty array is returned if the input source string is {@code null}, or an array containing an empty string if the input source string is empty
      * @see #splitToLines(String, int)
      * @see Pattern#split(CharSequence)
      */
@@ -1917,7 +2365,8 @@ public final class RegExUtil {
      *
      * @param source the string to be split into lines, may be {@code null} or empty
      * @param limit the result threshold. A non-positive limit indicates no limit.
-     * @return an array of strings computed by splitting the source string into lines
+     * @return an array of strings computed by splitting the source string into lines.
+     *         An empty array is returned if the input source string is {@code null}, or an array containing an empty string if the input source string is empty
      * @see #splitToLines(String)
      * @see Pattern#split(CharSequence, int)
      */

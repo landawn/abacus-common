@@ -7131,23 +7131,6 @@ public final class RowDataset implements Dataset, Cloneable {
         }
     }
 
-    //    private void initNewColumnListForRightJoin(final List<String> newColumnNameList, final List<List<Object>> newColumnList, final Dataset right,
-    //            final List<String> leftColumnNames, final List<String> rightColumnNames) {
-    //        for (String leftColumnName : leftColumnNames) {
-    //            if (right.containsColumn(leftColumnName)) {
-    //                throw new IllegalArgumentException(
-    //                        "The column in this Dataset: " + leftColumnName + " is already included in right Dataset: " + rightColumnNames);
-    //            }
-    //
-    //            newColumnList.add(new ArrayList<>());
-    //        }
-    //
-    //        for (String rightColumnName : rightColumnNames) {
-    //            newColumnNameList.add(rightColumnName);
-    //            newColumnList.add(new ArrayList<>());
-    //        }
-    //    }
-
     private List<String> getLeftColumnNamesForRightJoin() { // NOSONAR
         // final List<String> leftColumnNames = new ArrayList<>(_columnNameList);
 
@@ -8704,55 +8687,6 @@ public final class RowDataset implements Dataset, Cloneable {
 
     //    @Deprecated
 
-    //    @Override
-    //    public <T> List<List<T>> split(final int size, final Class<? extends T> rowType) {
-    //        return split(_columnNameList, size, rowType);
-    //    }
-    //
-    //    @Override
-    //    public <T> List<List<T>> split(final Collection<String> columnNames, final int size, final Class<? extends T> rowType) {
-    //        return split(columnNames, 0, size(), size, rowType);
-    //    }
-    //
-    //    @Override
-    //    public <T> List<List<T>> split(final int fromRowIndex, final int toRowIndex, final int size, final Class<? extends T> rowType) {
-    //        return split(_columnNameList, fromRowIndex, toRowIndex, size, rowType);
-    //    }
-    //
-    //    @Override
-    //    public <T> List<List<T>> split(final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex,
-    //            final int size, final Class<? extends T> rowType) {
-    //        checkRowIndex(fromRowIndex, toRowIndex);
-    //
-    //        final List<T> list = this.toList(columnNames, fromRowIndex, toRowIndex, rowType);
-    //
-    //        return N.split(list, size);
-    //    }
-    //
-    //    @Override
-    //    public <T> List<List<T>> split(int size, IntFunction<? extends T> rowSupplier) {
-    //        return split(_columnNameList, size, rowSupplier);
-    //    }
-    //
-    //    @Override
-    //    public <T> List<List<T>> split(Collection<String> columnNames, int size, IntFunction<? extends T> rowSupplier) {
-    //        return split(columnNames, 0, size(), size, rowSupplier);
-    //    }
-    //
-    //    @Override
-    //    public <T> List<List<T>> split(int fromRowIndex, int toRowIndex, int size, IntFunction<? extends T> rowSupplier) {
-    //        return split(_columnNameList, fromRowIndex, toRowIndex, size, rowSupplier);
-    //    }
-    //
-    //    @Override
-    //    public <T> List<List<T>> split(Collection<String> columnNames, int fromRowIndex, int toRowIndex, int size, IntFunction<? extends T> rowSupplier) {
-    //        checkRowIndex(fromRowIndex, toRowIndex);
-    //
-    //        final List<T> list = this.toList(columnNames, fromRowIndex, toRowIndex, rowSupplier);
-    //
-    //        return N.split(list, size);
-    //    }
-
     @Override
     public Dataset slice(final Collection<String> columnNames) {
         return slice(0, size(), columnNames);
@@ -8805,33 +8739,6 @@ public final class RowDataset implements Dataset, Cloneable {
         return new PaginatedDataset(columnNames, pageSize);
     }
 
-    //    @SuppressWarnings("rawtypes")
-    //    @Override
-    //    public <T extends Comparable<? super T>> Map<String, T> percentiles(final String columnName) {
-    //        if (size() == 0) {
-    //            throw new RuntimeException("The size of dataset is 0");
-    //        }
-    //
-    //        final Object[] columns = getColumn(columnName).toArray();
-    //
-    //        N.sort(columns);
-    //
-    //        return (Map) N.percentiles(columns);
-    //    }
-    //
-    //    @Override
-    //    public <T> Map<String, T> percentiles(final String columnName, final Comparator<? super T> comparator) {
-    //        if (size() == 0) {
-    //            throw new RuntimeException("The size of dataset is 0");
-    //        }
-    //
-    //        final T[] columns = (T[]) getColumn(columnName).toArray();
-    //
-    //        N.sort(columns, comparator);
-    //
-    //        return N.percentiles(columns);
-    //    }
-
     @Override
     public <T> Stream<T> stream(final String columnName) {
         return stream(0, size(), columnName);
@@ -8843,33 +8750,6 @@ public final class RowDataset implements Dataset, Cloneable {
 
         return (Stream<T>) Stream.of(_columnList.get(checkColumnName(columnName)), fromRowIndex, toRowIndex);
     }
-
-    //    @SuppressWarnings("rawtypes")
-    //    @Override
-    //    public <T extends Comparable<? super T>> Map<String, T> percentiles(final String columnName) {
-    //        if (size() == 0) {
-    //            throw new RuntimeException("The size of dataset is 0");
-    //        }
-    //
-    //        final Object[] columns = getColumn(columnName).toArray();
-    //
-    //        N.sort(columns);
-    //
-    //        return (Map) N.percentiles(columns);
-    //    }
-    //
-    //    @Override
-    //    public <T> Map<String, T> percentiles(final String columnName, final Comparator<? super T> comparator) {
-    //        if (size() == 0) {
-    //            throw new RuntimeException("The size of dataset is 0");
-    //        }
-    //
-    //        final T[] columns = (T[]) getColumn(columnName).toArray();
-    //
-    //        N.sort(columns, comparator);
-    //
-    //        return N.percentiles(columns);
-    //    }
 
     @Override
     public <T> Stream<T> stream(final Class<? extends T> rowType) {
@@ -9219,29 +9099,6 @@ public final class RowDataset implements Dataset, Cloneable {
         });
     }
 
-    //    @Override
-    //    public <T> T getProperty(final String propName) {
-    //        return (T) (_properties == null ? null : _properties.get(propName));
-    //    }
-    //
-    //    @Override
-    //    public <T> T setProperty(final String propName, final Object propValue) {
-    //        if (_properties == null) {
-    //            _properties = new Properties<String, Object>();
-    //        }
-    //
-    //        return (T) _properties.put(propName, propValue);
-    //    }
-    //
-    //    @Override
-    //    public <T> T removeProperty(final String propName) {
-    //        if (_properties == null) {
-    //            return null;
-    //        }
-    //
-    //        return (T) _properties.remove(propName);
-    //    }
-
     @Override
     public <R, E extends Exception> R apply(final Throwables.Function<? super Dataset, ? extends R, E> func) throws E {
         return func.apply(this);
@@ -9344,29 +9201,6 @@ public final class RowDataset implements Dataset, Cloneable {
             return result;
         }
     }
-
-    //    @Override
-    //    public <T> T getProperty(final String propName) {
-    //        return (T) (_properties == null ? null : _properties.get(propName));
-    //    }
-    //
-    //    @Override
-    //    public <T> T setProperty(final String propName, final Object propValue) {
-    //        if (_properties == null) {
-    //            _properties = new Properties<String, Object>();
-    //        }
-    //
-    //        return (T) _properties.put(propName, propValue);
-    //    }
-    //
-    //    @Override
-    //    public <T> T removeProperty(final String propName) {
-    //        if (_properties == null) {
-    //            return null;
-    //        }
-    //
-    //        return (T) _properties.remove(propName);
-    //    }
 
     @Override
     public void println() {

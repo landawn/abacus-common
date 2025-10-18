@@ -4,8 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -38,7 +38,7 @@ public class WSSecurityUtil2025Test extends TestBase {
 
         Assertions.assertNotNull(nonce1);
         Assertions.assertNotNull(nonce2);
-        Assertions.assertFalse(N.equals(nonce1, nonce2), "Two consecutive nonces should be different");
+        Assertions.assertFalse(CommonUtil.equals(nonce1, nonce2), "Two consecutive nonces should be different");
     }
 
     @Test
@@ -86,7 +86,7 @@ public class WSSecurityUtil2025Test extends TestBase {
         byte[] digest1 = WSSecurityUtil.generateDigest("input1".getBytes(StandardCharsets.UTF_8));
         byte[] digest2 = WSSecurityUtil.generateDigest("input2".getBytes(StandardCharsets.UTF_8));
 
-        Assertions.assertFalse(N.equals(digest1, digest2), "Different inputs should produce different digests");
+        Assertions.assertFalse(CommonUtil.equals(digest1, digest2), "Different inputs should produce different digests");
     }
 
     @Test

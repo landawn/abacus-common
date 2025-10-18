@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -1043,9 +1044,9 @@ public final class Numbers {
      * </code>
      * </pre>
      *
-     * @param x The float value to be formatted.
-     * @param decimalFormat The decimal format pattern to be used for formatting.
-     * @return A string representation of the float value formatted according to the provided decimal format.
+     * @param x the float value to be formatted.
+     * @param decimalFormat the decimal format pattern to be used for formatting.
+     * @return a string representation of the float value formatted according to the provided decimal format.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see java.text.DecimalFormat#format(double)
      */
@@ -1080,9 +1081,9 @@ public final class Numbers {
      * </code>
      * </pre>
      *
-     * @param x The Float value to be formatted. If {@code null}, it will be treated as 0f.
-     * @param decimalFormat The decimal format pattern to be used for formatting.
-     * @return A string representation of the Float value formatted according to the provided decimal format.
+     * @param x the Float value to be formatted. If {@code null}, it will be treated as 0f.
+     * @param decimalFormat the decimal format pattern to be used for formatting.
+     * @return a string representation of the Float value formatted according to the provided decimal format.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see java.text.DecimalFormat#format(double)
      */
@@ -1120,9 +1121,9 @@ public final class Numbers {
      * </code>
      * </pre>
      *
-     * @param x The double value to be formatted.
-     * @param decimalFormat The decimal format pattern to be used for formatting.
-     * @return A string representation of the double value formatted according to the provided decimal format.
+     * @param x the double value to be formatted.
+     * @param decimalFormat the decimal format pattern to be used for formatting.
+     * @return a string representation of the double value formatted according to the provided decimal format.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see java.text.DecimalFormat#format(double)
      */
@@ -1157,9 +1158,9 @@ public final class Numbers {
      * </code>
      * </pre>
      *
-     * @param x The Double value to be formatted. If {@code null}, it will be treated as 0d.
-     * @param decimalFormat The decimal format pattern to be used for formatting.
-     * @return A string representation of the Double value formatted according to the provided decimal format.
+     * @param x the Double value to be formatted. If {@code null}, it will be treated as 0d.
+     * @param decimalFormat the decimal format pattern to be used for formatting.
+     * @return a string representation of the Double value formatted according to the provided decimal format.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see java.text.DecimalFormat#format(double)
      */
@@ -1180,29 +1181,72 @@ public final class Numbers {
     }
 
     /**
-     * Extracts the first integer value from the given string. If no integer value is found, it returns 0. 
+     * Extracts the first integer value found in the given string.
      *
-     * @param str The string to extract the integer value from.
-     * @return The extracted integer value, or 0 if no integer value is found.
+     * <p>This method searches through the provided string to find the first occurrence of an integer value.
+     * It uses a regular expression pattern to identify integer patterns, including negative numbers.
+     * If no integer is found in the string, an empty OptionalInt is returned.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Numbers.extractFirstInt("abc123def");     // returns OptionalInt.of(123)
+     * Numbers.extractFirstInt("price: $45.99"); // returns OptionalInt.of(45)
+     * Numbers.extractFirstInt("total: -10");    // returns OptionalInt.of(-10)
+     * Numbers.extractFirstInt("no numbers");    // returns OptionalInt.empty()
+     * Numbers.extractFirstInt("");              // returns OptionalInt.empty()
+     * Numbers.extractFirstInt(null);            // returns OptionalInt.empty()
+     * }</pre>
+     *
+     * @param str the string to search for integer values (may be null or empty)
+     * @return an OptionalInt containing the first integer found in the string,
+     *         or OptionalInt.empty() if no integer is found or if the input string is null/empty
      * @see #extractFirstInt(String, int)
      * @see #extractFirstLong(String)
-     * @see #extractFirstDouble(String)
-     * @see #extractFirstDouble(String, boolean)
      * @see Strings#extractFirstInteger(String)
+     * @see RegExUtil#findFirst(String, Pattern)
+     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#INTEGER_FINDER
      */
-    public static int extractFirstInt(final String str) {
-        return extractFirstInt(str, 0);
+    public static u.OptionalInt extractFirstInt(final String str) {
+        if (Strings.isEmpty(str)) {
+            return u.OptionalInt.empty();
+        }
+
+        final Matcher matcher = RegExUtil.INTEGER_FINDER.matcher(str);
+
+        if (matcher.find()) {
+            return u.OptionalInt.of(Integer.parseInt(matcher.group(1)));
+        }
+
+        return u.OptionalInt.empty();
     }
 
     /**
-     * Extracts the first integer value from the given string. If no integer value is found, it returns the specified default value.
+     * Extracts the first integer value found in the given string, or returns a default value if no integer is found.
      *
-     * @param str The string to extract the integer value from.
-     * @param defaultValue The default value to return if no integer value is found.
-     * @return The extracted integer value, or the specified default value if no integer value is found.
+     * <p>This method searches through the provided string to find the first occurrence of an integer value.
+     * It uses a regular expression pattern to identify integer patterns, including negative numbers.
+     * If no integer is found in the string, the specified default value is returned.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Numbers.extractFirstInt("abc123def", 0);     // returns 123
+     * Numbers.extractFirstInt("price: $45.99", 0); // returns 45
+     * Numbers.extractFirstInt("total: -10", 0);    // returns -10
+     * Numbers.extractFirstInt("no numbers", 0);    // returns 0
+     * Numbers.extractFirstInt("", 0);              // returns 0
+     * Numbers.extractFirstInt(null, 0);            // returns 0
+     * }</pre>
+     *
+     * @param str the string to search for integer values (may be null or empty)
+     * @param defaultValue the value to return if no integer is found in the string
+     * @return the first integer found in the string, or the specified default value if no integer is found or if the input string is null/empty
      * @see #extractFirstInt(String)
-     * @see #extractFirstLong(String)
+     * @see #extractFirstLong(String, long)
      * @see Strings#extractFirstInteger(String)
+     * @see RegExUtil#findFirst(String, Pattern)
+     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#INTEGER_FINDER
      */
     public static int extractFirstInt(final String str, final int defaultValue) {
         if (Strings.isEmpty(str)) {
@@ -1210,6 +1254,7 @@ public final class Numbers {
         }
 
         final Matcher matcher = RegExUtil.INTEGER_FINDER.matcher(str);
+
         if (matcher.find()) {
             return Integer.parseInt(matcher.group(1));
         }
@@ -1218,25 +1263,71 @@ public final class Numbers {
     }
 
     /**
-     * Extracts the first long value from the given string. If no long value is found, it returns 0L.
+     * Extracts the first long value from the given string.
      *
-     * @param str The string to extract the long value from.
-     * @return The extracted long value, or 0L if no long value is found.
-     * @see #extractFirstLong(String, long) 
-     * @see Strings#extractFirstInteger(String) 
+     * <p>This method searches through the provided string to find the first occurrence of a long value.
+     * It uses a regular expression pattern to identify integer patterns, including negative numbers.
+     * If no long value is found in the string, an empty OptionalLong is returned.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Numbers.extractFirstLong("abc123def");           // returns OptionalLong.of(123L)
+     * Numbers.extractFirstLong("price: $4500000000");  // returns OptionalLong.of(4500000000L)
+     * Numbers.extractFirstLong("total: -10000000000"); // returns OptionalLong.of(-10000000000L)
+     * Numbers.extractFirstLong("no numbers");          // returns OptionalLong.empty()
+     * Numbers.extractFirstLong("");                    // returns OptionalLong.empty()
+     * Numbers.extractFirstLong(null);                  // returns OptionalLong.empty()
+     * }</pre>
+     *
+     * @param str the string to extract the long value from.
+     * @return the extracted long value wrapped in an OptionalLong, or an empty OptionalLong if no long value is found or if the input string is null/empty.
+     * @see #extractFirstLong(String, long)
+     * @see #extractFirstInt(String)
+     * @see Strings#extractFirstInteger(String)
+     * @see RegExUtil#findFirst(String, Pattern)
+     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#INTEGER_FINDER
      */
-    public static long extractFirstLong(final String str) {
-        return extractFirstLong(str, 0L);
+    public static u.OptionalLong extractFirstLong(final String str) {
+        if (Strings.isEmpty(str)) {
+            return u.OptionalLong.empty();
+        }
+
+        final Matcher matcher = RegExUtil.INTEGER_FINDER.matcher(str);
+
+        if (matcher.find()) {
+            return u.OptionalLong.of(Long.parseLong(matcher.group(1)));
+        }
+
+        return u.OptionalLong.empty();
     }
 
     /**
-     * Extracts the first long value from the given string. If no long value is found, it returns the specified default value.
+     * Extracts the first long value from the given string, or returns a default value if no long value is found.
      *
-     * @param str The string to extract the long value from.
-     * @param defaultValue The default value to return if no long value is found.
-     * @return The extracted long value, or the specified default value if no long value is found.
+     * <p>This method searches through the provided string to find the first occurrence of a long value.
+     * It uses a regular expression pattern to identify integer patterns, including negative numbers.
+     * If no long value is found in the string, the specified default value is returned.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Numbers.extractFirstLong("abc123def", 0L);           // returns 123L
+     * Numbers.extractFirstLong("price: $4500000000", 0L);  // returns 4500000000L
+     * Numbers.extractFirstLong("total: -10000000000", 0L); // returns -10000000000L
+     * Numbers.extractFirstLong("no numbers", 0L);          // returns 0L
+     * Numbers.extractFirstLong("", 0L);                    // returns 0L
+     * Numbers.extractFirstLong(null, 0L);                  // returns 0L
+     * }</pre>
+     *
+     * @param str the string to extract the long value from.
+     * @param defaultValue the default value to return if no long value is found.
+     * @return the extracted long value, or the specified default value if no long value is found or if the input string is null/empty.
      * @see #extractFirstLong(String)
+     * @see #extractFirstInt(String, int)
      * @see Strings#extractFirstInteger(String)
+     * @see RegExUtil#findFirst(String, Pattern)
+     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#INTEGER_FINDER
      */
     public static long extractFirstLong(final String str, final long defaultValue) {
         if (Strings.isEmpty(str)) {
@@ -1252,53 +1343,110 @@ public final class Numbers {
     }
 
     /**
-     * Extracts the first double value from the given string. If no double value is found, it returns 0.0.
+     * Extracts the first double value from the given string.
      *
-     * @param str The string to extract the double value from.
-     * @return The extracted double value, or 0.0 if no double value is found.
+     * <p>This method searches through the provided string to find the first occurrence of a double value.
+     * It uses a regular expression pattern to identify decimal number patterns. If no double value is found
+     * in the string, an empty OptionalDouble is returned.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Numbers.extractFirstDouble("abc123.45def");         // returns OptionalDouble.of(123.45)
+     * Numbers.extractFirstDouble("value: -0.00123");      // returns OptionalDouble.of(-0.00123)
+     * Numbers.extractFirstDouble("scientific: 1.23e10");  // returns OptionalDouble.of(1.23)
+     * Numbers.extractFirstDouble("no numbers");           // returns OptionalDouble.empty()
+     * Numbers.extractFirstDouble("");                     // returns OptionalDouble.empty()
+     * Numbers.extractFirstDouble(null);                   // returns OptionalDouble.empty()
+     * }</pre>
+     *
+     * @param str the string to extract the double value from.
+     * @return the extracted double value wrapped in an OptionalDouble, or an empty OptionalDouble if no double value is found or if the input string is null/empty.
+     * @see #extractFirstDouble(String, boolean)
      * @see #extractFirstDouble(String, double)
-     * @see #extractFirstDouble(String, double, boolean) 
+     * @see #extractFirstDouble(String, double, boolean)
      * @see Strings#extractFirstDouble(String)
-     * @see Strings#extractFirstDouble(String, boolean)
-     * @see Strings#replaceFirstDouble(String, String)
-     * @see Strings#replaceFirstDouble(String, String, boolean)
+     * @see RegExUtil#findFirst(String, Pattern)
+     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#NUMBER_FINDER
+     * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
-    public static double extractFirstDouble(final String str) {
-        return extractFirstDouble(str, 0.0, false);
+    public static u.OptionalDouble extractFirstDouble(final String str) {
+        return extractFirstDouble(str, false);
     }
 
     /**
-     * Extracts the first double value from the given string. If no double value is found, it returns 0.0.
+     * Extracts the first double value from the given string.
      *
-     * <p>This method is a convenience method that allows you to specify whether to include scientific notation in the search.
-     * If {@code includingCientificNumber} is {@code true}, it will search for both regular and scientific notation numbers.
-     * Otherwise, it will only search for regular numbers.</p>
+     * <p>This method searches through the provided string to find the first occurrence of a double value.
+     * It uses a regular expression pattern to identify decimal number patterns. If {@code includingCientificNumber}
+     * is set to {@code true}, it will also consider scientific notation (e.g., 1.23e10) as valid double values.
+     * If no double value is found in the string, an empty OptionalDouble is returned.</p>
      *
-     * @param str The string to extract the double value from.
-     * @param includingCientificNumber Whether to include scientific notation in the search.
-     * @return The extracted double value, or 0.0 if no double value is found.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Numbers.extractFirstDouble("abc123.45def", false);         // returns OptionalDouble.of(123.45)
+     * Numbers.extractFirstDouble("value: -0.00123", false);      // returns OptionalDouble.of(-0.00123)
+     * Numbers.extractFirstDouble("scientific: 1.23e10", false);  // returns OptionalDouble.of(1.23)
+     * Numbers.extractFirstDouble("scientific: 1.23e10", true);   // returns OptionalDouble.of(1.23e10)
+     * Numbers.extractFirstDouble("no numbers", false);           // returns OptionalDouble.empty()
+     * Numbers.extractFirstDouble("", false);                     // returns OptionalDouble.empty()
+     * Numbers.extractFirstDouble(null, false);                   // returns OptionalDouble.empty()
+     * }</pre>
+     *
+     * @param str the string to extract the double value from.
+     * @param includingCientificNumber whether to include scientific notation in the search for double values.
+     * @return the extracted double value wrapped in an OptionalDouble, or an empty OptionalDouble if no double value is found or if the input string is null/empty.
+     * @see #extractFirstDouble(String)
      * @see #extractFirstDouble(String, double)
-     * @see #extractFirstDouble(String, double, boolean) 
+     * @see #extractFirstDouble(String, double, boolean)
      * @see Strings#extractFirstDouble(String)
-     * @see Strings#extractFirstDouble(String, boolean)
-     * @see Strings#replaceFirstDouble(String, String)
-     * @see Strings#replaceFirstDouble(String, String, boolean)
+     * @see RegExUtil#findFirst(String, Pattern)
+     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#NUMBER_FINDER
+     * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
-    public static double extractFirstDouble(final String str, final boolean includingCientificNumber) {
-        return extractFirstDouble(str, 0.0, includingCientificNumber);
+    public static u.OptionalDouble extractFirstDouble(final String str, final boolean includingCientificNumber) {
+        if (Strings.isEmpty(str)) {
+            return u.OptionalDouble.empty();
+        }
+
+        final Matcher matcher = (includingCientificNumber ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str);
+
+        if (matcher.find()) {
+            return u.OptionalDouble.of(Double.parseDouble(matcher.group(1)));
+        }
+
+        return u.OptionalDouble.empty();
     }
 
     /**
      * Extracts the first double value from the given string. If no double value is found, it returns the specified default value.
      *
-     * @param str The string to extract the double value from.
-     * @param defaultValue The default value to return if no double value is found.
-     * @return The extracted double value, or the specified default value if no double value is found. 
+     * <p>This method searches through the provided string to find the first occurrence of a double value.
+     * It uses a regular expression pattern to identify decimal number patterns. If no double value is found
+     * in the string, the specified default value is returned.</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Numbers.extractFirstDouble("abc123.45def", 0.0);         // returns 123.45
+     * Numbers.extractFirstDouble("value: -0.00123", 0.0);      // returns -0.00123
+     * Numbers.extractFirstDouble("scientific: 1.23e10", 0.0);  // returns 1.23 (only mantissa extracted)
+     * Numbers.extractFirstDouble("no numbers", 0.0);           // returns 0.0
+     * Numbers.extractFirstDouble("", 0.0);                     // returns 0.0
+     * Numbers.extractFirstDouble(null, 0.0);                   // returns 0.0
+     * }</pre>
+     *
+     * @param str the string to extract the double value from.
+     * @param defaultValue the default value to return if no double value is found.
+     * @return the extracted double value, or the specified default value if no double value is found or if the input string is null/empty.
+     * @see #extractFirstDouble(String)
+     * @see #extractFirstDouble(String, boolean)
      * @see #extractFirstDouble(String, double, boolean)
      * @see Strings#extractFirstDouble(String)
-     * @see Strings#extractFirstDouble(String, boolean)
-     * @see Strings#replaceFirstDouble(String, String)
-     * @see Strings#replaceFirstDouble(String, String, boolean)
+     * @see RegExUtil#findFirst(String, Pattern)
+     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#NUMBER_FINDER
+     * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
     public static double extractFirstDouble(final String str, final double defaultValue) {
         return extractFirstDouble(str, defaultValue, false);
@@ -1307,18 +1455,34 @@ public final class Numbers {
     /**
      * Extracts the first double value from the given string. If no double value is found, it returns the specified default value.
      *
-     * <p>This method allows you to specify whether to include scientific notation in the search for double values.
-     * If {@code includingCientificNumber} is {@code true}, it will search for both regular and scientific notation numbers.
-     * Otherwise, it will only search for regular numbers.</p>
+     * <p>This method searches through the provided string to find the first occurrence of a double value.
+     * It uses a regular expression pattern to identify decimal number patterns. If {@code includingCientificNumber}
+     * is set to {@code true}, it will also consider scientific notation (e.g., 1.23e10) as valid double values.
+     * If no double value is found in the string, the specified default value is returned.</p>
      *
-     * @param str The string to extract the double value from.
-     * @param defaultValue The default value to return if no double value is found.
-     * @param includingCientificNumber Whether to include scientific notation in the search.
-     * @return The extracted double value, or the specified default value if no double value is found.
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Numbers.extractFirstDouble("abc123.45def", 0.0, false);         // returns 123.45
+     * Numbers.extractFirstDouble("value: -0.00123", 0.0, false);      // returns -0.00123
+     * Numbers.extractFirstDouble("scientific: 1.23e10", 0.0, false);  // returns 1.23 (only mantissa extracted)
+     * Numbers.extractFirstDouble("scientific: 1.23e10", 0.0, true);   // returns 1.23e10
+     * Numbers.extractFirstDouble("no numbers", 0.0, false);           // returns 0.0
+     * Numbers.extractFirstDouble("", 0.0, false);                     // returns 0.0
+     * Numbers.extractFirstDouble(null, 0.0, false);                   // returns 0.0
+     * }</pre>
+     *
+     * @param str the string to extract the double value from.
+     * @param defaultValue the default value to return if no double value is found.
+     * @param includingCientificNumber whether to include scientific notation in the search for double values.
+     * @return the extracted double value, or the specified default value if no double value is found or if the input string is null/empty.
+     * @see #extractFirstDouble(String)
+     * @see #extractFirstDouble(String, boolean)
+     * @see #extractFirstDouble(String, double)
      * @see Strings#extractFirstDouble(String)
-     * @see Strings#extractFirstDouble(String, boolean)
-     * @see Strings#replaceFirstDouble(String, String)
-     * @see Strings#replaceFirstDouble(String, String, boolean)
+     * @see RegExUtil#findFirst(String, Pattern)
+     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#NUMBER_FINDER
+     * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
     public static double extractFirstDouble(final String str, final double defaultValue, final boolean includingCientificNumber) {
         if (Strings.isEmpty(str)) {
@@ -1335,19 +1499,19 @@ public final class Numbers {
     }
 
     /**
-     * Converts the given string to a byte value.
-     *
-     * <p>This method attempts to convert the provided string to a byte. If the string is {@code null} or empty,
-     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a byte.</p>
-     *
-     * @param str The string to convert. This can be any instance of String.
-     * @return The byte representation of the provided string, or {@code 0} if the object is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as a byte.
-     * @see #toByte(String, byte)
-     * @see #isParsable(String)
-     * @see Byte#parseByte(String)
-     * @see Byte#decode(String)
-     */
+    * Converts the given string to a byte value.
+    *
+    * <p>This method attempts to convert the provided string to a byte. If the string is {@code null} or empty,
+    * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a byte.</p>
+    *
+    * @param str the string to convert. This can be any instance of String.
+    * @return the byte representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+    * @throws NumberFormatException if the string cannot be parsed as a byte.
+    * @see #toByte(String, byte)
+    * @see #isParsable(String)
+    * @see Byte#parseByte(String)
+    * @see Byte#decode(String)
+    */
     public static byte toByte(final String str) throws NumberFormatException {
         return toByte(str, (byte) 0);
     }
@@ -1359,9 +1523,9 @@ public final class Numbers {
      * default value {@code 0} is returned. If the object is a Number, its byte value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a byte.</p>
      *
-     * @param obj The object to convert. This can be any instance of Object.
-     * @return The byte representation of the provided object, or {@code 0} if the object is {@code null}.
-     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a byte.
+     * @param obj the object to convert. This can be any instance of Object.
+     * @return the byte representation of the provided object, or {@code 0} if the object is {@code null}.
+     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a byte.
      * @see #toByte(Object, byte)
      * @see #isParsable(String)
      * @see Byte#parseByte(String)
@@ -1377,10 +1541,10 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a byte. If the string is {@code null} or empty,
      * the provided default value is returned. Otherwise, the method attempts to parse the string as a byte.</p>
      *
-     * @param str The string to convert. This can be any instance of String.
-     * @param defaultValueForNull The default value to return if the string is {@code null} or empty.
-     * @return The byte representation of the provided string, or the default value if the string is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as a byte.
+     * @param str the string to convert. This can be any instance of String.
+     * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
+     * @return the byte representation of the provided string, or the default value if the string is {@code null} or empty.
+     * @throws NumberFormatException if the string cannot be parsed as a byte.
      * @see #isParsable(String)
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
@@ -1412,10 +1576,10 @@ public final class Numbers {
      * the provided default value is returned. If the object is a Number, its byte value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a byte.</p>
      *
-     * @param obj The object to convert. This can be any instance of Object.
-     * @param defaultValueForNull The default value to return if the object is {@code null}.
-     * @return The byte representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a byte.
+     * @param obj the object to convert. This can be any instance of Object.
+     * @param defaultValueForNull the default value to return if the object is {@code null}.
+     * @return the byte representation of the provided object, or the default value if the object is {@code null}.
+     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a byte.
      * @see #isParsable(String)
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
@@ -1446,9 +1610,9 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a short. If the string is {@code null} or empty,
      * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a short.</p>
      *
-     * @param str The string to convert. This can be any instance of String.
-     * @return The short representation of the provided string, or {@code 0} if the object is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as a short.
+     * @param str the string to convert. This can be any instance of String.
+     * @return the short representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException if the string cannot be parsed as a short.
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -1464,9 +1628,9 @@ public final class Numbers {
      * default value {@code 0} is returned. If the object is a Number, its short value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a short.</p>
      *
-     * @param obj The object to convert. This can be any instance of Object.
-     * @return The short representation of the provided object, or {@code 0} if the object is {@code null}.
-     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a short.
+     * @param obj the object to convert. This can be any instance of Object.
+     * @return the short representation of the provided object, or {@code 0} if the object is {@code null}.
+     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a short.
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -1481,10 +1645,10 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a short. If the string is {@code null} or empty,
      * the provided default value is returned. Otherwise, the method attempts to parse the string as a short.</p>
      *
-     * @param str The string to convert. This can be any instance of String.
-     * @param defaultValueForNull The default value to return if the string is {@code null} or empty.
-     * @return The short representation of the provided string, or the default value if the string is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as a short.
+     * @param str the string to convert. This can be any instance of String.
+     * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
+     * @return the short representation of the provided string, or the default value if the string is {@code null} or empty.
+     * @throws NumberFormatException if the string cannot be parsed as a short.
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -1516,10 +1680,10 @@ public final class Numbers {
      * the provided default value is returned. If the object is a Number, its short value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a short.</p>
      *
-     * @param obj The object to convert. This can be any instance of Object.
-     * @param defaultValueForNull The default value to return if the object is {@code null}.
-     * @return The short representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a short.
+     * @param obj the object to convert. This can be any instance of Object.
+     * @param defaultValueForNull the default value to return if the object is {@code null}.
+     * @return the short representation of the provided object, or the default value if the object is {@code null}.
+     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a short.
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -1550,9 +1714,9 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to an integer. If the string is {@code null} or empty,
      * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as an integer.</p>
      *
-     * @param str The string to convert. This can be any instance of String.
-     * @return The integer representation of the provided string, or {@code 0} if the object is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as an integer.
+     * @param str the string to convert. This can be any instance of String.
+     * @return the integer representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException if the string cannot be parsed as an integer.
      * @see #toInt(String, int)
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
@@ -1569,9 +1733,9 @@ public final class Numbers {
      * default value {@code 0} is returned. If the object is a Number, its integer value is returned.
      * Otherwise, the method attempts to parse the object's string representation as an integer.</p>
      *
-     * @param obj The object to convert. This can be any instance of Object.
-     * @return The integer representation of the provided object, or {@code 0} if the object is {@code null}.
-     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as an integer.
+     * @param obj the object to convert. This can be any instance of Object.
+     * @return the integer representation of the provided object, or {@code 0} if the object is {@code null}.
+     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as an integer.
      * @see #toInt(Object, int)
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
@@ -1587,10 +1751,10 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to an integer. If the string is {@code null} or empty,
      * the provided default value is returned. Otherwise, the method attempts to parse the string as an integer.</p>
      *
-     * @param str The string to convert. This can be any instance of String.
-     * @param defaultValueForNull The default value to return if the string is {@code null} or empty.
-     * @return The integer representation of the provided string, or the default value if the string is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as an integer.
+     * @param str the string to convert. This can be any instance of String.
+     * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
+     * @return the integer representation of the provided string, or the default value if the string is {@code null} or empty.
+     * @throws NumberFormatException if the string cannot be parsed as an integer.
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
@@ -1618,10 +1782,10 @@ public final class Numbers {
      * the provided default value is returned. If the object is a Number, its integer value is returned.
      * Otherwise, the method attempts to parse the object's string representation as an integer.</p>
      *
-     * @param obj The object to convert. This can be any instance of Object.
-     * @param defaultValueForNull The default value to return if the object is {@code null}.
-     * @return The integer representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as an integer.
+     * @param obj the object to convert. This can be any instance of Object.
+     * @param defaultValueForNull the default value to return if the object is {@code null}.
+     * @return the integer representation of the provided object, or the default value if the object is {@code null}.
+     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as an integer.
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
@@ -1652,9 +1816,9 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a long. If the string is {@code null} or empty,
      * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a long.</p>
      *
-     * @param str The string to convert. This can be any instance of String.
-     * @return The long representation of the provided string, or {@code 0} if the object is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as a long.
+     * @param str the string to convert. This can be any instance of String.
+     * @return the long representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException if the string cannot be parsed as a long.
      * @see #toLong(String, long)
      * @see #isParsable(String)
      * @see Long#parseLong(String)
@@ -1671,9 +1835,9 @@ public final class Numbers {
      * default value {@code 0} is returned. If the object is a Number, its long value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a long.</p>
      *
-     * @param obj The object to convert. This can be any instance of Object.
-     * @return The long representation of the provided object, or {@code 0} if the object is {@code null}.
-     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a long.
+     * @param obj the object to convert. This can be any instance of Object.
+     * @return the long representation of the provided object, or {@code 0} if the object is {@code null}.
+     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a long.
      * @see #toLong(Object, long)
      * @see #isParsable(String)
      * @see Long#parseLong(String)
@@ -1689,10 +1853,10 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a long. If the string is {@code null} or empty,
      * the provided default value is returned. Otherwise, the method attempts to parse the string as a long.</p>
      *
-     * @param str The string to convert. This can be any instance of String.
-     * @param defaultValueForNull The default value to return if the string is {@code null} or empty.
-     * @return The long representation of the provided string, or the default value if the string is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as a long.
+     * @param str the string to convert. This can be any instance of String.
+     * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
+     * @return the long representation of the provided string, or the default value if the string is {@code null} or empty.
+     * @throws NumberFormatException if the string cannot be parsed as a long.
      * @see #isParsable(String)
      * @see Long#parseLong(String)
      * @see Long#decode(String)
@@ -1730,10 +1894,10 @@ public final class Numbers {
      * the provided default value is returned. If the object is a Number, its long value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a long.</p>
      *
-     * @param obj The object to convert. This can be any instance of Object.
-     * @param defaultValueForNull The default value to return if the object is {@code null}.
-     * @return The long representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a long.
+     * @param obj the object to convert. This can be any instance of Object.
+     * @param defaultValueForNull the default value to return if the object is {@code null}.
+     * @return the long representation of the provided object, or the default value if the object is {@code null}.
+     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a long.
      * @see #isParsable(String)
      * @see Long#parseLong(String)
      * @see Long#decode(String)
@@ -1774,9 +1938,9 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a float. If the string is {@code null},
      * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a float.</p>
      *
-     * @param str The string to convert. This can be any instance of String.
-     * @return The float representation of the provided string, or {@code 0} if the object is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as a float.
+     * @param str the string to convert. This can be any instance of String.
+     * @return the float representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException if the string cannot be parsed as a float.
      * @see #toFloat(String, float)
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
@@ -1792,9 +1956,9 @@ public final class Numbers {
      * default value {@code 0} is returned. If the object is a Number, its float value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a float.</p>
      *
-     * @param obj The object to convert. This can be any instance of Object.
-     * @return The float representation of the provided object, or {@code 0} if the object is {@code null}.
-     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a float.
+     * @param obj the object to convert. This can be any instance of Object.
+     * @return the float representation of the provided object, or {@code 0} if the object is {@code null}.
+     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a float.
      * @see #toFloat(Object, float)
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
@@ -1809,10 +1973,10 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a float. If the string is {@code null} or empty,
      * the provided default value is returned. Otherwise, the method attempts to parse the string as a float.</p>
      *
-     * @param str The string to convert. This can be any instance of String.
-     * @param defaultValueForNull The default value to return if the provided string is {@code null} or empty.
-     * @return The float representation of the provided string, or the default value if the string is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as a float.
+     * @param str the string to convert. This can be any instance of String.
+     * @param defaultValueForNull the default value to return if the provided string is {@code null} or empty.
+     * @return the float representation of the provided string, or the default value if the string is {@code null} or empty.
+     * @throws NumberFormatException if the string cannot be parsed as a float.
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
      */
@@ -1831,10 +1995,10 @@ public final class Numbers {
      * the provided default value is returned. If the object is a Number, its float value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a float.</p>
      *
-     * @param obj The object to convert. This can be any instance of Object.
-     * @param defaultValueForNull The default value to return if the provided object is {@code null}.
-     * @return The float representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a float.
+     * @param obj the object to convert. This can be any instance of Object.
+     * @param defaultValueForNull the default value to return if the provided object is {@code null}.
+     * @return the float representation of the provided object, or the default value if the object is {@code null}.
+     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a float.
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
      */
@@ -1860,9 +2024,9 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a double. If the string is {@code null} or empty,
      * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a double.</p>
      *
-     * @param str The string to convert. This can be any instance of String.
-     * @return The double representation of the provided string, or {@code 0} if the object is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as a double.
+     * @param str the string to convert. This can be any instance of String.
+     * @return the double representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException if the string cannot be parsed as a double.
      * @see #toDouble(String, double)
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
@@ -1878,9 +2042,9 @@ public final class Numbers {
      * default value {@code 0} is returned. If the object is a Number, its double value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a double.</p>
      *
-     * @param obj The object to convert. This can be any instance of Object.
-     * @return The double representatio of the provided object, or {@code 0} if the object is {@code null}.
-     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a double.
+     * @param obj the object to convert. This can be any instance of Object.
+     * @return the double representatio of the provided object, or {@code 0} if the object is {@code null}.
+     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a double.
      * @see #toDouble(Object, double)
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
@@ -1895,10 +2059,10 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a double. If the string is {@code null} or empty,
      * the provided default value is returned. Otherwise, the method attempts to parse the string as a double.</p>
      *
-     * @param str The string to convert. This can be any instance of String.
-     * @param defaultValueForNull The default value to return if the provided string is {@code null} or empty.
-     * @return The double representation of the provided string, or the default value if the string is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as a double.
+     * @param str the string to convert. This can be any instance of String.
+     * @param defaultValueForNull the default value to return if the provided string is {@code null} or empty.
+     * @return the double representation of the provided string, or the default value if the string is {@code null} or empty.
+     * @throws NumberFormatException if the string cannot be parsed as a double.
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
      */
@@ -1917,10 +2081,10 @@ public final class Numbers {
      * the provided default value is returned. If the object is a Number, its double value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a double.</p>
      *
-     * @param obj The object to convert. This can be any instance of Object.
-     * @param defaultValueForNull The default value to return if the provided object is {@code null}.
-     * @return The double representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a double.
+     * @param obj the object to convert. This can be any instance of Object.
+     * @param defaultValueForNull the default value to return if the provided object is {@code null}.
+     * @return the double representation of the provided object, or the default value if the object is {@code null}.
+     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a double.
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
      */
@@ -2602,26 +2766,6 @@ public final class Numbers {
             }
             return createBigInteger(str);
         }
-
-        //    //Must be a Float, Double, BigDecimal
-        //    try {
-        //        final Float f = createFloat(str);
-        //        final Double d = createDouble(str);
-        //        if (!f.isInfinite()
-        //                && !(f.floatValue() == 0.0F && !isZero(mant, dec))
-        //                && f.toString().equals(d.toString())) {
-        //            return f;
-        //        }
-        //        if (!d.isInfinite() && !(d.doubleValue() == 0.0D && !isZero(mant, dec))) {
-        //            final BigDecimal b = createBigDecimal(str);
-        //            if (b.compareTo(BigDecimal.valueOf(d.doubleValue())) == 0) {
-        //                return d;
-        //            }
-        //            return b;
-        //        }
-        //    } catch (final NumberFormatException ignored) {
-        //        // ignore the bad number
-        //    }
 
         try {
             if (len > 308 && (decPos < 0 || decPos > 308)) { // MAX_VALUE = 0x1.fffffffffffffP+1023; // 1.7976931348623157e+308
@@ -4459,13 +4603,6 @@ public final class Numbers {
      * @see #lcm(int, int)
      */
     public static int gcd(int a, int b) throws ArithmeticException {
-        //    /*
-        //     * The reason we require both arguments to be >= 0 is because otherwise, what do you return on
-        //     * gcd(0, Integer.MIN_VALUE)? BigInteger.gcd would return positive 2^31, but positive 2^31
-        //     * isn't an int.
-        //     */
-        //    checkNonNegative("a", a);
-        //    checkNonNegative("b", b);
 
         if ((a == 0 && b == Integer.MIN_VALUE) || (b == 0 && a == Integer.MIN_VALUE)) {
             throw new ArithmeticException("overflow by 2^31");
@@ -4545,13 +4682,6 @@ public final class Numbers {
      * @see #lcm(long, long)
      */
     public static long gcd(long a, long b) throws ArithmeticException {
-        //    /*
-        //     * The reason we require both arguments to be >= 0 is because otherwise, what do you return on
-        //     * gcd(0, Long.MIN_VALUE)? BigInteger.gcd would return positive 2^63, but positive 2^63 isn't an
-        //     * int.
-        //     */
-        //    checkNonNegative("a", a);
-        //    checkNonNegative("b", b);
 
         if ((a == 0 && b == Long.MIN_VALUE) || (b == 0 && a == Long.MIN_VALUE)) {
             throw new ArithmeticException("overflow by 2^63");

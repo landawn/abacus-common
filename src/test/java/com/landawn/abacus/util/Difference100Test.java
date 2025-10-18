@@ -1,10 +1,10 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -15,8 +15,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Difference.BeanDifference;
@@ -666,7 +666,7 @@ public class Difference100Test extends TestBase {
                     if ("name".equals(propName) && v1 instanceof String && v2 instanceof String) {
                         return ((String) v1).equalsIgnoreCase((String) v2);
                     }
-                    return N.equals(v1, v2);
+                    return CommonUtil.equals(v1, v2);
                 });
 
         assertEquals(3, diff.inCommon().size());

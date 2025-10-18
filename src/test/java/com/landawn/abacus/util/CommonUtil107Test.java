@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -31,7 +31,7 @@ public class CommonUtil107Test extends TestBase {
         for (int i = 0; i < 10000; i++) {
             float[] arr = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
             float[] original = arr.clone();
-            N.shuffle(arr, 1, 4);
+            CommonUtil.shuffle(arr, 1, 4);
 
             Assertions.assertEquals(original[0], arr[0]);
             Assertions.assertEquals(original[4], arr[4], 0.000001);
@@ -49,7 +49,7 @@ public class CommonUtil107Test extends TestBase {
             float[] arr = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
             float[] original = arr.clone();
             Random rnd = new Random(42);
-            N.shuffle(arr, rnd);
+            CommonUtil.shuffle(arr, rnd);
 
             Arrays.sort(arr);
             Arrays.sort(original);
@@ -64,7 +64,7 @@ public class CommonUtil107Test extends TestBase {
             float[] arr = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
             float[] original = arr.clone();
             Random rnd = new Random(42);
-            N.shuffle(arr, 1, 4, rnd);
+            CommonUtil.shuffle(arr, 1, 4, rnd);
 
             Assertions.assertEquals(original[0], arr[0]);
             Assertions.assertEquals(original[4], arr[4]);
@@ -78,14 +78,14 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testShuffleFloatArrayEmpty() {
         float[] arr = {};
-        N.shuffle(arr, 0, 0, new Random());
+        CommonUtil.shuffle(arr, 0, 0, new Random());
         Assertions.assertEquals(0, arr.length);
     }
 
     @Test
     public void testShuffleFloatArrayNull() {
         float[] arr = null;
-        N.shuffle(arr, new Random());
+        CommonUtil.shuffle(arr, new Random());
         Assertions.assertNull(arr);
     }
 
@@ -95,7 +95,7 @@ public class CommonUtil107Test extends TestBase {
         for (int i = 0; i < 10000; i++) {
             double[] arr = { 1.0, 2.0, 3.0, 4.0, 5.0 };
             double[] original = arr.clone();
-            N.shuffle(arr);
+            CommonUtil.shuffle(arr);
 
             Arrays.sort(arr);
             Arrays.sort(original);
@@ -108,7 +108,7 @@ public class CommonUtil107Test extends TestBase {
         for (int i = 0; i < 10000; i++) {
             double[] arr = { 1.0, 2.0, 3.0, 4.0, 5.0 };
             double[] original = arr.clone();
-            N.shuffle(arr, 1, 4);
+            CommonUtil.shuffle(arr, 1, 4);
 
             Assertions.assertEquals(original[0], arr[0]);
             Assertions.assertEquals(original[4], arr[4], 0.000001);
@@ -124,7 +124,7 @@ public class CommonUtil107Test extends TestBase {
         double[] arr = { 1.0, 2.0, 3.0, 4.0, 5.0 };
         double[] original = arr.clone();
         Random rnd = new Random(42);
-        N.shuffle(arr, rnd);
+        CommonUtil.shuffle(arr, rnd);
 
         Arrays.sort(arr);
         Arrays.sort(original);
@@ -136,7 +136,7 @@ public class CommonUtil107Test extends TestBase {
         double[] arr = { 1.0, 2.0, 3.0, 4.0, 5.0 };
         double[] original = arr.clone();
         Random rnd = new Random(42);
-        N.shuffle(arr, 1, 4, rnd);
+        CommonUtil.shuffle(arr, 1, 4, rnd);
 
         Assertions.assertEquals(original[0], arr[0]);
         Assertions.assertEquals(original[4], arr[4]);
@@ -150,7 +150,7 @@ public class CommonUtil107Test extends TestBase {
     public void testShuffleObjectArray() {
         String[] arr = { "a", "b", "c", "d", "e" };
         String[] original = arr.clone();
-        N.shuffle(arr);
+        CommonUtil.shuffle(arr);
 
         Arrays.sort(arr);
         Arrays.sort(original);
@@ -161,7 +161,7 @@ public class CommonUtil107Test extends TestBase {
     public void testShuffleObjectArrayWithRange() {
         String[] arr = { "a", "b", "c", "d", "e" };
         String[] original = arr.clone();
-        N.shuffle(arr, 1, 4);
+        CommonUtil.shuffle(arr, 1, 4);
 
         Assertions.assertEquals(original[0], arr[0]);
         Assertions.assertEquals(original[4], arr[4]);
@@ -176,7 +176,7 @@ public class CommonUtil107Test extends TestBase {
         String[] arr = { "a", "b", "c", "d", "e" };
         String[] original = arr.clone();
         Random rnd = new Random(42);
-        N.shuffle(arr, rnd);
+        CommonUtil.shuffle(arr, rnd);
 
         Arrays.sort(arr);
         Arrays.sort(original);
@@ -188,7 +188,7 @@ public class CommonUtil107Test extends TestBase {
         String[] arr = { "a", "b", "c", "d", "e" };
         String[] original = arr.clone();
         Random rnd = new Random(42);
-        N.shuffle(arr, 1, 4, rnd);
+        CommonUtil.shuffle(arr, 1, 4, rnd);
 
         Assertions.assertEquals(original[0], arr[0]);
         Assertions.assertEquals(original[4], arr[4]);
@@ -202,7 +202,7 @@ public class CommonUtil107Test extends TestBase {
     public void testShuffleList() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
         List<String> original = new ArrayList<>(list);
-        N.shuffle(list);
+        CommonUtil.shuffle(list);
 
         Collections.sort(list);
         Collections.sort(original);
@@ -214,7 +214,7 @@ public class CommonUtil107Test extends TestBase {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
         List<String> original = new ArrayList<>(list);
         Random rnd = new Random(42);
-        N.shuffle(list, rnd);
+        CommonUtil.shuffle(list, rnd);
 
         Collections.sort(list);
         Collections.sort(original);
@@ -224,14 +224,14 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testShuffleListEmpty() {
         List<String> list = new ArrayList<>();
-        N.shuffle(list);
+        CommonUtil.shuffle(list);
         Assertions.assertTrue(list.isEmpty());
     }
 
     @Test
     public void testShuffleListSingleElement() {
         List<String> list = new ArrayList<>(Arrays.asList("a"));
-        N.shuffle(list);
+        CommonUtil.shuffle(list);
         Assertions.assertEquals(1, list.size());
         Assertions.assertEquals("a", list.get(0));
     }
@@ -240,7 +240,7 @@ public class CommonUtil107Test extends TestBase {
     public void testShuffleCollection() {
         Collection<String> coll = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
         List<String> original = new ArrayList<>(coll);
-        N.shuffle(coll);
+        CommonUtil.shuffle(coll);
 
         List<String> sorted = new ArrayList<>(coll);
         Collections.sort(sorted);
@@ -253,7 +253,7 @@ public class CommonUtil107Test extends TestBase {
         Collection<String> coll = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d", "e"));
         List<String> original = new ArrayList<>(coll);
         Random rnd = new Random(42);
-        N.shuffle(coll, rnd);
+        CommonUtil.shuffle(coll, rnd);
 
         List<String> sorted = new ArrayList<>(coll);
         Collections.sort(sorted);
@@ -264,14 +264,14 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testShuffleCollectionEmpty() {
         Collection<String> coll = new ArrayList<>();
-        N.shuffle(coll);
+        CommonUtil.shuffle(coll);
         Assertions.assertTrue(coll.isEmpty());
     }
 
     @Test
     public void testShuffleCollectionLessThanTwoElements() {
         Collection<String> coll = new ArrayList<>(Arrays.asList("a"));
-        N.shuffle(coll);
+        CommonUtil.shuffle(coll);
         Assertions.assertEquals(1, coll.size());
         Assertions.assertTrue(coll.contains("a"));
     }
@@ -279,7 +279,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapBooleanArray() {
         boolean[] arr = { true, false, true, false };
-        N.swap(arr, 0, 3);
+        CommonUtil.swap(arr, 0, 3);
         Assertions.assertFalse(arr[0]);
         Assertions.assertTrue(arr[3]);
     }
@@ -287,7 +287,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapCharArray() {
         char[] arr = { 'a', 'b', 'c', 'd' };
-        N.swap(arr, 1, 2);
+        CommonUtil.swap(arr, 1, 2);
         Assertions.assertEquals('c', arr[1]);
         Assertions.assertEquals('b', arr[2]);
     }
@@ -295,7 +295,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapByteArray() {
         byte[] arr = { 1, 2, 3, 4 };
-        N.swap(arr, 0, 3);
+        CommonUtil.swap(arr, 0, 3);
         Assertions.assertEquals(4, arr[0]);
         Assertions.assertEquals(1, arr[3]);
     }
@@ -303,7 +303,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapShortArray() {
         short[] arr = { 10, 20, 30, 40 };
-        N.swap(arr, 1, 3);
+        CommonUtil.swap(arr, 1, 3);
         Assertions.assertEquals(40, arr[1]);
         Assertions.assertEquals(20, arr[3]);
     }
@@ -311,7 +311,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapIntArray() {
         int[] arr = { 100, 200, 300, 400 };
-        N.swap(arr, 0, 2);
+        CommonUtil.swap(arr, 0, 2);
         Assertions.assertEquals(300, arr[0]);
         Assertions.assertEquals(100, arr[2]);
     }
@@ -319,7 +319,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapLongArray() {
         long[] arr = { 1000L, 2000L, 3000L, 4000L };
-        N.swap(arr, 1, 2);
+        CommonUtil.swap(arr, 1, 2);
         Assertions.assertEquals(3000L, arr[1]);
         Assertions.assertEquals(2000L, arr[2]);
     }
@@ -327,7 +327,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapFloatArray() {
         float[] arr = { 1.0f, 2.0f, 3.0f, 4.0f };
-        N.swap(arr, 0, 3);
+        CommonUtil.swap(arr, 0, 3);
         Assertions.assertEquals(4.0f, arr[0]);
         Assertions.assertEquals(1.0f, arr[3]);
     }
@@ -335,7 +335,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapDoubleArray() {
         double[] arr = { 1.0, 2.0, 3.0, 4.0 };
-        N.swap(arr, 1, 3);
+        CommonUtil.swap(arr, 1, 3);
         Assertions.assertEquals(4.0, arr[1]);
         Assertions.assertEquals(2.0, arr[3]);
     }
@@ -343,7 +343,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapObjectArray() {
         String[] arr = { "a", "b", "c", "d" };
-        N.swap(arr, 0, 2);
+        CommonUtil.swap(arr, 0, 2);
         Assertions.assertEquals("c", arr[0]);
         Assertions.assertEquals("a", arr[2]);
     }
@@ -351,7 +351,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapList() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
-        N.swap(list, 1, 3);
+        CommonUtil.swap(list, 1, 3);
         Assertions.assertEquals("d", list.get(1));
         Assertions.assertEquals("b", list.get(3));
     }
@@ -359,7 +359,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapPair() {
         Pair<String, String> pair = Pair.of("left", "right");
-        N.swap(pair);
+        CommonUtil.swap(pair);
         Assertions.assertEquals("right", pair.left());
         Assertions.assertEquals("left", pair.right());
     }
@@ -367,19 +367,19 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapIfPair() {
         Pair<Integer, Integer> pair = Pair.of(1, 2);
-        boolean swapped = N.swapIf(pair, p -> p.left() < p.right());
+        boolean swapped = CommonUtil.swapIf(pair, p -> p.left() < p.right());
         Assertions.assertTrue(swapped);
         Assertions.assertEquals(2, pair.left());
         Assertions.assertEquals(1, pair.right());
 
-        swapped = N.swapIf(pair, p -> p.left() < p.right());
+        swapped = CommonUtil.swapIf(pair, p -> p.left() < p.right());
         Assertions.assertFalse(swapped);
     }
 
     @Test
     public void testSwapTriple() {
         Triple<String, Integer, String> triple = Triple.of("left", 42, "right");
-        N.swap(triple);
+        CommonUtil.swap(triple);
         Assertions.assertEquals("right", triple.left());
         Assertions.assertEquals("left", triple.right());
         Assertions.assertEquals(42, triple.middle());
@@ -388,19 +388,19 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testSwapIfTriple() {
         Triple<Integer, String, Integer> triple = Triple.of(1, "middle", 2);
-        boolean swapped = N.swapIf(triple, t -> t.left() < t.right());
+        boolean swapped = CommonUtil.swapIf(triple, t -> t.left() < t.right());
         Assertions.assertTrue(swapped);
         Assertions.assertEquals(2, triple.left());
         Assertions.assertEquals(1, triple.right());
 
-        swapped = N.swapIf(triple, t -> t.left() < t.right());
+        swapped = CommonUtil.swapIf(triple, t -> t.left() < t.right());
         Assertions.assertFalse(swapped);
     }
 
     @Test
     public void testFillBooleanArray() {
         boolean[] arr = new boolean[5];
-        N.fill(arr, true);
+        CommonUtil.fill(arr, true);
         for (boolean b : arr) {
             Assertions.assertTrue(b);
         }
@@ -409,7 +409,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillBooleanArrayWithRange() {
         boolean[] arr = new boolean[5];
-        N.fill(arr, 1, 4, true);
+        CommonUtil.fill(arr, 1, 4, true);
         Assertions.assertFalse(arr[0]);
         Assertions.assertTrue(arr[1]);
         Assertions.assertTrue(arr[2]);
@@ -420,14 +420,14 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillBooleanArrayEmpty() {
         boolean[] arr = new boolean[0];
-        N.fill(arr, true);
+        CommonUtil.fill(arr, true);
         Assertions.assertEquals(0, arr.length);
     }
 
     @Test
     public void testFillCharArray() {
         char[] arr = new char[5];
-        N.fill(arr, 'x');
+        CommonUtil.fill(arr, 'x');
         for (char c : arr) {
             Assertions.assertEquals('x', c);
         }
@@ -436,7 +436,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillCharArrayWithRange() {
         char[] arr = new char[5];
-        N.fill(arr, 1, 4, 'x');
+        CommonUtil.fill(arr, 1, 4, 'x');
         Assertions.assertEquals('\0', arr[0]);
         Assertions.assertEquals('x', arr[1]);
         Assertions.assertEquals('x', arr[2]);
@@ -447,7 +447,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillByteArray() {
         byte[] arr = new byte[5];
-        N.fill(arr, (byte) 42);
+        CommonUtil.fill(arr, (byte) 42);
         for (byte b : arr) {
             Assertions.assertEquals(42, b);
         }
@@ -456,7 +456,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillByteArrayWithRange() {
         byte[] arr = new byte[5];
-        N.fill(arr, 2, 5, (byte) 42);
+        CommonUtil.fill(arr, 2, 5, (byte) 42);
         Assertions.assertEquals(0, arr[0]);
         Assertions.assertEquals(0, arr[1]);
         Assertions.assertEquals(42, arr[2]);
@@ -467,7 +467,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillShortArray() {
         short[] arr = new short[5];
-        N.fill(arr, (short) 100);
+        CommonUtil.fill(arr, (short) 100);
         for (short s : arr) {
             Assertions.assertEquals(100, s);
         }
@@ -476,7 +476,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillShortArrayWithRange() {
         short[] arr = new short[5];
-        N.fill(arr, 0, 3, (short) 100);
+        CommonUtil.fill(arr, 0, 3, (short) 100);
         Assertions.assertEquals(100, arr[0]);
         Assertions.assertEquals(100, arr[1]);
         Assertions.assertEquals(100, arr[2]);
@@ -487,7 +487,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillIntArray() {
         int[] arr = new int[5];
-        N.fill(arr, 999);
+        CommonUtil.fill(arr, 999);
         for (int i : arr) {
             Assertions.assertEquals(999, i);
         }
@@ -496,7 +496,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillIntArrayWithRange() {
         int[] arr = new int[5];
-        N.fill(arr, 1, 3, 999);
+        CommonUtil.fill(arr, 1, 3, 999);
         Assertions.assertEquals(0, arr[0]);
         Assertions.assertEquals(999, arr[1]);
         Assertions.assertEquals(999, arr[2]);
@@ -507,7 +507,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillLongArray() {
         long[] arr = new long[5];
-        N.fill(arr, 1000L);
+        CommonUtil.fill(arr, 1000L);
         for (long l : arr) {
             Assertions.assertEquals(1000L, l);
         }
@@ -516,7 +516,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillLongArrayWithRange() {
         long[] arr = new long[5];
-        N.fill(arr, 2, 4, 1000L);
+        CommonUtil.fill(arr, 2, 4, 1000L);
         Assertions.assertEquals(0L, arr[0]);
         Assertions.assertEquals(0L, arr[1]);
         Assertions.assertEquals(1000L, arr[2]);
@@ -527,7 +527,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillFloatArray() {
         float[] arr = new float[5];
-        N.fill(arr, 3.14f);
+        CommonUtil.fill(arr, 3.14f);
         for (float f : arr) {
             Assertions.assertEquals(3.14f, f);
         }
@@ -536,7 +536,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillFloatArrayWithRange() {
         float[] arr = new float[5];
-        N.fill(arr, 0, 2, 3.14f);
+        CommonUtil.fill(arr, 0, 2, 3.14f);
         Assertions.assertEquals(3.14f, arr[0]);
         Assertions.assertEquals(3.14f, arr[1]);
         Assertions.assertEquals(0.0f, arr[2]);
@@ -547,7 +547,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillDoubleArray() {
         double[] arr = new double[5];
-        N.fill(arr, 2.718);
+        CommonUtil.fill(arr, 2.718);
         for (double d : arr) {
             Assertions.assertEquals(2.718, d);
         }
@@ -556,7 +556,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillDoubleArrayWithRange() {
         double[] arr = new double[5];
-        N.fill(arr, 3, 5, 2.718);
+        CommonUtil.fill(arr, 3, 5, 2.718);
         Assertions.assertEquals(0.0, arr[0]);
         Assertions.assertEquals(0.0, arr[1]);
         Assertions.assertEquals(0.0, arr[2]);
@@ -567,7 +567,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillObjectArray() {
         String[] arr = new String[5];
-        N.fill(arr, "test");
+        CommonUtil.fill(arr, "test");
         for (String s : arr) {
             Assertions.assertEquals("test", s);
         }
@@ -576,7 +576,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillObjectArrayWithRange() {
         String[] arr = new String[5];
-        N.fill(arr, 1, 4, "test");
+        CommonUtil.fill(arr, 1, 4, "test");
         Assertions.assertNull(arr[0]);
         Assertions.assertEquals("test", arr[1]);
         Assertions.assertEquals("test", arr[2]);
@@ -587,14 +587,14 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillObjectArrayEmpty() {
         String[] arr = new String[0];
-        N.fill(arr, "test");
+        CommonUtil.fill(arr, "test");
         Assertions.assertEquals(0, arr.length);
     }
 
     @Test
     public void testFillList() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        N.fill(list, "x");
+        CommonUtil.fill(list, "x");
         for (String s : list) {
             Assertions.assertEquals("x", s);
         }
@@ -603,7 +603,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillListWithRange() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        N.fill(list, 1, 4, "x");
+        CommonUtil.fill(list, 1, 4, "x");
         Assertions.assertEquals("a", list.get(0));
         Assertions.assertEquals("x", list.get(1));
         Assertions.assertEquals("x", list.get(2));
@@ -614,7 +614,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillListExtending() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b"));
-        N.fill(list, 0, 5, "x");
+        CommonUtil.fill(list, 0, 5, "x");
         Assertions.assertEquals(5, list.size());
         for (String s : list) {
             Assertions.assertEquals("x", s);
@@ -624,7 +624,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillListWithGaps() {
         List<String> list = new ArrayList<>();
-        N.fill(list, 2, 5, "x");
+        CommonUtil.fill(list, 2, 5, "x");
         Assertions.assertEquals(5, list.size());
         Assertions.assertNull(list.get(0));
         Assertions.assertNull(list.get(1));
@@ -658,7 +658,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testPadLeft() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
-        boolean result = N.padLeft(list, 5, "x");
+        boolean result = CommonUtil.padLeft(list, 5, "x");
         Assertions.assertTrue(result);
         Assertions.assertEquals(5, list.size());
         Assertions.assertEquals("x", list.get(0));
@@ -671,7 +671,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testPadLeftNoChange() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
-        boolean result = N.padLeft(list, 3, "x");
+        boolean result = CommonUtil.padLeft(list, 3, "x");
         Assertions.assertFalse(result);
         Assertions.assertEquals(3, list.size());
     }
@@ -679,7 +679,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testPadLeftWithNull() {
         List<String> list = new ArrayList<>(Arrays.asList("a"));
-        boolean result = N.padLeft(list, 3, null);
+        boolean result = CommonUtil.padLeft(list, 3, null);
         Assertions.assertTrue(result);
         Assertions.assertEquals(3, list.size());
         Assertions.assertNull(list.get(0));
@@ -690,7 +690,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testPadRight() {
         Collection<String> coll = new ArrayList<>(Arrays.asList("a", "b", "c"));
-        boolean result = N.padRight(coll, 5, "x");
+        boolean result = CommonUtil.padRight(coll, 5, "x");
         Assertions.assertTrue(result);
         Assertions.assertEquals(5, coll.size());
         List<String> list = new ArrayList<>(coll);
@@ -704,7 +704,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testPadRightNoChange() {
         Collection<String> coll = new ArrayList<>(Arrays.asList("a", "b", "c"));
-        boolean result = N.padRight(coll, 2, "x");
+        boolean result = CommonUtil.padRight(coll, 2, "x");
         Assertions.assertFalse(result);
         Assertions.assertEquals(3, coll.size());
     }
@@ -712,7 +712,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testPadRightWithNull() {
         Collection<String> coll = new ArrayList<>(Arrays.asList("a"));
-        boolean result = N.padRight(coll, 3, null);
+        boolean result = CommonUtil.padRight(coll, 3, null);
         Assertions.assertTrue(result);
         Assertions.assertEquals(3, coll.size());
         List<String> list = new ArrayList<>(coll);
@@ -723,7 +723,7 @@ public class CommonUtil107Test extends TestBase {
 
     @Test
     public void testRepeat() {
-        List<String> result = N.repeat("x", 5);
+        List<String> result = CommonUtil.repeat("x", 5);
         Assertions.assertEquals(5, result.size());
         for (String s : result) {
             Assertions.assertEquals("x", s);
@@ -732,13 +732,13 @@ public class CommonUtil107Test extends TestBase {
 
     @Test
     public void testRepeatZero() {
-        List<String> result = N.repeat("x", 0);
+        List<String> result = CommonUtil.repeat("x", 0);
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
     public void testRepeatNull() {
-        List<String> result = N.repeat(null, 3);
+        List<String> result = CommonUtil.repeat(null, 3);
         Assertions.assertEquals(3, result.size());
         for (String s : result) {
             Assertions.assertNull(s);
@@ -748,7 +748,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testRepeatElements() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = N.repeatElements(input, 2);
+        List<String> result = CommonUtil.repeatElements(input, 2);
         Assertions.assertEquals(6, result.size());
         Assertions.assertEquals(Arrays.asList("a", "a", "b", "b", "c", "c"), result);
     }
@@ -756,21 +756,21 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testRepeatElementsZero() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = N.repeatElements(input, 0);
+        List<String> result = CommonUtil.repeatElements(input, 0);
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
     public void testRepeatElementsEmpty() {
         List<String> input = new ArrayList<>();
-        List<String> result = N.repeatElements(input, 3);
+        List<String> result = CommonUtil.repeatElements(input, 3);
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
     public void testRepeatCollection() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = N.repeatCollection(input, 2);
+        List<String> result = CommonUtil.repeatCollection(input, 2);
         Assertions.assertEquals(6, result.size());
         Assertions.assertEquals(Arrays.asList("a", "b", "c", "a", "b", "c"), result);
     }
@@ -778,21 +778,21 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testRepeatCollectionZero() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = N.repeatCollection(input, 0);
+        List<String> result = CommonUtil.repeatCollection(input, 0);
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
     public void testRepeatCollectionEmpty() {
         List<String> input = new ArrayList<>();
-        List<String> result = N.repeatCollection(input, 3);
+        List<String> result = CommonUtil.repeatCollection(input, 3);
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
     public void testRepeatElementsToSize() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = N.repeatElementsToSize(input, 8);
+        List<String> result = CommonUtil.repeatElementsToSize(input, 8);
         Assertions.assertEquals(8, result.size());
         Assertions.assertEquals(Arrays.asList("a", "a", "a", "b", "b", "b", "c", "c"), result);
     }
@@ -800,7 +800,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testRepeatElementsToSizeExact() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = N.repeatElementsToSize(input, 6);
+        List<String> result = CommonUtil.repeatElementsToSize(input, 6);
         Assertions.assertEquals(6, result.size());
         Assertions.assertEquals(Arrays.asList("a", "a", "b", "b", "c", "c"), result);
     }
@@ -808,14 +808,14 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testRepeatElementsToSizeZero() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = N.repeatElementsToSize(input, 0);
+        List<String> result = CommonUtil.repeatElementsToSize(input, 0);
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
     public void testRepeatCollectionToSize() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = N.repeatCollectionToSize(input, 7);
+        List<String> result = CommonUtil.repeatCollectionToSize(input, 7);
         Assertions.assertEquals(7, result.size());
         Assertions.assertEquals(Arrays.asList("a", "b", "c", "a", "b", "c", "a"), result);
     }
@@ -823,7 +823,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testRepeatCollectionToSizeExact() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = N.repeatCollectionToSize(input, 6);
+        List<String> result = CommonUtil.repeatCollectionToSize(input, 6);
         Assertions.assertEquals(6, result.size());
         Assertions.assertEquals(Arrays.asList("a", "b", "c", "a", "b", "c"), result);
     }
@@ -831,7 +831,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testRepeatCollectionToSizeZero() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = N.repeatCollectionToSize(input, 0);
+        List<String> result = CommonUtil.repeatCollectionToSize(input, 0);
         Assertions.assertTrue(result.isEmpty());
     }
 
@@ -839,7 +839,7 @@ public class CommonUtil107Test extends TestBase {
     public void testCopyBooleanArray() {
         boolean[] src = { true, false, true, false, true };
         boolean[] dest = new boolean[5];
-        N.copy(src, 1, dest, 2, 2);
+        CommonUtil.copy(src, 1, dest, 2, 2);
         Assertions.assertFalse(dest[0]);
         Assertions.assertFalse(dest[1]);
         Assertions.assertFalse(dest[2]);
@@ -850,7 +850,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyBooleanArraySameArray() {
         boolean[] arr = { true, false, true, false, true };
-        N.copy(arr, 0, arr, 2, 3);
+        CommonUtil.copy(arr, 0, arr, 2, 3);
         Assertions.assertTrue(arr[0]);
         Assertions.assertFalse(arr[1]);
         Assertions.assertTrue(arr[2]);
@@ -862,14 +862,14 @@ public class CommonUtil107Test extends TestBase {
     public void testCopyBooleanArrayEmpty() {
         boolean[] src = {};
         boolean[] dest = new boolean[5];
-        N.copy(src, 0, dest, 0, 0);
+        CommonUtil.copy(src, 0, dest, 0, 0);
     }
 
     @Test
     public void testCopyCharArray() {
         char[] src = { 'a', 'b', 'c', 'd', 'e' };
         char[] dest = new char[5];
-        N.copy(src, 1, dest, 0, 3);
+        CommonUtil.copy(src, 1, dest, 0, 3);
         Assertions.assertEquals('b', dest[0]);
         Assertions.assertEquals('c', dest[1]);
         Assertions.assertEquals('d', dest[2]);
@@ -881,7 +881,7 @@ public class CommonUtil107Test extends TestBase {
     public void testCopyByteArray() {
         byte[] src = { 1, 2, 3, 4, 5 };
         byte[] dest = new byte[5];
-        N.copy(src, 2, dest, 1, 3);
+        CommonUtil.copy(src, 2, dest, 1, 3);
         Assertions.assertEquals(0, dest[0]);
         Assertions.assertEquals(3, dest[1]);
         Assertions.assertEquals(4, dest[2]);
@@ -893,7 +893,7 @@ public class CommonUtil107Test extends TestBase {
     public void testCopyShortArray() {
         short[] src = { 10, 20, 30, 40, 50 };
         short[] dest = new short[5];
-        N.copy(src, 0, dest, 2, 2);
+        CommonUtil.copy(src, 0, dest, 2, 2);
         Assertions.assertEquals(0, dest[0]);
         Assertions.assertEquals(0, dest[1]);
         Assertions.assertEquals(10, dest[2]);
@@ -905,7 +905,7 @@ public class CommonUtil107Test extends TestBase {
     public void testCopyIntArray() {
         int[] src = { 100, 200, 300, 400, 500 };
         int[] dest = new int[5];
-        N.copy(src, 1, dest, 1, 3);
+        CommonUtil.copy(src, 1, dest, 1, 3);
         Assertions.assertEquals(0, dest[0]);
         Assertions.assertEquals(200, dest[1]);
         Assertions.assertEquals(300, dest[2]);
@@ -917,7 +917,7 @@ public class CommonUtil107Test extends TestBase {
     public void testCopyLongArray() {
         long[] src = { 1000L, 2000L, 3000L, 4000L, 5000L };
         long[] dest = new long[5];
-        N.copy(src, 2, dest, 0, 3);
+        CommonUtil.copy(src, 2, dest, 0, 3);
         Assertions.assertEquals(3000L, dest[0]);
         Assertions.assertEquals(4000L, dest[1]);
         Assertions.assertEquals(5000L, dest[2]);
@@ -929,7 +929,7 @@ public class CommonUtil107Test extends TestBase {
     public void testCopyFloatArray() {
         float[] src = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
         float[] dest = new float[5];
-        N.copy(src, 0, dest, 0, 5);
+        CommonUtil.copy(src, 0, dest, 0, 5);
         Assertions.assertArrayEquals(src, dest);
     }
 
@@ -937,7 +937,7 @@ public class CommonUtil107Test extends TestBase {
     public void testCopyDoubleArray() {
         double[] src = { 1.0, 2.0, 3.0, 4.0, 5.0 };
         double[] dest = new double[5];
-        N.copy(src, 3, dest, 3, 2);
+        CommonUtil.copy(src, 3, dest, 3, 2);
         Assertions.assertEquals(0.0, dest[0]);
         Assertions.assertEquals(0.0, dest[1]);
         Assertions.assertEquals(0.0, dest[2]);
@@ -949,7 +949,7 @@ public class CommonUtil107Test extends TestBase {
     public void testCopyObjectArray() {
         String[] src = { "a", "b", "c", "d", "e" };
         String[] dest = new String[5];
-        N.copy(src, 1, dest, 2, 2);
+        CommonUtil.copy(src, 1, dest, 2, 2);
         Assertions.assertNull(dest[0]);
         Assertions.assertNull(dest[1]);
         Assertions.assertEquals("b", dest[2]);
@@ -961,7 +961,7 @@ public class CommonUtil107Test extends TestBase {
     public void testCopyGenericObject() {
         int[] src = { 1, 2, 3, 4, 5 };
         int[] dest = new int[5];
-        N.copy((Object) src, 0, (Object) dest, 1, 4);
+        CommonUtil.copy((Object) src, 0, (Object) dest, 1, 4);
         Assertions.assertEquals(0, dest[0]);
         Assertions.assertEquals(1, dest[1]);
         Assertions.assertEquals(2, dest[2]);
@@ -972,7 +972,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfBooleanArray() {
         boolean[] original = { true, false, true };
-        boolean[] copy = N.copyOf(original, 5);
+        boolean[] copy = CommonUtil.copyOf(original, 5);
         Assertions.assertEquals(5, copy.length);
         Assertions.assertTrue(copy[0]);
         Assertions.assertFalse(copy[1]);
@@ -984,7 +984,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfBooleanArrayTruncate() {
         boolean[] original = { true, false, true, false, true };
-        boolean[] copy = N.copyOf(original, 3);
+        boolean[] copy = CommonUtil.copyOf(original, 3);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertTrue(copy[0]);
         Assertions.assertFalse(copy[1]);
@@ -994,7 +994,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfBooleanArraySameLength() {
         boolean[] original = { true, false, true };
-        boolean[] copy = N.copyOf(original, 3);
+        boolean[] copy = CommonUtil.copyOf(original, 3);
         Assertions.assertArrayEquals(original, copy);
         Assertions.assertNotSame(original, copy);
     }
@@ -1002,7 +1002,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfCharArray() {
         char[] original = { 'a', 'b', 'c' };
-        char[] copy = N.copyOf(original, 5);
+        char[] copy = CommonUtil.copyOf(original, 5);
         Assertions.assertEquals(5, copy.length);
         Assertions.assertEquals('a', copy[0]);
         Assertions.assertEquals('b', copy[1]);
@@ -1014,7 +1014,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfByteArray() {
         byte[] original = { 1, 2, 3 };
-        byte[] copy = N.copyOf(original, 2);
+        byte[] copy = CommonUtil.copyOf(original, 2);
         Assertions.assertEquals(2, copy.length);
         Assertions.assertEquals(1, copy[0]);
         Assertions.assertEquals(2, copy[1]);
@@ -1023,7 +1023,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfShortArray() {
         short[] original = { 10, 20, 30 };
-        short[] copy = N.copyOf(original, 4);
+        short[] copy = CommonUtil.copyOf(original, 4);
         Assertions.assertEquals(4, copy.length);
         Assertions.assertEquals(10, copy[0]);
         Assertions.assertEquals(20, copy[1]);
@@ -1034,7 +1034,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfIntArray() {
         int[] original = { 100, 200, 300 };
-        int[] copy = N.copyOf(original, 3);
+        int[] copy = CommonUtil.copyOf(original, 3);
         Assertions.assertArrayEquals(original, copy);
         Assertions.assertNotSame(original, copy);
     }
@@ -1042,7 +1042,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfLongArray() {
         long[] original = { 1000L, 2000L, 3000L };
-        long[] copy = N.copyOf(original, 5);
+        long[] copy = CommonUtil.copyOf(original, 5);
         Assertions.assertEquals(5, copy.length);
         Assertions.assertEquals(1000L, copy[0]);
         Assertions.assertEquals(2000L, copy[1]);
@@ -1054,7 +1054,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfFloatArray() {
         float[] original = { 1.0f, 2.0f, 3.0f };
-        float[] copy = N.copyOf(original, 2);
+        float[] copy = CommonUtil.copyOf(original, 2);
         Assertions.assertEquals(2, copy.length);
         Assertions.assertEquals(1.0f, copy[0]);
         Assertions.assertEquals(2.0f, copy[1]);
@@ -1063,7 +1063,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfDoubleArray() {
         double[] original = { 1.0, 2.0, 3.0 };
-        double[] copy = N.copyOf(original, 4);
+        double[] copy = CommonUtil.copyOf(original, 4);
         Assertions.assertEquals(4, copy.length);
         Assertions.assertEquals(1.0, copy[0]);
         Assertions.assertEquals(2.0, copy[1]);
@@ -1074,7 +1074,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfObjectArray() {
         String[] original = { "a", "b", "c" };
-        String[] copy = N.copyOf(original, 5);
+        String[] copy = CommonUtil.copyOf(original, 5);
         Assertions.assertEquals(5, copy.length);
         Assertions.assertEquals("a", copy[0]);
         Assertions.assertEquals("b", copy[1]);
@@ -1086,7 +1086,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfObjectArrayWithType() {
         Number[] original = { 1, 2, 3 };
-        Integer[] copy = N.copyOf(original, 4, Integer[].class);
+        Integer[] copy = CommonUtil.copyOf(original, 4, Integer[].class);
         Assertions.assertEquals(4, copy.length);
         Assertions.assertEquals(1, copy[0]);
         Assertions.assertEquals(2, copy[1]);
@@ -1097,7 +1097,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeBooleanArray() {
         boolean[] original = { true, false, true, false, true };
-        boolean[] copy = N.copyOfRange(original, 1, 4);
+        boolean[] copy = CommonUtil.copyOfRange(original, 1, 4);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertFalse(copy[0]);
         Assertions.assertTrue(copy[1]);
@@ -1107,7 +1107,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeBooleanArrayFullRange() {
         boolean[] original = { true, false, true };
-        boolean[] copy = N.copyOfRange(original, 0, 3);
+        boolean[] copy = CommonUtil.copyOfRange(original, 0, 3);
         Assertions.assertArrayEquals(original, copy);
         Assertions.assertNotSame(original, copy);
     }
@@ -1115,7 +1115,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeBooleanArrayWithStep() {
         boolean[] original = { true, false, true, false, true, false };
-        boolean[] copy = N.copyOfRange(original, 0, 6, 2);
+        boolean[] copy = CommonUtil.copyOfRange(original, 0, 6, 2);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertTrue(copy[0]);
         Assertions.assertTrue(copy[1]);
@@ -1125,7 +1125,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeBooleanArrayWithNegativeStep() {
         boolean[] original = { true, false, true, false, true };
-        boolean[] copy = N.copyOfRange(original, 4, 1, -1);
+        boolean[] copy = CommonUtil.copyOfRange(original, 4, 1, -1);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertTrue(copy[0]);
         Assertions.assertFalse(copy[1]);
@@ -1135,7 +1135,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeBooleanArrayWithNegativeStepToBeginning() {
         boolean[] original = { true, false, true, false, true };
-        boolean[] copy = N.copyOfRange(original, 4, -1, -1);
+        boolean[] copy = CommonUtil.copyOfRange(original, 4, -1, -1);
         Assertions.assertEquals(5, copy.length);
         Assertions.assertTrue(copy[0]);
         Assertions.assertFalse(copy[1]);
@@ -1147,7 +1147,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeCharArray() {
         char[] original = { 'a', 'b', 'c', 'd', 'e' };
-        char[] copy = N.copyOfRange(original, 1, 4);
+        char[] copy = CommonUtil.copyOfRange(original, 1, 4);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertEquals('b', copy[0]);
         Assertions.assertEquals('c', copy[1]);
@@ -1157,7 +1157,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeCharArrayWithStep() {
         char[] original = { 'a', 'b', 'c', 'd', 'e', 'f' };
-        char[] copy = N.copyOfRange(original, 1, 6, 2);
+        char[] copy = CommonUtil.copyOfRange(original, 1, 6, 2);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertEquals('b', copy[0]);
         Assertions.assertEquals('d', copy[1]);
@@ -1167,7 +1167,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeByteArray() {
         byte[] original = { 1, 2, 3, 4, 5 };
-        byte[] copy = N.copyOfRange(original, 2, 5);
+        byte[] copy = CommonUtil.copyOfRange(original, 2, 5);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertEquals(3, copy[0]);
         Assertions.assertEquals(4, copy[1]);
@@ -1177,7 +1177,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeByteArrayWithStep() {
         byte[] original = { 1, 2, 3, 4, 5, 6 };
-        byte[] copy = N.copyOfRange(original, 0, 5, 2);
+        byte[] copy = CommonUtil.copyOfRange(original, 0, 5, 2);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertEquals(1, copy[0]);
         Assertions.assertEquals(3, copy[1]);
@@ -1187,7 +1187,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeShortArray() {
         short[] original = { 10, 20, 30, 40, 50 };
-        short[] copy = N.copyOfRange(original, 0, 3);
+        short[] copy = CommonUtil.copyOfRange(original, 0, 3);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertEquals(10, copy[0]);
         Assertions.assertEquals(20, copy[1]);
@@ -1197,7 +1197,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeShortArrayWithStep() {
         short[] original = { 10, 20, 30, 40, 50, 60 };
-        short[] copy = N.copyOfRange(original, 1, 5, 2);
+        short[] copy = CommonUtil.copyOfRange(original, 1, 5, 2);
         Assertions.assertEquals(2, copy.length);
         Assertions.assertEquals(20, copy[0]);
         Assertions.assertEquals(40, copy[1]);
@@ -1206,7 +1206,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeIntArray() {
         int[] original = { 100, 200, 300, 400, 500 };
-        int[] copy = N.copyOfRange(original, 1, 3);
+        int[] copy = CommonUtil.copyOfRange(original, 1, 3);
         Assertions.assertEquals(2, copy.length);
         Assertions.assertEquals(200, copy[0]);
         Assertions.assertEquals(300, copy[1]);
@@ -1215,7 +1215,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeIntArrayWithStep() {
         int[] original = { 100, 200, 300, 400, 500, 600 };
-        int[] copy = N.copyOfRange(original, 0, 6, 3);
+        int[] copy = CommonUtil.copyOfRange(original, 0, 6, 3);
         Assertions.assertEquals(2, copy.length);
         Assertions.assertEquals(100, copy[0]);
         Assertions.assertEquals(400, copy[1]);
@@ -1224,7 +1224,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeLongArray() {
         long[] original = { 1000L, 2000L, 3000L, 4000L, 5000L };
-        long[] copy = N.copyOfRange(original, 2, 4);
+        long[] copy = CommonUtil.copyOfRange(original, 2, 4);
         Assertions.assertEquals(2, copy.length);
         Assertions.assertEquals(3000L, copy[0]);
         Assertions.assertEquals(4000L, copy[1]);
@@ -1233,7 +1233,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeLongArrayWithStep() {
         long[] original = { 1000L, 2000L, 3000L, 4000L, 5000L };
-        long[] copy = N.copyOfRange(original, 4, 0, -2);
+        long[] copy = CommonUtil.copyOfRange(original, 4, 0, -2);
         Assertions.assertEquals(2, copy.length);
         Assertions.assertEquals(5000L, copy[0]);
         Assertions.assertEquals(3000L, copy[1]);
@@ -1242,7 +1242,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeFloatArray() {
         float[] original = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
-        float[] copy = N.copyOfRange(original, 3, 5);
+        float[] copy = CommonUtil.copyOfRange(original, 3, 5);
         Assertions.assertEquals(2, copy.length);
         Assertions.assertEquals(4.0f, copy[0]);
         Assertions.assertEquals(5.0f, copy[1]);
@@ -1251,7 +1251,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeFloatArrayWithStep() {
         float[] original = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f };
-        float[] copy = N.copyOfRange(original, 0, 6, 2);
+        float[] copy = CommonUtil.copyOfRange(original, 0, 6, 2);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertEquals(1.0f, copy[0]);
         Assertions.assertEquals(3.0f, copy[1]);
@@ -1261,7 +1261,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeDoubleArray() {
         double[] original = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-        double[] copy = N.copyOfRange(original, 0, 2);
+        double[] copy = CommonUtil.copyOfRange(original, 0, 2);
         Assertions.assertEquals(2, copy.length);
         Assertions.assertEquals(1.0, copy[0]);
         Assertions.assertEquals(2.0, copy[1]);
@@ -1270,7 +1270,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeDoubleArrayWithStep() {
         double[] original = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-        double[] copy = N.copyOfRange(original, 1, 5, 2);
+        double[] copy = CommonUtil.copyOfRange(original, 1, 5, 2);
         Assertions.assertEquals(2, copy.length);
         Assertions.assertEquals(2.0, copy[0]);
         Assertions.assertEquals(4.0, copy[1]);
@@ -1279,7 +1279,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeObjectArray() {
         String[] original = { "a", "b", "c", "d", "e" };
-        String[] copy = N.copyOfRange(original, 1, 4);
+        String[] copy = CommonUtil.copyOfRange(original, 1, 4);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertEquals("b", copy[0]);
         Assertions.assertEquals("c", copy[1]);
@@ -1289,7 +1289,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeObjectArrayWithStep() {
         String[] original = { "a", "b", "c", "d", "e", "f" };
-        String[] copy = N.copyOfRange(original, 0, 6, 2);
+        String[] copy = CommonUtil.copyOfRange(original, 0, 6, 2);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertEquals("a", copy[0]);
         Assertions.assertEquals("c", copy[1]);
@@ -1299,7 +1299,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeObjectArrayWithType() {
         Number[] original = { 1, 2, 3, 4, 5 };
-        Integer[] copy = N.copyOfRange(original, 1, 4, Integer[].class);
+        Integer[] copy = CommonUtil.copyOfRange(original, 1, 4, Integer[].class);
         Assertions.assertEquals(3, copy.length);
         Assertions.assertEquals(2, copy[0]);
         Assertions.assertEquals(3, copy[1]);
@@ -1309,7 +1309,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeObjectArrayWithTypeAndStep() {
         Number[] original = { 1, 2, 3, 4, 5, 6 };
-        Integer[] copy = N.copyOfRange(original, 0, 6, 3, Integer[].class);
+        Integer[] copy = CommonUtil.copyOfRange(original, 0, 6, 3, Integer[].class);
         Assertions.assertEquals(2, copy.length);
         Assertions.assertEquals(1, copy[0]);
         Assertions.assertEquals(4, copy[1]);
@@ -1318,7 +1318,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeList() {
         List<String> original = Arrays.asList("a", "b", "c", "d", "e");
-        List<String> copy = N.copyOfRange(original, 1, 4);
+        List<String> copy = CommonUtil.copyOfRange(original, 1, 4);
         Assertions.assertEquals(3, copy.size());
         Assertions.assertEquals("b", copy.get(0));
         Assertions.assertEquals("c", copy.get(1));
@@ -1328,7 +1328,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeListWithStep() {
         List<String> original = Arrays.asList("a", "b", "c", "d", "e", "f");
-        List<String> copy = N.copyOfRange(original, 0, 5, 2);
+        List<String> copy = CommonUtil.copyOfRange(original, 0, 5, 2);
         Assertions.assertEquals(3, copy.size());
         Assertions.assertEquals("a", copy.get(0));
         Assertions.assertEquals("c", copy.get(1));
@@ -1338,28 +1338,28 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCopyOfRangeString() {
         String original = "abcde";
-        String copy = N.copyOfRange(original, 1, 4);
+        String copy = CommonUtil.copyOfRange(original, 1, 4);
         Assertions.assertEquals("bcd", copy);
     }
 
     @Test
     public void testCopyOfRangeStringFullRange() {
         String original = "abcde";
-        String copy = N.copyOfRange(original, 0, 5);
+        String copy = CommonUtil.copyOfRange(original, 0, 5);
         Assertions.assertEquals(original, copy);
     }
 
     @Test
     public void testCopyOfRangeStringWithStep() {
         String original = "abcdef";
-        String copy = N.copyOfRange(original, 0, 6, 2);
+        String copy = CommonUtil.copyOfRange(original, 0, 6, 2);
         Assertions.assertEquals("ace", copy);
     }
 
     @Test
     public void testCloneBooleanArray() {
         boolean[] original = { true, false, true };
-        boolean[] cloned = N.clone(original);
+        boolean[] cloned = CommonUtil.clone(original);
         Assertions.assertArrayEquals(original, cloned);
         Assertions.assertNotSame(original, cloned);
     }
@@ -1367,14 +1367,14 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCloneBooleanArrayNull() {
         boolean[] original = null;
-        boolean[] cloned = N.clone(original);
+        boolean[] cloned = CommonUtil.clone(original);
         Assertions.assertNull(cloned);
     }
 
     @Test
     public void testCloneCharArray() {
         char[] original = { 'a', 'b', 'c' };
-        char[] cloned = N.clone(original);
+        char[] cloned = CommonUtil.clone(original);
         Assertions.assertArrayEquals(original, cloned);
         Assertions.assertNotSame(original, cloned);
     }
@@ -1382,7 +1382,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCloneByteArray() {
         byte[] original = { 1, 2, 3 };
-        byte[] cloned = N.clone(original);
+        byte[] cloned = CommonUtil.clone(original);
         Assertions.assertArrayEquals(original, cloned);
         Assertions.assertNotSame(original, cloned);
     }
@@ -1390,7 +1390,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCloneShortArray() {
         short[] original = { 10, 20, 30 };
-        short[] cloned = N.clone(original);
+        short[] cloned = CommonUtil.clone(original);
         Assertions.assertArrayEquals(original, cloned);
         Assertions.assertNotSame(original, cloned);
     }
@@ -1398,7 +1398,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCloneIntArray() {
         int[] original = { 100, 200, 300 };
-        int[] cloned = N.clone(original);
+        int[] cloned = CommonUtil.clone(original);
         Assertions.assertArrayEquals(original, cloned);
         Assertions.assertNotSame(original, cloned);
     }
@@ -1406,7 +1406,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCloneLongArray() {
         long[] original = { 1000L, 2000L, 3000L };
-        long[] cloned = N.clone(original);
+        long[] cloned = CommonUtil.clone(original);
         Assertions.assertArrayEquals(original, cloned);
         Assertions.assertNotSame(original, cloned);
     }
@@ -1414,7 +1414,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCloneFloatArray() {
         float[] original = { 1.0f, 2.0f, 3.0f };
-        float[] cloned = N.clone(original);
+        float[] cloned = CommonUtil.clone(original);
         Assertions.assertArrayEquals(original, cloned);
         Assertions.assertNotSame(original, cloned);
     }
@@ -1422,7 +1422,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCloneDoubleArray() {
         double[] original = { 1.0, 2.0, 3.0 };
-        double[] cloned = N.clone(original);
+        double[] cloned = CommonUtil.clone(original);
         Assertions.assertArrayEquals(original, cloned);
         Assertions.assertNotSame(original, cloned);
     }
@@ -1430,17 +1430,17 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testCloneObjectArray() {
         String[] original = { "a", "b", "c" };
-        String[] cloned = N.clone(original);
+        String[] cloned = CommonUtil.clone(original);
         Assertions.assertArrayEquals(original, cloned);
         Assertions.assertNotSame(original, cloned);
     }
 
     @Test
     public void testClone2DBoolean() {
-        assertNull(N.clone((boolean[][]) null));
+        assertNull(CommonUtil.clone((boolean[][]) null));
 
         final boolean[][] a = new boolean[][] { { true, false }, { false, true } };
-        final boolean[][] cloneA = N.clone(a);
+        final boolean[][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertArrayEquals(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
@@ -1449,22 +1449,22 @@ public class CommonUtil107Test extends TestBase {
         assertTrue(a[0][0]);
 
         final boolean[][] b = new boolean[][] { { true, false }, null };
-        final boolean[][] cloneB = N.clone(b);
+        final boolean[][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertArrayEquals(b, cloneB);
 
         final boolean[][] c = new boolean[0][0];
-        final boolean[][] cloneC = N.clone(c);
+        final boolean[][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertArrayEquals(c, cloneC);
     }
 
     @Test
     public void testClone2DChar() {
-        assertNull(N.clone((char[][]) null));
+        assertNull(CommonUtil.clone((char[][]) null));
 
         final char[][] a = new char[][] { { 'a', 'b' }, { 'c', 'd' } };
-        final char[][] cloneA = N.clone(a);
+        final char[][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertArrayEquals(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
@@ -1473,22 +1473,22 @@ public class CommonUtil107Test extends TestBase {
         assertEquals('a', a[0][0]);
 
         final char[][] b = new char[][] { { 'a', 'b' }, null };
-        final char[][] cloneB = N.clone(b);
+        final char[][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertArrayEquals(b, cloneB);
 
         final char[][] c = new char[0][0];
-        final char[][] cloneC = N.clone(c);
+        final char[][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertArrayEquals(c, cloneC);
     }
 
     @Test
     public void testClone2DByte() {
-        assertNull(N.clone((byte[][]) null));
+        assertNull(CommonUtil.clone((byte[][]) null));
 
         final byte[][] a = new byte[][] { { 1, 2 }, { 3, 4 } };
-        final byte[][] cloneA = N.clone(a);
+        final byte[][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertArrayEquals(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
@@ -1497,22 +1497,22 @@ public class CommonUtil107Test extends TestBase {
         assertEquals(1, a[0][0]);
 
         final byte[][] b = new byte[][] { { 1, 2 }, null };
-        final byte[][] cloneB = N.clone(b);
+        final byte[][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertArrayEquals(b, cloneB);
 
         final byte[][] c = new byte[0][0];
-        final byte[][] cloneC = N.clone(c);
+        final byte[][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertArrayEquals(c, cloneC);
     }
 
     @Test
     public void testClone2DShort() {
-        assertNull(N.clone((short[][]) null));
+        assertNull(CommonUtil.clone((short[][]) null));
 
         final short[][] a = new short[][] { { 1, 2 }, { 3, 4 } };
-        final short[][] cloneA = N.clone(a);
+        final short[][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertArrayEquals(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
@@ -1521,22 +1521,22 @@ public class CommonUtil107Test extends TestBase {
         assertEquals(1, a[0][0]);
 
         final short[][] b = new short[][] { { 1, 2 }, null };
-        final short[][] cloneB = N.clone(b);
+        final short[][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertArrayEquals(b, cloneB);
 
         final short[][] c = new short[0][0];
-        final short[][] cloneC = N.clone(c);
+        final short[][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertArrayEquals(c, cloneC);
     }
 
     @Test
     public void testClone2DInt() {
-        assertNull(N.clone((int[][]) null));
+        assertNull(CommonUtil.clone((int[][]) null));
 
         final int[][] a = new int[][] { { 1, 2 }, { 3, 4 } };
-        final int[][] cloneA = N.clone(a);
+        final int[][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertArrayEquals(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
@@ -1545,22 +1545,22 @@ public class CommonUtil107Test extends TestBase {
         assertEquals(1, a[0][0]);
 
         final int[][] b = new int[][] { { 1, 2 }, null };
-        final int[][] cloneB = N.clone(b);
+        final int[][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertArrayEquals(b, cloneB);
 
         final int[][] c = new int[0][0];
-        final int[][] cloneC = N.clone(c);
+        final int[][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertArrayEquals(c, cloneC);
     }
 
     @Test
     public void testClone2DLong() {
-        assertNull(N.clone((long[][]) null));
+        assertNull(CommonUtil.clone((long[][]) null));
 
         final long[][] a = new long[][] { { 1L, 2L }, { 3L, 4L } };
-        final long[][] cloneA = N.clone(a);
+        final long[][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertArrayEquals(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
@@ -1569,22 +1569,22 @@ public class CommonUtil107Test extends TestBase {
         assertEquals(1L, a[0][0]);
 
         final long[][] b = new long[][] { { 1L, 2L }, null };
-        final long[][] cloneB = N.clone(b);
+        final long[][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertArrayEquals(b, cloneB);
 
         final long[][] c = new long[0][0];
-        final long[][] cloneC = N.clone(c);
+        final long[][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertArrayEquals(c, cloneC);
     }
 
     @Test
     public void testClone2DFloat() {
-        assertNull(N.clone((float[][]) null));
+        assertNull(CommonUtil.clone((float[][]) null));
 
         final float[][] a = new float[][] { { 1.0f, 2.0f }, { 3.0f, 4.0f } };
-        final float[][] cloneA = N.clone(a);
+        final float[][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertArrayEquals(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
@@ -1593,22 +1593,22 @@ public class CommonUtil107Test extends TestBase {
         assertEquals(1.0f, a[0][0], 0.000001);
 
         final float[][] b = new float[][] { { 1.0f, 2.0f }, null };
-        final float[][] cloneB = N.clone(b);
+        final float[][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertArrayEquals(b, cloneB);
 
         final float[][] c = new float[0][0];
-        final float[][] cloneC = N.clone(c);
+        final float[][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertArrayEquals(c, cloneC);
     }
 
     @Test
     public void testClone2DDouble() {
-        assertNull(N.clone((double[][]) null));
+        assertNull(CommonUtil.clone((double[][]) null));
 
         final double[][] a = new double[][] { { 1.0, 2.0 }, { 3.0, 4.0 } };
-        final double[][] cloneA = N.clone(a);
+        final double[][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertArrayEquals(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
@@ -1617,22 +1617,22 @@ public class CommonUtil107Test extends TestBase {
         assertEquals(1.0, a[0][0], 0.000001);
 
         final double[][] b = new double[][] { { 1.0, 2.0 }, null };
-        final double[][] cloneB = N.clone(b);
+        final double[][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertArrayEquals(b, cloneB);
 
         final double[][] c = new double[0][0];
-        final double[][] cloneC = N.clone(c);
+        final double[][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertArrayEquals(c, cloneC);
     }
 
     @Test
     public void testClone2DGeneric() {
-        assertNull(N.clone((String[][]) null));
+        assertNull(CommonUtil.clone((String[][]) null));
 
         final String[][] a = new String[][] { { "a", "b" }, { "c", "d" } };
-        final String[][] cloneA = N.clone(a);
+        final String[][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertArrayEquals(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
@@ -1641,22 +1641,22 @@ public class CommonUtil107Test extends TestBase {
         assertEquals("a", a[0][0]);
 
         final String[][] b = new String[][] { { "a", "b" }, null };
-        final String[][] cloneB = N.clone(b);
+        final String[][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertArrayEquals(b, cloneB);
 
         final String[][] c = new String[0][0];
-        final String[][] cloneC = N.clone(c);
+        final String[][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertArrayEquals(c, cloneC);
     }
 
     @Test
     public void testClone3DBoolean() {
-        assertNull(N.clone((boolean[][][]) null));
+        assertNull(CommonUtil.clone((boolean[][][]) null));
 
         final boolean[][][] a = new boolean[][][] { { { true, false } }, { { false, true } } };
-        final boolean[][][] cloneA = N.clone(a);
+        final boolean[][][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
         assertNotSame(a[0][0], cloneA[0][0]);
@@ -1668,24 +1668,24 @@ public class CommonUtil107Test extends TestBase {
         assertTrue(a[0][0][0]);
 
         final boolean[][][] b = new boolean[][][] { { { true, false } }, null };
-        final boolean[][][] cloneB = N.clone(b);
+        final boolean[][][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertEquals(b.length, cloneB.length);
         assertArrayEquals(b[0], cloneB[0]);
         assertNull(cloneB[1]);
 
         final boolean[][][] c = new boolean[0][0][0];
-        final boolean[][][] cloneC = N.clone(c);
+        final boolean[][][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertEquals(0, cloneC.length);
     }
 
     @Test
     public void testClone3DChar() {
-        assertNull(N.clone((char[][][]) null));
+        assertNull(CommonUtil.clone((char[][][]) null));
 
         final char[][][] a = new char[][][] { { { 'a', 'b' } }, { { 'c', 'd' } } };
-        final char[][][] cloneA = N.clone(a);
+        final char[][][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
         assertNotSame(a[0][0], cloneA[0][0]);
@@ -1697,24 +1697,24 @@ public class CommonUtil107Test extends TestBase {
         assertEquals('a', a[0][0][0]);
 
         final char[][][] b = new char[][][] { { { 'a', 'b' } }, null };
-        final char[][][] cloneB = N.clone(b);
+        final char[][][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertEquals(b.length, cloneB.length);
         assertArrayEquals(b[0], cloneB[0]);
         assertNull(cloneB[1]);
 
         final char[][][] c = new char[0][0][0];
-        final char[][][] cloneC = N.clone(c);
+        final char[][][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertEquals(0, cloneC.length);
     }
 
     @Test
     public void testClone3DByte() {
-        assertNull(N.clone((byte[][][]) null));
+        assertNull(CommonUtil.clone((byte[][][]) null));
 
         final byte[][][] a = new byte[][][] { { { 1, 2 } }, { { 3, 4 } } };
-        final byte[][][] cloneA = N.clone(a);
+        final byte[][][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
         assertNotSame(a[0][0], cloneA[0][0]);
@@ -1726,24 +1726,24 @@ public class CommonUtil107Test extends TestBase {
         assertEquals(1, a[0][0][0]);
 
         final byte[][][] b = new byte[][][] { { { 1, 2 } }, null };
-        final byte[][][] cloneB = N.clone(b);
+        final byte[][][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertEquals(b.length, cloneB.length);
         assertArrayEquals(b[0], cloneB[0]);
         assertNull(cloneB[1]);
 
         final byte[][][] c = new byte[0][0][0];
-        final byte[][][] cloneC = N.clone(c);
+        final byte[][][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertEquals(0, cloneC.length);
     }
 
     @Test
     public void testClone3DShort() {
-        assertNull(N.clone((short[][][]) null));
+        assertNull(CommonUtil.clone((short[][][]) null));
 
         final short[][][] a = new short[][][] { { { 1, 2 } }, { { 3, 4 } } };
-        final short[][][] cloneA = N.clone(a);
+        final short[][][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
         assertNotSame(a[0][0], cloneA[0][0]);
@@ -1755,24 +1755,24 @@ public class CommonUtil107Test extends TestBase {
         assertEquals(1, a[0][0][0]);
 
         final short[][][] b = new short[][][] { { { 1, 2 } }, null };
-        final short[][][] cloneB = N.clone(b);
+        final short[][][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertEquals(b.length, cloneB.length);
         assertArrayEquals(b[0], cloneB[0]);
         assertNull(cloneB[1]);
 
         final short[][][] c = new short[0][0][0];
-        final short[][][] cloneC = N.clone(c);
+        final short[][][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertEquals(0, cloneC.length);
     }
 
     @Test
     public void testClone3DInt() {
-        assertNull(N.clone((int[][][]) null));
+        assertNull(CommonUtil.clone((int[][][]) null));
 
         final int[][][] a = new int[][][] { { { 1, 2 } }, { { 3, 4 } } };
-        final int[][][] cloneA = N.clone(a);
+        final int[][][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
         assertNotSame(a[0][0], cloneA[0][0]);
@@ -1784,24 +1784,24 @@ public class CommonUtil107Test extends TestBase {
         assertEquals(1, a[0][0][0]);
 
         final int[][][] b = new int[][][] { { { 1, 2 } }, null };
-        final int[][][] cloneB = N.clone(b);
+        final int[][][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertEquals(b.length, cloneB.length);
         assertArrayEquals(b[0], cloneB[0]);
         assertNull(cloneB[1]);
 
         final int[][][] c = new int[0][0][0];
-        final int[][][] cloneC = N.clone(c);
+        final int[][][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertEquals(0, cloneC.length);
     }
 
     @Test
     public void testClone3DLong() {
-        assertNull(N.clone((long[][][]) null));
+        assertNull(CommonUtil.clone((long[][][]) null));
 
         final long[][][] a = new long[][][] { { { 1L, 2L } }, { { 3L, 4L } } };
-        final long[][][] cloneA = N.clone(a);
+        final long[][][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
         assertNotSame(a[0][0], cloneA[0][0]);
@@ -1813,24 +1813,24 @@ public class CommonUtil107Test extends TestBase {
         assertEquals(1L, a[0][0][0]);
 
         final long[][][] b = new long[][][] { { { 1L, 2L } }, null };
-        final long[][][] cloneB = N.clone(b);
+        final long[][][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertEquals(b.length, cloneB.length);
         assertArrayEquals(b[0], cloneB[0]);
         assertNull(cloneB[1]);
 
         final long[][][] c = new long[0][0][0];
-        final long[][][] cloneC = N.clone(c);
+        final long[][][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertEquals(0, cloneC.length);
     }
 
     @Test
     public void testClone3DFloat() {
-        assertNull(N.clone((float[][][]) null));
+        assertNull(CommonUtil.clone((float[][][]) null));
 
         final float[][][] a = new float[][][] { { { 1.0f, 2.0f } }, { { 3.0f, 4.0f } } };
-        final float[][][] cloneA = N.clone(a);
+        final float[][][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
         assertNotSame(a[0][0], cloneA[0][0]);
@@ -1842,24 +1842,24 @@ public class CommonUtil107Test extends TestBase {
         assertEquals(1.0f, a[0][0][0], 0.000001);
 
         final float[][][] b = new float[][][] { { { 1.0f, 2.0f } }, null };
-        final float[][][] cloneB = N.clone(b);
+        final float[][][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertEquals(b.length, cloneB.length);
         assertArrayEquals(b[0], cloneB[0]);
         assertNull(cloneB[1]);
 
         final float[][][] c = new float[0][0][0];
-        final float[][][] cloneC = N.clone(c);
+        final float[][][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertEquals(0, cloneC.length);
     }
 
     @Test
     public void testClone3DDouble() {
-        assertNull(N.clone((double[][][]) null));
+        assertNull(CommonUtil.clone((double[][][]) null));
 
         final double[][][] a = new double[][][] { { { 1.0, 2.0 } }, { { 3.0, 4.0 } } };
-        final double[][][] cloneA = N.clone(a);
+        final double[][][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
         assertNotSame(a[0][0], cloneA[0][0]);
@@ -1871,24 +1871,24 @@ public class CommonUtil107Test extends TestBase {
         assertEquals(1.0, a[0][0][0], 0.000001);
 
         final double[][][] b = new double[][][] { { { 1.0, 2.0 } }, null };
-        final double[][][] cloneB = N.clone(b);
+        final double[][][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertEquals(b.length, cloneB.length);
         assertArrayEquals(b[0], cloneB[0]);
         assertNull(cloneB[1]);
 
         final double[][][] c = new double[0][0][0];
-        final double[][][] cloneC = N.clone(c);
+        final double[][][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertEquals(0, cloneC.length);
     }
 
     @Test
     public void testClone3DGeneric() {
-        assertNull(N.clone((String[][][]) null));
+        assertNull(CommonUtil.clone((String[][][]) null));
 
         final String[][][] a = new String[][][] { { { "a", "b" } }, { { "c", "d" } } };
-        final String[][][] cloneA = N.clone(a);
+        final String[][][] cloneA = CommonUtil.clone(a);
         assertNotSame(a, cloneA);
         assertNotSame(a[0], cloneA[0]);
         assertNotSame(a[0][0], cloneA[0][0]);
@@ -1900,14 +1900,14 @@ public class CommonUtil107Test extends TestBase {
         assertEquals("a", a[0][0][0]);
 
         final String[][][] b = new String[][][] { { { "a", "b" } }, null };
-        final String[][][] cloneB = N.clone(b);
+        final String[][][] cloneB = CommonUtil.clone(b);
         assertNotSame(b, cloneB);
         assertEquals(b.length, cloneB.length);
         assertArrayEquals(b[0], cloneB[0]);
         assertNull(cloneB[1]);
 
         final String[][][] c = new String[0][0][0];
-        final String[][][] cloneC = N.clone(c);
+        final String[][][] cloneC = CommonUtil.clone(c);
         assertNotSame(c, cloneC);
         assertEquals(0, cloneC.length);
     }

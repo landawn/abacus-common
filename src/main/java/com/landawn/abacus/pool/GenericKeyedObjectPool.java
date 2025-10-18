@@ -426,26 +426,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
-    //    /**
-    //     *
-    //     *
-    //     * @param e
-    //     * @return true, if successful
-    //     * @throws IllegalStateException
-    //     */
-    //    @Override
-    //    public boolean containsValue(final E e) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        lock.lock();
-    //
-    //        try {
-    //            return pool.containsValue(e);
-    //        } finally {
-    //            lock.unlock();
-    //        }
-    //    }
-
     /**
      * Returns a snapshot of the keys contained in this pool.
      * The returned set is a copy and will not reflect subsequent changes to the pool.

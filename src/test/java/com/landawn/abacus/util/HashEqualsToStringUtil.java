@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.landawn.abacus.util.Array;
-
 public final class HashEqualsToStringUtil {
 
     private HashEqualsToStringUtil() {

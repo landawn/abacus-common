@@ -26,17 +26,8 @@ public class HttpResponse2025Test extends TestBase {
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Content-Type", Collections.singletonList("application/json"));
 
-        return new HttpResponse(
-                "https://api.example.com/test",
-                System.currentTimeMillis() - 1000,
-                System.currentTimeMillis(),
-                statusCode,
-                message,
-                headers,
-                body.getBytes(StandardCharsets.UTF_8),
-                ContentFormat.JSON,
-                StandardCharsets.UTF_8
-        );
+        return new HttpResponse("https://api.example.com/test", System.currentTimeMillis() - 1000, System.currentTimeMillis(), statusCode, message, headers,
+                body.getBytes(StandardCharsets.UTF_8), ContentFormat.JSON, StandardCharsets.UTF_8);
     }
 
     @Test
@@ -244,29 +235,11 @@ public class HttpResponse2025Test extends TestBase {
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Content-Type", Collections.singletonList("application/json"));
 
-        HttpResponse response1 = new HttpResponse(
-                "https://api.example.com/test",
-                1000L,
-                2000L,
-                200,
-                "OK",
-                headers,
-                "test".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.JSON,
-                StandardCharsets.UTF_8
-        );
+        HttpResponse response1 = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "OK", headers, "test".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.JSON, StandardCharsets.UTF_8);
 
-        HttpResponse response2 = new HttpResponse(
-                "https://api.example.com/test",
-                1000L,
-                2000L,
-                200,
-                "Success",
-                headers,
-                "test".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.JSON,
-                StandardCharsets.UTF_8
-        );
+        HttpResponse response2 = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "Success", headers,
+                "test".getBytes(StandardCharsets.UTF_8), ContentFormat.JSON, StandardCharsets.UTF_8);
 
         assertFalse(response1.equals(response2));
     }
@@ -276,29 +249,11 @@ public class HttpResponse2025Test extends TestBase {
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Content-Type", Collections.singletonList("application/json"));
 
-        HttpResponse response1 = new HttpResponse(
-                "https://api.example.com/test1",
-                1000L,
-                2000L,
-                200,
-                "OK",
-                headers,
-                "test".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.JSON,
-                StandardCharsets.UTF_8
-        );
+        HttpResponse response1 = new HttpResponse("https://api.example.com/test1", 1000L, 2000L, 200, "OK", headers, "test".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.JSON, StandardCharsets.UTF_8);
 
-        HttpResponse response2 = new HttpResponse(
-                "https://api.example.com/test2",
-                1000L,
-                2000L,
-                200,
-                "OK",
-                headers,
-                "test".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.JSON,
-                StandardCharsets.UTF_8
-        );
+        HttpResponse response2 = new HttpResponse("https://api.example.com/test2", 1000L, 2000L, 200, "OK", headers, "test".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.JSON, StandardCharsets.UTF_8);
 
         assertFalse(response1.equals(response2));
     }
@@ -308,29 +263,11 @@ public class HttpResponse2025Test extends TestBase {
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Content-Type", Collections.singletonList("application/json"));
 
-        HttpResponse response1 = new HttpResponse(
-                "https://api.example.com/test",
-                1000L,
-                2000L,
-                200,
-                "OK",
-                headers,
-                "body1".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.JSON,
-                StandardCharsets.UTF_8
-        );
+        HttpResponse response1 = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "OK", headers, "body1".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.JSON, StandardCharsets.UTF_8);
 
-        HttpResponse response2 = new HttpResponse(
-                "https://api.example.com/test",
-                1000L,
-                2000L,
-                200,
-                "OK",
-                headers,
-                "body2".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.JSON,
-                StandardCharsets.UTF_8
-        );
+        HttpResponse response2 = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "OK", headers, "body2".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.JSON, StandardCharsets.UTF_8);
 
         assertFalse(response1.equals(response2));
     }
@@ -371,17 +308,9 @@ public class HttpResponse2025Test extends TestBase {
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Content-Type", Collections.singletonList("text/plain"));
 
-        HttpResponse response = new HttpResponse(
-                "https://api.example.com/test",
-                1000L,
-                2000L,
-                200,
-                "OK",
-                headers,
-                "test".getBytes(StandardCharsets.UTF_8),
-                null,  // null body format
-                StandardCharsets.UTF_8
-        );
+        HttpResponse response = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "OK", headers, "test".getBytes(StandardCharsets.UTF_8),
+                null, // null body format
+                StandardCharsets.UTF_8);
 
         String body = response.body(String.class);
         assertEquals("test", body);
@@ -392,17 +321,8 @@ public class HttpResponse2025Test extends TestBase {
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Content-Type", Collections.singletonList("application/xml"));
 
-        HttpResponse response = new HttpResponse(
-                "https://api.example.com/test",
-                1000L,
-                2000L,
-                200,
-                "OK",
-                headers,
-                "<root>test</root>".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.XML,
-                StandardCharsets.UTF_8
-        );
+        HttpResponse response = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "OK", headers,
+                "<root>test</root>".getBytes(StandardCharsets.UTF_8), ContentFormat.XML, StandardCharsets.UTF_8);
 
         String body = response.body(String.class);
         assertEquals("<root>test</root>", body);
@@ -413,17 +333,8 @@ public class HttpResponse2025Test extends TestBase {
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Content-Type", Collections.singletonList("application/x-www-form-urlencoded"));
 
-        HttpResponse response = new HttpResponse(
-                "https://api.example.com/test",
-                1000L,
-                2000L,
-                200,
-                "OK",
-                headers,
-                "key=value".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.FormUrlEncoded,
-                StandardCharsets.UTF_8
-        );
+        HttpResponse response = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "OK", headers, "key=value".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.FormUrlEncoded, StandardCharsets.UTF_8);
 
         String body = response.body(String.class);
         assertEquals("key=value", body);
@@ -436,17 +347,8 @@ public class HttpResponse2025Test extends TestBase {
         headers.put("Cache-Control", Collections.singletonList("no-cache"));
         headers.put("X-Custom-Header", Collections.singletonList("custom-value"));
 
-        HttpResponse response = new HttpResponse(
-                "https://api.example.com/test",
-                1000L,
-                2000L,
-                200,
-                "OK",
-                headers,
-                "test".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.JSON,
-                StandardCharsets.UTF_8
-        );
+        HttpResponse response = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "OK", headers, "test".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.JSON, StandardCharsets.UTF_8);
 
         assertEquals(3, response.headers().size());
         assertEquals("no-cache", response.headers().get("Cache-Control").get(0));

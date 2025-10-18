@@ -185,7 +185,7 @@ public class Strings200Test extends TestBase {
     public void testIsAllEmptyIterable() {
         assertTrue(Strings.isAllEmpty(list(null, "", null)));
         assertFalse(Strings.isAllEmpty(list(null, "a", "")));
-        assertTrue(Strings.isAllEmpty(new ArrayList<String>()));
+        assertTrue(Strings.isAllEmpty(new ArrayList<>()));
         assertTrue(Strings.isAllEmpty((Iterable<String>) null));
     }
 
@@ -201,7 +201,7 @@ public class Strings200Test extends TestBase {
     public void testIsAllBlankIterable() {
         assertTrue(Strings.isAllBlank(list(null, " ", "\n")));
         assertFalse(Strings.isAllBlank(list(null, "a", " ")));
-        assertTrue(Strings.isAllBlank(new ArrayList<String>()));
+        assertTrue(Strings.isAllBlank(new ArrayList<>()));
         assertTrue(Strings.isAllBlank((Iterable<String>) null));
     }
 
@@ -218,7 +218,7 @@ public class Strings200Test extends TestBase {
     public void testIsAnyEmptyIterable() {
         assertTrue(Strings.isAnyEmpty(list("a", "", "b")));
         assertFalse(Strings.isAnyEmpty(list("a", "b")));
-        assertFalse(Strings.isAnyEmpty(new ArrayList<String>()));
+        assertFalse(Strings.isAnyEmpty(new ArrayList<>()));
         assertFalse(Strings.isAnyEmpty((Iterable<String>) null));
     }
 
@@ -236,7 +236,7 @@ public class Strings200Test extends TestBase {
     public void testIsAnyBlankIterable() {
         assertTrue(Strings.isAnyBlank(list("a", " ", "b")));
         assertFalse(Strings.isAnyBlank(list("a", "b")));
-        assertFalse(Strings.isAnyBlank(new ArrayList<String>()));
+        assertFalse(Strings.isAnyBlank(new ArrayList<>()));
         assertFalse(Strings.isAnyBlank((Iterable<String>) null));
     }
 
@@ -274,7 +274,7 @@ public class Strings200Test extends TestBase {
     public void testFirstNonEmptyIterable() {
         assertEquals("a", Strings.firstNonEmpty(list(null, "", "a", "b")));
         assertEquals("", Strings.firstNonEmpty(list(null, "")));
-        assertEquals("", Strings.firstNonEmpty(new ArrayList<String>()));
+        assertEquals("", Strings.firstNonEmpty(new ArrayList<>()));
         assertEquals("", Strings.firstNonEmpty((Iterable<String>) null));
     }
 
@@ -289,7 +289,7 @@ public class Strings200Test extends TestBase {
     public void testFirstNonBlankIterable() {
         assertEquals("a", Strings.firstNonBlank(list(null, " ", "\t", "a", "b")));
         assertEquals("", Strings.firstNonBlank(list(null, " ", "\t")));
-        assertEquals("", Strings.firstNonBlank(new ArrayList<String>()));
+        assertEquals("", Strings.firstNonBlank(new ArrayList<>()));
         assertEquals("", Strings.firstNonBlank((Iterable<String>) null));
     }
 

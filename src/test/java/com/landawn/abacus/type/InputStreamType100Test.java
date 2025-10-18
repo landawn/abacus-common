@@ -17,8 +17,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -83,7 +83,7 @@ public class InputStreamType100Test extends TestBase {
         InputStream expectedStream = new ByteArrayInputStream(new byte[0]);
         when(blob.getBinaryStream()).thenReturn(expectedStream);
 
-        InputStream result = inputStreamType.valueOf((Object) blob);
+        InputStream result = inputStreamType.valueOf(blob);
         assertEquals(expectedStream, result);
         verify(blob).getBinaryStream();
 

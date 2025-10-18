@@ -21,8 +21,6 @@ import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.type.AbstractType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
-import com.landawn.abacus.util.Dates;
-import com.landawn.abacus.util.N;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -92,7 +90,7 @@ public class TypeTest extends AbstractTest {
     @Test
     public void test_MapEntry() {
         AbstractMap.SimpleEntry<String, Integer> entry = new AbstractMap.SimpleEntry<>("abc", 123);
-        Type<Map.Entry<String, Integer>> type = N.typeOf("Map.Entry<String, Integer>");
+        Type<Map.Entry<String, Integer>> type = CommonUtil.typeOf("Map.Entry<String, Integer>");
 
         String str = type.stringOf(entry);
         N.println(str);

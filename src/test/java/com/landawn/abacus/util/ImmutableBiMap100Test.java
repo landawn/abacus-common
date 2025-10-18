@@ -3,8 +3,8 @@ package com.landawn.abacus.util;
 import static org.junit.Assert.assertThrows;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -123,7 +123,7 @@ public class ImmutableBiMap100Test extends TestBase {
     @Test
     public void testCopyOf_Map_Deprecated() {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            ImmutableBiMap.copyOf(N.asMap("key", "value"));
+            ImmutableBiMap.copyOf(CommonUtil.asMap("key", "value"));
         });
     }
 
@@ -156,7 +156,7 @@ public class ImmutableBiMap100Test extends TestBase {
     @Test
     public void testWrap_Map_Deprecated() {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            ImmutableBiMap.wrap(N.asMap("key", "value"));
+            ImmutableBiMap.wrap(CommonUtil.asMap("key", "value"));
         });
     }
 

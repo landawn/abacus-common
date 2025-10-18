@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -149,7 +149,7 @@ public class CodeGenerationUtil100Test extends TestBase {
                 .generateUpperCaseWithUnderscore(true)
                 .generateFunctionPropName(true)
                 .functionClassName("f")
-                .propFunctions(N.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
+                .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
                 .build();
 
         N.println(CodeGenerationUtil.generatePropNameTableClasses(codeConfig));
@@ -215,7 +215,7 @@ public class CodeGenerationUtil100Test extends TestBase {
                 .classNameForUpperCaseWithUnderscore("su_custom")
                 .generateFunctionPropName(true)
                 .functionClassName("func")
-                .propFunctions(N.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
+                .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
                 .build();
 
         String result = CodeGenerationUtil.generatePropNameTableClasses(config);

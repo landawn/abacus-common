@@ -16,8 +16,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedException;
@@ -112,7 +112,7 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_loadSheet_File_SheetName_RowExtractor() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = N.newDataset(N.asList("col1", "col2"), N.asList(N.asList("a", "b"), N.asList("c", "d")));
+        Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("col1", "col2"), CommonUtil.asList(CommonUtil.asList("a", "b"), CommonUtil.asList("c", "d")));
         ExcelUtil.writeSheet("TestSheet", dataset, tempFile);
 
         Dataset loaded = ExcelUtil.loadSheet(tempFile, "TestSheet", RowExtractors.DEFAULT);
@@ -312,7 +312,7 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_writeSheet_WithDataset() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = N.newDataset(N.asList("column1", "column2"), N.asList(N.asList("ab", "cd"), N.asList("ef", "gh")));
+        Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("column1", "column2"), CommonUtil.asList(CommonUtil.asList("ab", "cd"), CommonUtil.asList("ef", "gh")));
 
         ExcelUtil.writeSheet("DatasetSheet", dataset, tempFile);
 
@@ -324,7 +324,7 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_writeSheet_Dataset_SheetCreateOptions() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = N.newDataset(N.asList("A", "B"), N.asList(N.asList(1, 2)));
+        Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("A", "B"), CommonUtil.asList(CommonUtil.asList(1, 2)));
 
         SheetCreateOptions options = SheetCreateOptions.builder().autoSizeColumn(true).build();
 
@@ -337,7 +337,7 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_writeSheet_Dataset_SheetSetter() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = N.newDataset(N.asList("C"), N.asList(N.asList(3)));
+        Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("C"), CommonUtil.asList(CommonUtil.asList(3)));
 
         Consumer<Sheet> setter = sheet -> sheet.setDefaultRowHeight((short) 400);
 
@@ -715,8 +715,8 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_RoundTrip_WriteAndLoad() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset original = N.newDataset(N.asList("name", "value", "flag"),
-                N.asList(N.asList("A", 10, true), N.asList("B", 20, false), N.asList("C", 30, true)));
+        Dataset original = CommonUtil.newDataset(CommonUtil.asList("name", "value", "flag"),
+                CommonUtil.asList(CommonUtil.asList("A", 10, true), CommonUtil.asList("B", 20, false), CommonUtil.asList("C", 30, true)));
 
         ExcelUtil.writeSheet("Data", original, tempFile);
         Dataset loaded = ExcelUtil.loadSheet(tempFile);

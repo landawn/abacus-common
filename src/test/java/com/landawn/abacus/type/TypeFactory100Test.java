@@ -10,8 +10,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.util.Strings;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONParser;
@@ -100,7 +100,7 @@ public class TypeFactory100Test extends TestBase {
     public void testRegisterTypeWithClassAndType() {
         class CustomClass3 {
         }
-        Type<CustomClass3> customType = new Type<CustomClass3>() {
+        Type<CustomClass3> customType = new Type<>() {
             @Override
             public String name() {
                 return "CustomClass3";
@@ -444,7 +444,7 @@ public class TypeFactory100Test extends TestBase {
 
     @Test
     public void testRegisterType() {
-        Type<?> customType = new Type<Object>() {
+        Type<?> customType = new Type<>() {
             @Override
             public String name() {
                 return "UniqueTypeName456";

@@ -492,7 +492,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Integer[] ages = {25, 30, 35};
      * BiIterator<String, Integer> iter = BiIterator.zip(names, ages);
      * iter.forEachRemaining((name, age) -> System.out.println(name + ": " + age));
-     * // Output: Alice: 25, Bob: 30, Charlie: 35
+     * // Output:
+     * // Alice: 25
+     * // Bob: 30
+     * // Charlie: 35
      * }</pre>
      *
      * @param <A> the type of elements in the first array

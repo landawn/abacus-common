@@ -724,14 +724,6 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         init();
 
-        //    if (!containsRow(rowKey)) {
-        //        addRow(rowKey, null);
-        //    }
-        //
-        //    if (!containsColumn(columnKey)) {
-        //        addColumn(columnKey, null);
-        //    }
-
         return put(rowIndex, columnIndex, value);
     }
 
@@ -1126,25 +1118,6 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #countOfNonNullValue()
      */
     public boolean containsValue(final Object value) {
-        //        if (value == null) {
-        //            for (R r : rowKeySet()) {
-        //                for (C c : columnKeySet()) {
-        //                    if (this.get(r, c) == null) {
-        //                        return true;
-        //                    }
-        //                }
-        //            }
-        //        } else {
-        //            for (R r : rowKeySet()) {
-        //                for (C c : columnKeySet()) {
-        //                    if (value.equals(this.get(r, c))) {
-        //                        return true;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //
-        //        return false;
 
         if (_isInitialized) {
             for (final List<V> column : _columnList) {
@@ -1789,15 +1762,6 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #setColumn(Object, Collection)
      */
     public ImmutableList<V> getColumn(final C columnKey) throws IllegalArgumentException {
-
-        //    if (_initialized) {
-        //        column = _columnList.get(getColumnIndex(columnKey));
-        //    } else {
-        //        final int rowLength = rowLength();
-        //        checkColumnKey(columnKey);
-        //        column = new ArrayList<>(rowLength);
-        //        N.fill(column, 0, rowLength, null);
-        //    }
 
         if (!_isInitialized) {
             init();
@@ -3029,7 +2993,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Sorts the columns in the sheet based on the column keys using the provided comparator.
      * The comparator takes two column keys as input and returns a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
      *
-     * @param cmp The comparator to determine the order of the column keys. It takes two column keys as input and returns a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+     * @param cmp the comparator to determine the order of the column keys. It takes two column keys as input and returns a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
      * @throws IllegalStateException if the sheet is frozen (read-only).
      */
     public void sortByColumnKey(final Comparator<? super C> cmp) throws IllegalStateException {
@@ -3092,8 +3056,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Sorts the columns in the sheet based on the values in the specified column using the provided comparator.
      * The comparator takes two values from the column as input and returns a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
      *
-     * @param columnKey The key of the column based on whose values the columns will be sorted.
-     * @param cmp The comparator to determine the order of the values in the specified column. It takes two values from the column as input and returns a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+     * @param columnKey the key of the column based on whose values the columns will be sorted.
+     * @param cmp the comparator to determine the order of the values in the specified column. It takes two values from the column as input and returns a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
      * @throws IllegalStateException if the sheet is frozen (read-only).
      */
     public void sortByColumn(final C columnKey, final Comparator<? super V> cmp) throws IllegalStateException {
@@ -3310,7 +3274,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This method creates a new Sheet object and initializes it with the same row keys, column keys, and values as the current Sheet.
      * Changes to the copy will not affect the current Sheet, and vice versa.
      *
-     * @return A new Sheet object that is a copy of the current Sheet.
+     * @return a new Sheet object that is a copy of the current Sheet.
      */
     public Sheet<R, C, V> copy() {
         final Sheet<R, C, V> copy = new Sheet<>(_rowKeySet, _columnKeySet);
@@ -3335,9 +3299,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This method creates a new Sheet object and initializes it with the same values as the current Sheet for the specified row keys and column keys.
      * Changes to the copy will not affect the current Sheet, and vice versa.
      *
-     * @param rowKeySet The collection of row keys to be included in the copied Sheet.
-     * @param columnKeySet The collection of column keys to be included in the copied Sheet.
-     * @return A new Sheet object that is a copy of the current Sheet with the specified row keys and column keys.
+     * @param rowKeySet the collection of row keys to be included in the copied Sheet.
+     * @param columnKeySet the collection of column keys to be included in the copied Sheet.
+     * @return a new Sheet object that is a copy of the current Sheet with the specified row keys and column keys.
      * @throws IllegalArgumentException if any of the specified row keys or column keys are not present in the current Sheet.
      */
     public Sheet<R, C, V> copy(final Collection<R> rowKeySet, final Collection<C> columnKeySet) {
@@ -3387,7 +3351,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Changes to the copy will not affect the current Sheet, and vice versa.
      * The copy will maintain the same frozen state as the current Sheet.
      *
-     * @return A new Sheet object that is a deep copy of the current Sheet.
+     * @return a new Sheet object that is a deep copy of the current Sheet.
      */
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Beta
@@ -3401,8 +3365,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This method creates a new Sheet object and initializes it with the same row keys, column keys, and values as the current Sheet.
      * Changes to the copy will not affect the current Sheet, and vice versa.
      *
-     * @param freeze A boolean value that determines whether the copied Sheet should be frozen (read-only).
-     * @return A new Sheet object that is a deep copy of the current Sheet.
+     * @param freeze a boolean value that determines whether the copied Sheet should be frozen (read-only).
+     * @return a new Sheet object that is a deep copy of the current Sheet.
      */
     public Sheet<R, C, V> clone(final boolean freeze) {
         if (kryoParser == null) {
@@ -3933,32 +3897,6 @@ public final class Sheet<R, C, V> implements Cloneable {
         return cellsH(0, rowLength());
     }
 
-    //    /**
-    //     * Returns a stream of cells from a specific row in the Sheet.
-    //     * <p>
-    //     * Creates a stream containing all cells from the specified row, ordered by columns.
-    //     * </p>
-    //     *
-    //     * <pre>{@code
-    //     * Sheet<String, String, Integer> sheet = Sheet.rows(
-    //     *     List.of("row1", "row2"),
-    //     *     List.of("col1", "col2", "col3"),
-    //     *     new Integer[][] {{1, 2, 3}, {4, 5, 6}}
-    //     * );
-    //     * 
-    //     * sheet.cellsH(0).forEach(cell -> System.out.println(cell.value()));
-    //     * // Prints: 1, 2, 3 (values from row1)
-    //     * }</pre>
-    //     *
-    //     * @param rowIndex the zero-based index of the row
-    //     * @return a Stream of Cell objects from the specified row
-    //     * @throws IndexOutOfBoundsException if rowIndex < 0 or rowIndex >= rowLength()
-    //     * @see #cellsH(int, int)
-    //     */
-    //    public Stream<Sheet.Cell<R, C, V>> cellsH(final int rowIndex) throws IndexOutOfBoundsException {
-    //        return cellsH(rowIndex, rowIndex + 1);
-    //    }
-
     /**
      * Returns a stream of cells from a range of rows in horizontal order.
      * <p>
@@ -4062,32 +4000,6 @@ public final class Sheet<R, C, V> implements Cloneable {
     public Stream<Sheet.Cell<R, C, V>> cellsV() {
         return cellsV(0, columnLength());
     }
-
-    //    /**
-    //     * Returns a stream of cells from a specific column in the Sheet.
-    //     * <p>
-    //     * Creates a stream containing all cells from the specified column, ordered by rows.
-    //     * </p>
-    //     *
-    //     * <pre>{@code
-    //     * Sheet<String, String, Integer> sheet = Sheet.rows(
-    //     *     List.of("row1", "row2", "row3"),
-    //     *     List.of("col1", "col2"),
-    //     *     new Integer[][] {{1, 2}, {3, 4}, {5, 6}}
-    //     * );
-    //     * 
-    //     * sheet.cellsV(0).forEach(cell -> System.out.println(cell.value()));
-    //     * // Prints: 1, 3, 5 (values from col1)
-    //     * }</pre>
-    //     *
-    //     * @param columnIndex the zero-based index of the column
-    //     * @return a Stream of Cell objects from the specified column
-    //     * @throws IndexOutOfBoundsException if columnIndex < 0 or columnIndex >= columnLength()
-    //     * @see #cellsV(int, int)
-    //     */
-    //    public Stream<Sheet.Cell<R, C, V>> cellsV(final int columnIndex) throws IndexOutOfBoundsException {
-    //        return cellsV(columnIndex, columnIndex + 1);
-    //    }
 
     /**
      * Returns a stream of cells from a range of columns in vertical order.
@@ -4440,41 +4352,14 @@ public final class Sheet<R, C, V> implements Cloneable {
         return pointsH(0, rowLength());
     }
 
-    //    /**
-    //     * Returns a stream of coordinate points from a specific row.
-    //     * <p>
-    //     * Creates a stream of Point objects for all column positions in the specified row.
-    //     * Points are ordered by column index.
-    //     * </p>
-    //     *
-    //     * <pre>{@code
-    //     * Sheet<String, String, Integer> sheet = new Sheet<>(
-    //     *     List.of("row1", "row2"),
-    //     *     List.of("col1", "col2", "col3")
-    //     * );
-    //     * 
-    //     * sheet.pointsH(0).forEach(point -> 
-    //     *     System.out.println("(" + point.rowIndex() + "," + point.columnIndex() + ")"));
-    //     * // Prints: (0,0) (0,1) (0,2)
-    //     * }</pre>
-    //     *
-    //     * @param rowIndex the zero-based index of the row
-    //     * @return a Stream of Point objects from the specified row
-    //     * @throws IndexOutOfBoundsException if rowIndex < 0 or rowIndex >= rowLength()
-    //     * @see #pointsH(int, int)
-    //     */
-    //    public Stream<Point> pointsH(final int rowIndex) throws IndexOutOfBoundsException {
-    //        return pointsH(rowIndex, rowIndex + 1);
-    //    }
-
     /**
      * Returns a stream of Point objects representing the points in the Sheet in a horizontal manner.
      * Each Point represents a point in the Sheet with its row and column indices.
      * The points are ordered by rows, starting from the specified {@code fromRowIndex} and ending at the specified {@code toRowIndex}.
      *
-     * @param fromRowIndex The index of the row from which the stream should start.
-     * @param toRowIndex The index of the row at which the stream should end.
-     * @return A Stream of Point objects representing the points in the Sheet, ordered by rows starting from the specified {@code fromRowIndex} and ending at the specified {@code toRowIndex}.
+     * @param fromRowIndex the index of the row from which the stream should start.
+     * @param toRowIndex the index of the row at which the stream should end.
+     * @return a Stream of Point objects representing the points in the Sheet, ordered by rows starting from the specified {@code fromRowIndex} and ending at the specified {@code toRowIndex}.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the range of the Sheet's row indices.
      */
     public Stream<Point> pointsH(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
@@ -4492,33 +4377,20 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each Point represents a point in the Sheet with its row and column indices.
      * The points are ordered by columns, meaning the points in the first column are followed by the points in the second column, and so on.
      *
-     * @return A Stream of Point objects representing the points in the Sheet, ordered by columns.
+     * @return a Stream of Point objects representing the points in the Sheet, ordered by columns.
      */
     public Stream<Point> pointsV() {
         return pointsV(0, columnLength());
     }
-
-    //    /**
-    //     * Returns a stream of Point objects representing the points in the specified column in the Sheet.
-    //     * Each Point represents a point in the Sheet with its row and column indices.
-    //     * The points are ordered by rows, meaning the points in the first row are followed by the points in the subsequent rows.
-    //     *
-    //     * @param columnIndex The index of the column from which the stream should start.
-    //     * @return A Stream of Point objects representing the points in the specified column in the Sheet.
-    //     * @throws IndexOutOfBoundsException if the columnIndex is out of the range of the Sheet's column indices.
-    //     */
-    //    public Stream<Point> pointsV(final int columnIndex) throws IndexOutOfBoundsException {
-    //        return pointsV(columnIndex, columnIndex + 1);
-    //    }
 
     /**
      * Returns a stream of Point objects representing the points in the Sheet in a vertical manner.
      * Each Point represents a point in the Sheet with its row and column indices.
      * The points are ordered by columns, starting from the specified {@code fromColumnIndex} and ending at the specified {@code toColumnIndex}.
      *
-     * @param fromColumnIndex The index of the column from which the stream should start.
-     * @param toColumnIndex The index of the column at which the stream should end.
-     * @return A Stream of Point objects representing the points in the Sheet, ordered by columns starting from the specified {@code fromColumnIndex} and ending at the specified {@code toColumnIndex}.
+     * @param fromColumnIndex the index of the column from which the stream should start.
+     * @param toColumnIndex the index of the column at which the stream should end.
+     * @return a Stream of Point objects representing the points in the Sheet, ordered by columns starting from the specified {@code fromColumnIndex} and ending at the specified {@code toColumnIndex}.
      * @throws IndexOutOfBoundsException if the fromColumnIndex or toColumnIndex is out of the range of the Sheet's column indices.
      */
     public Stream<Point> pointsV(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
@@ -4537,7 +4409,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each Point in the inner stream represents a point in the Sheet with its row and column indices.
      * The points in each row are ordered by columns, meaning the points in the first column are followed by the points in the second column, and so on.
      *
-     * @return A Stream of Stream of Point objects representing the points in the Sheet, ordered by rows.
+     * @return a Stream of Stream of Point objects representing the points in the Sheet, ordered by rows.
      */
     public Stream<Stream<Point>> pointsR() {
         return pointsR(0, rowLength());
@@ -4550,9 +4422,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The points in each row are ordered by columns, meaning the points in the first column are followed by the points in the second column, and so on.
      * The points are ordered by rows, starting from the specified {@code fromRowIndex} and ending at the specified {@code toRowIndex}.
      *
-     * @param fromRowIndex The index of the row from which the stream should start.
-     * @param toRowIndex The index of the row at which the stream should end.
-     * @return A Stream of Stream of Point objects representing the points in the Sheet, ordered by rows starting from the specified {@code fromRowIndex} and ending at the specified {@code toRowIndex}.
+     * @param fromRowIndex the index of the row from which the stream should start.
+     * @param toRowIndex the index of the row at which the stream should end.
+     * @return a Stream of Stream of Point objects representing the points in the Sheet, ordered by rows starting from the specified {@code fromRowIndex} and ending at the specified {@code toRowIndex}.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the range of the Sheet's row indices.
      */
     public Stream<Stream<Point>> pointsR(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
@@ -4571,7 +4443,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each Point in the inner stream represents a point in the Sheet with its row and column indices.
      * The points in each column are ordered by rows, meaning the points in the first row are followed by the points in the subsequent rows.
      *
-     * @return A Stream of Stream of Point objects representing the points in the Sheet, ordered by columns.
+     * @return a Stream of Stream of Point objects representing the points in the Sheet, ordered by columns.
      */
     public Stream<Stream<Point>> pointsC() {
         return pointsC(0, columnLength());
@@ -4584,9 +4456,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The points in each column are ordered by rows, meaning the points in the first row are followed by the points in the subsequent rows.
      * The points are ordered by columns, starting from the specified {@code fromColumnIndex} and ending at the specified {@code toColumnIndex}.
      *
-     * @param fromColumnIndex The index of the column from which the stream should start.
-     * @param toColumnIndex The index of the column at which the stream should end.
-     * @return A Stream of Stream of Point objects representing the points in the Sheet, ordered by columns starting from the specified {@code fromColumnIndex} and ending at the specified {@code toColumnIndex}.
+     * @param fromColumnIndex the index of the column from which the stream should start.
+     * @param toColumnIndex the index of the column at which the stream should end.
+     * @return a Stream of Stream of Point objects representing the points in the Sheet, ordered by columns starting from the specified {@code fromColumnIndex} and ending at the specified {@code toColumnIndex}.
      * @throws IndexOutOfBoundsException if the fromColumnIndex or toColumnIndex is out of the range of the Sheet's column indices.
      */
     public Stream<Stream<Point>> pointsC(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
@@ -4625,41 +4497,14 @@ public final class Sheet<R, C, V> implements Cloneable {
         return streamH(0, rowLength());
     }
 
-    //    /**
-    //     * Returns a stream of values from a specific row.
-    //     * <p>
-    //     * Creates a stream containing all values from the specified row, ordered by columns.
-    //     * Includes null values from empty cells.
-    //     * </p>
-    //     *
-    //     * <pre>{@code
-    //     * Sheet<String, String, Integer> sheet = Sheet.rows(
-    //     *     List.of("row1", "row2"),
-    //     *     List.of("col1", "col2", "col3"),
-    //     *     new Integer[][] {{1, 2, 3}, {4, null, 6}}
-    //     * );
-    //     * 
-    //     * sheet.streamH(1).forEach(System.out::println);
-    //     * // Prints: 4, null, 6 (values from row2)
-    //     * }</pre>
-    //     *
-    //     * @param rowIndex the zero-based index of the row
-    //     * @return a Stream of values from the specified row
-    //     * @throws IndexOutOfBoundsException if rowIndex < 0 or rowIndex >= rowLength()
-    //     * @see #streamH(int, int)
-    //     */
-    //    public Stream<V> streamH(final int rowIndex) throws IndexOutOfBoundsException {
-    //        return streamH(rowIndex, rowIndex + 1);
-    //    }
-
     /**
      * Returns a stream of values in the Sheet in a horizontal manner.
      * The values are ordered by rows, starting from the specified {@code fromRowIndex} and ending at the specified {@code toRowIndex}.
      * The values in each row are ordered by columns, meaning the values in the first column are followed by the values in the subsequent columns.
      *
-     * @param fromRowIndex The index of the row from which the stream should start.
-     * @param toRowIndex The index of the row at which the stream should end.
-     * @return A Stream of values representing the values in the Sheet, ordered by rows starting from the specified {@code fromRowIndex} and ending at the specified {@code toRowIndex}.
+     * @param fromRowIndex the index of the row from which the stream should start.
+     * @param toRowIndex the index of the row at which the stream should end.
+     * @return a Stream of values representing the values in the Sheet, ordered by rows starting from the specified {@code fromRowIndex} and ending at the specified {@code toRowIndex}.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the range of the Sheet's row indices.
      */
     public Stream<V> streamH(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
@@ -4715,23 +4560,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Returns a stream of values in the Sheet in a vertical manner.
      * The values are ordered by columns, meaning the values in the first column are followed by the values in the second column, and so on.
      *
-     * @return A Stream of values representing the values in the Sheet, ordered by columns.
+     * @return a Stream of values representing the values in the Sheet, ordered by columns.
      */
     public Stream<V> streamV() {
         return streamV(0, columnLength());
     }
-
-    //    /**
-    //     * Returns a stream of values in the specified column in the Sheet.
-    //     * The values are ordered by rows, meaning the values in the first row are followed by the values in the subsequent rows.
-    //     *
-    //     * @param columnIndex The index of the column from which the stream should start.
-    //     * @return A Stream of values representing the values in the specified column in the Sheet.
-    //     * @throws IndexOutOfBoundsException if the columnIndex is out of the range of the Sheet's column indices.
-    //     */
-    //    public Stream<V> streamV(final int columnIndex) throws IndexOutOfBoundsException {
-    //        return streamV(columnIndex, columnIndex + 1);
-    //    }
 
     /**
      * Returns a stream of values from a range of columns in vertical order.
@@ -5087,9 +4920,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each pair in the stream represents a row in the Sheet, with the row key and a stream of values in that row.
      * The pairs are ordered by rows, starting from the specified {@code fromRowIndex} and ending at the specified {@code toRowIndex}.
      *
-     * @param fromRowIndex The index of the row from which the stream should start.
-     * @param toRowIndex The index of the row at which the stream should end.
-     * @return A Stream of Pair objects, where each Pair consists of a row key and a Stream of values in that row, ordered by rows starting from the specified {@code fromRowIndex} and ending at the specified {@code toRowIndex}.
+     * @param fromRowIndex the index of the row from which the stream should start.
+     * @param toRowIndex the index of the row at which the stream should end.
+     * @return a Stream of Pair objects, where each Pair consists of a row key and a Stream of values in that row, ordered by rows starting from the specified {@code fromRowIndex} and ending at the specified {@code toRowIndex}.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the range of the Sheet's row indices.
      */
     public Stream<Pair<R, Stream<V>>> rows(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
@@ -5198,10 +5031,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // row2: 3-4
      * }</pre>
      *
-     * @param <T> The type of the mapped value for each row.
-     * @param rowMapper A function that takes an integer and a DisposableObjArray as input and produces an object of type T.
+     * @param <T> the type of the mapped value for each row.
+     * @param rowMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                  The integer represents the index of the row in the Dataset, and the DisposableObjArray represents the row itself.
-     * @return A Stream of Pair objects, where each Pair consists of a row key and a mapped value obtained by applying the {@code rowMapper} function to the row's values, ordered by rows.
+     * @return a Stream of Pair objects, where each Pair consists of a row key and a mapped value obtained by applying the {@code rowMapper} function to the row's values, ordered by rows.
      */
     public <T> Stream<Pair<R, T>> rows(final IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
         return rows(0, rowLength(), rowMapper);
@@ -5229,12 +5062,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // row2: 3-4
      * }</pre>
      *
-     * @param <T> The type of the mapped value for each row.
+     * @param <T> the type of the mapped value for each row.
      * @param fromRowIndex the starting row index (inclusive)
      * @param toRowIndex the ending row index (exclusive)
-     * @param rowMapper A function that takes an integer and a DisposableObjArray as input and produces an object of type T.
+     * @param rowMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                  The integer represents the index of the row in the Dataset, and the DisposableObjArray represents the row itself.
-     * @return A Stream of Pair objects for the specified row range, where each Pair consists of a row key and a mapped value obtained by applying the {@code rowMapper} function to the row's values, ordered by rows.
+     * @return a Stream of Pair objects for the specified row range, where each Pair consists of a row key and a mapped value obtained by applying the {@code rowMapper} function to the row's values, ordered by rows.
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex > toRowIndex
      */
     public <T> Stream<Pair<R, T>> rows(final int fromRowIndex, final int toRowIndex, final IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
@@ -5423,10 +5256,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // col2: 2-4
      * }</pre>
      *
-     * @param <T> The type of the mapped value for each column.
-     * @param columnMapper A function that takes an integer and a DisposableObjArray as input and produces an object of type T.
+     * @param <T> the type of the mapped value for each column.
+     * @param columnMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                     The integer represents the index of the column in the Dataset, and the DisposableObjArray represents the column itself.
-     * @return A Stream of Pair objects, where each Pair consists of a column key and a mapped value obtained by applying the {@code columnMapper} function to the column's values, ordered by columns.
+     * @return a Stream of Pair objects, where each Pair consists of a column key and a mapped value obtained by applying the {@code columnMapper} function to the column's values, ordered by columns.
      */
     public <T> Stream<Pair<C, T>> columns(final IntObjFunction<? super DisposableObjArray, ? extends T> columnMapper) {
         return columns(0, columnLength(), columnMapper);
@@ -5454,12 +5287,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // col2: 2-5-8
      * }</pre>
      *
-     * @param <T> The type of the mapped value for each column.
+     * @param <T> the type of the mapped value for each column.
      * @param fromColumnIndex the starting column index (inclusive)
      * @param toColumnIndex the ending column index (exclusive)
-     * @param columnMapper A function that takes an integer and a DisposableObjArray as input and produces an object of type T.
+     * @param columnMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                     The integer represents the index of the column in the Dataset, and the DisposableObjArray represents the column itself.
-     * @return A Stream of Pair objects for the specified column range, where each Pair consists of a column key and a mapped value obtained by applying the {@code columnMapper} function to the column's values, ordered by columns.
+     * @return a Stream of Pair objects for the specified column range, where each Pair consists of a column key and a mapped value obtained by applying the {@code columnMapper} function to the column's values, ordered by columns.
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex > toColumnIndex
      */
     public <T> Stream<Pair<C, T>> columns(final int fromColumnIndex, final int toColumnIndex,
@@ -5520,7 +5353,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each row in the Sheet becomes a row in the Dataset, with the column keys serving as the column names in the Dataset.
      * The Dataset is ordered by rows, meaning the first row in the Sheet becomes the first row in the Dataset, and so on.
      *
-     * @return A Dataset object representing the data in the Sheet, ordered by rows.
+     * @return a Dataset object representing the data in the Sheet, ordered by rows.
      */
     public Dataset toDatasetH() {
         final int rowLength = rowLength();
@@ -5553,7 +5386,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each column in the Sheet becomes a row in the Dataset, with the row keys serving as the column names in the Dataset.
      * The Dataset is ordered by columns, meaning the first column in the Sheet becomes the first row in the Dataset, and so on.
      *
-     * @return A Dataset object representing the data in the Sheet, ordered by columns.
+     * @return a Dataset object representing the data in the Sheet, ordered by columns.
      */
     public Dataset toDatasetV() {
         final int rowLength = rowLength();
@@ -6035,9 +5868,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Prints the content of the Sheet to the provided Writer output.
      * The content is printed in a tabular format with specified row keys and column keys.
      *
-     * @param rowKeySet The collection of row keys to be included in the output.
-     * @param columnKeySet The collection of column keys to be included in the output.
-     * @param output The appendable to which the content of the Sheet will be printed.
+     * @param rowKeySet the collection of row keys to be included in the output.
+     * @param columnKeySet the collection of column keys to be included in the output.
+     * @param output the appendable to which the content of the Sheet will be printed.
      * @throws IllegalArgumentException if the provided row keys or column keys are not included in this sheet.
      * @throws UncheckedIOException if an I/O error occurs while printing the content of the Sheet.
      * @see #println()
@@ -6052,10 +5885,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Prints the content of the Sheet to the provided Writer output.
      * The content is printed in a tabular format with specified row keys and column keys.
      *
-     * @param rowKeySet The collection of row keys to be included in the output.
-     * @param columnKeySet The collection of column keys to be included in the output.
-     * @param prefix The prefix string to be printed before each line of the Sheet content.
-     * @param output The appendable to which the content of the Sheet will be printed.
+     * @param rowKeySet the collection of row keys to be included in the output.
+     * @param columnKeySet the collection of column keys to be included in the output.
+     * @param prefix the prefix string to be printed before each line of the Sheet content.
+     * @param output the appendable to which the content of the Sheet will be printed.
      * @throws IllegalArgumentException if the provided row keys or column keys are not included in this sheet.
      * @throws UncheckedIOException if an I/O error occurs while printing the content of the Sheet.
      * @see #println()

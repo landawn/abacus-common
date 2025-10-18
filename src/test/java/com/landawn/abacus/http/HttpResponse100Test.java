@@ -14,13 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
-
-import com.landawn.abacus.type.Type;
-import com.landawn.abacus.type.TypeFactory;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.type.Type;
+import com.landawn.abacus.type.TypeFactory;
 
 @Tag("new-test")
 public class HttpResponse100Test extends TestBase {

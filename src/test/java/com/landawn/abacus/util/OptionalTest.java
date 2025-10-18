@@ -54,47 +54,47 @@ public class OptionalTest extends AbstractTest {
     @Test
     public void test_01() {
         {
-            Type<OptionalBoolean> type = N.typeOf(OptionalBoolean.class);
+            Type<OptionalBoolean> type = CommonUtil.typeOf(OptionalBoolean.class);
             assertEquals(OptionalBoolean.of(true), type.valueOf(type.stringOf(OptionalBoolean.of(true))));
         }
         {
-            Type<OptionalChar> type = N.typeOf(OptionalChar.class);
+            Type<OptionalChar> type = CommonUtil.typeOf(OptionalChar.class);
             assertEquals(OptionalChar.of('a'), type.valueOf(type.stringOf(OptionalChar.of('a'))));
         }
         {
-            Type<OptionalByte> type = N.typeOf(OptionalByte.class);
+            Type<OptionalByte> type = CommonUtil.typeOf(OptionalByte.class);
             assertEquals(OptionalByte.of((byte) 1), type.valueOf(type.stringOf(OptionalByte.of((byte) 1))));
         }
         {
-            Type<OptionalShort> type = N.typeOf(OptionalShort.class);
+            Type<OptionalShort> type = CommonUtil.typeOf(OptionalShort.class);
             assertEquals(OptionalShort.of((short) 1), type.valueOf(type.stringOf(OptionalShort.of((short) 1))));
         }
         {
-            Type<OptionalInt> type = N.typeOf(OptionalInt.class);
+            Type<OptionalInt> type = CommonUtil.typeOf(OptionalInt.class);
             assertEquals(OptionalInt.of(1), type.valueOf(type.stringOf(OptionalInt.of(1))));
         }
         {
-            Type<OptionalLong> type = N.typeOf(OptionalLong.class);
+            Type<OptionalLong> type = CommonUtil.typeOf(OptionalLong.class);
             assertEquals(OptionalLong.of(1), type.valueOf(type.stringOf(OptionalLong.of(1))));
         }
 
         {
-            Type<OptionalFloat> type = N.typeOf(OptionalFloat.class);
+            Type<OptionalFloat> type = CommonUtil.typeOf(OptionalFloat.class);
             assertEquals(OptionalFloat.of(1.1f), type.valueOf(type.stringOf(OptionalFloat.of(1.1f))));
         }
 
         {
-            Type<OptionalDouble> type = N.typeOf(OptionalDouble.class);
+            Type<OptionalDouble> type = CommonUtil.typeOf(OptionalDouble.class);
             assertEquals(OptionalDouble.of(1.1), type.valueOf(type.stringOf(OptionalDouble.of(1.1))));
         }
 
         {
-            Type<Optional<Float>> type = N.typeOf("Optional<Float>");
+            Type<Optional<Float>> type = CommonUtil.typeOf("Optional<Float>");
             assertEquals(Optional.of(1.1f), type.valueOf(type.stringOf(Optional.of(1.1f))));
         }
 
         {
-            Type<Optional<Date>> type = N.typeOf("Optional<Date>");
+            Type<Optional<Date>> type = CommonUtil.typeOf("Optional<Date>");
             assertEquals(Optional.of(Dates.parseDate("2016-02-02")), type.valueOf(type.stringOf(Optional.of(Dates.parseDate("2016-02-02")))));
         }
     }

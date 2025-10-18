@@ -168,55 +168,6 @@ class JSONStringReader extends AbstractJSONReader {
         return new JSONStringReader(str, beginIndex, endIndex, cbuf);
     }
 
-    //
-    //    @Override
-    //    public int nextNameToken() throws IOException {
-    //        nextChar = 0;
-    //        strStart = strPosition;
-    //
-    //        if (nextEvent == START_QUOTATION_D) {
-    //            for (; strPosition < strLength;) {
-    //                if (strValue[strPosition++] == '"') {
-    //                    strEnd = strPosition - 1;
-    //                    nextEvent = END_QUOTATION_D;
-    //
-    //                    return nextEvent;
-    //                }
-    //            }
-    //        } else if (nextEvent == START_QUOTATION_S) {
-    //            for (; strPosition < strLength;) {
-    //                if (strValue[strPosition++] == '\'') {
-    //                    strEnd = strPosition - 1;
-    //                    nextEvent = END_QUOTATION_S;
-    //
-    //                    return nextEvent;
-    //                }
-    //            }
-    //        } else {
-    //            for (int ch = 0; strPosition < strLength;) {
-    //                ch = strValue[strPosition++];
-    //
-    //                // skip whitespace char.
-    //                if ((ch < 33) && (strStart == (strPosition - 1))) {
-    //                    strStart++;
-    //                } else if (ch < 128) {
-    //                    nextEvent = charEvents[ch];
-    //
-    //                    if (nextEvent > 0) {
-    //                        strEnd = strPosition - 1;
-    //
-    //                        return nextEvent;
-    //                    }
-    //                }
-    //            }
-    //        }
-    //
-    //        strEnd = strPosition - 1;
-    //        nextEvent = -1;
-    //
-    //        return nextEvent;
-    //    }
-
     /**
      * Returns the last token read from the JSON input.
      * This method is used to retrieve the last structural token or value

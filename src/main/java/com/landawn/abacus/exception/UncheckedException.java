@@ -65,21 +65,6 @@ public class UncheckedException extends RuntimeException {
 
     // private final Throwable checkedException;
 
-    //    /**
-    //     * Constructor for UncheckedIOException.
-    //     */
-    //    UncheckedException() {
-    //    }
-    //
-    //    /**
-    //     * Constructor for UncheckedIOException.
-    //     *
-    //     * @param message
-    //     */
-    //    UncheckedException(final String message) {
-    //        super(message);
-    //    }
-
     /**
      * Constructs a new {@code UncheckedException} by wrapping the specified checked exception.
      * This constructor preserves all information from the original exception including its

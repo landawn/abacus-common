@@ -62,7 +62,7 @@ import com.landawn.abacus.util.stream.Stream;
  *     .val();
  * }</pre>
  *
- * @param <T> The type of the value this Builder holds
+ * @param <T> the type of the value this Builder holds
  *
  * @see ImmutableList#builder()
  * @see ImmutableSet#builder()
@@ -1821,7 +1821,7 @@ public class Builder<T> {
          * Adds a single key-value mapping to the multimap.
          * If the key already exists, the value is added to the collection associated with that key.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * multimapBuilder.put("fruits", "apple")
          *                .put("fruits", "orange");
@@ -1841,7 +1841,7 @@ public class Builder<T> {
          * Adds all key-value mappings from the specified map to the multimap.
          * Each entry in the map results in a single value being added to the multimap.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * Map<String, String> map = Map.of("color", "red", "size", "large");
          * multimapBuilder.put(map);
@@ -1860,7 +1860,7 @@ public class Builder<T> {
          * Adds multiple values for a single key to the multimap.
          * All values in the collection are associated with the specified key.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * multimapBuilder.putMany("colors", Arrays.asList("red", "green", "blue"));
          * }</pre>
@@ -1879,7 +1879,7 @@ public class Builder<T> {
          * Adds multiple key-collection mappings from the specified map to the multimap.
          * Each key is mapped to all values in its corresponding collection.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * Map<String, List<String>> map = Map.of(
          *     "fruits", Arrays.asList("apple", "orange"),
@@ -1901,7 +1901,7 @@ public class Builder<T> {
          * Adds all key-value mappings from another multimap to this multimap.
          * All associations from the source multimap are copied.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * Multimap<String, String> source = // ... another multimap
          * multimapBuilder.putMany(source);
@@ -1920,7 +1920,7 @@ public class Builder<T> {
          * Removes a single occurrence of the specified key-value mapping from the multimap.
          * If the key-value pair exists multiple times, only one occurrence is removed.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * multimapBuilder.removeOne("fruits", "apple");
          * }</pre>
@@ -1939,7 +1939,7 @@ public class Builder<T> {
          * Removes single occurrences of all key-value mappings specified in the map.
          * For each entry, one occurrence of the key-value pair is removed if it exists.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * Map<String, String> toRemove = Map.of("fruits", "apple", "colors", "red");
          * multimapBuilder.removeOne(toRemove);
@@ -1958,7 +1958,7 @@ public class Builder<T> {
          * Removes all values associated with the specified key from the multimap.
          * After this operation, the key will no longer be present in the multimap.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * multimapBuilder.removeAll("fruits");
          * }</pre>
@@ -1976,7 +1976,7 @@ public class Builder<T> {
          * Removes multiple specific values associated with a key from the multimap.
          * Only the specified values are removed; other values for the key remain.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * multimapBuilder.removeMany("fruits", Arrays.asList("apple", "orange"));
          * }</pre>
@@ -1995,7 +1995,7 @@ public class Builder<T> {
          * Removes multiple values for multiple keys as specified in the map.
          * For each key in the map, the associated collection of values is removed.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * Map<String, List<String>> toRemove = Map.of(
          *     "fruits", Arrays.asList("apple", "orange"),
@@ -2017,7 +2017,7 @@ public class Builder<T> {
          * Removes all key-value mappings that exist in the specified multimap from this multimap.
          * Each key-value pair in the source multimap is removed from this multimap if present.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * Multimap<String, String> toRemove = // ... another multimap
          * multimapBuilder.removeMany(toRemove);
@@ -2053,7 +2053,7 @@ public class Builder<T> {
         /**
          * Renames a single column in the dataset.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.renameColumn("old_name", "new_name");
          * }</pre>
@@ -2071,7 +2071,7 @@ public class Builder<T> {
         /**
          * Renames multiple columns in the dataset using a map of old names to new names.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * Map<String, String> renames = Map.of(
          *     "old_col1", "new_col1",
@@ -2093,7 +2093,7 @@ public class Builder<T> {
          * Renames specified columns using a function that transforms column names.
          * The function is applied to each column name in the collection.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.renameColumns(Arrays.asList("col1", "col2"), 
          *                             name -> name.toUpperCase());
@@ -2112,7 +2112,7 @@ public class Builder<T> {
         /**
          * Renames all columns in the dataset using a function that transforms column names.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.renameColumns(name -> "prefix_" + name);
          * }</pre>
@@ -2130,7 +2130,7 @@ public class Builder<T> {
          * Adds a new column to the dataset at the end with the specified name and values.
          * The size of the column list must match the number of rows in the dataset.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.addColumn("age", Arrays.asList(25, 30, 35));
          * }</pre>
@@ -2149,7 +2149,7 @@ public class Builder<T> {
          * Adds a new column to the dataset at the specified position with the given name and values.
          * Existing columns at or after the index are shifted to the right.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.addColumn(1, "age", Arrays.asList(25, 30, 35));
          * }</pre>
@@ -2169,7 +2169,7 @@ public class Builder<T> {
          * Adds a new column by applying a function to values from an existing column.
          * The function transforms each value in the source column to produce the new column.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.addColumn("age_squared", "age", 
          *                         (Integer age) -> age * age);
@@ -2189,7 +2189,7 @@ public class Builder<T> {
         /**
          * Adds a new column at a specific position by applying a function to values from an existing column.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.addColumn(2, "age_squared", "age", 
          *                         (Integer age) -> age * age);
@@ -2211,7 +2211,7 @@ public class Builder<T> {
          * Adds a new column by applying a function to values from multiple existing columns.
          * The function receives an array of values from the specified columns for each row.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.addColumn("full_name", Arrays.asList("first", "last"),
          *     arr -> arr.get(0) + " " + arr.get(1));
@@ -2232,7 +2232,7 @@ public class Builder<T> {
         /**
          * Adds a new column at a specific position by applying a function to values from multiple columns.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.addColumn(1, "full_name", Arrays.asList("first", "last"),
          *     arr -> arr.get(0) + " " + arr.get(1));
@@ -2254,7 +2254,7 @@ public class Builder<T> {
         /**
          * Adds a new column by applying a binary function to values from two existing columns.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.addColumn("sum", Tuple.of("col1", "col2"),
          *     (Integer a, Integer b) -> a + b);
@@ -2274,7 +2274,7 @@ public class Builder<T> {
         /**
          * Adds a new column at a specific position by applying a binary function to values from two columns.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.addColumn(3, "sum", Tuple.of("col1", "col2"),
          *     (Integer a, Integer b) -> a + b);
@@ -2296,7 +2296,7 @@ public class Builder<T> {
         /**
          * Adds a new column by applying a ternary function to values from three existing columns.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.addColumn("result", Tuple.of("a", "b", "c"),
          *     (Integer a, Integer b, Integer c) -> a + b + c);
@@ -2316,7 +2316,7 @@ public class Builder<T> {
         /**
          * Adds a new column at a specific position by applying a ternary function to values from three columns.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.addColumn(2, "result", Tuple.of("a", "b", "c"),
          *     (Integer a, Integer b, Integer c) -> a + b + c);
@@ -2338,7 +2338,7 @@ public class Builder<T> {
         /**
          * Removes a column from the dataset by name.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.removeColumn("unnecessary_column");
          * }</pre>
@@ -2355,7 +2355,7 @@ public class Builder<T> {
         /**
          * Removes multiple columns from the dataset by their names.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.removeColumns(Arrays.asList("col1", "col2", "col3"));
          * }</pre>
@@ -2372,7 +2372,7 @@ public class Builder<T> {
         /**
          * Removes all columns that match the specified predicate condition.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.removeColumns(name -> name.startsWith("temp_"));
          * }</pre>
@@ -2390,7 +2390,7 @@ public class Builder<T> {
          * Updates all values in a column by applying a transformation function.
          * Each value in the column is replaced with the result of the function.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.updateColumn("price", (Double p) -> p * 1.1);
          * }</pre>
@@ -2408,7 +2408,7 @@ public class Builder<T> {
         /**
          * Updates all values in multiple columns by applying the same transformation function.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.updateColumns(Arrays.asList("price", "cost"), (i, c, v) -> v * 1.1);
          * }</pre>
@@ -2428,7 +2428,7 @@ public class Builder<T> {
          * Converts a column's data type to the specified target type.
          * Values are converted using appropriate type conversion rules.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.convertColumn("age", Integer.class);
          * }</pre>
@@ -2446,7 +2446,7 @@ public class Builder<T> {
         /**
          * Converts multiple columns to their specified target types.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * Map<String, Class<?>> conversions = Map.of(
          *     "age", Integer.class,
@@ -2468,7 +2468,7 @@ public class Builder<T> {
          * Combines multiple columns into a single new column of the specified type.
          * The values from the source columns are merged based on the target type's requirements.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.combineColumns(Arrays.asList("year", "month", "day"), 
          *                              "date", LocalDate.class);
@@ -2488,7 +2488,7 @@ public class Builder<T> {
         /**
          * Combines multiple columns into a single new column using a custom combine function.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.combineColumns(Arrays.asList("first", "last"), "fullName",
          *     arr -> arr.get(0) + " " + arr.get(1));
@@ -2509,7 +2509,7 @@ public class Builder<T> {
         /**
          * Combines two columns into a single new column using a binary function.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.combineColumns(Tuple.of("width", "height"), "area",
          *     (Integer w, Integer h) -> w * h);
@@ -2529,7 +2529,7 @@ public class Builder<T> {
         /**
          * Combines three columns into a single new column using a ternary function.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.combineColumns(Tuple.of("red", "green", "blue"), "rgb",
          *     (Integer r, Integer g, Integer b) -> String.format("#%02X%02X%02X", r, g, b));
@@ -2551,7 +2551,7 @@ public class Builder<T> {
          * Divides a single column into multiple new columns using a function that returns a list.
          * Each value in the source column is split into multiple values for the new columns.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.divideColumn("full_name", Arrays.asList("first", "last"),
          *     (String name) -> Arrays.asList(name.split(" ")));
@@ -2572,7 +2572,7 @@ public class Builder<T> {
          * Divides a single column into multiple new columns using a consumer that populates an array.
          * The consumer receives the source value and an output array to fill.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.divideColumn("coordinates", Arrays.asList("x", "y", "z"),
          *     (String coords, Object[] output) -> {
@@ -2597,7 +2597,7 @@ public class Builder<T> {
         /**
          * Divides a single column into two new columns using a consumer that populates a Pair.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.divideColumn("key_value", Tuple.of("key", "value"),
          *     (String kv, Pair<Object, Object> output) -> {
@@ -2622,7 +2622,7 @@ public class Builder<T> {
         /**
          * Divides a single column into three new columns using a consumer that populates a Triple.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.divideColumn("rgb", Tuple.of("red", "green", "blue"),
          *     (String color, Triple<Object, Object, Object> output) -> {
@@ -2649,7 +2649,7 @@ public class Builder<T> {
          * Updates all values in the entire dataset by applying a transformation function.
          * The function is applied to every value in every column.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.updateAll(value -> value == null ? "" : value);
          * }</pre>
@@ -2668,7 +2668,7 @@ public class Builder<T> {
         * <br />
         * The update is performed by applying a function to each value in the Dataset. The function takes the row index, column name, and current value, and returns the new value.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.updateAll((rowIndex, colName, value) -> {
          *     if ("status".equals(colName) && value == null) {
@@ -2678,7 +2678,7 @@ public class Builder<T> {
          * });
          * }</pre>
          *
-         * @param func The function to be applied to each value in the Dataset. It takes the row index, column name, and current value, and returns the new value.
+         * @param func the function to be applied to each value in the Dataset. It takes the row index, column name, and current value, and returns the new value.
          * @return this builder instance for method chaining
          * @see Dataset#updateAll(IntBiObjFunction)
          */
@@ -2691,7 +2691,7 @@ public class Builder<T> {
         /**
          * Replaces all values in the dataset that match a predicate with a new value.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * datasetBuilder.replaceIf(value -> value == null || "".equals(value), "N/A");
          * }</pre>
@@ -2711,13 +2711,13 @@ public class Builder<T> {
          * <br />
          * The predicate takes the row index, column name, and each value in the Dataset as input, and returns a boolean indicating whether the value should be replaced.
          *
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          *  datasetBuilder.replaceIf((rowIndex, colName, value) -> "status".equals(colName) && "inactive".equals(value), "N/A");
          * }</pre>
          *
-         * @param predicate The predicate to test each value in the sheet. It takes the row index, column name, and a value from the Dataset as input, and returns a boolean indicating whether the value should be replaced.
-         * @param newValue The new value to replace the values that satisfy the condition.
+         * @param predicate the predicate to test each value in the sheet. It takes the row index, column name, and a value from the Dataset as input, and returns a boolean indicating whether the value should be replaced.
+         * @param newValue the new value to replace the values that satisfy the condition.
          * @return this builder instance for method chaining
          * @see Dataset#replaceIf(IntBiObjPredicate, Object)
          */
@@ -2731,7 +2731,7 @@ public class Builder<T> {
          * Prepends the rows from another Dataset to the beginning of this Dataset.
          * The columns of both Datasets must be identical.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * Dataset header = // ... dataset with header rows
          * datasetBuilder.prepend(header);
@@ -2751,7 +2751,7 @@ public class Builder<T> {
          * Appends the rows from another Dataset to the end of this Dataset.
          * The columns of both Datasets must be identical.
          * 
-         * <p>Example:</p>
+         * <p>Example usage:</p></p>
          * <pre>{@code
          * Dataset moreData = // ... dataset with additional rows
          * datasetBuilder.append(moreData);
@@ -2773,7 +2773,7 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two comparable objects using their natural ordering.
      * This is the starting point for building a comparison chain.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compare(obj1.getName(), obj2.getName())
      *                     .compare(obj1.getAge(), obj2.getAge())
@@ -2793,7 +2793,7 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two objects using a specified comparator.
      * This is the starting point for building a comparison chain with custom comparison logic.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compare(str1, str2, String.CASE_INSENSITIVE_ORDER)
      *                     .compare(obj1.getDate(), obj2.getDate())
@@ -2810,23 +2810,11 @@ public class Builder<T> {
         return new ComparisonBuilder().compare(left, right, comparator);
     }
 
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param left
-    //     * @param right
-    //     * @param func
-    //     * @return
-    //     */
-    //    public static <T> ComparisonBuilder compare(T left, T right, BiFunction<? super T, ? super T, Integer> func) {
-    //        return new ComparisonBuilder().compare(left, right, func);
-    //    }
-
     /**
      * Creates a new ComparisonBuilder and compares two comparable objects, treating null as smaller.
      * Null values are considered less than non-null values in the comparison.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compareNullLess(obj1.getName(), obj2.getName())
      *                     .compareNullLess(obj1.getDescription(), obj2.getDescription())
@@ -2846,7 +2834,7 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two comparable objects, treating null as bigger.
      * Null values are considered greater than non-null values in the comparison.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compareNullBigger(obj1.getOptionalField(), obj2.getOptionalField())
      *                     .compare(obj1.getId(), obj2.getId())
@@ -2866,7 +2854,7 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two boolean values, treating false as less than true.
      * This is useful for sorting where false values should come before true values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compareFalseLess(obj1.isActive(), obj2.isActive())
      *                     .compare(obj1.getName(), obj2.getName())
@@ -2885,7 +2873,7 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two boolean values, treating true as less than false.
      * This is useful for sorting where true values should come before false values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compareTrueLess(obj1.isPriority(), obj2.isPriority())
      *                     .compare(obj1.getTimestamp(), obj2.getTimestamp())
@@ -2904,7 +2892,7 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two char values.
      * Characters are compared by their numeric values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compare(obj1.getGrade(), obj2.getGrade())
      *                     .compare(obj1.getScore(), obj2.getScore())
@@ -2922,7 +2910,7 @@ public class Builder<T> {
     /**
      * Creates a new ComparisonBuilder and compares two byte values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compare(obj1.getPriority(), obj2.getPriority())
      *                     .compare(obj1.getLevel(), obj2.getLevel())
@@ -2940,7 +2928,7 @@ public class Builder<T> {
     /**
      * Creates a new ComparisonBuilder and compares two short values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compare(obj1.getRank(), obj2.getRank())
      *                     .compare(obj1.getYear(), obj2.getYear())
@@ -2958,7 +2946,7 @@ public class Builder<T> {
     /**
      * Creates a new ComparisonBuilder and compares two int values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compare(obj1.getAge(), obj2.getAge())
      *                     .compare(obj1.getId(), obj2.getId())
@@ -2976,7 +2964,7 @@ public class Builder<T> {
     /**
      * Creates a new ComparisonBuilder and compares two long values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compare(obj1.getTimestamp(), obj2.getTimestamp())
      *                     .compare(obj1.getSize(), obj2.getSize())
@@ -2995,7 +2983,7 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two float values.
      * Uses Float.compare() for proper handling of NaN and special values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compare(obj1.getWeight(), obj2.getWeight())
      *                     .compare(obj1.getHeight(), obj2.getHeight())
@@ -3014,7 +3002,7 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two float values with a specified tolerance.
      * This is useful for comparing floating-point numbers where exact equality is not required.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compare(obj1.getWeight(), obj2.getWeight(), 0.01f)
      *                     .compare(obj1.getHeight(), obj2.getHeight(), 0.01f)
@@ -3034,7 +3022,7 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two double values.
      * Uses Double.compare() for proper handling of NaN and special values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compare(obj1.getPrice(), obj2.getPrice())
      *                     .compare(obj1.getDiscount(), obj2.getDiscount())
@@ -3053,7 +3041,7 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two double values with a specified tolerance.
      * This is useful for comparing floating-point numbers where exact equality is not required.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int result = Builder.compare(obj1.getPrice(), obj2.getPrice(), 0.01)
      *                     .compare(obj1.getDiscount(), obj2.getDiscount(), 0.01)
@@ -3073,7 +3061,7 @@ public class Builder<T> {
      * Creates a new EquivalenceBuilder and checks equality of two objects.
      * Uses N.equals() for null-safe comparison.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.getName(), obj2.getName())
      *                        .equals(obj1.getAge(), obj2.getAge())
@@ -3092,7 +3080,7 @@ public class Builder<T> {
      * Creates a new EquivalenceBuilder and checks equality using a custom function.
      * The function determines whether the two objects should be considered equal.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1, obj2, (a, b) -> a.getId() == b.getId())
      *                        .equals(obj1.getName(), obj2.getName())
@@ -3112,7 +3100,7 @@ public class Builder<T> {
     /**
      * Creates a new EquivalenceBuilder and checks equality of two boolean values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.isActive(), obj2.isActive())
      *                        .equals(obj1.isEnabled(), obj2.isEnabled())
@@ -3130,7 +3118,7 @@ public class Builder<T> {
     /**
      * Creates a new EquivalenceBuilder and checks equality of two char values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.getGrade(), obj2.getGrade())
      *                        .equals(obj1.getCategory(), obj2.getCategory())
@@ -3148,7 +3136,7 @@ public class Builder<T> {
     /**
      * Creates a new EquivalenceBuilder and checks equality of two byte values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.getLevel(), obj2.getLevel())
      *                        .equals(obj1.getRank(), obj2.getRank())
@@ -3166,7 +3154,7 @@ public class Builder<T> {
     /**
      * Creates a new EquivalenceBuilder and checks equality of two short values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.getYear(), obj2.getYear())
      *                        .equals(obj1.getMonth(), obj2.getMonth())
@@ -3184,7 +3172,7 @@ public class Builder<T> {
     /**
      * Creates a new EquivalenceBuilder and checks equality of two int values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.getId(), obj2.getId())
      *                        .equals(obj1.getAge(), obj2.getAge())
@@ -3202,7 +3190,7 @@ public class Builder<T> {
     /**
      * Creates a new EquivalenceBuilder and checks equality of two long values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.getTimestamp(), obj2.getTimestamp())
      *                        .equals(obj1.getSize(), obj2.getSize())
@@ -3221,7 +3209,7 @@ public class Builder<T> {
      * Creates a new EquivalenceBuilder and checks equality of two float values.
      * Uses Float.compare() for proper handling of NaN and special values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.getWeight(), obj2.getWeight())
      *                        .equals(obj1.getHeight(), obj2.getHeight())
@@ -3240,7 +3228,7 @@ public class Builder<T> {
      * Creates a new EquivalenceBuilder and checks equality of two float values with a specified tolerance.
      * This is useful for comparing floating-point numbers where exact equality is not required.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.getWeight(), obj2.getWeight(), 0.01f)
      *                        .equals(obj1.getHeight(), obj2.getHeight(), 0.01f)
@@ -3260,7 +3248,7 @@ public class Builder<T> {
      * Creates a new EquivalenceBuilder and checks equality of two double values.
      * Uses Double.compare() for proper handling of NaN and special values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.getPrice(), obj2.getPrice())
      *                        .equals(obj1.getDiscount(), obj2.getDiscount())
@@ -3279,7 +3267,7 @@ public class Builder<T> {
      * Creates a new EquivalenceBuilder and checks equality of two double values with a specified tolerance.
      * This is useful for comparing floating-point numbers where exact equality is not required.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.getPrice(), obj2.getPrice(), 0.01)
      *                        .equals(obj1.getDiscount(), obj2.getDiscount(), 0.01)
@@ -3299,7 +3287,7 @@ public class Builder<T> {
      * Creates a new HashCodeBuilder and adds the hash code of the specified object.
      * This is the starting point for building a hash code from multiple values.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int hashCode = Builder.hash(obj.getName())
      *                       .hash(obj.getAge())
@@ -3318,7 +3306,7 @@ public class Builder<T> {
      * Creates a new HashCodeBuilder and adds a hash code computed by a custom function.
      * This allows custom hash code calculation for complex objects.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int hashCode = Builder.hash(person, p -> p.getId())
      *                       .hash(person.getName())
@@ -3337,7 +3325,7 @@ public class Builder<T> {
     /**
      * Creates a new HashCodeBuilder and adds the hash code of a boolean value.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int hashCode = Builder.hash(obj.isActive())
      *                       .hash(obj.isEnabled())
@@ -3354,7 +3342,7 @@ public class Builder<T> {
     /**
      * Creates a new HashCodeBuilder and adds the hash code of a char value.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int hashCode = Builder.hash(obj.getGrade())
      *                       .hash(obj.getCategory())
@@ -3371,7 +3359,7 @@ public class Builder<T> {
     /**
      * Creates a new HashCodeBuilder and adds the hash code of a byte value.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int hashCode = Builder.hash(obj.getLevel())
      *                       .hash(obj.getRank())
@@ -3388,7 +3376,7 @@ public class Builder<T> {
     /**
      * Creates a new HashCodeBuilder and adds the hash code of a short value.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int hashCode = Builder.hash(obj.getYear())
      *                       .hash(obj.getMonth())
@@ -3405,7 +3393,7 @@ public class Builder<T> {
     /**
      * Creates a new HashCodeBuilder and adds the hash code of an int value.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int hashCode = Builder.hash(obj.getId())
      *                       .hash(obj.getAge())
@@ -3422,7 +3410,7 @@ public class Builder<T> {
     /**
      * Creates a new HashCodeBuilder and adds the hash code of a long value.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int hashCode = Builder.hash(obj.getTimestamp())
      *                       .hash(obj.getSize())
@@ -3439,7 +3427,7 @@ public class Builder<T> {
     /**
      * Creates a new HashCodeBuilder and adds the hash code of a float value.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int hashCode = Builder.hash(obj.getWeight())
      *                       .hash(obj.getHeight())
@@ -3456,7 +3444,7 @@ public class Builder<T> {
     /**
      * Creates a new HashCodeBuilder and adds the hash code of a double value.
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * int hashCode = Builder.hash(obj.getPrice())
      *                       .hash(obj.getDiscount())

@@ -9,8 +9,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -290,6 +290,6 @@ public class ImmutableSortedMap100Test extends TestBase {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> map.put("c", 3));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> map.remove("a"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> map.clear());
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.putAll(N.asMap("d", 4)));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.putAll(CommonUtil.asMap("d", 4)));
     }
 }

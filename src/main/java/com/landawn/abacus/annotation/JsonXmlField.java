@@ -226,14 +226,6 @@ public @interface JsonXmlField {
      */
     boolean isJsonRawValue() default false;
 
-    //    /**
-    //     *
-    //     * @return
-    //     * @deprecated should use the order of fields defined.
-    //     */
-    //    @Deprecated
-    //    int ordinal() default -1;
-
     /**
      * Controls whether the field is included during serialization, deserialization, or both.
      * 

@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -62,7 +62,7 @@ public class N102Test extends TestBase {
         boolean[] result = N.deleteRange(arr, 1, 3);
         assertArrayEquals(new boolean[] { true, false, true }, result);
 
-        assertEquals(N.EMPTY_BOOLEAN_ARRAY, N.deleteRange((boolean[]) null, 0, 0));
+        assertEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.deleteRange((boolean[]) null, 0, 0));
 
         boolean[] original = { true, false };
         boolean[] noDeletion = N.deleteRange(original, 0, 0);
@@ -74,7 +74,7 @@ public class N102Test extends TestBase {
         char[] result = N.deleteRange(charArray, 1, 3);
         assertArrayEquals(new char[] { 'a', 'd', 'e' }, result);
 
-        assertEquals(N.EMPTY_CHAR_ARRAY, N.deleteRange((char[]) null, 0, 0));
+        assertEquals(CommonUtil.EMPTY_CHAR_ARRAY, N.deleteRange((char[]) null, 0, 0));
         assertArrayEquals(charArray.clone(), N.deleteRange(charArray, 0, 0));
     }
 
@@ -83,7 +83,7 @@ public class N102Test extends TestBase {
         byte[] result = N.deleteRange(byteArray, 1, 3);
         assertArrayEquals(new byte[] { 1, 4, 5 }, result);
 
-        assertArrayEquals(N.EMPTY_BYTE_ARRAY, N.deleteRange((byte[]) null, 0, 0));
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, N.deleteRange((byte[]) null, 0, 0));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class N102Test extends TestBase {
         short[] result = N.deleteRange(shortArray, 1, 3);
         assertArrayEquals(new short[] { 1, 4, 5 }, result);
 
-        assertArrayEquals(N.EMPTY_SHORT_ARRAY, N.deleteRange((short[]) null, 0, 0));
+        assertArrayEquals(CommonUtil.EMPTY_SHORT_ARRAY, N.deleteRange((short[]) null, 0, 0));
     }
 
     @Test
@@ -99,7 +99,7 @@ public class N102Test extends TestBase {
         int[] result = N.deleteRange(intArray, 1, 3);
         assertArrayEquals(new int[] { 1, 4, 5 }, result);
 
-        assertArrayEquals(N.EMPTY_INT_ARRAY, N.deleteRange((int[]) null, 0, 0));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.deleteRange((int[]) null, 0, 0));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class N102Test extends TestBase {
         long[] result = N.deleteRange(longArray, 1, 3);
         assertArrayEquals(new long[] { 1L, 4L, 5L }, result);
 
-        assertEquals(N.EMPTY_LONG_ARRAY, N.deleteRange((long[]) null, 0, 0));
+        assertEquals(CommonUtil.EMPTY_LONG_ARRAY, N.deleteRange((long[]) null, 0, 0));
     }
 
     @Test
@@ -115,7 +115,7 @@ public class N102Test extends TestBase {
         float[] result = N.deleteRange(floatArray, 1, 3);
         assertArrayEquals(new float[] { 1.0f, 4.0f, 5.0f }, result);
 
-        assertEquals(N.EMPTY_FLOAT_ARRAY, N.deleteRange((float[]) null, 0, 0));
+        assertEquals(CommonUtil.EMPTY_FLOAT_ARRAY, N.deleteRange((float[]) null, 0, 0));
     }
 
     @Test
@@ -123,7 +123,7 @@ public class N102Test extends TestBase {
         double[] result = N.deleteRange(doubleArray, 1, 3);
         assertArrayEquals(new double[] { 1.0, 4.0, 5.0 }, result);
 
-        assertEquals(N.EMPTY_DOUBLE_ARRAY, N.deleteRange((double[]) null, 0, 0));
+        assertEquals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.deleteRange((double[]) null, 0, 0));
     }
 
     @Test
@@ -131,7 +131,7 @@ public class N102Test extends TestBase {
         String[] result = N.deleteRange(stringArray, 1, 3);
         assertArrayEquals(new String[] { "one", "four", "five" }, result);
 
-        assertArrayEquals(N.EMPTY_STRING_ARRAY, N.deleteRange((String[]) null, 0, 0));
+        assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, N.deleteRange((String[]) null, 0, 0));
     }
 
     @Test
@@ -1296,7 +1296,7 @@ public class N102Test extends TestBase {
         assertEquals("c", N.median(sorted, 1, 4));
         assertEquals("c", N.median(sorted, Comparator.naturalOrder()));
         assertEquals("c", N.median(sorted, 0, 5, Comparator.naturalOrder()));
-        assertEquals("bee", N.median(N.asList("ant", "bee", "tiger"), Comparator.comparing(String::length)));
+        assertEquals("bee", N.median(CommonUtil.asList("ant", "bee", "tiger"), Comparator.comparing(String::length)));
     }
 
     @Test

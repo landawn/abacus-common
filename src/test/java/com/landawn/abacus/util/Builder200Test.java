@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToIntFunction;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Builder.BooleanListBuilder;
@@ -137,7 +137,7 @@ public class Builder200Test extends TestBase {
 
     @Test
     public void testOfMultimap() {
-        Multimap<String, Integer, List<Integer>> multimap = N.newListMultimap();
+        Multimap<String, Integer, List<Integer>> multimap = CommonUtil.newListMultimap();
         multimap.put("a", 1);
         MultimapBuilder<String, Integer, List<Integer>, Multimap<String, Integer, List<Integer>>> builder = Builder.of(multimap);
         assertNotNull(builder);
@@ -146,7 +146,7 @@ public class Builder200Test extends TestBase {
 
     @Test
     public void testOfDataset() {
-        Dataset dataset = new RowDataset(Arrays.asList("col1"), N.asList(new ArrayList<>()));
+        Dataset dataset = new RowDataset(Arrays.asList("col1"), CommonUtil.asList(new ArrayList<>()));
         DatasetBuilder builder = Builder.of(dataset);
         assertNotNull(builder);
         assertSame(dataset, builder.val());
@@ -169,14 +169,14 @@ public class Builder200Test extends TestBase {
 
     @Test
     public void testVal() {
-        ListBuilder<String, List<String>> builder = Builder.of(N.asList("test"));
-        assertEquals(N.asList("test"), builder.val());
+        ListBuilder<String, List<String>> builder = Builder.of(CommonUtil.asList("test"));
+        assertEquals(CommonUtil.asList("test"), builder.val());
     }
 
     @Test
     public void testAccept() {
         AtomicInteger counter = new AtomicInteger(0);
-        ListBuilder<String, List<String>> builder = Builder.of(N.asList("test"));
+        ListBuilder<String, List<String>> builder = Builder.of(CommonUtil.asList("test"));
         builder.accept(s -> counter.incrementAndGet());
         assertEquals(1, counter.get());
     }
@@ -321,7 +321,7 @@ public class Builder200Test extends TestBase {
 
     @Test
     public void testMultisetBuilder() {
-        Multiset<String> multiset = N.newMultiset();
+        Multiset<String> multiset = CommonUtil.newMultiset();
         MultisetBuilder<String> builder = Builder.of(multiset);
         builder.add("a").add("a", 2).setCount("b", 3);
         assertEquals(3, multiset.count("a"));
@@ -336,7 +336,7 @@ public class Builder200Test extends TestBase {
 
     @Test
     public void testMultimapBuilder() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         builder.put("a", 1).put("a", 2).putMany("b", Arrays.asList(3, 4));
         assertEquals(Arrays.asList(1, 2), multimap.get("a"));
@@ -439,14 +439,14 @@ public class Builder200Test extends TestBase {
 
     @Test
     public void testHashCodeBuilder() {
-        int expected = 31 * N.hashCode(1) + N.hashCode("a");
+        int expected = 31 * CommonUtil.hashCode(1) + CommonUtil.hashCode("a");
         assertEquals(expected, Builder.hash(1).hash("a").result());
 
-        expected = 31 * (31 * N.hashCode(1) + N.hashCode("a")) + N.hashCode("b");
+        expected = 31 * (31 * CommonUtil.hashCode(1) + CommonUtil.hashCode("a")) + CommonUtil.hashCode("b");
         assertEquals(expected, Builder.hash(1).hash("a").hash("b").result());
 
         ToIntFunction<String> lenFunc = String::length;
-        expected = 31 * N.hashCode(1) + lenFunc.applyAsInt("abc");
+        expected = 31 * CommonUtil.hashCode(1) + lenFunc.applyAsInt("abc");
         assertEquals(expected, Builder.hash(1).hash("abc", lenFunc).result());
     }
 }

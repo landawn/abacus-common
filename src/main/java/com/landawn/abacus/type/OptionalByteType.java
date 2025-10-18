@@ -63,6 +63,16 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     }
 
     /**
+     * Returns the default value for OptionalByte type, which is an empty OptionalByte.
+     *
+     * @return OptionalByte.empty()
+     */
+    @Override
+    public OptionalByte defaultValue() {
+        return OptionalByte.empty();
+    }
+
+    /**
      * Converts an {@link OptionalByte} object to its string representation.
      * 
      * @param x the OptionalByte object to convert

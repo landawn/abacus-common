@@ -25,8 +25,8 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -134,7 +134,7 @@ public class BiIterator101Test extends TestBase {
 
             List<Pair<Long, Long>> results = iter.toList();
             assertEquals(4, results.size());
-            assertEquals((long) (Integer.MAX_VALUE - 5), results.get(0).left());
+            assertEquals(Integer.MAX_VALUE - 5, results.get(0).left());
         }
     }
 

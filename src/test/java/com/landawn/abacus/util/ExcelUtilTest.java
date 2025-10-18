@@ -52,7 +52,7 @@ public class ExcelUtilTest extends AbstractTest {
 
     @Test
     public void test_loadSheet() {
-        final Dataset dataset = N.newDataset(N.asList("column1", "column2"), N.asList(N.asList("ab", "cd"), N.asList("ef", "gh")));
+        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("column1", "column2"), CommonUtil.asList(CommonUtil.asList("ab", "cd"), CommonUtil.asList("ef", "gh")));
         dataset.println();
 
         File outputExcelFile = new File("./src/test/resources/test_excel_02.xlsx");

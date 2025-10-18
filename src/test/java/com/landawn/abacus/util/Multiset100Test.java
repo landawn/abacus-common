@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
@@ -636,15 +636,18 @@ public class Multiset100Test extends TestBase {
 
         Set<Multiset.Entry<String>> entries = multiset.entrySet();
 
-        Multiset.Entry<String> testEntry = new Multiset.Entry<String>() {
+        Multiset.Entry<String> testEntry = new Multiset.Entry<>() {
+            @Override
             public String element() {
                 return "a";
             }
 
+            @Override
             public int count() {
                 return 3;
             }
 
+            @Override
             public boolean equals(Object o) {
                 if (o instanceof Multiset.Entry<?> e) {
                     return count() == e.count() && Objects.equals(element(), e.element());
@@ -652,10 +655,12 @@ public class Multiset100Test extends TestBase {
                 return false;
             }
 
+            @Override
             public int hashCode() {
                 return Objects.hashCode(element()) ^ count();
             }
 
+            @Override
             public String toString() {
                 return element() + " x " + count();
             }
@@ -1009,15 +1014,18 @@ public class Multiset100Test extends TestBase {
 
         assertEquals("test x 5", entry.toString());
 
-        Multiset.Entry<String> sameEntry = new Multiset.Entry<String>() {
+        Multiset.Entry<String> sameEntry = new Multiset.Entry<>() {
+            @Override
             public String element() {
                 return "test";
             }
 
+            @Override
             public int count() {
                 return 5;
             }
 
+            @Override
             public boolean equals(Object o) {
                 if (o instanceof Multiset.Entry<?> e) {
                     return count() == e.count() && Objects.equals(element(), e.element());
@@ -1025,10 +1033,12 @@ public class Multiset100Test extends TestBase {
                 return false;
             }
 
+            @Override
             public int hashCode() {
                 return Objects.hashCode(element()) ^ count();
             }
 
+            @Override
             public String toString() {
                 return element() + " x " + count();
             }

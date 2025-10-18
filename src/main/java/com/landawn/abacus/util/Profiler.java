@@ -1708,17 +1708,6 @@ public final class Profiler {
             output.println("endTime:   " + time2String(getEndTimeInMillis()));
             output.println("totalElapsedTime: " + elapsedTimeFormat.format(getElapsedTimeInMillis()));
             output.println();
-            //            MethodStatistics methodStatistics = getMaxElapsedTimeInMillisMethod();
-            //
-            //            if (methodStatistics != null) {
-            //                writer.println("maxMethodTime(" + methodStatistics.getMethodName() + "): " + elapsedTimeInMillisFormat.format(methodStatistics.getElapsedTimeInMillis()));
-            //            }
-            //
-            //            methodStatistics = getMinElapsedTimeInMillisMethod();
-            //
-            //            if (methodStatistics != null) {
-            //                writer.println("minMethodTime(" + methodStatistics.getMethodName() + "): " + elapsedTimeInMillisFormat.format(methodStatistics.getElapsedTimeInMillis()));
-            //            }
             final String methodNameTitle = "<method name>";
             final List<String> methodNameList = getMethodNameList();
             int maxMethodNameLength = methodNameTitle.length();
@@ -1820,19 +1809,6 @@ public final class Profiler {
             output.println("<br/>" + "totalElapsedTime: " + elapsedTimeFormat.format(getElapsedTimeInMillis()));
             output.println("<br/>"); //NOSONAR
 
-            //            MethodStatistics methodStatistics = getMaxElapsedTimeInMillisMethod();
-            //
-            //            if (methodStatistics != null) {
-            //                writer.println(
-            //                        "<br/>" + "maxMethodTime: " + elapsedTimeInMillisFormat.format(methodStatistics.getElapsedTimeInMillis()));
-            //            }
-            //
-            //            methodStatistics = getMinElapsedTimeInMillisMethod();
-            //
-            //            if (methodStatistics != null) {
-            //                writer.println(
-            //                        "<br/>" + "minMethodTime(" + methodStatistics.getMethodName() + "): " + elapsedTimeInMillisFormat.format(methodStatistics.getElapsedTimeInMillis()));
-            //            }
             output.println("<br/>");
             output.println("<table width=\"1200\" border=\"1\">");
             output.println("<tr>");
@@ -1951,17 +1927,6 @@ public final class Profiler {
             output.println("<endTime>" + time2String(getEndTimeInMillis()) + "</endTime>");
             output.println("<totalElapsedTime>" + elapsedTimeFormat.format(getElapsedTimeInMillis()) + "</totalElapsedTime>");
             output.println();
-            //            MethodStatistics methodStatistics = getMinElapsedTimeInMillisMethod();
-            //
-            //            if (methodStatistics != null) {
-            //                writer.println("<minMethodTime>" + elapsedTimeInMillisFormat.format(methodStatistics.getElapsedTimeInMillis()) + "</minMethodTime>");
-            //            }
-            //
-            //            methodStatistics = getMaxElapsedTimeInMillisMethod();
-            //
-            //            if (methodStatistics != null) {
-            //                writer.println("<maxMethodTime>" + elapsedTimeInMillisFormat.format(methodStatistics.getElapsedTimeInMillis()) + "</maxMethodTime>");
-            //            }
             final List<String> methodNameList = getMethodNameList();
             for (final String methodName : methodNameList) {
                 final List<MethodStatistics> methodStatisticsList = getMethodStatisticsList(methodName);

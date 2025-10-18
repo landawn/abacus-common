@@ -30,31 +30,31 @@ public class RegExUtilTest extends AbstractTest {
         assertFalse(RegExUtil.find(text, RegExUtil.WHITESPACE_MATCHER));
 
         N.println("a b c".split(" "));
-        assertTrue(N.equals(new String[] { "a", "b", "c" }, "a b c".split(" ")));
-        assertTrue(N.equals(new String[] { "a", "b", "c" }, "a b c".split(" ", 0)));
-        assertTrue(N.equals(new String[] { "a", "b", "c" }, "a b c".split(" ", -1)));
-        assertTrue(N.equals(new String[] { "a b c" }, "a b c".split(" ", 1)));
-        assertTrue(N.equals(new String[] { "a", "b c" }, "a b c".split(" ", 2)));
-        assertTrue(N.equals(new String[] { "a", "b", "c" }, "a b c".split(RegExUtil.WHITESPACE_FINDER.pattern())));
-        assertTrue(N.equals(new String[] { "a b c" }, "a b c".split(RegExUtil.WHITESPACE_MATCHER.pattern())));
-        assertTrue(N.equals(new String[] { "" }, "".split(" ")));
-        assertTrue(N.equals(new String[] { "" }, "".split(RegExUtil.WHITESPACE_FINDER.pattern())));
-        assertTrue(N.equals(new String[] { "" }, "".split(RegExUtil.WHITESPACE_MATCHER.pattern())));
+        assertTrue(CommonUtil.equals(new String[] { "a", "b", "c" }, "a b c".split(" ")));
+        assertTrue(CommonUtil.equals(new String[] { "a", "b", "c" }, "a b c".split(" ", 0)));
+        assertTrue(CommonUtil.equals(new String[] { "a", "b", "c" }, "a b c".split(" ", -1)));
+        assertTrue(CommonUtil.equals(new String[] { "a b c" }, "a b c".split(" ", 1)));
+        assertTrue(CommonUtil.equals(new String[] { "a", "b c" }, "a b c".split(" ", 2)));
+        assertTrue(CommonUtil.equals(new String[] { "a", "b", "c" }, "a b c".split(RegExUtil.WHITESPACE_FINDER.pattern())));
+        assertTrue(CommonUtil.equals(new String[] { "a b c" }, "a b c".split(RegExUtil.WHITESPACE_MATCHER.pattern())));
+        assertTrue(CommonUtil.equals(new String[] { "" }, "".split(" ")));
+        assertTrue(CommonUtil.equals(new String[] { "" }, "".split(RegExUtil.WHITESPACE_FINDER.pattern())));
+        assertTrue(CommonUtil.equals(new String[] { "" }, "".split(RegExUtil.WHITESPACE_MATCHER.pattern())));
 
-        assertTrue(N.equals(new String[] { "" }, RegExUtil.split("", " ")));
-        assertTrue(N.equals(new String[] { "" }, RegExUtil.split("", RegExUtil.WHITESPACE_FINDER.pattern())));
-        assertTrue(N.equals(new String[] { "" }, RegExUtil.split("", RegExUtil.WHITESPACE_MATCHER.pattern())));
-        assertTrue(N.equals(N.EMPTY_STRING_ARRAY, RegExUtil.split(null, " ")));
-        assertTrue(N.equals(N.EMPTY_STRING_ARRAY, RegExUtil.split(null, RegExUtil.WHITESPACE_FINDER.pattern())));
-        assertTrue(N.equals(N.EMPTY_STRING_ARRAY, RegExUtil.split(null, RegExUtil.WHITESPACE_MATCHER.pattern())));
+        assertTrue(CommonUtil.equals(new String[] { "" }, RegExUtil.split("", " ")));
+        assertTrue(CommonUtil.equals(new String[] { "" }, RegExUtil.split("", RegExUtil.WHITESPACE_FINDER.pattern())));
+        assertTrue(CommonUtil.equals(new String[] { "" }, RegExUtil.split("", RegExUtil.WHITESPACE_MATCHER.pattern())));
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, RegExUtil.split(null, " ")));
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, RegExUtil.split(null, RegExUtil.WHITESPACE_FINDER.pattern())));
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, RegExUtil.split(null, RegExUtil.WHITESPACE_MATCHER.pattern())));
 
-        assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Splitter.with(" ").splitToArray(null)));
-        assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Splitter.with(RegExUtil.WHITESPACE_FINDER).splitToArray(null)));
-        assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Splitter.with(RegExUtil.WHITESPACE_MATCHER).splitToArray(null)));
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Splitter.with(" ").splitToArray(null)));
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Splitter.with(RegExUtil.WHITESPACE_FINDER).splitToArray(null)));
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Splitter.with(RegExUtil.WHITESPACE_MATCHER).splitToArray(null)));
 
-        assertTrue(N.equals(new String[] { "" }, Splitter.with(" ").splitToArray("")));
-        assertTrue(N.equals(new String[] { "" }, Splitter.with(RegExUtil.WHITESPACE_FINDER).splitToArray("")));
-        assertTrue(N.equals(new String[] { "" }, Splitter.with(RegExUtil.WHITESPACE_MATCHER).splitToArray("")));
+        assertTrue(CommonUtil.equals(new String[] { "" }, Splitter.with(" ").splitToArray("")));
+        assertTrue(CommonUtil.equals(new String[] { "" }, Splitter.with(RegExUtil.WHITESPACE_FINDER).splitToArray("")));
+        assertTrue(CommonUtil.equals(new String[] { "" }, Splitter.with(RegExUtil.WHITESPACE_MATCHER).splitToArray("")));
     }
 
 }

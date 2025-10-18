@@ -19,13 +19,13 @@ public class TypeAttrParserTest extends AbstractTest {
         N.println(result.getClassName());
         N.println(result.getTypeParameters());
         N.println(result.getParameters());
-        assertTrue(N.equals(new String[] { "," }, result.getParameters()));
+        assertTrue(CommonUtil.equals(new String[] { "," }, result.getParameters()));
 
         result = TypeAttrParser.parse("List(a,b)");
         N.println(result.getClassName());
         N.println(result.getTypeParameters());
         N.println(result.getParameters());
 
-        assertTrue(N.equals(new String[] { "a", "b" }, result.getParameters()));
+        assertTrue(CommonUtil.equals(new String[] { "a", "b" }, result.getParameters()));
     }
 }

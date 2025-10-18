@@ -748,7 +748,7 @@ public class Throwables100Test extends TestBase {
     public void testIterator_Close() throws Exception {
         AtomicBoolean resourceClosed = new AtomicBoolean(false);
 
-        Throwables.Iterator<String, Exception> iter = new Throwables.Iterator<String, Exception>() {
+        Throwables.Iterator<String, Exception> iter = new Throwables.Iterator<>() {
             private boolean hasMore = true;
 
             @Override
@@ -776,7 +776,7 @@ public class Throwables100Test extends TestBase {
     public void testIterator_Close_MultipleCalls() throws Exception {
         AtomicInteger closeCount = new AtomicInteger(0);
 
-        Throwables.Iterator<String, Exception> iter = new Throwables.Iterator<String, Exception>() {
+        Throwables.Iterator<String, Exception> iter = new Throwables.Iterator<>() {
             @Override
             public boolean hasNext() {
                 return false;
@@ -1131,7 +1131,7 @@ public class Throwables100Test extends TestBase {
 
         Throwables.ObjLongPredicate<String, Exception> objLongPred = (s, l) -> s.hashCode() == l;
         String test = "test";
-        assertTrue(objLongPred.test(test, (long) test.hashCode()));
+        assertTrue(objLongPred.test(test, test.hashCode()));
 
         Throwables.ObjDoublePredicate<String, Exception> objDoublePred = (s, d) -> Double.parseDouble(s) == d;
         assertTrue(objDoublePred.test("3.14", 3.14));
@@ -1309,7 +1309,7 @@ public class Throwables100Test extends TestBase {
     public void testIterator_Defer_Close() throws Exception {
         AtomicBoolean closeCalled = new AtomicBoolean(false);
 
-        Throwables.Iterator<String, Exception> innerIter = new Throwables.Iterator<String, Exception>() {
+        Throwables.Iterator<String, Exception> innerIter = new Throwables.Iterator<>() {
             @Override
             public boolean hasNext() {
                 return false;
@@ -1584,7 +1584,7 @@ public class Throwables100Test extends TestBase {
 
         Throwables.LongObjPredicate<String, Exception> longObjPred = (l, s) -> s.hashCode() == l;
         String test = "test";
-        assertTrue(longObjPred.test((long) test.hashCode(), test));
+        assertTrue(longObjPred.test(test.hashCode(), test));
     }
 
     @Test

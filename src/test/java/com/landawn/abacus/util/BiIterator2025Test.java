@@ -553,7 +553,7 @@ public class BiIterator2025Test extends TestBase {
             collected.add(mapped.next());
         }
         assertEquals(5, collected.size());
-        assertEquals(N.asList(0, 3, 6, 9, 12), collected);
+        assertEquals(CommonUtil.asList(0, 3, 6, 9, 12), collected);
     }
 
     @Test

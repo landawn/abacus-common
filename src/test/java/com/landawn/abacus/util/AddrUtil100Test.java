@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -85,7 +85,7 @@ public class AddrUtil100Test extends TestBase {
     @Test
     public void testGetAddressListFromEmptyCollection() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            AddrUtil.getAddressList(new ArrayList<String>());
+            AddrUtil.getAddressList(new ArrayList<>());
         });
     }
 
@@ -114,7 +114,7 @@ public class AddrUtil100Test extends TestBase {
 
     @Test
     public void testGetAddressListFromURLWithEmpty() {
-        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(new ArrayList<URL>());
+        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(new ArrayList<>());
         Assertions.assertTrue(addrs.isEmpty());
     }
 }

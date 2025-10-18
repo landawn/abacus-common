@@ -1045,7 +1045,7 @@ public class Dataset2025Test extends TestBase {
 
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "dept"), new Object[][] { { 1, "IT" }, { 2, "HR" } });
 
-        Dataset joined = ds1.innerJoin(ds2, N.asMap("id", "id"));
+        Dataset joined = ds1.innerJoin(ds2, CommonUtil.asMap("id", "id"));
         assertNotNull(joined);
         assertEquals(2, joined.size());
     }
@@ -1056,7 +1056,7 @@ public class Dataset2025Test extends TestBase {
 
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "year", "dept"), new Object[][] { { 1, 2023, "IT" }, { 2, 2023, "HR" } });
 
-        Dataset joined = ds1.innerJoin(ds2, N.asMap("id", "id", "year", "year"));
+        Dataset joined = ds1.innerJoin(ds2, CommonUtil.asMap("id", "id", "year", "year"));
         assertNotNull(joined);
         assertEquals(2, joined.size());
     }
@@ -1067,7 +1067,7 @@ public class Dataset2025Test extends TestBase {
 
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "dept"), new Object[][] { { 1, "IT" }, { 2, "HR" } });
 
-        Dataset joined = ds1.leftJoin(ds2, N.asMap("id", "id"));
+        Dataset joined = ds1.leftJoin(ds2, CommonUtil.asMap("id", "id"));
         assertNotNull(joined);
         assertEquals(3, joined.size());
     }
@@ -1078,7 +1078,7 @@ public class Dataset2025Test extends TestBase {
 
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "dept"), new Object[][] { { 1, "IT" }, { 2, "HR" }, { 3, "Finance" } });
 
-        Dataset joined = ds1.rightJoin(ds2, N.asMap("id", "id"));
+        Dataset joined = ds1.rightJoin(ds2, CommonUtil.asMap("id", "id"));
         assertNotNull(joined);
         assertEquals(3, joined.size());
     }
@@ -1089,7 +1089,7 @@ public class Dataset2025Test extends TestBase {
 
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "dept"), new Object[][] { { 2, "HR" }, { 3, "Finance" } });
 
-        Dataset joined = ds1.fullJoin(ds2, N.asMap("id", "id"));
+        Dataset joined = ds1.fullJoin(ds2, CommonUtil.asMap("id", "id"));
         assertNotNull(joined);
         assertEquals(3, joined.size());
     }

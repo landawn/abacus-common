@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static com.landawn.abacus.util.Numbers.extractFirstDouble;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -12,8 +13,8 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -121,7 +122,7 @@ public class Numbers200Test extends TestBase {
 
     @Test
     public void testConvert_doubleToLong_overflow() {
-        assertEquals(Long.MAX_VALUE, Numbers.convert((double) Long.MAX_VALUE + 100.0, long.class));
+        assertEquals(Long.MAX_VALUE, Numbers.convert(Long.MAX_VALUE + 100.0, long.class));
     }
 
     @Test
@@ -253,11 +254,11 @@ public class Numbers200Test extends TestBase {
 
     @Test
     public void testExtractFirstInt() {
-        assertEquals(123, Numbers.extractFirstInt("abc 123 def 456"));
-        assertEquals(0, Numbers.extractFirstInt("abc def"));
-        assertEquals(0, Numbers.extractFirstInt(null));
-        assertEquals(0, Numbers.extractFirstInt(""));
-        assertEquals(-45, Numbers.extractFirstInt("xyz -45 abc"));
+        assertEquals(123, Numbers.extractFirstInt("abc 123 def 456").get());
+        assertEquals(-45, Numbers.extractFirstInt("xyz -45 abc").get());
+        assertTrue(Numbers.extractFirstInt("abc def").isEmpty());
+        assertTrue(Numbers.extractFirstInt("").isEmpty());
+        assertTrue(Numbers.extractFirstInt(null).isEmpty());
     }
 
     @Test
@@ -269,9 +270,11 @@ public class Numbers200Test extends TestBase {
 
     @Test
     public void testExtractFirstLong() {
-        assertEquals(1234567890L, Numbers.extractFirstLong("abc 1234567890 def"));
-        assertEquals(0L, Numbers.extractFirstLong("abc def"));
-        assertEquals(-987L, Numbers.extractFirstLong("word -987 test"));
+        assertEquals(1234567890L, Numbers.extractFirstLong("abc 1234567890 def").get());
+        assertEquals(-987L, Numbers.extractFirstLong("word -987 test").get());
+        assertTrue(Numbers.extractFirstLong("abc def").isEmpty());
+        assertTrue(Numbers.extractFirstLong("").isEmpty());
+        assertTrue(Numbers.extractFirstLong(null).isEmpty());
     }
 
     @Test
@@ -282,11 +285,14 @@ public class Numbers200Test extends TestBase {
 
     @Test
     public void testExtractFirstDouble() {
-        assertEquals(123.45, Numbers.extractFirstDouble("abc 123.45 def"), DELTA);
-        assertEquals(0.0, Numbers.extractFirstDouble("abc def"), DELTA);
-        assertEquals(-0.5, Numbers.extractFirstDouble("neg -0.5 test"), DELTA);
-        assertEquals(1.2e3, Numbers.extractFirstDouble("sci 1.2e3 end", true), DELTA);
-        assertEquals(1.2, Numbers.extractFirstDouble("sci 1.2e3 end", false), DELTA);
+        assertEquals(123.456, extractFirstDouble("abc123.456def").orElseThrow(), DELTA);
+        assertEquals(-78.9, extractFirstDouble("xyz-78.9abc").orElseThrow(), DELTA);
+        assertTrue(extractFirstDouble("no numbers").isEmpty());
+        assertEquals(99.9, extractFirstDouble("no numbers", 99.9), DELTA);
+
+        assertEquals(1.23e4, extractFirstDouble("value is 1.23e4", true).orElseThrow(), DELTA);
+        assertEquals(1.23, extractFirstDouble("value is 1.23e4", false).orElseThrow(), DELTA);
+        assertEquals(-5.67e-3, extractFirstDouble("result: -5.67e-3", true).orElseThrow(), DELTA);
     }
 
     @Test
@@ -1103,14 +1109,14 @@ public class Numbers200Test extends TestBase {
         assertEquals(4, Numbers.roundToInt(4.5, RoundingMode.DOWN));
         assertEquals(5, Numbers.roundToInt(4.5, RoundingMode.CEILING));
         assertThrows(ArithmeticException.class, () -> Numbers.roundToInt(Double.NaN, RoundingMode.FLOOR));
-        assertThrows(ArithmeticException.class, () -> Numbers.roundToInt((double) Integer.MAX_VALUE + 1.0, RoundingMode.FLOOR));
+        assertThrows(ArithmeticException.class, () -> Numbers.roundToInt(Integer.MAX_VALUE + 1.0, RoundingMode.FLOOR));
     }
 
     @Test
     public void testRoundToLong() {
         assertEquals(5L, Numbers.roundToLong(4.5, RoundingMode.HALF_UP));
         assertThrows(ArithmeticException.class, () -> Numbers.roundToLong(Double.POSITIVE_INFINITY, RoundingMode.FLOOR));
-        assertThrows(ArithmeticException.class, () -> Numbers.roundToLong((double) Long.MAX_VALUE + 100.0, RoundingMode.FLOOR));
+        assertThrows(ArithmeticException.class, () -> Numbers.roundToLong(Long.MAX_VALUE + 100.0, RoundingMode.FLOOR));
     }
 
     @Test

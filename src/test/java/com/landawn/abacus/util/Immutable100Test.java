@@ -1,8 +1,8 @@
 package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -14,7 +14,7 @@ public class Immutable100Test extends TestBase {
         Assertions.assertTrue(ImmutableList.empty() instanceof Immutable);
         Assertions.assertTrue(ImmutableSet.empty() instanceof Immutable);
         Assertions.assertTrue(ImmutableMap.empty() instanceof Immutable);
-        Assertions.assertTrue(ImmutableCollection.wrap(N.emptyList()) instanceof Immutable);
+        Assertions.assertTrue(ImmutableCollection.wrap(CommonUtil.emptyList()) instanceof Immutable);
         Assertions.assertTrue(ImmutableArray.of("a", "b") instanceof Immutable);
 
         Assertions.assertTrue(ImmutableBiMap.empty() instanceof Immutable);

@@ -14,8 +14,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
@@ -182,9 +182,9 @@ public class TriIterator2025Test extends TestBase {
 
     @Test
     public void testZip_iterables() {
-        List<String> names = N.asList("Alice", "Bob");
-        List<Integer> ages = N.asList(25, 30);
-        List<Boolean> active = N.asList(true, false);
+        List<String> names = CommonUtil.asList("Alice", "Bob");
+        List<Integer> ages = CommonUtil.asList(25, 30);
+        List<Boolean> active = CommonUtil.asList(true, false);
 
         TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names, ages, active);
 
@@ -198,8 +198,8 @@ public class TriIterator2025Test extends TestBase {
 
     @Test
     public void testZip_iterables_nullIterable() {
-        List<String> names = N.asList("Alice");
-        List<Integer> ages = N.asList(25);
+        List<String> names = CommonUtil.asList("Alice");
+        List<Integer> ages = CommonUtil.asList(25);
 
         TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names, ages, (Iterable<Boolean>) null);
         assertFalse(iter.hasNext());
@@ -207,9 +207,9 @@ public class TriIterator2025Test extends TestBase {
 
     @Test
     public void testZip_iterables_withDefaults() {
-        List<String> names = N.asList("Alice");
-        List<Integer> ages = N.asList(25, 30);
-        List<Boolean> active = N.asList();
+        List<String> names = CommonUtil.asList("Alice");
+        List<Integer> ages = CommonUtil.asList(25, 30);
+        List<Boolean> active = CommonUtil.asList();
 
         TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names, ages, active, "Unknown", 0, false);
 
@@ -222,9 +222,9 @@ public class TriIterator2025Test extends TestBase {
 
     @Test
     public void testZip_iterators() {
-        List<String> names = N.asList("Alice", "Bob", "Charlie");
-        List<Integer> ages = N.asList(25, 30, 35);
-        List<Boolean> active = N.asList(true, false, true);
+        List<String> names = CommonUtil.asList("Alice", "Bob", "Charlie");
+        List<Integer> ages = CommonUtil.asList(25, 30, 35);
+        List<Boolean> active = CommonUtil.asList(true, false, true);
 
         TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names.iterator(), ages.iterator(), active.iterator());
 
@@ -238,8 +238,8 @@ public class TriIterator2025Test extends TestBase {
 
     @Test
     public void testZip_iterators_nullIterator() {
-        List<String> names = N.asList("Alice");
-        List<Integer> ages = N.asList(25);
+        List<String> names = CommonUtil.asList("Alice");
+        List<Integer> ages = CommonUtil.asList(25);
 
         TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names.iterator(), ages.iterator(), (Iterator<Boolean>) null);
         assertFalse(iter.hasNext());
@@ -247,9 +247,9 @@ public class TriIterator2025Test extends TestBase {
 
     @Test
     public void testZip_iterators_withDefaults() {
-        List<String> names = N.asList("Alice");
-        List<Integer> ages = N.asList(25, 30);
-        List<Boolean> active = N.asList();
+        List<String> names = CommonUtil.asList("Alice");
+        List<Integer> ages = CommonUtil.asList(25, 30);
+        List<Boolean> active = CommonUtil.asList();
 
         TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names.iterator(), ages.iterator(), active.iterator(), "Unknown", 0, false);
 
@@ -259,7 +259,7 @@ public class TriIterator2025Test extends TestBase {
 
     @Test
     public void testUnzip_iterable() {
-        List<String> items = N.asList("1:a:true", "2:b:false", "3:c:true");
+        List<String> items = CommonUtil.asList("1:a:true", "2:b:false", "3:c:true");
 
         TriIterator<Integer, String, Boolean> iter = TriIterator.unzip(items, (item, triple) -> {
             String[] parts = item.split(":");
@@ -286,7 +286,7 @@ public class TriIterator2025Test extends TestBase {
 
     @Test
     public void testUnzip_iterator() {
-        List<String> items = N.asList("1:a", "2:b");
+        List<String> items = CommonUtil.asList("1:a", "2:b");
         Iterator<String> iterator = items.iterator();
 
         TriIterator<Integer, String, String> iter = TriIterator.unzip(iterator, (item, triple) -> {

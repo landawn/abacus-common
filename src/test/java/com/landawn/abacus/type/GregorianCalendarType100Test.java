@@ -14,8 +14,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -45,13 +45,13 @@ public class GregorianCalendarType100Test extends TestBase {
         assertNull(gregorianCalendarType.valueOf((Object) null));
 
         long timestamp = System.currentTimeMillis();
-        GregorianCalendar result = gregorianCalendarType.valueOf((Object) timestamp);
+        GregorianCalendar result = gregorianCalendarType.valueOf(timestamp);
 
         Date date = new Date();
-        result = gregorianCalendarType.valueOf((Object) date);
+        result = gregorianCalendarType.valueOf(date);
 
         Calendar calendar = Calendar.getInstance();
-        result = gregorianCalendarType.valueOf((Object) calendar);
+        result = gregorianCalendarType.valueOf(calendar);
     }
 
     @Test

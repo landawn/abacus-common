@@ -24,8 +24,8 @@ import java.util.function.BiPredicate;
 import java.util.function.ToIntFunction;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Builder.BooleanListBuilder;
@@ -357,7 +357,7 @@ public class Builder100Test extends TestBase {
 
     @Test
     public void testMultimapBuilder() {
-        Multimap<String, String, List<String>> multimap = N.newListMultimap();
+        Multimap<String, String, List<String>> multimap = CommonUtil.newListMultimap();
         multimap.put("key1", "value1");
 
         MultimapBuilder<String, String, List<String>, Multimap<String, String, List<String>>> builder = Builder.of(multimap);

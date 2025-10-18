@@ -121,20 +121,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Creates a new BooleanList containing the specified boolean values.
-     * 
-     * <p>If the input array is {@code null}, an empty list is returned. Otherwise, a new list
-     * is created with a copy of the input array's elements.</p>
-     * 
-     * <p>Example usage:
-     * <pre>{@code
-     * BooleanList list1 = BooleanList.of(true, false, true);
-     * BooleanList list2 = BooleanList.of(); // empty list
-     * }</pre></p>
+     * Creates a new BooleanList containing the specified elements. The specified array is used directly
+     * as the backing array without copying, so subsequent modifications to the array will affect the list.
+     * If the input array is {@code null}, an empty list is returned.
      *
-     * @param a the array of boolean values to be included in the new list. Can be {@code null}.
-     * @return a new BooleanList containing the elements of the specified array,
-     *         or an empty list if the array is {@code null}
+     * @param a the array of elements to be included in the new list. Can be {@code null}.
+     * @return a new BooleanList containing the elements from the specified array, or an empty list if the array is {@code null}
      */
     public static BooleanList of(final boolean... a) {
         return new BooleanList(N.nullToEmpty(a));
@@ -254,14 +246,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Returns the boolean value at the specified position in this list.
-     * 
-     * <p>This method runs in constant time.</p>
+     * Returns the element at the specified position in this list.
      *
      * @param index the index of the element to return
-     * @return the boolean value at the specified position in this list
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *         ({@code index < 0 || index >= size()})
+     * @return the element at the specified position in this list
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public boolean get(final int index) { // NOSONAR
         rangeCheck(index);
@@ -271,14 +260,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Replaces the element at the specified position in this list with the specified element.
-     * 
-     * <p>This method runs in constant time.</p>
      *
      * @param index the index of the element to replace
      * @param e the element to be stored at the specified position
      * @return the element previously at the specified position
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *         ({@code index < 0 || index >= size()})
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public boolean set(final int index, final boolean e) {
         rangeCheck(index);
@@ -1069,11 +1055,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Returns {@code true} if this list contains the specified element.
      * More formally, returns {@code true} if and only if this list contains
      * at least one element {@code e} such that {@code e == valueToFind}.
-     * 
-     * <p>This method runs in linear time.</p>
+     *
+     * <p>This method performs a linear search through the list.
      *
      * @param valueToFind the element whose presence in this list is to be tested
-     * @return {@code true} if this list contains the specified element; {@code false} otherwise
+     * @return {@code true} if this list contains the specified element, {@code false} otherwise
      */
     public boolean contains(final boolean valueToFind) {
         return indexOf(valueToFind) >= 0;
@@ -1571,42 +1557,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @throws E the e
-    //     */
-    //    public <E extends Exception> void forEachIndexed(final Throwables.IntBooleanConsumer<E> action) throws E {
-    //        forEachIndexed(0, size, action);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param action
-    //     * @throws IndexOutOfBoundsException
-    //     * @throws E the e
-    //     */
-    //    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntBooleanConsumer<E> action)
-    //            throws IndexOutOfBoundsException, E {
-    //        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
-    //
-    //        if (size > 0) {
-    //            if (fromIndex <= toIndex) {
-    //                for (int i = fromIndex; i < toIndex; i++) {
-    //                    action.accept(i, elementData[i]);
-    //                }
-    //            } else {
-    //                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
-    //                    action.accept(i, elementData[i]);
-    //                }
-    //            }
-    //        }
-    //    }
-
     /**
      * Returns an {@code OptionalBoolean} containing the first element of this list,
      * or an empty {@code OptionalBoolean} if this list is empty.
@@ -1924,8 +1874,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Removes all elements from this list. The list will be empty after this call returns.
      * The capacity of the list is not changed.
-     * 
-     * <p>This operation has O(n) time complexity as it resets all elements to false.</p>
      */
     @Override
     public void clear() {
@@ -1998,9 +1946,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns a new array containing all elements of this list in proper sequence.
-     * The returned array is independent of this list.
-     * 
-     * <p>The length of the returned array is equal to the size of this list.</p>
      *
      * @return a new boolean array containing all elements of this list
      */

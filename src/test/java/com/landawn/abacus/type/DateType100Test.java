@@ -13,8 +13,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -48,12 +48,12 @@ public class DateType100Test extends TestBase {
     @Test
     public void testValueOfObject() {
         long timestamp = System.currentTimeMillis();
-        Date date = dateType.valueOf((Object) timestamp);
+        Date date = dateType.valueOf(timestamp);
         assertNotNull(date);
         assertEquals(timestamp, date.getTime());
 
         java.util.Date utilDate = new java.util.Date();
-        Date sqlDate = dateType.valueOf((Object) utilDate);
+        Date sqlDate = dateType.valueOf(utilDate);
         assertNotNull(sqlDate);
         assertEquals(utilDate.getTime(), sqlDate.getTime());
 

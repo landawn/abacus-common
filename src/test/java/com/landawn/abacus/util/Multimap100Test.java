@@ -25,8 +25,8 @@ import java.util.TreeSet;
 import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.If.OrElse;
@@ -40,13 +40,13 @@ public class Multimap100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        multimap = N.newListMultimap();
-        setMultimap = N.newSetMultimap();
+        multimap = CommonUtil.newListMultimap();
+        setMultimap = CommonUtil.newSetMultimap();
     }
 
     @Test
     public void testDefaultConstructor() {
-        Multimap<String, Integer, List<Integer>> mm = N.newListMultimap();
+        Multimap<String, Integer, List<Integer>> mm = CommonUtil.newListMultimap();
         assertNotNull(mm);
         assertTrue(mm.isEmpty());
         assertEquals(0, mm.size());
@@ -54,14 +54,14 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testConstructorWithInitialCapacity() {
-        Multimap<String, Integer, List<Integer>> mm = N.newListMultimap();
+        Multimap<String, Integer, List<Integer>> mm = CommonUtil.newListMultimap();
         assertNotNull(mm);
         assertTrue(mm.isEmpty());
     }
 
     @Test
     public void testConstructorWithMapAndCollectionTypes() {
-        Multimap<String, Integer, Set<Integer>> mm = N.newMultimap(TreeMap::new, TreeSet::new);
+        Multimap<String, Integer, Set<Integer>> mm = CommonUtil.newMultimap(TreeMap::new, TreeSet::new);
         assertNotNull(mm);
         mm.put("a", 1);
         mm.put("b", 2);
@@ -70,7 +70,7 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testConstructorWithSuppliers() {
-        Multimap<String, Integer, List<Integer>> mm = N.newMultimap(() -> new HashMap<>(), () -> new ArrayList<>());
+        Multimap<String, Integer, List<Integer>> mm = CommonUtil.newMultimap(() -> new HashMap<>(), () -> new ArrayList<>());
         assertNotNull(mm);
         mm.put("test", 1);
         assertEquals(1, mm.get("test").size());
@@ -184,7 +184,7 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testPutManyMultimap() {
-        Multimap<String, Integer, List<Integer>> other = N.newListMultimap();
+        Multimap<String, Integer, List<Integer>> other = CommonUtil.newListMultimap();
         other.putMany("key1", Arrays.asList(1, 2));
         other.putMany("key2", Arrays.asList(3, 4));
 
@@ -258,7 +258,7 @@ public class Multimap100Test extends TestBase {
         multimap.putMany("key1", Arrays.asList(1, 2, 3));
         multimap.putMany("key2", Arrays.asList(4, 5, 6));
 
-        Multimap<String, Integer, List<Integer>> toRemove = N.newListMultimap();
+        Multimap<String, Integer, List<Integer>> toRemove = CommonUtil.newListMultimap();
         toRemove.putMany("key1", Arrays.asList(1, 2));
         toRemove.putMany("key2", Arrays.asList(5));
 
@@ -832,7 +832,7 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testEquals() {
-        Multimap<String, Integer, List<Integer>> other = N.newListMultimap();
+        Multimap<String, Integer, List<Integer>> other = CommonUtil.newListMultimap();
 
         assertTrue(multimap.equals(multimap));
         assertTrue(multimap.equals(other));
@@ -849,7 +849,7 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testHashCode() {
-        Multimap<String, Integer, List<Integer>> other = N.newListMultimap();
+        Multimap<String, Integer, List<Integer>> other = CommonUtil.newListMultimap();
 
         assertEquals(multimap.hashCode(), other.hashCode());
 
@@ -926,7 +926,7 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testReplaceWithInvalidValue() {
-        Multimap<String, Integer, Set<Integer>> customMap = N.newMultimap(HashMap::new, () -> new HashSet<Integer>() {
+        Multimap<String, Integer, Set<Integer>> customMap = CommonUtil.newMultimap(HashMap::new, () -> new HashSet<Integer>() {
             @Override
             public boolean add(Integer e) {
                 if (e != null && e < 0) {
@@ -1058,7 +1058,7 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testInternalMapSupplier() {
-        Multimap<String, Integer, List<Integer>> treeMultimap = N.newMultimap(TreeMap::new, ArrayList::new);
+        Multimap<String, Integer, List<Integer>> treeMultimap = CommonUtil.newMultimap(TreeMap::new, ArrayList::new);
 
         treeMultimap.put("c", 3);
         treeMultimap.put("a", 1);
@@ -1072,7 +1072,7 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testCustomCollectionBehavior() {
-        Multimap<String, Integer, List<Integer>> customMultimap = N.newMultimap(HashMap::new, () -> new ArrayList<Integer>() {
+        Multimap<String, Integer, List<Integer>> customMultimap = CommonUtil.newMultimap(HashMap::new, () -> new ArrayList<Integer>() {
             @Override
             public boolean add(Integer e) {
                 if (e != null && e > 100) {
@@ -1139,7 +1139,7 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testTypeSafety() {
-        Multimap<Integer, String, Set<String>> typedMultimap = N.newMultimap(HashMap::new, HashSet::new);
+        Multimap<Integer, String, Set<String>> typedMultimap = CommonUtil.newMultimap(HashMap::new, HashSet::new);
 
         typedMultimap.put(1, "one");
         typedMultimap.put(2, "two");
@@ -1147,7 +1147,7 @@ public class Multimap100Test extends TestBase {
         Set<String> values = typedMultimap.get(1);
         assertTrue(values instanceof Set);
 
-        Multimap<String, Object, List<Object>> objectMultimap = N.newListMultimap();
+        Multimap<String, Object, List<Object>> objectMultimap = CommonUtil.newListMultimap();
         objectMultimap.put("mixed", "string");
         objectMultimap.put("mixed", 123);
         objectMultimap.put("mixed", true);
@@ -1261,7 +1261,7 @@ public class Multimap100Test extends TestBase {
             }
         }
 
-        Multimap<CustomKey, Integer, List<Integer>> customMultimap = N.newListMultimap();
+        Multimap<CustomKey, Integer, List<Integer>> customMultimap = CommonUtil.newListMultimap();
         CustomKey key1 = new CustomKey("TEST");
         CustomKey key2 = new CustomKey("test");
 
@@ -1276,7 +1276,7 @@ public class Multimap100Test extends TestBase {
     public void testIntegrationScenario1() {
         List<String> words = Arrays.asList("apple", "apricot", "banana", "berry", "cherry", "apple");
 
-        Multimap<Character, String, List<String>> grouped = N.newListMultimap();
+        Multimap<Character, String, List<String>> grouped = CommonUtil.newListMultimap();
         for (String word : words) {
             grouped.put(word.charAt(0), word);
         }
@@ -1300,7 +1300,7 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testIntegrationScenario2() {
-        Multimap<String, String, Set<String>> userPermissions = N.newMultimap(HashMap::new, HashSet::new);
+        Multimap<String, String, Set<String>> userPermissions = CommonUtil.newMultimap(HashMap::new, HashSet::new);
 
         userPermissions.putMany("admin", Arrays.asList("read", "write", "delete"));
         userPermissions.putMany("user", Arrays.asList("read"));
@@ -1326,7 +1326,7 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testIntegrationScenario3() {
-        Multimap<String, Long, List<Long>> eventTimestamps = N.newListMultimap();
+        Multimap<String, Long, List<Long>> eventTimestamps = CommonUtil.newListMultimap();
 
         long baseTime = System.currentTimeMillis();
         eventTimestamps.putMany("login", Arrays.asList(baseTime, baseTime + 1000, baseTime + 2000));
@@ -1431,7 +1431,7 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testComprehensiveScenario() {
-        Multimap<String, Object, List<Object>> complexMap = N.newListMultimap();
+        Multimap<String, Object, List<Object>> complexMap = CommonUtil.newListMultimap();
 
         complexMap.put("numbers", 1);
         complexMap.put("numbers", 2.5);

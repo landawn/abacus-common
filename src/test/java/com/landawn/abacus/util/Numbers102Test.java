@@ -1,12 +1,14 @@
 package com.landawn.abacus.util;
 
+import static org.junit.Assert.assertTrue;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
@@ -128,11 +130,11 @@ public class Numbers102Test extends TestBase {
 
     @Test
     public void testExtractFirstInt() {
-        Assertions.assertEquals(123, Numbers.extractFirstInt("abc123def"));
-        Assertions.assertEquals(-456, Numbers.extractFirstInt("test-456end"));
-        Assertions.assertEquals(0, Numbers.extractFirstInt("no numbers here"));
-        Assertions.assertEquals(0, Numbers.extractFirstInt(null));
-        Assertions.assertEquals(0, Numbers.extractFirstInt(""));
+        Assertions.assertEquals(123, Numbers.extractFirstInt("abc123def").get());
+        Assertions.assertEquals(-456, Numbers.extractFirstInt("test-456end").get());
+        assertTrue(Numbers.extractFirstInt("no numbers here").isEmpty());
+        assertTrue(Numbers.extractFirstInt("").isEmpty());
+        assertTrue(Numbers.extractFirstInt(null).isEmpty());
 
         Assertions.assertEquals(123, Numbers.extractFirstInt("abc123def", 999));
         Assertions.assertEquals(999, Numbers.extractFirstInt("no numbers", 999));
@@ -141,10 +143,11 @@ public class Numbers102Test extends TestBase {
 
     @Test
     public void testExtractFirstLong() {
-        Assertions.assertEquals(123456789012L, Numbers.extractFirstLong("abc123456789012def"));
-        Assertions.assertEquals(-456L, Numbers.extractFirstLong("test-456end"));
-        Assertions.assertEquals(0L, Numbers.extractFirstLong("no numbers here"));
-        Assertions.assertEquals(0L, Numbers.extractFirstLong(null));
+        Assertions.assertEquals(123456789012L, Numbers.extractFirstLong("abc123456789012def").get());
+        Assertions.assertEquals(-456L, Numbers.extractFirstLong("test-456end").get());
+        assertTrue(Numbers.extractFirstLong("no numbers here").isEmpty());
+        assertTrue(Numbers.extractFirstLong("").isEmpty());
+        assertTrue(Numbers.extractFirstLong(null).isEmpty());
 
         Assertions.assertEquals(123L, Numbers.extractFirstLong("abc123def", 999L));
         Assertions.assertEquals(999L, Numbers.extractFirstLong("no numbers", 999L));
@@ -152,13 +155,13 @@ public class Numbers102Test extends TestBase {
 
     @Test
     public void testExtractFirstDouble() {
-        Assertions.assertEquals(123.45, Numbers.extractFirstDouble("abc123.45def"), 0.001);
-        Assertions.assertEquals(-456.78, Numbers.extractFirstDouble("test-456.78end"), 0.001);
-        Assertions.assertEquals(0.0, Numbers.extractFirstDouble("no numbers here"), 0.001);
-        Assertions.assertEquals(0.0, Numbers.extractFirstDouble(null), 0.001);
+        Assertions.assertEquals(123.45, Numbers.extractFirstDouble("abc123.45def").orElseThrow(), 0.001);
+        Assertions.assertEquals(-456.78, Numbers.extractFirstDouble("test-456.78end").get(), 0.001);
+        Assertions.assertEquals(0.0, Numbers.extractFirstDouble("no numbers here").orElse(0.0), 0.001);
+        Assertions.assertEquals(0.0, Numbers.extractFirstDouble(null).orElse(0.0), 0.001);
 
-        Assertions.assertEquals(1.23e5, Numbers.extractFirstDouble("value: 1.23e5", true), 0.001);
-        Assertions.assertEquals(1.23, Numbers.extractFirstDouble("value: 1.23e5", false), 0.001);
+        Assertions.assertEquals(1.23e5, Numbers.extractFirstDouble("value: 1.23e5", true).get(), 0.001);
+        Assertions.assertEquals(1.23, Numbers.extractFirstDouble("value: 1.23e5", false).get(), 0.001);
 
         Assertions.assertEquals(999.9, Numbers.extractFirstDouble("no numbers", 999.9), 0.001);
         Assertions.assertEquals(123.45, Numbers.extractFirstDouble("abc123.45def", 999.9, false), 0.001);
@@ -352,8 +355,8 @@ public class Numbers102Test extends TestBase {
     public void testToIntExact() {
         Assertions.assertEquals(12345, Numbers.toIntExact(12345L));
         Assertions.assertEquals(-12345, Numbers.toIntExact(-12345L));
-        Assertions.assertEquals(Integer.MAX_VALUE, Numbers.toIntExact((long) Integer.MAX_VALUE));
-        Assertions.assertEquals(Integer.MIN_VALUE, Numbers.toIntExact((long) Integer.MIN_VALUE));
+        Assertions.assertEquals(Integer.MAX_VALUE, Numbers.toIntExact(Integer.MAX_VALUE));
+        Assertions.assertEquals(Integer.MIN_VALUE, Numbers.toIntExact(Integer.MIN_VALUE));
 
         Assertions.assertThrows(ArithmeticException.class, () -> Numbers.toIntExact(Long.MAX_VALUE));
         Assertions.assertThrows(ArithmeticException.class, () -> Numbers.toIntExact(Long.MIN_VALUE));

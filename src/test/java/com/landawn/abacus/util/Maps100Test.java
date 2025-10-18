@@ -30,12 +30,11 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalBoolean;
@@ -663,7 +662,7 @@ public class Maps100Test extends TestBase {
     public void testGetByPathIfExists() {
         Map<String, Object> map = new HashMap<>();
         map.put("key", "value");
-        map.put("key2", N.asMap("kk2", "123"));
+        map.put("key2", CommonUtil.asMap("kk2", "123"));
 
         Nullable<String> result = Maps.getByPathIfExists(map, "key");
         assertTrue(result.isPresent());
@@ -1243,7 +1242,7 @@ public class Maps100Test extends TestBase {
         assertEquals("Jane", beans.get(1).getName());
         assertEquals(25, beans.get(1).getAge());
 
-        List<TestBean> beans2 = Beans.map2Bean(maps, N.asList("name"), TestBean.class);
+        List<TestBean> beans2 = Beans.map2Bean(maps, CommonUtil.asList("name"), TestBean.class);
 
         assertEquals(2, beans2.size());
         assertEquals("John", beans2.get(0).getName());
@@ -1355,7 +1354,7 @@ public class Maps100Test extends TestBase {
             bean.setName("John");
             bean.setNestedBean(nested);
 
-            Map<String, Object> map = Beans.deepBean2Map(bean, N.asList("name", "nestedBean"));
+            Map<String, Object> map = Beans.deepBean2Map(bean, CommonUtil.asList("name", "nestedBean"));
             assertEquals("John", map.get("name"));
 
             Map<String, Object> nestedMap = (Map<String, Object>) map.get("nestedBean");
@@ -1390,7 +1389,7 @@ public class Maps100Test extends TestBase {
             bean.setAge(30);
             bean.setNestedBean(nested);
 
-            Map<String, Object> flatMap = Beans.bean2FlatMap(bean, N.asList("name", "nestedBean"));
+            Map<String, Object> flatMap = Beans.bean2FlatMap(bean, CommonUtil.asList("name", "nestedBean"));
             assertEquals("John", flatMap.get("name"));
             assertNull(flatMap.get("age"));
             assertEquals("nestedValue", flatMap.get("nestedBean.value"));

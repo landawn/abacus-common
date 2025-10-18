@@ -63,6 +63,16 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
     }
 
     /**
+     * Returns the default value for OptionalLong type, which is an empty OptionalLong.
+     *
+     * @return OptionalLong.empty()
+     */
+    @Override
+    public OptionalLong defaultValue() {
+        return OptionalLong.empty();
+    }
+
+    /**
      * Converts an {@link OptionalLong} object to its string representation.
      * 
      * @param x the OptionalLong object to convert

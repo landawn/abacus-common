@@ -257,7 +257,7 @@ public class AddrUtil2025Test extends TestBase {
     @Test
     public void testGetAddressList_Collection_EmptyCollection() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            AddrUtil.getAddressList(new ArrayList<String>());
+            AddrUtil.getAddressList(new ArrayList<>());
         });
     }
 
@@ -398,7 +398,7 @@ public class AddrUtil2025Test extends TestBase {
 
     @Test
     public void testGetAddressListFromURL_EmptyList() {
-        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(new ArrayList<URL>());
+        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(new ArrayList<>());
         Assertions.assertNotNull(addrs);
         Assertions.assertTrue(addrs.isEmpty());
     }

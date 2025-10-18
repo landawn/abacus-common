@@ -5,9 +5,10 @@ import java.util.Date;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.Column;
 import com.landawn.abacus.annotation.Id;
 import com.landawn.abacus.annotation.JsonXmlConfig;
@@ -16,8 +17,6 @@ import com.landawn.abacus.annotation.ReadOnlyId;
 import com.landawn.abacus.annotation.Transient;
 import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.util.NamingPolicy;
-
-import com.landawn.abacus.TestBase;
 
 @Tag("new-test")
 public class ParserUtil101Test extends TestBase {

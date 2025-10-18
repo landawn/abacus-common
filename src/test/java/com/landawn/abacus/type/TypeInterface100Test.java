@@ -45,8 +45,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -92,7 +92,7 @@ public class TypeInterface100Test extends TestBase {
     @Test
     @DisplayName("Test Type.of(TypeReference)")
     public void testOfTypeReference() {
-        TypeReference<List<String>> typeRef = new TypeReference<List<String>>() {
+        TypeReference<List<String>> typeRef = new TypeReference<>() {
         };
         Type<List<String>> type = Type.of(typeRef);
         assertNotNull(type);
@@ -690,7 +690,7 @@ public class TypeInterface100Test extends TestBase {
     public void testValueOfObject() {
         assertEquals("test", stringType.valueOf((Object) "test"));
         assertNull(stringType.valueOf((Object) null));
-        assertEquals(123, integerType.valueOf((Object) 123));
+        assertEquals(123, integerType.valueOf(123));
     }
 
     @Test

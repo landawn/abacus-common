@@ -1,9 +1,13 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -452,7 +456,7 @@ public class MutableLong2025Test extends TestBase {
     @Test
     public void test_doubleValue_maxValue() {
         MutableLong ml = MutableLong.of(Long.MAX_VALUE);
-        assertEquals((double) Long.MAX_VALUE, ml.doubleValue(), 0.0001);
+        assertEquals(Long.MAX_VALUE, ml.doubleValue(), 0.0001);
     }
 
     @Test

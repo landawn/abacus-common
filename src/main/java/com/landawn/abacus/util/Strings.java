@@ -97,6 +97,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * @see Joiner
  * @see Splitter
+ * @see com.landawn.abacus.util.RegExUtil
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
@@ -105,7 +106,6 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.URLEncodedUtil
  * @see com.landawn.abacus.util.AppendableWriter
  * @see com.landawn.abacus.util.StringWriter
- * @see com.landawn.abacus.util.RegExUtil
  * @see com.landawn.abacus.util.IEEE754rUtil
  */
 @SuppressWarnings({ "java:S1694", "UnnecessaryUnicodeEscape" })
@@ -201,27 +201,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //    static final Set<String> CASE_INSENSITIVE_KEYWORDS = Set.of(" ", ", ", ";", ":", ":", ":", "=", "|", "&", "@", "$", "*", "+", "-", "_", "#", "!", "<", ">",
     //            "~", "^", "%", "\"", "'", "`", "{", "}", "[", "]", "(", ")", "?", "/", "\\", ".", ",", ";", ":", "!", "@", "#", "$", "%", "^", "&", "*");
 
-    //    static final Set<String> CASE_INSENSITIVE_KEYWORDS;
-    //
-    //    static {
-    //        final String[] strs = java.util.stream.Stream.of(WD.class.getDeclaredFields())
-    //                .filter(it -> Modifier.isPublic(it.getModifiers()) && Modifier.isStatic(it.getModifiers()) && Modifier.isFinal(it.getModifiers())
-    //                        && it.getType() == String.class)
-    //                .map(it -> {
-    //                    try {
-    //                        return (String) it.get(null);
-    //                    } catch (IllegalArgumentException | IllegalAccessException e) {
-    //                        throw new RuntimeException(e);
-    //                    }
-    //                })
-    //                .filter(it -> it.length() <= 3 && it.toUpperCase().equals(it.toLowerCase()))
-    //                .toArray(String[]::new);
-    //
-    //        CASE_INSENSITIVE_KEYWORDS = Set.of(strs);
-    //
-    //        N.println(CASE_INSENSITIVE_KEYWORDS);
-    //    }
-
     /**
      * A regex pattern for recognizing blocks of whitespace characters.
      * The apparent convolutedness of the pattern serves the purpose of ignoring
@@ -235,35 +214,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
     private static final Splitter trimLineSplitter = Splitter.forLines().trimResults();
     private static final Splitter omitEmptyLinesLineSplitter = Splitter.forLines().omitEmptyStrings();
     private static final Splitter trimAndOmitEmptyLinesLineSplitter = Splitter.forLines().trimResults().omitEmptyStrings();
-
-    //    private static final Map<Object, Splitter> splitterPool = new HashMap<>();
-    //
-    //    private static final Map<Object, Splitter> trimSplitterPool = new HashMap<>();
-    //
-    //    private static final Map<Object, Splitter> preserveSplitterPool = new HashMap<>();
-    //
-    //    private static final Map<Object, Splitter> trimPreserveSplitterPool = new HashMap<>();
-    //
-    //    static {
-    //        final List<String> delimiters = Array.asList(" ", "  ", "   ", "\t", "\n", "\r", ",", ", ", ";", "; ", ":", ": ", " : ", "-", " - ", "_", " _ ", "#",
-    //                "##", " # ", "=", "==", " = ", "|", " | ", "||", " || ", "&", "&&", "@", "@@", "$", "$$", "*", "**", "+", "++");
-    //
-    //        for (final String delimiter : delimiters) {
-    //            splitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings());
-    //            trimSplitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings().trimResults());
-    //            preserveSplitterPool.put(delimiter, Splitter.with(delimiter));
-    //            trimPreserveSplitterPool.put(delimiter, Splitter.with(delimiter).trimResults());
-    //
-    //            if (delimiter.length() == 1) {
-    //                final char delimiterChar = delimiter.charAt(0);
-    //
-    //                splitterPool.put(delimiterChar, Splitter.with(delimiterChar).omitEmptyStrings());
-    //                trimSplitterPool.put(delimiterChar, Splitter.with(delimiterChar).omitEmptyStrings().trimResults());
-    //                preserveSplitterPool.put(delimiterChar, Splitter.with(delimiterChar));
-    //                trimPreserveSplitterPool.put(delimiterChar, Splitter.with(delimiterChar).trimResults());
-    //            }
-    //        }
-    //    }
 
     private static final Encoder BASE64_ENCODER = java.util.Base64.getEncoder();
 
@@ -285,7 +235,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The UUID is generated using a cryptographically strong pseudo random number generator.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String uuid = uuid();                          // returns something like "550e8400-e29b-41d4-a716-446655440000"
      * 
@@ -294,7 +244,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * String uniqueKey = "KEY_" + uuid();            // returns "KEY_123e4567-e89b-12d3-a456-426614174000"
      * }</pre>
      *
-     * @return A new UUID string in the standard format (8-4-4-4-12).
+     * @return a new UUID string in the standard format (8-4-4-4-12).
      * @see #guid()
      * @see UUID#randomUUID()
      */
@@ -311,7 +261,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The returned string is suitable for use cases where a unique identifier is needed without
      * the standard UUID hyphen separators.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String guid = guid();                          // returns something like "550e8400e29b41d4a716446655440000"
      * 
@@ -320,7 +270,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * String fileName = "temp_" + guid() + ".txt";   // returns "temp_550e8400e29b41d4a716446655440000.txt"
      * }</pre>
      *
-     * @return A new UUID string without hyphens, consisting of 32 hexadecimal characters.
+     * @return a new UUID string without hyphens, consisting of 32 hexadecimal characters.
      * @see #uuid()
      * @see UUID#randomUUID()
      */
@@ -335,7 +285,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the input array is {@code null}, the method returns {@code null} rather than
      * throwing a NullPointerException.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * char[] chars = {'h', 'e', 'l', 'l', 'o'};
      * valueOf(chars);                                // returns "hello"
@@ -344,8 +294,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * valueOf(null);                                 // returns null
      * }</pre>
      *
-     * @param value The character array to be converted. It can be {@code null}.
-     * @return A String representation of the character array. Returns {@code null} if <i>value</i> is {@code null}.
+     * @param value the character array to be converted, may be {@code null}
+     * @return a String representation of the character array. Returns {@code null} if <i>value</i> is {@code null}.
      * @see String#valueOf(char[])
      * @see N#toString(Object)
      */
@@ -362,7 +312,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
       *
       * <p>The method returns {@code false} for null or empty input.</p>
       *
-      * <p>Example:
+      * <p>Example usage:</p>
       * <pre>{@code
       * // Valid Java identifiers
       * isValidJavaIdentifier("myVariable");           // returns true
@@ -378,7 +328,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
       * isValidJavaIdentifier("123abc");               // returns {@code false} (starts with digit)
       * }</pre>
       *
-      * @param cs The CharSequence to be checked. It can be {@code null} or empty.
+      * @param cs the CharSequence to be checked, may be {@code null} or empty
       * @return {@code true} if the CharSequence is a valid Java identifier, {@code false} otherwise.
       * @see Character#isJavaIdentifierStart(char)
       * @see Character#isJavaIdentifierPart(char)
@@ -401,7 +351,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null or empty input.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Java keywords
      * isKeyword("class");                            // returns true
@@ -416,7 +366,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isKeyword("");                                 // returns false
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null} or empty.
+     * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence is a Java keyword, {@code false} otherwise.
      */
     public static boolean isKeyword(final CharSequence cs) {
@@ -436,7 +386,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null or empty input.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Valid email addresses
      * isValidEmailAddress("user@example.com");       // returns true
@@ -451,7 +401,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isValidEmailAddress("");                       // returns false
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null} or empty.
+     * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence is a valid email address, {@code false} otherwise.
      * @see #findFirstEmailAddress(CharSequence)
      * @see #findAllEmailAddresses(CharSequence)
@@ -473,7 +423,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null or empty input.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Valid URLs
      * isValidUrl("http://www.example.com");          // returns true
@@ -488,7 +438,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isValidUrl("");                                // returns false
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null} or empty.
+     * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence is a valid URL, {@code false} otherwise.
      */
     public static boolean isValidUrl(final CharSequence cs) {
@@ -508,7 +458,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null or empty input.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Valid HTTP URLs
      * isValidHttpUrl("http://www.example.com");      // returns true
@@ -523,7 +473,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isValidHttpUrl("");                            // returns false
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null} or empty.
+     * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence is a valid HTTP URL, {@code false} otherwise.
      */
     public static boolean isValidHttpUrl(final CharSequence cs) {
@@ -540,7 +490,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>A CharSequence is considered empty if it has zero length. This method provides
      * a null-safe way to check for empty strings.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isEmpty(null);                                 // returns true
      * isEmpty("");                                   // returns true
@@ -549,7 +499,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isEmpty(new StringBuilder());                  // returns true
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null}.
+     * @param cs the CharSequence to be checked, may be {@code null}
      * @return {@code true} if the CharSequence is {@code null} or has zero length, {@code false} otherwise.
      */
     public static boolean isEmpty(final CharSequence cs) {
@@ -563,7 +513,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * characters as defined by {@link Character#isWhitespace(char)}. This includes spaces,
      * tabs, newlines, and other Unicode whitespace characters.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isBlank(null);                                 // returns true
      * isBlank("");                                   // returns true
@@ -573,7 +523,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isBlank("abc");                                // returns false
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null} or empty.
+     * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence is {@code null} or contains only whitespace characters, {@code false} otherwise.
      */
     public static boolean isBlank(final CharSequence cs) {
@@ -600,7 +550,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method is the opposite of {@link #isEmpty(CharSequence)}. It returns {@code true}
      * when the CharSequence is not null and has at least one character.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isNotEmpty("abc");                             // returns true
      * isNotEmpty("   ");                             // returns {@code true} (contains spaces)
@@ -609,7 +559,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isNotEmpty(null);                              // returns false
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null}.
+     * @param cs the CharSequence to be checked, may be {@code null}
      * @return {@code true} if the CharSequence is not {@code null} and not empty, {@code false} otherwise.
      */
     public static boolean isNotEmpty(final CharSequence cs) {
@@ -624,7 +574,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method is marked as @Beta, indicating it may be subject to change in future versions.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isNotBlank("abc");                             // returns true
      * isNotBlank("  abc  ");                         // returns true
@@ -633,7 +583,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isNotBlank(null);                              // returns false
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null}.
+     * @param cs the CharSequence to be checked, may be {@code null}
      * @return {@code true} if the CharSequence is not {@code null} and contains non-whitespace characters, {@code false} otherwise.
      */
     @Beta
@@ -647,7 +597,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method returns {@code true} only when both CharSequences are either null or empty.
      * If at least one CharSequence is not empty, the method returns {@code false}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAllEmpty(null, null);                        // returns true
      * isAllEmpty("", "");                            // returns true
@@ -658,8 +608,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAllEmpty("abc", "xyz");                      // returns false
      * }</pre>
      *
-     * @param a The first CharSequence to be checked. It can be {@code null}.
-     * @param b The second CharSequence to be checked. It can be {@code null}.
+     * @param a the first CharSequence to be checked, may be {@code null}
+     * @param b the second CharSequence to be checked, may be {@code null}
      * @return {@code true} if both CharSequences are {@code null} or empty, {@code false} otherwise.
      */
     public static boolean isAllEmpty(final CharSequence a, final CharSequence b) {
@@ -672,7 +622,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method returns {@code true} only when all three CharSequences are either null or empty.
      * If at least one CharSequence is not empty, the method returns {@code false}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAllEmpty(null, null, null);                  // returns true
      * isAllEmpty("", "", "");                        // returns true
@@ -682,9 +632,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAllEmpty("", "", "123");                     // returns false
      * }</pre>
      *
-     * @param a The first CharSequence to be checked. It can be {@code null}.
-     * @param b The second CharSequence to be checked. It can be {@code null}.
-     * @param c The third CharSequence to be checked. It can be {@code null}.
+     * @param a the first CharSequence to be checked, may be {@code null}
+     * @param b the second CharSequence to be checked, may be {@code null}
+     * @param c the third CharSequence to be checked, may be {@code null}
      * @return {@code true} if all CharSequences are {@code null} or empty, {@code false} otherwise.
      */
     public static boolean isAllEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
@@ -735,7 +685,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the Iterable itself is null or empty, the method returns {@code true}.
      * If at least one CharSequence is not empty, the method returns {@code false}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList(null, "", null);
      * isAllEmpty(list1);                             // returns true
@@ -747,7 +697,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAllEmpty(new ArrayList<>());                 // returns true
      * }</pre>
      *
-     * @param css The Iterable of CharSequences to be checked. It can be {@code null}.
+     * @param css the Iterable of CharSequences to be checked, may be {@code null}
      * @return {@code true} if all CharSequences in the Iterable are {@code null} or empty, {@code false} otherwise.
      */
     public static boolean isAllEmpty(final Iterable<? extends CharSequence> css) {
@@ -770,7 +720,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method returns {@code true} only when both CharSequences are either null, empty, or contain only whitespace.
      * If at least one CharSequence contains non-whitespace characters, the method returns {@code false}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAllBlank(null, null);                        // returns true
      * isAllBlank("", "");                            // returns true
@@ -780,8 +730,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAllBlank("   ", "xyz");                      // returns false
      * }</pre>
      *
-     * @param a The first CharSequence to be checked. It can be {@code null}.
-     * @param b The second CharSequence to be checked. It can be {@code null}.
+     * @param a the first CharSequence to be checked, may be {@code null}
+     * @param b the second CharSequence to be checked, may be {@code null}
      * @return {@code true} if both CharSequences are {@code null} or blank, {@code false} otherwise.
      */
     public static boolean isAllBlank(final CharSequence a, final CharSequence b) {
@@ -794,7 +744,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method returns {@code true} only when all three CharSequences are either null, empty, or contain only whitespace.
      * If at least one CharSequence contains non-whitespace characters, the method returns {@code false}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAllBlank(null, null, null);                  // returns true
      * isAllBlank("", "", "");                        // returns true
@@ -803,9 +753,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAllBlank("", "xyz", "   ");                  // returns false
      * }</pre>
      *
-     * @param a The first CharSequence to be checked. It can be {@code null}.
-     * @param b The second CharSequence to be checked. It can be {@code null}.
-     * @param c The third CharSequence to be checked. It can be {@code null}.
+     * @param a the first CharSequence to be checked, may be {@code null}
+     * @param b the second CharSequence to be checked, may be {@code null}
+     * @param c the third CharSequence to be checked, may be {@code null}
      * @return {@code true} if all CharSequences are {@code null} or blank, {@code false} otherwise.
      */
     public static boolean isAllBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
@@ -858,7 +808,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the Iterable itself is null or empty, the method returns {@code true}.
      * If at least one CharSequence contains non-whitespace characters, the method returns {@code false}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList(null, "", "   ");
      * isAllBlank(list1);                             // returns true
@@ -870,7 +820,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAllBlank(new ArrayList<>());                 // returns true
      * }</pre>
      *
-     * @param css The Iterable of CharSequences to be checked. It can be {@code null}.
+     * @param css the Iterable of CharSequences to be checked, may be {@code null}
      * @return {@code true} if all CharSequences in the Iterable are {@code null} or blank, {@code false} otherwise.
      */
     public static boolean isAllBlank(final Iterable<? extends CharSequence> css) {
@@ -893,7 +843,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method returns {@code true} if at least one of the two CharSequences is either null or empty.
      * It returns {@code false} only when both CharSequences are not empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAnyEmpty(null, null);                        // returns true
      * isAnyEmpty("", "");                            // returns true
@@ -904,8 +854,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAnyEmpty("   ", "xyz");                      // returns {@code false} (spaces are not empty)
      * }</pre>
      *
-     * @param a The first CharSequence to be checked. It can be {@code null}.
-     * @param b The second CharSequence to be checked. It can be {@code null}.
+     * @param a the first CharSequence to be checked, may be {@code null}
+     * @param b the second CharSequence to be checked, may be {@code null}
      * @return {@code true} if any of the CharSequences are {@code null} or empty, {@code false} otherwise.
      */
     public static boolean isAnyEmpty(final CharSequence a, final CharSequence b) {
@@ -918,7 +868,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method returns {@code true} if at least one of the three CharSequences is either null or empty.
      * It returns {@code false} only when all CharSequences are not empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAnyEmpty(null, null, null);                  // returns true
      * isAnyEmpty("abc", "", "xyz");                  // returns true
@@ -928,9 +878,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAnyEmpty("   ", "def", "xyz");               // returns {@code false} (spaces are not empty)
      * }</pre>
      *
-     * @param a The first CharSequence to be checked. It can be {@code null}.
-     * @param b The second CharSequence to be checked. It can be {@code null}.
-     * @param c The third CharSequence to be checked. It can be {@code null}.
+     * @param a the first CharSequence to be checked, may be {@code null}
+     * @param b the second CharSequence to be checked, may be {@code null}
+     * @param c the third CharSequence to be checked, may be {@code null}
      * @return {@code true} if any of the CharSequences are {@code null} or empty, {@code false} otherwise.
      */
     public static boolean isAnyEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
@@ -982,7 +932,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the Iterable itself is null or empty, the method returns {@code false}.
      * It returns {@code false} only when all CharSequences in the Iterable are not empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList("abc", "", "xyz");
      * isAnyEmpty(list1);                             // returns true
@@ -994,7 +944,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAnyEmpty(new ArrayList<>());                 // returns false
      * }</pre>
      *
-     * @param css The Iterable of CharSequences to be checked. It can be {@code null}.
+     * @param css the Iterable of CharSequences to be checked, may be {@code null}
      * @return {@code true} if any CharSequences in the Iterable are {@code null} or empty, {@code false} otherwise.
      */
     public static boolean isAnyEmpty(final Iterable<? extends CharSequence> css) {
@@ -1017,7 +967,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method returns {@code true} if at least one of the two CharSequences is either null, empty, or contains only whitespace.
      * It returns {@code false} only when both CharSequences contain non-whitespace characters.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAnyBlank(null, null);                        // returns true
      * isAnyBlank("", "");                            // returns true
@@ -1027,8 +977,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAnyBlank("abc", "xyz");                      // returns false
      * }</pre>
      *
-     * @param a The first CharSequence to be checked. It can be {@code null}.
-     * @param b The second CharSequence to be checked. It can be {@code null}.
+     * @param a the first CharSequence to be checked, may be {@code null}
+     * @param b the second CharSequence to be checked, may be {@code null}
      * @return {@code true} if any of the CharSequences are {@code null} or blank, {@code false} otherwise.
      */
     public static boolean isAnyBlank(final CharSequence a, final CharSequence b) {
@@ -1041,7 +991,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method returns {@code true} if at least one of the three CharSequences is either null, empty, or contains only whitespace.
      * It returns {@code false} only when all CharSequences contain non-whitespace characters.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAnyBlank(null, null, null);                  // returns true
      * isAnyBlank("abc", "   ", "xyz");               // returns true
@@ -1050,9 +1000,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAnyBlank("abc", "def", "xyz");               // returns false
      * }</pre>
      *
-     * @param a The first CharSequence to be checked. It can be {@code null}.
-     * @param b The second CharSequence to be checked. It can be {@code null}.
-     * @param c The third CharSequence to be checked. It can be {@code null}.
+     * @param a the first CharSequence to be checked, may be {@code null}
+     * @param b the second CharSequence to be checked, may be {@code null}
+     * @param c the third CharSequence to be checked, may be {@code null}
      * @return {@code true} if any of the CharSequences are {@code null} or blank, {@code false} otherwise.
      */
     public static boolean isAnyBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
@@ -1107,7 +1057,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the Iterable itself is null or empty, the method returns {@code false}.
      * It returns {@code false} only when all CharSequences in the Iterable contain non-whitespace characters.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList("abc", "   ", "xyz");
      * isAnyBlank(list1);                             // returns true
@@ -1119,7 +1069,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAnyBlank(new ArrayList<>());                 // returns false
      * }</pre>
      *
-     * @param css The Iterable of CharSequences to be checked. It can be {@code null}.
+     * @param css the Iterable of CharSequences to be checked, may be {@code null}
      * @return {@code true} if any CharSequences in the Iterable are {@code null} or blank, {@code false} otherwise.
      */
     public static boolean isAnyBlank(final Iterable<? extends CharSequence> css) {
@@ -1143,7 +1093,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * The prefixSuffix parameter serves as both the prefix and suffix.
      * The check is case-sensitive.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isWrappedWith("'hello'", "'");                 // returns true
      * isWrappedWith("\"text\"", "\"");               // returns true
@@ -1153,8 +1103,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isWrappedWith(null, "'");                      // returns false
      * }</pre>
      *
-     * @param str The input string to be checked.
-     * @param prefixSuffix The string that should be the prefix and suffix of the input string.
+     * @param str the input string to be checked, may be {@code null} or empty
+     * @param prefixSuffix the string that should be the prefix and suffix of the input string.
      * @return {@code true} if the input string starts and ends with the prefixSuffix string, {@code false} otherwise.
      * @throws IllegalArgumentException if prefixSuffix is empty.
      */
@@ -1170,7 +1120,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method verifies whether the string starts with the specified prefix and ends with the specified suffix.
      * The check is case-sensitive.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isWrappedWith("<html>content</html>", "<html>", "</html>");   // returns true
      * isWrappedWith("{data}", "{", "}");                            // returns true
@@ -1180,9 +1130,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isWrappedWith(null, "<", ">");                                // returns false
      * }</pre>
      *
-     * @param str The input string to be checked.
-     * @param prefix The string that should be the prefix of the input string.
-     * @param suffix The string that should be the suffix of the input string.
+     * @param str the input string to be checked, may be {@code null} or empty
+     * @param prefix the string that should be the prefix of the input string.
+     * @param suffix the string that should be the suffix of the input string.
      * @return {@code true} if the input string starts with the prefix and ends with the suffix, {@code false} otherwise.
      * @throws IllegalArgumentException if prefix or suffix is empty.
      */
@@ -1199,7 +1149,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method provides a null-safe way to ensure a CharSequence is never null.
      * The default value must not be null.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * defaultIfNull("hello", "default");             // returns "hello"
      * defaultIfNull(null, "default");                // returns "default"
@@ -1228,7 +1178,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method provides a null-safe way to ensure a CharSequence is never null, with lazy evaluation of the default value.
      * The supplier is only invoked if the input CharSequence is null.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * defaultIfNull("hello", () -> "default");       // returns "hello"
      * defaultIfNull(null, () -> "default");          // returns "default"
@@ -1259,7 +1209,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method considers a CharSequence empty if it is null or has zero length.
      * The default value must not be empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * defaultIfEmpty("hello", "default");            // returns "hello"
      * defaultIfEmpty("", "default");                 // returns "default"
@@ -1289,7 +1239,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method considers a CharSequence empty if it is null or has zero length.
      * The supplier is only invoked if the input CharSequence is empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * defaultIfEmpty("hello", () -> "default");      // returns "hello"
      * defaultIfEmpty("", () -> "default");           // returns "default"
@@ -1321,7 +1271,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method considers a CharSequence blank if it is null, empty, or contains only whitespace characters.
      * The default value must not be blank.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * defaultIfBlank("hello", "default");            // returns "hello"
      * defaultIfBlank("   ", "default");              // returns "default"
@@ -1352,7 +1302,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method considers a CharSequence blank if it is null, empty, or contains only whitespace characters.
      * The supplier is only invoked if the input CharSequence is blank.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * defaultIfBlank("hello", () -> "default");      // returns "hello"
      * defaultIfBlank("   ", () -> "default");        // returns "default"
@@ -1385,7 +1335,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * A string is considered empty if it is null or has zero length.
      * If both strings are empty, an empty string ("") is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * firstNonEmpty("hello", "world");               // returns "hello"
      * firstNonEmpty("", "world");                    // returns "world"
@@ -1394,9 +1344,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * firstNonEmpty(null, null);                     // returns ""
      * }</pre>
      *
-     * @param a The first String to be checked. It can be {@code null} or empty.
-     * @param b The second String to be checked. It can be {@code null} or empty.
-     * @return The first non-empty String from the given two String. If both are empty, returns an empty string {@code ""}.
+     * @param a the first String to be checked, may be {@code null} or empty
+     * @param b the second String to be checked, may be {@code null} or empty
+     * @return the first non-empty String from the given two String. If both are empty, returns an empty string {@code ""}.
      * @see N#firstNonEmpty(CharSequence, CharSequence)
      */
     public static String firstNonEmpty(final String a, final String b) {
@@ -1410,7 +1360,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * A string is considered empty if it is null or has zero length.
      * If all strings are empty, an empty string ("") is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * firstNonEmpty("hello", "world", "!");          // returns "hello"
      * firstNonEmpty("", "world", "!");               // returns "world"
@@ -1420,10 +1370,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * firstNonEmpty(null, null, null);               // returns ""
      * }</pre>
      *
-     * @param a The first String to be checked. It can be {@code null} or empty.
-     * @param b The second String to be checked. It can be {@code null} or empty.
-     * @param c The third String to be checked. It can be {@code null} or empty.
-     * @return The first non-empty String from the given three Strings. If all are empty, returns an empty string {@code ""}.
+     * @param a the first String to be checked, may be {@code null} or empty
+     * @param b the second String to be checked, may be {@code null} or empty
+     * @param c the third String to be checked, may be {@code null} or empty
+     * @return the first non-empty String from the given three Strings. If all are empty, returns an empty string {@code ""}.
      * @see N#firstNonEmpty(CharSequence, CharSequence, CharSequence)
      */
     public static String firstNonEmpty(final String a, final String b, final String c) {
@@ -1473,7 +1423,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * A string is considered empty if it is null or has zero length.
      * If all strings are empty or the Iterable is null or empty, an empty string ("") is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList("", null, "hello");
      * firstNonEmpty(list1);                          // returns "hello"
@@ -1485,8 +1435,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * firstNonEmpty(new ArrayList<>());              // returns ""
      * }</pre>
      *
-     * @param css The Iterable of Strings to be checked. It can be {@code null}.
-     * @return The first non-empty String from the given Iterable. If all Strings are empty or the Iterable is {@code null}, returns an empty string {@code ""}.
+     * @param css the Iterable of Strings to be checked, may be {@code null}
+     * @return the first non-empty String from the given Iterable. If all Strings are empty or the Iterable is {@code null}, returns an empty string {@code ""}.
      * @see N#firstNonEmpty(Iterable)
      */
     public static String firstNonEmpty(final Iterable<String> css) {
@@ -1510,7 +1460,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * A string is considered blank if it is null, empty, or contains only whitespace characters.
      * If both strings are blank, an empty string ("") is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * firstNonBlank("hello", "world");               // returns "hello"
      * firstNonBlank("   ", "world");                 // returns "world"
@@ -1519,9 +1469,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * firstNonBlank(null, null);                     // returns ""
      * }</pre>
      *
-     * @param a The first String to be checked. It can be {@code null} or empty.
-     * @param b The second String to be checked. It can be {@code null} or empty.
-     * @return The first non-blank String from the given two Strings. If both are blank, returns an empty string {@code ""}.
+     * @param a the first String to be checked, may be {@code null} or empty
+     * @param b the second String to be checked, may be {@code null} or empty
+     * @return the first non-blank String from the given two Strings. If both are blank, returns an empty string {@code ""}.
      * @see N#firstNonBlank(CharSequence, CharSequence)
      */
     public static String firstNonBlank(final String a, final String b) {
@@ -1535,7 +1485,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * A string is considered blank if it is null, empty, or contains only whitespace characters.
      * If all strings are blank, an empty string ("") is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * firstNonBlank("hello", "world", "!");          // returns "hello"
      * firstNonBlank("   ", "world", "!");            // returns "world"
@@ -1545,10 +1495,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * firstNonBlank(null, null, null);               // returns ""
      * }</pre>
      *
-     * @param a The first String to be checked. It can be {@code null} or empty.
-     * @param b The second String to be checked. It can be {@code null} or empty.
-     * @param c The third String to be checked. It can be {@code null} or empty.
-     * @return The first non-blank String from the given three Strings. If all are blank, returns an empty string {@code ""}.
+     * @param a the first String to be checked, may be {@code null} or empty
+     * @param b the second String to be checked, may be {@code null} or empty
+     * @param c the third String to be checked, may be {@code null} or empty
+     * @return the first non-blank String from the given three Strings. If all are blank, returns an empty string {@code ""}.
      * @see N#firstNonBlank(CharSequence, CharSequence, CharSequence)
      */
     public static String firstNonBlank(final String a, final String b, final String c) {
@@ -1562,7 +1512,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * A string is considered blank if it is null, empty, or contains only whitespace characters.
      * If all strings are blank or the array is null or empty, an empty string ("") is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * firstNonBlank(null, "   ", "hello");           // returns "hello"
      * firstNonBlank("", "\t", "world");              // returns "world"
@@ -1572,8 +1522,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * firstNonBlank((String[]) null);                // returns ""
      * }</pre>
      *
-     * @param css The Strings to be checked. They can be {@code null} or empty.
-     * @return The first non-blank String from the given Strings. If all are blank, returns an empty string {@code ""}.
+     * @param css the Strings to be checked. They can be {@code null} or empty.
+     * @return the first non-blank String from the given Strings. If all are blank, returns an empty string {@code ""}.
      * @see N#firstNonBlank(CharSequence...)
      */
     public static String firstNonBlank(final String... css) {
@@ -1597,7 +1547,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * A string is considered blank if it is null, empty, or contains only whitespace characters.
      * If all strings are blank or the Iterable is null or empty, an empty string ("") is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList("   ", null, "hello");
      * firstNonBlank(list1);                          // returns "hello"
@@ -1609,8 +1559,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * firstNonBlank(new ArrayList<>());              // returns ""
      * }</pre>
      *
-     * @param css The Iterable of Strings to be checked. It can be {@code null}.
-     * @return The first non-blank String from the given Iterable. If all Strings are blank or the Iterable is {@code null}, returns an empty string {@code ""}.
+     * @param css the Iterable of Strings to be checked, may be {@code null}
+     * @return the first non-blank String from the given Iterable. If all Strings are blank or the Iterable is {@code null}, returns an empty string {@code ""}.
      * @see N#firstNonBlank(Iterable)
      */
     public static String firstNonBlank(final Iterable<String> css) {
@@ -1632,7 +1582,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method provides a null-safe way to ensure a string is never null, converting null values to empty strings.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * nullToEmpty(null);                             // returns ""
      * nullToEmpty("");                               // returns ""
@@ -1640,8 +1590,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * nullToEmpty("hello");                          // returns "hello"
      * }</pre>
      *
-     * @param str The input string to be checked. It can be {@code null}.
-     * @return An empty string if the input string is {@code null}, otherwise the original string.
+     * @param str the input string to be checked, may be {@code null}
+     * @return an empty string if the input string is {@code null}, otherwise the original string.
      * @see N#nullToEmpty(String)
      */
     public static String nullToEmpty(final String str) {
@@ -1655,7 +1605,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method modifies the array in-place, replacing all null elements with empty strings.
      * Non-null elements remain unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {null, "hello", null, "world"};
      * nullToEmpty(arr);                              // arr becomes {"", "hello", "", "world"}
@@ -1667,7 +1617,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * nullToEmpty(new String[0]);                    // does nothing
      * }</pre>
      *
-     * @param strs The input string array to be checked. Each {@code null} element in the array will be converted to an empty string. It can be {@code null} or empty.
+     * @param strs the input string array to be checked. Each {@code null} element in the array will be converted to an empty string, may be {@code null} or empty
      * @see N#nullToEmpty(String[])
      * @see N#nullToEmptyForEach(String[])
      */
@@ -1687,7 +1637,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method considers a string empty if it has zero length. Strings containing only whitespace
      * are not considered empty and will not be converted to null.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * emptyToNull("");                               // returns null
      * emptyToNull(null);                             // returns null
@@ -1695,7 +1645,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * emptyToNull("hello");                          // returns "hello"
      * }</pre>
      *
-     * @param str The input string to be checked. It can be {@code null} or empty.
+     * @param str the input string to be checked, may be {@code null} or empty
      * @return {@code null} if the input string is empty, otherwise the original string.
      */
     public static <T extends CharSequence> T emptyToNull(final T str) {
@@ -1709,7 +1659,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method modifies the array in-place, replacing all empty string elements with null.
      * Non-empty elements and null elements remain unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"", "hello", "", "world"};
      * emptyToNull(arr);                              // arr becomes {null, "hello", null, "world"}
@@ -1721,7 +1671,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * emptyToNull(new String[0]);                    // does nothing
      * }</pre>
      *
-     * @param strs The input string array to be checked. Each empty element in the array will be converted to {@code null}. It can be {@code null} or empty.
+     * @param strs the input string array to be checked. Each empty element in the array will be converted to {@code null}, may be {@code null} or empty
      */
     public static <T extends CharSequence> void emptyToNull(final T[] strs) {
         if (N.isEmpty(strs)) {
@@ -1738,7 +1688,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method considers a string blank if it is null, empty, or contains only whitespace characters.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * blankToEmpty(null);                            // returns ""
      * blankToEmpty("");                              // returns ""
@@ -1748,8 +1698,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * blankToEmpty("  hello  ");                     // returns "  hello  "
      * }</pre>
      *
-     * @param str The input string to be checked. It can be {@code null} or empty.
-     * @return An empty string if the input string is blank, otherwise the original string.
+     * @param str the input string to be checked, may be {@code null} or empty
+     * @return an empty string if the input string is blank, otherwise the original string.
      */
     public static String blankToEmpty(final String str) {
         return isBlank(str) ? EMPTY : str;
@@ -1763,7 +1713,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * A string is considered blank if it is null, empty, or contains only whitespace characters.
      * Non-blank elements remain unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {null, "   ", "hello", "\t"};
      * blankToEmpty(arr);                             // arr becomes {"", "", "hello", ""}
@@ -1775,7 +1725,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * blankToEmpty(new String[0]);                   // does nothing
      * }</pre>
      *
-     * @param strs The input string array to be checked. Each blank element in the array will be converted to an empty string. It can be {@code null} or empty.
+     * @param strs the input string array to be checked. Each blank element in the array will be converted to an empty string, may be {@code null} or empty
      */
     public static void blankToEmpty(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -1792,7 +1742,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method considers a string blank if it is null, empty, or contains only whitespace characters.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * blankToNull("");                               // returns null
      * blankToNull("   ");                            // returns null
@@ -1802,7 +1752,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * blankToNull("  hello  ");                      // returns "  hello  "
      * }</pre>
      *
-     * @param str The input string to be checked. It can be {@code null} or empty.
+     * @param str the input string to be checked, may be {@code null} or empty
      * @return {@code null} if the input string is blank, otherwise the original string.
      */
     public static <T extends CharSequence> T blankToNull(final T str) {
@@ -1817,7 +1767,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * A string is considered blank if it is null, empty, or contains only whitespace characters.
      * Non-blank elements remain unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"   ", "hello", "\t", "world"};
      * blankToNull(arr);                              // arr becomes {null, "hello", null, "world"}
@@ -1829,7 +1779,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * blankToNull(new String[0]);                    // does nothing
      * }</pre>
      *
-     * @param strs The input string array to be checked. Each blank element in the array will be converted to {@code null}. It can be {@code null} or empty.
+     * @param strs the input string array to be checked. Each blank element in the array will be converted to {@code null}, may be {@code null} or empty
      */
     public static <T extends CharSequence> void blankToNull(final T[] strs) {
         if (N.isEmpty(strs)) {
@@ -1869,7 +1819,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
      * </pre>
      *
-     * @param str the String to check, which may be null
+     * @param str the String to check, may be {@code null}
      * @param offset left edge of source String
      * @param maxWidth maximum length of result String, must be at least 4
      * @return abbreviated String, {@code null} if {@code null} String input
@@ -1913,7 +1863,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.abbreviate("abcdefghij", "...", 5, 6)        = IllegalArgumentException
      * </pre>
      *
-     * @param str the String to check, which may be null
+     * @param str the String to check, may be {@code null}
      * @param abbrevMarker the String used as replacement marker
      * @param offset left edge of source String
      * @param maxWidth maximum length of result String, must be at least 4
@@ -1991,7 +1941,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.abbreviate("abcdefg", 3) = IllegalArgumentException
      * </pre>
      *
-     * @param str the String to check, which may be null
+     * @param str the String to check, may be {@code null}
      * @param maxWidth maximum length of result String, must be at least 4
      * @return abbreviated String
      * @throws IllegalArgumentException if the width is too small
@@ -2029,7 +1979,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.abbreviate("abcdefg", "...", 3) = IllegalArgumentException
      * </pre>
      *
-     * @param str the String to check, which may be null
+     * @param str the String to check, may be {@code null}
      * @param abbrevMarker the String used as replacement marker
      * @param maxWidth maximum length of result String, must be at least {@code abbrevMarker.length + 1}
      * @return abbreviated String
@@ -2062,8 +2012,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.abbreviateMiddle("abcdef", ".", 4)     = "ab.f"
      * </pre>
      *
-     * @param str the String to abbreviate, which may be null
-     * @param middle the String to replace the middle characters with, which may be null
+     * @param str the String to abbreviate, may be {@code null}
+     * @param middle the String to replace the middle characters with, may be {@code null}
      * @param length the length to abbreviate {@code str} to.
      * @return the abbreviated String if the above criteria is met, or the original String supplied for abbreviation.
      */
@@ -2086,7 +2036,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If the size is less than the String length, the original String is returned.
      * This method is equivalent to {@code center(str, size, " ")}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>
      * Strings.center(null, 3)     = "   "
      * Strings.center("", 3)     = "   "
@@ -2095,7 +2045,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.center("a", 4)    = " a  "
      * </pre>
      *
-     * @param str the String to center, which may be null
+     * @param str the String to center, may be {@code null}
      * @param size the int size of new String
      * @return centered String
      */
@@ -2120,7 +2070,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.center("a", 4, 'y')    = "yayy"
      * </pre>
      *
-     * @param str the String to center, which may be null
+     * @param str the String to center, may be {@code null}
      * @param size the int size of new String.
      * @param padChar the character to pad the new String with
      * @return centered String
@@ -2162,7 +2112,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.center("abc", 7, "")   = "  abc  "
      * </pre>
      *
-     * @param str the String to center, which may be null
+     * @param str the String to center, may be {@code null}
      * @param minLength the minimum size of new String.
      * @param padStr the String to pad the new String with, must not be {@code null} or empty
      * @return centered String
@@ -2195,7 +2145,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Pads the given string from the start (left) with spaces until the string reaches the specified minimum length.
      * If the length of the given string is already greater than or equal to the specified minimum length, the original string is returned.
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * padStart("abc", 5);                            // returns "  abc"
      * padStart("abc", 3);                            // returns "abc"
@@ -2204,9 +2154,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * padStart(null, 3);                             // returns "   "
      * }</pre>
      *
-     * @param str The string to be padded. It can be {@code null} or empty.
-     * @param minLength The minimum length the string should have after padding. Must be non-negative.
-     * @return A new string that is a copy of the original string padded with leading spaces so that it reaches the specified minimum length.
+     * @param str the string to be padded, may be {@code null} or empty
+     * @param minLength the minimum length the string should have after padding. Must be non-negative.
+     * @return a new string that is a copy of the original string padded with leading spaces so that it reaches the specified minimum length.
      *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padStart(final String str, final int minLength) {
@@ -2217,7 +2167,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Pads the given string from the start (left) with the specified character until the string reaches the specified minimum length.
      * If the length of the given string is already greater than or equal to the specified minimum length, the original string is returned.
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * padStart("abc", 5, '*');                       // returns "**abc"
      * padStart("abc", 3, '*');                       // returns "abc"
@@ -2226,10 +2176,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * padStart(null, 3, '-');                        // returns "---"
      * }</pre>
      *
-     * @param str The string to be padded. It can be {@code null}, in which case it will be treated as an empty string.
-     * @param minLength The minimum length the string should have after padding. Must be non-negative.
-     * @param padChar The character to be used for padding.
-     * @return A new string that is a copy of the original string padded with the padChar so that it reaches the specified minimum length.
+     * @param str the string to be padded, may be {@code null} or empty
+     * @param minLength the minimum length the string should have after padding. Must be non-negative.
+     * @param padChar the character to be used for padding.
+     * @return a new string that is a copy of the original string padded with the padChar so that it reaches the specified minimum length.
      *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padStart(String str, final int minLength, final char padChar) {
@@ -2252,7 +2202,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the padding string is longer than the remaining space, only the necessary portion of the padding string is used.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * padStart("abc", 7, "xy");                      // returns "xyxyabc"
      * padStart("abc", 6, "123");                     // returns "123abc"
@@ -2261,10 +2211,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * padStart(null, 3, "0");                        // returns "000"
      * }</pre>
      *
-     * @param str The string to be padded. It can be {@code null}, in which case it will be treated as an empty string.
-     * @param minLength The minimum length the string should have after padding. Must be non-negative.
-     * @param padStr The string to be used for padding.
-     * @return A new string that is a copy of the original string padded with the padStr so that it reaches the specified minimum length.
+     * @param str the string to be padded, may be {@code null} or empty
+     * @param minLength the minimum length the string should have after padding. Must be non-negative.
+     * @param padStr the string to be used for padding.
+     * @return a new string that is a copy of the original string padded with the padStr so that it reaches the specified minimum length.
      *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padStart(String str, final int minLength, final String padStr) {
@@ -2314,7 +2264,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Pads the given string from the end (right) with spaces until the string reaches the specified minimum length.
      * If the length of the given string is already greater than or equal to the specified minimum length, the original string is returned.
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * padEnd("abc", 5);                              // returns "abc  "
      * padEnd("abc", 3);                              // returns "abc"
@@ -2323,9 +2273,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * padEnd(null, 3);                               // returns "   "
      * }</pre>
      *
-     * @param str The string to be padded. It can be {@code null}, in which case it will be treated as an empty string.
-     * @param minLength The minimum length the string should have after padding. Must be non-negative.
-     * @return A new string that is a copy of the original string padded with trailing spaces so that it reaches the specified minimum length.
+     * @param str the string to be padded, may be {@code null} or empty
+     * @param minLength the minimum length the string should have after padding. Must be non-negative.
+     * @return a new string that is a copy of the original string padded with trailing spaces so that it reaches the specified minimum length.
      *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padEnd(final String str, final int minLength) {
@@ -2336,7 +2286,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Pads the given string from the end (right) with the specified character until the string reaches the specified minimum length.
      * If the length of the given string is already greater than or equal to the specified minimum length, the original string is returned.
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * padEnd("abc", 5, '*');                         // returns "abc**"
      * padEnd("abc", 3, '*');                         // returns "abc"
@@ -2345,10 +2295,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * padEnd(null, 3, '-');                          // returns "---"
      * }</pre>
      *
-     * @param str The string to be padded. It can be {@code null}, in which case it will be treated as an empty string.
-     * @param minLength The minimum length the string should have after padding. Must be non-negative.
-     * @param padChar The character to be used for padding.
-     * @return A new string that is a copy of the original string padded with the padChar so that it reaches the specified minimum length.
+     * @param str the string to be padded, may be {@code null} or empty
+     * @param minLength the minimum length the string should have after padding. Must be non-negative.
+     * @param padChar the character to be used for padding.
+     * @return a new string that is a copy of the original string padded with the padChar so that it reaches the specified minimum length.
      *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padEnd(String str, final int minLength, final char padChar) {
@@ -2371,7 +2321,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the padding string is longer than the remaining space, only the necessary portion of the padding string is used.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * padEnd("abc", 7, "xy");                        // returns "abcxyxy"
      * padEnd("abc", 6, "123");                       // returns "abc123"
@@ -2380,10 +2330,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * padEnd(null, 3, "0");                          // returns "000"
      * }</pre>
      *
-     * @param str The string to be padded. It can be {@code null}, in which case it will be treated as an empty string.
-     * @param minLength The minimum length the string should have after padding. Must be non-negative.
-     * @param padStr The string to be used for padding. Must not be {@code null} or empty.
-     * @return A new string that is a copy of the original string padded with the padStr so that it reaches the specified minimum length.
+     * @param str the string to be padded, may be {@code null} or empty
+     * @param minLength the minimum length the string should have after padding. Must be non-negative.
+     * @param padStr the string to be used for padding. Must not be {@code null} or empty.
+     * @return a new string that is a copy of the original string padded with the padStr so that it reaches the specified minimum length.
      *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      * @throws IllegalArgumentException if padStr is {@code null} or empty
      */
@@ -2438,7 +2388,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method creates a string consisting of the specified character repeated n times.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * repeat('a', 0);                                // returns ""
      * repeat('a', 3);                                // returns "aaa"
@@ -2446,9 +2396,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * repeat(' ', 4);                                // returns "    "
      * }</pre>
      *
-     * @param ch The character to be repeated.
-     * @param n The number of times the character should be repeated. Must be non-negative.
-     * @return A string consisting of the given character repeated n times.
+     * @param ch the character to be repeated.
+     * @param n the number of times the character should be repeated. Must be non-negative.
+     * @return a string consisting of the given character repeated n times.
      * @throws IllegalArgumentException if n is negative.
      */
     public static String repeat(final char ch, final int n) throws IllegalArgumentException {
@@ -2469,7 +2419,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method creates a string consisting of the specified character repeated n times,
      * with each occurrence separated by the delimiter.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * repeat('a', 0, ',');                           // returns ""
      * repeat('a', 1, ',');                           // returns "a"
@@ -2477,10 +2427,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * repeat('*', 4, '-');                           // returns "*-*-*-*"
      * }</pre>
      *
-     * @param ch The character to be repeated.
-     * @param n The number of times the character should be repeated. Must be non-negative.
-     * @param delimiter The character used to separate the repeated characters.
-     * @return A string consisting of the given character repeated n times, separated by the delimiter.
+     * @param ch the character to be repeated.
+     * @param n the number of times the character should be repeated. Must be non-negative.
+     * @param delimiter the character used to separate the repeated characters.
+     * @return a string consisting of the given character repeated n times, separated by the delimiter.
      * @throws IllegalArgumentException if n is negative.
      * @see #repeat(char, int, char)
      * @see #repeat(String, int, String)
@@ -2497,7 +2447,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method creates a string consisting of the specified string repeated n times.
      * If the input string is null or empty, or n is 0, empty string {@code ""} is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * repeat("ab", 0);                               // returns ""
      * repeat("ab", 1);                               // returns "ab"
@@ -2507,9 +2457,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * repeat("", 3);                                 // returns ""
      * }</pre>
      *
-     * @param str The string to be repeated. It can be {@code null} or empty.
-     * @param n The number of times the string should be repeated. Must be non-negative.
-     * @return A string consisting of the given string repeated n times, an empty string {@code ""} if the input string is null or empty, or n is 0.
+     * @param str the string to be repeated, may be {@code null} or empty
+     * @param n the number of times the string should be repeated. Must be non-negative.
+     * @return a string consisting of the given string repeated n times, an empty string {@code ""} if the input string is null or empty, or n is 0.
      * @throws IllegalArgumentException if n is negative.
      * @see #repeat(char, int, char)
      * @see #repeat(String, int, String)
@@ -2532,7 +2482,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method creates a string consisting of the specified string repeated n times,
      * with each occurrence separated by the delimiter.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * repeat("ab", 0, ",");                          // returns ""
      * repeat("ab", 1, ",");                          // returns "ab"
@@ -2541,10 +2491,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * repeat("X", 4, "-");                           // returns "X-X-X-X"
      * }</pre>
      *
-     * @param str The string to be repeated. It can be {@code null} or empty.
-     * @param n The number of times the string should be repeated. Must be non-negative.
-     * @param delimiter The string used to separate the repeated strings.
-     * @return A string consisting of the given string repeated n times, separated by the delimiter.
+     * @param str the string to be repeated, may be {@code null} or empty
+     * @param n the number of times the string should be repeated. Must be non-negative.
+     * @param delimiter the string used to separate the repeated strings.
+     * @return a string consisting of the given string repeated n times, separated by the delimiter.
      * @throws IllegalArgumentException if n is negative.
      */
     public static String repeat(final String str, final int n, final String delimiter) throws IllegalArgumentException {
@@ -2562,7 +2512,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method creates a string consisting of the prefix, followed by the specified string repeated n times
      * (with each occurrence separated by the delimiter), and ending with the suffix.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * repeat("ab", 0, ",", "[", "]");                // returns "[]"
      * repeat("ab", 1, ",", "[", "]");                // returns "[ab]"
@@ -2570,12 +2520,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * repeat("X", 4, "-", "Start:", ":End");         // returns "Start:X-X-X-X:End"
      * }</pre>
      *
-     * @param str The string to be repeated. It can be {@code null} or empty.
-     * @param n The number of times the string should be repeated. Must be non-negative.
-     * @param delimiter The string used to separate the repeated strings.
-     * @param prefix The string to be added at the start of the resulting string.
-     * @param suffix The string to be added at the end of the resulting string.
-     * @return A string consisting of the prefix, the given string repeated n times separated by the delimiter, and the suffix.
+     * @param str the string to be repeated, may be {@code null} or empty
+     * @param n the number of times the string should be repeated. Must be non-negative.
+     * @param delimiter the string used to separate the repeated strings.
+     * @param prefix the string to be added at the start of the resulting string.
+     * @param suffix the string to be added at the end of the resulting string.
+     * @return a string consisting of the prefix, the given string repeated n times separated by the delimiter, and the suffix.
      * @throws IllegalArgumentException if n is negative.
      */
     public static String repeat(String str, final int n, String delimiter, String prefix, String suffix) throws IllegalArgumentException {
@@ -2600,15 +2550,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method provides a null-safe way to convert a String to a byte array using the platform's default charset.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * getBytes("hello");                             // returns byte array of "hello"
      * getBytes("");                                  // returns empty byte array
      * getBytes(null);                                // returns null
      * }</pre>
      *
-     * @param string The input string to be converted. It can be {@code null}.
-     * @return A byte array representation of the input string using the default charset, or {@code null} if the input string is {@code null}.
+     * @param string the input string to be converted, may be {@code null}
+     * @return a byte array representation of the input string using the default charset, or {@code null} if the input string is {@code null}.
      */
     @MayReturnNull
     public static byte[] getBytes(final String string) {
@@ -2620,7 +2570,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method provides a null-safe way to convert a String to a byte array using the specified charset.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * getBytes("hello", StandardCharsets.UTF_8);     // returns UTF-8 encoded bytes
      * getBytes("hello", StandardCharsets.US_ASCII);  // returns ASCII encoded bytes
@@ -2628,8 +2578,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * getBytes(null, StandardCharsets.UTF_8);        // returns null
      * }</pre>
      *
-     * @param string The input string to be converted. It can be {@code null}.
-     * @param charset The charset to be used for encoding.
+     * @param string the input string to be converted, may be {@code null}
+     * @param charset the charset to be used for encoding.
      * @return the encoded bytes
      */
     @MayReturnNull
@@ -2642,7 +2592,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method provides a null-safe way to convert a String to a UTF-8 encoded byte array.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * getBytesUtf8("hello");                         // returns UTF-8 encoded bytes
      * getBytesUtf8("世界");                           // returns UTF-8 encoded bytes
@@ -2650,8 +2600,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * getBytesUtf8(null);                            // returns null
      * }</pre>
      *
-     * @param string The input string to be converted. It can be {@code null}.
-     * @return A byte array representation of the input string using UTF-8 encoding, or {@code null} if the input string is {@code null}.
+     * @param string the input string to be converted, may be {@code null}
+     * @return a byte array representation of the input string using UTF-8 encoding, or {@code null} if the input string is {@code null}.
      */
     @MayReturnNull
     public static byte[] getBytesUtf8(final String string) {
@@ -2664,7 +2614,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method provides a null-safe way to convert a CharSequence to a char array.
      * It handles String instances efficiently by using the native toCharArray() method.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * toCharArray("hello");                          // returns ['h','e','l','l','o']
      * toCharArray("");                               // returns []
@@ -2672,8 +2622,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * toCharArray(new StringBuilder("abc"));         // returns ['a','b','c']
      * }</pre>
      *
-     * @param source The input CharSequence to be converted. It can be {@code null}.
-     * @return A char array representation of the input CharSequence. Returns {@code null} if the input CharSequence is {@code null}.
+     * @param source the input CharSequence to be converted, may be {@code null}
+     * @return a char array representation of the input CharSequence. Returns {@code null} if the input CharSequence is {@code null}.
      */
     @MayReturnNull
     public static char[] toCharArray(final CharSequence source) {
@@ -2703,7 +2653,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * code point. Isolated surrogate code units (i.e., a high surrogate not followed by a low surrogate or
      * a low surrogate not preceded by a high surrogate) will be returned as-is.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>
      * Strings.toCodePoints(null)   =  null
      * Strings.toCodePoints("")     =  []  // empty array
@@ -2712,7 +2662,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str the character sequence to convert
-     * @return An array of code points representing the input CharSequence, or {@code null} if the input is {@code null}.
+     * @return an array of code points representing the input CharSequence, or {@code null} if the input is {@code null}.
      */
     @MayReturnNull
     public static int[] toCodePoints(final CharSequence str) {
@@ -2733,7 +2683,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method converts the specified character to its lowercase equivalent
      * according to the Unicode standard.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * toLowerCase('A');                              // returns 'a'
      * toLowerCase('Z');                              // returns 'z'
@@ -2742,8 +2692,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * toLowerCase('Ω');                              // returns 'ω'
      * }</pre>
      *
-     * @param ch The character to convert to lowercase.
-     * @return The lowercase equivalent of the character.
+     * @param ch the character to convert to lowercase.
+     * @return the lowercase equivalent of the character.
      * @see Character#toLowerCase(char)
      */
     public static char toLowerCase(final char ch) {
@@ -2774,7 +2724,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to lower case, which may be null
+     *            the String to lower case, may be {@code null}
      * @return the specified String if it's {@code null} or empty.
      */
     public static String toLowerCase(final String str) {
@@ -2805,7 +2755,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to lower case, which may be null
+     *            the String to lower case, may be {@code null}
      * @param locale
      *            the locale that defines the case transformation rules, must
      *            not be null
@@ -2827,7 +2777,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * before uppercase letters that are preceded by lowercase letters or followed by lowercase letters.
      * This is useful for converting camelCase or PascalCase strings to snake_case.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * toLowerCaseWithUnderscore("helloWorld");       // returns "hello_world"
      * toLowerCaseWithUnderscore("HelloWorld");       // returns "hello_world"
@@ -2877,7 +2827,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method converts the specified character to its uppercase equivalent
      * according to the Unicode standard.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * toUpperCase('a');                              // returns 'A'
      * toUpperCase('z');                              // returns 'Z'
@@ -2886,8 +2836,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * toUpperCase('ω');                              // returns 'Ω'
      * }</pre>
      *
-     * @param ch The character to convert to uppercase.
-     * @return The uppercase equivalent of the character.
+     * @param ch the character to convert to uppercase.
+     * @return the uppercase equivalent of the character.
      * @see Character#toUpperCase(char)
      */
     public static char toUpperCase(final char ch) {
@@ -2917,7 +2867,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Strings.toUpperCase("aBc") = "ABC"
      * </pre>
      *
-     * @param str the String to upper case, which may be null
+     * @param str the String to upper case, may be {@code null}
      * @return the specified String if it's {@code null} or empty.
      */
     public static String toUpperCase(final String str) {
@@ -2947,7 +2897,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     *            the String to upper case, which may be null
+     *            the String to upper case, may be {@code null}
      * @param locale
      *            the locale that defines the case transformation rules, must
      *            not be null
@@ -2972,7 +2922,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * toUpperCaseWithUnderscore(null);           // returns null
      * toUpperCaseWithUnderscore("");             // returns ""
@@ -2983,7 +2933,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * toUpperCaseWithUnderscore("IOError");       // returns "IO_ERROR"
      * }</pre>
      *
-     * @param str the input string to be converted. It can be {@code null} or empty.
+     * @param str the input string to be converted, may be {@code null} or empty
      * @return the converted string in upper case with underscores, or the original string if it is {@code null} or empty.
      */
     public static String toUpperCaseWithUnderscore(final String str) {
@@ -3035,7 +2985,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * toCamelCase(null);                 // returns null
      * toCamelCase("");                   // returns ""
@@ -3047,8 +2997,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * toCamelCase("firstName");          // returns "firstName"
      * }</pre>
      *
-     * @param str The input string to be converted. It can be {@code null} or empty.
-     * @return A camel case representation of the input string. Returns the original string if it's {@code null} or empty.
+     * @param str the input string to be converted, may be {@code null} or empty
+     * @return a camel case representation of the input string. Returns the original string if it's {@code null} or empty.
      */
     public static String toCamelCase(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3067,7 +3017,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * toCamelCase(null, '.');            // returns null
      * toCamelCase("", '.');              // returns ""
@@ -3077,9 +3027,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * toCamelCase("firstName", '.');     // returns "firstName"
      * }</pre>
      *
-     * @param str The input string to be converted. It can be {@code null} or empty.
-     * @param splitChar The character used to split the input string.
-     * @return A camel case representation of the input string. Returns the original string if it's {@code null} or empty.
+     * @param str the input string to be converted, may be {@code null} or empty
+     * @param splitChar the character used to split the input string.
+     * @return a camel case representation of the input string. Returns the original string if it's {@code null} or empty.
      */
     public static String toCamelCase(final String str, final char splitChar) {
         if (str == null || str.isEmpty()) {
@@ -3142,7 +3092,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * toPascalCase(null);                // returns null
      * toPascalCase("");                  // returns ""
@@ -3153,8 +3103,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * toPascalCase("first");             // returns "First"
      * }</pre>
      *
-     * @param str The input string to be converted. It can be {@code null} or empty.
-     * @return A Pascal case representation of the input string. Returns the original string if it's {@code null} or empty.
+     * @param str the input string to be converted, may be {@code null} or empty
+     * @return a Pascal case representation of the input string. Returns the original string if it's {@code null} or empty.
      */
     public static String toPascalCase(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3175,7 +3125,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * toPascalCase(null, '.');           // returns null
      * toPascalCase("", '.');             // returns ""
@@ -3186,9 +3136,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * toPascalCase("firstname", '.');    // returns "Firstname"
      * }</pre>
      *
-     * @param str The input string to be converted. It can be {@code null} or empty.
-     * @param splitChar The character used to split the input string.
-     * @return A Pascal case representation of the input string. Returns the original string if it's {@code null} or empty.
+     * @param str the input string to be converted, may be {@code null} or empty
+     * @param splitChar the character used to split the input string.
+     * @return a Pascal case representation of the input string. Returns the original string if it's {@code null} or empty.
      */
     public static String toPascalCase(final String str, final char splitChar) {
         if (str == null || str.isEmpty()) {
@@ -3228,7 +3178,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method converts uppercase and title case characters to lowercase, and lowercase characters to uppercase.
      * Characters that are neither uppercase, title case, nor lowercase remain unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * swapCase('A');    // returns 'a'
      * swapCase('a');    // returns 'A'
@@ -3236,8 +3186,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * swapCase(' ');    // returns ' '
      * }</pre>
      *
-     * @param ch The input character to be case-swapped.
-     * @return The case-swapped representation of the input character.
+     * @param ch the input character to be case-swapped.
+     * @return the case-swapped representation of the input character.
      */
     public static char swapCase(final char ch) {
         return Character.isUpperCase(ch) || Character.isTitleCase(ch) ? Character.toLowerCase(ch)
@@ -3255,7 +3205,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Note: This method performs character-by-character case swapping, not word-based swapping. 
      * For word-based algorithms, see {@link org.apache.commons.lang3.text.WordUtils#swapCase(String)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * swapCase(null);                    // returns null
      * swapCase("");                      // returns ""
@@ -3264,7 +3214,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * swapCase("ABC123xyz");             // returns "abc123XYZ"
      * }</pre>
      *
-     * @param str the String to swap case, which may be null
+     * @param str the String to swap case, may be {@code null}
      * @return the case-swapped String, {@code null} if the input is {@code null}
      */
     public static String swapCase(final String str) {
@@ -3304,7 +3254,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null}, empty, or already starts with a lowercase character.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * uncapitalize(null);        // returns null
      * uncapitalize("");          // returns ""
@@ -3314,8 +3264,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * uncapitalize("C");         // returns "c"
      * }</pre>
      *
-     * @param str The string to be uncapitalized. It can be {@code null} or empty.
-     * @return A string with its first character converted to lower case, or the original string if it's {@code null}, empty, or already starts with a lowercase character.
+     * @param str the string to be uncapitalized, may be {@code null} or empty
+     * @return a string with its first character converted to lower case, or the original string if it's {@code null}, empty, or already starts with a lowercase character.
      */
     public static String uncapitalize(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3355,7 +3305,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null}, empty, or already starts with an uppercase character.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * capitalize(null);          // returns null
      * capitalize("");            // returns ""
@@ -3366,8 +3316,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * capitalize("'cat'");       // returns "'cat'"
      * }</pre>
      *
-     * @param str The string to be capitalized. It can be {@code null} or empty.
-     * @return A string with its first character converted to upper case, or the original string if it's {@code null}, empty, or already starts with an uppercase character.
+     * @param str the string to be capitalized, may be {@code null} or empty
+     * @return a string with its first character converted to upper case, or the original string if it's {@code null}, empty, or already starts with an uppercase character.
      */
     public static String capitalize(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3404,7 +3354,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * capitalizeFully(null);                     // returns null
      * capitalizeFully("");                       // returns ""
@@ -3414,8 +3364,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * capitalizeFully("hELLO wORLD");            // returns "HELLO WORLD"
      * }</pre>
      *
-     * @param str The string to be processed. It can be {@code null} or empty.
-     * @return The processed string with all words capitalized, or the original string if it's {@code null} or empty.
+     * @param str the string to be processed, may be {@code null} or empty
+     * @return the processed string with all words capitalized, or the original string if it's {@code null} or empty.
      */
     public static String capitalizeFully(final String str) {
         return capitalizeFully(str, " ");
@@ -3429,7 +3379,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * capitalizeFully(null, "-");                // returns null
      * capitalizeFully("", "-");                  // returns ""
@@ -3438,9 +3388,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * capitalizeFully("hello.world.java", ".");  // returns "Hello.World.Java"
      * }</pre>
      *
-     * @param str The string to be processed. It can be {@code null} or empty.
-     * @param delimiter The delimiter used to split the string into words. It must not be empty.
-     * @return The processed string with all words capitalized, or the original string if it's {@code null} or empty.
+     * @param str the string to be processed, may be {@code null} or empty
+     * @param delimiter the delimiter used to split the string into words. It must not be empty.
+     * @return the processed string with all words capitalized, or the original string if it's {@code null} or empty.
      * @throws IllegalArgumentException if the provided delimiter is empty.
      * @see #convertWords(String, String, Collection, Function)
      */
@@ -3471,17 +3421,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * capitalizeFully("the quick brown fox", " ", "the", "of");     // returns "The Quick Brown Fox"
      * capitalizeFully("the end of story", " ", "the", "of");        // returns "The End of Story"
      * capitalizeFully("of mice and men", " ", "of", "and");         // returns "Of Mice and Men"
      * }</pre>
      *
-     * @param str The string to be processed. If it's {@code null} or empty, the method will return the input string.
-     * @param delimiter The delimiter used to split the string into words. It must not be empty.
-     * @param excludedWords An array of words to be excluded from capitalization. If it's {@code null} or empty, all words will be capitalized.
-     * @return The processed string with all non-excluded words capitalized.
+     * @param str the string to be processed, may be {@code null} or empty If it's {@code null} or empty, the method will return the input string.
+     * @param delimiter the delimiter used to split the string into words. It must not be empty.
+     * @param excludedWords an array of words to be excluded from capitalization. If it's {@code null} or empty, all words will be capitalized.
+     * @return the processed string with all non-excluded words capitalized.
      * @throws IllegalArgumentException if the provided delimiter is empty.
      */
     public static String capitalizeFully(final String str, final String delimiter, final String... excludedWords) throws IllegalArgumentException {
@@ -3509,17 +3459,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Set<String> excluded = Set.of("the", "of", "and");
      * capitalizeFully("the lord of the rings", " ", excluded);      // returns "The Lord of the Rings"
      * capitalizeFully("and then there were none", " ", excluded);   // returns "And Then There Were None"
      * }</pre>
      *
-     * @param str The string to be processed. If it's {@code null} or empty, the method will return the input string.
-     * @param delimiter The delimiter used to split the string into words. It must not be empty.
-     * @param excludedWords A collection of words to be excluded from capitalization. If it's {@code null} or empty, all words will be capitalized.
-     * @return The processed string with all non-excluded words capitalized.
+     * @param str the string to be processed, may be {@code null} or empty If it's {@code null} or empty, the method will return the input string.
+     * @param delimiter the delimiter used to split the string into words. It must not be empty.
+     * @param excludedWords a collection of words to be excluded from capitalization. If it's {@code null} or empty, all words will be capitalized.
+     * @return the processed string with all non-excluded words capitalized.
      * @throws IllegalArgumentException if the provided delimiter is empty.
      * @see #convertWords(String, String, Collection, Function)
      */
@@ -3553,16 +3503,16 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * convertWords("hello world", String::toUpperCase);          // returns "HELLO WORLD"
      * convertWords("hello world", s -> s + "!");                 // returns "hello! world!"
      * convertWords("hello  world", String::toUpperCase);         // returns "HELLO  WORLD"
      * }</pre>
      *
-     * @param str The string to be processed. If it's {@code null} or empty, the method will return the input string.
-     * @param converter The function used to convert each word. This function should accept a string and return a string.
-     * @return The processed string with all words converted using the provided converter function.
+     * @param str the string to be processed, may be {@code null} or empty If it's {@code null} or empty, the method will return the input string.
+     * @param converter the function used to convert each word. This function should accept a string and return a string.
+     * @return the processed string with all words converted using the provided converter function.
      */
     public static String convertWords(final String str, final Function<? super String, String> converter) {
         return convertWords(str, " ", converter);
@@ -3576,17 +3526,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * convertWords("hello-world", "-", String::toUpperCase);     // returns "HELLO-WORLD"
      * convertWords("hello.world.java", ".", s -> "[" + s + "]"); // returns "[hello].[world].[java]"
      * convertWords("hello--world", "-", String::toUpperCase);    // returns "HELLO--WORLD"
      * }</pre>
      *
-     * @param str The string to be processed. If it's {@code null} or empty, the method will return the input string.
-     * @param delimiter The delimiter used to split the string into words. It must not be empty.
-     * @param converter The function used to convert each word.
-     * @return The processed string with all words converted using the provided converter function.
+     * @param str the string to be processed, may be {@code null} or empty If it's {@code null} or empty, the method will return the input string.
+     * @param delimiter the delimiter used to split the string into words. It must not be empty.
+     * @param converter the function used to convert each word.
+     * @return the processed string with all words converted using the provided converter function.
      * @throws IllegalArgumentException if the provided delimiter is empty.
      */
     public static String convertWords(final String str, final String delimiter, final Function<? super String, String> converter)
@@ -3616,18 +3566,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Set<String> excluded = Set.of("and", "or");
      * convertWords("jack and jill", " ", excluded, String::toUpperCase);  // returns "JACK and JILL"
      * convertWords("true or false", " ", excluded, s -> "*" + s + "*");   // returns "*true* or *false*"
      * }</pre>
      *
-     * @param str The string to be processed. If it's {@code null} or empty, the method will return the input string.
-     * @param delimiter The delimiter used to split the string into words. It must not be empty.
-     * @param excludedWords A collection of words to be excluded from conversion. If it's {@code null} or empty, all words will be converted.
-     * @param converter The function used to convert each word. If a word is in the excludedWords collection, it will not be converted.
-     * @return The processed string with all non-excluded words converted using the provided converter function.
+     * @param str the string to be processed, may be {@code null} or empty If it's {@code null} or empty, the method will return the input string.
+     * @param delimiter the delimiter used to split the string into words. It must not be empty.
+     * @param excludedWords a collection of words to be excluded from conversion. If it's {@code null} or empty, all words will be converted.
+     * @param converter the function used to convert each word. If a word is in the excludedWords collection, it will not be converted.
+     * @return the processed string with all non-excluded words converted using the provided converter function.
      * @throws IllegalArgumentException if the provided delimiter is empty.
      */
     public static String convertWords(final String str, final String delimiter, final Collection<String> excludedWords,
@@ -3661,7 +3611,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * quoteEscaped(null);                    // returns null
      * quoteEscaped("");                      // returns ""
@@ -3671,8 +3621,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * quoteEscaped("Already \\'escaped\\'"); // returns "Already \\'escaped\\'"
      * }</pre>
      *
-     * @param str The string to be processed. It can be {@code null} or empty.
-     * @return The string with all unescaped single and double quotes escaped, or the original string if it's {@code null} or empty.
+     * @param str the string to be processed, may be {@code null} or empty
+     * @return the string with all unescaped single and double quotes escaped, or the original string if it's {@code null} or empty.
      */
     public static String quoteEscaped(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3711,7 +3661,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * quoteEscaped(null, '"');               // returns null
      * quoteEscaped("", '"');                 // returns ""
@@ -3762,7 +3712,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method converts a character to its Unicode escape sequence representation.
      * The format is the Java source code format: a backslash followed by 'u' and exactly four hexadecimal digits.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * unicodeEscaped(' ');     // returns "\u0020"
      * unicodeEscaped('A');     // returns "\u0041"
@@ -3794,7 +3744,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} if the input is {@code null}, and an empty string if the input is empty or contains only whitespace.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * normalizeSpace(null);                     // returns null
      * normalizeSpace("");                       // returns ""
@@ -3806,7 +3756,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * normalizeSpace("  multiple   spaces  ");  // returns "multiple spaces"
      * }</pre>
      *
-     * @param str the source String to normalize whitespaces from, which may be null
+     * @param str the source String to normalize whitespaces from, may be {@code null}
      * @return the normalized String, {@code null} if the input is {@code null}
      * @see Pattern
      * @see #trim(String)
@@ -3826,7 +3776,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method searches for all occurrences of the target string and replaces them with the replacement string.
      * A {@code null} reference passed to this method is a no-op.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceAll(null, *, *);           // returns null
      * replaceAll("", *, *);             // returns ""
@@ -3839,9 +3789,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceAll("abaaaba", "aa", "z"); // returns "abzaba"
      * }</pre>
      *
-     * @param str text to search and replace in, which may be null
-     * @param target the String to search for, which may be null
-     * @param replacement the String to replace it with, which may be null
+     * @param str text to search and replace in, may be {@code null}
+     * @param target the String to search for, may be {@code null}
+     * @param replacement the String to replace it with, may be {@code null}
      * @return the text with all occurrences of the target string replaced, {@code null} if the input is {@code null}
      */
     public static String replaceAll(final String str, final String target, final String replacement) {
@@ -3854,7 +3804,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method searches for all occurrences of the target string starting from the given index and replaces them with the replacement string.
      * Occurrences before the specified index are not replaced.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceAll("abacadae", 0, "a", "z");    // returns "zbzczde"
      * replaceAll("abacadae", 3, "a", "z");    // returns "abzczde"
@@ -3863,11 +3813,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceAll("hello world", 6, "o", "0"); // returns "hello w0rld"
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param fromIndex The index from which to start the search for the target string. It should be a non-negative integer.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement The string to replace the target string. It can be {@code null}.
-     * @return A new string with all occurrences of the target string replaced with the replacement string, starting from the specified index.
+     * @param str the input string where the replacement should occur, may be {@code null} or empty
+     * @param fromIndex the index from which to start the search for the target string. It should be a non-negative integer.
+     * @param target the string to be replaced, may be {@code null} or empty
+     * @param replacement the string to replace the target string, may be {@code null}
+     * @return a new string with all occurrences of the target string replaced with the replacement string, starting from the specified index.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      */
     public static String replaceAll(final String str, final int fromIndex, final String target, final String replacement) {
@@ -3880,7 +3830,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method searches for the first occurrence of the target string and replaces it with the replacement string.
      * Subsequent occurrences are not replaced.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceFirst(null, *, *);            // returns null
      * replaceFirst("", *, *);              // returns ""
@@ -3893,9 +3843,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceFirst("abaaaba", "aa", "z");  // returns "abzaba"
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement The string to replace the target string. It can be {@code null}.
+     * @param str the input string where the replacement should occur, may be {@code null} or empty
+     * @param target the string to be replaced, may be {@code null} or empty
+     * @param replacement the string to replace the target string, may be {@code null}
      * @return the text with the first occurrence of the target string replaced, {@code null} if the input is {@code null}
      */
     public static String replaceFirst(final String str, final String target, final String replacement) {
@@ -3908,7 +3858,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method searches for the first occurrence of the target string starting from the given index and replaces it with the replacement string.
      * Occurrences before the specified index are not replaced.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceFirst("abacadae", 0, "a", "z");    // returns "zbacadae"
      * replaceFirst("abacadae", 3, "a", "z");    // returns "abzcadae"
@@ -3917,11 +3867,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceFirst("hello world", 6, "o", "0"); // returns "hello w0rld"
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param fromIndex The index from which to start the search for the target string. It should be a non-negative integer.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement The string to replace the target string. It can be {@code null}.
-     * @return A new string with the first occurrence of the target string replaced with the replacement string, starting from the specified index.
+     * @param str the input string where the replacement should occur, may be {@code null} or empty
+     * @param fromIndex the index from which to start the search for the target string. It should be a non-negative integer.
+     * @param target the string to be replaced, may be {@code null} or empty
+     * @param replacement the string to replace the target string, may be {@code null}
+     * @return a new string with the first occurrence of the target string replaced with the replacement string, starting from the specified index.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      */
     public static String replaceFirst(final String str, final int fromIndex, final String target, final String replacement) {
@@ -3933,7 +3883,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method is equivalent to {@link #replaceFirst(String, String, String)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceOnce(null, *, *);            // returns null
      * replaceOnce("", *, *);              // returns ""
@@ -3945,10 +3895,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceOnce("aba", "a", "z");       // returns "zba"
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null}.
-     * @param target The string to be replaced. It can be {@code null}.
-     * @param replacement The string to replace the target string. It can be {@code null}.
-     * @return A new string with the first occurrence of the target string replaced with the replacement string.
+     * @param str the input string where the replacement should occur, may be {@code null}
+     * @param target the string to be replaced, may be {@code null}
+     * @param replacement the string to replace the target string, may be {@code null}
+     * @return a new string with the first occurrence of the target string replaced with the replacement string.
      *         If the input string or target string is {@code null}, the method returns the original string.
      * @deprecated Use {@link #replaceFirst(String, String, String)} instead
      */
@@ -3962,11 +3912,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method is equivalent to {@link #replaceFirst(String, int, String, String)}.</p>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param fromIndex The index from which to start the search for the target string. It should be a non-negative integer.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement The string to replace the target string. It can be {@code null}.
-     * @return A new string with the first occurrence of the target string replaced with the replacement string, starting from the specified index.
+     * @param str the input string where the replacement should occur, may be {@code null} or empty
+     * @param fromIndex the index from which to start the search for the target string. It should be a non-negative integer.
+     * @param target the string to be replaced, may be {@code null} or empty
+     * @param replacement the string to replace the target string, may be {@code null}
+     * @return a new string with the first occurrence of the target string replaced with the replacement string, starting from the specified index.
      * @deprecated Use {@link #replaceFirst(String, int, String, String)} instead
      */
     @Deprecated
@@ -3980,7 +3930,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method searches for the last occurrence of the target string and replaces it with the replacement string.
      * All other occurrences remain unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceLast(null, *, *);            // returns null
      * replaceLast("", *, *);              // returns ""
@@ -3993,10 +3943,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceLast("abaaaba", "aa", "z");  // returns "abaazba"
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement the String to replace with, which may be null
-     * @return A new string with the last occurrence of the target string replaced with the replacement string.
+     * @param str the input string where the replacement should occur, may be {@code null} or empty
+     * @param target the string to be replaced, may be {@code null} or empty
+     * @param replacement the String to replace with, may be {@code null}
+     * @return a new string with the last occurrence of the target string replaced with the replacement string.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      */
     public static String replaceLast(final String str, final String target, final String replacement) {
@@ -4009,7 +3959,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method searches backward from the specified index for the last occurrence of the target string and replaces it with the replacement string.
      * The search starts from the given index and proceeds toward the beginning of the string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceLast("abacadae", 8, "a", "z");    // returns "abacadze"
      * replaceLast("abacadae", 5, "a", "z");    // returns "abzcadae"
@@ -4018,11 +3968,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceLast("hello world", 5, "o", "0");  // returns "hell0 world"
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param startIndexFromBack The index to start the search from, searching backward.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement The string to replace the target string. It can be {@code null}.
-     * @return A new string with the last occurrence of the target string replaced with the replacement string, starting from the specified index backward.
+     * @param str the input string where the replacement should occur, may be {@code null} or empty
+     * @param startIndexFromBack the index to start the search from, searching backward.
+     * @param target the string to be replaced, may be {@code null} or empty
+     * @param replacement the string to replace the target string, may be {@code null}
+     * @return a new string with the last occurrence of the target string replaced with the replacement string, starting from the specified index backward.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      */
     public static String replaceLast(final String str, final int startIndexFromBack, final String target, final String replacement) {
@@ -4047,7 +3997,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>A {@code null} reference passed to this method is a no-op.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replace(null, *, *, *, *);              // returns null
      * replace("", *, *, *, *);                // returns ""
@@ -4063,12 +4013,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replace("abaa", 1, "a", "z", -1);       // returns "abzz"
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null}.
-     * @param fromIndex The index from which to start the search for the target string. It should be a non-negative integer.
-     * @param target The string to be replaced. It can be {@code null}.
-     * @param replacement The string to replace the target string. It cannot be {@code null}.
-     * @param max The maximum number of replacements. If it's -1, all occurrences will be replaced.
-     * @return A new string with occurrences of the target string replaced with the replacement string, starting from the specified index and up to the maximum number of replacements.
+     * @param str the input string where the replacement should occur, may be {@code null}
+     * @param fromIndex the index from which to start the search for the target string. It should be a non-negative integer.
+     * @param target the string to be replaced, may be {@code null}
+     * @param replacement the string to replace the target string. It cannot be {@code null}.
+     * @param max the maximum number of replacements. If it's -1, all occurrences will be replaced.
+     * @return a new string with occurrences of the target string replaced with the replacement string, starting from the specified index and up to the maximum number of replacements.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      */
     public static String replace(final String str, final int fromIndex, final String target, final String replacement, final int max) {
@@ -4081,7 +4031,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method performs a case-insensitive search for all occurrences of the target string and replaces them with the replacement string.
      * The case of the original text is preserved except for the replaced portions.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceAllIgnoreCase(null, *, *);              // returns null
      * replaceAllIgnoreCase("", *, *);                // returns ""
@@ -4094,10 +4044,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceAllIgnoreCase("ABa", "a", "z");         // returns "zBz"
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement The string to replace the target string. It can be {@code null}.
-     * @return A new string with all occurrences of the target string replaced with the replacement string, ignoring case considerations.
+     * @param str the input string where the replacement should occur, may be {@code null} or empty
+     * @param target the string to be replaced, may be {@code null} or empty
+     * @param replacement the string to replace the target string, may be {@code null}
+     * @return a new string with all occurrences of the target string replaced with the replacement string, ignoring case considerations.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      */
     public static String replaceAllIgnoreCase(final String str, final String target, final String replacement) {
@@ -4110,7 +4060,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method performs a case-insensitive search for all occurrences of the target string starting from the given index 
      * and replaces them with the replacement string. The case of the original text is preserved except for the replaced portions.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceAllIgnoreCase("aBaCaDaE", 0, "A", "z");    // returns "zBzCzDzE"
      * replaceAllIgnoreCase("aBaCaDaE", 3, "A", "z");    // returns "aBzCzDzE"
@@ -4119,11 +4069,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceAllIgnoreCase("HELLO world", 6, "o", "0"); // returns "HELLO w0rld"
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param fromIndex The index from which to start the search for the target string. It should be a non-negative integer.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement The string to replace the target string. It can be {@code null}.
-     * @return A new string with all occurrences of the target string replaced with the replacement string, ignoring case considerations, starting from the specified index.
+     * @param str the input string where the replacement should occur, may be {@code null} or empty
+     * @param fromIndex the index from which to start the search for the target string. It should be a non-negative integer.
+     * @param target the string to be replaced, may be {@code null} or empty
+     * @param replacement the string to replace the target string, may be {@code null}
+     * @return a new string with all occurrences of the target string replaced with the replacement string, ignoring case considerations, starting from the specified index.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      */
     public static String replaceAllIgnoreCase(final String str, final int fromIndex, final String target, final String replacement) {
@@ -4138,7 +4088,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if the target is not found or if the input/target is null or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceFirstIgnoreCase("Hello World", "hello", "Hi");     // returns "Hi World"
      * replaceFirstIgnoreCase("JAVA java Java", "java", "C++");  // returns "C++ java Java"
@@ -4148,10 +4098,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceFirstIgnoreCase("Test", null, "new");              // returns "Test"
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement The string to replace the target string. It can be {@code null}.
-     * @return A new string with the first occurrence of the target string replaced with the replacement string, ignoring case considerations.
+     * @param str the input string where the replacement should occur, may be {@code null} or empty
+     * @param target the string to be replaced, may be {@code null} or empty
+     * @param replacement the string to replace the target string, may be {@code null}
+     * @return a new string with the first occurrence of the target string replaced with the replacement string, ignoring case considerations.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      */
     public static String replaceFirstIgnoreCase(final String str, final String target, final String replacement) {
@@ -4166,7 +4116,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns the original string if the target is not found after the specified index or if the input/target is null or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceFirstIgnoreCase("Hello HELLO hello", 0, "hello", "Hi");    // returns "Hi HELLO hello"
      * replaceFirstIgnoreCase("Hello HELLO hello", 6, "hello", "Hi");    // returns "Hello Hi hello"
@@ -4175,11 +4125,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceFirstIgnoreCase("Test", 10, "test", "Best");               // returns "Test"
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param fromIndex The index from which to start the search for the target string. It should be a non-negative integer.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement The string to replace the target string. It can be {@code null}.
-     * @return A new string with the first occurrence of the target string replaced with the replacement string, ignoring case considerations, starting from the specified index.
+     * @param str the input string where the replacement should occur, may be {@code null} or empty
+     * @param fromIndex the index from which to start the search for the target string. It should be a non-negative integer.
+     * @param target the string to be replaced, may be {@code null} or empty
+     * @param replacement the string to replace the target string, may be {@code null}
+     * @return a new string with the first occurrence of the target string replaced with the replacement string, ignoring case considerations, starting from the specified index.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      */
     public static String replaceFirstIgnoreCase(final String str, final int fromIndex, final String target, final String replacement) {
@@ -4195,7 +4145,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If max is -1, all occurrences will be replaced. If max is 0, no replacements will be made.
      * If the replacement is null, it will be treated as an empty string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceIgnoreCase("Java JAVA java", 0, "java", "C++", -1);    // returns "C++ C++ C++"
      * replaceIgnoreCase("Java JAVA java", 0, "java", "C++", 2);     // returns "C++ C++ java"
@@ -4204,12 +4154,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceIgnoreCase("Test", 0, "test", null, 1);                // returns ""
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It can be {@code null} or empty.
-     * @param fromIndex The index from which to start the search for the target string. It should be a non-negative integer.
-     * @param target The string to be replaced. It can be {@code null} or empty.
-     * @param replacement The string to replace the target string. It can be {@code null}.
-     * @param max The maximum number of replacements. If it's -1, all occurrences will be replaced.
-     * @return A new string with occurrences of the target string replaced with the replacement string, ignoring case considerations, starting from the specified index and up to the maximum number of replacements.
+     * @param str the input string where the replacement should occur, may be {@code null} or empty
+     * @param fromIndex the index from which to start the search for the target string. It should be a non-negative integer.
+     * @param target the string to be replaced, may be {@code null} or empty
+     * @param replacement the string to replace the target string, may be {@code null}
+     * @param max the maximum number of replacements. If it's -1, all occurrences will be replaced.
+     * @return a new string with occurrences of the target string replaced with the replacement string, ignoring case considerations, starting from the specified index and up to the maximum number of replacements.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      */
     public static String replaceIgnoreCase(final String str, final int fromIndex, final String target, final String replacement, final int max) {
@@ -4272,7 +4222,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method replaces the characters in the input string from the start index (inclusive) to the end index (exclusive)
      * with the specified replacement string. The original string is not modified.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceRange("Hello World", 6, 11, "Java");     // returns "Hello Java"
      * replaceRange("Programming", 0, 7, "Test");      // returns "Testming"
@@ -4280,12 +4230,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceRange("Test", 1, 3, "");                 // returns "Tt"
      * }</pre>
      *
-     * @param str The input string where the replacement should occur. It cannot be {@code null}.
-     * @param fromIndex The start index of the substring to be replaced. It should be a non-negative integer and less than the length of the input string.
-     * @param toIndex The end index of the substring to be replaced. It should be a non-negative integer, greater than the start index and less than or equal to the length of the input string.
-     * @param replacement The string to replace the substring. It cannot be {@code null}.
-     * @return A new string with the specified substring replaced with the replacement string.
-     * @throws IndexOutOfBoundsException If the start or end index is out of the string bounds.
+     * @param str the input string where the replacement should occur. It cannot be {@code null}.
+     * @param fromIndex the start index of the substring to be replaced. It should be a non-negative integer and less than the length of the input string.
+     * @param toIndex the end index of the substring to be replaced. It should be a non-negative integer, greater than the start index and less than or equal to the length of the input string.
+     * @param replacement the string to replace the substring. It cannot be {@code null}.
+     * @return a new string with the specified substring replaced with the replacement string.
+     * @throws IndexOutOfBoundsException if the start or end index is out of the string bounds.
      * @deprecated Use {@link #replaceRange(String, int, int, String)} instead of this method.
      * @see #replaceRange(String, int, int, String)
      */
@@ -4303,7 +4253,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The delimiters themselves are not included in the replaced substring and remain in the result.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceBetween("Hello [World]!", "[", "]", "Java");       // returns "Hello [Java]!"
      * replaceBetween("Start<old>End", "<", ">", "new");         // returns "Start<new>End"
@@ -4313,11 +4263,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceBetween(null, "[", "]", "test");                   // returns null
      * }</pre>
      *
-     * @param str The string to be processed.
-     * @param delimiterOfExclusiveBeginIndex The delimiter after which the replacement should start.
-     * @param delimiterOfExclusiveEndIndex The delimiter before which the replacement should end.
-     * @param replacement The string to replace the substring between the delimiters. If it's {@code null}, the substring between the delimiters will be removed.
-     * @return The processed string with the substring between the delimiters replaced with the replacement string.
+     * @param str the string to be processed, may be {@code null} or empty
+     * @param delimiterOfExclusiveBeginIndex the delimiter after which the replacement should start.
+     * @param delimiterOfExclusiveEndIndex the delimiter before which the replacement should end.
+     * @param replacement the string to replace the substring between the delimiters. If it's {@code null}, the substring between the delimiters will be removed.
+     * @return the processed string with the substring between the delimiters replaced with the replacement string.
      *         If the input string is {@code null} or either of the delimiters is {@code null}, the original string is returned.
      * @see #substringBetween(String, String, String)
      */
@@ -4350,7 +4300,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method finds the first occurrence of the delimiter and replaces everything after it
      * (excluding the delimiter itself) with the replacement string. The delimiter remains in the result.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceAfter("Hello, World!", ",", " Java!");      // returns "Hello, Java!"
      * replaceAfter("prefix:suffix", ":", "new");         // returns "prefix:new"
@@ -4360,10 +4310,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceAfter(null, ":", "test");                   // returns null
      * }</pre>
      *
-     * @param str The string to be processed.
-     * @param delimiterOfExclusiveBeginIndex The delimiter after which the replacement should start.
-     * @param replacement The string to replace the substring after the delimiter. If it's {@code null}, the substring after the delimiter will be removed.
-     * @return The processed string with the substring after the delimiter replaced with the replacement string.
+     * @param str the string to be processed, may be {@code null} or empty
+     * @param delimiterOfExclusiveBeginIndex the delimiter after which the replacement should start.
+     * @param replacement the string to replace the substring after the delimiter. If it's {@code null}, the substring after the delimiter will be removed.
+     * @return the processed string with the substring after the delimiter replaced with the replacement string.
      *         If the input string is {@code null} or the delimiter is {@code null}, the original string is returned.
      */
     public static String replaceAfter(final String str, final String delimiterOfExclusiveBeginIndex, final String replacement) {
@@ -4388,7 +4338,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method finds the first occurrence of the delimiter and replaces everything before it
      * (excluding the delimiter itself) with the replacement string. The delimiter remains in the result.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * replaceBefore("Hello, World!", ",", "Hi");         // returns "Hi, World!"
      * replaceBefore("prefix:suffix", ":", "new");        // returns "new:suffix"
@@ -4398,10 +4348,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceBefore(null, ":", "test");                  // returns null
      * }</pre>
      *
-     * @param str The string to be processed.
-     * @param delimiterOfExclusiveEndIndex The delimiter before which the replacement should end.
-     * @param replacement The string to replace the substring before the delimiter. If it's {@code null}, the substring before the delimiter will be removed.
-     * @return The processed string with the substring before the delimiter replaced with the replacement string.
+     * @param str the string to be processed, may be {@code null} or empty
+     * @param delimiterOfExclusiveEndIndex the delimiter before which the replacement should end.
+     * @param replacement the string to replace the substring before the delimiter. If it's {@code null}, the substring before the delimiter will be removed.
+     * @return the processed string with the substring before the delimiter replaced with the replacement string.
      *         If the input string is {@code null} or the delimiter is {@code null}, the original string is returned.
      */
     public static String replaceBefore(final String str, final String delimiterOfExclusiveEndIndex, final String replacement) {
@@ -4427,7 +4377,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>A {@code null} source string will return {@code null}. An empty ("") source string will return the empty string.
      * A {@code null} search string will return the source string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * removeStart(null, "*");                  // returns null
      * removeStart("", "*");                    // returns ""
@@ -4438,8 +4388,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * removeStart("abc", "");                  // returns "abc"
      * }</pre>
      *
-     * @param str the source String to search, which may be null
-     * @param removeStr the String to search for and remove, which may be null
+     * @param str the source String to search, may be {@code null}
+     * @param removeStr the String to search for and remove, may be {@code null}
      * @return the substring with the string removed if found, {@code null} if null String input
      */
     public static String removeStart(final String str, final String removeStr) {
@@ -4460,7 +4410,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>A {@code null} source string will return {@code null}. An empty ("") source string will return the empty string.
      * A {@code null} search string will return the source string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * removeStartIgnoreCase(null, "*");                   // returns null
      * removeStartIgnoreCase("", "*");                     // returns ""
@@ -4472,7 +4422,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * removeStartIgnoreCase("abc", "");                   // returns "abc"
      * }</pre>
      *
-     * @param str the source String to search, which may be null
+     * @param str the source String to search, may be {@code null}
      * @param removeStr the String to search for (case insensitive) and remove, may be null
      * @return the specified String if it's {@code null} or empty, or removal String is {@code null} or empty.
      */
@@ -4494,7 +4444,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>A {@code null} source string will return {@code null}. An empty ("") source string will return the empty string.
      * A {@code null} search string will return the source string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * removeEnd(null, "*");                   // returns null
      * removeEnd("", "*");                     // returns ""
@@ -4505,8 +4455,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * removeEnd("abc", "");                   // returns "abc"
      * }</pre>
      *
-     * @param str the source String to search, which may be null
-     * @param removeStr the String to search for and remove, which may be null
+     * @param str the source String to search, may be {@code null}
+     * @param removeStr the String to search for and remove, may be {@code null}
      * @return the specified String if it's {@code null} or empty, or removal String is {@code null} or empty.
      */
     public static String removeEnd(final String str, final String removeStr) {
@@ -4527,7 +4477,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>A {@code null} source string will return {@code null}. An empty ("") source string will return the empty string.
      * A {@code null} search string will return the source string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * removeEndIgnoreCase(null, "*");                    // returns null
      * removeEndIgnoreCase("", "*");                      // returns ""
@@ -4540,7 +4490,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * removeEndIgnoreCase("www.domain.COM", ".com");     // returns "www.domain"
      * }</pre>
      *
-     * @param str the source String to search, which may be null
+     * @param str the source String to search, may be {@code null}
      * @param removeStr the String to search for (case insensitive) and remove, may be null
      * @return the specified String if it's {@code null} or empty, or removal String is {@code null} or empty.
      */
@@ -4562,7 +4512,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method searches for all occurrences of the specified character in the input string
      * and removes them. If the character is not found, the original string is returned unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * removeAll("abcabc", 'a');    // returns "bcbc"
      * removeAll("hello", 'l');     // returns "heo"
@@ -4571,9 +4521,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * removeAll("", 'a');          // returns null
      * }</pre>
      *
-     * @param str The input string from which the character should be removed. It can be {@code null} or empty.
-     * @param removeChar The character to be removed.
-     * @return A new string with all occurrences of the specified character removed.
+     * @param str the input string from which the character should be removed, may be {@code null} or empty
+     * @param removeChar the character to be removed.
+     * @return a new string with all occurrences of the specified character removed.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the character is not found, the input string is returned unchanged.
      */
     public static String removeAll(final String str, final char removeChar) {
@@ -4586,7 +4536,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method searches for all occurrences of the specified character starting from the given index
      * and removes them from the string. Characters before the specified index are preserved.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * removeAll("abcabc", 0, 'a');    // returns "bcbc"
      * removeAll("abcabc", 3, 'a');    // returns "abcbc"
@@ -4596,10 +4546,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * removeAll(null, 0, 'a');        // returns null
      * }</pre>
      *
-     * @param str The input string where the removal should occur. It can be {@code null} or empty.
-     * @param fromIndex The index from which to start the removal. It should be a non-negative integer.
-     * @param removeChar The character to be removed.
-     * @return A new string with all occurrences of the specified character removed, starting from the specified index.
+     * @param str the input string where the removal should occur, may be {@code null} or empty
+     * @param fromIndex the index from which to start the removal. It should be a non-negative integer.
+     * @param removeChar the character to be removed.
+     * @return a new string with all occurrences of the specified character removed, starting from the specified index.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the character is not found, the input string is returned unchanged.
      */
     public static String removeAll(final String str, final int fromIndex, final char removeChar) {
@@ -4640,7 +4590,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>A {@code null} source string will return {@code null}. An empty ("") source string will return the empty string.
      * A {@code null} remove string will return the source string. An empty ("") remove string will return the source string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * removeAll(null, "*");         // returns null
      * removeAll("", "*");           // returns ""
@@ -4651,8 +4601,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * removeAll("abcabc", "abc");   // returns ""
      * }</pre>
      *
-     * @param str the source String to search, which may be null
-     * @param removeStr the String to search for and remove, which may be null
+     * @param str the source String to search, may be {@code null}
+     * @param removeStr the String to search for and remove, may be {@code null}
      * @return the specified String if it's {@code null} or empty.
      */
     public static String removeAll(final String str, final String removeStr) {
@@ -4665,7 +4615,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method searches for all occurrences of the specified string starting from the given index
      * and removes them from the input string. The part of the string before the specified index is preserved.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * removeAll("abcabcabc", 0, "abc");    // returns ""
      * removeAll("abcabcabc", 3, "abc");    // returns "abc"
@@ -4675,10 +4625,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * removeAll(null, 0, "abc");           // returns null
      * }</pre>
      *
-     * @param str The input string where the removal should occur. It can be {@code null} or empty.
-     * @param fromIndex The index from which to start the removal. It should be a non-negative integer.
-     * @param removeStr The string to be removed. It can be {@code null} or empty.
-     * @return A new string with all occurrences of the specified string removed, starting from the specified index.
+     * @param str the input string where the removal should occur, may be {@code null} or empty
+     * @param fromIndex the index from which to start the removal. It should be a non-negative integer.
+     * @param removeStr the string to be removed, may be {@code null} or empty
+     * @return a new string with all occurrences of the specified string removed, starting from the specified index.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the string to be removed is not found, the input string is returned unchanged.
      */
     public static String removeAll(final String str, final int fromIndex, final String removeStr) {
@@ -4697,7 +4647,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method splits the string at each occurrence of the delimiter character. Empty strings between
      * consecutive delimiters are omitted from the result. Leading and trailing delimiters are also ignored.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * split("a,b,c", ',');         // returns ["a", "b", "c"]
      * split("a,,b,c", ',');        // returns ["a", "b", "c"]
@@ -4707,9 +4657,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * split(null, ',');            // returns []
      * }</pre>
      *
-     * @param str The string to be split.
-     * @param delimiter The character used as the delimiter for splitting the string.
-     * @return An array of substrings derived from the input string, split based on the delimiter character.
+     * @param str the string to be split, may be {@code null} or empty
+     * @param delimiter the character used as the delimiter for splitting the string
+     * @return an array of substrings derived from the input string, split based on the delimiter character.
      *         If the input string is {@code null} or empty, the method will return an empty String array.
      */
     public static String[] split(final String str, final char delimiter) {
@@ -4731,7 +4681,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method splits the string at each occurrence of the delimiter character. Empty strings between
      * consecutive delimiters are omitted from the result. Leading and trailing delimiters are also ignored.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * split(" a , b , c ", ',', true);    // returns ["a", "b", "c"]
      * split(" a , b , c ", ',', false);   // returns [" a ", " b ", " c "]
@@ -4740,10 +4690,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * split(null, ',', true);             // returns []
      * }</pre>
      *
-     * @param str The string to be split.
-     * @param delimiter The character used as the delimiter for splitting the string.
-     * @param trim A boolean that determines whether to trim leading and trailing whitespace from each substring.
-     * @return An array of substrings derived from the input string, split based on the delimiter character and optionally trimmed.
+     * @param str the string to be split, may be {@code null} or empty
+     * @param delimiter the character used as the delimiter for splitting the string
+     * @param trim a boolean that determines whether to trim leading and trailing whitespace from each substring.
+     * @return an array of substrings derived from the input string, split based on the delimiter character and optionally trimmed.
      *         If the input string is {@code null} or empty, the method will return an empty String array.
      */
     public static String[] split(final String str, final char delimiter, final boolean trim) {
@@ -4767,7 +4717,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method splits the string at each occurrence of the delimiter string. Empty strings between
      * consecutive delimiters are omitted from the result. If delimiter is {@code null}, the string is split on whitespace.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * split("a::b::c", "::");        // returns ["a", "b", "c"]
      * split("a::::b::c", "::");      // returns ["a", "b", "c"]
@@ -4778,9 +4728,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * split(null, "::");             // returns []
      * }</pre>
      *
-     * @param str The string to be split.
-     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
-     * @return An array of substrings derived from the input string, split based on the delimiter string.
+     * @param str the string to be split, may be {@code null} or empty
+     * @param delimiter the string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
+     * @return an array of substrings derived from the input string, split based on the delimiter string.
      *         If the input string is {@code null} or empty, the method will return an empty String array.
      */
     public static String[] split(final String str, final String delimiter) {
@@ -4802,7 +4752,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method splits the string at each occurrence of the delimiter string. Empty strings between
      * consecutive delimiters are omitted from the result. If delimiter is {@code null}, the string is split on whitespace.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * split(" a :: b :: c ", "::", true);    // returns ["a", "b", "c"]
      * split(" a :: b :: c ", "::", false);   // returns [" a ", " b ", " c "]
@@ -4812,10 +4762,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * split(null, "::", true);               // returns []
      * }</pre>
      *
-     * @param str The string to be split.
-     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
-     * @param trim A boolean that determines whether to trim leading and trailing whitespace from each substring.
-     * @return An array of substrings derived from the input string, split based on the delimiter string and optionally trimmed.
+     * @param str the string to be split, may be {@code null} or empty
+     * @param delimiter the string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
+     * @param trim a boolean that determines whether to trim leading and trailing whitespace from each substring.
+     * @return an array of substrings derived from the input string, split based on the delimiter string and optionally trimmed.
      *         If the input string is {@code null} or empty, the method will return an empty String array.
      */
     public static String[] split(final String str, final String delimiter, final boolean trim) {
@@ -4841,7 +4791,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the string contains more delimiters than max-1, the last substring will contain all remaining text including delimiters.
      * Empty strings between consecutive delimiters are omitted from the result.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * split("a:b:c:d:e", ":", 3);    // returns ["a", "b", "c:d:e"]
      * split("a:b:c:d:e", ":", 5);    // returns ["a", "b", "c", "d", "e"]
@@ -4851,11 +4801,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * split(null, ":", 3);           // returns []
      * }</pre>
      *
-     * @param str The string to be split.
-     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
-     * @param max The maximum number of substrings to be included in the resulting array.
+     * @param str the string to be split, may be {@code null} or empty
+     * @param delimiter the string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
+     * @param max the maximum number of substrings to be included in the resulting array.
      *            If the string contains more delimiters, the last substring will contain all remaining text.
-     * @return An array of substrings derived from the input string, split based on the delimiter string.
+     * @return an array of substrings derived from the input string, split based on the delimiter string.
      *         If the input string is {@code null} or empty, the method will return an empty String array.
      * @throws IllegalArgumentException if the max parameter is not a positive integer.
      */
@@ -4884,7 +4834,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the string contains more delimiters than max-1, the last substring will contain all remaining text including delimiters.
      * Empty strings between consecutive delimiters are omitted from the result.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * split(" a : b : c : d ", ":", 3, true);    // returns ["a", "b", "c : d"]
      * split(" a : b : c : d ", ":", 3, false);   // returns [" a ", " b ", " c : d "]
@@ -4894,12 +4844,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * split(null, ":", 3, true);                 // returns []
      * }</pre>
      *
-     * @param str The string to be split.
-     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
-     * @param max The maximum number of substrings to be included in the resulting array.
+     * @param str the string to be split, may be {@code null} or empty
+     * @param delimiter the string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
+     * @param max the maximum number of substrings to be included in the resulting array.
      *            If the string contains more delimiters, the last substring will contain all remaining text.
-     * @param trim A boolean that determines whether to trim leading and trailing whitespace from each substring.
-     * @return An array of substrings derived from the input string, split based on the delimiter string, limited by the max parameter and optionally trimmed.
+     * @param trim a boolean that determines whether to trim leading and trailing whitespace from each substring.
+     * @return an array of substrings derived from the input string, split based on the delimiter string, limited by the max parameter and optionally trimmed.
      *         If the input string is {@code null} or empty, the method will return an empty String array.
      * @throws IllegalArgumentException if the max parameter is not a positive integer.
      */
@@ -4928,7 +4878,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>An empty String array {@code []} will be returned if the input string {@code null}.
      * A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * splitPreserveAllTokens(null, '*');              // returns []
      * splitPreserveAllTokens("", '*');                // returns [""]
@@ -4968,7 +4918,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>An empty String array {@code []} will be returned if the input string {@code null}.
      * A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * splitPreserveAllTokens(" a . b . c ", '.', true);     // returns ["a", "b", "c"]
      * splitPreserveAllTokens(" a . b . c ", '.', false);    // returns [" a ", " b ", " c "]
@@ -4980,7 +4930,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str the String to parse, may be {@code null}
      * @param delimiter the character used as the delimiter
-     * @param trim If {@code true}, leading and trailing whitespace is removed from each substring.
+     * @param trim if {@code true}, leading and trailing whitespace is removed from each substring.
      * @return an array of parsed Strings. An empty String array {@code []} will be returned if the input string {@code null},
      *         or a String array with single empty String: {@code [""]} will be returned if the input string is empty.
      */
@@ -5010,7 +4960,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>An empty String array {@code []} will be returned if the input string {@code null}.
      * A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * splitPreserveAllTokens(null, "*");            // returns []
      * splitPreserveAllTokens("", "*");              // returns [""]
@@ -5024,7 +4974,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str  the String to parse, may be {@code null}
-     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
+     * @param delimiter the string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
      * @return an array of parsed Strings. An empty String array {@code []} will be returned if the input string {@code null},
      *         or a String array with single empty String: {@code [""]} will be returned if the input string is empty.
      */
@@ -5051,7 +5001,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>An empty String array {@code []} will be returned if the input string {@code null}.
      * A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * splitPreserveAllTokens(" a : b : c ", ":", true);     // returns ["a", "b", "c"]
      * splitPreserveAllTokens(" a : b : c ", ":", false);    // returns [" a ", " b ", " c "]
@@ -5062,8 +5012,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str  the String to parse, may be {@code null}
-     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
-     * @param trim If {@code true}, leading and trailing whitespace is removed from each substring.
+     * @param delimiter the string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
+     * @param trim if {@code true}, leading and trailing whitespace is removed from each substring.
      * @return an array of parsed Strings. An empty String array {@code []} will be returned if the input string {@code null},
      *         or a String array with single empty String: {@code [""]} will be returned if the input string is empty.
      */
@@ -5096,7 +5046,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>An empty String array {@code []} will be returned if the input string {@code null}.
      * A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * splitPreserveAllTokens("a:b:c:d", ":", 3);      // returns ["a", "b", "c:d"]
      * splitPreserveAllTokens("a:b:::d", ":", 3);      // returns ["a", "b", "::d"]
@@ -5107,8 +5057,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str  the String to parse, may be {@code null}
-     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
-     * @param max The maximum number of substrings to be included in the resulting array.
+     * @param delimiter the string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
+     * @param max the maximum number of substrings to be included in the resulting array.
      * @return an array of parsed Strings. An empty String array {@code []} will be returned if the input string {@code null},
      *         or a String array with single empty String: {@code [""]} will be returned if the input string is empty.
      * @throws IllegalArgumentException if the max parameter is not a positive integer.
@@ -5143,7 +5093,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>An empty String array {@code []} will be returned if the input string {@code null}.
      * A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * splitPreserveAllTokens(" a : b : c : d ", ":", 3, true);    // returns ["a", "b", "c : d"]
      * splitPreserveAllTokens(" a : b : c : d ", ":", 3, false);   // returns [" a ", " b ", " c : d "]
@@ -5154,9 +5104,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str  the String to parse, may be {@code null}
-     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
-     * @param max The maximum number of substrings to be included in the resulting array.
-     * @param trim If {@code true}, leading and trailing whitespace is removed from each substring.
+     * @param delimiter the string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
+     * @param max the maximum number of substrings to be included in the resulting array.
+     * @param trim if {@code true}, leading and trailing whitespace is removed from each substring.
      * @return an array of parsed Strings. An empty String array {@code []} will be returned if the input string {@code null},
      *         or a String array with single empty String: {@code [""]} will be returned if the input string is empty.
      * @throws IllegalArgumentException if the max parameter is not a positive integer.
@@ -5343,7 +5293,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the newline character ('\n'), or the carriage return followed immediately by the newline character ('\r\n').
      * Empty lines are preserved in the result.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * splitToLines("Line1\nLine2\nLine3");     // returns ["Line1", "Line2", "Line3"]
      * splitToLines("Line1\r\nLine2\r\nLine3"); // returns ["Line1", "Line2", "Line3"]
@@ -5353,8 +5303,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * splitToLines(null);                      // returns []
      * }</pre>
      *
-     * @param str The string to be split. If it's {@code null}, the method will return an empty String array.
-     * @return An array of substrings derived from the input string, each of which is a line of text.
+     * @param str the string to be split, may be {@code null} or empty If it's {@code null}, the method will return an empty String array.
+     * @return an array of substrings derived from the input string, each of which is a line of text.
      *         If the input string is {@code null}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
      */
     public static String[] splitToLines(final String str) {
@@ -5375,7 +5325,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the trim parameter is {@code true}, leading and trailing whitespace is removed from each line of text.
      * If the omitEmptyLines parameter is {@code true}, empty lines (after trimming, if the trim parameter is true) are not included in the resulting array.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * splitToLines(" Line1 \n Line2 \n Line3 ", true, false);    // returns ["Line1", "Line2", "Line3"]
      * splitToLines(" Line1 \n \n Line3 ", true, true);           // returns ["Line1", "Line3"]
@@ -5386,10 +5336,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * splitToLines(null, true, true);                            // returns []
      * }</pre>
      *
-     * @param str The string to be split.
-     * @param trim A boolean that determines whether to trim leading and trailing whitespace from each line of text.
-     * @param omitEmptyLines A boolean that determines whether to omit empty lines from the resulting array.
-     * @return An array of substrings derived from the input string, each of which is a line of text, optionally trimmed and with empty lines optionally omitted.
+     * @param str the string to be split, may be {@code null} or empty
+     * @param trim a boolean that determines whether to trim leading and trailing whitespace from each line of text.
+     * @param omitEmptyLines a boolean that determines whether to omit empty lines from the resulting array.
+     * @return an array of substrings derived from the input string, each of which is a line of text, optionally trimmed and with empty lines optionally omitted.
      *         If the input string is {@code null} or {@code str.length() == 0 && omitEmptyLines}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
      */
     public static String[] splitToLines(final String str, final boolean trim, final boolean omitEmptyLines) {
@@ -5422,7 +5372,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>To trim your choice of characters, use the {@link #strip(String, String)} methods.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * trim(null);           // returns null
      * trim("");             // returns ""
@@ -5432,7 +5382,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * trim(" \t\r\n ");     // returns ""
      * }</pre>
      *
-     * @param str the String to be trimmed, which may be null
+     * @param str the String to be trimmed, may be {@code null}
      * @return the trimmed string, {@code null} if null String input
      */
     public static String trim(final String str) {
@@ -5445,7 +5395,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method uses {@link String#trim()} to remove space characters (char &lt;= 32) from both ends of each string.
      * If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"  abc  ", " def ", "ghi"};
      * trim(arr);  // arr becomes ["abc", "def", "ghi"]
@@ -5454,7 +5404,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * trim(arr2); // arr2 becomes [null, "test", ""]
      * }</pre>
      *
-     * @param strs The array of strings to be trimmed. Each string in the array will be updated in-place.
+     * @param strs the array of strings to be trimmed. Each string in the array will be updated in-place.
      */
     public static void trim(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -5472,7 +5422,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The String is trimmed using {@link String#trim()}. Trim removes start and end characters &lt;= 32.
      * To strip whitespace use {@link #stripToNull(String)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * trimToNull(null);           // returns null
      * trimToNull("");             // returns null
@@ -5482,7 +5432,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * trimToNull(" \t\r\n ");     // returns null
      * }</pre>
      *
-     * @param str the String to be trimmed, which may be null
+     * @param str the String to be trimmed, may be {@code null}
      * @return the trimmed String, {@code null} if only spaces, empty or null String input
      */
     public static String trimToNull(String str) {
@@ -5497,7 +5447,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method uses {@link String#trim()} to remove whitespace. If a string becomes empty after trimming, it is set to {@code null}.
      * If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"  abc  ", "   ", "def", ""};
      * trimToNull(arr);  // arr becomes ["abc", null, "def", null]
@@ -5506,7 +5456,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * trimToNull(arr2); // arr2 becomes [null, "test", null]
      * }</pre>
      *
-     * @param strs The array of strings to be trimmed. Each string in the array will be updated in-place.
+     * @param strs the array of strings to be trimmed. Each string in the array will be updated in-place.
      */
     public static void trimToNull(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -5524,7 +5474,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The String is trimmed using {@link String#trim()}. Trim removes start and end characters &lt;= 32.
      * To strip whitespace use {@link #stripToEmpty(String)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * trimToEmpty(null);           // returns ""
      * trimToEmpty("");             // returns ""
@@ -5534,7 +5484,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * trimToEmpty(" \t\r\n ");     // returns ""
      * }</pre>
      *
-     * @param str the String to be trimmed, which may be null
+     * @param str the String to be trimmed, may be {@code null}
      * @return the trimmed String, or an empty String if {@code null} input
      */
     public static String trimToEmpty(final String str) {
@@ -5548,7 +5498,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * This method uses {@link String#trim()} to remove whitespace.
      * If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"  abc  ", null, "def", "   "};
      * trimToEmpty(arr);  // arr becomes ["abc", "", "def", ""]
@@ -5557,7 +5507,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * trimToEmpty(arr2); // arr2 becomes ["", "test", ""]
      * }</pre>
      *
-     * @param strs The array of strings to be trimmed. Each string in the array will be updated in-place.
+     * @param strs the array of strings to be trimmed. Each string in the array will be updated in-place.
      */
     public static void trimToEmpty(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -5580,7 +5530,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>A {@code null} input String returns {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * strip(null);      // returns null
      * strip("");        // returns ""
@@ -5592,7 +5542,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * strip(" ab c ");  // returns "ab c"
      * }</pre>
      *
-     * @param str the String to remove whitespace from, which may be null
+     * @param str the String to remove whitespace from, may be {@code null}
      * @return the stripped String, {@code null} if null String input
      */
     public static String strip(final String str) {
@@ -5606,7 +5556,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Whitespace is defined by {@link Character#isWhitespace(char)}.
      * If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"  abc  ", " def ", "ghi"};
      * strip(arr);  // arr becomes ["abc", "def", "ghi"]
@@ -5615,7 +5565,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * strip(arr2); // arr2 becomes [null, "test", ""]
      * }</pre>
      *
-     * @param strs The array of strings to be stripped. Each string in the array will be updated in-place.
+     * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
      */
     public static void strip(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -5633,7 +5583,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This is similar to {@link #trimToNull(String)} but removes whitespace.
      * Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * stripToNull(null);      // returns null
      * stripToNull("");        // returns null
@@ -5645,7 +5595,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * stripToNull(" ab c ");  // returns "ab c"
      * }</pre>
      *
-     * @param str the String to be stripped, which may be null
+     * @param str the String to be stripped, may be {@code null}
      * @return the stripped String, {@code null} if whitespace, empty or null String input
      */
     public static String stripToNull(String str) {
@@ -5661,7 +5611,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Whitespace is defined by {@link Character#isWhitespace(char)}.
      * If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"  abc  ", "   ", "def", ""};
      * stripToNull(arr);  // arr becomes ["abc", null, "def", null]
@@ -5670,7 +5620,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * stripToNull(arr2); // arr2 becomes [null, "test", null]
      * }</pre>
      *
-     * @param strs The array of strings to be stripped. Each string in the array will be updated in-place.
+     * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
      */
     public static void stripToNull(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -5688,7 +5638,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This is similar to {@link #trimToEmpty(String)} but removes whitespace.
      * Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * stripToEmpty(null);      // returns ""
      * stripToEmpty("");        // returns ""
@@ -5700,7 +5650,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * stripToEmpty(" ab c ");  // returns "ab c"
      * }</pre>
      *
-     * @param str the String to be stripped, which may be null
+     * @param str the String to be stripped, may be {@code null}
      * @return the trimmed String, or an empty String if {@code null} input
      */
     public static String stripToEmpty(final String str) {
@@ -5715,7 +5665,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Whitespace is defined by {@link Character#isWhitespace(char)}.
      * If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"  abc  ", null, "def", "   "};
      * stripToEmpty(arr);  // arr becomes ["abc", "", "def", ""]
@@ -5724,7 +5674,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * stripToEmpty(arr2); // arr2 becomes ["", "test", ""]
      * }</pre>
      *
-     * @param strs The array of strings to be stripped. Each string in the array will be updated in-place.
+     * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
      */
     public static void stripToEmpty(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -5746,7 +5696,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If the stripChars String is {@code null}, whitespace is stripped as defined by {@link Character#isWhitespace(char)}.
      * Alternatively use {@link #strip(String)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * strip(null, "*");           // returns null
      * strip("", "*");             // returns ""
@@ -5758,7 +5708,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * strip("yxabcxyz", "xyz");   // returns "abc"
      * }</pre>
      *
-     * @param str the String to remove characters from, which may be null
+     * @param str the String to remove characters from, may be {@code null}
      * @param stripChars the characters to remove, {@code null} treated as whitespace
      * @return the specified String if it's {@code null} or empty.
      */
@@ -5777,7 +5727,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the stripChars is {@code null}, whitespace is stripped as defined by {@link Character#isWhitespace(char)}.
      * If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"xxabcyy", "xydefyx", "xyz"};
      * strip(arr, "xyz");  // arr becomes ["abc", "def", ""]
@@ -5786,8 +5736,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * strip(arr2, null);  // arr2 becomes ["test", null, "abc"]
      * }</pre>
      *
-     * @param strs The array of strings to be stripped. Each string in the array will be updated in-place.
-     * @param stripChars The set of characters to be stripped from the strings. If {@code null}, the method behaves as {@link #strip(String)}.
+     * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
+     * @param stripChars the set of characters to be stripped from the strings. If {@code null}, the method behaves as {@link #strip(String)}.
      */
     public static void strip(final String[] strs, final String stripChars) {
         if (N.isEmpty(strs)) {
@@ -5805,7 +5755,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.
      * A {@code null} input String returns {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * stripStart(null);        // returns null
      * stripStart("");          // returns ""
@@ -5815,7 +5765,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * stripStart(" abc ");     // returns "abc "
      * }</pre>
      *
-     * @param str the String to remove whitespace from, which may be null
+     * @param str the String to remove whitespace from, may be {@code null}
      * @return the stripped String, {@code null} if null String input
      */
     public static String stripStart(final String str) {
@@ -5829,7 +5779,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the stripChars String is {@code null}, whitespace is stripped as defined by {@link Character#isWhitespace(char)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * stripStart(null, "*");           // returns null
      * stripStart("", "*");             // returns ""
@@ -5842,7 +5792,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * stripStart("xyzabc", "xyz");     // returns "abc"
      * }</pre>
      *
-     * @param str the String to remove characters from, which may be null
+     * @param str the String to remove characters from, may be {@code null}
      * @param stripChars the characters to remove, {@code null} treated as whitespace
      * @return the specified String if it's {@code null} or empty.
      */
@@ -5873,7 +5823,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the stripChars is {@code null}, whitespace is stripped as defined by {@link Character#isWhitespace(char)}.
      * If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"xxabc", "xydef", "xyz"};
      * stripStart(arr, "xyz");  // arr becomes ["abc", "def", ""]
@@ -5882,8 +5832,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * stripStart(arr2, null);  // arr2 becomes ["test", null, "abc"]
      * }</pre>
      *
-     * @param strs The array of strings to be stripped. Each string in the array will be updated in-place.
-     * @param stripChars The set of characters to be stripped from the start of the strings. If {@code null}, the method behaves as {@link #stripStart(String, String)}.
+     * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
+     * @param stripChars the set of characters to be stripped from the start of the strings. If {@code null}, the method behaves as {@link #stripStart(String, String)}.
      * @see #stripStart(String, String)
      */
     public static void stripStart(final String[] strs, final String stripChars) {
@@ -5902,7 +5852,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.
      * A {@code null} input String returns {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * stripEnd(null);          // returns null
      * stripEnd("");            // returns ""
@@ -5912,7 +5862,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * stripEnd(" abc ");       // returns " abc"
      * }</pre>
      *
-     * @param str the String to remove whitespace from, which may be null
+     * @param str the String to remove whitespace from, may be {@code null}
      * @return the stripped String, {@code null} if null String input
      */
     public static String stripEnd(final String str) {
@@ -5926,7 +5876,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the stripChars String is {@code null}, whitespace is stripped as defined by {@link Character#isWhitespace(char)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * stripEnd(null, "*");           // returns null
      * stripEnd("", "*");             // returns ""
@@ -5940,7 +5890,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * stripEnd("abcxyz", "xyz");     // returns "abc"
      * }</pre>
      *
-     * @param str the String to remove characters from, which may be null
+     * @param str the String to remove characters from, may be {@code null}
      * @param stripChars the set of characters to remove, {@code null} treated as whitespace
      * @return the specified String if it's {@code null} or empty.
      */
@@ -5971,7 +5921,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the stripChars is {@code null}, whitespace is stripped as defined by {@link Character#isWhitespace(char)}.
      * If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"abcxx", "defxy", "xyz"};
      * stripEnd(arr, "xyz");  // arr becomes ["abc", "def", ""]
@@ -5980,8 +5930,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * stripEnd(arr2, null);  // arr2 becomes ["test", null, "abc"]
      * }</pre>
      *
-     * @param strs The array of strings to be stripped. Each string in the array will be updated in-place.
-     * @param stripChars The set of characters to be stripped from the end of the strings. If {@code null}, the method behaves as {@link #stripEnd(String, String)}.
+     * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
+     * @param stripChars the set of characters to be stripped from the end of the strings. If {@code null}, the method behaves as {@link #stripEnd(String, String)}.
      * @see #stripEnd(String, String)
      */
     public static void stripEnd(final String[] strs, final String stripChars) {
@@ -6003,7 +5953,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method uses Java's Normalizer to decompose accented characters and then removes the combining diacritical marks.
      * Some special characters like Ł and ł are handled separately.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * stripAccents(null);                  // returns null
      * stripAccents("");                    // returns ""
@@ -6013,7 +5963,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * stripAccents("Łódź");                // returns "Lodz"
      * }</pre>
      *
-     * @param str the String to strip accents from, which may be null
+     * @param str the String to strip accents from, may be {@code null}
      * @return the stripped String, {@code null} if null String input
      */
     // See also Lucene's ASCIIFoldingFilter (Lucene 2.9) that replaces accented
@@ -6055,7 +6005,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method uses {@link #stripAccents(String)} to remove accents from each string.
      * If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"éclair", "café", "naïve"};
      * stripAccents(arr);  // arr becomes ["eclair", "cafe", "naive"]
@@ -6064,7 +6014,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * stripAccents(arr2); // arr2 becomes [null, "Lodz", "resume"]
      * }</pre>
      *
-     * @param strs The array of strings to be stripped. Each string in the array will be updated in-place.
+     * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
      */
     public static void stripAccents(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -6087,7 +6037,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} if the input is {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * chomp(null)          = null
      * chomp("")            = ""
@@ -6103,8 +6053,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * chomp("\r\n")        = ""
      * }</pre>
      *
-     * @param str the String to chomp a newline from, which may be null
-     * @return String without newline at the end, {@code null} if {@code null} String input
+     * @param str the String to chomp a newline from, may be {@code null}
+     * @return string without newline at the end, {@code null} if {@code null} String input
      * @see #chop(String)
      */
     public static String chomp(final String str) {
@@ -6145,14 +6095,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] strs = {"abc\n", "def\r", "ghi"};
      * chomp(strs);
      * // strs is now {"abc", "def", "ghi"}
      * }</pre>
      *
-     * @param strs The array of strings to be chomped. Each string in the array will be updated in-place.
+     * @param strs the array of strings to be chomped. Each string in the array will be updated in-place.
      */
     public static void chomp(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -6176,7 +6126,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input is {@code null}, and an empty string if the input
      * has only one character or is already empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * chop(null)          = null
      * chop("")            = ""
@@ -6191,8 +6141,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * chop("\r\n")        = ""
      * }</pre>
      *
-     * @param str the String to chop last character from, which may be null
-     * @return String without last character, {@code null} if {@code null} String input
+     * @param str the String to chop last character from, may be {@code null}
+     * @return string without last character, {@code null} if {@code null} String input
      * @see #chomp(String)
      */
     public static String chop(final String str) {
@@ -6223,14 +6173,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] strs = {"abc", "def\r\n", "g"};
      * chop(strs);
      * // strs is now {"ab", "def", ""}
      * }</pre>
      *
-     * @param strs The array of strings to be chopped. Each string in the array will be updated in-place.
+     * @param strs the array of strings to be chopped. Each string in the array will be updated in-place.
      */
     public static void chop(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -6251,7 +6201,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If {@code maxWidth} is less than 0, an {@code IllegalArgumentException} is thrown.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * truncate(null, 0)       = null
      * truncate(null, 2)       = null
@@ -6263,10 +6213,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * truncate("abcdefg", -1) = throws an IllegalArgumentException
      * }</pre>
      *
-     * @param str the String to truncate, which may be null
+     * @param str the String to truncate, may be {@code null}
      * @param maxWidth maximum length of result String, must be positive
      * @return truncated String, {@code null} if {@code null} String input
-     * @throws IllegalArgumentException If {@code maxWidth} is less than 0
+     * @throws IllegalArgumentException if {@code maxWidth} is less than 0
      */
     public static String truncate(final String str, final int maxWidth) {
         return truncate(str, 0, maxWidth);
@@ -6281,7 +6231,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If {@code offset} or {@code maxWidth} is less than 0, an {@code IllegalArgumentException} is thrown.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * truncate(null, 0, 0) = null
      * truncate(null, 2, 4) = null
@@ -6295,11 +6245,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * truncate("abcdefghij", 3, -1) = throws an IllegalArgumentException
      * }</pre>
      *
-     * @param str the String to truncate, which may be null
+     * @param str the String to truncate, may be {@code null}
      * @param offset left edge of source String
      * @param maxWidth maximum length of result String, must be positive
      * @return truncated String, {@code null} if {@code null} String input
-     * @throws IllegalArgumentException If {@code offset} or {@code maxWidth} is less than 0
+     * @throws IllegalArgumentException if {@code offset} or {@code maxWidth} is less than 0
      */
     @MayReturnNull
     public static String truncate(final String str, final int offset, final int maxWidth) throws IllegalArgumentException {
@@ -6326,16 +6276,16 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] strs = {"hello", "world123", "hi"};
      * truncate(strs, 5);
      * // strs is now {"hello", "world", "hi"}
      * }</pre>
      *
-     * @param strs The array of strings to be truncated. Each string in the array will be updated in-place.
-     * @param maxWidth The maximum length for each string. Must be non-negative.
-     * @throws IllegalArgumentException If maxWidth is less than 0.
+     * @param strs the array of strings to be truncated. Each string in the array will be updated in-place.
+     * @param maxWidth the maximum length for each string. Must be non-negative.
+     * @throws IllegalArgumentException if maxWidth is less than 0.
      */
     public static void truncate(final String[] strs, final int maxWidth) {
         N.checkArgNotNegative(maxWidth, cs.maxWidth);
@@ -6359,17 +6309,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] strs = {"hello", "world123", "hi"};
      * truncate(strs, 2, 3);
      * // strs is now {"llo", "rld", ""}
      * }</pre>
      *
-     * @param strs The array of strings to be truncated. Each string in the array will be updated in-place.
-     * @param offset The starting index from where the string needs to be truncated.
-     * @param maxWidth The maximum length for each string starting from the offset. Must be non-negative.
-     * @throws IllegalArgumentException If maxWidth or offset is less than 0.
+     * @param strs the array of strings to be truncated. Each string in the array will be updated in-place.
+     * @param offset the starting index from where the string needs to be truncated.
+     * @param maxWidth the maximum length for each string starting from the offset. Must be non-negative.
+     * @throws IllegalArgumentException if maxWidth or offset is less than 0.
      */
     public static void truncate(final String[] strs, final int offset, final int maxWidth) {
         N.checkArgNotNegative(offset, cs.offset);
@@ -6394,7 +6344,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * This includes spaces, tabs, newlines, and other Unicode whitespace characters. The method returns
      * {@code null} if the input is {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * deleteWhitespace(null)         = null
      * deleteWhitespace("")           = ""
@@ -6404,7 +6354,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * deleteWhitespace("a b\tc\r\n") = "abc"
      * }</pre>
      *
-     * @param str the String to delete whitespace from, which may be null
+     * @param str the String to delete whitespace from, may be {@code null}
      * @return the String without whitespaces, {@code null} if {@code null} String input
      */
     public static String deleteWhitespace(final String str) {
@@ -6437,14 +6387,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the input array is {@code null} or empty, the method does nothing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] strs = {"  hello  ", "world\t123", " h i "};
      * deleteWhitespace(strs);
      * // strs is now {"hello", "world123", "hi"}
      * }</pre>
      *
-     * @param strs The array of strings to be processed. Each string in the array will be updated in-place.
+     * @param strs the array of strings to be processed. Each string in the array will be updated in-place.
      */
     public static void deleteWhitespace(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -6465,7 +6415,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The suffix must not be empty, otherwise an {@code IllegalArgumentException} is thrown.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * appendIfMissing(null, ".txt")     = ".txt"
      * appendIfMissing("", ".txt")       = ".txt"
@@ -6475,10 +6425,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * appendIfMissing("file", "")       = throws IllegalArgumentException
      * }</pre>
      *
-     * @param str The string to which the suffix should be appended. May be {@code null} or empty.
-     * @param suffix The suffix to append to the string. Must not be empty.
-     * @return The input string with the suffix appended if it was not already present; otherwise, the original string.
-     * @throws IllegalArgumentException If the suffix is empty.
+     * @param str the string to which the suffix should be appended, may be {@code null} or empty
+     * @param suffix the suffix to append to the string. Must not be empty.
+     * @return the input string with the suffix appended if it was not already present; otherwise, the original string.
+     * @throws IllegalArgumentException if the suffix is empty.
      */
     public static String appendIfMissing(final String str, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(suffix, cs.suffix);
@@ -6502,7 +6452,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The suffix must not be empty, otherwise an {@code IllegalArgumentException} is thrown.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * appendIfMissingIgnoreCase(null, ".TXT")     = ".TXT"
      * appendIfMissingIgnoreCase("", ".TXT")       = ".TXT"
@@ -6512,10 +6462,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * appendIfMissingIgnoreCase("file", "")       = throws IllegalArgumentException
      * }</pre>
      *
-     * @param str The string to which the suffix should be appended. May be {@code null} or empty.
-     * @param suffix The suffix to append to the string. Must not be empty.
-     * @return The input string with the suffix appended if it was not already present; otherwise, the original string.
-     * @throws IllegalArgumentException If the suffix is empty.
+     * @param str the string to which the suffix should be appended, may be {@code null} or empty
+     * @param suffix the suffix to append to the string. Must not be empty.
+     * @return the input string with the suffix appended if it was not already present; otherwise, the original string.
+     * @throws IllegalArgumentException if the suffix is empty.
      */
     public static String appendIfMissingIgnoreCase(final String str, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(suffix, cs.suffix);
@@ -6538,7 +6488,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The prefix must not be empty, otherwise an {@code IllegalArgumentException} is thrown.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * prependIfMissing(null, "http://")     = "http://"
      * prependIfMissing("", "http://")       = "http://"
@@ -6548,10 +6498,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * prependIfMissing("example.com", "")   = throws IllegalArgumentException
      * }</pre>
      *
-     * @param str The string to which the prefix should be prepended. May be {@code null} or empty.
-     * @param prefix The prefix to prepend to the string. Must not be empty.
-     * @return The input string with the prefix prepended if it was not already present; otherwise, the original string.
-     * @throws IllegalArgumentException If the prefix is empty.
+     * @param str the string to which the prefix should be prepended, may be {@code null} or empty
+     * @param prefix the prefix to prepend to the string. Must not be empty.
+     * @return the input string with the prefix prepended if it was not already present; otherwise, the original string.
+     * @throws IllegalArgumentException if the prefix is empty.
      */
     public static String prependIfMissing(final String str, final String prefix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
@@ -6575,7 +6525,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The prefix must not be empty, otherwise an {@code IllegalArgumentException} is thrown.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * prependIfMissingIgnoreCase(null, "HTTP://")     = "HTTP://"
      * prependIfMissingIgnoreCase("", "HTTP://")       = "HTTP://"
@@ -6585,10 +6535,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * prependIfMissingIgnoreCase("example.com", "")   = throws IllegalArgumentException
      * }</pre>
      *
-     * @param str The string to which the prefix should be prepended. May be {@code null} or empty.
-     * @param prefix The prefix to prepend to the string. Must not be empty.
-     * @return The input string with the prefix prepended if it was not already present; otherwise, the original string.
-     * @throws IllegalArgumentException If the prefix is empty.
+     * @param str the string to which the prefix should be prepended, may be {@code null} or empty
+     * @param prefix the prefix to prepend to the string. Must not be empty.
+     * @return the input string with the prefix prepended if it was not already present; otherwise, the original string.
+     * @throws IllegalArgumentException if the prefix is empty.
      */
     public static String prependIfMissingIgnoreCase(final String str, final String prefix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
@@ -6616,7 +6566,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The prefixSuffix must not be empty, otherwise an {@code IllegalArgumentException} is thrown.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * wrapIfMissing(null, "\"")    = "\"\""
      * wrapIfMissing("", "\"")      = "\"\""
@@ -6627,10 +6577,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * wrapIfMissing("abc", "")     = throws IllegalArgumentException
      * }</pre>
      *
-     * @param str The string to be wrapped. May be {@code null} or empty.
-     * @param prefixSuffix The string to be used as both the prefix and suffix for wrapping. Must not be empty.
-     * @return The input string wrapped with the prefixSuffix at both ends if they were not already present; otherwise, the original string.
-     * @throws IllegalArgumentException If the prefixSuffix is empty.
+     * @param str the string to be wrapped. May be {@code null} or empty.
+     * @param prefixSuffix the string to be used as both the prefix and suffix for wrapping. Must not be empty.
+     * @return the input string wrapped with the prefixSuffix at both ends if they were not already present; otherwise, the original string.
+     * @throws IllegalArgumentException if the prefixSuffix is empty.
      */
     public static String wrapIfMissing(final String str, final String prefixSuffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
@@ -6652,7 +6602,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The prefix and suffix must not be empty, otherwise an {@code IllegalArgumentException} is thrown.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * wrapIfMissing(null, "[", "]") = "[]"
      * wrapIfMissing("", "[", "]") = "[]"
@@ -6668,11 +6618,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * wrapIfMissing("aaaa", "aa", "aa") = "aaaa"
      * }</pre>
      *
-     * @param str The string to be wrapped. May be {@code null} or empty.
-     * @param prefix The string to be used as the prefix for wrapping. Must not be empty.
-     * @param suffix The string to be used as the suffix for wrapping. Must not be empty.
-     * @return The input string wrapped with the prefix and suffix at both ends if they were not already present; otherwise, the original string.
-     * @throws IllegalArgumentException If the prefix or suffix is empty.
+     * @param str the string to be wrapped. May be {@code null} or empty.
+     * @param prefix the string to be used as the prefix for wrapping. Must not be empty.
+     * @param suffix the string to be used as the suffix for wrapping. Must not be empty.
+     * @return the input string wrapped with the prefix and suffix at both ends if they were not already present; otherwise, the original string.
+     * @throws IllegalArgumentException if the prefix or suffix is empty.
      */
     public static String wrapIfMissing(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
@@ -6698,7 +6648,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The prefixSuffix must not be empty, otherwise an {@code IllegalArgumentException} is thrown.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * wrap(null, "\"")    = "\"\""
      * wrap("", "\"")      = "\"\""
@@ -6709,10 +6659,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * wrap("abc", "")     = throws IllegalArgumentException
      * }</pre>
      *
-     * @param str The string to be wrapped. May be {@code null}.
-     * @param prefixSuffix The string to be used as both the prefix and suffix for wrapping. Must not be empty.
-     * @return The input string wrapped with the prefixSuffix at both ends.
-     * @throws IllegalArgumentException If the prefixSuffix is empty.
+     * @param str the string to be wrapped. May be {@code null}.
+     * @param prefixSuffix the string to be used as both the prefix and suffix for wrapping. Must not be empty.
+     * @return the input string wrapped with the prefixSuffix at both ends.
+     * @throws IllegalArgumentException if the prefixSuffix is empty.
      */
     public static String wrap(final String str, final String prefixSuffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
@@ -6728,7 +6678,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The prefix and suffix must not be empty, otherwise an {@code IllegalArgumentException} is thrown.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * wrap(null, "[", "]") = "[]"
      * wrap("", "[", "]") = "[]"
@@ -6741,11 +6691,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * wrap("aaa", "aa", "aa") = "aaaaaaa"
      * }</pre>
      *
-     * @param str The string to be wrapped. May be {@code null}.
-     * @param prefix The string to be used as the prefix for wrapping. Must not be empty.
-     * @param suffix The string to be used as the suffix for wrapping. Must not be empty.
-     * @return The input string wrapped with the prefix and suffix at both ends.
-     * @throws IllegalArgumentException If the prefix or suffix is empty.
+     * @param str the string to be wrapped. May be {@code null}.
+     * @param prefix the string to be used as the prefix for wrapping. Must not be empty.
+     * @param suffix the string to be used as the suffix for wrapping. Must not be empty.
+     * @return the input string wrapped with the prefix and suffix at both ends.
+     * @throws IllegalArgumentException if the prefix or suffix is empty.
      */
     public static String wrap(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
@@ -6768,7 +6718,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The prefixSuffix must not be empty, otherwise an {@code IllegalArgumentException} is thrown.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * unwrap(null, "\"")     = null
      * unwrap("", "\"")       = ""
@@ -6780,10 +6730,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * unwrap("abc", "")      = throws IllegalArgumentException
      * }</pre>
      *
-     * @param str The string to be unwrapped. May be {@code null} or empty.
-     * @param prefixSuffix The string used as both the prefix and suffix for unwrapping. Must not be empty.
-     * @return The input string with the prefixSuffix removed from both ends if they were present; otherwise, the original string.
-     * @throws IllegalArgumentException If the prefixSuffix is empty.
+     * @param str the string to be unwrapped. May be {@code null} or empty.
+     * @param prefixSuffix the string used as both the prefix and suffix for unwrapping. Must not be empty.
+     * @return the input string with the prefixSuffix removed from both ends if they were present; otherwise, the original string.
+     * @throws IllegalArgumentException if the prefixSuffix is empty.
      */
     public static String unwrap(final String str, final String prefixSuffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
@@ -6801,7 +6751,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The prefix and suffix must not be empty, otherwise an {@code IllegalArgumentException} is thrown.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * unwrap(null, "[", "]") = null
      * unwrap("", "[", "]") = ""
@@ -6817,11 +6767,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * unwrap("aaaa", "aa", "aa") = ""
      * }</pre>
      *
-     * @param str The string to be unwrapped. May be {@code null} or empty.
-     * @param prefix The string used as the prefix for unwrapping. Must not be empty.
-     * @param suffix The string used as the suffix for unwrapping. Must not be empty.
-     * @return The input string with the prefix and suffix removed from both ends if they were present; otherwise, the original string.
-     * @throws IllegalArgumentException If the prefix or suffix is empty.
+     * @param str the string to be unwrapped. May be {@code null} or empty.
+     * @param prefix the string used as the prefix for unwrapping. Must not be empty.
+     * @param suffix the string used as the suffix for unwrapping. Must not be empty.
+     * @return the input string with the prefix and suffix removed from both ends if they were present; otherwise, the original string.
+     * @throws IllegalArgumentException if the prefix or suffix is empty.
      */
     public static String unwrap(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
@@ -6842,7 +6792,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method delegates to {@link Character#isLowerCase(char)} to determine if the character
      * is a lowercase letter according to Unicode standards.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isLowerCase('a') = true
      * isLowerCase('A') = false
@@ -6865,7 +6815,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Unlike {@link #isLowerCase(char)}, this method only considers ASCII lowercase letters and
      * does not include lowercase letters from other Unicode ranges.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAsciiLowerCase('a') = true
      * isAsciiLowerCase('z') = true
@@ -6887,7 +6837,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method delegates to {@link Character#isUpperCase(char)} to determine if the character
      * is an uppercase letter according to Unicode standards.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isUpperCase('A') = true
      * isUpperCase('a') = false
@@ -6910,7 +6860,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Unlike {@link #isUpperCase(char)}, this method only considers ASCII uppercase letters and
      * does not include uppercase letters from other Unicode ranges.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAsciiUpperCase('A') = true
      * isAsciiUpperCase('Z') = true
@@ -6933,7 +6883,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * according to {@link Character#isLowerCase(char)}. An empty CharSequence or {@code null} returns
      * {@code true}. Note that non-letter characters will cause this method to return {@code false}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAllLowerCase(null)   = true
      * isAllLowerCase("")     = true
@@ -6943,7 +6893,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAllLowerCase("ab1")  = false (digit is not a lowercase letter)
      * }</pre>
      *
-     * @param cs the CharSequence to check, which may be null
+     * @param cs the CharSequence to check, may be {@code null}
      * @return {@code true} if all characters are lowercase or the CharSequence is empty or {@code null}; {@code false} otherwise
      */
     public static boolean isAllLowerCase(final CharSequence cs) {
@@ -6969,7 +6919,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * according to {@link Character#isUpperCase(char)}. An empty CharSequence or {@code null} returns
      * {@code true}. Note that non-letter characters will cause this method to return {@code false}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAllUpperCase(null)   = true
      * isAllUpperCase("")     = true
@@ -6979,7 +6929,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAllUpperCase("AB1")  = false (digit is not an uppercase letter)
      * }</pre>
      *
-     * @param cs the CharSequence to check, which may be null
+     * @param cs the CharSequence to check, may be {@code null}
      * @return {@code true} if all characters are uppercase or the CharSequence is empty; {@code false} otherwise
      */
     public static boolean isAllUpperCase(final CharSequence cs) {
@@ -7005,7 +6955,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the CharSequence is empty, {@code null}, or contains only a single character, it is not considered
      * mixed case and the method returns {@code false}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isMixedCase(null)    = false
      * isMixedCase("")      = false
@@ -7019,7 +6969,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isMixedCase("a1B2")  = true
      * }</pre>
      *
-     * @param cs The CharSequence to check. It may be {@code null}.
+     * @param cs the CharSequence to check. It may be {@code null}.
      * @return {@code true} if the CharSequence is mixed case, {@code false} otherwise.
      */
     public static boolean isMixedCase(final CharSequence cs) {
@@ -7057,7 +7007,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * is a digit (0-9) according to Unicode standards. This includes not only ASCII digits but
      * also digits from other Unicode scripts.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isDigit('0') = true
      * isDigit('9') = true
@@ -7081,7 +7031,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * is a letter according to Unicode standards. This includes letters from all Unicode scripts,
      * not just ASCII letters.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isLetter('a') = true
      * isLetter('A') = true
@@ -7106,7 +7056,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * is either a letter or a digit according to Unicode standards. This includes letters and digits
      * from all Unicode scripts, not just ASCII.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isLetterOrDigit('a') = true
      * isLetterOrDigit('A') = true
@@ -7134,7 +7084,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * standard ASCII character set (0-127). ASCII 7-bit includes control characters, printable
      * characters, letters, digits, and special symbols.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAscii('a')  = true
      * isAscii('A')  = true
@@ -7159,7 +7109,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * which are characters with values from 32 to 126 inclusive. This range includes space,
      * letters, digits, punctuation, and symbols, but excludes control characters.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAsciiPrintable('a')  = true
      * isAsciiPrintable('A')  = true
@@ -7186,7 +7136,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * are those with values less than 32 or equal to 127 (DEL). These include characters like
      * newline, carriage return, tab, and other non-printable control codes.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAsciiControl('\n') = true (newline, value 10)
      * isAsciiControl('\r') = true (carriage return, value 13)
@@ -7213,7 +7163,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lowercase (a-z). It does not include letters from extended character sets or other
      * Unicode scripts.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAsciiAlpha('a')  = true
      * isAsciiAlpha('A')  = true
@@ -7240,7 +7190,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * It does not include uppercase letters from extended character sets or other
      * Unicode scripts.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAsciiAlphaUpper('A')  = true
      * isAsciiAlphaUpper('Z')  = true
@@ -7266,7 +7216,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * It does not include lowercase letters from extended character sets or other
      * Unicode scripts.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAsciiAlphaLower('a')  = true
      * isAsciiAlphaLower('z')  = true
@@ -7291,7 +7241,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method checks if the character is an ASCII digit (0-9). It does not include
      * digits from extended character sets or other Unicode scripts.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAsciiNumeric('0')  = true
      * isAsciiNumeric('9')  = true
@@ -7318,7 +7268,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * ASCII digit (0-9). It combines the checks from {@link #isAsciiAlpha(char)} and
      * {@link #isAsciiNumeric(char)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAsciiAlphanumeric('a')  = true
      * isAsciiAlphanumeric('A')  = true
@@ -7348,7 +7298,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * {@code false}. The method will return {@code false} if any character is outside the
      * printable ASCII range.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * isAsciiPrintable(null)     = false
      * isAsciiPrintable("")       = true
@@ -7391,7 +7341,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null or empty input.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // ASCII alphabetic strings
      * isAsciiAlpha("abcDEF");                // returns true
@@ -7405,7 +7355,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAsciiAlpha("café");                  // returns {@code false} (contains non-ASCII character)
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null} or empty.
+     * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence contains only ASCII alphabetic characters and is non-null/non-empty, {@code false} otherwise.
      * @see #isAlpha(CharSequence)
      * @see #isAsciiAlphaSpace(CharSequence)
@@ -7434,7 +7384,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null input, but {@code true} for empty string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // ASCII alphabetic strings with spaces
      * isAsciiAlphaSpace("Hello World");      // returns true
@@ -7448,7 +7398,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAsciiAlphaSpace("café");             // returns {@code false} (contains non-ASCII character)
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null} or empty.
+     * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence contains only ASCII alphabetic characters and spaces and is non-null, {@code false} otherwise.
      * @see #isAsciiAlpha(CharSequence)
      * @see #isAlphaSpace(CharSequence)
@@ -7481,7 +7431,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null or empty input.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // ASCII alphanumeric strings
      * isAsciiAlphanumeric("abc123");         // returns true
@@ -7497,7 +7447,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAsciiAlphanumeric("café123");        // returns {@code false} (contains non-ASCII character)
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null} or empty.
+     * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence contains only ASCII alphanumeric characters and is non-null/non-empty, {@code false} otherwise.
      * @see #isAlphanumeric(CharSequence)
      * @see #isAsciiAlpha(CharSequence)
@@ -7528,7 +7478,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null input, but {@code true} for empty string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // ASCII alphanumeric strings with spaces
      * isAsciiAlphanumericSpace("Hello World 123");  // returns true
@@ -7542,7 +7492,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAsciiAlphanumericSpace("café 2023");        // returns {@code false} (contains non-ASCII character)
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null} or empty.
+     * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence contains only ASCII alphanumeric characters and spaces and is non-null, {@code false} otherwise.
      * @see #isAsciiAlphanumeric(CharSequence)
      * @see #isAlphanumericSpace(CharSequence)
@@ -7574,7 +7524,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null or empty input.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // ASCII numeric strings
      * isAsciiNumeric("123");                 // returns true
@@ -7590,7 +7540,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAsciiNumeric("12a");                 // returns {@code false} (contains letter)
      * }</pre>
      *
-     * @param cs The CharSequence to be checked. It can be {@code null} or empty.
+     * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence contains only ASCII numeric characters and is non-null/non-empty, {@code false} otherwise.
      * @see #isNumeric(CharSequence)
      * @see #isAsciiDigitalNumber(String)
@@ -7623,7 +7573,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null or empty input.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Unicode letter strings
      * isAlpha("abc");                        // returns true
@@ -7640,7 +7590,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAlpha("ab-c");                       // returns {@code false} (contains hyphen)
      * }</pre>
      *
-     * @param cs The CharSequence to check, which may be null
+     * @param cs the CharSequence to check, may be {@code null}
      * @return {@code true} if only contains letters and is non-null/non-empty, {@code false} otherwise.
      * @see Character#isLetter(char)
      * @see #isAsciiAlpha(CharSequence)
@@ -7670,7 +7620,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null input, but {@code true} for empty string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Unicode letter strings with spaces
      * isAlphaSpace("Hello World");           // returns true
@@ -7687,7 +7637,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAlphaSpace("ab\tc");                 // returns {@code false} (contains tab)
      * }</pre>
      *
-     * @param cs The CharSequence to check, which may be null
+     * @param cs the CharSequence to check, may be {@code null}
      * @return {@code true} if only contains letters and spaces and is non-null, {@code false} otherwise.
      * @see #isAlpha(CharSequence)
      * @see #isAsciiAlphaSpace(CharSequence)
@@ -7720,7 +7670,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null or empty input.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Unicode alphanumeric strings
      * isAlphanumeric("abc");                 // returns true
@@ -7738,7 +7688,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAlphanumeric("ab-c");                // returns {@code false} (contains hyphen)
      * }</pre>
      *
-     * @param cs The CharSequence to check, which may be null
+     * @param cs the CharSequence to check, may be {@code null}
      * @return {@code true} if only contains letters or digits and is non-null/non-empty, {@code false} otherwise.
      * @see Character#isLetterOrDigit(char)
      * @see #isAsciiAlphanumeric(CharSequence)
@@ -7768,7 +7718,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null input, but {@code true} for empty string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Unicode alphanumeric strings with spaces
      * isAlphanumericSpace("Hello World 123");       // returns true
@@ -7785,7 +7735,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAlphanumericSpace("ab\tc");                 // returns {@code false} (contains tab)
      * }</pre>
      *
-     * @param cs The CharSequence to check, which may be null
+     * @param cs the CharSequence to check, may be {@code null}
      * @return {@code true} if only contains letters, digits or spaces and is non-null, {@code false} otherwise.
      * @see #isAlphanumeric(CharSequence)
      * @see #isAsciiAlphanumericSpace(CharSequence)
@@ -7823,7 +7773,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * when parsed by Integer.parseInt or Long.parseLong, e.g., if the value is outside the
      * range for int or long respectively.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Unicode numeric strings
      * isNumeric("123");                      // returns true
@@ -7842,7 +7792,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isNumeric("+123");                     // returns {@code false} (contains plus sign)
      * }</pre>
      *
-     * @param cs The CharSequence to check, which may be null
+     * @param cs the CharSequence to check, may be {@code null}
      * @return {@code true} if only contains digits and is non-null/non-empty, {@code false} otherwise.
      * @see Character#isDigit(char)
      * @see #isAsciiNumeric(CharSequence)
@@ -7874,7 +7824,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null input, but {@code true} for empty string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Unicode numeric strings with spaces
      * isNumericSpace("123 456");             // returns true
@@ -7892,7 +7842,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isNumericSpace("12\t3");               // returns {@code false} (contains tab)
      * }</pre>
      *
-     * @param cs The CharSequence to check, which may be null
+     * @param cs the CharSequence to check, may be {@code null}
      * @return {@code true} if only contains digits or spaces and is non-null, {@code false} otherwise.
      * @see #isNumeric(CharSequence)
      * @see Character#isDigit(char)
@@ -7924,7 +7874,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null input, but {@code true} for empty string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Whitespace strings
      * isWhitespace("");                      // returns {@code true} (empty string)
@@ -7940,7 +7890,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isWhitespace(" a ");                   // returns {@code false} (contains letter)
      * }</pre>
      *
-     * @param cs The CharSequence to check, which may be null
+     * @param cs the CharSequence to check, may be {@code null}
      * @return {@code true} if only contains whitespace and is non-null, {@code false} otherwise.
      * @see Character#isWhitespace(char)
      */
@@ -7996,7 +7946,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null, empty strings, or strings containing spaces.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Valid ASCII digital numbers
      * isAsciiDigitalNumber("0");             // returns true
@@ -8018,7 +7968,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAsciiDigitalNumber("e10");           // returns {@code false} (no digits before 'e')
      * }</pre>
      *
-     * @param str The string to check, which may be null
+     * @param str the string to check, may be {@code null}
      * @return {@code true} if the string represents a valid ASCII digital number, {@code false} otherwise.
      * @see #isAsciiDigitalInteger(String)
      * @see #isNumber(String)
@@ -8112,7 +8062,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code false} for null, empty strings, or strings containing spaces.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Valid ASCII digital integers
      * isAsciiDigitalInteger("0");            // returns true
@@ -8133,7 +8083,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isAsciiDigitalInteger("+");            // returns {@code false} (only sign, no digits)
      * }</pre>
      *
-     * @param str The string to check, which may be null
+     * @param str the string to check, may be {@code null}
      * @return {@code true} if the string represents a valid ASCII digital integer, {@code false} otherwise.
      * @see #isAsciiDigitalNumber(String)
      * @see #isAsciiNumeric(CharSequence)
@@ -8179,7 +8129,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code -1} for null or empty input strings.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Character found
      * indexOf("hello", 'h');                 // returns 0
@@ -8193,9 +8143,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOf("", 'a');                      // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param charValueToFind The Unicode code of the character to be found.
-     * @return The index of the first occurrence of the character in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param charValueToFind the Unicode code of the character to be found.
+     * @return the index of the first occurrence of the character in the character sequence represented by this object,
      *         or -1 if the character does not occur.
      * @see String#indexOf(int)
      */
@@ -8217,7 +8167,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code -1} for null or empty input strings.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Character found
      * indexOf("hello", 'l', 0);              // returns 2
@@ -8231,10 +8181,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOf("", 'a', 0);                   // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param charValueToFind The Unicode code of the character to be found.
-     * @param fromIndex The index to start the search from.
-     * @return The index of the first occurrence of the character in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param charValueToFind the Unicode code of the character to be found.
+     * @param fromIndex the index to start the search from.
+     * @return the index of the first occurrence of the character in the character sequence represented by this object,
      *         or -1 if the character does not occur.
      * @see String#indexOf(int, int)
      */
@@ -8258,7 +8208,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code -1} if the substring is not found, or if either parameter is null,
      * or if the substring is longer than the string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Substring found
      * indexOf("hello world", "world");       // returns 6
@@ -8273,9 +8223,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOf("", "test");                   // returns -1 (substring longer than string)
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found.
-     * @return The index of the first occurrence of the substring in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found.
+     * @return the index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur.
      * @see String#indexOf(String)
      */
@@ -8298,7 +8248,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code -1} if the substring is not found, or if either parameter is null,
      * or if the substring cannot fit in the remaining portion of the string from {@code fromIndex}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Substring found
      * indexOf("hello world", "o", 0);        // returns 4
@@ -8312,10 +8262,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOf("test", null, 0);              // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found.
-     * @param fromIndex The index to start the search from.
-     * @return The index of the first occurrence of the substring in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found.
+     * @param fromIndex the index to start the search from.
+     * @return the index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur.
      * @see String#indexOf(String, int)
      */
@@ -8341,7 +8291,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * 
      * <p>Note: Use the {@code indexOf(String, int)} method when searching for a single character to avoid ambiguous compilation errors.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Characters found
      * indexOfAny("hello", 'e', 'o');         // returns 1 (first 'e')
@@ -8355,9 +8305,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOfAny("hello");                   // returns -1 (empty array)
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valuesToFind The array of characters to be found.
-     * @return The index of the first occurrence of any character in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valuesToFind the array of characters to be found.
+     * @return the index of the first occurrence of any character in the character sequence represented by this object,
      *         or -1 if none of the characters occur.
      * @see #indexOfAny(String, int, char...)
      * @see #indexOf(String, int)
@@ -8379,7 +8329,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * 
      * <p>Note: Use the {@code indexOf(String, int, int)} method when searching for a single character to avoid ambiguous compilation errors.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Characters found
      * indexOfAny("hello", 0, 'e', 'o');      // returns 1 (first 'e')
@@ -8392,10 +8342,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOfAny(null, 0, 'a');              // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param fromIndex The index to start the search from.
-     * @param valuesToFind The array of characters to be found.
-     * @return The index of the first occurrence of any character in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param fromIndex the index to start the search from.
+     * @param valuesToFind the array of characters to be found.
+     * @return the index of the first occurrence of any character in the character sequence represented by this object,
      *         or -1 if none of the characters occur.
      * @see #indexOfAny(String, char...)
      * @see #indexOf(String, int, int)
@@ -8419,15 +8369,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 if (c == ch) {
                     // checked by checkInputChars
 
-                    //    if (i < strLast && j < chsLast && Character.isHighSurrogate(ch)) {
-                    //        // ch is a supplementary character
-                    //        if (valuesToFind[j + 1] == str.charAt(i + 1)) {
-                    //            return i;
-                    //        }
-                    //    } else {
-                    //        return i;
-                    //    }
-
                     return i;
                 }
             }
@@ -8448,7 +8389,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * 
      * <p>Note: Use the {@code indexOf(String, String)} method when searching for a single string to avoid ambiguous compilation errors.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Substrings found
      * indexOfAny("hello world", "world", "hello");    // returns 0 ("hello" comes first)
@@ -8462,9 +8403,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOfAny("test", new String[0]);              // returns -1 (empty array)
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valuesToFind The array of substrings to be found.
-     * @return The index of the first occurrence of any substring in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valuesToFind the array of substrings to be found.
+     * @return the index of the first occurrence of any substring in the character sequence represented by this object,
      *         or -1 if none of the substrings occur.
      * @see #indexOfAny(String, int, String...)
      * @see #indexOf(String, String)
@@ -8486,7 +8427,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * 
      * <p>Note: Use the {@code indexOf(String, String, int)} method when searching for a single string to avoid ambiguous compilation errors.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Substrings found
      * indexOfAny("hello world", 0, "world", "hello"); // returns 0 ("hello" at index 0)
@@ -8499,10 +8440,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOfAny(null, 0, "test");                    // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param fromIndex The index to start the search from.
-     * @param valuesToFind The array of substrings to be found.
-     * @return The index of the first occurrence of any substring in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param fromIndex the index to start the search from.
+     * @param valuesToFind the array of substrings to be found.
+     * @return the index of the first occurrence of any substring in the character sequence represented by this object,
      *         or -1 if none of the substrings occur.
      * @see #indexOfAny(String, String...)
      * @see #indexOf(String, String, int)
@@ -8543,7 +8484,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * or if the string is null or empty. If the exclusion array is null or empty, returns 0
      * (the first character is not excluded).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Characters not in exclusion array found
      * indexOfAnyBut("hello", 'h', 'e');      // returns 2 (first 'l')
@@ -8557,9 +8498,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOfAnyBut("hello");                // returns 0 (empty exclusion array)
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valuesToExclude The array of characters to exclude from the search.
-     * @return The index of the first occurrence of any character not in the array of characters
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valuesToExclude the array of characters to exclude from the search.
+     * @return the index of the first occurrence of any character not in the array of characters
      *         to exclude, or -1 if all characters are in the array or the string is {@code null} or empty.
      * @see #indexOfAnyBut(String, int, char...)
      */
@@ -8580,7 +8521,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * in the exclusion array, or if the string is null or empty. If the exclusion array is
      * null or empty, returns {@code fromIndex} (if valid).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Characters not in exclusion array found
      * indexOfAnyBut("hello", 0, 'h', 'e');   // returns 2 (first 'l')
@@ -8594,10 +8535,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOfAnyBut(null, 0, 'a');           // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param fromIndex The index to start the search from.
-     * @param valuesToExclude The array of characters to exclude from the search.
-     * @return The index of the first occurrence of any character not in the array of characters
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param fromIndex the index to start the search from.
+     * @param valuesToExclude the array of characters to exclude from the search.
+     * @return the index of the first occurrence of any character not in the array of characters
      *         to exclude, or -1 if all characters are in the array or the string is {@code null} or empty.
      * @see #indexOfAnyBut(String, char...)
      */
@@ -8624,14 +8565,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 if (c == ch) {
                     // checked by checkInputChars
 
-                    //    if (i < strLast && j < chsLast && Character.isHighSurrogate(ch)) {
-                    //        if (valuesToExclude[j + 1] == str.charAt(i + 1)) {
-                    //            continue outer;
-                    //        }
-                    //    } else {
-                    //        continue outer;
-                    //    }
-
                     continue outer;
                 }
             }
@@ -8653,7 +8586,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If the delimiter is empty, this method behaves the same as {@link #indexOf(String, String)}.
      * The method returns {@code -1} if the substring is not found as a delimited token.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Delimited substring found
      * indexOf("apple,banana,cherry", "banana", ",");     // returns 6
@@ -8668,10 +8601,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOf("test", null, ",");                        // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found.
-     * @param delimiter The delimiter to separate the search.
-     * @return The index of the first occurrence of the substring in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found.
+     * @param delimiter the delimiter to separate the search.
+     * @return the index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur.
      * @see #indexOf(String, String, String, int)
      */
@@ -8694,7 +8627,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If the delimiter is empty, this method behaves the same as {@link #indexOf(String, String, int)}.
      * The method returns {@code -1} if the substring is not found as a delimited token.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Delimited substring found
      * indexOf("apple,banana,cherry", "banana", ",", 0);  // returns 6
@@ -8707,11 +8640,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOf("test", "test", ",", 5);                   // returns -1 (fromIndex beyond match)
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found.
-     * @param delimiter The delimiter to separate the search.
-     * @param fromIndex The index to start the search from.
-     * @return The index of the first occurrence of the substring in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found.
+     * @param delimiter the delimiter to separate the search.
+     * @param fromIndex the index to start the search from.
+     * @return the index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur.
      * @see #indexOf(String, String, String)
      */
@@ -8771,7 +8704,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns -1 if the substring is not found, or if either the input string or the substring to find is {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * indexOfIgnoreCase("Hello World", "WORLD");     // returns 6
      * indexOfIgnoreCase("Hello World", "world");     // returns 6
@@ -8780,9 +8713,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOfIgnoreCase("test", null);               // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found. May be {@code null}.
-     * @return The index of the first occurrence of the substring in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found. May be {@code null}.
+     * @return the index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur or if either parameter is {@code null}.
      */
     public static int indexOfIgnoreCase(final String str, final String valueToFind) {
@@ -8800,7 +8733,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if the substring is not found, or if either the input string or the substring to find is {@code null}.
      * If {@code fromIndex} is negative, it is treated as 0. If {@code fromIndex} is greater than the string length, -1 is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * indexOfIgnoreCase("Hello World Hello", "hello", 0);    // returns 0
      * indexOfIgnoreCase("Hello World Hello", "hello", 7);    // returns 13
@@ -8808,10 +8741,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOfIgnoreCase("test", "TEST", -5);                 // returns 0
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found. May be {@code null}.
-     * @param fromIndex The index to start the search from. Negative values are treated as 0.
-     * @return The index of the first occurrence of the substring in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param fromIndex the index to start the search from. Negative values are treated as 0.
+     * @return the index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur or if either string parameter is {@code null}.
      */
     public static int indexOfIgnoreCase(final String str, final String valueToFind, int fromIndex) {
@@ -8844,7 +8777,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns -1 if the substring is not found with the required delimiter boundaries, or if any parameter is {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * indexOfIgnoreCase("apple,APPLE,banana", "apple", ",");    // returns 0
      * indexOfIgnoreCase("apple,APPLE,banana", "APPLE", ",");    // returns 0
@@ -8852,10 +8785,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOfIgnoreCase("test", "test", ",");                   // returns 0
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found. May be {@code null}.
-     * @param delimiter The delimiter to be used for the search. May be {@code null} or empty.
-     * @return The index of the first occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param delimiter the delimiter to be used for the search. May be {@code null} or empty.
+     * @return the index of the first occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
      *         or -1 if the substring does not occur with proper boundaries or if any parameter is {@code null}.
      */
     public static int indexOfIgnoreCase(final String str, final String valueToFind, final String delimiter) {
@@ -8873,7 +8806,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substring to find is {@code null}. If the delimiter is empty or {@code null}, the method behaves the same as
      * {@link #indexOfIgnoreCase(String, String, int)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 0);     // returns 0
      * indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 7);     // returns 6
@@ -8881,11 +8814,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOfIgnoreCase("test value test", "test", " ", 5);         // returns 11
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found. May be {@code null}.
-     * @param delimiter The delimiter to be used for the search. May be {@code null} or empty.
-     * @param fromIndex The index to start the search from. Negative values are treated as 0.
-     * @return The index of the first occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param delimiter the delimiter to be used for the search. May be {@code null} or empty.
+     * @param fromIndex the index to start the search from. Negative values are treated as 0.
+     * @return the index of the first occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
      *         or -1 if the substring does not occur with proper boundaries or if the input string or substring to find is {@code null}.
      */
     public static int indexOfIgnoreCase(final String str, final String valueToFind, final String delimiter, int fromIndex) {
@@ -8944,7 +8877,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns -1 if the character is not found, or if the input string is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastIndexOf("Hello World", 'o');         // returns 7
      * lastIndexOf("Hello World", 'x');         // returns -1
@@ -8952,9 +8885,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastIndexOf(null, 'a');                  // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param charValueToFind The character to be found.
-     * @return The index of the last occurrence of the character in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param charValueToFind the character to be found.
+     * @return the index of the last occurrence of the character in the character sequence represented by this object,
      *         or -1 if the character does not occur or if the string is {@code null} or empty.
      */
     public static int lastIndexOf(final String str, final int charValueToFind) {
@@ -8978,7 +8911,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If no such character occurs in this string at or before position {@code startIndexFromBack},
      * then -1 is returned. All indices are specified in {@code char} values (Unicode code units).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastIndexOf("Hello World", 'o', 10);     // returns 7
      * lastIndexOf("Hello World", 'o', 5);      // returns 4
@@ -8986,14 +8919,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastIndexOf("Hello", 'l', -1);           // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param charValueToFind A character (Unicode code point).
-     * @param startIndexFromBack The index to start the search from. There is no restriction on
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param charValueToFind a character (Unicode code point).
+     * @param startIndexFromBack the index to start the search from. There is no restriction on
      *            the value of {@code startIndexFromBack}. If it is greater than or
      *            equal to the length of this string, it has the same effect as
      *            if it were equal to one less than the length of this string:
      *            this entire string may be searched. If it is negative, -1 is returned.
-     * @return The index of the last occurrence of the character in the
+     * @return the index of the last occurrence of the character in the
      *         character sequence represented by this object that is less than
      *         or equal to {@code startIndexFromBack}, or {@code -1} if the
      *         character does not occur before that point.
@@ -9018,7 +8951,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if either the input string or the substring to find is {@code null},
      * or if the substring is longer than the input string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastIndexOf("Hello World Hello", "Hello");    // returns 13
      * lastIndexOf("Hello World", "World");          // returns 6
@@ -9027,9 +8960,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastIndexOf("test", null);                    // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found. May be {@code null}.
-     * @return The index of the last occurrence of the substring in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found. May be {@code null}.
+     * @return the index of the last occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur or if either parameter is {@code null}.
      */
     public static int lastIndexOf(final String str, final String valueToFind) {
@@ -9051,7 +8984,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if either the input string or the substring to find is {@code null},
      * if {@code startIndexFromBack} is negative, or if the substring is longer than the input string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastIndexOf("Hello World Hello", "Hello", 15);    // returns 13
      * lastIndexOf("Hello World Hello", "Hello", 10);    // returns 0
@@ -9059,11 +8992,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastIndexOf("test", "test", -1);                  // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found. May be {@code null}.
-     * @param startIndexFromBack The index to start the search from, searching backward.
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
-     * @return The index of the last occurrence of the substring at or before the specified index,
+     * @return the index of the last occurrence of the substring at or before the specified index,
      *         or -1 if the substring does not occur or if any parameter is invalid.
      */
     public static int lastIndexOf(final String str, final String valueToFind, int startIndexFromBack) {
@@ -9087,7 +9020,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * or if any parameter is {@code null}. If the delimiter is empty or {@code null}, the method behaves
      * the same as {@link #lastIndexOf(String, String)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastIndexOf("apple,banana,apple", "apple", ",");     // returns 13
      * lastIndexOf("pineapple,apple", "apple", ",");        // returns 10
@@ -9095,10 +9028,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastIndexOf("test", "test", ",");                    // returns 0
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found. May be {@code null}.
-     * @param delimiter The delimiter to separate the search. May be {@code null} or empty.
-     * @return The index of the last occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param delimiter the delimiter to separate the search. May be {@code null} or empty.
+     * @return the index of the last occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
      *         or -1 if the substring does not occur with proper boundaries or if any parameter is {@code null}.
      */
     public static int lastIndexOf(final String str, final String valueToFind, final String delimiter) {
@@ -9117,7 +9050,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * or if the input string or substring to find is {@code null}. If the delimiter is empty or {@code null},
      * the method behaves the same as {@link #lastIndexOf(String, String, int)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastIndexOf("apple,banana,apple", "apple", ",", 20);    // returns 13
      * lastIndexOf("apple,banana,apple", "apple", ",", 10);    // returns 0
@@ -9125,12 +9058,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastIndexOf("test value test", "test", " ", 10);        // returns 0
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found. May be {@code null}.
-     * @param delimiter The delimiter to separate the search. May be {@code null} or empty.
-     * @param startIndexFromBack The index to start the search from, searching backward.
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param delimiter the delimiter to separate the search. May be {@code null} or empty.
+     * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
-     * @return The index of the last occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
+     * @return the index of the last occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
      *         or -1 if the substring does not occur with proper boundaries or if the input string or substring to find is {@code null}.
      */
     public static int lastIndexOf(final String str, final String valueToFind, final String delimiter, int startIndexFromBack) {
@@ -9187,7 +9120,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if the substring is not found, or if either the input string or the substring to find is {@code null},
      * or if the substring is longer than the input string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastIndexOfIgnoreCase("Hello World HELLO", "hello");    // returns 13
      * lastIndexOfIgnoreCase("Hello World", "WORLD");          // returns 6
@@ -9196,9 +9129,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastIndexOfIgnoreCase("test", null);                    // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found. May be {@code null}.
-     * @return The index of the last occurrence of the substring in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found. May be {@code null}.
+     * @return the index of the last occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur or if either parameter is {@code null}.
      */
     public static int lastIndexOfIgnoreCase(final String str, final String valueToFind) {
@@ -9220,7 +9153,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if the substring is not found at or before the specified index, or if either the input string
      * or the substring to find is {@code null}, if {@code startIndexFromBack} is negative, or if the substring is longer than the input string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastIndexOfIgnoreCase("Hello World HELLO", "hello", 15);    // returns 13
      * lastIndexOfIgnoreCase("Hello World HELLO", "hello", 10);    // returns 0
@@ -9228,11 +9161,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastIndexOfIgnoreCase("test", "TEST", -1);                  // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The substring to be found. May be {@code null}.
-     * @param startIndexFromBack The index to start the search from, searching backward.
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
-     * @return The index of the last occurrence of the substring at or before the specified index,
+     * @return the index of the last occurrence of the substring at or before the specified index,
      *         or -1 if the substring does not occur or if any parameter is invalid.
      */
     public static int lastIndexOfIgnoreCase(final String str, final String valueToFind, int startIndexFromBack) {
@@ -9262,7 +9195,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if none of the characters are found, or if the input string is {@code null} or empty,
      * or if the character array is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastIndexOfAny("Hello World", 'o', 'l');        // returns 9 or 7 (implementation dependent)
      * lastIndexOfAny("Hello World", 'x', 'y', 'z');   // returns -1
@@ -9270,9 +9203,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastIndexOfAny(null, 'a');                      // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valuesToFind The array of characters to be found. May be {@code null} or empty.
-     * @return The index of the last occurrence of any character in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valuesToFind the array of characters to be found. May be {@code null} or empty.
+     * @return the index of the last occurrence of any character in the character sequence represented by this object,
      *         or -1 if none of the characters occur or if the string or character array is {@code null} or empty.
      * @see #smallestLastIndexOfAll(String, String[])
      * @see #smallestLastIndexOfAll(String, int, String[])
@@ -9307,15 +9240,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 if (valuesToFind[j] == ch) {
                     // checked by checkInputChars
 
-                    //    if (i > 0 && j > 0 && Character.isHighSurrogate(ch = str.charAt(i - 1))) {
-                    //        // ch is a supplementary character
-                    //        if (valuesToFind[j - 1] == ch) {
-                    //            return i - 1;
-                    //        }
-                    //    } else {
-                    //        return i;
-                    //    }
-
                     return i;
                 }
             }
@@ -9335,7 +9259,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if none of the substrings are found, or if the input string is {@code null},
      * or if the substring array is {@code null} or empty. {@code null} elements in the array are ignored.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastIndexOfAny("Hello World", "World", "Hello");       // returns 6 or 0 (implementation dependent)
      * lastIndexOfAny("Hello World", "xyz", "abc");           // returns -1
@@ -9343,9 +9267,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastIndexOfAny(null, "test");                          // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valuesToFind The array of substrings to be found. May be {@code null} or empty.
-     * @return The index of the last occurrence of any substring in the character sequence represented by this object,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valuesToFind the array of substrings to be found. May be {@code null} or empty.
+     * @return the index of the last occurrence of any substring in the character sequence represented by this object,
      *         or -1 if none of the substrings occur or if the string or substring array is {@code null} or empty.
      * @see #smallestLastIndexOfAll(String, String[])
      * @see #smallestLastIndexOfAll(String, int, String[])
@@ -9425,7 +9349,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if none of the substrings are found, or if the input string is {@code null},
      * or if the substring array is {@code null} or empty. {@code null} elements in the array are ignored.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * smallestIndexOfAll("Hello World", "World", "o");        // returns 4
      * smallestIndexOfAll("Hello World", "xyz", "abc");        // returns -1
@@ -9433,9 +9357,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * smallestIndexOfAll(null, "test");                       // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valuesToFind The array of substrings to be found. May be {@code null} or empty.
-     * @return The smallest index of all substrings within the input string or -1 if none of the substrings occur.
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valuesToFind the array of substrings to be found. May be {@code null} or empty.
+     * @return the smallest index of all substrings within the input string or -1 if none of the substrings occur.
      * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
      */
@@ -9454,7 +9378,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * if {@code fromIndex} is greater than the string length, or if the substring array is {@code null} or empty.
      * {@code null} elements in the array are ignored. If {@code fromIndex} is negative, it is treated as 0.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * smallestIndexOfAll("Hello World", 0, "World", "o");       // returns 4
      * smallestIndexOfAll("Hello World", 5, "World", "o");       // returns 6
@@ -9462,10 +9386,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * smallestIndexOfAll("test", -5, "test");                   // returns 0
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param fromIndex The index to start the search from. Negative values are treated as 0.
-     * @param valuesToFind The array of substrings to be found. May be {@code null} or empty.
-     * @return The smallest index of all substrings within the input string from {@code fromIndex} or -1 if none of the substrings occur.
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param fromIndex the index to start the search from. Negative values are treated as 0.
+     * @param valuesToFind the array of substrings to be found. May be {@code null} or empty.
+     * @return the smallest index of all substrings within the input string from {@code fromIndex} or -1 if none of the substrings occur.
      * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
      */
@@ -9507,7 +9431,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if none of the substrings are found, or if the input string is {@code null},
      * or if the substring array is {@code null} or empty. {@code null} elements in the array are ignored.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * largestIndexOfAll("Hello World", "o", "World");         // returns 6
      * largestIndexOfAll("Hello World", "H", "d");             // returns 10
@@ -9515,9 +9439,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * largestIndexOfAll(null, "test");                        // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valuesToFind The array of substrings to be found. May be {@code null} or empty.
-     * @return The largest index of all substrings within the input string or -1 if none of the substrings occur.
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valuesToFind the array of substrings to be found. May be {@code null} or empty.
+     * @return the largest index of all substrings within the input string or -1 if none of the substrings occur.
      * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
      */
@@ -9537,7 +9461,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * if {@code fromIndex} is greater than the string length, or if the substring array is {@code null} or empty.
      * {@code null} elements in the array are ignored. If {@code fromIndex} is negative, it is treated as 0.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * largestIndexOfAll("Hello World", 0, "o", "World");      // returns 6
      * largestIndexOfAll("Hello World", 5, "o", "H");          // returns 7
@@ -9545,10 +9469,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * largestIndexOfAll("test", -5, "test", "t");             // returns 3
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param fromIndex The index to start the search from. Negative values are treated as 0.
-     * @param valuesToFind The array of substrings to be found. May be {@code null} or empty.
-     * @return The largest index of all substrings within the input string from {@code fromIndex} or -1 if none of the substrings occur.
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param fromIndex the index to start the search from. Negative values are treated as 0.
+     * @param valuesToFind the array of substrings to be found. May be {@code null} or empty.
+     * @return the largest index of all substrings within the input string from {@code fromIndex} or -1 if none of the substrings occur.
      * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
      */
@@ -9592,7 +9516,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if none of the substrings are found, or if the input string is {@code null},
      * or if the substring array is {@code null} or empty. {@code null} elements in the array are ignored.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * smallestLastIndexOfAll("Hello World", "o", "World");      // returns 6
      * smallestLastIndexOfAll("Hello Hello", "Hello", "o");      // returns 7
@@ -9600,9 +9524,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * smallestLastIndexOfAll(null, "test");                     // returns -1
      * }</pre>
      *
-     * @param str The string to search within. It may be {@code null}.
-     * @param valuesToFind The substrings to find within the string. These may be empty or {@code null}.
-     * @return The smallest last index of all substrings within the input string or -1 if none of the substrings occur.
+     * @param str the string to search within. It may be {@code null}.
+     * @param valuesToFind the substrings to find within the string. These may be empty or {@code null}.
+     * @return the smallest last index of all substrings within the input string or -1 if none of the substrings occur.
      * @see #lastIndexOfAny(String, String[])
      * @see #lastIndexOfAny(String, char[])
      */
@@ -9621,7 +9545,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * if {@code startIndexFromBack} is negative, or if the substring array is {@code null} or empty.
      * {@code null} elements in the array are ignored.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * smallestLastIndexOfAll("Hello World", 10, "o", "World");    // returns 6
      * smallestLastIndexOfAll("Hello World", 5, "o", "World");     // returns 4
@@ -9629,11 +9553,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * smallestLastIndexOfAll("test", -1, "test");                 // returns -1
      * }</pre>
      *
-     * @param str The string to search within. It may be {@code null}.
-     * @param startIndexFromBack The index to start the search from, searching backward.
+     * @param str the string to search within. It may be {@code null}.
+     * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
-     * @param valuesToFind The substrings to find within the string. These may be empty or {@code null}.
-     * @return The smallest index of all substrings within the input string from {@code startIndexFromBack} or -1 if none of the substrings occur.
+     * @param valuesToFind the substrings to find within the string. These may be empty or {@code null}.
+     * @return the smallest index of all substrings within the input string from {@code startIndexFromBack} or -1 if none of the substrings occur.
      * @see #lastIndexOfAny(String, String[])
      * @see #lastIndexOfAny(String, char[])
      */
@@ -9674,7 +9598,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if none of the substrings are found, or if the input string is {@code null},
      * or if the substring array is {@code null} or empty. {@code null} elements in the array are ignored.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * largestLastIndexOfAll("Hello World", "o", "World");       // returns 7
      * largestLastIndexOfAll("Hello Hello", "Hello", "e");       // returns 8
@@ -9682,9 +9606,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * largestLastIndexOfAll(null, "test");                      // returns -1
      * }</pre>
      *
-     * @param str The string to search within. It may be {@code null}.
-     * @param valuesToFind The substrings to find within the string. These may be empty or {@code null}.
-     * @return The largest last index of all substrings within the input string or -1 if none of the substrings occur.
+     * @param str the string to search within. It may be {@code null}.
+     * @param valuesToFind the substrings to find within the string. These may be empty or {@code null}.
+     * @return the largest last index of all substrings within the input string or -1 if none of the substrings occur.
      * @see #lastIndexOfAny(String, String[])
      * @see #lastIndexOfAny(String, char[])
      */
@@ -9703,7 +9627,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * if {@code startIndexFromBack} is negative, or if the substring array is {@code null} or empty.
      * {@code null} elements in the array are ignored.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * largestLastIndexOfAll("Hello World", 10, "o", "World");     // returns 7
      * largestLastIndexOfAll("Hello World", 6, "o", "World");      // returns 6
@@ -9711,11 +9635,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * largestLastIndexOfAll("test", -1, "test");                  // returns -1
      * }</pre>
      *
-     * @param str The string to search within. It may be {@code null}.
-     * @param startIndexFromBack The index to start the search from, searching backward.
+     * @param str the string to search within. It may be {@code null}.
+     * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
-     * @param valuesToFind The substrings to find within the string. These may be empty or {@code null}.
-     * @return The largest index of all substrings within the input string from {@code startIndexFromBack} or -1 if none of the substrings occur.
+     * @param valuesToFind the substrings to find within the string. These may be empty or {@code null}.
+     * @return the largest index of all substrings within the input string from {@code startIndexFromBack} or -1 if none of the substrings occur.
      * @see #lastIndexOfAny(String, String[])
      * @see #lastIndexOfAny(String, char[])
      */
@@ -9753,7 +9677,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if the value does not occur as many times as requested, or if either the input string
      * or the value to find is {@code null}, or if the value is longer than the input string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * ordinalIndexOf("aabaabaa", "a", 1);      // returns 0
      * ordinalIndexOf("aabaabaa", "a", 3);      // returns 3
@@ -9766,10 +9690,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * ordinalIndexOf(null, null, 1)            // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The value to be found. May be {@code null}.
-     * @param ordinal The n-th occurrence to find. Must be greater than or equal to 1.
-     * @return The index of the n-th occurrence of the specified value within the input string,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the value to be found. May be {@code null}.
+     * @param ordinal the n-th occurrence to find. Must be greater than or equal to 1.
+     * @return the index of the n-th occurrence of the specified value within the input string,
      *         or -1 if the value does not occur as many times as requested.
      * @throws IllegalArgumentException if ordinal is less than 1
      */
@@ -9786,7 +9710,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns -1 if the value does not occur as many times as requested, or if either the input string
      * or the value to find is {@code null}, or if the value is longer than the input string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastOrdinalIndexOf("aabaabaa", "a", 1);      // returns 7
      * lastOrdinalIndexOf("aabaabaa", "a", 3);      // returns 4
@@ -9799,10 +9723,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastOrdinalIndexOf(null, null, 1)            // returns -1
      * }</pre>
      *
-     * @param str The string to be checked. May be {@code null} or empty.
-     * @param valueToFind The value to be found. May be {@code null}.
-     * @param ordinal The n-th last occurrence to find. Must be greater than or equal to 1.
-     * @return The index of the n-th last occurrence of the specified value within the input string,
+     * @param str the string to be checked. May be {@code null} or empty.
+     * @param valueToFind the value to be found. May be {@code null}.
+     * @param ordinal the n-th last occurrence to find. Must be greater than or equal to 1.
+     * @return the index of the n-th last occurrence of the specified value within the input string,
      *         or -1 if the value does not occur as many times as requested.
      * @throws IllegalArgumentException if ordinal is less than 1
      */
@@ -9820,7 +9744,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty stream if the input string or the substring to find is {@code null},
      * or if the substring is longer than the input string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * indicesOf("abca", "a").join(", ");       // returns "0, 3"
      * indicesOf("abcA", "a").join(", ");       // returns "0"
@@ -9851,7 +9775,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty stream if the input string or the substring to find is {@code null},
      * or if the substring is longer than the remaining part of the input string from {@code fromIndex}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * indicesOf("abcabc", "a", 0).join(", ");      // returns "0, 3"
      * indicesOf("abcabc", "a", 2).join(", ");      // returns "3"
@@ -9954,7 +9878,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method performs a simple character-by-character comparison to count occurrences.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Count character occurrences
      * countMatches("hello world", 'l');              // returns 3
@@ -9995,7 +9919,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method performs a sequential search through the string, advancing past each found occurrence.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Count substring occurrences
      * countMatches("abcabcabc", "abc");              // returns 3
@@ -10041,7 +9965,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method uses the indexOf method internally for efficient searching.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check character presence
      * contains("hello", 'e');                        // returns true
@@ -10072,7 +9996,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method uses the indexOf method internally for efficient searching.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check substring presence
      * contains("hello world", "world");              // returns true
@@ -10104,7 +10028,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If either the input string or the substring is {@code null}, the method returns {@code false}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check token presence with delimiter
      * contains("apple,banana,orange", "banana", ","); // returns true
@@ -10136,7 +10060,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method converts both strings to lowercase internally for comparison.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check substring presence ignoring case
      * containsIgnoreCase("Hello World", "world");    // returns true
@@ -10168,7 +10092,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If either the input string or the substring is {@code null}, the method returns {@code false}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check token presence with delimiter ignoring case
      * containsIgnoreCase("Apple,Banana,Orange", "banana", ","); // returns true
@@ -10200,7 +10124,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method checks each character independently; duplicates in the array do not require multiple occurrences in the string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if all characters are present
      * containsAll("hello world", 'h', 'e', 'l');    // returns true
@@ -10245,7 +10169,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method checks each substring independently; duplicates in the array do not require multiple occurrences in the string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if all substrings are present
      * containsAll("hello world", "hello", "world"); // returns true
@@ -10288,7 +10212,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method checks each substring independently; duplicates in the array do not require multiple occurrences in the string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if all substrings are present ignoring case
      * containsAllIgnoreCase("Hello World", "HELLO", "world"); // returns true
@@ -10329,7 +10253,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method stops searching as soon as any character is found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if any character is present
      * containsAny("hello", 'a', 'e', 'i');          // returns {@code true} ('e' is present)
@@ -10362,7 +10286,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method stops searching as soon as any substring is found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if any substring is present
      * containsAny("hello world", "xyz", "world");   // returns {@code true} ("world" is present)
@@ -10399,7 +10323,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method stops searching as soon as any substring is found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if any substring is present ignoring case
      * containsAnyIgnoreCase("Hello World", "xyz", "WORLD");  // returns true
@@ -10449,7 +10373,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method stops checking and returns {@code false} as soon as any character is found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if none of the characters are present
      * containsNone("hello", 'x', 'y', 'z');         // returns true
@@ -10482,15 +10406,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 if (c == ch) {
                     // checked by checkInputChars
 
-                    //    if (Character.isHighSurrogate(ch)) {
-                    //        if ((j == chsLast) || (i < strLast && valuesToFind[j + 1] == str.charAt(i + 1))) {
-                    //            return false;
-                    //        }
-                    //    } else {
-                    //        // ch is in the Basic Multilingual Plane
-                    //        return false;
-                    //    }
-
                     return false;
                 }
             }
@@ -10508,7 +10423,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method is equivalent to {@code !containsAny(str, valuesToFind)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if none of the substrings are present
      * containsNone("hello world", "xyz", "abc");    // returns true
@@ -10543,7 +10458,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method is equivalent to {@code !containsAnyIgnoreCase(str, valuesToFind)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if none of the substrings are present ignoring case
      * containsNoneIgnoreCase("Hello World", "xyz", "abc");   // returns true
@@ -10576,7 +10491,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method checks that all characters in the string are from the allowed set.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if string contains only specified characters
      * containsOnly("aaa", 'a');                     // returns true
@@ -10611,7 +10526,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method stops checking as soon as a whitespace character is found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check for whitespace presence
      * containsWhitespace("hello world");            // returns {@code true} (space)
@@ -10649,7 +10564,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method delegates to the standard {@link String#startsWith(String)} method.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if string starts with prefix
      * startsWith("hello world", "hello");           // returns true
@@ -10677,7 +10592,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method uses {@link String#regionMatches(boolean, int, String, int, int)} for comparison.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if string starts with prefix ignoring case
      * startsWithIgnoreCase("Hello World", "hello"); // returns true
@@ -10721,7 +10636,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method stops checking as soon as a matching prefix is found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if string starts with any prefix
      * startsWithAny("hello world", "hi", "hello");  // returns true
@@ -10760,7 +10675,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method stops checking as soon as a matching prefix is found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if string starts with any prefix ignoring case
      * startsWithAnyIgnoreCase("Hello World", "hi", "hello"); // returns true
@@ -10798,7 +10713,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method delegates to the standard {@link String#endsWith(String)} method.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if string ends with suffix
      * endsWith("hello world", "world");             // returns true
@@ -10826,7 +10741,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method uses {@link String#regionMatches(boolean, int, String, int, int)} for comparison.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if string ends with suffix ignoring case
      * endsWithIgnoreCase("Hello World", "world");   // returns true
@@ -10854,7 +10769,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method stops checking as soon as a matching suffix is found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if string ends with any suffix
      * endsWithAny("hello.txt", ".txt", ".doc");     // returns true
@@ -10892,7 +10807,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method stops checking as soon as a matching suffix is found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if string ends with any suffix ignoring case
      * endsWithAnyIgnoreCase("hello.txt", ".TXT", ".DOC");    // returns true
@@ -10948,7 +10863,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method is null-safe and more efficient than using {@link String#equals(Object)}
      * when either string might be {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Compare strings for equality
      * equals("hello", "hello");                     // returns true
@@ -10959,8 +10874,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * equals("", "");                               // returns true
      * }</pre>
      *
-     * @param a the first string to compare, which may be null
-     * @param b the second string to compare, which may be null
+     * @param a the first string to compare, may be {@code null}
+     * @param b the second string to compare, may be {@code null}
      * @return {@code true} if the strings are equal, {@code false} otherwise
      */
     public static boolean equals(final String a, final String b) {
@@ -10976,7 +10891,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method is null-safe alternative to {@link String#equalsIgnoreCase(String)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Compare strings for equality ignoring case
      * equalsIgnoreCase("hello", "HELLO");           // returns true
@@ -10987,8 +10902,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * equalsIgnoreCase("", "");                     // returns true
      * }</pre>
      *
-     * @param a the first string to compare, which may be null
-     * @param b the second string to compare, which may be null
+     * @param a the first string to compare, may be {@code null}
+     * @param b the second string to compare, may be {@code null}
      * @return {@code true} if the strings are equal, ignoring case considerations, {@code false} otherwise
      */
     public static boolean equalsIgnoreCase(final String a, final String b) {
@@ -11004,7 +10919,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method stops checking as soon as a match is found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if string equals any value
      * equalsAny("test", "test", "demo", "sample");  // returns true
@@ -11014,7 +10929,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * equalsAny("test");                            // returns {@code false} (empty array)
      * }</pre>
      *
-     * @param str the string to be checked, which may be null
+     * @param str the string to be checked, may be {@code null}
      * @param searchStrings the array of strings to compare against, may be {@code null} or empty
      * @return {@code true} if the string is equal to any of the specified search strings, {@code false} otherwise
      */
@@ -11041,7 +10956,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method stops checking as soon as a match is found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Check if string equals any value ignoring case
      * equalsAnyIgnoreCase("test", "TEST", "demo");  // returns true
@@ -11051,7 +10966,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * equalsAnyIgnoreCase("test");                  // returns {@code false} (empty array)
      * }</pre>
      *
-     * @param str the string to be checked, which may be null
+     * @param str the string to be checked, may be {@code null}
      * @param searchStrs the array of strings to compare against, may be {@code null} or empty
      * @return {@code true} if the string is equal to any of the specified search strings, ignoring case considerations, {@code false} otherwise
      */
@@ -11088,7 +11003,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The comparison uses {@link String#compareToIgnoreCase(String)} for non-null values.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Compare strings ignoring case
      * compareIgnoreCase("abc", "ABC");              // returns 0
@@ -11099,8 +11014,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * compareIgnoreCase(null, null);                // returns 0
      * }</pre>
      *
-     * @param a the first string to compare, which may be null
-     * @param b the second string to compare, which may be null
+     * @param a the first string to compare, may be {@code null}
+     * @param b the second string to compare, may be {@code null}
      * @return a negative integer, zero, or a positive integer as the first string is less than, equal to, or greater than the second string, ignoring case considerations
      */
     public static int compareIgnoreCase(final String a, final String b) {
@@ -11116,7 +11031,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The comparison is case-sensitive and character-by-character.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Find index of first difference
      * indexOfDifference("i am a machine", "i am a robot");    // returns 7
@@ -11131,8 +11046,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * indexOfDifference(null, "");                            // returns -1
      * }</pre>
      *
-     * @param a the first String, which may be null
-     * @param b the second String, which may be null
+     * @param a the first String, may be {@code null}
+     * @param b the second String, may be {@code null}
      * @return the index where the strings begin to differ, or -1 if they are equal
      */
     public static int indexOfDifference(final String a, final String b) {
@@ -11169,7 +11084,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The comparison stops at the length of the shortest string. If all strings are identical
      * up to that point but have different lengths, the method returns the length of the shortest string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Find index of first difference across multiple strings
      * indexOfDifference("i am a machine", "i am a robot");     // returns 7
@@ -11251,7 +11166,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns 0 if either CharSequence is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lengthOfCommonPrefix("hello", "help");         // returns 3 (common prefix "hel")
      * lengthOfCommonPrefix("abc", "abcdef");         // returns 3 (common prefix "abc")
@@ -11261,9 +11176,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lengthOfCommonPrefix("hello", "hello");        // returns 5 (identical strings)
      * }</pre>
      *
-     * @param a The first CharSequence to compare. It can be {@code null}.
-     * @param b The second CharSequence to compare. It can be {@code null}.
-     * @return The length of the common prefix, or 0 if either CharSequence is {@code null} or empty.
+     * @param a the first CharSequence to compare, may be {@code null}
+     * @param b the second CharSequence to compare, may be {@code null}
+     * @return the length of the common prefix, or 0 if either CharSequence is {@code null} or empty.
      * @see #commonPrefix(CharSequence, CharSequence)
      * @see #lengthOfCommonSuffix(CharSequence, CharSequence)
      */
@@ -11295,7 +11210,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns 0 if either CharSequence is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lengthOfCommonSuffix("hello", "jello");        // returns 4 (common suffix "ello")
      * lengthOfCommonSuffix("testing", "ing");        // returns 3 (common suffix "ing")
@@ -11305,9 +11220,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lengthOfCommonSuffix(null, "hello");           // returns 0 (null input)
      * }</pre>
      *
-     * @param a The first CharSequence to compare. It can be {@code null}.
-     * @param b The second CharSequence to compare. It can be {@code null}.
-     * @return The length of the common suffix, or 0 if either CharSequence is {@code null} or empty.
+     * @param a the first CharSequence to compare, may be {@code null}
+     * @param b the second CharSequence to compare, may be {@code null}
+     * @return the length of the common suffix, or 0 if either CharSequence is {@code null} or empty.
      * @see #commonSuffix(CharSequence, CharSequence)
      * @see #lengthOfCommonPrefix(CharSequence, CharSequence)
      */
@@ -11370,7 +11285,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty string if the array is empty, {@code null}, any CharSequence is {@code null} or empty,
      * or if there is no common prefix among the CharSequences.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * commonPrefix("flower", "flow", "flight");      // returns "fl"
      * commonPrefix("dog", "racecar", "car");         // returns "" (no common prefix)
@@ -11381,8 +11296,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * commonPrefix("", "hello");                     // returns "" (empty element)
      * }</pre>
      *
-     * @param strs The array of CharSequences to compare. It can be empty or contain {@code null} elements.
-     * @return The longest common prefix among the given CharSequences, or an empty string if no common prefix exists.
+     * @param strs the array of CharSequences to compare. It can be empty or contain {@code null} elements.
+     * @return the longest common prefix among the given CharSequences, or an empty string if no common prefix exists.
      * @see #commonPrefix(CharSequence, CharSequence)
      * @see #lengthOfCommonPrefix(CharSequence, CharSequence)
      */
@@ -11453,7 +11368,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty string if the array is empty, {@code null}, any CharSequence is {@code null} or empty,
      * or if there is no common suffix among the CharSequences.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * commonSuffix("testing", "eating", "meeting");  // returns "ting"
      * commonSuffix("hello", "jello", "yellow");      // returns "llo"
@@ -11464,8 +11379,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * commonSuffix("", "hello");                     // returns "" (empty element)
      * }</pre>
      *
-     * @param strs The array of CharSequences to compare. It can be empty or contain {@code null} elements.
-     * @return The longest common suffix among the given CharSequences, or an empty string if no common suffix exists.
+     * @param strs the array of CharSequences to compare. It can be empty or contain {@code null} elements.
+     * @return the longest common suffix among the given CharSequences, or an empty string if no common suffix exists.
      * @see #commonSuffix(CharSequence, CharSequence)
      * @see #lengthOfCommonSuffix(CharSequence, CharSequence)
      */
@@ -11520,7 +11435,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if either CharSequence is {@code null}, empty, or if there is no common substring.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * longestCommonSubstring("abcdxyz", "xyzabcd");  // returns "abcd" (or "xyz")
      * longestCommonSubstring("zxabcdezy", "yzabcdezx"); // returns "abcdez"
@@ -11530,9 +11445,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * longestCommonSubstring(null, "hello");         // returns "" (null input)
      * }</pre>
      *
-     * @param a The first CharSequence to compare. It can be {@code null}.
-     * @param b The second CharSequence to compare. It can be {@code null}.
-     * @return The longest common substring, or an empty string if no common substring exists.
+     * @param a the first CharSequence to compare, may be {@code null}
+     * @param b the second CharSequence to compare, may be {@code null}
+     * @return the longest common substring, or an empty string if no common substring exists.
      * @see #commonPrefix(CharSequence, CharSequence)
      * @see #commonSuffix(CharSequence, CharSequence)
      */
@@ -11606,7 +11521,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the string is {@code null} or empty, an empty OptionalChar is returned, allowing for safe handling
      * of edge cases without throwing exceptions.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * firstChar("Hello");                    // returns OptionalChar.of('H')
      * firstChar("A");                        // returns OptionalChar.of('A')
@@ -11615,8 +11530,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * firstChar("  spaces");                 // returns OptionalChar.of(' ')
      * }</pre>
      *
-     * @param str The input string from which to extract the first character. It can be {@code null} or empty.
-     * @return An OptionalChar containing the first character of the string, or an empty OptionalChar if the string is {@code null} or empty.
+     * @param str the input string from which to extract the first character, may be {@code null} or empty
+     * @return an OptionalChar containing the first character of the string, or an empty OptionalChar if the string is {@code null} or empty.
      * @see #lastChar(String)
      * @see OptionalChar
      */
@@ -11635,7 +11550,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the string is {@code null} or empty, an empty OptionalChar is returned, allowing for safe handling
      * of edge cases without throwing exceptions.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastChar("Hello");                     // returns OptionalChar.of('o')
      * lastChar("A");                         // returns OptionalChar.of('A')
@@ -11644,8 +11559,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastChar("test ");                     // returns OptionalChar.of(' ')
      * }</pre>
      *
-     * @param str The input string from which to extract the last character. It can be {@code null} or empty.
-     * @return An OptionalChar containing the last character of the string, or an empty OptionalChar if the string is {@code null} or empty.
+     * @param str the input string from which to extract the last character, may be {@code null} or empty
+     * @return an OptionalChar containing the last character of the string, or an empty OptionalChar if the string is {@code null} or empty.
      * @see #firstChar(String)
      * @see OptionalChar
      */
@@ -11664,7 +11579,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the string length is less than or equal to {@code n}, the entire string is returned.
      * If the string is {@code null} or empty, or if {@code n} is 0, an empty string is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * firstChars("Hello World", 5);          // returns "Hello"
      * firstChars("Hi", 5);                   // returns "Hi" (string shorter than n)
@@ -11674,9 +11589,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * firstChars("Example", 7);              // returns "Example" (exact length)
      * }</pre>
      *
-     * @param str The input string from which to extract characters. It can be {@code null} or empty.
-     * @param n The maximum number of characters to return from the beginning of the string.
-     * @return At most the first {@code n} characters of the string, or an empty string if the input is {@code null} or empty.
+     * @param str the input string from which to extract characters, may be {@code null} or empty
+     * @param n the maximum number of characters to return from the beginning of the string.
+     * @return at most the first {@code n} characters of the string, or an empty string if the input is {@code null} or empty.
      * @throws IllegalArgumentException if {@code n} is negative.
      * @see #lastChars(String, int)
      */
@@ -11700,7 +11615,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the string length is less than or equal to {@code n}, the entire string is returned.
      * If the string is {@code null} or empty, or if {@code n} is 0, an empty string is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lastChars("Hello World", 5);           // returns "World"
      * lastChars("Hi", 5);                    // returns "Hi" (string shorter than n)
@@ -11710,9 +11625,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * lastChars("Example", 7);               // returns "Example" (exact length)
      * }</pre>
      *
-     * @param str The input string from which to extract characters. It can be {@code null} or empty.
-     * @param n The maximum number of characters to return from the end of the string.
-     * @return At most the last {@code n} characters of the string, or an empty string if the input is {@code null} or empty.
+     * @param str the input string from which to extract characters, may be {@code null} or empty
+     * @param n the maximum number of characters to return from the end of the string.
+     * @return at most the last {@code n} characters of the string, or an empty string if the input is {@code null} or empty.
      * @throws IllegalArgumentException if {@code n} is negative.
      * @see #firstChars(String, int)
      */
@@ -11739,7 +11654,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the string is {@code null}, the index is negative,
      * or the index is greater than the string length.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substring("Hello World", 6);           // returns "World"
      * substring("Hello", 0);                 // returns "Hello"
@@ -11749,9 +11664,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substring(null, 0);                    // returns null
      * }</pre>
      *
-     * @param str The input string from which to extract the substring. It can be {@code null}.
-     * @param inclusiveBeginIndex The starting index of the substring (inclusive).
-     * @return The substring starting from the specified index, or {@code null} if the input is invalid.
+     * @param str the input string from which to extract the substring, may be {@code null}
+     * @param inclusiveBeginIndex the starting index of the substring (inclusive).
+     * @return the substring starting from the specified index, or {@code null} if the input is invalid.
      * @see StrUtil#substring(String, int)
      * @see #substring(String, int, int)
      * @see #substringAfter(String, char)
@@ -11776,7 +11691,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the string is {@code null}, either index is negative,
      * or the begin index is greater than the end index or string length.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substring("Hello World", 0, 5);        // returns "Hello"
      * substring("Hello World", 6, 11);       // returns "World"
@@ -11787,10 +11702,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substring(null, 0, 5);                 // returns null
      * }</pre>
      *
-     * @param str The input string from which to extract the substring. It can be {@code null}.
-     * @param inclusiveBeginIndex The starting index of the substring (inclusive).
-     * @param exclusiveEndIndex The ending index of the substring (exclusive).
-     * @return The substring between the specified indices, or {@code null} if the input is invalid.
+     * @param str the input string from which to extract the substring, may be {@code null}
+     * @param inclusiveBeginIndex the starting index of the substring (inclusive).
+     * @param exclusiveEndIndex the ending index of the substring (exclusive).
+     * @return the substring between the specified indices, or {@code null} if the input is invalid.
      * @see StrUtil#substring(String, int, int)
      */
     @MayReturnNull
@@ -11812,7 +11727,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the string is {@code null}, the begin index is negative,
      * or if the function returns a negative end index.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Get next 3 characters from index
      * substring("Hello World", 0, i -> i + 3);      // returns "Hel"
@@ -11826,10 +11741,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substring(null, 0, i -> i + 3);               // returns null
      * }</pre>
      *
-     * @param str The input string from which to extract the substring. It can be {@code null}.
-     * @param inclusiveBeginIndex The starting index of the substring (inclusive).
-     * @param funcOfExclusiveEndIndex Function that calculates the end index based on the begin index.
-     * @return The substring determined by the indices, or {@code null} if the input is invalid.
+     * @param str the input string from which to extract the substring, may be {@code null}
+     * @param inclusiveBeginIndex the starting index of the substring (inclusive).
+     * @param funcOfExclusiveEndIndex function that calculates the end index based on the begin index.
+     * @return the substring determined by the indices, or {@code null} if the input is invalid.
      * @see StrUtil#substring(String, int, IntUnaryOperator)
      * @see #substring(String, int, int)
      */
@@ -11852,7 +11767,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the string is {@code null}, the end index is negative,
      * or if the function returns a negative begin index.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Get 3 characters before end index
      * substring("Hello World", i -> i - 3, 8);      // returns "Wor"
@@ -11866,10 +11781,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substring(null, i -> 0, 5);                   // returns null
      * }</pre>
      *
-     * @param str The input string from which to extract the substring. It can be {@code null}.
-     * @param funcOfInclusiveBeginIndex Function that calculates the begin index based on the end index.
-     * @param exclusiveEndIndex The ending index of the substring (exclusive).
-     * @return The substring determined by the indices, or {@code null} if the input is invalid.
+     * @param str the input string from which to extract the substring, may be {@code null}
+     * @param funcOfInclusiveBeginIndex function that calculates the begin index based on the end index.
+     * @param exclusiveEndIndex the ending index of the substring (exclusive).
+     * @return the substring determined by the indices, or {@code null} if the input is invalid.
      * @see StrUtil#substring(String, IntUnaryOperator, int)
      * @see #substring(String, int, int)
      */
@@ -11891,7 +11806,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} if the string is {@code null}, empty, or if the delimiter is not found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substring("Hello World", ' ');         // returns " World"
      * substring("user@example.com", '@');    // returns "@example.com"
@@ -11900,9 +11815,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substring(null, 'a');                  // returns null
      * }</pre>
      *
-     * @param str The input string to search in. It can be {@code null} or empty.
-     * @param delimiterOfInclusiveBeginIndex The character marking the start of the substring (inclusive).
-     * @return The substring starting from the delimiter, or {@code null} if not found.
+     * @param str the input string to search in, may be {@code null} or empty
+     * @param delimiterOfInclusiveBeginIndex the character marking the start of the substring (inclusive).
+     * @return the substring starting from the delimiter, or {@code null} if not found.
      * @see #substringAfter(String, char)
      * @deprecated Use {@link #substringAfter(String, char)} for clearer semantics
      */
@@ -11927,7 +11842,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the string is {@code null}, the delimiter is {@code null},
      * or if the delimiter is not found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substring("Hello World", "Wo");        // returns "World"
      * substring("user@example.com", "@");    // returns "@example.com"
@@ -11936,9 +11851,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substring(null, "test");               // returns null
      * }</pre>
      *
-     * @param str The input string to search in. It can be {@code null}.
-     * @param delimiterOfInclusiveBeginIndex The delimiter string marking the start of the substring (inclusive).
-     * @return The substring starting from the delimiter, or {@code null} if not found.
+     * @param str the input string to search in, may be {@code null}
+     * @param delimiterOfInclusiveBeginIndex the delimiter string marking the start of the substring (inclusive).
+     * @return the substring starting from the delimiter, or {@code null} if not found.
      * @see #substringAfter(String, String)
      * @deprecated Use {@link #substringAfter(String, String)} for clearer semantics
      */
@@ -11966,7 +11881,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the string is {@code null}, empty, the begin index is invalid,
      * or if the delimiter is not found after the begin index.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substring("Hello, World!", 0, ',');    // returns "Hello"
      * substring("a-b-c-d", 2, '-');          // returns "b"
@@ -11975,10 +11890,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substring(null, 0, ',');               // returns null
      * }</pre>
      *
-     * @param str The input string to search in. It can be {@code null} or empty.
-     * @param inclusiveBeginIndex The starting index of the substring (inclusive).
-     * @param delimiterOfExclusiveEndIndex The character marking the end of the substring (exclusive).
-     * @return The substring between the index and delimiter, or {@code null} if not found.
+     * @param str the input string to search in, may be {@code null} or empty
+     * @param inclusiveBeginIndex the starting index of the substring (inclusive).
+     * @param delimiterOfExclusiveEndIndex the character marking the end of the substring (exclusive).
+     * @return the substring between the index and delimiter, or {@code null} if not found.
      * @see #substring(String, int, int)
      * @deprecated Use more explicit substring methods with clear start/end indices
      */
@@ -12010,7 +11925,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the string is {@code null}, the delimiter is {@code null},
      * the begin index is invalid, or if the delimiter is not found after the begin index.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substring("Hello, World!", 0, ", ");   // returns "Hello"
      * substring("<tag>content</tag>", 5, "</"); // returns "content"
@@ -12019,10 +11934,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substring(null, 0, "test");            // returns null
      * }</pre>
      *
-     * @param str The input string to search in. It can be {@code null}.
-     * @param inclusiveBeginIndex The starting index of the substring (inclusive).
-     * @param delimiterOfExclusiveEndIndex The delimiter string marking the end of the substring (exclusive).
-     * @return The substring between the index and delimiter, or {@code null} if not found.
+     * @param str the input string to search in, may be {@code null}
+     * @param inclusiveBeginIndex the starting index of the substring (inclusive).
+     * @param delimiterOfExclusiveEndIndex the delimiter string marking the end of the substring (exclusive).
+     * @return the substring between the index and delimiter, or {@code null} if not found.
      * @see #substring(String, int, int)
      * @deprecated Use more explicit substring methods with clear start/end indices
      */
@@ -12050,7 +11965,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the string is {@code null}, empty, the end index is negative,
      * or if the delimiter is not found before the end index.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substring("a-b-c-d", '-', 7);          // returns "-d" (last '-' before index 6)
      * substring("hello world", ' ', 11);     // returns " world"
@@ -12059,10 +11974,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substring(null, 'a', 5);               // returns null
      * }</pre>
      *
-     * @param str The input string to search in. It can be {@code null} or empty.
-     * @param delimiterOfInclusiveBeginIndex The character marking the start of the substring (inclusive).
-     * @param exclusiveEndIndex The ending index of the substring (exclusive).
-     * @return The substring from the last delimiter to the end index, or {@code null} if not found.
+     * @param str the input string to search in, may be {@code null} or empty
+     * @param delimiterOfInclusiveBeginIndex the character marking the start of the substring (inclusive).
+     * @param exclusiveEndIndex the ending index of the substring (exclusive).
+     * @return the substring from the last delimiter to the end index, or {@code null} if not found.
      * @see #substring(String, int, int)
      * @deprecated Use more explicit substring methods with clear start/end indices
      */
@@ -12087,7 +12002,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the string is {@code null}, the delimiter is {@code null},
      * the end index is negative, or if the delimiter is not found before the adjusted search position.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substring("<a><b><c>", "<", 9);        // returns "<c>" (last '<' before adjusted position)
      * substring("foo-bar-baz", "-", 11);     // returns "-baz"
@@ -12096,10 +12011,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substring(null, "test", 5);            // returns null
      * }</pre>
      *
-     * @param str The input string to search in. It can be {@code null}.
-     * @param delimiterOfInclusiveBeginIndex The delimiter string marking the start of the substring (inclusive).
-     * @param exclusiveEndIndex The ending index of the substring (exclusive).
-     * @return The substring from the last delimiter to the end index, or {@code null} if not found.
+     * @param str the input string to search in, may be {@code null}
+     * @param delimiterOfInclusiveBeginIndex the delimiter string marking the start of the substring (inclusive).
+     * @param exclusiveEndIndex the ending index of the substring (exclusive).
+     * @return the substring from the last delimiter to the end index, or {@code null} if not found.
      * @see #substring(String, int, int)
      * @deprecated Use more explicit substring methods with clear start/end indices
      */
@@ -12126,7 +12041,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} if the string is {@code null}, empty, or if the delimiter is not found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringAfter("user@example.com", '@');      // returns "example.com"
      * substringAfter("Hello World", ' ');           // returns "World"
@@ -12136,9 +12051,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringAfter(null, 'a');                    // returns null
      * }</pre>
      *
-     * @param str The input string to search in. It can be {@code null} or empty.
-     * @param delimiterOfExclusiveBeginIndex The character after which to extract the substring.
-     * @return The substring after the delimiter, or {@code null} if the delimiter is not found.
+     * @param str the input string to search in, may be {@code null} or empty
+     * @param delimiterOfExclusiveBeginIndex the character after which to extract the substring.
+     * @return the substring after the delimiter, or {@code null} if the delimiter is not found.
      * @see #substringBefore(String, char)
      * @see #substringAfterLast(String, char)
      */
@@ -12167,7 +12082,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the string is {@code null}, the delimiter is {@code null},
      * or if the delimiter is not found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringAfter("www.example.com", "www.");    // returns "example.com"
      * substringAfter("Hello::World", "::");         // returns "World"
@@ -12177,9 +12092,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringAfter("test", null);                 // returns null
      * }</pre>
      *
-     * @param str The input string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The delimiter string after which to extract the substring.
-     * @return The substring after the delimiter, or {@code null} if the delimiter is not found.
+     * @param str the input string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter string after which to extract the substring.
+     * @return the substring after the delimiter, or {@code null} if the delimiter is not found.
      * @see #substringBefore(String, String)
      * @see #substringAfterLast(String, String)
      */
@@ -12212,7 +12127,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if any input is {@code null}, the end index is negative,
      * the delimiter is not found, or if the delimiter's position would exceed the end index.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringAfter("Hello, World!", ", ", 10);    // returns "Wo"
      * substringAfter("a-b-c-d", "-", 5);            // returns "b"
@@ -12222,10 +12137,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringAfter(null, "test", 5);              // returns null
      * }</pre>
      *
-     * @param str The input string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The delimiter string after which to extract the substring.
-     * @param exclusiveEndIndex The ending index of the substring (exclusive).
-     * @return The substring after the delimiter up to the end index, or {@code null} if not found.
+     * @param str the input string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter string after which to extract the substring.
+     * @param exclusiveEndIndex the ending index of the substring (exclusive).
+     * @return the substring after the delimiter up to the end index, or {@code null} if not found.
      * @see #substringAfter(String, String)
      * @see #substringBetween(String, String, int)
      */
@@ -12261,7 +12176,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the string is {@code null}, the delimiter is {@code null},
      * or if the delimiter is not found (case-insensitive).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringAfterIgnoreCase("Hello WORLD", "hello ");  // returns "WORLD"
      * substringAfterIgnoreCase("user@EXAMPLE.com", "@");  // returns "EXAMPLE.com"
@@ -12271,9 +12186,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringAfterIgnoreCase(null, "test");             // returns null
      * }</pre>
      *
-     * @param str The input string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The delimiter string after which to extract the substring.
-     * @return The substring after the delimiter (case-insensitive), or {@code null} if not found.
+     * @param str the input string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter string after which to extract the substring.
+     * @return the substring after the delimiter (case-insensitive), or {@code null} if not found.
      * @see #substringAfter(String, String)
      * @see #substringAfterLastIgnoreCase(String, String)
      */
@@ -12306,7 +12221,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} if the string is {@code null}, empty, or if the delimiter is not found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringAfterLast("com.example.App", '.');       // returns "App"
      * substringAfterLast("/home/user/file.txt", '/');   // returns "file.txt"
@@ -12316,9 +12231,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringAfterLast(null, 'a');                    // returns null
      * }</pre>
      *
-     * @param str The input string to search in. It can be {@code null} or empty.
-     * @param delimiterOfExclusiveBeginIndex The character after which to extract the substring.
-     * @return The substring after the last occurrence of the delimiter, or {@code null} if not found.
+     * @param str the input string to search in, may be {@code null} or empty
+     * @param delimiterOfExclusiveBeginIndex the character after which to extract the substring.
+     * @return the substring after the last occurrence of the delimiter, or {@code null} if not found.
      * @see #substringAfter(String, char)
      * @see #substringBeforeLast(String, char)
      */
@@ -12347,7 +12262,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the string is {@code null}, the delimiter is {@code null},
      * or if the delimiter is not found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringAfterLast("a.b.c.txt", ".");             // returns "txt"
      * substringAfterLast("folder1/folder2/file", "/");  // returns "file"
@@ -12357,9 +12272,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringAfterLast(null, "test");                 // returns null
      * }</pre>
      *
-     * @param str The input string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The delimiter string after which to extract the substring.
-     * @return The substring after the last occurrence of the delimiter, or {@code null} if not found.
+     * @param str the input string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter string after which to extract the substring.
+     * @return the substring after the last occurrence of the delimiter, or {@code null} if not found.
      * @see #substringAfter(String, String)
      * @see #substringBeforeLast(String, String)
      */
@@ -12393,7 +12308,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the exclusiveEndIndex is negative, the delimiter is not found, or if the delimiter occurs at or beyond
      * the exclusiveEndIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringAfterLast("com.example.Test", ".", 11);     // returns "example"
      * substringAfterLast("a.b.c.d", ".", 5);               // returns "b"
@@ -12404,10 +12319,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringAfterLast("test", ".", -1);                 // returns null
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The delimiter to search for. It can be {@code null}.
-     * @param exclusiveEndIndex The exclusive end index for the search range.
-     * @return The substring after the last occurrence of the delimiter within the range, or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter to search for, may be {@code null}
+     * @param exclusiveEndIndex the exclusive end index for the search range.
+     * @return the substring after the last occurrence of the delimiter within the range, or {@code null} if not found.
      */
     @MayReturnNull
     public static String substringAfterLast(final String str, final String delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
@@ -12442,7 +12357,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, the delimiter is {@code null},
      * or if the delimiter is not found. Returns an empty string if the delimiter is empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringAfterLastIgnoreCase("com.Example.Test", ".example.");  // returns "Test"
      * substringAfterLastIgnoreCase("COM.EXAMPLE.TEST", ".example.");  // returns "TEST"
@@ -12453,9 +12368,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringAfterLastIgnoreCase("test", "");                       // returns ""
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The delimiter to search for, case-insensitive. It can be {@code null}.
-     * @return The substring after the last occurrence of the delimiter (case-insensitive), or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter to search for, case-insensitive, may be {@code null}
+     * @return the substring after the last occurrence of the delimiter (case-insensitive), or {@code null} if not found.
      */
     @Beta
     @MayReturnNull
@@ -12487,7 +12402,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, the delimiters array
      * is {@code null} or empty, or if none of the delimiter characters are found in the string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringAfterAny("user@example.com", '@', '.');     // returns "example.com"
      * substringAfterAny("first.last@domain", '.', '@');    // returns "last@domain"
@@ -12498,9 +12413,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringAfterAny("test", new char[0]);              // returns null
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimitersOfExclusiveBeginIndex The array of delimiter characters to search for.
-     * @return The substring after the first occurrence of any delimiter, or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param delimitersOfExclusiveBeginIndex the array of delimiter characters to search for.
+     * @return the substring after the first occurrence of any delimiter, or {@code null} if not found.
      * @see #substringAfter(String, String)
      */
     @MayReturnNull
@@ -12534,7 +12449,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, the delimiters array
      * is {@code null} or empty, or if none of the delimiter strings are found in the string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringAfterAny("user@@domain.com", "@@", "@");    // returns "domain.com"
      * substringAfterAny("Hello World Java", " ", ", ");    // returns "World Java"
@@ -12545,9 +12460,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringAfterAny("test", new String[0]);            // returns null
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimitersOfExclusiveBeginIndex The array of delimiter strings to search for.
-     * @return The substring after the first occurrence of any delimiter, or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param delimitersOfExclusiveBeginIndex the array of delimiter strings to search for.
+     * @return the substring after the first occurrence of any delimiter, or {@code null} if not found.
      * @see #substringAfter(String, String)
      */
     @MayReturnNull
@@ -12579,7 +12494,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null} or if the delimiter
      * character is not found in the string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBefore("user@example.com", '@');           // returns "user"
      * substringBefore("first.last", '.');                 // returns "first"
@@ -12588,9 +12503,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBefore(null, '@');                         // returns null
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveEndIndex The delimiter character to search for.
-     * @return The substring before the first occurrence of the delimiter, or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveEndIndex the delimiter character to search for.
+     * @return the substring before the first occurrence of the delimiter, or {@code null} if not found.
      */
     @MayReturnNull
     public static String substringBefore(final String str, final char delimiterOfExclusiveEndIndex) {
@@ -12617,7 +12532,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, the delimiter is {@code null},
      * or if the delimiter is not found. Returns an empty string if the delimiter is empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBefore("user@example.com", "@");           // returns "user"
      * substringBefore("Hello World Java", " World");      // returns "Hello"
@@ -12628,9 +12543,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBefore("test", "");                        // returns ""
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveEndIndex The delimiter string to search for. It can be {@code null}.
-     * @return The substring before the first occurrence of the delimiter, or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveEndIndex the delimiter string to search for, may be {@code null}
+     * @return the substring before the first occurrence of the delimiter, or {@code null} if not found.
      */
     @MayReturnNull
     public static String substringBefore(final String str, final String delimiterOfExclusiveEndIndex) {
@@ -12662,7 +12577,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the inclusiveBeginIndex is negative or greater than the string length, the delimiter is not found,
      * or if the delimiter is empty and inclusiveBeginIndex equals the string length.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBefore("user@example@com", 5, "@");        // returns "example"
      * substringBefore("Hello World Java", 6, " ");        // returns "World"
@@ -12673,10 +12588,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBefore("test", 0, "");                     // returns ""
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param inclusiveBeginIndex The index to start the substring from (inclusive).
-     * @param delimiterOfExclusiveEndIndex The delimiter string to search for. It can be {@code null}.
-     * @return The substring from inclusiveBeginIndex to the first occurrence of the delimiter, or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param inclusiveBeginIndex the index to start the substring from (inclusive).
+     * @param delimiterOfExclusiveEndIndex the delimiter string to search for, may be {@code null}
+     * @return the substring from inclusiveBeginIndex to the first occurrence of the delimiter, or {@code null} if not found.
      */
     @MayReturnNull
     public static String substringBefore(final String str, final int inclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
@@ -12709,7 +12624,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, the delimiter is {@code null},
      * or if the delimiter is not found. Returns an empty string if the delimiter is empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBeforeIgnoreCase("User@Example.com", "@EXAMPLE");  // returns "User"
      * substringBeforeIgnoreCase("HELLO world", " WORLD");         // returns "HELLO"
@@ -12720,9 +12635,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBeforeIgnoreCase("test", "");                      // returns ""
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveEndIndex The delimiter string to search for, case-insensitive. It can be {@code null}.
-     * @return The substring before the first occurrence of the delimiter (case-insensitive), or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveEndIndex the delimiter string to search for, case-insensitive, may be {@code null}
+     * @return the substring before the first occurrence of the delimiter (case-insensitive), or {@code null} if not found.
      */
     @Beta
     @MayReturnNull
@@ -12754,7 +12669,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, empty, or if the
      * delimiter character is not found in the string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBeforeLast("com.example.Test", '.');       // returns "com.example"
      * substringBeforeLast("user@example@com", '@');       // returns "user@example"
@@ -12764,9 +12679,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBeforeLast("", '.');                       // returns null
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null} or empty.
-     * @param delimiterOfExclusiveEndIndex The delimiter character to search for.
-     * @return The substring before the last occurrence of the delimiter, or {@code null} if not found.
+     * @param str the string to search in, may be {@code null} or empty
+     * @param delimiterOfExclusiveEndIndex the delimiter character to search for.
+     * @return the substring before the last occurrence of the delimiter, or {@code null} if not found.
      */
     @MayReturnNull
     public static String substringBeforeLast(final String str, final char delimiterOfExclusiveEndIndex) {
@@ -12793,7 +12708,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, the delimiter is {@code null},
      * or if the delimiter is not found. Returns the original string if the delimiter is empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBeforeLast("com.example.Test", ".");       // returns "com.example"
      * substringBeforeLast("Hello World World", " World"); // returns "Hello World"
@@ -12804,9 +12719,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBeforeLast("test", "");                    // returns "test"
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveEndIndex The delimiter string to search for. It can be {@code null}.
-     * @return The substring before the last occurrence of the delimiter, or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveEndIndex the delimiter string to search for, may be {@code null}
+     * @return the substring before the last occurrence of the delimiter, or {@code null} if not found.
      */
     @MayReturnNull
     public static String substringBeforeLast(final String str, final String delimiterOfExclusiveEndIndex) {
@@ -12838,7 +12753,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the inclusiveBeginIndex is negative or greater than the string length, the delimiter is not found,
      * or if the delimiter is found before the inclusiveBeginIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBeforeLast("com.example.Test", 4, ".");    // returns "example"
      * substringBeforeLast("a.b.c.d", 2, ".");             // returns "b.c"
@@ -12849,10 +12764,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBeforeLast("test", 0, "");                 // returns "test"
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param inclusiveBeginIndex The index to start the substring from (inclusive).
-     * @param delimiterOfExclusiveEndIndex The delimiter string to search for. It can be {@code null}.
-     * @return The substring from inclusiveBeginIndex to the last occurrence of the delimiter, or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param inclusiveBeginIndex the index to start the substring from (inclusive).
+     * @param delimiterOfExclusiveEndIndex the delimiter string to search for, may be {@code null}
+     * @return the substring from inclusiveBeginIndex to the last occurrence of the delimiter, or {@code null} if not found.
      */
     @MayReturnNull
     public static String substringBeforeLast(final String str, final int inclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
@@ -12886,7 +12801,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, the delimiter is {@code null},
      * or if the delimiter is not found. Returns the original string if the delimiter is empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBeforeLastIgnoreCase("Com.Example.TEST", ".test");  // returns "Com.Example"
      * substringBeforeLastIgnoreCase("HELLO world WORLD", " world"); // returns "HELLO world"
@@ -12897,9 +12812,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBeforeLastIgnoreCase("test", "");                    // returns "test"
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveEndIndex The delimiter string to search for, case-insensitive. It can be {@code null}.
-     * @return The substring before the last occurrence of the delimiter (case-insensitive), or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveEndIndex the delimiter string to search for, case-insensitive, may be {@code null}
+     * @return the substring before the last occurrence of the delimiter (case-insensitive), or {@code null} if not found.
      */
     @Beta
     @MayReturnNull
@@ -12931,7 +12846,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, the delimiters array
      * is {@code null} or empty, or if none of the delimiter characters are found in the string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBeforeAny("user@example.com", '@', '.');    // returns "user"
      * substringBeforeAny("first.last@domain", '.', '@');   // returns "first"
@@ -12942,9 +12857,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBeforeAny("test", new char[0]);             // returns null
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimitersOfExclusiveEndIndex The array of delimiter characters to search for.
-     * @return The substring before the first occurrence of any delimiter, or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param delimitersOfExclusiveEndIndex the array of delimiter characters to search for.
+     * @return the substring before the first occurrence of any delimiter, or {@code null} if not found.
      * @see #substringBefore(String, String)
      */
     @MayReturnNull
@@ -12979,7 +12894,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, the delimiters array
      * is {@code null} or empty, or if none of the delimiter strings are found in the string.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBeforeAny("user@@domain.com", "@@", "@");   // returns "user"
      * substringBeforeAny("Hello World Java", " World", " ");// returns "Hello"
@@ -12990,9 +12905,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBeforeAny("test", new String[0]);           // returns null
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimitersOfExclusiveEndIndex The array of delimiter strings to search for.
-     * @return The substring before the first occurrence of any delimiter, or {@code null} if not found.
+     * @param str the string to search in, may be {@code null}
+     * @param delimitersOfExclusiveEndIndex the array of delimiter strings to search for.
+     * @return the substring before the first occurrence of any delimiter, or {@code null} if not found.
      * @see #substringBefore(String, String)
      */
     @MayReturnNull
@@ -13025,7 +12940,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * exclusiveBeginIndex is greater than or equal to exclusiveEndIndex, or exclusiveBeginIndex is greater than
      * or equal to the string length.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBetween("abcdef", 0, 3);                    // returns "bc"
      * substringBetween("abcdef", -1, 3);                  // returns "abc"
@@ -13036,10 +12951,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("test", -2, 3);                     // returns null (beginIndex < -1)
      * }</pre>
      *
-     * @param str The string to extract from. It can be {@code null}.
-     * @param exclusiveBeginIndex The exclusive beginning index (the character at this index is not included).
-     * @param exclusiveEndIndex The exclusive ending index (the character at this index is not included).
-     * @return The substring between the specified indices, or {@code null} if the indices are invalid.
+     * @param str the string to extract from, may be {@code null}
+     * @param exclusiveBeginIndex the exclusive beginning index (the character at this index is not included).
+     * @param exclusiveEndIndex the exclusive ending index (the character at this index is not included).
+     * @return the substring between the specified indices, or {@code null} if the indices are invalid.
      */
     @MayReturnNull
     public static String substringBetween(final String str, final int exclusiveBeginIndex, final int exclusiveEndIndex) {
@@ -13061,7 +12976,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * exclusiveBeginIndex is greater than or equal to the string length, or if the delimiter is not found
      * after the exclusiveBeginIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBetween("user@example.com", 3, '@');       // returns "r"
      * substringBetween("a,b,c,d", 1, ',');                // returns "b"
@@ -13071,10 +12986,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("test", 4, '@');                   // returns null (beginIndex >= length)
      * }</pre>
      *
-     * @param str The string to extract from. It can be {@code null}.
-     * @param exclusiveBeginIndex The exclusive beginning index (the character at this index is not included).
-     * @param delimiterOfExclusiveEndIndex The delimiter character marking the end of the substring.
-     * @return The substring between the index and the delimiter, or {@code null} if not found.
+     * @param str the string to extract from, may be {@code null}
+     * @param exclusiveBeginIndex the exclusive beginning index (the character at this index is not included).
+     * @param delimiterOfExclusiveEndIndex the delimiter character marking the end of the substring.
+     * @return the substring between the index and the delimiter, or {@code null} if not found.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
@@ -13104,7 +13019,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * exclusiveBeginIndex is less than -1, exclusiveBeginIndex is greater than or equal to the string length,
      * or if the delimiter is not found after the exclusiveBeginIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBetween("Hello World Java", 5, " ");       // returns "World"
      * substringBetween("user@@domain.com", 3, "@@");      // returns "r"
@@ -13115,10 +13030,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("test", 4, "@");                   // returns null (beginIndex >= length)
      * }</pre>
      *
-     * @param str The string to extract from. It can be {@code null}.
-     * @param exclusiveBeginIndex The exclusive beginning index (the character at this index is not included).
-     * @param delimiterOfExclusiveEndIndex The delimiter string marking the end of the substring. It can be {@code null}.
-     * @return The substring between the index and the delimiter, or {@code null} if not found.
+     * @param str the string to extract from, may be {@code null}
+     * @param exclusiveBeginIndex the exclusive beginning index (the character at this index is not included).
+     * @param delimiterOfExclusiveEndIndex the delimiter string marking the end of the substring, may be {@code null}
+     * @return the substring between the index and the delimiter, or {@code null} if not found.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
@@ -13147,7 +13062,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, exclusiveEndIndex is less than
      * or equal to 0, the delimiter is not found, or if the delimiter occurs at or after the exclusiveEndIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBetween("user@example", '@', 11);          // returns "example"
      * substringBetween("a,b,c", ',', 3);                  // returns "b"
@@ -13158,10 +13073,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("test", '@', 0);                   // returns null (endIndex <= 0)
      * }</pre>
      *
-     * @param str The string to extract from. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The delimiter character marking the beginning of the substring.
-     * @param exclusiveEndIndex The exclusive ending index (the character at this index is not included).
-     * @return The substring between the delimiter and the index, or {@code null} if not found.
+     * @param str the string to extract from, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter character marking the beginning of the substring.
+     * @param exclusiveEndIndex the exclusive ending index (the character at this index is not included).
+     * @return the substring between the delimiter and the index, or {@code null} if not found.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
@@ -13196,7 +13111,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * exclusiveEndIndex is negative, the delimiter is not found, or if the delimiter's end position is
      * greater than the exclusiveEndIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBetween("Hello World Java", " ", 11);      // returns "World"
      * substringBetween("user@@domain", "@@", 13);         // returns "domain"
@@ -13208,10 +13123,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("test", "@", -1);                  // returns null (endIndex < 0)
      * }</pre>
      *
-     * @param str The string to extract from. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The delimiter string marking the beginning of the substring. It can be {@code null}.
-     * @param exclusiveEndIndex The exclusive ending index (the character at this index is not included).
-     * @return The substring between the delimiter and the index, or {@code null} if not found.
+     * @param str the string to extract from, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter string marking the beginning of the substring, may be {@code null}
+     * @param exclusiveEndIndex the exclusive ending index (the character at this index is not included).
+     * @return the substring between the delimiter and the index, or {@code null} if not found.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
@@ -13245,7 +13160,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, the string length is 1 or less,
      * the first delimiter is not found, or the second delimiter is not found after the first one.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBetween("a,b,c", ',', ',');                 // returns "b"
      * substringBetween("'quoted'", '\'', '\'');           // returns "quoted"
@@ -13257,10 +13172,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("", ',', ',');                     // returns null
      * }</pre>
      *
-     * @param str The string to extract from. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The delimiter character marking the beginning of the substring.
-     * @param delimiterOfExclusiveEndIndex The delimiter character marking the end of the substring.
-     * @return The substring between the two delimiter occurrences, or {@code null} if not found.
+     * @param str the string to extract from, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter character marking the beginning of the substring.
+     * @param delimiterOfExclusiveEndIndex the delimiter character marking the end of the substring.
+     * @return the substring between the two delimiter occurrences, or {@code null} if not found.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
@@ -13301,7 +13216,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, the delimiter is {@code null},
      * the first delimiter is not found, or the second delimiter is not found after the first one.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBetween("{{content}}", "{{");               // returns "content"
      * substringBetween("<tag>value</tag>", "<tag>");      // returns "value</tag>"
@@ -13312,9 +13227,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("test", null);                     // returns null
      * }</pre>
      *
-     * @param str The string to extract from. It can be {@code null}.
-     * @param delimiter The delimiter string marking both the beginning and end of the substring. It can be {@code null}.
-     * @return The substring between two occurrences of the delimiter, or {@code null} if not found or the specified source string is emmpty or {@code null}.
+     * @param str the string to extract from, may be {@code null}
+     * @param delimiter the delimiter string marking both the beginning and end of the substring, may be {@code null}
+     * @return the substring between two occurrences of the delimiter, or {@code null} if not found or the specified source string is emmpty or {@code null}.
      * @see #substringBetween(String, String, String)
      * @see #substringBetween(String, int, int)
      */
@@ -13333,7 +13248,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, either delimiter is {@code null},
      * the beginning delimiter is not found, or the ending delimiter is not found after the beginning delimiter.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBetween("<tag>content</tag>", "<tag>", "</tag>");  // returns "content"
      * substringBetween("{{start}}middle{{end}}", "{{start}}", "{{end}}"); // returns "middle"
@@ -13345,10 +13260,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("test", "{{", null);                       // returns null
      * }</pre>
      *
-     * @param str The string to extract from. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The delimiter string marking the beginning of the substring. It can be {@code null}.
-     * @param delimiterOfExclusiveEndIndex The delimiter string marking the end of the substring. It can be {@code null}.
-     * @return The substring between the two delimiters, or {@code null} if not found.
+     * @param str the string to extract from, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter string marking the beginning of the substring, may be {@code null}
+     * @param delimiterOfExclusiveEndIndex the delimiter string marking the end of the substring, may be {@code null}
+     * @return the substring between the two delimiters, or {@code null} if not found.
      */
     @MayReturnNull
     public static String substringBetween(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
@@ -13367,7 +13282,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * fromIndex is greater than the string length, the beginning delimiter is not found, or the ending delimiter
      * is not found after the beginning delimiter.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBetween("<a>text1</a><a>text2</a>", 5, "<a>", "</a>");  // returns "text2"
      * substringBetween("{{x}}{{y}}", 3, "{{", "}}");                    // returns "y"
@@ -13379,11 +13294,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("test", 0, "{{", null);                          // returns null
      * }</pre>
      *
-     * @param str The string to extract from. It can be {@code null}.
-     * @param fromIndex The index to start searching from. If less than or equal to 0, search starts from the beginning.
-     * @param delimiterOfExclusiveBeginIndex The delimiter string marking the beginning of the substring. It can be {@code null}.
-     * @param delimiterOfExclusiveEndIndex The delimiter string marking the end of the substring. It can be {@code null}.
-     * @return The substring between the two delimiters, or {@code null} if not found.
+     * @param str the string to extract from, may be {@code null}
+     * @param fromIndex the index to start searching from. If less than or equal to 0, search starts from the beginning.
+     * @param delimiterOfExclusiveBeginIndex the delimiter string marking the beginning of the substring, may be {@code null}
+     * @param delimiterOfExclusiveEndIndex the delimiter string marking the end of the substring, may be {@code null}
+     * @return the substring between the two delimiters, or {@code null} if not found.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
@@ -13421,7 +13336,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, the delimiter is {@code null},
      * the first delimiter is not found, or the second delimiter is not found after the first one.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBetweenIgnoreCaes("{{CONTENT}}", "{{");              // returns "CONTENT"
      * substringBetweenIgnoreCaes("<TAG>value</TAG>", "<tag>");      // returns "value</TAG>"
@@ -13432,9 +13347,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetweenIgnoreCaes("test", null);                     // returns null
      * }</pre>
      *
-     * @param str The string to extract from. It can be {@code null}.
-     * @param delimiter The delimiter string marking both the beginning and end of the substring, case-insensitive. It can be {@code null}.
-     * @return The substring between two occurrences of the delimiter (case-insensitive), or {@code null} if not found.
+     * @param str the string to extract from, may be {@code null}
+     * @param delimiter the delimiter string marking both the beginning and end of the substring, case-insensitive, may be {@code null}
+     * @return the substring between two occurrences of the delimiter (case-insensitive), or {@code null} if not found.
      * @see #substringBetweenIgnoreCaes(String, String, String)
      */
     @Beta
@@ -13454,7 +13369,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, either delimiter is {@code null},
      * the beginning delimiter is not found, or the ending delimiter is not found after the beginning delimiter.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBetweenIgnoreCaes("<TAG>content</TAG>", "<tag>", "</tag>");  // returns "content"
      * substringBetweenIgnoreCaes("{{START}}middle{{END}}", "{{start}}", "{{end}}"); // returns "middle"
@@ -13466,10 +13381,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetweenIgnoreCaes("test", "{{", null);                       // returns null
      * }</pre>
      *
-     * @param str The string to extract from. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The delimiter string marking the beginning of the substring, case-insensitive. It can be {@code null}.
-     * @param delimiterOfExclusiveEndIndex The delimiter string marking the end of the substring, case-insensitive. It can be {@code null}.
-     * @return The substring between the two delimiters (case-insensitive), or {@code null} if not found.
+     * @param str the string to extract from, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter string marking the beginning of the substring, case-insensitive, may be {@code null}
+     * @param delimiterOfExclusiveEndIndex the delimiter string marking the end of the substring, case-insensitive, may be {@code null}
+     * @return the substring between the two delimiters (case-insensitive), or {@code null} if not found.
      * @see #substringBetweenIgnoreCaes(String, int, String, String)
      */
     @Beta
@@ -13491,7 +13406,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * fromIndex is greater than the string length, the beginning delimiter is not found, or the ending delimiter
      * is not found after the beginning delimiter.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * substringBetweenIgnoreCaes("<A>text1</A><A>text2</A>", 5, "<a>", "</a>");  // returns "text2"
      * substringBetweenIgnoreCaes("{{X}}{{Y}}", 3, "{{", "}}");                    // returns "Y"
@@ -13503,11 +13418,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetweenIgnoreCaes("test", 0, "{{", null);                          // returns null
      * }</pre>
      *
-     * @param str The string to extract from. It can be {@code null}.
-     * @param fromIndex The index to start searching from. If less than or equal to 0, search starts from the beginning.
-     * @param delimiterOfExclusiveBeginIndex The delimiter string marking the beginning of the substring, case-insensitive. It can be {@code null}.
-     * @param delimiterOfExclusiveEndIndex The delimiter string marking the end of the substring, case-insensitive. It can be {@code null}.
-     * @return The substring between the two delimiters (case-insensitive), or {@code null} if not found.
+     * @param str the string to extract from, may be {@code null}
+     * @param fromIndex the index to start searching from. If less than or equal to 0, search starts from the beginning.
+     * @param delimiterOfExclusiveBeginIndex the delimiter string marking the beginning of the substring, case-insensitive, may be {@code null}
+     * @param delimiterOfExclusiveEndIndex the delimiter string marking the end of the substring, case-insensitive, may be {@code null}
+     * @return the substring between the two delimiters (case-insensitive), or {@code null} if not found.
      * @see #substringBetweenIgnoreCaes(String, String, String)
      */
     @Beta
@@ -13547,7 +13462,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, if the begin index is less than -1
      * or greater than or equal to the string length, or if the calculated end index is invalid.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Extract substring with dynamic end index
      * substringBetween("Hello World", 0, i -> i + 6);     // returns "ello "
@@ -13560,10 +13475,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("Hello", 2, i -> 2);               // returns null (end <= begin)
      * }</pre>
      *
-     * @param str The input string from which to extract the substring. It can be {@code null}.
-     * @param exclusiveBeginIndex The exclusive beginning index (the character at this index is not included).
-     * @param funcOfExclusiveEndIndex A function that calculates the exclusive end index based on the begin index.
-     * @return The substring between the specified indices, or {@code null} if invalid parameters are provided.
+     * @param str the input string from which to extract the substring, may be {@code null}
+     * @param exclusiveBeginIndex the exclusive beginning index (the character at this index is not included).
+     * @param funcOfExclusiveEndIndex a function that calculates the exclusive end index based on the begin index.
+     * @return the substring between the specified indices, or {@code null} if invalid parameters are provided.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
@@ -13592,7 +13507,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns {@code null} if the input string is {@code null}, if the end index is less than or equal to 0,
      * or if the calculated begin index is invalid.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Extract substring with dynamic begin index
      * substringBetween("Hello World", i -> i - 6, 11);    // returns "World"
@@ -13605,10 +13520,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("Hello", i -> 5, 3);               // returns null (begin >= end)
      * }</pre>
      *
-     * @param str The input string from which to extract the substring. It can be {@code null}.
-     * @param funcOfExclusiveBeginIndex A function that calculates the exclusive begin index based on the end index.
-     * @param exclusiveEndIndex The exclusive ending index (the character at this index is not included).
-     * @return The substring between the specified indices, or {@code null} if invalid parameters are provided.
+     * @param str the input string from which to extract the substring, may be {@code null}
+     * @param funcOfExclusiveBeginIndex a function that calculates the exclusive begin index based on the end index.
+     * @param exclusiveEndIndex the exclusive ending index (the character at this index is not included).
+     * @return the substring between the specified indices, or {@code null} if invalid parameters are provided.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
@@ -13639,7 +13554,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * or not found, if the delimiter length is greater than or equal to the string length, or if the calculated
      * end index is invalid.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Extract substring after delimiter with dynamic end
      * substringBetween("Hello:World", ":", i -> i + 5);     // returns "World"
@@ -13652,10 +13567,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("Hello", "Hello", i -> 10);          // returns null (delimiter too long)
      * }</pre>
      *
-     * @param str The input string from which to extract the substring. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The delimiter marking the beginning of the substring (non-inclusive).
-     * @param funcOfExclusiveEndIndex A function that calculates the exclusive end index based on the start index after the delimiter.
-     * @return The substring between the delimiter and calculated end index, or {@code null} if invalid parameters are provided.
+     * @param str the input string from which to extract the substring, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter marking the beginning of the substring (non-inclusive).
+     * @param funcOfExclusiveEndIndex a function that calculates the exclusive end index based on the start index after the delimiter.
+     * @return the substring between the delimiter and calculated end index, or {@code null} if invalid parameters are provided.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
@@ -13693,7 +13608,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * or not found, if the delimiter length is greater than or equal to the string length, or if the calculated
      * begin index is invalid.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Extract substring with dynamic begin before delimiter
      * substringBetween("Hello:World", i -> i - 5, ":");     // returns "Hello"
@@ -13706,10 +13621,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween("Hello", i -> 0, "Hello");           // returns null (delimiter too long)
      * }</pre>
      *
-     * @param str The input string from which to extract the substring. It can be {@code null}.
-     * @param funcOfExclusiveBeginIndex A function that calculates the exclusive begin index based on the end index of the delimiter.
-     * @param delimiterOfExclusiveEndIndex The delimiter marking the end of the substring (non-inclusive).
-     * @return The substring between the calculated begin index and delimiter, or {@code null} if invalid parameters are provided.
+     * @param str the input string from which to extract the substring, may be {@code null}
+     * @param funcOfExclusiveBeginIndex a function that calculates the exclusive begin index based on the end index of the delimiter.
+     * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (non-inclusive).
+     * @return the substring between the calculated begin index and delimiter, or {@code null} if invalid parameters are provided.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
@@ -13742,7 +13657,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty list if the input string is {@code null} or if no matches are found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Extract content between brackets
      * substringsBetween("3[a]2[b]", '[', ']');              // returns ["a", "b"]
@@ -13755,10 +13670,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringsBetween("", '[', ']');                      // returns []
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The character marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The character marking the end of the substring (non-inclusive).
-     * @return A list of matched substrings, or an empty list if no match is found or the input is {@code null}.
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the character marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the character marking the end of the substring (non-inclusive).
+     * @return a list of matched substrings, or an empty list if no match is found or the input is {@code null}.
      * @see #substringsBetween(String, String, String, ExtractStrategy)
      * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
      */
@@ -13779,7 +13694,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty list if the input string is {@code null} or if no matches are found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // With nested delimiters
      * String str = "3[a2[c]]2[a]";
@@ -13792,11 +13707,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringsBetween(null, '[', ']', ExtractStrategy.DEFAULT);       // returns []
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The character marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The character marking the end of the substring (non-inclusive).
-     * @param extractStrategy The strategy to use for handling nested delimiters.
-     * @return A list of matched substrings, or an empty list if no match is found or the input is {@code null}.
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the character marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the character marking the end of the substring (non-inclusive).
+     * @param extractStrategy the strategy to use for handling nested delimiters.
+     * @return a list of matched substrings, or an empty list if no match is found or the input is {@code null}.
      * @throws IllegalArgumentException if extractStrategy is {@code null}.
      * @see #substringsBetween(String, String, String, ExtractStrategy)
      * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
@@ -13816,7 +13731,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty list if the input string is {@code null} or if no matches are found
      * within the specified range.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Search within specific range
      * substringsBetween("a[b]c[d]e[f]", 2, 8, '[', ']');    // returns ["b", "d"]
@@ -13828,12 +13743,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringsBetween(null, 0, 5, '[', ']');              // returns []
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param fromIndex The index to start the search from (inclusive).
-     * @param toIndex The index to end the search at (exclusive).
-     * @param delimiterOfExclusiveBeginIndex The character marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The character marking the end of the substring (non-inclusive).
-     * @return A list of matched substrings, or an empty list if no match is found or the input is {@code null}.
+     * @param str the string to search in, may be {@code null}
+     * @param fromIndex the index to start the search from (inclusive).
+     * @param toIndex the index to end the search at (exclusive).
+     * @param delimiterOfExclusiveBeginIndex the character marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the character marking the end of the substring (non-inclusive).
+     * @return a list of matched substrings, or an empty list if no match is found or the input is {@code null}.
      * @throws IndexOutOfBoundsException if the indices are invalid.
      * @see #substringsBetween(String, String, String, ExtractStrategy)
      * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
@@ -13854,7 +13769,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty list if the input string is {@code null}, if either delimiter is {@code null},
      * or if no matches are found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Extract content between string delimiters
      * substringsBetween("a<tag>b</tag>c<tag>d</tag>", "<tag>", "</tag>");  // returns ["b", "d"]
@@ -13867,10 +13782,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringsBetween("test", null, ">");                                // returns []
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The string marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The string marking the end of the substring (non-inclusive).
-     * @return A list of matched substrings, or an empty list if no match is found or the input is {@code null}.
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive).
+     * @return a list of matched substrings, or an empty list if no match is found or the input is {@code null}.
      * @see #substringsBetween(String, String, String, ExtractStrategy)
      * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
      */
@@ -13892,7 +13807,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty list if the input string is {@code null}, if either delimiter is {@code null},
      * or if no matches are found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // String: 3[a2[c]]2[a]
      * substringsBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.DEFAULT);       // returns ["a2[c", "a"]
@@ -13905,11 +13820,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringsBetween("[[b[a]]c]", "[", "]", ExtractStrategy.IGNORE_NESTED);    // returns ["[b[a]]c"]
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The string marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The string marking the end of the substring (non-inclusive).
-     * @param extractStrategy The strategy to use for handling nested delimiters.
-     * @return A list of matched substrings, or an empty list if no match is found or the input is {@code null}.
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive).
+     * @param extractStrategy the strategy to use for handling nested delimiters.
+     * @return a list of matched substrings, or an empty list if no match is found or the input is {@code null}.
      * @throws IllegalArgumentException if extractStrategy is {@code null}.
      * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
      * @see #substringsBetween(String, int, int, String, String, ExtractStrategy, int)
@@ -13929,7 +13844,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty list if the input string is {@code null}, if either delimiter is {@code null},
      * or if no matches are found within the specified range.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Search within specific range
      * substringsBetween("a<b>c<d>e<f>", 2, 10, "<", ">");   // returns ["b", "d"]
@@ -13941,12 +13856,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringsBetween(null, 0, 5, "<", ">");              // returns []
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param fromIndex The index to start the search from (inclusive).
-     * @param toIndex The index to end the search at (exclusive).
-     * @param delimiterOfExclusiveBeginIndex The string marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The string marking the end of the substring (non-inclusive).
-     * @return A list of matched substrings, or an empty list if no match is found or the input is {@code null}.
+     * @param str the string to search in, may be {@code null}
+     * @param fromIndex the index to start the search from (inclusive).
+     * @param toIndex the index to end the search at (exclusive).
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive).
+     * @return a list of matched substrings, or an empty list if no match is found or the input is {@code null}.
      * @throws IndexOutOfBoundsException if the indices are invalid.
      * @see #substringsBetween(String, String, String, ExtractStrategy)
      * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
@@ -13972,7 +13887,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty list if the input string is {@code null}, if either delimiter is {@code null},
      * if {@code maxCount} is 0, or if no matches are found within the specified range.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Extract with different strategies
      * String str = "3[a2[c]]2[a]";
@@ -13985,14 +13900,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringsBetween("test", 0, 4, "[", "]", ExtractStrategy.DEFAULT, 0);               // returns []
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param fromIndex The index to start the search from (inclusive).
-     * @param toIndex The index to end the search at (exclusive).
-     * @param delimiterOfExclusiveBeginIndex The string marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The string marking the end of the substring (non-inclusive).
-     * @param extractStrategy The strategy to use for handling nested delimiters.
-     * @param maxCount The maximum number of substrings to extract; if {@code Integer.MAX_VALUE}, all matching substrings will be extracted.
-     * @return A list of matched substrings, or an empty list if no match is found or the input is {@code null}.
+     * @param str the string to search in, may be {@code null}
+     * @param fromIndex the index to start the search from (inclusive).
+     * @param toIndex the index to end the search at (exclusive).
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive).
+     * @param extractStrategy the strategy to use for handling nested delimiters.
+     * @param maxCount the maximum number of substrings to extract; if {@code Integer.MAX_VALUE}, all matching substrings will be extracted.
+     * @return a list of matched substrings, or an empty list if no match is found or the input is {@code null}.
      * @throws IndexOutOfBoundsException if the indices are invalid.
      * @throws IllegalArgumentException if maxCount is negative or extractStrategy is {@code null}.
      * @see #substringsBetween(String, String, String, ExtractStrategy)
@@ -14024,7 +13939,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty list if the input string is {@code null}, empty, or if no matches are found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Get indices of content between brackets
      * substringIndicesBetween("3[a]2[b]", '[', ']');        // returns [[2, 3], [6, 7]]
@@ -14037,10 +13952,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringIndicesBetween("no match", '[', ']');        // returns []
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The character marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The character marking the end of the substring (non-inclusive).
-     * @return A list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the character marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the character marking the end of the substring (non-inclusive).
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
      *         matching substring, or an empty list if no match is found or the input is {@code null}.
      * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
      * @see #substringIndicesBetween(String, int, int, String, String, ExtractStrategy, int)
@@ -14064,7 +13979,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty list if the input string is {@code null}, empty, or if no matches are found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // String: 3[a2[c]]2[a]
      * substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT);       // returns [[2, 6], [10, 11]]
@@ -14076,11 +13991,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringIndicesBetween(null, '[', ']', ExtractStrategy.DEFAULT);                 // returns []
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The character marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The character marking the end of the substring (non-inclusive).
-     * @param extractStrategy The strategy to use for handling nested delimiters.
-     * @return A list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the character marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the character marking the end of the substring (non-inclusive).
+     * @param extractStrategy the strategy to use for handling nested delimiters.
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
      *         matching substring, or an empty list if no match is found or the input is {@code null}.
      * @throws IllegalArgumentException if extractStrategy is {@code null}.
      * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
@@ -14108,7 +14023,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty list if the input string is {@code null}, empty, or if no matches are found
      * within the specified range.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Search within specific range
      * substringIndicesBetween("a[b]c[d]e[f]", 2, 8, '[', ']');  // returns [[3, 4], [6, 7]]
@@ -14120,12 +14035,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringIndicesBetween(null, 0, 5, '[', ']');            // returns []
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param fromIndex The starting index to search from (inclusive).
-     * @param toIndex The ending index to search until (exclusive).
-     * @param delimiterOfExclusiveBeginIndex The character marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The character marking the end of the substring (non-inclusive).
-     * @return A list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     * @param str the string to search in, may be {@code null}
+     * @param fromIndex the starting index to search from (inclusive).
+     * @param toIndex the ending index to search until (exclusive).
+     * @param delimiterOfExclusiveBeginIndex the character marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the character marking the end of the substring (non-inclusive).
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
      *         matching substring, or an empty list if no match is found or the input is {@code null}.
      * @throws IndexOutOfBoundsException if the indices are invalid.
      * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
@@ -14154,7 +14069,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty list if the input string is {@code null}, if either delimiter is {@code null}
      * or empty, or if no matches are found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Get indices of content between string delimiters
      * substringIndicesBetween("a<tag>b</tag>c<tag>d</tag>", "<tag>", "</tag>");  // returns [[6, 7], [19, 20]]
@@ -14167,10 +14082,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringIndicesBetween("test", null, ">");                                // returns []
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The string marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The string marking the end of the substring (non-inclusive).
-     * @return A list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive).
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
      *         matching substring, or an empty list if no match is found or the input is {@code null}.
      * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
      * @see #substringIndicesBetween(String, int, int, String, String, ExtractStrategy, int)
@@ -14196,7 +14111,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty list if the input string is {@code null}, if either delimiter is {@code null}
      * or empty, or if no matches are found.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // String: 3[a2[c]]2[a]
      * substringIndicesBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.DEFAULT);       // returns [[2, 6], [10, 11]]
@@ -14209,11 +14124,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringIndicesBetween("[[b[a]]c]", "[", "]", ExtractStrategy.IGNORE_NESTED);    // returns [[1, 8]]
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param delimiterOfExclusiveBeginIndex The string marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The string marking the end of the substring (non-inclusive).
-     * @param extractStrategy The strategy to use for handling nested delimiters.
-     * @return A list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     * @param str the string to search in, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive).
+     * @param extractStrategy the strategy to use for handling nested delimiters.
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
      *         matching substring, or an empty list if no match is found or the input is {@code null}.
      * @throws IllegalArgumentException if extractStrategy is {@code null}.
      * @see #substringIndicesBetween(String, int, int, String, String, ExtractStrategy, int)
@@ -14239,7 +14154,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty list if the input string is {@code null}, if either delimiter is {@code null}
      * or empty, or if no matches are found within the specified range.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Search within specific range
      * substringIndicesBetween("a<b>c<d>e<f>", 2, 10, "<", ">");     // returns [[3, 4], [6, 7]]
@@ -14251,12 +14166,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringIndicesBetween(null, 0, 5, "<", ">");                // returns []
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param fromIndex The starting index to search from (inclusive).
-     * @param toIndex The ending index to search until (exclusive).
-     * @param delimiterOfExclusiveBeginIndex The string marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The string marking the end of the substring (non-inclusive).
-     * @return A list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     * @param str the string to search in, may be {@code null}
+     * @param fromIndex the starting index to search from (inclusive).
+     * @param toIndex the ending index to search until (exclusive).
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive).
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
      *         matching substring, or an empty list if no match is found or the input is {@code null}.
      * @throws IndexOutOfBoundsException if the indices are invalid.
      * @see #substringIndicesBetween(String, String, String, ExtractStrategy)
@@ -14285,7 +14200,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method returns an empty list if the input string is {@code null}, if either delimiter is {@code null}
      * or empty, if {@code maxCount} is 0, or if no matches are found within the specified range.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // String: 3[a2[c]]2[a]
      * substringIndicesBetween("3[a2[c]]2[a]", 0, 12, "[", "]", ExtractStrategy.DEFAULT, 10);       // returns [[2, 6], [10, 11]]
@@ -14297,14 +14212,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringIndicesBetween("test", 0, 4, "[", "]", ExtractStrategy.DEFAULT, 0);                 // returns []
      * }</pre>
      *
-     * @param str The string to search in. It can be {@code null}.
-     * @param fromIndex The index to start the search from (inclusive).
-     * @param toIndex The index to end the search at (exclusive).
-     * @param delimiterOfExclusiveBeginIndex The string marking the beginning of the substring (non-inclusive).
-     * @param delimiterOfExclusiveEndIndex The string marking the end of the substring (non-inclusive).
-     * @param extractStrategy The strategy to use for handling nested delimiters.
-     * @param maxCount The maximum number of matches to find.
-     * @return A list of int arrays containing the start and end indices (exclusive of delimiters) of each
+     * @param str the string to search in, may be {@code null}
+     * @param fromIndex the index to start the search from (inclusive).
+     * @param toIndex the index to end the search at (exclusive).
+     * @param delimiterOfExclusiveBeginIndex the string marking the beginning of the substring (non-inclusive).
+     * @param delimiterOfExclusiveEndIndex the string marking the end of the substring (non-inclusive).
+     * @param extractStrategy the strategy to use for handling nested delimiters.
+     * @param maxCount the maximum number of matches to find.
+     * @return a list of int arrays containing the start and end indices (exclusive of delimiters) of each
      *         matching substring, or an empty list if no match is found or the input is {@code null}.
      * @throws IndexOutOfBoundsException if the indices are invalid.
      * @throws IllegalArgumentException if maxCount is negative or extractStrategy is {@code null}.
@@ -14428,7 +14343,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * it returns the replacement string (or empty if replacement is {@code null}). If {@code fromIndex}
      * equals {@code toIndex} and replacement is empty, the original string is returned unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Replace range with new text
      * replaceRange("Hello World", 6, 11, "Java");           // returns "Hello Java"
@@ -14444,11 +14359,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceRange("", 0, 0, "Text");                      // returns "Text"
      * }</pre>
      *
-     * @param str The original string. It can be {@code null}.
-     * @param fromIndex The initial index of the range to be replaced, inclusive; must be valid index
-     * @param toIndex The final index of the range to be replaced, exclusive; must be valid
-     * @param replacement The string to replace the specified range in the original string. It can be {@code null}.
-     * @return A new string with the specified range replaced by the replacement string.
+     * @param str the original string, may be {@code null}
+     * @param fromIndex the initial index of the range to be replaced, inclusive; must be valid index
+     * @param toIndex the final index of the range to be replaced, exclusive; must be valid
+     * @param replacement the string to replace the specified range in the original string, may be {@code null}
+     * @return a new string with the specified range replaced by the replacement string.
      * @throws IndexOutOfBoundsException if the range is out of the string bounds or indices are invalid.
      * @see N#replaceRange(String, int, int, String)
      */
@@ -14479,7 +14394,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty input.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Moving a range of characters
      * moveRange("ABCDEFGH", 2, 5, 0);      // returns "CDEABFGH" (moves "CDE" to position 0)
@@ -14535,7 +14450,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty input.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Deleting a range of characters
      * deleteRange("ABCDEFGH", 2, 5);       // returns "ABFGH" (removes "CDE")
@@ -14585,7 +14500,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty arrays.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining boolean arrays
      * join(new boolean[]{true, false, true});    // returns "true, false, true" (using default separator)
@@ -14597,7 +14512,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param a the boolean array to join
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty
      * @see #join(boolean[], int, int, String, String, String)
      */
     public static String join(final boolean[] a) {
@@ -14613,7 +14528,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty arrays.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining boolean arrays with string delimiters
      * join(new boolean[]{true, false, true}, ", ");    // returns "true, false, true"
@@ -14626,8 +14541,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param a the boolean array to join
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty
      * @see #join(boolean[], int, int, String, String, String)
      */
     public static String join(final boolean[] a, final String delimiter) {
@@ -14648,7 +14563,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty arrays, or when fromIndex equals toIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining a range of boolean array elements
      * boolean[] arr = {true, false, true, false, true};
@@ -14662,10 +14577,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param a the boolean array to join
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of array bounds
      * @see #join(boolean[], int, int, String, String, String)
      */
@@ -14684,7 +14599,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method handles edge cases gracefully: if the array is null/empty or fromIndex equals toIndex,
      * it returns just the prefix and suffix concatenated (or an empty string if both are empty).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining with prefix and suffix
      * boolean[] arr = {true, false, true, false, true};
@@ -14698,13 +14613,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(arr, 0, 2, "", "<", ">");           // returns "<truefalse>"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be empty.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
+     * @param a the array containing the elements to join together. It can be empty.
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final boolean[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
@@ -14764,7 +14679,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty arrays.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining char arrays
      * join(new char[]{'a', 'b', 'c'});         // returns "a, b, c" (using default separator)
@@ -14776,7 +14691,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param a the char array to join
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty
      * @see #join(char[], int, int, String, String, String)
      */
     public static String join(final char[] a) {
@@ -14791,7 +14706,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty arrays.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining char arrays with string delimiters
      * join(new char[]{'a', 'b', 'c'}, ", ");    // returns "a, b, c"
@@ -14804,8 +14719,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param a the char array to join
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty
      * @see #join(char[], int, int, String, String, String)
      */
     public static String join(final char[] a, final String delimiter) {
@@ -14825,7 +14740,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty arrays, or when fromIndex equals toIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining a range of char array elements
      * char[] arr = {'a', 'b', 'c', 'd', 'e'};
@@ -14839,10 +14754,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param a the char array to join
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of array bounds
      * @see #join(char[], int, int, String, String, String)
      */
@@ -14860,7 +14775,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method handles edge cases gracefully: if the array is null/empty or fromIndex equals toIndex,
      * it returns just the prefix and suffix concatenated (or an empty string if both are empty).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining with prefix and suffix
      * char[] arr = {'a', 'b', 'c', 'd', 'e'};
@@ -14874,13 +14789,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(arr, 0, 2, "", "<", ">");           // returns "<ab>"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be empty.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
+     * @param a the array containing the elements to join together. It can be empty.
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final char[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
@@ -14940,7 +14855,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty arrays.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining byte arrays
      * join(new byte[]{1, 2, 3});               // returns "1, 2, 3" (using default separator)
@@ -14952,7 +14867,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param a the byte array to join
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty
      * @see #join(byte[], int, int, String, String, String)
      */
     public static String join(final byte[] a) {
@@ -14968,7 +14883,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty arrays.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining byte arrays with string delimiters
      * join(new byte[]{1, 2, 3}, ", ");         // returns "1, 2, 3"
@@ -14981,8 +14896,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param a the byte array to join
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty
      * @see #join(byte[], int, int, String, String, String)
      */
     public static String join(final byte[] a, final String delimiter) {
@@ -15002,7 +14917,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty arrays, or when fromIndex equals toIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining a range of byte array elements
      * byte[] arr = {1, 2, 3, 4, 5};
@@ -15016,10 +14931,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param a the byte array to join
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of array bounds
      * @see #join(byte[], int, int, String, String, String)
      */
@@ -15038,7 +14953,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method handles edge cases gracefully: if the array is null/empty or fromIndex equals toIndex,
      * it returns just the prefix and suffix concatenated (or an empty string if both are empty).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining with prefix and suffix
      * byte[] arr = {1, 2, 3, 4, 5};
@@ -15052,13 +14967,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(arr, 0, 2, "", "<", ">");           // returns "<12>"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be empty.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
+     * @param a the array containing the elements to join together. It can be empty.
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final byte[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
@@ -15118,7 +15033,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty arrays.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining short arrays
      * join(new short[]{1, 2, 3});              // returns "1, 2, 3" (using default separator)
@@ -15130,7 +15045,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param a the short array to join
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty
      * @see #join(short[], int, int, String, String, String)
      */
     public static String join(final short[] a) {
@@ -15146,7 +15061,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty arrays.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining short arrays with string delimiters
      * join(new short[]{1, 2, 3}, ", ");        // returns "1, 2, 3"
@@ -15159,8 +15074,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param a the short array to join
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty
      * @see #join(short[], int, int, String, String, String)
      */
     public static String join(final short[] a, final String delimiter) {
@@ -15180,7 +15095,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty arrays, or when fromIndex equals toIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Joining a range of short array elements
      * short[] arr = {10, 20, 30, 40, 50};
@@ -15194,10 +15109,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param a the short array to join
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of array bounds
      */
     public static String join(final short[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
@@ -15214,7 +15129,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If the array is {@code null} or empty, or if {@code fromIndex == toIndex}, the method returns
      * an appropriate combination of prefix and suffix, or an empty string if both are empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * short[] numbers = {1, 2, 3, 4, 5};
      * 
@@ -15231,13 +15146,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final short[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
@@ -15295,7 +15210,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all elements of the array using the default element separator.
      * It is equivalent to calling {@code join(a, 0, a.length, ELEMENT_SEPARATOR)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5};
      * join(numbers);                    // returns "1, 2, 3, 4, 5" (using default separator)
@@ -15305,8 +15220,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(null);                       // returns ""
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty.
      * @see #join(int[], int, int, String, String, String)
      */
     public static String join(final int[] a) {
@@ -15319,7 +15234,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all elements of the array using the provided string delimiter.
      * Each element is converted to its string representation and separated by the delimiter.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5};
      * join(numbers, ", ");              // returns "1, 2, 3, 4, 5"
@@ -15328,9 +15243,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, " and ");           // returns "1 and 2 and 3 and 4 and 5"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty.
      * @see #join(int[], int, int, String, String, String)
      */
     public static String join(final int[] a, final String delimiter) {
@@ -15347,7 +15262,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates elements from index {@code fromIndex} (inclusive) to {@code toIndex} (exclusive)
      * using the provided string delimiter. Each element is converted to its string representation.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5};
      * join(numbers, 1, 4, ", ");        // returns "2, 3, 4"
@@ -15359,11 +15274,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, 0, 1, ", ");        // returns "1" (single element)
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      * @see #join(int[], int, int, String, String, String)
      */
@@ -15380,7 +15295,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If the array is {@code null} or empty, or if {@code fromIndex == toIndex}, the method returns
      * an appropriate combination of prefix and suffix, or an empty string if both are empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5};
      * 
@@ -15398,13 +15313,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final int[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
@@ -15462,7 +15377,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all elements of the array using the default element separator.
      * It is equivalent to calling {@code join(a, 0, a.length, ELEMENT_SEPARATOR)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * long[] numbers = {100L, 200L, 300L};
      * join(numbers);                    // returns "100, 200, 300" (using default separator)
@@ -15472,8 +15387,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(null);                       // returns ""
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty.
      * @see #join(long[], int, int, String, String, String)
      */
     public static String join(final long[] a) {
@@ -15486,7 +15401,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all elements of the array using the provided string delimiter.
      * Each element is converted to its string representation and separated by the delimiter.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * long[] numbers = {100L, 200L, 300L};
      * join(numbers, ", ");              // returns "100, 200, 300"
@@ -15495,9 +15410,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, " and ");           // returns "100 and 200 and 300"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty.
      * @see #join(long[], int, int, String, String, String)
      */
     public static String join(final long[] a, final String delimiter) {
@@ -15514,7 +15429,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates elements from index {@code fromIndex} (inclusive) to {@code toIndex} (exclusive)
      * using the provided string delimiter. Each element is converted to its string representation.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * long[] numbers = {100L, 200L, 300L, 400L, 500L};
      * join(numbers, 1, 4, ", ");        // returns "200, 300, 400"
@@ -15526,11 +15441,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, 0, 1, ", ");        // returns "100" (single element)
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      * @see #join(long[], int, int, String, String, String)
      */
@@ -15547,7 +15462,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If the array is {@code null} or empty, or if {@code fromIndex == toIndex}, the method returns
      * an appropriate combination of prefix and suffix, or an empty string if both are empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * long[] numbers = {100L, 200L, 300L, 400L, 500L};
      * 
@@ -15565,13 +15480,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final long[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
@@ -15629,7 +15544,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all elements of the array using the default element separator.
      * It is equivalent to calling {@code join(a, 0, a.length, ELEMENT_SEPARATOR)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * float[] numbers = {1.5f, 2.7f, 3.14f};
      * join(numbers);                    // returns "1.5, 2.7, 3.14" (using default separator)
@@ -15639,8 +15554,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(null);                       // returns ""
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty.
      * @see #join(float[], int, int, String, String, String)
      */
     public static String join(final float[] a) {
@@ -15653,7 +15568,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all elements of the array using the provided string delimiter.
      * Each element is converted to its string representation and separated by the delimiter.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * float[] numbers = {1.5f, 2.7f, 3.14f};
      * join(numbers, ", ");              // returns "1.5, 2.7, 3.14"
@@ -15662,9 +15577,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, " and ");           // returns "1.5 and 2.7 and 3.14"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty.
      * @see #join(float[], int, int, String, String, String)
      */
     public static String join(final float[] a, final String delimiter) {
@@ -15681,7 +15596,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates elements from index {@code fromIndex} (inclusive) to {@code toIndex} (exclusive)
      * using the provided string delimiter. Each element is converted to its string representation.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * float[] numbers = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f};
      * join(numbers, 1, 4, ", ");        // returns "2.2, 3.3, 4.4"
@@ -15693,11 +15608,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, 0, 1, ", ");        // returns "1.1" (single element)
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      * @see #join(float[], int, int, String, String, String)
      */
@@ -15714,7 +15629,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If the array is {@code null} or empty, or if {@code fromIndex == toIndex}, the method returns
      * an appropriate combination of prefix and suffix, or an empty string if both are empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * float[] numbers = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f};
      * 
@@ -15732,13 +15647,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty and <i>prefix'/'suffix</i> are empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty and <i>prefix'/'suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
@@ -15796,7 +15711,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all elements of the array using the default element separator.
      * It is equivalent to calling {@code join(a, 0, a.length, ELEMENT_SEPARATOR)}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * double[] numbers = {1.5, 2.7, 3.14159};
      * join(numbers);                    // returns "1.5, 2.7, 3.14159" (using default separator)
@@ -15806,8 +15721,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(null);                       // returns ""
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty.
      * @see #join(double[], int, int, String, String, String)
      */
     public static String join(final double[] a) {
@@ -15820,7 +15735,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all elements of the array using the provided string delimiter.
      * Each element is converted to its string representation and separated by the delimiter.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * double[] numbers = {1.5, 2.7, 3.14159};
      * join(numbers, ", ");              // returns "1.5, 2.7, 3.14159"
@@ -15829,9 +15744,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, " and ");           // returns "1.5 and 2.7 and 3.14159"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty.
      * @see #join(double[], int, int, String, String, String)
      */
     public static String join(final double[] a, final String delimiter) {
@@ -15848,7 +15763,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates elements from index {@code fromIndex} (inclusive) to {@code toIndex} (exclusive)
      * using the provided string delimiter. Each element is converted to its string representation.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * double[] numbers = {1.1, 2.2, 3.3, 4.4, 5.5};
      * join(numbers, 1, 4, ", ");        // returns "2.2, 3.3, 4.4"
@@ -15860,11 +15775,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, 0, 1, ", ");        // returns "1.1" (single element)
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      * @see #join(double[], int, int, String, String, String)
      */
@@ -15881,7 +15796,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If the array is {@code null} or empty, or if {@code fromIndex == toIndex}, the method returns
      * an appropriate combination of prefix and suffix, or an empty string if both are empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * double[] numbers = {1.1, 2.2, 3.3, 4.4, 5.5};
      * 
@@ -15899,13 +15814,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null} or empty.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
+     * @param a the array containing the elements to join together, may be {@code null} or empty
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final double[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
@@ -15966,7 +15881,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "cherry"};
      * join(arr);                                     // returns "apple, banana, cherry"
@@ -15978,8 +15893,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(new String[0]);                           // returns ""
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null}.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty
+     * @param a the array containing the elements to join together, may be {@code null}
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty
      * @see #join(Object[], String, String, String, boolean)
      */
     public static String join(final Object[] a) {
@@ -15995,7 +15910,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "cherry"};
      * join(arr, " - ");                              // returns "apple - banana - cherry"
@@ -16009,9 +15924,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(new String[0], ", ");                     // returns ""
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null}.
-     * @param delimiter The delimiter string that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty
+     * @param a the array containing the elements to join together, may be {@code null}
+     * @param delimiter the delimiter string that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty
      * @see #join(Object[], String, String, String, boolean)
      */
     public static String join(final Object[] a, final String delimiter) {
@@ -16031,7 +15946,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty and both prefix and suffix are empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "cherry"};
      * join(arr, ", ", "[", "]");                     // returns "[apple, banana, cherry]"
@@ -16041,11 +15956,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(null, ", ", "Start: ", " :End");          // returns "Start:  :End"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null}.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string with prefix and suffix applied.
+     * @param a the array containing the elements to join together, may be {@code null}
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string with prefix and suffix applied.
      * @see #join(Object[], String, String, String, boolean)
      */
     public static String join(final Object[] a, final String delimiter, final String prefix, final String suffix) {
@@ -16062,7 +15977,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty and both prefix and suffix are empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {" apple ", " banana ", " cherry "};
      * join(arr, ", ", "[", "]", true);               // returns "[apple, banana, cherry]"
@@ -16072,12 +15987,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(mixed, " | ", "", "", true);              // returns "1 | hello | true"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null}.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @param trim If {@code true}, trims the string representations of each element.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
+     * @param a the array containing the elements to join together, may be {@code null}
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @param trim if {@code true}, trims the string representations of each element.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      */
     public static String join(final Object[] a, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         return join(a, 0, N.len(a), delimiter, prefix, suffix, trim);
@@ -16093,7 +16008,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "cherry", "date", "elderberry"};
      * join(arr, 1, 4, " - ");                        // returns "banana - cherry - date"
@@ -16101,11 +16016,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(arr, 2, 4, "");                           // returns "cherrydate"
      * }</pre>
      *
-     * @param a The array containing the elements to join together.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @param a the array containing the elements to join together.
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds
      * @see #join(Object[], int, int, String, String, String, boolean)
      */
@@ -16123,7 +16038,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {" apple ", " banana ", " cherry ", " date "};
      * join(arr, 1, 3, " - ", true);                  // returns "banana - cherry"
@@ -16131,12 +16046,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(arr, 0, 4, "", true);                     // returns "applebananacherrydate"
      * }</pre>
      *
-     * @param a The array containing the elements to join together.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param trim If {@code true}, trims the string representations of each element.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @param a the array containing the elements to join together.
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param trim if {@code true}, trims the string representations of each element.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds
      * @see #join(Object[], int, int, String, String, String, boolean)
      */
@@ -16154,7 +16069,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and both prefix and suffix are empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "cherry", "date"};
      * join(arr, 1, 3, ", ", "[", "]");               // returns "[banana, cherry]"
@@ -16162,13 +16077,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(arr, 2, 2, ", ", "[", "]");               // returns "[]"
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null}.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex}.
+     * @param a the array containing the elements to join together, may be {@code null}
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final Object[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
@@ -16187,7 +16102,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method handles edge cases gracefully: if the array is {@code null} or empty, or if {@code fromIndex == toIndex},
      * it returns just the concatenation of prefix and suffix (or an empty string if both are empty).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * String[] arr = {" apple ", " banana ", " cherry ", " date "};
      * join(arr, 1, 3, ", ", "[", "]", true);         // returns "[banana, cherry]"
@@ -16199,14 +16114,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(new String[0], 0, 0, ", ", "", "", true); // returns ""
      * }</pre>
      *
-     * @param a The array containing the elements to join together. It can be {@code null}.
-     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @param trim If {@code true}, trims the string representations of each element.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
+     * @param a the array containing the elements to join together, may be {@code null}
+     * @param fromIndex the start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @param trim if {@code true}, trims the string representations of each element.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final Object[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix,
@@ -16249,7 +16164,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified Iterable is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
      * join(list);                                    // returns "apple, banana, cherry"
@@ -16261,8 +16176,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(new ArrayList<>());                       // returns ""
      * }</pre>
      *
-     * @param c The Iterable containing the elements to join together. It can be {@code null}.
-     * @return The concatenated string. Returns an empty string if the specified Iterable is {@code null} or empty
+     * @param c the Iterable containing the elements to join together, may be {@code null}
+     * @return the concatenated string. Returns an empty string if the specified Iterable is {@code null} or empty
      * @see #join(Iterable, String, String, String, boolean)
      */
     public static String join(final Iterable<?> c) {
@@ -16278,7 +16193,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified Iterable is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
      * join(list, " - ");                             // returns "apple - banana - cherry"
@@ -16292,9 +16207,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(new ArrayList<>(), ", ");                 // returns ""
      * }</pre>
      *
-     * @param c The Iterable containing the elements to join together. It can be {@code null}.
-     * @param delimiter The delimiter string that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified Iterable is {@code null} or empty
+     * @param c the Iterable containing the elements to join together, may be {@code null}
+     * @param delimiter the delimiter string that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified Iterable is {@code null} or empty
      * @see #join(Iterable, String, String, String, boolean)
      */
     public static String join(final Iterable<?> c, final String delimiter) {
@@ -16310,7 +16225,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns just the concatenation of prefix and suffix if the Iterable is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
      * join(list, ", ", "[", "]");                    // returns "[apple, banana, cherry]"
@@ -16320,11 +16235,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(null, ", ", "Start: ", " :End");          // returns "Start:  :End"
      * }</pre>
      *
-     * @param c The Iterable containing the elements to join together. It can be {@code null}.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified Iterable is {@code null} or empty and <i>prefix, suffix</i> are empty.
+     * @param c the Iterable containing the elements to join together, may be {@code null}
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string. Returns an empty string if the specified Iterable is {@code null} or empty and <i>prefix, suffix</i> are empty.
      * @see #join(Iterable, String, String, String, boolean)
      */
     public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix) {
@@ -16342,7 +16257,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>For Collection types, this method delegates to the more efficient range-based join method.
      * For other Iterable types, it uses iterator-based processing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list = Arrays.asList(" apple ", " banana ", " cherry ");
      * join(list, ", ", "[", "]", true);              // returns "[apple, banana, cherry]"
@@ -16352,12 +16267,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(set, " | ", "", "", true);                // returns "one | two" (order may vary)
      * }</pre>
      *
-     * @param c The Iterable containing the elements to join together. It can be {@code null}.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @param trim If {@code true}, trims the string representations of each element.
-     * @return The concatenated string. Returns an empty string if the specified Iterable is {@code null} or empty and <i>prefix, suffix</i> are empty.
+     * @param c the Iterable containing the elements to join together, may be {@code null}
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @param trim if {@code true}, trims the string representations of each element.
+     * @return the concatenated string. Returns an empty string if the specified Iterable is {@code null} or empty and <i>prefix, suffix</i> are empty.
      */
     public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         if (c instanceof final Collection<?> coll) { // NOSONAR
@@ -16377,7 +16292,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified Collection is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry", "date", "elderberry");
      * join(list, 1, 4, " - ");                       // returns "banana - cherry - date"
@@ -16385,11 +16300,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(list, 2, 4, "");                          // returns "cherrydate"
      * }</pre>
      *
-     * @param c The Collection containing the elements to join together.
-     * @param fromIndex The start index in the collection from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the collection up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified Collection is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @param c the Collection containing the elements to join together.
+     * @param fromIndex the start index in the collection from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the collection up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified Collection is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds
      * @see #join(Collection, int, int, String, String, String, boolean)
      */
@@ -16407,7 +16322,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified Collection is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list = Arrays.asList(" apple ", " banana ", " cherry ", " date ");
      * join(list, 1, 3, " - ", true);                 // returns "banana - cherry"
@@ -16415,12 +16330,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(list, 0, 4, "", true);                    // returns "applebananacherrydate"
      * }</pre>
      *
-     * @param c The Collection containing the elements to join together.
-     * @param fromIndex The start index in the collection from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the collection up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param trim If {@code true}, trims the string representations of each element.
-     * @return The concatenated string. Returns an empty string if the specified Collection is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @param c the Collection containing the elements to join together.
+     * @param fromIndex the start index in the collection from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the collection up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param trim if {@code true}, trims the string representations of each element.
+     * @return the concatenated string. Returns an empty string if the specified Collection is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds
      * @see #join(Collection, int, int, String, String, String, boolean)
      */
@@ -16438,7 +16353,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns just the concatenation of prefix and suffix if the collection is {@code null} or empty or {@code fromIndex == toIndex}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry", "date");
      * join(list, 1, 3, ", ", "[", "]");              // returns "[banana, cherry]"
@@ -16446,13 +16361,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(list, 2, 2, ", ", "[", "]");              // returns "[]"
      * }</pre>
      *
-     * @param c The Collection containing the elements to join together. It can be {@code null}.
-     * @param fromIndex The start index in the Collection from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the Collection up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified Collection is {@code null} or empty or {@code fromIndex == toIndex}.
+     * @param c the Collection containing the elements to join together, may be {@code null}
+     * @param fromIndex the start index in the Collection from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the Collection up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string. Returns an empty string if the specified Collection is {@code null} or empty or {@code fromIndex == toIndex}.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the Collection size.
      */
     public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
@@ -16471,7 +16386,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The method efficiently handles List types with RandomAccess for better performance.
      * It returns just the concatenation of prefix and suffix if the collection is {@code null} or empty or {@code fromIndex == toIndex}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list = Arrays.asList(" apple ", " banana ", " cherry ", " date ");
      * join(list, 1, 3, ", ", "[", "]", true);        // returns "[banana, cherry]"
@@ -16483,14 +16398,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(new ArrayList<>(), 0, 0, ", ", "", "", true); // returns ""
      * }</pre>
      *
-     * @param c The Collection containing the elements to join together. It can be {@code null}.
-     * @param fromIndex The start index in the Collection from which to start joining elements. It must be a non-negative integer.
-     * @param toIndex The end index in the Collection up to which to join elements. It must be a non-negative integer and not less than fromIndex.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @param trim If {@code true}, trims the string representations of each element.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
+     * @param c the Collection containing the elements to join together, may be {@code null}
+     * @param fromIndex the start index in the Collection from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex the end index in the Collection up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @param trim if {@code true}, trims the string representations of each element.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the Collection size.
      */
     public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix,
@@ -16546,7 +16461,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified Iterator is {@code null} or has no elements.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
      * join(list.iterator());                         // returns "apple, banana, cherry"
@@ -16558,8 +16473,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(new ArrayList<>().iterator());            // returns ""
      * }</pre>
      *
-     * @param iter The Iterator containing the elements to join together. It can be {@code null}.
-     * @return The concatenated string. Returns an empty string if the specified Iterator is {@code null} or empty
+     * @param iter the Iterator containing the elements to join together, may be {@code null}
+     * @return the concatenated string. Returns an empty string if the specified Iterator is {@code null} or empty
      * @see #join(Iterator, String, String, String, boolean)
      */
     public static String join(final Iterator<?> iter) {
@@ -16576,7 +16491,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the specified Iterator is {@code null} or has no elements.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
      * join(list.iterator(), " - ");                  // returns "apple - banana - cherry"
@@ -16590,9 +16505,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(new ArrayList<>().iterator(), ", ");      // returns ""
      * }</pre>
      *
-     * @param iter The Iterator containing the elements to join together. It can be {@code null}.
-     * @param delimiter The delimiter string that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @return The concatenated string. Returns an empty string if the specified Iterator is {@code null} or empty
+     * @param iter the Iterator containing the elements to join together, may be {@code null}
+     * @param delimiter the delimiter string that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @return the concatenated string. Returns an empty string if the specified Iterator is {@code null} or empty
      * @see #join(Iterator, String, String, String, boolean)
      */
     public static String join(final Iterator<?> iter, final String delimiter) {
@@ -16609,7 +16524,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns just the concatenation of prefix and suffix if the Iterator is {@code null} or has no elements.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
      * join(list.iterator(), ", ", "[", "]");         // returns "[apple, banana, cherry]"
@@ -16619,11 +16534,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(null, ", ", "Start: ", " :End");          // returns "Start:  :End"
      * }</pre>
      *
-     * @param iter The Iterator containing the elements to join together. It can be {@code null}.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified Iterator is {@code null} or empty and <i>prefix, suffix</i> are empty.
+     * @param iter the Iterator containing the elements to join together, may be {@code null}
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string. Returns an empty string if the specified Iterator is {@code null} or empty and <i>prefix, suffix</i> are empty.
      * @see #join(Iterator, String, String, String, boolean)
      */
     public static String join(final Iterator<?> iter, final String delimiter, final String prefix, final String suffix) {
@@ -16641,7 +16556,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method internally converts the iterator to a list and then uses the collection-based join method for processing.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<String> list = Arrays.asList(" apple ", " banana ", " cherry ");
      * join(list.iterator(), ", ", "[", "]", true);   // returns "[apple, banana, cherry]"
@@ -16651,12 +16566,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * join(set.iterator(), " | ", "", "", true);     // returns "one | two" (order may vary)
      * }</pre>
      *
-     * @param iter The Iterator containing the elements to join together. It can be {@code null}.
-     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @param trim If {@code true}, trims the string representations of each element.
-     * @return The concatenated string. Returns an empty string if the specified Iterator is {@code null} or empty and <i>prefix, suffix</i> are empty.
+     * @param iter the Iterator containing the elements to join together, may be {@code null}
+     * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @param trim if {@code true}, trims the string representations of each element.
+     * @return the concatenated string. Returns an empty string if the specified Iterator is {@code null} or empty and <i>prefix, suffix</i> are empty.
      */
     public static String join(final Iterator<?> iter, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         if (iter == null) {
@@ -16685,7 +16600,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty maps.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("apple", 5);
@@ -16697,8 +16612,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * joinEntries(null);                             // returns ""
      * }</pre>
      *
-     * @param m The Map containing the entries to join. It can be {@code null} or empty.
-     * @return A string representation of the map entries, or an empty string if the map is null or empty.
+     * @param m the Map containing the entries to join, may be {@code null} or empty
+     * @return a string representation of the map entries, or an empty string if the map is null or empty.
      * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m) {
@@ -16714,7 +16629,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty maps.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("name", 1);
@@ -16726,9 +16641,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * joinEntries(emptyMap, ", ");                   // returns ""
      * }</pre>
      *
-     * @param m The Map containing the entries to join. It can be {@code null} or empty.
-     * @param entryDelimiter The delimiter string that separates each entry.
-     * @return A string representation of the map entries, or an empty string if the map is null or empty.
+     * @param m the Map containing the entries to join, may be {@code null} or empty
+     * @param entryDelimiter the delimiter string that separates each entry.
+     * @return a string representation of the map entries, or an empty string if the map is null or empty.
      * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter) {
@@ -16749,7 +16664,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty maps.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("min", 10);
@@ -16762,10 +16677,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * joinEntries(emptyMap, ", ", " = ");            // returns ""
      * }</pre>
      *
-     * @param m The Map containing the entries to join. It can be {@code null} or empty.
-     * @param entryDelimiter The delimiter string that separates each entry.
-     * @param keyValueDelimiter The delimiter string that separates the key and value within each entry. It can be empty.
-     * @return A string representation of the map entries, or an empty string if the map is null or empty.
+     * @param m the Map containing the entries to join, may be {@code null} or empty
+     * @param entryDelimiter the delimiter string that separates each entry.
+     * @param keyValueDelimiter the delimiter string that separates the key and value within each entry. It can be empty.
+     * @return a string representation of the map entries, or an empty string if the map is null or empty.
      * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter) {
@@ -16786,7 +16701,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the map is null or empty, the method returns only the concatenated prefix and suffix (or empty string if both are empty).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("x", 1);
@@ -16799,12 +16714,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * joinEntries(emptyMap, ", ", "=", "", "");      // returns ""
      * }</pre>
      *
-     * @param m The Map containing the entries to join. It can be {@code null} or empty.
-     * @param entryDelimiter The delimiter string that separates each entry.
-     * @param keyValueDelimiter The delimiter string that separates the key and value within each entry. It can be empty.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string with prefix and suffix, or just prefix+suffix if the map is null or empty.
+     * @param m the Map containing the entries to join, may be {@code null} or empty
+     * @param entryDelimiter the delimiter string that separates each entry.
+     * @param keyValueDelimiter the delimiter string that separates the key and value within each entry. It can be empty.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string with prefix and suffix, or just prefix+suffix if the map is null or empty.
      * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix) {
@@ -16822,7 +16737,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the map is null or empty, the method returns only the concatenated prefix and suffix (or empty string if both are empty).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Map<String, String> map = new LinkedHashMap<>();
      * map.put(" name ", " John ");
@@ -16837,13 +16752,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * joinEntries(numbers, " + ", "*", "(", ")", false); // returns "(1*100 + 2*200)"
      * }</pre>
      *
-     * @param m The Map containing the entries to join. It can be {@code null} or empty.
-     * @param entryDelimiter The delimiter that separates each entry. It can be empty.
-     * @param keyValueDelimiter The delimiter that separates the key and value within each entry. It can be empty.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @param trim If {@code true}, trims the string representations of each key and value.
-     * @return The concatenated string with prefix and suffix, or just prefix+suffix if the map is null or empty.
+     * @param m the Map containing the entries to join, may be {@code null} or empty
+     * @param entryDelimiter the delimiter that separates each entry. It can be empty.
+     * @param keyValueDelimiter the delimiter that separates the key and value within each entry. It can be empty.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @param trim if {@code true}, trims the string representations of each key and value.
+     * @return the concatenated string with prefix and suffix, or just prefix+suffix if the map is null or empty.
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix,
             final boolean trim) {
@@ -16859,7 +16774,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the map is null, empty, or if fromIndex equals toIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("first", 1);
@@ -16871,11 +16786,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * joinEntries(map, 2, 2, ", ");                  // returns ""
      * }</pre>
      *
-     * @param m The Map containing the entries to join. It can be {@code null} or empty.
-     * @param fromIndex The starting index (inclusive) of entries to include.
-     * @param toIndex The ending index (exclusive) of entries to include.
-     * @param entryDelimiter The delimiter string that separates each entry.
-     * @return A string representation of the specified range of map entries.
+     * @param m the Map containing the entries to join, may be {@code null} or empty
+     * @param fromIndex the starting index (inclusive) of entries to include.
+     * @param toIndex the ending index (exclusive) of entries to include.
+     * @param entryDelimiter the delimiter string that separates each entry.
+     * @return a string representation of the specified range of map entries.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range.
      * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
@@ -16893,7 +16808,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the map is null, empty, or if fromIndex equals toIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Map<String, String> map = new LinkedHashMap<>();
      * map.put(" key1 ", " value1 ");
@@ -16905,12 +16820,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * joinEntries(map, 1, 3, " | ", true);           // returns "key2=value2 | key3=value3"
      * }</pre>
      *
-     * @param m The Map containing the entries to join. It can be {@code null} or empty.
-     * @param fromIndex The starting index (inclusive) of entries to include.
-     * @param toIndex The ending index (exclusive) of entries to include.
-     * @param entryDelimiter The delimiter string that separates each entry.
-     * @param trim If {@code true}, trims the string representations of each key and value.
-     * @return A string representation of the specified range of map entries.
+     * @param m the Map containing the entries to join, may be {@code null} or empty
+     * @param fromIndex the starting index (inclusive) of entries to include.
+     * @param toIndex the ending index (exclusive) of entries to include.
+     * @param entryDelimiter the delimiter string that separates each entry.
+     * @param trim if {@code true}, trims the string representations of each key and value.
+     * @return a string representation of the specified range of map entries.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range.
      * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
@@ -16928,7 +16843,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the map is null, empty, or if fromIndex equals toIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("min", 10);
@@ -16940,12 +16855,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * joinEntries(map, 0, 1, "|", "");               // returns "min10"
      * }</pre>
      *
-     * @param m The Map containing the entries to join. It can be {@code null} or empty.
-     * @param fromIndex The starting index (inclusive) of entries to include.
-     * @param toIndex The ending index (exclusive) of entries to include.
-     * @param entryDelimiter The delimiter string that separates each entry.
-     * @param keyValueDelimiter The delimiter string that separates the key and value within each entry. It can be empty.
-     * @return A string representation of the specified range of map entries.
+     * @param m the Map containing the entries to join, may be {@code null} or empty
+     * @param fromIndex the starting index (inclusive) of entries to include.
+     * @param toIndex the ending index (exclusive) of entries to include.
+     * @param entryDelimiter the delimiter string that separates each entry.
+     * @param keyValueDelimiter the delimiter string that separates the key and value within each entry. It can be empty.
+     * @return a string representation of the specified range of map entries.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range.
      * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
@@ -16964,7 +16879,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the map is null, empty, or if fromIndex equals toIndex.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Map<String, String> map = new LinkedHashMap<>();
      * map.put(" name ", " John ");
@@ -16976,13 +16891,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * joinEntries(map, 1, 3, " AND ", " IS ", true); // returns "age IS 25 AND city IS NYC"
      * }</pre>
      *
-     * @param m The Map containing the entries to join. It can be {@code null} or empty.
-     * @param fromIndex The starting index (inclusive) of entries to include.
-     * @param toIndex The ending index (exclusive) of entries to include.
-     * @param entryDelimiter The delimiter string that separates each entry.
-     * @param keyValueDelimiter The delimiter string that separates the key and value within each entry. It can be empty.
-     * @param trim If {@code true}, leading and trailing whitespace of each key and value will be removed.
-     * @return A string representation of the specified range of map entries.
+     * @param m the Map containing the entries to join, may be {@code null} or empty
+     * @param fromIndex the starting index (inclusive) of entries to include.
+     * @param toIndex the ending index (exclusive) of entries to include.
+     * @param entryDelimiter the delimiter string that separates each entry.
+     * @param keyValueDelimiter the delimiter string that separates the key and value within each entry. It can be empty.
+     * @param trim if {@code true}, leading and trailing whitespace of each key and value will be removed.
+     * @return a string representation of the specified range of map entries.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range.
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final String keyValueDelimiter,
@@ -17002,7 +16917,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If the map is null, empty, or if fromIndex equals toIndex, the method returns only the concatenated prefix and suffix 
      * (or empty string if both are empty).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("x", 1);
@@ -17014,14 +16929,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * joinEntries(map, 2, 2, ", ", "=", "{", "}");   // returns "{}"
      * }</pre>
      *
-     * @param m The Map containing the entries to join. It can be {@code null} or empty.
-     * @param fromIndex The starting index (inclusive) of entries to include.
-     * @param toIndex The ending index (exclusive) of entries to include.
-     * @param entryDelimiter The delimiter string that separates each entry.
-     * @param keyValueDelimiter The delimiter string that separates the key and value within each entry. It can be empty.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string with prefix and suffix.
+     * @param m the Map containing the entries to join, may be {@code null} or empty
+     * @param fromIndex the starting index (inclusive) of entries to include.
+     * @param toIndex the ending index (exclusive) of entries to include.
+     * @param entryDelimiter the delimiter string that separates each entry.
+     * @param keyValueDelimiter the delimiter string that separates the key and value within each entry. It can be empty.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @return the concatenated string with prefix and suffix.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range.
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final String keyValueDelimiter,
@@ -17042,7 +16957,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If the map is null, empty, or if fromIndex equals toIndex, the method returns only the concatenated prefix and suffix 
      * (or empty string if both are empty).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Map<String, String> map = new LinkedHashMap<>();
      * map.put(" id ", " 123 ");
@@ -17057,15 +16972,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * joinEntries(map, 2, 2, ", ", "=", "[", "]", false); // returns "[]"
      * }</pre>
      *
-     * @param m The Map containing the entries to join. It can be {@code null} or empty.
-     * @param fromIndex The start index in the entry set from which to start joining entries. It should be non-negative and no larger than the size of the map.
-     * @param toIndex The end index in the entry set up to which to join entries. It should be non-negative, no larger than the size of the map, and not less than fromIndex.
-     * @param entryDelimiter The delimiter that separates each entry. It can be empty.
-     * @param keyValueDelimiter The delimiter that separates the key and value within each entry. It can be empty.
-     * @param prefix The prefix to be added at the beginning. It can be empty.
-     * @param suffix The suffix to be added at the end. It can be empty.
-     * @param trim If {@code true}, leading and trailing whitespace of each key and value will be removed.
-     * @return The concatenated string with prefix and suffix, or just prefix+suffix if the range is empty.
+     * @param m the Map containing the entries to join, may be {@code null} or empty
+     * @param fromIndex the start index in the entry set from which to start joining entries. It should be non-negative and no larger than the size of the map.
+     * @param toIndex the end index in the entry set up to which to join entries. It should be non-negative, no larger than the size of the map, and not less than fromIndex.
+     * @param entryDelimiter the delimiter that separates each entry. It can be empty.
+     * @param keyValueDelimiter the delimiter that separates the key and value within each entry. It can be empty.
+     * @param prefix the prefix to be added at the beginning. It can be empty.
+     * @param suffix the suffix to be added at the end. It can be empty.
+     * @param trim if {@code true}, leading and trailing whitespace of each key and value will be removed.
+     * @return the concatenated string with prefix and suffix, or just prefix+suffix if the range is empty.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range.
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final String keyValueDelimiter,
@@ -17140,7 +17055,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string for null or empty iterables.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<Person> people = Arrays.asList(
      *     new Person("John", 25),
@@ -17161,7 +17076,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param <T> the type of elements in the iterable
-     * @param c the iterable whose elements are to be joined. It can be {@code null} or empty.
+     * @param c the iterable whose elements are to be joined, may be {@code null} or empty
      * @param entryDelimiter the delimiter to use between entries
      * @param keyValueDelimiter the delimiter to use between keys and values
      * @param keyExtractor function to extract keys from elements. Must not be {@code null}.
@@ -17187,7 +17102,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>If the iterable is null or empty, the method returns only the concatenated prefix and suffix 
      * (or empty string if both are empty).</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * List<Map.Entry<String, Integer>> entries = Arrays.asList(
      *     Map.entry(" name ", 1),
@@ -17210,12 +17125,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param <T> the type of elements in the iterable
-     * @param c the iterable whose elements are to be joined. It can be {@code null} or empty.
+     * @param c the iterable whose elements are to be joined, may be {@code null} or empty
      * @param entryDelimiter the delimiter to use between entries
      * @param keyValueDelimiter the delimiter to use between keys and values
      * @param prefix the string to place at the start of the result. It can be empty.
      * @param suffix the string to place at the end of the result. It can be empty.
-     * @param trim If {@code true}, trims the string representations of extracted keys and values.
+     * @param trim if {@code true}, trims the string representations of extracted keys and values.
      * @param keyExtractor function to extract keys from elements. Must not be {@code null}.
      * @param valueExtractor function to extract values from elements. Must not be {@code null}.
      * @return a string representation of the iterable's elements with prefix and suffix, or just prefix+suffix if the iterable is null or empty.
@@ -17288,7 +17203,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if both input strings are {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("Hello", "World");          // returns "HelloWorld"
      * concat("Hello", null);             // returns "Hello"
@@ -17298,9 +17213,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * concat("", "");                    // returns ""
      * }</pre>
      *
-     * @param a The first string to concatenate. It can be {@code null} or empty.
-     * @param b The second string to concatenate. It can be {@code null} or empty.
-     * @return The concatenated string. Returns an empty string if both inputs are {@code null} or empty.
+     * @param a the first string to concatenate, may be {@code null} or empty
+     * @param b the second string to concatenate, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if both inputs are {@code null} or empty.
      */
     public static String concat(final String a, final String b) {
         if (N.isEmpty(a)) {
@@ -17319,7 +17234,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all input strings are {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("Hello", " ", "World");     // returns "Hello World"
      * concat("A", "B", "C");             // returns "ABC"
@@ -17328,10 +17243,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * concat("", "", "");                // returns ""
      * }</pre>
      *
-     * @param a The first string to concatenate. It can be {@code null} or empty.
-     * @param b The second string to concatenate. It can be {@code null} or empty.
-     * @param c The third string to concatenate. It can be {@code null} or empty.
-     * @return The concatenated string. Returns an empty string if all inputs are {@code null} or empty.
+     * @param a the first string to concatenate, may be {@code null} or empty
+     * @param b the second string to concatenate, may be {@code null} or empty
+     * @param c the third string to concatenate, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if all inputs are {@code null} or empty.
      */
     public static String concat(final String a, final String b, final String c) {
         return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c));
@@ -17346,7 +17261,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all input strings are {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("Hello", " ", "World", "!");        // returns "Hello World!"
      * concat("A", "B", "C", "D");                // returns "ABCD"
@@ -17354,11 +17269,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * concat(null, null, null, null);            // returns ""
      * }</pre>
      *
-     * @param a The first string to concatenate. It can be {@code null} or empty.
-     * @param b The second string to concatenate. It can be {@code null} or empty.
-     * @param c The third string to concatenate. It can be {@code null} or empty.
-     * @param d The fourth string to concatenate. It can be {@code null} or empty.
-     * @return The concatenated string. Returns an empty string if all inputs are {@code null} or empty.
+     * @param a the first string to concatenate, may be {@code null} or empty
+     * @param b the second string to concatenate, may be {@code null} or empty
+     * @param c the third string to concatenate, may be {@code null} or empty
+     * @param d the fourth string to concatenate, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if all inputs are {@code null} or empty.
      */
     public static String concat(final String a, final String b, final String c, final String d) {
         return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d));
@@ -17373,7 +17288,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all input strings are {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("Hello", " ", "World", "!", "!");   // returns "Hello World!!"
      * concat("A", "B", "C", "D", "E");           // returns "ABCDE"
@@ -17381,12 +17296,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * concat(null, null, null, null, null);      // returns ""
      * }</pre>
      *
-     * @param a The first string to concatenate. It can be {@code null} or empty.
-     * @param b The second string to concatenate. It can be {@code null} or empty.
-     * @param c The third string to concatenate. It can be {@code null} or empty.
-     * @param d The fourth string to concatenate. It can be {@code null} or empty.
-     * @param e The fifth string to concatenate. It can be {@code null} or empty.
-     * @return The concatenated string. Returns an empty string if all inputs are {@code null} or empty.
+     * @param a the first string to concatenate, may be {@code null} or empty
+     * @param b the second string to concatenate, may be {@code null} or empty
+     * @param c the third string to concatenate, may be {@code null} or empty
+     * @param d the fourth string to concatenate, may be {@code null} or empty
+     * @param e the fifth string to concatenate, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if all inputs are {@code null} or empty.
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e) {
         return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e));
@@ -17401,7 +17316,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all input strings are {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("A", "B", "C", "D", "E", "F");      // returns "ABCDEF"
      * concat("1", "2", "3", "4", "5", "6");      // returns "123456"
@@ -17409,13 +17324,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * concat(null, null, null, null, null, null); // returns ""
      * }</pre>
      *
-     * @param a The first string to concatenate. It can be {@code null} or empty.
-     * @param b The second string to concatenate. It can be {@code null} or empty.
-     * @param c The third string to concatenate. It can be {@code null} or empty.
-     * @param d The fourth string to concatenate. It can be {@code null} or empty.
-     * @param e The fifth string to concatenate. It can be {@code null} or empty.
-     * @param f The sixth string to concatenate. It can be {@code null} or empty.
-     * @return The concatenated string. Returns an empty string if all inputs are {@code null} or empty.
+     * @param a the first string to concatenate, may be {@code null} or empty
+     * @param b the second string to concatenate, may be {@code null} or empty
+     * @param c the third string to concatenate, may be {@code null} or empty
+     * @param d the fourth string to concatenate, may be {@code null} or empty
+     * @param e the fifth string to concatenate, may be {@code null} or empty
+     * @param f the sixth string to concatenate, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if all inputs are {@code null} or empty.
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f) {
         return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f));
@@ -17430,21 +17345,21 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all input strings are {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("A", "B", "C", "D", "E", "F", "G"); // returns "ABCDEFG"
      * concat("1", "2", "3", "4", "5", "6", "7"); // returns "1234567"
      * concat("H", "e", "l", "l", "o", " ", "7"); // returns "Hello 7"
      * }</pre>
      *
-     * @param a The first string to concatenate. It can be {@code null} or empty.
-     * @param b The second string to concatenate. It can be {@code null} or empty.
-     * @param c The third string to concatenate. It can be {@code null} or empty.
-     * @param d The fourth string to concatenate. It can be {@code null} or empty.
-     * @param e The fifth string to concatenate. It can be {@code null} or empty.
-     * @param f The sixth string to concatenate. It can be {@code null} or empty.
-     * @param g The seventh string to concatenate. It can be {@code null} or empty.
-     * @return The concatenated string. Returns an empty string if all inputs are {@code null} or empty.
+     * @param a the first string to concatenate, may be {@code null} or empty
+     * @param b the second string to concatenate, may be {@code null} or empty
+     * @param c the third string to concatenate, may be {@code null} or empty
+     * @param d the fourth string to concatenate, may be {@code null} or empty
+     * @param e the fifth string to concatenate, may be {@code null} or empty
+     * @param f the sixth string to concatenate, may be {@code null} or empty
+     * @param g the seventh string to concatenate, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if all inputs are {@code null} or empty.
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f, final String g) {
         return String.join(Strings.EMPTY, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f), nullToEmpty(g));
@@ -17459,22 +17374,22 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all input strings are {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("A", "B", "C", "D", "E", "F", "G", "H"); // returns "ABCDEFGH"
      * concat("1", "2", "3", "4", "5", "6", "7", "8"); // returns "12345678"
      * concat("H", "e", "l", "l", "o", " ", "8", "!"); // returns "Hello 8!"
      * }</pre>
      *
-     * @param a The first string to concatenate. It can be {@code null} or empty.
-     * @param b The second string to concatenate. It can be {@code null} or empty.
-     * @param c The third string to concatenate. It can be {@code null} or empty.
-     * @param d The fourth string to concatenate. It can be {@code null} or empty.
-     * @param e The fifth string to concatenate. It can be {@code null} or empty.
-     * @param f The sixth string to concatenate. It can be {@code null} or empty.
-     * @param g The seventh string to concatenate. It can be {@code null} or empty.
-     * @param h The eighth string to concatenate. It can be {@code null} or empty.
-     * @return The concatenated string. Returns an empty string if all inputs are {@code null} or empty.
+     * @param a the first string to concatenate, may be {@code null} or empty
+     * @param b the second string to concatenate, may be {@code null} or empty
+     * @param c the third string to concatenate, may be {@code null} or empty
+     * @param d the fourth string to concatenate, may be {@code null} or empty
+     * @param e the fifth string to concatenate, may be {@code null} or empty
+     * @param f the sixth string to concatenate, may be {@code null} or empty
+     * @param g the seventh string to concatenate, may be {@code null} or empty
+     * @param h the eighth string to concatenate, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if all inputs are {@code null} or empty.
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f, final String g,
             final String h) {
@@ -17491,23 +17406,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all input strings are {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("A", "B", "C", "D", "E", "F", "G", "H", "I"); // returns "ABCDEFGHI"
      * concat("1", "2", "3", "4", "5", "6", "7", "8", "9"); // returns "123456789"
      * concat("H", "e", "l", "l", "o", " ", "9", "!", "!"); // returns "Hello 9!!"
      * }</pre>
      *
-     * @param a The first string to concatenate. It can be {@code null}.
-     * @param b The second string to concatenate. It can be {@code null}.
-     * @param c The third string to concatenate. It can be {@code null}.
-     * @param d The fourth string to concatenate. It can be {@code null}.
-     * @param e The fifth string to concatenate. It can be {@code null}.
-     * @param f The sixth string to concatenate. It can be {@code null}.
-     * @param g The seventh string to concatenate. It can be {@code null}.
-     * @param h The eighth string to concatenate. It can be {@code null}.
-     * @param i The ninth string to concatenate. It can be {@code null}.
-     * @return The concatenated string. Returns {@code ""} if all input strings are {@code null} or empty.
+     * @param a the first string to concatenate, may be {@code null}
+     * @param b the second string to concatenate, may be {@code null}
+     * @param c the third string to concatenate, may be {@code null}
+     * @param d the fourth string to concatenate, may be {@code null}
+     * @param e the fifth string to concatenate, may be {@code null}
+     * @param f the sixth string to concatenate, may be {@code null}
+     * @param g the seventh string to concatenate, may be {@code null}
+     * @param h the eighth string to concatenate, may be {@code null}
+     * @param i the ninth string to concatenate, may be {@code null}
+     * @return the concatenated string. Returns {@code ""} if all input strings are {@code null} or empty.
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f, final String g, final String h,
             final String i) {
@@ -17525,7 +17440,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the array is {@code null}, empty, or contains only {@code null} elements.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat(new String[]{"Hello", " ", "World"});      // returns "Hello World"
      * concat(new String[]{"A", "B", "C", "D"});         // returns "ABCD"
@@ -17535,8 +17450,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * concat((String[]) null);                          // returns ""
      * }</pre>
      *
-     * @param a The array of strings to concatenate. It can be {@code null} or empty.
-     * @return The concatenated string. Returns an empty string if the array is {@code null} or empty.
+     * @param a the array of strings to concatenate, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if the array is {@code null} or empty.
      */
     public static String concat(final String... a) {
         final int len = N.len(a);
@@ -17583,7 +17498,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if both objects are {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("Hello", 123);              // returns "Hello123"
      * concat(42, " is the answer");      // returns "42 is the answer"
@@ -17592,9 +17507,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * concat(null, null);                // returns ""
      * }</pre>
      *
-     * @param a The first object to concatenate. It can be {@code null}.
-     * @param b The second object to concatenate. It can be {@code null}.
-     * @return The concatenated string representation of the objects.
+     * @param a the first object to concatenate, may be {@code null}
+     * @param b the second object to concatenate, may be {@code null}
+     * @return the concatenated string representation of the objects.
      */
     public static String concat(final Object a, final Object b) {
         return Strings.concat(N.toString(a), N.toString(b));
@@ -17609,7 +17524,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all objects are {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("Hello", " ", "World");     // returns "Hello World"
      * concat(1, 2, 3);                   // returns "123"
@@ -17617,10 +17532,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * concat(null, null, null);          // returns ""
      * }</pre>
      *
-     * @param a The first object to concatenate. It can be {@code null}.
-     * @param b The second object to concatenate. It can be {@code null}.
-     * @param c The third object to concatenate. It can be {@code null}.
-     * @return The concatenated string representation of the objects.
+     * @param a the first object to concatenate, may be {@code null}
+     * @param b the second object to concatenate, may be {@code null}
+     * @param c the third object to concatenate, may be {@code null}
+     * @return the concatenated string representation of the objects.
      * @see #concat(Object, Object)
      */
     public static String concat(final Object a, final Object b, final Object c) {
@@ -17636,7 +17551,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all objects are {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("A", "B", "C", "D");                // returns "ABCD"
      * concat(1, "+", 2, "=3");                   // returns "1+2=3"
@@ -17644,11 +17559,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * concat(null, null, null, null);            // returns ""
      * }</pre>
      *
-     * @param a The first object to concatenate. It can be {@code null}.
-     * @param b The second object to concatenate. It can be {@code null}.
-     * @param c The third object to concatenate. It can be {@code null}.
-     * @param d The fourth object to concatenate. It can be {@code null}.
-     * @return The concatenated string representation of the objects.
+     * @param a the first object to concatenate, may be {@code null}
+     * @param b the second object to concatenate, may be {@code null}
+     * @param c the third object to concatenate, may be {@code null}
+     * @param d the fourth object to concatenate, may be {@code null}
+     * @return the concatenated string representation of the objects.
      * @see #concat(Object, Object)
      */
     public static String concat(final Object a, final Object b, final Object c, final Object d) {
@@ -17664,7 +17579,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all objects are {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("A", "B", "C", "D", "E");           // returns "ABCDE"
      * concat(1, " ", 2, " ", 3);                 // returns "1 2 3"
@@ -17672,12 +17587,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * concat(null, null, null, null, null);      // returns ""
      * }</pre>
      *
-     * @param a The first object to concatenate. It can be {@code null}.
-     * @param b The second object to concatenate. It can be {@code null}.
-     * @param c The third object to concatenate. It can be {@code null}.
-     * @param d The fourth object to concatenate. It can be {@code null}.
-     * @param e The fifth object to concatenate. It can be {@code null}.
-     * @return The concatenated string representation of the objects.
+     * @param a the first object to concatenate, may be {@code null}
+     * @param b the second object to concatenate, may be {@code null}
+     * @param c the third object to concatenate, may be {@code null}
+     * @param d the fourth object to concatenate, may be {@code null}
+     * @param e the fifth object to concatenate, may be {@code null}
+     * @return the concatenated string representation of the objects.
      * @see #concat(Object, Object)
      */
     public static String concat(final Object a, final Object b, final Object c, final Object d, final Object e) {
@@ -17693,20 +17608,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all objects are {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("A", "B", "C", "D", "E", "F");      // returns "ABCDEF"
      * concat(1, 2, 3, 4, 5, 6);                  // returns "123456"
      * concat("H", "e", "l", "l", "o", "!");      // returns "Hello!"
      * }</pre>
      *
-     * @param a The first object to concatenate. It can be {@code null}.
-     * @param b The second object to concatenate. It can be {@code null}.
-     * @param c The third object to concatenate. It can be {@code null}.
-     * @param d The fourth object to concatenate. It can be {@code null}.
-     * @param e The fifth object to concatenate. It can be {@code null}.
-     * @param f The sixth object to concatenate. It can be {@code null}.
-     * @return The concatenated string representation of the objects.
+     * @param a the first object to concatenate, may be {@code null}
+     * @param b the second object to concatenate, may be {@code null}
+     * @param c the third object to concatenate, may be {@code null}
+     * @param d the fourth object to concatenate, may be {@code null}
+     * @param e the fifth object to concatenate, may be {@code null}
+     * @param f the sixth object to concatenate, may be {@code null}
+     * @return the concatenated string representation of the objects.
      * @see #concat(Object, Object)
      */
     public static String concat(final Object a, final Object b, final Object c, final Object d, final Object e, final Object f) {
@@ -17722,21 +17637,21 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all objects are {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("A", "B", "C", "D", "E", "F", "G"); // returns "ABCDEFG"
      * concat(1, 2, 3, 4, 5, 6, 7);               // returns "1234567"
      * concat("H", "e", "l", "l", "o", " ", 7);   // returns "Hello 7"
      * }</pre>
      *
-     * @param a The first object to concatenate. It can be {@code null}.
-     * @param b The second object to concatenate. It can be {@code null}.
-     * @param c The third object to concatenate. It can be {@code null}.
-     * @param d The fourth object to concatenate. It can be {@code null}.
-     * @param e The fifth object to concatenate. It can be {@code null}.
-     * @param f The sixth object to concatenate. It can be {@code null}.
-     * @param g The seventh object to concatenate. It can be {@code null}.
-     * @return The concatenated string representation of the objects.
+     * @param a the first object to concatenate, may be {@code null}
+     * @param b the second object to concatenate, may be {@code null}
+     * @param c the third object to concatenate, may be {@code null}
+     * @param d the fourth object to concatenate, may be {@code null}
+     * @param e the fifth object to concatenate, may be {@code null}
+     * @param f the sixth object to concatenate, may be {@code null}
+     * @param g the seventh object to concatenate, may be {@code null}
+     * @return the concatenated string representation of the objects.
      * @see #concat(Object, Object)
      */
     public static String concat(final Object a, final Object b, final Object c, final Object d, final Object e, final Object f, final Object g) {
@@ -17752,22 +17667,22 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all objects are {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("A", "B", "C", "D", "E", "F", "G", "H"); // returns "ABCDEFGH"
      * concat(1, 2, 3, 4, 5, 6, 7, 8);                 // returns "12345678"
      * concat("H", "e", "l", "l", "o", " ", 8, "!");   // returns "Hello 8!"
      * }</pre>
      *
-     * @param a The first object to concatenate. It can be {@code null}.
-     * @param b The second object to concatenate. It can be {@code null}.
-     * @param c The third object to concatenate. It can be {@code null}.
-     * @param d The fourth object to concatenate. It can be {@code null}.
-     * @param e The fifth object to concatenate. It can be {@code null}.
-     * @param f The sixth object to concatenate. It can be {@code null}.
-     * @param g The seventh object to concatenate. It can be {@code null}.
-     * @param h The eighth object to concatenate. It can be {@code null}.
-     * @return The concatenated string representation of the objects.
+     * @param a the first object to concatenate, may be {@code null}
+     * @param b the second object to concatenate, may be {@code null}
+     * @param c the third object to concatenate, may be {@code null}
+     * @param d the fourth object to concatenate, may be {@code null}
+     * @param e the fifth object to concatenate, may be {@code null}
+     * @param f the sixth object to concatenate, may be {@code null}
+     * @param g the seventh object to concatenate, may be {@code null}
+     * @param h the eighth object to concatenate, may be {@code null}
+     * @return the concatenated string representation of the objects.
      * @see #concat(Object, Object)
      */
     public static String concat(final Object a, final Object b, final Object c, final Object d, final Object e, final Object f, final Object g,
@@ -17784,23 +17699,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if all objects are {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * concat("A", "B", "C", "D", "E", "F", "G", "H", "I"); // returns "ABCDEFGHI"
      * concat(1, 2, 3, 4, 5, 6, 7, 8, 9);                   // returns "123456789"
      * concat("H", "e", "l", "l", "o", " ", 9, "!", "!");   // returns "Hello 9!!"
      * }</pre>
      *
-     * @param a The first object to concatenate. It can be {@code null}.
-     * @param b The second object to concatenate. It can be {@code null}.
-     * @param c The third object to concatenate. It can be {@code null}.
-     * @param d The fourth object to concatenate. It can be {@code null}.
-     * @param e The fifth object to concatenate. It can be {@code null}.
-     * @param f The sixth object to concatenate. It can be {@code null}.
-     * @param g The seventh object to concatenate. It can be {@code null}.
-     * @param h The eighth object to concatenate. It can be {@code null}.
-     * @param i The ninth object to concatenate. It can be {@code null}.
-     * @return The concatenated string. Returns {@code ""} if all input objects are {@code null} or empty.
+     * @param a the first object to concatenate, may be {@code null}
+     * @param b the second object to concatenate, may be {@code null}
+     * @param c the third object to concatenate, may be {@code null}
+     * @param d the fourth object to concatenate, may be {@code null}
+     * @param e the fifth object to concatenate, may be {@code null}
+     * @param f the sixth object to concatenate, may be {@code null}
+     * @param g the seventh object to concatenate, may be {@code null}
+     * @param h the eighth object to concatenate, may be {@code null}
+     * @param i the ninth object to concatenate, may be {@code null}
+     * @return the concatenated string. Returns {@code ""} if all input objects are {@code null} or empty.
      */
     public static String concat(final Object a, final Object b, final Object c, final Object d, final Object e, final Object f, final Object g, final Object h,
             final Object i) {
@@ -17850,7 +17765,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p><b>Warning:</b> Only the exact two-character placeholder sequence {@code "%s"} is
      * recognized.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * lenientFormat("Hello %s", "World");              // returns "Hello World"
      * lenientFormat("Hello %s %s", "New", "World");    // returns "Hello New World"
@@ -17866,7 +17781,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *     specified is substituted for the first occurrence of {@code "%s"} in the template, and so
      *     forth. A {@code null} argument is converted to the four-character string {@code "null"};
      *     {@code non-null} values are converted to strings using {@link Object#toString()}.
-     * @return The formatted string with placeholders replaced by arguments.
+     * @return the formatted string with placeholders replaced by arguments.
      */
     // TODO(diamondm) consider using Arrays.toString() for array parameters
     public static String lenientFormat(String template, Object... args) {
@@ -17941,7 +17856,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method properly handles Unicode characters and maintains character pairs.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * reverse("Hello");                  // returns "olleH"
      * reverse("12345");                  // returns "54321"
@@ -17950,8 +17865,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * reverse(null);                     // returns null
      * }</pre>
      *
-     * @param str The string to be reversed. May be {@code null} or empty.
-     * @return A new string with the characters reversed. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
+     * @param str the string to be reversed. May be {@code null} or empty.
+     * @return a new string with the characters reversed. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
      */
     public static String reverse(final String str) {
         if (N.len(str) <= 1) {
@@ -17978,7 +17893,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the delimiter is not found in the string, the original string is returned unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * reverseDelimited(null, '*');       // returns null
      * reverseDelimited("", '*');         // returns ""
@@ -17987,9 +17902,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * reverseDelimited("java.lang.String", '.'); // returns "String.lang.java"
      * }</pre>
      *
-     * @param str The string to reverse, which may be {@code null}.
-     * @param delimiter The delimiter character to use for splitting and joining.
-     * @return The string with its delimited segments reversed. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
+     * @param str the string to reverse, which may be {@code null}.
+     * @param delimiter the delimiter character to use for splitting and joining.
+     * @return the string with its delimited segments reversed. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
      */
     public static String reverseDelimited(final String str, final char delimiter) {
         if (N.len(str) <= 1) {
@@ -18014,7 +17929,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the delimiter is not found in the string, the original string is returned unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * reverseDelimited(null, " ");                // returns null
      * reverseDelimited("", " ");                  // returns ""
@@ -18023,9 +17938,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * reverseDelimited("A::B::C", "::");         // returns "C::B::A"
      * }</pre>
      *
-     * @param str The string to be reversed. May be {@code null} or empty.
-     * @param delimiter The delimiter that separates the elements in the string.
-     * @return The reversed string. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
+     * @param str the string to be reversed. May be {@code null} or empty.
+     * @param delimiter the delimiter that separates the elements in the string.
+     * @return the reversed string. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
      */
     public static String reverseDelimited(final String str, final String delimiter) {
         if (N.len(str) <= 1) {
@@ -18050,7 +17965,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the input string is {@code null}, empty, or has a length of 1 or less, it is returned unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * sort("dcba");                      // returns "abcd"
      * sort("54321");                     // returns "12345"
@@ -18060,8 +17975,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * sort(null);                        // returns null
      * }</pre>
      *
-     * @param str The string whose characters are to be sorted. May be {@code null} or empty.
-     * @return A new sorted string if the specified {@code str} is not {@code null} or empty, otherwise the specified {@code str} is returned. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
+     * @param str the string whose characters are to be sorted. May be {@code null} or empty.
+     * @return a new sorted string if the specified {@code str} is not {@code null} or empty, otherwise the specified {@code str} is returned. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
      */
     public static String sort(final String str) {
         if (N.len(str) <= 1) {
@@ -18086,7 +18001,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>The shift value is normalized using modulo operation, so shifts larger than the string
      * length will wrap around appropriately.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * rotate(null, *);        // returns null
      * rotate("", *);          // returns ""
@@ -18099,7 +18014,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * rotate("abcdefg", -9);  // returns "cdefgab"
      * }</pre>
      *
-     * @param str the String to rotate, which may be null
+     * @param str the String to rotate, may be {@code null}
      * @param shift number of time to shift (positive : right shift, negative : left shift)
      * @return the rotated String,
      *          or the original String if {@code shift == 0},
@@ -18134,7 +18049,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the input string is {@code null}, empty, or has a length of 1 or less, it is returned unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * shuffle("Hello");                  // might return "leHol", "olleH", etc.
      * shuffle("12345");                  // might return "31524", "45213", etc.
@@ -18143,8 +18058,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * shuffle(null);                     // returns null
      * }</pre>
      *
-     * @param str The string to be shuffled. May be {@code null} or empty.
-     * @return A new string with the characters shuffled. If the input string is {@code null} or empty, the input string is returned.
+     * @param str the string to be shuffled. May be {@code null} or empty.
+     * @return a new string with the characters shuffled. If the input string is {@code null} or empty, the input string is returned.
      */
     public static String shuffle(final String str) {
         return shuffle(str, N.RAND);
@@ -18159,7 +18074,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the input string is {@code null}, empty, or has a length of 1 or less, it is returned unchanged.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * Random rnd = new Random(42);
      * shuffle("Hello", rnd);             // returns a deterministic shuffle
@@ -18169,9 +18084,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * shuffle(null, rnd);                // returns null
      * }</pre>
      *
-     * @param str The string to be shuffled. May be {@code null} or empty.
-     * @param rnd The Random instance used to shuffle the characters.
-     * @return A new string with the characters shuffled. If the input string is {@code null} or empty, the input string is returned.
+     * @param str the string to be shuffled. May be {@code null} or empty.
+     * @param rnd the Random instance used to shuffle the characters.
+     * @return a new string with the characters shuffled. If the input string is {@code null} or empty, the input string is returned.
      */
     public static String shuffle(final String str, final Random rnd) {
         final int strLen = N.len(str);
@@ -18199,7 +18114,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the overlay string is {@code null} or empty, the specified portion is simply removed.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * overlay(null, "abc", 0, 0);          // returns "abc"
      * overlay("", "abc", 0, 0);            // returns "abc"
@@ -18208,8 +18123,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * overlay("abcdef", "zzzz", 2, 4);    // returns "abzzzzef"
      * }</pre>
      *
-     * @param str the String to do overlaying in, which may be null
-     * @param overlay the String to overlay, which may be null
+     * @param str the String to do overlaying in, may be {@code null}
+     * @param overlay the String to overlay, may be {@code null}
      * @param start the position to start overlaying at; must be valid index
      * @param end the position to stop overlaying before; must be valid
      * @return overlayed String, or {@code overlay} if {@code null} String input
@@ -18232,7 +18147,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method provides a more strict parsing than {@code Boolean.parseBoolean}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * parseBoolean("true");              // returns true
      * parseBoolean("True");              // returns true
@@ -18243,8 +18158,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * parseBoolean(null);                // returns false
      * }</pre>
      *
-     * @param str The string to be parsed. May be {@code null}.
-     * @return The boolean represented by the string argument.
+     * @param str the string to be parsed. May be {@code null}.
+     * @return the boolean represented by the string argument.
      * @see Boolean#parseBoolean(String)
      */
     public static boolean parseBoolean(final String str) {
@@ -18264,7 +18179,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This allows for both direct character representation and numeric character codes.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * parseChar("A");                    // returns 'A'
      * parseChar("65");                   // returns 'A' (ASCII code 65)
@@ -18274,8 +18189,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * parseChar(null);                   // returns '\0'
      * }</pre>
      *
-     * @param str The string to be parsed. May be {@code null}.
-     * @return The char represented by the string argument.
+     * @param str the string to be parsed. May be {@code null}.
+     * @return the char represented by the string argument.
      * @throws NumberFormatException if the string has more than one character and cannot be parsed as an integer
      * @throws IllegalArgumentException if the string represents an integer outside the valid char range [0, 65535]
      */
@@ -18300,7 +18215,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @return
-     * @throws NumberFormatException If the string is not a parsable {@code byte}.
+     * @throws NumberFormatException if the string is not a parsable {@code byte}.
      * @see Numbers#toByte(String)
      * @deprecated replaced by {@code Numbers.toByte(String)}
      */
@@ -18316,7 +18231,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @return
-     * @throws NumberFormatException If the string is not a parsable {@code short}.
+     * @throws NumberFormatException if the string is not a parsable {@code short}.
      * @see Numbers#toShort(String)
      * @deprecated replaced by {@code Numbers.toShort(String)}
      */
@@ -18331,9 +18246,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method attempts to convert the provided string to an integer. If the string is {@code null} or empty,
      * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as an integer.</p>
      *
-     * @param str The string to convert. This can be any instance of String.
-     * @return The integer representation of the provided string, or {@code 0} if the object is {@code null} or empty.
-     * @throws NumberFormatException If the string cannot be parsed as an integer.
+     * @param str the string to convert. This can be any instance of String.
+     * @return the integer representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException if the string cannot be parsed as an integer.
      * @see Numbers#toInt(String)
      * @deprecated replaced by {@code Numbers.toInt(String)}
      */
@@ -18349,7 +18264,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @return
-     * @throws NumberFormatException If the string is not a parsable {@code long}.
+     * @throws NumberFormatException if the string is not a parsable {@code long}.
      * @see Numbers#toLong(String)
      * @deprecated replaced by {@code Numbers.toLong(String)}
      */
@@ -18365,7 +18280,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @return
-     * @throws NumberFormatException If the string is not a parsable {@code float}.
+     * @throws NumberFormatException if the string is not a parsable {@code float}.
      * @see Numbers#toFloat(String)
      * @deprecated replaced by {@code Numbers.toFloat(String)}
      */
@@ -18381,7 +18296,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @return
-     * @throws NumberFormatException If the string is not a parsable {@code double}.
+     * @throws NumberFormatException if the string is not a parsable {@code double}.
      * @see Numbers#toDouble(String)
      * @deprecated replaced by {@code Numbers.toDouble(String)}
      */
@@ -18398,7 +18313,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the input byte array is {@code null} or empty, an empty string is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * base64Encode("Hello".getBytes());  // returns "SGVsbG8="
      * base64Encode(new byte[]{1,2,3});   // returns "AQID"
@@ -18406,8 +18321,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64Encode(null);                // returns ""
      * }</pre>
      *
-     * @param binaryData The byte array to be encoded.
-     * @return The Base64 encoded string, or an empty String {@code ""} if the input byte array is {@code null} or empty.
+     * @param binaryData the byte array to be encoded.
+     * @return the Base64 encoded string, or an empty String {@code ""} if the input byte array is {@code null} or empty.
      */
     public static String base64Encode(final byte[] binaryData) {
         if (N.isEmpty(binaryData)) {
@@ -18426,7 +18341,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>If the input string is {@code null} or empty, an empty string is returned.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * base64EncodeString("Hello");       // returns "SGVsbG8="
      * base64EncodeString("Hello World"); // returns "SGVsbG8gV29ybGQ="
@@ -18434,8 +18349,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64EncodeString(null);          // returns ""
      * }</pre>
      *
-     * @param str The string to be encoded.
-     * @return The Base64 encoded string, or an empty String {@code ""} if the input string is {@code null} or empty
+     * @param str the string to be encoded.
+     * @return the Base64 encoded string, or an empty String {@code ""} if the input string is {@code null} or empty
      */
     public static String base64EncodeString(final String str) {
         if (Strings.isEmpty(str)) {
@@ -18454,7 +18369,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Basic encoding
      * base64EncodeUtf8String("Hello World");         // returns "SGVsbG8gV29ybGQ="
@@ -18466,8 +18381,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64EncodeUtf8String("");                    // returns ""
      * }</pre>
      *
-     * @param str The string to be encoded.
-     * @return The Base64 encoded string, or an empty String {@code ""} if the input string is {@code null} or empty.
+     * @param str the string to be encoded.
+     * @return the Base64 encoded string, or an empty String {@code ""} if the input string is {@code null} or empty.
      * @see #base64EncodeString(String, Charset)
      */
     public static String base64EncodeUtf8String(final String str) {
@@ -18483,7 +18398,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Different charset encodings
      * base64EncodeString("Hello", StandardCharsets.UTF_8);      // returns "SGVsbG8="
@@ -18495,9 +18410,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64EncodeString("", StandardCharsets.UTF_8);           // returns ""
      * }</pre>
      *
-     * @param str The string to be encoded.
-     * @param charset The charset to be used to encode the input string.
-     * @return The Base64 encoded string.
+     * @param str the string to be encoded.
+     * @param charset the charset to be used to encode the input string.
+     * @return the Base64 encoded string.
      * @see String#getBytes(Charset)
      */
     public static String base64EncodeString(final String str, final Charset charset) {
@@ -18516,7 +18431,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty byte array if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Basic decoding
      * base64Decode("SGVsbG8gV29ybGQ=");             // returns byte array for "Hello World"
@@ -18527,8 +18442,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64Decode("");                              // returns empty byte array
      * }</pre>
      *
-     * @param base64String The Base64 encoded string to be decoded.
-     * @return The decoded byte array, or an empty byte array if the input string is {@code null} or empty.
+     * @param base64String the Base64 encoded string to be decoded.
+     * @return the decoded byte array, or an empty byte array if the input string is {@code null} or empty.
      */
     public static byte[] base64Decode(final String base64String) {
         if (Strings.isEmpty(base64String)) {
@@ -18547,7 +18462,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Basic decoding to string
      * base64DecodeToString("SGVsbG8gV29ybGQ=");     // returns "Hello World"
@@ -18558,8 +18473,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64DecodeToString("");                      // returns ""
      * }</pre>
      *
-     * @param base64String The Base64 encoded string to be decoded.
-     * @return The decoded string, or an empty String {@code ""} if the input string is {@code null} or empty.
+     * @param base64String the Base64 encoded string to be decoded.
+     * @return the decoded string, or an empty String {@code ""} if the input string is {@code null} or empty.
      */
     public static String base64DecodeToString(final String base64String) {
         if (Strings.isEmpty(base64String)) {
@@ -18577,7 +18492,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // UTF-8 specific decoding
      * base64DecodeToUtf8String("SGVsbG8gV29ybGQ=");         // returns "Hello World"
@@ -18588,8 +18503,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64DecodeToUtf8String("");                          // returns ""
      * }</pre>
      *
-     * @param base64String The Base64 URL encoded string to be decoded.
-     * @return The decoded UTF-8 string, or an empty String {@code ""} if the input string is {@code null} or empty.
+     * @param base64String the Base64 URL encoded string to be decoded.
+     * @return the decoded UTF-8 string, or an empty String {@code ""} if the input string is {@code null} or empty.
      */
     public static String base64DecodeToUtf8String(final String base64String) {
         return base64DecodeToString(base64String, Charsets.UTF_8);
@@ -18604,7 +18519,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Different charset decoding
      * base64DecodeToString("SGVsbG8=", StandardCharsets.UTF_8);      // returns "Hello"
@@ -18616,9 +18531,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64DecodeToString("", StandardCharsets.UTF_8);              // returns ""
      * }</pre>
      *
-     * @param base64String The Base64 encoded string to be decoded.
-     * @param charset The charset to be used to decode the resulting byte array.
-     * @return The decoded string.
+     * @param base64String the Base64 encoded string to be decoded.
+     * @param charset the charset to be used to decode the resulting byte array.
+     * @return the decoded string.
      * @see String#String(byte[], Charset)
      */
     public static String base64DecodeToString(final String base64String, final Charset charset) {
@@ -18638,7 +18553,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the input byte array is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // URL-safe encoding
      * base64UrlEncode("Hello World".getBytes());     // returns URL-safe Base64 string
@@ -18649,8 +18564,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64UrlEncode(new byte[0]);                  // returns ""
      * }</pre>
      *
-     * @param binaryData The byte array to be encoded.
-     * @return The Base64 URL encoded string, or an empty String {@code ""} if the input byte array is {@code null} or empty.
+     * @param binaryData the byte array to be encoded.
+     * @return the Base64 URL encoded string, or an empty String {@code ""} if the input byte array is {@code null} or empty.
      */
     public static String base64UrlEncode(final byte[] binaryData) {
         if (N.isEmpty(binaryData)) {
@@ -18669,7 +18584,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty byte array if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // URL-safe decoding
      * base64UrlDecode("SGVsbG8gV29ybGQ");            // returns byte array for "Hello World"
@@ -18680,8 +18595,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64UrlDecode("");                           // returns empty byte array
      * }</pre>
      *
-     * @param base64String The Base64 URL encoded string to be decoded.
-     * @return The decoded byte array, an empty byte array if the input string is {@code null} or empty.
+     * @param base64String the Base64 URL encoded string to be decoded.
+     * @return the decoded byte array, an empty byte array if the input string is {@code null} or empty.
      */
     public static byte[] base64UrlDecode(final String base64String) {
         if (Strings.isEmpty(base64String)) {
@@ -18700,7 +18615,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // URL-safe decoding to string
      * base64UrlDecodeToString("SGVsbG8gV29ybGQ");    // returns "Hello World"
@@ -18711,8 +18626,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64UrlDecodeToString("");                   // returns ""
      * }</pre>
      *
-     * @param base64String The Base64 URL encoded string to be decoded.
-     * @return The decoded string, or an empty String {@code ""} if the input string is {@code null} or empty.
+     * @param base64String the Base64 URL encoded string to be decoded.
+     * @return the decoded string, or an empty String {@code ""} if the input string is {@code null} or empty.
      * @throws  IllegalArgumentException if {@code base64String} is not in valid Base64 scheme
      */
     public static String base64UrlDecodeToString(final String base64String) {
@@ -18732,7 +18647,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // URL-safe UTF-8 decoding
      * base64UrlDecodeToUtf8String("SGVsbG8gV29ybGQ");       // returns "Hello World"
@@ -18743,8 +18658,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64UrlDecodeToUtf8String("");                       // returns ""
      * }</pre>
      *
-     * @param base64String The Base64 URL encoded string to be decoded.
-     * @return The decoded UTF-8 string, or an empty String {@code ""} if the input string is {@code null} or empty.
+     * @param base64String the Base64 URL encoded string to be decoded.
+     * @return the decoded UTF-8 string, or an empty String {@code ""} if the input string is {@code null} or empty.
      */
     public static String base64UrlDecodeToUtf8String(final String base64String) {
         return base64UrlDecodeToString(base64String, Charsets.UTF_8);
@@ -18759,7 +18674,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Different charset URL-safe decoding
      * base64UrlDecodeToString("SGVsbG8", StandardCharsets.UTF_8);      // returns "Hello"
@@ -18771,9 +18686,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * base64UrlDecodeToString("", StandardCharsets.UTF_8);             // returns ""
      * }</pre>
      *
-     * @param base64String The Base64 URL encoded string to be decoded.
-     * @param charset The charset to be used to decode the based decoded {@code bytes}
-     * @return The decoded string, or an empty String {@code ""} if the input string is {@code null} or empty.
+     * @param base64String the Base64 URL encoded string to be decoded.
+     * @param charset the charset to be used to decode the based decoded {@code bytes}
+     * @return the decoded string, or an empty String {@code ""} if the input string is {@code null} or empty.
      */
     public static String base64UrlDecodeToString(final String base64String, final Charset charset) {
         if (Strings.isEmpty(base64String)) {
@@ -18792,7 +18707,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method handles various object types including Maps, JavaBeans, and collections.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Encoding a Map
      * Map<String, String> params = new HashMap<>();
@@ -18809,8 +18724,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * urlEncode(null);                                // returns ""        
      * }</pre>
      *
-     * @param parameters The parameters to be URL-encoded.
-     * @return The URL-encoded string representation of the parameters.
+     * @param parameters the parameters to be URL-encoded.
+     * @return the URL-encoded string representation of the parameters.
      * @see URLEncodedUtil#encode(Object)
      * @see URLEncoder#encode(String, String)
      */
@@ -18827,7 +18742,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method handles various object types and encodes them according to the specified charset.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Encoding with UTF-8
      * Map<String, String> params = new HashMap<>();
@@ -18839,9 +18754,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * urlEncode(params, StandardCharsets.ISO_8859_1); // returns ISO-8859-1 encoded string
      * }</pre>
      *
-     * @param parameters The parameters to be URL-encoded.
-     * @param charset The charset to be used for encoding.
-     * @return The URL-encoded string representation of the parameters.
+     * @param parameters the parameters to be URL-encoded.
+     * @param charset the charset to be used for encoding.
+     * @return the URL-encoded string representation of the parameters.
      * @see URLEncodedUtil#encode(Object, Charset)
      * @see URLEncoder#encode(String, Charset)
      */
@@ -18858,7 +18773,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty map if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Basic decoding
      * urlDecode("name=John+Doe&age=30");             // returns {name=John Doe, age=30}
@@ -18872,8 +18787,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * urlDecode("");                                 // returns empty map
      * }</pre>
      *
-     * @param urlQuery The URL query string to be decoded.
-     * @return A map containing the decoded key-value pairs from the URL query string.
+     * @param urlQuery the URL query string to be decoded.
+     * @return a map containing the decoded key-value pairs from the URL query string.
      * @see URLEncodedUtil#decode(String)
      * @see URLDecoder#decode(String)
      */
@@ -18890,7 +18805,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty map if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // UTF-8 decoding
      * urlDecode("name=Jos%C3%A9&city=S%C3%A3o+Paulo", StandardCharsets.UTF_8);
@@ -18901,9 +18816,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // returns {data=test data}
      * }</pre>
      *
-     * @param urlQuery The URL query string to be decoded.
-     * @param charset The charset to be used for decoding.
-     * @return A map containing the decoded key-value pairs from the URL query string.
+     * @param urlQuery the URL query string to be decoded.
+     * @param charset the charset to be used for decoding.
+     * @return a map containing the decoded key-value pairs from the URL query string.
      * @see URLEncodedUtil#decode(String, Charset)
      * @see URLDecoder#decode(String, Charset)
      */
@@ -18920,7 +18835,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Define a class
      * public class UserParams {
@@ -18935,10 +18850,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // params.getAge() returns 30
      * }</pre>
      *
-     * @param <T> The type of the object to be returned.
-     * @param urlQuery The URL query string to be decoded.
-     * @param targetType The class of the object to be returned.
-     * @return An object of the specified type containing the decoded data from the URL query string.
+     * @param <T> the type of the object to be returned.
+     * @param urlQuery the URL query string to be decoded.
+     * @param targetType the class of the object to be returned.
+     * @return an object of the specified type containing the decoded data from the URL query string.
      * @see URLEncodedUtil#decode(String, Class)
      */
     public static <T> T urlDecode(final String urlQuery, final Class<? extends T> targetType) {
@@ -18955,7 +18870,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Define a class
      * public class Product {
@@ -18971,11 +18886,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * // product.getDescription() returns "Delicious coffee"
      * }</pre>
      *
-     * @param <T> The type of the object to be returned.
-     * @param urlQuery The URL query string to be decoded.
-     * @param charset The charset to be used for decoding.
-     * @param targetType The class of the object to be returned.
-     * @return An object of type T that represents the decoded URL query string.
+     * @param <T> the type of the object to be returned.
+     * @param urlQuery the URL query string to be decoded.
+     * @param charset the charset to be used for decoding.
+     * @param targetType the class of the object to be returned.
+     * @return an object of type T that represents the decoded URL query string.
      * @see URLEncodedUtil#decode(String, Charset, Class)
      */
     public static <T> T urlDecode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) {
@@ -19021,7 +18936,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method uses a lookup table for efficient validation.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Valid Base64 characters
      * isBase64((byte)'A');                           // returns true
@@ -19037,7 +18952,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isBase64((byte)'@');                           // returns false
      * }</pre>
      *
-     * @param octet The value to test
+     * @param octet the value to test
      * @return {@code true} if the value is defined in the base 64 alphabet, {@code false} otherwise.
      */
     public static boolean isBase64(final byte octet) {
@@ -19053,7 +18968,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code true} for empty arrays and {@code false} for {@code null} array</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Valid Base64 byte arrays
      * isBase64("SGVsbG8=".getBytes());               // returns true
@@ -19092,7 +19007,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code true} for empty strings. and {@code false} for {@code null} string</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Valid Base64 strings
      * isBase64("SGVsbG8gV29ybGQ=");                 // returns true
@@ -19106,7 +19021,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * isBase64((String) null);                       // returns {@code false}
      * }</pre>
      *
-     * @param base64 String to test
+     * @param base64 string to test
      * @return {@code true} if all characters in the String are valid characters in the Base64 alphabet or if
      *         the String is empty; {@code false}, otherwise
      */
@@ -19127,7 +19042,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} for null or empty input.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Finding email addresses
      * findFirstEmailAddress("Contact: john@example.com");    // returns "john@example.com"
@@ -19140,8 +19055,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * findFirstEmailAddress("");                             // returns null
      * }</pre>
      *
-     * @param cs The CharSequence to be searched. It can be {@code null} or empty.
-     * @return The first email address found in the CharSequence, or {@code null} if no email address is found.
+     * @param cs the CharSequence to be searched, may be {@code null} or empty
+     * @return the first email address found in the CharSequence, or {@code null} if no email address is found.
      * @see #isValidEmailAddress(CharSequence)
      * @see #findAllEmailAddresses(CharSequence)
      */
@@ -19172,7 +19087,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method never returns {@code null}, always returning at least an empty list.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Finding multiple email addresses
      * findAllEmailAddresses("Contact: john@example.com and jane@test.org");
@@ -19187,8 +19102,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * findAllEmailAddresses("");                     // returns []
      * }</pre>
      *
-     * @param cs The CharSequence to be searched. It can be {@code null} or empty.
-     * @return A list of all found email addresses, or an empty list if no email address is found.
+     * @param cs the CharSequence to be searched, may be {@code null} or empty
+     * @return a list of all found email addresses, or an empty list if no email address is found.
      * @see #isValidEmailAddress(CharSequence)
      * @see #findFirstEmailAddress(CharSequence)
      */
@@ -19217,7 +19132,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} if the input array is {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Trimming strings
      * String[] input = {"  hello  ", " world ", "test"};
@@ -19232,8 +19147,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * copyThenTrim(new String[0]);                   // returns empty array
      * }</pre>
      *
-     * @param strs The array of strings to be copied and trimmed. May be {@code null}.
-     * @return A new array with the trimmed strings. Returns {@code null} if the input array is {@code null}.
+     * @param strs the array of strings to be copied and trimmed. May be {@code null}.
+     * @return a new array with the trimmed strings. Returns {@code null} if the input array is {@code null}.
      * @see N#copyThenReplaceAll(Object[], java.util.function.UnaryOperator)
      * @see Fn#trim()
      * @see Fn#trimToEmpty()
@@ -19254,7 +19169,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} if the input array is {@code null}.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Stripping strings
      * String[] input = {"  hello  ", " world ", "test"};
@@ -19269,8 +19184,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * copyThenStrip(new String[0]);                  // returns empty array
      * }</pre>
      *
-     * @param strs The array of strings to be copied and stripped. May be {@code null}.
-     * @return A new array with the stripped strings. Returns {@code null} if the input array is {@code null}.
+     * @param strs the array of strings to be copied and stripped. May be {@code null}.
+     * @return a new array with the stripped strings. Returns {@code null} if the input array is {@code null}.
      * @see N#copyThenReplaceAll(Object[], java.util.function.UnaryOperator)
      * @see Fn#strip()
      * @see Fn#stripToEmpty()
@@ -19291,7 +19206,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} if no integer is found or if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Extracting integers
      * extractFirstInteger("Price: $123");            // returns "123"
@@ -19304,11 +19219,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * extractFirstInteger("");                       // returns null
      * }</pre>
      *
-     * @param str The string to extract the integer from. It can be {@code null} or empty.
-     * @return The extracted integer as a string, or {@code null} if no integer is found, or the input string is {@code null} or empty.
+     * @param str the string to extract the integer from, may be {@code null} or empty
+     * @return the extracted integer as a string, or {@code null} if no integer is found, or the input string is {@code null} or empty.
      * @see #replaceFirstInteger(String, String)
      * @see Numbers#extractFirstInt(String)
      * @see Numbers#extractFirstLong(String)
+     * @see RegExUtil#findFirst(String, Pattern)
+     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#INTEGER_FINDER
      */
     public static String extractFirstInteger(final String str) {
         if (Strings.isEmpty(str)) {
@@ -19332,7 +19250,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} if no number is found or the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Extracting doubles
      * extractFirstDouble("Price: $12.99");           // returns "12.99"
@@ -19345,11 +19263,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * extractFirstDouble("");                        // returns null
      * }</pre>
      *
-     * @param str The string to extract the double from. It can be {@code null} or empty.
-     * @return The extracted double as a string, or {@code null} if no double is found, or the input string is {@code null} or empty.
+     * @param str the string to extract the double from, may be {@code null} or empty
+     * @return the extracted double as a string, or {@code null} if no double is found, or the input string is {@code null} or empty.
      * @see #extractFirstInteger(String)
      * @see #replaceFirstDouble(String, String)
      * @see Numbers#extractFirstDouble(String)
+     * @see RegExUtil#findFirst(String, Pattern)
+     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#NUMBER_FINDER
+     * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
     public static String extractFirstDouble(final String str) {
         return extractFirstDouble(str, false);
@@ -19364,7 +19286,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns {@code null} if no number is found or if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Regular number extraction
      * extractFirstDouble("Value: 3.14159", false);   // returns "3.14159"
@@ -19381,13 +19303,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * extractFirstDouble("", true;                     // returns null
      * }</pre>
      *
-     * @param str The string to extract the double from. It can be {@code null} or empty.
-     * @param includingCientificNumber If {@code true}, it will also include scientific numbers in the search.
-     * @return The extracted double as a string, or {@code null} if no double is found, or the input string is {@code null} or empty.
+     * @param str the string to extract the double from, may be {@code null} or empty
+     * @param includingCientificNumber if {@code true}, it will also include scientific numbers in the search.
+     * @return the extracted double as a string, or {@code null} if no double is found, or the input string is {@code null} or empty.
      * @see #extractFirstInteger(String)
      * @see #extractFirstDouble(String)
      * @see #replaceFirstDouble(String, String)
      * @see Numbers#extractFirstDouble(String, boolean)
+     * @see RegExUtil#findFirst(String, Pattern)
+     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#NUMBER_FINDER
+     * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
     public static String extractFirstDouble(final String str, final boolean includingCientificNumber) {
         if (Strings.isEmpty(str)) {
@@ -19412,7 +19338,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Replacing integers
      * replaceFirstInteger("Room 404, Floor 2", "X");  // returns "Room X, Floor 2"
@@ -19425,10 +19351,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceFirstInteger("", "X");                   // returns ""
      * }</pre>
      *
-     * @param str The string to be modified. It can be {@code null} or empty.
-     * @param replacement The string to replace the integer with.
-     * @return The modified string with the first integer replaced by the specified replacement string, or an empty string if the input is {@code null} or empty.
+     * @param str the string to be modified, may be {@code null} or empty
+     * @param replacement the string to replace the integer with.
+     * @return the modified string with the first integer replaced by the specified replacement string, or an empty string if the input is {@code null} or empty.
      * @see #extractFirstInteger(String)
+     * @see RegExUtil#replaceFirst(String, Pattern, String)
+     * @see RegExUtil#replaceLast(String, Pattern, String)
+     * @see RegExUtil#INTEGER_FINDER
      */
     public static String replaceFirstInteger(final String str, final String replacement) {
         if (Strings.isEmpty(str)) {
@@ -19447,7 +19376,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Replacing doubles
      * replaceFirstDouble("Price: $12.99 (was $15.99)", "X"); // returns "Price: $X (was $15.99)"
@@ -19459,10 +19388,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceFirstDouble(null, "X");                         // returns ""
      * }</pre>
      *
-     * @param str The string to be modified. It can be {@code null} or empty.
-     * @param replacement The string to replace the double with.
-     * @return The modified string with the first double replaced by the specified replacement string, or an empty string if the input is {@code null} or empty.
+     * @param str the string to be modified, may be {@code null} or empty
+     * @param replacement the string to replace the double with.
+     * @return the modified string with the first double replaced by the specified replacement string, or an empty string if the input is {@code null} or empty.
      * @see #extractFirstDouble(String)
+     * @see RegExUtil#replaceFirst(String, Pattern, String)
+     * @see RegExUtil#replaceLast(String, Pattern, String)
+     * @see RegExUtil#NUMBER_FINDER
      */
     public static String replaceFirstDouble(final String str, final String replacement) {
         if (Strings.isEmpty(str)) {
@@ -19481,7 +19413,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>The method returns an empty string if the input is {@code null} or empty.</p>
      *
-     * <p>Example:
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Regular number replacement
      * replaceFirstDouble("Value: 3.14, Pi", "X", false);     // returns "Value: X, Pi"
@@ -19492,11 +19424,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * replaceFirstDouble("Result: 1.23e10", "X", false);      // returns "Result: Xe10" (partial)
      * }</pre>
      *
-     * @param str The string to be modified. It can be {@code null} or empty.
-     * @param replacement The string to replace the double with.
-     * @param includingCientificNumber If {@code true}, it will also include scientific numbers in the search.
-     * @return The modified string with the first double replaced by the specified replacement string, or an empty string if the input is {@code null} or empty.
+     * @param str the string to be modified, may be {@code null} or empty
+     * @param replacement the string to replace the double with.
+     * @param includingCientificNumber if {@code true}, it will also include scientific numbers in the search.
+     * @return the modified string with the first double replaced by the specified replacement string, or an empty string if the input is {@code null} or empty.
      * @see #extractFirstDouble(String, boolean)
+     * @see RegExUtil#replaceFirst(String, Pattern, String)
+     * @see RegExUtil#replaceLast(String, Pattern, String)
+     * @see RegExUtil#NUMBER_FINDER
+     * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
     public static String replaceFirstDouble(final String str, final String replacement, final boolean includingCientificNumber) {
         if (Strings.isEmpty(str)) {
@@ -19584,7 +19520,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * If the index is negative or greater than or equal to the string length, or if the string is {@code null}, 
          * an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substring("hello", 0);      // returns Optional.of("hello")
          * substring("hello", 2);      // returns Optional.of("llo")
@@ -19593,9 +19529,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substring(null, 0);         // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param inclusiveBeginIndex The starting index (inclusive) of the substring.
-         * @return An {@code Optional<String>} containing the substring if valid, otherwise empty.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
+         * @return an {@code Optional<String>} containing the substring if valid, otherwise empty.
          * @see Strings#substring(String, int)
          */
         public static Optional<String> substring(final String str, final int inclusiveBeginIndex) {
@@ -19609,7 +19545,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * and ending at the exclusive end index. If the indices are invalid (negative, begin >= end, or out of bounds), 
          * or if the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substring("hello", 0, 5);   // returns Optional.of("hello")
          * substring("hello", 1, 4);   // returns Optional.of("ell")
@@ -19618,10 +19554,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substring(null, 0, 5);      // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param inclusiveBeginIndex The starting index (inclusive) of the substring.
-         * @param exclusiveEndIndex The ending index (exclusive) of the substring.
-         * @return An {@code Optional<String>} containing the substring if valid, otherwise empty.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
+         * @param exclusiveEndIndex the ending index (exclusive) of the substring.
+         * @return an {@code Optional<String>} containing the substring if valid, otherwise empty.
          * @see Strings#substring(String, int, int)
          */
         public static Optional<String> substring(final String str, final int inclusiveBeginIndex, final int exclusiveEndIndex) {
@@ -19635,7 +19571,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * The exclusive end index is calculated by applying the provided function to the string length.
          * If the resulting indices are invalid or if the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substring("hello", 1, len -> len - 1);  // returns Optional.of("ell") (from 1 to 4)
          * substring("hello", 0, len -> len);      // returns Optional.of("hello")
@@ -19644,30 +19580,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substring(null, 0, len -> len);         // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param inclusiveBeginIndex The starting index (inclusive) of the substring.
-         * @param funcOfExclusiveEndIndex A function that takes the string length and returns the exclusive end index.
-         * @return An {@code Optional<String>} containing the substring if valid, otherwise empty.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
+         * @param funcOfExclusiveEndIndex a function that takes the string length and returns the exclusive end index.
+         * @return an {@code Optional<String>} containing the substring if valid, otherwise empty.
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
         public static Optional<String> substring(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex));
         }
-
-        //        /**
-        //         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-        //         *
-        //         * @param str
-        //         * @param inclusiveBeginIndex
-        //         * @param funcOfExclusiveEndIndex
-        //         * @return
-        //         * @see #substring(String, int, int)
-        //         */
-        //        @Beta
-        //        public static Optional<String> substring(final String str, final int inclusiveBeginIndex,
-        //                final BiFunction<? super String, Integer, Integer> funcOfExclusiveEndIndex) {
-        //            return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex));
-        //        }
 
         /**
          * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
@@ -19676,7 +19597,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * by applying the provided function to the exclusive end index. If the resulting indices are invalid 
          * or if the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substring("hello", end -> 0, 5);        // returns Optional.of("hello")
          * substring("hello", end -> end - 3, 4);  // returns Optional.of("el") (from 1 to 4)
@@ -19685,30 +19606,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substring(null, end -> 0, 5);           // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param funcOfInclusiveBeginIndex A function that takes the exclusive end index and returns the inclusive begin index.
-         * @param exclusiveEndIndex The ending index (exclusive) of the substring.
-         * @return An {@code Optional<String>} containing the substring if valid, otherwise empty.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param funcOfInclusiveBeginIndex a function that takes the exclusive end index and returns the inclusive begin index.
+         * @param exclusiveEndIndex the ending index (exclusive) of the substring.
+         * @return an {@code Optional<String>} containing the substring if valid, otherwise empty.
          * @see Strings#substring(String, IntUnaryOperator, int)
          */
         public static Optional<String> substring(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
             return Optional.ofNullable(Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex));
         }
-
-        //        /**
-        //         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-        //         *
-        //         * @param str
-        //         * @param funcOfInclusiveBeginIndex
-        //         * @param exclusiveEndIndex
-        //         * @return
-        //         * @see #substring(String, int, int)
-        //         */
-        //        @Beta
-        //        public static Optional<String> substring(final String str, final BiFunction<? super String, Integer, Integer> funcOfInclusiveBeginIndex,
-        //                final int exclusiveEndIndex) {
-        //            return Optional.ofNullable(Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex));
-        //        }
 
         /**
          * Returns the substring if it exists, otherwise returns {@code defaultStr}.
@@ -19716,7 +19622,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring from the given string starting at the specified index to the end of the string.
          * If the substring cannot be extracted (due to invalid index or {@code null} string), the default string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringOrElse("hello", 0, "default");     // returns "hello"
          * substringOrElse("hello", 2, "default");     // returns "llo"
@@ -19725,10 +19631,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringOrElse("hello", 2, null);          // returns "llo"
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param inclusiveBeginIndex The starting index (inclusive) of the substring.
-         * @param defaultStr The default string to return if substring extraction fails. Can be {@code null}.
-         * @return The substring if it exists, otherwise {@code defaultStr}.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
+         * @param defaultStr the default string to return if substring extraction fails. Can be {@code null}.
+         * @return the substring if it exists, otherwise {@code defaultStr}.
          * @see Strings#substringAfter(String, char)
          */
         @Beta
@@ -19744,7 +19650,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring from the given string between the specified indices.
          * If the substring cannot be extracted (due to invalid indices or {@code null} string), the default string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringOrElse("hello", 0, 5, "default");  // returns "hello"
          * substringOrElse("hello", 1, 4, "default");  // returns "ell"
@@ -19753,11 +19659,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringOrElse("hello", 1, 4, null);       // returns "ell"
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param inclusiveBeginIndex The starting index (inclusive) of the substring.
-         * @param exclusiveEndIndex The ending index (exclusive) of the substring.
-         * @param defaultStr The default string to return if substring extraction fails. Can be {@code null}.
-         * @return The substring if it exists, otherwise {@code defaultStr}.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
+         * @param exclusiveEndIndex the ending index (exclusive) of the substring.
+         * @param defaultStr the default string to return if substring extraction fails. Can be {@code null}.
+         * @return the substring if it exists, otherwise {@code defaultStr}.
          * @see Strings#substring(String, int, int)
          */
         @Beta
@@ -19773,7 +19679,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring where the end index is calculated by the provided function.
          * If the substring cannot be extracted, the default string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringOrElse("hello", 1, len -> len - 1, "default"); // returns "ell"
          * substringOrElse("hello", 0, len -> len, "default");     // returns "hello"
@@ -19781,11 +19687,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringOrElse(null, 0, len -> len, "default");        // returns "default"
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param inclusiveBeginIndex The starting index (inclusive) of the substring.
-         * @param funcOfExclusiveEndIndex A function that takes the string length and returns the exclusive end index.
-         * @param defaultStr The default string to return if substring extraction fails. Can be {@code null}.
-         * @return The substring if it exists, otherwise {@code defaultStr}.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
+         * @param funcOfExclusiveEndIndex a function that takes the string length and returns the exclusive end index.
+         * @param defaultStr the default string to return if substring extraction fails. Can be {@code null}.
+         * @return the substring if it exists, otherwise {@code defaultStr}.
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
         @Beta
@@ -19802,7 +19708,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring where the begin index is calculated by the provided function.
          * If the substring cannot be extracted, the default string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringOrElse("hello", end -> 0, 5, "default");       // returns "hello"
          * substringOrElse("hello", end -> end - 3, 4, "default"); // returns "el"
@@ -19810,11 +19716,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringOrElse(null, end -> 0, 5, "default");          // returns "default"
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param funcOfInclusiveBeginIndex A function that takes the exclusive end index and returns the inclusive begin index.
-         * @param exclusiveEndIndex The ending index (exclusive) of the substring.
-         * @param defaultStr The default string to return if substring extraction fails. Can be {@code null}.
-         * @return The substring if it exists, otherwise {@code defaultStr}.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param funcOfInclusiveBeginIndex a function that takes the exclusive end index and returns the inclusive begin index.
+         * @param exclusiveEndIndex the ending index (exclusive) of the substring.
+         * @param defaultStr the default string to return if substring extraction fails. Can be {@code null}.
+         * @return the substring if it exists, otherwise {@code defaultStr}.
          * @see Strings#substring(String, IntUnaryOperator, int)
          */
         @Beta
@@ -19832,7 +19738,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * If the substring cannot be extracted (due to invalid index), the original string is returned.
          * If the string is {@code null}, {@code null} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringOrElseItself("hello", 0);     // returns "hello"
          * substringOrElseItself("hello", 2);     // returns "llo"
@@ -19841,9 +19747,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringOrElseItself(null, 0);        // returns null
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param inclusiveBeginIndex The starting index (inclusive) of the substring.
-         * @return The substring if it exists, otherwise {@code str} itself.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
+         * @return the substring if it exists, otherwise {@code str} itself.
          * @see Strings#substringAfter(String, char)
          */
         @Beta
@@ -19860,7 +19766,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * If the substring cannot be extracted (due to invalid indices), the original string is returned.
          * If the string is {@code null}, {@code null} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringOrElseItself("hello", 0, 5);  // returns "hello"
          * substringOrElseItself("hello", 1, 4);  // returns "ell"
@@ -19869,10 +19775,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringOrElseItself(null, 0, 5);     // returns null
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param inclusiveBeginIndex The starting index (inclusive) of the substring.
-         * @param exclusiveEndIndex The ending index (exclusive) of the substring.
-         * @return The substring if it exists, otherwise {@code str} itself.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
+         * @param exclusiveEndIndex the ending index (exclusive) of the substring.
+         * @return the substring if it exists, otherwise {@code str} itself.
          * @see Strings#substring(String, int, int)
          */
         @Beta
@@ -19888,7 +19794,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring where the end index is calculated by the provided function.
          * If the substring cannot be extracted, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringOrElseItself("hello", 1, len -> len - 1); // returns "ell"
          * substringOrElseItself("hello", 0, len -> len);     // returns "hello"
@@ -19896,10 +19802,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringOrElseItself(null, 0, len -> len);        // returns null
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param inclusiveBeginIndex The starting index (inclusive) of the substring.
-         * @param funcOfExclusiveEndIndex A function that takes the string length and returns the exclusive end index.
-         * @return The substring if it exists, otherwise {@code str} itself.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
+         * @param funcOfExclusiveEndIndex a function that takes the string length and returns the exclusive end index.
+         * @return the substring if it exists, otherwise {@code str} itself.
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
         @Beta
@@ -19915,7 +19821,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring where the begin index is calculated by the provided function.
          * If the substring cannot be extracted, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringOrElseItself("hello", end -> 0, 5);       // returns "hello"
          * substringOrElseItself("hello", end -> end - 3, 4); // returns "el"
@@ -19923,10 +19829,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringOrElseItself(null, end -> 0, 5);          // returns null
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param funcOfInclusiveBeginIndex A function that takes the exclusive end index and returns the inclusive begin index.
-         * @param exclusiveEndIndex The ending index (exclusive) of the substring.
-         * @return The substring if it exists, otherwise {@code str} itself.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param funcOfInclusiveBeginIndex a function that takes the exclusive end index and returns the inclusive begin index.
+         * @param exclusiveEndIndex the ending index (exclusive) of the substring.
+         * @return the substring if it exists, otherwise {@code str} itself.
          * @see Strings#substring(String, IntUnaryOperator, int)
          */
         @Beta
@@ -19942,7 +19848,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring that appears after the first occurrence of the specified delimiter character.
          * If the delimiter is not found or the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfter("hello.world", '.');    // returns Optional.of("world")
          * substringAfter("hello", '.');          // returns Optional.empty()
@@ -19951,9 +19857,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfter(null, '.');             // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The delimiter character after which the substring begins.
-         * @return An {@code Optional<String>} containing the substring after the delimiter, or empty if not found.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the delimiter character after which the substring begins.
+         * @return an {@code Optional<String>} containing the substring after the delimiter, or empty if not found.
          * @see Strings#substringAfter(String, char)
          */
         @Beta
@@ -19967,7 +19873,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring that appears after the first occurrence of the specified delimiter string.
          * If the delimiter is not found or the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfter("hello world", " ");    // returns Optional.of("world")
          * substringAfter("hello::world", "::");  // returns Optional.of("world")
@@ -19976,9 +19882,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfter(null, " ");             // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The delimiter string after which the substring begins.
-         * @return An {@code Optional<String>} containing the substring after the delimiter, or empty if not found.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the delimiter string after which the substring begins.
+         * @return an {@code Optional<String>} containing the substring after the delimiter, or empty if not found.
          * @see Strings#substringAfter(String, String)
          */
         @Beta
@@ -19993,7 +19899,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * and before the specified exclusive end index. If the delimiter is not found, the end index is invalid, 
          * or the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfter("hello world", " ", 8);     // returns Optional.of("wor")
          * substringAfter("hello::world", "::", 10);  // returns Optional.of("world")
@@ -20002,10 +19908,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfter(null, " ", 5);              // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The delimiter string after which the substring begins.
-         * @param exclusiveEndIndex The ending index (exclusive) of the substring.
-         * @return An {@code Optional<String>} containing the substring after the delimiter up to the end index, or empty if not found.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the delimiter string after which the substring begins.
+         * @param exclusiveEndIndex the ending index (exclusive) of the substring.
+         * @return an {@code Optional<String>} containing the substring after the delimiter up to the end index, or empty if not found.
          * @see Strings#substringAfter(String, String, int)
          */
         @Beta
@@ -20019,7 +19925,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring that appears after the last occurrence of the specified delimiter character.
          * If the delimiter is not found or the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterLast("com.example.Test", '.');   // returns Optional.of("Test")
          * substringAfterLast("hello", '.');              // returns Optional.empty()
@@ -20028,9 +19934,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterLast(null, '.');                 // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The delimiter character after which the substring begins.
-         * @return An {@code Optional<String>} containing the substring after the last occurrence of the delimiter, or empty if not found.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the delimiter character after which the substring begins.
+         * @return an {@code Optional<String>} containing the substring after the last occurrence of the delimiter, or empty if not found.
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
@@ -20044,7 +19950,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring that appears after the last occurrence of the specified delimiter string.
          * If the delimiter is not found or the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterLast("com.example.Test", ".");   // returns Optional.of("Test")
          * substringAfterLast("hello::world::test", "::"); // returns Optional.of("test")
@@ -20053,9 +19959,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterLast(null, ".");                 // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The delimiter string after which the substring begins.
-         * @return An {@code Optional<String>} containing the substring after the last occurrence of the delimiter, or empty if not found.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the delimiter string after which the substring begins.
+         * @return an {@code Optional<String>} containing the substring after the last occurrence of the delimiter, or empty if not found.
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
@@ -20070,7 +19976,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * and before the specified exclusive end index. If the delimiter is not found, the end index is invalid,
          * or the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterLast("com.example.Test", ".", 15);    // returns Optional.of("Tes")
          * substringAfterLast("a::b::c::d", "::", 12);         // returns Optional.of("d")
@@ -20079,10 +19985,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterLast(null, ".", 10);                  // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The delimiter string after which the substring begins.
-         * @param exclusiveEndIndex The ending index (exclusive) of the substring.
-         * @return An {@code Optional<String>} containing the substring after the last delimiter up to the end index, or empty if not found.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the delimiter string after which the substring begins.
+         * @param exclusiveEndIndex the ending index (exclusive) of the substring.
+         * @return an {@code Optional<String>} containing the substring after the last delimiter up to the end index, or empty if not found.
          * @see Strings#substringAfterLast(String, String, int)
          */
         @Beta
@@ -20096,7 +20002,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring that appears after the first occurrence of any of the specified delimiter characters.
          * If none of the delimiters are found or the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterAny("hello.world", '.', '!');     // returns Optional.of("world")
          * substringAfterAny("hello!world", '.', '!');     // returns Optional.of("world")
@@ -20105,9 +20011,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterAny(null, '.', '!');              // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param delimitersOfExclusiveBeginIndex The delimiter characters after which the substring begins.
-         * @return An {@code Optional<String>} containing the substring after the first found delimiter, or empty if none found.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param delimitersOfExclusiveBeginIndex the delimiter characters after which the substring begins.
+         * @return an {@code Optional<String>} containing the substring after the first found delimiter, or empty if none found.
          * @see Strings#substringAfterAny(String, char[])
          */
         @Beta
@@ -20121,7 +20027,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring that appears after the first occurrence of any of the specified delimiter strings.
          * If none of the delimiters are found or the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterAny("hello world", " ", "::");    // returns Optional.of("world")
          * substringAfterAny("hello::world", " ", "::");   // returns Optional.of("world")
@@ -20130,9 +20036,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterAny(null, " ", "::");             // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param delimitersOfExclusiveBeginIndex The delimiter strings after which the substring begins.
-         * @return An {@code Optional<String>} containing the substring after the first found delimiter, or empty if none found.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param delimitersOfExclusiveBeginIndex the delimiter strings after which the substring begins.
+         * @return an {@code Optional<String>} containing the substring after the first found delimiter, or empty if none found.
          * @see Strings#substringAfterAny(String, String[])
          */
         @Beta
@@ -20146,7 +20052,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring that appears before the first occurrence of the specified delimiter character.
          * If the delimiter is not found or the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBefore("hello.world", '.');    // returns Optional.of("hello")
          * substringBefore("hello", '.');          // returns Optional.empty()
@@ -20155,9 +20061,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBefore(null, '.');             // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param delimiterOfExclusiveEndIndex The delimiter character before which the substring ends.
-         * @return An {@code Optional<String>} containing the substring before the delimiter, or empty if not found.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param delimiterOfExclusiveEndIndex the delimiter character before which the substring ends.
+         * @return an {@code Optional<String>} containing the substring before the delimiter, or empty if not found.
          * @see Strings#substringBefore(String, String)
          */
         @Beta
@@ -20171,7 +20077,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method extracts a substring that appears before the first occurrence of the specified delimiter string.
          * If the delimiter is not found or the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBefore("hello world", " ");    // returns Optional.of("hello")
          * substringBefore("hello::world", "::");  // returns Optional.of("hello")
@@ -20180,9 +20086,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBefore(null, " ");             // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string from which to extract the substring. Can be {@code null}.
-         * @param delimiterOfExclusiveEndIndex The delimiter string before which the substring ends.
-         * @return An {@code Optional<String>} containing the substring before the delimiter, or empty if not found.
+         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param delimiterOfExclusiveEndIndex the delimiter string before which the substring ends.
+         * @return an {@code Optional<String>} containing the substring before the delimiter, or empty if not found.
          * @see Strings#substringBefore(String, String)
          */
         @Beta
@@ -20200,7 +20106,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string or delimiter.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBefore("hello.world.java", 0, ".");      // returns Optional.of("hello")
          * substringBefore("hello.world.java", 6, ".");      // returns Optional.of("world")
@@ -20209,9 +20115,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBefore("hello", 0, null);                // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param inclusiveBeginIndex The index from which to start searching (inclusive).
-         * @param delimiterOfExclusiveEndIndex The delimiter marking the end of the substring (exclusive).
+         * @param str the string to search in. Can be {@code null}.
+         * @param inclusiveBeginIndex the index from which to start searching (inclusive).
+         * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBefore(String, int, String)
          */
@@ -20230,7 +20136,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeLast("hello.world.java", '.');     // returns Optional.of("hello.world")
          * substringBeforeLast("hello", '.');                // returns Optional.empty()
@@ -20238,8 +20144,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeLast(null, '.');                   // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveEndIndex The character delimiter marking the end of the substring (exclusive).
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveEndIndex the character delimiter marking the end of the substring (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBeforeLast(String, String)
          */
@@ -20258,7 +20164,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string or delimiter.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeLast("hello.world.java", ".");     // returns Optional.of("hello.world")
          * substringBeforeLast("hello//world//java", "//");  // returns Optional.of("hello//world")
@@ -20267,8 +20173,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeLast("hello", null);               // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveEndIndex The string delimiter marking the end of the substring (exclusive).
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveEndIndex the string delimiter marking the end of the substring (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBeforeLast(String, String)
          */
@@ -20287,7 +20193,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string or delimiter.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeLast("hello.world.java", 0, ".");      // returns Optional.of("hello.world")
          * substringBeforeLast("hello.world.java", 6, ".");      // returns Optional.of("world")
@@ -20296,9 +20202,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeLast("hello", 0, null);                // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param inclusiveBeginIndex The index from which to start searching (inclusive).
-         * @param delimiterOfExclusiveEndIndex The delimiter marking the end of the substring (exclusive).
+         * @param str the string to search in. Can be {@code null}.
+         * @param inclusiveBeginIndex the index from which to start searching (inclusive).
+         * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBeforeLast(String, int, String)
          */
@@ -20317,7 +20223,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string or null/empty delimiter array.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeAny("hello.world:java", '.', ':');     // returns Optional.of("hello")
          * substringBeforeAny("hello-world", '.', ':');          // returns Optional.empty()
@@ -20326,8 +20232,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeAny("hello", (char[])null);            // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimitersOfExclusiveEndIndex The character delimiters marking the end of the substring (exclusive).
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimitersOfExclusiveEndIndex the character delimiters marking the end of the substring (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBeforeAny(String, char[])
          */
@@ -20346,7 +20252,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string or null/empty delimiter array.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeAny("hello.world::java", ".", "::");     // returns Optional.of("hello")
          * substringBeforeAny("hello-world", ".", "::");           // returns Optional.empty()
@@ -20355,8 +20261,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeAny("hello", (String[])null);            // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimitersOfExclusiveEndIndex The string delimiters marking the end of the substring (exclusive).
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimitersOfExclusiveEndIndex the string delimiters marking the end of the substring (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBeforeAny(String, String[])
          */
@@ -20372,7 +20278,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * after (not including) that delimiter. If the delimiter is not found or the input is null,
          * the default string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterOrElse("hello.world", ".", "default");     // returns "world"
          * substringAfterOrElse("hello", ".", "default");           // returns "default"
@@ -20380,10 +20286,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterOrElse("hello.", ".", "default");          // returns ""
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The delimiter marking the beginning of the substring (exclusive).
-         * @param defaultStr The default string to return if substring is not found.
-         * @return The substring after the delimiter if found, otherwise {@code defaultStr}.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the delimiter marking the beginning of the substring (exclusive).
+         * @param defaultStr the default string to return if substring is not found.
+         * @return the substring after the delimiter if found, otherwise {@code defaultStr}.
          * @see Strings#substringAfter(String, String)
          */
         @Beta
@@ -20401,7 +20307,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * after (not including) that delimiter. If the delimiter is not found or the input is null,
          * the default string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterLastOrElse("hello.world.java", ".", "default");     // returns "java"
          * substringAfterLastOrElse("hello", ".", "default");                // returns "default"
@@ -20409,10 +20315,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterLastOrElse("hello.world.", ".", "default");         // returns ""
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The delimiter marking the beginning of the substring (exclusive).
-         * @param defaultStr The default string to return if substring is not found.
-         * @return The substring after the last delimiter if found, otherwise {@code defaultStr}.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the delimiter marking the beginning of the substring (exclusive).
+         * @param defaultStr the default string to return if substring is not found.
+         * @return the substring after the last delimiter if found, otherwise {@code defaultStr}.
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
@@ -20429,7 +20335,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * from the beginning up to (but not including) that delimiter. If the delimiter is not found
          * or the input is null, the default string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeOrElse("hello.world", ".", "default");     // returns "hello"
          * substringBeforeOrElse("hello", ".", "default");           // returns "default"
@@ -20437,10 +20343,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeOrElse(".world", ".", "default");          // returns ""
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveEndIndex The delimiter marking the end of the substring (exclusive).
-         * @param defaultStr The default string to return if substring is not found.
-         * @return The substring before the delimiter if found, otherwise {@code defaultStr}.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
+         * @param defaultStr the default string to return if substring is not found.
+         * @return the substring before the delimiter if found, otherwise {@code defaultStr}.
          * @see Strings#substringBefore(String, String)
          */
         @Beta
@@ -20458,7 +20364,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * from the beginning up to (but not including) that delimiter. If the delimiter is not found
          * or the input is null, the default string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeLastOrElse("hello.world.java", ".", "default");     // returns "hello.world"
          * substringBeforeLastOrElse("hello", ".", "default");                // returns "default"
@@ -20466,10 +20372,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeLastOrElse("hello.", ".", "default");               // returns "hello"
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveEndIndex The delimiter marking the end of the substring (exclusive).
-         * @param defaultStr The default string to return if substring is not found.
-         * @return The substring before the last delimiter if found, otherwise {@code defaultStr}.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
+         * @param defaultStr the default string to return if substring is not found.
+         * @return the substring before the last delimiter if found, otherwise {@code defaultStr}.
          * @see Strings#substringBeforeLast(String, String)
          */
         @Beta
@@ -20487,7 +20393,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the substring after (not including) that delimiter. If the delimiter is not found or
          * the input is null, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterOrElseItself("hello.world", '.');     // returns "world"
          * substringAfterOrElseItself("hello", '.');           // returns "hello"
@@ -20495,9 +20401,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterOrElseItself("hello.", '.');          // returns ""
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The character delimiter marking the beginning of the substring (exclusive).
-         * @return The substring after the delimiter if found, otherwise {@code str} itself.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the character delimiter marking the beginning of the substring (exclusive).
+         * @return the substring after the delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringAfter(String, char)
          */
         @Beta
@@ -20515,7 +20421,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the substring after (not including) that delimiter. If the delimiter is not found or
          * the input is null, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterOrElseItself("hello::world", "::");     // returns "world"
          * substringAfterOrElseItself("hello", "::");            // returns "hello"
@@ -20523,9 +20429,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterOrElseItself("hello::", "::");          // returns ""
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The string delimiter marking the beginning of the substring (exclusive).
-         * @return The substring after the delimiter if found, otherwise {@code str} itself.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning of the substring (exclusive).
+         * @return the substring after the delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringAfter(String, String)
          */
         @Beta
@@ -20543,7 +20449,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * after (not including) that delimiter up to the specified exclusive end index. If the delimiter
          * is not found or the input is null, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterOrElseItself("hello.world.java", ".", 11);     // returns "world"
          * substringAfterOrElseItself("hello.world.java", ".", 20);     // returns "world.java"
@@ -20551,10 +20457,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterOrElseItself(null, ".", 10);                   // returns null
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The delimiter marking the beginning of the substring (exclusive).
-         * @param exclusiveEndIndex The index marking the end of the substring (exclusive).
-         * @return The substring after the delimiter if found, otherwise {@code str} itself.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the delimiter marking the beginning of the substring (exclusive).
+         * @param exclusiveEndIndex the index marking the end of the substring (exclusive).
+         * @return the substring after the delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringAfter(String, String)
          */
         @Beta
@@ -20572,7 +20478,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the substring after (not including) that delimiter. If the delimiter is not found or
          * the input is null, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterLastOrElseItself("hello.world.java", '.');     // returns "java"
          * substringAfterLastOrElseItself("hello", '.');                // returns "hello"
@@ -20580,9 +20486,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterLastOrElseItself("hello.world.", '.');         // returns ""
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The character delimiter marking the beginning of the substring (exclusive).
-         * @return The substring after the last delimiter if found, otherwise {@code str} itself.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the character delimiter marking the beginning of the substring (exclusive).
+         * @return the substring after the last delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
@@ -20600,7 +20506,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the substring after (not including) that delimiter. If the delimiter is not found or
          * the input is null, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterLastOrElseItself("hello::world::java", "::");     // returns "java"
          * substringAfterLastOrElseItself("hello", "::");                  // returns "hello"
@@ -20608,9 +20514,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterLastOrElseItself("hello::world::", "::");         // returns ""
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The string delimiter marking the beginning of the substring (exclusive).
-         * @return The substring after the last delimiter if found, otherwise {@code str} itself.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning of the substring (exclusive).
+         * @return the substring after the last delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
@@ -20628,7 +20534,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * after (not including) that delimiter up to the specified exclusive end index. If the delimiter
          * is not found or the input is null, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringAfterLastOrElseItself("hello.world.java", ".", 16);     // returns "java"
          * substringAfterLastOrElseItself("hello.world.java", ".", 14);     // returns "ja"
@@ -20636,10 +20542,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringAfterLastOrElseItself(null, ".", 10);                   // returns null
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The delimiter marking the beginning of the substring (exclusive).
-         * @param exclusiveEndIndex The index marking the end of the substring (exclusive).
-         * @return The substring after the last delimiter if found, otherwise {@code str} itself.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the delimiter marking the beginning of the substring (exclusive).
+         * @param exclusiveEndIndex the index marking the end of the substring (exclusive).
+         * @return the substring after the last delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
@@ -20657,7 +20563,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the substring from the beginning up to (but not including) that delimiter. If the delimiter
          * is not found or the input is null, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeOrElseItself("hello.world", '.');     // returns "hello"
          * substringBeforeOrElseItself("hello", '.');           // returns "hello"
@@ -20665,9 +20571,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeOrElseItself(".world", '.');          // returns ""
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveEndIndex The character delimiter marking the end of the substring (exclusive).
-         * @return The substring before the delimiter if found, otherwise {@code str} itself.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveEndIndex the character delimiter marking the end of the substring (exclusive).
+         * @return the substring before the delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringBefore(String, String)
          */
         @Beta
@@ -20685,7 +20591,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the substring from the beginning up to (but not including) that delimiter. If the delimiter
          * is not found or the input is null, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeOrElseItself("hello::world", "::");     // returns "hello"
          * substringBeforeOrElseItself("hello", "::");            // returns "hello"
@@ -20693,9 +20599,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeOrElseItself("::world", "::");          // returns ""
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveEndIndex The string delimiter marking the end of the substring (exclusive).
-         * @return The substring before the delimiter if found, otherwise {@code str} itself.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveEndIndex the string delimiter marking the end of the substring (exclusive).
+         * @return the substring before the delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringBefore(String, String)
          */
         @Beta
@@ -20714,7 +20620,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the delimiter. If the delimiter is not found or the input is null, the original string
          * is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeOrElseItself("hello.world.java", 0, ".");      // returns "hello"
          * substringBeforeOrElseItself("hello.world.java", 6, ".");      // returns "world"
@@ -20722,10 +20628,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeOrElseItself(null, 0, ".");                    // returns null
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param inclusiveBeginIndex The index from which to start searching (inclusive).
-         * @param delimiterOfExclusiveEndIndex The delimiter marking the end of the substring (exclusive).
-         * @return The substring before the delimiter if found, otherwise {@code str} itself.
+         * @param str the string to search in. Can be {@code null}.
+         * @param inclusiveBeginIndex the index from which to start searching (inclusive).
+         * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
+         * @return the substring before the delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringBefore(String, String)
          */
         @Beta
@@ -20743,7 +20649,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the substring from the beginning up to (but not including) that delimiter. If the delimiter
          * is not found or the input is null, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeLastOrElseItself("hello.world.java", '.');     // returns "hello.world"
          * substringBeforeLastOrElseItself("hello", '.');                // returns "hello"
@@ -20751,9 +20657,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeLastOrElseItself("hello.", '.');               // returns "hello"
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveEndIndex The character delimiter marking the end of the substring (exclusive).
-         * @return The substring before the last delimiter if found, otherwise {@code str} itself.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveEndIndex the character delimiter marking the end of the substring (exclusive).
+         * @return the substring before the last delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringBeforeLast(String, String)
          */
         @Beta
@@ -20771,7 +20677,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the substring from the beginning up to (but not including) that delimiter. If the delimiter
          * is not found or the input is null, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeLastOrElseItself("hello::world::java", "::");     // returns "hello::world"
          * substringBeforeLastOrElseItself("hello", "::");                  // returns "hello"
@@ -20779,9 +20685,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeLastOrElseItself("hello::", "::");                // returns "hello"
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param delimiterOfExclusiveEndIndex The string delimiter marking the end of the substring (exclusive).
-         * @return The substring before the last delimiter if found, otherwise {@code str} itself.
+         * @param str the string to search in. Can be {@code null}.
+         * @param delimiterOfExclusiveEndIndex the string delimiter marking the end of the substring (exclusive).
+         * @return the substring before the last delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringBeforeLast(String, String)
          */
         @Beta
@@ -20799,7 +20705,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * end index and returns the substring from the beginning up to (but not including) that
          * delimiter. If the delimiter is not found or the input is null, the original string is returned.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBeforeLastOrElseItself("hello.world.java", 16, ".");     // returns "hello.world"
          * substringBeforeLastOrElseItself("hello.world.java", 11, ".");     // returns "hello"
@@ -20807,10 +20713,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBeforeLastOrElseItself(null, 10, ".");                   // returns null
          * }</pre>
          *
-         * @param str The string to search in. Can be {@code null}.
-         * @param exclusiveEndIndex The index marking the end boundary for searching (exclusive).
-         * @param delimiterOfExclusiveEndIndex The delimiter marking the end of the substring (exclusive).
-         * @return The substring before the last delimiter if found, otherwise {@code str} itself.
+         * @param str the string to search in. Can be {@code null}.
+         * @param exclusiveEndIndex the index marking the end boundary for searching (exclusive).
+         * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
+         * @return the substring before the last delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringBeforeLast(String, String)
          */
         @Beta
@@ -20830,7 +20736,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBetween("hello world", 5, 11);     // returns Optional.of(" world")
          * substringBetween("hello", 0, 5);            // returns Optional.of("ello")
@@ -20839,9 +20745,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, 0, 5);               // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param exclusiveBeginIndex The starting index (exclusive).
-         * @param exclusiveEndIndex The ending index (exclusive).
+         * @param str the string to extract from. Can be {@code null}.
+         * @param exclusiveBeginIndex the starting index (exclusive).
+         * @param exclusiveEndIndex the ending index (exclusive).
          * @return {@code Optional<String>} containing the substring if valid indices, otherwise empty.
          * @see Strings#substringBetween(String, int, int)
          */
@@ -20859,7 +20765,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBetween("hello.world.java", 5, '.');     // returns Optional.of("world")
          * substringBetween("hello.world", 0, '.');          // returns Optional.of("ello")
@@ -20867,9 +20773,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, 0, '.');                   // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param exclusiveBeginIndex The starting index (exclusive).
-         * @param delimiterOfExclusiveEndIndex The character delimiter marking the end (exclusive).
+         * @param str the string to extract from. Can be {@code null}.
+         * @param exclusiveBeginIndex the starting index (exclusive).
+         * @param delimiterOfExclusiveEndIndex the character delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBetween(String, int, char)
          */
@@ -20887,7 +20793,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string or delimiter.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBetween("hello::world::java", 5, "::");     // returns Optional.of("world")
          * substringBetween("hello::world", 0, "::");           // returns Optional.of("ello")
@@ -20895,9 +20801,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, 0, "::");                     // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param exclusiveBeginIndex The starting index (exclusive).
-         * @param delimiterOfExclusiveEndIndex The string delimiter marking the end (exclusive).
+         * @param str the string to extract from. Can be {@code null}.
+         * @param exclusiveBeginIndex the starting index (exclusive).
+         * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBetween(String, int, String)
          */
@@ -20915,7 +20821,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBetween("hello.world.java", '.', 11);     // returns Optional.of("world")
          * substringBetween("hello.world.java", '.', 20);     // returns Optional.of("world.java")
@@ -20923,9 +20829,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, '.', 10);                   // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The character delimiter marking the beginning (exclusive).
-         * @param exclusiveEndIndex The ending index (exclusive).
+         * @param str the string to extract from. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the character delimiter marking the beginning (exclusive).
+         * @param exclusiveEndIndex the ending index (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBetween(String, char, int)
          */
@@ -20943,7 +20849,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string or delimiter.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBetween("hello::world::java", "::", 13);     // returns Optional.of("world")
          * substringBetween("hello::world::java", "::", 20);     // returns Optional.of("world::java")
@@ -20951,9 +20857,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, "::", 10);                     // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The string delimiter marking the beginning (exclusive).
-         * @param exclusiveEndIndex The ending index (exclusive).
+         * @param str the string to extract from. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
+         * @param exclusiveEndIndex the ending index (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBetween(String, String, int)
          */
@@ -20971,7 +20877,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBetween("hello[world]java", '[', ']');     // returns Optional.of("world")
          * substringBetween("hello.world.java", '.', '.');     // returns Optional.of("world")
@@ -20979,9 +20885,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, '[', ']');                   // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The character delimiter marking the beginning (exclusive).
-         * @param delimiterOfExclusiveEndIndex The character delimiter marking the end (exclusive).
+         * @param str the string to extract from. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the character delimiter marking the beginning (exclusive).
+         * @param delimiterOfExclusiveEndIndex the character delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBetween(String, char, char)
          */
@@ -20999,7 +20905,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string or tag.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBetween("*hello*world*", "*");     // returns Optional.of("hello")
          * substringBetween("##value##", "##");        // returns Optional.of("value")
@@ -21007,8 +20913,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, "*");                // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param tag The tag string marking both the beginning and end (exclusive).
+         * @param str the string to extract from. Can be {@code null}.
+         * @param tag the tag string marking both the beginning and end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see #substringBetween(String, String, String)
          * @see #substringBetween(String, int, int)
@@ -21027,7 +20933,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string or delimiters.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBetween("hello<start>world</end>java", "<start>", "</end>");     // returns Optional.of("world")
          * substringBetween("hello::world::java", "::", "::");                       // returns Optional.of("world")
@@ -21035,9 +20941,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, "<start>", "</end>");                              // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The string delimiter marking the beginning (exclusive).
-         * @param delimiterOfExclusiveEndIndex The string delimiter marking the end (exclusive).
+         * @param str the string to extract from. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
+         * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBetween(String, String, String)
          */
@@ -21056,7 +20962,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string or delimiters.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * substringBetween("hello<a>world</a><a>java</a>", 10, "<a>", "</a>");     // returns Optional.of("java")
          * substringBetween("hello::world::java", 0, "::", "::");                   // returns Optional.of("world")
@@ -21064,10 +20970,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, 0, "<a>", "</a>");                                // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param fromIndex The index from which to start searching.
-         * @param delimiterOfExclusiveBeginIndex The string delimiter marking the beginning (exclusive).
-         * @param delimiterOfExclusiveEndIndex The string delimiter marking the end (exclusive).
+         * @param str the string to extract from. Can be {@code null}.
+         * @param fromIndex the index from which to start searching.
+         * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
+         * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see #substringBetween(String, int, int)
          */
@@ -21086,7 +20992,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string or function.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * // Extract 5 characters after the begin index
          * substringBetween("hello world", 5, beginIdx -> beginIdx + 6);     // returns Optional.of(" world")
@@ -21097,9 +21003,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, 0, idx -> idx + 5);                        // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param exclusiveBeginIndex The starting index (exclusive).
-         * @param funcOfExclusiveEndIndex Function to calculate the ending index based on begin index.
+         * @param str the string to extract from. Can be {@code null}.
+         * @param exclusiveBeginIndex the starting index (exclusive).
+         * @param funcOfExclusiveEndIndex function to calculate the ending index based on begin index.
          * @return {@code Optional<String>} containing the substring if valid indices, otherwise empty.
          * @see Strings#substringBetween(String, int, IntUnaryOperator)
          */
@@ -21117,7 +21023,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string or function.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * // Extract 5 characters before the end index
          * substringBetween("hello world", endIdx -> endIdx - 5, 11);     // returns Optional.of("world")
@@ -21128,9 +21034,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, idx -> idx - 5, 10);                    // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param funcOfExclusiveBeginIndex Function to calculate the starting index based on end index.
-         * @param exclusiveEndIndex The ending index (exclusive).
+         * @param str the string to extract from. Can be {@code null}.
+         * @param funcOfExclusiveBeginIndex function to calculate the starting index based on end index.
+         * @param exclusiveEndIndex the ending index (exclusive).
          * @return {@code Optional<String>} containing the substring if valid indices, otherwise empty.
          * @see Strings#substringBetween(String, IntUnaryOperator, int)
          */
@@ -21149,7 +21055,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string, delimiter, or function.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * // Extract 5 characters after the delimiter
          * substringBetween("hello::world", "::", idx -> idx + 5);     // returns Optional.of("world")
@@ -21160,9 +21066,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, "::", idx -> idx + 5);               // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param delimiterOfExclusiveBeginIndex The string delimiter marking the beginning (exclusive).
-         * @param funcOfExclusiveEndIndex Function to calculate the ending index based on delimiter position.
+         * @param str the string to extract from. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
+         * @param funcOfExclusiveEndIndex function to calculate the ending index based on delimiter position.
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see #substringBetween(String, int, int)
          */
@@ -21182,7 +21088,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method returns an empty {@code Optional} for null input string, delimiter, or function.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * // Extract from 5 characters before the last delimiter
          * substringBetween("hello.world.java", idx -> idx - 5, ".");     // returns Optional.of("world")
@@ -21193,9 +21099,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * substringBetween(null, idx -> idx - 5, ".");                   // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to extract from. Can be {@code null}.
-         * @param funcOfExclusiveBeginIndex Function to calculate the starting index based on delimiter position.
-         * @param delimiterOfExclusiveEndIndex The string delimiter marking the end (exclusive).
+         * @param str the string to extract from. Can be {@code null}.
+         * @param funcOfExclusiveBeginIndex function to calculate the starting index based on delimiter position.
+         * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see #substringBetween(String, int, int)
          */
@@ -21213,7 +21119,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * createInteger("123");        // returns OptionalInt.of(123)
          * createInteger("-456");       // returns OptionalInt.of(-456)
@@ -21224,7 +21130,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * createInteger(null);         // returns OptionalInt.empty()
          * }</pre>
          *
-         * @param str The string to parse. Can be {@code null} or blank.
+         * @param str the string to parse. Can be {@code null} or blank.
          * @return {@code OptionalInt} containing the parsed integer value, or empty if parsing fails.
          * @see Numbers#createInteger(String)
          */
@@ -21250,7 +21156,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * createLong("123456789");        // returns OptionalLong.of(123456789L)
          * createLong("-9876543210");      // returns OptionalLong.of(-9876543210L)
@@ -21261,7 +21167,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * createLong(null);               // returns OptionalLong.empty()
          * }</pre>
          *
-         * @param str The string to parse. Can be {@code null} or blank.
+         * @param str the string to parse. Can be {@code null} or blank.
          * @return {@code OptionalLong} containing the parsed long value, or empty if parsing fails.
          * @see Numbers#createLong(String)
          */
@@ -21287,7 +21193,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * createFloat("123.45");          // returns OptionalFloat.of(123.45f)
          * createFloat("-67.89");          // returns OptionalFloat.of(-67.89f)
@@ -21299,7 +21205,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * createFloat(null);              // returns OptionalFloat.empty()
          * }</pre>
          *
-         * @param str The string to parse. Can be {@code null} or blank.
+         * @param str the string to parse. Can be {@code null} or blank.
          * @return {@code OptionalFloat} containing the parsed float value, or empty if parsing fails.
          * @see Numbers#createFloat(String)
          */
@@ -21325,7 +21231,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * createDouble("123.456789");      // returns OptionalDouble.of(123.456789)
          * createDouble("-67.89012");       // returns OptionalDouble.of(-67.89012)
@@ -21337,7 +21243,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * createDouble(null);              // returns OptionalDouble.empty()
          * }</pre>
          *
-         * @param str The string to parse. Can be {@code null} or blank.
+         * @param str the string to parse. Can be {@code null} or blank.
          * @return {@code OptionalDouble} containing the parsed double value, or empty if parsing fails.
          * @see Numbers#createDouble(String)
          */
@@ -21363,7 +21269,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * createBigInteger("123456789012345678901234567890");     // returns Optional of the BigInteger
          * createBigInteger("-999999999999999999999999999999");    // returns Optional of the BigInteger
@@ -21374,7 +21280,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * createBigInteger(null);                                 // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to parse. Can be {@code null} or blank.
+         * @param str the string to parse. Can be {@code null} or blank.
          * @return {@code Optional<BigInteger>} containing the parsed BigInteger value, or empty if parsing fails.
          * @see Numbers#createBigInteger(String)
          */
@@ -21400,7 +21306,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * createBigDecimal("123.456789012345678901234567890");     // returns Optional of the BigDecimal
          * createBigDecimal("-999999999999999999999.999999999");    // returns Optional of the BigDecimal
@@ -21411,7 +21317,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * createBigDecimal(null);                                  // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to parse. Can be {@code null} or blank.
+         * @param str the string to parse. Can be {@code null} or blank.
          * @return {@code Optional<BigDecimal>} containing the parsed BigDecimal value, or empty if parsing fails.
          * @see Numbers#createBigDecimal(String)
          */
@@ -21438,7 +21344,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
-         * <p>Example:
+         * <p>Example usage:</p>
          * <pre>{@code
          * createNumber("123");                    // returns Optional.of(Integer 123)
          * createNumber("1234567890123456789");    // returns Optional.of(Long or BigInteger)
@@ -21450,7 +21356,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * createNumber(null);                     // returns Optional.empty()
          * }</pre>
          *
-         * @param str The string to parse. Can be {@code null} or blank.
+         * @param str the string to parse. Can be {@code null} or blank.
          * @return {@code Optional<Number>} containing the parsed Number value, or empty if parsing fails.
          * @see Numbers#createNumber(String)
          */

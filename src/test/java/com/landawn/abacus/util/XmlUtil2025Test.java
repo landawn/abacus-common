@@ -73,7 +73,7 @@ public class XmlUtil2025Test extends TestBase {
             if (obj == null || getClass() != obj.getClass())
                 return false;
             Person person = (Person) obj;
-            return age == person.age && N.equals(name, person.name);
+            return age == person.age && CommonUtil.equals(name, person.name);
         }
 
         @Override

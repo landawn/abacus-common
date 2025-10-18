@@ -13,8 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalChar;
@@ -1177,7 +1177,7 @@ public class Strings100Test extends TestBase {
     public void testContainsAllChars() {
         assertTrue(Strings.containsAll("abcd", 'a', 'b'));
         assertFalse(Strings.containsAll("abcd", 'a', 'e'));
-        assertTrue(Strings.containsAll("abcd", N.EMPTY_CHAR_ARRAY));
+        assertTrue(Strings.containsAll("abcd", CommonUtil.EMPTY_CHAR_ARRAY));
         assertFalse(Strings.containsAll(null, 'a'));
     }
 
@@ -1186,7 +1186,7 @@ public class Strings100Test extends TestBase {
     public void testContainsAllStrings() {
         assertTrue(Strings.containsAll("abcdef", "ab", "cd"));
         assertFalse(Strings.containsAll("abcdef", "ab", "gh"));
-        assertTrue(Strings.containsAll("abcdef", N.EMPTY_STRING_ARRAY));
+        assertTrue(Strings.containsAll("abcdef", CommonUtil.EMPTY_STRING_ARRAY));
         assertFalse(Strings.containsAll(null, "a"));
     }
 
@@ -1195,7 +1195,7 @@ public class Strings100Test extends TestBase {
     public void testContainsAnyChars() {
         assertTrue(Strings.containsAny("abcd", 'a', 'e'));
         assertFalse(Strings.containsAny("abcd", 'e', 'f'));
-        assertFalse(Strings.containsAny("abcd", N.EMPTY_CHAR_ARRAY));
+        assertFalse(Strings.containsAny("abcd", CommonUtil.EMPTY_CHAR_ARRAY));
         assertFalse(Strings.containsAny(null, 'a'));
     }
 
@@ -1204,7 +1204,7 @@ public class Strings100Test extends TestBase {
     public void testContainsAnyStrings() {
         assertTrue(Strings.containsAny("abcdef", "ab", "gh"));
         assertFalse(Strings.containsAny("abcdef", "gh", "ij"));
-        assertFalse(Strings.containsAny("abcdef", N.EMPTY_STRING_ARRAY));
+        assertFalse(Strings.containsAny("abcdef", CommonUtil.EMPTY_STRING_ARRAY));
         assertFalse(Strings.containsAny(null, "a"));
     }
 
@@ -1213,7 +1213,7 @@ public class Strings100Test extends TestBase {
     public void testContainsNoneChars() {
         assertTrue(Strings.containsNone("abcd", 'e', 'f'));
         assertFalse(Strings.containsNone("abcd", 'a', 'e'));
-        assertTrue(Strings.containsNone("abcd", N.EMPTY_CHAR_ARRAY));
+        assertTrue(Strings.containsNone("abcd", CommonUtil.EMPTY_CHAR_ARRAY));
         assertTrue(Strings.containsNone(null, 'a'));
     }
 
@@ -1222,7 +1222,7 @@ public class Strings100Test extends TestBase {
     public void testContainsNoneStrings() {
         assertTrue(Strings.containsNone("abcdef", "gh", "ij"));
         assertFalse(Strings.containsNone("abcdef", "ab", "gh"));
-        assertTrue(Strings.containsNone("abcdef", N.EMPTY_STRING_ARRAY));
+        assertTrue(Strings.containsNone("abcdef", CommonUtil.EMPTY_STRING_ARRAY));
         assertTrue(Strings.containsNone(null, "a"));
     }
 

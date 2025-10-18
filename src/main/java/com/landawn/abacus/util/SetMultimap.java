@@ -315,26 +315,6 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         return multimap;
     }
 
-    //    /**
-    //     *
-    //     * @param <K> the key type
-    //     * @param <E>
-    //     * @param map
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static <K, E> SetMultimap<K, E> copyOf(final Map<? extends K, ? extends Collection<? extends E>> map) {
-    //        final SetMultimap<K, E> multimap = new SetMultimap<>(Maps.newTargetMap(map), HashSet.class);
-    //
-    //        if (N.notEmpty(map)) {
-    //            for (Map.Entry<? extends K, ? extends Collection<? extends E>> entry : map.entrySet()) {
-    //                multimap.putAll(entry.getKey(), entry.getValue());
-    //            }
-    //        }
-    //
-    //        return multimap;
-    //    }
-
     /**
      * Creates a new instance of SetMultimap from a collection by grouping elements by keys extracted using the provided function.
      * Each element is mapped to a key, and all elements with the same key are collected into a set.
@@ -406,79 +386,6 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
         return multimap;
     }
-
-    //    /**
-    //     *
-    //     * @param <K> the key type
-    //     * @param <E>
-    //     * @param map
-    //     * @return
-    //     * @see Multimap#invertFrom(Map, Supplier)
-    //     */
-    //    public static <K, E> SetMultimap<E, K> invertFrom(final Map<K, E> map) {
-    //        final SetMultimap<E, K> multimap = new SetMultimap<>(Maps.newOrderingMap(map), HashSet.class);
-    //
-    //        if (N.notEmpty(map)) {
-    //            for (Map.Entry<K, E> entry : map.entrySet()) {
-    //                multimap.put(entry.getValue(), entry.getKey());
-    //            }
-    //        }
-    //
-    //        return multimap;
-    //    }
-    //
-    //    /**
-    //     * Flat invert from.
-    //     *
-    //     * @param <K> the key type
-    //     * @param <E>
-    //     * @param map
-    //     * @return
-    //     * @see Multimap#flatInvertFrom(Map, Supplier)
-    //     */
-    //    public static <K, E> SetMultimap<E, K> flatInvertFrom(final Map<K, ? extends Collection<? extends E>> map) {
-    //        final SetMultimap<E, K> multimap = new SetMultimap<>(Maps.newOrderingMap(map), HashSet.class);
-    //
-    //        if (N.notEmpty(map)) {
-    //            for (Map.Entry<K, ? extends Collection<? extends E>> entry : map.entrySet()) {
-    //                final Collection<? extends E> c = entry.getValue();
-    //
-    //                if (N.notEmpty(c)) {
-    //                    for (E e : c) {
-    //                        multimap.put(e, entry.getKey());
-    //                    }
-    //                }
-    //            }
-    //        }
-    //
-    //        return multimap;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <K> the key type
-    //     * @param <E>
-    //     * @param <V> the value type
-    //     * @param map
-    //     * @return
-    //     */
-    //    public static <K, E, V extends Collection<E>> SetMultimap<E, K> invertFrom(final Multimap<K, E, V> map) {
-    //        final SetMultimap<E, K> multimap = new SetMultimap<>(Maps.newOrderingMap(map.valueMap), HashSet.class);
-    //
-    //        if (N.notEmpty(map)) {
-    //            for (Map.Entry<K, V> entry : map.entrySet()) {
-    //                final V c = entry.getValue();
-    //
-    //                if (N.notEmpty(c)) {
-    //                    for (E e : c) {
-    //                        multimap.put(e, entry.getKey());
-    //                    }
-    //                }
-    //            }
-    //        }
-    //
-    //        return multimap;
-    //    }
 
     /**
      * Creates a new instance of SetMultimap by concatenating the key-value pairs from two specified maps.
@@ -837,33 +744,5 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         return ImmutableMap.wrap(map);
     }
 
-    // It won't work.
-    //    /**
-    //     * Returns a synchronized {@code SetMultimap} which shares the same internal {@code Map} with this {@code SetMultimap}.
-    //     * That's to say, the changes in one of the returned {@code SetMultimap} and this {@code SetMultimap} will impact another one.
-    //     *
-    //     * @see Collections#synchronizedMap(Map)
-    //     */
-    //    @Override
-    //    public SetMultimap<K, E> synchronized() {
-    //        return new SetMultimap<>(Collections.synchronizedMap(valueMap), concreteValueType);
-    //    }
-
     //    public SetMultimap<E, K> inversed() {
-    //        final SetMultimap<E, K> multimap = new SetMultimap<E, K>(valueMap.getClass(), concreteValueType);
-    //
-    //        if (N.notEmpty(valueMap)) {
-    //            for (Map.Entry<K, ? extends Set<? extends E>> entry : valueMap.entrySet()) {
-    //                final Set<? extends E> c = entry.getValue();
-    //
-    //                if (N.notEmpty(c)) {
-    //                    for (E e : c) {
-    //                        multimap.put(e, entry.getKey());
-    //                    }
-    //                }
-    //            }
-    //        }
-    //
-    //        return multimap;
-    //    }
 }

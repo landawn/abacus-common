@@ -15,8 +15,6 @@ import static com.landawn.abacus.util.Numbers.createInteger;
 import static com.landawn.abacus.util.Numbers.createLong;
 import static com.landawn.abacus.util.Numbers.createNumber;
 import static com.landawn.abacus.util.Numbers.divide;
-import static com.landawn.abacus.util.Numbers.extractFirstDouble;
-import static com.landawn.abacus.util.Numbers.extractFirstInt;
 import static com.landawn.abacus.util.Numbers.factorial;
 import static com.landawn.abacus.util.Numbers.factorialToBigInteger;
 import static com.landawn.abacus.util.Numbers.factorialToDouble;
@@ -73,8 +71,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -240,39 +238,6 @@ public class Numbers101Test extends TestBase {
         @DisplayName("format should throw on null pattern")
         public void testFormatNullPattern() {
             assertThrows(IllegalArgumentException.class, () -> Numbers.format(12.345, (String) null));
-        }
-    }
-
-    @Nested
-    @DisplayName("Number Extraction Tests")
-    public class ExtractionTests {
-
-        @ParameterizedTest
-        @CsvSource({ "'abc123def', 123", "'no numbers here', 0", "'-456xyz', -456", "'', 0" })
-        @DisplayName("extractFirstInt from strings")
-        public void testExtractFirstInt(String input, int expected) {
-            assertEquals(expected, extractFirstInt(input));
-        }
-
-        @Test
-        @DisplayName("extractFirstInt with default value")
-        public void testExtractFirstIntWithDefault() {
-            assertEquals(999, extractFirstInt("no numbers", 999));
-            assertEquals(123, extractFirstInt("abc123", 999));
-        }
-
-        @ParameterizedTest
-        @CsvSource({ "'price: 12.34', 12.34", "'no decimal here', 0.0", "'-45.67 degrees', -45.67" })
-        @DisplayName("extractFirstDouble from strings")
-        public void testExtractFirstDouble(String input, double expected) {
-            assertEquals(expected, extractFirstDouble(input), 1e-10);
-        }
-
-        @ParameterizedTest
-        @CsvSource({ "'1.23e10', 1.23e10", "'2.5E-5', 2.5E-5", "'no scientific notation', 0.0" })
-        @DisplayName("extractFirstSciDouble from strings")
-        public void testExtractFirstSciDouble(String input, double expected) {
-            assertEquals(expected, extractFirstDouble(input, true), 1e-10);
         }
     }
 

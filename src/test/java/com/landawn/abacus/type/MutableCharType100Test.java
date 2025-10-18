@@ -11,8 +11,8 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
@@ -101,7 +101,7 @@ public class MutableCharType100Test extends TestBase {
     @Test
     public void testSetPreparedStatementWithNonNull() throws SQLException {
         mutableCharType.set(mockPreparedStatement, 1, MutableChar.of('M'));
-        Mockito.verify(mockPreparedStatement).setInt(1, (int) 'M');
+        Mockito.verify(mockPreparedStatement).setInt(1, 'M');
     }
 
     @Test
@@ -113,7 +113,7 @@ public class MutableCharType100Test extends TestBase {
     @Test
     public void testSetCallableStatementWithNonNull() throws SQLException {
         mutableCharType.set(mockCallableStatement, "param", MutableChar.of('!'));
-        Mockito.verify(mockCallableStatement).setInt("param", (int) '!');
+        Mockito.verify(mockCallableStatement).setInt("param", '!');
     }
 
     @Test

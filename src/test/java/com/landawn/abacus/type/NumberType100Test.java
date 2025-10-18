@@ -11,8 +11,8 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -127,7 +127,7 @@ public class NumberType100Test extends TestBase {
     public void testWriteCharacterWithValue() throws IOException {
         intNumberType.writeCharacter(writer, 123, config);
         verify(writer).writeInt(123);
-        ;
+
 
         doubleNumberType.writeCharacter(writer, 123.45, config);
         verify(writer).write(123.45);

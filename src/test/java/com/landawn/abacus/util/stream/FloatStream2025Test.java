@@ -1541,4 +1541,149 @@ public class FloatStream2025Test extends TestBase {
             assertThrows(NullPointerException.class, () -> createFloatStream(1.0f, 2.0f).filter(null).count());
         }
     }
+
+    // Additional coverage improvement tests - Collection-based factory methods
+
+    @Test
+    @DisplayName("zip() collection of streams with function")
+    public void testZipCollectionStreamsAdditional() {
+        Collection<FloatStream> streams = Arrays.asList(
+                FloatStream.of(1.0f, 2.0f),
+                FloatStream.of(10.0f, 20.0f),
+                FloatStream.of(100.0f, 200.0f)
+        );
+        FloatStream result = FloatStream.zip(streams, floats -> {
+            float sum = 0.0f;
+            for (Float f : floats) sum += f;
+            return sum;
+        });
+        assertArrayEquals(new float[] { 111.0f, 222.0f }, result.toArray());
+    }
+
+    @Test
+    @DisplayName("zip() collection with defaults additional")
+    public void testZipCollectionDefaultsAdditional() {
+        Collection<FloatStream> streams = Arrays.asList(
+                FloatStream.of(1.0f, 2.0f, 3.0f),
+                FloatStream.of(10.0f, 20.0f)
+        );
+        float[] defaults = { 0.0f, 100.0f };
+        FloatStream result = FloatStream.zip(streams, defaults, floats -> {
+            float sum = 0.0f;
+            for (Float f : floats) sum += f;
+            return sum;
+        });
+        assertEquals(3, result.count());
+    }
+
+    @Test
+    @DisplayName("merge() collection of streams additional")
+    public void testMergeCollectionAdditional() {
+        Collection<FloatStream> streams = Arrays.asList(
+                FloatStream.of(1.0f, 7.0f),
+                FloatStream.of(3.0f, 8.0f),
+                FloatStream.of(5.0f, 9.0f)
+        );
+        FloatStream result = FloatStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, result.count());
+    }
+
+    @Test
+    @DisplayName("merge() three arrays additional")
+    public void testMergeThreeArraysAdditional() {
+        float[] a1 = { 1.0f, 10.0f };
+        float[] a2 = { 4.0f, 11.0f };
+        float[] a3 = { 7.0f, 12.0f };
+        FloatStream stream = FloatStream.merge(a1, a2, a3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, stream.count());
+    }
+
+    @Test
+    @DisplayName("merge() three streams additional")
+    public void testMergeThreeStreamsAdditional() {
+        FloatStream s1 = FloatStream.of(1.0f, 15.0f);
+        FloatStream s2 = FloatStream.of(8.0f, 16.0f);
+        FloatStream s3 = FloatStream.of(12.0f, 17.0f);
+        FloatStream stream = FloatStream.merge(s1, s2, s3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, stream.count());
+    }
+
+    // Edge cases
+
+    @Test
+    @DisplayName("flatten() with alignment horizontally additional")
+    public void testFlattenAlignmentAdditional() {
+        float[][] array = { { 1.0f, 2.0f, 3.0f }, { 4.0f, 5.0f }, { 6.0f } };
+        FloatStream stream = FloatStream.flatten(array, 0.0f, true);
+        float[] result = stream.toArray();
+        assertEquals(9, result.length);
+        assertEquals(1.0f, result[0], 0.001);
+        assertEquals(4.0f, result[1], 0.001);
+        assertEquals(6.0f, result[2], 0.001);
+    }
+
+    
+
+    // Parallel operations
+
+    @Test
+    @DisplayName("parallel stream operations additional")
+    public void testParallelOperationsAdditional() {
+        FloatStream stream = FloatStream.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f).parallel();
+        float[] result = stream.filter(f -> f > 3.0f).map(f -> f * 2).toArray();
+        assertEquals(5, result.length);
+    }
+
+    @Test
+    @DisplayName("iterate() with immediate false hasNext additional")
+    public void testIterateFalseHasNextAdditional() {
+        FloatStream stream = FloatStream.iterate(1.0f, () -> false, f -> f + 1.0f);
+        assertEquals(0, stream.count());
+    }
+
+    @Test
+    @DisplayName("collapse() with no collapsible elements additional")
+    public void testCollapseNoCollapsibleAdditional() {
+        FloatStream stream = FloatStream.of(1.0f, 10.0f, 20.0f, 30.0f);
+        float[] result = stream.collapse((a, b) -> Math.abs(b - a) <= 2.0f, Float::sum).toArray();
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("scan() on empty stream additional")
+    public void testScanEmptyAdditional() {
+        FloatStream emptyStream = FloatStream.empty();
+        float[] result = emptyStream.scan(Float::sum).toArray();
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    @DisplayName("zip() three arrays with defaults additional")
+    public void testZipThreeArraysDefaultsAdditional() {
+        float[] a1 = { 1.0f, 2.0f };
+        float[] a2 = { 10.0f };
+        float[] a3 = { 100.0f, 200.0f, 300.0f };
+        FloatStream stream = FloatStream.zip(a1, a2, a3, 0.0f, 0.0f, 0.0f, (a, b, c) -> a + b + c);
+        assertEquals(3, stream.count());
+    }
+
+    @Test
+    @DisplayName("zip() three iterators with defaults additional")
+    public void testZipThreeIteratorsDefaultsAdditional() {
+        FloatIterator iter1 = FloatIterator.of(1.0f, 2.0f);
+        FloatIterator iter2 = FloatIterator.of(10.0f);
+        FloatIterator iter3 = FloatIterator.of(100.0f, 200.0f, 300.0f);
+        FloatStream stream = FloatStream.zip(iter1, iter2, iter3, 0.0f, 0.0f, 0.0f, (a, b, c) -> a + b + c);
+        assertEquals(3, stream.count());
+    }
+
+    @Test
+    @DisplayName("zip() three streams with defaults additional")
+    public void testZipThreeStreamsDefaultsAdditional() {
+        FloatStream s1 = FloatStream.of(1.0f, 2.0f);
+        FloatStream s2 = FloatStream.of(10.0f);
+        FloatStream s3 = FloatStream.of(100.0f, 200.0f, 300.0f);
+        FloatStream stream = FloatStream.zip(s1, s2, s3, 0.0f, 0.0f, 0.0f, (a, b, c) -> a + b + c);
+        assertEquals(3, stream.count());
+    }
 }

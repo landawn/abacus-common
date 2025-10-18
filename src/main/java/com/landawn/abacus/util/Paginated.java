@@ -66,31 +66,6 @@ import com.landawn.abacus.util.stream.Stream;
  * @since 1.0
  */
 public interface Paginated<T> extends Iterable<T> {
-    //    /**
-    //     * Checks for next.
-    //     *
-    //     * @return {@code true}, if successful
-    //     */
-    //    boolean hasNext(); // confusing with Iterator.hasNext()
-    //
-    //    T nextPage();
-    //
-    //    T currentPage();
-    //
-    //    T previousPage();
-    //
-    //    /**
-    //     *
-    //     * @param pageNum
-    //     * @return
-    //     */
-    //    Paginated<T> absolute(int pageNum);
-    //    
-    //   /**
-    //    *
-    //    * @return int
-    //    */
-    //   int currentPageNum();
 
     /**
      * Returns the first page of the paginated data wrapped in an Optional.

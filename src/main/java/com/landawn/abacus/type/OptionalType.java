@@ -97,6 +97,16 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
+     * Returns the default value for Optional type, which is an empty Optional.
+     *
+     * @return Optional.empty()
+     */
+    @Override
+    public Optional<T> defaultValue() {
+        return Optional.<T> empty();
+    }
+
+    /**
      * Converts an {@link Optional} object to its string representation.
      * If the Optional is null or empty, returns null. Otherwise,
      * delegates to the element type's string conversion.

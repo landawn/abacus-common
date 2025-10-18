@@ -1296,4 +1296,146 @@ public class ByteStream2025Test extends TestBase {
         assertEquals(2, multiset.get((byte) 2));
         assertEquals(3, multiset.get((byte) 3));
     }
+
+    // Additional coverage improvement tests - Collection-based factory methods
+
+    @Test
+    public void testZipWithCollectionOfStreams() {
+        Collection<ByteStream> streams = Arrays.asList(
+                ByteStream.of((byte) 1, (byte) 2),
+                ByteStream.of((byte) 10, (byte) 20),
+                ByteStream.of((byte) 100, (byte) 127)
+        );
+        ByteStream result = ByteStream.zip(streams, bytes -> {
+            byte sum = 0;
+            for (Byte b : bytes) sum += b;
+            return sum;
+        });
+        assertArrayEquals(new byte[] { 111, -107 }, result.toArray());
+    }
+
+    @Test
+    public void testZipWithCollectionAndValuesForNone() {
+        Collection<ByteStream> streams = Arrays.asList(
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3),
+                ByteStream.of((byte) 10, (byte) 20)
+        );
+        byte[] defaults = { 0, 100 };
+        ByteStream result = ByteStream.zip(streams, defaults, bytes -> {
+            byte sum = 0;
+            for (Byte b : bytes) sum += b;
+            return sum;
+        });
+        assertEquals(3, result.count());
+    }
+
+    @Test
+    public void testMergeWithCollectionOfStreams() {
+        Collection<ByteStream> streams = Arrays.asList(
+                ByteStream.of((byte) 1, (byte) 5),
+                ByteStream.of((byte) 2, (byte) 6),
+                ByteStream.of((byte) 3, (byte) 7)
+        );
+        ByteStream result = ByteStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, result.count());
+    }
+
+    @Test
+    public void testMergeThreeArraysAdditional() {
+        byte[] a1 = { 1, 7 };
+        byte[] a2 = { 3, 8 };
+        byte[] a3 = { 5, 9 };
+        ByteStream stream = ByteStream.merge(a1, a2, a3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, stream.count());
+    }
+
+    @Test
+    public void testMergeThreeStreamsAdditional() {
+        ByteStream s1 = ByteStream.of((byte) 1, (byte) 10);
+        ByteStream s2 = ByteStream.of((byte) 5, (byte) 15);
+        ByteStream s3 = ByteStream.of((byte) 8, (byte) 20);
+        ByteStream stream = ByteStream.merge(s1, s2, s3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, stream.count());
+    }
+
+    // Edge cases
+
+    @Test
+    public void testFlattenWithAlignmentHorizontally() {
+        byte[][] array = { { 1, 2, 3 }, { 4, 5 }, { 6 } };
+        ByteStream stream = ByteStream.flatten(array, (byte) 0, true);
+        byte[] result = stream.toArray();
+        assertEquals(9, result.length);
+        assertEquals(1, result[0]);
+        assertEquals(4, result[1]);
+        assertEquals(6, result[2]);
+    }
+
+    @Test
+    public void testRangeClosedWithNegativeStep() {
+        ByteStream stream = ByteStream.rangeClosed((byte) 10, (byte) 1, (byte) -2);
+        assertArrayEquals(new byte[] { 10, 8, 6, 4, 2 }, stream.toArray());
+    }
+
+    @Test
+    public void testRangeWithInvalidStepDirection() {
+        ByteStream stream = ByteStream.range((byte) 1, (byte) 10, (byte) -1);
+        assertEquals(0, stream.count());
+    }
+
+    // Parallel operations
+
+    @Test
+    public void testParallelStreamOperations() {
+        ByteStream stream = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 7, (byte) 8).parallel();
+        byte[] result = stream.filter(b -> b % 2 == 0).map(b -> (byte) (b * 2)).toArray();
+        assertEquals(4, result.length);
+    }
+
+    @Test
+    public void testIterateWithImmediateFalseHasNext() {
+        ByteStream stream = ByteStream.iterate((byte) 1, () -> false, b -> (byte) (b + 1));
+        assertEquals(0, stream.count());
+    }
+
+    @Test
+    public void testCollapseWithNoCollapsibleElements() {
+        ByteStream stream = ByteStream.of((byte) 1, (byte) 10, (byte) 20, (byte) 30);
+        byte[] result = stream.collapse((a, b) -> b - a <= 2, (a, b) -> (byte) (a + b)).toArray();
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    public void testScanOnEmptyStream() {
+        ByteStream emptyStream = ByteStream.empty();
+        byte[] result = emptyStream.scan((a, b) -> (byte) (a + b)).toArray();
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testZipThreeArraysWithDefaultsAdditional() {
+        byte[] a1 = { 1, 2 };
+        byte[] a2 = { 10 };
+        byte[] a3 = { 100, 101, 102 };
+        ByteStream stream = ByteStream.zip(a1, a2, a3, (byte) 0, (byte) 0, (byte) 0, (a, b, c) -> (byte) (a + b + c));
+        assertEquals(3, stream.count());
+    }
+
+    @Test
+    public void testZipThreeIteratorsWithDefaultsAdditional() {
+        ByteIterator iter1 = ByteIterator.of(new byte[] { 1, 2 });
+        ByteIterator iter2 = ByteIterator.of(new byte[] { 10 });
+        ByteIterator iter3 = ByteIterator.of(new byte[] { 100, 101, 102 });
+        ByteStream stream = ByteStream.zip(iter1, iter2, iter3, (byte) 0, (byte) 0, (byte) 0, (a, b, c) -> (byte) (a + b + c));
+        assertEquals(3, stream.count());
+    }
+
+    @Test
+    public void testZipThreeStreamsWithDefaultsAdditional() {
+        ByteStream s1 = ByteStream.of((byte) 1, (byte) 2);
+        ByteStream s2 = ByteStream.of((byte) 10);
+        ByteStream s3 = ByteStream.of((byte) 100, (byte) 101, (byte) 102);
+        ByteStream stream = ByteStream.zip(s1, s2, s3, (byte) 0, (byte) 0, (byte) 0, (a, b, c) -> (byte) (a + b + c));
+        assertEquals(3, stream.count());
+    }
 }

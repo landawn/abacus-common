@@ -20,8 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.If.OrElse;
@@ -37,8 +37,8 @@ public class Multimap2025Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        listMultimap = N.newListMultimap();
-        setMultimap = N.newSetMultimap();
+        listMultimap = CommonUtil.newListMultimap();
+        setMultimap = CommonUtil.newSetMultimap();
     }
 
     @Test
@@ -301,13 +301,13 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testPutManyMultimap_EmptyMultimap() {
-        ListMultimap<String, Integer> other = N.newListMultimap();
+        ListMultimap<String, Integer> other = CommonUtil.newListMultimap();
         assertFalse(listMultimap.putMany(other));
     }
 
     @Test
     public void testPutManyMultimap_WithValues() {
-        ListMultimap<String, Integer> other = N.newListMultimap();
+        ListMultimap<String, Integer> other = CommonUtil.newListMultimap();
         other.put("key1", 10);
         other.put("key1", 20);
         other.put("key2", 30);
@@ -442,7 +442,7 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testRemoveManyMultimap_EmptyMultimap() {
-        ListMultimap<String, Integer> other = N.newListMultimap();
+        ListMultimap<String, Integer> other = CommonUtil.newListMultimap();
         assertFalse(listMultimap.removeMany(other));
     }
 
@@ -451,7 +451,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.putMany("key1", Arrays.asList(10, 20, 30));
         listMultimap.putMany("key2", Arrays.asList(40, 50));
 
-        ListMultimap<String, Integer> toRemove = N.newListMultimap();
+        ListMultimap<String, Integer> toRemove = CommonUtil.newListMultimap();
         toRemove.put("key1", 10);
         toRemove.put("key1", 20);
         toRemove.put("key2", 40);
@@ -758,7 +758,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.replaceAll((k, v) -> {
             List<Integer> newList = new ArrayList<>();
             newList.add(99);
-            return (List<Integer>) newList;
+            return newList;
         });
         assertTrue(listMultimap.isEmpty());
     }
@@ -771,7 +771,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.replaceAll((k, v) -> {
             List<Integer> newList = new ArrayList<>();
             newList.add(99);
-            return (List<Integer>) newList;
+            return newList;
         });
 
         assertEquals(Integer.valueOf(99), listMultimap.get("key1").get(0));
@@ -783,7 +783,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.computeIfAbsent("key1", k -> {
             List<Integer> list = new ArrayList<>();
             list.add(99);
-            return (List<Integer>) list;
+            return list;
         });
 
         assertNotNull(result);
@@ -799,7 +799,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.computeIfAbsent("key1", k -> {
             List<Integer> list = new ArrayList<>();
             list.add(99);
-            return (List<Integer>) list;
+            return list;
         });
 
         assertEquals(original, result);
@@ -819,7 +819,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.computeIfPresent("key1", (k, v) -> {
             List<Integer> list = new ArrayList<>();
             list.add(99);
-            return (List<Integer>) list;
+            return list;
         });
 
         assertNull(result);
@@ -833,7 +833,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.computeIfPresent("key1", (k, v) -> {
             List<Integer> list = new ArrayList<>(v);
             list.add(99);
-            return (List<Integer>) list;
+            return list;
         });
 
         assertNotNull(result);
@@ -856,7 +856,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.compute("key1", (k, v) -> {
             List<Integer> list = new ArrayList<>();
             list.add(99);
-            return (List<Integer>) list;
+            return list;
         });
 
         assertNotNull(result);
@@ -871,7 +871,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.compute("key1", (k, v) -> {
             List<Integer> list = new ArrayList<>(v);
             list.add(99);
-            return (List<Integer>) list;
+            return list;
         });
 
         assertNotNull(result);
@@ -893,7 +893,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.merge("key1", elements, (v, c) -> {
             List<Integer> merged = new ArrayList<>(v);
             merged.addAll(c);
-            return (List<Integer>) merged;
+            return merged;
         });
 
         assertNotNull(result);
@@ -908,7 +908,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.merge("key1", elements, (v, c) -> {
             List<Integer> merged = new ArrayList<>(v);
             merged.addAll(c);
-            return (List<Integer>) merged;
+            return merged;
         });
 
         assertNotNull(result);
@@ -921,7 +921,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.merge("key1", 99, (v, e) -> {
             List<Integer> merged = new ArrayList<>(v);
             merged.add(e);
-            return (List<Integer>) merged;
+            return merged;
         });
 
         assertNotNull(result);
@@ -936,7 +936,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.merge("key1", 99, (v, e) -> {
             List<Integer> merged = new ArrayList<>(v);
             merged.add(e);
-            return (List<Integer>) merged;
+            return merged;
         });
 
         assertNotNull(result);
@@ -1566,7 +1566,7 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testHashCode_EmptyMultimaps() {
-        ListMultimap<String, Integer> other = N.newListMultimap();
+        ListMultimap<String, Integer> other = CommonUtil.newListMultimap();
         assertEquals(listMultimap.hashCode(), other.hashCode());
     }
 
@@ -1574,7 +1574,7 @@ public class Multimap2025Test extends TestBase {
     public void testHashCode_EqualMultimaps() {
         listMultimap.put("key1", 10);
 
-        ListMultimap<String, Integer> other = N.newListMultimap();
+        ListMultimap<String, Integer> other = CommonUtil.newListMultimap();
         other.put("key1", 10);
 
         assertEquals(listMultimap.hashCode(), other.hashCode());
@@ -1597,7 +1597,7 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testEquals_EmptyMultimaps() {
-        ListMultimap<String, Integer> other = N.newListMultimap();
+        ListMultimap<String, Integer> other = CommonUtil.newListMultimap();
         assertTrue(listMultimap.equals(other));
     }
 
@@ -1606,7 +1606,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key1", 10);
         listMultimap.put("key2", 20);
 
-        ListMultimap<String, Integer> other = N.newListMultimap();
+        ListMultimap<String, Integer> other = CommonUtil.newListMultimap();
         other.put("key1", 10);
         other.put("key2", 20);
 
@@ -1617,7 +1617,7 @@ public class Multimap2025Test extends TestBase {
     public void testEquals_DifferentMultimaps() {
         listMultimap.put("key1", 10);
 
-        ListMultimap<String, Integer> other = N.newListMultimap();
+        ListMultimap<String, Integer> other = CommonUtil.newListMultimap();
         other.put("key1", 20);
 
         assertFalse(listMultimap.equals(other));
@@ -1867,7 +1867,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.computeIfAbsent(null, k -> {
             List<Integer> list = new ArrayList<>();
             list.add(99);
-            return (List<Integer>) list;
+            return list;
         });
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -1880,7 +1880,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.computeIfPresent(null, (k, v) -> {
             List<Integer> list = new ArrayList<>(v);
             list.add(20);
-            return (List<Integer>) list;
+            return list;
         });
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -1891,7 +1891,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.compute(null, (k, v) -> {
             List<Integer> list = v == null ? new ArrayList<>() : new ArrayList<>(v);
             list.add(99);
-            return (List<Integer>) list;
+            return list;
         });
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -1903,7 +1903,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.merge(null, elements, (v, c) -> {
             List<Integer> merged = new ArrayList<>(v);
             merged.addAll(c);
-            return (List<Integer>) merged;
+            return merged;
         });
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -1914,7 +1914,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> result = listMultimap.merge(null, 99, (v, e) -> {
             List<Integer> merged = new ArrayList<>(v);
             merged.add(e);
-            return (List<Integer>) merged;
+            return merged;
         });
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -2088,9 +2088,9 @@ public class Multimap2025Test extends TestBase {
     @Test
     public void testHashCode_ConsistentWithEquals() {
         listMultimap.put("key1", 10);
-        ListMultimap<String, Integer> other1 = N.newListMultimap();
+        ListMultimap<String, Integer> other1 = CommonUtil.newListMultimap();
         other1.put("key1", 10);
-        ListMultimap<String, Integer> other2 = N.newListMultimap();
+        ListMultimap<String, Integer> other2 = CommonUtil.newListMultimap();
         other2.put("key1", 20);
 
         assertEquals(listMultimap.hashCode(), other1.hashCode());
@@ -2101,7 +2101,7 @@ public class Multimap2025Test extends TestBase {
     @Test
     public void testEquals_WithSetMultimap() {
         listMultimap.put("key1", 10);
-        SetMultimap<String, Integer> setMm = N.newSetMultimap();
+        SetMultimap<String, Integer> setMm = CommonUtil.newSetMultimap();
         setMm.put("key1", 10);
         assertNotNull(listMultimap.equals(setMm));
     }

@@ -21,8 +21,8 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
@@ -283,9 +283,9 @@ public class CSVUtil102Test extends TestBase {
         }
 
         Map<String, Type<?>> columnTypeMap = new HashMap<>();
-        columnTypeMap.put("name", N.typeOf(String.class));
-        columnTypeMap.put("age", N.typeOf(Integer.class));
-        columnTypeMap.put("salary", N.typeOf(Double.class));
+        columnTypeMap.put("name", CommonUtil.typeOf(String.class));
+        columnTypeMap.put("age", CommonUtil.typeOf(Integer.class));
+        columnTypeMap.put("salary", CommonUtil.typeOf(Double.class));
 
         Dataset ds = CSVUtil.loadCSV(tempFile, columnTypeMap);
         assertEquals("John", ds.get(0, 0));
@@ -386,8 +386,8 @@ public class CSVUtil102Test extends TestBase {
         StringWriter sw = new StringWriter();
         BufferedCSVWriter writer = new BufferedCSVWriter(sw);
 
-        CSVUtil.writeField(writer, N.typeOf(String.class), "Hello");
-        CSVUtil.writeField(writer, N.typeOf(Integer.class), 42);
+        CSVUtil.writeField(writer, CommonUtil.typeOf(String.class), "Hello");
+        CSVUtil.writeField(writer, CommonUtil.typeOf(Integer.class), 42);
         CSVUtil.writeField(writer, null, null);
 
         writer.flush();

@@ -97,6 +97,16 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
+     * Returns the default value for Optional type, which is an empty Optional.
+     *
+     * @return Optional.empty()
+     */
+    @Override
+    public Optional<T> defaultValue() {
+        return Optional.<T> empty();
+    }
+
+    /**
      * Converts an Optional to its string representation.
      * If the optional is empty or null, returns null.
      * Otherwise, returns the string representation of the contained value.

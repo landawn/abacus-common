@@ -13,8 +13,8 @@ import java.util.function.BiPredicate;
 import java.util.function.ToIntFunction;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
@@ -121,7 +121,7 @@ public class Builder102Test extends TestBase {
 
     @Test
     public void testOfMultimap() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         Builder.MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         Assertions.assertNotNull(builder);
         Assertions.assertSame(multimap, builder.val());
@@ -580,7 +580,7 @@ public class Builder102Test extends TestBase {
 
     @Test
     public void testMultimapBuilderPut() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         Builder.MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
 
         builder.put("key", 1).put("key", 2);
@@ -589,7 +589,7 @@ public class Builder102Test extends TestBase {
 
     @Test
     public void testMultimapBuilderPutMap() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         Map<String, Integer> map = new HashMap<>();
         map.put("key1", 1);
         map.put("key2", 2);
@@ -603,7 +603,7 @@ public class Builder102Test extends TestBase {
 
     @Test
     public void testMultimapBuilderPutMany() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         Builder.MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
 
         builder.putMany("key", Arrays.asList(1, 2, 3));
@@ -612,7 +612,7 @@ public class Builder102Test extends TestBase {
 
     @Test
     public void testMultimapBuilderPutManyMap() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         Map<String, List<Integer>> map = new HashMap<>();
         map.put("key1", Arrays.asList(1, 2));
         map.put("key2", Arrays.asList(3, 4));
@@ -626,8 +626,8 @@ public class Builder102Test extends TestBase {
 
     @Test
     public void testMultimapBuilderPutManyMultimap() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
-        ListMultimap<String, Integer> toAdd = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
+        ListMultimap<String, Integer> toAdd = CommonUtil.newListMultimap();
         toAdd.putMany("key", Arrays.asList(1, 2, 3));
 
         Builder.MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
@@ -638,7 +638,7 @@ public class Builder102Test extends TestBase {
 
     @Test
     public void testMultimapBuilderRemoveOne() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         multimap.put("key", 1);
         multimap.put("key", 2);
 
@@ -651,7 +651,7 @@ public class Builder102Test extends TestBase {
 
     @Test
     public void testMultimapBuilderRemoveOneMap() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         multimap.put("key1", 1);
         multimap.put("key2", 2);
 
@@ -667,8 +667,8 @@ public class Builder102Test extends TestBase {
 
     @Test
     public void testMultimapBuilderRemoveAll() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
-        multimap.putMany("key", N.asList(1, 2, 3));
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
+        multimap.putMany("key", CommonUtil.asList(1, 2, 3));
 
         Builder.MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         builder.removeAll("key");
@@ -678,7 +678,7 @@ public class Builder102Test extends TestBase {
 
     @Test
     public void testMultimapBuilderRemoveMany() {
-        ListMultimap<String, Integer> multimap = N.newListMultimap();
+        ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         multimap.putMany("key", Arrays.asList(1, 2, 3, 4));
 
         Builder.MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
@@ -701,17 +701,17 @@ public class Builder102Test extends TestBase {
 
     @Test
     public void testDatasetBuilderAddColumn() {
-        Dataset ds = new RowDataset(N.asList("col1"), N.asList(Arrays.asList("val1")));
+        Dataset ds = new RowDataset(CommonUtil.asList("col1"), CommonUtil.asList(Arrays.asList("val1")));
         Builder.DatasetBuilder builder = Builder.of(ds);
 
-        builder.addColumn("col2", N.asList("val2"));
+        builder.addColumn("col2", CommonUtil.asList("val2"));
         Assertions.assertEquals(2, ds.columnCount());
         Assertions.assertTrue(ds.columnNameList().contains("col2"));
     }
 
     @Test
     public void testDatasetBuilderRemoveColumn() {
-        Dataset ds = new RowDataset(N.asList("col1", "col2"), N.asList(N.asList("val1"), N.asList("val2")));
+        Dataset ds = new RowDataset(CommonUtil.asList("col1", "col2"), CommonUtil.asList(CommonUtil.asList("val1"), CommonUtil.asList("val2")));
         Builder.DatasetBuilder builder = Builder.of(ds);
 
         builder.removeColumn("col2");

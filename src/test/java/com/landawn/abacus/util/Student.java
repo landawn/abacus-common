@@ -75,14 +75,14 @@ public class Student extends Person implements Serializable, Cloneable {
     @Override
     public int hashCode() {
         int h = 17;
-        h = 31 * h + N.hashCode(list);
-        h = 31 * h + N.hashCode(map);
-        h = 31 * h + N.hashCode(map1);
-        h = 31 * h + N.hashCode(map2);
-        h = 31 * h + N.hashCode(getFirstName());
-        h = 31 * h + N.hashCode(getMiddleName());
-        h = 31 * h + N.hashCode(getLastName());
-        return 31 * h + N.hashCode(getBirthDate());
+        h = 31 * h + CommonUtil.hashCode(list);
+        h = 31 * h + CommonUtil.hashCode(map);
+        h = 31 * h + CommonUtil.hashCode(map1);
+        h = 31 * h + CommonUtil.hashCode(map2);
+        h = 31 * h + CommonUtil.hashCode(getFirstName());
+        h = 31 * h + CommonUtil.hashCode(getMiddleName());
+        h = 31 * h + CommonUtil.hashCode(getLastName());
+        return 31 * h + CommonUtil.hashCode(getBirthDate());
     }
 
     @Override
@@ -92,9 +92,9 @@ public class Student extends Person implements Serializable, Cloneable {
         }
 
         if (obj instanceof Student other) {
-            if (N.equals(list, other.list) && N.equals(map, other.map) && N.equals(map1, other.map1) && N.equals(map2, other.map2)
-                    && N.equals(getFirstName(), other.getFirstName()) && N.equals(getMiddleName(), other.getMiddleName())
-                    && N.equals(getLastName(), other.getLastName()) && N.equals(getBirthDate(), other.getBirthDate())) {
+            if (CommonUtil.equals(list, other.list) && CommonUtil.equals(map, other.map) && CommonUtil.equals(map1, other.map1) && CommonUtil.equals(map2, other.map2)
+                    && CommonUtil.equals(getFirstName(), other.getFirstName()) && CommonUtil.equals(getMiddleName(), other.getMiddleName())
+                    && CommonUtil.equals(getLastName(), other.getLastName()) && CommonUtil.equals(getBirthDate(), other.getBirthDate())) {
 
                 return true;
             }
@@ -105,8 +105,8 @@ public class Student extends Person implements Serializable, Cloneable {
 
     @Override
     public String toString() {
-        return "{" + "firstName=" + N.toString(getFirstName()) + ", " + "middleName=" + N.toString(getMiddleName()) + ", " + "lastName="
-                + N.toString(getLastName()) + ", " + "birthDate=" + N.toString(getBirthDate()) + ", " + "map=" + N.toString(map) + ", " + "map1="
-                + N.toString(map1) + ", " + "map2=" + N.toString(map2) + ", " + "}";
+        return "{" + "firstName=" + CommonUtil.toString(getFirstName()) + ", " + "middleName=" + CommonUtil.toString(getMiddleName()) + ", " + "lastName="
+                + CommonUtil.toString(getLastName()) + ", " + "birthDate=" + CommonUtil.toString(getBirthDate()) + ", " + "map=" + CommonUtil.toString(map) + ", " + "map1="
+                + CommonUtil.toString(map1) + ", " + "map2=" + CommonUtil.toString(map2) + ", " + "}";
     }
 }

@@ -1352,45 +1352,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract Iterator<B> iterator();
 
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param <E>
-    //     * @param func
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    public abstract <R, E extends Exception> R apply(Throwables.Function<? super L, ? extends R, E> func) throws E;
-    //
-    //    /**
-    //     * Apply if not empty.
-    //     *
-    //     * @param <R>
-    //     * @param <E>
-    //     * @param func
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    public abstract <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super L, ? extends R, E> func) throws E;
-    //
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @throws E the e
-    //     */
-    //    public abstract <E extends Exception> void accept(Throwables.Consumer<? super L, E> action) throws E;
-    //
-    //    /**
-    //     * Accept if not empty.
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    public abstract <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super L, E> action) throws E;
-
     /**
      * Prints the string representation of this primitive list to the standard output.
      * This method is marked as @Beta, indicating it is subject to change or removal in future versions.

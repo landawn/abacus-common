@@ -26,8 +26,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -89,7 +89,7 @@ public class ZonedDateTimeType100Test extends TestBase {
     @Test
     public void testValueOfObjectWithNumber() {
         long epochMilli = 1703502645000L;
-        ZonedDateTime result = zonedDateTimeType.valueOf((Object) epochMilli);
+        ZonedDateTime result = zonedDateTimeType.valueOf(epochMilli);
         assertNotNull(result);
         assertEquals(epochMilli, result.toInstant().toEpochMilli());
     }

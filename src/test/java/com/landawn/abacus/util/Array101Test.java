@@ -3,8 +3,8 @@ package com.landawn.abacus.util;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -611,7 +611,7 @@ public class Array101Test extends TestBase {
     @Test
     public void testRangeClosed_long_overflow() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Array.rangeClosed(0L, (long) Integer.MAX_VALUE);
+            Array.rangeClosed(0L, Integer.MAX_VALUE);
         });
     }
 

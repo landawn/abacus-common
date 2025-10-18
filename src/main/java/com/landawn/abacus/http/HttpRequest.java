@@ -795,27 +795,6 @@ public final class HttpRequest {
         return execute(HttpMethod.PUT, resultClass);
     }
 
-    // TODO HTTP METHOD PATCH is not supported by HttpURLConnection.
-    //    /**
-    //     *
-    //     * @return
-    //     * @throws UncheckedIOException the unchecked IO exception
-    //     */
-    //    public HttpResponse patch() throws UncheckedIOException {
-    //        return patch(HttpResponse.class);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param resultClass
-    //     * @return
-    //     * @throws UncheckedIOException the unchecked IO exception
-    //     */
-    //    public <T> T patch(final Class<T> resultClass) throws UncheckedIOException {
-    //        return execute(HttpMethod.PATCH, resultClass);
-    //    }
-
     /**
      * Executes a DELETE request and returns the response as an HttpResponse.
      * DELETE requests remove a specified resource from the server.

@@ -22,8 +22,8 @@ import java.util.function.BiFunction;
 import java.util.function.IntFunction;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Nullable;
@@ -652,7 +652,7 @@ public class Maps2025Test extends TestBase {
     public void testGetByPathIfExists() {
         Map<String, Object> map = new HashMap<>();
         map.put("key", "value");
-        map.put("key2", N.asMap("kk2", "123"));
+        map.put("key2", CommonUtil.asMap("kk2", "123"));
 
         Nullable<String> result = Maps.getByPathIfExists(map, "key");
         assertTrue(result.isPresent());
@@ -668,13 +668,13 @@ public class Maps2025Test extends TestBase {
 
     @Test
     public void testContainsEntry() {
-        Map.Entry<String, String> entry = N.newEntry("key1", "value1");
+        Map.Entry<String, String> entry = CommonUtil.newEntry("key1", "value1");
         assertTrue(Maps.contains(testMap, entry));
 
-        Map.Entry<String, String> wrongValue = N.newEntry("key1", "wrongValue");
+        Map.Entry<String, String> wrongValue = CommonUtil.newEntry("key1", "wrongValue");
         assertFalse(Maps.contains(testMap, wrongValue));
 
-        Map.Entry<String, String> missing = N.newEntry("missing", "value");
+        Map.Entry<String, String> missing = CommonUtil.newEntry("missing", "value");
         assertFalse(Maps.contains(testMap, missing));
     }
 
@@ -852,14 +852,14 @@ public class Maps2025Test extends TestBase {
     public void testRemoveEntry() {
         Map<String, String> map = new HashMap<>(testMap);
 
-        Map.Entry<String, String> entry = N.newEntry("key1", "value1");
+        Map.Entry<String, String> entry = CommonUtil.newEntry("key1", "value1");
         assertTrue(Maps.remove(map, entry));
         assertFalse(map.containsKey("key1"));
 
-        Map.Entry<String, String> missing = N.newEntry("missing", "value");
+        Map.Entry<String, String> missing = CommonUtil.newEntry("missing", "value");
         assertFalse(Maps.remove(map, missing));
 
-        Map.Entry<String, String> wrongValue = N.newEntry("key2", "wrongValue");
+        Map.Entry<String, String> wrongValue = CommonUtil.newEntry("key2", "wrongValue");
         assertFalse(Maps.remove(map, wrongValue));
         assertTrue(map.containsKey("key2"));
     }

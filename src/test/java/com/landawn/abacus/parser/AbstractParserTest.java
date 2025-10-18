@@ -299,10 +299,7 @@ public abstract class AbstractParserTest extends AbstractTest {
                 return false;
             }
             TransientBean other = (TransientBean) obj;
-            if (!Objects.equals(nontransientField, other.nontransientField)) {
-                return false;
-            }
-            if (!Objects.equals(transientField, other.transientField)) {
+            if (!Objects.equals(nontransientField, other.nontransientField) || !Objects.equals(transientField, other.transientField)) {
                 return false;
             }
             return true;

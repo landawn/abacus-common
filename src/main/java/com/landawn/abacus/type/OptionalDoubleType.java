@@ -63,6 +63,16 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
     }
 
     /**
+     * Returns the default value for OptionalDouble type, which is an empty OptionalDouble.
+     *
+     * @return OptionalDouble.empty()
+     */
+    @Override
+    public OptionalDouble defaultValue() {
+        return OptionalDouble.empty();
+    }
+
+    /**
      * Converts an {@link OptionalDouble} object to its string representation.
      * 
      * @param x the OptionalDouble object to convert

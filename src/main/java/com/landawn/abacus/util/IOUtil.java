@@ -331,15 +331,15 @@ public final class IOUtil {
 
     /**
      * Retrieves the host name of the local machine.
-     * If the host name cannot be determined, it returns "UNKNOWN_HOST_NAME".
+     * if the host name cannot be determined, it returns "UNKNOWN_HOST_NAME".
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * String hostName = IOUtil.getHostName();
      * System.out.println("Current host name: " + hostName);
-     * </code></pre>
+     * }</pre>
      *
-     * @return The host name of the local machine, or "UNKNOWN_HOST_NAME" if it cannot be determined.
+     * @return the host name of the local machine, or "UNKNOWN_HOST_NAME" if it cannot be determined
      */
     public static String getHostName() {
         String ret = hostName;
@@ -385,18 +385,18 @@ public final class IOUtil {
      * Returns the free disk space on the volume where the current working directory resides, in kilobytes (KB).
      * This is equivalent to calling {@code freeDiskSpaceKb(new File(".").getAbsolutePath())}.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try {
      *     long freeSpace = IOUtil.freeDiskSpaceKb();
      *     System.out.println("Free disk space: " + freeSpace + " KB");
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @return The amount of free disk space in kilobytes.
-     * @throws UncheckedIOException if an I/O error occurs while retrieving the free space information.
+     * @return the amount of free disk space in kilobytes
+     * @throws UncheckedIOException if an I/O error occurs while retrieving the free space information
      */
     public static long freeDiskSpaceKb() throws UncheckedIOException {
         try {
@@ -411,19 +411,19 @@ public final class IOUtil {
      * This is equivalent to calling {@code freeDiskSpaceKb(new File(".").getAbsolutePath(), timeout)}.
      * The command to retrieve the disk space will be aborted if it exceeds the specified timeout.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try {
      *     long freeSpace = IOUtil.freeDiskSpaceKb(5000); // 5-second timeout
      *     System.out.println("Free disk space: " + freeSpace + " KB");
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space within the specified timeout: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param timeout The maximum time in milliseconds to wait for the command to complete. A value of zero or less means no timeout.
-     * @return The amount of free disk space in kilobytes.
-     * @throws UncheckedIOException if an I/O error occurs or the command times out.
+     * @param timeout the maximum time in milliseconds to wait for the command to complete. A value of zero or less means no timeout
+     * @return the amount of free disk space in kilobytes
+     * @throws UncheckedIOException if an I/O error occurs or the command times out
      */
     public static long freeDiskSpaceKb(final long timeout) throws UncheckedIOException {
         try {
@@ -445,8 +445,8 @@ public final class IOUtil {
      * </ul>
      * Note: The accuracy of this method depends on the availability and output format of the underlying system commands.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try {
      *     // For Windows
      *     long freeSpace = IOUtil.freeDiskSpaceKb("C:\\");
@@ -458,10 +458,10 @@ public final class IOUtil {
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space for the specified path: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param path The path to a file or directory on the volume to check. It must not be {@code null}. On Unix, it should not be an empty string.
-     * @return The amount of free disk space in kilobytes.
+     * @param path the path to a file or directory on the volume to check. It must not be {@code null}. On Unix, it should not be an empty string.
+     * @return the amount of free disk space in kilobytes.
      * @throws UncheckedIOException if an I/O error occurs while retrieving the free space information.
      * @throws IllegalArgumentException if the path is invalid.
      */
@@ -483,8 +483,8 @@ public final class IOUtil {
      * </ul>
      * Note: The accuracy of this method depends on the availability and output format of the underlying system commands.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try {
      *     // For Windows, with a 5-second timeout
      *     long freeSpace = IOUtil.freeDiskSpaceKb("C:\\", 5000);
@@ -492,11 +492,11 @@ public final class IOUtil {
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space for the specified path within the timeout: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param path The path to a file or directory on the volume to check. It must not be {@code null}. On Unix, it should not be an empty string.
-     * @param timeout The maximum time in milliseconds to wait for the command to complete. A value of zero or less means no timeout.
-     * @return The amount of free disk space in kilobytes.
+     * @param path the path to a file or directory on the volume to check. It must not be {@code null}. On Unix, it should not be an empty string.
+     * @param timeout the maximum time in milliseconds to wait for the command to complete. A value of zero or less means no timeout.
+     * @return the amount of free disk space in kilobytes.
      * @throws UncheckedIOException if an I/O error occurs or the command times out.
      * @throws IllegalArgumentException if the path is invalid.
      */
@@ -515,14 +515,14 @@ public final class IOUtil {
     /**
      * Converts a character array to a byte array using the default character set of the platform.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * char[] chars = new char[]{'H', 'e', 'l', 'l', 'o'};
      * byte[] bytes = IOUtil.chars2Bytes(chars);
-     * </code></pre>
+     * }</pre>
      *
-     * @param chars The character array to convert. May be {@code null} or empty.
-     * @return The resulting byte array, or an empty byte array if the input is {@code null} or empty.
+     * @param chars the character array to convert. May be {@code null} or empty.
+     * @return the resulting byte array, or an empty byte array if the input is {@code null} or empty.
      */
     public static byte[] chars2Bytes(final char[] chars) {
         return chars2Bytes(chars, DEFAULT_CHARSET);
@@ -531,16 +531,16 @@ public final class IOUtil {
     /**
      * Converts a character array to a byte array using the specified character set.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * char[] chars = new char[]{'H', 'e', 'l', 'l', 'o'};
      * byte[] bytes = IOUtil.chars2Bytes(chars, StandardCharsets.UTF_8);
      * IOUtil.chars2Bytes(null); // returns empty byte array
-     * </code></pre>
+     * }</pre>
      *
-     * @param chars The character array to convert. May be {@code null} or empty.
-     * @param charset The character set to use for encoding. If {@code null}, the platform's default charset is used.
-     * @return The resulting byte array, or an empty byte array if the input is {@code null} or empty.
+     * @param chars the character array to convert. May be {@code null} or empty.
+     * @param charset the character set to use for encoding. If {@code null}, the platform's default charset is used.
+     * @return the resulting byte array, or an empty byte array if the input is {@code null} or empty.
      */
     public static byte[] chars2Bytes(final char[] chars, final Charset charset) {
         if (N.isEmpty(chars)) {
@@ -553,18 +553,18 @@ public final class IOUtil {
     /**
      * Converts a sub-array of a character array to a byte array using the specified character set.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * char[] chars = new char[]{'H', 'e', 'l', 'l', 'o'};
      * // Convert the sub-array {'e', 'l', 'l'}
      * byte[] bytes = IOUtil.chars2Bytes(chars, 1, 3, StandardCharsets.UTF_8);
-     * </code></pre>
+     * }</pre>
      *
-     * @param chars The source character array.
-     * @param offset The starting position in the character array (0-based).
-     * @param charCount The number of characters to convert.
-     * @param charset The character set to use for encoding. If {@code null}, the platform's default charset is used.
-     * @return The resulting byte array, or an empty byte array if {@code charCount} is zero.
+     * @param chars the source character array, may be {@code null} or empty
+     * @param offset the starting position in the character array (0-based), must be >= 0
+     * @param charCount the number of characters to convert, must be >= 0
+     * @param charset the character set to use for encoding. If {@code null}, the platform's default charset is used.
+     * @return the resulting byte array, or an empty byte array if {@code charCount} is zero.
      * @throws IndexOutOfBoundsException if {@code offset} or {@code charCount} is out of bounds.
      */
     public static byte[] chars2Bytes(final char[] chars, final int offset, final int charCount, Charset charset) {
@@ -587,15 +587,15 @@ public final class IOUtil {
     /**
      * Converts a byte array to a character array using the default character set of the platform.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * byte[] bytes = new byte[]{72, 101, 108, 108, 111}; // "Hello"
      * char[] chars = IOUtil.bytes2Chars(bytes);
      * IOUtil.bytes2Chars(null); // returns empty char array
-     * </code></pre>
+     * }</pre>
      *
-     * @param bytes The byte array to convert. May be {@code null} or empty.
-     * @return The resulting character array, or an empty character array if the input is {@code null} or empty.
+     * @param bytes the byte array to convert. May be {@code null} or empty.
+     * @return the resulting character array, or an empty character array if the input is {@code null} or empty.
      */
     public static char[] bytes2Chars(final byte[] bytes) {
         return bytes2Chars(bytes, DEFAULT_CHARSET);
@@ -604,15 +604,15 @@ public final class IOUtil {
     /**
      * Converts a byte array to a character array using the specified character set.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * byte[] bytes = new byte[]{72, 101, 108, 108, 111}; // "Hello" in UTF-8
      * char[] chars = IOUtil.bytes2Chars(bytes, StandardCharsets.UTF_8);
-     * </code></pre>
+     * }</pre>
      *
-     * @param bytes The byte array to convert. May be {@code null} or empty.
-     * @param charset The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return The resulting character array, or an empty character array if the input is {@code null} or empty.
+     * @param bytes the byte array to convert. May be {@code null} or empty.
+     * @param charset the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return the resulting character array, or an empty character array if the input is {@code null} or empty.
      */
     public static char[] bytes2Chars(final byte[] bytes, final Charset charset) {
         if (N.isEmpty(bytes)) {
@@ -625,18 +625,18 @@ public final class IOUtil {
     /**
      * Converts a sub-array of a byte array to a character array using the specified character set.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * byte[] bytes = new byte[]{72, 101, 108, 108, 111}; // "Hello" in UTF-8
      * // Convert the sub-array {101, 108, 108}
      * char[] chars = IOUtil.bytes2Chars(bytes, 1, 3, StandardCharsets.UTF_8);
-     * </code></pre>
+     * }</pre>
      *
-     * @param bytes The source byte array.
-     * @param offset The starting position in the byte array (0-based).
-     * @param byteCount The number of bytes to convert.
-     * @param charset The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return The resulting character array, or an empty character array if {@code byteCount} is zero.
+     * @param bytes the source byte array, may be {@code null} or empty
+     * @param offset the starting position in the byte array (0-based), must be >= 0
+     * @param byteCount the number of bytes to convert, must be >= 0
+     * @param charset the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return the resulting character array, or an empty character array if {@code byteCount} is zero.
      * @throws IndexOutOfBoundsException if {@code offset} or {@code byteCount} is out of bounds.
      */
     public static char[] bytes2Chars(final byte[] bytes, final int offset, final int byteCount, Charset charset) {
@@ -658,18 +658,18 @@ public final class IOUtil {
 
     /**
      * Converts a {@code String} to an {@code InputStream} using the platform's default character set.
-     * If the input string is {@code null}, an empty {@code InputStream} is returned.
+     * if the input string is {@code null}, an empty {@code InputStream} is returned.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * String str = "Hello, World!";
      * try (InputStream inputStream = IOUtil.string2InputStream(str)) {
      *     // Use the inputStream
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param str The string to convert. Must not be {@code null}.
-     * @return An {@code InputStream} for the given string, or an empty {@code InputStream} if the input is {@code null}.
+     * @param str the string to convert, must not be {@code null}
+     * @return an {@code InputStream} for the given string, or an empty {@code InputStream} if the input is {@code null}.
      */
     public static InputStream string2InputStream(final String str) {
         return string2InputStream(str, DEFAULT_CHARSET);
@@ -677,19 +677,19 @@ public final class IOUtil {
 
     /**
      * Converts a {@code String} to an {@code InputStream} using the specified character set.
-     * If the input string is {@code null}, an empty {@code InputStream} is returned.
+     * if the input string is {@code null}, an empty {@code InputStream} is returned.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * String str = "Hello, World!";
      * try (InputStream inputStream = IOUtil.string2InputStream(str, StandardCharsets.UTF_8)) {
      *     // Use the inputStream
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param str The string to convert. Must not be {@code null}.
-     * @param charset The character set to use for encoding. If {@code null}, the platform's default charset is used.
-     * @return An {@code InputStream} for the given string, or an empty {@code InputStream} if the input is {@code null}.
+     * @param str the string to convert, must not be {@code null}
+     * @param charset the character set to use for encoding. If {@code null}, the platform's default charset is used.
+     * @return an {@code InputStream} for the given string, or an empty {@code InputStream} if the input is {@code null}.
      */
     public static InputStream string2InputStream(final String str, Charset charset) {
         charset = checkCharset(charset);
@@ -701,18 +701,18 @@ public final class IOUtil {
 
     /**
      * Converts a {@code String} into a {@code Reader}.
-     * If the input string is {@code null}, an empty reader is returned.
+     * if the input string is {@code null}, an empty reader is returned.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * String str = "Hello, World!";
      * try (Reader reader = IOUtil.string2Reader(str)) {
      *     // Use the reader
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param str The string to convert. May be {@code null}.
-     * @return A {@code Reader} for the given string, or an empty reader if the input is {@code null}.
+     * @param str the string to convert. May be {@code null}.
+     * @return a {@code Reader} for the given string, or an empty reader if the input is {@code null}.
      * @see StringReader
      */
     public static Reader string2Reader(final String str) {
@@ -723,17 +723,17 @@ public final class IOUtil {
      * Wraps a {@code StringBuilder} in a {@code Writer}.
      * Any characters written to the writer will be appended to the string builder.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * StringBuilder sb = new StringBuilder();
      * try (Writer writer = IOUtil.stringBuilder2Writer(sb)) {
      *     writer.write("Hello");
      * }
      * // sb.toString() will be "Hello"
-     * </code></pre>
+     * }</pre>
      *
-     * @param sb The {@code StringBuilder} to wrap. Must not be {@code null}.
-     * @return A {@code Writer} that appends to the specified string builder.
+     * @param sb the {@code StringBuilder} to wrap, must not be {@code null}
+     * @return a {@code Writer} that appends to the specified string builder.
      * @throws IllegalArgumentException if the input {@code StringBuilder} is {@code null}.
      */
     public static Writer stringBuilder2Writer(final StringBuilder sb) throws IllegalArgumentException {
@@ -751,8 +751,8 @@ public final class IOUtil {
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("data.bin");
      * try {
      *     byte[] fileBytes = IOUtil.readAllBytes(file);
@@ -760,10 +760,10 @@ public final class IOUtil {
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @return A byte array containing all bytes from the file.
+     * @param source the file to read from, must not be {@code null}
+     * @return a byte array containing all bytes from the file.
      * @throws OutOfMemoryError if the file is too large to be read into a byte array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -789,18 +789,18 @@ public final class IOUtil {
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("data.bin")) {
      *     byte[] allBytes = IOUtil.readAllBytes(inputStream);
      *     // Process the bytes
      * } catch (IOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from.
-     * @return A byte array containing all bytes read from the stream.
+     * @param source the {@code InputStream} to read from, may be {@code null}
+     * @return a byte array containing all bytes read from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into a byte array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -819,8 +819,8 @@ public final class IOUtil {
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("data.bin");
      * try {
      *     byte[] fileBytes = IOUtil.readBytes(file);
@@ -828,10 +828,10 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @return A byte array containing all bytes from the file.
+     * @param source the file to read from, must not be {@code null}
+     * @return a byte array containing all bytes from the file.
      * @throws OutOfMemoryError if the file is too large to be read into a byte array.
      * @throws IOException if an I/O error occurs.
      * @see #readAllBytes(File)
@@ -854,8 +854,8 @@ public final class IOUtil {
     /**
      * Reads up to a specified number of bytes from a file into a byte array, starting from a given offset.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("data.bin");
      * try {
      *     // Read 1024 bytes, starting from the 100th byte
@@ -864,12 +864,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading partial file content: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param offset The starting position in the file, in bytes, from where to begin reading.
-     * @param maxLen The maximum number of bytes to read.
-     * @return A byte array containing the bytes read from the file. The length of the array will be at most {@code maxLen}.
+     * @param source the file to read from, must not be {@code null}
+     * @param offset the starting position in the file, in bytes, from where to begin reading, must be >= 0
+     * @param maxLen the maximum number of bytes to read, must be >= 0
+     * @return a byte array containing the bytes read from the file. The length of the array will be at most {@code maxLen}.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
@@ -894,18 +894,18 @@ public final class IOUtil {
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("data.bin")) {
      *     byte[] allBytes = IOUtil.readBytes(inputStream);
      *     // Process the bytes
      * } catch (IOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from.
-     * @return A byte array containing all bytes read from the stream.
+     * @param source the {@code InputStream} to read from, may be {@code null}
+     * @return a byte array containing all bytes read from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into a byte array.
      * @throws IOException if an I/O error occurs.
      * @see #readAllBytes(InputStream)
@@ -919,8 +919,8 @@ public final class IOUtil {
      * Reads up to a specified number of bytes from an {@code InputStream} into a byte array, starting from a given offset.
      * This method will skip the specified number of bytes from the stream before starting to read.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("data.bin")) {
      *     // Skip the first 100 bytes and read the next 1024 bytes
      *     byte[] partialBytes = IOUtil.readBytes(inputStream, 100, 1024);
@@ -928,12 +928,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading partial stream content: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from. Must not be {@code null}.
-     * @param offset The number of bytes to skip from the beginning of the stream.
-     * @param maxLen The maximum number of bytes to read after the offset.
-     * @return A byte array containing the bytes read from the stream. The length of the array will be at most {@code maxLen}.
+     * @param source the {@code InputStream} to read from, must not be {@code null}
+     * @param offset the number of bytes to skip from the beginning of the stream.
+     * @param maxLen the maximum number of bytes to read after the offset.
+     * @return a byte array containing the bytes read from the stream. The length of the array will be at most {@code maxLen}.
      * @throws IOException if an I/O error occurs during reading or skipping.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
@@ -989,8 +989,8 @@ public final class IOUtil {
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     char[] fileChars = IOUtil.readAllChars(file);
@@ -998,10 +998,10 @@ public final class IOUtil {
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @return A character array containing all characters from the file.
+     * @param source the file to read from, must not be {@code null}
+     * @return a character array containing all characters from the file.
      * @throws OutOfMemoryError if the file is too large to be read into a character array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -1015,8 +1015,8 @@ public final class IOUtil {
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     char[] fileChars = IOUtil.readAllChars(file, StandardCharsets.UTF_8);
@@ -1024,11 +1024,11 @@ public final class IOUtil {
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return A character array containing all characters from the file.
+     * @param source the file to read from, must not be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return a character array containing all characters from the file.
      * @throws OutOfMemoryError if the file is too large to be read into a character array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -1054,18 +1054,18 @@ public final class IOUtil {
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     char[] allChars = IOUtil.readAllChars(inputStream);
      *     // Process the characters
      * } catch (IOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from.
-     * @return A character array containing all characters read from the stream.
+     * @param source the {@code InputStream} to read from, may be {@code null}
+     * @return a character array containing all characters read from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into a character array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -1079,19 +1079,19 @@ public final class IOUtil {
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     char[] allChars = IOUtil.readAllChars(inputStream, StandardCharsets.UTF_8);
      *     // Process the characters
      * } catch (IOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return A character array containing all characters read from the stream.
+     * @param source the {@code InputStream} to read from, may be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return a character array containing all characters read from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into a character array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -1111,18 +1111,18 @@ public final class IOUtil {
      * Note: This method should not be used for readers with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input reader is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     char[] allChars = IOUtil.readAllChars(reader);
      *     // Process the characters
      * } catch (IOException e) {
      *     System.err.println("Error reading from reader: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code Reader} to read from.
-     * @return A character array containing all characters read from the reader.
+     * @param source the {@code Reader} to read from, may be {@code null}
+     * @return a character array containing all characters read from the reader.
      * @throws OutOfMemoryError if the reader's content is too large to be read into a character array.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -1140,8 +1140,8 @@ public final class IOUtil {
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     char[] fileChars = IOUtil.readChars(file);
@@ -1149,10 +1149,10 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @return A character array containing all characters from the file.
+     * @param source the file to read from, must not be {@code null}
+     * @return a character array containing all characters from the file.
      * @throws OutOfMemoryError if the file is too large to be read into a character array.
      * @throws IOException if an I/O error occurs.
      * @see #readAllChars(File)
@@ -1168,8 +1168,8 @@ public final class IOUtil {
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     char[] fileChars = IOUtil.readChars(file, StandardCharsets.UTF_8);
@@ -1177,11 +1177,11 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return A character array containing all characters from the file.
+     * @param source the file to read from, must not be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return a character array containing all characters from the file.
      * @throws OutOfMemoryError if the file is too large to be read into a character array.
      * @throws IOException if an I/O error occurs.
      * @see #readAllChars(File, Charset)
@@ -1194,8 +1194,8 @@ public final class IOUtil {
     /**
      * Reads up to a specified number of characters from a file into a character array, starting from a given character offset, using the platform's default charset.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     // Read 1024 characters, starting from the 100th character
@@ -1204,12 +1204,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading partial file content: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param offset The starting position in characters in the file, from where to begin reading.
-     * @param maxLen The maximum number of characters to read.
-     * @return A character array containing the characters read from the file. The length of the array will be at most {@code maxLen}.
+     * @param source the file to read from, must not be {@code null}
+     * @param offset the starting position in characters in the file, from where to begin reading.
+     * @param maxLen the maximum number of characters to read.
+     * @return a character array containing the characters read from the file. The length of the array will be at most {@code maxLen}.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
@@ -1220,8 +1220,8 @@ public final class IOUtil {
     /**
      * Reads up to a specified number of characters from a file into a character array, starting from a given character offset, using the specified character set.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     // Read 1024 characters, starting from the 100th character, using UTF-8 encoding
@@ -1230,13 +1230,13 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading partial file content: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @param offset The starting position in characters in the file, from where to begin reading.
-     * @param maxLen The maximum number of characters to read.
-     * @return A character array containing the characters read from the file. The length of the array will be at most {@code maxLen}.
+     * @param source the file to read from, must not be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param offset the starting position in characters in the file, from where to begin reading.
+     * @param maxLen the maximum number of characters to read.
+     * @return a character array containing the characters read from the file. The length of the array will be at most {@code maxLen}.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
@@ -1264,18 +1264,18 @@ public final class IOUtil {
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     char[] allChars = IOUtil.readChars(inputStream);
      *     // Process the characters
      * } catch (IOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from.
-     * @return A character array containing all characters read from the stream.
+     * @param source the {@code InputStream} to read from, may be {@code null}
+     * @return a character array containing all characters read from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into a character array.
      * @throws IOException if an I/O error occurs.
      * @see #readAllChars(InputStream)
@@ -1294,19 +1294,19 @@ public final class IOUtil {
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     char[] allChars = IOUtil.readChars(inputStream, StandardCharsets.UTF_8);
      *     // Process the characters
      * } catch (IOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return A character array containing all characters read from the stream.
+     * @param source the {@code InputStream} to read from, may be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return a character array containing all characters read from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into a character array.
      * @throws IOException if an I/O error occurs.
      * @see #readAllChars(InputStream, Charset)
@@ -1321,8 +1321,8 @@ public final class IOUtil {
      * Reads up to a specified number of characters from an {@code InputStream} into a character array, starting from a given character offset, using the platform's default charset.
      * This method will skip the specified number of bytes from the stream before starting to read.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     // Skip the first 100 characters and read the next 1024 characters
      *     char[] partialChars = IOUtil.readChars(inputStream, 100, 1024);
@@ -1330,12 +1330,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading partial stream content: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from. Must not be {@code null}.
-     * @param offset The starting position in characters in the stream, from where to begin reading.
-     * @param maxLen The maximum number of characters to read.
-     * @return A character array containing the characters read from the stream. The length of the array will be at most {@code maxLen}.
+     * @param source the {@code InputStream} to read from, must not be {@code null}
+     * @param offset the starting position in characters in the stream, from where to begin reading.
+     * @param maxLen the maximum number of characters to read.
+     * @return a character array containing the characters read from the stream. The length of the array will be at most {@code maxLen}.
      * @throws IOException if an I/O error occurs during reading or skipping.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      * @see #readChars(InputStream, Charset, long, int)
@@ -1349,8 +1349,8 @@ public final class IOUtil {
      * Reads up to a specified number of characters from an {@code InputStream} into a character array, starting from a given character offset, using the specified character set.
      * This method will skip the specified number of bytes from the stream before starting to read.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     // Skip the first 100 characters and read the next 1024 characters using UTF-8
      *     char[] partialChars = IOUtil.readChars(inputStream, StandardCharsets.UTF_8, 100, 1024);
@@ -1358,13 +1358,13 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading partial stream content: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from. Must not be {@code null}.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @param offset The starting position in characters in the stream, from where to begin reading.
-     * @param maxLen The maximum number of characters to read.
-     * @return A character array containing the characters read from the stream. The length of the array will be at most {@code maxLen}.
+     * @param source the {@code InputStream} to read from, must not be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param offset the starting position in characters in the stream, from where to begin reading.
+     * @param maxLen the maximum number of characters to read.
+     * @return a character array containing the characters read from the stream. The length of the array will be at most {@code maxLen}.
      * @throws IOException if an I/O error occurs during reading or skipping.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      * @see #readChars(Reader, long, int)
@@ -1389,18 +1389,18 @@ public final class IOUtil {
      * Note: This method should not be used for readers with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input reader is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     char[] allChars = IOUtil.readChars(reader);
      *     // Process the characters
      * } catch (IOException e) {
      *     System.err.println("Error reading from reader: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code Reader} to read from.
-     * @return A character array containing all characters read from the reader.
+     * @param source the {@code Reader} to read from, may be {@code null}
+     * @return a character array containing all characters read from the reader.
      * @throws OutOfMemoryError if the reader's content is too large to be read into a character array.
      * @throws IOException if an I/O error occurs.
      * @see #readAllChars(Reader)
@@ -1414,8 +1414,8 @@ public final class IOUtil {
      * Reads up to a specified number of characters from a {@code Reader} into a character array, starting from a given character offset.
      * This method will skip the specified number of characters from the reader before starting to read.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     // Skip the first 100 characters and read the next 1024 characters
      *     char[] partialChars = IOUtil.readChars(reader, 100, 1024);
@@ -1423,12 +1423,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading partial reader content: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code Reader} to read from. Must not be {@code null}.
-     * @param offset The starting position in characters in the reader, from where to begin reading.
-     * @param maxLen The maximum number of characters to read.
-     * @return A character array containing the characters read from the reader. The length of the array will be at most {@code maxLen}.
+     * @param source the {@code Reader} to read from, must not be {@code null}
+     * @param offset the starting position in characters in the reader, from where to begin reading.
+     * @param maxLen the maximum number of characters to read.
+     * @return a character array containing the characters read from the reader. The length of the array will be at most {@code maxLen}.
      * @throws IOException if an I/O error occurs during reading or skipping.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
@@ -1487,8 +1487,8 @@ public final class IOUtil {
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     String content = IOUtil.readAllToString(file);
@@ -1496,10 +1496,10 @@ public final class IOUtil {
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @return A {@code String} containing the entire content of the file.
+     * @param source the file to read from, must not be {@code null}
+     * @return a {@code String} containing the entire content of the file.
      * @throws OutOfMemoryError if the file is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -1513,8 +1513,8 @@ public final class IOUtil {
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     String content = IOUtil.readAllToString(file, "UTF-8");
@@ -1522,11 +1522,11 @@ public final class IOUtil {
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param encoding The name of the character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return A {@code String} containing the entire content of the file.
+     * @param source the file to read from, must not be {@code null}
+     * @param encoding the name of the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return a {@code String} containing the entire content of the file.
      * @throws OutOfMemoryError if the file is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws IllegalArgumentException if the named charset is not supported.
@@ -1541,8 +1541,8 @@ public final class IOUtil {
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     String content = IOUtil.readAllToString(file, StandardCharsets.UTF_8);
@@ -1550,11 +1550,11 @@ public final class IOUtil {
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return A {@code String} containing the entire content of the file.
+     * @param source the file to read from, must not be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return a {@code String} containing the entire content of the file.
      * @throws OutOfMemoryError if the file is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -1580,18 +1580,18 @@ public final class IOUtil {
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     String content = IOUtil.readAllToString(inputStream);
      *     System.out.println(content);
      * } catch (IOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from.
-     * @return A {@code String} containing all content read from the stream.
+     * @param source the {@code InputStream} to read from, may be {@code null}
+     * @return a {@code String} containing all content read from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #readAllToString(InputStream, Charset)
@@ -1607,19 +1607,19 @@ public final class IOUtil {
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     String content = IOUtil.readAllToString(inputStream, StandardCharsets.UTF_8);
      *     System.out.println(content);
      * } catch (IOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return A {@code String} containing all content read from the stream.
+     * @param source the {@code InputStream} to read from, may be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return a {@code String} containing all content read from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #readAllToString(Reader)
@@ -1645,18 +1645,18 @@ public final class IOUtil {
      * Note: This method should not be used for readers with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input reader is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     String content = IOUtil.readAllToString(reader);
      *     System.out.println(content);
      * } catch (IOException e) {
      *     System.err.println("Error reading from reader: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code Reader} to read from.
-     * @return A {@code String} containing all content read from the reader.
+     * @param source the {@code Reader} to read from, may be {@code null}
+     * @return a {@code String} containing all content read from the reader.
      * @throws OutOfMemoryError if the reader's content is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -1669,8 +1669,8 @@ public final class IOUtil {
     /**
      * Reads up to a specified number of characters from a file into a {@code String}, starting from a given character offset, using the platform's default charset.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     // Read 1024 characters, starting from the 100th character
@@ -1679,12 +1679,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading partial file content: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param offset The starting position in characters in the file, from where to begin reading.
-     * @param maxLen The maximum number of characters to read.
-     * @return A {@code String} containing the characters read from the file.
+     * @param source the file to read from, must not be {@code null}
+     * @param offset the starting position in characters in the file, from where to begin reading.
+     * @param maxLen the maximum number of characters to read.
+     * @return a {@code String} containing the characters read from the file.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
@@ -1695,8 +1695,8 @@ public final class IOUtil {
     /**
      * Reads up to a specified number of characters from a file into a {@code String}, starting from a given character offset, using the specified character set.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     // Read 1024 characters, starting from the 100th character, using UTF-8 encoding
@@ -1705,13 +1705,13 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading partial file content: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @param offset The starting position in characters in the file, from where to begin reading.
-     * @param maxLen The maximum number of characters to read.
-     * @return A {@code String} containing the characters read from the file.
+     * @param source the file to read from, must not be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param offset the starting position in characters in the file, from where to begin reading.
+     * @param maxLen the maximum number of characters to read.
+     * @return a {@code String} containing the characters read from the file.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
@@ -1736,8 +1736,8 @@ public final class IOUtil {
      * Reads up to a specified number of characters from an {@code InputStream} into a {@code String}, starting from a given character offset, using the platform's default charset.
      * This method will skip the specified number of bytes from the stream before starting to read.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     // Skip the first 100 characters and read the next 1024 characters
      *     String partialContent = IOUtil.readToString(inputStream, 100, 1024);
@@ -1745,12 +1745,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading partial stream content: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from. Must not be {@code null}.
-     * @param offset The starting position in characters in the stream, from where to begin reading.
-     * @param maxLen The maximum number of characters to read.
-     * @return A {@code String} containing the characters read from the stream.
+     * @param source the {@code InputStream} to read from, must not be {@code null}
+     * @param offset the starting position in characters in the stream, from where to begin reading.
+     * @param maxLen the maximum number of characters to read.
+     * @return a {@code String} containing the characters read from the stream.
      * @throws IOException if an I/O error occurs during reading or skipping.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      * @see #readToString(InputStream, Charset, long, int)
@@ -1764,8 +1764,8 @@ public final class IOUtil {
      * Reads up to a specified number of characters from an {@code InputStream} into a {@code String}, starting from a given character offset, using the specified character set.
      * This method will skip the specified number of bytes from the stream before starting to read.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     // Skip the first 100 characters and read the next 1024 characters using UTF-8
      *     String partialContent = IOUtil.readToString(inputStream, StandardCharsets.UTF_8, 100, 1024);
@@ -1773,13 +1773,13 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading partial stream content: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from. Must not be {@code null}.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @param offset The starting position in characters in the stream, from where to begin reading.
-     * @param maxLen The maximum number of characters to read.
-     * @return A {@code String} containing the characters read from the stream.
+     * @param source the {@code InputStream} to read from, must not be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param offset the starting position in characters in the stream, from where to begin reading.
+     * @param maxLen the maximum number of characters to read.
+     * @return a {@code String} containing the characters read from the stream.
      * @throws IOException if an I/O error occurs during reading or skipping.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      * @see #readToString(Reader, long, int)
@@ -1801,8 +1801,8 @@ public final class IOUtil {
      * Reads up to a specified number of characters from a {@code Reader} into a {@code String}, starting from a given character offset.
      * This method will skip the specified number of characters from the reader before starting to read.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     // Skip the first 100 characters and read the next 1024 characters
      *     String partialContent = IOUtil.readToString(reader, 100, 1024);
@@ -1810,12 +1810,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading partial reader content: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code Reader} to read from. Must not be {@code null}.
-     * @param offset The starting position in characters in the reader, from where to begin reading.
-     * @param maxLen The maximum number of characters to read.
-     * @return A {@code String} containing the characters read from the reader.
+     * @param source the {@code Reader} to read from, must not be {@code null}
+     * @param offset the starting position in characters in the reader, from where to begin reading.
+     * @param maxLen the maximum number of characters to read.
+     * @return a {@code String} containing the characters read from the reader.
      * @throws IOException if an I/O error occurs during reading or skipping.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
@@ -1831,8 +1831,8 @@ public final class IOUtil {
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     List&lt;String&gt; lines = IOUtil.readAllLines(file);
@@ -1840,10 +1840,10 @@ public final class IOUtil {
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @return A list of strings, each representing a line in the file.
+     * @param source the file to read from, must not be {@code null}
+     * @return a list of strings, each representing a line in the file.
      * @throws OutOfMemoryError if the file is too large to be read into memory.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -1857,8 +1857,8 @@ public final class IOUtil {
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     List&lt;String&gt; lines = IOUtil.readAllLines(file, "UTF-8");
@@ -1866,11 +1866,11 @@ public final class IOUtil {
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param encoding The name of the character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return A list of strings, each representing a line in the file.
+     * @param source the file to read from, must not be {@code null}
+     * @param encoding the name of the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return a list of strings, each representing a line in the file.
      * @throws OutOfMemoryError if the file is too large to be read into memory.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws IllegalArgumentException if the named charset is not supported.
@@ -1885,8 +1885,8 @@ public final class IOUtil {
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     List&lt;String&gt; lines = IOUtil.readAllLines(file, StandardCharsets.UTF_8);
@@ -1894,11 +1894,11 @@ public final class IOUtil {
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return A list of strings, each representing a line in the file.
+     * @param source the file to read from, must not be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return a list of strings, each representing a line in the file.
      * @throws OutOfMemoryError if the file is too large to be read into memory.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -1924,18 +1924,18 @@ public final class IOUtil {
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     List&lt;String&gt; lines = IOUtil.readAllLines(inputStream);
      *     lines.forEach(System.out::println);
      * } catch (IOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from.
-     * @return A list of strings, each representing a line from the stream.
+     * @param source the {@code InputStream} to read from, may be {@code null}
+     * @return a list of strings, each representing a line from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into memory.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #readAllLines(InputStream, Charset)
@@ -1951,19 +1951,19 @@ public final class IOUtil {
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     List&lt;String&gt; lines = IOUtil.readAllLines(inputStream, StandardCharsets.UTF_8);
      *     lines.forEach(System.out::println);
      * } catch (IOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return A list of strings, each representing a line from the stream.
+     * @param source the {@code InputStream} to read from, may be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return a list of strings, each representing a line from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into memory.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #readAllLines(Reader)
@@ -1985,18 +1985,18 @@ public final class IOUtil {
      * Note: This method should not be used for readers with content size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input reader is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     List&lt;String&gt; lines = IOUtil.readAllLines(reader);
      *     lines.forEach(System.out::println);
      * } catch (IOException e) {
      *     System.err.println("Error reading from reader: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code Reader} to read from.
-     * @return A list of strings, each representing a line from the reader.
+     * @param source the {@code Reader} to read from, may be {@code null}
+     * @return a list of strings, each representing a line from the reader.
      * @throws OutOfMemoryError if the reader's content is too large to be read into memory.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -2022,87 +2022,11 @@ public final class IOUtil {
         return res;
     }
 
-    //    /**
-    //     * <br />
-    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-    //     *
-    //     * @param source
-    //     * @return
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @deprecated replaced by {@link #readAllLines(File)}
-    //     */
-    //    @Deprecated
-    //    public static List<String> readLines(final File source) throws UncheckedIOException {
-    //        return readAllLines(source);
-    //    }
-    //
-    //    /**
-    //     * <br />
-    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-    //     *
-    //     * @param source
-    //     * @param encoding
-    //     * @return
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @deprecated replaced by {@link #readAllLines(File, Charset)}
-    //     */
-    //    @Deprecated
-    //    public static List<String> readLines(final File source, final Charset encoding) throws UncheckedIOException {
-    //        return readAllLines(source, encoding);
-    //    }
-    //
-    //    /**
-    //     * <br />
-    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-    //     *
-    //     * @param source
-    //     * @return
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @deprecated replaced by {@link #readAllLines(InputStream)}
-    //     */
-    //    @Deprecated
-    //    public static List<String> readLines(final InputStream source) throws UncheckedIOException {
-    //        return readAllLines(source);
-    //    }
-    //
-    //    /**
-    //     * <br />
-    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-    //     *
-    //     * @param source
-    //     * @param encoding
-    //     * @return
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @deprecated replaced by {@link #readAllLines(InputStream, Charset)}
-    //     */
-    //    @Deprecated
-    //    public static List<String> readLines(final InputStream source, final Charset encoding) throws UncheckedIOException {
-    //        return readAllLines(source, encoding);
-    //    }
-    //
-    //    /**
-    //     * <br />
-    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-    //     *
-    //     * @param source
-    //     * @return
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @deprecated replaced by {@link #readAllLines(Reader)}
-    //     */
-    //    @Deprecated
-    //    public static List<String> readLines(final Reader source) throws UncheckedIOException {
-    //        try {
-    //            return readLines(source, 0, Integer.MAX_VALUE);
-    //        } catch (IOException e) {
-    //            throw new UncheckedIOException(e);
-    //        }
-    //    }
-
     /**
      * Reads a specified number of lines from a file into a list of strings, starting from a given line offset, using the platform's default charset.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     // Read 10 lines, starting from the 5th line
@@ -2111,12 +2035,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading lines from file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param offset The 0-based index of the first line to read.
-     * @param count The number of lines to read.
-     * @return A list of strings, each representing a line from the specified range in the file.
+     * @param source the file to read from, must not be {@code null}
+     * @param offset the 0-based index of the first line to read.
+     * @param count the number of lines to read.
+     * @return a list of strings, each representing a line from the specified range in the file.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
@@ -2127,8 +2051,8 @@ public final class IOUtil {
     /**
      * Reads a specified number of lines from a file into a list of strings, starting from a given line offset, using the specified character set.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     // Read 10 lines, starting from the 5th line, using UTF-8 encoding
@@ -2137,13 +2061,13 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading lines from file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @param offset The 0-based index of the first line to read.
-     * @param count The number of lines to read.
-     * @return A list of strings, each representing a line from the specified range in the file.
+     * @param source the file to read from, must not be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param offset the 0-based index of the first line to read.
+     * @param count the number of lines to read.
+     * @return a list of strings, each representing a line from the specified range in the file.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
@@ -2168,8 +2092,8 @@ public final class IOUtil {
      * Reads a specified number of lines from an {@code InputStream} into a list of strings, starting from a given line offset, using the platform's default charset.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     // Read 10 lines, starting from the 5th line
      *     List&lt;String&gt; lines = IOUtil.readLines(inputStream, 4, 10);
@@ -2177,12 +2101,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading lines from stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from. Must not be {@code null}.
-     * @param offset The 0-based index of the first line to read.
-     * @param count The number of lines to read.
-     * @return A list of strings, each representing a line from the specified range in the stream.
+     * @param source the {@code InputStream} to read from, must not be {@code null}
+     * @param offset the 0-based index of the first line to read.
+     * @param count the number of lines to read.
+     * @return a list of strings, each representing a line from the specified range in the stream.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @see #readLines(InputStream, Charset, int, int)
@@ -2196,8 +2120,8 @@ public final class IOUtil {
      * Reads a specified number of lines from an {@code InputStream} into a list of strings, starting from a given line offset, using the specified character set.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     // Read 10 lines, starting from the 5th line, using UTF-8 encoding
      *     List&lt;String&gt; lines = IOUtil.readLines(inputStream, StandardCharsets.UTF_8, 4, 10);
@@ -2205,13 +2129,13 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading lines from stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code InputStream} to read from. Must not be {@code null}.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @param offset The 0-based index of the first line to read.
-     * @param count The number of lines to read.
-     * @return A list of strings, each representing a line from the specified range in the stream.
+     * @param source the {@code InputStream} to read from, must not be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param offset the 0-based index of the first line to read.
+     * @param count the number of lines to read.
+     * @return a list of strings, each representing a line from the specified range in the stream.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @see #readLines(Reader, int, int)
@@ -2227,8 +2151,8 @@ public final class IOUtil {
      * Reads a specified number of lines from a {@code Reader} into a list of strings, starting from a given line offset.
      * The input reader is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     // Read 10 lines, starting from the 5th line
      *     List&lt;String&gt; lines = IOUtil.readLines(reader, 4, 10);
@@ -2236,12 +2160,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading lines from reader: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code Reader} to read from. Must not be {@code null}.
-     * @param offset The 0-based index of the first line to read.
-     * @param count The number of lines to read.
-     * @return A list of strings, each representing a line from the specified range in the reader.
+     * @param source the {@code Reader} to read from, must not be {@code null}
+     * @param offset the 0-based index of the first line to read.
+     * @param count the number of lines to read.
+     * @return a list of strings, each representing a line from the specified range in the reader.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
@@ -2277,8 +2201,8 @@ public final class IOUtil {
     /**
      * Reads the first line from a file using the platform's default charset.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     String firstLine = IOUtil.readFirstLine(file);
@@ -2288,10 +2212,10 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @return The first line of the file, or {@code null} if the file is empty.
+     * @param source the file to read from, must not be {@code null}
+     * @return the first line of the file, or {@code null} if the file is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readFirstLine(final File source) throws IOException {
@@ -2301,8 +2225,8 @@ public final class IOUtil {
     /**
      * Reads the first line from a file using the specified character set.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     String firstLine = IOUtil.readFirstLine(file, StandardCharsets.UTF_8);
@@ -2312,11 +2236,11 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return The first line of the file, or {@code null} if the file is empty.
+     * @param source the file to read from, must not be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return the first line of the file, or {@code null} if the file is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readFirstLine(final File source, final Charset encoding) throws IOException {
@@ -2333,63 +2257,12 @@ public final class IOUtil {
         }
     }
 
-    //    /**
-    //     * Reads the first line from an {@code InputStream} using the platform's default character set.
-    //     * The input stream is not closed by this method.
-    //     *
-    //     * <p><b>Usage Example:</b></p>
-    //     * <pre><code>
-    //     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
-    //     *     String firstLine = IOUtil.readFirstLine(inputStream);
-    //     *     if (firstLine != null) {
-    //     *         System.out.println("First line: " + firstLine);
-    //     *     }
-    //     * } catch (IOException e) {
-    //     *     System.err.println("Error reading from stream: " + e.getMessage());
-    //     * }
-    //     * </code></pre>
-    //     *
-    //     * @param source The {@code InputStream} to read from. Must not be {@code null}.
-    //     * @return The first line from the stream, or {@code null} if the stream is empty.
-    //     * @throws IOException if an I/O error occurs.
-    //     * @deprecated use {@link #readFirstLine(Reader)} instead.
-    //     */
-    //    public static String readFirstLine(final InputStream source) throws IOException {
-    //        return readFirstLine(source, DEFAULT_CHARSET);
-    //    }
-    //
-    //    /**
-    //     * Reads the first line from an {@code InputStream} using the specified character set.
-    //     * The input stream is not closed by this method.
-    //     *
-    //     * <p><b>Usage Example:</b></p>
-    //     * <pre><code>
-    //     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
-    //     *     String firstLine = IOUtil.readFirstLine(inputStream, StandardCharsets.UTF_8);
-    //     *     if (firstLine != null) {
-    //     *         System.out.println("First line: " + firstLine);
-    //     *     }
-    //     * } catch (IOException e) {
-    //     *     System.err.println("Error reading from stream: " + e.getMessage());
-    //     * }
-    //     * </code></pre>
-    //     *
-    //     * @param source The {@code InputStream} to read from. Must not be {@code null}.
-    //     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-    //     * @return The first line from the stream, or {@code null} if the stream is empty.
-    //     * @throws IOException if an I/O error occurs.
-    //     * @deprecated use {@link #readFirstLine(Reader)} instead.
-    //     */
-    //    public static String readFirstLine(final InputStream source, final Charset encoding) throws IOException {
-    //        return readFirstLine(createReader(source, encoding));
-    //    }
-
     /**
      * Reads the first line from a {@code Reader}.
      * The input reader is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     String firstLine = IOUtil.readFirstLine(reader);
      *     if (firstLine != null) {
@@ -2398,10 +2271,10 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading from reader: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code Reader} to read from. Must not be {@code null}.
-     * @return The first line from the reader, or {@code null} if the reader is empty.
+     * @param source the {@code Reader} to read from, must not be {@code null}
+     * @return the first line from the reader, or {@code null} if the reader is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readFirstLine(final Reader source) throws IOException {
@@ -2411,8 +2284,8 @@ public final class IOUtil {
     /**
      * Reads the last line from a file using the platform's default charset.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     String lastLine = IOUtil.readLastLine(file);
@@ -2422,10 +2295,10 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @return The last line of the file, or {@code null} if the file is empty.
+     * @param source the file to read from, must not be {@code null}
+     * @return the last line of the file, or {@code null} if the file is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readLastLine(final File source) throws IOException {
@@ -2435,8 +2308,8 @@ public final class IOUtil {
     /**
      * Reads the last line from a file using the specified character set.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     String lastLine = IOUtil.readLastLine(file, StandardCharsets.UTF_8);
@@ -2446,11 +2319,11 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-     * @return The last line of the file, or {@code null} if the file is empty.
+     * @param source the file to read from, must not be {@code null}
+     * @param encoding the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @return the last line of the file, or {@code null} if the file is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readLastLine(final File source, final Charset encoding) throws IOException {
@@ -2467,63 +2340,12 @@ public final class IOUtil {
         }
     }
 
-    //    /**
-    //     * Reads the last line from an {@code InputStream} using the platform's default character set.
-    //     * The input stream is not closed by this method.
-    //     *
-    //     * <p><b>Usage Example:</b></p>
-    //     * <pre><code>
-    //     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
-    //     *     String lastLine = IOUtil.readLastLine(inputStream);
-    //     *     if (lastLine != null) {
-    //     *         System.out.println("Last line: " + lastLine);
-    //     *     }
-    //     * } catch (IOException e) {
-    //     *     System.err.println("Error reading from stream: " + e.getMessage());
-    //     * }
-    //     * </code></pre>
-    //     *
-    //     * @param source The {@code InputStream} to read from. Must not be {@code null}.
-    //     * @return The last line from the stream, or {@code null} if the stream is empty.
-    //     * @throws IOException if an I/O error occurs.
-    //     * @deprecated use {@link #readLastLine(Reader)} instead.
-    //     */
-    //    public static String readLastLine(final InputStream source) throws IOException {
-    //        return readLastLine(source, DEFAULT_CHARSET);
-    //    }
-    //
-    //    /**
-    //     * Reads the last line from an {@code InputStream} using the specified character set.
-    //     * The input stream is not closed by this method.
-    //     *
-    //     * <p><b>Usage Example:</b></p>
-    //     * <pre><code>
-    //     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
-    //     *     String lastLine = IOUtil.readLastLine(inputStream, StandardCharsets.UTF_8);
-    //     *     if (lastLine != null) {
-    //     *         System.out.println("Last line: " + lastLine);
-    //     *     }
-    //     * } catch (IOException e) {
-    //     *     System.err.println("Error reading from stream: " + e.getMessage());
-    //     * }
-    //     * </code></pre>
-    //     *
-    //     * @param source The {@code InputStream} to read from. Must not be {@code null}.
-    //     * @param encoding The character set to use for decoding. If {@code null}, the platform's default charset is used.
-    //     * @return The last line from the stream, or {@code null} if the stream is empty.
-    //     * @throws IOException if an I/O error occurs.
-    //     * @deprecated use {@link #readLastLine(Reader)} instead.
-    //     */
-    //    public static String readLastLine(final InputStream source, final Charset encoding) throws IOException {
-    //        return readLastLine(createReader(source, encoding));
-    //    }
-
     /**
      * Reads the last line from a {@code Reader} and returns it as a {@code String}.
      * The input reader is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     String lastLine = IOUtil.readLastLine(reader);
      *     if (lastLine != null) {
@@ -2532,10 +2354,10 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading from reader: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The {@code Reader} to read the last line from. Must not be {@code null}.
-     * @return A {@code String} containing the last line from the reader, or {@code null} if the reader is empty.
+     * @param source the {@code Reader} to read the last line from, must not be {@code null}
+     * @return a {@code String} containing the last line from the reader, or {@code null} if the reader is empty.
      * @throws IOException if an I/O error occurs.
      */
     public static String readLastLine(final Reader source) throws IOException {
@@ -2562,8 +2384,8 @@ public final class IOUtil {
      * Reads a specific line from a file using the default charset and returns it as a {@code String}.
      * The line to read is determined by the provided line index (0-based).
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     String line = IOUtil.readLine(file, 0); // Read the first line
@@ -2571,11 +2393,11 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source    The file to read the line from. Must not be {@code null}.
-     * @param lineIndex The index of the line to read, starting from 0 for the first line.
-     * @return A {@code String} containing the specified line from the file, or {@code null} if the file has fewer lines.
+     * @param source    the file to read the line from, must not be {@code null}
+     * @param lineIndex the index of the line to read, starting from 0 for the first line.
+     * @return a {@code String} containing the specified line from the file, or {@code null} if the file has fewer lines.
      * @throws IllegalArgumentException if the line index is negative.
      * @throws IOException              if an I/O error occurs.
      */
@@ -2587,8 +2409,8 @@ public final class IOUtil {
      * Reads a specific line from a file using the provided charset and returns it as a {@code String}.
      * The line to read is determined by the provided line index (0-based).
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
      *     String line = IOUtil.readLine(file, StandardCharsets.UTF_8, 5); // Read the 6th line
@@ -2596,12 +2418,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source    The file to read the line from. Must not be {@code null}.
-     * @param encoding  The charset to be used to open the specified file for reading. If {@code null}, the platform's default charset is used.
-     * @param lineIndex The index of the line to read, starting from 0 for the first line.
-     * @return A {@code String} containing the specified line from the file, or {@code null} if the file has fewer lines.
+     * @param source    the file to read the line from, must not be {@code null}
+     * @param encoding  the charset to be used to open the specified file for reading. If {@code null}, the platform's default charset is used.
+     * @param lineIndex the index of the line to read, starting from 0 for the first line.
+     * @return a {@code String} containing the specified line from the file, or {@code null} if the file has fewer lines.
      * @throws IllegalArgumentException if the line index is negative.
      * @throws IOException              if an I/O error occurs.
      */
@@ -2621,76 +2443,23 @@ public final class IOUtil {
         }
     }
 
-    //    /**
-    //     * Reads a specific line from an {@code InputStream} using the default charset and returns it as a {@code String}.
-    //     * The line to read is determined by the provided line index (0-based). The input stream is not closed by this method.
-    //     *
-    //     * <p><b>Usage Example:</b></p>
-    //     * <pre><code>
-    //     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
-    //     *     String line = IOUtil.readLine(inputStream, 2); // Read the 3rd line
-    //     *     System.out.println("Line 3: " + line);
-    //     * } catch (IOException e) {
-    //     *     System.err.println("Error reading from stream: " + e.getMessage());
-    //     * }
-    //     * </code></pre>
-    //     *
-    //     * @param source    The {@code InputStream} to read the line from. Must not be {@code null}.
-    //     * @param lineIndex The index of the line to read, starting from 0 for the first line.
-    //     * @return A {@code String} containing the specified line from the stream, or {@code null} if the stream has fewer lines.
-    //     * @throws IllegalArgumentException if the line index is negative.
-    //     * @throws IOException              if an I/O error occurs.
-    //     * @deprecated use {@link #readLine(Reader, int)} instead.
-    //     */
-    //    public static String readLine(final InputStream source, final int lineIndex) throws IllegalArgumentException, IOException {
-    //        return readLine(source, DEFAULT_CHARSET, lineIndex);
-    //    }
-    //
-    //    /**
-    //     * Reads a specific line from an {@code InputStream} using the provided charset and returns it as a {@code String}.
-    //     * The line to read is determined by the provided line index (0-based). The input stream is not closed by this method.
-    //     *
-    //     * <p><b>Usage Example:</b></p>
-    //     * <pre><code>
-    //     * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
-    //     *     String line = IOUtil.readLine(inputStream, StandardCharsets.UTF_8, 10); // Read the 11th line
-    //     *     System.out.println("Line 11: " + line);
-    //     * } catch (IOException e) {
-    //     *     System.err.println("Error reading from stream: " + e.getMessage());
-    //     * }
-    //     * </code></pre>
-    //     *
-    //     * @param source    The {@code InputStream} to read the line from. Must not be {@code null}.
-    //     * @param encoding  The charset to be used to open the specified {@code InputStream} for reading. If {@code null}, the platform's default charset is used.
-    //     * @param lineIndex The index of the line to read, starting from 0 for the first line.
-    //     * @return A {@code String} containing the specified line from the stream, or {@code null} if the stream has fewer lines.
-    //     * @throws IllegalArgumentException if the line index is negative.
-    //     * @throws IOException              if an I/O error occurs.
-    //     * @deprecated use {@link #readLine(Reader, int)} instead.
-    //     */
-    //    public static String readLine(final InputStream source, final Charset encoding, final int lineIndex) throws IllegalArgumentException, IOException {
-    //        N.checkArgNotNegative(lineIndex, cs.lineIndex);
-    //
-    //        return readLine(createReader(source, encoding), lineIndex);
-    //    }
-
     /**
      * Reads a specific line from a {@code Reader} and returns it as a {@code String}.
      * The line to read is determined by the provided line index (0-based). The input reader is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     String line = IOUtil.readLine(reader, 4); // Read the 5th line
      *     System.out.println("Line 5: " + line);
      * } catch (IOException e) {
      *     System.err.println("Error reading from reader: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source    The {@code Reader} to read the line from. Must not be {@code null}.
-     * @param lineIndex The index of the line to read, starting from 0 for the first line.
-     * @return A {@code String} containing the specified line from the reader, or {@code null} if the reader has fewer lines.
+     * @param source    the {@code Reader} to read the line from, must not be {@code null}
+     * @param lineIndex the index of the line to read, starting from 0 for the first line.
+     * @return a {@code String} containing the specified line from the reader, or {@code null} if the reader has fewer lines.
      * @throws IllegalArgumentException if the line index is negative.
      * @throws IOException              if an I/O error occurs.
      */
@@ -2726,8 +2495,8 @@ public final class IOUtil {
     /**
      * Reads data from a file into a byte array buffer.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("data.bin");
      * byte[] buffer = new byte[1024];
      * try {
@@ -2736,11 +2505,11 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read from. Must not be {@code null}.
-     * @param buf    The byte array buffer where the data is to be stored. Must not be {@code null}.
-     * @return The total number of bytes read into the buffer, or {@code -1} if there is no more data because the end of the file has been reached.
+     * @param source the file to read from, must not be {@code null}
+     * @param buf    the byte array buffer where the data is to be stored, must not be {@code null}
+     * @return the total number of bytes read into the buffer, or {@code -1} if there is no more data because the end of the file has been reached.
      * @throws IOException if an I/O error occurs.
      */
     public static int read(final File source, final byte[] buf) throws IOException {
@@ -2750,8 +2519,8 @@ public final class IOUtil {
     /**
      * Reads data from a file into a byte array buffer with specified offset and length.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("data.bin");
      * byte[] buffer = new byte[1024];
      * try {
@@ -2760,13 +2529,13 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read data from, not {@code null}.
-     * @param buf    The byte array buffer where the data is to be stored, not {@code null}.
-     * @param off    The start offset in the array at which the data is written.
-     * @param len    The maximum number of bytes to read.
-     * @return The total number of bytes read into the buffer, or -1 if there is no more data because the end of the file has been reached.
+     * @param source the file to read data from, must not be {@code null}
+     * @param buf    the byte array buffer where the data is to be stored, must not be {@code null}
+     * @param off    the start offset in the array at which the data is written.
+     * @param len    the maximum number of bytes to read.
+     * @return the total number of bytes read into the buffer, or -1 if there is no more data because the end of the file has been reached.
      * @throws IOException if an I/O error occurs.
      */
     public static int read(final File source, final byte[] buf, final int off, final int len) throws IOException {
@@ -2785,8 +2554,8 @@ public final class IOUtil {
      * Reads data from an InputStream into a byte array buffer.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("data.bin")) {
      *     byte[] buffer = new byte[1024];
      *     int bytesRead = IOUtil.read(inputStream, buffer);
@@ -2794,11 +2563,11 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The InputStream to read data from, not {@code null}.
-     * @param buf    The byte array buffer where the data is to be stored, not {@code null}.
-     * @return The total number of bytes read into the buffer, or -1 if there is no more data because the end of the stream has been reached.
+     * @param source the InputStream to read data from, must not be {@code null}
+     * @param buf    the byte array buffer where the data is to be stored, must not be {@code null}
+     * @return the total number of bytes read into the buffer, or -1 if there is no more data because the end of the stream has been reached.
      * @throws IOException if an I/O error occurs.
      */
     public static int read(final InputStream source, final byte[] buf) throws IOException {
@@ -2809,8 +2578,8 @@ public final class IOUtil {
      * Reads data from an InputStream into a byte array buffer with specified offset and length.
      * The input stream is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("data.bin")) {
      *     byte[] buffer = new byte[1024];
      *     int bytesRead = IOUtil.read(inputStream, buffer, 50, 200); // Read 200 bytes into buffer starting at index 50
@@ -2818,13 +2587,13 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading stream: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The InputStream to read data from, not {@code null}.
-     * @param buf    The byte array buffer where the data is to be stored, not {@code null}.
-     * @param off    The start offset in the array at which the data is written.
-     * @param len    The maximum number of bytes to read.
-     * @return The total number of bytes read into the buffer, or -1 if there is no more data because the end of the stream has been reached.
+     * @param source the InputStream to read data from, must not be {@code null}
+     * @param buf    the byte array buffer where the data is to be stored, must not be {@code null}
+     * @param off    the start offset in the array at which the data is written.
+     * @param len    the maximum number of bytes to read.
+     * @return the total number of bytes read into the buffer, or -1 if there is no more data because the end of the stream has been reached.
      * @throws IOException if an I/O error occurs.
      */
     public static int read(final InputStream source, final byte[] buf, final int off, final int len) throws IOException {
@@ -2858,8 +2627,8 @@ public final class IOUtil {
     /**
      * Reads data from a file into a char array buffer using the default charset.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * char[] buffer = new char[1024];
      * try {
@@ -2868,11 +2637,11 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read data from, not {@code null}.
-     * @param buf    The char array buffer where the data is to be stored, not {@code null}.
-     * @return The total number of chars read into the buffer, or -1 if there is no more data because the end of the file has been reached.
+     * @param source the file to read data from, must not be {@code null}
+     * @param buf    the char array buffer where the data is to be stored, must not be {@code null}
+     * @return the total number of chars read into the buffer, or -1 if there is no more data because the end of the file has been reached.
      * @throws IOException if an I/O error occurs.
      */
     public static int read(final File source, final char[] buf) throws IOException {
@@ -2882,8 +2651,8 @@ public final class IOUtil {
     /**
      * Reads data from a file into a char array buffer using the provided charset.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * char[] buffer = new char[1024];
      * try {
@@ -2892,12 +2661,12 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source  The file to read data from, not {@code null}.
-     * @param charset The charset to be used to open the specified file for reading.
-     * @param buf     The char array buffer where the data is to be stored, not {@code null}.
-     * @return The total number of chars read into the buffer, or -1 if there is no more data because the end of the file has been reached.
+     * @param source  the file to read data from, must not be {@code null}
+     * @param charset the charset to be used to open the specified file for reading.
+     * @param buf     the char array buffer where the data is to be stored, must not be {@code null}
+     * @return the total number of chars read into the buffer, or -1 if there is no more data because the end of the file has been reached.
      * @throws IOException if an I/O error occurs.
      */
     public static int read(final File source, final Charset charset, final char[] buf) throws IOException {
@@ -2907,8 +2676,8 @@ public final class IOUtil {
     /**
      * Reads data from a file into a char array buffer using the default charset with specified offset and length.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * char[] buffer = new char[1024];
      * try {
@@ -2917,13 +2686,13 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The file to read data from, not {@code null}.
-     * @param buf    The char array buffer where the data is to be stored, not {@code null}.
-     * @param off    The start offset in the array at which the data is written.
-     * @param len    The maximum number of chars to read.
-     * @return The total number of chars read into the buffer, or -1 if there is no more data because the end of the file has been reached.
+     * @param source the file to read data from, must not be {@code null}
+     * @param buf    the char array buffer where the data is to be stored, must not be {@code null}
+     * @param off    the start offset in the array at which the data is written.
+     * @param len    the maximum number of chars to read.
+     * @return the total number of chars read into the buffer, or -1 if there is no more data because the end of the file has been reached.
      * @throws IOException if an I/O error occurs.
      */
     public static int read(final File source, final char[] buf, final int off, final int len) throws IOException {
@@ -2933,8 +2702,8 @@ public final class IOUtil {
     /**
      * Reads data from a file into a char array buffer using the provided charset with specified offset and length.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * File file = new File("text_file.txt");
      * char[] buffer = new char[1024];
      * try {
@@ -2943,14 +2712,14 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source  The file to read data from, not {@code null}.
-     * @param charset The charset to be used to open the specified file for reading.
-     * @param buf     The char array buffer where the data is to be stored, not {@code null}.
-     * @param off     The start offset in the array at which the data is written.
-     * @param len     The maximum number of chars to read.
-     * @return The total number of chars read into the buffer, or -1 if there is no more data because the end of the file has been reached.
+     * @param source  the file to read data from, must not be {@code null}
+     * @param charset the charset to be used to open the specified file for reading.
+     * @param buf     the char array buffer where the data is to be stored, must not be {@code null}
+     * @param off     the start offset in the array at which the data is written.
+     * @param len     the maximum number of chars to read.
+     * @return the total number of chars read into the buffer, or -1 if there is no more data because the end of the file has been reached.
      * @throws IOException if an I/O error occurs.
      */
     public static int read(final File source, final Charset charset, final char[] buf, final int off, final int len) throws IOException {
@@ -2971,8 +2740,8 @@ public final class IOUtil {
      * Reads data from a Reader into a char array buffer.
      * The input reader is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     char[] buffer = new char[1024];
      *     int charsRead = IOUtil.read(reader, buffer);
@@ -2980,11 +2749,11 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading from reader: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The Reader to read data from, not {@code null}.
-     * @param buf    The char array buffer where the data is to be stored, not {@code null}.
-     * @return The total number of chars read into the buffer, or -1 if there is no more data because the end of the stream has been reached.
+     * @param source the Reader to read data from, must not be {@code null}
+     * @param buf    the char array buffer where the data is to be stored, must not be {@code null}
+     * @return the total number of chars read into the buffer, or -1 if there is no more data because the end of the stream has been reached.
      * @throws IOException if an I/O error occurs.
      */
     public static int read(final Reader source, final char[] buf) throws IOException {
@@ -2995,8 +2764,8 @@ public final class IOUtil {
      * Reads data from a Reader into a char array buffer with specified offset and length.
      * The input reader is not closed by this method.
      *
-     * <p><b>Usage Example:</b></p>
-     * <pre><code>
+     * <p>Example usage:</p>
+     * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     char[] buffer = new char[1024];
      *     int charsRead = IOUtil.read(reader, buffer, 50, 200); // Read 200 chars into buffer starting at index 50
@@ -3004,13 +2773,13 @@ public final class IOUtil {
      * } catch (IOException e) {
      *     System.err.println("Error reading from reader: " + e.getMessage());
      * }
-     * </code></pre>
+     * }</pre>
      *
-     * @param source The Reader to read data from, not {@code null}.
-     * @param buf    The char array buffer where the data is to be stored, not {@code null}.
-     * @param off    The start offset in the array at which the data is written.
-     * @param len    The maximum number of chars to read.
-     * @return The total number of chars read into the buffer, or -1 if there is no more data because the end of the stream has been reached.
+     * @param source the Reader to read data from, must not be {@code null}
+     * @param buf    the char array buffer where the data is to be stored, must not be {@code null}
+     * @param off    the start offset in the array at which the data is written.
+     * @param len    the maximum number of chars to read.
+     * @return the total number of chars read into the buffer, or -1 if there is no more data because the end of the stream has been reached.
      * @throws IOException if an I/O error occurs.
      */
     public static int read(final Reader source, final char[] buf, final int off, final int len) throws IOException {
@@ -3044,9 +2813,9 @@ public final class IOUtil {
     /**
      * Creates the reader.
      *
-     * @param source The input stream to read from.
-     * @param encoding The character encoding to use. If {@code null}, the default charset is used.
-     * @return An InputStreamReader configured with the specified encoding.
+     * @param source the input stream to read from.
+     * @param encoding the character encoding to use. If {@code null}, the default charset is used.
+     * @return an InputStreamReader configured with the specified encoding.
      */
     static InputStreamReader createReader(final InputStream source, final Charset encoding) {
         return encoding == null ? IOUtil.newInputStreamReader(source, DEFAULT_CHARSET) : IOUtil.newInputStreamReader(source, encoding);
@@ -3056,8 +2825,8 @@ public final class IOUtil {
      * Writes the string representation of an Object to a file as a single line using the default charset.
      * The string representation of the object is obtained by calling {@code N.toString(obj)}.
      *
-     * @param obj    The Object to be written.
-     * @param output The file where the object's string representation is to be written, not {@code null}.
+     * @param obj    the Object to be written.
+     * @param output the file where the object's string representation is to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see N#toString(Object)
@@ -3076,41 +2845,12 @@ public final class IOUtil {
         }
     }
 
-    //    /**
-    //     * Writes the string representation of an Object to an OutputStream as a single line using the default charset.
-    //     * The string representation of the object is obtained by calling {@code N.toString(obj)}.
-    //     *
-    //     * @param obj    The Object to be written.
-    //     * @param output The OutputStream where the object's string representation is to be written, not {@code null}.
-    //     * @throws IOException if an I/O error occurs.
-    //     * @see N#toString(Object)
-    //     * @deprecated for low performance. Use {@link #writeLine(Object, Writer)} instead.
-    //     */
-    //    public static void writeLine(final Object obj, final OutputStream output) throws IOException {
-    //        writeLine(obj, output, true); // must flush here
-    //    }
-    //
-    //    /**
-    //     * Writes the string representation of an Object to an OutputStream as a single line using the default charset.
-    //     * The string representation of the object is obtained by calling {@code N.toString(obj)}.
-    //     *
-    //     * @param obj    The Object to be written.
-    //     * @param output The OutputStream where the object's string representation is to be written, not {@code null}.
-    //     * @param flush  If {@code true}, the stream will be flushed after writing the line.
-    //     * @throws IOException if an I/O error occurs.
-    //     * @see N#toString(Object)
-    //     * @deprecated for low performance. Use {@link #writeLine(Object, Writer)} instead.
-    //     */
-    //    public static void writeLine(final Object obj, final OutputStream output, final boolean flush) throws IOException {
-    //        writeLine(obj, IOUtil.newOutputStreamWriter(output), true); // NOSONAR // must flush here
-    //    }
-
     /**
      * Writes the string representation of an Object to a Writer as a single line using the default charset.
      * The string representation of the object is obtained by calling {@code N.toString(obj)}.
      *
-     * @param obj    The Object to be written.
-     * @param output The Writer where the object's string representation is to be written, not {@code null}.
+     * @param obj    the Object to be written.
+     * @param output the Writer where the object's string representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      * @see N#toString(Object)
      */
@@ -3122,9 +2862,9 @@ public final class IOUtil {
      * Writes the string representation of an Object to a Writer as a single line.
      * The string representation of the object is obtained by calling {@code N.toString(obj)}.
      *
-     * @param obj    The Object to be written.
-     * @param output The Writer where the object's string representation is to be written, not {@code null}.
-     * @param flush  If {@code true}, the stream will be flushed after writing the line.
+     * @param obj    the Object to be written.
+     * @param output the Writer where the object's string representation is to be written, must not be {@code null}
+     * @param flush  if {@code true}, the stream will be flushed after writing the line.
      * @throws IOException if an I/O error occurs.
      * @see N#toString(Object)
      */
@@ -3146,8 +2886,8 @@ public final class IOUtil {
      * Writes the string representation of each object in an Iterator to a file. Each object is written as a single line using the default charset.
      * The string representation of each object is obtained by calling {@code N.toString(obj)}.
      *
-     * @param lines  The Iterator containing the objects to be written.
-     * @param output The File where the objects' string representations are to be written, not {@code null}.
+     * @param lines  the Iterator containing the objects to be written.
+     * @param output the File where the objects' string representations are to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see N#toString(Object)
@@ -3168,49 +2908,12 @@ public final class IOUtil {
         }
     }
 
-    //    /**
-    //     * Writes the string representation of each object in an Iterator to an OutputStream. Each object is written as a single line using the default charset.
-    //     * The string representation of each object is obtained by calling {@code N.toString(obj)}.
-    //     *
-    //     * @param lines  The Iterator containing the objects to be written.
-    //     * @param output The OutputStream where the objects' string representations are to be written, not {@code null}.
-    //     * @throws IOException if an I/O error occurs.
-    //     * @see N#toString(Object)
-    //     * @deprecated for low performance. Use {@link #writeLines(Iterator, Writer)} instead.
-    //     */
-    //    public static void writeLines(final Iterator<?> lines, final OutputStream output) throws IOException {
-    //        if (N.isEmpty(lines)) {
-    //            return;
-    //        }
-    //
-    //        writeLines(lines, output, true); // must flush here
-    //    }
-    //
-    //    /**
-    //     * Writes the string representation of each object in an Iterator to an OutputStream. Each object is written as a single line using the default charset.
-    //     * The string representation of each object is obtained by calling {@code N.toString(obj)}.
-    //     *
-    //     * @param lines  The Iterator containing the objects to be written.
-    //     * @param output The OutputStream where the objects' string representations are to be written, not {@code null}.
-    //     * @param flush  If {@code true}, the stream will be flushed after writing the lines.
-    //     * @throws IOException if an I/O error occurs.
-    //     * @see N#toString(Object)
-    //     * @deprecated for low performance. Use {@link #writeLines(Iterator, Writer)} instead.
-    //     */
-    //    public static void writeLines(final Iterator<?> lines, final OutputStream output, final boolean flush) throws IOException {
-    //        if (N.isEmpty(lines)) {
-    //            return;
-    //        }
-    //
-    //        writeLines(lines, IOUtil.newOutputStreamWriter(output), true); // must flush here
-    //    }
-
     /**
      * Writes the string representation of each object in an Iterator to a Writer. Each object is written as a single line.
      * The string representation of each object is obtained by calling {@code N.toString(obj)}.
      *
-     * @param lines  The Iterator containing the objects to be written.
-     * @param output The Writer where the objects' string representations are to be written, not {@code null}.
+     * @param lines  the Iterator containing the objects to be written.
+     * @param output the Writer where the objects' string representations are to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      * @see N#toString(Object)
      */
@@ -3226,9 +2929,9 @@ public final class IOUtil {
      * Writes the string representation of each object in an Iterator to a Writer. Each object is written as a single line.
      * The string representation of each object is obtained by calling {@code N.toString(obj)}.
      *
-     * @param lines  The Iterator containing the objects to be written.
-     * @param output The Writer where the objects' string representations are to be written, not {@code null}.
-     * @param flush  If {@code true}, the stream will be flushed after writing the lines.
+     * @param lines  the Iterator containing the objects to be written.
+     * @param output the Writer where the objects' string representations are to be written, must not be {@code null}
+     * @param flush  if {@code true}, the stream will be flushed after writing the lines.
      * @throws IOException if an I/O error occurs.
      * @see N#toString(Object)
      */
@@ -3269,8 +2972,8 @@ public final class IOUtil {
      * Writes the string representation of each object in an Iterable to a file. Each object is written as a single line using the default charset.
      * The string representation of each object is obtained by calling {@code N.toString(obj)}.
      *
-     * @param lines  The Iterable containing the objects to be written.
-     * @param output The File where the objects' string representations are to be written, not {@code null}. 
+     * @param lines  the Iterable containing the objects to be written.
+     * @param output the File where the objects' string representations are to be written, must not be {@code null} 
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see N#toString(Object)
@@ -3292,119 +2995,13 @@ public final class IOUtil {
     }
 
     //    /**
-    //     *
-    //     * @param lines
-    //     * @param offset
-    //     * @param count
-    //     * @param output
-    //     * @throws IOException if an I/O error occurs.
-    //     * @see {@link List#subList(int, int)}
-    //     * @see {@link N#slice(Collection, int, int)}
-    //     * @deprecated {@code offset/count} may be misused with {@code fromIndex/toIndex}. This method will be removed later.
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public static void writeLines(final Collection<?> lines, final int offset, final int count, final File output) throws IOException {
-    //        if (count == 0 && N.size(lines) >= offset) {
-    //            return;
-    //        }
-    //
-    //        Writer writer = null;
-    //
-    //        try {
-    //            writer = IOUtil.newFileWriter(output);
-    //
-    //            writeLines(lines, offset, count, writer, true);
-    //        } finally {
-    //            close(writer);
-    //        }
-    //    }
-
-    //    /**
-    //     * Writes the string representation of each object in an Iterable to an OutputStream. Each object is written as a single line using the default charset.
-    //     * The string representation of each object is obtained by calling {@code N.toString(obj)}.
-    //     *
-    //     * @param lines  The Iterable containing the objects to be written.
-    //     * @param output The OutputStream where the objects' string representations are to be written, not {@code null}.
-    //     * @throws IOException if an I/O error occurs.
-    //     * @see N#toString(Object)
-    //     * @deprecated for low performance. Use {@link #writeLines(Iterable, Writer)} instead.
-    //     */
-    //    public static void writeLines(final Iterable<?> lines, final OutputStream output) throws IOException {
-    //        if (N.isEmpty(lines)) {
-    //            return;
-    //        }
-    //
-    //        writeLines(lines, output, true); //must flush here
-    //    }
-    //
-    //    /**
-    //     * Writes the string representation of each object in an Iterable to an OutputStream. Each object is written as a single line using the default charset.
-    //     * The string representation of each object is obtained by calling {@code N.toString(obj)}.
-    //     *
-    //     * @param lines  The Iterable containing the objects to be written.
-    //     * @param output The OutputStream where the objects' string representations are to be written, not {@code null}.
-    //     * @param flush  If {@code true}, the stream will be flushed after writing the lines.
-    //     * @throws IOException if an I/O error occurs.
-    //     * @see N#toString(Object)
-    //     * @deprecated for low performance. Use {@link #writeLines(Iterable, Writer)} instead.
-    //     */
-    //    public static void writeLines(final Iterable<?> lines, final OutputStream output, final boolean flush) throws IOException {
-    //        if (N.isEmpty(lines)) {
-    //            return;
-    //        }
-    //
-    //        writeLines(lines, IOUtil.newOutputStreamWriter(output), true); // must flush here
-    //    }
-
-    //    /**
-    //     *
-    //     * @param lines
-    //     * @param offset
-    //     * @param count
-    //     * @param output
-    //     * @see {@link List#subList(int, int)}
-    //     * @see {@link N#slice(Collection, int, int)}
-    //     * @deprecated {@code offset/count} may be misused with {@code fromIndex/toIndex}. This method will be removed later.
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public static void writeLines(final Collection<?> lines, final int offset, final int count, final OutputStream output) throws IOException {
-    //        if (count == 0 && N.size(lines) >= offset) {
-    //            return;
-    //        }
-    //
-    //        writeLines(lines, offset, count, output, false);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param lines
-    //     * @param offset
-    //     * @param count
-    //     * @param output
-    //     * @param flush
-    //     * @see {@link List#subList(int, int)}
-    //     * @see {@link N#slice(Collection, int, int)}
-    //     * @deprecated {@code offset/count} may be misused with {@code fromIndex/toIndex}. This method will be removed later.
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public static void writeLines(final Collection<?> lines, final int offset, final int count, final OutputStream output, final boolean flush)
-    //            throws IOException {
-    //        if (count == 0 && N.size(lines) >= offset) {
-    //            return;
-    //        }
-    //
-    //        writeLines(lines, offset, count, IOUtil.newOutputStreamWriter(output), flush); // NOSONAR
-    //    }
 
     /**
      * Writes the string representation of each object in an Iterable to a Writer. Each object is written as a single line.
      * The string representation of each object is obtained by calling {@code N.toString(obj)}.
      *
-     * @param lines  The Iterable containing the objects to be written.
-     * @param output The Writer where the objects' string representations are to be written, not {@code null}.
+     * @param lines  the Iterable containing the objects to be written.
+     * @param output the Writer where the objects' string representations are to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      * @see N#toString(Object)
      */
@@ -3420,9 +3017,9 @@ public final class IOUtil {
      * Writes the string representation of each object in an Iterable to a Writer. Each object is written as a single line.
      * The string representation of each object is obtained by calling {@code N.toString(obj)}.
      *
-     * @param lines  The Iterable containing the objects to be written.
-     * @param output The Writer where the objects' string representations are to be written, not {@code null}.
-     * @param flush  If {@code true}, the stream will be flushed after writing the lines.
+     * @param lines  the Iterable containing the objects to be written.
+     * @param output the Writer where the objects' string representations are to be written, must not be {@code null}
+     * @param flush  if {@code true}, the stream will be flushed after writing the lines.
      * @throws IOException if an I/O error occurs.
      * @see N#toString(Object)
      */
@@ -3455,293 +3052,101 @@ public final class IOUtil {
         }
     }
 
-    //    /**
-    //     *
-    //     * @param lines
-    //     * @param offset
-    //     * @param count
-    //     * @param output
-    //     * @see {@link List#subList(int, int)}
-    //     * @see {@link N#slice(Collection, int, int)}
-    //     * @deprecated {@code offset/count} may be misused with {@code fromIndex/toIndex}. This method will be removed later.
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public static void writeLines(final Collection<?> lines, final int offset, final int count, final Writer output) throws IOException {
-    //        if (count == 0 && N.size(lines) >= offset) {
-    //            return;
-    //        }
-    //
-    //        writeLines(lines, offset, count, output, false);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param lines
-    //     * @param offset
-    //     * @param count
-    //     * @param output
-    //     * @param flush
-    //     * @see {@link List#subList(int, int)}
-    //     * @see {@link N#slice(Collection, int, int)}
-    //     * @deprecated {@code offset/count} may be misused with {@code fromIndex/toIndex}. This method will be removed later.
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public static void writeLines(final Collection<?> lines, final int offset, int count, final Writer output, final boolean flush) throws IOException {
-    //        if (count == 0 && N.size(lines) >= offset) {
-    //            return;
-    //        }
-    //
-    //        boolean isBufferedWriter = isBufferedWriter(output);
-    //        final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
-    //
-    //        try {
-    //            int lineNum = 0;
-    //
-    //            for (Object line : lines) {
-    //                if (lineNum++ >= offset) {
-    //                    if (line == null) {
-    //                        bw.write(Strings.NULL_CHAR_ARRAY);
-    //                    } else {
-    //                        bw.write(N.toString(line));
-    //                    }
-    //
-    //                    bw.write(IOUtil.LINE_SEPARATOR);
-    //
-    //                    count--;
-    //                }
-    //
-    //                if (count <= 0) {
-    //                    break;
-    //                }
-    //            }
-    //
-    //            if (flush || !isBufferedWriter) {
-    //                bw.flush();
-    //            }
-    //        } finally {
-    //            if (!isBufferedWriter) {
-    //                Objectory.recycle((BufferedWriter) bw);
-    //            }
-    //        }
-    //    }
-
     /**
      * Writes the string representation of a boolean to a Writer.
      *
-     * @param b      The boolean value to be written.
-     * @param output The Writer where the boolean's string representation is to be written, not {@code null}.
+     * @param b      the boolean value to be written.
+     * @param output the Writer where the boolean's string representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final boolean b, final Writer output) throws IOException {
         output.write(N.stringOf(b));
     }
 
-    //    /**
-    //     *
-    //     * @param b
-    //     * @param output
-    //     * @param flush
-    //     * @throws IOException if an I/O error occurs.
-    //     */
-    //    static void write(final boolean b, final Writer output, final boolean flush) throws IOException {
-    //        output.write(N.stringOf(b));
-    //
-    //        if (flush) {
-    //            output.flush();
-    //        }
-    //    }
-
     /**
      * Writes a single character to a Writer.
      *
-     * @param c      The character to be written.
-     * @param output The Writer where the character is to be written, not {@code null}.
+     * @param c      the character to be written.
+     * @param output the Writer where the character is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final char c, final Writer output) throws IOException {
         output.write(c);
     }
 
-    //    /**
-    //     *
-    //     * @param c
-    //     * @param output
-    //     * @param flush
-    //     * @throws IOException if an I/O error occurs.
-    //     */
-    //    static void write(final char c, final Writer output, final boolean flush) throws IOException {
-    //        output.write(c);
-    //
-    //        if (flush) {
-    //            output.flush();
-    //        }
-    //    }
-
     /**
      * Writes the string representation of a byte to a Writer.
      *
-     * @param b      The byte value to be written.
-     * @param output The Writer where the byte's string representation is to be written, not {@code null}.
+     * @param b      the byte value to be written.
+     * @param output the Writer where the byte's string representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final byte b, final Writer output) throws IOException {
         output.write(N.stringOf(b));
     }
 
-    //    /**
-    //     *
-    //     * @param b
-    //     * @param output
-    //     * @param flush
-    //     * @throws IOException if an I/O error occurs.
-    //     */
-    //    static void write(final byte b, final Writer output, final boolean flush) throws IOException {
-    //        output.write(N.stringOf(b));
-    //
-    //        if (flush) {
-    //            output.flush();
-    //        }
-    //    }
-
     /**
      * Writes the string representation of a short to a Writer.
      *
-     * @param s      The short value to be written.
-     * @param output The Writer where the short's string representation is to be written, not {@code null}.
+     * @param s      the short value to be written.
+     * @param output the Writer where the short's string representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final short s, final Writer output) throws IOException {
         output.write(N.stringOf(s));
     }
 
-    //    /**
-    //     *
-    //     * @param s
-    //     * @param output
-    //     * @param flush
-    //     * @throws IOException if an I/O error occurs.
-    //     */
-    //    static void write(final short s, final Writer output, final boolean flush) throws IOException {
-    //        output.write(N.stringOf(s));
-    //
-    //        if (flush) {
-    //            output.flush();
-    //        }
-    //    }
-
     /**
      * Writes the string representation of an integer to a Writer.
      *
-     * @param i      The integer value to be written.
-     * @param output The Writer where the integer's string representation is to be written, not {@code null}.
+     * @param i      the integer value to be written.
+     * @param output the Writer where the integer's string representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final int i, final Writer output) throws IOException {
         output.write(N.stringOf(i));
     }
 
-    //    /**
-    //     *
-    //     * @param i
-    //     * @param output
-    //     * @param flush
-    //     * @throws IOException if an I/O error occurs.
-    //     */
-    //    static void write(final int i, final Writer output, final boolean flush) throws IOException {
-    //        output.write(N.stringOf(i));
-    //
-    //        if (flush) {
-    //            output.flush();
-    //        }
-    //    }
-
     /**
      * Writes the string representation of a long to a Writer.
      *
-     * @param lng    The long value to be written.
-     * @param output The Writer where the long's string representation is to be written, not {@code null}.
+     * @param lng    the long value to be written.
+     * @param output the Writer where the long's string representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final long lng, final Writer output) throws IOException {
         output.write(N.stringOf(lng));
     }
 
-    //    /**
-    //     *
-    //     * @param lng
-    //     * @param output
-    //     * @param flush
-    //     * @throws IOException if an I/O error occurs.
-    //     */
-    //    static void write(final long lng, final Writer output, final boolean flush) throws IOException {
-    //        output.write(N.stringOf(lng));
-    //
-    //        if (flush) {
-    //            output.flush();
-    //        }
-    //    }
-
     /**
      * Writes the string representation of a float to a Writer.
      *
-     * @param f    The float value to be written.
-     * @param output The Writer where the float string representation is to be written, not {@code null}.
+     * @param f    the float value to be written.
+     * @param output the Writer where the float string representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final float f, final Writer output) throws IOException {
         output.write(N.stringOf(f));
     }
 
-    //    /**
-    //     *
-    //     * @param f
-    //     * @param output
-    //     * @param flush
-    //     * @throws IOException if an I/O error occurs.
-    //     */
-    //    static void write(final float f, final Writer output, final boolean flush) throws IOException {
-    //        output.write(N.stringOf(f));
-    //
-    //        if (flush) {
-    //            output.flush();
-    //        }
-    //    }
-
     /**
      * Writes the string representation of a double to a Writer.
      *
-     * @param d    The double value to be written.
-     * @param output The Writer where the double string representation is to be written, not {@code null}.
+     * @param d    the double value to be written.
+     * @param output the Writer where the double string representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final double d, final Writer output) throws IOException {
         output.write(N.stringOf(d));
     }
 
-    //    /**
-    //     *
-    //     * @param d
-    //     * @param output
-    //     * @param flush
-    //     * @throws IOException if an I/O error occurs.
-    //     */
-    //    static void write(final double d, final Writer output, final boolean flush) throws IOException {
-    //        output.write(N.stringOf(d));
-    //
-    //        if (flush) {
-    //            output.flush();
-    //        }
-    //    }
-
     /**
      * Writes the string representation of an object to a Writer.
      * The string representation of the object is obtained by calling {@code N.toString(obj)}.
      * Note: This method also protects write(boolean/char/byte/.../double, Writer) from NullPointerException.
      *
-     * @param obj    The object whose string representation is to be written.
-     * @param output The Writer where the object's string representation is to be written, not {@code null}.
+     * @param obj    the object whose string representation is to be written.
+     * @param output the Writer where the object's string representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      * @see N#toString(Object)
      */
@@ -3752,8 +3157,8 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a CharSequence to a File.
      *
-     * @param cs     The CharSequence whose byte array representation is to be written.
-     * @param output The File where the CharSequence's byte array representation is to be written, not {@code null}.
+     * @param cs     the CharSequence whose byte array representation is to be written.
+     * @param output the File where the CharSequence's byte array representation is to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see String#getBytes()
@@ -3765,9 +3170,9 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a CharSequence to a File using the specified Charset.
      *
-     * @param cs      The CharSequence whose byte array representation is to be written.
-     * @param charset The Charset to be used to encode the CharSequence into a sequence of bytes.
-     * @param output  The File where the CharSequence's byte array representation is to be written, not {@code null}.
+     * @param cs      the CharSequence whose byte array representation is to be written.
+     * @param charset the Charset to be used to encode the CharSequence into a sequence of bytes.
+     * @param output  the File where the CharSequence's byte array representation is to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see String#getBytes(Charset)
@@ -3781,8 +3186,8 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a CharSequence to an OutputStream.
      *
-     * @param cs     The CharSequence whose byte array representation is to be written.
-     * @param output The OutputStream where the CharSequence's byte array representation is to be written, not {@code null}.
+     * @param cs     the CharSequence whose byte array representation is to be written.
+     * @param output the OutputStream where the CharSequence's byte array representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      * @see String#getBytes()
      */
@@ -3793,9 +3198,9 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a CharSequence to an OutputStream using the specified Charset.
      *
-     * @param cs      The CharSequence whose byte array representation is to be written.
-     * @param charset The Charset to be used to encode the CharSequence into a sequence of bytes.
-     * @param output  The File where the CharSequence's byte array representation is to be written, not {@code null}.
+     * @param cs      the CharSequence whose byte array representation is to be written.
+     * @param charset the Charset to be used to encode the CharSequence into a sequence of bytes.
+     * @param output  the File where the CharSequence's byte array representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      * @see String#getBytes(Charset)
      */
@@ -3806,9 +3211,9 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a CharSequence to an OutputStream.
      *
-     * @param cs     The CharSequence whose byte array representation is to be written.
-     * @param output The OutputStream where the CharSequence's byte array representation is to be written, not {@code null}.
-     * @param flush  If {@code true}, the output stream is flushed after writing the CharSequence.
+     * @param cs     the CharSequence whose byte array representation is to be written.
+     * @param output the OutputStream where the CharSequence's byte array representation is to be written, must not be {@code null}
+     * @param flush  if {@code true}, the output stream is flushed after writing the CharSequence.
      * @throws IOException if an I/O error occurs.
      * @see String#getBytes()
      */
@@ -3819,10 +3224,10 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a CharSequence to an OutputStream using the specified Charset.
      *
-     * @param cs      The CharSequence whose byte array representation is to be written.
-     * @param charset The Charset to be used to encode the CharSequence into a sequence of bytes.
-     * @param output  The OutputStream where the CharSequence's byte array representation is to be written, not {@code null}.
-     * @param flush   If {@code true}, the output stream is flushed after writing the CharSequence.
+     * @param cs      the CharSequence whose byte array representation is to be written.
+     * @param charset the Charset to be used to encode the CharSequence into a sequence of bytes.
+     * @param output  the OutputStream where the CharSequence's byte array representation is to be written, must not be {@code null}
+     * @param flush   if {@code true}, the output stream is flushed after writing the CharSequence.
      * @throws IOException if an I/O error occurs.
      * @see String#getBytes(Charset)
      */
@@ -3839,8 +3244,8 @@ public final class IOUtil {
     /**
      * Writes the string representation of a CharSequence to a Writer.
      *
-     * @param cs     The CharSequence whose string representation is to be written.
-     * @param output The Writer where the CharSequence's string representation is to be written, not {@code null}.
+     * @param cs     the CharSequence whose string representation is to be written.
+     * @param output the Writer where the CharSequence's string representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final CharSequence cs, final Writer output) throws IOException {
@@ -3850,9 +3255,9 @@ public final class IOUtil {
     /**
      * Writes the string representation of a CharSequence to a Writer.
      *
-     * @param cs     The CharSequence whose string representation is to be written.
-     * @param output The Writer where the CharSequence's string representation is to be written, not {@code null}.
-     * @param flush  If {@code true}, the Writer is flushed after writing the CharSequence.
+     * @param cs     the CharSequence whose string representation is to be written.
+     * @param output the Writer where the CharSequence's string representation is to be written, must not be {@code null}
+     * @param flush  if {@code true}, the Writer is flushed after writing the CharSequence.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final CharSequence cs, final Writer output, final boolean flush) throws IOException {
@@ -3866,8 +3271,8 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a character array to a File.
      *
-     * @param chars  The character array whose byte array representation is to be written.
-     * @param output The File where the character array's byte array representation is to be written, not {@code null}.
+     * @param chars  the character array whose byte array representation is to be written.
+     * @param output the File where the character array's byte array representation is to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], Charset)
@@ -3884,9 +3289,9 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a character array to a File using the specified Charset.
      *
-     * @param chars   The character array whose byte array representation is to be written.
-     * @param charset The Charset to be used to encode the character array into a sequence of bytes.
-     * @param output  The File where the character array's byte array representation is to be written, not {@code null}.
+     * @param chars   the character array whose byte array representation is to be written.
+     * @param charset the Charset to be used to encode the character array into a sequence of bytes.
+     * @param output  the File where the character array's byte array representation is to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], Charset)
@@ -3903,10 +3308,10 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a character array to a File.
      *
-     * @param chars  The character array whose byte array representation is to be written.
-     * @param offset The starting position in the character array.
-     * @param count  The number of characters to be written from the character array.
-     * @param output The File where the character array's byte array representation is to be written, not {@code null}.
+     * @param chars  the character array whose byte array representation is to be written.
+     * @param offset the starting position in the character array.
+     * @param count  the number of characters to be written from the character array.
+     * @param output the File where the character array's byte array representation is to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], int, int, Charset)
@@ -3923,11 +3328,11 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a character array to a File using the specified Charset.
      *
-     * @param chars   The character array whose byte array representation is to be written.
-     * @param offset  The starting position in the character array.
-     * @param count   The number of characters to be written from the character array.
-     * @param charset The Charset to be used to encode the character array into a sequence of bytes.
-     * @param output  The File where the character array's byte array representation is to be written, not {@code null}.
+     * @param chars   the character array whose byte array representation is to be written.
+     * @param offset  the starting position in the character array.
+     * @param count   the number of characters to be written from the character array.
+     * @param charset the Charset to be used to encode the character array into a sequence of bytes.
+     * @param output  the File where the character array's byte array representation is to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], int, int, Charset)
@@ -3944,8 +3349,8 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a character array to an OutputStream.
      *
-     * @param chars  The character array whose byte array representation is to be written.
-     * @param output The OutputStream where the character array's byte array representation is to be written.
+     * @param chars  the character array whose byte array representation is to be written.
+     * @param output the OutputStream where the character array's byte array representation is to be written.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final char[] chars, final OutputStream output) throws IOException {
@@ -3959,9 +3364,9 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a character array to an OutputStream using the specified Charset.
      *
-     * @param chars   The character array whose byte array representation is to be written.
-     * @param charset The Charset to be used to encode the character array into a sequence of bytes.
-     * @param output  The OutputStream where the character array's byte array representation is to be written.
+     * @param chars   the character array whose byte array representation is to be written.
+     * @param charset the Charset to be used to encode the character array into a sequence of bytes.
+     * @param output  the OutputStream where the character array's byte array representation is to be written.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final char[] chars, final Charset charset, final OutputStream output) throws IOException {
@@ -3975,10 +3380,10 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a character array to an OutputStream.
      *
-     * @param chars  The character array whose byte array representation is to be written.
-     * @param offset The starting position in the character array.
-     * @param count  The number of characters to be written from the character array.
-     * @param output The OutputStream where the character array's byte array representation is to be written, not {@code null}.
+     * @param chars  the character array whose byte array representation is to be written.
+     * @param offset the starting position in the character array.
+     * @param count  the number of characters to be written from the character array.
+     * @param output the OutputStream where the character array's byte array representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], int, int, Charset)
      */
@@ -3993,11 +3398,11 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a character array to an OutputStream using the specified Charset.
      *
-     * @param chars   The character array whose byte array representation is to be written.
-     * @param offset  The starting position in the character array.
-     * @param count   The number of characters to be written from the character array.
-     * @param charset The Charset to be used to encode the character array into a sequence of bytes.
-     * @param output  The OutputStream where the character array's byte array representation is to be written, not {@code null}.
+     * @param chars   the character array whose byte array representation is to be written.
+     * @param offset  the starting position in the character array.
+     * @param count   the number of characters to be written from the character array.
+     * @param charset the Charset to be used to encode the character array into a sequence of bytes.
+     * @param output  the OutputStream where the character array's byte array representation is to be written, must not be {@code null}
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], int, int, Charset)
      */
@@ -4012,9 +3417,9 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a character array to an OutputStream.
      *
-     * @param chars  The character array whose byte array representation is to be written.
-     * @param output The OutputStream where the character array's byte array representation is to be written, not {@code null}.
-     * @param flush  If {@code true}, the output stream is flushed after writing the CharSequence.
+     * @param chars  the character array whose byte array representation is to be written.
+     * @param output the OutputStream where the character array's byte array representation is to be written, must not be {@code null}
+     * @param flush  if {@code true}, the output stream is flushed after writing the CharSequence.
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], Charset)
      */
@@ -4029,11 +3434,11 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a character array to an OutputStream.
      *
-     * @param chars  The character array whose byte array representation is to be written.
-     * @param offset The starting position in the character array.
-     * @param count  The number of characters to be written from the character array.
-     * @param output The OutputStream where the character array's byte array representation is to be written, not {@code null}.
-     * @param flush  If {@code true}, the output stream is flushed after writing the CharSequence.
+     * @param chars  the character array whose byte array representation is to be written.
+     * @param offset the starting position in the character array.
+     * @param count  the number of characters to be written from the character array.
+     * @param output the OutputStream where the character array's byte array representation is to be written, must not be {@code null}
+     * @param flush  if {@code true}, the output stream is flushed after writing the CharSequence.
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], int, int, Charset)
      */
@@ -4051,12 +3456,12 @@ public final class IOUtil {
     /**
      * Writes the byte array representation of a character array to an OutputStream using the specified Charset.
      *
-     * @param chars   The character array whose byte array representation is to be written.
-     * @param offset  The starting position in the character array.
-     * @param count   The number of characters to be written from the character array.
-     * @param charset The Charset to be used to encode the character array into a sequence of bytes.
-     * @param output  The OutputStream where the character array's byte array representation is to be written, not {@code null}.
-     * @param flush   If {@code true}, the output stream is flushed after writing the CharSequence.
+     * @param chars   the character array whose byte array representation is to be written.
+     * @param offset  the starting position in the character array.
+     * @param count   the number of characters to be written from the character array.
+     * @param charset the Charset to be used to encode the character array into a sequence of bytes.
+     * @param output  the OutputStream where the character array's byte array representation is to be written, must not be {@code null}
+     * @param flush   if {@code true}, the output stream is flushed after writing the CharSequence.
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], int, int, Charset)
      */
@@ -4075,8 +3480,8 @@ public final class IOUtil {
     /**
      * Writes the string representation of a character array to a Writer.
      *
-     * @param chars  The character array to be written.
-     * @param output The Writer where the character array is to be written.
+     * @param chars  the character array to be written.
+     * @param output the Writer where the character array is to be written.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final char[] chars, final Writer output) throws IOException {
@@ -4090,10 +3495,10 @@ public final class IOUtil {
     /**
      * Writes a portion of a character array to a Writer.
      *
-     * @param chars  The character array to be written.
-     * @param offset The starting position in the character array.
-     * @param count  The number of characters to be written from the character array.
-     * @param output The Writer where the character array is to be written.
+     * @param chars  the character array to be written.
+     * @param offset the starting position in the character array.
+     * @param count  the number of characters to be written from the character array.
+     * @param output the Writer where the character array is to be written.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final char[] chars, final int offset, final int count, final Writer output) throws IOException {
@@ -4110,9 +3515,9 @@ public final class IOUtil {
     /**
      * Writes an array of characters to a Writer.
      *
-     * @param chars  The character array to be written.
-     * @param output The Writer where the character array is to be written.
-     * @param flush  If {@code true}, the output writer will be flushed after writing.
+     * @param chars  the character array to be written.
+     * @param output the Writer where the character array is to be written.
+     * @param flush  if {@code true}, the output writer will be flushed after writing.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final char[] chars, final Writer output, final boolean flush) throws IOException {
@@ -4126,11 +3531,11 @@ public final class IOUtil {
     /**
      * Writes a portion of a character array to a Writer.
      *
-     * @param chars  The character array to be written.
-     * @param offset The starting position in the character array.
-     * @param count  The number of characters to be written from the character array.
-     * @param output The Writer where the character array is to be written.
-     * @param flush  If {@code true}, the output writer will be flushed after writing.
+     * @param chars  the character array to be written.
+     * @param offset the starting position in the character array.
+     * @param count  the number of characters to be written from the character array.
+     * @param output the Writer where the character array is to be written.
+     * @param flush  if {@code true}, the output writer will be flushed after writing.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final char[] chars, final int offset, final int count, final Writer output, final boolean flush) throws IOException {
@@ -4151,8 +3556,8 @@ public final class IOUtil {
     /**
      * Writes an array of bytes to a File.
      *
-     * @param bytes  The byte array to be written.
-     * @param output The File where the byte array is to be written.
+     * @param bytes  the byte array to be written.
+     * @param output the File where the byte array is to be written.
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      */
@@ -4168,10 +3573,10 @@ public final class IOUtil {
     /**
      * Writes a portion of a byte array to a File.
      *
-     * @param bytes  The byte array to be written.
-     * @param offset The starting position in the byte array.
-     * @param count  The number of bytes to be written from the byte array.
-     * @param output The File where the byte array is to be written.
+     * @param bytes  the byte array to be written.
+     * @param offset the starting position in the byte array.
+     * @param count  the number of bytes to be written from the byte array.
+     * @param output the File where the byte array is to be written.
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      */
@@ -4202,8 +3607,8 @@ public final class IOUtil {
     /**
      * Writes an array of bytes to an OutputStream.
      *
-     * @param bytes  The byte array to be written.
-     * @param output The OutputStream where the byte array is to be written.
+     * @param bytes  the byte array to be written.
+     * @param output the OutputStream where the byte array is to be written.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final byte[] bytes, final OutputStream output) throws IOException {
@@ -4217,10 +3622,10 @@ public final class IOUtil {
     /**
      * Writes a portion of a byte array to an OutputStream.
      *
-     * @param bytes  The byte array to be written.
-     * @param offset The starting position in the byte array.
-     * @param count  The number of bytes to be written from the byte array.
-     * @param output The OutputStream where the byte array is to be written.
+     * @param bytes  the byte array to be written.
+     * @param offset the starting position in the byte array.
+     * @param count  the number of bytes to be written from the byte array.
+     * @param output the OutputStream where the byte array is to be written.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final byte[] bytes, final int offset, final int count, final OutputStream output) throws IOException {
@@ -4237,9 +3642,9 @@ public final class IOUtil {
     /**
      * Writes an array of bytes to an OutputStream.
      *
-     * @param bytes  The byte array to be written.
-     * @param output The OutputStream where the byte array is to be written.
-     * @param flush  If {@code true}, the output stream is flushed after writing the byte array.
+     * @param bytes  the byte array to be written.
+     * @param output the OutputStream where the byte array is to be written.
+     * @param flush  if {@code true}, the output stream is flushed after writing the byte array.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final byte[] bytes, final OutputStream output, final boolean flush) throws IOException {
@@ -4253,11 +3658,11 @@ public final class IOUtil {
     /**
      * Writes a portion of a byte array to an OutputStream.
      *
-     * @param bytes  The byte array to be written.
-     * @param offset The starting position in the byte array.
-     * @param count  The number of bytes to be written from the byte array.
-     * @param output The OutputStream where the byte array is to be written.
-     * @param flush  If {@code true}, the output stream is flushed after writing the byte array.
+     * @param bytes  the byte array to be written.
+     * @param offset the starting position in the byte array.
+     * @param count  the number of bytes to be written from the byte array.
+     * @param output the OutputStream where the byte array is to be written.
+     * @param flush  if {@code true}, the output stream is flushed after writing the byte array.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final byte[] bytes, final int offset, final int count, final OutputStream output, final boolean flush) throws IOException {
@@ -4279,10 +3684,10 @@ public final class IOUtil {
     /**
      * Writes the content of the source file to the output file.
      *
-     * @param source The file to read from.
-     * @param output The file to write to.
+     * @param source the file to read from.
+     * @param output the file to write to.
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
-     * @return The total number of bytes written to the output file.
+     * @return the total number of bytes written to the output file.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final File source, final File output) throws IOException {
@@ -4292,12 +3697,12 @@ public final class IOUtil {
     /**
      * Writes a portion of a file to another file.
      *
-     * @param source The source file to be written. Must not be {@code null}.
-     * @param offset The starting position in the source file, in bytes.
-     * @param count  The number of bytes to be written from the source file.
-     * @param output The output file where the source file is to be written. Must not be {@code null}.
+     * @param source the source file to be written, must not be {@code null}
+     * @param offset the starting position in the source file, in bytes.
+     * @param count  the number of bytes to be written from the source file.
+     * @param output the output file where the source file is to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
-     * @return The total number of bytes written.
+     * @return the total number of bytes written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final File source, final long offset, final long count, final File output) throws IOException {
@@ -4318,9 +3723,9 @@ public final class IOUtil {
     /**
      * Writes the content of a source file to an {@code OutputStream}.
      *
-     * @param source The source file to be written. Must not be {@code null}.
-     * @param output The {@code OutputStream} where the source file is to be written. Must not be {@code null}.
-     * @return The total number of bytes written.
+     * @param source the source file to be written, must not be {@code null}
+     * @param output the {@code OutputStream} where the source file is to be written, must not be {@code null}
+     * @return the total number of bytes written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final File source, final OutputStream output) throws IOException {
@@ -4330,11 +3735,11 @@ public final class IOUtil {
     /**
      * Writes the content of the source file to the output stream, starting from the specified offset and writing up to the specified count.
      *
-     * @param source The file to read from.
-     * @param offset The position in the file to start reading from.
-     * @param count  The maximum number of bytes to write to the output.
-     * @param output The output stream to write to.
-     * @return The total number of bytes written to the output stream.
+     * @param source the file to read from.
+     * @param offset the position in the file to start reading from.
+     * @param count  the maximum number of bytes to write to the output.
+     * @param output the output stream to write to.
+     * @return the total number of bytes written to the output stream.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final File source, final long offset, final long count, final OutputStream output) throws IOException {
@@ -4344,10 +3749,10 @@ public final class IOUtil {
     /**
      * Writes the content of a source file to an {@code OutputStream}.
      *
-     * @param source The source file to be written. Must not be {@code null}.
-     * @param output The {@code OutputStream} where the source file is to be written. Must not be {@code null}.
-     * @param flush  If {@code true}, the output stream will be flushed after the write operation.
-     * @return The total number of bytes written.
+     * @param source the source file to be written, must not be {@code null}
+     * @param output the {@code OutputStream} where the source file is to be written, must not be {@code null}
+     * @param flush  if {@code true}, the output stream will be flushed after the write operation.
+     * @return the total number of bytes written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final File source, final OutputStream output, final boolean flush) throws IOException {
@@ -4356,14 +3761,14 @@ public final class IOUtil {
 
     /**
      * Writes the content of the source file to the output stream, starting from the specified offset and writing up to the specified count.
-     * If the flush parameter is {@code true}, the output stream is flushed after the write operation.
+     * if the flush parameter is {@code true}, the output stream is flushed after the write operation.
      *
-     * @param source The file to read from.
-     * @param offset The position in the file to start reading from.
-     * @param count  The maximum number of bytes to write to the output.
-     * @param output The output stream to write to.
-     * @param flush  If {@code true}, the output stream is flushed after the write operation.
-     * @return The total number of bytes written to the output stream.
+     * @param source the file to read from.
+     * @param offset the position in the file to start reading from.
+     * @param count  the maximum number of bytes to write to the output.
+     * @param output the output stream to write to.
+     * @param flush  if {@code true}, the output stream is flushed after the write operation.
+     * @return the total number of bytes written to the output stream.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final File source, final long offset, final long count, final OutputStream output, final boolean flush) throws IOException {
@@ -4380,75 +3785,13 @@ public final class IOUtil {
         }
     }
 
-    //    /**
-    //     *
-    //     * @param source
-    //     * @param output
-    //     * @return
-    //     * @throws IOException if an I/O error occurs.
-    //     */
-    //    public static long write(final File source, final Writer output) throws IOException {
-    //        return write(source, output, false);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param source
-    //     * @param offset
-    //     * @param count
-    //     * @param output
-    //     * @return
-    //     * @throws IOException if an I/O error occurs.
-    //     * @deprecated inconsistent with methods: {@code write(File, long, long, File)} and {@code write(File, long, long, OutputStream)}. Unit for offset/count is char here. but it's byte in {@code write(File, long, long, File)} and {@code write(File, long, long, OutputStream)}.
-    //     */
-    //    @Deprecated
-    //    public static long write(final File source, final long offset, final long count, final Writer output) throws IOException {
-    //        return write(source, offset, count, output, false);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param source
-    //     * @param output
-    //     * @param flush
-    //     * @return
-    //     * @throws IOException if an I/O error occurs.
-    //     */
-    //    public static long write(final File source, final Writer output, final boolean flush) throws IOException {
-    //        return write(source, 0, Long.MAX_VALUE, output, flush);
-    //    }
-    //
-    //    /**
-    //     *
-    //     *
-    //     * @param source
-    //     * @param offset by char
-    //     * @param count
-    //     * @param output
-    //     * @param flush
-    //     * @return
-    //     * @throws IOException if an I/O error occurs.
-    //     * @deprecated inconsistent with methods: {@code write(File, long, long, File)} and {@code write(File, long, long, OutputStream)}. Unit for offset/count is char here. but it's byte in {@code write(File, long, long, File)} and {@code write(File, long, long, OutputStream)}.
-    //     */
-    //    @Deprecated
-    //    public static long write(final File source, final long offset, final long count, final Writer output, final boolean flush) throws IOException {
-    //        Reader reader = null;
-    //        try {
-    //            reader = IOUtil.newBufferedReader(source);
-    //
-    //            return write(reader, offset, count, output, flush);
-    //        } finally {
-    //            closeQuietly(reader);
-    //        }
-    //    }
-
     /**
      * Writes the content of the input stream to the specified output file.
      *
-     * @param source The input stream to read from.
-     * @param output The file to write to.
+     * @param source the input stream to read from.
+     * @param output the file to write to.
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
-     * @return The total number of bytes written to the output file.
+     * @return the total number of bytes written to the output file.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final InputStream source, final File output) throws IOException {
@@ -4458,12 +3801,12 @@ public final class IOUtil {
     /**
      * Writes the content of an {@code InputStream} to a file.
      *
-     * @param source The {@code InputStream} to be written. Must not be {@code null}.
-     * @param offset The starting point from where to begin writing bytes from the {@code InputStream}, in bytes.
-     * @param count  The maximum number of bytes to write to the file.
-     * @param output The file where the {@code InputStream} is to be written. Must not be {@code null}.
+     * @param source the {@code InputStream} to be written, must not be {@code null}
+     * @param offset the starting point from where to begin writing bytes from the {@code InputStream}, in bytes.
+     * @param count  the maximum number of bytes to write to the file.
+     * @param output the file where the {@code InputStream} is to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
-     * @return The total number of bytes written.
+     * @return the total number of bytes written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final InputStream source, final long offset, final long count, final File output) throws IOException {
@@ -4490,9 +3833,9 @@ public final class IOUtil {
     /**
      * Writes the content of an {@code InputStream} to an {@code OutputStream}.
      *
-     * @param source The {@code InputStream} to be written. Must not be {@code null}.
-     * @param output The {@code OutputStream} where the {@code InputStream} is to be written. Must not be {@code null}.
-     * @return The total number of bytes written.
+     * @param source the {@code InputStream} to be written, must not be {@code null}
+     * @param output the {@code OutputStream} where the {@code InputStream} is to be written, must not be {@code null}
+     * @return the total number of bytes written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final InputStream source, final OutputStream output) throws IOException {
@@ -4502,11 +3845,11 @@ public final class IOUtil {
     /**
      * Writes the content of an {@code InputStream} to an {@code OutputStream}.
      *
-     * @param source The {@code InputStream} to be written. Must not be {@code null}.
-     * @param offset The starting point from where to begin writing bytes from the {@code InputStream}, in bytes.
-     * @param count  The maximum number of bytes to write to the {@code OutputStream}.
-     * @param output The {@code OutputStream} where the {@code InputStream} is to be written. Must not be {@code null}.
-     * @return The total number of bytes written.
+     * @param source the {@code InputStream} to be written, must not be {@code null}
+     * @param offset the starting point from where to begin writing bytes from the {@code InputStream}, in bytes.
+     * @param count  the maximum number of bytes to write to the {@code OutputStream}.
+     * @param output the {@code OutputStream} where the {@code InputStream} is to be written, must not be {@code null}
+     * @return the total number of bytes written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final InputStream source, final long offset, final long count, final OutputStream output) throws IOException {
@@ -4516,10 +3859,10 @@ public final class IOUtil {
     /**
      * Writes the content of an {@code InputStream} to an {@code OutputStream}.
      *
-     * @param source The {@code InputStream} to be written. Must not be {@code null}.
-     * @param output The {@code OutputStream} where the {@code InputStream} is to be written. Must not be {@code null}.
-     * @param flush  If {@code true}, the output stream will be flushed after writing.
-     * @return The total number of bytes written.
+     * @param source the {@code InputStream} to be written, must not be {@code null}
+     * @param output the {@code OutputStream} where the {@code InputStream} is to be written, must not be {@code null}
+     * @param flush  if {@code true}, the output stream will be flushed after writing.
+     * @return the total number of bytes written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final InputStream source, final OutputStream output, final boolean flush) throws IOException {
@@ -4528,14 +3871,14 @@ public final class IOUtil {
 
     /**
      * Writes the content of the input stream to the output stream, starting from the specified offset and writing up to the specified count.
-     * If the flush parameter is {@code true}, the output stream is flushed after the write operation.
+     * if the flush parameter is {@code true}, the output stream is flushed after the write operation.
      *
-     * @param source The input stream to read from.
-     * @param offset The position in the input stream to start reading from.
-     * @param count  The maximum number of bytes to write to the output.
-     * @param output The output stream to write to.
-     * @param flush  If {@code true}, the output stream is flushed after the write operation.
-     * @return The total number of bytes written to the output stream.
+     * @param source the input stream to read from.
+     * @param offset the position in the input stream to start reading from.
+     * @param count  the maximum number of bytes to write to the output.
+     * @param output the output stream to write to.
+     * @param flush  if {@code true}, the output stream is flushed after the write operation.
+     * @return the total number of bytes written to the output stream.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final InputStream source, final long offset, final long count, final OutputStream output, final boolean flush)
@@ -4584,10 +3927,10 @@ public final class IOUtil {
     /**
      * Writes the content of a {@code Reader} to a file.
      *
-     * @param source The {@code Reader} to be written. Must not be {@code null}.
-     * @param output The file where the {@code Reader}'s content is to be written. Must not be {@code null}.
+     * @param source the {@code Reader} to be written, must not be {@code null}
+     * @param output the file where the {@code Reader}'s content is to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
-     * @return The total number of characters written.
+     * @return the total number of characters written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final Reader source, final File output) throws IOException {
@@ -4597,11 +3940,11 @@ public final class IOUtil {
     /**
      * Writes the content of a {@code Reader} to a file using the specified {@code Charset}.
      *
-     * @param source  The {@code Reader} to be written. Must not be {@code null}.
-     * @param charset The {@code Charset} to be used to open the specified file for writing. If {@code null}, the platform's default charset is used.
-     * @param output  The file where the {@code Reader}'s content is to be written. Must not be {@code null}.
+     * @param source  the {@code Reader} to be written, must not be {@code null}
+     * @param charset the {@code Charset} to be used to open the specified file for writing. If {@code null}, the platform's default charset is used.
+     * @param output  the file where the {@code Reader}'s content is to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
-     * @return The total number of characters written.
+     * @return the total number of characters written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final Reader source, final Charset charset, final File output) throws IOException {
@@ -4611,12 +3954,12 @@ public final class IOUtil {
     /**
      * Writes the content of a {@code Reader} to a file starting from a specific offset and up to a certain count.
      *
-     * @param source The {@code Reader} to be written. Must not be {@code null}.
-     * @param offset The position in the {@code Reader} to start writing from, in characters.
-     * @param count  The maximum number of characters to be written.
-     * @param output The file where the {@code Reader}'s content is to be written. Must not be {@code null}.
+     * @param source the {@code Reader} to be written, must not be {@code null}
+     * @param offset the position in the {@code Reader} to start writing from, in characters.
+     * @param count  the maximum number of characters to be written.
+     * @param output the file where the {@code Reader}'s content is to be written, must not be {@code null}
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
-     * @return The total number of characters written.
+     * @return the total number of characters written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final Reader source, final long offset, final long count, final File output) throws IOException {
@@ -4626,13 +3969,13 @@ public final class IOUtil {
     /**
      * Writes the content of a {@code Reader} to a file starting from a specific offset and up to a certain count using the specified {@code Charset}.
      *
-     * @param source  The {@code Reader} to be written. Must not be {@code null}.
-     * @param offset  The position in the {@code Reader} to start writing from, in characters.
-     * @param count   The maximum number of characters to be written.
-     * @param charset The {@code Charset} to be used to open the specified file for writing. If {@code null}, the platform's default charset is used.
+     * @param source  the {@code Reader} to be written, must not be {@code null}
+     * @param offset  the position in the {@code Reader} to start writing from, in characters.
+     * @param count   the maximum number of characters to be written.
+     * @param charset the {@code Charset} to be used to open the specified file for writing. If {@code null}, the platform's default charset is used.
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
-     * @param output  The file where the {@code Reader}'s content is to be written. Must not be {@code null}.
-     * @return The total number of characters written.
+     * @param output  the file where the {@code Reader}'s content is to be written, must not be {@code null}
+     * @return the total number of characters written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final Reader source, final long offset, final long count, final Charset charset, final File output) throws IOException {
@@ -4657,9 +4000,9 @@ public final class IOUtil {
     /**
      * Writes the content from a {@code Reader} to a {@code Writer}.
      *
-     * @param source The {@code Reader} to be written. Must not be {@code null}.
-     * @param output The {@code Writer} where the {@code Reader}'s content is to be written. Must not be {@code null}.
-     * @return The total number of characters written.
+     * @param source the {@code Reader} to be written, must not be {@code null}
+     * @param output the {@code Writer} where the {@code Reader}'s content is to be written, must not be {@code null}
+     * @return the total number of characters written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final Reader source, final Writer output) throws IOException {
@@ -4669,11 +4012,11 @@ public final class IOUtil {
     /**
      * Writes the content of a {@code Reader} to a {@code Writer} starting from a specific offset and up to a certain count.
      *
-     * @param source The {@code Reader} to be written. Must not be {@code null}.
-     * @param offset The position in the {@code Reader} to start writing from, in characters.
-     * @param count  The maximum number of characters to be written.
-     * @param output The {@code Writer} where the {@code Reader}'s content is to be written. Must not be {@code null}.
-     * @return The total number of characters written.
+     * @param source the {@code Reader} to be written, must not be {@code null}
+     * @param offset the position in the {@code Reader} to start writing from, in characters.
+     * @param count  the maximum number of characters to be written.
+     * @param output the {@code Writer} where the {@code Reader}'s content is to be written, must not be {@code null}
+     * @return the total number of characters written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final Reader source, final long offset, final long count, final Writer output) throws IOException {
@@ -4683,10 +4026,10 @@ public final class IOUtil {
     /**
      * Writes the content of a {@code Reader} to a {@code Writer}.
      *
-     * @param source The {@code Reader} to be written. Must not be {@code null}.
-     * @param output The {@code Writer} where the {@code Reader}'s content is to be written. Must not be {@code null}.
-     * @param flush  If {@code true}, the output {@code Writer} is flushed after writing.
-     * @return The total number of characters written.
+     * @param source the {@code Reader} to be written, must not be {@code null}
+     * @param output the {@code Writer} where the {@code Reader}'s content is to be written, must not be {@code null}
+     * @param flush  if {@code true}, the output {@code Writer} is flushed after writing.
+     * @return the total number of characters written.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final Reader source, final Writer output, final boolean flush) throws IOException {
@@ -4696,13 +4039,13 @@ public final class IOUtil {
     /**
      * Writes a specified number of characters from a Reader to a Writer, starting from a specified offset.
      *
-     * @param source The Reader to read from.
-     * @param offset The position in the Reader to start reading from.
-     * @param count  The number of characters to read from the Reader and write to the Writer.
-     * @param output The Writer to write to.
-     * @param flush  If {@code true}, the output Writer is flushed after writing.
-     * @return The total number of characters written to the Writer.
-     * @throws IllegalArgumentException If the source Reader is {@code null} or if the count is negative.
+     * @param source the Reader to read from.
+     * @param offset the position in the Reader to start reading from.
+     * @param count  the number of characters to read from the Reader and write to the Writer.
+     * @param output the Writer to write to.
+     * @param flush  if {@code true}, the output Writer is flushed after writing.
+     * @return the total number of characters written to the Writer.
+     * @throws IllegalArgumentException if the source Reader is {@code null} or if the count is negative.
      * @throws IOException              if an I/O error occurs.
      */
     public static long write(final Reader source, final long offset, final long count, final Writer output, final boolean flush)
@@ -4747,8 +4090,8 @@ public final class IOUtil {
     /**
      * Appends the given byte array to the specified file.
      *
-     * @param bytes      The byte array to append to the file.
-     * @param targetFile The file to which the byte array will be appended.
+     * @param bytes      the byte array to append to the file.
+     * @param targetFile the file to which the byte array will be appended.
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      */
@@ -4763,10 +4106,10 @@ public final class IOUtil {
     /**
      * Appends the given byte array to the specified file starting from the specified offset up to the count.
      *
-     * @param bytes      The byte array to append to the file.
-     * @param offset     The starting index from where to append the bytes.
-     * @param count      The number of bytes to append from the byte array.
-     * @param targetFile The file to which the byte array will be appended.
+     * @param bytes      the byte array to append to the file.
+     * @param offset     the starting index from where to append the bytes.
+     * @param count      the number of bytes to append from the byte array.
+     * @param targetFile the file to which the byte array will be appended.
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      */
@@ -4794,8 +4137,8 @@ public final class IOUtil {
     /**
      * Appends the given character array to the specified file.
      *
-     * @param chars      The character array to append to the file.
-     * @param targetFile The file to which the character array will be appended.
+     * @param chars      the character array to append to the file.
+     * @param targetFile the file to which the character array will be appended.
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], Charset)
@@ -4812,9 +4155,9 @@ public final class IOUtil {
     /**
      * Appends the given character array to the specified file.
      *
-     * @param chars      The character array to append to the file.
-     * @param charset    The Charset to be used to encode the character array into a sequence of bytes.
-     * @param targetFile The file to which the character array will be appended.
+     * @param chars      the character array to append to the file.
+     * @param charset    the Charset to be used to encode the character array into a sequence of bytes.
+     * @param targetFile the file to which the character array will be appended.
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], Charset)
@@ -4832,10 +4175,10 @@ public final class IOUtil {
      * Appends the content of the character array to the target file.
      * The content to be appended starts at the specified offset and extends count characters.
      *
-     * @param chars      The character array to append to the file.
-     * @param offset     The initial offset in the character array.
-     * @param count      The number of characters to append.
-     * @param targetFile The file to which the character array will be appended, not {@code null}.
+     * @param chars      the character array to append to the file.
+     * @param offset     the initial offset in the character array.
+     * @param count      the number of characters to append.
+     * @param targetFile the file to which the character array will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], int, int, Charset)
@@ -4856,11 +4199,11 @@ public final class IOUtil {
      * Appends the content of the character array to the target file.
      * The content to be appended starts at the specified offset and extends count characters.
      *
-     * @param chars      The character array to append to the file.
-     * @param offset     The initial offset in the character array.
-     * @param count      The number of characters to append.
-     * @param charset    The Charset to be used to encode the character array into a sequence of bytes.
-     * @param targetFile The file to which the character array will be appended, not {@code null}.
+     * @param chars      the character array to append to the file.
+     * @param offset     the initial offset in the character array.
+     * @param count      the number of characters to append.
+     * @param charset    the Charset to be used to encode the character array into a sequence of bytes.
+     * @param targetFile the file to which the character array will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #chars2Bytes(char[], int, int, Charset)
@@ -4880,8 +4223,8 @@ public final class IOUtil {
     /**
      * Appends the content of the CharSequence to the target file.
      *
-     * @param cs         The CharSequence to append to the file.
-     * @param targetFile The file to which the CharSequence will be appended, not {@code null}.
+     * @param cs         the CharSequence to append to the file.
+     * @param targetFile the file to which the CharSequence will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      */
@@ -4892,9 +4235,9 @@ public final class IOUtil {
     /**
      * Appends the content of the CharSequence to the target file.
      *
-     * @param cs         The CharSequence to append to the file.
-     * @param charset    The Charset to be used to encode the character array into a sequence of bytes.
-     * @param targetFile The file to which the CharSequence will be appended, not {@code null}.
+     * @param cs         the CharSequence to append to the file.
+     * @param charset    the Charset to be used to encode the character array into a sequence of bytes.
+     * @param targetFile the file to which the CharSequence will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      */
@@ -4905,10 +4248,10 @@ public final class IOUtil {
     /**
      * Appends the content of the source file to the target file.
      *
-     * @param source     The source file to read from, not {@code null}.
-     * @param targetFile The target file to append to, not {@code null}.
+     * @param source     the source file to read from, must not be {@code null}
+     * @param targetFile the target file to append to, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
-     * @return The number of bytes appended.
+     * @return the number of bytes appended.
      * @throws IOException if an I/O error occurs.
      */
     public static long append(final File source, final File targetFile) throws IOException {
@@ -4919,12 +4262,12 @@ public final class IOUtil {
      * Appends the content of the source file to the target file.
      * The content to be appended is read from the source file starting from the specified offset in bytes and up to the specified count.
      *
-     * @param source     The source file to read from, not {@code null}.
-     * @param offset     The starting point in bytes from where to read in the source file.
-     * @param count      The maximum number of bytes to read from the source file.
-     * @param targetFile The file to which the content will be appended, not {@code null}.
+     * @param source     the source file to read from, must not be {@code null}
+     * @param offset     the starting point in bytes from where to read in the source file.
+     * @param count      the maximum number of bytes to read from the source file.
+     * @param targetFile the file to which the content will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
-     * @return The number of bytes appended to the target file.
+     * @return the number of bytes appended to the target file.
      * @throws IOException if an I/O error occurs.
      */
     public static long append(final File source, final long offset, final long count, final File targetFile) throws IOException {
@@ -4950,10 +4293,10 @@ public final class IOUtil {
      * Appends the content of the InputStream to the target file.
      * The content to be appended is read from the InputStream.
      *
-     * @param source     The InputStream to read from, not {@code null}.
-     * @param targetFile The file to which the InputStream content will be appended, not {@code null}.
+     * @param source     the InputStream to read from, must not be {@code null}
+     * @param targetFile the file to which the InputStream content will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
-     * @return The number of bytes appended to the target file.
+     * @return the number of bytes appended to the target file.
      * @throws IOException if an I/O error occurs.
      */
     public static long append(final InputStream source, final File targetFile) throws IOException {
@@ -4964,12 +4307,12 @@ public final class IOUtil {
      * Appends the content of the InputStream to the target file.
      * The content to be appended is read from the InputStream starting from the specified offset in bytes and up to the specified count.
      *
-     * @param source     The InputStream to read from, not {@code null}.
-     * @param offset     The starting point in bytes from where to read in the InputStream.
-     * @param count      The maximum number of bytes to read from the InputStream.
-     * @param targetFile The file to which the InputStream content will be appended, not {@code null}.
+     * @param source     the InputStream to read from, must not be {@code null}
+     * @param offset     the starting point in bytes from where to read in the InputStream.
+     * @param count      the maximum number of bytes to read from the InputStream.
+     * @param targetFile the file to which the InputStream content will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
-     * @return The number of bytes appended to the target file.
+     * @return the number of bytes appended to the target file.
      * @throws IOException if an I/O error occurs.
      */
     public static long append(final InputStream source, final long offset, final long count, final File targetFile) throws IOException {
@@ -4993,10 +4336,10 @@ public final class IOUtil {
      * Appends the content of the Reader to the target file.
      * This file is opened to write with the default charset.
      *
-     * @param source     The Reader to read from, not {@code null}.
-     * @param targetFile The file to which the Reader content will be appended, not {@code null}.
+     * @param source     the Reader to read from, must not be {@code null}
+     * @param targetFile the file to which the Reader content will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
-     * @return The number of characters appended to the target file.
+     * @return the number of characters appended to the target file.
      * @throws IOException if an I/O error occurs.
      */
 
@@ -5008,11 +4351,11 @@ public final class IOUtil {
      * Appends the content of the Reader to the target file.
      * This file is opened to write with the provided charset.
      *
-     * @param source     The Reader to read from, not {@code null}.
-     * @param charset    The Charset to be used to open the specified for writing.
-     * @param targetFile The file to which the Reader content will be appended, not {@code null}.
+     * @param source     the Reader to read from, must not be {@code null}
+     * @param charset    the Charset to be used to open the specified for writing.
+     * @param targetFile the file to which the Reader content will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
-     * @return The number of characters appended to the target file.
+     * @return the number of characters appended to the target file.
      * @throws IOException if an I/O error occurs.
      */
     public static long append(final Reader source, final Charset charset, final File targetFile) throws IOException {
@@ -5024,12 +4367,12 @@ public final class IOUtil {
      * The content to be appended is read from the Reader starting from the specified offset in characters and up to the specified count.
      * This file is opened to write with the default charset.
      *
-     * @param source     The Reader to read from, not {@code null}.
-     * @param offset     The position in the Reader to start reading from.
-     * @param count      The maximum number of characters to read from the Reader.
-     * @param targetFile The file to which the Reader content will be appended, not {@code null}.
+     * @param source     the Reader to read from, must not be {@code null}
+     * @param offset     the position in the Reader to start reading from.
+     * @param count      the maximum number of characters to read from the Reader.
+     * @param targetFile the file to which the Reader content will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
-     * @return The number of characters appended to the target file.
+     * @return the number of characters appended to the target file.
      * @throws IOException if an I/O error occurs.
      */
     public static long append(final Reader source, final long offset, final long count, final File targetFile) throws IOException {
@@ -5041,13 +4384,13 @@ public final class IOUtil {
      * The content to be appended is read from the Reader starting from the specified offset in characters and up to the specified count.
      * This file is opened to write with the provided charset.
      *
-     * @param source     The Reader to read from, not {@code null}.
-     * @param offset     The position in the Reader to start reading from.
-     * @param count      The maximum number of characters to read from the Reader.
-     * @param charset    The Charset to be used to open the specified for writing.
-     * @param targetFile The file to which the Reader content will be appended, not {@code null}.
+     * @param source     the Reader to read from, must not be {@code null}
+     * @param offset     the position in the Reader to start reading from.
+     * @param count      the maximum number of characters to read from the Reader.
+     * @param charset    the Charset to be used to open the specified for writing.
+     * @param targetFile the file to which the Reader content will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
-     * @return The number of characters appended to the target file.
+     * @return the number of characters appended to the target file.
      * @throws IOException if an I/O error occurs.
      */
     public static long append(final Reader source, final long offset, final long count, final Charset charset, final File targetFile) throws IOException {
@@ -5075,8 +4418,8 @@ public final class IOUtil {
      * Appends the string representation of the specified object as a new line to the target file.
      * The string representation is obtained by invoking the {@code N.toString(Object)} method.
      *
-     * @param obj        The object whose string representation is to be appended to the file.
-     * @param targetFile The file to which the object's string representation will be appended, not {@code null}.
+     * @param obj        the object whose string representation is to be appended to the file.
+     * @param targetFile the file to which the object's string representation will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #writeLine(Object, File)
@@ -5090,9 +4433,9 @@ public final class IOUtil {
      * Appends the string representation of the specified object as a new line to the target file.
      * The string representation is obtained by invoking the {@code N.toString(Object)} method.
      *
-     * @param obj        The object whose string representation is to be appended to the file.
-     * @param charset    The Charset to be used to encode string representation of the specified object into a sequence of bytes.
-     * @param targetFile The file to which the object's string representation will be appended, not {@code null}.
+     * @param obj        the object whose string representation is to be appended to the file.
+     * @param charset    the Charset to be used to encode string representation of the specified object into a sequence of bytes.
+     * @param targetFile the file to which the object's string representation will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #writeLine(Object, File)
@@ -5109,8 +4452,8 @@ public final class IOUtil {
      * The string representation is obtained by invoking the {@code N.toString(Object)} method.
      * This file is opened to write with the default charset.
      *
-     * @param lines      The iterable whose elements' string representations are to be appended to the file.
-     * @param targetFile The file to which the elements' string representations will be appended, not {@code null}.
+     * @param lines      the iterable whose elements' string representations are to be appended to the file.
+     * @param targetFile the file to which the elements' string representations will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #writeLines(Iterable, File)
@@ -5130,9 +4473,9 @@ public final class IOUtil {
      * The string representation is obtained by invoking the {@code N.toString(Object)} method.
      * This file is opened to write with the provided charset.
      *
-     * @param lines      The iterable whose elements' string representations are to be appended to the file.
-     * @param charset    The Charset to be used to open the specified file for writing.
-     * @param targetFile The file to which the elements' string representations will be appended, not {@code null}.
+     * @param lines      the iterable whose elements' string representations are to be appended to the file.
+     * @param charset    the Charset to be used to open the specified file for writing.
+     * @param targetFile the file to which the elements' string representations will be appended, must not be {@code null}
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #writeLines(Iterable, File)
@@ -5160,9 +4503,9 @@ public final class IOUtil {
     /**
      * Transfers bytes from a source channel to a target channel.
      *
-     * @param src    The source channel from which bytes are to be read.
-     * @param output The target channel to which bytes are to be written.
-     * @return The number of bytes transferred.
+     * @param src    the source channel from which bytes are to be read.
+     * @param output the target channel to which bytes are to be written.
+     * @return the number of bytes transferred.
      * @throws IOException if an I/O error occurs during the transfer.
      */
     public static long transfer(final ReadableByteChannel src, final WritableByteChannel output) throws IOException {
@@ -5175,9 +4518,9 @@ public final class IOUtil {
     /**
      * Skips over and discards a specified number of bytes from the input stream.
      *
-     * @param input       The {@code InputStream} from which bytes are to be skipped. Must not be {@code null}.
-     * @param bytesToSkip The number of bytes to be skipped.
-     * @return The actual number of bytes skipped.
+     * @param input       the {@code InputStream} from which bytes are to be skipped, must not be {@code null}
+     * @param bytesToSkip the number of bytes to be skipped.
+     * @return the actual number of bytes skipped.
      * @throws IOException if an I/O error occurs.
      */
     public static long skip(final InputStream input, final long bytesToSkip) throws IOException {
@@ -5211,9 +4554,9 @@ public final class IOUtil {
     /**
      * Skips over and discards a specified number of characters from the input reader.
      *
-     * @param input       The {@code Reader} from which characters are to be skipped. Must not be {@code null}.
-     * @param charsToSkip The number of characters to be skipped.
-     * @return The actual number of characters skipped.
+     * @param input       the {@code Reader} from which characters are to be skipped, must not be {@code null}
+     * @param charsToSkip the number of characters to be skipped.
+     * @return the actual number of characters skipped.
      * @throws IOException if an I/O error occurs.
      */
     public static long skip(final Reader input, final long charsToSkip) throws IOException {
@@ -5247,8 +4590,8 @@ public final class IOUtil {
     /**
      * Skips over and discards a specified number of bytes from the input stream.
      *
-     * @param input       The input stream to be skipped. Must not be {@code null}.
-     * @param bytesToSkip The number of bytes to be skipped.
+     * @param input       the input stream to be skipped, must not be {@code null}
+     * @param bytesToSkip the number of bytes to be skipped.
      * @throws IOException if an I/O error occurs, including if the input stream reaches the end before skipping all the bytes.
      */
     public static void skipFully(final InputStream input, final long bytesToSkip) throws IOException {
@@ -5262,8 +4605,8 @@ public final class IOUtil {
     /**
      * Skips over and discards a specified number of characters from the input reader.
      *
-     * @param input       The {@code Reader} from which characters are to be skipped. Must not be {@code null}.
-     * @param charsToSkip The number of characters to be skipped.
+     * @param input       the {@code Reader} from which characters are to be skipped, must not be {@code null}
+     * @param charsToSkip the number of characters to be skipped.
      * @throws IOException if an I/O error occurs, including if the {@code Reader} reaches the end before skipping all the characters.
      */
     public static void skipFully(final Reader input, final long charsToSkip) throws IOException {
@@ -5286,8 +4629,8 @@ public final class IOUtil {
      *   <li>Without these flags, operations may fail with access errors</li>
      * </ul>
      *
-     * @param file The file to be mapped into memory.
-     * @return A MappedByteBuffer that represents the content of the file.
+     * @param file the file to be mapped into memory.
+     * @return a MappedByteBuffer that represents the content of the file.
      * @throws IllegalArgumentException if the provided file is {@code null}.
      * @throws IOException              if an I/O error occurs during the operation.
      * @see FileChannel#map(MapMode, long, long)
@@ -5355,7 +4698,7 @@ public final class IOUtil {
      *   <li>Without these flags, operations may fail with access errors</li>
      * </ul>
      *
-     * <p><b>Usage Example:</b></p>
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Map a file for reading
      * File file = new File("data.bin");
@@ -5413,8 +4756,8 @@ public final class IOUtil {
      * a/../b} may refer to a sibling of {@code x}, rather than the sibling of
      * {@code a} referred to by {@code b}.
      *
-     * @param pathname The file path to simplify.
-     * @return The simplified path string with redundant elements removed.
+     * @param pathname the file path to simplify.
+     * @return the simplified path string with redundant elements removed.
      */
     public static String simplifyPath(String pathname) {
         if (Strings.isEmpty(pathname)) {
@@ -5465,8 +4808,8 @@ public final class IOUtil {
     /**
      * Returns the file extension of the specified file. Empty string is returned if the file has no extension.
      *
-     * @param file The file whose extension is to be retrieved.
-     * @return The file extension, or {@code null} if the file is {@code null}.
+     * @param file the file whose extension is to be retrieved.
+     * @return the file extension, or {@code null} if the file is {@code null}.
      * @see FilenameUtil#getExtension(String) 
      */
     @MayReturnNull
@@ -5481,8 +4824,8 @@ public final class IOUtil {
     /**
      * Returns the file extension of the specified file name. Empty string is returned if the file has no extension.
      *
-     * @param fileName The name of the file whose extension is to be retrieved.
-     * @return The file extension, or {@code null} if the specified file name is {@code null}.
+     * @param fileName the name of the file whose extension is to be retrieved.
+     * @return the file extension, or {@code null} if the specified file name is {@code null}.
      * @see FilenameUtil#getExtension(String)
      */
     @MayReturnNull
@@ -5493,8 +4836,8 @@ public final class IOUtil {
     /**
      * Returns the file name without its extension.
      *
-     * @param file The file whose name without extension is to be retrieved.
-     * @return The file name without extension, or {@code null} if the file is {@code null}.
+     * @param file the file whose name without extension is to be retrieved.
+     * @return the file name without extension, or {@code null} if the file is {@code null}.
      * @see FilenameUtil#removeExtension(String)
      */
     @MayReturnNull
@@ -5514,7 +4857,7 @@ public final class IOUtil {
      * unchanged.</p>
      * 
      *
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * FilenameUtil.removeExtension("foo.txt");    // Returns "foo"
      * FilenameUtil.removeExtension("a\\b\\c.jpg"); // Returns "a\\b\\c"
@@ -5535,8 +4878,8 @@ public final class IOUtil {
     /**
      * Creates a new AppendableWriter instance that wraps the provided Appendable object.
      *
-     * @param appendable The Appendable object to be wrapped by the AppendableWriter. Must not be {@code null}.
-     * @return A new instance of AppendableWriter that wraps the provided Appendable.
+     * @param appendable the Appendable object to be wrapped by the AppendableWriter, must not be {@code null}
+     * @return a new instance of AppendableWriter that wraps the provided Appendable.
      * @throws IllegalArgumentException if the appendable is {@code null}.
      */
     public static AppendableWriter newAppendableWriter(final Appendable appendable) {
@@ -5546,7 +4889,7 @@ public final class IOUtil {
     /**
      * Creates a new StringWriter instance.
      *
-     * @return A new instance of StringWriter.
+     * @return a new instance of StringWriter.
      */
     public static StringWriter newStringWriter() {
         return new StringWriter();
@@ -5555,8 +4898,8 @@ public final class IOUtil {
     /**
      * Creates a new StringWriter instance with the specified initial size.
      *
-     * @param initialSize The initial size of the buffer.
-     * @return A new instance of StringWriter with the specified initial size.
+     * @param initialSize the initial size of the buffer.
+     * @return a new instance of StringWriter with the specified initial size.
      */
     public static StringWriter newStringWriter(final int initialSize) {
         return new StringWriter(initialSize);
@@ -5565,8 +4908,8 @@ public final class IOUtil {
     /**
      * Creates a new StringWriter instance with the content of the specified StringBuilder.
      *
-     * @param sb The StringBuilder whose content is to be used for the StringWriter.
-     * @return A new instance of StringWriter with the content of the specified StringBuilder.
+     * @param sb the StringBuilder whose content is to be used for the StringWriter.
+     * @return a new instance of StringWriter with the content of the specified StringBuilder.
      */
     public static StringWriter newStringWriter(final StringBuilder sb) {
         return new StringWriter(sb);
@@ -5575,7 +4918,7 @@ public final class IOUtil {
     /**
      * Creates a new ByteArrayOutputStream instance.
      *
-     * @return A new instance of ByteArrayOutputStream.
+     * @return a new instance of ByteArrayOutputStream.
      */
     public static ByteArrayOutputStream newByteArrayOutputStream() {
         return new ByteArrayOutputStream();
@@ -5584,8 +4927,8 @@ public final class IOUtil {
     /**
      * Creates a new ByteArrayOutputStream instance with the specified initial capacity.
      *
-     * @param initCapacity The initial capacity of the ByteArrayOutputStream.
-     * @return A new instance of ByteArrayOutputStream with the specified initial capacity.
+     * @param initCapacity the initial capacity of the ByteArrayOutputStream.
+     * @return a new instance of ByteArrayOutputStream with the specified initial capacity.
      */
     public static ByteArrayOutputStream newByteArrayOutputStream(final int initCapacity) {
         return new ByteArrayOutputStream(initCapacity);
@@ -5594,8 +4937,8 @@ public final class IOUtil {
     /**
      * Creates a new FileInputStream instance for the specified file.
      *
-     * @param file The file to be opened for reading.
-     * @return A new FileInputStream instance.
+     * @param file the file to be opened for reading.
+     * @return a new FileInputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileInputStream#FileInputStream(File)
      */
@@ -5610,8 +4953,8 @@ public final class IOUtil {
     /**
      * Creates a new FileInputStream instance for the specified file name.
      *
-     * @param name The name of the file to be opened for reading.
-     * @return A new FileInputStream instance.
+     * @param name the name of the file to be opened for reading.
+     * @return a new FileInputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #newFileInputStream(File)
      * @see FileInputStream#FileInputStream(String)
@@ -5627,8 +4970,8 @@ public final class IOUtil {
     /**
      * Creates a new FileOutputStream instance for the specified file.
      *
-     * @param file The file to be opened for writing.
-     * @return A new FileOutputStream instance.
+     * @param file the file to be opened for writing.
+     * @return a new FileOutputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileOutputStream#FileOutputStream(File)
      */
@@ -5645,9 +4988,9 @@ public final class IOUtil {
     /**
      * Creates a new FileOutputStream instance for the specified file.
      *
-     * @param file   The file to be opened for writing.
+     * @param file   the file to be opened for writing.
      * @param append {@code true} if the file is to be opened for appending.
-     * @return A new FileOutputStream instance.
+     * @return a new FileOutputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileOutputStream#FileOutputStream(File, boolean)
      */
@@ -5664,8 +5007,8 @@ public final class IOUtil {
     /**
      * Creates a new FileOutputStream instance for the specified file name.
      *
-     * @param name The name of the file to be opened for writing.
-     * @return A new FileOutputStream instance.
+     * @param name the name of the file to be opened for writing.
+     * @return a new FileOutputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileOutputStream#FileOutputStream(String)
      */
@@ -5676,8 +5019,8 @@ public final class IOUtil {
     /**
      * Creates a new FileReader instance for the specified file and the default Charset.
      *
-     * @param file The file to be opened for reading.
-     * @return A new FileReader instance.
+     * @param file the file to be opened for reading.
+     * @return a new FileReader instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileReader#FileReader(File, Charset)
      */
@@ -5692,9 +5035,9 @@ public final class IOUtil {
     /**
      * Creates a new FileReader instance for the specified file and charset.
      *
-     * @param file    The file to be opened for reading.
-     * @param charset The Charset to be used for creating the FileReader.
-     * @return A new FileReader instance.
+     * @param file    the file to be opened for reading.
+     * @param charset the Charset to be used for creating the FileReader.
+     * @return a new FileReader instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileReader#FileReader(File, Charset)
      */
@@ -5709,8 +5052,8 @@ public final class IOUtil {
     /**
      * Creates a new FileWriter instance for the specified file and the default Charset.
      *
-     * @param file The file to be opened for writing.
-     * @return A new FileWriter instance.
+     * @param file the file to be opened for writing.
+     * @return a new FileWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileWriter#FileWriter(File, Charset)
      */
@@ -5727,9 +5070,9 @@ public final class IOUtil {
     /**
      * Creates a new FileWriter instance for the specified file and charset.
      *
-     * @param file    The file to be opened for writing.
-     * @param charset The Charset to be used for creating the FileWriter.
-     * @return A new FileWriter instance.
+     * @param file    the file to be opened for writing.
+     * @param charset the Charset to be used for creating the FileWriter.
+     * @return a new FileWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileWriter#FileWriter(File, Charset)
      */
@@ -5746,10 +5089,10 @@ public final class IOUtil {
     /**
      * Creates a new FileWriter instance for the specified file and charset.
      *
-     * @param file    The file to be opened for writing.
-     * @param charset The Charset to be used for creating the FileWriter.
+     * @param file    the file to be opened for writing.
+     * @param charset the Charset to be used for creating the FileWriter.
      * @param append  {@code true} if the file is to be opened for appending.
-     * @return A new FileWriter instance.
+     * @return a new FileWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileWriter#FileWriter(File, Charset, boolean)
      */
@@ -5766,8 +5109,8 @@ public final class IOUtil {
     /**
      * Creates a new InputStreamReader instance for the specified InputStream and the default Charset.
      *
-     * @param is The InputStream to be read.
-     * @return A new InputStreamReader instance.
+     * @param is the InputStream to be read.
+     * @return a new InputStreamReader instance.
      * @see InputStreamReader#InputStreamReader(InputStream, Charset)
      */
     public static InputStreamReader newInputStreamReader(final InputStream is) {
@@ -5777,9 +5120,9 @@ public final class IOUtil {
     /**
      * Creates a new InputStreamReader instance for the specified InputStream and Charset.
      *
-     * @param is      The InputStream to be read.
-     * @param charset The Charset to be used for creating the InputStreamReader.
-     * @return A new InputStreamReader instance.
+     * @param is      the InputStream to be read.
+     * @param charset the Charset to be used for creating the InputStreamReader.
+     * @return a new InputStreamReader instance.
      * @see InputStreamReader#InputStreamReader(InputStream, Charset)
      */
     public static InputStreamReader newInputStreamReader(final InputStream is, final Charset charset) {
@@ -5789,8 +5132,8 @@ public final class IOUtil {
     /**
      * Creates a new OutputStreamWriter instance for the specified OutputStream and the default Charset.
      *
-     * @param os The OutputStream to be written to.
-     * @return A new OutputStreamWriter instance.
+     * @param os the OutputStream to be written to.
+     * @return a new OutputStreamWriter instance.
      * @see OutputStreamWriter#OutputStreamWriter(OutputStream, Charset)
      */
     public static OutputStreamWriter newOutputStreamWriter(final OutputStream os) {
@@ -5800,9 +5143,9 @@ public final class IOUtil {
     /**
      * Creates a new OutputStreamWriter instance for the specified OutputStream and Charset.
      *
-     * @param os      The OutputStream to be written to.
-     * @param charset The Charset to be used for creating the OutputStreamWriter.
-     * @return A new OutputStreamWriter instance.
+     * @param os      the OutputStream to be written to.
+     * @param charset the Charset to be used for creating the OutputStreamWriter.
+     * @return a new OutputStreamWriter instance.
      * @see OutputStreamWriter#OutputStreamWriter(OutputStream, Charset)
      */
     public static OutputStreamWriter newOutputStreamWriter(final OutputStream os, final Charset charset) {
@@ -5812,8 +5155,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedInputStream instance that wraps the specified InputStream.
      *
-     * @param is The InputStream to be wrapped.
-     * @return A new BufferedInputStream instance.
+     * @param is the InputStream to be wrapped.
+     * @return a new BufferedInputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see BufferedInputStream#BufferedInputStream(InputStream)
      */
@@ -5824,8 +5167,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedReader instance for the specified file path.
      *
-     * @param filePath The path of the file to be read.
-     * @return A new BufferedReader instance.
+     * @param filePath the path of the file to be read.
+     * @return a new BufferedReader instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #newBufferedReader(File)
      */
@@ -5836,8 +5179,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedInputStream instance for the specified file.
      *
-     * @param file The file to be read.
-     * @return A new BufferedInputStream instance.
+     * @param file the file to be read.
+     * @return a new BufferedInputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #newFileInputStream(File)
      * @see BufferedInputStream#BufferedInputStream(InputStream)
@@ -5849,9 +5192,9 @@ public final class IOUtil {
     /**
      * Creates a new BufferedInputStream instance for the specified file with a specified buffer size.
      *
-     * @param file The file to be read.
-     * @param size The size of the buffer to be used.
-     * @return A new BufferedInputStream instance.
+     * @param file the file to be read.
+     * @param size the size of the buffer to be used.
+     * @return a new BufferedInputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #newFileInputStream(File)
      * @see BufferedInputStream#BufferedInputStream(InputStream, int)
@@ -5863,8 +5206,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedOutputStream instance that wraps the specified OutputStream.
      *
-     * @param os The OutputStream to be wrapped.
-     * @return A new BufferedOutputStream instance.
+     * @param os the OutputStream to be wrapped.
+     * @return a new BufferedOutputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see BufferedOutputStream#BufferedOutputStream(OutputStream)
      */
@@ -5875,8 +5218,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedOutputStream instance for the specified file.
      *
-     * @param file The file to be written to.
-     * @return A new BufferedOutputStream instance.
+     * @param file the file to be written to.
+     * @return a new BufferedOutputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #newFileOutputStream(File)
      * @see BufferedOutputStream#BufferedOutputStream(OutputStream)
@@ -5888,9 +5231,9 @@ public final class IOUtil {
     /**
      * Creates a new BufferedOutputStream instance for the specified file with a specified buffer size.
      *
-     * @param file The file to be written to.
-     * @param size The size of the buffer to be used.
-     * @return A new BufferedOutputStream instance.
+     * @param file the file to be written to.
+     * @param size the size of the buffer to be used.
+     * @return a new BufferedOutputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #newFileOutputStream(File)
      * @see BufferedOutputStream#BufferedOutputStream(OutputStream, int)
@@ -5902,8 +5245,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedReader instance that wraps the specified Reader.
      *
-     * @param reader The Reader to be wrapped.
-     * @return A new BufferedReader instance.
+     * @param reader the Reader to be wrapped.
+     * @return a new BufferedReader instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see java.io.BufferedReader#BufferedReader(Reader)
      */
@@ -5914,8 +5257,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedReader instance for the specified file with the default charset.
      *
-     * @param file The file to be read from.
-     * @return A new BufferedReader instance.
+     * @param file the file to be read from.
+     * @return a new BufferedReader instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #newFileReader(File)
      * @see java.io.BufferedReader#BufferedReader(Reader)
@@ -5927,9 +5270,9 @@ public final class IOUtil {
     /**
      * Creates a new BufferedReader instance for the specified file with a specified charset.
      *
-     * @param file    The file to be read from.
-     * @param charset The charset to be used.
-     * @return A new BufferedReader instance.
+     * @param file    the file to be read from.
+     * @param charset the charset to be used.
+     * @return a new BufferedReader instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #newInputStreamReader(InputStream, Charset)
      * @see java.io.BufferedReader#BufferedReader(Reader)
@@ -5941,8 +5284,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedReader instance for the specified path with the default charset.
      *
-     * @param path The path of the file to be read from.
-     * @return A new BufferedReader instance.
+     * @param path the path of the file to be read from.
+     * @return a new BufferedReader instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see java.nio.file.Files#newBufferedReader(Path, Charset)
      */
@@ -5957,9 +5300,9 @@ public final class IOUtil {
     /**
      * Creates a new BufferedReader instance for the specified path with a specified charset.
      *
-     * @param path    The path of the file to be read from.
-     * @param charset The charset to be used.
-     * @return A new BufferedReader instance.
+     * @param path    the path of the file to be read from.
+     * @param charset the charset to be used.
+     * @return a new BufferedReader instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see java.nio.file.Files#newBufferedReader(Path, Charset)
      */
@@ -5974,8 +5317,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedReader instance for the specified InputStream with the default charset.
      *
-     * @param is The InputStream to be read from.
-     * @return A new BufferedReader instance.
+     * @param is the InputStream to be read from.
+     * @return a new BufferedReader instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #newInputStreamReader(InputStream)
      * @see java.io.BufferedReader#BufferedReader(Reader)
@@ -5987,9 +5330,9 @@ public final class IOUtil {
     /**
      * Creates a new BufferedReader instance for the specified InputStream with a specified charset.
      *
-     * @param is      The InputStream to be read from.
-     * @param charset The charset to be used.
-     * @return A new BufferedReader instance.
+     * @param is      the InputStream to be read from.
+     * @param charset the charset to be used.
+     * @return a new BufferedReader instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #newInputStreamReader(InputStream, Charset)
      * @see java.io.BufferedReader#BufferedReader(Reader)
@@ -6001,8 +5344,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedWriter instance that wraps the specified Writer.
      *
-     * @param writer The Writer to be wrapped.
-     * @return A new BufferedWriter instance.
+     * @param writer the Writer to be wrapped.
+     * @return a new BufferedWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see java.io.BufferedWriter#BufferedWriter(Writer)
      */
@@ -6013,8 +5356,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedWriter instance for the specified file path and default charset.
      *
-     * @param filePath The path of the file to be written to.
-     * @return A new BufferedWriter instance.
+     * @param filePath the path of the file to be written to.
+     * @return a new BufferedWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     static java.io.BufferedWriter newBufferedWriter(final String filePath) throws UncheckedIOException {
@@ -6024,8 +5367,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedWriter instance for the specified file and default charset.
      *
-     * @param file The file to be written to.
-     * @return A new BufferedWriter instance.
+     * @param file the file to be written to.
+     * @return a new BufferedWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static java.io.BufferedWriter newBufferedWriter(final File file) throws UncheckedIOException {
@@ -6035,9 +5378,9 @@ public final class IOUtil {
     /**
      * Creates a new BufferedWriter instance for the specified file and charset.
      *
-     * @param file    The file to be written to.
-     * @param charset The charset to be used for writing to the file.
-     * @return A new BufferedWriter instance.
+     * @param file    the file to be written to.
+     * @param charset the charset to be used for writing to the file.
+     * @return a new BufferedWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see java.io.BufferedWriter#BufferedWriter(Writer)
      */
@@ -6048,8 +5391,8 @@ public final class IOUtil {
     /**
      * Creates a new BufferedWriter instance for the specified OutputStream with default charset.
      *
-     * @param os The OutputStream to be written to.
-     * @return A new BufferedWriter instance.
+     * @param os the OutputStream to be written to.
+     * @return a new BufferedWriter instance.
      * @see #newOutputStreamWriter(OutputStream)
      * @see java.io.BufferedWriter#BufferedWriter(Writer)
      */
@@ -6060,9 +5403,9 @@ public final class IOUtil {
     /**
      * Creates a new BufferedWriter instance for the specified OutputStream and Charset.
      *
-     * @param os      The OutputStream to be written to.
-     * @param charset The Charset to be used for writing to the OutputStream.
-     * @return A new BufferedWriter instance.
+     * @param os      the OutputStream to be written to.
+     * @param charset the Charset to be used for writing to the OutputStream.
+     * @return a new BufferedWriter instance.
      * @see #newOutputStreamWriter(OutputStream, Charset)
      * @see java.io.BufferedWriter#BufferedWriter(Writer)
      */
@@ -6073,8 +5416,8 @@ public final class IOUtil {
     /**
      * Creates a new LZ4BlockInputStream instance for the specified InputStream.
      *
-     * @param is The InputStream to be read from.
-     * @return A new LZ4BlockInputStream instance.
+     * @param is the InputStream to be read from.
+     * @return a new LZ4BlockInputStream instance.
      */
     public static LZ4BlockInputStream newLZ4BlockInputStream(final InputStream is) {
         return new LZ4BlockInputStream(is);
@@ -6083,8 +5426,8 @@ public final class IOUtil {
     /**
      * Creates a new LZ4BlockOutputStream instance for the specified OutputStream.
      *
-     * @param os The OutputStream to be written to.
-     * @return A new LZ4BlockOutputStream instance.
+     * @param os the OutputStream to be written to.
+     * @return a new LZ4BlockOutputStream instance.
      */
     public static LZ4BlockOutputStream newLZ4BlockOutputStream(final OutputStream os) {
         return new LZ4BlockOutputStream(os);
@@ -6093,9 +5436,9 @@ public final class IOUtil {
     /**
      * Creates a new LZ4BlockOutputStream instance for the specified OutputStream with the given block size.
      *
-     * @param os        The OutputStream to be written to.
-     * @param blockSize The block size for the LZ4BlockOutputStream.
-     * @return A new LZ4BlockOutputStream instance.
+     * @param os        the OutputStream to be written to.
+     * @param blockSize the block size for the LZ4BlockOutputStream.
+     * @return a new LZ4BlockOutputStream instance.
      */
     public static LZ4BlockOutputStream newLZ4BlockOutputStream(final OutputStream os, final int blockSize) {
         return new LZ4BlockOutputStream(os, blockSize);
@@ -6104,8 +5447,8 @@ public final class IOUtil {
     /**
      * Creates a new SnappyInputStream instance for the specified InputStream.
      *
-     * @param is The InputStream to be read from.
-     * @return A new SnappyInputStream instance.
+     * @param is the InputStream to be read from.
+     * @return a new SnappyInputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static SnappyInputStream newSnappyInputStream(final InputStream is) throws UncheckedIOException {
@@ -6119,8 +5462,8 @@ public final class IOUtil {
     /**
      * Creates a new SnappyOutputStream instance for the specified OutputStream.
      *
-     * @param os The OutputStream to be written to.
-     * @return A new SnappyOutputStream instance.
+     * @param os the OutputStream to be written to.
+     * @return a new SnappyOutputStream instance.
      */
     public static SnappyOutputStream newSnappyOutputStream(final OutputStream os) {
         return new SnappyOutputStream(os);
@@ -6129,9 +5472,9 @@ public final class IOUtil {
     /**
      * Creates a new SnappyOutputStream instance with the specified OutputStream and buffer size.
      *
-     * @param os         The OutputStream to be written to.
-     * @param bufferSize The size of the buffer to be used.
-     * @return A new SnappyOutputStream instance.
+     * @param os         the OutputStream to be written to.
+     * @param bufferSize the size of the buffer to be used.
+     * @return a new SnappyOutputStream instance.
      */
     public static SnappyOutputStream newSnappyOutputStream(final OutputStream os, final int bufferSize) {
         return new SnappyOutputStream(os, bufferSize);
@@ -6140,8 +5483,8 @@ public final class IOUtil {
     /**
      * Creates a new GZIPInputStream instance for the specified InputStream.
      *
-     * @param is The InputStream to be read from.
-     * @return A new GZIPInputStream instance.
+     * @param is the InputStream to be read from.
+     * @return a new GZIPInputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static GZIPInputStream newGZIPInputStream(final InputStream is) throws UncheckedIOException {
@@ -6155,9 +5498,9 @@ public final class IOUtil {
     /**
      * Creates a new GZIPInputStream instance with the specified InputStream and buffer size.
      *
-     * @param is         The InputStream to be read from.
-     * @param bufferSize The size of the buffer to be used.
-     * @return A new GZIPInputStream instance.
+     * @param is         the InputStream to be read from.
+     * @param bufferSize the size of the buffer to be used.
+     * @return a new GZIPInputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static GZIPInputStream newGZIPInputStream(final InputStream is, final int bufferSize) throws UncheckedIOException {
@@ -6171,8 +5514,8 @@ public final class IOUtil {
     /**
      * Creates a new GZIPOutputStream instance for the specified OutputStream.
      *
-     * @param os The OutputStream to be written to.
-     * @return A new GZIPOutputStream instance.
+     * @param os the OutputStream to be written to.
+     * @return a new GZIPOutputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static GZIPOutputStream newGZIPOutputStream(final OutputStream os) throws UncheckedIOException {
@@ -6186,9 +5529,9 @@ public final class IOUtil {
     /**
      * Creates a new GZIPOutputStream with the specified OutputStream and buffer size.
      *
-     * @param os         The OutputStream to be written to.
-     * @param bufferSize The size of the buffer to be used.
-     * @return A new GZIPOutputStream instance.
+     * @param os         the OutputStream to be written to.
+     * @param bufferSize the size of the buffer to be used.
+     * @return a new GZIPOutputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static GZIPOutputStream newGZIPOutputStream(final OutputStream os, final int bufferSize) throws UncheckedIOException {
@@ -6202,8 +5545,8 @@ public final class IOUtil {
     /**
      * Creates a new ZipInputStream with the specified InputStream.
      *
-     * @param is The InputStream to be used for creating the ZipInputStream.
-     * @return A new ZipInputStream instance.
+     * @param is the InputStream to be used for creating the ZipInputStream.
+     * @return a new ZipInputStream instance.
      * @see ZipInputStream#ZipInputStream(InputStream)
      */
     public static ZipInputStream newZipInputStream(final InputStream is) {
@@ -6213,9 +5556,9 @@ public final class IOUtil {
     /**
      * Creates a new ZipInputStream with the specified InputStream and Charset.
      *
-     * @param is      The InputStream to be used for creating the ZipInputStream.
-     * @param charset The Charset to be used for creating the ZipInputStream.
-     * @return A new ZipInputStream instance.
+     * @param is      the InputStream to be used for creating the ZipInputStream.
+     * @param charset the Charset to be used for creating the ZipInputStream.
+     * @return a new ZipInputStream instance.
      * @see ZipInputStream#ZipInputStream(InputStream, Charset)
      */
     public static ZipInputStream newZipInputStream(final InputStream is, final Charset charset) {
@@ -6225,8 +5568,8 @@ public final class IOUtil {
     /**
      * Creates a new ZipOutputStream with the specified OutputStream.
      *
-     * @param os The OutputStream to be used for creating the ZipOutputStream.
-     * @return A new ZipOutputStream instance.
+     * @param os the OutputStream to be used for creating the ZipOutputStream.
+     * @return a new ZipOutputStream instance.
      * @see ZipOutputStream#ZipOutputStream(OutputStream)
      */
     public static ZipOutputStream newZipOutputStream(final OutputStream os) {
@@ -6236,9 +5579,9 @@ public final class IOUtil {
     /**
      * Creates a new ZipOutputStream with the specified OutputStream and Charset.
      *
-     * @param os      The OutputStream to be used for creating the ZipOutputStream.
-     * @param charset The Charset to be used for creating the ZipOutputStream.
-     * @return A new ZipOutputStream instance.
+     * @param os      the OutputStream to be used for creating the ZipOutputStream.
+     * @param charset the Charset to be used for creating the ZipOutputStream.
+     * @return a new ZipOutputStream instance.
      * @see ZipOutputStream#ZipOutputStream(OutputStream, Charset)
      */
     public static ZipOutputStream newZipOutputStream(final OutputStream os, final Charset charset) {
@@ -6248,8 +5591,8 @@ public final class IOUtil {
     /**
      * Creates a new BrotliInputStream instance for the specified input stream.
      *
-     * @param is The input stream to be used for creating the BrotliInputStream.
-     * @return A new BrotliInputStream instance.
+     * @param is the input stream to be used for creating the BrotliInputStream.
+     * @return a new BrotliInputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static BrotliInputStream newBrotliInputStream(final InputStream is) throws UncheckedIOException {
@@ -6259,14 +5602,6 @@ public final class IOUtil {
             throw new UncheckedIOException(e);
         }
     }
-
-    //    public static BrotliOutputStream newBrotliOutputStream(final OutputStream os) throws UncheckedIOException {
-    //        try {
-    //            return new BrotliOutputStream(os);
-    //        } catch (IOException e) {
-    //            throw new UncheckedIOException(e);
-    //        }
-    //    }
 
     /**
      * Closes the provided {@code URLConnection} if it's a {@code HttpURLConnection} by disconnection.
@@ -6281,9 +5616,9 @@ public final class IOUtil {
 
     /**
      * Closes the provided AutoCloseable object.
-     * If the object is {@code null}, this method does nothing.
+     * if the object is {@code null}, this method does nothing.
      *
-     * @param closeable The AutoCloseable object to be closed. It can be {@code null}.
+     * @param closeable the AutoCloseable object to be closed. It can be {@code null}.
      */
     public static void close(final AutoCloseable closeable) {
         if (closeable != null) {
@@ -6299,8 +5634,8 @@ public final class IOUtil {
      * Closes the provided AutoCloseable object and handles any exceptions that occur during the closing operation.
      * The provided Consumer is used to handle any exceptions that are thrown.
      *
-     * @param closeable        The AutoCloseable object to be closed, may be {@code null}.
-     * @param exceptionHandler The Consumer to handle any exceptions thrown during the close operation, not {@code null}.
+     * @param closeable        the AutoCloseable object to be closed, may be {@code null}.
+     * @param exceptionHandler the Consumer to handle any exceptions thrown during the close operation, must not be {@code null}
      */
     public static void close(final AutoCloseable closeable, final Consumer<Exception> exceptionHandler) {
         if (closeable != null) {
@@ -6316,7 +5651,7 @@ public final class IOUtil {
      * Closes all provided AutoCloseable objects.
      * If an AutoCloseable object is {@code null}, it will be ignored.
      *
-     * @param a The AutoCloseable objects to be closed. It may contain {@code null} elements.
+     * @param a the AutoCloseable objects to be closed. It may contain {@code null} elements.
      */
     public static void closeAll(final AutoCloseable... a) {
         if (N.isEmpty(a)) {
@@ -6330,7 +5665,7 @@ public final class IOUtil {
      * Closes all provided AutoCloseable objects in the Iterable.
      * If an AutoCloseable object is {@code null}, it will be ignored.
      *
-     * @param c The Iterable of AutoCloseable objects to be closed. It may contain {@code null} elements.
+     * @param c the Iterable of AutoCloseable objects to be closed. It may contain {@code null} elements.
      */
     public static void closeAll(final Iterable<? extends AutoCloseable> c) {
         if (N.isEmpty(c)) {
@@ -6362,7 +5697,7 @@ public final class IOUtil {
      * Closes the provided AutoCloseable object quietly.
      * Any exceptions that occur during the closing operation are ignored.
      *
-     * @param closeable The AutoCloseable object to be closed. It can be {@code null}.
+     * @param closeable the AutoCloseable object to be closed. It can be {@code null}.
      */
     public static void closeQuietly(final AutoCloseable closeable) {
         if (closeable != null) {
@@ -6379,7 +5714,7 @@ public final class IOUtil {
      * Closes all provided AutoCloseable objects quietly.
      * Any exceptions that occur during the closing operation are ignored.
      *
-     * @param a The AutoCloseable objects to be closed. It may contain {@code null} elements.
+     * @param a the AutoCloseable objects to be closed. It may contain {@code null} elements.
      */
     public static void closeAllQuietly(final AutoCloseable... a) {
         if (N.isEmpty(a)) {
@@ -6393,7 +5728,7 @@ public final class IOUtil {
      * Closes all provided AutoCloseable objects quietly.
      * Any exceptions that occur during the closing operation are ignored.
      *
-     * @param c The Iterable of AutoCloseable objects to be closed. It may contain {@code null} elements.
+     * @param c the Iterable of AutoCloseable objects to be closed. It may contain {@code null} elements.
      */
     public static void closeAllQuietly(final Iterable<? extends AutoCloseable> c) {
         if (N.isEmpty(c)) {
@@ -6405,55 +5740,12 @@ public final class IOUtil {
         }
     }
 
-    //    /**
-    //     *
-    //     * @param srcFile
-    //     * @param destDir
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @deprecated Use {@link #copyToDirectory(File,File)} instead
-    //     */
-    //    @Deprecated
-    //    public static void copyFileToDirectory(final File srcFile, final File destDir) throws UncheckedIOException {
-    //        copyToDirectory(srcFile, destDir);
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param srcFile
-    //     * @param destDir
-    //     * @param preserveFileDate
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @deprecated Use {@link #copyToDirectory(File,File, boolean)} instead
-    //     */
-    //    @Deprecated
-    //    public static void copyFileToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws UncheckedIOException {
-    //        copyToDirectory(srcFile, destDir, preserveFileDate);
-    //    }
-    //
-    //    /**
-    //     * Copy the specified <code>scrFile</code> if it's a file or its subfiles/directories if it's a directory to the target <code>destDir</code> with the specified <code>filter</code>.
-    //     *
-    //     * @param <E>
-    //     * @param srcFile
-    //     * @param destDir
-    //     * @param preserveFileDate
-    //     * @param filter
-    //     * @throws UncheckedIOException if an I/O error occurs.
-    //     * @throws E the e
-    //     * @deprecated Use {@link #copyToDirectory(File,File,boolean,Throwables.BiPredicate<? super File, ? super File, E>)} instead
-    //     */
-    //    @Deprecated
-    //    public static <E extends Exception> void copyFileToDirectory(File srcFile, File destDir, final boolean preserveFileDate,
-    //            final Throwables.BiPredicate<? super File, ? super File, E> filter) throws UncheckedIOException, E {
-    //        copyToDirectory(srcFile, destDir, preserveFileDate, filter);
-    //    }
-
     /**
      * Copies the specified source file or directory to the specified destination directory.
      *
-     * @param srcFile The source file or directory to be copied. It must not be {@code null}.
-     * @param destDir The destination directory where the source file or directory will be copied to. It must not be {@code null}.
-     * @throws IOException If an I/O error occurs.
+     * @param srcFile the source file or directory to be copied. It must not be {@code null}.
+     * @param destDir the destination directory where the source file or directory will be copied to. It must not be {@code null}.
+     * @throws IOException if an I/O error occurs.
      */
     public static void copyToDirectory(final File srcFile, final File destDir) throws IOException {
         copyToDirectory(srcFile, destDir, true);
@@ -6461,12 +5753,12 @@ public final class IOUtil {
 
     /**
      * Copies the specified source file or directory to the specified destination directory.
-     * If the source is a directory, all its contents will be copied into the destination directory.
+     * if the source is a directory, all its contents will be copied into the destination directory.
      *
-     * @param srcFile          The source file or directory to be copied. It must not be {@code null}.
-     * @param destDir          The destination directory where the source file or directory will be copied to. It must not be {@code null}.
-     * @param preserveFileDate If {@code true}, the last modified date of the file will be preserved in the copied file.
-     * @throws IOException If an I/O error occurs.
+     * @param srcFile          the source file or directory to be copied. It must not be {@code null}.
+     * @param destDir          the destination directory where the source file or directory will be copied to. It must not be {@code null}.
+     * @param preserveFileDate if {@code true}, the last modified date of the file will be preserved in the copied file.
+     * @throws IOException if an I/O error occurs.
      */
     public static void copyToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws IOException {
         copyToDirectory(srcFile, destDir, preserveFileDate, Fn.BiPredicates.alwaysTrue());
@@ -6474,15 +5766,15 @@ public final class IOUtil {
 
     /**
      * Copies the specified source file or directory to the specified destination directory.
-     * If the source is a directory, all its contents will be copied into the destination directory.
+     * if the source is a directory, all its contents will be copied into the destination directory.
      *
-     * @param <E>              The type of the exception that may be thrown by the filter.
-     * @param srcFile          The source file or directory to be copied. It must not be {@code null}.
-     * @param destDir          The destination directory where the source file or directory will be copied to. It must not be {@code null}.
-     * @param preserveFileDate If {@code true}, the last modified date of the file will be preserved in the copied file.
-     * @param filter           A BiPredicate that takes the source and destination files as arguments and returns a boolean. If the predicate returns {@code true}, the file is copied; if it returns {@code false}, the file is not copied.
-     * @throws IOException If an I/O error occurs.
-     * @throws E                    If the filter throws an exception.
+     * @param <E>              the type of the exception that may be thrown by the filter.
+     * @param srcFile          the source file or directory to be copied. It must not be {@code null}.
+     * @param destDir          the destination directory where the source file or directory will be copied to. It must not be {@code null}.
+     * @param preserveFileDate if {@code true}, the last modified date of the file will be preserved in the copied file.
+     * @param filter           a BiPredicate that takes the source and destination files as arguments and returns a boolean. if the predicate returns {@code true}, the file is copied; if it returns {@code false}, the file is not copied.
+     * @throws IOException if an I/O error occurs.
+     * @throws E                    if the filter throws an exception.
      */
     public static <E extends Exception> void copyToDirectory(File srcFile, File destDir, final boolean preserveFileDate,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws IOException, E {
@@ -6523,11 +5815,11 @@ public final class IOUtil {
     /**
      * Internal copy directory method.
      *
-     * @param <E>              The type of exception that the filter may throw during file filtering.
-     * @param srcDir           The validated source directory, must not be {@code null}.
-     * @param destDir          The validated destination directory, must not be {@code null}.
-     * @param preserveFileDate Whether to preserve the file date.
-     * @param filter           The filter to apply, {@code null} means copy all directories and files.
+     * @param <E>              the type of exception that the filter may throw during file filtering.
+     * @param srcDir           the validated source directory, must not be {@code null}
+     * @param destDir          the validated destination directory, must not be {@code null}
+     * @param preserveFileDate whether to preserve the file date.
+     * @param filter           the filter to apply, {@code null} means copy all directories and files.
      * @throws IOException if an I/O error occurs.
      * @throws E           if filter throws an exception during file filtering.
      */
@@ -6622,8 +5914,8 @@ public final class IOUtil {
     /**
      * Throws IllegalArgumentException if the given files' canonical representations are equal.
      *
-     * @param file1 The first file to compare.
-     * @param file2 The second file to compare.
+     * @param file1 the first file to compare.
+     * @param file2 the second file to compare.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if the given files' canonical representations are equal.
      */
@@ -6639,7 +5931,7 @@ public final class IOUtil {
      * is null, nothing happens.
      *
      * @param file the File that may need parents, which may be null.
-     * @return The parent directory, or {@code null} if the given File does have a parent.
+     * @return the parent directory, or {@code null} if the given File does have a parent.
      * @since 2.9.0
      */
     private static boolean createParentDirectories(final File file) {
@@ -6649,8 +5941,8 @@ public final class IOUtil {
     /**
      * Gets the parent of the given file. The given file may be null. Note that a file's parent may be null as well.
      *
-     * @param file The file to query, which may be null.
-     * @return The parent file or {@code null}. Note that a file's parent may be null as well.
+     * @param file the file to query, which may be null.
+     * @return the parent file or {@code null}. Note that a file's parent may be null as well.
      */
     private static File getParentFile(final File file) {
         return file == null ? null : file.getParentFile();
@@ -6659,8 +5951,8 @@ public final class IOUtil {
     /**
      * Sets file lastModifiedTime, lastAccessTime and creationTime to match the source file
      *
-     * @param sourceFile The source file to query.
-     * @param targetFile The target file or directory to set.
+     * @param sourceFile the source file to query.
+     * @param targetFile the target file or directory to set.
      * @return {@code true} if and only if the operation succeeded;
      *          {@code false} otherwise}.}.
      */
@@ -6687,11 +5979,11 @@ public final class IOUtil {
      * Copies the contents of a directory to another directory.
      * <p>
      * This method copies all files and subdirectories from the source directory to the destination directory.
-     * If the destination directory does not exist, it is created.
+     * if the destination directory does not exist, it is created.
      * </p>
      *
-     * @param srcDir  the source directory to copy from, must not be {@code null}.
-     * @param destDir the destination directory to copy to, must not be {@code null}.
+     * @param srcDir  the source directory to copy from, must not be {@code null}
+     * @param destDir the destination directory to copy to, must not be {@code null}
      * @throws IOException          if an I/O error occurs or if the source directory does not exist.
      */
     public static void copyDirectory(final File srcDir, final File destDir) throws IOException {
@@ -6713,18 +6005,18 @@ public final class IOUtil {
      * Copies a file to a new location preserving the file date.
      * <p>
      * This method copies the contents of the specified source file to the specified destination file. The directory
-     * holding the destination file is created if it does not exist. If the destination file exists, then this method
+     * holding the destination file is created if it does not exist. if the destination file exists, then this method
      * overwrites it. A symbolic link is resolved before copying, so the new file is not a link.
      * </p>
      * <p>
      * <strong>Note:</strong> This method tries to preserve the file's last modified date/times using
      * {@link BasicFileAttributeView#setTimes(FileTime, FileTime, FileTime)}. However, it is not guaranteed that the
-     * operation will succeed. If the modification operation fails, it falls back to
+     * operation will succeed. if the modification operation fails, it falls back to
      * {@link File#setLastModified(long)}, and if that fails, the method throws IOException.
      * </p>
      *
-     * @param srcFile an existing file to copy, must not be {@code null}.
-     * @param destFile the new file, must not be {@code null}.}.
+     * @param srcFile an existing file to copy, must not be {@code null}
+     * @param destFile the new file, must not be {@code null}}.
      * @throws IOException if source or destination is invalid.
      * @throws IOException if an error occurs or setting the last-modified time didn't succeed.
      * @throws IOException if the output file length is not the same as the input file length after the copy completes.
@@ -6739,18 +6031,18 @@ public final class IOUtil {
      * Copies an existing file to a new file location.
      * <p>
      * This method copies the contents of the specified source file to the specified destination file. The directory
-     * holding the destination file is created if it does not exist. If the destination file exists, then this method
+     * holding the destination file is created if it does not exist. if the destination file exists, then this method
      * overwrites it. A symbolic link is resolved before copying so the new file is not a link.
      * </p>
      * <p>
      * <strong>Note:</strong> Setting {@code preserveFileDate} to {@code true} tries to preserve the file's last
      * modified date/times using {@link BasicFileAttributeView#setTimes(FileTime, FileTime, FileTime)}. However, it is
-     * not guaranteed that the operation will succeed. If the modification operation fails, it falls back to
+     * not guaranteed that the operation will succeed. if the modification operation fails, it falls back to
      * {@link File#setLastModified(long)}, and if that fails, the method throws IOException.
      * </p>
      *
-     * @param srcFile an existing file to copy, must not be {@code null}.
-     * @param destFile the new file, must not be {@code null}.
+     * @param srcFile an existing file to copy, must not be {@code null}
+     * @param destFile the new file, must not be {@code null}
      * @param preserveFileDate true if the file date of the copy should be the same as the original.}.
      * @throws IOException if source or destination is invalid.
      * @throws IOException if an error occurs or setting the last-modified time didn't succeed.
@@ -6765,12 +6057,12 @@ public final class IOUtil {
      * Copies a file to a new location.
      * <p>
      * This method copies the contents of the specified source file to the specified destination file. The directory
-     * holding the destination file is created if it does not exist. If the destination file exists, you can overwrite
+     * holding the destination file is created if it does not exist. if the destination file exists, you can overwrite
      * it if you use {@link StandardCopyOption#REPLACE_EXISTING}.
      * </p>
      *
-     * @param srcFile an existing file to copy, must not be {@code null}.
-     * @param destFile the new file, must not be {@code null}.
+     * @param srcFile an existing file to copy, must not be {@code null}
+     * @param destFile the new file, must not be {@code null}
      * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.}.
      * @throws FileNotFoundException if the source does not exist.
      * @throws IllegalArgumentException if source is not a file.
@@ -6786,7 +6078,7 @@ public final class IOUtil {
      * Copies the contents of a file to a new location.
      * <p>
      * This method copies the contents of the specified source file to the specified destination file. The directory
-     * holding the destination file is created if it does not exist. If the destination file exists, you can overwrite
+     * holding the destination file is created if it does not exist. if the destination file exists, you can overwrite
      * it with {@link StandardCopyOption#REPLACE_EXISTING}.
      * </p>
      *
@@ -6798,12 +6090,12 @@ public final class IOUtil {
      * <p>
      * <strong>Note:</strong> Setting {@code preserveFileDate} to {@code true} tries to preserve the file's last
      * modified date/times using {@link BasicFileAttributeView#setTimes(FileTime, FileTime, FileTime)}. However, it is
-     * not guaranteed that the operation will succeed. If the modification operation fails, it falls back to
+     * not guaranteed that the operation will succeed. if the modification operation fails, it falls back to
      * {@link File#setLastModified(long)}, and if that fails, the method throws IOException.
      * </p>
      *
-     * @param srcFile an existing file to copy, must not be {@code null}.
-     * @param destFile the new file, must not be {@code null}.
+     * @param srcFile an existing file to copy, must not be {@code null}
+     * @param destFile the new file, must not be {@code null}
      * @param preserveFileDate true if the file date of the copy should be the same as the original.
      * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.}.
      * @throws FileNotFoundException if the source does not exist.
@@ -6911,10 +6203,10 @@ public final class IOUtil {
     /**
      * Copies a file or directory from the source path to the target path.
      *
-     * @param source  The source path of the file or directory to be copied.
-     * @param target  The target path where the file or directory will be copied to.
-     * @param options Optional arguments that specify how the copy should be done.
-     * @return The path to the target file or directory.
+     * @param source  the source path of the file or directory to be copied.
+     * @param target  the target path where the file or directory will be copied to.
+     * @param options optional arguments that specify how the copy should be done.
+     * @return the path to the target file or directory.
      * @throws IOException if an I/O error occurs.
      * @see Files#copy(Path, Path, CopyOption...)
      */
@@ -6925,10 +6217,10 @@ public final class IOUtil {
     /**
      * Copies the content of the given InputStream to the specified target Path.
      *
-     * @param in      The InputStream to be copied.
-     * @param target  The target Path where the InputStream content will be copied to.
-     * @param options Optional arguments that specify how the copy should be done.
-     * @return The number of bytes read or skipped and written to the target Path. 
+     * @param in      the InputStream to be copied.
+     * @param target  the target Path where the InputStream content will be copied to.
+     * @param options optional arguments that specify how the copy should be done.
+     * @return the number of bytes read or skipped and written to the target Path. 
      * @see Files#copy(InputStream, Path, CopyOption...)
      */
     public static long copy(final InputStream in, final Path target, final CopyOption... options) throws IOException {
@@ -6938,9 +6230,9 @@ public final class IOUtil {
     /**
      * Copies the content of the file at the given source Path to the specified OutputStream.
      *
-     * @param source The source Path of the file to be copied.
-     * @param output The OutputStream where the file content will be copied to.
-     * @return The number of bytes read or skipped and written to the OutputStream.
+     * @param source the source Path of the file to be copied.
+     * @param output the OutputStream where the file content will be copied to.
+     * @return the number of bytes read or skipped and written to the OutputStream.
      * @throws IOException if an I/O error occurs during the copy operation.
      * @see Files#copy(Path, OutputStream)
      */
@@ -6953,7 +6245,7 @@ public final class IOUtil {
      *
      * <p>This method automatically uses {@code StandardCopyOption.REPLACE_EXISTING} as the copy option,
      * which means it will replace any existing file with the same name at the destination.
-     * If the source is a directory, the entire directory and its contents will be moved.</p>
+     * if the source is a directory, the entire directory and its contents will be moved.</p>
      *
      * <p>Example usage:</p>
      * <pre>
@@ -6966,8 +6258,8 @@ public final class IOUtil {
      * // and has been removed from the original location
      * </pre>
      *
-     * @param srcFile The source file or directory to be moved
-     * @param destDir The destination directory where the file or directory will be moved to
+     * @param srcFile the source file or directory to be moved
+     * @param destDir the destination directory where the file or directory will be moved to
      * @throws IOException if an I/O error occurs during the move operation, such as if the source doesn't exist
      *         or the destination cannot be written to
      * @see #move(File, File, CopyOption...)
@@ -6979,11 +6271,11 @@ public final class IOUtil {
 
     /**
      * Moves a file from the source file to the target directory.
-     * If the destination directory does not exist, it will be created.
+     * if the destination directory does not exist, it will be created.
      *
-     * @param srcFile The source file to be moved.
-     * @param destDir The target directory where the file will be moved to.
-     * @param options Optional arguments that specify how the move should be done.
+     * @param srcFile the source file to be moved.
+     * @param destDir the target directory where the file will be moved to.
+     * @param options optional arguments that specify how the move should be done.
      * @throws IOException if an I/O error occurs.
      */
     public static void move(final File srcFile, final File destDir, final CopyOption... options) throws IOException {
@@ -6999,10 +6291,10 @@ public final class IOUtil {
     /**
      * Moves a file from the source path to the target path.
      *
-     * @param source  The source Path of the file to be moved.
-     * @param target  The target Path where the file will be moved to.
-     * @param options Optional arguments that specify how the move should be done.
-     * @return The target path.
+     * @param source  the source Path of the file to be moved.
+     * @param target  the target Path where the file will be moved to.
+     * @param options optional arguments that specify how the move should be done.
+     * @return the target path.
      * @throws IOException if an I/O error occurs.
      * @see Files#move(Path, Path, CopyOption...)
      */
@@ -7013,8 +6305,8 @@ public final class IOUtil {
     /**
      * Renames the specified source file to the new file name provided.
      *
-     * @param srcFile     The source file to be renamed.
-     * @param newFileName The new name for the file.
+     * @param srcFile     the source file to be renamed.
+     * @param newFileName the new name for the file.
      * @return {@code true} if the renaming succeeded, {@code false} otherwise.
      */
     public static boolean renameTo(final File srcFile, final String newFileName) {
@@ -7024,7 +6316,7 @@ public final class IOUtil {
     /**
      * Deletes the specified file if it exists by calling {@link File#delete()}.
      * <p>
-     * This method attempts to delete the specified file or directory. If the file is {@code null}
+     * This method attempts to delete the specified file or directory. if the file is {@code null}
      * or does not exist, the method returns {@code false} without attempting deletion.
      * For directories, this method only deletes empty directories - it will not delete
      * directories that contain files or subdirectories.
@@ -7043,7 +6335,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param file The file or directory to delete. Can be {@code null}.
+     * @param file the file or directory to delete. Can be {@code null}.
      * @return {@code true} if the file was deleted successfully; {@code false} if the file
      *         is {@code null}, does not exist, or could not be deleted.
      * @see File#delete()
@@ -7080,7 +6372,7 @@ public final class IOUtil {
      * System.out.println("File deleted: " + deleted);
      * }</pre>
      *
-     * @param file The file or directory to delete. Can be {@code null}.
+     * @param file the file or directory to delete. Can be {@code null}.
      * @return {@code true} if the file was deleted successfully; {@code false} if the file
      *         is {@code null}, does not exist, could not be deleted, or if an exception occurred.
      * @see File#delete()
@@ -7100,9 +6392,9 @@ public final class IOUtil {
     /**
      * Deletes the specified file and all its subfiles/directories recursively if it's a directory.
      * <p>
-     * This method performs a recursive deletion operation. If the specified file is a directory,
+     * This method performs a recursive deletion operation. if the specified file is a directory,
      * it will delete all files and subdirectories within it before deleting the directory itself.
-     * If the file is a regular file, it will simply delete the file. If the file does not exist
+     * if the file is a regular file, it will simply delete the file. if the file does not exist
      * or is {@code null}, the method returns {@code false} without performing any operations.
      * <p>
      * This operation is irreversible and will permanently remove all specified files and directories.
@@ -7118,7 +6410,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param file The file or directory to delete recursively.
+     * @param file the file or directory to delete recursively.
      * @return {@code true} if the file/directory and all its contents were deleted successfully;
      *         {@code false} if the file is {@code null}, does not exist, or could not be deleted.
      * @see File#delete()
@@ -7161,7 +6453,7 @@ public final class IOUtil {
      * Deletes all subfiles and subdirectories from the specified directory.
      * <p>
      * This method removes all files and directories contained within the specified directory,
-     * but leaves the directory itself intact. If the directory does not exist or is actually
+     * but leaves the directory itself intact. if the directory does not exist or is actually
      * a file, the method returns {@code false} without performing any operations.
      * <p>
      * This operation is recursive - subdirectories and all their contents will be deleted.
@@ -7178,7 +6470,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param dir The directory from which to delete all files and subdirectories.
+     * @param dir the directory from which to delete all files and subdirectories.
      * @return {@code true} if all files and directories were deleted successfully;
      *         {@code false} if the directory does not exist or is actually a file, 
      *         or some files could not be deleted or if the operation failed.
@@ -7215,9 +6507,9 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param <E> The type of exception that the filter may throw.
-     * @param dir The directory from which to delete files and subdirectories.
-     * @param filter The predicate to determine which files/directories should be deleted.
+     * @param <E> the type of exception that the filter may throw.
+     * @param dir the directory from which to delete files and subdirectories.
+     * @param filter the predicate to determine which files/directories should be deleted.
      *               Receives the parent directory and the file/directory being evaluated.
      * @return {@code true} if all matching files and directories were deleted successfully;
      *         {@code false} if the directory does not exist or is actually a file, 
@@ -7272,7 +6564,7 @@ public final class IOUtil {
      * Cleans a directory by deleting all subfiles and subdirectories within it.
      * <p>
      * This method removes all files and directories contained within the specified directory,
-     * but leaves the directory itself intact. If the directory does not exist or is actually
+     * but leaves the directory itself intact. if the directory does not exist or is actually
      * a file, the method returns {@code false} without performing any operations.
      * <p>
      * This operation is recursive - subdirectories and all their contents will be deleted.
@@ -7289,7 +6581,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param dir The directory to clean.
+     * @param dir the directory to clean.
      * @return {@code true} if all subfiles and subdirectories were deleted successfully; 
      *         {@code false} if the directory does not exist or is actually a file, 
      *         or some files could not be deleted or if the operation failed.
@@ -7331,7 +6623,7 @@ public final class IOUtil {
      * <p>
      * This method attempts to create a new file at the path specified by the input File
      * object, but only if a file or directory doesn't already exist at that location.
-     * If the parent directory doesn't exist, the method will attempt to create it before
+     * if the parent directory doesn't exist, the method will attempt to create it before
      * creating the file.
      * 
      * <p>
@@ -7366,7 +6658,7 @@ public final class IOUtil {
      * <p>
      * This method attempts to create the directory named by the given {@code File} object.
      * If a directory with this name already exists, the method returns {@code false}.
-     * If the directory does not exist, it is created. This method does not create parent
+     * if the directory does not exist, it is created. This method does not create parent
      * directories. Use {@link #mkdirsIfNotExists(File)} to create parent directories as well.
      *
      * <p><b>Example:</b></p>
@@ -7380,7 +6672,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param dir The directory to create.
+     * @param dir the directory to create.
      * @return {@code true} if the directory was created successfully; {@code false} if the directory already exists or creation failed.
      * @see File#mkdir()
      * @see #mkdirsIfNotExists(File)
@@ -7399,7 +6691,7 @@ public final class IOUtil {
      * <p>
      * This method attempts to create the directory named by the given {@code File} object,
      * including any necessary but nonexistent parent directories. If a directory with this 
-     * name already exists, the method returns {@code false}. If the directory does not exist,
+     * name already exists, the method returns {@code false}. if the directory does not exist,
      * it and all necessary parent directories are created.
      * <p>
      * Unlike {@link #mkdirIfNotExists(File)}, this method will create parent directories
@@ -7416,7 +6708,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param dir The directory to create, including any necessary parent directories.
+     * @param dir the directory to create, including any necessary parent directories.
      * @return {@code true} if the directories were created successfully; {@code false} if the directory already exists or creation failed.
      * @see File#mkdirs()
      * @see #mkdirIfNotExists(File)
@@ -7434,7 +6726,7 @@ public final class IOUtil {
     /**
      * Checks if the provided Reader is an instance of {@code java.io.BufferedReader}.
      *
-     * @param reader The Reader to be checked.
+     * @param reader the Reader to be checked.
      * @return {@code true} if the Reader is an instance of BufferedReader, {@code false} otherwise.
      */
     public static boolean isBufferedReader(final Reader reader) {
@@ -7444,7 +6736,7 @@ public final class IOUtil {
     /**
      * Checks if the provided Writer is an instance of {@code java.io.BufferedWriter}.
      *
-     * @param writer The Writer to be checked.
+     * @param writer the Writer to be checked.
      * @return {@code true} if the Writer is an instance of BufferedWriter, {@code false} otherwise.
      */
     public static boolean isBufferedWriter(final Writer writer) {
@@ -7572,7 +6864,7 @@ public final class IOUtil {
     /**
      * Checks if the specified file is a Symbolic Link rather than an actual file.
      *
-     * @param file The file to be checked.
+     * @param file the file to be checked.
      * @return {@code true} if the file is a Symbolic Link, {@code false} otherwise.
      * @see Files#isSymbolicLink(Path)
      */
@@ -7581,9 +6873,9 @@ public final class IOUtil {
     }
 
     /**
-     * Returns the size of the specified file or directory. If the provided
+     * Returns the size of the specified file or directory. if the provided
      * {@link File} is a regular file, then the file's length is returned.
-     * If the argument is a directory, then the size of the directory is
+     * if the argument is a directory, then the size of the directory is
      * calculated recursively. If a directory or subdirectory is security
      * restricted, its size will not be included.
      * <p>
@@ -7604,9 +6896,9 @@ public final class IOUtil {
 
     /**
      * Returns the size of the specified file or directory.
-     * @param file The file or directory whose size is to be calculated. Must not be {@code null}.
+     * @param file the file or directory whose size is to be calculated, must not be {@code null}
      * @param considerNonExistingFileAsEmpty if {@code true}, the size of non-existing file is considered as 0.
-     * @return The total size in bytes. For directories, this is the recursive sum of all files within it.
+     * @return the total size in bytes. For directories, this is the recursive sum of all files within it.
      * @throws FileNotFoundException if the file does not exist and considerNonExistingFileAsEmpty is {@code false}.
      */
     public static long sizeOf(final File file, final boolean considerNonExistingFileAsEmpty) throws FileNotFoundException {
@@ -7643,9 +6935,9 @@ public final class IOUtil {
     /**
      * Counts the size of a directory recursively (sum of the length of all files).
      *
-     * @param directory The directory whose size is to be calculated. Must not be {@code null}.
+     * @param directory the directory whose size is to be calculated, must not be {@code null}
      * @param considerNonExistingDirectoryAsEmpty if {@code true}, the size of non-existing directory is considered as 0.
-     * @return The total size in bytes of all files within the directory and its subdirectories.
+     * @return the total size in bytes of all files within the directory and its subdirectories.
      * @throws FileNotFoundException if the directory does not exist and considerNonExistingDirectoryAsEmpty is {@code false}.
      */
     public static long sizeOfDirectory(final File directory, final boolean considerNonExistingDirectoryAsEmpty) throws FileNotFoundException {
@@ -7690,8 +6982,8 @@ public final class IOUtil {
     /**
      * Returns the size of the specified file or directory as a BigInteger.
      *
-     * @param file The file or directory whose size is to be calculated. Must not be {@code null}.
-     * @return The total size as a BigInteger. For directories, this is the recursive sum of all files within it.
+     * @param file the file or directory whose size is to be calculated, must not be {@code null}
+     * @return the total size as a BigInteger. For directories, this is the recursive sum of all files within it.
      * @throws FileNotFoundException if the file does not exist.
      * @see #sizeOf(File)
      * @see #sizeOfDirectoryAsBigInteger(File)
@@ -7709,8 +7001,8 @@ public final class IOUtil {
     /**
      * Returns the size of the specified directory as a BigInteger.
      *
-     * @param directory The directory whose size is to be calculated. Must not be {@code null}.
-     * @return The total size as a BigInteger of all files within the directory and its subdirectories.
+     * @param directory the directory whose size is to be calculated, must not be {@code null}
+     * @return the total size as a BigInteger of all files within the directory and its subdirectories.
      * @throws FileNotFoundException if the directory does not exist.
      * @see #sizeOfDirectory(File)
      * @see #sizeOfAsBigInteger(File)
@@ -7802,8 +7094,8 @@ public final class IOUtil {
     /**
      * Compresses the specified source file and writes the compressed data to the target file using the ZIP compression algorithm.
      *
-     * @param sourceFile The file to be compressed. This must be a valid file.
-     * @param targetFile The file to which the compressed data will be written. This must be a valid file.
+     * @param sourceFile the file to be compressed. This must be a valid file.
+     * @param targetFile the file to which the compressed data will be written. This must be a valid file.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static void zip(final File sourceFile, final File targetFile) throws UncheckedIOException {
@@ -7822,8 +7114,8 @@ public final class IOUtil {
     /**
      * Compresses the specified source files and writes the compressed data to the target file using the ZIP compression algorithm.
      *
-     * @param sourceFiles The collection of files to be compressed. Each must be a valid file.
-     * @param targetFile  The file to which the compressed data will be written. This must be a valid file.
+     * @param sourceFiles the collection of files to be compressed. Each must be a valid file.
+     * @param targetFile  the file to which the compressed data will be written. This must be a valid file.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static void zip(final Collection<File> sourceFiles, final File targetFile) throws UncheckedIOException {
@@ -7846,9 +7138,9 @@ public final class IOUtil {
      * Compresses the specified source file and writes the compressed data to the target file using the provided ZipOutputStream.
      * This is a helper method used in the process of creating a ZIP file.
      *
-     * @param sourceFile The file to be compressed. This must be a valid file.
-     * @param zos        The ZipOutputStream to which the compressed data will be written.
-     * @param targetFile The file to which the compressed data will be written. This must be a valid file.
+     * @param sourceFile the file to be compressed. This must be a valid file.
+     * @param zos        the ZipOutputStream to which the compressed data will be written.
+     * @param targetFile the file to which the compressed data will be written. This must be a valid file.
      * @throws IOException if an I/O error occurs.
      */
     private static void zipFile(final File sourceFile, final ZipOutputStream zos, final File targetFile) throws IOException {
@@ -7886,10 +7178,10 @@ public final class IOUtil {
      * Compresses the specified file and writes the compressed data to the target file using the provided ZipOutputStream.
      * This is a helper method used in the process of creating a ZIP file.
      *
-     * @param file       The file to be compressed. This must be a valid file.
-     * @param sourceDir  The directory containing the file to be compressed.
-     * @param zos        The ZipOutputStream to which the compressed data will be written.
-     * @param targetFile The file to which the compressed data will be written. This must be a valid file.
+     * @param file       the file to be compressed. This must be a valid file.
+     * @param sourceDir  the directory containing the file to be compressed.
+     * @param zos        the ZipOutputStream to which the compressed data will be written.
+     * @param targetFile the file to which the compressed data will be written. This must be a valid file.
      * @throws IOException if an I/O error occurs during the process.
      */
     private static void zipFile(final File file, final File sourceDir, final ZipOutputStream zos, final File targetFile) throws IOException {
@@ -7930,8 +7222,8 @@ public final class IOUtil {
     /**
      * Unzips the specified source ZIP file to the target directory.
      *
-     * @param srcZipFile The source ZIP file to be unzipped. This must be a valid ZIP file.
-     * @param targetDir  The directory to which the contents of the ZIP file will be extracted. This must be a valid directory.
+     * @param srcZipFile the source ZIP file to be unzipped. This must be a valid ZIP file.
+     * @param targetDir  the directory to which the contents of the ZIP file will be extracted. This must be a valid directory.
      * @throws IOException if an I/O error occurs during the unzip process.
      */
     public static void unzip(final File srcZipFile, final File targetDir) throws IOException {
@@ -8010,7 +7302,7 @@ public final class IOUtil {
      * <ul>
      *   <li><strong>Regular parts:</strong> Each part (except the last) will be approximately equal in size</li>
      *   <li><strong>Last part:</strong> Contains any remaining bytes, which may be smaller than the other parts</li>
-     *   <li><strong>Empty files:</strong> If the source file is empty, one empty part file is created</li>
+     *   <li><strong>Empty files:</strong> if the source file is empty, one empty part file is created</li>
      * </ul>
      *
      * <p>Example usage:</p>
@@ -8057,7 +7349,7 @@ public final class IOUtil {
      * <ul>
      *   <li><strong>Regular parts:</strong> Each part (except the last) will be approximately equal in size</li>
      *   <li><strong>Last part:</strong> Contains any remaining bytes, which may be smaller than the other parts</li>
-     *   <li><strong>Empty files:</strong> If the source file is empty, one empty part file is created</li>
+     *   <li><strong>Empty files:</strong> if the source file is empty, one empty part file is created</li>
      * </ul>
      *
      * <p>Example usage:</p>
@@ -8109,7 +7401,7 @@ public final class IOUtil {
     * <ul>
     *   <li><strong>Regular parts:</strong> Each part (except the last) will be exactly {@code sizeOfPart} bytes</li>
     *   <li><strong>Last part:</strong> Contains the remaining bytes, which may be smaller than {@code sizeOfPart}</li>
-    *   <li><strong>Empty files:</strong> If the source file is empty, one empty part file is created</li>
+    *   <li><strong>Empty files:</strong> if the source file is empty, one empty part file is created</li>
     * </ul>
     *
     * <p>Example usage:</p>
@@ -8156,7 +7448,7 @@ public final class IOUtil {
     * <ul>
     *   <li><strong>Regular parts:</strong> Each part (except the last) will be exactly {@code sizeOfPart} bytes</li>
     *   <li><strong>Last part:</strong> Contains the remaining bytes, which may be smaller than {@code sizeOfPart}</li>
-    *   <li><strong>Empty files:</strong> If the source file is empty, one empty part file is created</li>
+    *   <li><strong>Empty files:</strong> if the source file is empty, one empty part file is created</li>
     * </ul>
     *
     * <p>Example usage:</p>
@@ -8235,8 +7527,8 @@ public final class IOUtil {
     /**
      * Splits the specified file into a number of parts by line.
      *
-     * @param file       The file to be split. This must be a valid file.
-     * @param numOfParts The number of parts the file should be split into.
+     * @param file       the file to be split. This must be a valid file.
+     * @param numOfParts the number of parts the file should be split into.
      * @throws UncheckedIOException if an I/O error occurs during the process.
      */
     static void splitByLine(final File file, final int numOfParts) throws UncheckedIOException {
@@ -8246,9 +7538,9 @@ public final class IOUtil {
     /**
      * Splits the specified file into a number of parts by line.
      *
-     * @param file       The file to be split. This must be a valid file.
-     * @param numOfParts The number of parts the file should be split into.
-     * @param destDir    The directory where the split parts will be stored.
+     * @param file       the file to be split. This must be a valid file.
+     * @param numOfParts the number of parts the file should be split into.
+     * @param destDir    the directory where the split parts will be stored.
      * @throws UncheckedIOException if an I/O error occurs during the process.
      */
     @SuppressWarnings("null")
@@ -8319,9 +7611,9 @@ public final class IOUtil {
     /**
      * Estimate the total line count of the file by reading the specified line count ahead.
      *
-     * @param file The file whose line count is to be estimated. Must not be {@code null}.
-     * @param byReadingLineNum The number of lines to read for estimating the total count.
-     * @return The estimated total line count based on the sample size.
+     * @param file the file whose line count is to be estimated, must not be {@code null}
+     * @param byReadingLineNum the number of lines to read for estimating the total count.
+     * @return the estimated total line count based on the sample size.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     private static long estimateLineCount(final File file, final int byReadingLineNum) throws UncheckedIOException {
@@ -8357,9 +7649,9 @@ public final class IOUtil {
     /**
      * Merges the given source files into the specified destination file.
      *
-     * @param sourceFiles An array of files to be merged. These must be valid files.
-     * @param destFile    The destination file where the merged content will be written. This must be a valid file.
-     * @return The number of bytes written to the destination file.
+     * @param sourceFiles an array of files to be merged. These must be valid files.
+     * @param destFile    the destination file where the merged content will be written. This must be a valid file.
+     * @return the number of bytes written to the destination file.
      * @throws UncheckedIOException if an I/O error occurs during the process.
      */
     public static long merge(final File[] sourceFiles, final File destFile) throws UncheckedIOException {
@@ -8369,9 +7661,9 @@ public final class IOUtil {
     /**
      * Merges the given source files into the specified destination file.
      *
-     * @param sourceFiles A collection of files to be merged. These must be valid files.
-     * @param destFile    The destination file where the merged content will be written. This must be a valid file.
-     * @return The number of bytes written to the destination file.
+     * @param sourceFiles a collection of files to be merged. These must be valid files.
+     * @param destFile    the destination file where the merged content will be written. This must be a valid file.
+     * @return the number of bytes written to the destination file.
      * @throws UncheckedIOException if an I/O error occurs during the process.
      */
     public static long merge(final Collection<File> sourceFiles, final File destFile) throws UncheckedIOException {
@@ -8381,7 +7673,7 @@ public final class IOUtil {
     /**
      * Merges the given source files into the specified destination file, separated by the provided delimiter.
      *
-     * <p><b>Usage Example:</b></p>
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Merge split files back together
      * List<File> parts = Arrays.asList(
@@ -8396,10 +7688,10 @@ public final class IOUtil {
      * IOUtil.merge(parts, "\n".getBytes(), merged);
      * }</pre>
      *
-     * @param sourceFiles A collection of files to be merged. These must be valid files.
-     * @param delimiter   A byte array that will be inserted between each file during the merge.
-     * @param destFile    The destination file where the merged content will be written. This must be a valid file.
-     * @return The number of bytes written to the destination file.
+     * @param sourceFiles a collection of files to be merged. These must be valid files.
+     * @param delimiter   a byte array that will be inserted between each file during the merge.
+     * @param destFile    the destination file where the merged content will be written. This must be a valid file.
+     * @return the number of bytes written to the destination file.
      * @throws UncheckedIOException if an I/O error occurs during the process.
      */
     public static long merge(final Collection<File> sourceFiles, final byte[] delimiter, final File destFile) throws UncheckedIOException {
@@ -8449,9 +7741,9 @@ public final class IOUtil {
     /**
      * Gets the absolute path.
      *
-     * @param parentDir The parent directory from which to resolve the relative path.
-     * @param relativeFilePath The relative file path to be resolved.
-     * @return The absolute path as a String.
+     * @param parentDir the parent directory from which to resolve the relative path.
+     * @param relativeFilePath the relative file path to be resolved.
+     * @return the absolute path as a String.
      */
     @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
     private static String getAbsolutePath(final File parentDir, String relativeFilePath) {
@@ -8486,8 +7778,8 @@ public final class IOUtil {
     /**
      * Lists all files in the specified parent directory.
      *
-     * @param parentPath The parent directory from which to list files.
-     * @return A list of File objects representing all files in the parent directory.
+     * @param parentPath the parent directory from which to list files.
+     * @return a list of File objects representing all files in the parent directory.
      * @see Stream#listFiles(File)
      * @see Fn#isFile()
      * @see Fn#isDirectory()
@@ -8498,13 +7790,13 @@ public final class IOUtil {
 
     /**
      * Lists all files in the specified parent directory.
-     * If the recursive parameter is set to {@code true}, it will list files in all subdirectories as well.
-     * If the excludeDirectory parameter is set to {@code true}, it will exclude directories from the list.
+     * if the recursive parameter is set to {@code true}, it will list files in all subdirectories as well.
+     * if the excludeDirectory parameter is set to {@code true}, it will exclude directories from the list.
      *
-     * @param parentPath       The parent directory from which to list files.
-     * @param recursively      A boolean indicating whether to list files in all subdirectories.
-     * @param excludeDirectory A boolean indicating whether to exclude directories from the list.
-     * @return A list of File objects representing all files in the parent directory.
+     * @param parentPath       the parent directory from which to list files.
+     * @param recursively      a boolean indicating whether to list files in all subdirectories.
+     * @param excludeDirectory a boolean indicating whether to exclude directories from the list.
+     * @return a list of File objects representing all files in the parent directory.
      * @see Stream#listFiles(File, boolean, boolean)
      * @see Fn#isFile()
      * @see Fn#isDirectory()
@@ -8515,14 +7807,14 @@ public final class IOUtil {
 
     /**
      * Lists all files in the specified parent directory.
-     * If the recursive parameter is set to {@code true}, it will list files in all subdirectories as well.
+     * if the recursive parameter is set to {@code true}, it will list files in all subdirectories as well.
      *
-     * @param <E>         The type of the exception that may be thrown by the filter.
-     * @param parentPath  The parent directory where the listing will start. It must not be {@code null}.
-     * @param recursively If {@code true}, files in all subdirectories of the parent directory will be listed.
-     * @param filter      A BiPredicate that takes the parent directory and a file as arguments and returns a boolean. If the predicate returns {@code true}, the file is listed; if it returns {@code false}, the file is not listed.
-     * @return A list of files in the specified directory and possibly its subdirectories.
-     * @throws E If the filter throws an exception.
+     * @param <E>         the type of the exception that may be thrown by the filter.
+     * @param parentPath  the parent directory where the listing will start. It must not be {@code null}.
+     * @param recursively if {@code true}, files in all subdirectories of the parent directory will be listed.
+     * @param filter      a BiPredicate that takes the parent directory and a file as arguments and returns a boolean. if the predicate returns {@code true}, the file is listed; if it returns {@code false}, the file is not listed.
+     * @return a list of files in the specified directory and possibly its subdirectories.
+     * @throws E if the filter throws an exception.
      * @see Stream#listFiles(File, boolean, boolean)
      * @see Fn#isFile()
      * @see Fn#isDirectory()
@@ -8560,8 +7852,8 @@ public final class IOUtil {
     /**
      * Lists all directories in the specified parent directory.
      *
-     * @param parentPath The parent directory from which to list directories.
-     * @return A list of File objects representing all directories in the parent directory.
+     * @param parentPath the parent directory from which to list directories.
+     * @return a list of File objects representing all directories in the parent directory.
      * @see Stream#listFiles(File)
      * @see Fn#isDirectory()
      */
@@ -8571,11 +7863,11 @@ public final class IOUtil {
 
     /**
      * Lists all directories in the specified parent directory.
-     * If the recursive parameter is set to {@code true}, it will list directories in all subdirectories as well.
+     * if the recursive parameter is set to {@code true}, it will list directories in all subdirectories as well.
      *
-     * @param parentPath  The parent directory from which to list directories.
-     * @param recursively A boolean indicating whether to list directories in all subdirectories.
-     * @return A list of File objects representing all directories in the parent directory and its subdirectories if recursively is {@code true}.
+     * @param parentPath  the parent directory from which to list directories.
+     * @param recursively a boolean indicating whether to list directories in all subdirectories.
+     * @return a list of File objects representing all directories in the parent directory and its subdirectories if recursively is {@code true}.
      * @see Stream#listFiles(File, boolean, boolean)
      * @see Fn#isDirectory()
      */
@@ -8586,9 +7878,9 @@ public final class IOUtil {
     /**
      * Gets the relative path.
      *
-     * @param parentDir The parent directory used as the base for the relative path.
-     * @param file The file whose relative path is to be determined.
-     * @return The relative path from parentDir to file.
+     * @param parentDir the parent directory used as the base for the relative path.
+     * @param file the file whose relative path is to be determined.
+     * @return the relative path from parentDir to file.
      */
     private static String getRelativePath(final File parentDir, final File file) {
         if (file.equals(parentDir)) {
@@ -8601,8 +7893,8 @@ public final class IOUtil {
     /**
      * Lists the names of all files and directories in the specified parent directory.
      *
-     * @param parentPath The parent directory from which to list files and directories.
-     * @return A list of strings representing the names of all files and directories in the parent directory.
+     * @param parentPath the parent directory from which to list files and directories.
+     * @return a list of strings representing the names of all files and directories in the parent directory.
      * @see Stream#listFiles(File)
      * @see Fn#isFile()
      * @see Fn#isDirectory()
@@ -8613,13 +7905,13 @@ public final class IOUtil {
 
     /**
      * Lists the names of all files and directories in the specified parent directory.
-     * If the recursive parameter is set to {@code true}, it will list files in all subdirectories as well.
-     * If the excludeDirectory parameter is set to {@code true}, it will exclude directories from the list.
+     * if the recursive parameter is set to {@code true}, it will list files in all subdirectories as well.
+     * if the excludeDirectory parameter is set to {@code true}, it will exclude directories from the list.
      *
-     * @param parentPath       The parent directory from which to list files and directories.
-     * @param recursively      A boolean indicating whether to list files in all subdirectories.
-     * @param excludeDirectory A boolean indicating whether to exclude directories from the list.
-     * @return A list of strings representing the names of all files and directories in the parent directory.
+     * @param parentPath       the parent directory from which to list files and directories.
+     * @param recursively      a boolean indicating whether to list files in all subdirectories.
+     * @param excludeDirectory a boolean indicating whether to exclude directories from the list.
+     * @return a list of strings representing the names of all files and directories in the parent directory.
      * @see Stream#listFiles(File, boolean, boolean)
      * @see Fn#isFile()
      * @see Fn#isDirectory()
@@ -8641,7 +7933,7 @@ public final class IOUtil {
      * passing them through literally.
      *
      * @param url the file URL to convert, {@code null} returns {@code null}
-     * @return A File object corresponding to the input URL.
+     * @return a File object corresponding to the input URL.
      * @throws IllegalArgumentException if the parameter is {@code null} or the URL is not a file URL
      */
     public static File toFile(final URL url) {
@@ -8664,8 +7956,8 @@ public final class IOUtil {
      * result string. Except for rare edge cases, this will make unencoded URLs
      * pass through unaltered.
      *
-     * @param url The URL to decode, may be {@code null}.
-     * @return The decoded URL or {@code null} if the input was
+     * @param url the URL to decode, may be {@code null}.
+     * @return the decoded URL or {@code null} if the input was
      * {@code null}.
      */
     // unavoidable until Java 7
@@ -8705,8 +7997,8 @@ public final class IOUtil {
      * Converts each {@code URL} in the specified array to a {@code File}.
      * <p>
      * Returns an array of the same size as the input.
-     * If the input is {@code null}, an empty array is returned.
-     * If the input contains {@code null}, the output array contains {@code null} at the same
+     * if the input is {@code null}, an empty array is returned.
+     * if the input contains {@code null}, the output array contains {@code null} at the same
      * index.
      * <p>
      * This method will decode the URL.
@@ -8736,8 +8028,8 @@ public final class IOUtil {
     /**
      * Converts a collection of URLs into a list of corresponding File objects.
      *
-     * @param urls The collection of URLs to be converted.
-     * @return A list of File objects corresponding to the input URLs.
+     * @param urls the collection of URLs to be converted.
+     * @return a list of File objects corresponding to the input URLs.
      * @throws UncheckedIOException if an I/O error occurs during the conversion.
      */
     public static List<File> toFiles(final Collection<URL> urls) throws UncheckedIOException {
@@ -8757,8 +8049,8 @@ public final class IOUtil {
     /**
      * Converts a File object into a URL.
      *
-     * @param file The File object to be converted.
-     * @return A URL object corresponding to the input File object.
+     * @param file the File object to be converted.
+     * @return a URL object corresponding to the input File object.
      * @throws UncheckedIOException if an I/O error occurs during the conversion.
      * @see File#toURI()
      * @see URI#toURL()
@@ -8774,8 +8066,8 @@ public final class IOUtil {
     /**
      * Converts an array of File objects into an array of corresponding URL objects.
      *
-     * @param files The array of File objects to be converted.
-     * @return An array of URL objects corresponding to the input File objects.
+     * @param files the array of File objects to be converted.
+     * @return an array of URL objects corresponding to the input File objects.
      * @throws UncheckedIOException if an I/O error occurs during the conversion.
      * @see File#toURI()
      * @see URI#toURL()
@@ -8801,8 +8093,8 @@ public final class IOUtil {
     /**
      * Converts a collection of File objects into a list of corresponding URL objects.
      *
-     * @param files The collection of File objects to be converted.
-     * @return A list of URL objects corresponding to the input File objects.
+     * @param files the collection of File objects to be converted.
+     * @return a list of URL objects corresponding to the input File objects.
      * @throws UncheckedIOException if an I/O error occurs during the conversion.
      * @see File#toURI()
      * @see URI#toURL()
@@ -8846,7 +8138,7 @@ public final class IOUtil {
      * @param file2 the second file
      * @return {@code true} if the contents of the files are equal or they both don't exist, {@code false} otherwise
      * @throws IllegalArgumentException when an input is not a file.
-     * @throws IOException If an I/O error occurs.
+     * @throws IOException if an I/O error occurs.
      */
     public static boolean contentEquals(final File file1, final File file2) throws IOException {
         if (file1 == file2) {
@@ -8900,7 +8192,7 @@ public final class IOUtil {
      * false otherwise
      * @throws IllegalArgumentException when an input is not a file.
      * @throws IOException in case of an I/O error.
-     * @throws UnsupportedCharsetException If the named charset is unavailable (unchecked exception).
+     * @throws UnsupportedCharsetException if the named charset is unavailable (unchecked exception).
      * @see IOUtil#contentEqualsIgnoreEOL(Reader, Reader)
      * @since 2.2
      */
@@ -9126,11 +8418,11 @@ public final class IOUtil {
     /**
      * Parse the specified file/directory line by line.
      *
-     * @param <E>        The type of exception that the lineAction can throw.
-     * @param source     The source file to be parsed.
-     * @param lineAction A Consumer that takes a line of the file as a String and performs the desired operation.
-     * @throws UncheckedIOException If an I/O error occurs.
-     * @throws E                    If the lineAction throws an exception.
+     * @param <E>        the type of exception that the lineAction can throw.
+     * @param source     the source file to be parsed.
+     * @param lineAction a Consumer that takes a line of the file as a String and performs the desired operation.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @throws E                    if the lineAction throws an exception.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
@@ -9142,11 +8434,11 @@ public final class IOUtil {
     /**
      * Parse the specified file/directory line by line.
      *
-     * @param <E> The type of exception that the lineAction may throw during line processing.
-     * @param <E2> The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param source The file or directory to process. If a directory, all files within it are processed recursively.
-     * @param lineAction The action to perform on each line.
-     * @param onComplete The action to perform after all lines have been processed successfully.
+     * @param <E> the type of exception that the lineAction may throw during line processing.
+     * @param <E2> the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param source the file or directory to process. If a directory, all files within it are processed recursively.
+     * @param lineAction the action to perform on each line.
+     * @param onComplete the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E if lineAction throws an exception while processing a line.
      * @throws E2 if onComplete throws an exception.
@@ -9161,11 +8453,11 @@ public final class IOUtil {
     /**
      * Parse the specified file/directory line by line.
      *
-     * @param <E> The type of exception that the lineAction may throw during line processing.
-     * @param source The file or directory to process. If a directory, all files within it are processed recursively.
-     * @param lineOffset The number of lines to skip from the beginning.
-     * @param count The maximum number of lines to process after the offset.
-     * @param lineAction The action to perform on each line.
+     * @param <E> the type of exception that the lineAction may throw during line processing.
+     * @param source the file or directory to process. If a directory, all files within it are processed recursively.
+     * @param lineOffset the number of lines to skip from the beginning.
+     * @param count the maximum number of lines to process after the offset.
+     * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9179,13 +8471,13 @@ public final class IOUtil {
     /**
      * Parse the specified file/directory line by line.
      *
-     * @param <E> The type of exception that the lineAction may throw during line processing.
-     * @param <E2> The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param source The file or directory to process. If a directory, all files within it are processed recursively.
-     * @param lineOffset The number of lines to skip from the beginning.
-     * @param count The maximum number of lines to process after the offset.
-     * @param lineAction The action to perform on each line.
-     * @param onComplete The action to perform after all lines have been processed successfully.
+     * @param <E> the type of exception that the lineAction may throw during line processing.
+     * @param <E2> the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param source the file or directory to process. If a directory, all files within it are processed recursively.
+     * @param lineOffset the number of lines to skip from the beginning.
+     * @param count the maximum number of lines to process after the offset.
+     * @param lineAction the action to perform on each line.
+     * @param onComplete the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E if lineAction throws an exception while processing a line.
      * @throws E2 if onComplete throws an exception.
@@ -9200,7 +8492,7 @@ public final class IOUtil {
     /**
      * Parse the specified file/directory line by line with optional parallel processing.
      *
-     * <p><b>Usage Example:</b></p>
+     * <p>Example usage:</p>
      * <pre>{@code
      * // Simple sequential processing
      * File file = new File("data.txt");
@@ -9216,13 +8508,13 @@ public final class IOUtil {
      *     line -> System.out.println("Processing: " + line));
      * }</pre>
      *
-     * @param <E> The type of exception that the lineAction may throw during line processing.
-     * @param source The file or directory to process. If a directory, all files within it are processed recursively.
-     * @param lineOffset The number of lines to skip from the beginning.
-     * @param count The maximum number of lines to process after the offset.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize The size of the buffer queue between reader and processor threads.
-     * @param lineAction The action to perform on each line.
+     * @param <E> the type of exception that the lineAction may throw during line processing.
+     * @param source the file or directory to process. If a directory, all files within it are processed recursively.
+     * @param lineOffset the number of lines to skip from the beginning.
+     * @param count the maximum number of lines to process after the offset.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize the size of the buffer queue between reader and processor threads.
+     * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9236,18 +8528,18 @@ public final class IOUtil {
     /**
      * Parse the specified file/directory line by line.
      *
-     * @param <E>              The type of exception that the lineAction can throw.
-     * @param <E2>             The type of exception that the onComplete can throw.
-     * @param source           The source file/directory to be parsed.
-     * @param lineOffset       The line number from where to start parsing.
-     * @param count            The number of lines to be parsed.
-     * @param processThreadNum The number of threads to be used for parsing.
-     * @param queueSize        The size of the queue for holding lines to be parsed.
-     * @param lineAction       A Consumer that takes a line of the file as a String and performs the desired operation.
-     * @param onComplete       A Runnable that is executed after the parsing is complete.
-     * @throws UncheckedIOException If an I/O error occurs.
-     * @throws E                    If the lineAction throws an exception.
-     * @throws E2                   If the onComplete throws an exception.
+     * @param <E>              the type of exception that the lineAction can throw.
+     * @param <E2>             the type of exception that the onComplete can throw.
+     * @param source           the source file/directory to be parsed.
+     * @param lineOffset       the line number from where to start parsing.
+     * @param count            the number of lines to be parsed.
+     * @param processThreadNum the number of threads to be used for parsing.
+     * @param queueSize        the size of the queue for holding lines to be parsed.
+     * @param lineAction       a Consumer that takes a line of the file as a String and performs the desired operation.
+     * @param onComplete       a Runnable that is executed after the parsing is complete.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @throws E                    if the lineAction throws an exception.
+     * @throws E2                   if the onComplete throws an exception.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
@@ -9261,11 +8553,11 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
-     * @param <E>        The type of exception that the lineAction can throw.
-     * @param files      The collection of files to be parsed.
-     * @param lineAction A Consumer that takes a line of the file as a String and performs the desired operation.
-     * @throws UncheckedIOException If an I/O error occurs.
-     * @throws E                    If the lineAction throws an exception.
+     * @param <E>        the type of exception that the lineAction can throw.
+     * @param files      the collection of files to be parsed.
+     * @param lineAction a Consumer that takes a line of the file as a String and performs the desired operation.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @throws E                    if the lineAction throws an exception.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
@@ -9277,11 +8569,11 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
-     * @param <E> The type of exception that the lineAction may throw during line processing.
-     * @param <E2> The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param files The collection of files to be parsed.
-     * @param lineAction A Consumer that takes a line of the file as a String and performs the desired operation.
-     * @param onComplete A Runnable that is executed after the parsing is complete.
+     * @param <E> the type of exception that the lineAction may throw during line processing.
+     * @param <E2> the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param files the collection of files to be parsed.
+     * @param lineAction a Consumer that takes a line of the file as a String and performs the desired operation.
+     * @param onComplete a Runnable that is executed after the parsing is complete.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E if lineAction throws an exception while processing a line.
      * @throws E2 if onComplete throws an exception.
@@ -9296,11 +8588,11 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
-     * @param <E>        The type of exception that the lineAction may throw during line processing.
-     * @param files      The collection of files/directories to process. Directories are processed recursively.
-     * @param lineOffset The number of lines to skip from the beginning.
-     * @param count      The maximum number of lines to process after the offset.
-     * @param lineAction The action to perform on each line.
+     * @param <E>        the type of exception that the lineAction may throw during line processing.
+     * @param files      the collection of files/directories to process. Directories are processed recursively.
+     * @param lineOffset the number of lines to skip from the beginning.
+     * @param count      the maximum number of lines to process after the offset.
+     * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9314,13 +8606,13 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
-     * @param <E>        The type of exception that the lineAction may throw during line processing.
-     * @param <E2>       The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param files      The collection of files/directories to process. Directories are processed recursively.
-     * @param lineOffset The number of lines to skip from the beginning.
-     * @param count      The maximum number of lines to process after the offset.
-     * @param lineAction The action to perform on each line.
-     * @param onComplete The action to perform after all lines have been processed successfully.
+     * @param <E>        the type of exception that the lineAction may throw during line processing.
+     * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param files      the collection of files/directories to process. Directories are processed recursively.
+     * @param lineOffset the number of lines to skip from the beginning.
+     * @param count      the maximum number of lines to process after the offset.
+     * @param lineAction the action to perform on each line.
+     * @param onComplete the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
@@ -9335,13 +8627,13 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param files            The collection of files/directories to process. Directories are processed recursively.
-     * @param lineOffset       The number of lines to skip from the beginning.
-     * @param count            The maximum number of lines to process after the offset.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param files            the collection of files/directories to process. Directories are processed recursively.
+     * @param lineOffset       the number of lines to skip from the beginning.
+     * @param count            the maximum number of lines to process after the offset.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9355,16 +8647,16 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
-     * @param <E>        The type of exception that the lineAction can throw.
-     * @param <E2>       The type of exception that the onComplete can throw.
-     * @param files      The collection of files to be parsed.
-     * @param lineOffset The line number from where to start parsing.
-     * @param count      The number of lines to be parsed.
-     * @param lineAction A Consumer that takes a line of the file as a String and performs the desired operation.
-     * @param onComplete A Runnable that is executed after the parsing is complete.
-     * @throws UncheckedIOException If an I/O error occurs.
-     * @throws E                    If the lineAction throws an exception.
-     * @throws E2                   If the onComplete throws an exception.
+     * @param <E>        the type of exception that the lineAction can throw.
+     * @param <E2>       the type of exception that the onComplete can throw.
+     * @param files      the collection of files to be parsed.
+     * @param lineOffset the line number from where to start parsing.
+     * @param count      the number of lines to be parsed.
+     * @param lineAction a Consumer that takes a line of the file as a String and performs the desired operation.
+     * @param onComplete a Runnable that is executed after the parsing is complete.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @throws E                    if the lineAction throws an exception.
+     * @throws E2                   if the onComplete throws an exception.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
@@ -9405,12 +8697,12 @@ public final class IOUtil {
     /**
      * Parse the specified file/directory line by line.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param source           The file or directory to process. Directories are processed recursively.
-     * @param readThreadNum    The number of threads for reading files.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param source           the file or directory to process. Directories are processed recursively.
+     * @param readThreadNum    the number of threads for reading files.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9424,14 +8716,14 @@ public final class IOUtil {
     /**
      * Parse the specified file/directory line by line.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param <E2>             The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param source           The file or directory to process. Directories are processed recursively.
-     * @param readThreadNum    The number of threads for reading files.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
-     * @param onComplete       The action to perform after all lines have been processed successfully.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param source           the file or directory to process. Directories are processed recursively.
+     * @param readThreadNum    the number of threads for reading files.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
+     * @param onComplete       the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
@@ -9447,14 +8739,14 @@ public final class IOUtil {
     /**
      * Parse the specified file/directory line by line.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param source           The file or directory to process. Directories are processed recursively.
-     * @param lineOffset       The number of lines to skip from the beginning.
-     * @param count            The maximum number of lines to process after the offset.
-     * @param readThreadNum    The number of threads for reading files.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param source           the file or directory to process. Directories are processed recursively.
+     * @param lineOffset       the number of lines to skip from the beginning.
+     * @param count            the maximum number of lines to process after the offset.
+     * @param readThreadNum    the number of threads for reading files.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9468,16 +8760,16 @@ public final class IOUtil {
     /**
      * Parse the specified file/directory line by line.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param <E2>             The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param source           The file or directory to process. All subfiles are processed recursively if this is a directory.
-     * @param lineOffset       The number of lines to skip from the beginning.
-     * @param count            The maximum number of lines to process after the offset.
-     * @param readThreadNum    The number of threads for reading files.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
-     * @param onComplete       The action to perform after all lines have been processed successfully.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param source           the file or directory to process. All subfiles are processed recursively if this is a directory.
+     * @param lineOffset       the number of lines to skip from the beginning.
+     * @param count            the maximum number of lines to process after the offset.
+     * @param readThreadNum    the number of threads for reading files.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
+     * @param onComplete       the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
@@ -9494,12 +8786,12 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param files            The collection of files/directories to process. Directories are processed recursively.
-     * @param readThreadNum    The number of threads for reading files.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param files            the collection of files/directories to process. Directories are processed recursively.
+     * @param readThreadNum    the number of threads for reading files.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9513,14 +8805,14 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param <E2>             The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param files            The collection of files/directories to process. Directories are processed recursively.
-     * @param readThreadNum    The number of threads for reading files.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
-     * @param onComplete       The action to perform after all lines have been processed successfully.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param files            the collection of files/directories to process. Directories are processed recursively.
+     * @param readThreadNum    the number of threads for reading files.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
+     * @param onComplete       the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
@@ -9536,14 +8828,14 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param files            The collection of files/directories to process. Directories are processed recursively.
-     * @param lineOffset       The number of lines to skip from the beginning.
-     * @param count            The maximum number of lines to process after the offset.
-     * @param readThreadNum    The number of threads for reading files.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param files            the collection of files/directories to process. Directories are processed recursively.
+     * @param lineOffset       the number of lines to skip from the beginning.
+     * @param count            the maximum number of lines to process after the offset.
+     * @param readThreadNum    the number of threads for reading files.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9557,16 +8849,16 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param <E2>             The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param files            The collection of files/directories to process. All subfiles are processed recursively if an element is a directory.
-     * @param lineOffset       The number of lines to skip from the beginning.
-     * @param count            The maximum number of lines to process after the offset.
-     * @param readThreadNum    The number of threads for reading files.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
-     * @param onComplete       The action to perform after all lines have been processed successfully.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param files            the collection of files/directories to process. All subfiles are processed recursively if an element is a directory.
+     * @param lineOffset       the number of lines to skip from the beginning.
+     * @param count            the maximum number of lines to process after the offset.
+     * @param readThreadNum    the number of threads for reading files.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
+     * @param onComplete       the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
@@ -9610,9 +8902,9 @@ public final class IOUtil {
     /**
      * Parse the specified InputStream line by line.
      *
-     * @param <E>        The type of exception that the lineAction may throw during line processing.
-     * @param source     The InputStream to read lines from.
-     * @param lineAction The action to perform on each line.
+     * @param <E>        the type of exception that the lineAction may throw during line processing.
+     * @param source     the InputStream to read lines from.
+     * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9626,11 +8918,11 @@ public final class IOUtil {
     /**
      * Parse the specified InputStream line by line.
      *
-     * @param <E>        The type of exception that the lineAction may throw during line processing.
-     * @param <E2>       The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param source     The InputStream to read lines from.
-     * @param lineAction The action to perform on each line.
-     * @param onComplete The action to perform after all lines have been processed successfully.
+     * @param <E>        the type of exception that the lineAction may throw during line processing.
+     * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param source     the InputStream to read lines from.
+     * @param lineAction the action to perform on each line.
+     * @param onComplete the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
@@ -9645,11 +8937,11 @@ public final class IOUtil {
     /**
      * Parse the specified InputStream line by line.
      *
-     * @param <E>        The type of exception that the lineAction may throw during line processing.
-     * @param source     The InputStream to read lines from.
-     * @param lineOffset The number of lines to skip from the beginning.
-     * @param count      The maximum number of lines to process after the offset.
-     * @param lineAction The action to perform on each line.
+     * @param <E>        the type of exception that the lineAction may throw during line processing.
+     * @param source     the InputStream to read lines from.
+     * @param lineOffset the number of lines to skip from the beginning.
+     * @param count      the maximum number of lines to process after the offset.
+     * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9663,13 +8955,13 @@ public final class IOUtil {
     /**
      * Parse the specified InputStream line by line.
      *
-     * @param <E>        The type of exception that the lineAction may throw during line processing.
-     * @param <E2>       The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param source     The InputStream to read lines from.
-     * @param lineOffset The number of lines to skip from the beginning.
-     * @param count      The maximum number of lines to process after the offset.
-     * @param lineAction The action to perform on each line.
-     * @param onComplete The action to perform after all lines have been processed successfully.
+     * @param <E>        the type of exception that the lineAction may throw during line processing.
+     * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param source     the InputStream to read lines from.
+     * @param lineOffset the number of lines to skip from the beginning.
+     * @param count      the maximum number of lines to process after the offset.
+     * @param lineAction the action to perform on each line.
+     * @param onComplete the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
@@ -9684,13 +8976,13 @@ public final class IOUtil {
     /**
      * Parse the specified InputStream line by line.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param source           The InputStream to read lines from.
-     * @param lineOffset       The number of lines to skip from the beginning.
-     * @param count            The maximum number of lines to process after the offset.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param source           the InputStream to read lines from.
+     * @param lineOffset       the number of lines to skip from the beginning.
+     * @param count            the maximum number of lines to process after the offset.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9704,15 +8996,15 @@ public final class IOUtil {
     /**
      * Parse the specified InputStream line by line.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param <E2>             The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param source           The InputStream to read lines from.
-     * @param lineOffset       The number of lines to skip from the beginning.
-     * @param count            The maximum number of lines to process after the offset.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
-     * @param onComplete       The action to perform after all lines have been processed successfully.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param source           the InputStream to read lines from.
+     * @param lineOffset       the number of lines to skip from the beginning.
+     * @param count            the maximum number of lines to process after the offset.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
+     * @param onComplete       the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
@@ -9734,9 +9026,9 @@ public final class IOUtil {
     /**
      * Parse the specified Reader line by line.
      *
-     * @param <E>        The type of exception that the lineAction may throw during line processing.
-     * @param source     The Reader to read lines from.
-     * @param lineAction The action to perform on each line.
+     * @param <E>        the type of exception that the lineAction may throw during line processing.
+     * @param source     the Reader to read lines from.
+     * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9750,11 +9042,11 @@ public final class IOUtil {
     /**
      * Parse the specified Reader line by line.
      *
-     * @param <E>        The type of exception that the lineAction may throw during line processing.
-     * @param <E2>       The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param source     The Reader to read lines from.
-     * @param lineAction The action to perform on each line.
-     * @param onComplete The action to perform after all lines have been processed successfully.
+     * @param <E>        the type of exception that the lineAction may throw during line processing.
+     * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param source     the Reader to read lines from.
+     * @param lineAction the action to perform on each line.
+     * @param onComplete the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
@@ -9769,11 +9061,11 @@ public final class IOUtil {
     /**
      * Parse the specified Reader line by line.
      *
-     * @param <E>        The type of exception that the lineAction may throw during line processing.
-     * @param source     The Reader to read lines from.
-     * @param lineOffset The number of lines to skip from the beginning.
-     * @param count      The maximum number of lines to process after the offset.
-     * @param lineAction The action to perform on each line.
+     * @param <E>        the type of exception that the lineAction may throw during line processing.
+     * @param source     the Reader to read lines from.
+     * @param lineOffset the number of lines to skip from the beginning.
+     * @param count      the maximum number of lines to process after the offset.
+     * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9787,13 +9079,13 @@ public final class IOUtil {
     /**
      * Parse the specified Reader line by line.
      *
-     * @param <E>        The type of exception that the lineAction may throw during line processing.
-     * @param <E2>       The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param source     The Reader to read lines from.
-     * @param lineOffset The number of lines to skip from the beginning.
-     * @param count      The maximum number of lines to process after the offset.
-     * @param lineAction The action to perform on each line.
-     * @param onComplete The action to perform after all lines have been processed successfully.
+     * @param <E>        the type of exception that the lineAction may throw during line processing.
+     * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param source     the Reader to read lines from.
+     * @param lineOffset the number of lines to skip from the beginning.
+     * @param count      the maximum number of lines to process after the offset.
+     * @param lineAction the action to perform on each line.
+     * @param onComplete the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
@@ -9808,13 +9100,13 @@ public final class IOUtil {
     /**
      * Parse the specified Reader line by line.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param source           The Reader to read lines from.
-     * @param lineOffset       The number of lines to skip from the beginning.
-     * @param count            The maximum number of lines to process after the offset.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param source           the Reader to read lines from.
+     * @param lineOffset       the number of lines to skip from the beginning.
+     * @param count            the maximum number of lines to process after the offset.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
@@ -9828,15 +9120,15 @@ public final class IOUtil {
     /**
      * Parse the specified Reader line by line.
      *
-     * @param <E>              The type of exception that the lineAction may throw during line processing.
-     * @param <E2>             The type of exception that the onComplete callback may throw after all lines are processed.
-     * @param source           The Reader to read lines from.
-     * @param lineOffset       The number of lines to skip from the beginning.
-     * @param count            The maximum number of lines to process after the offset.
-     * @param processThreadNum The number of worker threads for parallel processing. 0 or negative for sequential processing.
-     * @param queueSize        The size of the buffer queue between reader and processor threads.
-     * @param lineAction       The action to perform on each line.
-     * @param onComplete       The action to perform after all lines have been processed successfully.
+     * @param <E>              the type of exception that the lineAction may throw during line processing.
+     * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
+     * @param source           the Reader to read lines from.
+     * @param lineOffset       the number of lines to skip from the beginning.
+     * @param count            the maximum number of lines to process after the offset.
+     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param queueSize        the size of the buffer queue between reader and processor threads.
+     * @param lineAction       the action to perform on each line.
+     * @param onComplete       the action to perform after all lines have been processed successfully.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
@@ -9851,9 +9143,9 @@ public final class IOUtil {
     /**
      * Opens a file and returns an InputStream. Handles .gz and .zip files automatically.
      *
-     * @param source The file to open. Must not be {@code null}.
-     * @param outputZipFile A holder for the ZipFile if the source is a .zip file.
-     * @return An InputStream for reading the file.
+     * @param source the file to open, must not be {@code null}
+     * @param outputZipFile a holder for the ZipFile if the source is a .zip file.
+     * @return an InputStream for reading the file.
      * @throws IOException if an I/O error occurs.
      */
     private static InputStream openFile(final File source, final Holder<ZipFile> outputZipFile) throws IOException {
@@ -9887,9 +9179,9 @@ public final class IOUtil {
     /**
      * Converts a CharSequence to a byte array using the specified charset.
      *
-     * @param cs      The CharSequence to convert.
-     * @param charset The charset to use for encoding.
-     * @return The byte array representation of the CharSequence.
+     * @param cs      the CharSequence to convert.
+     * @param charset the charset to use for encoding.
+     * @return the byte array representation of the CharSequence.
      */
     private static byte[] toByteArray(final CharSequence cs, final Charset charset) {
         return String.valueOf(cs).getBytes(charset);

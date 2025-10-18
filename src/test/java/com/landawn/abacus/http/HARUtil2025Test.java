@@ -372,57 +372,15 @@ public class HARUtil2025Test extends TestBase {
     // Helper methods to create test HAR data
 
     private String createTestHarString(String url, String method) {
-        return "{"
-                + "\"log\": {"
-                + "\"entries\": ["
-                + "{"
-                + "\"request\": {"
-                + "\"method\": \"" + method + "\","
-                + "\"url\": \"" + url + "\","
-                + "\"headers\": ["
-                + "{"
-                + "\"name\": \"Content-Type\","
-                + "\"value\": \"application/json\""
-                + "}"
-                + "],"
-                + "\"postData\": {"
-                + "\"text\": \"{}\","
-                + "\"mimeType\": \"application/json\""
-                + "}"
-                + "}"
-                + "}"
-                + "]"
-                + "}"
-                + "}";
+        return "{" + "\"log\": {" + "\"entries\": [" + "{" + "\"request\": {" + "\"method\": \"" + method + "\"," + "\"url\": \"" + url + "\","
+                + "\"headers\": [" + "{" + "\"name\": \"Content-Type\"," + "\"value\": \"application/json\"" + "}" + "]," + "\"postData\": {"
+                + "\"text\": \"{}\"," + "\"mimeType\": \"application/json\"" + "}" + "}" + "}" + "]" + "}" + "}";
     }
 
     private String createTestHarStringWithMultipleEntries() {
-        return "{"
-                + "\"log\": {"
-                + "\"entries\": ["
-                + "{"
-                + "\"request\": {"
-                + "\"method\": \"GET\","
-                + "\"url\": \"https://api.example.com/users\","
-                + "\"headers\": []"
-                + "}"
-                + "},"
-                + "{"
-                + "\"request\": {"
-                + "\"method\": \"GET\","
-                + "\"url\": \"https://api.example.com/products\","
-                + "\"headers\": []"
-                + "}"
-                + "},"
-                + "{"
-                + "\"request\": {"
-                + "\"method\": \"POST\","
-                + "\"url\": \"https://api.example.com/orders\","
-                + "\"headers\": []"
-                + "}"
-                + "}"
-                + "]"
-                + "}"
-                + "}";
+        return "{" + "\"log\": {" + "\"entries\": [" + "{" + "\"request\": {" + "\"method\": \"GET\"," + "\"url\": \"https://api.example.com/users\","
+                + "\"headers\": []" + "}" + "}," + "{" + "\"request\": {" + "\"method\": \"GET\"," + "\"url\": \"https://api.example.com/products\","
+                + "\"headers\": []" + "}" + "}," + "{" + "\"request\": {" + "\"method\": \"POST\"," + "\"url\": \"https://api.example.com/orders\","
+                + "\"headers\": []" + "}" + "}" + "]" + "}" + "}";
     }
 }

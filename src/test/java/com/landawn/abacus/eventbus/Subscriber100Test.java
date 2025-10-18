@@ -10,8 +10,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ThreadMode;
@@ -30,7 +30,7 @@ public class Subscriber100Test extends TestBase {
     public void testOnMethod() {
         AtomicReference<String> receivedEvent = new AtomicReference<>();
 
-        Subscriber<String> subscriber = new Subscriber<String>() {
+        Subscriber<String> subscriber = new Subscriber<>() {
             @Override
             public void on(String event) {
                 receivedEvent.set(event);
@@ -122,7 +122,7 @@ public class Subscriber100Test extends TestBase {
             throw new RuntimeException("Test exception");
         };
 
-        Subscriber<String> normalSubscriber = new Subscriber<String>() {
+        Subscriber<String> normalSubscriber = new Subscriber<>() {
             String received = null;
 
             @Override
@@ -177,7 +177,7 @@ public class Subscriber100Test extends TestBase {
     public void testAnonymousClassImplementation() {
         final List<String> events = new ArrayList<>();
 
-        Subscriber<String> subscriber = new Subscriber<String>() {
+        Subscriber<String> subscriber = new Subscriber<>() {
             @Override
             public void on(String event) {
                 events.add("Received: " + event);

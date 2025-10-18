@@ -49,22 +49,6 @@ class Log4Jv2Logger extends AbstractLogger {
      */
     public static final String FQCN = Log4Jv2Logger.class.getName();
 
-    // private static final String LOG4J_XML = "log4j.xml";
-    // private static final boolean existsLog4JFile;
-    //
-    // static {
-    // boolean temp = false;
-    //
-    // try {
-    // URL url = Loader.getResource(LOG4J_XML);
-    // temp = (url != null) && (url.getFile() != null);
-    // } catch (Exception e) {
-    // // ignore
-    // }
-    //
-    // existsLog4JFile = temp;
-    // }
-    //
     private final ExtendedLogger loggerImpl;
 
     /**

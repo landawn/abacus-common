@@ -97,8 +97,8 @@ import java.text.DecimalFormat;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.math3.util.FastMath;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -229,36 +229,36 @@ public class Numbers100Test extends TestBase {
 
     @Test
     public void testExtractFirstInt() {
-        assertEquals(123, extractFirstInt("abc123def"));
-        assertEquals(-456, extractFirstInt("xyz-456abc"));
-        assertEquals(789, extractFirstInt("789"));
-        assertEquals(0, extractFirstInt("abc"));
-        assertEquals(0, extractFirstInt(""));
-        assertEquals(0, extractFirstInt(null));
+        assertEquals(123, extractFirstInt("abc123def").get());
+        assertEquals(-456, extractFirstInt("xyz-456abc").get());
+        assertEquals(789, extractFirstInt("789").get());
+        assertTrue(extractFirstInt("abc").isEmpty());
+        assertTrue(extractFirstInt(" ").isEmpty());
+        assertTrue(extractFirstInt(null).isEmpty());
         assertEquals(999, extractFirstInt("no numbers here", 999));
         assertEquals(42, extractFirstInt("answer is 42", 0));
     }
 
     @Test
     public void testExtractFirstLong() {
-        assertEquals(1234567890123L, extractFirstLong("abc1234567890123def"));
-        assertEquals(-9876543210L, extractFirstLong("xyz-9876543210abc"));
-        assertEquals(0L, extractFirstLong("no numbers"));
-        assertEquals(0L, extractFirstLong(""));
-        assertEquals(0L, extractFirstLong(null));
+        assertEquals(1234567890123L, extractFirstLong("abc1234567890123def").get());
+        assertEquals(-9876543210L, extractFirstLong("xyz-9876543210abc").get());
+        assertTrue(extractFirstLong("abc").isEmpty());
+        assertTrue(extractFirstLong(" ").isEmpty());
+        assertTrue(extractFirstLong(null).isEmpty());
         assertEquals(999L, extractFirstLong("no numbers here", 999L));
     }
 
     @Test
     public void testExtractFirstDouble() {
-        assertEquals(123.456, extractFirstDouble("abc123.456def"), DELTA);
-        assertEquals(-78.9, extractFirstDouble("xyz-78.9abc"), DELTA);
-        assertEquals(0.0, extractFirstDouble("no numbers"), DELTA);
+        assertEquals(123.456, extractFirstDouble("abc123.456def").orElseThrow(), DELTA);
+        assertEquals(-78.9, extractFirstDouble("xyz-78.9abc").orElseThrow(), DELTA);
+        assertTrue(extractFirstDouble("no numbers").isEmpty());
         assertEquals(99.9, extractFirstDouble("no numbers", 99.9), DELTA);
 
-        assertEquals(1.23e4, extractFirstDouble("value is 1.23e4", true), DELTA);
-        assertEquals(1.23, extractFirstDouble("value is 1.23e4", false), DELTA);
-        assertEquals(-5.67e-3, extractFirstDouble("result: -5.67e-3", true), DELTA);
+        assertEquals(1.23e4, extractFirstDouble("value is 1.23e4", true).orElseThrow(), DELTA);
+        assertEquals(1.23, extractFirstDouble("value is 1.23e4", false).orElseThrow(), DELTA);
+        assertEquals(-5.67e-3, extractFirstDouble("result: -5.67e-3", true).orElseThrow(), DELTA);
     }
 
     @Test
@@ -400,8 +400,8 @@ public class Numbers100Test extends TestBase {
     public void testToIntExact() {
         assertEquals(12345, toIntExact(12345L));
         assertEquals(-12345, toIntExact(-12345L));
-        assertEquals(Integer.MAX_VALUE, toIntExact((long) Integer.MAX_VALUE));
-        assertEquals(Integer.MIN_VALUE, toIntExact((long) Integer.MIN_VALUE));
+        assertEquals(Integer.MAX_VALUE, toIntExact(Integer.MAX_VALUE));
+        assertEquals(Integer.MIN_VALUE, toIntExact(Integer.MIN_VALUE));
 
         try {
             toIntExact(Integer.MAX_VALUE + 1L);
@@ -1157,8 +1157,8 @@ public class Numbers100Test extends TestBase {
     public void testSaturatedCast() {
         assertEquals(100, saturatedCast(100L));
         assertEquals(-100, saturatedCast(-100L));
-        assertEquals(Integer.MAX_VALUE, saturatedCast((long) Integer.MAX_VALUE));
-        assertEquals(Integer.MIN_VALUE, saturatedCast((long) Integer.MIN_VALUE));
+        assertEquals(Integer.MAX_VALUE, saturatedCast(Integer.MAX_VALUE));
+        assertEquals(Integer.MIN_VALUE, saturatedCast(Integer.MIN_VALUE));
         assertEquals(Integer.MAX_VALUE, saturatedCast(Long.MAX_VALUE));
         assertEquals(Integer.MIN_VALUE, saturatedCast(Long.MIN_VALUE));
         assertEquals(Integer.MAX_VALUE, saturatedCast(Integer.MAX_VALUE + 1L));

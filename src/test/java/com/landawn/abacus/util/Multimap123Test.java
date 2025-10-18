@@ -29,8 +29,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.If.OrElse;
@@ -46,8 +46,8 @@ public class Multimap123Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        listMultimap = N.newListMultimap();
-        setMultimap = N.newSetMultimap();
+        listMultimap = CommonUtil.newListMultimap();
+        setMultimap = CommonUtil.newSetMultimap();
     }
 
     @Test
@@ -406,7 +406,7 @@ public class Multimap123Test extends TestBase {
 
     @Test
     public void testPutManyMultimap() {
-        ListMultimap<String, Integer> other = N.newListMultimap();
+        ListMultimap<String, Integer> other = CommonUtil.newListMultimap();
         other.put("key1", 10);
         other.put("key1", 20);
         other.put("key2", 30);
@@ -414,7 +414,7 @@ public class Multimap123Test extends TestBase {
         assertTrue(listMultimap.putMany(other));
         assertEquals(3, listMultimap.totalCountOfValues());
 
-        ListMultimap<String, Integer> empty = N.newListMultimap();
+        ListMultimap<String, Integer> empty = CommonUtil.newListMultimap();
         assertFalse(listMultimap.putMany(empty));
         assertFalse(listMultimap.putMany((Multimap<String, Integer, ? extends Collection<Integer>>) null));
     }
@@ -525,7 +525,7 @@ public class Multimap123Test extends TestBase {
         listMultimap.put("key1", 20);
         listMultimap.put("key2", 30);
 
-        ListMultimap<String, Integer> toRemove = N.newListMultimap();
+        ListMultimap<String, Integer> toRemove = CommonUtil.newListMultimap();
         toRemove.put("key1", 10);
         toRemove.put("key2", 30);
 
@@ -534,7 +534,7 @@ public class Multimap123Test extends TestBase {
         assertTrue(listMultimap.contains("key1", 20));
         assertFalse(listMultimap.containsKey("key2"));
 
-        ListMultimap<String, Integer> empty = N.newListMultimap();
+        ListMultimap<String, Integer> empty = CommonUtil.newListMultimap();
         assertFalse(listMultimap.removeMany(empty));
     }
 
@@ -1159,8 +1159,8 @@ public class Multimap123Test extends TestBase {
 
     @Test
     public void testHashCode() {
-        ListMultimap<String, Integer> mm1 = N.newListMultimap();
-        ListMultimap<String, Integer> mm2 = N.newListMultimap();
+        ListMultimap<String, Integer> mm1 = CommonUtil.newListMultimap();
+        ListMultimap<String, Integer> mm2 = CommonUtil.newListMultimap();
 
         assertEquals(mm1.hashCode(), mm2.hashCode());
 
@@ -1174,8 +1174,8 @@ public class Multimap123Test extends TestBase {
 
     @Test
     public void testEquals() {
-        ListMultimap<String, Integer> mm1 = N.newListMultimap();
-        ListMultimap<String, Integer> mm2 = N.newListMultimap();
+        ListMultimap<String, Integer> mm1 = CommonUtil.newListMultimap();
+        ListMultimap<String, Integer> mm2 = CommonUtil.newListMultimap();
 
         assertTrue(mm1.equals(mm2));
         assertTrue(mm1.equals(mm1));
@@ -1192,7 +1192,7 @@ public class Multimap123Test extends TestBase {
         assertFalse(mm1.equals(null));
         assertFalse(mm1.equals("not a multimap"));
 
-        SetMultimap<String, Integer> setMm = N.newSetMultimap();
+        SetMultimap<String, Integer> setMm = CommonUtil.newSetMultimap();
         setMm.put("key1", 10);
         setMm.put("key2", 20);
         assertFalse(mm1.equals(setMm));

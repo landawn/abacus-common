@@ -3,12 +3,11 @@ package com.landawn.abacus.parser;
 import org.apache.avro.Schema;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
-
-import com.landawn.abacus.parser.AvroDeserializationConfig.ADC;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.AvroDeserializationConfig.ADC;
 
 @Tag("new-test")
 public class AvroDeserializationConfig100Test extends TestBase {

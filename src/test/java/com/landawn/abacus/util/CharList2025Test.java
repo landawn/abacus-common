@@ -1,6 +1,5 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -14,8 +13,8 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalChar;
@@ -1266,9 +1265,9 @@ public class CharList2025Test extends TestBase {
         CharList list = CharList.of('a', 'b', 'c');
         IntList intList = list.toIntList();
         assertEquals(3, intList.size());
-        assertEquals((int) 'a', intList.get(0));
-        assertEquals((int) 'b', intList.get(1));
-        assertEquals((int) 'c', intList.get(2));
+        assertEquals('a', intList.get(0));
+        assertEquals('b', intList.get(1));
+        assertEquals('c', intList.get(2));
     }
 
     @Test

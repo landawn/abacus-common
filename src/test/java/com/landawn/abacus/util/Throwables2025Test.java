@@ -1,6 +1,5 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,11 +20,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Throwables.Callable;
 import com.landawn.abacus.util.Throwables.Iterator;
 import com.landawn.abacus.util.Throwables.LazyInitializer;
 import com.landawn.abacus.util.u.Nullable;
@@ -832,7 +830,7 @@ public class Throwables2025Test extends TestBase {
     public void testIterator_Close_MultipleCalls() throws Exception {
         AtomicInteger closeCount = new AtomicInteger(0);
 
-        Iterator<String, Exception> iter = new Iterator<String, Exception>() {
+        Iterator<String, Exception> iter = new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return false;
@@ -860,7 +858,7 @@ public class Throwables2025Test extends TestBase {
     public void testIterator_Close_CallsCloseResource() throws Exception {
         AtomicBoolean closed = new AtomicBoolean(false);
 
-        Iterator<String, Exception> iter = new Iterator<String, Exception>() {
+        Iterator<String, Exception> iter = new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return false;

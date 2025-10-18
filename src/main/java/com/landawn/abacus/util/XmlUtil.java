@@ -1365,7 +1365,7 @@ public final class XmlUtil {
      * <pre>{@code
      * char[] chars = "Data: <value> & 'text'".toCharArray();
      * StringBuilder sb = new StringBuilder();
-     * XmlUtil.writeCharacters(chars, 7, 14, sb);
+     * XmlUtil.writeCharacters(chars, 6, 14, sb);
      * // Result: "&lt;value&gt; &amp; "
      * }</pre>
      *

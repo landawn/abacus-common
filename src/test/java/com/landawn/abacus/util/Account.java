@@ -213,18 +213,18 @@ public class Account implements ExtendDirtyBasicPNL.AccountPNL {
     @Override
     public int hashCode() {
         int h = 17;
-        h = 31 * h + N.hashCode(id);
-        h = 31 * h + N.hashCode(gui);
-        h = 31 * h + N.hashCode(emailAddress);
-        h = 31 * h + N.hashCode(firstName);
-        h = 31 * h + N.hashCode(middleName);
-        h = 31 * h + N.hashCode(lastName);
-        h = 31 * h + N.hashCode(birthDate);
-        h = 31 * h + N.hashCode(status);
-        h = 31 * h + N.hashCode(lastUpdateTime);
-        h = 31 * h + N.hashCode(createdTime);
-        h = 31 * h + N.hashCode(contact);
-        return 31 * h + N.hashCode(devices);
+        h = 31 * h + CommonUtil.hashCode(id);
+        h = 31 * h + CommonUtil.hashCode(gui);
+        h = 31 * h + CommonUtil.hashCode(emailAddress);
+        h = 31 * h + CommonUtil.hashCode(firstName);
+        h = 31 * h + CommonUtil.hashCode(middleName);
+        h = 31 * h + CommonUtil.hashCode(lastName);
+        h = 31 * h + CommonUtil.hashCode(birthDate);
+        h = 31 * h + CommonUtil.hashCode(status);
+        h = 31 * h + CommonUtil.hashCode(lastUpdateTime);
+        h = 31 * h + CommonUtil.hashCode(createdTime);
+        h = 31 * h + CommonUtil.hashCode(contact);
+        return 31 * h + CommonUtil.hashCode(devices);
     }
 
     @Override
@@ -234,10 +234,10 @@ public class Account implements ExtendDirtyBasicPNL.AccountPNL {
         }
 
         if (obj instanceof Account other) {
-            if (N.equals(id, other.id) && N.equals(gui, other.gui) && N.equals(emailAddress, other.emailAddress) && N.equals(firstName, other.firstName)
-                    && N.equals(middleName, other.middleName) && N.equals(lastName, other.lastName) && N.equals(birthDate, other.birthDate)
-                    && N.equals(status, other.status) && N.equals(lastUpdateTime, other.lastUpdateTime) && N.equals(createdTime, other.createdTime)
-                    && N.equals(contact, other.contact) && N.equals(devices, other.devices)) {
+            if (CommonUtil.equals(id, other.id) && CommonUtil.equals(gui, other.gui) && CommonUtil.equals(emailAddress, other.emailAddress) && CommonUtil.equals(firstName, other.firstName)
+                    && CommonUtil.equals(middleName, other.middleName) && CommonUtil.equals(lastName, other.lastName) && CommonUtil.equals(birthDate, other.birthDate)
+                    && CommonUtil.equals(status, other.status) && CommonUtil.equals(lastUpdateTime, other.lastUpdateTime) && CommonUtil.equals(createdTime, other.createdTime)
+                    && CommonUtil.equals(contact, other.contact) && CommonUtil.equals(devices, other.devices)) {
 
                 return true;
             }
@@ -248,10 +248,10 @@ public class Account implements ExtendDirtyBasicPNL.AccountPNL {
 
     @Override
     public String toString() {
-        return "{" + "id=" + N.toString(id) + ", " + "gui=" + N.toString(gui) + ", " + "emailAddress=" + N.toString(emailAddress) + ", " + "firstName="
-                + N.toString(firstName) + ", " + "middleName=" + N.toString(middleName) + ", " + "lastName=" + N.toString(lastName) + ", " + "birthDate="
-                + N.toString(birthDate) + ", " + "status=" + N.toString(status) + ", " + "lastUpdateTime=" + N.toString(lastUpdateTime) + ", " + "createdTime="
-                + N.toString(createdTime) + ", " + "contact=" + N.toString(contact) + ", " + "devices=" + N.toString(devices) + "}";
+        return "{" + "id=" + CommonUtil.toString(id) + ", " + "gui=" + CommonUtil.toString(gui) + ", " + "emailAddress=" + CommonUtil.toString(emailAddress) + ", " + "firstName="
+                + CommonUtil.toString(firstName) + ", " + "middleName=" + CommonUtil.toString(middleName) + ", " + "lastName=" + CommonUtil.toString(lastName) + ", " + "birthDate="
+                + CommonUtil.toString(birthDate) + ", " + "status=" + CommonUtil.toString(status) + ", " + "lastUpdateTime=" + CommonUtil.toString(lastUpdateTime) + ", " + "createdTime="
+                + CommonUtil.toString(createdTime) + ", " + "contact=" + CommonUtil.toString(contact) + ", " + "devices=" + CommonUtil.toString(devices) + "}";
     }
 
     /*

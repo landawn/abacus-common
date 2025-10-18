@@ -303,7 +303,7 @@ public class FastJson2025Test extends TestBase {
     @Test
     public void test_fromJson_string_typeReference() {
         String json = "[{\"name\":\"John\",\"age\":30},{\"name\":\"Jane\",\"age\":25}]";
-        TypeReference<List<Person>> typeRef = new TypeReference<List<Person>>() {
+        TypeReference<List<Person>> typeRef = new TypeReference<>() {
         };
         List<Person> people = FastJson.fromJson(json, typeRef);
         assertNotNull(people);
@@ -315,7 +315,7 @@ public class FastJson2025Test extends TestBase {
     @Test
     public void test_fromJson_string_typeReference_withFeatures() {
         String json = "[{\"name\":\"John\",\"age\":30}]";
-        TypeReference<List<Person>> typeRef = new TypeReference<List<Person>>() {
+        TypeReference<List<Person>> typeRef = new TypeReference<>() {
         };
         List<Person> people = FastJson.fromJson(json, typeRef, JSONReader.Feature.SupportSmartMatch);
         assertNotNull(people);
@@ -325,7 +325,7 @@ public class FastJson2025Test extends TestBase {
     @Test
     public void test_fromJson_string_typeReference_withContext() {
         String json = "[{\"name\":\"John\",\"age\":30}]";
-        TypeReference<List<Person>> typeRef = new TypeReference<List<Person>>() {
+        TypeReference<List<Person>> typeRef = new TypeReference<>() {
         };
         JSONReader.Context context = new JSONReader.Context();
         List<Person> people = FastJson.fromJson(json, typeRef, context);
@@ -412,7 +412,7 @@ public class FastJson2025Test extends TestBase {
         original.add(new Person("Alice", 28));
         original.add(new Person("Bob", 35));
         String json = FastJson.toJson(original);
-        TypeReference<List<Person>> typeRef = new TypeReference<List<Person>>() {
+        TypeReference<List<Person>> typeRef = new TypeReference<>() {
         };
         List<Person> restored = FastJson.fromJson(json, typeRef);
         assertEquals(original.size(), restored.size());
@@ -426,7 +426,7 @@ public class FastJson2025Test extends TestBase {
         original.put("one", 1);
         original.put("two", 2);
         String json = FastJson.toJson(original);
-        TypeReference<Map<String, Integer>> typeRef = new TypeReference<Map<String, Integer>>() {
+        TypeReference<Map<String, Integer>> typeRef = new TypeReference<>() {
         };
         Map<String, Integer> restored = FastJson.fromJson(json, typeRef);
         assertEquals(original.size(), restored.size());
@@ -479,7 +479,7 @@ public class FastJson2025Test extends TestBase {
         String json = FastJson.toJson(emptyList);
         assertEquals("[]", json);
 
-        TypeReference<List<Person>> typeRef = new TypeReference<List<Person>>() {
+        TypeReference<List<Person>> typeRef = new TypeReference<>() {
         };
         List<Person> restored = FastJson.fromJson(json, typeRef);
         assertNotNull(restored);
@@ -492,7 +492,7 @@ public class FastJson2025Test extends TestBase {
         String json = FastJson.toJson(emptyMap);
         assertEquals("{}", json);
 
-        TypeReference<Map<String, Object>> typeRef = new TypeReference<Map<String, Object>>() {
+        TypeReference<Map<String, Object>> typeRef = new TypeReference<>() {
         };
         Map<String, Object> restored = FastJson.fromJson(json, typeRef);
         assertNotNull(restored);

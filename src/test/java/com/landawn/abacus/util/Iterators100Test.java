@@ -23,8 +23,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Nullable;
@@ -885,8 +885,8 @@ public class Iterators100Test extends TestBase {
 
     @Test
     public void testTriIteratorConcat() {
-        TriIterator<String, Integer, Boolean> tri1 = TriIterator.zip(N.asList("a"), N.asList(1), N.asList(true));
-        TriIterator<String, Integer, Boolean> tri2 = TriIterator.zip(N.asList("b"), N.asList(2), N.asList(false));
+        TriIterator<String, Integer, Boolean> tri1 = TriIterator.zip(CommonUtil.asList("a"), CommonUtil.asList(1), CommonUtil.asList(true));
+        TriIterator<String, Integer, Boolean> tri2 = TriIterator.zip(CommonUtil.asList("b"), CommonUtil.asList(2), CommonUtil.asList(false));
 
         TriIterator<String, Integer, Boolean> result = Iterators.concat(tri1, tri2);
 

@@ -177,18 +177,6 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     @Override
     public String declaringName() {
-        //        final String name = getName();
-        //        final int index = name.lastIndexOf('.');
-        //
-        //        if (index >= 0) {
-        //            final int index2 = name.lastIndexOf('<');
-        //
-        //            if (index2 < 0 || index2 > index) {
-        //                return name.substring(index + 1);
-        //            }
-        //        }
-        //
-        //        return name;
 
         return name;
     }

@@ -76,7 +76,7 @@ public final class NameUtil {
      * <p>This method is useful for determining whether a string has already been
      * cached and thus can be retrieved efficiently without additional processing.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * if (NameUtil.isCachedName("firstName")) {
      *     // Name is already cached
@@ -97,7 +97,7 @@ public final class NameUtil {
      * and then returned. This ensures that frequently used strings share the same
      * reference, reducing memory usage.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * String cached = NameUtil.getCachedName("firstName");
      * // All subsequent calls with "firstName" will return the same reference
@@ -123,7 +123,7 @@ public final class NameUtil {
      * available space. The force parameter determines whether to bypass the
      * duplicate check.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * String cached = NameUtil.cacheName("com.example.Person", false);
      * // The string is now interned and cached
@@ -153,7 +153,7 @@ public final class NameUtil {
      * parent name followed by a period. This is useful for validating hierarchical
      * naming structures.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * boolean isCanonical = NameUtil.isCanonicalName("com.example.Person", 
      *                                                "com.example.Person.firstName");
@@ -180,7 +180,7 @@ public final class NameUtil {
      * 
      * <p>The result is cached for efficient repeated access.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * String simple = NameUtil.getSimpleName("com.example.Person.firstName");
      * // Returns "firstName"
@@ -222,7 +222,7 @@ public final class NameUtil {
      * 
      * <p>The result is cached for efficient repeated access.</p>
      * 
-     * <p>Example:</p>
+     * <p>Example usage:</p></p>
      * <pre>{@code
      * String parent = NameUtil.getParentName("com.example.Person.firstName");
      * // Returns "com.example.Person"

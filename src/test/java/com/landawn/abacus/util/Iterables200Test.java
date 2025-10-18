@@ -27,8 +27,8 @@ import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Nullable;
@@ -156,7 +156,7 @@ public class Iterables200Test extends TestBase {
     @Test
     public void testMinIteratorComparable() {
         assertTrue(Iterables.min((Iterator<String>) null).isEmpty());
-        assertTrue(Iterables.min(list(N.EMPTY_STRING_ARRAY).iterator()).isEmpty());
+        assertTrue(Iterables.min(list(CommonUtil.EMPTY_STRING_ARRAY).iterator()).isEmpty());
         assertEquals("a", Iterables.min(list("a", "b", "c").iterator()).get());
         assertEquals("a", Iterables.min(list("c", "b", "a").iterator()).get());
         assertEquals("a", Iterables.min(list("a", null, "c").iterator()).get());
@@ -166,7 +166,7 @@ public class Iterables200Test extends TestBase {
     public void testMinIteratorComparator() {
         Comparator<String> reverseOrder = Comparator.reverseOrder();
         assertTrue(Iterables.min((Iterator<String>) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.min(list(N.EMPTY_STRING_ARRAY).iterator(), reverseOrder).isEmpty());
+        assertTrue(Iterables.min(list(CommonUtil.EMPTY_STRING_ARRAY).iterator(), reverseOrder).isEmpty());
         assertEquals("c", Iterables.min(list("a", "b", "c").iterator(), reverseOrder).get());
         assertEquals("a", Iterables.min(list("a", "b", "c").iterator(), Comparator.naturalOrder()).get());
         assertEquals("a", Iterables.min(list("a", null, "c").iterator(), Comparator.nullsLast(Comparator.naturalOrder())).get());
@@ -192,7 +192,7 @@ public class Iterables200Test extends TestBase {
     @Test
     public void testMinByIterator() {
         assertTrue(Iterables.minBy((Iterator<String>) null, String::length).isEmpty());
-        assertTrue(Iterables.minBy(list(N.EMPTY_STRING_ARRAY).iterator(), String::length).isEmpty());
+        assertTrue(Iterables.minBy(list(CommonUtil.EMPTY_STRING_ARRAY).iterator(), String::length).isEmpty());
         assertEquals("a", Iterables.minBy(list("aaa", "a", "bb").iterator(), String::length).get());
         assertEquals("bb", Iterables.minBy(list("aaa", null, "bb").iterator(), s -> s == null ? 1000 : s.length()).get());
     }
@@ -215,7 +215,7 @@ public class Iterables200Test extends TestBase {
     @Test
     public void testMinIntIteratorExtractor() {
         assertTrue(Iterables.minInt((Iterator<String>) null, String::length).isEmpty());
-        assertTrue(Iterables.minInt(list(N.EMPTY_STRING_ARRAY).iterator(), String::length).isEmpty());
+        assertTrue(Iterables.minInt(list(CommonUtil.EMPTY_STRING_ARRAY).iterator(), String::length).isEmpty());
         assertEquals(1, Iterables.minInt(list("aaa", "a", "bb").iterator(), String::length).get());
     }
 
@@ -240,7 +240,7 @@ public class Iterables200Test extends TestBase {
     public void testMinLongIteratorExtractor() {
         ToLongFunction<String> lengthToLong = s -> (long) s.length();
         assertTrue(Iterables.minLong((Iterator<String>) null, lengthToLong).isEmpty());
-        assertTrue(Iterables.minLong(list(N.EMPTY_STRING_ARRAY).iterator(), lengthToLong).isEmpty());
+        assertTrue(Iterables.minLong(list(CommonUtil.EMPTY_STRING_ARRAY).iterator(), lengthToLong).isEmpty());
         assertEquals(1L, Iterables.minLong(list("aaa", "a", "bb").iterator(), lengthToLong).get());
     }
 
@@ -264,7 +264,7 @@ public class Iterables200Test extends TestBase {
     public void testMinDoubleIteratorExtractor() {
         ToDoubleFunction<String> lengthToDouble = s -> (double) s.length();
         assertTrue(Iterables.minDouble((Iterator<String>) null, lengthToDouble).isEmpty());
-        assertTrue(Iterables.minDouble(list(N.EMPTY_STRING_ARRAY).iterator(), lengthToDouble).isEmpty());
+        assertTrue(Iterables.minDouble(list(CommonUtil.EMPTY_STRING_ARRAY).iterator(), lengthToDouble).isEmpty());
         assertEquals(1.0, Iterables.minDouble(list("aaa", "a", "bb").iterator(), lengthToDouble).get());
     }
 
@@ -362,7 +362,7 @@ public class Iterables200Test extends TestBase {
     @Test
     public void testMaxIteratorComparable() {
         assertTrue(Iterables.max((Iterator<String>) null).isEmpty());
-        assertTrue(Iterables.max(list(N.EMPTY_STRING_ARRAY).iterator()).isEmpty());
+        assertTrue(Iterables.max(list(CommonUtil.EMPTY_STRING_ARRAY).iterator()).isEmpty());
         assertEquals("c", Iterables.max(list("a", "b", "c").iterator()).get());
         assertEquals("c", Iterables.max(list("a", null, "c").iterator()).get());
     }
@@ -371,7 +371,7 @@ public class Iterables200Test extends TestBase {
     public void testMaxIteratorComparator() {
         Comparator<String> reverseOrder = Comparator.reverseOrder();
         assertTrue(Iterables.max((Iterator<String>) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.max(list(N.EMPTY_STRING_ARRAY).iterator(), reverseOrder).isEmpty());
+        assertTrue(Iterables.max(list(CommonUtil.EMPTY_STRING_ARRAY).iterator(), reverseOrder).isEmpty());
         assertEquals("a", Iterables.max(list("a", "b", "c").iterator(), reverseOrder).get());
         assertEquals("c", Iterables.max(list("a", "b", "c").iterator(), Comparator.naturalOrder()).get());
         assertEquals("c", Iterables.max(list("a", null, "c").iterator(), Comparator.nullsFirst(Comparator.naturalOrder())).get());
@@ -397,7 +397,7 @@ public class Iterables200Test extends TestBase {
     @Test
     public void testMaxByIterator() {
         assertTrue(Iterables.maxBy((Iterator<String>) null, String::length).isEmpty());
-        assertTrue(Iterables.maxBy(list(N.EMPTY_STRING_ARRAY).iterator(), String::length).isEmpty());
+        assertTrue(Iterables.maxBy(list(CommonUtil.EMPTY_STRING_ARRAY).iterator(), String::length).isEmpty());
         assertEquals("aaa", Iterables.maxBy(list("aaa", "a", "bb").iterator(), String::length).get());
         assertEquals("aaa", Iterables.maxBy(list("aaa", null, "bb").iterator(), s -> s == null ? -1 : s.length()).get());
     }
@@ -419,7 +419,7 @@ public class Iterables200Test extends TestBase {
     @Test
     public void testMaxIntIteratorExtractor() {
         assertTrue(Iterables.maxInt((Iterator<String>) null, String::length).isEmpty());
-        assertTrue(Iterables.maxInt(list(N.EMPTY_STRING_ARRAY).iterator(), String::length).isEmpty());
+        assertTrue(Iterables.maxInt(list(CommonUtil.EMPTY_STRING_ARRAY).iterator(), String::length).isEmpty());
         assertEquals(3, Iterables.maxInt(list("aaa", "a", "bb").iterator(), String::length).get());
     }
 
@@ -443,7 +443,7 @@ public class Iterables200Test extends TestBase {
     public void testMaxLongIteratorExtractor() {
         ToLongFunction<String> lengthToLong = s -> (long) s.length();
         assertTrue(Iterables.maxLong((Iterator<String>) null, lengthToLong).isEmpty());
-        assertTrue(Iterables.maxLong(list(N.EMPTY_STRING_ARRAY).iterator(), lengthToLong).isEmpty());
+        assertTrue(Iterables.maxLong(list(CommonUtil.EMPTY_STRING_ARRAY).iterator(), lengthToLong).isEmpty());
         assertEquals(3L, Iterables.maxLong(list("aaa", "a", "bb").iterator(), lengthToLong).get());
     }
 
@@ -467,7 +467,7 @@ public class Iterables200Test extends TestBase {
     public void testMaxDoubleIteratorExtractor() {
         ToDoubleFunction<String> lengthToDouble = s -> (double) s.length();
         assertTrue(Iterables.maxDouble((Iterator<String>) null, lengthToDouble).isEmpty());
-        assertTrue(Iterables.maxDouble(list(N.EMPTY_STRING_ARRAY).iterator(), lengthToDouble).isEmpty());
+        assertTrue(Iterables.maxDouble(list(CommonUtil.EMPTY_STRING_ARRAY).iterator(), lengthToDouble).isEmpty());
         assertEquals(3.0, Iterables.maxDouble(list("aaa", "a", "bb").iterator(), lengthToDouble).get());
     }
 
@@ -518,7 +518,7 @@ public class Iterables200Test extends TestBase {
     @Test
     public void testMinMaxIteratorComparable() {
         assertTrue(Iterables.minMax((Iterator<String>) null).isEmpty());
-        assertTrue(Iterables.minMax(list(N.EMPTY_STRING_ARRAY).iterator()).isEmpty());
+        assertTrue(Iterables.minMax(list(CommonUtil.EMPTY_STRING_ARRAY).iterator()).isEmpty());
         Pair<String, String> result = Iterables.minMax(list("b", "a", "c").iterator()).get();
         assertEquals("a", result.left());
         assertEquals("c", result.right());
@@ -528,7 +528,7 @@ public class Iterables200Test extends TestBase {
     public void testMinMaxIteratorComparator() {
         Comparator<String> reverseOrder = Comparator.reverseOrder();
         assertTrue(Iterables.minMax((Iterator<String>) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.minMax(list(N.EMPTY_STRING_ARRAY).iterator(), reverseOrder).isEmpty());
+        assertTrue(Iterables.minMax(list(CommonUtil.EMPTY_STRING_ARRAY).iterator(), reverseOrder).isEmpty());
         Pair<String, String> result = Iterables.minMax(list("b", "a", "c").iterator(), reverseOrder).get();
         assertEquals("c", result.left());
         assertEquals("a", result.right());

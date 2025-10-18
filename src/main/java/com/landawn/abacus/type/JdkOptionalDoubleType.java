@@ -64,6 +64,16 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     }
 
     /**
+     * Returns the default value for OptionalDouble type, which is an empty OptionalDouble.
+     *
+     * @return OptionalDouble.empty()
+     */
+    @Override
+    public OptionalDouble defaultValue() {
+        return OptionalDouble.empty();
+    }
+
+    /**
      * Converts an OptionalDouble to its string representation.
      * If the optional is empty or null, returns null.
      * Otherwise, returns the string representation of the contained double value.

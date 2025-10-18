@@ -2,11 +2,14 @@ package com.landawn.abacus.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.landawn.abacus.util.*;
 import org.junit.jupiter.api.Test;
 
 import com.alibaba.fastjson2.JSON;
 import com.landawn.abacus.parser.entity.EntityA;
+import com.landawn.abacus.util.Beans;
+import com.landawn.abacus.util.Color;
+import com.landawn.abacus.util.Dates;
+import com.landawn.abacus.util.N;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1667,14 +1667,6 @@ public final class HttpRequest {
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
-        //    try {
-        //        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
-        //                .thenApply(it -> getBody(it, resultClass));
-        //    } finally {
-        //        // This is asynchronous call
-        //        // doAfterExecution(httpClientToUse);
-        //    }
-
         return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
                 .thenApply(it -> getBody(it, resultClass));
     }

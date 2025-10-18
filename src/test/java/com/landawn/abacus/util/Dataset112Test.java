@@ -20,8 +20,8 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
@@ -370,7 +370,7 @@ public class Dataset112Test extends TestBase {
         assertEquals(1, testDataset.getByte(0));
         assertEquals(1, testDataset.getShort(0));
         assertEquals(1, testDataset.getInt(0));
-        assertEquals(1L, (long) testDataset.getLong(0));
+        assertEquals(1L, testDataset.getLong(0));
         assertEquals(1.0f, testDataset.getFloat(0));
         assertEquals(1.0, testDataset.getDouble(0));
 

@@ -693,19 +693,7 @@ public class XMLParser2Test extends AbstractParserTest {
 
             Bean_1 other = (Bean_1) obj;
 
-            if (!Objects.equals(intList, other.intList)) {
-                return false;
-            }
-
-            if (!Objects.equals(shortList, other.shortList)) {
-                return false;
-            }
-
-            if (!Objects.equals(strList, other.strList)) {
-                return false;
-            }
-
-            if (!Objects.equals(xmlGregorianCalendar, other.xmlGregorianCalendar)) {
+            if (!Objects.equals(intList, other.intList) || !Objects.equals(shortList, other.shortList) || !Objects.equals(strList, other.strList) || !Objects.equals(xmlGregorianCalendar, other.xmlGregorianCalendar)) {
                 return false;
             }
 
@@ -778,19 +766,7 @@ public class XMLParser2Test extends AbstractParserTest {
 
             Customer other = (Customer) obj;
 
-            if (age != other.age) {
-                return false;
-            }
-
-            if (ch != other.ch) {
-                return false;
-            }
-
-            if (id != other.id) {
-                return false;
-            }
-
-            if (!Objects.equals(name, other.name)) {
+            if ((age != other.age) || (ch != other.ch) || (id != other.id) || !Objects.equals(name, other.name)) {
                 return false;
             }
 
@@ -867,19 +843,7 @@ public class XMLParser2Test extends AbstractParserTest {
 
             Bean other = (Bean) obj;
 
-            if (!Arrays.equals(bytes, other.bytes)) {
-                return false;
-            }
-
-            if (!Arrays.equals(chars, other.chars)) {
-                return false;
-            }
-
-            if (!Arrays.equals(strings, other.strings)) {
-                return false;
-            }
-
-            if (!Objects.equals(typeList, other.typeList)) {
+            if (!Arrays.equals(bytes, other.bytes) || !Arrays.equals(chars, other.chars) || !Arrays.equals(strings, other.strings) || !Objects.equals(typeList, other.typeList)) {
                 return false;
             }
 
@@ -1161,19 +1125,7 @@ public class XMLParser2Test extends AbstractParserTest {
 
             XBean other = (XBean) obj;
 
-            if (typeBoolean != other.typeBoolean) {
-                return false;
-            }
-
-            if (!Objects.equals(typeBoolean2, other.typeBoolean2)) {
-                return false;
-            }
-
-            if (typeByte != other.typeByte) {
-                return false;
-            }
-
-            if (!Objects.equals(typeCalendar, other.typeCalendar)) {
+            if ((typeBoolean != other.typeBoolean) || !Objects.equals(typeBoolean2, other.typeBoolean2) || (typeByte != other.typeByte) || !Objects.equals(typeCalendar, other.typeCalendar)) {
                 return false;
             }
 
@@ -1326,15 +1278,7 @@ public class XMLParser2Test extends AbstractParserTest {
 
             JaxbBean other = (JaxbBean) obj;
 
-            if (!Objects.equals(list, other.list)) {
-                return false;
-            }
-
-            if (!Objects.equals(map, other.map)) {
-                return false;
-            }
-
-            if (!Objects.equals(string, other.string)) {
+            if (!Objects.equals(list, other.list) || !Objects.equals(map, other.map) || !Objects.equals(string, other.string)) {
                 return false;
             }
 

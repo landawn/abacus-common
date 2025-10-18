@@ -385,27 +385,6 @@ public abstract class Configuration {
             }
         }
 
-        //    File dir = getCurrentSourceCodeLocation();
-        //
-        //    if (logger.isInfoEnabled()) {
-        //        logger.info("start to find simplified file: '" + simpleConfigFileName + "' from source path: '" + dir.getAbsolutePath()
-        //                + "'. current folder identified by './' is: '" + IOUtil.CURRENT_PATH + "'.");
-        //    }
-        //
-        //    int i = 0;
-        //
-        //    do {
-        //        configurationFile = findFileInDir(folderPrefix, simpleConfigFileName, dir, isDir, foundDir);
-        //
-        //        if (configurationFile != null && configurationFile.exists()) {
-        //            configFilePathPool.put(configFileName, configurationFile.getAbsolutePath());
-        //
-        //            return configurationFile;
-        //        }
-        //
-        //        dir = dir.getParentFile();
-        //    } while (i++ < 3 && (dir != null) && !dir.getName().endsWith(File.separator));
-
         final File dir = new File(IOUtil.CURRENT_DIR);
 
         if (logger.isInfoEnabled()) {

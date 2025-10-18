@@ -27,7 +27,7 @@ public class CodeGenerationUtilTest {
                 .classNameForUpperCaseWithUnderscore("sau")
                 .generateFunctionPropName(true)
                 .functionClassName("f")
-                .propFunctions(N.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
+                .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
                 .build();
 
         N.println(CodeGenerationUtil.generatePropNameTableClasses(codeConfig));

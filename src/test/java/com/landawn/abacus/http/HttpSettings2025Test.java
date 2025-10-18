@@ -272,9 +272,7 @@ public class HttpSettings2025Test extends TestBase {
     @Test
     public void testHeadersHttpHeaders() {
         HttpSettings settings = HttpSettings.create();
-        HttpHeaders headers = HttpHeaders.create()
-                .set("Header1", "value1")
-                .set("Header2", "value2");
+        HttpHeaders headers = HttpHeaders.create().set("Header1", "value1").set("Header2", "value2");
 
         HttpSettings result = settings.headers(headers);
         assertEquals("value1", settings.headers().get("Header1"));
@@ -328,8 +326,7 @@ public class HttpSettings2025Test extends TestBase {
 
     @Test
     public void testCopyWithoutHeaders() {
-        HttpSettings original = HttpSettings.create()
-                .setConnectionTimeout(5000L);
+        HttpSettings original = HttpSettings.create().setConnectionTimeout(5000L);
 
         HttpSettings copy = original.copy();
         assertNotNull(copy);
@@ -359,9 +356,7 @@ public class HttpSettings2025Test extends TestBase {
 
     @Test
     public void testToString() {
-        HttpSettings settings = HttpSettings.create()
-                .setConnectionTimeout(5000L)
-                .setReadTimeout(10000L);
+        HttpSettings settings = HttpSettings.create().setConnectionTimeout(5000L).setReadTimeout(10000L);
 
         String str = settings.toString();
         assertNotNull(str);

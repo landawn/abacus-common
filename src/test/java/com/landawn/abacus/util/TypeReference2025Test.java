@@ -10,8 +10,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
@@ -21,7 +21,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testGetType_SimpleType() {
-        TypeReference<String> ref = new TypeReference<String>() {
+        TypeReference<String> ref = new TypeReference<>() {
         };
         java.lang.reflect.Type type = ref.getType();
 
@@ -31,7 +31,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testGetType_GenericList() {
-        TypeReference<List<String>> ref = new TypeReference<List<String>>() {
+        TypeReference<List<String>> ref = new TypeReference<>() {
         };
         java.lang.reflect.Type type = ref.getType();
 
@@ -44,7 +44,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testGetType_GenericMap() {
-        TypeReference<Map<String, Integer>> ref = new TypeReference<Map<String, Integer>>() {
+        TypeReference<Map<String, Integer>> ref = new TypeReference<>() {
         };
         java.lang.reflect.Type type = ref.getType();
 
@@ -58,7 +58,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testGetType_ComplexNestedGeneric() {
-        TypeReference<Map<String, List<Set<Integer>>>> ref = new TypeReference<Map<String, List<Set<Integer>>>>() {
+        TypeReference<Map<String, List<Set<Integer>>>> ref = new TypeReference<>() {
         };
         java.lang.reflect.Type type = ref.getType();
 
@@ -71,7 +71,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testGetType_ArrayType() {
-        TypeReference<String[]> ref = new TypeReference<String[]>() {
+        TypeReference<String[]> ref = new TypeReference<>() {
         };
         java.lang.reflect.Type type = ref.getType();
 
@@ -81,7 +81,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testGetType_PrimitiveWrapper() {
-        TypeReference<Integer> ref = new TypeReference<Integer>() {
+        TypeReference<Integer> ref = new TypeReference<>() {
         };
         java.lang.reflect.Type type = ref.getType();
 
@@ -91,7 +91,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testGetType_WildcardUpperBound() {
-        TypeReference<List<? extends Number>> ref = new TypeReference<List<? extends Number>>() {
+        TypeReference<List<? extends Number>> ref = new TypeReference<>() {
         };
         java.lang.reflect.Type type = ref.getType();
 
@@ -101,7 +101,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testGetType_WildcardLowerBound() {
-        TypeReference<List<? super Integer>> ref = new TypeReference<List<? super Integer>>() {
+        TypeReference<List<? super Integer>> ref = new TypeReference<>() {
         };
         java.lang.reflect.Type type = ref.getType();
 
@@ -111,7 +111,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testGetType_MultipleTypeParameters() {
-        TypeReference<Map<String, Integer>> ref = new TypeReference<Map<String, Integer>>() {
+        TypeReference<Map<String, Integer>> ref = new TypeReference<>() {
         };
         java.lang.reflect.Type type = ref.getType();
 
@@ -126,9 +126,9 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testGetType_DifferentImplementations() {
-        TypeReference<ArrayList<String>> ref1 = new TypeReference<ArrayList<String>>() {
+        TypeReference<ArrayList<String>> ref1 = new TypeReference<>() {
         };
-        TypeReference<LinkedList<String>> ref2 = new TypeReference<LinkedList<String>>() {
+        TypeReference<LinkedList<String>> ref2 = new TypeReference<>() {
         };
 
         java.lang.reflect.Type type1 = ref1.getType();
@@ -139,7 +139,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testGetType_ConsistentAcrossCalls() {
-        TypeReference<List<String>> ref = new TypeReference<List<String>>() {
+        TypeReference<List<String>> ref = new TypeReference<>() {
         };
 
         java.lang.reflect.Type type1 = ref.getType();
@@ -150,7 +150,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testType_SimpleType() {
-        TypeReference<String> ref = new TypeReference<String>() {
+        TypeReference<String> ref = new TypeReference<>() {
         };
         Type<String> type = ref.type();
 
@@ -160,7 +160,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testType_GenericList() {
-        TypeReference<List<String>> ref = new TypeReference<List<String>>() {
+        TypeReference<List<String>> ref = new TypeReference<>() {
         };
         Type<List<String>> type = ref.type();
 
@@ -170,7 +170,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testType_GenericMap() {
-        TypeReference<Map<String, Integer>> ref = new TypeReference<Map<String, Integer>>() {
+        TypeReference<Map<String, Integer>> ref = new TypeReference<>() {
         };
         Type<Map<String, Integer>> type = ref.type();
 
@@ -180,7 +180,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testType_ComplexNestedGeneric() {
-        TypeReference<Map<String, List<Integer>>> ref = new TypeReference<Map<String, List<Integer>>>() {
+        TypeReference<Map<String, List<Integer>>> ref = new TypeReference<>() {
         };
         Type<Map<String, List<Integer>>> type = ref.type();
 
@@ -190,7 +190,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testType_ArrayType() {
-        TypeReference<Integer[]> ref = new TypeReference<Integer[]>() {
+        TypeReference<Integer[]> ref = new TypeReference<>() {
         };
         Type<Integer[]> type = ref.type();
 
@@ -200,7 +200,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testType_NotNull() {
-        TypeReference<String> ref = new TypeReference<String>() {
+        TypeReference<String> ref = new TypeReference<>() {
         };
         Type<String> type = ref.type();
 
@@ -209,7 +209,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testType_ConsistentAcrossCalls() {
-        TypeReference<List<String>> ref = new TypeReference<List<String>>() {
+        TypeReference<List<String>> ref = new TypeReference<>() {
         };
 
         Type<List<String>> type1 = ref.type();
@@ -220,9 +220,9 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testType_EqualForSameGenericType() {
-        TypeReference<List<String>> ref1 = new TypeReference<List<String>>() {
+        TypeReference<List<String>> ref1 = new TypeReference<>() {
         };
-        TypeReference<List<String>> ref2 = new TypeReference<List<String>>() {
+        TypeReference<List<String>> ref2 = new TypeReference<>() {
         };
 
         Type<List<String>> type1 = ref1.type();
@@ -233,9 +233,9 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testType_NotEqualForDifferentGenericType() {
-        TypeReference<List<String>> ref1 = new TypeReference<List<String>>() {
+        TypeReference<List<String>> ref1 = new TypeReference<>() {
         };
-        TypeReference<List<Integer>> ref2 = new TypeReference<List<Integer>>() {
+        TypeReference<List<Integer>> ref2 = new TypeReference<>() {
         };
 
         Type<List<String>> type1 = ref1.type();
@@ -246,7 +246,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testType_WithBounds() {
-        TypeReference<List<? extends Number>> ref = new TypeReference<List<? extends Number>>() {
+        TypeReference<List<? extends Number>> ref = new TypeReference<>() {
         };
         Type<List<? extends Number>> type = ref.type();
 
@@ -256,7 +256,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeToken_SimpleType() {
-        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<String>() {
+        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<>() {
         };
         Type<String> type = token.type();
 
@@ -266,7 +266,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeToken_GenericType() {
-        TypeReference.TypeToken<List<String>> token = new TypeReference.TypeToken<List<String>>() {
+        TypeReference.TypeToken<List<String>> token = new TypeReference.TypeToken<>() {
         };
         Type<List<String>> type = token.type();
 
@@ -276,7 +276,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeToken_ExtendsTypeReference() {
-        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<String>() {
+        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<>() {
         };
 
         Assertions.assertTrue(token instanceof TypeReference);
@@ -284,7 +284,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeToken_GetType() {
-        TypeReference.TypeToken<List<Integer>> token = new TypeReference.TypeToken<List<Integer>>() {
+        TypeReference.TypeToken<List<Integer>> token = new TypeReference.TypeToken<>() {
         };
         java.lang.reflect.Type type = token.getType();
 
@@ -294,7 +294,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeToken_IsAnonymousClass() {
-        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<String>() {
+        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<>() {
         };
 
         Assertions.assertTrue(token.getClass().isAnonymousClass());
@@ -302,7 +302,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeToken_ComplexType() {
-        TypeReference.TypeToken<Map<String, List<Integer>>> token = new TypeReference.TypeToken<Map<String, List<Integer>>>() {
+        TypeReference.TypeToken<Map<String, List<Integer>>> token = new TypeReference.TypeToken<>() {
         };
         Type<Map<String, List<Integer>>> type = token.type();
 
@@ -312,9 +312,9 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeToken_EqualityWithTypeReference() {
-        TypeReference<String> ref = new TypeReference<String>() {
+        TypeReference<String> ref = new TypeReference<>() {
         };
-        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<String>() {
+        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<>() {
         };
 
         Assertions.assertEquals(ref.type(), token.type());
@@ -331,7 +331,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeReference_WithCustomClass() {
-        TypeReference<TestBean> ref = new TypeReference<TestBean>() {
+        TypeReference<TestBean> ref = new TypeReference<>() {
         };
         Type<TestBean> type = ref.type();
 
@@ -341,7 +341,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeReference_WithGenericCustomClass() {
-        TypeReference<GenericBean<String, Integer>> ref = new TypeReference<GenericBean<String, Integer>>() {
+        TypeReference<GenericBean<String, Integer>> ref = new TypeReference<>() {
         };
         Type<GenericBean<String, Integer>> type = ref.type();
 
@@ -351,9 +351,9 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeReference_DifferentMapImplementations() {
-        TypeReference<HashMap<String, Integer>> ref1 = new TypeReference<HashMap<String, Integer>>() {
+        TypeReference<HashMap<String, Integer>> ref1 = new TypeReference<>() {
         };
-        TypeReference<TreeMap<String, Integer>> ref2 = new TypeReference<TreeMap<String, Integer>>() {
+        TypeReference<TreeMap<String, Integer>> ref2 = new TypeReference<>() {
         };
 
         Assertions.assertNotEquals(ref1.type(), ref2.type());
@@ -361,7 +361,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeReference_MultiDimensionalArray() {
-        TypeReference<String[][]> ref = new TypeReference<String[][]>() {
+        TypeReference<String[][]> ref = new TypeReference<>() {
         };
         Type<String[][]> type = ref.type();
 
@@ -371,7 +371,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeReference_PrimitiveArray() {
-        TypeReference<int[]> ref = new TypeReference<int[]>() {
+        TypeReference<int[]> ref = new TypeReference<>() {
         };
         Type<int[]> type = ref.type();
 
@@ -381,7 +381,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeReference_IsAnonymousClass() {
-        TypeReference<String> ref = new TypeReference<String>() {
+        TypeReference<String> ref = new TypeReference<>() {
         };
 
         Assertions.assertTrue(ref.getClass().isAnonymousClass());
@@ -389,9 +389,9 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeReference_MultipleInstances() {
-        TypeReference<String> ref1 = new TypeReference<String>() {
+        TypeReference<String> ref1 = new TypeReference<>() {
         };
-        TypeReference<String> ref2 = new TypeReference<String>() {
+        TypeReference<String> ref2 = new TypeReference<>() {
         };
 
         Assertions.assertNotSame(ref1, ref2);
@@ -401,7 +401,7 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testGetType_AndType_Consistency() {
-        TypeReference<List<String>> ref = new TypeReference<List<String>>() {
+        TypeReference<List<String>> ref = new TypeReference<>() {
         };
 
         java.lang.reflect.Type rawType = ref.getType();
@@ -413,9 +413,9 @@ public class TypeReference2025Test extends TestBase {
 
     @Test
     public void testTypeToken_AndTypeReference_BothWork() {
-        TypeReference<List<String>> ref = new TypeReference<List<String>>() {
+        TypeReference<List<String>> ref = new TypeReference<>() {
         };
-        TypeReference.TypeToken<List<String>> token = new TypeReference.TypeToken<List<String>>() {
+        TypeReference.TypeToken<List<String>> token = new TypeReference.TypeToken<>() {
         };
 
         Assertions.assertEquals(ref.getType(), token.getType());

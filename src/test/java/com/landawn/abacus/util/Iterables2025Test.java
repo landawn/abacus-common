@@ -26,11 +26,10 @@ import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Range;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalByte;
@@ -1007,7 +1006,7 @@ public class Iterables2025Test extends TestBase {
         assertEquals(BigInteger.valueOf(600), result.get());
 
         assertFalse(Iterables.sumBigInteger((Iterable<BigInteger>) null).isPresent());
-        assertFalse(Iterables.sumBigInteger(new ArrayList<BigInteger>()).isPresent());
+        assertFalse(Iterables.sumBigInteger(new ArrayList<>()).isPresent());
     }
 
     @Test
@@ -1027,7 +1026,7 @@ public class Iterables2025Test extends TestBase {
         assertEquals(BigDecimal.valueOf(61.5), result.get());
 
         assertFalse(Iterables.sumBigDecimal((Iterable<BigDecimal>) null).isPresent());
-        assertFalse(Iterables.sumBigDecimal(new ArrayList<BigDecimal>()).isPresent());
+        assertFalse(Iterables.sumBigDecimal(new ArrayList<>()).isPresent());
     }
 
     @Test
@@ -1286,7 +1285,7 @@ public class Iterables2025Test extends TestBase {
         assertEquals(BigDecimal.valueOf(200), result.get());
 
         assertFalse(Iterables.averageBigInteger((Iterable<BigInteger>) null).isPresent());
-        assertFalse(Iterables.averageBigInteger(new ArrayList<BigInteger>()).isPresent());
+        assertFalse(Iterables.averageBigInteger(new ArrayList<>()).isPresent());
     }
 
     @Test
@@ -1306,7 +1305,7 @@ public class Iterables2025Test extends TestBase {
         assertEquals(new BigDecimal("20.5"), result.get());
 
         assertFalse(Iterables.averageBigDecimal((Iterable<BigDecimal>) null).isPresent());
-        assertFalse(Iterables.averageBigDecimal(new ArrayList<BigDecimal>()).isPresent());
+        assertFalse(Iterables.averageBigDecimal(new ArrayList<>()).isPresent());
     }
 
     @Test

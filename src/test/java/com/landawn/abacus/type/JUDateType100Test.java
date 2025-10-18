@@ -19,8 +19,8 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
@@ -52,7 +52,7 @@ public class JUDateType100Test extends TestBase {
     @Test
     public void testValueOf_Object_Number() {
         long millis = 1703502645123L;
-        Date result = dateType.valueOf((Object) millis);
+        Date result = dateType.valueOf(millis);
         assertNotNull(result);
         assertEquals(millis, result.getTime());
     }
@@ -60,7 +60,7 @@ public class JUDateType100Test extends TestBase {
     @Test
     public void testValueOf_Object_Date() {
         Date date = new Date(1703502645123L);
-        Date result = dateType.valueOf((Object) date);
+        Date result = dateType.valueOf(date);
         assertNotNull(result);
         assertEquals(date.getTime(), result.getTime());
         assertNotSame(date, result);

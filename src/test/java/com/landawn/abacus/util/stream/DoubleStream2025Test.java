@@ -1186,4 +1186,146 @@ public class DoubleStream2025Test extends TestBase {
         assertNotNull(list);
         assertTrue(list.size() == 5);
     }
+
+    // Additional coverage tests for 2025
+
+    @Test
+    public void testZipWithCollectionOfStreams() {
+        Collection<DoubleStream> streams = Arrays.asList(
+            DoubleStream.of(1.0, 2.0),
+            DoubleStream.of(10.0, 20.0),
+            DoubleStream.of(100.0, 200.0)
+        );
+        DoubleStream result = DoubleStream.zip(streams, doubles -> {
+            double sum = 0.0;
+            for (Double d : doubles) sum += d;
+            return sum;
+        });
+        assertArrayEquals(new double[] { 111.0, 222.0 }, result.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testZipWithCollectionDefaultValues() {
+        Collection<DoubleStream> streams = Arrays.asList(
+            DoubleStream.of(1.0, 2.0),
+            DoubleStream.of(10.0)
+        );
+        double[] defaults = new double[] { 0.0, 0.0 };
+        DoubleStream result = DoubleStream.zip(streams, defaults, doubles -> {
+            double sum = 0.0;
+            for (Double d : doubles) sum += d;
+            return sum;
+        });
+        assertEquals(2, result.count());
+    }
+
+    @Test
+    public void testMergeWithCollection() {
+        Collection<DoubleStream> streams = Arrays.asList(
+            DoubleStream.of(1.0, 5.0),
+            DoubleStream.of(2.0, 6.0),
+            DoubleStream.of(3.0, 7.0)
+        );
+        DoubleStream result = DoubleStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, result.count());
+    }
+
+    @Test
+    public void testMergeThreeArraysAdditional() {
+        double[] a1 = { 1.0, 7.0 };
+        double[] a2 = { 3.0, 8.0 };
+        double[] a3 = { 5.0, 9.0 };
+        DoubleStream stream = DoubleStream.merge(a1, a2, a3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, stream.count());
+    }
+
+    @Test
+    public void testMergeThreeStreamsAdditional() {
+        DoubleStream s1 = DoubleStream.of(1.0, 7.0);
+        DoubleStream s2 = DoubleStream.of(3.0, 8.0);
+        DoubleStream s3 = DoubleStream.of(5.0, 9.0);
+        DoubleStream result = DoubleStream.merge(s1, s2, s3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, result.count());
+    }
+
+    @Test
+    public void testFlattenHorizontalWithPadding() {
+        double[][] array = { { 1.0, 2.0 }, { 3.0 }, { 4.0, 5.0, 6.0 } };
+        DoubleStream stream = DoubleStream.flatten(array, 0.0, false);
+        double[] result = stream.toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 0.0, 3.0, 0.0, 0.0, 4.0, 5.0, 6.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testRangeClosedWithNegativeStep() {
+        // DoubleStream doesn't support rangeClosed with step parameter
+        // Testing generate with limited range instead
+        DoubleStream stream = DoubleStream.iterate(5.0, d -> d >= 1.0, d -> d - 1.0);
+        double[] result = stream.toArray();
+        assertArrayEquals(new double[] { 5.0, 4.0, 3.0, 2.0, 1.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testRangeWithInvalidStepDirection() {
+        // DoubleStream doesn't support range with step parameter
+        // Testing iterate with false condition instead
+        DoubleStream stream = DoubleStream.iterate(1.0, d -> d < 5.0 && d > 10.0, d -> d + 1.0);
+        assertEquals(0, stream.count());
+    }
+
+    @Test
+    public void testParallelFilterMap() {
+        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
+        double[] result = stream.parallel().filter(x -> x % 2 == 0).map(x -> x * 2).toArray();
+        assertEquals(4, result.length);
+    }
+
+    @Test
+    public void testIterateWithFalseHasNext() {
+        DoubleStream stream = DoubleStream.iterate(() -> false, () -> 1.0);
+        assertEquals(0, stream.count());
+    }
+
+    @Test
+    public void testCollapseNonCollapsible() {
+        DoubleStream stream = DoubleStream.of(1.0, 10.0, 100.0);
+        double[] result = stream.collapse((prev, next) -> false, (a, b) -> a + b).toArray();
+        assertArrayEquals(new double[] { 1.0, 10.0, 100.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testScanEmptyStream() {
+        DoubleStream stream = DoubleStream.empty();
+        double[] result = stream.scan((a, b) -> a + b).toArray();
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testZipThreeArraysWithDefaultsAdditional() {
+        double[] a = { 1.0 };
+        double[] b = { 2.0, 3.0 };
+        double[] c = { 4.0, 5.0, 6.0 };
+        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
+        double[] result = stream.toArray();
+        assertEquals(3, result.length);
+    }
+
+    @Test
+    public void testZipThreeIteratorsWithDefaultsAdditional() {
+        DoubleIterator a = DoubleIterator.of(new double[] { 1.0 });
+        DoubleIterator b = DoubleIterator.of(new double[] { 2.0, 3.0 });
+        DoubleIterator c = DoubleIterator.of(new double[] { 4.0, 5.0, 6.0 });
+        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
+        assertEquals(3, stream.count());
+    }
+
+    @Test
+    public void testZipThreeStreamsWithDefaultsAdditional() {
+        DoubleStream a = DoubleStream.of(1.0);
+        DoubleStream b = DoubleStream.of(2.0, 3.0);
+        DoubleStream c = DoubleStream.of(4.0, 5.0, 6.0);
+        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
+        double[] result = stream.toArray();
+        assertEquals(3, result.length);
+    }
 }

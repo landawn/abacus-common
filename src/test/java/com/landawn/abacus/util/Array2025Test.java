@@ -1491,7 +1491,7 @@ public class Array2025Test extends TestBase {
 
     @Test
     public void test_unbox_Byte() {
-        byte[] unboxed = Array.unbox((Byte) (byte) 1, (Byte) (byte) 2, (Byte) (byte) 3);
+        byte[] unboxed = Array.unbox((byte) 1, (byte) 2, (byte) 3);
         assertArrayEquals(new byte[] { 1, 2, 3 }, unboxed);
 
         byte[] withNulls = Array.unbox(new Byte[] { 1, null, 3 }, (byte) 0);
@@ -1515,7 +1515,7 @@ public class Array2025Test extends TestBase {
 
     @Test
     public void test_unbox_Short() {
-        short[] unboxed = Array.unbox((Short) (short) 1, (Short) (short) 2, (Short) (short) 3);
+        short[] unboxed = Array.unbox((short) 1, (short) 2, (short) 3);
         assertArrayEquals(new short[] { 1, 2, 3 }, unboxed);
 
         short[] withNulls = Array.unbox(new Short[] { 1, null, 3 }, (short) 0);

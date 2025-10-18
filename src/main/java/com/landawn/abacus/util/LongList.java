@@ -121,15 +121,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * Creates a LongList containing the specified elements.
-     * 
-     * <p>This factory method uses the provided array directly as the internal storage
-     * without copying, making it efficient for creating lists from existing arrays.
-     * If the provided array is null, an empty list is returned.
+     * Creates a new LongList containing the specified elements. The specified array is used directly
+     * as the backing array without copying, so subsequent modifications to the array will affect the list.
+     * If the input array is {@code null}, an empty list is returned.
      *
-     * @param a the array of long values to be placed into the new list
-     * @return a new LongList containing the elements of the specified array,
-     *         or an empty list if the array is null
+     * @param a the array of elements to be included in the new list. Can be {@code null}.
+     * @return a new LongList containing the elements from the specified array, or an empty list if the array is {@code null}
      */
     public static LongList of(final long... a) {
         return new LongList(N.nullToEmpty(a));
@@ -335,12 +332,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * Returns the long value at the specified position in this list.
+     * Returns the element at the specified position in this list.
      *
      * @param index the index of the element to return
-     * @return the long value at the specified position in this list
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *         ({@code index < 0 || index >= size()})
+     * @return the element at the specified position in this list
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public long get(final int index) {
         rangeCheck(index);
@@ -352,10 +348,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Replaces the element at the specified position in this list with the specified element.
      *
      * @param index the index of the element to replace
-     * @param e the long value to be stored at the specified position
+     * @param e the element to be stored at the specified position
      * @return the element previously at the specified position
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *         ({@code index < 0 || index >= size()})
+     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
     public long set(final int index, final long e) {
         rangeCheck(index);
@@ -1073,12 +1068,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * Tests if this list contains the specified value.
-     * 
-     * <p>This method performs a linear search through the list to find the value.
+     * Returns {@code true} if this list contains the specified element.
+     * More formally, returns {@code true} if and only if this list contains
+     * at least one element {@code e} such that {@code e == valueToFind}.
      *
-     * @param valueToFind the value to search for
-     * @return {@code true} if this list contains at least one occurrence of the specified value
+     * <p>This method performs a linear search through the list.
+     *
+     * @param valueToFind the element whose presence in this list is to be tested
+     * @return {@code true} if this list contains the specified element, {@code false} otherwise
      */
     public boolean contains(final long valueToFind) {
         return indexOf(valueToFind) >= 0;
@@ -2152,11 +2149,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * Removes all elements from this list.
-     * <p>
-     * After this method returns, the list will be empty (size will be 0).
+     * Removes all elements from this list. The list will be empty after this call returns.
      * The capacity of the list is not changed.
-     * </p>
      */
     @Override
     public void clear() {
@@ -2229,13 +2223,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * Returns a new array containing all elements of this list.
-     * <p>
-     * The returned array is a copy, and changes to it will not affect this list.
-     * The length of the returned array equals the size of this list.
-     * </p>
+     * Returns a new array containing all elements of this list in proper sequence.
      *
-     * @return a new long array containing all elements from this list
+     * @return a new long array containing all elements of this list
      */
     @Override
     public long[] toArray() {

@@ -15,13 +15,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import com.landawn.abacus.util.stream.Stream;
-
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.stream.Stream;
 
 @Tag("new-test")
 public class Traverser100Test extends TestBase {

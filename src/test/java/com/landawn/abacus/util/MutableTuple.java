@@ -42,7 +42,7 @@ public abstract class MutableTuple {
 
         @Override
         public Object[] toArray() {
-            return N.EMPTY_OBJECT_ARRAY;
+            return CommonUtil.EMPTY_OBJECT_ARRAY;
         }
 
         @Override
@@ -52,7 +52,7 @@ public abstract class MutableTuple {
 
         @Override
         public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
-            N.checkArgNotNull(consumer);
+            CommonUtil.checkArgNotNull(consumer);
             // do nothing.
         }
 
@@ -268,7 +268,7 @@ public abstract class MutableTuple {
         @Override
         public <A> A[] toArray(A[] a) {
             if (a.length < 1) {
-                a = N.copyOf(a, 1);
+                a = CommonUtil.copyOf(a, 1);
             }
 
             a[0] = (A) _1;
@@ -308,7 +308,7 @@ public abstract class MutableTuple {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            return prime * result + N.hashCode(_1);
+            return prime * result + CommonUtil.hashCode(_1);
         }
 
         @Override
@@ -320,7 +320,7 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple1.class)) {
                 final MutableTuple1<?> other = (MutableTuple1<?>) obj;
 
-                return N.equals(this._1, other._1);
+                return CommonUtil.equals(this._1, other._1);
             }
 
             return false;
@@ -328,7 +328,7 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + "]";
+            return "[" + CommonUtil.toString(_1) + "]";
         }
     }
 
@@ -373,7 +373,7 @@ public abstract class MutableTuple {
         @Override
         public <A> A[] toArray(A[] a) {
             if (a.length < 2) {
-                a = N.copyOf(a, 2);
+                a = CommonUtil.copyOf(a, 2);
             }
 
             a[0] = (A) _1;
@@ -427,8 +427,8 @@ public abstract class MutableTuple {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + N.hashCode(_1);
-            return prime * result + N.hashCode(_2);
+            result = prime * result + CommonUtil.hashCode(_1);
+            return prime * result + CommonUtil.hashCode(_2);
         }
 
         @Override
@@ -440,7 +440,7 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple2.class)) {
                 final MutableTuple2<?, ?> other = (MutableTuple2<?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2);
             }
 
             return false;
@@ -448,7 +448,7 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + "]";
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + "]";
         }
     }
 
@@ -495,7 +495,7 @@ public abstract class MutableTuple {
         @Override
         public <A> A[] toArray(A[] a) {
             if (a.length < 3) {
-                a = N.copyOf(a, 3);
+                a = CommonUtil.copyOf(a, 3);
             }
 
             a[0] = (A) _1;
@@ -553,9 +553,9 @@ public abstract class MutableTuple {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + N.hashCode(_1);
-            result = prime * result + N.hashCode(_2);
-            return prime * result + N.hashCode(_3);
+            result = prime * result + CommonUtil.hashCode(_1);
+            result = prime * result + CommonUtil.hashCode(_2);
+            return prime * result + CommonUtil.hashCode(_3);
         }
 
         @Override
@@ -567,7 +567,7 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple3.class)) {
                 final MutableTuple3<?, ?, ?> other = (MutableTuple3<?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3);
             }
 
             return false;
@@ -575,7 +575,7 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + "]";
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + "]";
         }
     }
 
@@ -624,7 +624,7 @@ public abstract class MutableTuple {
         @Override
         public <A> A[] toArray(A[] a) {
             if (a.length < 4) {
-                a = N.copyOf(a, 4);
+                a = CommonUtil.copyOf(a, 4);
             }
 
             a[0] = (A) _1;
@@ -667,10 +667,10 @@ public abstract class MutableTuple {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + N.hashCode(_1);
-            result = prime * result + N.hashCode(_2);
-            result = prime * result + N.hashCode(_3);
-            return prime * result + N.hashCode(_4);
+            result = prime * result + CommonUtil.hashCode(_1);
+            result = prime * result + CommonUtil.hashCode(_2);
+            result = prime * result + CommonUtil.hashCode(_3);
+            return prime * result + CommonUtil.hashCode(_4);
         }
 
         @Override
@@ -682,7 +682,7 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple4.class)) {
                 final MutableTuple4<?, ?, ?, ?> other = (MutableTuple4<?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3) && CommonUtil.equals(this._4, other._4);
             }
 
             return false;
@@ -690,7 +690,7 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + "]";
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + "]";
         }
     }
 
@@ -741,7 +741,7 @@ public abstract class MutableTuple {
         @Override
         public <A> A[] toArray(A[] a) {
             if (a.length < 5) {
-                a = N.copyOf(a, 5);
+                a = CommonUtil.copyOf(a, 5);
             }
 
             a[0] = (A) _1;
@@ -786,11 +786,11 @@ public abstract class MutableTuple {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + N.hashCode(_1);
-            result = prime * result + N.hashCode(_2);
-            result = prime * result + N.hashCode(_3);
-            result = prime * result + N.hashCode(_4);
-            return prime * result + N.hashCode(_5);
+            result = prime * result + CommonUtil.hashCode(_1);
+            result = prime * result + CommonUtil.hashCode(_2);
+            result = prime * result + CommonUtil.hashCode(_3);
+            result = prime * result + CommonUtil.hashCode(_4);
+            return prime * result + CommonUtil.hashCode(_5);
         }
 
         @Override
@@ -802,8 +802,8 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple5.class)) {
                 final MutableTuple5<?, ?, ?, ?, ?> other = (MutableTuple5<?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
-                        && N.equals(this._5, other._5);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3) && CommonUtil.equals(this._4, other._4)
+                        && CommonUtil.equals(this._5, other._5);
             }
 
             return false;
@@ -811,7 +811,7 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + "]";
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", " + CommonUtil.toString(_5) + "]";
         }
     }
 
@@ -864,7 +864,7 @@ public abstract class MutableTuple {
         @Override
         public <A> A[] toArray(A[] a) {
             if (a.length < 6) {
-                a = N.copyOf(a, 6);
+                a = CommonUtil.copyOf(a, 6);
             }
 
             a[0] = (A) _1;
@@ -911,12 +911,12 @@ public abstract class MutableTuple {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + N.hashCode(_1);
-            result = prime * result + N.hashCode(_2);
-            result = prime * result + N.hashCode(_3);
-            result = prime * result + N.hashCode(_4);
-            result = prime * result + N.hashCode(_5);
-            return prime * result + N.hashCode(_6);
+            result = prime * result + CommonUtil.hashCode(_1);
+            result = prime * result + CommonUtil.hashCode(_2);
+            result = prime * result + CommonUtil.hashCode(_3);
+            result = prime * result + CommonUtil.hashCode(_4);
+            result = prime * result + CommonUtil.hashCode(_5);
+            return prime * result + CommonUtil.hashCode(_6);
         }
 
         @Override
@@ -928,8 +928,8 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple6.class)) {
                 final MutableTuple6<?, ?, ?, ?, ?, ?> other = (MutableTuple6<?, ?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
-                        && N.equals(this._5, other._5) && N.equals(this._6, other._6);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3) && CommonUtil.equals(this._4, other._4)
+                        && CommonUtil.equals(this._5, other._5) && CommonUtil.equals(this._6, other._6);
             }
 
             return false;
@@ -937,7 +937,7 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", " + CommonUtil.toString(_5) + ", " + CommonUtil.toString(_6)
                     + "]";
         }
     }
@@ -993,7 +993,7 @@ public abstract class MutableTuple {
         @Override
         public <A> A[] toArray(A[] a) {
             if (a.length < 7) {
-                a = N.copyOf(a, 7);
+                a = CommonUtil.copyOf(a, 7);
             }
 
             a[0] = (A) _1;
@@ -1042,13 +1042,13 @@ public abstract class MutableTuple {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + N.hashCode(_1);
-            result = prime * result + N.hashCode(_2);
-            result = prime * result + N.hashCode(_3);
-            result = prime * result + N.hashCode(_4);
-            result = prime * result + N.hashCode(_5);
-            result = prime * result + N.hashCode(_6);
-            return prime * result + N.hashCode(_7);
+            result = prime * result + CommonUtil.hashCode(_1);
+            result = prime * result + CommonUtil.hashCode(_2);
+            result = prime * result + CommonUtil.hashCode(_3);
+            result = prime * result + CommonUtil.hashCode(_4);
+            result = prime * result + CommonUtil.hashCode(_5);
+            result = prime * result + CommonUtil.hashCode(_6);
+            return prime * result + CommonUtil.hashCode(_7);
         }
 
         @Override
@@ -1060,8 +1060,8 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple7.class)) {
                 final MutableTuple7<?, ?, ?, ?, ?, ?, ?> other = (MutableTuple7<?, ?, ?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
-                        && N.equals(this._5, other._5) && N.equals(this._6, other._6) && N.equals(this._7, other._7);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3) && CommonUtil.equals(this._4, other._4)
+                        && CommonUtil.equals(this._5, other._5) && CommonUtil.equals(this._6, other._6) && CommonUtil.equals(this._7, other._7);
             }
 
             return false;
@@ -1069,8 +1069,8 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
-                    + ", " + N.toString(_7) + "]";
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", " + CommonUtil.toString(_5) + ", " + CommonUtil.toString(_6)
+                    + ", " + CommonUtil.toString(_7) + "]";
         }
     }
 
@@ -1127,7 +1127,7 @@ public abstract class MutableTuple {
         @Override
         public <A> A[] toArray(A[] a) {
             if (a.length < 8) {
-                a = N.copyOf(a, 8);
+                a = CommonUtil.copyOf(a, 8);
             }
 
             a[0] = (A) _1;
@@ -1178,14 +1178,14 @@ public abstract class MutableTuple {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + N.hashCode(_1);
-            result = prime * result + N.hashCode(_2);
-            result = prime * result + N.hashCode(_3);
-            result = prime * result + N.hashCode(_4);
-            result = prime * result + N.hashCode(_5);
-            result = prime * result + N.hashCode(_6);
-            result = prime * result + N.hashCode(_7);
-            return prime * result + N.hashCode(_8);
+            result = prime * result + CommonUtil.hashCode(_1);
+            result = prime * result + CommonUtil.hashCode(_2);
+            result = prime * result + CommonUtil.hashCode(_3);
+            result = prime * result + CommonUtil.hashCode(_4);
+            result = prime * result + CommonUtil.hashCode(_5);
+            result = prime * result + CommonUtil.hashCode(_6);
+            result = prime * result + CommonUtil.hashCode(_7);
+            return prime * result + CommonUtil.hashCode(_8);
         }
 
         @Override
@@ -1197,8 +1197,8 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple8.class)) {
                 final MutableTuple8<?, ?, ?, ?, ?, ?, ?, ?> other = (MutableTuple8<?, ?, ?, ?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
-                        && N.equals(this._5, other._5) && N.equals(this._6, other._6) && N.equals(this._7, other._7) && N.equals(this._8, other._8);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3) && CommonUtil.equals(this._4, other._4)
+                        && CommonUtil.equals(this._5, other._5) && CommonUtil.equals(this._6, other._6) && CommonUtil.equals(this._7, other._7) && CommonUtil.equals(this._8, other._8);
             }
 
             return false;
@@ -1206,8 +1206,8 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
-                    + ", " + N.toString(_7) + ", " + N.toString(_8) + "]";
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", " + CommonUtil.toString(_5) + ", " + CommonUtil.toString(_6)
+                    + ", " + CommonUtil.toString(_7) + ", " + CommonUtil.toString(_8) + "]";
         }
     }
 
@@ -1266,7 +1266,7 @@ public abstract class MutableTuple {
         @Override
         public <A> A[] toArray(A[] a) {
             if (a.length < 9) {
-                a = N.copyOf(a, 9);
+                a = CommonUtil.copyOf(a, 9);
             }
 
             a[0] = (A) _1;
@@ -1319,15 +1319,15 @@ public abstract class MutableTuple {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + N.hashCode(_1);
-            result = prime * result + N.hashCode(_2);
-            result = prime * result + N.hashCode(_3);
-            result = prime * result + N.hashCode(_4);
-            result = prime * result + N.hashCode(_5);
-            result = prime * result + N.hashCode(_6);
-            result = prime * result + N.hashCode(_7);
-            result = prime * result + N.hashCode(_8);
-            return prime * result + N.hashCode(_9);
+            result = prime * result + CommonUtil.hashCode(_1);
+            result = prime * result + CommonUtil.hashCode(_2);
+            result = prime * result + CommonUtil.hashCode(_3);
+            result = prime * result + CommonUtil.hashCode(_4);
+            result = prime * result + CommonUtil.hashCode(_5);
+            result = prime * result + CommonUtil.hashCode(_6);
+            result = prime * result + CommonUtil.hashCode(_7);
+            result = prime * result + CommonUtil.hashCode(_8);
+            return prime * result + CommonUtil.hashCode(_9);
         }
 
         @Override
@@ -1339,9 +1339,9 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple9.class)) {
                 final MutableTuple9<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (MutableTuple9<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
-                        && N.equals(this._5, other._5) && N.equals(this._6, other._6) && N.equals(this._7, other._7) && N.equals(this._8, other._8)
-                        && N.equals(this._9, other._9);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3) && CommonUtil.equals(this._4, other._4)
+                        && CommonUtil.equals(this._5, other._5) && CommonUtil.equals(this._6, other._6) && CommonUtil.equals(this._7, other._7) && CommonUtil.equals(this._8, other._8)
+                        && CommonUtil.equals(this._9, other._9);
             }
 
             return false;
@@ -1349,8 +1349,8 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
-                    + ", " + N.toString(_7) + ", " + N.toString(_8) + ", " + N.toString(_9) + "]";
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", " + CommonUtil.toString(_5) + ", " + CommonUtil.toString(_6)
+                    + ", " + CommonUtil.toString(_7) + ", " + CommonUtil.toString(_8) + ", " + CommonUtil.toString(_9) + "]";
         }
     }
 }
